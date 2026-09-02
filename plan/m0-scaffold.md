@@ -1,6 +1,6 @@
 # M0 — Scaffold
 
-**Status:** In progress · **Depends on:** — · **Spec:** *Milestones → M0*
+**Status:** Done · **Depends on:** — · **Spec:** *Milestones → M0*
 
 ## Purpose
 
@@ -29,36 +29,49 @@ Missing for M0:
 
 ## Tasks
 
-- [ ] **T-M0-01** Adopt `very_good_analysis`: add to `dev_dependencies`,
+- [x] **T-M0-01** Adopt `very_good_analysis`: add to `dev_dependencies`,
   switch `analysis_options.yaml` include, fix all resulting lints.
   *AC: `flutter analyze --fatal-infos` is clean under `very_good_analysis`.*
-- [ ] **T-M0-02** Seed `lib/src/` layout: create `main.dart` → `src/app.dart`
+- [x] **T-M0-02** Seed `lib/src/` layout: create `main.dart` → `src/app.dart`
   (`MaterialApp` root) plus `src/core/logging.dart` and `src/core/errors.dart`.
   Remaining modules are created by their owning milestone (first task in each
   file). *AC: layout root exists, analyze clean.*
-- [ ] **T-M0-03** App shell: replace the counter app with the Copist shell —
+- [x] **T-M0-03** App shell: replace the counter app with the Copist shell —
   placeholder home screen showing app name, feather-icon placeholder, and a
   "no library set" state (real library UI arrives in M1). Riverpod wired as the
   state tool (app-level state provider). *AC: builds and launches on Android
   and Linux; "Flutter Demo" gone.*
-- [ ] **T-M0-04** Placeholder branding: app label "Copist", feather icon as
+- [x] **T-M0-04** Placeholder branding: app label "Copist", feather icon as
   placeholder launcher icon, theme seed color. Note in code/README that name +
   icon will be renamed before release (first candidate "Inkwell" rejected —
   existing product). *AC: label/icon visible on both platforms.*
-- [ ] **T-M0-05** Android `minSdk 35`: set `minSdk = 35` in
+- [x] **T-M0-05** Android `minSdk 35`: set `minSdk = 35` in
   `android/app/build.gradle.kts` (compile/target per Flutter defaults).
   *AC: release build compiles; manifest reports minSdk 35.*
-- [ ] **T-M0-06** GitHub Actions CI: `.github/workflows/ci.yml` on
+- [x] **T-M0-06** GitHub Actions CI: `.github/workflows/ci.yml` on
   push/PR — jobs: `flutter analyze --fatal-infos` and `flutter test`; Flutter
   stable channel, pub cache caching. *AC: workflow runs green on main.*
-- [ ] **T-M0-07** Test scaffolding: replace counter smoke test with a shell
+- [x] **T-M0-07** Test scaffolding: replace counter smoke test with a shell
   smoke test (app boots, shows placeholder branding); create `integration_test/`
   with a first on-device boot test. *AC: unit + widget + integration tests
   green locally and in CI.*
-- [ ] **T-M0-08** Seed core dependencies in `pubspec.yaml`: `riverpod`, `drift`,
+- [x] **T-M0-08** Seed core dependencies in `pubspec.yaml`: `riverpod`, `drift`,
   `path_provider`, `flutter_markdown`, `katex_flutter`, `flutter_highlight`,
   `flutter_secure_storage`, `very_good_analysis`. *AC: `flutter pub get`
   resolves on stable; CI verify job passes.*
+
+### Package substitutions (recorded at M0)
+
+- **`katex_flutter` → `katex_dart` (^0.1.1):** the pub.dev `katex_flutter`
+  package is a 2020-era, non-null-safe relic and cannot resolve on current
+  Flutter. `katex_dart` is the actively maintained pure-Dart port of KaTeX
+  (2026-07); spec math coverage still verified in **M2** (T-M2-03).
+- **`flutter_markdown` → `flutter_markdown_plus` (^1.0.12):** `flutter_markdown`
+  is discontinued on pub.dev, replaced by `flutter_markdown_plus` (active
+  successor, same renderer lineage).
+- **Android `compileSdk = 37`** (above the Flutter default of 36) because
+  `flutter_secure_storage` requires compiling against API 37; `targetSdk`
+  stays at the Flutter default.
 
 ## Technical design
 
