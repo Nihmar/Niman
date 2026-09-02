@@ -1,6 +1,6 @@
 # M1 — Library core
 
-**Status:** Planned · **Depends on:** M0 · **Spec:** *Requirements* (model,
+**Status:** Done · **Depends on:** M0 · **Spec:** *Requirements* (model,
 trash), *Milestones → M1*
 
 ## Purpose
@@ -17,33 +17,33 @@ indexer.
 
 ## Tasks
 
-- [ ] **T-M1-01** Library model + open/create flow: user picks a root folder
+- [x] **T-M1-01** Library model + open/create flow: user picks a root folder
   path (open existing or create new empty library); root stored in
   `library_settings` (design.md). *AC: both flows work on Android and Linux;
   reopening the app resumes the library.*
-- [ ] **T-M1-02** Drift `notes` table + full-scan indexer: recursive scan of
+- [x] **T-M1-02** Drift `notes` table + full-scan indexer: recursive scan of
   the root (excluding `.trash/`, `.history/`, dotfiles) building `notes` rows
   (directories materialized), content `sha256` with size/mtime shortcut.
   *AC: index equals the disk tree; delete the db file → rescan reproduces it.*
-- [ ] **T-M1-03** File watcher: recursive watch with debounce (~250 ms) feeding
+- [x] **T-M1-03** File watcher: recursive watch with debounce (~250 ms) feeding
   the indexer incrementally; periodic full-rescan fallback (~60 s) to catch
   missed events. *AC: external create/rename/delete/move (done from a terminal)
   appears in the tree within one debounce window.*
-- [ ] **T-M1-04** Tree UI: sidebar tree of folders/notes — expand/collapse,
+- [x] **T-M1-04** Tree UI: sidebar tree of folders/notes — expand/collapse,
   select, lazy rendering. *AC: lazy list; renders a 10k-note fixture without
   jank (smoke).*
-- [ ] **T-M1-05** CRUD: create note (→ `<name>.md`) / folder; rename; move;
+- [x] **T-M1-05** CRUD: create note (→ `<name>.md`) / folder; rename; move;
   delete → move into `.trash/` (collision-safe timestamped name). Writes via
   atomic temp-file + rename. *AC: every op reflected on disk and in the index
   within one watcher cycle.*
-- [ ] **T-M1-06** Trash toggle (library setting, design.md): on = delete moves
+- [x] **T-M1-06** Trash toggle (library setting, design.md): on = delete moves
   to `.trash/`; off = hard delete. Includes listing and restoring trash items.
   *AC: toggle persists across app restart; both paths tested.*
-- [ ] **T-M1-07** Unified index maintenance: all note ops go through one
+- [x] **T-M1-07** Unified index maintenance: all note ops go through one
   `Indexer` entry point (write → event → index update) so app-originated and
   disk-originated changes converge identically. *AC: same final index from
   app edit vs. external edit.*
-- [ ] **T-M1-08** Tests: unit (indexer scan/rebuild, note ops, trash logic) and
+- [x] **T-M1-08** Tests: unit (indexer scan/rebuild, note ops, trash logic) and
   widget (tree CRUD flow, trash toggle). *AC: green in CI.*
 
 ## Technical design
