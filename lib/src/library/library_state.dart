@@ -37,17 +37,26 @@ final class LibraryController implements LibrarySession {
   LibraryController(
     this.dbFactory, {
     this.rescanInterval = defaultRescanInterval,
+    this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
   });
 
   /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(seconds: 60);
 
+  /// Default delay between a non-blocking resume becoming ready and its
+  /// reconciliation scan, leaving the UI time to paint the tree first.
+  static const defaultResumeReconcileDelay = Duration(milliseconds: 1000);
+
   /// Builds the database on demand (app-support location in the app).
   final Future<CopistDatabase> Function() dbFactory;
 
   /// How often the full-rescan fallback runs.
   final Duration rescanInterval;
+
+  /// Delay between a non-blocking resume becoming ready and its
+  /// reconciliation scan, leaving the UI time to paint the tree first.
+  final Duration resumeReconcileDelay;
 
   /// Debounce window for the file watcher.
   final Duration watcherDebounce;
@@ -63,6 +72,9 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   FileWatcher? _watcher;
   Timer? _rescanTimer;
+  /// Reconciliation scan pending after a non-blocking resume; cancelled in
+  /// [_teardown] so a stale scan can never hit a different library.
+  Timer? _reconcileTimer;
 
   /// Current phase.
   @override
@@ -121,7 +133,7 @@ final class LibraryController implements LibrarySession {
       if (last == null) return;
       final dir = Directory(last);
       if (!dir.existsSync()) return;
-      await open(last, create: false);
+      await open(last, create: false, blockingScan: false);
     } on Object catch (_) {
       // Resume is best effort; the open screen is reached with lastError.
     }
@@ -129,8 +141,20 @@ final class LibraryController implements LibrarySession {
 
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
+  ///
+  /// With [blockingScan] true (the default) the full index scan completes
+  /// before the library becomes ready. With [blockingScan] false (used by
+  /// [resume] for a fast relaunch) the library becomes ready immediately
+  /// from the last index, and a reconciliation scan runs
+  /// [resumeReconcileDelay] later so external changes converge within
+  /// seconds (the scan is still a blocking disk walk, so it must not gate
+  /// the first frame).
   @override
-  Future<void> open(String path, {required bool create}) async {
+  Future<void> open(
+    String path, {
+    required bool create,
+    bool blockingScan = true,
+  }) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
@@ -151,7 +175,9 @@ final class LibraryController implements LibrarySession {
       final indexer = Indexer(db)..
         onChanged = _bump;
       final ops = NoteOps(root: abs, db: db, indexer: indexer);
-      await indexer.fullScan(abs);
+      if (blockingScan) {
+        await indexer.fullScan(abs);
+      }
       final watcher = FileWatcher(abs, debounce: watcherDebounce);
       watcher.events.listen(_onWatchBatch);
       await watcher.start();
@@ -162,6 +188,10 @@ final class LibraryController implements LibrarySession {
       _phase = LibraryPhase.ready;
       await AppSettingsRepo(db).setLastLibraryPath(abs);
       _bump();
+      if (!blockingScan) {
+        _reconcileTimer =
+            Timer(resumeReconcileDelay, () => _safeRescan(abs));
+      }
     } on Object catch (error) {
       _lastError = '$error';
       _phase = LibraryPhase.none;
@@ -222,6 +252,8 @@ final class LibraryController implements LibrarySession {
   Future<void> _teardown() async {
     _rescanTimer?.cancel();
     _rescanTimer = null;
+    _reconcileTimer?.cancel();
+    _reconcileTimer = null;
     final watcher = _watcher;
     _watcher = null;
     await watcher?.stop();

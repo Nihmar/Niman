@@ -75,11 +75,23 @@ abstract interface class LibrarySession {
   NoteOperations? get ops;
 
   /// Resumes the last opened library (if it still exists).
+  ///
+  /// Non-blocking: the library becomes ready immediately from the last
+  /// index, and a background reconciliation scan converges it with the
+  /// disk, so a relaunch does not wait on a full disk walk.
   Future<void> resume();
 
   /// Opens the library at [path]; with [create] true it is created first
   /// when missing.
-  Future<void> open(String path, {required bool create});
+  ///
+  /// With [blockingScan] true (the default) the full index scan completes
+  /// before the library becomes ready. With [blockingScan] false (used by
+  /// [resume]) the scan is deferred to a background reconciliation.
+  Future<void> open(
+    String path, {
+    required bool create,
+    bool blockingScan = true,
+  });
 
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();

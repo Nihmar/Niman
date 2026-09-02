@@ -9,6 +9,7 @@ which is the **source of truth for requirements**; this folder plans the work.
 | File | Milestone | Status |
 |------|-----------|--------|
 | [design.md](design.md) | Shared architecture & conventions | — |
+| [android.md](android.md) | Cross-cutting — Android storage & startup issues | — |
 | [m0-scaffold.md](m0-scaffold.md) | M0 — Scaffold | **Done** |
 | [m1-library-core.md](m1-library-core.md) | M1 — Library core | Planned |
 | [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | Planned |

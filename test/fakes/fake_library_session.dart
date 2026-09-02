@@ -60,11 +60,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _resumeStarted = true;
     final path = resumePath;
     if (path == null) return Future<void>.value();
-    return open(path, create: false);
+    // Mirrors the real resume: non-blocking, and the in-memory index already
+    // mirrors the tree, so there is nothing to reconcile.
+    return open(path, create: false, blockingScan: false);
   }
 
   @override
-  Future<void> open(String path, {required bool create}) async {
+  Future<void> open(
+    String path, {
+    required bool create,
+    bool blockingScan = true,
+  }) async {
     if (_phase != LibraryPhase.none) {
       throw StateError('A library is already open (phase: ${_phase.name})');
     }
