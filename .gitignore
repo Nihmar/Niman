@@ -5,6 +5,7 @@
 *.pyc
 *.swp
 *.apk
+copist-*.tar.gz
 .buildlog/
 .history
 
