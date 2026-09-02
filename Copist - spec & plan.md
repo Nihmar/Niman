@@ -65,7 +65,7 @@
     
 *   **Themes:** brightness (day/night/system) × palette (system | Catppuccin). Night + Catppuccin = dark Catppuccin (Mocha); day + Catppuccin = Latte. Token-based so more palettes can be added.
     
-*   **Licensing:** open source (MIT default — confirm before release).
+*   **Licensing:** open source (MIT — confirmed).
     
 
 ## Development stack
