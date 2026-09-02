@@ -92,8 +92,8 @@ disk are always the source of truth.
 
 - **Framework:** Flutter (stable channel), Dart with `very_good_analysis`.
 - **State:** Riverpod.
-- **Rendering:** `flutter_markdown` for preview, `katex_flutter` (pure-Dart KaTeX)
-  for math, `flutter_highlight` for code highlighting.
+- **Rendering:** `flutter_markdown_plus` for preview, `katex_dart` (pure-Dart
+  KaTeX) for math, `flutter_highlight` for code highlighting.
 - **Editor:** custom lightweight source editor (Markdown + math-span
   highlighting) with bidirectional scroll sync via line mapping.
 - **WebDAV client:** `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match,
@@ -126,9 +126,9 @@ disk are always the source of truth.
 
 | # | Milestone | Scope |
 |---|-----------|-------|
-| M0 | Scaffold | Project, lint, CI, placeholder branding, app shell — **in progress** |
+| M0 | Scaffold | Project, lint, CI, placeholder branding, app shell — **done** |
 | M1 | Library core | Open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle |
-| M2 | Editor + preview | Highlighting, `flutter_markdown` + `katex_flutter`, bidirectional scroll sync, all Markdown extras, word count, heading outline + folding |
+| M2 | Editor + preview | Highlighting, `flutter_markdown_plus` + `katex_dart`, bidirectional scroll sync, all Markdown extras, word count, heading outline + folding |
 | M3 | Links & search | Link resolution + click navigation, FTS5 search (word/tag/title), tag list |
 | M4 | Frontmatter & templates | YAML parse/edit, template placeholder engine |
 | M5 | Sync | WebDAV client, state machine, manual + automatic, delete propagation, conflict merge UI |
