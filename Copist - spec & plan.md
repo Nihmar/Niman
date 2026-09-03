@@ -57,7 +57,7 @@
     
 *   **Security:** first-launch choice: plain or encrypted library (AES-256-GCM per file, key in OS secure storage; export yields plain `.md`). Credentials in `flutter_secure_storage`. Transport: TLS (no standard WebDAV E2E; Nextcloud E2EE is a separate protocol).
     
-*   **Search:** full-text (title + body + tags), FTS5, instant at 1M notes.
+*   **Search:** full-text (title + body) via FTS5, plus tag lookup from the tag tables (tags are not indexed in FTS); instant at 1M notes.
     
 *   **Export:** note → `.md` / `.html` (with KaTeX); library/folder → `.md` bundle (zip). PDF = stretch.
     
@@ -74,9 +74,9 @@
     
 *   State: Riverpod
     
-*   Markdown: `flutter_markdown`; math: `katex_flutter` (pure-Dart KaTeX, verify version at M2); code highlighting: `flutter_highlight`
+*   Markdown: `flutter_markdown_plus` (the maintained fork; `flutter_markdown` is discontinued); math: `katex_dart` (pure-Dart KaTeX, verify version at M2); code highlighting: `flutter_highlight`
     
-*   Editor: custom lightweight source editor (MD + math-span highlighting) + bidirectional scroll sync via line mapping
+*   Editor: lightweight source editor (MD + math-span highlighting) + bidirectional scroll sync via line mapping; custom widget vs Flutter text editing decided at M2
     
 *   WebDAV: `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match, Basic auth, http+https (zero deps)
     
@@ -84,7 +84,7 @@
     
 *   Testing: `flutter_test`, `integration_test`, mock WebDAV server (Dart `HttpServer`)
     
-*   CI: GitHub Actions (analyze, test; builds added in M7)
+*   No CI: analyze, test and release builds run locally
     
 *   Packaging: APK/AAB; Linux tar.gz + AppImage + Arch pkg (PKGBUILD)
     
@@ -101,16 +101,18 @@ Watch (local file events) + Poll (remote PROPFIND) → Reconcile (content hash v
     
 *   Search: FTS5.
     
-*   Editor: single text buffer per note (fine at MB scale).
+*   Editor: single text buffer per note (assumed fine at MB scale; measured at M2).
     
 
 ## Milestones
 
-*   **M0 Scaffold** — project, lint, CI, placeholder branding, app shell (in progress)
+*   **M0 Scaffold** — project, lint, placeholder branding, app shell (done)
     
-*   **M1 Library core** — open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle
+*   **M1 Library core** — open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle (done)
     
-*   **M2 Editor + preview** — highlighting, flutter_markdown + katex_flutter, bidirectional scroll sync, all MD extras, word count, heading outline + folding
+*   **M1.5 Index integrity** — index diff with stable row ids, change notification, subtree parent fix (blocks M2)
+    
+*   **M2 Editor + preview** — highlighting, flutter_markdown_plus + katex_dart, bidirectional scroll sync, all MD extras, word count, heading outline + folding
     
 *   **M3 Links & search** — link resolution + click nav, FTS5 search (word/tag/title), tag list
     
@@ -120,6 +122,6 @@ Watch (local file events) + Poll (remote PROPFIND) → Reconcile (content hash v
     
 *   **M6 Scale & polish** — 1M-note perf pass, multi-tab, import/export, themes (brightness × palette), secure storage, onboarding (library + encryption choice)
     
-*   **M7 Packaging & release** — APK; Linux tar.gz + AppImage + Arch pkg; CI builds; open-source repo (license, README)
+*   **M7 Packaging & release** — APK; Linux tar.gz + AppImage + Arch pkg; Windows zip; open-source repo (license, README)
     
 *   **Stretch (ordered):** Mermaid, PDF export, LaTeX autocomplete, Linux spellcheck, E2E

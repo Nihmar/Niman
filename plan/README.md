@@ -9,9 +9,10 @@ which is the **source of truth for requirements**; this folder plans the work.
 | File | Milestone | Status |
 |------|-----------|--------|
 | [design.md](design.md) | Shared architecture & conventions | — |
-| [android.md](android.md) | Cross-cutting — Android storage & startup issues | — |
+| [android.md](android.md) | Cross-cutting — Android storage & startup issues | **Fixed** |
 | [m0-scaffold.md](m0-scaffold.md) | M0 — Scaffold | **Done** |
-| [m1-library-core.md](m1-library-core.md) | M1 — Library core | Planned |
+| [m1-library-core.md](m1-library-core.md) | M1 — Library core | **Done** |
+| [m1_5-index-integrity.md](m1_5-index-integrity.md) | M1.5 — Index integrity | **Next** |
 | [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | Planned |
 | [m3-links-search.md](m3-links-search.md) | M3 — Links & search | Planned |
 | [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | Planned |
@@ -21,7 +22,8 @@ which is the **source of truth for requirements**; this folder plans the work.
 
 ## Conventions
 
-- **Task IDs:** `T-M{n}-{num}` (e.g. `T-M5-07`); checkboxes track completion.
+- **Task IDs:** `T-M{n}-{num}` (e.g. `T-M5-07`, `T-M1.5-03`); checkboxes
+  track completion.
 - **Milestone files** share one structure: Purpose → Current state → Tasks →
   Technical design → Exit criteria → Risks / open questions.
 - **Cross-cutting architecture** (module layout, drift schema, sync state
@@ -33,11 +35,17 @@ which is the **source of truth for requirements**; this folder plans the work.
 ## Dependencies
 
 ```
-M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7
+M0 → M1 → M1.5 → M2 → M3 → M4 → M5 → M6 → M7
 ```
 
 Strictly sequential: each milestone builds on the previous one's modules
 (`lib/src/…`) and tests. Stretch goals are not on the critical path.
+
+M1.5 is not a feature milestone: it closes correctness gaps found in the
+M1 indexer once the app ran on a real Android library. It blocks M2
+because the tree is the surface everything later renders from, and
+because M3's tables cannot key off an index whose row ids are reassigned
+on every scan.
 
 ## Stretch goals (ordered)
 

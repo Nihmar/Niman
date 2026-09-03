@@ -1,13 +1,14 @@
 # M7 — Packaging & release
 
 **Status:** Planned · **Depends on:** M6 · **Spec:** *Requirements* (platform
-packaging, licensing), *Development stack* (packaging, CI), *Milestones → M7*
+packaging, licensing), *Development stack* (packaging), *Milestones → M7*
 
 ## Purpose
 
 Ship: final branding (rename from placeholder), signed Android APK/AAB,
-Linux tar.gz + AppImage + Arch `.pkg.tar.zst` (PKGBUILD, no AUR), CI build
-jobs, and the open-source release (MIT — confirmed).
+Linux tar.gz + AppImage + Arch `.pkg.tar.zst` (PKGBUILD, no AUR), a
+repeatable per-platform build procedure, and the open-source release
+(MIT — confirmed).
 
 ## Current state
 
@@ -21,15 +22,17 @@ placeholder (feather icon); no build/packaging pipeline; no release.
   labels, launcher icons, window titles, docs. *AC: single source of truth for
   the name across android/, linux/, windows/, docs.*
 - [ ] **T-M7-02** Android packaging: release-signed APK + AAB; versioning
-  (`versionName`/`versionCode`) policy; signing keys via CI secrets (never in
-  the repo). *AC: install on a minSdk-35 device; store-ready AAB.*
+  (`versionName`/`versionCode`) policy; signing keys kept on the signing
+  machine (never in the repo). *AC: install on a minSdk-35 device; store-ready AAB.*
 - [ ] **T-M7-03** Linux packaging: release tar.gz; AppImage (bundled
   offline, Wayland-compatible); Arch `.pkg.tar.zst` built from a PKGBUILD
   (no AUR). *AC: each artifact runs on the target distro; PKGBUILD accepted
   into the repo.*
-- [ ] **T-M7-04** CI builds: GitHub Actions build jobs — APK/AAB (android
-  toolchain) and Linux artifacts (tar.gz, AppImage, pkg) on tags; artifact
-  upload. *AC: pushing a tag produces all artifacts in CI.*
+- [ ] **T-M7-04** Release build procedure: one documented sequence per
+  platform, from a clean checkout to the artifact, so a release is
+  reproducible without a pipeline (there is none, by choice). A script per
+  platform is enough. *AC: following the document from a clean checkout
+  produces every artifact.*
 - [ ] **T-M7-05** Open-source release: repo hygiene (README final, LICENSE =
   MIT confirmed, contributing doc), issue/PR templates. *AC: repo is
   fork-and-build ready.*
@@ -50,8 +53,9 @@ placeholder (feather icon); no build/packaging pipeline; no release.
   T-M7-03), PKGBUILD packages the tar.gz (M7-03); Windows:
   `flutter build windows --release` → `build\windows\x64\runner\Release\`,
   on a Windows host (M7-07).
-- **CI:** extend the M0 workflow — build jobs on `v*` tags, `actions/upload-
-  artifact` for outputs; signing secrets from the repo's CI secrets.
+- **Builds:** run by hand on each host — Linux and Android from the Linux
+  machine, Windows from a Windows one. Signing keys live on the signing
+  machine and never in the repo.
 - **Versioning:** single `pubspec.yaml` version drives all platforms
   (`flutter build` reads it); changelog maintained per release.
 - **Repo layout:** no source changes expected — M7 is build/release work over
@@ -61,7 +65,7 @@ placeholder (feather icon); no build/packaging pipeline; no release.
 
 - A signed Android APK/AAB installs and passes the on-device E2E.
 - Linux tar.gz + AppImage + Arch pkg each run on their targets.
-- A tag triggers a full CI build producing all artifacts.
+- The documented procedure produces every artifact from a clean checkout.
 - The repo is releasable as open source under MIT.
 
 ## Risks / open questions
@@ -69,8 +73,8 @@ placeholder (feather icon); no build/packaging pipeline; no release.
 - AppImage tooling (`mage` vs `linuxdeploy`) — decide in T-M7-03; both are
   offline-capable.
 - Code-signing availability per platform (Linux AppImage signing is
-  optional; Android signing keys are the critical path) — set up CI secrets
-  early in T-M7-02.
+  optional; Android signing keys are the critical path) — set the keys up
+  early in T-M7-02, stored outside the repo.
 - Arch PKGBUILD packaging of a Flutter app (bundle the whole build dir) —
   verify size/performance of the pkg; keep the PKGBUILD in-repo.
 - Final rename (T-M7-01) touches app labels/icons/docs — coordinate with the

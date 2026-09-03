@@ -41,8 +41,7 @@ M3 indexes files but ignores frontmatter; new notes are created blank.
   substitution) merged into the new note's frontmatter. *AC: new note carries
   substituted content + frontmatter; editor opens it.*
 - [ ] **T-M4-08** Tests: unit (parser, placeholder engine, frontmatter merge,
-  pinned logic) and widget (template dialog, pinned section). *AC: green in
-  CI.*
+  pinned logic) and widget (template dialog, pinned section). *AC: green.*
 
 ## Technical design
 
@@ -67,7 +66,7 @@ See [design.md](design.md) → *Data model (drift)* (`frontmatter_fields`),
   title/pinned/aliases visibly work in tree, links, and display.
 - Templates: folder configurable, placeholders substitute correctly,
   create-from-template produces a valid note with merged frontmatter.
-- Unit + widget tests green in CI.
+- Unit + widget tests green.
 
 ## Risks / open questions
 

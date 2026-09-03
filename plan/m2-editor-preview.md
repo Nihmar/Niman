@@ -1,38 +1,52 @@
 # M2 — Editor + preview
 
-**Status:** Planned · **Depends on:** M1 · **Spec:** *Requirements* (editor,
-math, layout, images), *Milestones → M2*
+**Status:** Planned · **Depends on:** M1.5 · **Spec:** *Requirements*
+(editor, math, layout, images), *Milestones → M2*
 
 ## Purpose
 
-Read and write notes: a custom lightweight source editor with Markdown + math
-highlighting, a live `flutter_markdown` + KaTeX preview, bidirectional scroll
-sync, all Markdown extras, word count, heading outline + folding, image
-insert, and the responsive layout system.
+Read and write notes: a lightweight source editor with Markdown + math
+highlighting, a live `flutter_markdown_plus` + KaTeX preview, bidirectional
+scroll sync, all Markdown extras, word count, heading outline + folding,
+image insert, and the responsive layout system.
 
 ## Current state
 
-M1 provides tree + CRUD; notes open to a placeholder view with no editing.
+M1.5 leaves a correct index and tree; notes open to a placeholder view with
+no editing.
 
 ## Tasks
 
-- [ ] **T-M2-01** Source editor: custom single-buffer editor widget (caret,
-  selection, IME handling) that loads/saves a note's content; debounced
-  autosave + save-on-focus-loss, atomic writes. *AC: edit a note, close the
-  app, content persisted; IME works on Android + Linux.*
+The first two tasks decide whether the rest of this milestone's design
+holds. Run them before anything else is built on top.
+
+- [ ] **T-M2-00** Editor spike: decide whether the editor is a custom
+  widget or Flutter's own text editing with a custom
+  `TextEditingController` and `buildTextSpan`. The controller route gives
+  the design's own rule for free — highlighting as presentation over a
+  plain-text model — with caret, selection, IME and accessibility already
+  solved. The one requirement that a plain text field cannot serve is
+  folding (T-M2-07), so the spike is really about what folding costs
+  either way. Include a jank measurement on a novel-length buffer, which
+  the spec asserts is fine but nothing has verified. *AC: a decision
+  recorded here with the measurement behind it.*
+- [ ] **T-M2-01** Source editor per the T-M2-00 decision: loads/saves a
+  note's content; debounced autosave + save-on-focus-loss, atomic writes.
+  *AC: edit a note, close the app, content persisted; IME works on
+  Android + Linux.*
 - [ ] **T-M2-02** Highlighting layer: tokenizer for Markdown tokens (headings,
   bold/italic, code, lists, links) and math spans (`$…$`, `$$…$$`); styled
   display over a plain-text buffer (highlighting is a display concern only).
   *AC: tokens and math spans visually distinct; no rich-text edit model.*
-- [ ] **T-M2-03** Verify `katex_flutter`: confirm the pinned pure-Dart KaTeX
+- [ ] **T-M2-03** Verify `katex_dart`: confirm the pinned pure-Dart KaTeX
   version renders the spec coverage — matrices, `aligned`/`cases`, `\text`,
   `\newcommand` — before building on it. *AC: demo fixture renders all four
   cases; version decision recorded.*
-- [ ] **T-M2-04** Preview pipeline: `flutter_markdown` render parsed once per
-  change (debounced), lazy block layout; tables, task lists, footnotes,
-  strikethrough, code blocks via `flutter_highlight`. *AC: fixture with every
-  extra renders correctly.*
-- [ ] **T-M2-05** Math pipeline: extract math spans → `katex_flutter` render →
+- [ ] **T-M2-04** Preview pipeline: `flutter_markdown_plus` render parsed
+  once per change (debounced), lazy block layout; tables, task lists,
+  footnotes, strikethrough, code blocks via `flutter_highlight`. *AC:
+  fixture with every extra renders correctly.*
+- [ ] **T-M2-05** Math pipeline: extract math spans → `katex_dart` render →
   LRU cache keyed by math string (design.md); placeholder box while rendering;
   same spans highlighted in the editor. *AC: editing a math expression reuses
   the cache for unchanged spans.*
@@ -50,7 +64,7 @@ M1 provides tree + CRUD; notes open to a placeholder view with no editing.
   (`assets/` or chosen folder) → insert a link (no base64 by default).
   *AC: image visible in preview from the library-relative link.*
 - [ ] **T-M2-10** Tests: unit (scroll-mapping, KaTeX LRU, highlighter) and
-  widget (editor/preview render parity, layout modes). *AC: green in CI.*
+  widget (editor/preview render parity, layout modes). *AC: green.*
 
 ## Technical design
 
@@ -77,14 +91,20 @@ See [design.md](design.md) → *Editor & preview*. M2 slice:
 - Inline `$x^2$` and display `$$…$$` render via KaTeX; editor highlights them.
 - Bidirectional scroll sync verified; all layout modes + override work.
 - Word count, outline, and folding work on the fixture.
-- Unit + widget tests green in CI.
+- Unit + widget tests green.
 
 ## Risks / open questions
 
-- `flutter_markdown` built-in coverage of footnotes/task-list checkboxes may
-  need custom builders/extensions — verify in T-M2-04, budget a fallback
-  custom-block pass.
+- `flutter_markdown_plus` built-in coverage of footnotes/task-list
+  checkboxes may need custom builders/extensions — verify in T-M2-04,
+  budget a fallback custom-block pass. The package is the maintained fork
+  of `flutter_markdown`, which upstream discontinued; the spec's stack
+  list still named the old one.
 - Highlight-overlay performance at MB-scale files: if a full re-tokenize per
   frame is too slow, token incrementally (on changed lines only).
+- Writing caret, selection and IME from scratch is the largest single
+  unknown in the plan (Android composition, autocorrect, text scaling,
+  accessibility). T-M2-00 exists so that cost is chosen deliberately
+  rather than inherited from a one-line stack decision.
 - IME edge cases (multi-line input, auto-correction) on Android — integration
   test in M2's `integration_test/`.

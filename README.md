@@ -104,7 +104,7 @@ disk are always the source of truth.
   credentials via `flutter_secure_storage`.
 - **Testing:** `flutter_test`, `integration_test`, and a mock WebDAV server
   (Dart `HttpServer`).
-- **CI:** GitHub Actions (analyze + test; builds added in M7).
+- **No CI:** analyze, test and release builds are run locally.
 - **Packaging:** APK/AAB; Linux tar.gz + AppImage + Arch pkg (PKGBUILD).
 
 ### Sync state machine
@@ -128,14 +128,15 @@ disk are always the source of truth.
 
 | # | Milestone | Scope |
 |---|-----------|-------|
-| M0 | Scaffold | Project, lint, CI, placeholder branding, app shell — **done** |
-| M1 | Library core | Open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle |
+| M0 | Scaffold | Project, lint, placeholder branding, app shell — **done** |
+| M1 | Library core | Open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle — **done** |
+| M1.5 | Index integrity | Index diff with stable row ids, change notification, subtree parent fix — **next, blocks M2** |
 | M2 | Editor + preview | Highlighting, `flutter_markdown_plus` + `katex_dart`, bidirectional scroll sync, all Markdown extras, word count, heading outline + folding |
 | M3 | Links & search | Link resolution + click navigation, FTS5 search (word/tag/title), tag list |
 | M4 | Frontmatter & templates | YAML parse/edit, template placeholder engine |
 | M5 | Sync | WebDAV client, state machine, manual + automatic, delete propagation, conflict merge UI |
 | M6 | Scale & polish | 1M-note performance pass, multi-tab, import/export, themes (brightness × palette), secure storage, onboarding (library + encryption choice) |
-| M7 | Packaging & release | APK; Linux tar.gz + AppImage + Arch pkg; CI builds; open-source repo (license, README) |
+| M7 | Packaging & release | APK; Linux tar.gz + AppImage + Arch pkg; Windows zip; open-source repo (license, README) |
 
 **Stretch goals (in order):** Mermaid, PDF export, LaTeX autocomplete, Linux
 spellcheck, E2E.

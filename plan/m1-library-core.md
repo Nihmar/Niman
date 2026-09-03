@@ -44,7 +44,7 @@ indexer.
   disk-originated changes converge identically. *AC: same final index from
   app edit vs. external edit.*
 - [x] **T-M1-08** Tests: unit (indexer scan/rebuild, note ops, trash logic) and
-  widget (tree CRUD flow, trash toggle). *AC: green in CI.*
+  widget (tree CRUD flow, trash toggle). *AC: green.*
 
 ## Technical design
 
@@ -56,27 +56,37 @@ M1 slice:
   `core/settings/` (`library_settings`).
 - **Note naming:** display name = filename; notes stored as `<name>.md` with
   sanitized names. Directories are first-class rows.
-- **Hashing:** content `sha256` computed during scan/ops; `(size, mtime)`
-  shortcut skips re-hashing unchanged files.
+- **Hashing:** content `sha256` for note files only; the `(size, mtime)`
+  shortcut reuses the stored digest, and attachments are indexed without
+  ever being read. Hashing runs on a background isolate together with the
+  walk (see [android.md](android.md) issue 3).
 - **Watcher:** `dart:io` recursive `Directory.watch`; events debounced into
   indexer batches; the ~60 s rescan doubles as the M5 poll cadence later.
-- **Open/create flow (M1 scope):** manual path entry — desktop path dialog;
-  Android app-specific storage in tests/early builds.
+- **Open/create flow:** the native directory picker on both platforms (SAF
+  on Android, xdg-desktop-portal on Linux); no manual path entry. Android
+  additionally needs "All files access" — see [android.md](android.md).
 
 ## Exit criteria
 
 - On Android + Linux: create a library, open it, create/rename/move/delete
   notes and folders, toggle trash; disk-only edits appear in the tree.
+  **Not actually met:** the index never notifies the session, so a
+  disk-only edit reaches the index but not the tree — T-M1.5-01.
 - Index verifiably rebuildable (delete db → rescan → identical tree).
-- Unit + widget tests green in CI.
+- Unit + widget tests green.
 
 ## Risks / open questions
 
-- **Android scoped storage:** how the user picks the production library root
-  (SAF tree URI vs. app-specific dir) — deferred to M6 onboarding; M1 uses
-  app-specific storage + manual path entry.
+- ~~**Android scoped storage:** how the user picks the production library
+  root.~~ **Settled** in [android.md](android.md) issue 2: the native
+  directory picker chooses the root and `MANAGE_EXTERNAL_STORAGE`
+  ("All files access") makes it readable. A SAF tree grant does not, since
+  the library is read with plain `dart:io`. Verified on device; only the
+  image-insert paths remain, under T-M6-09.
 - Recursive watch reliability on Android (FUSE, inotify limits) — the periodic
-  rescan is the safety net.
+  rescan is the safety net. It is also the only thing that catches missed
+  events until [m1_5-index-integrity.md](m1_5-index-integrity.md) makes the
+  index notify the UI at all.
 - Case-sensitive filename handling across platforms (index normalizes
   case-sensitivity per OS at compare time).
 - `.history/` versioning lands in M5 (it is the merge base for sync); until

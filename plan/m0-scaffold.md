@@ -6,7 +6,7 @@
 
 A working app skeleton that all later milestones build on: Flutter project with
 the project's lint setup, the real (but minimal) app shell, placeholder
-branding, CI, test scaffolding, and the seeded dependency stack. No feature
+branding, test scaffolding, and the seeded dependency stack. No feature
 logic.
 
 ## Current state
@@ -23,7 +23,8 @@ Missing for M0:
 - `lib/src/` module layout (design.md).
 - App shell + placeholder branding (still "Flutter Demo" counter).
 - Android `minSdk 35` (currently Flutter default via `flutter.minSdkVersion`).
-- GitHub Actions CI (no `.github/`).
+- ~~GitHub Actions CI~~ (removed again after M1; the project runs
+  analyze and test locally and has no `.github/`).
 - `integration_test/` (does not exist).
 - Core dependencies from the stack (only `cupertino_icons`).
 
@@ -48,17 +49,18 @@ Missing for M0:
 - [x] **T-M0-05** Android `minSdk 35`: set `minSdk = 35` in
   `android/app/build.gradle.kts` (compile/target per Flutter defaults).
   *AC: release build compiles; manifest reports minSdk 35.*
-- [x] **T-M0-06** GitHub Actions CI: `.github/workflows/ci.yml` on
-  push/PR — jobs: `flutter analyze --fatal-infos` and `flutter test`; Flutter
-  stable channel, pub cache caching. *AC: workflow runs green on main.*
+- [x] ~~**T-M0-06** GitHub Actions CI~~ **Reverted after M1:** the
+  workflow was removed and the project deliberately has no CI. `flutter
+  analyze --fatal-infos` and `flutter test` are run locally before each
+  commit instead.
 - [x] **T-M0-07** Test scaffolding: replace counter smoke test with a shell
   smoke test (app boots, shows placeholder branding); create `integration_test/`
   with a first on-device boot test. *AC: unit + widget + integration tests
-  green locally and in CI.*
+  green locally.*
 - [x] **T-M0-08** Seed core dependencies in `pubspec.yaml`: `riverpod`, `drift`,
-  `path_provider`, `flutter_markdown`, `katex_flutter`, `flutter_highlight`,
+  `path_provider`, `flutter_markdown_plus`, `katex_dart`, `flutter_highlight`,
   `flutter_secure_storage`, `very_good_analysis`. *AC: `flutter pub get`
-  resolves on stable; CI verify job passes.*
+  resolves on stable.*
 
 ### Package substitutions (recorded at M0)
 
@@ -87,12 +89,12 @@ Shell state: a single Riverpod provider holding app state
 (`library path: null` at M0). Theme: system-brightness Material theme only;
 the full brightness × palette system lands in M6.
 
-CI matrix: `ubuntu-latest`; Android tooling only for analysis/testing at M0 —
-build jobs are added in M7.
+Verification runs on the development machine: analyze and test on Linux,
+release builds per platform (M7).
 
 ## Exit criteria
 
-- `flutter analyze --fatal-infos` and `flutter test` green in CI.
+- `flutter analyze --fatal-infos` and `flutter test` green.
 - App builds and launches on **Android (minSdk 35)** and **Linux** with
   placeholder branding; counter app gone.
 - `integration_test/` boot test runs on at least one device.
@@ -102,9 +104,9 @@ build jobs are added in M7.
 
 - `very_good_analysis` strictness may flag generated/template code — expect a
   small cleanup pass.
-- `katex_flutter` is pinned now but explicitly verified against spec math
+- `katex_dart` is pinned now but explicitly verified against spec math
   coverage in **M2** (per spec).
-- `drift` codegen (`build_runner`) needs to stay out of CI until M1 adds the
-  schema.
-- Flutter stable version drift: pin the CI channel; re-verify SDK constraint
-  in `pubspec.yaml` (`^3.13.2`).
+- `drift` codegen (`build_runner`) is run by hand after schema changes, not
+  by any pipeline.
+- Flutter stable version drift: re-verify the SDK constraint in
+  `pubspec.yaml` (`^3.13.2`) after an SDK upgrade.

@@ -26,9 +26,12 @@ history yet.
   in `flutter_secure_storage`; connection test action. *AC: no secret ever
   written to drift or logs.*
 - [ ] **T-M5-03** `sync_items` tracking (design.md): per-path
-  (sha256, size, modified, etag); reconcile per the state machine on every
-  trigger. *AC: reconcile unit tests cover every branch (upload/download/
-  conflict/delete/skip).*
+  (sha256, size, modified, etag) plus a pointer to the merge base — the
+  `.history` version, or its digest, that was current at the last
+  successful sync. Without it T-M5-08 has no way to find the base it is
+  specified to use. Reconcile per the state machine on every trigger.
+  *AC: reconcile unit tests cover every branch (upload/download/
+  conflict/delete/skip); the base pointer survives a restart.*
 - [ ] **T-M5-04** `.history/` versioning: on every note save keep the last N
   versions (library setting, default 10) as `.history/<path>.v<n>`; excluded
   from index, watcher, and sync. *AC: N+1 saves → exactly N versions; merge
@@ -44,7 +47,9 @@ history yet.
   remote delete (tombstone ops in the queue). *AC: remote tree matches local
   after sync.*
 - [ ] **T-M5-08** Conflict path: PUT 412 → re-fetch remote → 3-way merge
-  (base = `.history` version at last sync) → conflict UI: hunk-level
+  (base = the `.history` version the T-M5-03 pointer names; if it is gone,
+  because retention rolled past it, fall back to a two-way merge and say
+  so in the UI) → conflict UI: hunk-level
   mine/theirs per hunk, or keep whole file; result written locally and
   re-queued. *AC: mock-server scenario drives the dialog end-to-end; both
   hunk and whole-file resolutions tested.*
@@ -55,7 +60,7 @@ history yet.
   exponential backoff; UI shows queued-op status. *AC: kill server mid-sync →
   resume cleanly on reconnect.*
 - [ ] **T-M5-11** Tests: mock WebDAV suite (round trip, ETag, 412, offline) +
-  integration_test E2E (open → edit → sync → conflict). *AC: green in CI;
+  integration_test E2E (open → edit → sync → conflict). *AC: green;
   E2E on a device.*
 
 ## Technical design
@@ -78,7 +83,7 @@ See [design.md](design.md) → *Sync architecture (WebDAV)* and *Data model
 
 ## Exit criteria
 
-- A real WebDAV server (or the mock in CI) round-trips the whole library:
+- A real WebDAV server (or the mock server) round-trips the whole library:
   notes, folders, renames, deletes.
 - A real 412 conflict produces the merge UI; both resolution styles work.
 - Offline disconnect/reconnect resumes without data loss.
@@ -95,3 +100,13 @@ See [design.md](design.md) → *Sync architecture (WebDAV)* and *Data model
 - `.history` retention of *other devices'* versions: history is local-only per
   spec — cross-device merge bases rely on the oldest local version; acceptable
   per v1 scope (multi-device simultaneous editing out of scope).
+- Retention can outlive the merge base: with the default of 10 versions, a
+  file saved often between two syncs rolls its base out of `.history`.
+  T-M5-03's pointer makes that detectable; T-M5-08 defines what happens
+  then. Consider pinning the base version until the next successful sync.
+- Encryption lands after sync (T-M6-06), and turning it on rewrites every
+  file's bytes: a full re-upload, and every other device sees every file as
+  changed. The merge in T-M5-08 also works on text, so it has to decrypt
+  first. Cheapest resolution is to make encryption a property fixed when
+  the library is created, which is what the M6 onboarding already implies —
+  decide it there and state it here.
