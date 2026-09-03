@@ -6,6 +6,8 @@
 *.swp
 *.apk
 copist-*.tar.gz
+# Debug logs exported from the Settings screen.
+copist-debug-log-*.txt
 .buildlog/
 .history
 
