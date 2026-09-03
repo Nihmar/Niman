@@ -52,14 +52,16 @@ final class NoteDao {
     return _db.select(_db.notes).get();
   }
 
-  /// Deletes the row at `path` and every descendant row.
-  Future<void> deleteSubtree(String path) {
-    return _db
-        .customStatement(
-          r"DELETE FROM notes WHERE path = ? OR path LIKE ? ESCAPE '\'",
-          [path, '${_sqlLikeEscape(path)}/%'],
-        )
-        .then((_) {});
+  /// Deletes the row at `path` and every descendant row, returning the
+  /// number of rows deleted.
+  Future<int> deleteSubtree(String path) {
+    final t = _db.notes;
+    return (_db.delete(t)
+          ..where(
+            (x) => x.path.equals(path) |
+                x.path.like('${_sqlLikeEscape(path)}/%', escapeChar: r'\'),
+          ))
+      .go();
   }
 
   /// The row at `path` and every descendant row (the directory subtree),

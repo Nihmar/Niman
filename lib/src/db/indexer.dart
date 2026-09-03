@@ -166,12 +166,15 @@ final class Indexer {
     return next;
   }
 
-  /// Rebuilds the entire index from a full disk scan of `root`.
+  /// Rebuilds the index from a full disk scan of `root`.
   ///
-  /// Deletes every row and re-inserts, so the result is always an exact
-  /// replica of the disk tree. Used on first open, on the periodic rescan
-  /// fallback, and for explicit re-index. Skips the write (and does not
-  /// fire [onChanged]) when the index already mirrors the disk tree.
+  /// The index is diffed against the walk, so every row whose path survives
+  /// keeps its id (the stable id space is what the M3 `frontmatter_fields`,
+  /// `note_tags` and FTS indexes key off): gone paths are deleted, new
+  /// paths inserted, surviving rows updated where they actually changed.
+  /// Used on first open, on the periodic rescan fallback, and for explicit
+  /// re-index. Skips the write (and does not fire [onChanged]) when the
+  /// index already mirrors the disk tree.
   Future<void> fullScan(String root) {
     return _synchronized(() async {
       final old = <String, Note>{
@@ -190,11 +193,10 @@ final class Indexer {
         _log.info('fullScan: index already mirrors disk, no write');
         return;
       }
-      _log.info('fullScan: tree changed, rewriting index');
-      final shas = await _digests(root, entries, 0, old);
+      _log.info('fullScan: tree changed, applying diff');
+      final shas = await _digests(root, entries, old);
       await _db.transaction(() async {
-        await _db.customStatement('DELETE FROM notes');
-        await _insertEntries(entries, shas);
+        await _applyDiff(entries: entries, old: old, shas: shas);
       });
     });
   }
@@ -276,10 +278,13 @@ final class Indexer {
 
   /// Whether the desired tree differs from [old].
   ///
-  /// Digests take no part in this: [_digests] only ever reuses a stored
-  /// one when `(size, mtime)` already proves the content unchanged, so a
-  /// digest can never be the deciding difference — and comparing it would
-  /// force a rewrite of every index written by an older build.
+  /// Includes the parent links: an index written by an older build can hold
+  /// the right paths with wrong parents, and the diff repairs those, so the
+  /// no-write check has to see them. Digests take no part in this:
+  /// [_digests] only ever reuses a stored one when `(size, mtime)` already
+  /// proves the content unchanged, so a digest can never be the deciding
+  /// difference — and comparing it would force a rewrite of every index
+  /// written by an older build.
   bool _treeChanged(Map<String, Note> old, List<DiskEntry> entries) {
     if (old.length != entries.length) return true;
     for (final e in entries) {
@@ -289,6 +294,10 @@ final class Indexer {
         return true;
       }
       if (o.modified != toStoredSecond(e.modified)) return true;
+      final parentRel = parentOf(e.rel);
+      if (o.parent != (parentRel.isEmpty ? 0 : old[parentRel]?.id)) {
+        return true;
+      }
     }
     return false;
   }
@@ -301,20 +310,18 @@ final class Indexer {
   /// full of images and e-books would otherwise be read end to end on
   /// every first scan, which is what made the app freeze for seconds.
   ///
-  /// [depth] is the number of leading path segments stripped to form the
-  /// lookup key (0 for full scans, N for a directory subtree sync); [old]
-  /// is keyed accordingly.
+  /// [old] holds the current index rows keyed root-relative, which serves
+  /// both a full scan and a subtree walk.
   Future<Map<String, String>> _digests(
     String root,
     List<DiskEntry> entries,
-    int depth,
     Map<String, Note> old,
   ) async {
     final shas = <String, String>{};
     final todo = <String>[];
     for (final e in entries) {
       if (e.isDir || !_isNote(e.name)) continue;
-      final prev = old[stripSegments(e.rel, depth)];
+      final prev = old[e.rel];
       if (prev != null &&
           prev.size == e.size &&
           prev.modified == toStoredSecond(e.modified) &&
@@ -350,58 +357,105 @@ final class Indexer {
     return extra > 0 ? '$shown, … (+$extra more)' : shown;
   }
 
-  /// Inserts [entries] (directories first, then files), assigning the parent
-  /// ids collected from the directory pass.
-  Future<void> _insertEntries(
-    List<DiskEntry> entries,
-    Map<String, String> shas,
-  ) async {
-    final dirIds = <String, int>{};
+  /// Applies the difference between the desired tree [entries] (a walk of
+  /// [scope], keyed root-relative) and the current index rows [old] (scoped
+  /// to [scope]).
+  ///
+  /// New paths are inserted, rows whose name, size, mtime, parent link or
+  /// digest changed are updated, and gone paths are deleted through their
+  /// highest gone ancestor so a removed directory takes its descendants with
+  /// it. Every surviving path keeps its id, so parent links pointing into
+  /// the index stay valid and only genuinely re-parented rows are updated.
+  Future<void> _applyDiff({
+    required List<DiskEntry> entries,
+    required Map<String, Note> old,
+    required Map<String, String> shas,
+    String scope = '',
+    int scopeParentId = 0,
+  }) async {
+    final scopeParentRel = parentOf(scope);
+    final newIds = <String, int>{};
     for (final e in entries) {
-      if (!e.isDir) continue;
-      final id = await _db
-          .into(_db.notes)
-          .insert(
-            NotesCompanion.insert(
-              path: e.rel,
-              parent: 0,
-              name: e.name,
-              isDir: true,
-              size: 0,
-              modified: e.modified,
+      final parentId = _resolveParent(
+        parentOf(e.rel),
+        scopeParentRel,
+        scopeParentId,
+        old,
+        newIds,
+        e.rel,
+      );
+      final prev = old[e.rel];
+      if (prev == null) {
+        final id = await _db.into(_db.notes).insert(
+          NotesCompanion.insert(
+            path: e.rel,
+            parent: parentId,
+            name: e.name,
+            isDir: e.isDir,
+            size: e.size,
+            modified: e.modified,
+            sha256: Value(shas[e.rel]),
+          ),
+        );
+        newIds[e.rel] = id;
+        continue;
+      }
+      final changed =
+          prev.parent != parentId ||
+          prev.name != e.name ||
+          prev.isDir != e.isDir ||
+          prev.size != e.size ||
+          prev.modified != toStoredSecond(e.modified) ||
+          prev.sha256 != shas[e.rel];
+      if (!changed) continue;
+      await (_db
+            .update(_db.notes)
+            ..where((t) => t.path.equals(e.rel)))
+          .write(
+            NotesCompanion(
+              parent: Value(parentId),
+              name: Value(e.name),
+              isDir: Value(e.isDir),
+              size: Value(e.size),
+              modified: Value(e.modified),
+              sha256: Value(shas[e.rel]),
             ),
           );
-      dirIds[e.rel] = id;
     }
-    for (final e in entries) {
-      if (!e.isDir) continue;
-      final parentId = _parentId(e.rel, dirIds);
-      if (parentId != 0) {
-        await (_db.update(_db.notes)
-              ..where((t) => t.path.equals(e.rel)))
-            .write(NotesCompanion(parent: Value(parentId)));
-      }
-    }
-    for (final e in entries) {
-      if (e.isDir) continue;
-      final parentId = _parentId(e.rel, dirIds);
-      await _db.into(_db.notes).insert(
-        NotesCompanion.insert(
-          path: e.rel,
-          parent: parentId,
-          name: e.name,
-          isDir: false,
-          size: e.size,
-          modified: e.modified,
-          sha256: Value(shas[e.rel]),
-        ),
-      );
+    final entryRels = <String>{for (final e in entries) e.rel};
+    final gone = <String>{
+      for (final rel in old.keys)
+        if (!entryRels.contains(rel)) rel,
+    };
+    for (final rel in gone) {
+      if (gone.contains(parentOf(rel))) continue;
+      await _dao.deleteSubtree(rel);
     }
   }
 
-  int _parentId(String rel, Map<String, int> dirIds) {
-    final parentRel = parentOf(rel);
-    return parentRel.isEmpty ? 0 : dirIds[parentRel] ?? 0;
+  /// The parent id for the entry at [rel]: 0 for the walk root's parent,
+  /// [scopeParentId] for the scope's parent, and the stored — or freshly
+  /// inserted — id of the parent row otherwise.
+  ///
+  /// A parent that is neither stored nor in this batch is an index
+  /// invariant violation, surfaced instead of silently re-parenting the row
+  /// to the library root.
+  int _resolveParent(
+    String parentRel,
+    String scopeParentRel,
+    int scopeParentId,
+    Map<String, Note> old,
+    Map<String, int> newIds,
+    String rel,
+  ) {
+    if (parentRel == scopeParentRel) return scopeParentId;
+    final id = old[parentRel]?.id ?? newIds[parentRel];
+    if (id == null) {
+      throw StateError(
+        'Index is missing the parent row "$parentRel" of "$rel"',
+      );
+    }
+    return id;
   }
 
   bool _isHidden(String rel) {
@@ -412,26 +466,34 @@ final class Indexer {
   }
 
   /// Resyncs the subtree rooted at [abs] (which exists as a directory on
-  /// disk): walks the subtree, reuses unchanged digests, deletes the stale
-  /// rows, and inserts the fresh ones.
+  /// disk) against the index: walks the subtree, reuses unchanged digests,
+  /// and applies the diff — inserts, updates and deletes — so every row
+  /// whose path survives keeps its id.
   Future<void> _syncDirSubtree(String root, String abs) async {
     final rel = relPath(abs, root);
     final entries = await _walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
-    final oldRows = await _dao.subtreeRows(rel);
-    final depth = rel.isEmpty ? 0 : rel.split('/').length;
-    final oldBySuffix = <String, Note>{
-      for (final row in oldRows)
-        if (!row.isDir) stripSegments(row.path, depth): row,
+    final old = <String, Note>{
+      for (final row in rel.isEmpty
+          ? await _dao.allRows()
+          : await _dao.subtreeRows(rel))
+        row.path: row,
     };
-    final shas = await _digests(root, entries, depth, oldBySuffix);
+    final shas = await _digests(root, entries, old);
     await _db.transaction(() async {
-      if (rel.isEmpty) {
-        await _db.customStatement('DELETE FROM notes');
-      } else {
-        await _dao.deleteSubtree(rel);
-      }
-      await _insertEntries(entries, shas);
+      // The scope root's parent lives outside the walk, so it is resolved
+      // from the index — the directory chain is ensured when the rows are
+      // still missing — instead of from the batch.
+      final scopeParentId = rel.isEmpty
+          ? 0
+          : await _ensureDirChain(root, parentOf(rel));
+      await _applyDiff(
+        entries: entries,
+        old: old,
+        shas: shas,
+        scope: rel,
+        scopeParentId: scopeParentId,
+      );
     });
   }
 

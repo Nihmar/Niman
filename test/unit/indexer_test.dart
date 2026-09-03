@@ -103,6 +103,64 @@ void main() {
     expect(fired, isFalse);
   });
 
+  test('rescans keep the ids of every surviving row', () async {
+    await indexer.fullScan(root.path);
+    final note1 = (await dao.find('note1.md'))!;
+    final docs = (await dao.find('docs'))!;
+    final doc1 = (await dao.find('docs/doc1.md'))!;
+
+    // Add, remove and change entries on disk, then rescan.
+    File(p.join(root.path, 'note3.md')).writeAsStringSync('three');
+    File(p.join(root.path, 'note2.md')).deleteSync();
+    File(p.join(root.path, 'note1.md')).writeAsStringSync('changed');
+    await indexer.fullScan(root.path);
+
+    final note1Again = (await dao.find('note1.md'))!;
+    expect(note1Again.id, note1.id);
+    expect(note1Again.size, 7);
+    expect(note1Again.sha256, isNot(note1.sha256));
+    expect((await dao.find('docs'))!.id, docs.id);
+    final doc1Again = (await dao.find('docs/doc1.md'))!;
+    expect(doc1Again.id, doc1.id);
+    expect(doc1Again.parent, docs.id);
+    expect(await dao.find('note2.md'), isNull);
+    expect(await dao.find('note3.md'), isNotNull);
+  });
+
+  test('a subtree resync keeps the root under its indexed parent', () async {
+    Directory(p.join(root.path, 'a/b/c')).createSync(recursive: true);
+    File(p.join(root.path, 'a/b/c/x.md')).writeAsStringSync('x');
+    await indexer.fullScan(root.path);
+    final ab = (await dao.find('a/b'))!;
+
+    // The folder moves inside a/b; the resynced destination must come back
+    // under a/b, not the library root.
+    await Directory(p.join(root.path, 'a/b/c'))
+        .rename(p.join(root.path, 'a/b/c2'));
+    await indexer.resync(root.path, p.join(root.path, 'a/b/c2'));
+
+    final c2 = (await dao.find('a/b/c2'))!;
+    expect(c2.parent, ab.id);
+    expect((await dao.find('a/b/c2/x.md'))!.parent, c2.id);
+  });
+
+  test('a subtree resync repairs missing parent rows from disk', () async {
+    await indexer.fullScan(root.path);
+    // The whole chain appears outside the app while the app is open.
+    final leaf = Directory(p.join(root.path, 'm/n/o'))
+      ..createSync(recursive: true);
+    File(p.join(leaf.path, 'z.md')).writeAsStringSync('z');
+
+    await indexer.resync(root.path, leaf.path);
+
+    final m = (await dao.find('m'))!;
+    final n = (await dao.find('m/n'))!;
+    expect(m.parent, 0);
+    expect(n.parent, m.id);
+    expect((await dao.find('m/n/o'))!.parent, n.id);
+    expect(await dao.find('m/n/o/z.md'), isNotNull);
+  });
+
   test('applyEvents picks up external create and delete', () async {
     await indexer.fullScan(root.path);
 
