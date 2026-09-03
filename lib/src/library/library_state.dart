@@ -190,6 +190,10 @@ final class LibraryController implements LibrarySession {
       final watcher = FileWatcher(abs, debounce: watcherDebounce);
       watcher.events.listen(_onWatchBatch);
       await watcher.start();
+      // Held so [_teardown] can stop it: an unheld watcher keeps its
+      // recursive watch (and its event handling) alive for the whole
+      // process, and every reopen adds another one.
+      _watcher = watcher;
       _log.info('open: watcher started for $abs');
       _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
       _indexer = indexer;
