@@ -337,9 +337,7 @@ final class Indexer {
   /// Walks [start] on a background isolate and replays its log lines.
   Future<List<DiskEntry>> _walk(String root, String start) async {
     final scan = await Isolate.run(() => scanTree(root, start));
-    for (final line in scan.logs) {
-      _log.debug(line);
-    }
+    scan.logs.forEach(_log.debug);
     return scan.entries;
   }
 
