@@ -1,8 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Shared-storage library roots: without "All files access" the FUSE
-         layer hides file entries (directories stay visible) on Android 11+. -->
-    <uses-permission android:name="android:MANAGE_EXTERNAL_STORAGE" />
-
     <application
         android:label="Copist"
         android:name="${applicationName}"

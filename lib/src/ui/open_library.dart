@@ -1,4 +1,3 @@
-import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:file_picker/file_picker.dart';
@@ -22,7 +21,7 @@ final class OpenLibraryScreen extends StatefulWidget {
 }
 
 final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
-  /// True while a picker, permission prompt, or open is in flight.
+  /// True while a picker or open is in flight.
   bool _busy = false;
 
   /// A picker/open failure that the session does not know about.
@@ -93,7 +92,6 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _openExisting() async {
     _pickerError = null;
-    if (!await _ensureAccess()) return;
     final path = await _pickDirectory('Choose the library folder');
     if (path == null) return;
     await widget.controller.open(path, create: false);
@@ -102,7 +100,6 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _createNew() async {
     _pickerError = null;
-    if (!await _ensureAccess()) return;
     final parent = await _pickDirectory(
       'Choose the folder the library will be created in',
     );
@@ -111,21 +108,6 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     if (name == null || name.isEmpty) return;
     await widget.controller.open(p.join(parent, name), create: true);
     // The controller's event stream drives the rebuild (phase/lastError).
-  }
-
-  /// Asks for the Android "All files access" permission when needed.
-  ///
-  /// Returns whether shared storage is fully readable afterwards.
-  Future<bool> _ensureAccess() async {
-    _setBusy(true);
-    final granted = await StorageAccess.ensureAllFilesAccess();
-    _setBusy(false);
-    if (!granted) {
-      _pickerError =
-          'Copist needs "All files access" to read a shared-storage library. '
-          'Grant it in the system settings that just opened, then try again.';
-    }
-    return granted;
   }
 
   /// Opens the native directory picker; `null` when the user cancels.
