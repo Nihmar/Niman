@@ -51,7 +51,8 @@ lib/
       parser.dart           # [[…]] / [[…|alias]] / [[…#heading]] parsing
       resolver.dart         # unique filename, path fallback, aliases
     search/
-      search_repo.dart      # FTS5 queries (title + body)
+      query.dart            # user text → FTS5 MATCH / LIKE pattern
+      search_repo.dart      # FTS5 queries (title + body) + contains scan
       tag_repo.dart         # tag list + tag→note queries
     frontmatter/
       parser.dart           # general YAML frontmatter parse/validate
@@ -130,28 +131,47 @@ UI reads from it. Tag search queries `tags`/`note_tags`, not FTS.
 ### Search (FTS5)
 
 ```sql
-CREATE VIRTUAL TABLE notes_fts USING fts5(path UNINDEXED, title, body);
+CREATE VIRTUAL TABLE notes_fts USING fts5(
+  title,
+  body,
+  tokenize = 'unicode61 remove_diacritics 2'
+);
 ```
 
-Kept in sync by the indexer (same transaction that writes `notes`/
-`frontmatter_fields`). Search = FTS5 (title + body) plus tag lookup; tags
-are answered from `tags`/`note_tags`, not from FTS.
+Kept in sync by the indexer, in the same transaction that writes
+`notes`/`frontmatter_fields`. Search = FTS5 (title + body) plus tag
+lookup; tags are answered from `tags`/`note_tags`, not from FTS.
 
-**Open decision (T-M3-04).** The statement above is a standalone FTS5
-table: it keeps its own copy of every note body, so at 1M notes the index
-holds a second copy of the library. The alternatives are external content
-(`content='notes'`), which needs the body as a column of `notes` and so
-puts that same copy in a different table, and contentless
-(`content=''`), which stores no text and therefore cannot return the
-snippets T-M3-05 requires. Decide before writing the migration; whichever
-wins, the row keys must survive a rescan, which is what
-[m1_5-correctness.md](m1_5-correctness.md) makes true.
+- **`rowid` = `notes.id`.** The path is deliberately not a column: it
+  comes from the join, so a rename or a move touches no FTS row at all.
+  It also means search rides on stable ids, which is why
+  [m1_5-correctness.md](m1_5-correctness.md) comes first — today every
+  scan reassigns them and every FTS row would point at the wrong note.
+- **Title is its own column** so ranking can weight it above the body
+  (`bm25(notes_fts, 10.0, 1.0)`). Filename for now, frontmatter title
+  from M4.
+- **The table keeps its own copy of the text** (a standalone FTS5 table,
+  not `content='notes'` and not contentless). That copy is what makes
+  `snippet()` free of disk reads, and it is what substring search scans.
+  The cost is an index roughly the size of the notes' text.
 
 **Body reads.** Populating FTS is the first thing that needs a note's
 content since M1 stopped reading files during a scan. Read only the notes
-whose `(size, mtime)` or digest changed, and read them on a background
-isolate with the walk — reading every body on every scan is what made the
-app hang on Android before ([android.md](android.md) issue 3).
+whose `(size, mtime)` or digest changed, and read them on the background
+isolate that already hashes them, so a changed note is read once and not
+twice. Batch a couple of hundred notes per isolate round trip. Reading
+every body on every scan is what made the app hang on Android before
+([android.md](android.md) issue 3).
+
+**Two query modes.** Words is the default: an FTS5 `MATCH` with bm25
+ranking and `snippet()`. Contains is explicit, never a silent fallback,
+and scans the copy of the text held in the index with `LIKE` — inside one
+database file in fast internal storage, so it opens no note files and
+never crosses FUSE. It is bounded by the total text, so it is instant on
+a normal library and takes seconds at a million notes; the additive fix,
+if the M6 gate demands it, is a second FTS5 table with the `trigram`
+tokenizer, which indexes substrings at two to three times the text on
+disk.
 
 ### Sync state
 
