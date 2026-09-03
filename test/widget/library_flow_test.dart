@@ -202,6 +202,30 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
+    // Delete again, then permanently remove it from the trash: the dialog
+    // must name the item, and the confirm path must work.
+    await tester.tap(noteRow('Sacrifice.md'));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await settle(tester);
+    expect(noteRow('Sacrifice.md'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('open-trash')));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Delete permanently'));
+    await tester.pump();
+    expect(
+      find.text('Sacrifice.md will be deleted permanently (no restore)'),
+      findsOne,
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await settle(tester);
+    expect(find.text('Trash is empty'), findsOne);
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+
     // Switch the trash toggle off in settings.
     await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
@@ -217,7 +241,13 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
-    // Delete again: now a hard delete.
+    // Recreate the note, then delete it with the toggle off: hard delete.
+    await tester.tap(find.byIcon(Icons.note_add));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Sacrifice');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
     await tester.tap(noteRow('Sacrifice.md'));
     await settle(tester);
     await tester.tap(find.byIcon(Icons.delete_outline));

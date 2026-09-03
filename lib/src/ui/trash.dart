@@ -64,7 +64,7 @@ final class _TrashScreenState extends State<TrashScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete permanently'),
         content: Text(
-          '$item.name will be deleted permanently (no restore)',
+          '${item.name} will be deleted permanently (no restore)',
         ),
         actions: [
           TextButton(
