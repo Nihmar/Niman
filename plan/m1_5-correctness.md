@@ -98,6 +98,14 @@ items under a name it derives from the wrong source.
   skip them and a scan that lands mid-write indexes one as a note. Give
   them a leading dot. *AC: a scan concurrent with a write never produces
   a temp-file row.*
+- [ ] **T-M1.5-11** Empty trash empties the folder, not just the
+  manifest. Today `emptyTrash` walks the manifest, so anything a user
+  moved into `.trash/` by hand survives an "Empty trash" that claims to
+  have deleted everything. Delete every entry in `.trash/` instead, then
+  write an empty manifest, and say so in the confirmation dialog: this
+  removes items Copist never put there. *AC: an unmanaged file in
+  `.trash/` is gone after emptying; the manifest ends up empty; the
+  dialog states the wider scope.*
 
 ## Technical design
 
@@ -147,6 +155,7 @@ See [design.md](design.md) → *Data model (drift)*. M1.5 slice:
 - The trash manifest lives inside `.trash/`, which the index never sees,
   so nothing cross-checks the two. Entries whose item vanished are
   filtered out on read but never pruned (T-M1.5-09 does the pruning).
-- `emptyTrash` removes only managed items, leaving anything a user put in
-  `.trash/` by hand. That is deliberate, but the button says "Empty
-  trash" — decide whether the wording or the behaviour should change.
+- ~~`emptyTrash` removes only managed items.~~ **Decided:** the button
+  means what it says, so it empties the folder — see T-M1.5-11. Note that
+  this makes it destructive over files Copist did not create, which is
+  why the dialog has to spell it out.
