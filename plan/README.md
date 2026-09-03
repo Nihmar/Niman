@@ -12,7 +12,7 @@ which is the **source of truth for requirements**; this folder plans the work.
 | [android.md](android.md) | Cross-cutting — Android storage & startup issues | **Fixed** |
 | [m0-scaffold.md](m0-scaffold.md) | M0 — Scaffold | **Done** |
 | [m1-library-core.md](m1-library-core.md) | M1 — Library core | **Done** |
-| [m1_5-index-integrity.md](m1_5-index-integrity.md) | M1.5 — Index integrity | **Next** |
+| [m1_5-correctness.md](m1_5-correctness.md) | M1.5 — Correctness pass | **Next** |
 | [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | Planned |
 | [m3-links-search.md](m3-links-search.md) | M3 — Links & search | Planned |
 | [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | Planned |

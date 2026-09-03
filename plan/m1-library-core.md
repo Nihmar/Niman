@@ -85,7 +85,7 @@ M1 slice:
   image-insert paths remain, under T-M6-09.
 - Recursive watch reliability on Android (FUSE, inotify limits) — the periodic
   rescan is the safety net. It is also the only thing that catches missed
-  events until [m1_5-index-integrity.md](m1_5-index-integrity.md) makes the
+  events until [m1_5-correctness.md](m1_5-correctness.md) makes the
   index notify the UI at all.
 - Case-sensitive filename handling across platforms (index normalizes
   case-sensitivity per OS at compare time).

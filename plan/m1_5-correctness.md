@@ -1,14 +1,15 @@
-# M1.5 — Index integrity
+# M1.5 — Correctness pass
 
 **Status:** Planned · **Depends on:** M1 · **Blocks:** M2 · **Spec:**
 *Requirements* (model), *Performance strategy*
 
 ## Purpose
 
-Close the correctness gaps found in the M1 indexer after the Android
-device round. Two are bugs visible in the app; the third is the reason M3
-cannot start on top of the current index. None is a new feature: this
-milestone changes how the index is maintained, not what it holds.
+Close the defects found in M1 after the Android device round and a
+review of the note operations. Most are visible in the app; one is the
+reason M3 cannot start on top of the current index. None is a new
+feature: this milestone changes how existing behaviour works, not what
+the app does.
 
 M2 is blocked on this because the tree is the surface every later
 milestone builds on, and because the fix to the rewrite strategy touches
@@ -19,9 +20,10 @@ the same code paths M3 would otherwise extend.
 M1 is done and verified on device: the library opens, the watcher and
 the periodic rescan run off the UI isolate, and the tree renders from
 materialized rows. Underneath, the index is maintained by deleting and
-re-inserting rows, and mutations never notify the UI.
+re-inserting rows, mutations never notify the UI, and the trash restores
+items under a name it derives from the wrong source.
 
-## Tasks
+## Tasks — index
 
 - [ ] **T-M1.5-01** Fire `Indexer.onChanged` after every successful index
   mutation (`fullScan` write, `applyEvents`, `resync`), which is what its
@@ -61,6 +63,42 @@ re-inserting rows, and mutations never notify the UI.
   after subtree resyncs, revision on disk-originated change, and the
   existing rebuildability check kept green. *AC: green.*
 
+## Tasks — note operations and trash
+
+- [ ] **T-M1.5-06** Restore under the original name. `restoreTrash`
+  derives the restored name from the name inside `.trash/` via
+  `splitFileName`, but that name is not the original one: a collision is
+  stored as `<base>.<unixSeconds><ext>`, so a restored note keeps the
+  timestamp, and a folder whose name contains a dot is truncated at it —
+  `v1.2 notes` comes back as `v1`. The manifest already records
+  `originalPath`; take the name from there. *AC: restoring a timestamped
+  item and a dotted folder name both yield the original name (uniquified
+  only on a real collision).*
+- [ ] **T-M1.5-07** Fix the delete-permanently dialog text. It reads
+  `'$item.name will be deleted permanently'`, which interpolates the
+  object and then prints a literal `.name`, so the user is asked to
+  confirm deleting `Instance of 'TrashItem'.name`. *AC: the dialog names
+  the item; a widget test covers the confirm path, which today only the
+  restore path exercises.*
+- [ ] **T-M1.5-08** Reject moving a folder into itself or its own
+  subtree. The move picker lists every indexed folder, descendants of the
+  moved one included, and the rename then fails with a raw OS error in a
+  snackbar. Filter the candidates and validate in `NoteOps.move`.
+  *AC: the picker cannot offer an invalid target; `move` throws a
+  meaningful error if called with one anyway.*
+- [ ] **T-M1.5-09** Make the trash manifest tolerant. `_readManifest`
+  already survives a missing, empty or non-object file, but a single
+  malformed entry throws while decoding and takes the whole trash screen
+  with it, permanently. Skip bad entries instead, and drop entries whose
+  item is no longer on disk while writing. *AC: a manifest with one
+  corrupt entry still lists the others.*
+- [ ] **T-M1.5-10** Hide the atomic-write temp files from the index.
+  `writeFileAtomically` names them `<file>.copist-tmp-<micros>`, which
+  does not start with a dot, so the indexer's hidden-entry rule does not
+  skip them and a scan that lands mid-write indexes one as a note. Give
+  them a leading dot. *AC: a scan concurrent with a write never produces
+  a temp-file row.*
+
 ## Technical design
 
 See [design.md](design.md) → *Data model (drift)*. M1.5 slice:
@@ -91,6 +129,9 @@ See [design.md](design.md) → *Data model (drift)*. M1.5 slice:
 - Note ids survive rescans; a no-change rescan still writes nothing.
 - The index stays verifiably rebuildable: delete the db, rescan, get the
   same tree.
+- A restored item comes back under its own name, wherever it came from.
+- No dialog shows an object where a name belongs, and no move offers a
+  destination that cannot work.
 - Unit + widget tests green.
 
 ## Risks / open questions
@@ -103,3 +144,9 @@ See [design.md](design.md) → *Data model (drift)*. M1.5 slice:
 - Case-sensitivity of path keys across platforms (an M1 open question)
   becomes visible here, since the diff matches rows by path. Decide the
   comparison rule while writing it.
+- The trash manifest lives inside `.trash/`, which the index never sees,
+  so nothing cross-checks the two. Entries whose item vanished are
+  filtered out on read but never pruned (T-M1.5-09 does the pruning).
+- `emptyTrash` removes only managed items, leaving anything a user put in
+  `.trash/` by hand. That is deliberate, but the button says "Empty
+  trash" — decide whether the wording or the behaviour should change.

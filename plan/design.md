@@ -145,7 +145,7 @@ puts that same copy in a different table, and contentless
 (`content=''`), which stores no text and therefore cannot return the
 snippets T-M3-05 requires. Decide before writing the migration; whichever
 wins, the row keys must survive a rescan, which is what
-[m1_5-index-integrity.md](m1_5-index-integrity.md) makes true.
+[m1_5-correctness.md](m1_5-correctness.md) makes true.
 
 **Body reads.** Populating FTS is the first thing that needs a note's
 content since M1 stopped reading files during a scan. Read only the notes
