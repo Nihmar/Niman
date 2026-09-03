@@ -1,11 +1,11 @@
 # Android — storage & startup issues
 
-**Status:** 1 fixed · 2 awaiting on-device verification (third attempt:
-the SAF grant was never the right permission; the app now asks for
-"All files access") · T-M6-09 partial (root picking done; image-insert
-paths + on-device verification remain)
+**Status:** 1 fixed · 2 and 3 awaiting on-device verification (2's third
+attempt: the SAF grant was never the right permission; the app now asks
+for "All files access") · T-M6-09 partial (root picking done;
+image-insert paths + on-device verification remain)
 
-Two issues observed on Android (Linux unaffected).
+Three issues observed on Android (Linux unaffected).
 
 ## 1. Slow library reopen (fixed)
 
@@ -30,9 +30,9 @@ the file watcher starts, and a one-shot reconciliation `fullScan` runs
 60 s periodic fallback, and the pending scan is cancelled in teardown.
 Covered by `test/unit/library_state_test.dart`.
 
-**Known caveat:** the reconciliation walk still runs on the UI isolate — it
-no longer gates the first frame, but a large library will hitch briefly
-after the tree paints. If that bites, move the walk to a background
+**Known caveat (it bit — see issue 3):** the reconciliation walk used to
+run on the UI isolate. It no longer gates the first frame, but on a real
+library it froze the app for seconds; the walk now runs on a background
 isolate.
 
 ## 2. `.md` files missing from the tree on Android (fix on device)
@@ -115,3 +115,51 @@ stays open for the remaining scope: image-insert paths on both platforms
 and on-device verification (real devices, not just app-specific storage),
 originally flagged in the [m1-library-core.md](m1-library-core.md) open
 questions.
+
+## 3. "Copist isn't responding" during use (fix on device)
+
+**Symptom:** with the real library visible at last (885 files, 93
+folders), Android put up its ANR dialog now and then while the app was
+being used.
+
+**Root cause:** the scan runs on the UI isolate, and it is not cheap.
+From the 2026-09-03 13:45 device log, one open cost 6.8 s wall-clock:
+
+| phase | duration |
+| --- | --- |
+| walk of 978 entries | 0.6 s |
+| sha256 of 885 files | 6.2 s |
+| index rewrite | 0.02 s |
+
+Android raises the ANR dialog after ~5 s of blocked main thread, so the
+open alone cleared the bar. The digests were the bulk of it: the index
+hashed *every* file, and this library's `Attachments/` holds hundreds of
+images and multi-megabyte e-books, all read end to end. `hashFileSha256`
+reads with `readSync`, and `await`ing a synchronously-completing future
+only yields to the microtask queue, so no frame ran for the whole pass.
+On top of that the 60 s periodic `fullScan` re-walked all 978 entries —
+another ~0.6 s of blocked UI every minute, this one recurring.
+
+**Fix:**
+
+- `scanTree` and `hashFiles` are top-level and run through
+  `Isolate.run`, so neither the walk nor the digests touch the UI
+  isolate. The walk's log lines travel back in `ScanResult.logs` and are
+  replayed by the caller, since the log buffer does not exist over there.
+  The index write stays on the main isolate: it measured 0.02 s.
+- Only note files (`.md`) are digested. Attachments are indexed like any
+  other file, they are simply never read.
+- `fullScan` checks `_treeChanged` *before* computing digests, so the
+  common rescan — nothing changed — costs the walk and no reads at all.
+  Digests are no longer part of that comparison: a stored digest is only
+  ever reused when `(size, mtime)` already proves the content unchanged,
+  so it could never be the deciding difference.
+- Separately, `LibraryController.open` created the `FileWatcher` but
+  never stored it in `_watcher`, so `_teardown` never stopped it. Every
+  library close left its recursive watch alive for the rest of the
+  process, and reopening the same root doubled the event batches — each
+  duplicate costing a subtree walk and an index rewrite.
+
+**Status:** awaiting on-device verification. What to look for in the next
+device log: the gap between the `fullScan … found N entr(ies)` line and
+the `rewriting index` line, which is where the 6.2 s used to sit.
