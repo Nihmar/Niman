@@ -62,8 +62,12 @@ trade-off is gone: no default root exists anymore (see below).
   picker (SAF on Android, xdg-desktop-portal on Linux) — no raw path entry.
 - On Android the pick takes a *persistent, read+write* Storage Access
   Framework grant on the chosen folder (`file_picker` SAF options:
-  `grant: lifetime`, `accessMode: readWrite`) and resolves the tree URI
-  to the real path the indexer walks. That grant is the shared-storage
+  `grant: lifetime`, `accessMode: readWrite`). With SAF options the
+  plugin answers with the tree URI, so `resolveLibraryRoot`
+  (`lib/src/core/library_root.dart`) maps it to the FUSE path the grant
+  opens up (`primary:Documents/HelixNotes` →
+  `/storage/emulated/0/Documents/HelixNotes`) and the open screen
+  stat-checks it before `open()`. That grant is the shared-storage
   permission: the manifest declares no storage permission, and the grant
   survives restarts, so the saved root re-opens directly.
 - (First attempt, superseded: a `MANAGE_EXTERNAL_STORAGE` gate behind a
