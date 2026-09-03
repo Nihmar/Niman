@@ -1,3 +1,4 @@
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,12 @@ final class NoteTree extends StatefulWidget {
 }
 
 final class _NoteTreeState extends State<NoteTree> {
+  static const AppLogger _log = AppLogger(name: 'tree');
+
+  /// How many paths are listed in a single debug log line before the rest
+  /// is summarized, keeping huge folders from flooding the buffer.
+  static const _logPathCap = 200;
+
   /// Flattens the visible tree from the index.
   Future<List<_Row>> _flatten() async {
     final out = <_Row>[];
@@ -55,12 +62,31 @@ final class _NoteTreeState extends State<NoteTree> {
 
   Future<void> _walk(int parentId, int depth, List<_Row> out) async {
     final children = await widget.controller.children(parentId);
+    _log.debug(
+      'tree: children(parent=$parentId) -> ${children.length}: '
+      '${_pathList(children.map((n) => n.path))}',
+    );
     for (final note in children) {
       out.add(_Row(note: note, depth: depth));
       if (note.isDir && widget.expanded.contains(note.path)) {
         await _walk(note.id, depth + 1, out);
       }
     }
+  }
+
+  static String _pathList(Iterable<String> paths) {
+    final iterator = paths.iterator;
+    if (!iterator.moveNext()) return '(none)';
+    final shown = <String>[iterator.current];
+    var extra = 0;
+    while (iterator.moveNext() && shown.length < _logPathCap) {
+      shown.add(iterator.current);
+    }
+    while (iterator.moveNext()) {
+      extra++;
+    }
+    final list = shown.join(', ');
+    return extra > 0 ? '$list, … (+$extra more)' : list;
   }
 
   @override
