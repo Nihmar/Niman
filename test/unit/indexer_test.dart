@@ -161,6 +161,42 @@ void main() {
     expect(await dao.find('m/n/o/z.md'), isNotNull);
   });
 
+  test('onChanged fires once per entry point, only when the index wrote',
+      () async {
+    await indexer.fullScan(root.path);
+    var fires = 0;
+    indexer.onChanged = () => fires++;
+
+    // A no-change rescan writes nothing and fires nothing.
+    await indexer.fullScan(root.path);
+    expect(fires, 0);
+
+    final newAbs = p.join(root.path, 'note3.md');
+    File(newAbs).writeAsStringSync('new');
+    await indexer.applyEvents(root.path, [newAbs]);
+    expect(fires, 1);
+
+    // A batch that changes nothing fires nothing.
+    await indexer.applyEvents(
+      root.path,
+      [p.join(root.path, 'note1.md')],
+    );
+    expect(fires, 1);
+
+    // A directory resync that changes nothing fires nothing.
+    await indexer.resync(root.path, p.join(root.path, 'docs'));
+    expect(fires, 1);
+
+    // A batch with one prune and one upsert fires once for the batch.
+    File(newAbs).deleteSync();
+    File(p.join(root.path, 'note4.md')).writeAsStringSync('four');
+    await indexer.applyEvents(root.path, [
+      newAbs,
+      p.join(root.path, 'note4.md'),
+    ]);
+    expect(fires, 2);
+  });
+
   test('applyEvents picks up external create and delete', () async {
     await indexer.fullScan(root.path);
 

@@ -195,9 +195,14 @@ final class Indexer {
       }
       _log.info('fullScan: tree changed, applying diff');
       final shas = await _digests(root, entries, old);
+      var wrote = false;
       await _db.transaction(() async {
-        await _applyDiff(entries: entries, old: old, shas: shas);
+        wrote = await _applyDiff(entries: entries, old: old, shas: shas);
       });
+      if (wrote) {
+        final cb = onChanged;
+        if (cb != null) cb();
+      }
     });
   }
 
@@ -206,9 +211,11 @@ final class Indexer {
   /// Each path is reconciled against disk: existing directories resync their
   /// whole subtree, existing files are upserted, and absent paths are pruned
   /// (with their subtree). Dot components (`.trash/`, `.history/`, dotfiles)
-  /// are ignored.
+  /// are ignored. [onChanged] fires once per call, after the writes, and
+  /// only when the batch actually changed the index.
   Future<void> applyEvents(String root, List<String> paths) {
     return _synchronized(() async {
+      var wrote = false;
       final seen = <String>{};
       for (final abs in paths) {
         if (!seen.add(abs)) continue;
@@ -219,18 +226,11 @@ final class Indexer {
           );
           continue;
         }
-        final dir = Directory(abs);
-        final file = File(abs);
-        if (dir.existsSync()) {
-          _log.debug('applyEvents: "$abs" -> resync dir "$rel"');
-          await _syncDirSubtree(root, abs);
-        } else if (file.existsSync()) {
-          _log.debug('applyEvents: "$abs" -> upsert file "$rel"');
-          await _upsertFile(root, abs, rel);
-        } else {
-          _log.debug('applyEvents: "$abs" -> prune "$rel"');
-          await _dao.deleteSubtree(rel);
-        }
+        wrote |= await _reconcile(root, abs, rel, 'applyEvents');
+      }
+      if (wrote) {
+        final cb = onChanged;
+        if (cb != null) cb();
       }
     });
   }
@@ -238,7 +238,8 @@ final class Indexer {
   /// Reconciles [abs] with disk: if it exists as a directory the whole
   /// subtree is re-synced (covering renames/moves whose new path was not in
   /// the event batch), if it is a file it is upserted, and if it is gone its
-  /// index rows are pruned. Dot components are ignored.
+  /// index rows are pruned. Dot components are ignored. [onChanged] fires
+  /// after the writes, and only when the index actually changed.
   Future<void> resync(String root, String abs) {
     return _synchronized(() async {
       final rel = _safeRel(abs, root);
@@ -248,18 +249,37 @@ final class Indexer {
         );
         return;
       }
-      final dir = Directory(abs);
-      if (dir.existsSync()) {
-        _log.debug('resync: "$abs" -> resync dir "$rel"');
-        await _syncDirSubtree(root, abs);
-      } else if (File(abs).existsSync()) {
-        _log.debug('resync: "$abs" -> upsert file "$rel"');
-        await _upsertFile(root, abs, rel);
-      } else {
-        _log.debug('resync: "$abs" -> prune "$rel"');
-        await _dao.deleteSubtree(rel);
+      final wrote = await _reconcile(root, abs, rel, 'resync');
+      if (wrote) {
+        final cb = onChanged;
+        if (cb != null) cb();
       }
     });
+  }
+
+  /// Reconciles one absolute path against disk and the index, returning
+  /// whether the index changed. [tag] is the public entry point, kept in
+  /// the log lines.
+  Future<bool> _reconcile(
+    String root,
+    String abs,
+    String rel,
+    String tag,
+  ) async {
+    if (Directory(abs).existsSync()) {
+      _log.debug('$tag: "$abs" -> resync dir "$rel"');
+      return _syncDirSubtree(root, abs);
+    }
+    if (File(abs).existsSync()) {
+      _log.debug('$tag: "$abs" -> upsert file "$rel"');
+      return _upsertFile(root, abs, rel);
+    }
+    _log.debug('$tag: "$abs" -> prune "$rel"');
+    final deleted = await _dao.deleteSubtree(rel);
+    if (deleted > 0) {
+      _log.debug('$tag: pruned "$rel" ($deleted row(s))');
+    }
+    return deleted > 0;
   }
 
   /// Library-relative path of [abs], or `null` when the path is outside the
@@ -359,14 +379,14 @@ final class Indexer {
 
   /// Applies the difference between the desired tree [entries] (a walk of
   /// [scope], keyed root-relative) and the current index rows [old] (scoped
-  /// to [scope]).
+  /// to [scope]), returning whether anything was written.
   ///
   /// New paths are inserted, rows whose name, size, mtime, parent link or
   /// digest changed are updated, and gone paths are deleted through their
   /// highest gone ancestor so a removed directory takes its descendants with
   /// it. Every surviving path keeps its id, so parent links pointing into
   /// the index stay valid and only genuinely re-parented rows are updated.
-  Future<void> _applyDiff({
+  Future<bool> _applyDiff({
     required List<DiskEntry> entries,
     required Map<String, Note> old,
     required Map<String, String> shas,
@@ -375,6 +395,7 @@ final class Indexer {
   }) async {
     final scopeParentRel = parentOf(scope);
     final newIds = <String, int>{};
+    var wrote = false;
     for (final e in entries) {
       final parentId = _resolveParent(
         parentOf(e.rel),
@@ -398,6 +419,7 @@ final class Indexer {
           ),
         );
         newIds[e.rel] = id;
+        wrote = true;
         continue;
       }
       final changed =
@@ -421,6 +443,7 @@ final class Indexer {
               sha256: Value(shas[e.rel]),
             ),
           );
+      wrote = true;
     }
     final entryRels = <String>{for (final e in entries) e.rel};
     final gone = <String>{
@@ -430,7 +453,9 @@ final class Indexer {
     for (final rel in gone) {
       if (gone.contains(parentOf(rel))) continue;
       await _dao.deleteSubtree(rel);
+      wrote = true;
     }
+    return wrote;
   }
 
   /// The parent id for the entry at [rel]: 0 for the walk root's parent,
@@ -469,7 +494,7 @@ final class Indexer {
   /// disk) against the index: walks the subtree, reuses unchanged digests,
   /// and applies the diff — inserts, updates and deletes — so every row
   /// whose path survives keeps its id.
-  Future<void> _syncDirSubtree(String root, String abs) async {
+  Future<bool> _syncDirSubtree(String root, String abs) async {
     final rel = relPath(abs, root);
     final entries = await _walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
@@ -480,6 +505,7 @@ final class Indexer {
         row.path: row,
     };
     final shas = await _digests(root, entries, old);
+    var wrote = false;
     await _db.transaction(() async {
       // The scope root's parent lives outside the walk, so it is resolved
       // from the index — the directory chain is ensured when the rows are
@@ -487,7 +513,7 @@ final class Indexer {
       final scopeParentId = rel.isEmpty
           ? 0
           : await _ensureDirChain(root, parentOf(rel));
-      await _applyDiff(
+      wrote = await _applyDiff(
         entries: entries,
         old: old,
         shas: shas,
@@ -495,6 +521,7 @@ final class Indexer {
         scopeParentId: scopeParentId,
       );
     });
+    return wrote;
   }
 
   /// Ensures directory rows exist for every ancestor of [dirRel] (and
@@ -525,7 +552,11 @@ final class Indexer {
     return currentId;
   }
 
-  Future<void> _upsertFile(String root, String abs, String rel) async {
+  /// Inserts or updates the row for the file at [abs] (root-relative path
+  /// [rel]) and returns whether the index changed. The directory chain is
+  /// ensured first, so a file appearing outside the app comes in with its
+  /// parents.
+  Future<bool> _upsertFile(String root, String abs, String rel) async {
     final parentRel = parentOf(rel);
     final parentId = parentRel.isEmpty
         ? 0
@@ -548,10 +579,20 @@ final class Indexer {
           sha256: Value(sha),
         ),
       );
-    } else {
-      _log.debug('upsert "$rel": update (parent "$parentRel")');
-      await (_db.update(_db.notes)
-            ..where((t) => t.path.equals(rel)))
+      return true;
+    }
+    final changed = existing.parent != parentId ||
+        existing.name != p.basename(abs) ||
+        existing.isDir || // a stale directory row at a file path
+        existing.size != st.size ||
+        existing.modified != toStoredSecond(st.modified) ||
+        existing.sha256 != sha;
+    if (!changed) {
+      _log.debug('upsert "$rel": unchanged');
+      return false;
+    }
+    _log.debug('upsert "$rel": update (parent "$parentRel")');
+    await (_db.update(_db.notes)..where((t) => t.path.equals(rel)))
         .write(
           NotesCompanion(
             parent: Value(parentId),
@@ -562,6 +603,6 @@ final class Indexer {
             sha256: Value(sha),
           ),
         );
-    }
+    return true;
   }
 }

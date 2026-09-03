@@ -129,4 +129,24 @@ void main() {
     await second.close();
     await second.dispose();
   });
+
+  test('a disk-originated change moves the revision', () async {
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    final before = controller.revision;
+
+    File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+    await controller.rescanNow();
+
+    expect(controller.revision, greaterThan(before));
+    expect(await names(controller), containsAll(<String>['a.md', 'b.md']));
+
+    // A rescan that changes nothing does not move the revision again.
+    final quiet = controller.revision;
+    await controller.rescanNow();
+    expect(controller.revision, quiet);
+
+    await controller.close();
+    await controller.dispose();
+  });
 }
