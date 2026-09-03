@@ -194,6 +194,17 @@ void main() {
         throwsA(isA<Exception>()),
       );
     });
+
+    test('the temp file is a dotfile next to the target', () {
+      final file = File(p.join(tempDir.path, 'docs/note.md'));
+      final temp = atomicTempPath(file, 123);
+      // Same directory, so the rename stays on one filesystem...
+      expect(temp.parent.path, file.parent.path);
+      // ...and a dotfile, so the indexer's hidden-entry rule skips it.
+      expect(p.basename(temp.path), startsWith('.'));
+      expect(p.basename(temp.path), contains(p.basename(file.path)));
+      expect(atomicTempPath(file, 456).path, isNot(temp.path));
+    });
   });
 
   group('hashFileSha256', () {

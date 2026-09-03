@@ -79,6 +79,19 @@ void main() {
     expect(empty.parent, 0);
   });
 
+  test('a scan landing mid-write never indexes the atomic temp file',
+      () async {
+    // The temp file as it exists between the write and the rename.
+    final target = File(p.join(root.path, 'inflight.md'));
+    atomicTempPath(target, 42).writeAsStringSync('partial');
+
+    await indexer.fullScan(root.path);
+
+    final names = (await dao.allRows()).map((n) => n.path).toList();
+    expect(names.where((name) => name.contains('copist-tmp')), isEmpty);
+    expect(names, isNot(contains('inflight.md')));
+  });
+
   test('a fresh index reproduces the identical tree (rebuildable)', () async {
     await indexer.fullScan(root.path);
     final first = await dao.allRows();

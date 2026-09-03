@@ -48,14 +48,29 @@ const defaultNoteName = 'Untitled';
 /// The fallback folder name used when [sanitizeName] produces an empty name.
 const defaultFolderName = 'New folder';
 
+/// The temp file [writeFileAtomically] writes for [file] at [micros]: a
+/// dotfile in the target's own directory (what keeps the rename atomic on
+/// the same filesystem). The leading dot puts it under the indexer's
+/// hidden-entry rule, so a scan landing mid-write never indexes the temp
+/// file.
+File atomicTempPath(File file, int micros) {
+  return File(
+    p.join(
+      file.parent.path,
+      '.${p.basename(file.path)}$_tempMarker-$micros',
+    ),
+  );
+}
+
 /// Writes [data] to [file] atomically.
 ///
 /// Bytes are first written to a temporary file in the same directory,
 /// which is then renamed over [file]. A rename within one filesystem is
 /// atomic on Android and Linux, so readers never observe a partial write.
 Future<void> writeFileAtomically(File file, List<int> data) async {
-  final tmp = File(
-    '${file.path}$_tempMarker-${DateTime.now().microsecondsSinceEpoch}',
+  final tmp = atomicTempPath(
+    file,
+    DateTime.now().microsecondsSinceEpoch,
   );
   try {
     await tmp.writeAsBytes(data, flush: true);
