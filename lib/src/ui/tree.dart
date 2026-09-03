@@ -51,7 +51,41 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// How many paths are listed in a single debug log line before the rest
   /// is summarized, keeping huge folders from flooding the buffer.
-  static const _logPathCap = 200;
+  static const _logPathCap = 12;
+
+  /// The rows currently being shown, and the inputs they were built from.
+  ///
+  /// The flatten runs one `children` query per expanded level, so it must
+  /// not be restarted by every rebuild: selecting a note, toggling a
+  /// button — any `setState` above this widget — used to re-query the
+  /// whole visible tree, over a hundred queries a second on a real
+  /// library. Reusing the same future also keeps [FutureBuilder] from
+  /// flashing its spinner between rebuilds.
+  Future<List<_Row>>? _rows;
+  int? _rowsRevision;
+  Set<String> _rowsExpanded = const <String>{};
+
+  @override
+  void didUpdateWidget(NoteTree oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _rows = null;
+    }
+  }
+
+  /// The flattened rows for [revision], recomputed only when the index
+  /// revision or the set of expanded folders has changed.
+  Future<List<_Row>> _rowsFor(int revision) {
+    final cached = _rows;
+    if (cached != null &&
+        _rowsRevision == revision &&
+        setEquals(_rowsExpanded, widget.expanded)) {
+      return cached;
+    }
+    _rowsRevision = revision;
+    _rowsExpanded = Set<String>.of(widget.expanded);
+    return _rows = _flatten();
+  }
 
   /// Flattens the visible tree from the index.
   Future<List<_Row>> _flatten() async {
@@ -94,9 +128,9 @@ final class _NoteTreeState extends State<NoteTree> {
     return StreamBuilder<int>(
       stream: widget.controller.events,
       initialData: widget.controller.revision,
-      builder: (context, _) {
+      builder: (context, snapshot) {
         return FutureBuilder<List<_Row>>(
-          future: _flatten(),
+          future: _rowsFor(snapshot.data ?? widget.controller.revision),
           builder: (context, snap) {
             if (!snap.hasData) {
               return const Center(child: CircularProgressIndicator());
