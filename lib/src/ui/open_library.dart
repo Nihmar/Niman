@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:android_file_picker/android_file_picker.dart';
 import 'package:copist/src/core/library_root.dart';
 import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/tree_grant.dart';
+import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:file_picker/file_picker.dart';
@@ -15,8 +15,9 @@ import 'package:path/path.dart' as p;
 /// Both flows go through the native directory picker (Storage Access
 /// Framework on Android, xdg-desktop-portal on Linux) — no manual path
 /// entry, so a library root can only ever be a real, readable folder.
-/// On Android the pick takes a persistent read+write grant on the folder;
-/// that grant is the shared-storage permission.
+/// The picker only *chooses* the folder: on Android the library is read
+/// with plain file I/O, so "All files access" has to be granted before a
+/// root on shared storage is usable, and the screen asks for it up front.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
   const OpenLibraryScreen({required this.controller, super.key});
@@ -29,24 +30,48 @@ final class OpenLibraryScreen extends StatefulWidget {
 }
 
 final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
-  /// Logger for the shared-storage grant handling on this screen.
+  /// Logger for the shared-storage permission handling on this screen.
   final _storageLog = const AppLogger(name: 'storage');
-  /// SAF options for the pick: a persistent read+write grant on the
-  /// chosen folder (and its subtree). The grant survives app restarts,
-  /// so the saved root can be re-opened by real path later; without it
-  /// Android's FUSE layer keeps the folder's files invisible.
-  static const AndroidOptions _folderGrant = FilePickerAndroidOptions(
-    safOptions: AndroidSAFOptions(
-      grant: AndroidSAFGrant.lifetime,
-      accessMode: AndroidSAFAccessMode.readWrite,
-    ),
-  );
 
   /// True while a picker or open is in flight.
   bool _busy = false;
 
+  /// True on Android while "All files access" is not granted; both flows
+  /// stay disabled until it is.
+  bool _needsAccess = false;
+
   /// A picker/open failure that the session does not know about.
   String? _pickerError;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_refreshAccess());
+  }
+
+  /// Re-reads the shared-storage permission state into [_needsAccess].
+  Future<void> _refreshAccess() async {
+    final granted = await StorageAccess.hasAllFilesAccess();
+    if (!mounted || _needsAccess == !granted) return;
+    setState(() => _needsAccess = !granted);
+  }
+
+  /// Sends the user to the system "All files access" screen.
+  Future<void> _grantAccess() async {
+    _pickerError = null;
+    _setBusy(true);
+    final granted = await StorageAccess.ensureAllFilesAccess();
+    if (!mounted) return;
+    _storageLog.info('all-files access after prompt: $granted');
+    _setBusy(false);
+    setState(() {
+      _needsAccess = !granted;
+      if (!granted) {
+        _pickerError = 'Copist cannot read your notes without'
+            ' "All files access". Grant it to open a library.';
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,20 +101,25 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FilledButton(
-                      onPressed: active ? null : _openExisting,
-                      child: const Text('Open existing'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton.tonal(
-                      onPressed: active ? null : _createNew,
-                      child: const Text('Create new'),
-                    ),
-                  ],
-                ),
+                if (_needsAccess)
+                  _AccessPrompt(
+                    onGrant: active ? null : _grantAccess,
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FilledButton(
+                        onPressed: active ? null : _openExisting,
+                        child: const Text('Open existing'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.tonal(
+                        onPressed: active ? null : _createNew,
+                        child: const Text('Create new'),
+                      ),
+                    ],
+                  ),
                 if (active)
                   const Padding(
                     padding: EdgeInsets.only(top: 16),
@@ -133,27 +163,24 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   /// Opens the native directory picker; `null` when the user cancels.
   Future<String?> _pickDirectory(String title) async {
+    // Re-checked here too: the permission can be revoked from Settings
+    // while this screen is up.
+    if (!await StorageAccess.hasAllFilesAccess()) {
+      _storageLog.warning('pick blocked: no all-files access');
+      if (mounted) {
+        setState(() => _needsAccess = true);
+      }
+      return null;
+    }
     _setBusy(true);
     try {
-      final raw = await FilePicker.getDirectoryPath(
-        dialogTitle: title,
-        androidOptions: _folderGrant,
-      );
+      final raw = await FilePicker.getDirectoryPath(dialogTitle: title);
       _setBusy(false);
       if (raw == null || raw.trim().isEmpty) {
         return null; // The user cancelled.
       }
-      if (raw.startsWith('content://')) {
-        final granted = await TreeGrant.takePersistent(raw);
-        if (granted) {
-          _storageLog.info('tree grant taken: $raw');
-        } else {
-          _storageLog.warning('tree grant NOT taken for: $raw');
-          _pickerError =
-              'Could not save access to the folder. Pick it again.';
-          return null;
-        }
-      }
+      // The Android picker answers with a SAF tree URI rather than a
+      // path; the library is read by path, so map it to the real one.
       final path = resolveLibraryRoot(raw);
       if (path == null) {
         _pickerError = 'That folder is not supported.'
@@ -161,8 +188,8 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
         return null;
       }
       if (Platform.isAndroid) {
-        // The grant must make the folder reachable through the FUSE
-        // layer; fail here, where the cause is still obvious.
+        // The folder must be reachable through the FUSE layer; fail here,
+        // where the cause is still obvious.
         try {
           Directory(path).statSync();
         } on FileSystemException catch (e) {
@@ -189,6 +216,36 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   void _setBusy(bool busy) {
     if (_busy == busy) return;
     setState(() => _busy = busy);
+  }
+}
+
+/// Shown instead of the open/create buttons while Android withholds the
+/// shared-storage permission.
+final class _AccessPrompt extends StatelessWidget {
+  const _AccessPrompt({required this.onGrant});
+
+  /// Opens the system settings screen; null while a request is in flight.
+  final Future<void> Function()? onGrant;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Copist reads your notes as ordinary files, so Android needs to'
+          ' allow it access to all files. Nothing is uploaded, and only the'
+          ' library folder you pick is read.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          key: const Key('grant-storage-access'),
+          onPressed: onGrant,
+          child: const Text('Grant file access'),
+        ),
+      ],
+    );
   }
 }
 

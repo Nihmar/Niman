@@ -1,13 +1,14 @@
 // Resolves the native directory picker's result into the real
 // filesystem path of the library root.
 //
-// With the persistent SAF grant, the Android picker hands back the
-// external-storage tree URI (a
+// The Android picker hands back an external-storage tree URI (a
 // `content://com.android.externalstorage.documents/tree/...` string)
-// rather than a path. The provider's tree document IDs have the form
-// `<volume>:<path>` and map to the FUSE real paths the grant makes
-// accessible: volume `primary` is `/storage/emulated/0`, any other
-// volume is `/storage/<volume>`.
+// rather than a path, while the library is read with plain file I/O. The
+// provider's tree document IDs have the form `<volume>:<path>` and map to
+// the real FUSE paths: volume `primary` is `/storage/emulated/0`, any
+// other volume is `/storage/<volume>`. Reading those paths needs the
+// "All files access" permission (see `core/storage_access.dart`); the URI
+// itself grants nothing outside the DocumentsProvider.
 
 import 'package:path/path.dart' as p;
 

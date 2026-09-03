@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The library root is a user-chosen folder on shared storage, read
+         and written with plain file I/O (walk, watch, open). Without "All
+         files access" the FUSE layer backing /storage/emulated/0 hands the
+         app a directories-only view and denies open() on notes it did not
+         create. A Storage Access Framework tree grant does not help: it
+         only opens the DocumentsProvider (content:// URIs), not the
+         filesystem. -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+
     <application
         android:label="Copist"
         android:name="${applicationName}"

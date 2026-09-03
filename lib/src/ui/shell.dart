@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
@@ -30,8 +31,20 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     super.initState();
     if (!_resumeStarted) {
       _resumeStarted = true;
-      unawaited(ref.read(librarySessionProvider).resume());
+      unawaited(_resume());
     }
+  }
+
+  /// Resumes the last library, unless Android is withholding the
+  /// shared-storage permission.
+  ///
+  /// Resuming without it would reconcile the index against a root whose
+  /// files the OS hides, rewriting the tree down to its folders. The open
+  /// screen shows the permission prompt instead.
+  Future<void> _resume() async {
+    if (!await StorageAccess.hasAllFilesAccess()) return;
+    if (!mounted) return;
+    await ref.read(librarySessionProvider).resume();
   }
 
   @override

@@ -13,10 +13,6 @@ environment:
   sdk: ^3.13.2
 
 dependencies:
-  # SAF options types for the directory pick (file_picker's Android
-  # implementation); the grant is what lets Android read the library.
-  android_file_picker: ^1.1.0
-
   # Rebuildable index (SQLite + FTS5); schema lands in M1.
   crypto: ^3.0.7
   drift: ^2.34.3
