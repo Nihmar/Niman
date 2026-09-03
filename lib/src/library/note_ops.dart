@@ -319,15 +319,20 @@ final class NoteOps implements NoteOperations {
 
   /// Permanently deletes every managed trash item.
   @override
+  /// Deletes every entry in `.trash/`, not just the items Copist put
+  /// there: the trash screen promises to empty the folder, and that
+  /// includes anything a user moved into it by hand. Ends with an empty
+  /// manifest.
   Future<void> emptyTrash() {
     return _synchronized(() async {
-      final manifest = await _readManifest();
-      for (final name in manifest.keys.toList()) {
-        final trashAbs = _abs('.trash/$name');
-        if (Directory(trashAbs).existsSync()) {
-          await Directory(trashAbs).delete(recursive: true);
-        } else if (File(trashAbs).existsSync()) {
-          await File(trashAbs).delete();
+      final trashDir = Directory(_abs('.trash'));
+      if (trashDir.existsSync()) {
+        for (final entry in trashDir.listSync()) {
+          if (entry is Directory) {
+            await entry.delete(recursive: true);
+          } else {
+            await entry.delete();
+          }
         }
       }
       await _writeManifest(<String, _ManifestEntry>{});

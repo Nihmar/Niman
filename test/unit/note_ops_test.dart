@@ -335,6 +335,33 @@ void main() {
           jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
       expect(raw.keys, {'B.md', 'C.md'});
     });
+
+    test('emptyTrash removes items Copist never put there', () async {
+      await ops.createNote(parentPath: '', name: 'A');
+      await ops.delete('A.md');
+      // A user moved these into .trash/ by hand: none is in the manifest.
+      final foreign = File(p.join(root.path, '.trash/foreign.txt'))
+        ..writeAsStringSync('mine');
+      Directory(p.join(root.path, '.trash/foreign_folder/inner'))
+          .createSync(recursive: true);
+
+      await ops.emptyTrash();
+
+      expect(await ops.trashItems(), isEmpty);
+      expect(foreign.existsSync(), isFalse);
+      expect(
+        Directory(p.join(root.path, '.trash/foreign_folder')).existsSync(),
+        isFalse,
+      );
+      expect(
+        jsonDecode(
+          File(
+            p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
+          ).readAsStringSync(),
+        ),
+        isEmpty,
+      );
+    });
   });
 
   group('trash toggle', () {

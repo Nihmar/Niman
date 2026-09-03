@@ -262,6 +262,49 @@ void main() {
     await controller.dispose();
   });
 
+  testWidgets('emptying the trash says what it deletes', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'library');
+    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+
+    // A note in the trash, so the empty action is offered.
+    await tester.tap(find.byIcon(Icons.note_add));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Victim');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(noteRow('Victim.md'));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('open-trash')));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Empty trash'));
+    await tester.pump();
+    expect(
+      find.text(
+        'This deletes everything in the trash folder permanently, '
+        'including items Copist did not put there.',
+      ),
+      findsOne,
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Empty'));
+    await settle(tester);
+    expect(find.text('Trash is empty'), findsOne);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
   testWidgets('the move picker does not offer a folder as its own target',
       (tester) async {
     await tester.pumpWidget(buildApp());

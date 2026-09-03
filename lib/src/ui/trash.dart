@@ -89,7 +89,10 @@ final class _TrashScreenState extends State<TrashScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Empty trash'),
-        content: const Text('Delete all trash items permanently?'),
+        content: const Text(
+          'This deletes everything in the trash folder permanently, '
+          'including items Copist did not put there.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
