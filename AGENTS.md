@@ -36,6 +36,7 @@ Spec: `Copist - spec & plan.md`. Design: `plan/design.md`. Plan: `plan/m*.md`
 
 ## Design rules (affect how you code)
 - Disk is source of truth: one note = one `.md`. SQLite (drift) is a **rebuildable index only** — store nothing that can't be reconstructed by rescanning disk.
+- Android storage: the library is read/written with plain `dart:io` (walk, watch, open by path), so it needs `MANAGE_EXTERNAL_STORAGE` ("All files access"), gated by `core/storage_access.dart`. A SAF tree grant is **not** a substitute — it only opens the DocumentsProvider (`content://`), never the filesystem; two rounds were lost to that. The picker only *chooses* the root. Details: `plan/android.md`.
 - Scale: 1M notes + novel-length files. No O(n) full scans on hot paths; search via FTS5; keep tree rows materialized.
 - Vocabulary: Library (root), note, folder, tag, template, wikilink, trash, history. Not vault/canvas/daily note/backlinks.
 - Layout `lib/src/<module>/` per `plan/design.md`: core, library, db, editor, preview, links, search, frontmatter, templates, sync, ui.

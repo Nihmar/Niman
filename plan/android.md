@@ -1,9 +1,9 @@
 # Android — storage & startup issues
 
-**Status:** 1 fixed · 2 awaiting on-device verification (the tree grant
-is now really taken; the earlier round's grant was silently skipped) ·
-T-M6-09 partial (root picking done; image-insert paths + on-device
-verification remain)
+**Status:** 1 fixed · 2 awaiting on-device verification (third attempt:
+the SAF grant was never the right permission; the app now asks for
+"All files access") · T-M6-09 partial (root picking done; image-insert
+paths + on-device verification remain)
 
 Two issues observed on Android (Linux unaffected).
 
@@ -35,7 +35,7 @@ no longer gates the first frame, but a large library will hitch briefly
 after the tree paints. If that bites, move the walk to a background
 isolate.
 
-## 2. `.md` files missing from the tree on Android (fixed)
+## 2. `.md` files missing from the tree on Android (fix on device)
 
 **Symptom:** notes created outside the app never appeared in the tree,
 while the same library worked fine on Linux.
@@ -58,38 +58,60 @@ the then-default root — the app-specific folder
 `Android/data/<package>/files`, which the app may always read. That
 trade-off is gone: no default root exists anymore (see below).
 
+**Why the SAF grant did not fix it (two wasted rounds):** a persistent
+tree grant only opens the *DocumentsProvider* — `content://` URIs read
+through `ContentResolver`/`DocumentFile`. It changes nothing about the
+FUSE view that `dart:io` sees, and Copist reads the library entirely
+through `dart:io`: `Indexer` walks it with `listSync`/`statSync`,
+`FileWatcher` watches paths, notes are opened by path. The exported log
+of 2026-09-03 13:11 proves it in three lines: the grant *was* taken
+(`tree grant taken: content://…/tree/primary%3ADocuments%2FHelixNotes`),
+the scan that followed still reported `93 entr(ies) (0 file, 93 dir)`,
+and the app's own exported log file — written into that folder through
+the SAF save dialog seconds earlier — failed to reopen by path with
+`Permission denied, errno = 13`. Same file, same folder, same grant:
+the SAF channel works, the POSIX channel does not. (The very first
+attempt, a `MANAGE_EXTERNAL_STORAGE` gate, was on the right track but
+declared the permission as `android:MANAGE_EXTERNAL_STORAGE` instead of
+`android.permission.MANAGE_EXTERNAL_STORAGE`, so the app never appeared
+in the system's "All files access" list and could not be granted.)
+
 **Fix:**
 
 - The open/create screen picks the library root with the native directory
   picker (SAF on Android, xdg-desktop-portal on Linux) — no raw path entry.
-- On Android the pick takes a *persistent, read+write* Storage Access
-  Framework grant on the chosen folder. `file_picker`'s SAF options are
-  **not** used for it: in `android_file_picker` 1.1.0 (the latest) the
-  Dart side nests the options under a `safOptions` key the Kotlin side
-  never reads, so `grant` reads null and
-  `takePersistableUriPermission` is silently skipped (device log:
-  93 dirs, 0 files, no `walk: skip` lines — the FUSE view was still
-  directories-only). Instead the open screen takes the grant itself
-  right after the pick (`TreeGrant.takePersistent` →
-  `copist/storage` channel → `takePersistableUriPermission`), while
-  the activity still holds the transient grant from the pick result.
-  The plugin answers with the tree URI, so `resolveLibraryRoot`
-  (`lib/src/core/library_root.dart`) maps it to the FUSE path the grant
-  opens up (`primary:Documents/HelixNotes` →
-  `/storage/emulated/0/Documents/HelixNotes`) and the open screen
-  stat-checks it before `open()`. That grant is the shared-storage
-  permission: the manifest declares no storage permission, and the grant
-  survives restarts, so the saved root re-opens directly.
-- (First attempt, superseded: a `MANAGE_EXTERNAL_STORAGE` gate behind a
-  `copist/storage` method channel — the dangerous, app-wide permission.
-  The per-folder SAF grant makes it unnecessary.)
+  The picker only *chooses* the folder. On Android it answers with a tree
+  URI, which `resolveLibraryRoot` (`lib/src/core/library_root.dart`) maps
+  to the real path (`primary:Documents/HelixNotes` →
+  `/storage/emulated/0/Documents/HelixNotes`); the screen stat-checks it
+  before `open()`.
+- Access comes from `MANAGE_EXTERNAL_STORAGE` ("All files access"),
+  declared in the manifest and gated in the UI:
+  `core/storage_access.dart` (`hasAllFilesAccess` / `ensureAllFilesAccess`,
+  no-ops off Android) over the `copist/storage` channel, which answers
+  from `Environment.isExternalStorageManager()` and, on request, opens
+  Copist's page in the system settings screen and re-checks on return.
+  The open screen replaces its two buttons with a short explanation and a
+  "Grant file access" button while the permission is missing, and
+  `LibraryHome` skips `resume()` without it — resuming would reconcile
+  the index against a root whose files the OS hides and rewrite the tree
+  down to its folders.
+- On `minSdk 35` there is no lighter permission: `READ_EXTERNAL_STORAGE`
+  no longer exists and `READ_MEDIA_*` does not cover `.md`. The Play
+  Store route is the file-manager declaration, as Obsidian and Markor do.
+- The SAF grant path (`core/tree_grant.dart`, `takeTreeGrant`, the
+  `android_file_picker` dependency) is removed. Doing the I/O over
+  `DocumentFile` instead remains the theoretical fallback if the Play
+  declaration is ever refused, but it means rewriting every read and
+  write, and losing the watcher: inotify does not work on content URIs
+  and `ContentResolver` observers give no usable per-tree events.
 
-**Status:** awaiting on-device verification. The first "fixed" round was
-wrong: the plugin silently skipped the grant (broken option map), so
-the device log still showed the directories-only FUSE view (93 dirs,
-0 files, no `walk: skip` lines). The grant is now taken explicitly,
-so the next device round is the real test. **T-M6-09** in
-[m6-scale-polish.md](m6-scale-polish.md) stays open for the remaining
-scope: image-insert paths on both platforms and on-device verification
-(real devices, not just app-specific storage), originally flagged in the
-[m1-library-core.md](m1-library-core.md) open questions.
+**Status:** awaiting on-device verification. Two earlier "fixed" rounds
+were wrong for the same reason — both chased the SAF grant, which is not
+a filesystem permission. What to look for in the next device log: the
+full scan reporting a non-zero file count, and `walk: skip` lines for
+hidden entries. **T-M6-09** in [m6-scale-polish.md](m6-scale-polish.md)
+stays open for the remaining scope: image-insert paths on both platforms
+and on-device verification (real devices, not just app-specific storage),
+originally flagged in the [m1-library-core.md](m1-library-core.md) open
+questions.
