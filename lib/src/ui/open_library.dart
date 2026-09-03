@@ -1,3 +1,4 @@
+import 'package:android_file_picker/android_file_picker.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +10,8 @@ import 'package:path/path.dart' as p;
 /// Both flows go through the native directory picker (Storage Access
 /// Framework on Android, xdg-desktop-portal on Linux) — no manual path
 /// entry, so a library root can only ever be a real, readable folder.
+/// On Android the pick takes a persistent read+write grant on the folder;
+/// that grant is the shared-storage permission.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
   const OpenLibraryScreen({required this.controller, super.key});
@@ -21,6 +24,17 @@ final class OpenLibraryScreen extends StatefulWidget {
 }
 
 final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
+  /// SAF options for the pick: a persistent read+write grant on the
+  /// chosen folder (and its subtree). The grant survives app restarts,
+  /// so the saved root can be re-opened by real path later; without it
+  /// Android's FUSE layer keeps the folder's files invisible.
+  static const AndroidOptions _folderGrant = FilePickerAndroidOptions(
+    safOptions: AndroidSAFOptions(
+      grant: AndroidSAFGrant.lifetime,
+      accessMode: AndroidSAFAccessMode.readWrite,
+    ),
+  );
+
   /// True while a picker or open is in flight.
   bool _busy = false;
 
@@ -114,7 +128,10 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   Future<String?> _pickDirectory(String title) async {
     _setBusy(true);
     try {
-      final path = await FilePicker.getDirectoryPath(dialogTitle: title);
+      final path = await FilePicker.getDirectoryPath(
+        dialogTitle: title,
+        androidOptions: _folderGrant,
+      );
       _setBusy(false);
       return path;
     } on Object catch (error) {
