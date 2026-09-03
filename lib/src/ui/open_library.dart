@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:android_file_picker/android_file_picker.dart';
+import 'package:copist/src/core/library_root.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:file_picker/file_picker.dart';
@@ -128,11 +131,30 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   Future<String?> _pickDirectory(String title) async {
     _setBusy(true);
     try {
-      final path = await FilePicker.getDirectoryPath(
+      final raw = await FilePicker.getDirectoryPath(
         dialogTitle: title,
         androidOptions: _folderGrant,
       );
       _setBusy(false);
+      if (raw == null || raw.trim().isEmpty) {
+        return null; // The user cancelled.
+      }
+      final path = resolveLibraryRoot(raw);
+      if (path == null) {
+        _pickerError = 'That folder is not supported.'
+            ' Pick a folder on the device storage.';
+        return null;
+      }
+      if (Platform.isAndroid) {
+        // The grant must make the folder reachable through the FUSE
+        // layer; fail here, where the cause is still obvious.
+        try {
+          Directory(path).statSync();
+        } on FileSystemException catch (e) {
+          _pickerError = 'The system did not give access to the folder: $e';
+          return null;
+        }
+      }
       return path;
     } on Object catch (error) {
       // For example "unknown_path" from SAF for protected trees.
