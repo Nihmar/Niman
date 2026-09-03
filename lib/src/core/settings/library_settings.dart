@@ -70,6 +70,20 @@ final class AppSettingsRepo {
         .write(AppSettingsCompanion(libraryPath: Value(path)));
   }
 
+  /// Whether the debug log buffer records events (default true).
+  Future<bool> debugLogsEnabled() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty || rows.first.debugLogsEnabled;
+  }
+
+  /// Persists the debug log recording toggle.
+  Future<void> setDebugLogsEnabled({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(debugLogsEnabled: Value(enabled)));
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

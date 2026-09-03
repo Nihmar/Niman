@@ -59,6 +59,11 @@ class AppSettings extends Table {
   /// null until a library has been opened.
   TextColumn get libraryPath => text().named('library_path').nullable()();
 
+  /// Whether the in-app debug log buffer records events (default true).
+  BoolColumn get debugLogsEnabled => boolean()
+      .named('debug_logs_enabled')
+      .withDefault(const Constant(true))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -73,5 +78,19 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Fresh databases get all tables; v1 databases gain the
+  /// `debug_logs_enabled` column.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from == 1) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
+          'BOOLEAN NOT NULL DEFAULT 1',
+        );
+      }
+    },
+  );
 }

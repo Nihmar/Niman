@@ -815,8 +815,23 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _debugLogsEnabledMeta = const VerificationMeta(
+    'debugLogsEnabled',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, libraryPath];
+  late final GeneratedColumn<bool> debugLogsEnabled = GeneratedColumn<bool>(
+    'debug_logs_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("debug_logs_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, libraryPath, debugLogsEnabled];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -841,6 +856,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('debug_logs_enabled')) {
+      context.handle(
+        _debugLogsEnabledMeta,
+        debugLogsEnabled.isAcceptableOrUnknown(
+          data['debug_logs_enabled']!,
+          _debugLogsEnabledMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -858,6 +882,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}library_path'],
       ),
+      debugLogsEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}debug_logs_enabled'],
+      )!,
     );
   }
 
@@ -874,7 +902,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// Last opened library root, used to resume the library on startup;
   /// null until a library has been opened.
   final String? libraryPath;
-  const AppSetting({required this.id, this.libraryPath});
+
+  /// Whether the in-app debug log buffer records events (default true).
+  final bool debugLogsEnabled;
+  const AppSetting({
+    required this.id,
+    this.libraryPath,
+    required this.debugLogsEnabled,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -882,6 +917,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     if (!nullToAbsent || libraryPath != null) {
       map['library_path'] = Variable<String>(libraryPath);
     }
+    map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
     return map;
   }
 
@@ -891,6 +927,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       libraryPath: libraryPath == null && nullToAbsent
           ? const Value.absent()
           : Value(libraryPath),
+      debugLogsEnabled: Value(debugLogsEnabled),
     );
   }
 
@@ -902,6 +939,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return AppSetting(
       id: serializer.fromJson<int>(json['id']),
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
+      debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
     );
   }
   @override
@@ -910,15 +948,18 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'libraryPath': serializer.toJson<String?>(libraryPath),
+      'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
     };
   }
 
   AppSetting copyWith({
     int? id,
     Value<String?> libraryPath = const Value.absent(),
+    bool? debugLogsEnabled,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
+    debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -926,6 +967,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       libraryPath: data.libraryPath.present
           ? data.libraryPath.value
           : this.libraryPath,
+      debugLogsEnabled: data.debugLogsEnabled.present
+          ? data.debugLogsEnabled.value
+          : this.debugLogsEnabled,
     );
   }
 
@@ -933,46 +977,58 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   String toString() {
     return (StringBuffer('AppSetting(')
           ..write('id: $id, ')
-          ..write('libraryPath: $libraryPath')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('debugLogsEnabled: $debugLogsEnabled')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, libraryPath);
+  int get hashCode => Object.hash(id, libraryPath, debugLogsEnabled);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AppSetting &&
           other.id == this.id &&
-          other.libraryPath == this.libraryPath);
+          other.libraryPath == this.libraryPath &&
+          other.debugLogsEnabled == this.debugLogsEnabled);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String?> libraryPath;
+  final Value<bool> debugLogsEnabled;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
+    this.debugLogsEnabled = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
+    this.debugLogsEnabled = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
     Expression<String>? libraryPath,
+    Expression<bool>? debugLogsEnabled,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (libraryPath != null) 'library_path': libraryPath,
+      if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
     });
   }
 
-  AppSettingsCompanion copyWith({Value<int>? id, Value<String?>? libraryPath}) {
+  AppSettingsCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? libraryPath,
+    Value<bool>? debugLogsEnabled,
+  }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
       libraryPath: libraryPath ?? this.libraryPath,
+      debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
     );
   }
 
@@ -985,6 +1041,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (libraryPath.present) {
       map['library_path'] = Variable<String>(libraryPath.value);
     }
+    if (debugLogsEnabled.present) {
+      map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled.value);
+    }
     return map;
   }
 
@@ -992,7 +1051,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   String toString() {
     return (StringBuffer('AppSettingsCompanion(')
           ..write('id: $id, ')
-          ..write('libraryPath: $libraryPath')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('debugLogsEnabled: $debugLogsEnabled')
           ..write(')'))
         .toString();
   }
@@ -1433,9 +1493,17 @@ typedef $$LibrarySettingsTableProcessedTableManager =
       PrefetchHooks Function()
     >;
 typedef $$AppSettingsTableCreateCompanionBuilder =
-    AppSettingsCompanion Function({Value<int> id, Value<String?> libraryPath});
+    AppSettingsCompanion Function({
+      Value<int> id,
+      Value<String?> libraryPath,
+      Value<bool> debugLogsEnabled,
+    });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
-    AppSettingsCompanion Function({Value<int> id, Value<String?> libraryPath});
+    AppSettingsCompanion Function({
+      Value<int> id,
+      Value<String?> libraryPath,
+      Value<bool> debugLogsEnabled,
+    });
 
 class $$AppSettingsTableFilterComposer
     extends Composer<_$CopistDatabase, $AppSettingsTable> {
@@ -1453,6 +1521,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get libraryPath => $composableBuilder(
     column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get debugLogsEnabled => $composableBuilder(
+    column: $table.debugLogsEnabled,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1475,6 +1548,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.libraryPath,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get debugLogsEnabled => $composableBuilder(
+    column: $table.debugLogsEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1491,6 +1569,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get libraryPath => $composableBuilder(
     column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get debugLogsEnabled => $composableBuilder(
+    column: $table.debugLogsEnabled,
     builder: (column) => column,
   );
 }
@@ -1524,14 +1607,26 @@ class $$AppSettingsTableTableManager
               $$AppSettingsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$AppSettingsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> libraryPath = const Value.absent(),
-          }) => AppSettingsCompanion(id: id, libraryPath: libraryPath),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> libraryPath = const Value.absent(),
-          }) => AppSettingsCompanion.insert(id: id, libraryPath: libraryPath),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> libraryPath = const Value.absent(),
+                Value<bool> debugLogsEnabled = const Value.absent(),
+              }) => AppSettingsCompanion(
+                id: id,
+                libraryPath: libraryPath,
+                debugLogsEnabled: debugLogsEnabled,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> libraryPath = const Value.absent(),
+                Value<bool> debugLogsEnabled = const Value.absent(),
+              }) => AppSettingsCompanion.insert(
+                id: id,
+                libraryPath: libraryPath,
+                debugLogsEnabled: debugLogsEnabled,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
