@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:android_file_picker/android_file_picker.dart';
 import 'package:copist/src/core/library_root.dart';
+import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/tree_grant.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:file_picker/file_picker.dart';
@@ -27,6 +29,8 @@ final class OpenLibraryScreen extends StatefulWidget {
 }
 
 final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
+  /// Logger for the shared-storage grant handling on this screen.
+  final _storageLog = const AppLogger(name: 'storage');
   /// SAF options for the pick: a persistent read+write grant on the
   /// chosen folder (and its subtree). The grant survives app restarts,
   /// so the saved root can be re-opened by real path later; without it
@@ -138,6 +142,17 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
       _setBusy(false);
       if (raw == null || raw.trim().isEmpty) {
         return null; // The user cancelled.
+      }
+      if (raw.startsWith('content://')) {
+        final granted = await TreeGrant.takePersistent(raw);
+        if (granted) {
+          _storageLog.info('tree grant taken: $raw');
+        } else {
+          _storageLog.warning('tree grant NOT taken for: $raw');
+          _pickerError =
+              'Could not save access to the folder. Pick it again.';
+          return null;
+        }
       }
       final path = resolveLibraryRoot(raw);
       if (path == null) {
