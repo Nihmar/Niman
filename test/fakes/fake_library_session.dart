@@ -214,6 +214,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final row = _requireRow(path);
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);
+    if (targetParent == path || isUnder(path, targetParent)) {
+      throw ArgumentError(
+        'Cannot move "$path" into itself or its own subtree',
+      );
+    }
     _checkParent(targetParent);
     final name = p.basename(path);
     final String target;

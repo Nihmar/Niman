@@ -117,6 +117,28 @@ void main() {
       expect(await dao.find('Docs/X.md'), isNotNull);
       expect(await dao.find('Docs/X_1.md'), isNotNull);
     });
+
+    test('moving a folder into itself or its own subtree is rejected',
+        () async {
+      await ops.createFolder(parentPath: '', name: 'Docs');
+      await ops.createFolder(parentPath: 'Docs', name: 'Inner');
+
+      await expectLater(
+        () => ops.move('Docs', 'Docs'),
+        throwsA(isA<ArgumentError>()),
+      );
+      await expectLater(
+        () => ops.move('Docs', 'Docs/Inner'),
+        throwsA(isA<ArgumentError>()),
+      );
+      // The move was never attempted: nothing moved, nothing renamed.
+      expect(await dao.find('Docs'), isNotNull);
+      expect(await dao.find('Docs/Inner'), isNotNull);
+      expect(
+        Directory(p.join(root.path, 'Docs/Inner')).existsSync(),
+        isTrue,
+      );
+    });
   });
 
   group('delete (trash on by default)', () {

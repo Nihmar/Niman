@@ -164,11 +164,19 @@ final class NoteOps implements NoteOperations {
 
   /// Moves the note or folder at [path] into [targetParent], keeping its
   /// name (uniquified in the target). Returns the updated row.
+  ///
+  /// Throws [ArgumentError] when [targetParent] is [path] itself or inside
+  /// it — a folder cannot be renamed onto its own subtree.
   @override
   Future<Note> move(String path, String targetParent) {
     return _synchronized(() async {
       final row = await _mustFind(path);
       if (resolvePath(targetParent, p.basename(path)) == path) return row;
+      if (targetParent == path || isUnder(path, targetParent)) {
+        throw ArgumentError(
+          'Cannot move "$path" into itself or its own subtree',
+        );
+      }
       final name = p.basename(path);
       final targetDir = Directory(_abs(targetParent));
       String target;

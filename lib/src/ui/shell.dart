@@ -176,10 +176,16 @@ final class _LibraryShellState extends State<_LibraryShell> {
     if (sel == null) return;
     final folders = await widget.controller.folders();
     if (!mounted) return;
+    // A folder cannot move into itself or its own subtree, so those
+    // targets are not offered.
+    final candidates = [
+      for (final folder in folders)
+        if (folder.path != sel && !isUnder(sel, folder.path)) folder,
+    ];
     final target = await _showMoveDialog(
       context,
       name: p.basename(sel),
-      folders: folders,
+      folders: candidates,
     );
     if (target == null) return;
     await _guard(() async {

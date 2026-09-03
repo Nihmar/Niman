@@ -138,8 +138,9 @@ void main() {
       expect(stripSegments('a/b', 2), '');
     });
 
-    test('isUnder reports direct descendants only', () {
+    test('isUnder reports descendants at any depth', () {
       expect(isUnder('a/b', 'a/b/c'), isTrue);
+      expect(isUnder('a/b', 'a/b/c/d/e.md'), isTrue);
       expect(isUnder('a/b', 'a/bc'), isFalse);
       expect(isUnder('', 'note.md'), isTrue);
       expect(isUnder('a/b', 'a/b'), isFalse);

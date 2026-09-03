@@ -262,6 +262,50 @@ void main() {
     await controller.dispose();
   });
 
+  testWidgets('the move picker does not offer a folder as its own target',
+      (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'library');
+    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+
+    // Outer > Inner.
+    await tester.tap(find.byIcon(Icons.create_new_folder));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Outer');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(noteRow('Outer'));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.create_new_folder));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Inner');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    // The picker for Outer must not offer Outer, and it must not offer
+    // Outer/Inner either: a folder cannot move into its own subtree.
+    await tester.tap(noteRow('Outer'));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.drive_folder_upload));
+    await tester.pump();
+    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.pump();
+    expect(find.byType(DropdownMenuItem<String>), findsOne);
+    expect(find.text('Library root'), findsOne);
+    expect(find.text('Outer/Inner'), findsNothing);
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
   testWidgets('open existing picks a folder and opens it', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();

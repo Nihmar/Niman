@@ -186,7 +186,8 @@ String stripSegments(String path, int count) {
   return parts.sublist(count).join('/');
 }
 
-/// Whether [path] is a direct child of [parent] (empty parent = root).
+/// Whether [path] is strictly inside [parent], at any depth (empty parent
+/// = the library root).
 bool isUnder(String parent, String path) {
   final prefix = parent.isEmpty ? '' : '$parent/';
   return path.startsWith(prefix) && path.length > prefix.length;
