@@ -202,6 +202,36 @@ void main() {
         throwsStateError,
       );
     });
+
+    test('restores a timestamped note under its original name', () async {
+      await ops.createNote(parentPath: '', name: 'Dup');
+      await ops.delete('Dup.md');
+      await ops.createNote(parentPath: '', name: 'Dup');
+      await ops.delete('Dup.md');
+      final items = await ops.trashItems();
+      final plain = items.firstWhere((i) => i.name == 'Dup.md');
+      final timestamped = items.firstWhere((i) => i.name != 'Dup.md');
+
+      await ops.restoreTrash(plain.name);
+      await ops.restoreTrash(timestamped.name);
+
+      // Both come back under the original name, the second uniquified.
+      expect(await dao.find('Dup.md'), isNotNull);
+      expect(await dao.find('Dup_1.md'), isNotNull);
+    });
+
+    test('restores a dotted folder name whole', () async {
+      await ops.createFolder(parentPath: '', name: 'v1.2 notes');
+      await ops.createNote(parentPath: 'v1.2 notes', name: 'One');
+      await ops.delete('v1.2 notes');
+      final item = (await ops.trashItems()).single;
+
+      final restored = await ops.restoreTrash(item.name);
+
+      expect(restored.path, 'v1.2 notes');
+      expect(await dao.find('v1.2 notes'), isNotNull);
+      expect(await dao.find('v1.2 notes/One.md'), isNotNull);
+    });
   });
 
   group('trash management', () {

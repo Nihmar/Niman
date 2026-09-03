@@ -268,12 +268,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final restoreParent = originalDir != null && originalDir.isDir
         ? originalParent
         : '';
-    final parts = splitFileName(trashName);
-    final target = _uniqueInParent(
-      restoreParent,
-      parts.base,
-      row.isDir ? '' : parts.ext,
-    );
+    // The original name comes from the manifest, as in the real ops: the
+    // trash name may carry a collision timestamp.
+    final originalName = p.basename(entry.originalPath);
+    String base;
+    String ext;
+    if (row.isDir) {
+      base = originalName;
+      ext = '';
+    } else {
+      final parts = splitFileName(originalName);
+      base = parts.base;
+      ext = parts.ext;
+    }
+    final target = _uniqueInParent(restoreParent, base, ext);
     final newRel = resolvePath(restoreParent, target);
     _untrash(entry, newRel);
     _bump();

@@ -250,7 +250,12 @@ final class NoteOps implements NoteOperations {
   }
 
   /// Restores the trash item [trashName] to its original parent when that
-  /// folder still exists, otherwise to the library root (name uniquified).
+  /// folder still exists, otherwise to the library root.
+  ///
+  /// The item comes back under its original name (uniquified only on a
+  /// real collision), which is taken from the manifest's `originalPath` —
+  /// never from the name inside `.trash/`, which carries a collision
+  /// timestamp and would survive the restore.
   @override
   Future<Note> restoreTrash(String trashName) {
     return _synchronized(() async {
@@ -261,15 +266,16 @@ final class NoteOps implements NoteOperations {
       }
       final trashAbs = _abs('.trash/$trashName');
       final isDir = Directory(trashAbs).existsSync();
-      final parts = splitFileName(trashName);
+      final originalName = p.basename(entry.originalPath);
       final originalParent = parentOf(entry.originalPath);
       final originalDir = Directory(_abs(originalParent));
       final restoreParent = originalDir.existsSync() ? originalParent : '';
       final parentDirObj = Directory(_abs(restoreParent));
       String target;
       if (isDir) {
-        target = await uniqueFolderName(parentDirObj, parts.base);
+        target = await uniqueFolderName(parentDirObj, originalName);
       } else {
+        final parts = splitFileName(originalName);
         target = await uniqueFileName(parentDirObj, parts.base, parts.ext);
       }
       final newRel = resolvePath(restoreParent, target);
