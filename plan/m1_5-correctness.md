@@ -25,7 +25,7 @@ items under a name it derives from the wrong source.
 
 ## Tasks — index
 
-- [ ] **T-M1.5-01** Fire `Indexer.onChanged` after every successful index
+ - [x] **T-M1.5-01** Fire `Indexer.onChanged` after every successful index
   mutation (`fullScan` write, `applyEvents`, `resync`), which is what its
   own doc comment already promises and what `LibraryController` wires to
   `_bump`. Today it is never called, so the session revision never moves
@@ -36,7 +36,7 @@ items under a name it derives from the wrong source.
   *AC: a note created outside the app appears in the tree without any
   other interaction; a unit test on the real controller asserts the
   revision moves.*
-- [ ] **T-M1.5-02** Fix the parent link lost by a subtree resync.
+ - [x] **T-M1.5-02** Fix the parent link lost by a subtree resync.
   `_insertEntries` resolves parents only from the directory rows of the
   batch it is inserting, and `_parentId` falls back to `0` when the
   parent is outside it. A subtree resync therefore re-parents its own
@@ -44,7 +44,7 @@ items under a name it derives from the wrong source.
   that folder jumps to the top of the tree. *AC: a move inside
   `a/b/c` leaves `a/b/c` under `a/b`; test covers the resync path
   directly.*
-- [ ] **T-M1.5-03** Replace the wholesale rewrite with a diff.
+ - [x] **T-M1.5-03** Replace the wholesale rewrite with a diff.
   `fullScan` runs `DELETE FROM notes` and re-inserts everything whenever
   anything changed, and `_syncDirSubtree` does the same per subtree, so
   every `notes.id` is reassigned. The device logs show it: the same
@@ -53,19 +53,19 @@ items under a name it derives from the wrong source.
   and deletes, keeping the id of every row whose path survives. *AC: ids
   are stable across a rescan that adds, removes and renames entries; a
   rescan with no changes still writes nothing.*
-- [ ] **T-M1.5-04** Align the widget-test fake with the real contract.
+ - [x] **T-M1.5-04** Align the widget-test fake with the real contract.
   `FakeLibrarySession` bumps its revision on every mutation while
   `LibraryController` does not, which is why T-M1.5-01 went
   unnoticed by the test suite. Cover the notification contract where the real
   implementation lives. *AC: the fake and the controller agree on when
   the revision moves, asserted in both suites.*
-- [ ] **T-M1.5-05** Tests: id stability across scans, parent correctness
+ - [x] **T-M1.5-05** Tests: id stability across scans, parent correctness
   after subtree resyncs, revision on disk-originated change, and the
   existing rebuildability check kept green. *AC: green.*
 
 ## Tasks — note operations and trash
 
-- [ ] **T-M1.5-06** Restore under the original name. `restoreTrash`
+ - [x] **T-M1.5-06** Restore under the original name. `restoreTrash`
   derives the restored name from the name inside `.trash/` via
   `splitFileName`, but that name is not the original one: a collision is
   stored as `<base>.<unixSeconds><ext>`, so a restored note keeps the
@@ -74,31 +74,31 @@ items under a name it derives from the wrong source.
   `originalPath`; take the name from there. *AC: restoring a timestamped
   item and a dotted folder name both yield the original name (uniquified
   only on a real collision).*
-- [ ] **T-M1.5-07** Fix the delete-permanently dialog text. It reads
+ - [x] **T-M1.5-07** Fix the delete-permanently dialog text. It reads
   `'$item.name will be deleted permanently'`, which interpolates the
   object and then prints a literal `.name`, so the user is asked to
   confirm deleting `Instance of 'TrashItem'.name`. *AC: the dialog names
   the item; a widget test covers the confirm path, which today only the
   restore path exercises.*
-- [ ] **T-M1.5-08** Reject moving a folder into itself or its own
+ - [x] **T-M1.5-08** Reject moving a folder into itself or its own
   subtree. The move picker lists every indexed folder, descendants of the
   moved one included, and the rename then fails with a raw OS error in a
   snackbar. Filter the candidates and validate in `NoteOps.move`.
   *AC: the picker cannot offer an invalid target; `move` throws a
   meaningful error if called with one anyway.*
-- [ ] **T-M1.5-09** Make the trash manifest tolerant. `_readManifest`
+ - [x] **T-M1.5-09** Make the trash manifest tolerant. `_readManifest`
   already survives a missing, empty or non-object file, but a single
   malformed entry throws while decoding and takes the whole trash screen
   with it, permanently. Skip bad entries instead, and drop entries whose
   item is no longer on disk while writing. *AC: a manifest with one
   corrupt entry still lists the others.*
-- [ ] **T-M1.5-10** Hide the atomic-write temp files from the index.
+ - [x] **T-M1.5-10** Hide the atomic-write temp files from the index.
   `writeFileAtomically` names them `<file>.copist-tmp-<micros>`, which
   does not start with a dot, so the indexer's hidden-entry rule does not
   skip them and a scan that lands mid-write indexes one as a note. Give
   them a leading dot. *AC: a scan concurrent with a write never produces
   a temp-file row.*
-- [ ] **T-M1.5-11** Empty trash empties the folder, not just the
+ - [x] **T-M1.5-11** Empty trash empties the folder, not just the
   manifest. Today `emptyTrash` walks the manifest, so anything a user
   moved into `.trash/` by hand survives an "Empty trash" that claims to
   have deleted everything. Delete every entry in `.trash/` instead, then
