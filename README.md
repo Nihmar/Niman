@@ -82,11 +82,13 @@ disk are always the source of truth.
 
 ## Platforms
 
-- **Now:** Android + Linux.
-- **Later:** Windows, macOS, iOS (code is kept portable).
+- **Now:** Android + Linux + Windows.
+- **Later:** macOS, iOS (code is kept portable).
 - **Android:** minSdk 35 (Android 15), tablet support, APK for now.
 - **Linux:** Wayland required; release as AppImage + Arch `.pkg.tar.zst`
   (PKGBUILD, no AUR).
+- **Windows:** built on a Windows host (no cross-build from Linux); SQLite
+  comes bundled, since Windows has no system one.
 
 ## Architecture & stack
 

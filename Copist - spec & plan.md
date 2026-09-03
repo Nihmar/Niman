@@ -15,7 +15,7 @@
 
 ## Requirements (agreed)
 
-*   **Platforms:** Android + Linux now; Windows/macOS/iOS later (keep code portable).
+*   **Platforms:** Android + Linux + Windows now; macOS/iOS later (keep code portable).
     
 *   **Model:** one note = one `.md` file on disk, nested folders. SQLite is only a _rebuildable index_ (search/tags/frontmatter/sync state), never the source of truth.
     

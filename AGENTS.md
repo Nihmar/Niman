@@ -1,5 +1,5 @@
 # AGENTS.md
-Copist: Flutter Markdown notes (Android + Linux).
+Copist: Flutter Markdown notes (Android + Linux + Windows).
 Spec: `Copist - spec & plan.md`. Design: `plan/design.md`. Plan: `plan/m*.md`
 (M0→M7, sequential; check Status line — M1 done, M2 in progress).
 
@@ -10,9 +10,10 @@ Spec: `Copist - spec & plan.md`. Design: `plan/design.md`. Plan: `plan/m*.md`
 
 ## Commits
 - One logical change per commit; never bundle unrelated changes.
-- After each commit, rebuild both platforms and report **outcome + artifact path** only (not raw logs):
+- After each commit, rebuild the platforms the dev machine can build and report **outcome + artifact path** only (not raw logs):
   - `flutter build apk --release` → `build/app/outputs/flutter-apk/app-release.apk`
   - `flutter build linux --release` → `build/linux/x64/release/bundle/`
+  - Windows (`flutter build windows --release` → `build\windows\x64\runner\Release\`) needs a Windows host; it cannot be cross-built from Linux, so verify it there when the change touches platform code.
 
 ## Verify
 - `flutter analyze --fatal-infos` (CI: infos fatal; keep clean).

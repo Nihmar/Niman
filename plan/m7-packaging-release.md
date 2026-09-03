@@ -19,7 +19,7 @@ placeholder (feather icon); no build/packaging pipeline; no release.
 - [ ] **T-M7-01** Final branding: decide the real name + icon (placeholder is
   "Copist"/feather; "Inkwell" rejected as an existing product); update app
   labels, launcher icons, window titles, docs. *AC: single source of truth for
-  the name across android/, linux/, docs.*
+  the name across android/, linux/, windows/, docs.*
 - [ ] **T-M7-02** Android packaging: release-signed APK + AAB; versioning
   (`versionName`/`versionCode`) policy; signing keys via CI secrets (never in
   the repo). *AC: install on a minSdk-35 device; store-ready AAB.*
@@ -34,15 +34,22 @@ placeholder (feather icon); no build/packaging pipeline; no release.
   MIT confirmed, contributing doc), issue/PR templates. *AC: repo is
   fork-and-build ready.*
 - [ ] **T-M7-06** Release: tag `vX.Y.0`, changelog, publish artifacts
-  (APK/AAB, tar.gz, AppImage, pkg). *AC: a clean install from each artifact
-  passes the integration E2E.*
+  (APK/AAB, tar.gz, AppImage, pkg, Windows zip). *AC: a clean install from
+  each artifact passes the integration E2E.*
+- [ ] **T-M7-07** Windows packaging: the release runner directory, zipped,
+  plus an installer decision (MSIX vs a plain zip — MSIX needs a signing
+  certificate). There is no cross-build: the artifact has to be produced on
+  a Windows host. *AC: a clean install runs on a machine that never had
+  Flutter.*
 
 ## Technical design
 
 - **Builds:** `flutter build appbundle` / `flutter build apk --release`
   (M7-02); Linux: `flutter build linux --release` → tar.gz (M7-03), AppImage
   from the release build (tooling choice: `mage` or `linuxdeploy` — decide in
-  T-M7-03), PKGBUILD packages the tar.gz (M7-03).
+  T-M7-03), PKGBUILD packages the tar.gz (M7-03); Windows:
+  `flutter build windows --release` → `build\windows\x64\runner\Release\`,
+  on a Windows host (M7-07).
 - **CI:** extend the M0 workflow — build jobs on `v*` tags, `actions/upload-
   artifact` for outputs; signing secrets from the repo's CI secrets.
 - **Versioning:** single `pubspec.yaml` version drives all platforms

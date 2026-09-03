@@ -13,7 +13,7 @@ for *how*.
   frontmatter, alias, wikilink, trash, history, sync, pinned. No
   Obsidian-peculiar terms (no vault, canvas, publish, daily notes, graph view,
   backlinks).
-- **Portable code.** Android + Linux now; Windows/macOS/iOS later.
+- **Portable code.** Android + Linux + Windows now; macOS/iOS later.
 - **Scale is a hard requirement:** 1,000,000 notes and novel-length files.
 
 ## Module layout

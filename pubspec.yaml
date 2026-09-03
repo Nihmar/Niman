@@ -42,6 +42,12 @@ dependencies:
   # State management (app-wide).
   riverpod: ^2.6.1
 
+  # The SQLite the index runs on, bundled with the app. Android and Linux
+  # have a system libsqlite3 that drift's NativeDatabase can open; Windows
+  # ships no sqlite3.dll, so without this the app builds and then dies on
+  # its first index query.
+  sqlite3_flutter_libs: ^0.5.0
+
 dev_dependencies:
   build_runner: ^2.16.0
   drift_dev: ^2.34.5
