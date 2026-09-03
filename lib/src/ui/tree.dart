@@ -79,7 +79,7 @@ final class _NoteTreeState extends State<NoteTree> {
     final cached = _rows;
     if (cached != null &&
         _rowsRevision == revision &&
-        setEquals(_rowsExpanded, widget.expanded)) {
+        _setEquals(_rowsExpanded, widget.expanded)) {
       return cached;
     }
     _rowsRevision = revision;
@@ -158,6 +158,14 @@ final class _NoteTreeState extends State<NoteTree> {
       },
     );
   }
+}
+
+bool _setEquals(Set<String> a, Set<String> b) {
+  if (a.length != b.length) return false;
+  for (final e in a) {
+    if (!b.contains(e)) return false;
+  }
+  return true;
 }
 
 /// One row tile: chevron (folders), icon, and name.
