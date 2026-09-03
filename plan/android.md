@@ -1,9 +1,7 @@
 # Android — storage & startup issues
 
-**Status:** 1 fixed · 2 and 3 awaiting on-device verification (2's third
-attempt: the SAF grant was never the right permission; the app now asks
-for "All files access") · T-M6-09 partial (root picking done;
-image-insert paths + on-device verification remain)
+**Status:** all three fixed and verified on device · T-M6-09 partial
+(root picking done; image-insert paths remain)
 
 Three issues observed on Android (Linux unaffected).
 
@@ -30,12 +28,16 @@ the file watcher starts, and a one-shot reconciliation `fullScan` runs
 60 s periodic fallback, and the pending scan is cancelled in teardown.
 Covered by `test/unit/library_state_test.dart`.
 
-**Known caveat (it bit — see issue 3):** the reconciliation walk used to
-run on the UI isolate. It no longer gates the first frame, but on a real
-library it froze the app for seconds; the walk now runs on a background
-isolate.
+**Known caveat, since resolved (it bit — see issue 3):** the
+reconciliation walk used to run on the UI isolate. It no longer gated the
+first frame, but on a real library it froze the app for seconds; the walk
+now runs on a background isolate.
 
-## 2. `.md` files missing from the tree on Android (fix on device)
+**Status:** verified on device (log 2026-09-03 13:11): resume reached
+`open complete: ready` 4 ms after `open start`, with the reconciliation
+scan following a second later.
+
+## 2. `.md` files missing from the tree on Android (fixed)
 
 **Symptom:** notes created outside the app never appeared in the tree,
 while the same library worked fine on Linux.
@@ -106,17 +108,17 @@ in the system's "All files access" list and could not be granted.)
   write, and losing the watcher: inotify does not work on content URIs
   and `ContentResolver` observers give no usable per-tree events.
 
-**Status:** awaiting on-device verification. Two earlier "fixed" rounds
-were wrong for the same reason — both chased the SAF grant, which is not
-a filesystem permission. What to look for in the next device log: the
-full scan reporting a non-zero file count, and `walk: skip` lines for
-hidden entries. **T-M6-09** in [m6-scale-polish.md](m6-scale-polish.md)
+**Status:** verified on device (logs 2026-09-03 13:45 and 13:57): the
+scan reports `found 979 entr(ies) (886 file, 93 dir)` where it used to
+report zero files, and the tree shows the notes. Two earlier "fixed"
+rounds were wrong for the same reason — both chased the SAF grant, which
+is not a filesystem permission. **T-M6-09** in [m6-scale-polish.md](m6-scale-polish.md)
 stays open for the remaining scope: image-insert paths on both platforms
 and on-device verification (real devices, not just app-specific storage),
 originally flagged in the [m1-library-core.md](m1-library-core.md) open
 questions.
 
-## 3. "Copist isn't responding" during use (fix on device)
+## 3. "Copist isn't responding" during use (fixed)
 
 **Symptom:** with the real library visible at last (885 files, 93
 folders), Android put up its ANR dialog now and then while the app was
@@ -160,6 +162,17 @@ another ~0.6 s of blocked UI every minute, this one recurring.
   process, and reopening the same root doubled the event batches — each
   duplicate costing a subtree walk and an index rewrite.
 
-**Status:** awaiting on-device verification. What to look for in the next
-device log: the gap between the `fullScan … found N entr(ies)` line and
-the `rewriting index` line, which is where the 6.2 s used to sit.
+**Status:** verified on device (log 2026-09-03 13:57, same library). The
+open went from 6.8 s to 1.7 s, and what is left runs off the UI isolate:
+
+| phase | before | after |
+| --- | --- | --- |
+| walk | 0.6 s | 0.3 s |
+| digests + index rewrite | 6.2 s (886 files) | 1.4 s (473 notes) |
+| open, end to end | 6.8 s | 1.7 s |
+
+`digests: hashing 473 note(s)` confirms the other half of the fix: of the
+886 files, 473 are notes and the rest are attachments that are indexed
+without ever being read. The 60 s periodic rescan is not in that log's
+window — it stays worth a look on a longer session, though it now takes
+the same isolate path.
