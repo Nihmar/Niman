@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
 /// A batch of filesystem changes delivered by a [FileWatcher].
@@ -31,6 +32,8 @@ final class FileWatcher {
   /// The debounce window between the last event and the batch emission.
   static const defaultDebounce = Duration(milliseconds: 250);
 
+  final AppLogger _log = const AppLogger(name: 'watcher');
+
   /// The watched root directory (absolute path).
   final String root;
 
@@ -59,6 +62,7 @@ final class FileWatcher {
       throw StateError('Watcher is already started or closed');
     }
     _started = true;
+    _log.info('watcher start: "$root" (recursive)');
     final stream = Directory(root).watch(recursive: true);
     _listen(stream);
   }
@@ -66,8 +70,13 @@ final class FileWatcher {
   void _listen(Stream<FileSystemEvent> stream) {
     _subscription = stream.listen(
       _onEvent,
-      onError: (Object _) {/* transient FS errors: rescan is the net */},
+      onError: (Object error) {
+        // Transient FS errors are recoverable via the periodic rescan, but
+        // they are exactly what this log is meant to surface.
+        _log.warning('watcher stream error: $error');
+      },
       onDone: () {
+        _log.warning('watcher stream closed before stop()');
         _subscription = null;
       },
     );
@@ -78,6 +87,10 @@ final class FileWatcher {
     if (event is FileSystemMoveEvent) {
       // The destination may be unknown to the OS; resync the parent either
       // way, and index the destination when it is known.
+      _log.debug(
+        'watcher event: move "${event.path}" -> '
+        '${event.destination ?? 'unknown'}',
+      );
       _resyncDirs.add(p.dirname(event.path));
       _paths.add(event.path);
       final destination = event.destination;
@@ -85,9 +98,19 @@ final class FileWatcher {
         _paths.add(destination);
       }
     } else {
+      _log.debug('watcher event: ${_typeName(event)} "${event.path}"');
       _paths.add(event.path);
     }
     _timer ??= Timer(debounce, _flush);
+  }
+
+  String _typeName(FileSystemEvent event) {
+    return switch (event) {
+      FileSystemCreateEvent() => 'create',
+      FileSystemModifyEvent() => 'modify',
+      FileSystemDeleteEvent() => 'delete',
+      _ => 'type=${event.type}',
+    };
   }
 
   void _flush() {
