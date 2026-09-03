@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:drift/drift.dart';
@@ -41,11 +42,20 @@ final class DiskEntry {
 /// (T-M1-07).
 final class Indexer {
   /// Creates the indexer over the given [CopistDatabase].
-  Indexer(this._db) : _dao = NoteDao(_db);
+  Indexer(this._db)
+      :
+        _dao = NoteDao(_db),
+        _log = const AppLogger(name: 'indexer');
 
   final CopistDatabase _db;
 
   final NoteDao _dao;
+
+  final AppLogger _log;
+
+  /// How many entry paths are listed in a single debug log line before the
+  /// rest is summarized, keeping huge libraries from flooding the buffer.
+  static const _logEntryCap = 200;
 
   /// The DAO over the same database, exposed for read-side callers.
   NoteDao get dao => _dao;
@@ -74,12 +84,22 @@ final class Indexer {
         for (final row in await _dao.allRows()) row.path: row,
       };
       final entries = await _walk(root);
+      final files = entries.where((e) => !e.isDir).length;
+      _log.info(
+        'fullScan $root: found ${entries.length} entr(ies) '
+        '($files file, ${entries.length - files} dir)',
+      );
+      _log.debug('fullScan entries: ${_entryList(entries)}');
       final shas = <String, String>{};
       for (final e in entries) {
         if (e.isDir) continue;
         shas[e.rel] = await _hashOrReuse(root, e, 0, old);
       }
-      if (!_treeChanged(old, entries, shas)) return;
+      if (!_treeChanged(old, entries, shas)) {
+        _log.info('fullScan: index already mirrors disk, no write');
+        return;
+      }
+      _log.info('fullScan: tree changed, rewriting index');
       await _db.transaction(() async {
         await _db.customStatement('DELETE FROM notes');
         await _insertEntries(entries, shas);
@@ -99,14 +119,22 @@ final class Indexer {
       for (final abs in paths) {
         if (!seen.add(abs)) continue;
         final rel = _safeRel(abs, root);
-        if (rel == null) continue;
+        if (rel == null) {
+          _log.debug(
+            'applyEvents: skip "$abs" (outside root, root itself, or hidden)',
+          );
+          continue;
+        }
         final dir = Directory(abs);
         final file = File(abs);
         if (dir.existsSync()) {
+          _log.debug('applyEvents: "$abs" -> resync dir "$rel"');
           await _syncDirSubtree(root, abs);
         } else if (file.existsSync()) {
+          _log.debug('applyEvents: "$abs" -> upsert file "$rel"');
           await _upsertFile(root, abs, rel);
         } else {
+          _log.debug('applyEvents: "$abs" -> prune "$rel"');
           await _dao.deleteSubtree(rel);
         }
       }
@@ -120,13 +148,21 @@ final class Indexer {
   Future<void> resync(String root, String abs) {
     return _synchronized(() async {
       final rel = _safeRel(abs, root);
-      if (rel == null) return;
+      if (rel == null) {
+        _log.debug(
+          'resync: skip "$abs" (outside root, root itself, or hidden)',
+        );
+        return;
+      }
       final dir = Directory(abs);
       if (dir.existsSync()) {
+        _log.debug('resync: "$abs" -> resync dir "$rel"');
         await _syncDirSubtree(root, abs);
       } else if (File(abs).existsSync()) {
+        _log.debug('resync: "$abs" -> upsert file "$rel"');
         await _upsertFile(root, abs, rel);
       } else {
+        _log.debug('resync: "$abs" -> prune "$rel"');
         await _dao.deleteSubtree(rel);
       }
     });
@@ -209,7 +245,10 @@ final class Indexer {
     }
     for (final ent in dir.listSync(followLinks: false)) {
       final name = p.basename(ent.path);
-      if (name.startsWith('.')) continue;
+      if (name.startsWith('.')) {
+        _log.debug('walk: skip hidden entry "$name"');
+        continue;
+      }
       if (ent is Directory) {
         await _walkDir(root, ent, out);
       } else if (ent is File) {
@@ -223,8 +262,19 @@ final class Indexer {
             modified: st.modified,
           ),
         );
+      } else {
+        _log.debug('walk: skip non-file/dir entry "${ent.path}" ($ent)');
       }
     }
+  }
+
+  /// The [entries] rel paths as a single debug log line, capped at
+  /// [_logEntryCap] paths.
+  String _entryList(List<DiskEntry> entries) {
+    if (entries.isEmpty) return '(none)';
+    final shown = entries.take(_logEntryCap).map((e) => e.rel).join(', ');
+    final extra = entries.length - _logEntryCap;
+    return extra > 0 ? '$shown, … (+$extra more)' : shown;
   }
 
   /// Inserts [entries] (directories first, then files), assigning the parent
@@ -295,6 +345,7 @@ final class Indexer {
     final rel = relPath(abs, root);
     final entries = <DiskEntry>[];
     await _walkDir(root, Directory(abs), entries);
+    _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
     final oldRows = await _dao.subtreeRows(rel);
     final depth = rel.isEmpty ? 0 : rel.split('/').length;
     final oldBySuffix = <String, Note>{
@@ -353,6 +404,7 @@ final class Indexer {
     final sha = await hashFileSha256(File(abs));
     final existing = await _dao.find(rel);
     if (existing == null) {
+      _log.debug('upsert "$rel": insert (parent "$parentRel")');
       await _db.into(_db.notes).insert(
         NotesCompanion.insert(
           path: rel,
@@ -365,6 +417,7 @@ final class Indexer {
         ),
       );
     } else {
+      _log.debug('upsert "$rel": update (parent "$parentRel")');
       await (_db.update(_db.notes)
             ..where((t) => t.path.equals(rel)))
         .write(
