@@ -1,14 +1,15 @@
-import 'dart:async';
-import 'dart:io';
-
+import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
-/// The manual open/create screen (M1 scope: manual path entry; M6 onboarding
-/// will replace this flow).
+/// The open/create screen.
+///
+/// Both flows go through the native directory picker (Storage Access
+/// Framework on Android, xdg-desktop-portal on Linux) — no manual path
+/// entry, so a library root can only ever be a real, readable folder.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
   const OpenLibraryScreen({required this.controller, super.key});
@@ -16,57 +17,23 @@ final class OpenLibraryScreen extends StatefulWidget {
   /// The session that opens or creates the library for this screen.
   final LibrarySession controller;
 
-  /// A sensible default path for the current platform.
-  static Future<String> defaultLibraryPath() async {
-    if (Platform.isAndroid) {
-      // App-specific storage for early builds (M1 scope).
-      final dir = await getApplicationDocumentsDirectory();
-      return dir.path;
-    }
-    final home = Platform.environment['HOME'] ?? '/';
-    return p.join(home, 'Copist');
-  }
-
   @override
   State<OpenLibraryScreen> createState() => _OpenLibraryScreenState();
 }
 
 final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
-  late final TextEditingController _text = TextEditingController();
-  bool _defaultSet = false;
+  /// True while a picker, permission prompt, or open is in flight.
+  bool _busy = false;
 
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_setDefaultPath());
-  }
-
-  Future<void> _setDefaultPath() async {
-    final path = await OpenLibraryScreen.defaultLibraryPath();
-    if (mounted && !_defaultSet && _text.text.isEmpty) {
-      _text.text = path;
-      _defaultSet = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit({required bool create}) async {
-    final path = _text.text.trim();
-    if (path.isEmpty) return;
-    await widget.controller.open(path, create: create);
-    // The controller's event stream drives the rebuild (phase/lastError).
-  }
+  /// A picker/open failure that the session does not know about.
+  String? _pickerError;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final opening = widget.controller.phase == LibraryPhase.opening;
-    final error = widget.controller.lastError;
+    final error = widget.controller.lastError ?? _pickerError;
+    final active = opening || _busy;
     return Scaffold(
       appBar: AppBar(title: const Text('Copist')),
       body: Center(
@@ -89,33 +56,21 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: TextField(
-                    controller: _text,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Library root path',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FilledButton(
-                      onPressed: opening ? null : () => _submit(create: false),
+                      onPressed: active ? null : _openExisting,
                       child: const Text('Open existing'),
                     ),
                     const SizedBox(width: 8),
                     FilledButton.tonal(
-                      onPressed: opening ? null : () => _submit(create: true),
+                      onPressed: active ? null : _createNew,
                       child: const Text('Create new'),
                     ),
                   ],
                 ),
-                if (opening)
+                if (active)
                   const Padding(
                     padding: EdgeInsets.only(top: 16),
                     child: LinearProgressIndicator(),
@@ -134,5 +89,122 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openExisting() async {
+    _pickerError = null;
+    if (!await _ensureAccess()) return;
+    final path = await _pickDirectory('Choose the library folder');
+    if (path == null) return;
+    await widget.controller.open(path, create: false);
+    // The controller's event stream drives the rebuild (phase/lastError).
+  }
+
+  Future<void> _createNew() async {
+    _pickerError = null;
+    if (!await _ensureAccess()) return;
+    final parent = await _pickDirectory(
+      'Choose the folder the library will be created in',
+    );
+    if (parent == null) return;
+    final name = await _promptName();
+    if (name == null || name.isEmpty) return;
+    await widget.controller.open(p.join(parent, name), create: true);
+    // The controller's event stream drives the rebuild (phase/lastError).
+  }
+
+  /// Asks for the Android "All files access" permission when needed.
+  ///
+  /// Returns whether shared storage is fully readable afterwards.
+  Future<bool> _ensureAccess() async {
+    _setBusy(true);
+    final granted = await StorageAccess.ensureAllFilesAccess();
+    _setBusy(false);
+    if (!granted) {
+      _pickerError =
+          'Copist needs "All files access" to read a shared-storage library. '
+          'Grant it in the system settings that just opened, then try again.';
+    }
+    return granted;
+  }
+
+  /// Opens the native directory picker; `null` when the user cancels.
+  Future<String?> _pickDirectory(String title) async {
+    _setBusy(true);
+    try {
+      final path = await FilePicker.getDirectoryPath(dialogTitle: title);
+      _setBusy(false);
+      return path;
+    } on Object catch (error) {
+      // For example "unknown_path" from SAF for protected trees.
+      _setBusy(false);
+      _pickerError = 'Could not pick a folder: $error';
+      return null;
+    }
+  }
+
+  Future<String?> _promptName() {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => const _NewLibraryDialog(),
+    );
+  }
+
+  void _setBusy(bool busy) {
+    if (_busy == busy) return;
+    setState(() => _busy = busy);
+  }
+}
+
+/// Dialog that asks for the name of the new library folder.
+final class _NewLibraryDialog extends StatefulWidget {
+  /// Creates the dialog.
+  const _NewLibraryDialog();
+
+  @override
+  State<_NewLibraryDialog> createState() => _NewLibraryDialogState();
+}
+
+final class _NewLibraryDialogState extends State<_NewLibraryDialog> {
+  late final TextEditingController _text = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Rebuild on every keystroke so "Create" tracks the (trimmed) name.
+    _text.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = _text.text.trim();
+    return AlertDialog(
+      title: const Text('Create new library'),
+      content: TextField(
+        controller: _text,
+        autofocus: true,
+        decoration: const InputDecoration(labelText: 'Folder name'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: name.isEmpty ? null : _submit,
+          child: const Text('Create'),
+        ),
+      ],
+    );
+  }
+
+  void _submit() {
+    Navigator.of(context).pop(_text.text.trim());
   }
 }

@@ -3,11 +3,30 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
+
+/// A [FilePickerPlatform] stub: [directory] is what
+/// `getDirectoryPath` returns (`null` = the user canceled).
+final class _FakeFilePicker extends FilePickerPlatform {
+  String? directory;
+
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    String? initialDirectory,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async {
+    return directory;
+  }
+}
 
 /// The tree row (not the detail pane) showing [name].
 ///
@@ -29,9 +48,18 @@ Future<void> settle(WidgetTester tester) async {
 
 void main() {
   late FakeLibrarySession controller;
+  late _FakeFilePicker filePicker;
+  late FilePickerPlatform previousPicker;
 
   setUp(() {
     controller = FakeLibrarySession();
+    filePicker = _FakeFilePicker();
+    previousPicker = FilePickerPlatform.instance;
+    FilePickerPlatform.instance = filePicker;
+  });
+
+  tearDown(() {
+    FilePickerPlatform.instance = previousPicker;
   });
 
   Widget buildApp([LibrarySession? session]) {
@@ -51,8 +79,14 @@ void main() {
     expect(find.text('Open existing'), findsOne);
     expect(find.text('Create new'), findsOne);
 
-    await tester.enterText(find.byType(TextField), '/fake/library');
+    // "Create new": the native picker resolves a parent folder, then the
+    // name dialog names the library.
+    filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'library');
+    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
+    await tester.tap(find.text('Create'));
     await settle(tester);
 
     // The shell is up with an empty tree.
@@ -125,8 +159,12 @@ void main() {
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await tester.enterText(find.byType(TextField), '/fake/library');
+    filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'library');
+    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
+    await tester.tap(find.text('Create'));
     await settle(tester);
     expect(find.text('No notes yet'), findsOne);
 
@@ -191,6 +229,42 @@ void main() {
     expect(await controller.ops!.trashItems(), isEmpty);
 
     await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('open existing picks a folder and opens it', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    filePicker.directory = '/fake/library';
+    await tester.tap(find.text('Open existing'));
+    await settle(tester);
+
+    expect(find.text('No notes yet'), findsOne);
+    expect(controller.root, '/fake/library');
+
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('canceling the pickers stays on the open screen', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // Cancel the directory picker itself.
+    filePicker.directory = null;
+    await tester.tap(find.text('Open existing'));
+    await settle(tester);
+    expect(find.text('Open existing'), findsOne);
+
+    // Then cancel the name dialog after a successful parent pick.
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    expect(find.text('Open existing'), findsOne);
+
     await controller.dispose();
   });
 
