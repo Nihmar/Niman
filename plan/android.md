@@ -1,7 +1,9 @@
 # Android — storage & startup issues
 
-**Status:** both fixed · T-M6-09 partial (root picking done; image-insert
-paths + on-device verification remain)
+**Status:** 1 fixed · 2 awaiting on-device verification (the tree grant
+is now really taken; the earlier round's grant was silently skipped) ·
+T-M6-09 partial (root picking done; image-insert paths + on-device
+verification remain)
 
 Two issues observed on Android (Linux unaffected).
 
@@ -61,9 +63,17 @@ trade-off is gone: no default root exists anymore (see below).
 - The open/create screen picks the library root with the native directory
   picker (SAF on Android, xdg-desktop-portal on Linux) — no raw path entry.
 - On Android the pick takes a *persistent, read+write* Storage Access
-  Framework grant on the chosen folder (`file_picker` SAF options:
-  `grant: lifetime`, `accessMode: readWrite`). With SAF options the
-  plugin answers with the tree URI, so `resolveLibraryRoot`
+  Framework grant on the chosen folder. `file_picker`'s SAF options are
+  **not** used for it: in `android_file_picker` 1.1.0 (the latest) the
+  Dart side nests the options under a `safOptions` key the Kotlin side
+  never reads, so `grant` reads null and
+  `takePersistableUriPermission` is silently skipped (device log:
+  93 dirs, 0 files, no `walk: skip` lines — the FUSE view was still
+  directories-only). Instead the open screen takes the grant itself
+  right after the pick (`TreeGrant.takePersistent` →
+  `copist/storage` channel → `takePersistableUriPermission`), while
+  the activity still holds the transient grant from the pick result.
+  The plugin answers with the tree URI, so `resolveLibraryRoot`
   (`lib/src/core/library_root.dart`) maps it to the FUSE path the grant
   opens up (`primary:Documents/HelixNotes` →
   `/storage/emulated/0/Documents/HelixNotes`) and the open screen
@@ -74,7 +84,11 @@ trade-off is gone: no default root exists anymore (see below).
   `copist/storage` method channel — the dangerous, app-wide permission.
   The per-folder SAF grant makes it unnecessary.)
 
-**Status:** fixed. **T-M6-09** in
+**Status:** awaiting on-device verification. The first "fixed" round was
+wrong: the plugin silently skipped the grant (broken option map), so
+the device log still showed the directories-only FUSE view (93 dirs,
+0 files, no `walk: skip` lines). The grant is now taken explicitly,
+so the next device round is the real test. **T-M6-09** in
 [m6-scale-polish.md](m6-scale-polish.md) stays open for the remaining
 scope: image-insert paths on both platforms and on-device verification
 (real devices, not just app-specific storage), originally flagged in the
