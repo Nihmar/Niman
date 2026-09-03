@@ -91,8 +91,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<void> rescanNow() async {
-    // The in-memory index always matches its tree; nothing to rescan.
+    throw StateError('No library is open');
   }
+
+  @override
+  Future<bool> get debugLogsEnabled async => true;
+
+  @override
+  Future<void> setDebugLogsEnabled({required bool enabled}) async {}
 
   @override
   void notify() => _bump();

@@ -99,6 +99,14 @@ abstract interface class LibrarySession {
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
 
+  /// Whether the in-app debug log buffer records events.
+  ///
+  /// Also applies the persisted value to the live logger.
+  Future<bool> get debugLogsEnabled;
+
+  /// Sets (and persists) the debug log recording toggle.
+  Future<void> setDebugLogsEnabled({required bool enabled});
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 

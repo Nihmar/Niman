@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
@@ -62,6 +63,7 @@ final class LibraryController implements LibrarySession {
   final Duration watcherDebounce;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
+  final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
   LibraryPhase _phase = LibraryPhase.none;
   String? _root;
@@ -130,12 +132,17 @@ final class LibraryController implements LibrarySession {
     try {
       final db = await dbFactory();
       final last = await AppSettingsRepo(db).lastLibraryPath();
+      _log.info('resume: lastLibraryPath=$last');
       if (last == null) return;
       final dir = Directory(last);
-      if (!dir.existsSync()) return;
+      if (!dir.existsSync()) {
+        _log.warning('resume: root no longer exists: $last');
+        return;
+      }
       await open(last, create: false, blockingScan: false);
-    } on Object catch (_) {
+    } on Object catch (error) {
       // Resume is best effort; the open screen is reached with lastError.
+      _log.error('resume failed: $error');
     }
   }
 
@@ -162,6 +169,7 @@ final class LibraryController implements LibrarySession {
     _lastError = null;
     _bump();
     try {
+      _log.info('open start: $path create=$create blockingScan=$blockingScan');
       final abs = p.normalize(path.trim());
       final rootDir = Directory(abs);
       if (create) {
@@ -172,6 +180,7 @@ final class LibraryController implements LibrarySession {
         throw ArgumentError('Directory does not exist: $abs');
       }
       final db = await dbFactory();
+      AppLog.enabled = await AppSettingsRepo(db).debugLogsEnabled();
       final indexer = Indexer(db)..
         onChanged = _bump;
       final ops = NoteOps(root: abs, db: db, indexer: indexer);
@@ -181,6 +190,7 @@ final class LibraryController implements LibrarySession {
       final watcher = FileWatcher(abs, debounce: watcherDebounce);
       watcher.events.listen(_onWatchBatch);
       await watcher.start();
+      _log.info('open: watcher started for $abs');
       _rescanTimer = Timer.periodic(rescanInterval, (_) => _safeRescan(abs));
       _indexer = indexer;
       _ops = ops;
@@ -192,7 +202,9 @@ final class LibraryController implements LibrarySession {
         _reconcileTimer =
             Timer(resumeReconcileDelay, () => _safeRescan(abs));
       }
+      _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
+      _log.error('open failed: $error');
       _lastError = '$error';
       _phase = LibraryPhase.none;
       _root = null;
@@ -205,6 +217,7 @@ final class LibraryController implements LibrarySession {
   /// the persisted last-library path.
   @override
   Future<void> close() async {
+    _log.info('close: root=$_root');
     await _teardown();
     _root = null;
     _phase = LibraryPhase.none;
@@ -225,7 +238,26 @@ final class LibraryController implements LibrarySession {
     if (indexer == null || root == null) {
       throw StateError('No library is open');
     }
+    _log.info('manual rescan requested');
     return indexer.fullScan(root);
+  }
+
+  /// Whether the in-app debug log buffer records events.
+  @override
+  Future<bool> get debugLogsEnabled async {
+    final db = await database;
+    final enabled = await AppSettingsRepo(db).debugLogsEnabled();
+    AppLog.enabled = enabled;
+    return enabled;
+  }
+
+  /// Sets (and persists) the debug log recording toggle.
+  @override
+  Future<void> setDebugLogsEnabled({required bool enabled}) async {
+    _log.info('debug logging set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setDebugLogsEnabled(enabled: enabled);
+    AppLog.enabled = enabled;
   }
 
   /// Notifies listeners that state changed without an index mutation
@@ -262,6 +294,10 @@ final class LibraryController implements LibrarySession {
   }
 
   Future<void> _onWatchBatch(WatchBatch batch) async {
+    _log.debug(
+      'watch batch: ${batch.paths.length} path(s), '
+      '${batch.resyncDirs.length} resync dir(s)',
+    );
     final indexer = _indexer;
     final root = _root;
     if (indexer == null || root == null || phase != LibraryPhase.ready) {
@@ -274,8 +310,9 @@ final class LibraryController implements LibrarySession {
       if (batch.paths.isNotEmpty) {
         await indexer.applyEvents(root, batch.paths);
       }
-    } on Object catch (_) {
+    } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
+      _log.warning('watch batch failed: $error');
     }
   }
 
@@ -283,8 +320,11 @@ final class LibraryController implements LibrarySession {
     final indexer = _indexer;
     if (indexer == null || phase != LibraryPhase.ready) return;
     try {
+      _log.info('periodic rescan start: $abs');
       await indexer.fullScan(abs);
-    } on Object catch (_) {
+      _log.info('periodic rescan complete');
+    } on Object catch (error) {
+      _log.error('rescan failed: $error');
       if (!Directory(abs).existsSync()) {
         await close();
         _lastError = 'The library folder is no longer available.';
