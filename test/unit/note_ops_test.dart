@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/settings/library_settings.dart';
@@ -284,6 +285,55 @@ void main() {
         File(p.join(root.path, '.trash/B.md')).existsSync(),
         isFalse,
       );
+    });
+
+    test('a corrupt manifest entry is skipped, the rest still listed',
+        () async {
+      await ops.createNote(parentPath: '', name: 'A');
+      await ops.createNote(parentPath: '', name: 'B');
+      await ops.delete('A.md');
+      await ops.delete('B.md');
+      final manifestFile = File(
+        p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
+      );
+      final raw =
+          jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+      raw['A.md'] = <String, dynamic>{'originalPath': 'A.md'};
+      manifestFile.writeAsStringSync(jsonEncode(raw));
+
+      final items = await ops.trashItems();
+
+      expect(items.map((i) => i.name).toList(), ['B.md']);
+    });
+
+    test('a non-JSON manifest file yields an empty listing', () async {
+      await ops.createNote(parentPath: '', name: 'A');
+      await ops.delete('A.md');
+      File(p.join(root.path, '.trash/${NoteOps.manifestFileName}'))
+          .writeAsStringSync('{not json');
+
+      expect(await ops.trashItems(), isEmpty);
+    });
+
+    test('writing the manifest prunes items that left the trash',
+        () async {
+      await ops.createNote(parentPath: '', name: 'A');
+      await ops.createNote(parentPath: '', name: 'B');
+      await ops.delete('A.md');
+      await ops.delete('B.md');
+      // Something removes an item without going through the ops.
+      File(p.join(root.path, '.trash/A.md')).deleteSync();
+
+      // The next manifest write (another delete) drops the stale entry.
+      await ops.createNote(parentPath: '', name: 'C');
+      await ops.delete('C.md');
+
+      final manifestFile = File(
+        p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
+      );
+      final raw =
+          jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+      expect(raw.keys, {'B.md', 'C.md'});
     });
   });
 

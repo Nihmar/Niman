@@ -341,26 +341,55 @@ final class NoteOps implements NoteOperations {
 
   // -- manifest --------------------------------------------------------
 
+  /// Reads the trash manifest, surviving a torn or partially corrupt file:
+  /// a whole file that is not a JSON object yields an empty manifest, and
+  /// individual entries that do not decode are skipped, so one bad entry
+  /// can never take the trash screen down.
   Future<Map<String, _ManifestEntry>> _readManifest() async {
     final file = File(_abs('.trash/$manifestFileName'));
     if (!file.existsSync()) return <String, _ManifestEntry>{};
     final raw = file.readAsStringSync();
     if (raw.trim().isEmpty) return <String, _ManifestEntry>{};
-    final decoded = jsonDecode(raw);
+    Object? decoded;
+    try {
+      decoded = jsonDecode(raw);
+    } on FormatException {
+      return <String, _ManifestEntry>{};
+    }
     if (decoded is! Map) return <String, _ManifestEntry>{};
-    return {
-      for (final entry in decoded.entries)
-        (entry.key as String): _ManifestEntry.fromJson(
-          entry.value as Map<String, dynamic>,
-        ),
-    };
+    final manifest = <String, _ManifestEntry>{};
+    for (final entry in decoded.entries) {
+      final name = entry.key;
+      if (name is! String) continue;
+      final parsed = _parseManifestEntry(entry.value);
+      if (parsed != null) manifest[name] = parsed;
+    }
+    return manifest;
   }
 
+  static _ManifestEntry? _parseManifestEntry(Object? json) {
+    if (json is! Map) return null;
+    final originalPath = json['originalPath'];
+    final deletedAt = json['deletedAt'];
+    if (originalPath is! String || deletedAt is! int) return null;
+    return _ManifestEntry(
+      originalPath: originalPath,
+      deletedAt: DateTime.fromMillisecondsSinceEpoch(deletedAt),
+    );
+  }
+
+  /// Writes the manifest, dropping entries whose item is no longer on disk
+  /// so the file converges with `.trash/` even when something removed an
+  /// item without going through the ops.
   Future<void> _writeManifest(Map<String, _ManifestEntry> manifest) async {
     final trashDir = Directory(_abs('.trash'));
     if (!trashDir.existsSync()) await trashDir.create(recursive: true);
-    final payload = jsonEncode({
+    final kept = {
       for (final entry in manifest.entries)
+        if (_existsInTrash(entry.key)) entry.key: entry.value,
+    };
+    final payload = jsonEncode({
+      for (final entry in kept.entries)
         entry.key: entry.value.toJson(),
     });
     await writeFileAtomically(
@@ -390,16 +419,6 @@ final class _ManifestEntry {
     required this.originalPath,
     required this.deletedAt,
   });
-
-  /// Builds an entry from a decoded manifest JSON object.
-  factory _ManifestEntry.fromJson(Map<String, dynamic> json) {
-    return _ManifestEntry(
-      originalPath: json['originalPath'] as String,
-      deletedAt: DateTime.fromMillisecondsSinceEpoch(
-        json['deletedAt'] as int,
-      ),
-    );
-  }
 
   /// Library-relative path before the delete.
   final String originalPath;
