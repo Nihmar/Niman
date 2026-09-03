@@ -168,7 +168,13 @@ void main() {
     await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
     expect(find.text('Deletions move to .trash/ (off = hard delete)'), findsOne);
-    await tester.tap(find.byType(Switch));
+    final trashRow = find.ancestor(
+      of: find.text('Deletions move to .trash/ (off = hard delete)'),
+      matching: find.byType(SwitchListTile),
+    );
+    await tester.tap(
+      find.descendant(of: trashRow, matching: find.byType(Switch)),
+    );
     await settle(tester);
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
