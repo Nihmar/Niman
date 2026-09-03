@@ -58,17 +58,17 @@ trade-off is gone: no default root exists anymore (see below).
 
 **Fix:**
 
-- `AndroidManifest.xml` declares `MANAGE_EXTERNAL_STORAGE`, and
-  `MainActivity.kt` exposes a `copist/storage` method channel:
-  `hasManageStorageAccess`, and `requestManageStorageAccess` (launches
-  the system "All files access" screen, resolves when the user returns,
-  with the grant state at that point). Dart side:
-  `StorageAccess.ensureAllFilesAccess()` (`lib/src/core/storage_access.dart`),
-  a no-op on non-Android platforms.
 - The open/create screen picks the library root with the native directory
-  picker (SAF on Android, xdg-desktop-portal on Linux) — no raw path entry
-  — and both flows pass the `StorageAccess` gate first, so the permission
-  prompt precedes any picking.
+  picker (SAF on Android, xdg-desktop-portal on Linux) — no raw path entry.
+- On Android the pick takes a *persistent, read+write* Storage Access
+  Framework grant on the chosen folder (`file_picker` SAF options:
+  `grant: lifetime`, `accessMode: readWrite`) and resolves the tree URI
+  to the real path the indexer walks. That grant is the shared-storage
+  permission: the manifest declares no storage permission, and the grant
+  survives restarts, so the saved root re-opens directly.
+- (First attempt, superseded: a `MANAGE_EXTERNAL_STORAGE` gate behind a
+  `copist/storage` method channel — the dangerous, app-wide permission.
+  The per-folder SAF grant makes it unnecessary.)
 
 **Status:** fixed. **T-M6-09** in
 [m6-scale-polish.md](m6-scale-polish.md) stays open for the remaining
