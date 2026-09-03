@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
@@ -33,6 +34,99 @@ final class DiskEntry {
 
   /// Last modification time.
   final DateTime modified;
+}
+
+/// One disk walk's result: the entries found, plus the log lines the walk
+/// wanted to write.
+///
+/// The walk runs on a background isolate, where the app-wide log buffer
+/// does not exist, so its lines travel back here and are replayed by the
+/// caller instead.
+final class ScanResult {
+  /// Creates a walk result.
+  const ScanResult({required this.entries, required this.logs});
+
+  /// The entries found, directories and files, in traversal order.
+  final List<DiskEntry> entries;
+
+  /// Log lines produced during the walk, oldest first.
+  final List<String> logs;
+}
+
+/// Walks [start] (the library root itself, or a directory inside [root])
+/// depth-first, skipping hidden entries.
+///
+/// Top-level and fully synchronous so it can be handed to [Isolate.run]:
+/// on Android every `listSync`/`statSync` is a FUSE round trip, and a
+/// library of a few hundred entries costs the better part of a second —
+/// long enough to be felt on the UI isolate, and to stack up into an ANR
+/// together with the digests.
+ScanResult scanTree(String root, String start) {
+  final entries = <DiskEntry>[];
+  final logs = <String>[];
+  _walkDir(root, Directory(start), entries, logs);
+  return ScanResult(entries: entries, logs: logs);
+}
+
+void _walkDir(
+  String root,
+  Directory dir,
+  List<DiskEntry> out,
+  List<String> logs,
+) {
+  final rel = relPath(dir.path, root);
+  if (rel.isNotEmpty) {
+    final st = dir.statSync();
+    out.add(
+      DiskEntry(
+        rel: rel,
+        name: p.basename(dir.path),
+        isDir: true,
+        size: 0,
+        modified: st.modified,
+      ),
+    );
+  }
+  for (final ent in dir.listSync(followLinks: false)) {
+    final name = p.basename(ent.path);
+    if (name.startsWith('.')) {
+      logs.add('walk: skip hidden entry "$name"');
+      continue;
+    }
+    if (ent is Directory) {
+      _walkDir(root, ent, out, logs);
+    } else if (ent is File) {
+      final st = ent.statSync();
+      out.add(
+        DiskEntry(
+          rel: relPath(ent.path, root),
+          name: name,
+          isDir: false,
+          size: st.size,
+          modified: st.modified,
+        ),
+      );
+    } else {
+      logs.add('walk: skip non-file/dir entry "${ent.path}" ($ent)');
+    }
+  }
+}
+
+/// Digests the files at [rels] (library-relative) under [root].
+///
+/// Top-level for [Isolate.run]: hashing reads whole files, so it is the
+/// most expensive thing a scan does. A file that cannot be read (deleted
+/// or replaced mid-scan) is left out; the next scan picks it up.
+Future<Map<String, String>> hashFiles(String root, List<String> rels) async {
+  final out = <String, String>{};
+  for (final rel in rels) {
+    try {
+      out[rel] = await hashFileSha256(File(p.join(root, rel)));
+    } on FileSystemException catch (_) {
+      continue;
+    }
+  }
+  return out;
 }
 
 /// Builds and maintains the notes index so it mirrors the library on disk.
@@ -83,23 +177,21 @@ final class Indexer {
       final old = <String, Note>{
         for (final row in await _dao.allRows()) row.path: row,
       };
-      final entries = await _walk(root);
+      final entries = await _walk(root, root);
       final files = entries.where((e) => !e.isDir).length;
       _log.info(
         'fullScan $root: found ${entries.length} entr(ies) '
         '($files file, ${entries.length - files} dir)',
       );
       _log.debug('fullScan entries: ${_entryList(entries)}');
-      final shas = <String, String>{};
-      for (final e in entries) {
-        if (e.isDir) continue;
-        shas[e.rel] = await _hashOrReuse(root, e, 0, old);
-      }
-      if (!_treeChanged(old, entries, shas)) {
+      // Checked before the digests: a rescan that changes nothing — the
+      // common case, once a minute — then costs the walk and no reads.
+      if (!_treeChanged(old, entries)) {
         _log.info('fullScan: index already mirrors disk, no write');
         return;
       }
       _log.info('fullScan: tree changed, rewriting index');
+      final shas = await _digests(root, entries, 0, old);
       await _db.transaction(() async {
         await _db.customStatement('DELETE FROM notes');
         await _insertEntries(entries, shas);
@@ -182,12 +274,13 @@ final class Indexer {
     return rel;
   }
 
-  /// Whether the desired tree (entries + shas) differs from [old].
-  bool _treeChanged(
-    Map<String, Note> old,
-    List<DiskEntry> entries,
-    Map<String, String> shas,
-  ) {
+  /// Whether the desired tree differs from [old].
+  ///
+  /// Digests take no part in this: [_digests] only ever reuses a stored
+  /// one when `(size, mtime)` already proves the content unchanged, so a
+  /// digest can never be the deciding difference — and comparing it would
+  /// force a rewrite of every index written by an older build.
+  bool _treeChanged(Map<String, Note> old, List<DiskEntry> entries) {
     if (old.length != entries.length) return true;
     for (final e in entries) {
       final o = old[e.rel];
@@ -196,76 +289,58 @@ final class Indexer {
         return true;
       }
       if (o.modified != toStoredSecond(e.modified)) return true;
-      if (!e.isDir && o.sha256 != shas[e.rel]) return true;
     }
     return false;
   }
 
-  /// The sha256 for entry [e], reusing the previously indexed digest when
-  /// the `(size, mtime)` shortcut proves the content unchanged.
+  /// The digests for the note files in [entries].
+  ///
+  /// A stored digest is reused whenever the `(size, mtime)` shortcut
+  /// proves the content unchanged; the rest are hashed in one batch on a
+  /// background isolate. Only notes are digested — an attachment folder
+  /// full of images and e-books would otherwise be read end to end on
+  /// every first scan, which is what made the app freeze for seconds.
   ///
   /// [depth] is the number of leading path segments stripped to form the
-  /// lookup key (0 for full scans, N for a directory subtree sync); [old] is
-  /// keyed accordingly.
-  Future<String> _hashOrReuse(
+  /// lookup key (0 for full scans, N for a directory subtree sync); [old]
+  /// is keyed accordingly.
+  Future<Map<String, String>> _digests(
     String root,
-    DiskEntry e,
+    List<DiskEntry> entries,
     int depth,
     Map<String, Note> old,
   ) async {
-    final prev = old[stripSegments(e.rel, depth)];
-    if (prev != null &&
-        prev.size == e.size &&
-        prev.modified == toStoredSecond(e.modified) &&
-        prev.sha256 != null) {
-      return prev.sha256!;
-    }
-    return hashFileSha256(File(p.join(root, e.rel)));
-  }
-
-  Future<List<DiskEntry>> _walk(String root) async {
-    final out = <DiskEntry>[];
-    await _walkDir(root, Directory(root), out);
-    return out;
-  }
-
-  Future<void> _walkDir(String root, Directory dir, List<DiskEntry> out) async {
-    final rel = relPath(dir.path, root);
-    if (rel.isNotEmpty) {
-      final st = dir.statSync();
-      out.add(
-        DiskEntry(
-          rel: rel,
-          name: p.basename(dir.path),
-          isDir: true,
-          size: 0,
-          modified: st.modified,
-        ),
-      );
-    }
-    for (final ent in dir.listSync(followLinks: false)) {
-      final name = p.basename(ent.path);
-      if (name.startsWith('.')) {
-        _log.debug('walk: skip hidden entry "$name"');
-        continue;
-      }
-      if (ent is Directory) {
-        await _walkDir(root, ent, out);
-      } else if (ent is File) {
-        final st = ent.statSync();
-        out.add(
-          DiskEntry(
-            rel: relPath(ent.path, root),
-            name: name,
-            isDir: false,
-            size: st.size,
-            modified: st.modified,
-          ),
-        );
+    final shas = <String, String>{};
+    final todo = <String>[];
+    for (final e in entries) {
+      if (e.isDir || !_isNote(e.name)) continue;
+      final prev = old[stripSegments(e.rel, depth)];
+      if (prev != null &&
+          prev.size == e.size &&
+          prev.modified == toStoredSecond(e.modified) &&
+          prev.sha256 != null) {
+        shas[e.rel] = prev.sha256!;
       } else {
-        _log.debug('walk: skip non-file/dir entry "${ent.path}" ($ent)');
+        todo.add(e.rel);
       }
     }
+    if (todo.isEmpty) return shas;
+    _log.debug('digests: hashing ${todo.length} note(s)');
+    shas.addAll(await Isolate.run(() => hashFiles(root, todo)));
+    return shas;
+  }
+
+  /// Whether [name] is a note file, the only kind the index digests.
+  static bool _isNote(String name) =>
+      p.extension(name).toLowerCase() == '.md';
+
+  /// Walks [start] on a background isolate and replays its log lines.
+  Future<List<DiskEntry>> _walk(String root, String start) async {
+    final scan = await Isolate.run(() => scanTree(root, start));
+    for (final line in scan.logs) {
+      _log.debug(line);
+    }
+    return scan.entries;
   }
 
   /// The [entries] rel paths as a single debug log line, capped at
@@ -343,8 +418,7 @@ final class Indexer {
   /// rows, and inserts the fresh ones.
   Future<void> _syncDirSubtree(String root, String abs) async {
     final rel = relPath(abs, root);
-    final entries = <DiskEntry>[];
-    await _walkDir(root, Directory(abs), entries);
+    final entries = await _walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
     final oldRows = await _dao.subtreeRows(rel);
     final depth = rel.isEmpty ? 0 : rel.split('/').length;
@@ -352,11 +426,7 @@ final class Indexer {
       for (final row in oldRows)
         if (!row.isDir) stripSegments(row.path, depth): row,
     };
-    final shas = <String, String>{};
-    for (final e in entries) {
-      if (e.isDir) continue;
-      shas[e.rel] = await _hashOrReuse(root, e, depth, oldBySuffix);
-    }
+    final shas = await _digests(root, entries, depth, oldBySuffix);
     await _db.transaction(() async {
       if (rel.isEmpty) {
         await _db.customStatement('DELETE FROM notes');
@@ -401,7 +471,9 @@ final class Indexer {
         ? 0
         : await _ensureDirChain(root, parentRel);
     final st = File(abs).statSync();
-    final sha = await hashFileSha256(File(abs));
+    // Notes only, as in [_digests]; one note is small enough to hash here.
+    final sha =
+        _isNote(p.basename(abs)) ? await hashFileSha256(File(abs)) : null;
     final existing = await _dao.find(rel);
     if (existing == null) {
       _log.debug('upsert "$rel": insert (parent "$parentRel")');
