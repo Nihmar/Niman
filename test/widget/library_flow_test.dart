@@ -1,6 +1,7 @@
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
@@ -107,6 +108,13 @@ void main() {
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('First note.md'), findsOne);
+
+    // The detail pane gets the absolute path (DB rows carry only the
+    // library-relative one).
+    expect(
+      tester.widget<NoteView>(find.byType(NoteView)).path,
+      '/fake/library/First note.md',
+    );
 
     // Create a folder, expand it, and add a nested note.
     await tester.tap(find.byIcon(Icons.create_new_folder));

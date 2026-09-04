@@ -299,6 +299,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
           const VerticalDivider(width: 1),
           Expanded(
             child: _DetailPane(
+              root: controller.root,
               selectedPath: _selected,
               selectedIsDir: _selectedIsDir,
             ),
@@ -372,18 +373,28 @@ final class _ActionBar extends StatelessWidget {
 
 /// Right-hand pane: the note editor, or a prompt until a note is chosen.
 final class _DetailPane extends StatelessWidget {
-  const _DetailPane({required this.selectedPath, required this.selectedIsDir});
+  const _DetailPane({
+    required this.root,
+    required this.selectedPath,
+    required this.selectedIsDir,
+  });
 
+  /// Absolute library root; null until the session is ready.
+  final String? root;
+
+  /// Library-relative path of the selection.
   final String? selectedPath;
+
   final bool selectedIsDir;
 
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
-    if (path == null || selectedIsDir) {
+    final root = this.root;
+    if (path == null || selectedIsDir || root == null) {
       return const Center(child: Text('Select a note'));
     }
-    return NoteView(path: path);
+    return NoteView(path: p.join(root, path));
   }
 }
 
