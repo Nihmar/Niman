@@ -1,6 +1,6 @@
 # M1.5 — Correctness pass
 
-**Status:** Planned · **Depends on:** M1 · **Blocks:** M2 · **Spec:**
+**Status:** Done · **Depends on:** M1 · **Blocks:** M2 · **Spec:**
 *Requirements* (model), *Performance strategy*
 
 ## Purpose

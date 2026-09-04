@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** Planned · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E6 done; E7–E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -57,6 +57,14 @@ copyrighted).
 
 ## Editing model
 
+- **The model is `ComposingInput`** (decision): the platform is authoritative
+  for the IME, and delta lockstep is only defensible with a single owner of the
+  buffer, so `ComposingInput` is the editing model. `LineEditor`'s movement ops
+  (`moveUp/moveDown/moveHome/moveEnd`, `placeCaretAtLine`) move onto it as
+  selection changes (`setSelection`); `LineEditor` becomes a thin movement layer
+  or is deleted at E8. The two change signals (a listener list *and* a
+  `revision` counter) unify to one — `ComposingInput` extends `ChangeNotifier`,
+  which also drops the per-notify `List.of(_listeners)` copy.
 - **Caret** = (line, col) within the logical line list; rendered at the pixel
   point of (visual row, col) via the wrap mapping.
 - **Selection** = a span over the flat text (or over (line,col) endpoints);
@@ -97,17 +105,22 @@ rendering.
   no lost/duplicated input on a long note.*
   - **E4 core (this commit):** `composing_input.dart` — `ComposingInput`
     applies the platform's `TextEditingDelta` stream (insertion / deletion /
-    replacement / non-text) to `LineBuffer` in O(change), tracking the
+    replacement / non-text) to `LineBuffer` (the edit op is O(change); the
+    line-start reset is O(lines) — see the performance budget), tracking the
     composing region, selection and caret so the view can render the IME
-    underline. Lockstep is trusted (the platform is authoritative): a debug
-    O(1) `oldText.length == textLength` assert, no text compare. Property
-    test: 300 randomized edits on a 2000-line note keep the buffer exactly
-    correct (no lost / duplicated input). The `DeltaTextInputClient` bridge
-    and the composing-underline render are the E8 side (view); the model's
-    correctness is verified here.
-- [x] **E5** Selection + clipboard: tap/drag select (incl. multi-line),
-  copy/cut/paste. *AC: select across lines; copy/paste round-trips; cut
-  updates buffer + caret.*
+    underline. Lockstep is enforced, not just asserted: a direct edit
+    (`reset`/cut/paste) raises a flag that `apply` checks by re-anchoring to
+    `delta.oldText`, so a forgotten IME resync loses the pending edit instead
+    of silently corrupting; the debug O(1) `oldText.length == textLength`
+    assert is the backstop. The unrecognized-delta branch re-anchors + signals
+    a resync instead of dropping silently. Property test: 300 randomized edits
+    on a 2000-line note keep the buffer exactly correct (no lost / duplicated
+    input). The `DeltaTextInputClient` bridge and the composing-underline
+    render are the E8 side (view); the model's correctness is verified here.
+- [x] **E5** Selection + clipboard — model half: selection state + copy/cut/
+  paste buffer ops on `ComposingInput`. *AC (model half): select across lines;
+  copy/paste round-trips; cut updates buffer + caret.* The interactive half
+  (tap/drag hit-testing, selection highlight, clipboard UI) is E8b (view).
   - **E5 core (this commit):** selection state + selection buffer ops on
     `ComposingInput`, plus `LineBuffer.substring` (O(range) extraction, the
     copy/cut source — no full-text materialize). Selection is a
@@ -119,9 +132,11 @@ rendering.
     IME with a full `value` update (exactly how Flutter handles a local
     paste/cut). Tap/drag hit-testing, the selection highlight and the
     clipboard UI are the E8 side (view); the model's correctness is here.
-- [x] **E6** Folding (with T-M2-07 outline): folded line ranges omitted from
-  layout; fold/unfold; outline click → jump. *AC: folding a heading hides its
-  rows; scrolling past a fold is correct; outline lands on the heading.*
+- [x] **E6** Folding (with T-M2-07 outline) — model + layout half: `FoldState`
+  + fold-aware `RowModel`. *AC (model + layout half): folding a heading hides
+  its rows from the layout; scrolling is over the visible rows only.* The
+  interactive half (fold markers, outline panel, outline-click → jump) is E8c
+  (view).
   - **E6a:** `outline.dart` + `folding.dart` (pure model).
     `outlineOf(tokenizer lines)` derives headings from the tokenizer's
     `headingMarker` token (so a `#` in a code fence / math / frontmatter is
@@ -145,18 +160,57 @@ rendering.
 - [ ] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
   and paint styled rows; math spans styled. *AC: tokens/math visually
   distinct; no per-frame re-tokenize of the whole file (only visible rows).*
-- [ ] **E8** Wire into `NoteView` + autosave: replace the plain `TextField`
+- [ ] **E8a** Input view: the `DeltaTextInputClient` bridge over
+  `ComposingInput` (receive deltas → `apply`; push `value` +
+  `commitDirectEdit` after a direct edit), the composing-underline render, and
+  tap/drag hit testing. *AC: typing/backspace/arrows on Android + Linux edit
+  the buffer through the real IME; the composing underline tracks the region;
+  tap places the caret and drag extends the selection.*
+- [ ] **E8b** Selection + clipboard UI: the selection highlight and copy/cut/
+  paste wiring over the E5 model ops. *AC: select across lines; copy/paste
+  round-trips; cut updates buffer + caret; the IME is re-synced after a direct
+  edit (no lost input).*
+- [ ] **E8c** Folding + outline view: the fold markers, the outline panel, and
+  outline-click → jump. *AC: folding a heading hides its rows; scrolling past
+  a fold is correct; the outline lists headings and a click lands the caret on
+  the heading.*
+  - **Fold state across edits:** `FoldState` is indexed by line number and
+    freezes `lineCount`, so it does not survive an edit — an insertion/deletion
+    above a fold shifts every line after it, and a stale `visibleLines()` fed
+    to `setLines` would trip the range assert (debug) / throw (release). E8c
+    owns the folded *set* and remaps it on every edit: apply the edit's line
+    delta to the folded line numbers, recompute the outline, and rebuild the
+    `FoldState` before `RowModel.setLines` (a fold whose heading line no longer
+    resolves is dropped). Folds are transient view state, not buffer state.
+- [ ] **E8d** Wire into `NoteView` + autosave: replace the plain `TextField`
   baseline; debounce + save-on-focus-loss + atomic write (reuse M2 save
   path). *AC: edit a note, close the app, content persisted (byte-identical
   to what was typed); the baseline file is removed.*
+  - **CRLF (round-trip):** the byte-identical AC forces a line-ending decision:
+    keep `\r` in the line content (round-trip is free, but the tokenizer and
+    painter see a stray character) or strip `\r` on load and restore the
+    file's line ending on save (record it per note). Decide before the first
+    save.
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
-  scenario on the real 931K + 297K notes. *AC: no sustained slow frames;
-  keystroke + scroll inside frame budget; numbers recorded here.*
+  scenario on the real 931K + 297K notes, and microbenchmark a keystroke
+  (apply N single-character deltas to 1K / 10K / 100K-line buffers). *AC: no
+  sustained slow frames; scroll inside frame budget; per-keystroke cost
+  measured and shown to stay inside budget at 1 MB (the O(lines) reset is the
+  expected growth); numbers recorded here.*
 
 ## Performance budget
 
-- **Keystroke** (steady state, any file size): incremental tokenize (~0.5 ms)
-  - visible-row relayout (~1 ms) ≈ **< 2 ms** UI work; well inside 16 ms.
+- **Keystroke, model half** (steady state): the *claim* "O(change),
+  independent of file size" is not literally met today. `LineBuffer._resetPositions`
+  rebuilds the line-start array (O(lines), one allocation) and `RowModel.sync`
+  re-wraps (O(lines), one allocation) on every keystroke — O(lines) total, not
+  O(change). At measured sizes (~15K lines) that is a few hundred µs, well
+  inside 16 ms; E9 measures it at 1 MB to confirm. Follow-up if E9 shows it
+  matters: update `_lineStarts` in place (starts before the edit are unchanged,
+  starts after shift by a constant delta) instead of rebuilding.
+- **Keystroke, visual half** (steady state, any file size): incremental
+  tokenize (~0.5 ms) + visible-row relayout (~1 ms) ≈ **< 2 ms** UI work; well
+  inside 16 ms.
 - **Open** a 931K buffer: read off-isolate (~26 ms measured) + build line list
   O(chars) + first visible-row layout O(rows). Target first frame < 100 ms
   (no 734 ms open frame).
