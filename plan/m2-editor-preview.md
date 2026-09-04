@@ -12,8 +12,11 @@ image insert, and the responsive layout system.
 
 ## Current state
 
-M1.5 leaves a correct index and tree; notes open to a placeholder view with
-no editing.
+M1.5 leaves a correct index and tree. Notes open in a plain `TextField`
+baseline editor (autosave, atomic writes, absolute paths, responsive
+phone layout) — **rejected on-device** for novel-length files; the
+line-based editor it is being replaced by is planned in
+[m2a-line-editor.md](m2a-line-editor.md).
 
 ## Tasks
 
@@ -31,18 +34,32 @@ holds. Run them before anything else is built on top.
   the spec asserts is fine but nothing has verified. *AC: a decision
   recorded here with the measurement behind it.*
 
-### T-M2-00 decision: editor architecture (measured; selection pending device check)
+### T-M2-00 decision: editor architecture — **final: custom line-based editor**
 
-> **Status (on-device check in progress).** The measurement below is a
-> headless `TextPainter` proxy, and "perceptible jank" is a judgment to
-> make on a real device. So the first testable build ships the **plain,
-> monolithic `TextField`** editor (free caret/IME/selection, zero custom
-> code — `lib/src/editor/source_editor.dart`) and we feel it on Android and
-> Linux on a novel-length note (`tool/make_perf_note.dart` drops a 200 KB
-> note into a library). If it's acceptable, the whole custom caret/IME/IME
-> stack is avoided; if it janks, we switch to the line-based editor below.
-> The tokenizer (T-M2-02) is display-only and works with **either** choice,
-> so nothing is wasted.
+> **Status (final, 2026-09-04).** On-device verdict from the plain-`TextField`
+> baseline (release APK, Android, real library): the plain editor is
+> **rejected** for novel-length files. The custom line-based editor below is
+> confirmed and scheduled as sub-plan [m2a-line-editor.md](m2a-line-editor.md).
+> Raw evidence (full log + the two source notes, copyrighted — kept in the
+> gitignored `reference/` folder): `reference/opening-files.log.txt`.
+
+**On-device measurements** (release APK, per-frame from
+`addTimingsCallback`; loads run off the UI isolate via `Isolate.run`):
+
+| Note | Chars | Load | Steady state per frame | Verdict |
+|---|---|---|---|---|
+| `capitolo_04.md` | 25K | 15 ms | one 22 ms build blip | fine |
+| novel chapter | 297K | 66 ms | **~32 ms every frame** (build ~23 + raster ~8) | "almost smooth, not 100%" = pinned ~30 fps |
+| math notes | 931K | 26 ms | **~100 ms every frame** (build ~78 + raster ~20); 734 ms build on open | "atrocious" = ~10 fps |
+
+Signature: per-frame cost **proportional to total buffer size, not the
+visible window** — the monolithic `EditableText` re-lays-out the whole
+buffer on every frame (scroll *and* keystroke). Matches the headless spike
+below; the headless 44.5 ms whole-buffer layout was the 200 KB case, and
+the 931 KB file is ~4.6× that, as observed.
+
+Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
+fixture, desktop host, best-of-N; run it to refresh the numbers).
 
 Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
 fixture, desktop host, best-of-N; run it to refresh the numbers).
@@ -57,10 +74,10 @@ fixture, desktop host, best-of-N; run it to refresh the numbers).
 | Preview parse (`MarkdownParser` only) | 12.5 ms |
 | Preview eager full render (parse+build+layout+paint) | 2129 ms |
 
-**Proposed decision if the plain field janks: a custom, line-based widget,
-not Flutter's monolithic `EditableText`/`TextField`.**
+Decision: **a custom, line-based widget, not Flutter's monolithic
+`EditableText`/`TextField`.**
 
-Measurement-driven rationale (the case for the fallback):
+Measurement-driven rationale:
 
 1. **A monolithic field janks on novel-length.** `RenderEditable` holds the
    whole buffer as one text and re-lays-out the entire thing on every
@@ -88,10 +105,11 @@ nodes — 2.1 s for 200 KB. The preview must be **windowed**: parse the whole
 document, but build+lay out only the visible block range (a sliver) using the
 package's per-node builders. Never hand a novel-length document to
 `SmoothMarkdown`/`render()` unwindowed.
-- [ ] **T-M2-01** Source editor per the T-M2-00 decision: loads/saves a
-  note's content; debounced autosave + save-on-focus-loss, atomic writes.
-  *AC: edit a note, close the app, content persisted; IME works on
-  Android + Linux.*
+- [ ] **T-M2-01** Source editor: superseded by sub-plan
+  [m2a-line-editor.md](m2a-line-editor.md) (line-based editor, E1–E9),
+  confirmed by the T-M2-00 on-device verdict. The plain-`TextField`
+  baseline (autosave, atomic writes, save-on-focus-loss) stays in place as
+  the fallback and as the save-path donor until the sub-plan's E8 lands.
 - [ ] **T-M2-02** Highlighting layer: tokenizer for Markdown tokens (headings,
   bold/italic, code, lists, links) and math spans (`$…$`, `$$…$$`); styled
   display over a plain-text buffer (highlighting is a display concern only).
@@ -162,7 +180,8 @@ See [design.md](design.md) → *Editor & preview*. M2 slice:
   frame is too slow, token incrementally (on changed lines only).
 - Writing caret, selection and IME from scratch is the largest single
   unknown in the plan (Android composition, autocorrect, text scaling,
-  accessibility). T-M2-00 exists so that cost is chosen deliberately
-  rather than inherited from a one-line stack decision.
+  accessibility). T-M2-00 resolved that the cost is owed (the monolithic
+  field is disqualified on-device); the risk is now managed inside
+  [m2a-line-editor.md](m2a-line-editor.md) (E3–E6, IME-first ordering).
 - IME edge cases (multi-line input, auto-correction) on Android — integration
   test in M2's `integration_test/`.
