@@ -111,6 +111,24 @@ final class LineBuffer {
   /// Deletes the full-text offset range [start, end).
   void delete(int start, int end) => replace(start, end, '');
 
+  /// The text of the full-text offset range [start, end), `\n`-joined across
+  /// lines. O(range) — does not materialize the full text (unlike [text]).
+  String substring(int start, int end) {
+    _requireRange(start, 0, textLength, 'start');
+    _requireRange(end, start, textLength, 'end');
+    if (start == end) return '';
+    final (firstLine, firstCol) = locationOf(start);
+    final (lastLine, lastCol) = locationOf(end);
+    if (firstLine == lastLine) {
+      return _lines[firstLine].substring(firstCol, lastCol);
+    }
+    return <String>[
+      _lines[firstLine].substring(firstCol),
+      ..._lines.sublist(firstLine + 1, lastLine),
+      _lines[lastLine].substring(0, lastCol),
+    ].join('\n');
+  }
+
   /// Rebuilds [_lineStarts] (the full-text offset of every line).
   void _resetPositions() {
     final count = _lines.length;

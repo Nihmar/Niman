@@ -105,9 +105,20 @@ rendering.
     correct (no lost / duplicated input). The `DeltaTextInputClient` bridge
     and the composing-underline render are the E8 side (view); the model's
     correctness is verified here.
-- [ ] **E5** Selection + clipboard: tap/drag select (incl. multi-line),
+- [x] **E5** Selection + clipboard: tap/drag select (incl. multi-line),
   copy/cut/paste. *AC: select across lines; copy/paste round-trips; cut
   updates buffer + caret.*
+  - **E5 core (this commit):** selection state + selection buffer ops on
+    `ComposingInput`, plus `LineBuffer.substring` (O(range) extraction, the
+    copy/cut source — no full-text materialize). Selection is a
+    (anchor, focus) pair; the range is `[start, end)`, end exclusive.
+    `extendSelectionTo`/`collapseSelection` drive a drag-select; `selectionText`
+    (copy), `deleteSelection` (cut → buffer + caret, returns the text) and
+    `replaceSelection` (paste/replace → buffer + caret). The last two mutate
+    the buffer directly, so they break delta lockstep: the view re-syncs the
+    IME with a full `value` update (exactly how Flutter handles a local
+    paste/cut). Tap/drag hit-testing, the selection highlight and the
+    clipboard UI are the E8 side (view); the model's correctness is here.
 - [ ] **E6** Folding (with T-M2-07 outline): folded line ranges omitted from
   layout; fold/unfold; outline click → jump. *AC: folding a heading hides its
   rows; scrolling past a fold is correct; outline lands on the heading.*

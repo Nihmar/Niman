@@ -204,6 +204,36 @@ void main() {
       expect(ms, lessThan(1000));
     });
   });
+
+  group('substring', () {
+    test('extracts a single-line range', () {
+      final buffer = LineBuffer.fromText('hello world');
+      expect(buffer.substring(0, 5), 'hello');
+      expect(buffer.substring(6, 11), 'world');
+    });
+
+    test('joins with newlines across lines', () {
+      final buffer = LineBuffer.fromText('one\ntwo\nthree');
+      expect(buffer.substring(2, 10), 'e\ntwo\nth');
+      expect(buffer.substring(0, buffer.textLength), 'one\ntwo\nthree');
+    });
+
+    test('is empty when start == end', () {
+      final buffer = LineBuffer.fromText('hello');
+      expect(buffer.substring(2, 2), '');
+    });
+
+    test('matches String.substring over random ranges', () {
+      final rand = Random(0x5E);
+      final text = _randomText(rand, 2000);
+      final buffer = LineBuffer.fromText(text);
+      for (var i = 0; i < 200; i++) {
+        final a = rand.nextInt(text.length + 1);
+        final b = a + rand.nextInt(text.length + 1 - a);
+        expect(buffer.substring(a, b), text.substring(a, b));
+      }
+    });
+  });
 }
 
 String _randomText(Random rand, int maxUnits) {

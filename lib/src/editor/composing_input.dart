@@ -160,6 +160,69 @@ final class ComposingInput {
     setSelection(TextSelection.collapsed(offset: _buffer.offsetOf(line, 0)));
   }
 
+  /// Whether a (non-caret) range is selected.
+  bool get hasSelection => _selection.isValid && !_selection.isCollapsed;
+
+  /// The selected text (empty when nothing is selected). O(selection length).
+  String get selectionText {
+    final s = _selection;
+    if (!s.isValid || s.isCollapsed) return '';
+    return _buffer.substring(s.start, s.end);
+  }
+
+  /// Moves the selection's focus to [offset], keeping the anchor — the model
+  /// half of a drag-select (the view drives one call per pointer move).
+  void extendSelectionTo(int offset) {
+    final base = _selection.isValid ? _selection.baseOffset : 0;
+    _selection = TextSelection(
+      baseOffset: base,
+      extentOffset: offset.clamp(0, textLength),
+    );
+    _notify();
+  }
+
+  /// Collapses the selection to its focus (the caret) — ends a drag-select.
+  void collapseSelection() {
+    final focus = _selection.isValid ? _selection.extentOffset : 0;
+    _selection = TextSelection.collapsed(offset: focus);
+    _notify();
+  }
+
+  /// Deletes the current selection and collapses the caret to where it began,
+  /// returning the removed text (the source for the clipboard on a cut).
+  ///
+  /// No-op (returns `''`) when nothing is selected. This mutates the buffer
+  /// directly, so it breaks delta lockstep: the caller must re-sync the IME
+  /// with a full [value] update (as Flutter does after a local paste/cut).
+  String deleteSelection() {
+    final s = _selection;
+    if (!s.isValid || s.isCollapsed) return '';
+    final removed = _buffer.substring(s.start, s.end);
+    _buffer.delete(s.start, s.end);
+    _selection = TextSelection.collapsed(offset: s.start);
+    _composing = TextRange.empty;
+    _revision++;
+    _notify();
+    return removed;
+  }
+
+  /// Replaces the current selection with [text] (a paste / replace), or
+  /// inserts it at the caret when nothing is selected, leaving the caret
+  /// after the inserted text.
+  ///
+  /// Like [deleteSelection], this mutates the buffer directly and breaks
+  /// delta lockstep; the caller re-syncs the IME with a full [value] update.
+  void replaceSelection(String text) {
+    final s = _selection;
+    final start = s.isValid ? s.start : 0;
+    final end = s.isValid ? s.end : 0;
+    _buffer.replace(start, end, text);
+    _selection = TextSelection.collapsed(offset: start + text.length);
+    _composing = TextRange.empty;
+    _revision++;
+    _notify();
+  }
+
   /// Subscribes [listener] to every change (text, selection or composing).
   void addListener(void Function() listener) {
     _listeners.add(listener);
