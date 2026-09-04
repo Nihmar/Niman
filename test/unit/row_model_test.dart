@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:copist/src/editor/folding.dart';
 import 'package:copist/src/editor/line_buffer.dart';
+import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/row_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -127,6 +129,83 @@ void main() {
       final lookupMs = lookups.elapsedMilliseconds;
       expect(buildMs, lessThan(500));
       expect(lookupMs, lessThan(100));
+    });
+  });
+
+  group('folding (setLines)', () {
+    test('wraps only the visible lines', () {
+      final buffer = LineBuffer.fromText('ab\nc\n${'d' * 61}\nef');
+      // lines: 0 'ab'(2), 1 'c'(1), 2 'd'*61 (3 rows), 3 'ef'(2); col 30.
+      final all = RowModel(buffer, columns: 30);
+      expect(all.rowCount, 6);
+      // hide line 2 (the 3-row one): visible [0,1,3].
+      final model = RowModel(buffer, columns: 30, lines: [0, 1, 3]);
+      expect(model.rowCount, 3);
+      expect(model.lines, [0, 1, 3]);
+      expect(model.rowOfLine(0), 0);
+      expect(model.rowOfLine(1), 1);
+      expect(model.rowOfLine(3), 2);
+      expect(model.lineAndStartColumn(0), (0, 0));
+      expect(model.lineAndStartColumn(1), (1, 0));
+      expect(model.lineAndStartColumn(2), (3, 0));
+    });
+
+    test('rowOfLine throws for a folded line', () {
+      final buffer = LineBuffer.fromText('a\nb\nc');
+      final model = RowModel(
+        buffer,
+        columns: 10,
+        lines: [0, 2],
+      ); // line 1 folded
+      expect(() => model.rowOfLine(1), throwsArgumentError);
+      expect(model.rowOfLine(0), 0);
+      expect(model.rowOfLine(2), 1);
+    });
+
+    test('rows map back to visible lines only', () {
+      final buffer = LineBuffer.fromText('ab\n${'c' * 95}\n\n${'def' * 40}');
+      final model = RowModel(
+        buffer,
+        columns: 30,
+        lines: [0, 2, 3],
+      ); // fold line 1
+      final visible = <int>{0, 2, 3};
+      for (var row = 0; row < model.rowCount; row++) {
+        final (line, col) = model.lineAndStartColumn(row);
+        expect(visible.contains(line), isTrue);
+        expect(col % model.columns, 0);
+        expect(buffer.lineLength(line), greaterThanOrEqualTo(col));
+      }
+    });
+
+    test('sync resets the visible set to every line', () {
+      final buffer = LineBuffer.fromText('a\nb\nc\nd');
+      final model = RowModel(buffer, columns: 10, lines: [0, 2]);
+      expect(model.visibleLineCount, 2);
+      model.sync();
+      expect(model.visibleLineCount, 4);
+      expect(model.lines, [0, 1, 2, 3]);
+    });
+
+    test('wraps the FoldState visible set', () {
+      final buffer = LineBuffer.fromText(
+        '# A\nx\n## A1\ny\n## A2\nz\n# B\nw',
+      );
+      const outline = [
+        OutlineEntry(line: 0, level: 1, text: 'A'),
+        OutlineEntry(line: 2, level: 2, text: 'A1'),
+        OutlineEntry(line: 4, level: 2, text: 'A2'),
+        OutlineEntry(line: 6, level: 1, text: 'B'),
+      ];
+      final folds = FoldState(outline, buffer.lineCount, folded: {0});
+      // A (line 0) hides [1,6) -> visible [0,6,7].
+      expect(folds.visibleLines(), [0, 6, 7]);
+      final model = RowModel(buffer, columns: 40, lines: folds.visibleLines());
+      expect(model.lines, [0, 6, 7]);
+      for (var row = 0; row < model.rowCount; row++) {
+        final (line, _) = model.lineAndStartColumn(row);
+        expect({0, 6, 7}.contains(line), isTrue);
+      }
     });
   });
 }

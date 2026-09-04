@@ -119,10 +119,10 @@ rendering.
     IME with a full `value` update (exactly how Flutter handles a local
     paste/cut). Tap/drag hit-testing, the selection highlight and the
     clipboard UI are the E8 side (view); the model's correctness is here.
-- [ ] **E6** Folding (with T-M2-07 outline): folded line ranges omitted from
+- [x] **E6** Folding (with T-M2-07 outline): folded line ranges omitted from
   layout; fold/unfold; outline click → jump. *AC: folding a heading hides its
   rows; scrolling past a fold is correct; outline lands on the heading.*
-  - **E6a (this commit):** `outline.dart` + `folding.dart` (pure model).
+  - **E6a:** `outline.dart` + `folding.dart` (pure model).
     `outlineOf(tokenizer lines)` derives headings from the tokenizer's
     `headingMarker` token (so a `#` in a code fence / math / frontmatter is
     not a heading — the outline matches the highlighted headings). `FoldState`
@@ -133,6 +133,15 @@ rendering.
     is the ordered visible set the `RowModel` wraps. The fold anchors, the
     fold markers / outline panel and outline-click → jump are the E8 side
     (view); the layout skipping the rows is E6b (fold-aware `RowModel`).
+  - **E6b (this commit):** `RowModel` now wraps a *subset* of the buffer's
+    lines — the visible ones. The constructor takes an optional
+    `lines` (default: every line); `setLines(lines)` re-wraps to a visible
+    set and `sync()` resets to every line. Rows are laid out over the visible
+    lines only and `lineAndStartColumn`/`rowOfLine` map through the visible
+    set, so the `VirtualizedTextView` renders nothing for a folded range with
+    no view change. `rowOfLine` throws for a folded line. The fold markers /
+    outline panel and outline-click → jump (the interactive part of the AC)
+    are the E8 side (view); the layout skipping the rows is here.
 - [ ] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
   and paint styled rows; math spans styled. *AC: tokens/math visually
   distinct; no per-frame re-tokenize of the whole file (only visible rows).*
