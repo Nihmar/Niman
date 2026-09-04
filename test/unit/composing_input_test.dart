@@ -173,39 +173,45 @@ void main() {
   });
 
   group('direct edits and IME lockstep', () {
-    test('a direct edit followed by commitDirectEdit applies deltas normally',
-            () {
-      final input = ComposingInput('old');
-      const delta = TextEditingDeltaInsertion(
-        oldText: 'new',
-        textInserted: '!',
-        insertionOffset: 3,
-        selection: TextSelection.collapsed(offset: 4),
-        composing: TextRange.empty,
-      );
-      input
-        ..reset('new') // buffer = 'new', pending IME resync
-        ..commitDirectEdit() // the view pushed `value` to the IME
-        ..apply(delta);
-      expect(input.text, 'new!'); // delta applied, no re-anchor
-    });
+    test(
+      'a direct edit followed by commitDirectEdit applies deltas normally',
+      () {
+        final input = ComposingInput('old');
+        const delta = TextEditingDeltaInsertion(
+          oldText: 'new',
+          textInserted: '!',
+          insertionOffset: 3,
+          selection: TextSelection.collapsed(offset: 4),
+          composing: TextRange.empty,
+        );
+        input
+          ..reset('new') // buffer = 'new', pending IME resync
+          ..commitDirectEdit() // the view pushed `value` to the IME
+          ..apply(delta);
+        expect(input.text, 'new!'); // delta applied, no re-anchor
+      },
+    );
 
-    test('a direct edit without commitDirectEdit re-anchors (no corruption)',
-            () {
-      final input = ComposingInput('old');
-      const delta = TextEditingDeltaInsertion(
-        oldText: 'old',
-        textInserted: '?',
-        insertionOffset: 3,
-        selection: TextSelection.collapsed(offset: 4),
-        composing: TextRange.empty,
-      );
-      // The IME was never re-synced, so the delta is relative to its stale
-      // copy ('old'): apply re-anchors to it (the 'new' edit is lost, but the
-      // text is not corrupted).
-      input..reset('new')..apply(delta);
-      expect(input.text, 'old?');
-    });
+    test(
+      'a direct edit without commitDirectEdit re-anchors (no corruption)',
+      () {
+        final input = ComposingInput('old');
+        const delta = TextEditingDeltaInsertion(
+          oldText: 'old',
+          textInserted: '?',
+          insertionOffset: 3,
+          selection: TextSelection.collapsed(offset: 4),
+          composing: TextRange.empty,
+        );
+        // The IME was never re-synced, so the delta is relative to its stale
+        // copy ('old'): apply re-anchors to it (the 'new' edit is lost, but the
+        // text is not corrupted).
+        input
+          ..reset('new')
+          ..apply(delta);
+        expect(input.text, 'old?');
+      },
+    );
 
     test('paste (replaceSelection) is a direct edit too', () {
       final input = ComposingInput('say hi');
@@ -311,6 +317,148 @@ void main() {
       }
     });
   });
+
+  group('undo/redo (E-U)', () {
+    test('undo a typed insertion restores text + caret', () {
+      final input = ComposingInput('say ');
+      expect(
+        (input
+              ..setSelection(const TextSelection.collapsed(offset: 4))
+              ..apply(_insertDelta('say ', 'hi', 4)))
+            .text,
+        'say hi',
+      );
+      input.undo();
+      expect(input.text, 'say ');
+      expect(input.caret, 4);
+      expect(input.canUndo, isFalse);
+    });
+
+    test('redo re-applies an undone edit (text + caret)', () {
+      final input = ComposingInput('say ');
+      expect(
+        (input
+              ..setSelection(const TextSelection.collapsed(offset: 4))
+              ..apply(_insertDelta('say ', 'hi', 4)))
+            .text,
+        'say hi',
+      );
+      input.undo();
+      expect(input.text, 'say ');
+      input.redo();
+      expect(input.text, 'say hi');
+      expect(input.caret, 6);
+      expect(input.canRedo, isFalse);
+    });
+
+    test('undo a deletion restores the deleted text + selection', () {
+      final input = ComposingInput('say hi');
+      expect(
+        (input
+              ..setSelection(
+                const TextSelection(baseOffset: 4, extentOffset: 6),
+              )
+              ..apply(
+                const TextEditingDeltaDeletion(
+                  oldText: 'say hi',
+                  deletedRange: TextRange(start: 4, end: 6),
+                  selection: TextSelection.collapsed(offset: 4),
+                  composing: TextRange.empty,
+                ),
+              ))
+            .text,
+        'say ',
+      );
+      input.undo();
+      expect(input.text, 'say hi');
+      expect(input.selectionText, 'hi');
+    });
+
+    test('undo a cut (deleteSelection) restores text + selection', () {
+      final input = ComposingInput('hello world');
+      expect(
+        (input
+              ..setSelection(
+                const TextSelection(baseOffset: 6, extentOffset: 11),
+              )
+              ..deleteSelection())
+            .text,
+        'hello ',
+      );
+      input.undo();
+      expect(input.text, 'hello world');
+      expect(input.hasSelection, isTrue);
+      expect(input.selectionText, 'world');
+    });
+
+    test('undo a paste (replaceSelection) restores the original', () {
+      final input = ComposingInput('a   c');
+      expect(
+        (input
+              ..setSelection(
+                const TextSelection(baseOffset: 1, extentOffset: 4),
+              )
+              ..replaceSelection('b'))
+            .text,
+        'abc',
+      );
+      input.undo();
+      expect(input.text, 'a   c');
+    });
+
+    test('the stack is bounded (oldest edits dropped first)', () {
+      final input = ComposingInput('', maxHistory: 3);
+      for (final ch in const ['a', 'b', 'c', 'd', 'e']) {
+        input.apply(_insertDelta(input.text, ch, input.textLength));
+      }
+      expect(input.text, 'abcde');
+      input
+        ..undo()
+        ..undo()
+        ..undo();
+      expect(input.text, 'ab'); // 'a', 'b' were dropped from history
+      expect(input.canUndo, isFalse);
+    });
+
+    test('reset (a new load) clears the history', () {
+      final input = ComposingInput('ab');
+      expect((input..apply(_insertDelta('ab', 'c', 2))).text, 'abc');
+      input.reset('');
+      expect(input.canUndo, isFalse);
+      expect(input.canRedo, isFalse);
+    });
+
+    test('a new edit clears the redo branch', () {
+      final input = ComposingInput('ab');
+      expect(
+        (input
+              ..apply(_insertDelta('ab', 'c', 2))
+              ..apply(_insertDelta('abc', 'd', 3)))
+            .text,
+        'abcd',
+      );
+      input.undo();
+      expect(input.canRedo, isTrue);
+      expect((input..apply(_insertDelta('abc', '!', 3))).text, 'abc!');
+      expect(input.canRedo, isFalse);
+      expect(input.canUndo, isTrue);
+    });
+
+    test(
+      'undo re-syncs the IME (a following delta re-anchors, no lost input)',
+      () {
+        final input = ComposingInput('hello');
+        expect((input..apply(_insertDelta('hello', '!', 5))).text, 'hello!');
+        input.undo(); // direct edit → the resync flag is set
+        expect(input.text, 'hello');
+        // The IME still holds the pre-undo text ('hello!'); its next delta
+        // carries that as oldText. apply must re-anchor to it and apply the
+        // delta on it — the pending undo is lost, but the new input is kept
+        // (and no assertion fires, because undo set the resync flag).
+        expect((input..apply(_insertDelta('hello!', '?', 6))).text, 'hello!?');
+      },
+    );
+  });
 }
 
 String _splice(String s, int at, String ins) =>
@@ -318,3 +466,15 @@ String _splice(String s, int at, String ins) =>
 
 String _replaceIn(String s, int start, int end, String repl) =>
     '${s.substring(0, start)}$repl${s.substring(end)}';
+
+TextEditingDeltaInsertion _insertDelta(
+  String oldText,
+  String text,
+  int offset,
+) => TextEditingDeltaInsertion(
+  oldText: oldText,
+  textInserted: text,
+  insertionOffset: offset,
+  selection: TextSelection.collapsed(offset: offset + text.length),
+  composing: TextRange.empty,
+);

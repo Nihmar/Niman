@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E7 done; E-U, E8a–E8d, E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E7 + E-U done; E8a–E8d, E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -175,7 +175,7 @@ rendering.
     half lands in E8 (the view reads these runs); the budget (no per-frame
     re-tokenize) is what's verified here. Math spans get the `Math` token kind
     (styled) — no KaTeX engine (M2.5).
-- [ ] **E-U** Undo/redo (model): the line-list edit stack on `ComposingInput`
+- [x] **E-U** Undo/redo (model): the line-list edit stack on `ComposingInput`
   — insert/delete/replace ranges, bounded depth, with `undo`/`redo` ops that
   restore the exact buffer + caret and fire the change stream. *AC: a sequence
   of edits (typing, IME deltas, cut/paste) can be undone and redone to restore
@@ -184,6 +184,19 @@ rendering.
   E8d (which removes the `TextField` baseline that provided undo for free) so
   M2a does not ship with a lost feature; the undo/redo buttons + shortcuts are
   the E8a view side.
+  - **E-U core (this commit):** a bounded `_UndoEntry` stack on
+    `ComposingInput` (default depth 100, oldest dropped first). Every text
+    edit is recorded — `apply` (insertion / deletion / replacement; non-text
+    moves are not edits) and the direct `deleteSelection`/`replaceSelection`
+    (cut/paste) — each with the selection before + after. `undo`/`redo` replay
+    the entry (`buffer.replace`, O(change)), restore the exact caret (selection
+    before / after the edit), bump the revision (the change stream) and raise
+    the IME-resync flag (a direct edit's undo/redo re-syncs the IME — no lost
+    input). A new edit clears the redo branch; `reset` (a new load) clears
+    both stacks. ACs verified: typed / IME / cut / paste edits undo + redo to
+    the exact buffer + caret; the bounded stack drops oldest first; a post-undo
+    delta re-anchors on the IME's pre-undo `oldText` (the pending undo is lost,
+    the new input is kept).
 - [ ] **E8a** Input view: the `DeltaTextInputClient` bridge over
   `ComposingInput` (receive deltas → `apply`; push `value` +
   `commitDirectEdit` after a direct edit), the composing-underline render, and
