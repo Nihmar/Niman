@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E6 done; E7–E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E7 done; E-U, E8a–E8d, E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -135,7 +135,7 @@ rendering.
     paste/cut). Tap/drag hit-testing, the selection highlight and the
     clipboard UI are the E8 side (view); the model's correctness is here.
 - [x] **E6** Folding (with T-M2-07 outline) — model + layout half: `FoldState`
-  + fold-aware `RowModel`. *AC (model + layout half): folding a heading hides
+  - fold-aware `RowModel`. *AC (model + layout half): folding a heading hides
   its rows from the layout; scrolling is over the visible rows only.* The
   interactive half (fold markers, outline panel, outline-click → jump) is E8c
   (view).
@@ -159,9 +159,22 @@ rendering.
     no view change. `rowOfLine` throws for a folded line. The fold markers /
     outline panel and outline-click → jump (the interactive part of the AC)
     are the E8 side (view); the layout skipping the rows is here.
-- [ ] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
+- [x] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
   and paint styled rows; math spans styled. *AC: tokens/math visually
   distinct; no per-frame re-tokenize of the whole file (only visible rows).*
+  - **E7 core (this commit):** the incremental half. `LineBuffer` records the
+    last edit (region + replaced text + a count); `HighlightDocument` (with
+    `replace` — the O(edited lines) unit of work — and O(1) per-line accessors
+    so the view reads only visible lines, never the O(file) `lines` list);
+    `Highlighter` keeps it in sync (one buffer edit re-tokenizes only the
+    edited lines; the document stays `same` for the view to reuse; accumulated
+    edits fall back to a full rebuild; selection-only changes are a no-op);
+    `highlight_style`/`styled_runs` map `Token` → `TextStyle` and slice a row's
+    tokens to styled `TextSpan`s; `VirtualizedTextView` paints styled runs from
+    the document (null = plain text, unchanged). The AC's "visually distinct"
+    half lands in E8 (the view reads these runs); the budget (no per-frame
+    re-tokenize) is what's verified here. Math spans get the `Math` token kind
+    (styled) — no KaTeX engine (M2.5).
 - [ ] **E-U** Undo/redo (model): the line-list edit stack on `ComposingInput`
   — insert/delete/replace ranges, bounded depth, with `undo`/`redo` ops that
   restore the exact buffer + caret and fire the change stream. *AC: a sequence
