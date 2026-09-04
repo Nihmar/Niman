@@ -80,7 +80,7 @@ rendering.
 
 ## Milestones (each independently testable)
 
-- [ ] **E1** Line buffer model (pure Dart): text↔lines, apply edit
+- [x] **E1** Line buffer model (pure Dart): text↔lines, apply edit
   (insert/delete/replace), caret/offset math, incremental line counts.
   *AC: unit tests — edit ops keep buffer==source; offsets round-trip.*
 - [ ] **E2** Visual-row model + virtualized read-only view: wrap a logical
