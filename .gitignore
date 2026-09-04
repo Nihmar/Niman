@@ -6,6 +6,9 @@
 *.swp
 *.apk
 copist-*.tar.gz
+# Local reference files (real notes, copyrighted, and captured device
+# logs). Never commit this folder; the findings live in plan/.
+reference/
 # Debug logs exported from the Settings screen.
 copist-debug-log-*.txt
 .buildlog/
