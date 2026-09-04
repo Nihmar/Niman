@@ -79,6 +79,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     final opening = widget.controller.phase == LibraryPhase.opening;
     final error = widget.controller.lastError ?? _pickerError;
     final active = opening || _busy;
+    final narrow = MediaQuery.sizeOf(context).width < 600;
     return Scaffold(
       appBar: AppBar(title: const Text('Copist')),
       body: Center(
@@ -104,6 +105,20 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                 if (_needsAccess)
                   _AccessPrompt(
                     onGrant: active ? null : _grantAccess,
+                  )
+                else if (narrow)
+                  Column(
+                    children: [
+                      FilledButton(
+                        onPressed: active ? null : _openExisting,
+                        child: const Text('Open existing'),
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton.tonal(
+                        onPressed: active ? null : _createNew,
+                        child: const Text('Create new'),
+                      ),
+                    ],
                   )
                 else
                   Row(

@@ -442,4 +442,47 @@ void main() {
     await session.close();
     await session.dispose();
   });
+
+  testWidgets('phone width: notes open full-screen, back returns to tree',
+      (tester) async {
+    // Phone-sized surface (390 x 844 logical).
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // Open a library.
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'library');
+    await tester.pump();
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+    expect(find.text('No notes yet'), findsOne);
+
+    // Creating a note opens it full-screen.
+    await tester.tap(find.byIcon(Icons.note_add));
+    await tester.pump();
+    await tester.enterText(dialogField(), 'Phone');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.text('Phone.md'), findsOneWidget); // app bar title.
+    expect(noteRow('Phone.md'), findsNothing);
+
+    // Back returns to the tree; the selection is kept.
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsNothing);
+    expect(noteRow('Phone.md'), findsOne);
+
+    // Tapping the note opens it again.
+    await tester.tap(noteRow('Phone.md'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
+  });
 }

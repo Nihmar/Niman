@@ -79,6 +79,14 @@ final class _LibraryShellState extends State<_LibraryShell> {
   final Set<String> _expanded = <String>{};
   bool _busy = false;
 
+  /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
+  /// `false` = the selected note is open full-screen.
+  bool _treeVisible = true;
+
+  /// Below this width the shell is single-pane (spec: phones are
+  /// full-screen tree or editor, the split lands at 600 px and up).
+  static const double _phoneBreakpoint = 600;
+
   /// Parent path for new note/folder creation.
   String get _createParent {
     if (_selected == null) return '';
@@ -89,6 +97,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
     setState(() {
       _selected = note.path;
       _selectedIsDir = note.isDir;
+      _treeVisible = note.isDir;
       if (note.isDir) _expanded.add(note.path);
     });
   }
@@ -134,6 +143,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
+        _treeVisible = false;
       });
     });
   }
@@ -239,6 +249,30 @@ final class _LibraryShellState extends State<_LibraryShell> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final selectedPath = _selected;
+    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
+    if (narrow &&
+        selectedPath != null &&
+        !_selectedIsDir &&
+        !_treeVisible) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) setState(() => _treeVisible = true);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: BackButton(
+              onPressed: () => setState(() => _treeVisible = true),
+            ),
+            title: Text(p.basename(selectedPath)),
+          ),
+          body: NoteView(
+            path: p.join(controller.root ?? '', selectedPath),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Copist'),
@@ -268,44 +302,49 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          SizedBox(
-            width: 340,
-            child: Column(
+      body: narrow
+          ? _treePane(controller)
+          : Row(
               children: [
-                _ActionBar(
-                  hasSelection: _selected != null,
-                  busy: _busy,
-                  onCreateNote: _createNote,
-                  onCreateFolder: _createFolder,
-                  onRename: _rename,
-                  onMove: _move,
-                  onDelete: _delete,
-                ),
-                const SizedBox(height: 4),
+                SizedBox(width: 340, child: _treePane(controller)),
+                const VerticalDivider(width: 1),
                 Expanded(
-                  child: NoteTree(
-                    controller: controller,
+                  child: _DetailPane(
+                    root: controller.root,
                     selectedPath: _selected,
-                    expanded: _expanded,
-                    onToggle: _toggle,
-                    onSelect: _select,
+                    selectedIsDir: _selectedIsDir,
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  /// The tree pane: the action bar and the note tree — the whole body on
+  /// phones, the left column on wide screens.
+  Widget _treePane(LibrarySession controller) {
+    return Column(
+      children: [
+        _ActionBar(
+          hasSelection: _selected != null,
+          busy: _busy,
+          onCreateNote: _createNote,
+          onCreateFolder: _createFolder,
+          onRename: _rename,
+          onMove: _move,
+          onDelete: _delete,
+        ),
+        const SizedBox(height: 4),
+        Expanded(
+          child: NoteTree(
+            controller: controller,
+            selectedPath: _selected,
+            expanded: _expanded,
+            onToggle: _toggle,
+            onSelect: _select,
           ),
-          const VerticalDivider(width: 1),
-          Expanded(
-            child: _DetailPane(
-              root: controller.root,
-              selectedPath: _selected,
-              selectedIsDir: _selectedIsDir,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
