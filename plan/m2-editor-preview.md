@@ -47,7 +47,7 @@ holds. Run them before anything else is built on top.
 `addTimingsCallback`; loads run off the UI isolate via `Isolate.run`):
 
 | Note | Chars | Load | Steady state per frame | Verdict |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `capitolo_04.md` | 25K | 15 ms | one 22 ms build blip | fine |
 | novel chapter | 297K | 66 ms | **~32 ms every frame** (build ~23 + raster ~8) | "almost smooth, not 100%" = pinned ~30 fps |
 | math notes | 931K | 26 ms | **~100 ms every frame** (build ~78 + raster ~20); 734 ms build on open | "atrocious" = ~10 fps |
@@ -65,7 +65,7 @@ Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
 fixture, desktop host, best-of-N; run it to refresh the numbers).
 
 | Measurement | Value |
-|---|---|
+| --- | --- |
 | Tokenize full buffer (one-time, on open) | 17.4 ms |
 | Incremental tokenize per edit | 0.56 ms |
 | Per-line layout+paint (the line-based paint unit) | 28 µs/line |
@@ -105,6 +105,7 @@ nodes — 2.1 s for 200 KB. The preview must be **windowed**: parse the whole
 document, but build+lay out only the visible block range (a sliver) using the
 package's per-node builders. Never hand a novel-length document to
 `SmoothMarkdown`/`render()` unwindowed.
+
 - [ ] **T-M2-01** Source editor: superseded by sub-plan
   [m2a-line-editor.md](m2a-line-editor.md) (line-based editor, E1–E9),
   confirmed by the T-M2-00 on-device verdict. The plain-`TextField`
