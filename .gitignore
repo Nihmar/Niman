@@ -13,7 +13,7 @@ reference/
 copist-debug-log-*.txt
 .buildlog/
 .history
-
+screenshots/
 
 
 # Flutter repo-specific
