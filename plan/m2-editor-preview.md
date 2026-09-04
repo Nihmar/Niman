@@ -121,7 +121,10 @@ package's per-node builders. Never hand a novel-length document to
 - [ ] **T-M2-04** Preview pipeline: `flutter_markdown_plus` render parsed
   once per change (debounced), lazy block layout; tables, task lists,
   footnotes, strikethrough, code blocks via `flutter_highlight`. *AC:
-  fixture with every extra renders correctly.*
+  fixture with every extra renders correctly.* Conformance corpus:
+  `test/spec.json` — the CommonMark test suite (652 markdown→html
+  examples); run the preview's parsed structure against it as the
+  acceptance test.
 - [ ] **T-M2-05** Math pipeline: extract math spans → `katex_dart` render →
   LRU cache keyed by math string (design.md); placeholder box while rendering;
   same spans highlighted in the editor. *AC: editing a math expression reuses
