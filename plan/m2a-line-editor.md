@@ -72,6 +72,7 @@ copyrighted).
 ## Contract the rest of M2 relies on
 
 So M2's other tasks don't block on editor internals, the editor exposes:
+
 - the flat text buffer (get/set) + a caret line + visible scroll offset;
 - "set caret to line N" (for scroll sync + outline jump);
 - a change stream (for autosave debounce + preview re-parse).
@@ -83,7 +84,7 @@ rendering.
 - [x] **E1** Line buffer model (pure Dart): text↔lines, apply edit
   (insert/delete/replace), caret/offset math, incremental line counts.
   *AC: unit tests — edit ops keep buffer==source; offsets round-trip.*
-- [ ] **E2** Visual-row model + virtualized read-only view: wrap a logical
+- [x] **E2** Visual-row model + virtualized read-only view: wrap a logical
   line into rows; render only visible rows of a large buffer; smooth scroll.
   *AC: headless benchmark — open 931K buffer, steady-state frame build cost
   is O(visible), flat vs file size; scroll a long note without jank.*
@@ -114,7 +115,7 @@ rendering.
 ## Performance budget
 
 - **Keystroke** (steady state, any file size): incremental tokenize (~0.5 ms)
-  + visible-row relayout (~1 ms) ≈ **< 2 ms** UI work; well inside 16 ms.
+  - visible-row relayout (~1 ms) ≈ **< 2 ms** UI work; well inside 16 ms.
 - **Open** a 931K buffer: read off-isolate (~26 ms measured) + build line list
   O(chars) + first visible-row layout O(rows). Target first frame < 100 ms
   (no 734 ms open frame).
@@ -137,4 +138,10 @@ rendering.
   source editor; math and CJK are styled but metrics stay on the mono grid).
   If proportional is ever required, row height becomes per-row and the O(1)
   scroll math needs a cached row-height array — acceptable, still O(visible).
-- **Wrap choice** (word vs column) — decide at E2; both O(line).
+- **Wrap choice** — decided at E2: **column wrap** (hard wrap at the grid
+  width), O(1) row math on the monospace grid. Word wrap is a later visual
+  refinement (a presentation change over the same row model, plus per-row
+  start columns), not a model rewrite.
+- **Row height** — fixed at 21 px (12 px font × 1.75): the integer extent
+  keeps `itemExtent * rowCount` exact in double at any buffer size
+  (fractional extents trip the sliver's even-multiple assertion).
