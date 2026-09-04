@@ -91,10 +91,20 @@ rendering.
 - [x] **E3** Caret + basic keyboard editing on the model: typing, backspace,
   arrows, home/end. *AC: typed/deleted text updates the buffer; caret moves
   correctly; multi-keystroke sequences keep buffer==composed text.*
-- [ ] **E4** IME / composition (the hard one): Android composition +
+- [x] **E4** IME / composition (the hard one): Android composition +
   autocorrect, Linux text input; composition region rendered. *AC: IME works
   on Android + Linux; committing a composition edits the buffer correctly;
   no lost/duplicated input on a long note.*
+  - **E4 core (this commit):** `composing_input.dart` — `ComposingInput`
+    applies the platform's `TextEditingDelta` stream (insertion / deletion /
+    replacement / non-text) to `LineBuffer` in O(change), tracking the
+    composing region, selection and caret so the view can render the IME
+    underline. Lockstep is trusted (the platform is authoritative): a debug
+    O(1) `oldText.length == textLength` assert, no text compare. Property
+    test: 300 randomized edits on a 2000-line note keep the buffer exactly
+    correct (no lost / duplicated input). The `DeltaTextInputClient` bridge
+    and the composing-underline render are the E8 side (view); the model's
+    correctness is verified here.
 - [ ] **E5** Selection + clipboard: tap/drag select (incl. multi-line),
   copy/cut/paste. *AC: select across lines; copy/paste round-trips; cut
   updates buffer + caret.*
