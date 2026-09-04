@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E7 + E-U done; E8a–E8d, E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E7 + E-U done; E8a core done, E8a–E8d on-device + E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -203,6 +203,12 @@ rendering.
   tap/drag hit testing. *AC: typing/backspace/arrows on Android + Linux edit
   the buffer through the real IME; the composing underline tracks the region;
   tap places the caret and drag extends the selection.*
+  - **E8a core (this commit):** the headless-verifiable half — `ImeBridge`
+    (the IME value bridge over `ComposingInput`: computes the `TextEditingValue`
+    to push, forwards the delta stream to `apply`) and `HitTest` (pixel (x,y) →
+    (line, column) over a fold-aware `RowModel`, with the column clamped to the
+    row length). The on-device half (the `DeltaTextInputClient` wrapper, the
+    composing-underline render, the real IME) is pending.
 - [ ] **E8b** Selection + clipboard UI: the selection highlight and copy/cut/
   paste wiring over the E5 model ops. *AC: select across lines; copy/paste
   round-trips; cut updates buffer + caret; the IME is re-synced after a direct
