@@ -41,11 +41,15 @@ List<OutlineEntry> outlineOf(Iterable<StyledLine> lines) {
     if (tokens.isNotEmpty &&
         tokens.first.kind == TokenKind.headingMarker &&
         tokens.first.start == 0) {
+      final marker = tokens.first;
       out.add(
         OutlineEntry(
           line: line,
-          level: tokens.first.end,
-          text: l.text.substring(tokens.first.end).trim(),
+          // The level is the marker's length (number of `#`), not its end
+          // offset — the two only coincide because the marker starts at 0
+          // (checked above).
+          level: marker.end - marker.start,
+          text: l.text.substring(marker.end).trim(),
         ),
       );
     }

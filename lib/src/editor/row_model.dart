@@ -43,8 +43,10 @@ final class RowModel {
   final int columns;
 
   /// The visible logical lines, in order (a strictly increasing subsequence
-  /// of `0..buffer.lineCount - 1`); folded lines are absent.
-  List<int> _lines = const <int>[];
+  /// of `0..buffer.lineCount - 1`); folded lines are absent. `null` means
+  /// every line is visible — the common no-fold case, kept as a null sentinel
+  /// so [sync] does not materialize an identity list.
+  List<int>? _lines;
 
   /// For each visible position p, the first visual row of line `_lines[p]`;
   /// `_rowStarts.last` is the total row count.
@@ -53,11 +55,14 @@ final class RowModel {
   /// The total number of visual rows (over the visible lines).
   int get rowCount => _rowStarts.last;
 
-  /// The visible logical lines, in order.
-  List<int> get lines => List.unmodifiable(_lines);
+  /// The visible logical lines, in order. Materializes an identity list when
+  /// every line is visible (the common case); otherwise an unmodifiable view.
+  List<int> get lines => _lines == null
+      ? List<int>.generate(buffer.lineCount, (i) => i)
+      : List.unmodifiable(_lines!);
 
   /// The number of visible lines.
-  int get visibleLineCount => _lines.length;
+  int get visibleLineCount => _lines?.length ?? buffer.lineCount;
 
   /// The first visual row of logical line [line], which must be visible.
   int rowOfLine(int line) {
@@ -75,14 +80,19 @@ final class RowModel {
   (int, int) lineAndStartColumn(int row) {
     _requireRange(row, 0, rowCount - 1, 'row');
     final p = _posAtRow(row);
-    return (_lines[p], (row - _rowStarts[p]) * columns);
+    final lines = _lines;
+    final line = lines == null ? p : lines[p];
+    return (line, (row - _rowStarts[p]) * columns);
   }
 
   /// Re-wraps, treating every line of [buffer] as visible (clears any
-  /// [setLines] restriction). O(lines) — reads line lengths only. Call after
-  /// a [LineBuffer] edit when there are no folds.
+  /// [setLines] restriction). O(lines) — reads line lengths only, with a
+  /// single allocation (the row layout); the all-visible state is the null
+  /// sentinel, not a materialized list. Call after a [LineBuffer] edit when
+  /// there are no folds.
   void sync() {
-    setLines(List<int>.generate(buffer.lineCount, (i) => i));
+    _lines = null;
+    _wrap();
   }
 
   /// Restricts the model to the visible logical [lines] (a strictly
@@ -105,20 +115,25 @@ final class RowModel {
   }
 
   void _wrap() {
-    final n = _lines.length;
+    final lines = _lines;
+    final n = lines == null ? buffer.lineCount : lines.length;
     _rowStarts = List<int>.filled(n + 1, 0);
     var row = 0;
     for (var p = 0; p < n; p++) {
-      final len = buffer.lineLength(_lines[p]);
+      final line = lines == null ? p : lines[p];
+      final len = buffer.lineLength(line);
       row += len <= columns ? 1 : (len + columns - 1) ~/ columns;
       _rowStarts[p + 1] = row;
     }
   }
 
-  /// The visible position of logical line [line] (O(log lines)), or -1 if the
-  /// line is folded.
+  /// The visible position of logical line [line], or -1 if the line is
+  /// folded. O(1) when every line is visible, O(log lines) otherwise.
   int _posOfLine(int line) {
     final lines = _lines;
+    if (lines == null) {
+      return line >= 0 && line < buffer.lineCount ? line : -1;
+    }
     var lo = 0;
     var hi = lines.length;
     while (hi - lo > 0) {
