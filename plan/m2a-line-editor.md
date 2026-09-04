@@ -122,6 +122,17 @@ rendering.
 - [ ] **E6** Folding (with T-M2-07 outline): folded line ranges omitted from
   layout; fold/unfold; outline click → jump. *AC: folding a heading hides its
   rows; scrolling past a fold is correct; outline lands on the heading.*
+  - **E6a (this commit):** `outline.dart` + `folding.dart` (pure model).
+    `outlineOf(tokenizer lines)` derives headings from the tokenizer's
+    `headingMarker` token (so a `#` in a code fence / math / frontmatter is
+    not a heading — the outline matches the highlighted headings). `FoldState`
+    maps a set of folded heading lines to the hidden line ranges: a folded
+    heading on line L (level k) hides `[L+1, terminus)` where terminus is the
+    next same-or-higher heading (O(h) monotonic-stack scan); the ranges are
+    merged, so `isLineVisible(line)` is a binary search and `visibleLines()`
+    is the ordered visible set the `RowModel` wraps. The fold anchors, the
+    fold markers / outline panel and outline-click → jump are the E8 side
+    (view); the layout skipping the rows is E6b (fold-aware `RowModel`).
 - [ ] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
   and paint styled rows; math spans styled. *AC: tokens/math visually
   distinct; no per-frame re-tokenize of the whole file (only visible rows).*
