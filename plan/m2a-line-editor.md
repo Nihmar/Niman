@@ -88,7 +88,7 @@ rendering.
   line into rows; render only visible rows of a large buffer; smooth scroll.
   *AC: headless benchmark — open 931K buffer, steady-state frame build cost
   is O(visible), flat vs file size; scroll a long note without jank.*
-- [ ] **E3** Caret + basic keyboard editing on the model: typing, backspace,
+- [x] **E3** Caret + basic keyboard editing on the model: typing, backspace,
   arrows, home/end. *AC: typed/deleted text updates the buffer; caret moves
   correctly; multi-keystroke sequences keep buffer==composed text.*
 - [ ] **E4** IME / composition (the hard one): Android composition +
@@ -145,3 +145,9 @@ rendering.
 - **Row height** — fixed at 21 px (12 px font × 1.75): the integer extent
   keeps `itemExtent * rowCount` exact in double at any buffer size
   (fractional extents trip the sliver's even-multiple assertion).
+- **Caret space** — decided at E3: the caret is a full-text offset in the
+  same position space as `LineBuffer`; `LineEditor` (the editing session)
+  owns the buffer + caret and fires a change stream for autosave/preview.
+  Up/down move by *logical* line (column clamped to the target line); the
+  wrapped visual-row geometry stays a view concern (E2/E8), so `LineEditor`
+  is deliberately independent of `RowModel`.
