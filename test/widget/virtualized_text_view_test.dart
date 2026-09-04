@@ -5,6 +5,7 @@
 
 import 'dart:io';
 
+import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/line_buffer.dart';
 import 'package:copist/src/editor/row_model.dart';
 import 'package:copist/src/editor/virtualized_text_view.dart';
@@ -32,6 +33,30 @@ void main() {
     // The 60-char line wraps into two identical 30-char rows.
     expect(find.text('b' * 30), findsNWidgets(2));
     expect(find.text('gamma'), findsOneWidget);
+  });
+
+  testWidgets('paints styled runs (rich text) when a highlight is given', (
+    tester,
+  ) async {
+    final buffer = LineBuffer.fromText('# A\n**b** c\nd');
+    final model = RowModel(buffer, columns: 40);
+    final highlighter = Highlighter()..sync(buffer);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: VirtualizedTextView(
+            model: model,
+            highlight: highlighter.document,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // The styled path reassembles each visible row from its tokens (rich
+    // text), showing the full line.
+    expect(find.text('# A', findRichText: true), findsOneWidget);
+    expect(find.text('**b** c', findRichText: true), findsOneWidget);
   });
 
   testWidgets('renders only viewport-bounded rows of a 1 MB buffer', (

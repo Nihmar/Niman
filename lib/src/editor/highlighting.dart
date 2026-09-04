@@ -188,8 +188,11 @@ final class _State {
   int get hashCode {
     final f = fence;
     return Object.hash(
-        f == null ? -1 : f.char, f == null ? -2 : f.len,
-        inMath, inFrontmatter);
+      f == null ? -1 : f.char,
+      f == null ? -2 : f.len,
+      inMath,
+      inFrontmatter,
+    );
   }
 }
 
@@ -229,7 +232,16 @@ final class HighlightDocument {
   /// The current display text (lines joined with `\n`).
   String get text => _lines.map((l) => l.text).join('\n');
 
-  /// The styled lines.
+  /// The number of lines (O(1)).
+  int get lineCount => _lines.length;
+
+  /// Line [line]'s styled content (O(1)); [line] in 0..lineCount-1. This is
+  /// the per-visible-line accessor the editor view uses, in place of [lines]
+  /// (which is O(lineCount) and would break the "only visible rows" budget).
+  StyledLine lineAt(int line) =>
+      StyledLine(_lines[line].text, _lines[line].tokens);
+
+  /// The styled lines (all of them; O(lineCount)).
   List<StyledLine> get lines =>
       _lines.map((l) => StyledLine(l.text, l.tokens)).toList();
 
@@ -263,7 +275,8 @@ final class HighlightDocument {
     final kept = lastOffset > _lines[last].text.length
         ? _lines[last].text.length
         : lastOffset;
-    final suffix = _lines[last].text.substring(kept) +
+    final suffix =
+        _lines[last].text.substring(kept) +
         (eatsSeparator && last + 1 < _lines.length
             ? _lines[last + 1].text
             : '');
@@ -299,8 +312,7 @@ final class HighlightDocument {
   }
 
   static void _tokenizeAt(List<_Line> lines, int index, _Line line) {
-    final entering =
-        index == 0 ? _State.initial : lines[index - 1].exit;
+    final entering = index == 0 ? _State.initial : lines[index - 1].exit;
     line.entering = entering;
     line.exit = _stateAfter(line.text, entering, index);
     line.tokens = _lineTokens(line.text, entering, index);
@@ -498,8 +510,9 @@ final class HighlightDocument {
                 text.codeUnitAt(from + 1) == 0x78 ||
                 text.codeUnitAt(from + 1) == 0x58) &&
             text.codeUnitAt(from + 2) == 0x5D) {
-          final afterBox =
-              from + 3 < text.length ? text.codeUnitAt(from + 3) : -1;
+          final afterBox = from + 3 < text.length
+              ? text.codeUnitAt(from + 3)
+              : -1;
           if (afterBox == -1 || _isSpaceChar(afterBox)) {
             tokens.add(Token(TokenKind.taskBox, from, from + 3));
             from += 3;
@@ -517,8 +530,9 @@ final class HighlightDocument {
     return tokens;
   }
 
-  static final RegExp _hr =
-      RegExp(r'^\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$');
+  static final RegExp _hr = RegExp(
+    r'^\s{0,3}((?:-{3,})|(?:\*{3,})|(?:_{3,}))\s*$',
+  );
 }
 
 /// All math spans in [text], absolute offsets, markers included.
@@ -567,11 +581,13 @@ List<MathSpan> mathSpansIn(String text) {
     if (inMath) {
       if (trimmed.startsWith(r'$$')) {
         final indent = line.length - line.trimLeft().length;
-        spans.add(MathSpan(
-          mathStart,
-          lineStart + indent + 2,
-          block: true,
-        ));
+        spans.add(
+          MathSpan(
+            mathStart,
+            lineStart + indent + 2,
+            block: true,
+          ),
+        );
         inMath = false;
       } else if (i == lines.length - 1) {
         spans.add(MathSpan(mathStart, lineEnd, block: true));
@@ -582,11 +598,13 @@ List<MathSpan> mathSpansIn(String text) {
     if (trimmed.startsWith(r'$$')) {
       if (_isSingleLineMathPub(trimmed)) {
         final indent = line.length - line.trimLeft().length;
-        spans.add(MathSpan(
-          lineStart + indent,
-          lineStart + indent + trimmed.length,
-          block: true,
-        ));
+        spans.add(
+          MathSpan(
+            lineStart + indent,
+            lineStart + indent + trimmed.length,
+            block: true,
+          ),
+        );
       } else {
         inMath = true;
         mathStart = lineStart + (line.length - line.trimLeft().length);
@@ -602,17 +620,10 @@ List<MathSpan> mathSpansIn(String text) {
 }
 
 bool _isSingleLineMathPub(String trimmed) =>
-    trimmed.length >= 4 &&
-    trimmed.startsWith(r'$$') &&
-    trimmed.endsWith(r'$$');
+    trimmed.length >= 4 && trimmed.startsWith(r'$$') && trimmed.endsWith(r'$$');
 
 bool _isSpaceChar(int c) =>
-    c == 0x20 ||
-    c == 0x09 ||
-    c == 0x0A ||
-    c == 0x0B ||
-    c == 0x0C ||
-    c == 0x0D;
+    c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0B || c == 0x0C || c == 0x0D;
 
 /// `$…$` at/after [from] under the inline-math rules.
 (int, int)? _findMath(String line, int from) {
@@ -813,7 +824,8 @@ final class _InlineScanner {
     while (pos < line.length) {
       final m = _first(_italicUnder, line, pos);
       if (m == null) return null;
-      final okBefore = m.start == 0 ||
+      final okBefore =
+          m.start == 0 ||
           !(_isWord(line.codeUnitAt(m.start - 1)) ||
               line.codeUnitAt(m.start - 1) == 0x5F);
       final afterCh = m.end < line.length ? line.codeUnitAt(m.end) : -1;

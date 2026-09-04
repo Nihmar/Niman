@@ -1,22 +1,30 @@
+import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/row_model.dart';
+import 'package:copist/src/editor/styled_runs.dart';
 import 'package:flutter/material.dart';
 
 /// Read-only, virtualized text view over a [RowModel].
 ///
 /// Renders only the visual rows inside the viewport (plus a little sliver
 /// cache): a frame's build cost is O(visible rows), flat in the buffer size.
-/// This is the baseline the line-based editor is built on (M2a E2); caret,
-/// selection and highlighting land on top in later milestones.
+/// When [highlight] is given, each visible row is painted with the styled
+/// runs of its tokens (M2a E7); otherwise the row's text is plain.
 final class VirtualizedTextView extends StatelessWidget {
-  /// Creates the view over [model].
+  /// Creates the view over [model], optionally highlighting with [highlight].
   const VirtualizedTextView({
     required this.model,
+    this.highlight,
     this.scrollController,
     super.key,
   });
 
   /// The wrapped buffer this view renders.
   final RowModel model;
+
+  /// The styled document to paint from, or null for plain text. The caller
+  /// keeps it in sync with the buffer; this view only reads the visible
+  /// lines (never the whole document).
+  final HighlightDocument? highlight;
 
   /// Optional scroll controller (scroll sync and caret jumps).
   final ScrollController? scrollController;
@@ -36,6 +44,7 @@ final class VirtualizedTextView extends StatelessWidget {
   Widget build(BuildContext context) {
     final buffer = model.buffer;
     final columns = model.columns;
+    final highlight = this.highlight;
     return CustomScrollView(
       controller: scrollController,
       slivers: [
@@ -48,16 +57,30 @@ final class VirtualizedTextView extends StatelessWidget {
               final end = startCol + columns;
               return Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Text(
-                  text.substring(
-                    startCol,
-                    end > text.length ? text.length : end,
-                  ),
-                  style: _style,
-                  softWrap: false,
-                  overflow: TextOverflow.clip,
-                  maxLines: 1,
-                ),
+                child: highlight == null
+                    ? Text(
+                        text.substring(
+                          startCol,
+                          end > text.length ? text.length : end,
+                        ),
+                        style: _style,
+                        softWrap: false,
+                        overflow: TextOverflow.clip,
+                        maxLines: 1,
+                      )
+                    : Text.rich(
+                        TextSpan(
+                          style: _style,
+                          children: styledRuns(
+                            highlight.lineAt(line),
+                            startCol,
+                            end,
+                          ),
+                        ),
+                        softWrap: false,
+                        overflow: TextOverflow.clip,
+                        maxLines: 1,
+                      ),
               );
             },
             childCount: model.rowCount,

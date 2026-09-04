@@ -27,6 +27,8 @@ final class LineBuffer {
 
   List<String> _lines = <String>[''];
   List<int> _lineStarts = const <int>[];
+  int _edits = 0;
+  EditRegion? _lastEdit;
 
   /// Whether the buffer holds no text at all.
   bool get isEmpty => textLength == 0;
@@ -36,6 +38,16 @@ final class LineBuffer {
 
   /// The full text length in UTF-16 code units, line breaks included.
   int get textLength => _lineStarts.last + _lines.last.length;
+
+  /// Number of [replace]s applied (monotonically increasing) — the
+  /// "the text changed" signal a derived cache (the highlighter) syncs on.
+  /// No-op replaces, and selection-only changes (which never reach the
+  /// buffer), do not advance it.
+  int get editCount => _edits;
+
+  /// The region of the last [replace], or null until the first edit. Lets a
+  /// derived cache apply the edit incrementally instead of rescanning.
+  EditRegion? get lastEdit => _lastEdit;
 
   /// The full text: lines joined with `\n`.
   ///
@@ -103,6 +115,8 @@ final class LineBuffer {
       );
     }
     _resetPositions();
+    _lastEdit = EditRegion(start, end, insertion);
+    _edits++;
   }
 
   /// Inserts [text] at full-text offset [offset].
@@ -166,4 +180,21 @@ final class LineBuffer {
     }
     return low;
   }
+}
+
+/// The region of a single [LineBuffer.replace]: [start)..[end) replaced by
+/// [text]. Recorded on the buffer so derived caches (the highlighter) can
+/// apply the edit incrementally instead of rescanning the text.
+final class EditRegion {
+  /// Creates the edit region [start)..[end) replaced by [text].
+  const EditRegion(this.start, this.end, this.text);
+
+  /// Full-text offset of the first removed character.
+  final int start;
+
+  /// Full-text offset one past the last removed character.
+  final int end;
+
+  /// The text that replaced [start)..[end).
+  final String text;
 }
