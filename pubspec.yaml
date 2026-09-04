@@ -33,6 +33,7 @@ dependencies:
   flutter_secure_storage: ^11.0.0
 
   # Pure-Dart KaTeX for math; spec coverage is verified in M2.
+  flutter_smooth_markdown: 0.8.1
   katex_dart: ^0.1.1
 
   # Filesystem location for the library root.
