@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Entrypoint of the Copist application.
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   _reportSlowFrames();
   runApp(const ProviderScope(child: CopistApp()));
 }
