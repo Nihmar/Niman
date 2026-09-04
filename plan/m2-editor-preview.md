@@ -31,7 +31,18 @@ holds. Run them before anything else is built on top.
   the spec asserts is fine but nothing has verified. *AC: a decision
   recorded here with the measurement behind it.*
 
-### T-M2-00 decision: custom, line-based editor (measured)
+### T-M2-00 decision: editor architecture (measured; selection pending device check)
+
+> **Status (on-device check in progress).** The measurement below is a
+> headless `TextPainter` proxy, and "perceptible jank" is a judgment to
+> make on a real device. So the first testable build ships the **plain,
+> monolithic `TextField`** editor (free caret/IME/selection, zero custom
+> code — `lib/src/editor/source_editor.dart`) and we feel it on Android and
+> Linux on a novel-length note (`tool/make_perf_note.dart` drops a 200 KB
+> note into a library). If it's acceptable, the whole custom caret/IME/IME
+> stack is avoided; if it janks, we switch to the line-based editor below.
+> The tokenizer (T-M2-02) is display-only and works with **either** choice,
+> so nothing is wasted.
 
 Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
 fixture, desktop host, best-of-N; run it to refresh the numbers).
@@ -46,10 +57,10 @@ fixture, desktop host, best-of-N; run it to refresh the numbers).
 | Preview parse (`MarkdownParser` only) | 12.5 ms |
 | Preview eager full render (parse+build+layout+paint) | 2129 ms |
 
-**Decision: the editor is a custom, line-based widget, not Flutter's
-monolithic `EditableText`/`TextField`.**
+**Proposed decision if the plain field janks: a custom, line-based widget,
+not Flutter's monolithic `EditableText`/`TextField`.**
 
-Measurement-driven rationale:
+Measurement-driven rationale (the case for the fallback):
 
 1. **A monolithic field janks on novel-length.** `RenderEditable` holds the
    whole buffer as one text and re-lays-out the entire thing on every

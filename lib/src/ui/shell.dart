@@ -5,6 +5,7 @@ import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/trash.dart';
@@ -296,7 +297,12 @@ final class _LibraryShellState extends State<_LibraryShell> {
             ),
           ),
           const VerticalDivider(width: 1),
-          Expanded(child: _DetailPane(selectedPath: _selected)),
+          Expanded(
+            child: _DetailPane(
+              selectedPath: _selected,
+              selectedIsDir: _selectedIsDir,
+            ),
+          ),
         ],
       ),
     );
@@ -364,38 +370,20 @@ final class _ActionBar extends StatelessWidget {
   }
 }
 
-/// Right-hand pane; the M2 editor/preview replaces this placeholder.
+/// Right-hand pane: the note editor, or a prompt until a note is chosen.
 final class _DetailPane extends StatelessWidget {
-  const _DetailPane({required this.selectedPath});
+  const _DetailPane({required this.selectedPath, required this.selectedIsDir});
 
   final String? selectedPath;
+  final bool selectedIsDir;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (selectedPath == null) {
+    final path = selectedPath;
+    if (path == null || selectedIsDir) {
       return const Center(child: Text('Select a note'));
     }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            p.basename(selectedPath!),
-            style: theme.textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            selectedPath!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text('The editor and preview arrive in M2'),
-        ],
-      ),
-    );
+    return NoteView(path: path);
   }
 }
 
