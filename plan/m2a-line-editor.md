@@ -74,8 +74,10 @@ copyrighted).
   composition are applied as edits to the line list. This is where Android
   composition/autocorrect and Linux input live — the riskiest surface, so it
   is its own milestone (E4) before selection polish.
-- **Undo/redo:** stack of line-list edits (insert/delete/replace ranges).
-  Bounded depth. (Can be a later milestone if it threatens E1–E6.)
+- **Undo/redo:** stack of line-list edits (insert/delete/replace ranges),
+  bounded depth — scheduled as its own milestone (E-U) before E8d, which
+  removes the `TextField` baseline that provided undo for free, so M2a does
+  not ship with a lost feature.
 
 ## Contract the rest of M2 relies on
 
@@ -160,6 +162,15 @@ rendering.
 - [ ] **E7** Highlighting integration: per visible line, tokenize (T-M2-02)
   and paint styled rows; math spans styled. *AC: tokens/math visually
   distinct; no per-frame re-tokenize of the whole file (only visible rows).*
+- [ ] **E-U** Undo/redo (model): the line-list edit stack on `ComposingInput`
+  — insert/delete/replace ranges, bounded depth, with `undo`/`redo` ops that
+  restore the exact buffer + caret and fire the change stream. *AC: a sequence
+  of edits (typing, IME deltas, cut/paste) can be undone and redone to restore
+  the exact buffer + caret; the stack is bounded (oldest edits dropped first);
+  undo/redo of a direct edit re-syncs the IME (no lost input).* Placed before
+  E8d (which removes the `TextField` baseline that provided undo for free) so
+  M2a does not ship with a lost feature; the undo/redo buttons + shortcuts are
+  the E8a view side.
 - [ ] **E8a** Input view: the `DeltaTextInputClient` bridge over
   `ComposingInput` (receive deltas → `apply`; push `value` +
   `commitDirectEdit` after a direct edit), the composing-underline render, and
