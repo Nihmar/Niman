@@ -36,6 +36,7 @@ dependencies:
   katex_dart: ^0.1.1
 
   # Filesystem location for the library root.
+  meta: ^1.19.0
   path: ^1.9.1
   path_provider: ^2.1.6
 
