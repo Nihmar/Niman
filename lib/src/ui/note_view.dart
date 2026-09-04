@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/source_editor.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +38,8 @@ final class NoteView extends StatefulWidget {
 
 final class _NoteViewState extends State<NoteView>
     with WidgetsBindingObserver {
+  static const AppLogger _log = AppLogger(name: 'editor');
+
   late final TextEditingController _controller;
   late final FocusNode _focus;
   bool _loading = true;
@@ -91,18 +94,24 @@ final class _NoteViewState extends State<NoteView>
       _error = null;
       _dirty = false;
     });
+    final clock = Stopwatch()..start();
     try {
       final content = await _read(path);
       if (!mounted || widget.path != path) return;
       _controller.text = content;
       _controller.selection = const TextSelection.collapsed(offset: 0);
       setState(() => _loading = false);
+      _log.info(
+        'note loaded: $path (${content.length} chars, '
+        '${clock.elapsedMilliseconds} ms)',
+      );
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _error = '$error';
       });
+      _log.error('note load failed: $path ($error)');
     }
   }
 
@@ -128,9 +137,14 @@ final class _NoteViewState extends State<NoteView>
     final target = path ?? widget.path;
     final text = content ?? _controller.text;
     _saving = true;
+    final clock = Stopwatch()..start();
     try {
       await _write(target, text);
       _dirty = false;
+      _log.info(
+        'note saved: $target (${text.length} chars, '
+        '${clock.elapsedMilliseconds} ms)',
+      );
     } finally {
       _saving = false;
       if (mounted) setState(() {});
