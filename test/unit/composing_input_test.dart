@@ -172,6 +172,59 @@ void main() {
     });
   });
 
+  group('direct edits and IME lockstep', () {
+    test('a direct edit followed by commitDirectEdit applies deltas normally',
+            () {
+      final input = ComposingInput('old');
+      const delta = TextEditingDeltaInsertion(
+        oldText: 'new',
+        textInserted: '!',
+        insertionOffset: 3,
+        selection: TextSelection.collapsed(offset: 4),
+        composing: TextRange.empty,
+      );
+      input
+        ..reset('new') // buffer = 'new', pending IME resync
+        ..commitDirectEdit() // the view pushed `value` to the IME
+        ..apply(delta);
+      expect(input.text, 'new!'); // delta applied, no re-anchor
+    });
+
+    test('a direct edit without commitDirectEdit re-anchors (no corruption)',
+            () {
+      final input = ComposingInput('old');
+      const delta = TextEditingDeltaInsertion(
+        oldText: 'old',
+        textInserted: '?',
+        insertionOffset: 3,
+        selection: TextSelection.collapsed(offset: 4),
+        composing: TextRange.empty,
+      );
+      // The IME was never re-synced, so the delta is relative to its stale
+      // copy ('old'): apply re-anchors to it (the 'new' edit is lost, but the
+      // text is not corrupted).
+      input..reset('new')..apply(delta);
+      expect(input.text, 'old?');
+    });
+
+    test('paste (replaceSelection) is a direct edit too', () {
+      final input = ComposingInput('say hi');
+      const delta = TextEditingDeltaInsertion(
+        oldText: 'say yo',
+        textInserted: '!',
+        insertionOffset: 6,
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange.empty,
+      );
+      input
+        ..setSelection(const TextSelection(baseOffset: 4, extentOffset: 6))
+        ..replaceSelection('yo') // buffer = 'say yo', pending resync
+        ..commitDirectEdit()
+        ..apply(delta);
+      expect(input.text, 'say yo!');
+    });
+  });
+
   group('revision', () {
     test('advances only on text changes', () {
       final input = ComposingInput('a');

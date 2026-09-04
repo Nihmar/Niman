@@ -54,6 +54,13 @@ final class ComposingInput {
   TextRange _composing;
   int _revision = 0;
 
+  /// Whether a direct edit ([reset], [deleteSelection], [replaceSelection]) is
+  /// awaiting [commitDirectEdit] — i.e. the IME may still be out of lockstep
+  /// with the buffer. [apply] re-anchors when this is set, so a forgotten
+  /// [commitDirectEdit] loses the pending edit instead of silently corrupting
+  /// the text (the same-length case the length assert below cannot catch).
+  bool _needsImeSync = false;
+
   /// The buffer this client edits (the note's source of truth).
   LineBuffer get buffer => _buffer;
 
@@ -105,8 +112,22 @@ final class ComposingInput {
 
   /// Applies a platform [delta] to the buffer, selection and composing region.
   ///
+  /// Returns `true` when the client must push a full [value] update to re-sync
+  /// the IME (an unrecognized delta type), otherwise `false`.
+  ///
   /// See the class docs for the lockstep invariant this relies on.
-  void apply(TextEditingDelta delta) {
+  bool apply(TextEditingDelta delta) {
+    if (_needsImeSync) {
+      // A direct edit (reset/cut/paste) was not followed by
+      // [commitDirectEdit], so the IME's copy may be stale and this delta's
+      // offsets are relative to it, not to the buffer. Re-anchor the buffer to
+      // the platform's copy (delta.oldText) so the delta applies on the right
+      // base: the pending direct edit is lost, but the delta (the latest
+      // input) is preserved and lockstep is restored — the difference between
+      // a lost paste and a silently corrupting text.
+      _buffer.replace(0, _buffer.textLength, delta.oldText);
+      _needsImeSync = false;
+    }
     assert(
       delta.oldText.length == _buffer.textLength,
       'input client is out of lockstep with the IME; programmatic edits must '
@@ -124,13 +145,24 @@ final class ComposingInput {
           delta.replacementText,
         );
       case TextEditingDeltaNonTextUpdate():
-        return _setMeta(delta);
+        _setMeta(delta);
+        return false;
       default:
+        // An unrecognized delta type (a future Flutter addition) cannot be
+        // applied incrementally. Don't drop it silently (lost input): apply
+        // the metadata, re-anchor to the platform's last known-good copy, and
+        // tell the client to push a full [value] update so lockstep is
+        // restored. The one edit this delta carried is lost; later input is
+        // correct.
         assert(false, 'unhandled delta: ${delta.runtimeType}');
-        return;
+        _buffer.replace(0, _buffer.textLength, delta.oldText);
+        _revision++;
+        _setMeta(delta);
+        return true;
     }
     _revision++;
     _setMeta(delta);
+    return false;
   }
 
   /// Re-anchors the client to [text] after a programmatic change (loading a
@@ -144,7 +176,16 @@ final class ComposingInput {
     _selection = selection ?? const TextSelection.collapsed(offset: 0);
     _composing = TextRange.empty;
     _revision++;
+    _needsImeSync = true;
     _notify();
+  }
+
+  /// The view has pushed [value] to the IME after a direct edit ([reset],
+  /// [deleteSelection], [replaceSelection]), so the IME is back in lockstep
+  /// with the buffer. Clears the pending [apply] re-anchor. Call it every time
+  /// you push [value] following one of those methods.
+  void commitDirectEdit() {
+    _needsImeSync = false;
   }
 
   /// Programmatically sets the selection (a collapsed selection is the caret).
@@ -202,13 +243,14 @@ final class ComposingInput {
     _selection = TextSelection.collapsed(offset: s.start);
     _composing = TextRange.empty;
     _revision++;
+    _needsImeSync = true;
     _notify();
     return removed;
   }
 
   /// Replaces the current selection with [text] (a paste / replace), or
-  /// inserts it at the caret when nothing is selected, leaving the caret
-  /// after the inserted text.
+  /// inserts it at the caret when nothing is selected (at offset zero when
+  /// there is no caret), leaving the caret after the inserted text.
   ///
   /// Like [deleteSelection], this mutates the buffer directly and breaks
   /// delta lockstep; the caller re-syncs the IME with a full [value] update.
@@ -220,6 +262,7 @@ final class ComposingInput {
     _selection = TextSelection.collapsed(offset: start + text.length);
     _composing = TextRange.empty;
     _revision++;
+    _needsImeSync = true;
     _notify();
   }
 
