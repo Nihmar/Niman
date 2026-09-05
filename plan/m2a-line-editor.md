@@ -304,10 +304,44 @@ rendering.
     (no typing this round). Feedback fixed: long-press word selection
     (missing) + theme-aware caret color (hardcoded black, invisible on the
     dark theme).
-  - Pending (on-device, user-driven): round 2 — open the 931K note, type a
-    few characters (to capture the `keystroke:` lines), long-press a word
-    and drag to extend, scroll; export the log and check "no sustained slow
-    frames; scroll inside frame budget".
+  - On-device round 2 (2026-09-05, user, Android, small note + 931K note):
+    typing fast on the small note, but (a) the caret looked off by one
+    char, (b) the caret was flimsy (1px), (c) the keyboard showed a
+    checkmark instead of Enter, (d) the selection behaved like the finger
+    was a cursor — after long-pressing 8 chars and tapping elsewhere, the
+    next letter overwrote those 8, and (e) the 931K-note session ended in a
+    "crash": three ~2.03s vsync stalls around one keystroke + one save, no
+    ERROR lines, session dies. Root causes found from the logs + code:
+    (a/d) **the gesture path never pushed its new selection to the IME** —
+    tap/long-press/drag edited the `ComposingInput` but the platform kept
+    the stale selection, so the next keystroke edited that stale selection
+    (the 8-char overwrite; the "off by one" caret lands where the IME's
+    copy still pointed); (c) the IME was attached with the default
+    single-line `TextInputConfiguration` (checkmark = the "done" action);
+    (e) the app's own save fires the file watcher, whose batch path
+    (`Indexer._reconcile`/`_upsertFile`/`_ensureDirChain`) ran blocking
+    `existsSync`/`statSync` on the UI isolate — on Android each stat is a
+    FUSE round trip that takes seconds cold, hence the ~2.03s stalls (the
+    same ANR rule the M1 plan already enforces for scans); plus the wrap
+    width was a fixed 80 columns while the phone viewport shows ~55–60,
+    clipping long lines and parking the caret off-screen. All fixed this
+    round: gesture changes push to the IME (and only when changed),
+    `TextInputType.multiline`, 2px caret, viewport-derived wrap width
+    (capped at the `columns` param), and the indexer's event path probes
+    disk on a background isolate (`probePaths` via `Isolate.run`, one batch
+    per event/chain); a `CrashReporter` (main.dart) now records uncaught
+    errors to the log buffer AND persists a `copist-crash-<stamp>.txt`
+    (buffer + stack) into the open library, so a crash no longer loses the
+    evidence; more `AppLogger` diagnostics everywhere on the hot path
+    (per-delta IME lines with the platform's oldText size, gesture pixel→
+    offset→selection lines, IME push/focus lines, save start/encode/write
+    phases, lifecycle lines).
+  - Pending (on-device, user-driven): round 3 — open the 931K note, type a
+    few characters (capturing the `ime delta:`/`ime push:`/`keystroke:`
+    lines), long-press a word + drag to extend, then type (the overwrite
+    must now land in the selection, not 8 chars away), scroll; export the
+    log (and any `copist-crash-*.txt` if it still dies) and check "no
+    sustained slow frames; scroll inside frame budget".
 
 ## Performance budget
 
