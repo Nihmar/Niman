@@ -255,7 +255,9 @@ rendering.
     the focus-gated steady caret (a `Focus` widget + the `hasFocus` gate; the
     caret hides while the IME is mid-composition, where the underline takes
     over), and the tap/drag gestures (a `GestureDetector` over the text drives
-    `EditorGestures`: tap = caret, drag = selection; the selection highlight is
+    `EditorGestures`: tap = caret, long-press = word selection (a persistent
+    selection, cleared by a tap; a drag extends it), drag = selection; the
+    selection highlight is
     painted by the `CaretPainter` via the new `CaretGeometry.selectionRects`).
     The caret scroll sync (sub-step 5) is done: the editor scrolls to keep the
     caret's row visible (above → top, below → bottom). The NoteView wiring is
@@ -268,10 +270,11 @@ rendering.
     stripped on load (the line editor is line-based) and the save writes LF;
     restoring the file's original line ending on save is a deferred
     refinement (record it per note). Deferred: the caret blink (an
-    `AnimationController` refinement), the persistent selection (the drag-end
-    currently collapses per the E8a contract) + the vertical-scroll-vs-select
-    disambiguation. The E8d AC "edit, close, persisted" now holds
-    (byte-identical to the buffer = LF).
+    `AnimationController` refinement), the plain-drag persistent selection
+    (the *drag* flow's drag-end still collapses per the E8a contract; the
+    long-press selection persists after release, cleared by a tap) + the
+    vertical-scroll-vs-select disambiguation. The E8d AC "edit, close,
+    persisted" now holds (byte-identical to the buffer = LF).
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
   scenario on the real 931K + 297K notes, and microbenchmark a keystroke
   (apply N single-character deltas to 1K / 10K / 100K-line buffers). *AC: no
@@ -293,9 +296,18 @@ rendering.
     top/bottom in X ms`), one on init (`editor ready: ... rows in X ms`);
     `NoteView` already logs note load/save (chars + ms). All exportable from
     the settings-screen log buffer (`AppLog.dump()`).
-  - Pending (on-device, user-driven): open the real 931K + 297K notes in the
-    instrumented build, type/scroll, export the log, and check "no sustained
-    slow frames; scroll inside frame budget".
+  - On-device round 1 (2026-09-05, user, Android): opened the real
+    55K/296K/931K notes in the instrumented build — opening + switching fast
+    (load 10/15/37 ms, editor ready 0.01/0.18/0.28 ms), no sustained slow
+    frames (one borderline 20–27 ms frame per open = the note's first editor
+    frame; the ~111 ms slow frames are app startup). Keystrokes not covered
+    (no typing this round). Feedback fixed: long-press word selection
+    (missing) + theme-aware caret color (hardcoded black, invisible on the
+    dark theme).
+  - Pending (on-device, user-driven): round 2 — open the 931K note, type a
+    few characters (to capture the `keystroke:` lines), long-press a word
+    and drag to extend, scroll; export the log and check "no sustained slow
+    frames; scroll inside frame budget".
 
 ## Performance budget
 
