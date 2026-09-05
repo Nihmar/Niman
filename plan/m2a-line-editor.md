@@ -242,6 +242,18 @@ rendering.
     painter see a stray character) or strip `\r` on load and restore the
     file's line ending on save (record it per note). Decide before the first
     save.
+  - **E8d on-device progress (this branch):** the `NoteEditor` widget carries
+    E8a's on-device IME half — the `DeltaTextInputClient` bridge over
+    `ComposingInput` via `TextInput.attach`/`show` on focus + a
+    `setEditingState` resync after a direct edit — plus the caret +
+    composing-underline geometry (`CaretGeometry` + `offsetToRowColumn`), the
+    `CaretPainter` (draws the geometry), the overlay on the view (a `Stack` +
+    `CustomPaint` + a `scrollOffset` so the caret scrolls with the text), and
+    the focus-gated steady caret (a `Focus` widget + the `hasFocus` gate; the
+    caret hides while the IME is mid-composition, where the underline takes
+    over). Deferred: the caret blink (an `AnimationController` refinement),
+    the tap/drag gesture recognizers (E8a's on-device gesture half), and the
+    scroll/caret sync + autosave (the E8d AC).
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
   scenario on the real 931K + 297K notes, and microbenchmark a keystroke
   (apply N single-character deltas to 1K / 10K / 100K-line buffers). *AC: no
