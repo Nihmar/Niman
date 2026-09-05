@@ -13,10 +13,11 @@ final class CaretPainter extends CustomPainter {
     required this.caretOffset,
     required this.composing,
     required this.caretVisible,
+    required this.selection,
     this.scrollOffset = 0,
   });
 
-  /// The rect source (caret + composing underline).
+  /// The rect source (caret + composing underline + selection).
   final CaretGeometry geometry;
 
   /// The caret's buffer offset.
@@ -28,18 +29,27 @@ final class CaretPainter extends CustomPainter {
   /// Whether the caret is in the visible (on) blink phase.
   final bool caretVisible;
 
+  /// The current selection (the highlighted region; a collapsed selection is
+  /// the caret, not a highlight).
+  final TextSelection selection;
+
   /// The scroll offset of the text; the content-space rects are translated up
   /// by this much so the overlay (viewport-sized) tracks the scrolled text.
   final double scrollOffset;
 
   static const Color _caretColor = Color(0xFF000000);
   static const Color _underlineColor = Color(0xFF1A73E8);
+  static const Color _selectionColor = Color(0x331A73E8);
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas
       ..save()
       ..translate(0, -scrollOffset);
+    // The selection highlight goes behind everything.
+    for (final r in geometry.selectionRects(selection)) {
+      canvas.drawRect(r, Paint()..color = _selectionColor);
+    }
     for (final r in geometry.composingUnderlines(composing)) {
       canvas.drawRect(r, Paint()..color = _underlineColor);
     }
@@ -58,5 +68,6 @@ final class CaretPainter extends CustomPainter {
       old.caretOffset != caretOffset ||
       old.composing != composing ||
       old.caretVisible != caretVisible ||
+      old.selection != selection ||
       old.scrollOffset != scrollOffset;
 }

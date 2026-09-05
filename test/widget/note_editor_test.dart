@@ -1,6 +1,7 @@
 import 'package:copist/src/editor/caret_painter.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:copist/src/editor/note_editor.dart';
+import 'package:copist/src/editor/virtualized_text_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -95,6 +96,32 @@ void main() {
     await tester.pump();
     expect(_findCaretPainter(tester)!.scrollOffset, greaterThan(0));
     focus.dispose();
+  });
+
+  testWidgets('tap places the caret', (tester) async {
+    final input = ComposingInput('ab\ncdefgh\nij');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'ab\ncdefgh\nij',
+          focusNode: focus,
+          onTextChanged: (_) {},
+          input: input,
+        ),
+      ),
+    );
+    // Tap row 1, col 3 → line 1 ('cdefgh'), col 3 → offset 6.
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    await tester.tapAt(
+      Offset(
+        VirtualizedTextView.leftPadding + 3 * charWidth,
+        VirtualizedTextView.rowHeight,
+      ),
+    );
+    await tester.pump();
+    expect(input.selection, const TextSelection.collapsed(offset: 6));
   });
 
   testWidgets('caret shows only while focused', (tester) async {

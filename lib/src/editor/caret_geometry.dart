@@ -1,6 +1,7 @@
 import 'dart:ui' show Rect, TextRange;
 
 import 'package:copist/src/editor/row_model.dart';
+import 'package:flutter/services.dart' show TextSelection;
 
 /// The pixel geometry of the caret and the composing underline, given the
 /// buffer layout ([RowModel]) and the monospace font metrics (character
@@ -63,6 +64,34 @@ final class CaretGeometry {
           (row + 1) * rowHeight - 1,
           (to - from) * charWidth,
           1,
+        ),
+      );
+    }
+    return rects;
+  }
+
+  /// The selection-highlight rects for [selection] (empty when collapsed):
+  /// full row-height rects covering the selected characters, one per visual
+  /// row the selection spans.
+  List<Rect> selectionRects(TextSelection selection) {
+    if (!selection.isValid || selection.isCollapsed) {
+      return const <Rect>[];
+    }
+    final (startRow, startCol) = rowModel.offsetToRowColumn(selection.start);
+    final (endRow, endCol) = rowModel.offsetToRowColumn(selection.end);
+    final rects = <Rect>[];
+    for (var row = startRow; row <= endRow; row++) {
+      final from = row == startRow ? startCol : 0;
+      final to = row == endRow ? endCol : rowModel.columns;
+      if (to <= from) {
+        continue;
+      }
+      rects.add(
+        Rect.fromLTWH(
+          leftPadding + from * charWidth,
+          row * rowHeight,
+          (to - from) * charWidth,
+          rowHeight,
         ),
       );
     }

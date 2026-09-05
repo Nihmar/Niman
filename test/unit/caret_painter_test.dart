@@ -13,12 +13,14 @@ void main() {
     int caretOffset = 0,
     TextRange composing = const TextRange(start: 0, end: 0),
     bool caretVisible = true,
+    TextSelection selection = const TextSelection.collapsed(offset: 0),
   }) {
     return CaretPainter(
       geometry: geo,
       caretOffset: caretOffset,
       composing: composing,
       caretVisible: caretVisible,
+      selection: selection,
     );
   }
 
@@ -44,6 +46,12 @@ void main() {
       isTrue,
     );
     expect(p.shouldRepaint(painter(caretVisible: false)), isTrue);
+    expect(
+      p.shouldRepaint(
+        painter(selection: const TextSelection(baseOffset: 0, extentOffset: 3)),
+      ),
+      isTrue,
+    );
   });
 
   testWidgets('paint renders without error', (tester) async {

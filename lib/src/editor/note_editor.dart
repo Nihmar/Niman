@@ -1,6 +1,8 @@
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/caret_painter.dart';
 import 'package:copist/src/editor/composing_input.dart';
+import 'package:copist/src/editor/editor_gestures.dart';
+import 'package:copist/src/editor/hit_test.dart';
 import 'package:copist/src/editor/note_editor_client.dart';
 import 'package:copist/src/editor/row_model.dart';
 import 'package:copist/src/editor/virtualized_text_view.dart';
@@ -57,6 +59,8 @@ final class _NoteEditorState extends State<NoteEditor> {
   late final NoteEditorClient _client;
   late final RowModel _rows;
   late final CaretGeometry _caretGeometry;
+  late final HitTest _hitTest;
+  late final EditorGestures _gestures;
   late final ScrollController _scrollController;
   TextInputConnection? _connection;
   int _lastRevision = -1;
@@ -72,12 +76,19 @@ final class _NoteEditorState extends State<NoteEditor> {
       onConnectionClosed: _onConnectionClosed,
     );
     _rows = RowModel(_input.buffer, columns: widget.columns);
+    final charWidth = VirtualizedTextView.measureCharWidth();
     _caretGeometry = CaretGeometry(
       rowModel: _rows,
-      charWidth: VirtualizedTextView.measureCharWidth(),
+      charWidth: charWidth,
       rowHeight: VirtualizedTextView.rowHeight,
       leftPadding: VirtualizedTextView.leftPadding,
     );
+    _hitTest = HitTest(
+      rows: _rows,
+      rowHeight: VirtualizedTextView.rowHeight,
+      charWidth: charWidth,
+    );
+    _gestures = EditorGestures(hitTest: _hitTest, input: _input);
     _scrollController = ScrollController();
     _lastRevision = _input.revision;
     _input.addListener(_onChange);
@@ -86,6 +97,49 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   void _onScroll() => setState(() {});
+
+  double get _scrollOffset =>
+      _scrollController.hasClients ? _scrollController.offset : 0;
+
+  /// The pointer's x relative to the text start (the [HitTest] contract is
+  /// "x from the first glyph", so the row's left inset is subtracted).
+  double _textX(double localX) => localX - VirtualizedTextView.leftPadding;
+
+  /// A tap (no drag) places the caret at the tapped position.
+  void _handleTapUp(TapUpDetails details) {
+    _focusEditor();
+    _gestures.tapAt(
+      _textX(details.localPosition.dx),
+      details.localPosition.dy + _scrollOffset,
+    );
+  }
+
+  /// A drag begins a selection anchored at the drag start.
+  void _handlePanStart(DragStartDetails details) {
+    _focusEditor();
+    _gestures.dragStartAt(
+      _textX(details.localPosition.dx),
+      details.localPosition.dy + _scrollOffset,
+    );
+  }
+
+  /// A drag move extends the selection to the pointer.
+  void _handlePanUpdate(DragUpdateDetails details) {
+    _gestures.dragTo(
+      _textX(details.localPosition.dx),
+      details.localPosition.dy + _scrollOffset,
+    );
+  }
+
+  /// The drag ends: the selection collapses to its caret (the E8a
+  /// drag-select contract; a persistent selection is a later sub-step).
+  void _handlePanEnd(DragEndDetails details) => _gestures.dragEnd();
+
+  void _focusEditor() {
+    if (!widget.focusNode.hasFocus) {
+      widget.focusNode.requestFocus();
+    }
+  }
 
   /// Forwards a resync value from the client to the platform.
   void _pushValue(TextEditingValue value) {
@@ -146,9 +200,16 @@ final class _NoteEditorState extends State<NoteEditor> {
       focusNode: widget.focusNode,
       child: Stack(
         children: [
-          VirtualizedTextView(
-            model: _rows,
-            scrollController: _scrollController,
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapUp: _handleTapUp,
+            onPanStart: _handlePanStart,
+            onPanUpdate: _handlePanUpdate,
+            onPanEnd: _handlePanEnd,
+            child: VirtualizedTextView(
+              model: _rows,
+              scrollController: _scrollController,
+            ),
           ),
           IgnorePointer(
             child: CustomPaint(
@@ -157,9 +218,8 @@ final class _NoteEditorState extends State<NoteEditor> {
                 caretOffset: caret ?? 0,
                 composing: _input.composing,
                 caretVisible: caretVisible,
-                scrollOffset: _scrollController.hasClients
-                    ? _scrollController.offset
-                    : 0,
+                selection: _input.selection,
+                scrollOffset: _scrollOffset,
               ),
             ),
           ),
