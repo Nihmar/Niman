@@ -1,3 +1,4 @@
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/caret_painter.dart';
 import 'package:copist/src/editor/composing_input.dart';
@@ -55,6 +56,8 @@ final class NoteEditor extends StatefulWidget {
 }
 
 final class _NoteEditorState extends State<NoteEditor> {
+  static const AppLogger _log = AppLogger(name: 'editor');
+
   late final ComposingInput _input;
   late final NoteEditorClient _client;
   late final RowModel _rows;
@@ -75,7 +78,12 @@ final class _NoteEditorState extends State<NoteEditor> {
       onAction: _onAction,
       onConnectionClosed: _onConnectionClosed,
     );
+    final initClock = Stopwatch()..start();
     _rows = RowModel(_input.buffer, columns: widget.columns);
+    _log.debug(
+      'editor ready: ${_input.textLength} chars, ${_rows.rowCount} rows in '
+      '${_ms(initClock.elapsedMicroseconds)} ms',
+    );
     final charWidth = VirtualizedTextView.measureCharWidth();
     _caretGeometry = CaretGeometry(
       rowModel: _rows,
@@ -111,10 +119,19 @@ final class _NoteEditorState extends State<NoteEditor> {
     final rowTop = row * rowHeight;
     final rowBottom = (row + 1) * rowHeight;
     final pos = _scrollController.position;
+    final scrollClock = Stopwatch()..start();
     if (rowTop < pos.pixels) {
       pos.jumpTo(rowTop);
+      _log.debug(
+        'caret scroll: row $row to top in '
+        '${_ms(scrollClock.elapsedMicroseconds)} ms',
+      );
     } else if (rowBottom > pos.pixels + pos.viewportDimension) {
       pos.jumpTo(rowBottom - pos.viewportDimension);
+      _log.debug(
+        'caret scroll: row $row to bottom in '
+        '${_ms(scrollClock.elapsedMicroseconds)} ms',
+      );
     }
   }
 
@@ -190,15 +207,29 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   void _onChange() {
+    final clock = Stopwatch()..start();
     _rows.sync();
+    final foldMs = _ms(clock.elapsedMicroseconds);
     final revision = _input.revision;
     final textChanged = revision != _lastRevision;
     _lastRevision = revision;
     if (!mounted) return;
     _syncCaretScroll();
     setState(() {});
-    if (textChanged) widget.onTextChanged(_input.text);
+    if (textChanged) {
+      _log.debug(
+        'keystroke: fold $foldMs ms, '
+        '${_ms(clock.elapsedMicroseconds)} ms total, '
+        '${_input.textLength} chars, ${_rows.rowCount} rows',
+      );
+      widget.onTextChanged(_input.text);
+    }
   }
+
+  /// Formats [microseconds] as a milliseconds string (2 decimals), for the
+  /// [AppLogger] performance diagnostics.
+  static String _ms(int microseconds) =>
+      (microseconds / 1000).toStringAsFixed(2);
 
   @override
   void dispose() {
