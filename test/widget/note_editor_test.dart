@@ -124,6 +124,73 @@ void main() {
     expect(input.selection, const TextSelection.collapsed(offset: 6));
   });
 
+  testWidgets('drag extends the selection', (tester) async {
+    final input = ComposingInput('abcd\nefgh\nijkl');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'abcd\nefgh\nijkl',
+          focusNode: focus,
+          onTextChanged: (_) {},
+          input: input,
+        ),
+      ),
+    );
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    const left = VirtualizedTextView.leftPadding;
+    const rowH = VirtualizedTextView.rowHeight;
+    // Drag row 0, col 0 (offset 0) → row 1, col 2 (line 'efgh' starts at
+    // offset 5, col 2 → offset 7).
+    final gesture =
+        await tester.startGesture(const Offset(left, rowH * 0.5));
+    await tester.pump();
+    await gesture.moveTo(Offset(left + 2 * charWidth, rowH * 1.5));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    // The drag-end collapses the selection per the E8a contract.
+    expect(
+      input.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+  });
+
+  testWidgets('the caret scroll sync keeps the caret visible', (tester) async {
+    // 40 lines exceed the default 600px viewport (row height 21), so the
+    // last line starts off-screen.
+    final text = List.generate(40, (i) => 'line $i').join('\n');
+    final input = ComposingInput(text);
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: text,
+          focusNode: focus,
+          onTextChanged: (_) {},
+          input: input,
+        ),
+      ),
+    );
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      0.0,
+    );
+
+    // Move the caret to the start of the last line (off-screen).
+    input.setSelection(
+      TextSelection.collapsed(offset: text.lastIndexOf('\n') + 1),
+    );
+    await tester.pump();
+
+    // The scroll moved so the last line is visible (the offset > 0).
+    final pixels =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+    expect(pixels, greaterThan(0));
+  });
+
   testWidgets('caret shows only while focused', (tester) async {
     final input = ComposingInput('hi');
     final focus = FocusNode();

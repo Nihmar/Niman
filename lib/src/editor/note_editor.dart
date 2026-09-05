@@ -96,7 +96,27 @@ final class _NoteEditorState extends State<NoteEditor> {
     _scrollController.addListener(_onScroll);
   }
 
-  void _onScroll() => setState(() {});
+  void _onScroll() {
+    if (mounted) setState(() {});
+  }
+
+  /// Scrolls so the caret's row is visible (the caret scroll sync): if the
+  /// row is above the viewport, scroll it to the top; if below, to the
+  /// bottom. No-op when the row is already visible.
+  void _syncCaretScroll() {
+    final caret = _input.caret;
+    if (caret == null || !_scrollController.hasClients) return;
+    final row = _rows.offsetToRowColumn(caret).$1;
+    const rowHeight = VirtualizedTextView.rowHeight;
+    final rowTop = row * rowHeight;
+    final rowBottom = (row + 1) * rowHeight;
+    final pos = _scrollController.position;
+    if (rowTop < pos.pixels) {
+      pos.jumpTo(rowTop);
+    } else if (rowBottom > pos.pixels + pos.viewportDimension) {
+      pos.jumpTo(rowBottom - pos.viewportDimension);
+    }
+  }
 
   double get _scrollOffset =>
       _scrollController.hasClients ? _scrollController.offset : 0;
@@ -175,6 +195,7 @@ final class _NoteEditorState extends State<NoteEditor> {
     final textChanged = revision != _lastRevision;
     _lastRevision = revision;
     if (!mounted) return;
+    _syncCaretScroll();
     setState(() {});
     if (textChanged) widget.onTextChanged(_input.text);
   }
