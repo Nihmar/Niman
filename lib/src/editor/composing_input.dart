@@ -265,6 +265,67 @@ final class ComposingInput {
     _notify();
   }
 
+  /// Selects the word at [offset] (a run of non-whitespace characters) — or
+  /// the run of whitespace around it when [offset] is not inside a word — the
+  /// long-press selection contract. The anchor is the word end closest to
+  /// [offset], so a following [extendSelectionTo] (a drag) extends from
+  /// there.
+  ///
+  /// Materializes [text] (O(n)); it is gesture-driven (rare), not per-frame.
+  void selectWordAt(int offset) {
+    final text = _buffer.text;
+    final clamped = offset.clamp(0, text.length);
+    var probe = -1;
+    if (clamped < text.length && !_isSpace(text.codeUnitAt(clamped))) {
+      probe = clamped;
+    } else if (clamped > 0 && !_isSpace(text.codeUnitAt(clamped - 1))) {
+      probe = clamped - 1;
+    }
+    var start = 0;
+    var end = 0;
+    if (probe >= 0) {
+      start = probe;
+      while (start > 0 && !_isSpace(text.codeUnitAt(start - 1))) {
+        start--;
+      }
+      end = probe + 1;
+      while (end < text.length && !_isSpace(text.codeUnitAt(end))) {
+        end++;
+      }
+    } else {
+      start = clamped;
+      while (start > 0 && _isSpace(text.codeUnitAt(start - 1))) {
+        start--;
+      }
+      end = clamped;
+      while (end < text.length && _isSpace(text.codeUnitAt(end))) {
+        end++;
+      }
+    }
+    if (start == end) return; // empty buffer: nothing to select.
+    final t = clamped.clamp(start, end);
+    final base = (t - start).abs() <= (end - t).abs() ? start : end;
+    setSelection(
+      TextSelection(
+        baseOffset: base,
+        extentOffset: base == start ? end : start,
+      ),
+    );
+  }
+
+  /// A word-boundary whitespace: space, tab, newline, plus the Unicode
+  /// spaces prose uses (no-break variants — the notes carry the French
+  /// narrow no-break space).
+  static bool _isSpace(int unit) =>
+      unit == 0x20 ||
+      unit == 0x09 ||
+      unit == 0x0A ||
+      unit == 0xA0 ||
+      unit == 0x2007 ||
+      unit == 0x2009 ||
+      unit == 0x200A ||
+      unit == 0x202F;
+
   /// Deletes the current selection and collapses the caret to where it began,
   /// returning the removed text (the source for the clipboard on a cut).
   ///

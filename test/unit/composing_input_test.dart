@@ -138,6 +138,53 @@ void main() {
       expect((input..setCaretAtLine(2)).caretLine, 2);
       expect(input.caret, 8);
     });
+
+    test('selectWordAt selects the word containing the offset', () {
+      final input = ComposingInput('hello world')..selectWordAt(7);
+      // 'world' is [6, 11); the anchor is the start (closest to 7).
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 6, extentOffset: 11),
+      );
+    });
+
+    test('selectWordAt anchors on the word end closest to the offset', () {
+      final input = ComposingInput('hello world')..selectWordAt(10);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 11, extentOffset: 6),
+      );
+    });
+
+    test('selectWordAt on whitespace selects the gap', () {
+      final input = ComposingInput('ab  cd')..selectWordAt(3);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 2, extentOffset: 4),
+      );
+    });
+
+    test('selectWordAt at the end of the buffer selects the last word', () {
+      final input = ComposingInput('abc')..selectWordAt(3);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 3, extentOffset: 0),
+      );
+    });
+
+    test('selectWordAt treats the French narrow no-break space as a bound',
+        () {
+      final input = ComposingInput('mot\u202Fautre')..selectWordAt(4);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 4, extentOffset: 9),
+      );
+    });
+
+    test('selectWordAt on an empty buffer keeps the caret', () {
+      final input = ComposingInput('')..selectWordAt(0);
+      expect(input.selection, const TextSelection.collapsed(offset: 0));
+    });
   });
 
   group('reset and value', () {

@@ -47,4 +47,17 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 8),
     );
   });
+
+  test('long-press selects the word; a following drag extends it', () {
+    gestures.longPressAt(2.5, 15); // offset 4, inside 'cdefgh'
+    expect(
+      input.selection,
+      const TextSelection(baseOffset: 3, extentOffset: 9),
+    );
+    gestures.dragTo(2.5, 25); // offset 8 (wrapped row 'gh')
+    expect(
+      input.selection,
+      const TextSelection(baseOffset: 3, extentOffset: 8),
+    );
+  });
 }

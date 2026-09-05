@@ -151,6 +151,26 @@ final class _NoteEditorState extends State<NoteEditor> {
     );
   }
 
+  /// A long-press selects the word under the pointer (the long-press
+  /// contract); the selection persists after release (a tap clears it), and
+  /// a drag extending it arrives as long-press pan updates.
+  void _handleLongPressStart(LongPressStartDetails details) {
+    _focusEditor();
+    _gestures.longPressAt(
+      _textX(details.localPosition.dx),
+      details.localPosition.dy + _scrollOffset,
+    );
+  }
+
+  /// Extends the long-press selection to the pointer (the anchor stays at
+  /// the long-press end).
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    _gestures.dragTo(
+      _textX(details.localPosition.dx),
+      details.localPosition.dy + _scrollOffset,
+    );
+  }
+
   /// A drag begins a selection anchored at the drag start.
   void _handlePanStart(DragStartDetails details) {
     _focusEditor();
@@ -261,6 +281,8 @@ final class _NoteEditorState extends State<NoteEditor> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapUp: _handleTapUp,
+            onLongPressStart: _handleLongPressStart,
+            onLongPressMoveUpdate: _handleLongPressMoveUpdate,
             onPanStart: _handlePanStart,
             onPanUpdate: _handlePanUpdate,
             onPanEnd: _handlePanEnd,

@@ -215,4 +215,27 @@ void main() {
     expect(_findCaretPainter(tester)!.caretVisible, isFalse);
     focus.dispose();
   });
+
+  testWidgets('long-press selects the word under the pointer',
+      (tester) async {
+    final input = ComposingInput('hello world');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'hello world',
+          input: input,
+          focusNode: focus,
+          onTextChanged: (_) {},
+        ),
+      ),
+    );
+    // x 14 = the left padding (12) + 2 px, i.e. column 0 of row 0.
+    await tester.longPressAt(const Offset(14, 10));
+    await tester.pump();
+    expect(input.hasSelection, isTrue);
+    expect(input.selectionText, 'hello');
+    focus.dispose();
+  });
 }

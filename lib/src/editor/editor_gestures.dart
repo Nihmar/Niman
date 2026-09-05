@@ -23,6 +23,11 @@ final class EditorGestures {
     );
   }
 
+  /// Long-press at pixel (x, y): selects the word there (the long-press
+  /// contract; a following [dragTo] extends the selection).
+  void longPressAt(double x, double y) =>
+      input.selectWordAt(hitTest.offsetAt(x, y));
+
   /// Begins a drag-select at pixel (x, y): sets the selection anchor there.
   void dragStartAt(double x, double y) => tapAt(x, y);
 
