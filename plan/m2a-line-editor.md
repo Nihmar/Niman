@@ -251,8 +251,12 @@ rendering.
     `CustomPaint` + a `scrollOffset` so the caret scrolls with the text), and
     the focus-gated steady caret (a `Focus` widget + the `hasFocus` gate; the
     caret hides while the IME is mid-composition, where the underline takes
-    over). Deferred: the caret blink (an `AnimationController` refinement),
-    the tap/drag gesture recognizers (E8a's on-device gesture half), and the
+    over), and the tap/drag gestures (a `GestureDetector` over the text drives
+    `EditorGestures`: tap = caret, drag = selection; the selection highlight is
+    painted by the `CaretPainter` via the new `CaretGeometry.selectionRects`).
+    Deferred: the caret blink (an `AnimationController` refinement), the
+    persistent selection (the drag-end currently collapses per the E8a
+    contract) + the vertical-scroll-vs-select disambiguation, and the
     scroll/caret sync + autosave (the E8d AC).
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
   scenario on the real 931K + 297K notes, and microbenchmark a keystroke
