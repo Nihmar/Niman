@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E7 + E-U done; E8a + E8c headless cores done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit; E8b's headless core is E5 + ComposingUnderline; E8a–E8d on-device + E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E8d done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit, E8b's headless core is E5 + ComposingUnderline, E8a–E8d on-device: the `NoteEditor` widget (IME + caret + tap/drag + scroll sync) wired into the `NoteView` (the `SourceEditor` baseline removed); E9 on-device perf pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
