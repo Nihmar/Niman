@@ -93,6 +93,34 @@ final class FoldState {
     return out;
   }
 
+  /// The fold state after a line edit (M2a E8c): the folded set remapped
+  /// through a replace of [start, end) by [inserted] lines, over the
+  /// recomputed [newOutline] and [newLineCount].
+  ///
+  /// Folds are transient view state, not buffer state: a fold is indexed by
+  /// heading line number, so an edit above it shifts it, and an edit that
+  /// removes its heading line — or turns that line into a non-heading — drops
+  /// it. The line-number remap is exact; the "no longer a heading" case is
+  /// caught by checking the remapped line against [newOutline], which the
+  /// caller recomputes from the edited buffer before this call.
+  FoldState applyEdit({
+    required int start,
+    required int end,
+    required int inserted,
+    required List<OutlineEntry> newOutline,
+    required int newLineCount,
+  }) {
+    final headingLines = <int>{for (final e in newOutline) e.line};
+    final newFolded = <int>{};
+    for (final f in _folded) {
+      final fPrime = _remapLine(f, start, end, inserted);
+      if (fPrime == null) continue;
+      if (!headingLines.contains(fPrime)) continue;
+      newFolded.add(fPrime);
+    }
+    return FoldState(newOutline, newLineCount, folded: newFolded);
+  }
+
   void _recompute() {
     final h = _outline.length;
     // terminus[i] = line of the next heading with level <= outline[i].level
@@ -118,6 +146,21 @@ final class FoldState {
     }
     intervals.sort((a, b) => a.$1.compareTo(b.$1));
     _hidden = _merge(intervals);
+  }
+
+  /// Remaps logical line [f] through a replace of [start, end) by
+  /// [inserted] lines, or `null` if the edit removes the line.
+  ///
+  /// Lines before [start] are untouched; lines from [end] on shift by the net
+  /// delta `inserted - (end - start)`. A line inside `[start, end)` survives
+  /// (at the same number) only while a new line still occupies its position,
+  /// i.e. `f < start + inserted` — a one-for-one content edit keeps the line
+  /// number, a net deletion past `start + inserted` drops it.
+  static int? _remapLine(int f, int start, int end, int inserted) {
+    final delta = inserted - (end - start);
+    if (f < start) return f;
+    if (f >= end) return f + delta;
+    return f < start + inserted ? f : null;
   }
 
   static List<(int, int)> _merge(List<(int, int)> in_) {

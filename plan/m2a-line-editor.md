@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E7 + E-U done; E8a headless core done — ImeBridge + HitTest + ComposingUnderline + EditorGestures; E8a–E8d on-device + E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E7 + E-U done; E8a + E8c headless cores done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit; E8b's headless core is E5 + ComposingUnderline; E8a–E8d on-device + E9 pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -232,6 +232,7 @@ rendering.
     delta to the folded line numbers, recompute the outline, and rebuild the
     `FoldState` before `RowModel.setLines` (a fold whose heading line no longer
     resolves is dropped). Folds are transient view state, not buffer state.
+  - **E8c core (this commit):** the fold-remap-on-edit half. `FoldState.applyEdit(start, end, inserted, newOutline, newLineCount)` remaps the folded set through a line edit and returns a fresh `FoldState` over the recomputed outline: a fold above the edit is untouched, one at/after it shifts by the net delta, one whose heading line is removed (or no longer a heading in `newOutline`) is dropped, and a one-for-one content edit (a rename) keeps the fold at the same line. The on-device half (fold markers, outline panel, outline-click → jump, and calling `applyEdit` on every edit before `RowModel.setLines`) is E8d.
 - [ ] **E8d** Wire into `NoteView` + autosave: replace the plain `TextField`
   baseline; debounce + save-on-focus-loss + atomic write (reuse M2 save
   path). *AC: edit a note, close the app, content persisted (byte-identical
