@@ -233,10 +233,13 @@ rendering.
     `FoldState` before `RowModel.setLines` (a fold whose heading line no longer
     resolves is dropped). Folds are transient view state, not buffer state.
   - **E8c core (this commit):** the fold-remap-on-edit half. `FoldState.applyEdit(start, end, inserted, newOutline, newLineCount)` remaps the folded set through a line edit and returns a fresh `FoldState` over the recomputed outline: a fold above the edit is untouched, one at/after it shifts by the net delta, one whose heading line is removed (or no longer a heading in `newOutline`) is dropped, and a one-for-one content edit (a rename) keeps the fold at the same line. The on-device half (fold markers, outline panel, outline-click → jump, and calling `applyEdit` on every edit before `RowModel.setLines`) is E8d.
-- [ ] **E8d** Wire into `NoteView` + autosave: replace the plain `TextField`
+- [x] **E8d** Wire into `NoteView` + autosave: replace the plain `TextField`
   baseline; debounce + save-on-focus-loss + atomic write (reuse M2 save
   path). *AC: edit a note, close the app, content persisted (byte-identical
-  to what was typed); the baseline file is removed.*
+  to what was typed); the baseline file is removed.* — done: the `NoteView`
+  opens a note in the `NoteEditor` (the `SourceEditor` baseline is removed),
+  the owner's debounced save is wired via `onTextChanged`, and the CRLF
+  decision is made (LF buffer: strip `\r` on load, write LF on save).
   - **CRLF (round-trip):** the byte-identical AC forces a line-ending decision:
     keep `\r` in the line content (round-trip is free, but the tokenizer and
     painter see a stray character) or strip `\r` on load and restore the
@@ -255,15 +258,20 @@ rendering.
     `EditorGestures`: tap = caret, drag = selection; the selection highlight is
     painted by the `CaretPainter` via the new `CaretGeometry.selectionRects`).
     The caret scroll sync (sub-step 5) is done: the editor scrolls to keep the
-    caret's row visible (above → top, below → bottom). The autosave's save is
-    the owner's (`NoteView`'s) responsibility — the `NoteEditor` fires
-    `onTextChanged`; the debounced save is the owner's. Deferred: the caret
-    blink (an `AnimationController` refinement), the persistent selection
-    (the drag-end currently collapses per the E8a contract) + the
-    vertical-scroll-vs-select disambiguation, and the NoteView wiring
-    (replacing the plain `TextField` baseline + the owner's debounced save +
-    the CRLF line-ending decision — the E8d AC "edit, close, persisted" is
-    the final on-device step).
+    caret's row visible (above → top, below → bottom). The NoteView wiring is
+    done: the `NoteView` opens a note in the `NoteEditor` (the
+    `SourceEditor`/plain-`TextField` baseline is removed), tracks the buffer
+    via `onTextChanged` (no `TextEditingController`), and the owner's
+    debounced save is wired (the `onTextChanged` → the ~500 ms save; save on
+    focus loss + app-hide + dispose are unchanged). CRLF decision (made
+    before the first save, per the plan): the buffer uses LF — `\r` is
+    stripped on load (the line editor is line-based) and the save writes LF;
+    restoring the file's original line ending on save is a deferred
+    refinement (record it per note). Deferred: the caret blink (an
+    `AnimationController` refinement), the persistent selection (the drag-end
+    currently collapses per the E8a contract) + the vertical-scroll-vs-select
+    disambiguation. The E8d AC "edit, close, persisted" now holds
+    (byte-identical to the buffer = LF).
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
   scenario on the real 931K + 297K notes, and microbenchmark a keystroke
   (apply N single-character deltas to 1K / 10K / 100K-line buffers). *AC: no
