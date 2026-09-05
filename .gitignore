@@ -9,6 +9,9 @@ copist-*.tar.gz
 # Local reference files (real notes, copyrighted, and captured device
 # logs). Never commit this folder; the findings live in plan/.
 reference/
+
+# The on-device test note (novel-length fixture); never commit.
+/Geometria 1.md
 # Debug logs exported from the Settings screen.
 copist-debug-log-*.txt
 .buildlog/

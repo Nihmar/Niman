@@ -169,11 +169,39 @@ void main() {
       );
     });
 
-    test('selectWordAt on whitespace selects the gap', () {
+    test('selectWordAt on whitespace selects the nearest word (left first)',
+        () {
       final input = ComposingInput('ab  cd')..selectWordAt(3);
       expect(
         input.selection,
-        const TextSelection(baseOffset: 2, extentOffset: 4),
+        const TextSelection(baseOffset: 2, extentOffset: 0),
+      );
+    });
+
+    test('selectWordAt on a blank line selects the word above it', () {
+      // 'Geometria\n\n**M**': a long-press in the gap (the on-device round-3
+      // bug) must land on 'Geometria', not the "\n\n" between the lines.
+      final input = ComposingInput('Geometria\n\n**M**')..selectWordAt(10);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 9, extentOffset: 0),
+      );
+    });
+
+    test('selectWordAt on a blank line at the start selects the word below',
+        () {
+      final input = ComposingInput('\n\nhello')..selectWordAt(1);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 2, extentOffset: 7),
+      );
+    });
+
+    test('selectWordAt on an all-whitespace buffer selects the run', () {
+      final input = ComposingInput('\n \n')..selectWordAt(1);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 3),
       );
     });
 

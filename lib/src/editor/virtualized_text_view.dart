@@ -1,3 +1,5 @@
+import 'dart:ui' show BoxHeightStyle;
+
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/row_model.dart';
 import 'package:copist/src/editor/styled_runs.dart';
@@ -44,6 +46,7 @@ final class VirtualizedTextView extends StatelessWidget {
     height: 1.75,
   );
 
+
   /// The advance width of one character in [_style], measured with the same
   /// painter the [Text] rows use, so a caret computed from it aligns with the
   /// glyphs. Monospace: every character has this width.
@@ -53,6 +56,23 @@ final class VirtualizedTextView extends StatelessWidget {
       textDirection: TextDirection.ltr,
     )..layout();
     return painter.width;
+  }
+
+  /// The caret height for [_style]: one glyph's strut box (the font's
+  /// ascent + descent, no line-height leading) — the same measure the
+  /// platform's own caret uses (`BoxHeightStyle.strut`). The caret spans
+  /// that, centered in the row, not the full [rowHeight] (which read as too
+  /// tall on device, M2a on-device round 3).
+  static double measureCaretHeight() {
+    final painter = TextPainter(
+      text: const TextSpan(text: 'M', style: _style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final box = painter.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 1),
+      boxHeightStyle: BoxHeightStyle.strut,
+    ).single;
+    return box.bottom - box.top;
   }
 
   @override

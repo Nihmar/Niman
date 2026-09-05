@@ -336,12 +336,57 @@ rendering.
     (per-delta IME lines with the platform's oldText size, gesture pixel→
     offset→selection lines, IME push/focus lines, save start/encode/write
     phases, lifecycle lines).
-  - Pending (on-device, user-driven): round 3 — open the 931K note, type a
-    few characters (capturing the `ime delta:`/`ime push:`/`keystroke:`
-    lines), long-press a word + drag to extend, then type (the overwrite
-    must now land in the selection, not 8 chars away), scroll; export the
-    log (and any `copist-crash-*.txt` if it still dies) and check "no
-    sustained slow frames; scroll inside frame budget".
+  - On-device round 3 (2026-09-05, user, Android, 931K note
+    "Geometria 1" — kept at the repo root, gitignored): (1) the caret is
+    too tall for the characters (it spansned the full 21px row while the
+    glyphs are ~14px), (2) the cursor lands in the middle of the
+    characters after a tap, (3) long-pressing a word "selects from the end
+    of the line to the next line", (4) selecting a word is noticeably slow.
+    Forensics from the exported log (the long-press hit the blank line at
+    offset 448 between two paragraphs and `selectWordAt` returned the
+    "\n\n" run — invisible on screen, which is exactly "end of the line to
+    the next"; the ~2s vsync stalls correlate one-to-one with the full-text
+    IME pushes — every 931K push blocks the Android main thread ~2s, so a
+    drag pushing at pointer-move rate is a freeze storm; and the column
+    count re-wrapped 57→80 across the app resume, moving every row under
+    the finger — the "caret in the middle of a character"; the row/col
+    arithmetic in the log confirms a tap's x maps to its column exactly, so
+    the tap mapping itself is fine). Fixes: the caret now spans the font's
+    strut box (`measureCaretHeight`, the platform's own caret measure,
+    `BoxHeightStyle.strut`), centered in the row; `selectWordAt` on a
+    whitespace/line-gap offset takes the nearest word (left first, then
+    right) and only falls back to the whitespace run when the buffer has
+    no words at all — a "\n\n" selection is impossible; the wrap width is
+    re-derived only when a new width holds for two consecutive layouts
+    (the initial viewport fit still applies immediately), the re-wrap logs
+    old→new + cost and re-syncs the caret scroll; and the gesture path now
+    pushes to the IME once per gesture end (tap / long-press start / drag
+    end / long-press end), never per pointer move, and never an unchanged
+    selection. `enableSuggestions: false` on the attach as the experiment
+    for the ~2s push cost (flip back if the trade is not wanted). Gesture
+    logs now carry the scroll offset and the resolved row/col. Pending
+    (on-device, user-driven): round 4 — with the 931K note: tap, long-press
+    a word (it must select the word, not the line gap) + drag, then type
+    (the letter must land in the selection), scroll; note whether the
+    selection/typing still stalls (the `ime push:`/`slow:` lines say
+    where); export the log.
+  - Standard selection UI (handles + context toolbar), added after the
+    on-device rounds surfaced the gap (the user asked for as much
+    "by the book" behavior as possible): the framework's
+    `_SelectionHandleOverlay` handles (the platform handle assets,
+    draggable through the same pointer→offset mapping the editor gestures
+    use) and the `EditableText` context-menu contract (copy/cut/select
+    all/paste — the `EditableText.defaultContextMenuBuilder` actions, an
+    `AdaptiveTextSelectionToolbar` on iOS) over the virtualized view via
+    `NoteSelectionDelegate` (the `TextSelectionDelegate` shim; the
+    clipboard/IME glue lives there, not in the widget). The handles follow
+    leaders at the selection endpoints (the zero-size leader layers a
+    `RenderEditable` paints, realized here as 1×1
+    `CompositedTransformTarget`s) and the toolbar anchors from the endpoint
+    positions; the IME push path is unchanged (one push per gesture end).
+    Verified by `selection_delegate_test` (unit) + `selection_handles_test`
+    (widget: handles, toolbar, cut/copy/paste, select all, handle drag);
+    on-device verification folds into round 4.
 
 ## Performance budget
 

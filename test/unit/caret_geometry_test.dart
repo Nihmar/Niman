@@ -19,6 +19,7 @@ void main() {
       charWidth: 10,
       rowHeight: 20,
       leftPadding: 5,
+      caretHeight: 16,
     );
   });
 
@@ -31,12 +32,12 @@ void main() {
     expect(model.offsetToRowColumn(9), (2, 2)); // end of 'abcdef'
   });
 
-  test('caretRect places a 2px line at the caret column/row', () {
+  test('caretRect spans the glyph height, centered in the row', () {
     final r = geo.caretRect(7); // (row 2, col 0).
     expect(r.left, 5); // 5 + 0 * 10.
-    expect(r.top, 40); // 2 * 20.
+    expect(r.top, 42); // 2 * 20 + (20 - 16) / 2.
     expect(r.width, 2);
-    expect(r.height, 20);
+    expect(r.height, 16); // the glyph height, not the row height.
   });
 
   test('composingUnderlines: single row spans the composing columns', () {

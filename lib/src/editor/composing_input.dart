@@ -268,10 +268,15 @@ final class ComposingInput {
   }
 
   /// Selects the word at [offset] (a run of non-whitespace characters) — or
-  /// the run of whitespace around it when [offset] is not inside a word — the
-  /// long-press selection contract. The anchor is the word end closest to
-  /// [offset], so a following [extendSelectionTo] (a drag) extends from
-  /// there.
+  /// the nearest word when [offset] is on whitespace — the long-press
+  /// selection contract. The anchor is the word end closest to [offset], so
+  /// a following [extendSelectionTo] (a drag) extends from there.
+  ///
+  /// A long-press on a line gap or blank line lands on the nearest word
+  /// (left first, then right), never on the line breaks between lines: a
+  /// "\n\n" selection is invisible (a line break is not a glyph) and read on
+  /// device as "selected from the end of the line to the next" (M2a
+  /// on-device round 3).
   ///
   /// Materializes [text] (O(n)); it is gesture-driven (rare), not per-frame.
   void selectWordAt(int offset) {
@@ -282,6 +287,23 @@ final class ComposingInput {
       probe = clamped;
     } else if (clamped > 0 && !_isSpace(text.codeUnitAt(clamped - 1))) {
       probe = clamped - 1;
+    } else {
+      // The offset is on a run of whitespace (a line gap, a blank line, the
+      // buffer start/end): the nearest word, left first (a press just below
+      // a line lands on the line's last word).
+      var i = clamped - 1;
+      while (i >= 0 && _isSpace(text.codeUnitAt(i))) {
+        i--;
+      }
+      if (i >= 0) {
+        probe = i;
+      } else {
+        i = clamped;
+        while (i < text.length && _isSpace(text.codeUnitAt(i))) {
+          i++;
+        }
+        if (i < text.length) probe = i;
+      }
     }
     var start = 0;
     var end = 0;
@@ -295,6 +317,8 @@ final class ComposingInput {
         end++;
       }
     } else {
+      // No word anywhere in the buffer (all whitespace): the run around the
+      // offset is all there is.
       start = clamped;
       while (start > 0 && _isSpace(text.codeUnitAt(start - 1))) {
         start--;
@@ -303,8 +327,8 @@ final class ComposingInput {
       while (end < text.length && _isSpace(text.codeUnitAt(end))) {
         end++;
       }
+      if (start == end) return; // empty buffer: nothing to select.
     }
-    if (start == end) return; // empty buffer: nothing to select.
     final t = clamped.clamp(start, end);
     final base = (t - start).abs() <= (end - t).abs() ? start : end;
     setSelection(

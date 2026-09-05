@@ -16,6 +16,7 @@ final class CaretGeometry {
     required this.charWidth,
     required this.rowHeight,
     required this.leftPadding,
+    required this.caretHeight,
   });
 
   /// The wrapped buffer layout (row/column mapping).
@@ -30,16 +31,21 @@ final class CaretGeometry {
   /// The left inset of the text, in px.
   final double leftPadding;
 
-  /// The caret rect for buffer [offset]: a 2px-wide vertical line spanning
-  /// the row at the caret's column (2px — 1px read as flimsy on device,
-  /// M2a on-device round 2).
+  /// The caret height: one glyph's strut box
+  /// ([`VirtualizedTextView.measureCaretHeight`]).
+  final double caretHeight;
+
+  /// The caret rect for buffer [offset]: a 2px-wide vertical line at the
+  /// caret's column (2px — 1px read as flimsy on device, M2a on-device
+  /// round 2), [caretHeight] tall, centered in the row — the full row
+  /// height read as too tall (M2a on-device round 3).
   Rect caretRect(int offset) {
     final (row, col) = rowModel.offsetToRowColumn(offset);
     return Rect.fromLTWH(
       leftPadding + col * charWidth,
-      row * rowHeight,
+      row * rowHeight + (rowHeight - caretHeight) / 2,
       2,
-      rowHeight,
+      caretHeight,
     );
   }
 

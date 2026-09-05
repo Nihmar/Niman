@@ -26,13 +26,15 @@ void main() {
     final focus = FocusNode();
     String? reported;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hi',
-          input: input,
-          focusNode: focus,
-          onTextChanged: (t) => reported = t,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (t) => reported = t,  
+          ),
         ),
       ),
     );
@@ -57,13 +59,15 @@ void main() {
     final focus = FocusNode();
     String? reported;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hi',
-          input: input,
-          focusNode: focus,
-          onTextChanged: (t) => reported = t,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (t) => reported = t,  
+          ),
         ),
       ),
     );
@@ -80,13 +84,15 @@ void main() {
     final input = ComposingInput(text);
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: text,
-          input: input,
-          focusNode: focus,
-          onTextChanged: (_) {},
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: text,  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          ),
         ),
       ),
     );
@@ -102,13 +108,15 @@ void main() {
     final input = ComposingInput('ab\ncdefgh\nij');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'ab\ncdefgh\nij',
-          focusNode: focus,
-          onTextChanged: (_) {},
-          input: input,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'ab\ncdefgh\nij',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
         ),
       ),
     );
@@ -128,13 +136,15 @@ void main() {
     final input = ComposingInput('abcd\nefgh\nijkl');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'abcd\nefgh\nijkl',
-          focusNode: focus,
-          onTextChanged: (_) {},
-          input: input,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'abcd\nefgh\nijkl',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
         ),
       ),
     );
@@ -164,13 +174,15 @@ void main() {
     final input = ComposingInput(text);
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: text,
-          focusNode: focus,
-          onTextChanged: (_) {},
-          input: input,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: text,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
         ),
       ),
     );
@@ -195,13 +207,15 @@ void main() {
     final input = ComposingInput('hi');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hi',
-          input: input,
-          focusNode: focus,
-          onTextChanged: (_) {},
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          ),
         ),
       ),
     );
@@ -221,13 +235,15 @@ void main() {
     final input = ComposingInput('hello world');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hello world',
-          input: input,
-          focusNode: focus,
-          onTextChanged: (_) {},
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hello world',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          ),
         ),
       ),
     );
@@ -243,13 +259,15 @@ void main() {
     final input = ComposingInput('ab\ncdefgh\nij');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'ab\ncdefgh\nij',
-          focusNode: focus,
-          onTextChanged: (_) {},
-          input: input,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'ab\ncdefgh\nij',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
         ),
       ),
     );
@@ -275,13 +293,15 @@ void main() {
     final input = ComposingInput('hello world');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hello world',
-          input: input,
-          focusNode: focus,
-          onTextChanged: (_) {},
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hello world',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          ),
         ),
       ),
     );
@@ -293,17 +313,60 @@ void main() {
     focus.dispose();
   });
 
+  testWidgets('a drag pushes once, at the end (no per-move pushes)',
+      (tester) async {
+    final input = ComposingInput('hello world');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hello world',  
+          input: input,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump(); // attach + initial push (caret 0).
+    // Hold a horizontal drag (pan) from col 0 to col 10: the IME must not
+    // hear about the moves (a full-text push at novel length is a platform
+    // round trip; the per-move pushes froze the app, M2a on-device round 3).
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    final gesture = await tester.startGesture(
+      const Offset(VirtualizedTextView.leftPadding, 10),
+    );
+    for (var col = 1; col <= 10; col++) {
+      await gesture.moveBy(Offset(charWidth, 0));
+    }
+    await tester.pump();
+    expect(tester.testTextInput.editingState?['selectionBase'], 0);
+    expect(tester.testTextInput.editingState?['selectionExtent'], 0);
+    // The drag ends: the selection collapses to its caret (col 10 →
+    // offset 10) and is pushed once.
+    await gesture.up();
+    await tester.pump();
+    expect(tester.testTextInput.editingState?['selectionBase'], 10);
+    expect(tester.testTextInput.editingState?['selectionExtent'], 10);
+    focus.dispose();
+  });
+
   testWidgets('the IME is told the field is multiline', (tester) async {
     final input = ComposingInput('hi');
     final focus = FocusNode();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: NoteEditor(
-          initialText: 'hi',
-          focusNode: focus,
-          onTextChanged: (_) {},
-          input: input,
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
         ),
       ),
     );

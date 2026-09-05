@@ -34,6 +34,7 @@ void main() {
       charWidth: 10,
       rowHeight: 20,
       leftPadding: 5,
+      caretHeight: 16,
     );
   });
 
