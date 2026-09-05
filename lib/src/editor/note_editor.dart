@@ -112,6 +112,7 @@ final class _NoteEditorState extends State<NoteEditor> {
       _connection?.close();
       _connection = null;
     }
+    if (mounted) setState(() {});
   }
 
   void _onChange() {
@@ -137,26 +138,33 @@ final class _NoteEditorState extends State<NoteEditor> {
   @override
   Widget build(BuildContext context) {
     final caret = _input.caret;
-    return Stack(
-      children: [
-        VirtualizedTextView(
-          model: _rows,
-          scrollController: _scrollController,
-        ),
-        IgnorePointer(
-          child: CustomPaint(
-            painter: CaretPainter(
-              geometry: _caretGeometry,
-              caretOffset: caret ?? 0,
-              composing: _input.composing,
-              caretVisible: caret != null,
-              scrollOffset: _scrollController.hasClients
-                  ? _scrollController.offset
-                  : 0,
+    // The caret is steady (no blink yet); it shows only while the editor is
+    // focused and the IME is not mid-composition (the underline takes over).
+    final caretVisible =
+        caret != null && widget.focusNode.hasFocus && !_input.isComposing;
+    return Focus(
+      focusNode: widget.focusNode,
+      child: Stack(
+        children: [
+          VirtualizedTextView(
+            model: _rows,
+            scrollController: _scrollController,
+          ),
+          IgnorePointer(
+            child: CustomPaint(
+              painter: CaretPainter(
+                geometry: _caretGeometry,
+                caretOffset: caret ?? 0,
+                composing: _input.composing,
+                caretVisible: caretVisible,
+                scrollOffset: _scrollController.hasClients
+                    ? _scrollController.offset
+                    : 0,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

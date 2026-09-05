@@ -96,4 +96,29 @@ void main() {
     expect(_findCaretPainter(tester)!.scrollOffset, greaterThan(0));
     focus.dispose();
   });
+
+  testWidgets('caret shows only while focused', (tester) async {
+    final input = ComposingInput('hi');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'hi',
+          input: input,
+          focusNode: focus,
+          onTextChanged: (_) {},
+        ),
+      ),
+    );
+    expect(_findCaretPainter(tester)!.caretVisible, isFalse);
+    focus.requestFocus();
+    await tester.pump();
+    expect(_findCaretPainter(tester)!.caretVisible, isTrue);
+    focus.unfocus();
+    await tester.pump();
+    await tester.pump();
+    expect(_findCaretPainter(tester)!.caretVisible, isFalse);
+    focus.dispose();
+  });
 }
