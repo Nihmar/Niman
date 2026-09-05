@@ -1,6 +1,6 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E8d done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit, E8b's headless core is E5 + ComposingUnderline, E8a–E8d on-device: the `NoteEditor` widget (IME + caret + tap/drag + scroll sync) wired into the `NoteView` (the `SourceEditor` baseline removed); E9 on-device perf pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** In progress (E1–E8d done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit, E8b's headless core is E5 + ComposingUnderline, E8a–E8d on-device: the `NoteEditor` widget (IME + caret + tap/drag + scroll sync) wired into the `NoteView` (the `SourceEditor` baseline removed); E9: microbenchmark done + editor log instrumentation done, on-device T-M2-00 re-run pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan
@@ -278,6 +278,24 @@ rendering.
   sustained slow frames; scroll inside frame budget; per-keystroke cost
   measured and shown to stay inside budget at 1 MB (the O(lines) reset is the
   expected growth); numbers recorded here.*
+  - Microbenchmark done (`test/unit/m2a_keystroke_benchmark_test.dart`: 50
+    single-char insertions at end-of-buffer, `ComposingInput.apply` +
+    `RowModel.sync` per keystroke = the editor's `_onChange` model half, 10
+    warmup; dev machine, 2026-09-05): **1K lines (~0.0 MB): avg 0.07 ms,
+    max 0.34 ms · 10K lines (~0.1 MB): avg 0.32 ms, max 0.60 ms · 100K lines
+    (~1.1 MB): avg 4.4 ms, max 7.6 ms** — inside the 16 ms frame budget at
+    1 MB; the O(lines) growth is the expected one, and at ~1M lines this
+    half alone would be ~40 ms, so the in-place `_lineStarts` follow-up is
+    warranted before then.
+  - Log instrumentation done so the on-device run is analyzable:
+    `NoteEditor` logs via `AppLogger(name: 'editor')` — per keystroke
+    (`fold X ms, Y ms total, N chars, R rows`), per caret scroll (`row R to
+    top/bottom in X ms`), one on init (`editor ready: ... rows in X ms`);
+    `NoteView` already logs note load/save (chars + ms). All exportable from
+    the settings-screen log buffer (`AppLog.dump()`).
+  - Pending (on-device, user-driven): open the real 931K + 297K notes in the
+    instrumented build, type/scroll, export the log, and check "no sustained
+    slow frames; scroll inside frame budget".
 
 ## Performance budget
 
@@ -286,9 +304,11 @@ rendering.
   rebuilds the line-start array (O(lines), one allocation) and `RowModel.sync`
   re-wraps (O(lines), one allocation) on every keystroke — O(lines) total, not
   O(change). At measured sizes (~15K lines) that is a few hundred µs, well
-  inside 16 ms; E9 measures it at 1 MB to confirm. Follow-up if E9 shows it
-  matters: update `_lineStarts` in place (starts before the edit are unchanged,
-  starts after shift by a constant delta) instead of rebuilding.
+  inside 16 ms; E9 microbench at 1 MB confirms: avg 4.4 ms / max 7.6 ms per
+  keystroke at 100K lines (inside budget, O(lines) growth as expected).
+  Follow-up if it matters (it will at ~1M lines): update `_lineStarts` in
+  place (starts before the edit are unchanged, starts after shift by a
+  constant delta) instead of rebuilding.
 - **Keystroke, visual half** (steady state, any file size): incremental
   tokenize (~0.5 ms) + visible-row relayout (~1 ms) ≈ **< 2 ms** UI work; well
   inside 16 ms.
