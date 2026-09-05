@@ -6,6 +6,11 @@ import 'package:flutter/services.dart';
 /// into caret/selection edits on a [ComposingInput] via a [HitTest]. Pure —
 /// the view's gesture recognizers call these with pixel coordinates; no
 /// pointer events are parsed here.
+///
+/// Every method returns whether the selection actually changed: the view
+/// pushes the new selection to the IME only in that case (the platform's
+/// copy must stay in lockstep, or the next keystroke edits a stale
+/// selection), and skips the redundant push on a no-change.
 final class EditorGestures {
   /// Wraps the pixel→offset [hitTest] and the [input] it drives.
   EditorGestures({required this.hitTest, required this.input});
@@ -17,26 +22,35 @@ final class EditorGestures {
   final ComposingInput input;
 
   /// Places the caret at pixel (x, y) (a tap).
-  void tapAt(double x, double y) {
-    input.setSelection(
-      TextSelection.collapsed(offset: hitTest.offsetAt(x, y)),
-    );
+  bool tapAt(double x, double y) {
+    final before = input.selection;
+    input.setSelection(TextSelection.collapsed(offset: hitTest.offsetAt(x, y)));
+    return input.selection != before;
   }
 
   /// Long-press at pixel (x, y): selects the word there (the long-press
   /// contract; a following [dragTo] extends the selection).
-  void longPressAt(double x, double y) =>
-      input.selectWordAt(hitTest.offsetAt(x, y));
+  bool longPressAt(double x, double y) {
+    final before = input.selection;
+    input.selectWordAt(hitTest.offsetAt(x, y));
+    return input.selection != before;
+  }
 
   /// Begins a drag-select at pixel (x, y): sets the selection anchor there.
-  void dragStartAt(double x, double y) => tapAt(x, y);
+  bool dragStartAt(double x, double y) => tapAt(x, y);
 
   /// Extends the selection to pixel (x, y) (a drag move).
-  void dragTo(double x, double y) {
+  bool dragTo(double x, double y) {
+    final before = input.selection;
     input.extendSelectionTo(hitTest.offsetAt(x, y));
+    return input.selection != before;
   }
 
   /// Ends the drag-select: collapses the selection to the caret at the last
   /// drag position.
-  void dragEnd() => input.collapseSelection();
+  bool dragEnd() {
+    final before = input.selection;
+    input.collapseSelection();
+    return input.selection != before;
+  }
 }

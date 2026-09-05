@@ -31,11 +31,11 @@ void main() {
     expect(model.offsetToRowColumn(9), (2, 2)); // end of 'abcdef'
   });
 
-  test('caretRect places a 1px line at the caret column/row', () {
+  test('caretRect places a 2px line at the caret column/row', () {
     final r = geo.caretRect(7); // (row 2, col 0).
     expect(r.left, 5); // 5 + 0 * 10.
     expect(r.top, 40); // 2 * 20.
-    expect(r.width, 1);
+    expect(r.width, 2);
     expect(r.height, 20);
   });
 

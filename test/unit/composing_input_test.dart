@@ -113,6 +113,19 @@ void main() {
   });
 
   group('caret and selection', () {
+    test('setSelection is a no-op when the selection is unchanged', () {
+      var notified = 0;
+      final input = ComposingInput('hello')
+        ..addListener(() => notified++)
+        ..setSelection(const TextSelection.collapsed(offset: 2));
+      final afterFirst = notified;
+      // Same selection again (no notification), then a change (one).
+      input
+        ..setSelection(const TextSelection.collapsed(offset: 2))
+        ..setSelection(const TextSelection.collapsed(offset: 3));
+      expect(notified, afterFirst + 1);
+    });
+
     test('caret is the collapsed selection offset', () {
       final input = ComposingInput('hello');
       expect(

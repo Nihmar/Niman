@@ -1,7 +1,7 @@
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:flutter/rendering.dart';
 
-/// Paints the caret (a 1px vertical line) and the IME composing underline
+/// Paints the caret (a 2px vertical line) and the IME composing underline
 /// (1px horizontal bars). The rects come from a [CaretGeometry]; this painter
 /// only draws them, so its correctness reduces to the (separately tested)
 /// geometry plus these two draw passes.

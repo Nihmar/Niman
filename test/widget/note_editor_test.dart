@@ -238,4 +238,83 @@ void main() {
     expect(input.selectionText, 'hello');
     focus.dispose();
   });
+
+  testWidgets('a tap pushes the caret to the IME', (tester) async {
+    final input = ComposingInput('ab\ncdefgh\nij');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'ab\ncdefgh\nij',
+          focusNode: focus,
+          onTextChanged: (_) {},
+          input: input,
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    // Tap row 1, col 3 → line 1 ('cdefgh'), col 3 → offset 6.
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    await tester.tapAt(
+      Offset(
+        VirtualizedTextView.leftPadding + 3 * charWidth,
+        VirtualizedTextView.rowHeight,
+      ),
+    );
+    await tester.pump();
+    // The platform copy moved with the tap (the lockstep the next
+    // keystroke edits against).
+    expect(tester.testTextInput.editingState?['selectionBase'], 6);
+    expect(tester.testTextInput.editingState?['selectionExtent'], 6);
+    focus.dispose();
+  });
+
+  testWidgets('a long-press selection is pushed to the IME', (tester) async {
+    final input = ComposingInput('hello world');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'hello world',
+          input: input,
+          focusNode: focus,
+          onTextChanged: (_) {},
+        ),
+      ),
+    );
+    // x 14 = the left padding (12) + 2 px, i.e. column 0 of row 0.
+    await tester.longPressAt(const Offset(14, 10));
+    await tester.pump();
+    expect(tester.testTextInput.editingState?['selectionBase'], 0);
+    expect(tester.testTextInput.editingState?['selectionExtent'], 5);
+    focus.dispose();
+  });
+
+  testWidgets('the IME is told the field is multiline', (tester) async {
+    final input = ComposingInput('hi');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NoteEditor(
+          initialText: 'hi',
+          focusNode: focus,
+          onTextChanged: (_) {},
+          input: input,
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    // multiline (not the single-line default): the keyboard offers Enter,
+    // not a checkmark.
+    expect(
+      (tester.testTextInput.setClientArgs?['inputType'] as Map?)?['name'],
+      'TextInputType.multiline',
+    );
+    focus.dispose();
+  });
 }

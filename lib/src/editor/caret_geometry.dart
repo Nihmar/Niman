@@ -30,14 +30,15 @@ final class CaretGeometry {
   /// The left inset of the text, in px.
   final double leftPadding;
 
-  /// The caret rect for buffer [offset]: a 1px-wide vertical line spanning
-  /// the row at the caret's column.
+  /// The caret rect for buffer [offset]: a 2px-wide vertical line spanning
+  /// the row at the caret's column (2px — 1px read as flimsy on device,
+  /// M2a on-device round 2).
   Rect caretRect(int offset) {
     final (row, col) = rowModel.offsetToRowColumn(offset);
     return Rect.fromLTWH(
       leftPadding + col * charWidth,
       row * rowHeight,
-      1,
+      2,
       rowHeight,
     );
   }

@@ -224,9 +224,11 @@ final class ComposingInput {
     _needsImeSync = false;
   }
 
-  /// Programmatically sets the selection (a collapsed selection is the caret).
-  /// No text change; the caller tells the IME via a selection update.
+  /// Programmatically sets the selection (a collapsed selection is the
+  /// caret). No text change; the caller tells the IME via a selection
+  /// update. No-op (and no notification) when the selection is unchanged.
   void setSelection(TextSelection selection) {
+    if (_selection == selection) return;
     _selection = selection;
     _notify();
   }

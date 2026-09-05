@@ -1,3 +1,4 @@
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:flutter/services.dart';
 
@@ -30,6 +31,9 @@ final class NoteEditorClient with DeltaTextInputClient {
     this.onAction,
     this.onConnectionClosed,
   });
+
+  /// The IME diagnostics.
+  static const AppLogger _log = AppLogger(name: 'editor');
 
   /// The input model the client edits (the note's source of truth).
   final ComposingInput input;
@@ -64,9 +68,39 @@ final class NoteEditorClient with DeltaTextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     var resync = false;
     for (final delta in deltas) {
+      _log.debug('ime delta: ${_describeDelta(delta)}');
       if (input.apply(delta)) resync = true;
     }
     if (resync) pushValue();
+  }
+
+  /// The delta in one line: the kind, the edit, and the platform's oldText
+  /// size (the cost question at novel length: how big the text the IME ships
+  /// back with every keystroke is).
+  static String _describeDelta(TextEditingDelta delta) {
+    final old = delta.oldText.length;
+    final deltaDescription = switch (delta) {
+      TextEditingDeltaInsertion(:final insertionOffset, :final textInserted) =>
+          'insertion @ $insertionOffset "${_short(textInserted)}"',
+      TextEditingDeltaDeletion(:final deletedRange) =>
+          'deletion ${deletedRange.start}..${deletedRange.end}',
+      TextEditingDeltaReplacement(
+        :final replacedRange, :final replacementText
+      ) =>
+          'replacement ${replacedRange.start}..${replacedRange.end} '
+          '"${_short(replacementText)}"',
+      TextEditingDeltaNonTextUpdate() =>
+          'nonText selection ${delta.selection.start}..'
+          '${delta.selection.end} composing ${delta.composing.start}..'
+          '${delta.composing.end}',
+      _ => delta.runtimeType.toString(),
+    };
+    return '$deltaDescription (oldText $old)';
+  }
+
+  static String _short(String s) {
+    final flat = s.replaceAll('\n', r'\n');
+    return flat.length <= 40 ? flat : '${flat.substring(0, 40)}…';
   }
 
   @override

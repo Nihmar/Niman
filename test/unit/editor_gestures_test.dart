@@ -60,4 +60,16 @@ void main() {
       const TextSelection(baseOffset: 3, extentOffset: 8),
     );
   });
+
+  test('the methods report whether the selection changed', () {
+    expect(gestures.tapAt(2.5, 0), isTrue); // offset 1
+    expect(gestures.tapAt(2.5, 0), isFalse); // same cell again
+    expect(gestures.longPressAt(2.5, 15), isTrue); // word 'cdefgh'
+    expect(gestures.longPressAt(2.5, 15), isFalse); // same word again
+    expect(gestures.dragStartAt(0, 0), isTrue); // offset 0
+    expect(gestures.dragTo(2.5, 5), isTrue); // offset 1
+    expect(gestures.dragTo(2.5, 5), isFalse); // same offset
+    expect(gestures.dragEnd(), isTrue); // collapse to offset 1
+    expect(gestures.dragEnd(), isFalse); // already collapsed
+  });
 }
