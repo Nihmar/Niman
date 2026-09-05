@@ -254,10 +254,16 @@ rendering.
     over), and the tap/drag gestures (a `GestureDetector` over the text drives
     `EditorGestures`: tap = caret, drag = selection; the selection highlight is
     painted by the `CaretPainter` via the new `CaretGeometry.selectionRects`).
-    Deferred: the caret blink (an `AnimationController` refinement), the
-    persistent selection (the drag-end currently collapses per the E8a
-    contract) + the vertical-scroll-vs-select disambiguation, and the
-    scroll/caret sync + autosave (the E8d AC).
+    The caret scroll sync (sub-step 5) is done: the editor scrolls to keep the
+    caret's row visible (above → top, below → bottom). The autosave's save is
+    the owner's (`NoteView`'s) responsibility — the `NoteEditor` fires
+    `onTextChanged`; the debounced save is the owner's. Deferred: the caret
+    blink (an `AnimationController` refinement), the persistent selection
+    (the drag-end currently collapses per the E8a contract) + the
+    vertical-scroll-vs-select disambiguation, and the NoteView wiring
+    (replacing the plain `TextField` baseline + the owner's debounced save +
+    the CRLF line-ending decision — the E8d AC "edit, close, persisted" is
+    the final on-device step).
 - [ ] **E9** On-device performance verification: re-run the T-M2-00 log
   scenario on the real 931K + 297K notes, and microbenchmark a keystroke
   (apply N single-character deltas to 1K / 10K / 100K-line buffers). *AC: no
