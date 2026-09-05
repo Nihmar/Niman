@@ -91,9 +91,22 @@ final class _NoteViewState extends State<NoteView>
   Future<String> _read(String path) => widget.readNote?.call(path) ??
       Isolate.run(() => File(path).readAsString());
 
-  Future<void> _write(String path, String content) =>
-      widget.writeNote?.call(path, content) ??
-      writeFileAtomically(File(path), utf8.encode(content));
+  Future<void> _write(String path, String content) async {
+    final seam = widget.writeNote;
+    if (seam != null) {
+      await seam(path, content);
+      return;
+    }
+    // The two phases separately: the encode is a full O(n) string pass (the
+    // novel-length cost), the write the FUSE round trips.
+    final encodeClock = Stopwatch()..start();
+    final bytes = utf8.encode(content);
+    _log.debug(
+      'save write: ${bytes.length} bytes (encoded in '
+      '${encodeClock.elapsedMilliseconds} ms)',
+    );
+    await writeFileAtomically(File(path), bytes);
+  }
 
   Future<void> _load() async {
     final path = widget.path;
@@ -140,6 +153,7 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _log.info('lifecycle: ${state.name}');
     if (state == AppLifecycleState.paused) unawaited(_save());
   }
 
@@ -149,6 +163,7 @@ final class _NoteViewState extends State<NoteView>
     final text = content ?? _text ?? '';
     _saving = true;
     final clock = Stopwatch()..start();
+    _log.info('save start: $target (${text.length} chars)');
     try {
       await _write(target, text);
       _dirty = false;

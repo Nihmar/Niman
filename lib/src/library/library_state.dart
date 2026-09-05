@@ -45,6 +45,12 @@ final class LibraryController implements LibrarySession {
   /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(seconds: 60);
 
+  /// The root path of the currently open library, for crash reports (the
+  /// crash file is written next to the debug logs the user already exports
+  /// from there); null when no session is open. Set when a session opens,
+  /// cleared on close.
+  static String? currentRootPath;
+
   /// Default delay between a non-blocking resume becoming ready and its
   /// reconciliation scan, leaving the UI time to paint the tree first.
   static const defaultResumeReconcileDelay = Duration(milliseconds: 1000);
@@ -200,6 +206,7 @@ final class LibraryController implements LibrarySession {
       _ops = ops;
       _root = abs;
       _phase = LibraryPhase.ready;
+      currentRootPath = abs;
       await AppSettingsRepo(db).setLastLibraryPath(abs);
       _bump();
       if (!blockingScan) {
@@ -225,6 +232,7 @@ final class LibraryController implements LibrarySession {
     await _teardown();
     _root = null;
     _phase = LibraryPhase.none;
+    currentRootPath = null;
     try {
       final db = await dbFactory();
       await AppSettingsRepo(db).setLastLibraryPath(null);
