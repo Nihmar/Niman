@@ -14,6 +14,7 @@ final class CaretPainter extends CustomPainter {
     required this.composing,
     required this.caretVisible,
     required this.selection,
+    required this.caretColor,
     this.scrollOffset = 0,
   });
 
@@ -33,11 +34,14 @@ final class CaretPainter extends CustomPainter {
   /// the caret, not a highlight).
   final TextSelection selection;
 
+  /// The caret's color (the view passes the theme's caret color, so the caret
+  /// is visible on light and dark themes alike).
+  final Color caretColor;
+
   /// The scroll offset of the text; the content-space rects are translated up
   /// by this much so the overlay (viewport-sized) tracks the scrolled text.
   final double scrollOffset;
 
-  static const Color _caretColor = Color(0xFF000000);
   static const Color _underlineColor = Color(0xFF1A73E8);
   static const Color _selectionColor = Color(0x331A73E8);
 
@@ -56,7 +60,7 @@ final class CaretPainter extends CustomPainter {
     if (caretVisible) {
       canvas.drawRect(
         geometry.caretRect(caretOffset),
-        Paint()..color = _caretColor,
+        Paint()..color = caretColor,
       );
     }
     canvas.restore();
@@ -69,5 +73,6 @@ final class CaretPainter extends CustomPainter {
       old.composing != composing ||
       old.caretVisible != caretVisible ||
       old.selection != selection ||
+      old.caretColor != caretColor ||
       old.scrollOffset != scrollOffset;
 }

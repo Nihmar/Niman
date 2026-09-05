@@ -248,6 +248,12 @@ final class _NoteEditorState extends State<NoteEditor> {
     // focused and the IME is not mid-composition (the underline takes over).
     final caretVisible =
         caret != null && widget.focusNode.hasFocus && !_input.isComposing;
+    final theme = Theme.of(context);
+    // The theme's caret color (falling back to the scheme's primary, as
+    // MaterialApp does) so the caret is visible on light and dark themes
+    // alike.
+    final caretColor =
+        theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
     return Focus(
       focusNode: widget.focusNode,
       child: Stack(
@@ -271,6 +277,7 @@ final class _NoteEditorState extends State<NoteEditor> {
                 composing: _input.composing,
                 caretVisible: caretVisible,
                 selection: _input.selection,
+                caretColor: caretColor,
                 scrollOffset: _scrollOffset,
               ),
             ),

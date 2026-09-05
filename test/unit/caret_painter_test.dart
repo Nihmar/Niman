@@ -14,6 +14,7 @@ void main() {
     TextRange composing = const TextRange(start: 0, end: 0),
     bool caretVisible = true,
     TextSelection selection = const TextSelection.collapsed(offset: 0),
+    Color caretColor = const Color(0xFF000000),
   }) {
     return CaretPainter(
       geometry: geo,
@@ -21,6 +22,7 @@ void main() {
       composing: composing,
       caretVisible: caretVisible,
       selection: selection,
+      caretColor: caretColor,
     );
   }
 
