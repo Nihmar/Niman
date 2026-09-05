@@ -1,3 +1,5 @@
+import 'package:copist/src/editor/caret_geometry.dart';
+import 'package:copist/src/editor/caret_painter.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:copist/src/editor/note_editor_client.dart';
 import 'package:copist/src/editor/row_model.dart';
@@ -54,6 +56,8 @@ final class _NoteEditorState extends State<NoteEditor> {
   late final ComposingInput _input;
   late final NoteEditorClient _client;
   late final RowModel _rows;
+  late final CaretGeometry _caretGeometry;
+  late final ScrollController _scrollController;
   TextInputConnection? _connection;
   int _lastRevision = -1;
 
@@ -68,10 +72,20 @@ final class _NoteEditorState extends State<NoteEditor> {
       onConnectionClosed: _onConnectionClosed,
     );
     _rows = RowModel(_input.buffer, columns: widget.columns);
+    _caretGeometry = CaretGeometry(
+      rowModel: _rows,
+      charWidth: VirtualizedTextView.measureCharWidth(),
+      rowHeight: VirtualizedTextView.rowHeight,
+      leftPadding: VirtualizedTextView.leftPadding,
+    );
+    _scrollController = ScrollController();
     _lastRevision = _input.revision;
     _input.addListener(_onChange);
     widget.focusNode.addListener(_onFocusChanged);
+    _scrollController.addListener(_onScroll);
   }
+
+  void _onScroll() => setState(() {});
 
   /// Forwards a resync value from the client to the platform.
   void _pushValue(TextEditingValue value) {
@@ -115,11 +129,34 @@ final class _NoteEditorState extends State<NoteEditor> {
     _connection?.close();
     widget.focusNode.removeListener(_onFocusChanged);
     _input.removeListener(_onChange);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return VirtualizedTextView(model: _rows);
+    final caret = _input.caret;
+    return Stack(
+      children: [
+        VirtualizedTextView(
+          model: _rows,
+          scrollController: _scrollController,
+        ),
+        IgnorePointer(
+          child: CustomPaint(
+            painter: CaretPainter(
+              geometry: _caretGeometry,
+              caretOffset: caret ?? 0,
+              composing: _input.composing,
+              caretVisible: caret != null,
+              scrollOffset: _scrollController.hasClients
+                  ? _scrollController.offset
+                  : 0,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -34,11 +34,26 @@ final class VirtualizedTextView extends StatelessWidget {
   /// (fractional extents trip the sliver's even-multiple assertion).
   static const double rowHeight = 21;
 
+  /// Left inset of each row's text, in px. The caret geometry must use the
+  /// same value so the caret lands on the glyphs.
+  static const double leftPadding = 12;
+
   static const TextStyle _style = TextStyle(
     fontFamily: 'monospace',
     fontSize: 12,
     height: 1.75,
   );
+
+  /// The advance width of one character in [_style], measured with the same
+  /// painter the [Text] rows use, so a caret computed from it aligns with the
+  /// glyphs. Monospace: every character has this width.
+  static double measureCharWidth() {
+    final painter = TextPainter(
+      text: const TextSpan(text: '0', style: _style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return painter.width;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +71,7 @@ final class VirtualizedTextView extends StatelessWidget {
               final text = buffer.lineAt(line);
               final end = startCol + columns;
               return Padding(
-                padding: const EdgeInsets.only(left: 12),
+                padding: const EdgeInsets.only(left: leftPadding),
                 child: highlight == null
                     ? Text(
                         text.substring(
