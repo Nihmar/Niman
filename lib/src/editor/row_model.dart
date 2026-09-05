@@ -85,6 +85,15 @@ final class RowModel {
     return (line, (row - _rowStarts[p]) * columns);
   }
 
+  /// The (visual row, column-in-row) of buffer [offset] — the inverse of the
+  /// row/column-to-offset mapping, for placing the caret and the composing
+  /// underline. The line containing [offset] must be visible (a caret never
+  /// sits on a folded line).
+  (int, int) offsetToRowColumn(int offset) {
+    final (line, col) = buffer.locationOf(offset);
+    return (rowOfLine(line) + col ~/ columns, col % columns);
+  }
+
   /// Re-wraps, treating every line of [buffer] as visible (clears any
   /// [setLines] restriction). O(lines) — reads line lengths only, with a
   /// single allocation (the row layout); the all-visible state is the null
