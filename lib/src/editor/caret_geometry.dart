@@ -1,6 +1,7 @@
 import 'dart:ui' show Rect, TextRange;
 
 import 'package:copist/src/editor/row_model.dart';
+import 'package:copist/src/editor/row_text_metrics.dart';
 import 'package:flutter/services.dart' show TextSelection;
 
 /// The pixel geometry of the caret and the composing underline, given the
@@ -9,14 +10,23 @@ import 'package:flutter/services.dart' show TextSelection;
 ///
 /// Pure — it only computes [Rect]s, no painting — so it is
 /// headless-verifiable; the caret painter just draws these rects.
+///
+/// The caret x comes from [textMetrics] when given (a painter over the
+/// row's exact slice — M2a round-4 R2, so the caret lands on the glyphs);
+/// otherwise it falls back to the monospace grid. The multi-row spans
+/// ([selectionRects], [composingUnderlines]) always stay on the grid: they
+/// run on the per-frame paint path, where a painter layout per spanned row
+/// would cost O(selection) per frame.
 final class CaretGeometry {
-  /// Creates the geometry over [rowModel] with the given font metrics.
+  /// Creates the geometry over [rowModel] with the given font metrics,
+  /// optionally measuring the caret x with [textMetrics].
   const CaretGeometry({
     required this.rowModel,
     required this.charWidth,
     required this.rowHeight,
     required this.leftPadding,
     required this.caretHeight,
+    this.textMetrics,
   });
 
   /// The wrapped buffer layout (row/column mapping).
@@ -35,14 +45,22 @@ final class CaretGeometry {
   /// ([`VirtualizedTextView.measureCaretHeight`]).
   final double caretHeight;
 
+  /// The per-row painter metrics for the caret x, or null for the grid.
+  final RowTextMetrics? textMetrics;
+
   /// The caret rect for buffer [offset]: a 2px-wide vertical line at the
   /// caret's column (2px — 1px read as flimsy on device, M2a on-device
   /// round 2), [caretHeight] tall, centered in the row — the full row
   /// height read as too tall (M2a on-device round 3).
   Rect caretRect(int offset) {
-    final (row, col) = rowModel.offsetToRowColumn(offset);
+    // offsetToRowColumn's column is already the column within the row.
+    final (row, colInRow) = rowModel.offsetToRowColumn(offset);
+    final metrics = textMetrics;
+    final x = metrics == null
+        ? leftPadding + colInRow * charWidth
+        : leftPadding + metrics.caretX(rowModel.rowSliceText(row), colInRow);
     return Rect.fromLTWH(
-      leftPadding + col * charWidth,
+      x,
       row * rowHeight + (rowHeight - caretHeight) / 2,
       2,
       caretHeight,

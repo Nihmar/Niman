@@ -2,6 +2,7 @@ import 'dart:ui' show BoxHeightStyle;
 
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/row_model.dart';
+import 'package:copist/src/editor/row_text_metrics.dart';
 import 'package:copist/src/editor/styled_runs.dart';
 import 'package:flutter/material.dart';
 
@@ -40,32 +41,36 @@ final class VirtualizedTextView extends StatelessWidget {
   /// same value so the caret lands on the glyphs.
   static const double leftPadding = 12;
 
-  static const TextStyle _style = TextStyle(
+  /// The row text style. Public so the tap hit test and the caret
+  /// geometry measure in exactly what the rows paint (M2a round-4 R2).
+  static const TextStyle rowTextStyle = TextStyle(
     fontFamily: 'monospace',
     fontSize: 12,
     height: 1.75,
   );
 
 
-  /// The advance width of one character in [_style], measured with the same
-  /// painter the [Text] rows use, so a caret computed from it aligns with the
-  /// glyphs. Monospace: every character has this width.
+  /// The advance width of one character in [rowTextStyle], measured with
+  /// the same painter the [Text] rows use, so a caret computed from it
+  /// aligns with the glyphs. Monospace: every character has this width.
+  /// (Still used for the viewport→column-width fit; per-glyph x comes
+  /// from [RowTextMetrics], which measures the row slice itself.)
   static double measureCharWidth() {
     final painter = TextPainter(
-      text: const TextSpan(text: '0', style: _style),
+      text: const TextSpan(text: '0', style: rowTextStyle),
       textDirection: TextDirection.ltr,
     )..layout();
     return painter.width;
   }
 
-  /// The caret height for [_style]: one glyph's strut box (the font's
+  /// The caret height for [rowTextStyle]: one glyph's strut box (the font's
   /// ascent + descent, no line-height leading) — the same measure the
   /// platform's own caret uses (`BoxHeightStyle.strut`). The caret spans
   /// that, centered in the row, not the full [rowHeight] (which read as too
   /// tall on device, M2a on-device round 3).
   static double measureCaretHeight() {
     final painter = TextPainter(
-      text: const TextSpan(text: 'M', style: _style),
+      text: const TextSpan(text: 'M', style: rowTextStyle),
       textDirection: TextDirection.ltr,
     )..layout();
     final box = painter.getBoxesForSelection(
@@ -77,7 +82,6 @@ final class VirtualizedTextView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buffer = model.buffer;
     final columns = model.columns;
     final highlight = this.highlight;
     return CustomScrollView(
@@ -88,24 +92,27 @@ final class VirtualizedTextView extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (context, row) {
               final (line, startCol) = model.lineAndStartColumn(row);
-              final text = buffer.lineAt(line);
               final end = startCol + columns;
+              // The grid owns its metrics: rows ignore the system text
+              // scaler (M2a round-4 R2 — a minimum-size scaler shrank the
+              // glyphs under the fixed 21 px grid, parking the caret
+              // mid-glyph and drifting taps). App chrome outside the
+              // editor keeps respecting the scaler.
+              const scaler = TextScaler.noScaling;
               return Padding(
                 padding: const EdgeInsets.only(left: leftPadding),
                 child: highlight == null
                     ? Text(
-                        text.substring(
-                          startCol,
-                          end > text.length ? text.length : end,
-                        ),
-                        style: _style,
+                        model.rowSliceText(row),
+                        style: rowTextStyle,
                         softWrap: false,
                         overflow: TextOverflow.clip,
                         maxLines: 1,
+                        textScaler: scaler,
                       )
                     : Text.rich(
                         TextSpan(
-                          style: _style,
+                          style: rowTextStyle,
                           children: styledRuns(
                             highlight.lineAt(line),
                             startCol,
@@ -115,6 +122,7 @@ final class VirtualizedTextView extends StatelessWidget {
                         softWrap: false,
                         overflow: TextOverflow.clip,
                         maxLines: 1,
+                        textScaler: scaler,
                       ),
               );
             },

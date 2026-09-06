@@ -584,4 +584,51 @@ void main() {
     expect(input.selectionText, 'hello ');
     focus.dispose();
   });
+
+  testWidgets('tap on a rendered glyph lands its column at 0.85 scaler (R2)',
+      (tester) async {
+    // A 60-column single row: far enough right that a shrunken render
+    // drifts by whole characters under grid math (the M2a round-4 R2
+    // minimum-font report — col 20 at 0.85 lands 3 chars off).
+    const line = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWX';
+    final input = ComposingInput(line);
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            textScaler: TextScaler.linear(0.85),
+          ),
+          child: Scaffold(
+            body: NoteEditor(
+
+            initialText: line,  
+            focusNode: focus,  
+            onTextChanged: (_) {},  
+            input: input,  
+            ),
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    // The ground truth is the painted row itself: the caret x the real
+    // RenderParagraph reports for column 20.
+    final paragraph =
+        tester.renderObject<RenderParagraph>(find.text(line));
+    const col = 20;
+    final caretX = paragraph
+        .getOffsetForCaret(const TextPosition(offset: col), Rect.zero)
+        .dx;
+    final topLeft = tester.getTopLeft(find.text(line));
+    await tester.tapAt(topLeft + Offset(caretX, 10));
+    await tester.pump();
+    expect(input.selection, const TextSelection.collapsed(offset: col));
+    // And the same pixel re-tapped is a no-op (tap round-trips).
+    await tester.tapAt(topLeft + Offset(caretX, 10));
+    await tester.pump();
+    expect(input.selection, const TextSelection.collapsed(offset: col));
+    focus.dispose();
+  });
 }

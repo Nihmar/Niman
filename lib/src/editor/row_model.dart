@@ -94,6 +94,18 @@ final class RowModel {
     return (rowOfLine(line) + col ~/ columns, col % columns);
   }
 
+  /// The exact text visual row [row] renders: its logical line's slice
+  /// `[startCol, min(startCol + columns, length))`. The single source of
+  /// truth for the row slice — the view builder, the tap hit test and the
+  /// caret geometry all read it, so a painter over this string measures
+  /// exactly what the row paints (M2a round-4 R2).
+  String rowSliceText(int row) {
+    final (line, startCol) = lineAndStartColumn(row);
+    final text = buffer.lineAt(line);
+    final end = startCol + columns;
+    return text.substring(startCol, end > text.length ? text.length : end);
+  }
+
   /// Re-wraps, treating every line of [buffer] as visible (clears any
   /// [setLines] restriction). O(lines) — reads line lengths only, with a
   /// single allocation (the row layout); the all-visible state is the null

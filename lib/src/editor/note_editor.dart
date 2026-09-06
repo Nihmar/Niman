@@ -6,6 +6,7 @@ import 'package:copist/src/editor/editor_gestures.dart';
 import 'package:copist/src/editor/hit_test.dart';
 import 'package:copist/src/editor/note_editor_client.dart';
 import 'package:copist/src/editor/row_model.dart';
+import 'package:copist/src/editor/row_text_metrics.dart';
 import 'package:copist/src/editor/selection_delegate.dart';
 import 'package:copist/src/editor/selection_handles.dart';
 import 'package:copist/src/editor/virtualized_text_view.dart';
@@ -77,6 +78,12 @@ final class _NoteEditorState extends State<NoteEditor> {
   late final NoteEditorClient _client;
   late final double _charWidth;
   late final double _caretHeight;
+
+  /// The per-row painter metrics (caret x + tap columns over the row's
+  /// exact slice — M2a round-4 R2). Shared by the hit test and the caret
+  /// geometry; the style is the rows' own style.
+  late final RowTextMetrics _textMetrics =
+      const RowTextMetrics(style: VirtualizedTextView.rowTextStyle);
   late RowModel _rows;
   late CaretGeometry _caretGeometry;
   late HitTest _hitTest;
@@ -121,6 +128,9 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// happened (it is applied immediately; only later width changes are
   /// debounced).
   bool _didInitialColumnsFit = false;
+
+  /// Whether the grid-metrics diagnostic already logged (once per editor).
+  bool _loggedMetrics = false;
 
   /// The last selection pushed to the IME (the gesture pushes skip an
   /// unchanged selection — the platform already holds it).
@@ -174,12 +184,14 @@ final class _NoteEditorState extends State<NoteEditor> {
     rowHeight: VirtualizedTextView.rowHeight,
     leftPadding: VirtualizedTextView.leftPadding,
     caretHeight: _caretHeight,
+    textMetrics: _textMetrics,
   );
 
   HitTest _hitTestFor(RowModel rows) => HitTest(
     rows: rows,
     rowHeight: VirtualizedTextView.rowHeight,
     charWidth: _charWidth,
+    textMetrics: _textMetrics,
   );
 
   void _onScroll() {
@@ -672,6 +684,16 @@ final class _NoteEditorState extends State<NoteEditor> {
     return LayoutBuilder(
       builder: (context, constraints) {
         _applyColumnsIfChanged(constraints.maxWidth);
+        if (!_loggedMetrics) {
+          _loggedMetrics = true;
+          // The R4 device check: the grid's charWidth next to the system
+          // scaler the rows deliberately ignore (noScaling lock).
+          _log.info(
+            'metrics: charWidth ${_charWidth.toStringAsFixed(2)}, '
+            'system scaler ${MediaQuery.textScalerOf(context).scale(12).toStringAsFixed(2)}/12, '
+            'columns $_appliedColumns',
+          );
+        }
         final caret = _input.caret;
         // The caret is steady (no blink yet); it shows only while the editor
         // is focused and the IME is not mid-composition (the underline takes
