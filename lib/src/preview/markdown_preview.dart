@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:copist/src/preview/math_cache.dart';
+import 'package:copist/src/preview/math_syntax.dart';
+import 'package:copist/src/preview/math_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -32,6 +35,8 @@ final class MarkdownPreview extends StatefulWidget {
     this.padding = const EdgeInsets.all(16),
     this.controller,
     this.onTapLink,
+    this.mathStyle = const MathStyle(),
+    this.mathCache,
     super.key,
   });
 
@@ -67,6 +72,13 @@ final class MarkdownPreview extends StatefulWidget {
   /// Link callback (M3 link handling).
   final MarkdownTapLinkCallback? onTapLink;
 
+  /// Math visual style (size/color); see [MathStyle].
+  final MathStyle mathStyle;
+
+  /// The math render cache; one is created per widget when not injected
+  /// (tests inject their own with a synchronous renderer).
+  final MathCache? mathCache;
+
   @override
   State<MarkdownPreview> createState() => _MarkdownPreviewState();
 }
@@ -75,6 +87,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     implements MarkdownBuilderDelegate {
   final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
   List<Widget>? _children;
+  late final MathCache _mathCache = widget.mathCache ?? MathCache();
 
   @override
   void didChangeDependencies() {
@@ -95,6 +108,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   @override
   void dispose() {
     _disposeRecognizers();
+    if (widget.mathCache == null) _mathCache.dispose();
     super.dispose();
   }
 
@@ -110,12 +124,17 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       Theme.of(context),
     ).merge(widget.styleSheet);
     _disposeRecognizers();
+    final source = stripFrontmatter(widget.data);
     final document = md.Document(
+      blockSyntaxes: <md.BlockSyntax>[
+        const MathBlockSyntax(),
+        ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+      ],
       extensionSet: md.ExtensionSet.gitHubFlavored,
       encodeHtml: false,
     );
-    final nodes = document.parseLines(
-      const LineSplitter().convert(widget.data),
+    final nodes = splitInlineMath(
+      document.parseLines(const LineSplitter().convert(source)),
     );
     final builder = MarkdownBuilder(
       delegate: this,
@@ -125,7 +144,14 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       imageBuilder: widget.imageBuilder,
       checkboxBuilder: widget.checkboxBuilder,
       bulletBuilder: widget.bulletBuilder,
-      builders: widget.builders,
+      builders: <String, MarkdownElementBuilder>{
+        ...widget.builders,
+        'math': MathInlineBuilder(cache: _mathCache, style: widget.mathStyle),
+        'mathblock': MathBlockBuilder(
+          cache: _mathCache,
+          style: widget.mathStyle,
+        ),
+      },
       paddingBuilders: const {},
       listItemCrossAxisAlignment: MarkdownListItemCrossAxisAlignment.baseline,
     );

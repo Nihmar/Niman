@@ -158,10 +158,31 @@ package's per-node builders. Never hand a novel-length document to
   pinned at 639 so a package upgrade/option change flags a regression.
   Windowed-performance verification on the 200 KB/1 MB fixtures is still
   pending the on-device pass (E9-style).
-- [ ] **T-M2-05** Math pipeline: extract math spans → `katex_dart` render →
-  LRU cache keyed by math string (design.md); placeholder box while rendering;
-  same spans highlighted in the editor. *AC: editing a math expression reuses
-  the cache for unchanged spans.*
+- [x] **T-M2-05** Math pipeline: **done** — `lib/src/preview/math_*`:
+  shared inline/display span rules (`editor/math_rule.dart`, the editor
+  tokenizer and the preview parser agree by construction), `MathBlockSyntax`
+  (display `$$…$$`, single- and multi-line, top level + list items +
+  blockquotes — the markdown package re-parses dedented list content with
+  the document's syntaxes, so no extra plumbing), post-parse inline
+  splitting (invalid `$` stays prose; inline code/fences untouched),
+  frontmatter strip, `MathCache` (LRU 512, key = exact tex + display mode,
+  errors remembered but never cached, inflight coalescing, isolate render +
+  placeholder box, sync/async seams for tests) and the widget layer
+  (baselined inline span from the cached box on katex's public painter,
+  centered display block, red fallback on error). The `katex` Flutter
+  widget package is adopted (T-M2-03's "not used" clause superseded: its
+  `KatexBoxPainter`/`boxSizePx` are the render layer; the box tree is
+  still rendered from Copist's cache so a rebuild never re-parses).
+  Testing: rule/syntax/cache unit tests + widget tests (inline in prose,
+  display top-level + in lists, edit-reuse AC via cache counters,
+  placeholder→box transition, error fallback).
+  **Measured on `Geometria 1.md` (931K, math-heavy):** 12 645 inline +
+  841 display spans; 7162 unique keys (6322 cache hits — real notes
+  repeat formulas); render ~0.1 ms/span (718 ms all-unique, off-isolate);
+  whole-doc markdown parse ~418 ms per change — the preview-side parse is
+  the only remaining per-edit pipeline cost, to be moved off the UI
+  isolate with the T-M2-04 debounce wiring (or accepted once per
+  debounce). On-device preview pass stays the E9-style follow-up.
 - [ ] **T-M2-06** Bidirectional scroll sync: line-mapping table per render pass
   (source line → preview block); scrolling either pane moves the other.
   *AC: sync verified in widget test on a long fixture, both directions.*

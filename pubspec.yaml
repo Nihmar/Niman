@@ -39,6 +39,7 @@ dependencies:
   # preview's code highlighter (lang rules, parse).
   highlight: ^0.7.0
 
+  katex: ^1.0.0
   katex_dart: ^0.1.1
 
   # The Markdown parser core behind flutter_markdown_plus (AST + GFM and
