@@ -1,12 +1,14 @@
 # M2a round 4 — keyboard re-show, grid metrics lock, selection slop (Geometria 1)
 
-**Status:** Planned · **Depends on:** M2a fix P0–P4 (committed: `542585b` + `7551eae`) · **Evidence:** `copist-debug-log-2026-09-06-121736.027.txt` (931581 chars; pushes now `2224 chars (window) in 0.2–0.6 ms`, no ~2 s stalls) + user reports: keyboard showed once then never again (Enter key itself correct); caret renders mid-glyph; selection never matches intent; taps never land where tapped · **Decisions locked:** user font size = system minimum (~0.85×); editor grid owns its metrics (`TextScaler.noScaling` on rows); tap = keyboard; plain-drag persists + tap clears (unchanged).
+**Status:** R1–R3 done (`402d003` R1+R3, `5135140` R2) · R4 device pass outstanding · **Depends on:** M2a fix P0–P4 (committed: `542585b` + `7551eae`) · **Evidence:** `copist-debug-log-2026-09-06-121736.027.txt` (931581 chars; pushes now `2224 chars (window) in 0.2–0.6 ms`, no ~2 s stalls) + user reports: keyboard showed once then never again (Enter key itself correct); caret renders mid-glyph; selection never matches intent; taps never land where tapped · **Decisions locked:** user font size = system minimum (~0.85×); editor grid owns its metrics (`TextScaler.noScaling` on rows); tap = keyboard; plain-drag persists + tap clears (unchanged).
 
 ## Why a new round
 
 P2 fixed the performance stalls (log proves it: windowed pushes, worst frame 32 ms). What remains is all interaction-layer: the log contains **zero** `ime delta` / `keystroke` lines across 25+ taps, so the typing path is untested — the keyboard never returned. The caret/tap/selection symptoms share one confirmed root (system-minimum scaler vs. fixed 21 px grid) plus two independent defects (dead connection handling, jitter-as-drag).
 
 ## R1 — keyboard never returns after system dismiss
+
+**Done (`402d003`).**
 
 - Root: `_focusEditor()` (`lib/src/editor/note_editor.dart:357-361`) only calls `requestFocus()` when `!hasFocus`. A system-back/gesture keyboard dismiss keeps Flutter focus while killing the platform connection, so later taps do nothing. `_onConnectionClosed` (`:485-487`) is an empty no-op: never nulls `_connection`, never logs, never re-shows. The log shows exactly this: one `ime focus: attached`, no `connectionClosed`, no re-attach.
 - Fix:
@@ -18,6 +20,8 @@ P2 fixed the performance stalls (log proves it: windowed pushes, worst frame 32 
 
 ## R2 — grid metrics lock (caret mid-glyph + taps landing elsewhere)
 
+**Done (`5135140`):** rows pin `TextScaler.noScaling`; caret x + tap columns via the new `RowTextMetrics` (painter over `RowModel.rowSliceText`, the shared slice source); multi-row spans stay grid (frame path); one-time `metrics:` init log (charWidth + system scaler + columns) for the R4 check. Each new test was verified to fail on the `d10be40` baseline and pass with the fix.
+
 - Root (confirmed by minimum-font report): `measureCharWidth()` measures `'0'` at scaler 1.0 with no width constraint (`virtualized_text_view.dart:53-59`) and `rowHeight = 21` is fixed, but row `Text` widgets inherit the ~0.85× system scaler → real glyphs ~10 px, real rows ~18 px. Both caret x (`leftPadding + col * charWidth`) and tap mapping (`(x / charWidth).round()`, `(y / 21).floor()` in `hit_test.dart:33-40`) share the error, growing with column/row — matches col-50 taps and deep-page drift in the log.
 - Fix:
   - Pin rows: `textScaler: TextScaler.noScaling` on both row `Text` branches in `VirtualizedTextView.build` (grid owns metrics; app chrome keeps respecting system size). Document the cost: editor renders designed 12 px even at minimum system size.
@@ -26,6 +30,8 @@ P2 fixed the performance stalls (log proves it: windowed pushes, worst frame 32 
 - AC: tap-to-caret round-trips at col 40+ and row 20+; caret visually on-glyph in screenshots at minimum font size.
 
 ## R3 — selection slop + handle observability
+
+**Done (`402d003`).**
 
 - Root (in-log): `longPress → 410..417` followed by `longPressDrag` at *identical* coordinates shrinking to `410..412` — sub-slop touch jitter is treated as drag-extend. Handle drags emit no log lines, so handle behavior is unverifiable.
 - Fix:
