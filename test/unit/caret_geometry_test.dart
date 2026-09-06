@@ -59,17 +59,36 @@ void main() {
     );
   });
 
-  test('selectionRects: single row covers the full advances (stock)', () {
-    // [3,5) = 'ab' (line 1, in-row cols 0..2, row 1): full character cells.
+  test('selectionRects: single row trims only the outer edges', () {
+    // [3,5) = 'ab' (line 1, in-row cols 0..2, row 1): both edges are
+    // outer, so both trim by 1.
     final rects = geo.selectionRects(
       const TextSelection(baseOffset: 3, extentOffset: 5),
     );
     expect(rects, hasLength(1));
     final r = rects.single;
-    expect(r.left, 5); // 5 + 0 * 10.
-    expect(r.width, 20); // (2 - 0) * 10.
+    expect(r.left, 6); // 5 + 0 * 10 + outer inset 1.
+    expect(r.width, 18); // (2 - 0) * 10 - 2 * inset.
     expect(r.top, 20); // full row height (row 1 * 20).
     expect(r.height, 20);
+  });
+
+  test('selectionRects: multi-row keeps wrap edges full-bleed', () {
+    // [3,9) = 'abcdef' (line 1: row 1 'abcd' + row 2 'ef'): the first
+    // row's right (wrap) edge and the last row's left (wrap) edge stay
+    // full-bleed; only the selection start/end trim.
+    final rects = geo.selectionRects(
+      const TextSelection(baseOffset: 3, extentOffset: 9),
+    );
+    expect(rects, hasLength(2));
+    final first = rects[0];
+    expect(first.left, 6); // start edge trims: 5 + 0 * 10 + 1.
+    expect(first.width, 39); // right (wrap) edge full: 5 + 4 * 10 - 6.
+    expect(first.top, 20);
+    final last = rects[1];
+    expect(last.left, 5); // left (wrap) edge full: 5 + 0 * 10.
+    expect(last.width, 19); // end edge trims: 5 + 2 * 10 - 1 - 5.
+    expect(last.top, 40); // row 2 * 20.
   });
 
   test('selectionRects: collapsed or invalid is empty', () {

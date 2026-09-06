@@ -1,3 +1,4 @@
+import 'dart:math' show max;
 import 'dart:ui' show Rect, TextRange;
 
 import 'package:copist/src/editor/row_model.dart';
@@ -96,9 +97,11 @@ final class CaretGeometry {
 
   /// The selection-highlight rects for [selection] (empty when collapsed):
   /// full-advance grid rects covering the selected characters, one per
-  /// visual row the selection spans (stock-editor behavior — the round-6 T3
-  /// glyph-hug inset is reverted: the hug left visible gaps at the outer
-  /// edges next to the handles).
+  /// visual row the selection spans (stock-editor behavior). Only the two
+  /// outer edges (the start of the first row, the end of the last) are
+  /// trimmed by [_outerInset] so no wash hangs past the first/last glyph;
+  /// wrap/inner edges stay full-bleed so multi-row selections read
+  /// continuous.
   List<Rect> selectionRects(TextSelection selection) {
     if (!selection.isValid || selection.isCollapsed) {
       return const <Rect>[];
@@ -112,15 +115,24 @@ final class CaretGeometry {
       if (to <= from) {
         continue;
       }
+      final left =
+          leftPadding + from * charWidth + (row == startRow ? _outerInset : 0);
+      final right =
+          leftPadding + to * charWidth - (row == endRow ? _outerInset : 0);
       rects.add(
         Rect.fromLTWH(
-          leftPadding + from * charWidth,
+          left,
           row * rowHeight,
-          (to - from) * charWidth,
+          max(0, right - left).toDouble(),
           rowHeight,
         ),
       );
     }
     return rects;
   }
+
+  /// The outer-edge trim, px: the wash stops this far inside the first and
+  /// last selected cells so it hugs the end glyphs instead of filling
+  /// their side bearings.
+  static const double _outerInset = 1;
 }
