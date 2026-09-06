@@ -319,21 +319,45 @@ final class ComposingInput {
     } else if (clamped > 0 && !_isSpace(_codeAt(clamped - 1))) {
       probe = clamped - 1;
     } else {
-      // The offset is on a run of whitespace (a line gap, a blank line, the
-      // buffer start/end): the nearest word, left first (a press just below
-      // a line lands on the line's last word).
+      // The offset is on a whitespace run: the nearest word on the pressed
+      // line first (left, then right), so an in-line gap press never lands
+      // lines away (round-5 S4). A blank/all-space line keeps the tested
+      // fallback below (nearest line above, then below — never the "\n\n"
+      // itself, M2a on-device round 3).
+      final (pressLine, _) = _buffer.locationOf(clamped);
+      final lineStart = _buffer.offsetOf(pressLine, 0);
+      final lineEnd = lineStart + _buffer.lineLength(pressLine);
       var i = clamped - 1;
-      while (i >= 0 && _isSpace(_codeAt(i))) {
+      while (i >= lineStart && _isSpace(_codeAt(i))) {
         i--;
       }
-      if (i >= 0) {
+      if (i >= lineStart) {
         probe = i;
       } else {
         i = clamped;
-        while (i < length && _isSpace(_codeAt(i))) {
+        while (i < lineEnd && _isSpace(_codeAt(i))) {
           i++;
         }
-        if (i < length) probe = i;
+        if (i < lineEnd) {
+          probe = i;
+        } else {
+          // No word on this line: fall back to the nearest line above,
+          // then below (a press just below a line lands on the line's
+          // last word).
+          i = clamped - 1;
+          while (i >= 0 && _isSpace(_codeAt(i))) {
+            i--;
+          }
+          if (i >= 0) {
+            probe = i;
+          } else {
+            i = clamped;
+            while (i < length && _isSpace(_codeAt(i))) {
+              i++;
+            }
+            if (i < length) probe = i;
+          }
+        }
       }
     }
     var start = 0;

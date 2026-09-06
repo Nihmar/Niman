@@ -18,6 +18,7 @@ final class VirtualizedTextView extends StatelessWidget {
     required this.model,
     this.highlight,
     this.scrollController,
+    this.physics,
     super.key,
   });
 
@@ -31,6 +32,11 @@ final class VirtualizedTextView extends StatelessWidget {
 
   /// Optional scroll controller (scroll sync and caret jumps).
   final ScrollController? scrollController;
+
+  /// Optional scroll physics: the editor passes a non-scrollable physics
+  /// while a select-drag is locked, so the list cannot scroll under the
+  /// extending selection (M2a round-5 S1). Null keeps the default behavior.
+  final ScrollPhysics? physics;
 
   /// Row height in px. Integer on purpose: 12 * 1.75 is exactly 21.0 in
   /// double, so `itemExtent * rowCount` stays exact at any buffer size
@@ -86,6 +92,7 @@ final class VirtualizedTextView extends StatelessWidget {
     final highlight = this.highlight;
     return CustomScrollView(
       controller: scrollController,
+      physics: physics,
       slivers: [
         SliverFixedExtentList(
           itemExtent: rowHeight,

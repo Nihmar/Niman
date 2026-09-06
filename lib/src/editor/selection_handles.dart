@@ -4,6 +4,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:copist/src/editor/selection_delegate.dart';
+import 'package:copist/src/editor/selection_handle_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -199,7 +200,7 @@ final class SelectionHandles {
       onEndHandleDragUpdate: _dragUpdateEnd,
       onEndHandleDragEnd: _dragEnd,
       selectionEndpoints: _endpoints,
-      selectionControls: materialTextSelectionControls,
+      selectionControls: CopistSelectionControls(),
       // Required (not deprecated): the framework routes the toolbar's
       // state (paste enabled, …) through the delegate.
       selectionDelegate: delegate,
@@ -280,8 +281,13 @@ final class SelectionHandles {
   void _dragStart(DragStartDetails details) {
     _dragging = true;
     _dragStartSelection = input.selection;
-    _log.debug('handleDragStart: $_dragStartSelection');
+    _log.debug('handleDragStart: ${_range(_dragStartSelection)}');
   }
+
+  /// The `start..end` offsets (explicit ints — `${selection}` renders as
+  /// `Instance of 'TextSelection'` in the exported log, round-5 S3).
+  static String _range(TextSelection selection) =>
+      '${selection.start}..${selection.end}';
 
   /// The left handle (the selection's start side) moves to the pointer; the
   /// other side stays put.
@@ -295,7 +301,7 @@ final class SelectionHandles {
         extentOffset: math.max(fixed, offset),
       ),
     );
-    _log.debug('handleDragStartMove: $offset -> ${input.selection}');
+    _log.debug('handleDragStartMove: $offset -> ${_range(input.selection)}');
   }
 
   /// The right handle (the selection's end side) moves to the pointer; the
@@ -310,7 +316,7 @@ final class SelectionHandles {
         extentOffset: math.max(fixed, offset),
       ),
     );
-    _log.debug('handleDragEndMove: $offset -> ${input.selection}');
+    _log.debug('handleDragEndMove: $offset -> ${_range(input.selection)}');
   }
 
   /// The handle drag ends: commit the final selection to the IME (the moves
@@ -318,7 +324,7 @@ final class SelectionHandles {
   void _dragEnd(DragEndDetails details) {
     if (!_dragging) return;
     _dragging = false;
-    _log.debug('handleDragEnd: ${input.selection}');
+    _log.debug('handleDragEnd: ${_range(input.selection)}');
     commitSelection();
   }
 }

@@ -133,7 +133,8 @@ void main() {
     expect(input.selection, const TextSelection.collapsed(offset: 6));
   });
 
-  testWidgets('drag extends the selection', (tester) async {
+  testWidgets('collapsed horizontal drag moves the caret, never selects (S1)',
+      (tester) async {
     final input = ComposingInput('abcd\nefgh\nijkl');
     final focus = FocusNode();
     await tester.pumpWidget(
@@ -152,24 +153,111 @@ void main() {
     final charWidth = VirtualizedTextView.measureCharWidth();
     const left = VirtualizedTextView.leftPadding;
     const rowH = VirtualizedTextView.rowHeight;
-    // Drag row 0, col 0 (offset 0) → row 1, col 4 (line 'efgh' starts at
-    // offset 5, col 4 → offset 9). Horizontal first: the direction lock
-    // (M2a fix P4) sees the horizontal axis clear the slop before the
-    // vertical one, so this is a selection drag, not a scroll.
+    // The stock-editor touch-drag rule (round-5 S1+S2): a collapsed drag
+    // follows with the caret, it never grows a selection (selections come
+    // from long-press, handles, or an already-active selection).
     final gesture =
         await tester.startGesture(const Offset(left, rowH * 0.5));
-    await gesture.moveTo(Offset(left + 6 * charWidth, rowH * 0.5));
+    await gesture.moveTo(Offset(left + 4 * charWidth, rowH * 0.5));
     await tester.pump();
-    await gesture.moveTo(Offset(left + 4 * charWidth, rowH * 1.5));
-    await tester.pump();
+    expect(input.selection, const TextSelection.collapsed(offset: 4));
     await gesture.up();
     await tester.pump();
-    // The drag-end persists the selection (no collapse, M2a fix P4): the
-    // handles and toolbar stay up over it.
-    expect(
-      input.selection,
-      const TextSelection(baseOffset: 0, extentOffset: 9),
+    expect(input.selection, const TextSelection.collapsed(offset: 4));
+    focus.dispose();
+  });
+
+  testWidgets('selection-active drag extends on any axis, scroll frozen (S1)',
+      (tester) async {
+    // 40 lines exceed the 600px viewport (row height 21): scrollable.
+    final text = List.generate(40, (i) => 'line $i').join('\n');
+    final input = ComposingInput(text);
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: text,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
     );
+    input.setSelection(const TextSelection(baseOffset: 0, extentOffset: 4));
+    await tester.pump();
+    final position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.pixels, 0.0);
+    // Diagonal and vertical-dominant: the old direction lock would have
+    // yielded to scrolling (and the 123451 log showed the scroll running
+    // 418→475 while the selection sat frozen). With a selection active
+    // the drag selects and the list stays put.
+    const left = VirtualizedTextView.leftPadding;
+    final gesture = await tester.startGesture(const Offset(left, 10));
+    await tester.pump();
+    await gesture.moveTo(const Offset(left + 30, 70));
+    await tester.pump();
+    expect(input.selection.isCollapsed, isFalse);
+    expect(input.selection.baseOffset, 0);
+    expect(position.pixels, 0.0);
+    await gesture.up();
+    await tester.pump();
+    expect(input.selection.isCollapsed, isFalse);
+    focus.dispose();
+  });
+
+  testWidgets('a second finger mid-drag keeps the selection (S2)',
+      (tester) async {
+    final input = ComposingInput('hello world');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hello world',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    const left = VirtualizedTextView.leftPadding;
+    input.setSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 5),
+    );
+    await tester.pump();
+    // First finger drags from inside the selection rightward. Exact end
+    // columns are pinned by the R2 round-trip test; here only the anchor
+    // (the S2 contract) and the rightward extension matter.
+    final first =
+        await tester.startGesture(Offset(left + 2 * charWidth, 10));
+    await tester.pump();
+    await first.moveTo(Offset(left + 9.4 * charWidth, 10));
+    await tester.pump();
+    expect(input.selection.baseOffset, 2);
+    expect(input.selection.extentOffset, greaterThan(5));
+    // A second finger taps elsewhere mid-drag (the 123451 mid-drag
+    // collapse: the lock reset and the next move re-anchored). It must be
+    // ignored entirely: same anchor, same extent.
+    final before = input.selection;
+    final second = await tester.startGesture(const Offset(left, 100));
+    await tester.pump();
+    await second.up();
+    await tester.pump();
+    expect(input.selection, before);
+    await first.moveTo(Offset(left + 11.4 * charWidth, 10));
+    await tester.pump();
+    await first.up();
+    await tester.pump();
+    expect(input.selection.baseOffset, 2);
+    expect(input.selection.extentOffset, 11);
+    focus.dispose();
   });
 
   testWidgets('a vertical drag scrolls, not selects (M2a fix P4)',
@@ -387,11 +475,12 @@ void main() {
     await tester.pump();
     expect(tester.testTextInput.editingState?['selectionBase'], 0);
     expect(tester.testTextInput.editingState?['selectionExtent'], 0);
-    // The drag ends: the selection persists (no collapse, M2a fix P4) and
-    // is pushed once (window-sized).
+    // The drag ends: the followed caret is pushed once (collapsed —
+    // the stock-editor touch-drag rule moves the caret, it never grows a
+    // selection; round-5 S1).
     await gesture.up();
     await tester.pump();
-    expect(tester.testTextInput.editingState?['selectionBase'], 0);
+    expect(tester.testTextInput.editingState?['selectionBase'], 10);
     expect(tester.testTextInput.editingState?['selectionExtent'], 10);
     focus.dispose();
   });

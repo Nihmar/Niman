@@ -226,6 +226,17 @@ void main() {
       final input = ComposingInput('')..selectWordAt(0);
       expect(input.selection, const TextSelection.collapsed(offset: 0));
     });
+
+    test('selectWordAt in a gap stays on its line (round-5 S4)', () {
+      // 'x\n  b\ny', press at 2 (leading spaces of line 1): the old
+      // unbounded walk landed on 'x' above (1..0); the line-bounded walk
+      // lands on 'b' (4..5).
+      final input = ComposingInput('x\n  b\ny')..selectWordAt(2);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 4, extentOffset: 5),
+      );
+    });
   });
 
   group('reset and value', () {
