@@ -155,7 +155,9 @@ final class SelectionHandles {
   }
 
   /// The viewport-local offset of buffer [offset] (the anchor point of one
-  /// selection handle).
+  /// selection handle): the bottom of the offset's row, so the ball hangs
+  /// below the word (round-7 — the row top parked the balls mid-glyph, as
+  /// the 133116 screenshots show).
   TextSelectionPoint _pointFor(
     int offset,
     CaretGeometry geometry,
@@ -165,7 +167,7 @@ final class SelectionHandles {
     return TextSelectionPoint(
       Offset(
         geometry.leftPadding + col * geometry.charWidth,
-        row * geometry.rowHeight - scrollOffset,
+        (row + 1) * geometry.rowHeight - scrollOffset,
       ),
       TextDirection.ltr,
     );

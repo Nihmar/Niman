@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Copist's selection-handle controls (M2a round-5 T2): the stock Material
-/// toolbar and behavior, but smaller bottom-hanging balls with an edge
-/// highlight instead of the 22 px stock handles.
+/// toolbar and behavior, but smaller bottom-hanging flat balls (stock is
+/// 22 px).
 ///
 /// Only the handle rendering differs from [MaterialTextSelectionControls]:
 /// everything else (toolbar, copy/cut/paste/select-all gating, magnifier
@@ -64,10 +64,10 @@ final class CopistSelectionControls extends MaterialTextSelectionControls {
   }
 }
 
-/// A 16 px teardrop: filled ball + stem to the tip, with a bright rim
-/// behind it (the user-asked edge highlight, so the ball reads on dark
-/// themes). Unmirrored, the tip is the box's top-left corner and the ball
-/// hangs bottom-right; [mirrored] flips it horizontally.
+/// A 16 px teardrop: filled ball + stem to the tip (flat, no rim —
+/// round-7 removed the bright edge highlight). Unmirrored, the tip is the
+/// box's top-left corner and the ball hangs bottom-right; [mirrored] flips
+/// it horizontally.
 final class _CopistHandlePainter extends CustomPainter {
   /// Creates the painter in [color], optionally [mirrored] horizontally.
   const _CopistHandlePainter({required this.color, required this.mirrored});
@@ -78,20 +78,13 @@ final class _CopistHandlePainter extends CustomPainter {
   /// Whether to mirror horizontally (the left ball).
   final bool mirrored;
 
-  static const double _size =
-      CopistSelectionControls.handleSize;
+  static const double _size = CopistSelectionControls.handleSize;
   static const double _ballRadius = 5.5;
   static const Offset _ballCenter = Offset(6.5, 10);
   static const double _stemWidth = 3;
-  static const double _rimWidth = 1.5;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // The rim first (slightly larger, bright), then the filled ball+stem.
-    final rim = Paint()
-      ..color = const Color(0xB3FFFFFF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _rimWidth;
     final fill = Paint()..color = color;
     canvas.save();
     if (mirrored) {
@@ -100,8 +93,6 @@ final class _CopistHandlePainter extends CustomPainter {
         ..scale(-1, 1);
     }
     canvas
-      ..drawCircle(_ballCenter, _ballRadius + _rimWidth / 2, rim)
-      ..drawRect(const Rect.fromLTWH(0, 0, _stemWidth, 7), rim)
       ..drawCircle(_ballCenter, _ballRadius, fill)
       ..drawRect(const Rect.fromLTWH(0, 0, _stemWidth, 7), fill)
       ..restore();

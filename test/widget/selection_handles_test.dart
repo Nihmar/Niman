@@ -165,14 +165,18 @@ void main() {
     await _longPressFirstWord(tester);
     expect(input.selectionText, 'hello');
 
-    // The start endpoint is the viewport-local (leftPadding, 0); the
-    // Material handle's interactive center is the endpoint + (-11, 11)
-    // (a 22 px handle expanded to a 48 px hit area, anchored on its right
-    // edge).
+    // The start endpoint is the viewport-local (leftPadding, rowHeight) —
+    // the bottom of row 0 (round-7: the endpoints were the row top and the
+    // balls floated mid-glyph). The Material handle's interactive center is
+    // the endpoint + (-11, 11) (a 22 px handle expanded to a 48 px hit
+    // area, anchored on its right edge).
     final viewportTopLeft = tester.getTopLeft(find.byType(VirtualizedTextView));
     final charWidth = VirtualizedTextView.measureCharWidth();
     final startCenter = viewportTopLeft +
-        const Offset(VirtualizedTextView.leftPadding - 11, 11);
+        const Offset(
+          VirtualizedTextView.leftPadding - 11,
+          VirtualizedTextView.rowHeight + 11,
+        );
     // The pointer's end x must land in column 2: local x in
     // [leftPadding + 2·charWidth, leftPadding + 3·charWidth).
     final dx = 2 * charWidth + VirtualizedTextView.leftPadding;
