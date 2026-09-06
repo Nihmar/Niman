@@ -7,6 +7,9 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/note_editor.dart';
+import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/editor/word_count.dart';
+import 'package:copist/src/ui/outline_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -83,12 +86,22 @@ final class _NoteViewState extends State<NoteView>
   /// Identity comparison keeps this O(1) at any file size.
   CodeLines? _lastLines;
 
+  /// The editor's scroll: the outline jump (and the future scroll sync)
+  /// lands through it.
+  late final CodeScrollController _scroll;
+
   bool _loading = true;
   bool _ready = false;
   bool _saving = false;
   bool _savePending = false;
   String? _error;
   Timer? _saveTimer;
+
+  /// Debounced note-statistics refresh (word count + outline, T-M2-07).
+  Timer? _statsTimer;
+  int _wordCount = 0;
+  List<OutlineEntry> _outline = const <OutlineEntry>[];
+  bool _showOutline = false;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
@@ -103,6 +116,7 @@ final class _NoteViewState extends State<NoteView>
     _focus.addListener(_onFocusChanged);
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
+    _scroll = CodeScrollController();
     _controller = widget.controller == null
         ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
         : widget.controller!;
@@ -134,10 +148,13 @@ final class _NoteViewState extends State<NoteView>
   @override
   void dispose() {
     _saveTimer?.cancel();
+    _statsTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
     _focus.dispose();
+    _scroll.verticalScroller.dispose();
+    _scroll.horizontalScroller.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
@@ -189,6 +206,9 @@ final class _NoteViewState extends State<NoteView>
         _loading = false;
         _ready = true;
       });
+      // Word count + outline on open: they are debounced for edits only,
+      // the load path has its own refresh.
+      _refreshStats();
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -231,6 +251,35 @@ final class _NoteViewState extends State<NoteView>
         ? const Duration(seconds: 1)
         : const Duration(milliseconds: 500);
     _saveTimer = Timer(debounce, _save);
+    // Word count + outline (T-M2-07): the O(n) passes live behind a
+    // debounce, never on the keystroke path.
+    _statsTimer?.cancel();
+    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+  }
+
+  void _refreshStats() {
+    if (!mounted || _loading) return;
+    final text = _controller.text;
+    if (text != _lastStatsText) {
+      _lastStatsText = text;
+      setState(() {
+        _wordCount = countWords(text);
+        _outline = _highlight.outline();
+      });
+    }
+  }
+
+  String? _lastStatsText;
+
+  /// The outline jump: caret to the heading line, then bring it into view.
+  void _jumpToHeading(int line) {
+    _controller.selection = CodeLineSelection.collapsed(
+      index: line,
+      offset: 0,
+    );
+    _scroll.makeCenterIfInvisible(
+      CodeLinePosition(index: line, offset: 0),
+    );
   }
 
   void _onFocusChanged() {
@@ -319,15 +368,47 @@ final class _NoteViewState extends State<NoteView>
                       focusNode: _focus,
                       showLineNumbers: widget.showLineNumbers,
                       autofocus: widget.autofocusEditor,
+                      scrollController: _scroll,
                     ))
               : Center(child: Text(error)),
         ),
+        if (_showOutline && _outline.isNotEmpty)
+          OutlinePanel(
+            entries: _outline,
+            onJump: _jumpToHeading,
+          ),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-            child: Text(
-              _status,
-              style: Theme.of(context).textTheme.labelSmall,
+            child: Row(
+              children: [
+                if (!_loading)
+                  IconButton(
+                    key: const Key('outline-toggle'),
+                    tooltip: 'Outline',
+                    icon: const Icon(Icons.toc),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 34,
+                      minHeight: 26,
+                    ),
+                    onPressed: () =>
+                        setState(() => _showOutline = !_showOutline),
+                  ),
+                if (!_loading)
+                  Text(
+                    '$_wordCount words',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                const Spacer(),
+                Text(
+                  _status,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
             ),
           ),
         ),

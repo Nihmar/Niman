@@ -198,9 +198,20 @@ package's per-node builders. Never hand a novel-length document to
   test tolerates one block of quantization on a 300-paragraph fixture).
   Shell wiring lands with the layout modes (T-M2-08); on-device full-pass
   pending.
-- [ ] **T-M2-07** Word count + heading outline + folding: live word count;
-  outline panel listing headings (click → jump); folding collapses sections in
-  the editor. *AC: fold/unfold a section; outline jumps land correctly.*
+- [x] **T-M2-07** Word count + heading outline + folding:
+  **done** — live word count (whitespace-separated tokens; the O(n) pass
+  is debounced 350 ms, and computed on open), the outline (tokenizer-based
+  `outlineOf` — matches the highlighted headings; fences/math/frontmatter
+  never count) opens from `NoteView`'s status bar (`OutlinePanel`,
+  indented levels, tap → jump: caret to the heading line via the editor
+  scroll controller's `makeCenterIfInvisible`), and heading folding rides
+  re_editor's chunk model: `MarkdownChunkAnalyzer` derives `CodeChunk`
+  fold ranges from the outline (only real sections; nested child headings
+  fold inside their parent; the fold markers come from
+  `DefaultCodeChunkIndicator` next to the line numbers). ACs verified in
+  tests: fold/unfold collapses the section (`chunkParent` + line count),
+  outline jump lands the correct caret line. The 931K device pass stays
+  pending (fold markers + outline panel on the big note).
 - [ ] **T-M2-08** Layout modes: desktop = sidebar | editor | preview
   (draggable split); Android phone = full-screen Edit/Preview switch;
   tablet/wide = split; user override (auto / force split / force switch) in

@@ -1,5 +1,6 @@
 import 'package:copist/src/editor/highlight_style.dart';
 import 'package:copist/src/editor/highlighting.dart';
+import 'package:copist/src/editor/outline.dart';
 import 'package:flutter/widgets.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -87,6 +88,11 @@ final class EditorHighlightSync {
     _spans[index] = span;
     return span;
   }
+
+  /// The document's heading outline (T-M2-07), from the incremental
+  /// document's tokens — materializes the whole document, so call it from a
+  /// debounced path.
+  List<OutlineEntry> outline() => outlineOf(_doc.lines);
 
   /// The first line whose content differs between [old] and [current].
   ///

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/editor/markdown_chunks.dart';
 import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -74,22 +75,30 @@ final class NoteEditor extends StatelessWidget {
           'Roboto Mono',
         ],
       ),
-      // The row-number column (settings toggle). No chunk indicator: the
-      // default analyzer folds `{}`/`[]` — wrong for Markdown — so it is
-      // disabled below and heading folds (folding.dart) are re-introduced
-      // through that hook.
+      // The row-number column + fold markers (settings + T-M2-07): heading
+      // chunks come from MarkdownChunkAnalyzer (the header folds), not the
+      // default brace folding.
       indicatorBuilder: showLineNumbers
           ? (context, editingController, chunkController, notifier) {
-              return DefaultCodeLineNumber(
-                controller: editingController,
-                notifier: notifier,
+              return Row(
+                children: [
+                  DefaultCodeLineNumber(
+                    controller: editingController,
+                    notifier: notifier,
+                  ),
+                  DefaultCodeChunkIndicator(
+                    width: 20,
+                    controller: chunkController,
+                    notifier: notifier,
+                  ),
+                ],
               );
             }
           : null,
+      // Heading-section folds (the tokenizer's outline — fences/math/
+      // frontmatter are never anchors), not `{}`/`[]`.
+      chunkAnalyzer: const MarkdownChunkAnalyzer(),
       scrollController: scrollController,
-      // The default chunk analyzer folds `{}`/`[]` — wrong for Markdown.
-      // Heading folds (folding.dart) are re-introduced through this hook.
-      chunkAnalyzer: const NonCodeChunkAnalyzer(),
       toolbarController: MobileSelectionToolbarController(
         builder: ({
           required context,
