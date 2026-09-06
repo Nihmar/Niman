@@ -34,11 +34,41 @@ final class RowTextMetrics {
   }
 
   /// The column of [rowText] under pixel [x] (from the row's first glyph),
-  /// clamped to the row length [maxCol].
+  /// clamped to the row length [maxCol]: the caret boundary nearest [x].
+  ///
+  /// Measured from the same caret boundaries [caretX] paints, on one layout
+  /// — so a tap and the caret it places agree by construction. (The previous
+  /// `getPositionForOffset(...).offset` is a *character* index, not a caret
+  /// boundary: at a row's trailing edge it resolves to the last character
+  /// instead of past it, parking the caret behind the last char of long
+  /// rows on device.)
   int columnForX(String rowText, double x, int maxCol) {
-    return _painter(
-      rowText,
-    ).getPositionForOffset(Offset(x, 0)).offset.clamp(0, maxCol);
+    final clampedMax = maxCol.clamp(0, rowText.length);
+    if (clampedMax <= 0 || x <= 0) return 0;
+    final painter = _painter(rowText);
+    var best = 0;
+    var bestDist = (painter
+            .getOffsetForCaret(const TextPosition(offset: 0), Rect.zero)
+            .dx -
+        x)
+        .abs();
+    for (var col = 1; col <= clampedMax; col++) {
+      final dist = (painter
+                  .getOffsetForCaret(
+                    TextPosition(offset: col),
+                    Rect.zero,
+                  )
+                  .dx -
+              x)
+          .abs();
+      // Ties (an exact mid-glyph tap) round up, like the grid's
+      // `(x / charWidth).round()`.
+      if (dist <= bestDist) {
+        bestDist = dist;
+        best = col;
+      }
+    }
+    return best;
   }
 
   TextPainter _painter(String rowText) {
