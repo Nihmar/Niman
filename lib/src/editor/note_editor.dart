@@ -93,6 +93,13 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// The pointer-down position (viewport-local) the direction lock measures
   /// against; `null` when no pointer is down.
   Offset? _dragStart;
+
+  /// The long-press activation point (viewport-local): long-press drag
+  /// moves below the touch slop from it are touch jitter, not a drag
+  /// (the M2a round-4 R3 "word selection collapses on its own" bug — the
+  /// 121736 log showed a `longPressDrag` at identical coordinates
+  /// shrinking `410..417` to `410..412`). `null` outside a long-press.
+  Offset? _longPressStart;
   late final SelectionHandles _handles;
 
   /// The anchor of the selection handles/toolbar: the scroll viewport box
@@ -225,9 +232,17 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   /// Extends the long-press selection to the pointer (the anchor stays at
-  /// the long-press end).
-  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) =>
-      _handleDragMove('longPressDrag', details.localPosition);
+  /// the long-press end). Moves below the touch slop from the press point
+  /// are touch jitter and must not shrink the fresh word selection (R3).
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    final start = _longPressStart;
+    if (start != null &&
+        (details.localPosition - start).distance < kTouchSlop) {
+      _log.debug('longPressDrag: jitter below slop, ignored');
+      return;
+    }
+    _handleDragMove('longPressDrag', details.localPosition);
+  }
 
   /// A pointer down (viewport-local): arms the plain-drag direction lock
   /// for this gesture. Raw pointer callbacks, not arena recognizers (the
@@ -292,6 +307,7 @@ final class _NoteEditorState extends State<NoteEditor> {
     if (_dragKind == _DragKind.selecting) _pushSelection();
     _dragKind = _DragKind.none;
     _dragStart = null;
+    _longPressStart = null;
   }
 
   /// A long-press selects the word under the pointer (the long-press
@@ -303,6 +319,7 @@ final class _NoteEditorState extends State<NoteEditor> {
   void _handleLongPressStart(LongPressStartDetails details) {
     _focusEditor();
     _dragKind = _DragKind.longPress;
+    _longPressStart = details.localPosition;
     final changed = _gestures.longPressAt(
       _textX(details.localPosition.dx),
       details.localPosition.dy + _scrollOffset,
@@ -315,6 +332,7 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// persists (no collapse), but its moves did not push — land the final
   /// selection so the next keystroke edits it.
   void _handleLongPressEnd(LongPressEndDetails details) {
+    _longPressStart = null;
     _pushSelection();
   }
 
@@ -354,9 +372,23 @@ final class _NoteEditorState extends State<NoteEditor> {
           '(row $row col $col)';
   }
 
+  /// Ensures the keyboard is up: requests focus when unfocused (the
+  /// focus listener attaches + shows), and when already focused but the
+  /// platform closed the connection under us (a system back/gesture
+  /// dismiss keeps Flutter focus while killing the connection — the M2a
+  /// round-4 R1 "keyboard never returns" bug) re-attaches + shows, or
+  /// re-shows on a live connection (a hide without close).
   void _focusEditor() {
     if (!widget.focusNode.hasFocus) {
       widget.focusNode.requestFocus();
+      return;
+    }
+    if (_connection == null) {
+      _log.info('ime focus: re-attaching after a system dismiss');
+      _attachConnection();
+    } else {
+      _connection!.show();
+      _log.debug('ime show: keyboard re-shown on tap');
     }
   }
 
@@ -483,40 +515,51 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   void _onConnectionClosed() {
-    // The platform dismissed the keyboard; the connection is already closed.
+    // The platform dismissed the keyboard (system back/gesture): the
+    // connection is dead but focus is usually retained. Drop it so the
+    // next tap re-attaches via [_focusEditor] — and deliberately do NOT
+    // re-show here, or a user dismiss could never stay dismissed (R1).
+    _log.info('ime focus: connection closed by the platform');
+    _connection = null;
+  }
+
+  /// Attaches a fresh platform connection and shows the keyboard. Shared
+  /// by the focus-attach path and the re-attach after a system dismiss.
+  void _attachConnection() {
+    // multiline: the default (TextInputType.text) is a single-line field,
+    // whose keyboard offers a checkmark (done) instead of Enter (the M2a
+    // on-device round-2 keyboard complaint). No suggestion pipeline: on
+    // the 931K note every push drove the IME's suggestion strip, which
+    // blocked the Android main thread ~2 s per push (M2a round 3) — flip
+    // `enableSuggestions` back if the trade is not wanted.
+    final connection = TextInput.attach(
+      _client,
+      const TextInputConfiguration(
+        inputType: TextInputType.multiline,
+        // The default action is `done` (a checkmark on Gboard); a
+        // multiline note wants a real newline (the ⏎ key).
+        inputAction: TextInputAction.newline,
+        enableSuggestions: false,
+        // Delta model: the platform sends a TextEditingDelta per edit
+        // instead of the whole field (the P0 keystroke fix).
+        enableDeltaModel: true,
+      ),
+    );
+    _connection = connection;
+    final clock = Stopwatch()..start();
+    // The attach push is the caret's window (KB, M2a fix P2) — the buffer
+    // size is logged for the load context, not pushed.
+    _client.pushValue();
+    connection.show();
+    _log.info(
+      'ime focus: attached, pushed a window of a ${_input.textLength} '
+      'char buffer in ${_ms(clock.elapsedMicroseconds)} ms',
+    );
   }
 
   void _onFocusChanged() {
     if (widget.focusNode.hasFocus) {
-      // multiline: the default (TextInputType.text) is a single-line field,
-      // whose keyboard offers a checkmark (done) instead of Enter (the M2a
-      // on-device round-2 keyboard complaint). No suggestion pipeline: on
-      // the 931K note every push drove the IME's suggestion strip, which
-      // blocked the Android main thread ~2 s per push (M2a round 3) — flip
-      // `enableSuggestions` back if the trade is not wanted.
-      final connection = TextInput.attach(
-        _client,
-        const TextInputConfiguration(
-          inputType: TextInputType.multiline,
-          // The default action is `done` (a checkmark on Gboard); a
-          // multiline note wants a real newline (the ⏎ key).
-          inputAction: TextInputAction.newline,
-          enableSuggestions: false,
-          // Delta model: the platform sends a TextEditingDelta per edit
-          // instead of the whole field (the P0 keystroke fix).
-          enableDeltaModel: true,
-        ),
-      );
-      _connection = connection;
-      final clock = Stopwatch()..start();
-      // The attach push is the caret's window (KB, M2a fix P2) — the buffer
-      // size is logged for the load context, not pushed.
-      _client.pushValue();
-      connection.show();
-      _log.info(
-        'ime focus: attached, pushed a window of a ${_input.textLength} '
-        'char buffer in ${_ms(clock.elapsedMicroseconds)} ms',
-      );
+      _attachConnection();
     } else {
       _log.info('ime focus: connection closed');
       _connection?.close();

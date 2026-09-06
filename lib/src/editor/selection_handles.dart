@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:copist/src/editor/selection_delegate.dart';
@@ -36,6 +37,11 @@ final class SelectionHandles {
 
   /// Pushes the final selection to the IME on a handle-drag end.
   final void Function() commitSelection;
+
+  /// The handle-drag diagnostics (the M2a round-4 R3 log gap: handle drags
+  /// were the only gesture with no log lines, so handle behavior was
+  /// unverifiable from an exported log).
+  static const AppLogger _log = AppLogger(name: 'editor');
 
   /// The layer link the start handle follows: the editor anchors it to the
   /// `startAnchor` target (the start endpoint, moved on every update — the
@@ -274,6 +280,7 @@ final class SelectionHandles {
   void _dragStart(DragStartDetails details) {
     _dragging = true;
     _dragStartSelection = input.selection;
+    _log.debug('handleDragStart: $_dragStartSelection');
   }
 
   /// The left handle (the selection's start side) moves to the pointer; the
@@ -288,6 +295,7 @@ final class SelectionHandles {
         extentOffset: math.max(fixed, offset),
       ),
     );
+    _log.debug('handleDragStartMove: $offset -> ${input.selection}');
   }
 
   /// The right handle (the selection's end side) moves to the pointer; the
@@ -302,6 +310,7 @@ final class SelectionHandles {
         extentOffset: math.max(fixed, offset),
       ),
     );
+    _log.debug('handleDragEndMove: $offset -> ${input.selection}');
   }
 
   /// The handle drag ends: commit the final selection to the IME (the moves
@@ -309,6 +318,7 @@ final class SelectionHandles {
   void _dragEnd(DragEndDetails details) {
     if (!_dragging) return;
     _dragging = false;
+    _log.debug('handleDragEnd: ${input.selection}');
     commitSelection();
   }
 }

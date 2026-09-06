@@ -495,4 +495,93 @@ void main() {
     expect(input.text, 'hi');
     focus.dispose();
   });
+
+  testWidgets('a tap re-attaches after a system dismiss (R1)',
+      (tester) async {
+    final input = ComposingInput('hi');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    expect(tester.testTextInput.isVisible, isTrue);
+    // The system dismisses the keyboard (back/gesture): the platform kills
+    // the connection while Flutter focus is retained (the M2a on-device
+    // round-4 keyboard complaint — the log showed one attach, then
+    // silence across 25+ taps).
+    tester.testTextInput.closeConnection();
+    await tester.pump();
+    expect(focus.hasFocus, isTrue);
+    final callsBefore = tester.testTextInput.log.length;
+    // A tap must bring the keyboard back: re-attach (setClient) + push the
+    // window (setEditingState) + show.
+    await tester.tapAt(const Offset(20, 10));
+    await tester.pump();
+    final after = tester.testTextInput.log.sublist(callsBefore);
+    expect(
+      after.any((c) => c.method == 'TextInput.setClient'),
+      isTrue,
+      reason: 'a tap after a system dismiss must re-attach the connection',
+    );
+    expect(
+      after.any((c) => c.method == 'TextInput.show'),
+      isTrue,
+      reason: 'a tap after a system dismiss must re-show the keyboard',
+    );
+    expect(tester.testTextInput.isVisible, isTrue);
+    focus.dispose();
+  });
+
+  testWidgets('long-press jitter below slop keeps the word (R3)',
+      (tester) async {
+    final input = ComposingInput('hello world');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hello world',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    // x 14 = the left padding (12) + 2 px, i.e. column 0 of row 0.
+    final gesture = await tester.startGesture(const Offset(14, 10));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+    expect(input.selectionText, 'hello');
+    // Touch jitter below the slop must not shrink the fresh word selection
+    // (the M2a round-4 R3 log finding: a same-coordinate `longPressDrag`
+    // collapsed `410..417` to `410..412`).
+    await gesture.moveTo(const Offset(16, 11));
+    await tester.pump();
+    expect(input.selectionText, 'hello');
+    // A real drag past the slop still extends the selection.
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    await gesture.moveTo(Offset(14 + 6 * charWidth, 10));
+    await tester.pump();
+    expect(input.selectionText, 'hello ');
+    await gesture.up();
+    await tester.pump();
+    // The extended selection persists after release (no collapse).
+    expect(input.selectionText, 'hello ');
+    focus.dispose();
+  });
 }
