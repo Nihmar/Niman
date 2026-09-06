@@ -17,8 +17,8 @@
 /// worst case (an edit before an unclosed fence) the rest of the file.
 library;
 
+import 'package:copist/src/editor/math_rule.dart';
 import 'package:meta/meta.dart';
-
 /// The kind of a styled run within a line.
 enum TokenKind {
   /// Plain text. Not emitted as a token: any offset not covered by a token
@@ -446,7 +446,7 @@ final class HighlightDocument {
   }
 
   static bool _isSingleLineMath(String trimmed) =>
-      _isSingleLineMathPub(trimmed);
+      isSingleLineDisplay(trimmed);
 
   static _Fence? _fenceOpen(String text) {
     final info = _fenceOpenInfo(text);
@@ -666,7 +666,7 @@ List<MathSpan> mathSpansIn(String text) {
       continue;
     }
     if (trimmed.startsWith(r'$$')) {
-      if (_isSingleLineMathPub(trimmed)) {
+      if (isSingleLineDisplay(trimmed)) {
         final indent = line.length - line.trimLeft().length;
         spans.add(
           MathSpan(
@@ -681,7 +681,7 @@ List<MathSpan> mathSpansIn(String text) {
       }
       continue;
     }
-    for (final (s, e) in _allInlineMath(line)) {
+    for (final (s, e) in allInlineMath(line)) {
       spans.add(MathSpan(lineStart + s, lineStart + e, block: false));
     }
   }
@@ -689,42 +689,8 @@ List<MathSpan> mathSpansIn(String text) {
   return spans;
 }
 
-bool _isSingleLineMathPub(String trimmed) =>
-    trimmed.length >= 4 && trimmed.startsWith(r'$$') && trimmed.endsWith(r'$$');
-
 bool _isSpaceChar(int c) =>
     c == 0x20 || c == 0x09 || c == 0x0A || c == 0x0B || c == 0x0C || c == 0x0D;
-
-/// `$…$` at/after [from] under the inline-math rules.
-(int, int)? _findMath(String line, int from) {
-  for (var i = from; i < line.length; i++) {
-    if (line.codeUnitAt(i) != 0x24) continue;
-    final after = i + 1;
-    if (after >= line.length) continue;
-    final a = line.codeUnitAt(after);
-    if (a == 0x24 || _isSpaceChar(a)) continue;
-    for (var j = after; j < line.length; j++) {
-      if (line.codeUnitAt(j) != 0x24) continue;
-      final before = line.codeUnitAt(j - 1);
-      if (before == 0x5C || _isSpaceChar(before)) continue;
-      final nextCh = j + 1 < line.length ? line.codeUnitAt(j + 1) : -1;
-      if (nextCh >= 0x30 && nextCh <= 0x39) continue;
-      return (i, j + 1);
-    }
-  }
-  return null;
-}
-
-/// All `$…$` spans in [line].
-Iterable<(int, int)> _allInlineMath(String line) sync* {
-  var pos = 0;
-  while (pos < line.length) {
-    final m = _findMath(line, pos);
-    if (m == null) return;
-    yield m;
-    pos = m.$2;
-  }
-}
 
 /// The fence-opening run at the start of [text] (at least three backticks
 /// or tildes, nothing but whitespace/language after) or null.
@@ -791,7 +757,7 @@ final class _InlineScanner {
       if (code != null) {
         consider(TokenKind.codeInline, code.$1, code.$2);
       }
-      final math = _findMath(line, pos);
+      final math = findInlineMath(line, pos);
       if (math != null) {
         consider(TokenKind.mathInline, math.$1, math.$2);
       }
