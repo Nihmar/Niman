@@ -113,9 +113,12 @@ void main() {
       }
     });
 
-    test('no math when the open is followed by a space', () {
+    test('space-adjacent delimiters are math (the corpus writes dollar spans)',
+        () {
       final doc = HighlightDocument.fromText(r'5 $ 3 $');
-      expect(doc.lines.single.tokens, isEmpty);
+      final tokens = doc.lines.single.tokens;
+      expect(tokens, hasLength(1));
+      expect(tokens.single.kind, TokenKind.mathInline);
     });
 
     test('escaped dollar is not math', () {
@@ -123,9 +126,13 @@ void main() {
       expect(doc.lines.single.tokens, isEmpty);
     });
 
-    test('no math when the close is followed by a digit', () {
+    test('a digit-only span is math (the corpus uses number spans)', () {
       final doc = HighlightDocument.fromText(r'$x$5');
-      expect(doc.lines.single.tokens, isEmpty);
+      final tokens = doc.lines.single.tokens;
+      expect(tokens, hasLength(1));
+      expect(tokens.single.kind, TokenKind.mathInline);
+      final doc2 = HighlightDocument.fromText(r'$1$');
+      expect(doc2.lines.single.tokens.single.kind, TokenKind.mathInline);
     });
   });
 

@@ -43,4 +43,7 @@ final class AppStrings {
   // Preview switch (phone mode).
   static const String showPreviewTooltip = 'Show preview';
   static const String showEditorTooltip = 'Show editor';
+
+  // Raw-HTML table fallback.
+  static const String htmlTableFallback = '(raw HTML table)';
 }

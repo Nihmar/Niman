@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
+import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/math_widget.dart';
@@ -97,6 +100,15 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   List<Widget>? _children;
   late final MathCache _mathCache = widget.mathCache ?? MathCache();
 
+  /// Bumped per parse so a stale isolate result is dropped.
+  int _parseRevision = 0;
+
+  /// Below this size the parse stays synchronous (the divide is a single
+  /// frame's cost); above it the whole parse runs on a background isolate
+  /// so a 931K note never janks the UI (the measured 418 ms whole-doc
+  /// parse, T-M2-05).
+  static const int _syncParseLimit = 64 * 1024;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -128,22 +140,44 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   }
 
   void _parse() {
+    final revision = ++_parseRevision;
+    final source = stripFrontmatter(widget.data);
+    const documents = <md.BlockSyntax>[MathBlockSyntax()];
+
+    List<md.Node> runParse() {
+      final document = md.Document(
+        blockSyntaxes: <md.BlockSyntax>[
+          ...documents,
+          ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+        ],
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        encodeHtml: false,
+      );
+      return splitHtmlTables(
+        splitInlineMath(
+          document.parseLines(const LineSplitter().convert(source)),
+        ),
+      );
+    }
+
+    if (source.length <= _syncParseLimit) {
+      _applyParse(revision, source, runParse());
+      return;
+    }
+    // Large document: parse off the UI isolate (the AST is plain data).
+    unawaited(
+      Isolate.run(runParse).then((nodes) {
+        if (!mounted || revision != _parseRevision) return;
+        _applyParse(revision, source, nodes);
+      }).catchError((Object _) {}),
+    );
+  }
+
+  void _applyParse(int revision, String source, List<md.Node> nodes) {
+    if (!mounted || revision != _parseRevision) return;
     final styleSheet = MarkdownStyleSheet.fromTheme(
       Theme.of(context),
     ).merge(widget.styleSheet);
-    _disposeRecognizers();
-    final source = stripFrontmatter(widget.data);
-    final document = md.Document(
-      blockSyntaxes: <md.BlockSyntax>[
-        const MathBlockSyntax(),
-        ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-      ],
-      extensionSet: md.ExtensionSet.gitHubFlavored,
-      encodeHtml: false,
-    );
-    final nodes = splitInlineMath(
-      document.parseLines(const LineSplitter().convert(source)),
-    );
     final builder = MarkdownBuilder(
       delegate: this,
       selectable: false,
@@ -159,11 +193,14 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           cache: _mathCache,
           style: widget.mathStyle,
         ),
+        'htmlblock': HtmlTableBuilder(),
       },
       paddingBuilders: const {},
       listItemCrossAxisAlignment: MarkdownListItemCrossAxisAlignment.baseline,
     );
-    _children = builder.build(nodes);
+    setState(() {
+      _children = builder.build(nodes);
+    });
     widget.scrollMap?.rebuild(source);
   }
 

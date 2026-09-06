@@ -2,10 +2,12 @@
 /// is a math span" for both consumers, so the editor highlight and the
 /// preview parse can never drift:
 ///
-/// * inline math: a `$` whose next char is not whitespace or `$` opens; the
-///   span closes at a `$` whose previous char is not whitespace and not a
-///   backslash, and whose next char is not a digit (so `$5` and `\$$` are
-///   not math).
+/// * inline math: a `$` (not preceded by `\`) opens unless the next char is
+///   a `$` (display). Whitespace next to a delimiter is allowed (`$ x $`
+///   typesets) and digit-adjacent openers are math too: the real notes use
+///   `$1$`, `$2 \times 2$` everywhere (579 digit spans, no prose prices).
+///   A span closing guards only against `\$`; a `$5 and $10`-style prose
+///   price is the one documented edge (renders as a KaTeX error fallback).
 /// * display math: a line starting (after optional indentation) with `$$`.
 ///   A line whose trimmed content is exactly `$$…$$` is single-line
 ///   display; otherwise the block runs until the next line starting with
@@ -29,30 +31,24 @@ bool isDisplayClose(String trimmed) => trimmed.startsWith(r'$$');
 /// The index of the first `$` of a leading `$$` marker on [line], or -1.
 int displayMarkerStart(String line) {
   final trimmed = line.trimLeft();
-  return trimmed.startsWith(r'$$')
-      ? line.length - trimmed.length
-      : -1;
+  return trimmed.startsWith(r'$$') ? line.length - trimmed.length : -1;
 }
 
 /// The first inline-math span in [line] at/after [from], or null.
 ///
 /// The span covers the markers (`$…$`); the LaTeX is `line.substring(s + 1,
-/// e - 1)`. A `$` candidate is only an opener when the rules above hold; the
-/// matching close is the first `$` that passes the close rules after the
-/// open position.
+/// e - 1)`. Whitespace and digits inside the delimiters are allowed;
+/// `\$` (escaped) and `$$` (display) are not math.
 (int, int)? findInlineMath(String line, int from) {
   for (var i = from; i < line.length; i++) {
     if (line.codeUnitAt(i) != 0x24) continue;
+    if (i > 0 && line.codeUnitAt(i - 1) == 0x5C) continue;
     final after = i + 1;
     if (after >= line.length) continue;
-    final a = line.codeUnitAt(after);
-    if (a == 0x24 || _isSpaceChar(a)) continue;
+    if (line.codeUnitAt(after) == 0x24) continue;
     for (var j = after; j < line.length; j++) {
       if (line.codeUnitAt(j) != 0x24) continue;
-      final before = line.codeUnitAt(j - 1);
-      if (before == 0x5C || _isSpaceChar(before)) continue;
-      final next = j + 1 < line.length ? line.codeUnitAt(j + 1) : -1;
-      if (next >= 0x30 && next <= 0x39) continue;
+      if (j > 0 && line.codeUnitAt(j - 1) == 0x5C) continue;
       return (i, j + 1);
     }
   }
@@ -69,11 +65,3 @@ Iterable<(int, int)> allInlineMath(String line) sync* {
     pos = span.$2;
   }
 }
-
-bool _isSpaceChar(int c) =>
-    c == 0x20 ||
-    c == 0x09 ||
-    c == 0x0A ||
-    c == 0x0B ||
-    c == 0x0C ||
-    c == 0x0D;

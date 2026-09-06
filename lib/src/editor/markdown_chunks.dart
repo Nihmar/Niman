@@ -13,12 +13,20 @@ import 'package:re_editor/re_editor.dart';
 /// The analysis runs in re_editor's isolate per buffer change using Copist's
 /// tokenizer (the same one the highlight and the outline use), so a `#`
 /// inside a code fence, a math block or frontmatter is never a fold anchor.
+/// Above [lineLimit] the analyzer is a no-op: the whole-document tokenize
+/// (~80 ms at 931K, per keystroke, background) is not worth it for fold
+/// markers on monster notes — the outline panel still works (the highlight
+/// is incremental; only folding is capped).
 final class MarkdownChunkAnalyzer implements CodeChunkAnalyzer {
   /// Creates the analyzer.
-  const MarkdownChunkAnalyzer();
+  const MarkdownChunkAnalyzer({this.lineLimit = 20000});
+
+  /// Lines above which the analyzer returns no chunks.
+  final int lineLimit;
 
   @override
   List<CodeChunk> run(CodeLines codeLines) {
+    if (codeLines.length > lineLimit) return const [];
     final document = HighlightDocument.fromText(
       codeLines.asString(TextLineBreak.lf, false),
     );
