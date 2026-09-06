@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:isolate';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/math_widget.dart';
+import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -142,34 +143,39 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   void _parse() {
     final revision = ++_parseRevision;
     final source = stripFrontmatter(widget.data);
-    const documents = <md.BlockSyntax>[MathBlockSyntax()];
-
-    List<md.Node> runParse() {
-      final document = md.Document(
-        blockSyntaxes: <md.BlockSyntax>[
-          ...documents,
-          ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-        ],
-        extensionSet: md.ExtensionSet.gitHubFlavored,
-        encodeHtml: false,
-      );
-      return splitHtmlTables(
-        splitInlineMath(
-          document.parseLines(const LineSplitter().convert(source)),
-        ),
-      );
-    }
 
     if (source.length <= _syncParseLimit) {
-      _applyParse(revision, source, runParse());
+      _applyParse(revision, source, _parseSyncSource(source));
       return;
     }
     // Large document: parse off the UI isolate (the AST is plain data).
     unawaited(
-      Isolate.run(runParse).then((nodes) {
+      PreviewWork.run('parse', source).then((result) {
         if (!mounted || revision != _parseRevision) return;
-        _applyParse(revision, source, nodes);
-      }).catchError((Object _) {}),
+        if (result is! List<md.Node>) {
+          const AppLogger(name: 'preview').error(
+            'async parse failed (${source.length} chars): $result',
+          );
+          return;
+        }
+        _applyParse(revision, source, result);
+      }),
+    );
+  }
+
+  static List<md.Node> _parseSyncSource(String source) {
+    final document = md.Document(
+      blockSyntaxes: <md.BlockSyntax>[
+        const MathBlockSyntax(),
+        ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+      ],
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+      encodeHtml: false,
+    );
+    return splitHtmlTables(
+      splitInlineMath(
+        document.parseLines(const LineSplitter().convert(source)),
+      ),
     );
   }
 

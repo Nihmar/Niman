@@ -7,11 +7,13 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
+import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/word_count.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
+import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
@@ -126,6 +128,7 @@ final class _NoteViewState extends State<NoteView>
   Timer? _statsTimer;
   int _wordCount = 0;
   List<OutlineEntry> _outline = const <OutlineEntry>[];
+  String? _lastStatsText;
   bool _showOutline = false;
 
   /// Preview pane (T-M2-08): debounced text, its own scroll + map + math
@@ -196,10 +199,18 @@ final class _NoteViewState extends State<NoteView>
     super.dispose();
   }
 
-  Future<String> _read(String path) => widget.readNote?.call(path) ??
-      Isolate.run(() => File(path).readAsString());
-
-  Future<void> _write(String path, String content) async {
+  /// Applies precomputed stats (from the load isolate) to the state.
+  /// Applies precomputed stats (from the load isolate) to the state.
+  void _applyStats(String text, int words, List<String> outlineRows) {
+    _lastStatsText = text;
+    setState(() {
+      _wordCount = words;
+      _outline = outlineRows
+          .map(_parseOutlineRow)
+          .whereType<OutlineEntry>()
+          .toList();
+    });
+  }  Future<void> _write(String path, String content) async {
     final seam = widget.writeNote;
     if (seam != null) {
       await seam(path, content);
@@ -232,10 +243,26 @@ final class _NoteViewState extends State<NoteView>
     });
     final clock = Stopwatch()..start();
     try {
-      final content = await _read(path);
+      String content;
+      (int, List<String>)? stats;
+      if (widget.readNote != null) {
+        // The test seam: content per the injected reader; stats are
+        // computed afterwards (the synchronous path for small notes).
+        content = await widget.readNote!(path);
+        stats = null;
+      } else {
+        // Production: read AND stats in the same isolate — word count +
+        // outline are ready the moment the load ends (no second spawn).
+        final loaded = await Isolate.run(() => _readWithStats(path));
+        content = loaded.$1;
+        stats = (loaded.$2, loaded.$3);
+      }
       if (!mounted || widget.path != path) return;
       // The buffer uses LF: normalize line endings on load.
       final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+      if (stats != null) {
+        _applyStats(text, stats.$1, stats.$2);
+      }
       _controller.text = text;
       _lastLines = _controller.codeLines;
       _lastSavedRevision = _revision;
@@ -243,9 +270,10 @@ final class _NoteViewState extends State<NoteView>
         _loading = false;
         _ready = true;
       });
-      // Word count + outline on open: they are debounced for edits only,
-      // the load path has its own refresh.
-      _refreshStats();
+      // Word count + outline on open: debounced for edits only; the
+      // production load already has them from its isolate (the seam path
+      // uses the regular refresh).
+      if (stats == null) _refreshStats();
       _refreshPreview();
       _log.info(
         'note loaded: $path (${text.length} chars, '
@@ -324,16 +352,49 @@ final class _NoteViewState extends State<NoteView>
   void _refreshStats() {
     if (!mounted || _loading) return;
     final text = _controller.text;
-    if (text != _lastStatsText) {
-      _lastStatsText = text;
+    if (text == _lastStatsText) return;
+    _lastStatsText = text;
+    final revision = ++_statsRevision;
+    void apply(Object? result) {
+      if (!mounted || revision != _statsRevision) return;
+      final stats = PreviewWork.statsOf(result);
+      if (stats == null) return;
       setState(() {
-        _wordCount = countWords(text);
-        _outline = _highlight.outline();
+        _wordCount = stats.words;
+        _outline = stats.outline
+            .map(_parseOutlineRow)
+            .whereType<OutlineEntry>()
+            .toList();
       });
     }
+    // Word count + outline are O(n) pure passes. Notes above the threshold
+    // run them on an isolate (a 931K note costs ~400 ms — never on the
+    // main thread, that was the 1.2 s open stall); small ones stay
+    // synchronous (deterministic for tests).
+    if (text.length <= _syncWorkLimit) {
+      final result = _statsFor(text);
+      apply((result.$1, result.$2));
+      return;
+    }
+    unawaited(PreviewWork.run('stats', text).then(apply));
   }
 
-  String? _lastStatsText;
+  static const int _syncWorkLimit = 64 * 1024;
+
+  int _statsRevision = 0;
+
+  static OutlineEntry? _parseOutlineRow(String row) {
+    final parts = row.split('|');
+    if (parts.length < 3) return null;
+    final line = int.tryParse(parts[0]);
+    final level = int.tryParse(parts[1]);
+    if (line == null || level == null) return null;
+    return OutlineEntry(
+      line: line,
+      level: level,
+      text: parts.sublist(2).join('|'),
+    );
+  }
 
   /// The outline jump: caret to the heading line, then bring it into view.
   void _jumpToHeading(int line) {
@@ -506,4 +567,23 @@ final class _NoteViewState extends State<NoteView>
       ),
     );
   }
+}
+
+/// Reads [path] and computes the note stats in the same isolate, so word
+/// count + outline are ready the moment the load ends (top-level: sendable
+/// across isolates, unlike a closure over the State).
+(String, int, List<String>) _readWithStats(String path) {
+  final text = File(path).readAsStringSync();
+  final stats = _statsFor(text);
+  return (text, stats.$1, stats.$2);
+}
+
+/// Word count + heading outline of [text] (the row encoding
+/// `'line|level|text'` is what [_NoteViewState._parseOutlineRow] reads).
+(int, List<String>) _statsFor(String text) {
+  final styled = HighlightDocument.fromText(text).lines;
+  return (
+    countWords(text),
+    outlineOf(styled).map((e) => '${e.line}|${e.level}|${e.text}').toList(),
+  );
 }
