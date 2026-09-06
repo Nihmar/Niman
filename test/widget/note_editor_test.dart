@@ -726,6 +726,53 @@ void main() {
     focus.dispose();
   });
 
+  testWidgets('tap at the end of a full row parks after the last char',
+      (tester) async {
+    // A line exactly as wide as the viewport-fitted wrap is one full row:
+    // tapping its last cell must park the caret after the last char,
+    // never behind it.
+    const narrowWidth = 400.0;
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    final fitColumns =
+        ((narrowWidth - VirtualizedTextView.leftPadding) / charWidth)
+            .floor()
+            .clamp(1, 80);
+    expect(fitColumns, lessThan(80));
+    final line = 'a' * fitColumns;
+    final input = ComposingInput(line);
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: narrowWidth,
+            child: NoteEditor(
+
+            initialText: line,  
+            focusNode: focus,  
+            onTextChanged: (_) {},  
+            input: input,  
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    const left = VirtualizedTextView.leftPadding;
+    final origin = tester.getTopLeft(find.byType(NoteEditor));
+    // Right quarter of the last cell.
+    await tester.tapAt(
+      origin + Offset(left + (fitColumns - 0.25) * charWidth, 10),
+    );
+    await tester.pump();
+    expect(
+      input.selection,
+      TextSelection.collapsed(offset: fitColumns),
+    );
+    focus.dispose();
+  });
+
   testWidgets('tap on a rendered glyph lands its column at 0.85 scaler (R2)',
       (tester) async {
     // A 60-column single row: far enough right that a shrunken render

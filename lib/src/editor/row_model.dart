@@ -89,9 +89,21 @@ final class RowModel {
   /// row/column-to-offset mapping, for placing the caret and the composing
   /// underline. The line containing [offset] must be visible (a caret never
   /// sits on a folded line).
+  ///
+  /// An offset at the very end of a line whose length is an exact multiple
+  /// of [columns] (a full row's end caret) pins to that row's end: the wrap
+  /// allocates no trailing row, so the naive quotient points past the
+  /// model and the caret paint throws (the on-device "cursor stuck behind
+  /// the last char of long rows"). Mid-line wrap boundaries still resolve
+  /// to the next row's start, where the following char renders.
   (int, int) offsetToRowColumn(int offset) {
     final (line, col) = buffer.locationOf(offset);
-    return (rowOfLine(line) + col ~/ columns, col % columns);
+    final rowInLine = col ~/ columns;
+    final colInRow = col % columns;
+    if (colInRow == 0 && rowInLine > 0 && col == buffer.lineLength(line)) {
+      return (rowOfLine(line) + rowInLine - 1, columns);
+    }
+    return (rowOfLine(line) + rowInLine, colInRow);
   }
 
   /// The exact text visual row [row] renders: its logical line's slice

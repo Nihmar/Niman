@@ -62,6 +62,21 @@ void main() {
       }
     });
 
+    test('an exact-fit line end pins to the last row, not past it', () {
+      // A 60-char line at columns 30 is exactly two full rows: the end
+      // offset (col 60) has no trailing row of its own — it renders at the
+      // second row's end. (Before: (2, 0), past a 2-row model, and the
+      // caret paint threw — the on-device "cursor behind the last char".)
+      final buffer = LineBuffer.fromText('x' * 60);
+      final model = RowModel(buffer, columns: 30);
+      expect(model.rowCount, 2);
+      expect(model.offsetToRowColumn(60), (1, 30));
+      // Mid-line wrap boundaries still resolve to the next row's start,
+      // where the following char renders.
+      expect(model.offsetToRowColumn(30), (1, 0));
+      expect(model.offsetToRowColumn(59), (1, 29));
+    });
+
     test('rejects out-of-range rows and lines', () {
       final buffer = LineBuffer.fromText('a\nb');
       final model = RowModel(buffer, columns: 10);
