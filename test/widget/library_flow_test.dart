@@ -1,6 +1,7 @@
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
@@ -27,6 +28,13 @@ final class _FakeFilePicker extends FilePickerPlatform {
     return directory;
   }
 }
+
+/// The text input of whichever dialog is open (the note editor is a text
+/// field too, so the unscoped finder is ambiguous in the shell).
+Finder dialogField() => find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.byType(TextField),
+    );
 
 /// The tree row (not the detail pane) showing [name].
 ///
@@ -84,7 +92,7 @@ void main() {
     filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'library');
+    await tester.enterText(dialogField(), 'library');
     await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
     await tester.tap(find.text('Create'));
     await settle(tester);
@@ -96,15 +104,22 @@ void main() {
     // Create a note.
     await tester.tap(find.byIcon(Icons.note_add));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'First note');
+    await tester.enterText(dialogField(), 'First note');
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('First note.md'), findsOne);
 
+    // The detail pane gets the absolute path (DB rows carry only the
+    // library-relative one).
+    expect(
+      tester.widget<NoteView>(find.byType(NoteView)).path,
+      '/fake/library/First note.md',
+    );
+
     // Create a folder, expand it, and add a nested note.
     await tester.tap(find.byIcon(Icons.create_new_folder));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Docs');
+    await tester.enterText(dialogField(), 'Docs');
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('Docs'), findsOne);
@@ -114,7 +129,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.note_add));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Nested');
+    await tester.enterText(dialogField(), 'Nested');
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('Nested.md'), findsOne);
@@ -124,7 +139,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byIcon(Icons.edit));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Books');
+    await tester.enterText(dialogField(), 'Books');
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('Books'), findsOne);
@@ -162,7 +177,7 @@ void main() {
     filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'library');
+    await tester.enterText(dialogField(), 'library');
     await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
     await tester.tap(find.text('Create'));
     await settle(tester);
@@ -170,7 +185,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.note_add));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Sacrifice');
+    await tester.enterText(dialogField(), 'Sacrifice');
     await tester.tap(find.text('OK'));
     await settle(tester);
 
@@ -244,7 +259,7 @@ void main() {
     // Recreate the note, then delete it with the toggle off: hard delete.
     await tester.tap(find.byIcon(Icons.note_add));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Sacrifice');
+    await tester.enterText(dialogField(), 'Sacrifice');
     await tester.tap(find.text('OK'));
     await settle(tester);
 
@@ -268,7 +283,7 @@ void main() {
     filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'library');
+    await tester.enterText(dialogField(), 'library');
     await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
     await tester.tap(find.text('Create'));
     await settle(tester);
@@ -276,7 +291,7 @@ void main() {
     // A note in the trash, so the empty action is offered.
     await tester.tap(find.byIcon(Icons.note_add));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Victim');
+    await tester.enterText(dialogField(), 'Victim');
     await tester.tap(find.text('OK'));
     await settle(tester);
     await tester.tap(noteRow('Victim.md'));
@@ -312,7 +327,7 @@ void main() {
     filePicker.directory = '/fake';
     await tester.tap(find.text('Create new'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'library');
+    await tester.enterText(dialogField(), 'library');
     await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
     await tester.tap(find.text('Create'));
     await settle(tester);
@@ -320,14 +335,14 @@ void main() {
     // Outer > Inner.
     await tester.tap(find.byIcon(Icons.create_new_folder));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Outer');
+    await tester.enterText(dialogField(), 'Outer');
     await tester.tap(find.text('OK'));
     await settle(tester);
     await tester.tap(noteRow('Outer'));
     await settle(tester);
     await tester.tap(find.byIcon(Icons.create_new_folder));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'Inner');
+    await tester.enterText(dialogField(), 'Inner');
     await tester.tap(find.text('OK'));
     await settle(tester);
 
@@ -426,5 +441,48 @@ void main() {
 
     await session.close();
     await session.dispose();
+  });
+
+  testWidgets('phone width: notes open full-screen, back returns to tree',
+      (tester) async {
+    // Phone-sized surface (390 x 844 logical).
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+
+    // Open a library.
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'library');
+    await tester.pump();
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+    expect(find.text('No notes yet'), findsOne);
+
+    // Creating a note opens it full-screen.
+    await tester.tap(find.byIcon(Icons.note_add));
+    await tester.pump();
+    await tester.enterText(dialogField(), 'Phone');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.text('Phone.md'), findsOneWidget); // app bar title.
+    expect(noteRow('Phone.md'), findsNothing);
+
+    // Back returns to the tree; the selection is kept.
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsNothing);
+    expect(noteRow('Phone.md'), findsOne);
+
+    // Tapping the note opens it again.
+    await tester.tap(noteRow('Phone.md'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
   });
 }

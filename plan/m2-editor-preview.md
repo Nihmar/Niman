@@ -1,6 +1,8 @@
 # M2 — Editor + preview
 
-**Status:** Planned · **Depends on:** M1.5 · **Spec:** *Requirements*
+**Status:** In progress (M2a editor + highlighting done — see
+[m2a-line-editor.md](m2a-line-editor.md); T-M2-01/02 below; next: T-M2-03
+katex verification, then the preview pipeline) · **Depends on:** M1.5 · **Spec:** *Requirements*
 (editor, math, layout, images), *Milestones → M2*
 
 ## Purpose
@@ -12,15 +14,18 @@ image insert, and the responsive layout system.
 
 ## Current state
 
-M1.5 leaves a correct index and tree; notes open to a placeholder view with
-no editing.
+M1.5 leaves a correct index and tree. Notes open in a plain `TextField`
+baseline editor (autosave, atomic writes, absolute paths, responsive
+phone layout) — **rejected on-device** for novel-length files; the
+line-based editor it is being replaced by is planned in
+[m2a-line-editor.md](m2a-line-editor.md).
 
 ## Tasks
 
 The first two tasks decide whether the rest of this milestone's design
 holds. Run them before anything else is built on top.
 
-- [ ] **T-M2-00** Editor spike: decide whether the editor is a custom
+- [x] **T-M2-00** Editor spike: decide whether the editor is a custom
   widget or Flutter's own text editing with a custom
   `TextEditingController` and `buildTextSpan`. The controller route gives
   the design's own rule for free — highlighting as presentation over a
@@ -30,39 +35,219 @@ holds. Run them before anything else is built on top.
   either way. Include a jank measurement on a novel-length buffer, which
   the spec asserts is fine but nothing has verified. *AC: a decision
   recorded here with the measurement behind it.*
-- [ ] **T-M2-01** Source editor per the T-M2-00 decision: loads/saves a
-  note's content; debounced autosave + save-on-focus-loss, atomic writes.
-  *AC: edit a note, close the app, content persisted; IME works on
-  Android + Linux.*
-- [ ] **T-M2-02** Highlighting layer: tokenizer for Markdown tokens (headings,
-  bold/italic, code, lists, links) and math spans (`$…$`, `$$…$$`); styled
-  display over a plain-text buffer (highlighting is a display concern only).
-  *AC: tokens and math spans visually distinct; no rich-text edit model.*
-- [ ] **T-M2-03** Verify `katex_dart`: confirm the pinned pure-Dart KaTeX
-  version renders the spec coverage — matrices, `aligned`/`cases`, `\text`,
-  `\newcommand` — before building on it. *AC: demo fixture renders all four
-  cases; version decision recorded.*
-- [ ] **T-M2-04** Preview pipeline: `flutter_markdown_plus` render parsed
-  once per change (debounced), lazy block layout; tables, task lists,
-  footnotes, strikethrough, code blocks via `flutter_highlight`. *AC:
-  fixture with every extra renders correctly.*
-- [ ] **T-M2-05** Math pipeline: extract math spans → `katex_dart` render →
-  LRU cache keyed by math string (design.md); placeholder box while rendering;
-  same spans highlighted in the editor. *AC: editing a math expression reuses
-  the cache for unchanged spans.*
-- [ ] **T-M2-06** Bidirectional scroll sync: line-mapping table per render pass
-  (source line → preview block); scrolling either pane moves the other.
-  *AC: sync verified in widget test on a long fixture, both directions.*
-- [ ] **T-M2-07** Word count + heading outline + folding: live word count;
-  outline panel listing headings (click → jump); folding collapses sections in
-  the editor. *AC: fold/unfold a section; outline jumps land correctly.*
-- [ ] **T-M2-08** Layout modes: desktop = sidebar | editor | preview
-  (draggable split); Android phone = full-screen Edit/Preview switch;
-  tablet/wide = split; user override (auto / force split / force switch) in
-  settings. *AC: all four modes reachable; override persists.*
-- [ ] **T-M2-09** Image insert: picker → copy file into the library
-  (`assets/` or chosen folder) → insert a link (no base64 by default).
-  *AC: image visible in preview from the library-relative link.*
+
+### T-M2-00 decision: editor architecture — **final: custom line-based editor**
+
+> **Status (final, 2026-09-04).** On-device verdict from the plain-`TextField`
+> baseline (release APK, Android, real library): the plain editor is
+> **rejected** for novel-length files. The custom line-based editor below is
+> confirmed and scheduled as sub-plan [m2a-line-editor.md](m2a-line-editor.md).
+> Raw evidence (full log + the two source notes, copyrighted — kept in the
+> gitignored `reference/` folder): `reference/opening-files.log.txt`.
+
+**On-device measurements** (release APK, per-frame from
+`addTimingsCallback`; loads run off the UI isolate via `Isolate.run`):
+
+| Note | Chars | Load | Steady state per frame | Verdict |
+| --- | --- | --- | --- | --- |
+| `capitolo_04.md` | 25K | 15 ms | one 22 ms build blip | fine |
+| novel chapter | 297K | 66 ms | **~32 ms every frame** (build ~23 + raster ~8) | "almost smooth, not 100%" = pinned ~30 fps |
+| math notes | 931K | 26 ms | **~100 ms every frame** (build ~78 + raster ~20); 734 ms build on open | "atrocious" = ~10 fps |
+
+Signature: per-frame cost **proportional to total buffer size, not the
+visible window** — the monolithic `EditableText` re-lays-out the whole
+buffer on every frame (scroll *and* keystroke). Matches the headless spike
+below; the headless 44.5 ms whole-buffer layout was the 200 KB case, and
+the 931 KB file is ~4.6× that, as observed.
+
+Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
+fixture, desktop host, best-of-N; run it to refresh the numbers).
+
+Spike: `test/unit/m2_spike_benchmark_test.dart` (200 KB / 6289-line
+fixture, desktop host, best-of-N; run it to refresh the numbers).
+
+| Measurement | Value |
+| --- | --- |
+| Tokenize full buffer (one-time, on open) | 17.4 ms |
+| Incremental tokenize per edit | 0.56 ms |
+| Per-line layout+paint (the line-based paint unit) | 28 µs/line |
+| Visible viewport re-layout (~40 lines) | ~1.1 ms |
+| Whole-buffer single-span layout (monolithic field) | 44.5 ms |
+| Preview parse (`MarkdownParser` only) | 12.5 ms |
+| Preview eager full render (parse+build+layout+paint) | 2129 ms |
+
+Decision: **a custom, line-based widget, not Flutter's monolithic
+`EditableText`/`TextField`.**
+
+Measurement-driven rationale:
+
+1. **A monolithic field janks on novel-length.** `RenderEditable` holds the
+   whole buffer as one text and re-lays-out the entire thing on every
+   keystroke; that whole-buffer layout measures **44.5 ms** — ~2.7 frames at
+   60 fps — *per keystroke* on a 200 KB file, which violates the spec's
+   "edits without perceptible jank." A line-based editor re-lays-out only
+   the changed line(s) plus the visible viewport, so a keystroke costs
+   0.56 ms (tokenize) + ~1.1 ms (layout) ≈ **1.7 ms**, inside frame budget.
+2. **Folding (T-M2-07) is only expressible line-based.** Collapsing a
+   heading range is "layout skips those lines" (design.md); a single
+   monolithic text cannot skip lines. A sliver list of line widgets folds by
+   omitting the folded lines.
+3. **Highlighting stays presentation.** Each line is its own styled
+   `TextPainter`/`RichText` built from the tokenizer's tokens — exactly
+   "highlighting as presentation over a plain-text model" (design.md), with
+   no rich-text edit model.
+4. **Accepted cost.** Caret, selection, IME composition, text scaling and
+   accessibility are ours to build (the plan's largest unknown). The numbers
+   above justify paying that cost: the monolithic alternative is disqualified
+   on performance, not on effort.
+
+**Preview cost model (guides T-M2-04/05).** Parsing is cheap (12.5 ms), but
+the package's `MarkdownRenderer.render()` is a fully eager `Column` over all
+nodes — 2.1 s for 200 KB. The preview must be **windowed**: parse the whole
+document, but build+lay out only the visible block range (a sliver) using the
+package's per-node builders. Never hand a novel-length document to
+`SmoothMarkdown`/`render()` unwindowed.
+
+- [x] **T-M2-01** Source editor: **done** via sub-plan
+  [m2a-line-editor.md](m2a-line-editor.md) — the custom line-based editor
+  was confirmed on-device, then replaced by the re_editor switch with the
+  incremental spanBuilder highlighter (see the sub-plan Status). The
+  plain-`TextField` baseline was removed; autosave/save-path discipline
+  (debounce, atomic writes, off-isolate join/encode/write) carried over
+  unchanged.
+- [x] **T-M2-02** Highlighting layer: **done** — the M2a tokenizer
+  (`highlighting.dart`: headings, bold/italic, code, lists, links, math
+  spans) drives per-line styled `TextSpan`s through re_editor's
+  `spanBuilder` (`highlight_sync.dart` + `highlight_style.dart`); math
+  spans are styled distinctly (purple, light/dark palettes); the edit
+  model stays plain text (no rich-text model). *AC: tokens/math visually
+  distinct; no per-frame re-tokenize of the whole file — verified on the
+  931K device log (keystroke sync 0.12–0.40 ms).*
+- [x] **T-M2-03** Verify `katex_dart`: **done** — pinned `katex_dart ^0.1.1`
+  (pure-Dart KaTeX port) renders the full spec coverage; the fixed
+  `test/unit/m2_t3_katex_test.dart` renders matrices, `aligned`/`cases`,
+  `\text`, and `\newcommand` (plus `\frac`/`\sqrt`/`\sum` sanity) to SVG
+  without throwing, and a matrix's box tree has non-zero geometry.
+  **Version decision recorded: keep `katex_dart`.** The math pipeline
+  (T-M2-05) will use `renderToBox` (box tree + em metrics — no Flutter
+  dependency, runs anywhere) with the LRU cache keyed by the exact math
+  string; the SVG serializer exists as a fallback if the preview wants
+  standalone images. The `katex` Flutter painter package is NOT used —
+  the box tree is ours to paint (or vendored via the SVG path).
+- [x] **T-M2-04** Preview pipeline: **done** — `lib/src/preview/`:
+  `MarkdownPreview` parses the whole document once per change
+  (flutter_markdown_plus `MarkdownBuilder` — tables, task lists,
+  footnotes, strikethrough come from the GFM extension set) and lays out
+  **only the viewport's blocks** over a `SliverList` (the design's
+  windowing rule: never the package's eager `Column`/`ListView`).
+  `PreviewCodeHighlighter` does code blocks via flutter_highlight.
+  Testing: `test/widget/markdown_preview_test.dart` — a fixture with every
+  extra renders; long-document scrolling proves laziness (far blocks are
+  not built until scrolled into the viewport); data changes rebuild; and
+  the CommonMark corpus (`test/spec.json`, all 652 examples) parses+builds
+  without errors.
+  **CommonMark conformance measured** (`test/unit/commonmark_conformance_test.dart`,
+  HTML-output comparison under the upstream harness normalization):
+  **639/652 (98.0%)** with the GFM set the preview ships. Pure
+  `commonMark` mode is 642 — GFM intentionally loses exactly the 3 bare
+  URL/email autolink examples (GFM extensions the preview wants). The
+  remaining ~10 misses are the markdown package's known edge gaps (tabs in
+  indented code, a few named entities, setext headings after leading
+  spaces, fence-info edge cases, €-emphasis boundaries, multiline HTML
+  comments) — parser territory, not Copist's wiring. The test's floor is
+  pinned at 639 so a package upgrade/option change flags a regression.
+  Windowed-performance verification on the 200 KB/1 MB fixtures is still
+  pending the on-device pass (E9-style).
+- [x] **T-M2-05** Math pipeline: **done** — `lib/src/preview/math_*`:
+  shared inline/display span rules (`editor/math_rule.dart`, the editor
+  tokenizer and the preview parser agree by construction), `MathBlockSyntax`
+  (display `$$…$$`, single- and multi-line, top level + list items +
+  blockquotes — the markdown package re-parses dedented list content with
+  the document's syntaxes, so no extra plumbing), post-parse inline
+  splitting (invalid `$` stays prose; inline code/fences untouched),
+  frontmatter strip, `MathCache` (LRU 512, key = exact tex + display mode,
+  errors remembered but never cached, inflight coalescing, isolate render +
+  placeholder box, sync/async seams for tests) and the widget layer
+  (baselined inline span from the cached box on katex's public painter,
+  centered display block, red fallback on error). The `katex` Flutter
+  widget package is adopted (T-M2-03's "not used" clause superseded: its
+  `KatexBoxPainter`/`boxSizePx` are the render layer; the box tree is
+  still rendered from Copist's cache so a rebuild never re-parses).
+  Testing: rule/syntax/cache unit tests + widget tests (inline in prose,
+  display top-level + in lists, edit-reuse AC via cache counters,
+  placeholder→box transition, error fallback).
+  **Measured on `Geometria 1.md` (931K, math-heavy):** 12 645 inline +
+  841 display spans; 7162 unique keys (6322 cache hits — real notes
+  repeat formulas); render ~0.1 ms/span (718 ms all-unique, off-isolate);
+  whole-doc markdown parse ~418 ms per change — the preview-side parse is
+  the only remaining per-edit pipeline cost, to be moved off the UI
+  isolate with the T-M2-04 debounce wiring (or accepted once per
+  debounce). On-device preview pass stays the E9-style follow-up.
+- [x] **T-M2-06** Bidirectional scroll sync: **done** —
+  `lib/src/preview/scroll_map.dart` (structural `BlockLocator` — source
+  lines → per-block start lines, mirroring the parser's top-level blocks;
+  coverage test asserts the block count matches the AST; known subtleties
+  handled: bullet/numbered list splits after a blank, setext-vs-hr,
+  display-math/fence single blocks) + the pixel side (per-block measured
+  heights via a layout wrapper in `MarkdownPreview`) +
+  `lib/src/preview/scroll_sync.dart` (`EditorPreviewScrollSync` links the
+  re_editor vertical controller and the preview's scroll controller; both
+  directions, programmatic-jump guard, deadzone; `NoteEditor` gained a
+  `scrollController` pass-through). Mapping is line-fractional (the editor
+  word-wraps, so its pixel extent is row-relative — the AC-verified widget
+  test tolerates one block of quantization on a 300-paragraph fixture).
+  Shell wiring lands with the layout modes (T-M2-08); on-device full-pass
+  pending.
+- [x] **T-M2-07** Word count + heading outline + folding:
+  **done** — live word count (whitespace-separated tokens; the O(n) pass
+  is debounced 350 ms, and computed on open), the outline (tokenizer-based
+  `outlineOf` — matches the highlighted headings; fences/math/frontmatter
+  never count) opens from `NoteView`'s status bar (`OutlinePanel`,
+  indented levels, tap → jump: caret to the heading line via the editor
+  scroll controller's `makeCenterIfInvisible`), and heading folding rides
+  re_editor's chunk model: `MarkdownChunkAnalyzer` derives `CodeChunk`
+  fold ranges from the outline (only real sections; nested child headings
+  fold inside their parent; the fold markers come from
+  `DefaultCodeChunkIndicator` next to the line numbers). ACs verified in
+  tests: fold/unfold collapses the section (`chunkParent` + line count),
+  outline jump lands the correct caret line. The 931K device pass stays
+  pending (fold markers + outline panel on the big note).
+- [x] **T-M2-08** Layout modes: **done** — `NoteView` owns the whole
+  editor|preview area: split mode = `EditorPreviewSplit` (draggable
+  divider, session-live + persisted ratio, T-M2-06 scroll sync wrapped
+  around both panes), full-screen mode = one pane at a time with the
+  **top switch** (status-bar-adjacent, above the pane). The shell resolves
+  the effective mode (width ≥ 600 dp vs phone, × the `preview_mode`
+  override) and passes it down, plus the persisted `split_ratio`
+  (app_settings schema v5: `preview_mode` + `split_ratio`, v1–v4
+  migrations keep rows). Settings screen gained the segmented
+  Auto / Side by side / Full screen control + split-width slider (all new
+  labels in `lib/src/ui/strings.dart` — the single label file; existing
+  settings/outline labels migrated there too, the rest is gradual).
+  Preview data is debounced (500 ms cadence, same as saves) with the math
+  cache + scroll map owned per NoteView. AC: all modes reachable (widget
+  tests: split, switch toggle, divider drag → fraction callbacks +
+  drag-end persistence, shell auto/forced resolution) and the override
+  persists (repo + migration tests). Tracked follow-ups: the whole-doc
+  markdown parse still runs on the UI isolate at the debounce (register
+  renders the package's note; off-isolate parse), library-relative images
+  in the preview landed with T-M2-09.
+- [x] **T-M2-09** Image insert: **done** — picker → copy into the library
+  → link at the caret. Picking is `file_picker` (v12, static API,
+  `FileType.image`); the copy is `lib/src/library/image_import.dart`
+  (`importImageToLibrary`): sha256 content-addressed name, the file lands
+  in `<library>/assets/` (created on demand) — same image never duplicated —
+  and the copy runs off the UI isolate (`Isolate.run`, FUSE rule). The
+  toolbar's insert button (alt text = the picked file's name; link =
+  `assets/<sha256>.<ext>`; 500 ms-debounced autosave covers the edit).
+  Preview visibility: `MarkdownPreview.imageDirectory` (library root) +
+  a resolve builder — the package's own resolver concatenates
+  `directory + uri` with **no separator** (`_functions_io.dart:42`), so
+  relative links go through our builder (`_imageFor`): `Image.file` under
+  the root, http(s)/data/resource keep package behavior, missing file =
+  empty box. AC verified: widget test renders + decodes a real 1×1 PNG
+  from a library-relative link, and the insert test copies + links at the
+  caret (+ autosave); unit tests cover the content addressing.
 - [ ] **T-M2-10** Tests: unit (scroll-mapping, KaTeX LRU, highlighter) and
   widget (editor/preview render parity, layout modes). *AC: green.*
 
@@ -104,7 +289,8 @@ See [design.md](design.md) → *Editor & preview*. M2 slice:
   frame is too slow, token incrementally (on changed lines only).
 - Writing caret, selection and IME from scratch is the largest single
   unknown in the plan (Android composition, autocorrect, text scaling,
-  accessibility). T-M2-00 exists so that cost is chosen deliberately
-  rather than inherited from a one-line stack decision.
+  accessibility). T-M2-00 resolved that the cost is owed (the monolithic
+  field is disqualified on-device); the risk is now managed inside
+  [m2a-line-editor.md](m2a-line-editor.md) (E3–E6, IME-first ordering).
 - IME edge cases (multi-line input, auto-correction) on Android — integration
   test in M2's `integration_test/`.

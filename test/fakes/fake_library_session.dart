@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -99,6 +100,39 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
+
+  @override
+  Future<bool> get lineNumbersEnabled async => true;
+
+  @override
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {}
+
+  @override
+  Future<bool> get editorAutofocusEnabled async => false;
+
+  @override
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {}
+
+  // T-M2-08 preview layout, with state so settings/layout widgets can
+  // exercise it in tests.
+  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
+  double _splitRatio = defaultSplitRatio;
+
+  @override
+  Future<PreviewLayoutMode> get previewMode async => _previewMode;
+
+  @override
+  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
+    _previewMode = mode;
+  }
+
+  @override
+  Future<double> get splitRatio async => _splitRatio;
+
+  @override
+  Future<void> setSplitRatio(double ratio) async {
+    _splitRatio = ratio;
+  }
 
   @override
   void notify() => _bump();

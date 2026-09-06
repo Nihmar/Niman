@@ -45,9 +45,18 @@ final class LibraryController implements LibrarySession {
   /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(seconds: 60);
 
+  /// The root path of the currently open library, for crash reports (the
+  /// crash file is written next to the debug logs the user already exports
+  /// from there); null when no session is open. Set when a session opens,
+  /// cleared on close.
+  static String? currentRootPath;
+
   /// Default delay between a non-blocking resume becoming ready and its
-  /// reconciliation scan, leaving the UI time to paint the tree first.
-  static const defaultResumeReconcileDelay = Duration(milliseconds: 1000);
+  /// reconciliation scan. Five seconds: the app's first seconds (first
+  /// frame, tree render, first interaction) are calmer without a scan and
+  /// its index-bump frames; external changes still converge when it fires
+  /// (the periodic rescan covers them too).
+  static const defaultResumeReconcileDelay = Duration(seconds: 5);
 
   /// Builds the database on demand (app-support location in the app).
   final Future<CopistDatabase> Function() dbFactory;
@@ -200,6 +209,7 @@ final class LibraryController implements LibrarySession {
       _ops = ops;
       _root = abs;
       _phase = LibraryPhase.ready;
+      currentRootPath = abs;
       await AppSettingsRepo(db).setLastLibraryPath(abs);
       _bump();
       if (!blockingScan) {
@@ -225,6 +235,7 @@ final class LibraryController implements LibrarySession {
     await _teardown();
     _root = null;
     _phase = LibraryPhase.none;
+    currentRootPath = null;
     try {
       final db = await dbFactory();
       await AppSettingsRepo(db).setLastLibraryPath(null);
@@ -262,6 +273,65 @@ final class LibraryController implements LibrarySession {
     final db = await database;
     await AppSettingsRepo(db).setDebugLogsEnabled(enabled: enabled);
     AppLog.enabled = enabled;
+  }
+
+  /// Whether the note editor shows the row-number column.
+  @override
+  Future<bool> get lineNumbersEnabled async {
+    final db = await database;
+    return AppSettingsRepo(db).lineNumbersEnabled();
+  }
+
+  /// Sets (and persists) the editor line-numbers toggle.
+  @override
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {
+    _log.info('editor line numbers set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setLineNumbersEnabled(enabled: enabled);
+  }
+
+  /// Whether the note editor focuses (shows the keyboard) on note open.
+  @override
+  Future<bool> get editorAutofocusEnabled async {
+    final db = await database;
+    return AppSettingsRepo(db).editorAutofocusEnabled();
+  }
+
+  /// Sets (and persists) the keyboard-on-open toggle.
+  @override
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
+    _log.info('editor keyboard-on-open set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setEditorAutofocusEnabled(enabled: enabled);
+  }
+
+  /// The preview layout mode.
+  @override
+  Future<PreviewLayoutMode> get previewMode async {
+    final db = await database;
+    return AppSettingsRepo(db).previewMode();
+  }
+
+  /// Sets (and persists) the preview layout mode.
+  @override
+  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
+    _log.info('preview mode set to ${mode.name}');
+    final db = await database;
+    await AppSettingsRepo(db).setPreviewMode(mode);
+  }
+
+  /// The editor|preview split ratio.
+  @override
+  Future<double> get splitRatio async {
+    final db = await database;
+    return AppSettingsRepo(db).splitRatio();
+  }
+
+  /// Sets (and persists) the split ratio.
+  @override
+  Future<void> setSplitRatio(double ratio) async {
+    final db = await database;
+    await AppSettingsRepo(db).setSplitRatio(ratio);
   }
 
   /// Notifies listeners that state changed without an index mutation

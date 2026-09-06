@@ -20,13 +20,25 @@ void main() {
   test(
     'v1 databases gain debug_logs_enabled on upgrade, keeping data',
     () async {
-    // Build a v1-shaped file: create the database at v2, then rewind the
-    // schema version and drop the column v1 never had.
+    // Build a v1-shaped file: create the database at v5, then rewind the
+    // schema version and drop the columns v1 never had.
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 1');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN debug_logs_enabled',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN line_numbers',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN preview_mode',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN split_ratio',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -39,6 +51,110 @@ void main() {
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
     expect(row.debugLogsEnabled, true);
+    expect(row.lineNumbers, true);
+    expect(row.editorAutofocus, false);
+    expect(row.previewMode, 'auto');
+    expect(row.splitRatio, 0.55);
+    await db.close();
+  });
+
+  test(
+    'v2 databases gain line_numbers on upgrade, persisting old rows',
+    () async {
+    // Build a v2-shaped file: create the database at v5, then rewind the
+    // schema version and drop the columns v2 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 2');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN line_numbers',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN preview_mode',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    expect(row.lineNumbers, true);
+    expect(row.editorAutofocus, false);
+    expect(row.debugLogsEnabled, true);
+    await db.close();
+  });
+
+  test(
+    'v3 databases gain editor_autofocus on upgrade, keeping values',
+    () async {
+    // Build a v3-shaped file: create the database at v5, then rewind the
+    // schema version and drop the columns v3 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 3');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN preview_mode',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    expect(row.lineNumbers, true);
+    expect(row.editorAutofocus, false);
+    expect(row.previewMode, 'auto');
+    expect(row.splitRatio, 0.55);
+    await db.close();
+  });
+
+  test(
+    'v4 databases gain preview_mode and split_ratio on upgrade, keeping '
+    'values',
+    () async {
+    // Build a v4-shaped file: create the database at v5, then rewind the
+    // schema version and drop the columns v4 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 4');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN preview_mode',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    expect(row.previewMode, 'auto');
+    expect(row.splitRatio, 0.55);
     await db.close();
   });
 }

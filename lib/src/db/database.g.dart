@@ -830,8 +830,70 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _lineNumbersMeta = const VerificationMeta(
+    'lineNumbers',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, libraryPath, debugLogsEnabled];
+  late final GeneratedColumn<bool> lineNumbers = GeneratedColumn<bool>(
+    'line_numbers',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("line_numbers" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _editorAutofocusMeta = const VerificationMeta(
+    'editorAutofocus',
+  );
+  @override
+  late final GeneratedColumn<bool> editorAutofocus = GeneratedColumn<bool>(
+    'editor_autofocus',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("editor_autofocus" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _previewModeMeta = const VerificationMeta(
+    'previewMode',
+  );
+  @override
+  late final GeneratedColumn<String> previewMode = GeneratedColumn<String>(
+    'preview_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('auto'),
+  );
+  static const VerificationMeta _splitRatioMeta = const VerificationMeta(
+    'splitRatio',
+  );
+  @override
+  late final GeneratedColumn<double> splitRatio = GeneratedColumn<double>(
+    'split_ratio',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.55),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    libraryPath,
+    debugLogsEnabled,
+    lineNumbers,
+    editorAutofocus,
+    previewMode,
+    splitRatio,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -865,6 +927,39 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('line_numbers')) {
+      context.handle(
+        _lineNumbersMeta,
+        lineNumbers.isAcceptableOrUnknown(
+          data['line_numbers']!,
+          _lineNumbersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('editor_autofocus')) {
+      context.handle(
+        _editorAutofocusMeta,
+        editorAutofocus.isAcceptableOrUnknown(
+          data['editor_autofocus']!,
+          _editorAutofocusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('preview_mode')) {
+      context.handle(
+        _previewModeMeta,
+        previewMode.isAcceptableOrUnknown(
+          data['preview_mode']!,
+          _previewModeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('split_ratio')) {
+      context.handle(
+        _splitRatioMeta,
+        splitRatio.isAcceptableOrUnknown(data['split_ratio']!, _splitRatioMeta),
+      );
+    }
     return context;
   }
 
@@ -886,6 +981,22 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}debug_logs_enabled'],
       )!,
+      lineNumbers: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}line_numbers'],
+      )!,
+      editorAutofocus: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}editor_autofocus'],
+      )!,
+      previewMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preview_mode'],
+      )!,
+      splitRatio: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}split_ratio'],
+      )!,
     );
   }
 
@@ -905,10 +1016,28 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// Whether the in-app debug log buffer records events (default true).
   final bool debugLogsEnabled;
+
+  /// Whether the note editor shows the row-number column (default true).
+  final bool lineNumbers;
+
+  /// Whether the note editor focuses (shows the keyboard) when a note
+  /// opens (default false — the keyboard appears on the first tap).
+  final bool editorAutofocus;
+
+  /// The preview layout mode: `auto` (width-based), `split` or `switch`
+  /// (forced; default `auto`).
+  final String previewMode;
+
+  /// The editor|preview split fraction (0..1; default 0.55).
+  final double splitRatio;
   const AppSetting({
     required this.id,
     this.libraryPath,
     required this.debugLogsEnabled,
+    required this.lineNumbers,
+    required this.editorAutofocus,
+    required this.previewMode,
+    required this.splitRatio,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -918,6 +1047,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['library_path'] = Variable<String>(libraryPath);
     }
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
+    map['line_numbers'] = Variable<bool>(lineNumbers);
+    map['editor_autofocus'] = Variable<bool>(editorAutofocus);
+    map['preview_mode'] = Variable<String>(previewMode);
+    map['split_ratio'] = Variable<double>(splitRatio);
     return map;
   }
 
@@ -928,6 +1061,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? const Value.absent()
           : Value(libraryPath),
       debugLogsEnabled: Value(debugLogsEnabled),
+      lineNumbers: Value(lineNumbers),
+      editorAutofocus: Value(editorAutofocus),
+      previewMode: Value(previewMode),
+      splitRatio: Value(splitRatio),
     );
   }
 
@@ -940,6 +1077,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: serializer.fromJson<int>(json['id']),
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
+      lineNumbers: serializer.fromJson<bool>(json['lineNumbers']),
+      editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
+      previewMode: serializer.fromJson<String>(json['previewMode']),
+      splitRatio: serializer.fromJson<double>(json['splitRatio']),
     );
   }
   @override
@@ -949,6 +1090,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'id': serializer.toJson<int>(id),
       'libraryPath': serializer.toJson<String?>(libraryPath),
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
+      'lineNumbers': serializer.toJson<bool>(lineNumbers),
+      'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
+      'previewMode': serializer.toJson<String>(previewMode),
+      'splitRatio': serializer.toJson<double>(splitRatio),
     };
   }
 
@@ -956,10 +1101,18 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? id,
     Value<String?> libraryPath = const Value.absent(),
     bool? debugLogsEnabled,
+    bool? lineNumbers,
+    bool? editorAutofocus,
+    String? previewMode,
+    double? splitRatio,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+    lineNumbers: lineNumbers ?? this.lineNumbers,
+    editorAutofocus: editorAutofocus ?? this.editorAutofocus,
+    previewMode: previewMode ?? this.previewMode,
+    splitRatio: splitRatio ?? this.splitRatio,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -970,6 +1123,18 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: data.debugLogsEnabled.present
           ? data.debugLogsEnabled.value
           : this.debugLogsEnabled,
+      lineNumbers: data.lineNumbers.present
+          ? data.lineNumbers.value
+          : this.lineNumbers,
+      editorAutofocus: data.editorAutofocus.present
+          ? data.editorAutofocus.value
+          : this.editorAutofocus,
+      previewMode: data.previewMode.present
+          ? data.previewMode.value
+          : this.previewMode,
+      splitRatio: data.splitRatio.present
+          ? data.splitRatio.value
+          : this.splitRatio,
     );
   }
 
@@ -978,45 +1143,81 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return (StringBuffer('AppSetting(')
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
-          ..write('debugLogsEnabled: $debugLogsEnabled')
+          ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('lineNumbers: $lineNumbers, ')
+          ..write('editorAutofocus: $editorAutofocus, ')
+          ..write('previewMode: $previewMode, ')
+          ..write('splitRatio: $splitRatio')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, libraryPath, debugLogsEnabled);
+  int get hashCode => Object.hash(
+    id,
+    libraryPath,
+    debugLogsEnabled,
+    lineNumbers,
+    editorAutofocus,
+    previewMode,
+    splitRatio,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AppSetting &&
           other.id == this.id &&
           other.libraryPath == this.libraryPath &&
-          other.debugLogsEnabled == this.debugLogsEnabled);
+          other.debugLogsEnabled == this.debugLogsEnabled &&
+          other.lineNumbers == this.lineNumbers &&
+          other.editorAutofocus == this.editorAutofocus &&
+          other.previewMode == this.previewMode &&
+          other.splitRatio == this.splitRatio);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String?> libraryPath;
   final Value<bool> debugLogsEnabled;
+  final Value<bool> lineNumbers;
+  final Value<bool> editorAutofocus;
+  final Value<String> previewMode;
+  final Value<double> splitRatio;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.lineNumbers = const Value.absent(),
+    this.editorAutofocus = const Value.absent(),
+    this.previewMode = const Value.absent(),
+    this.splitRatio = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.lineNumbers = const Value.absent(),
+    this.editorAutofocus = const Value.absent(),
+    this.previewMode = const Value.absent(),
+    this.splitRatio = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
     Expression<String>? libraryPath,
     Expression<bool>? debugLogsEnabled,
+    Expression<bool>? lineNumbers,
+    Expression<bool>? editorAutofocus,
+    Expression<String>? previewMode,
+    Expression<double>? splitRatio,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (libraryPath != null) 'library_path': libraryPath,
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
+      if (lineNumbers != null) 'line_numbers': lineNumbers,
+      if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
+      if (previewMode != null) 'preview_mode': previewMode,
+      if (splitRatio != null) 'split_ratio': splitRatio,
     });
   }
 
@@ -1024,11 +1225,19 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? id,
     Value<String?>? libraryPath,
     Value<bool>? debugLogsEnabled,
+    Value<bool>? lineNumbers,
+    Value<bool>? editorAutofocus,
+    Value<String>? previewMode,
+    Value<double>? splitRatio,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
       libraryPath: libraryPath ?? this.libraryPath,
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+      lineNumbers: lineNumbers ?? this.lineNumbers,
+      editorAutofocus: editorAutofocus ?? this.editorAutofocus,
+      previewMode: previewMode ?? this.previewMode,
+      splitRatio: splitRatio ?? this.splitRatio,
     );
   }
 
@@ -1044,6 +1253,18 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (debugLogsEnabled.present) {
       map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled.value);
     }
+    if (lineNumbers.present) {
+      map['line_numbers'] = Variable<bool>(lineNumbers.value);
+    }
+    if (editorAutofocus.present) {
+      map['editor_autofocus'] = Variable<bool>(editorAutofocus.value);
+    }
+    if (previewMode.present) {
+      map['preview_mode'] = Variable<String>(previewMode.value);
+    }
+    if (splitRatio.present) {
+      map['split_ratio'] = Variable<double>(splitRatio.value);
+    }
     return map;
   }
 
@@ -1052,7 +1273,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     return (StringBuffer('AppSettingsCompanion(')
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
-          ..write('debugLogsEnabled: $debugLogsEnabled')
+          ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('lineNumbers: $lineNumbers, ')
+          ..write('editorAutofocus: $editorAutofocus, ')
+          ..write('previewMode: $previewMode, ')
+          ..write('splitRatio: $splitRatio')
           ..write(')'))
         .toString();
   }
@@ -1497,12 +1722,20 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> lineNumbers,
+      Value<bool> editorAutofocus,
+      Value<String> previewMode,
+      Value<double> splitRatio,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> lineNumbers,
+      Value<bool> editorAutofocus,
+      Value<String> previewMode,
+      Value<double> splitRatio,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -1526,6 +1759,26 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get previewMode => $composableBuilder(
+    column: $table.previewMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get splitRatio => $composableBuilder(
+    column: $table.splitRatio,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1553,6 +1806,26 @@ class $$AppSettingsTableOrderingComposer
     column: $table.debugLogsEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get previewMode => $composableBuilder(
+    column: $table.previewMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get splitRatio => $composableBuilder(
+    column: $table.splitRatio,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1574,6 +1847,26 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get previewMode => $composableBuilder(
+    column: $table.previewMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get splitRatio => $composableBuilder(
+    column: $table.splitRatio,
     builder: (column) => column,
   );
 }
@@ -1612,20 +1905,36 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> lineNumbers = const Value.absent(),
+                Value<bool> editorAutofocus = const Value.absent(),
+                Value<String> previewMode = const Value.absent(),
+                Value<double> splitRatio = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                lineNumbers: lineNumbers,
+                editorAutofocus: editorAutofocus,
+                previewMode: previewMode,
+                splitRatio: splitRatio,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> lineNumbers = const Value.absent(),
+                Value<bool> editorAutofocus = const Value.absent(),
+                Value<String> previewMode = const Value.absent(),
+                Value<double> splitRatio = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                lineNumbers: lineNumbers,
+                editorAutofocus: editorAutofocus,
+                previewMode: previewMode,
+                splitRatio: splitRatio,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

@@ -5,7 +5,7 @@ Spec: `Copist - spec & plan.md`. Design: `plan/design.md`. Plan: `plan/m*.md`
 done, **M1.5 is next and blocks M2**).
 
 ## Env
-- Flutter not on PATH: `export PATH="$PATH:/home/alessandro/develop/flutter/bin"`
+- Flutter is on PATH (`flutter`, currently 3.47.2 stable). If it ever is not: `export PATH="$PATH:/home/alessandro/develop/flutter/bin"`.
 - Android SDK: `/home/alessandro/Android/Sdk` via gitignored `android/local.properties` (never commit).
 - Repo-root `copist-release.apk` / `copist-linux-x64.tar.gz` are gitignored artifacts, not sources.
 
@@ -44,3 +44,4 @@ done, **M1.5 is next and blocks M2**).
 - Never walk the disk or read file content on the UI isolate: on Android every `listSync`/`statSync` is a FUSE round trip and hashing reads whole files, which is how the app earned an ANR (`plan/android.md` issue 3). Use `Isolate.run`; the drift writes stay on the main isolate.
 - Vocabulary: Library (root), note, folder, tag, template, wikilink, trash, history. Not vault/canvas/daily note/backlinks.
 - Layout `lib/src/<module>/` per `plan/design.md`: core, library, db, editor, preview, links, search, frontmatter, templates, sync, ui.
+- No god classes: keep one class per file, and split a class that grows past a single clear responsibility (or ~300 lines) into smaller classes, each in its own file. A view that mixes IME handling, painting, gestures, and persistence is several classes (e.g. a `…Client` for the IME, a `…Painter`, the widget) wired together — not one big widget. This keeps files short enough to read and reason about.

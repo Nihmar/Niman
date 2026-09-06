@@ -112,6 +112,52 @@ void _walkDir(
   }
 }
 
+/// The on-disk state of one path, as probed by [probePaths].
+final class DiskProbe {
+  /// Creates a probe result.
+  const DiskProbe({
+    required this.exists,
+    required this.isDir,
+    required this.modified,
+    this.size = 0,
+  });
+
+  /// Whether the path exists (file or directory).
+  final bool exists;
+
+  /// Whether it is a directory.
+  final bool isDir;
+
+  /// The byte size (0 unless a file).
+  final int size;
+
+  /// The last-modification time.
+  final DateTime modified;
+}
+
+/// Probes [paths] (exists? directory? size? mtime?) — top-level so it can
+/// run on a background isolate via [Isolate.run]: on Android every stat is
+/// a FUSE round trip, and a cold FUSE takes seconds, so the watcher-event
+/// path must not stat on the UI isolate (a save behind an open editor is
+/// what froze the app, M2a on-device round 2).
+List<DiskProbe> probePaths(List<String> paths) => [
+  for (final path in paths) _probePath(path),
+];
+
+DiskProbe _probePath(String path) {
+  final st = File(path).statSync();
+  final type = st.type;
+  // A symlink probes through to its target, as the old existsSync calls did.
+  final isDir = type == FileSystemEntityType.directory ||
+      (type == FileSystemEntityType.link && Directory(path).existsSync());
+  return DiskProbe(
+    exists: type != FileSystemEntityType.notFound,
+    isDir: isDir,
+    size: type == FileSystemEntityType.file ? st.size : 0,
+    modified: st.modified,
+  );
+}
+
 /// Digests the files at [rels] (library-relative) under [root].
 ///
 /// Top-level for [Isolate.run]: hashing reads whole files, so it is the
@@ -266,13 +312,16 @@ final class Indexer {
     String rel,
     String tag,
   ) async {
-    if (Directory(abs).existsSync()) {
+    // One background-isolate probe (a FUSE stat on Android is a round trip
+    // that can take seconds cold, so it must not run on the UI isolate).
+    final probe = await Isolate.run(() => probePaths(<String>[abs]).single);
+    if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
       return _syncDirSubtree(root, abs);
     }
-    if (File(abs).existsSync()) {
+    if (probe.exists) {
       _log.debug('$tag: "$abs" -> upsert file "$rel"');
-      return _upsertFile(root, abs, rel);
+      return _upsertFile(root, abs, rel, probe);
     }
     _log.debug('$tag: "$abs" -> prune "$rel"');
     final deleted = await _dao.deleteSubtree(rel);
@@ -528,13 +577,30 @@ final class Indexer {
   /// [dirRel] itself), returning the id of the [dirRel] row.
   Future<int> _ensureDirChain(String root, String dirRel) async {
     final segs = dirRel.isEmpty ? <String>[] : dirRel.split('/');
+    // The missing rows first (index only, no disk), so the on-disk probe
+    // (one FUSE round trip per path) batches into a single background
+    // isolate call instead of one per ancestor on the UI isolate.
+    final missing = <String>[];
     var prefix = '';
+    for (final seg in segs) {
+      prefix = prefix.isEmpty ? seg : '$prefix/$seg';
+      if (await _dao.find(prefix) == null) missing.add(prefix);
+    }
+    final probes = missing.isEmpty
+        ? const <DiskProbe>[]
+        : await Isolate.run(
+            () => probePaths(
+              [for (final m in missing) p.join(root, m)],
+            ),
+          );
+    var probeIndex = 0;
     var currentId = 0;
+    prefix = '';
     for (final seg in segs) {
       prefix = prefix.isEmpty ? seg : '$prefix/$seg';
       final row = await _dao.find(prefix);
       if (row == null) {
-        final st = Directory(p.join(root, prefix)).statSync();
+        final probe = probes[probeIndex++];
         currentId = await _db.into(_db.notes).insert(
           NotesCompanion.insert(
             path: prefix,
@@ -542,7 +608,7 @@ final class Indexer {
             name: seg,
             isDir: true,
             size: 0,
-            modified: st.modified,
+            modified: probe.modified,
           ),
         );
       } else {
@@ -553,19 +619,33 @@ final class Indexer {
   }
 
   /// Inserts or updates the row for the file at [abs] (root-relative path
-  /// [rel]) and returns whether the index changed. The directory chain is
-  /// ensured first, so a file appearing outside the app comes in with its
-  /// parents.
-  Future<bool> _upsertFile(String root, String abs, String rel) async {
+  /// [rel], on-disk state [probe]) and returns whether the index changed.
+  /// The directory chain is ensured first, so a file appearing outside the
+  /// app comes in with its parents.
+  Future<bool> _upsertFile(
+    String root,
+    String abs,
+    String rel,
+    DiskProbe probe,
+  ) async {
     final parentRel = parentOf(rel);
     final parentId = parentRel.isEmpty
         ? 0
         : await _ensureDirChain(root, parentRel);
-    final st = File(abs).statSync();
-    // Notes only, as in [_digests]; one note is small enough to hash here.
-    final sha =
-        _isNote(p.basename(abs)) ? await hashFileSha256(File(abs)) : null;
     final existing = await _dao.find(rel);
+    // Notes only, as in [_digests]; the stored digest is reused when
+    // (size, mtime) prove the content unchanged, so our own save of a
+    // large note is not re-read end to end on every watcher event.
+    String? sha;
+    if (_isNote(p.basename(abs))) {
+      sha =
+          existing != null &&
+                  existing.sha256 != null &&
+                  existing.size == probe.size &&
+                  existing.modified == toStoredSecond(probe.modified)
+              ? existing.sha256
+              : (await Isolate.run(() => hashFiles(root, <String>[rel])))[rel];
+    }
     if (existing == null) {
       _log.debug('upsert "$rel": insert (parent "$parentRel")');
       await _db.into(_db.notes).insert(
@@ -574,8 +654,8 @@ final class Indexer {
           parent: parentId,
           name: p.basename(abs),
           isDir: false,
-          size: st.size,
-          modified: st.modified,
+          size: probe.size,
+          modified: probe.modified,
           sha256: Value(sha),
         ),
       );
@@ -584,8 +664,8 @@ final class Indexer {
     final changed = existing.parent != parentId ||
         existing.name != p.basename(abs) ||
         existing.isDir || // a stale directory row at a file path
-        existing.size != st.size ||
-        existing.modified != toStoredSecond(st.modified) ||
+        existing.size != probe.size ||
+        existing.modified != toStoredSecond(probe.modified) ||
         existing.sha256 != sha;
     if (!changed) {
       _log.debug('upsert "$rel": unchanged');
@@ -598,8 +678,8 @@ final class Indexer {
             parent: Value(parentId),
             name: Value(p.basename(abs)),
             isDir: const Value(false),
-            size: Value(st.size),
-            modified: Value(st.modified),
+            size: Value(probe.size),
+            modified: Value(probe.modified),
             sha256: Value(sha),
           ),
         );

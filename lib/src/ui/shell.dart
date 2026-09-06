@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/trash.dart';
@@ -78,6 +80,78 @@ final class _LibraryShellState extends State<_LibraryShell> {
   final Set<String> _expanded = <String>{};
   bool _busy = false;
 
+  /// The editor settings toggles, held here so both NoteView sites get the
+  /// same values and they refresh on session events (the settings screen
+  /// calls `notify()` after a toggle), so an open editor picks them up
+  /// without reopening the note. The shell rebuilds on every session event
+  /// (the LibraryHome StreamBuilder), so a refetch happens there — no
+  /// subscription needed.
+  bool _lineNumbers = true;
+  bool _autofocusEditor = false;
+
+  /// Preview layout (T-M2-08): the mode override and the split ratio the
+  /// shell persists; the effective mode is resolved at build (width ×
+  /// override).
+  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
+  double _splitRatio = defaultSplitRatio;
+
+  /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
+  /// `false` = the selected note is open full-screen.
+  bool _treeVisible = true;
+
+  /// Below this width the shell is single-pane (spec: phones are
+  /// full-screen tree or editor, the split lands at 600 px and up).
+  static const double _phoneBreakpoint = 600;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_refreshEditorSettings());
+  }
+
+  @override
+  void didUpdateWidget(covariant _LibraryShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    unawaited(_refreshEditorSettings());
+  }
+
+  Future<void> _refreshEditorSettings() async {
+    final controller = widget.controller;
+    final lineNumbers = await controller.lineNumbersEnabled;
+    final autofocus = await controller.editorAutofocusEnabled;
+    final previewMode = await controller.previewMode;
+    final splitRatio = await controller.splitRatio;
+    if (mounted &&
+        (lineNumbers != _lineNumbers ||
+            autofocus != _autofocusEditor ||
+            previewMode != _previewMode ||
+            splitRatio != _splitRatio)) {
+      setState(() {
+        _lineNumbers = lineNumbers;
+        _autofocusEditor = autofocus;
+        _previewMode = previewMode;
+        _splitRatio = splitRatio;
+      });
+    }
+  }
+
+  /// Live divider moves mirror into [_splitRatio]; the lift persists.
+  //ignore: use_setters_to_change_properties
+  void _onSplitFractionChanged(double value) => _splitRatio = value;
+
+  Future<void> _onSplitDragEnd() async {
+    await widget.controller.setSplitRatio(_splitRatio);
+    widget.controller.notify();
+  }
+
+  /// Resolves the effective preview layout for a width: forced modes win,
+  /// `auto` follows the width (split ≥ 600 dp, switch on phones).
+  bool _effectiveSplit({required bool narrow}) {
+    if (_previewMode == PreviewLayoutMode.split) return true;
+    if (_previewMode == PreviewLayoutMode.fullScreen) return false;
+    return !narrow;
+  }
+
   /// Parent path for new note/folder creation.
   String get _createParent {
     if (_selected == null) return '';
@@ -88,6 +162,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
     setState(() {
       _selected = note.path;
       _selectedIsDir = note.isDir;
+      _treeVisible = note.isDir;
       if (note.isDir) _expanded.add(note.path);
     });
   }
@@ -133,6 +208,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
+        _treeVisible = false;
       });
     });
   }
@@ -238,6 +314,37 @@ final class _LibraryShellState extends State<_LibraryShell> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final selectedPath = _selected;
+    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
+    if (narrow &&
+        selectedPath != null &&
+        !_selectedIsDir &&
+        !_treeVisible) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) setState(() => _treeVisible = true);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: BackButton(
+              onPressed: () => setState(() => _treeVisible = true),
+            ),
+            title: Text(p.basename(selectedPath)),
+          ),
+          body: NoteView(
+            path: p.join(controller.root ?? '', selectedPath),
+            showLineNumbers: _lineNumbers,
+            autofocusEditor: _autofocusEditor,
+            splitPreview: _effectiveSplit(narrow: true),
+            splitFraction: _splitRatio,
+            onSplitFractionChanged: _onSplitFractionChanged,
+            onSplitDragEnd: _onSplitDragEnd,
+            libraryRoot: controller.root,
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Copist'),
@@ -267,38 +374,55 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          SizedBox(
-            width: 340,
-            child: Column(
+      body: narrow
+          ? _treePane(controller)
+          : Row(
               children: [
-                _ActionBar(
-                  hasSelection: _selected != null,
-                  busy: _busy,
-                  onCreateNote: _createNote,
-                  onCreateFolder: _createFolder,
-                  onRename: _rename,
-                  onMove: _move,
-                  onDelete: _delete,
-                ),
-                const SizedBox(height: 4),
+                SizedBox(width: 340, child: _treePane(controller)),
+                const VerticalDivider(width: 1),
                 Expanded(
-                  child: NoteTree(
-                    controller: controller,
+                  child: _DetailPane(
+                    root: controller.root,
                     selectedPath: _selected,
-                    expanded: _expanded,
-                    onToggle: _toggle,
-                    onSelect: _select,
+                    selectedIsDir: _selectedIsDir,
+                    showLineNumbers: _lineNumbers,
+                    autofocusEditor: _autofocusEditor,
+                    splitPreview: _effectiveSplit(narrow: false),
+                    splitFraction: _splitRatio,
+                    onSplitFractionChanged: _onSplitFractionChanged,
+                    onSplitDragEnd: _onSplitDragEnd,
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  /// The tree pane: the action bar and the note tree — the whole body on
+  /// phones, the left column on wide screens.
+  Widget _treePane(LibrarySession controller) {
+    return Column(
+      children: [
+        _ActionBar(
+          hasSelection: _selected != null,
+          busy: _busy,
+          onCreateNote: _createNote,
+          onCreateFolder: _createFolder,
+          onRename: _rename,
+          onMove: _move,
+          onDelete: _delete,
+        ),
+        const SizedBox(height: 4),
+        Expanded(
+          child: NoteTree(
+            controller: controller,
+            selectedPath: _selected,
+            expanded: _expanded,
+            onToggle: _toggle,
+            onSelect: _select,
           ),
-          const VerticalDivider(width: 1),
-          Expanded(child: _DetailPane(selectedPath: _selected)),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -364,37 +488,54 @@ final class _ActionBar extends StatelessWidget {
   }
 }
 
-/// Right-hand pane; the M2 editor/preview replaces this placeholder.
+/// Right-hand pane: the note editor, or a prompt until a note is chosen.
 final class _DetailPane extends StatelessWidget {
-  const _DetailPane({required this.selectedPath});
+  const _DetailPane({
+    required this.root,
+    required this.selectedPath,
+    required this.selectedIsDir,
+    required this.showLineNumbers,
+    required this.autofocusEditor,
+    required this.splitPreview,
+    required this.splitFraction,
+    required this.onSplitFractionChanged,
+    required this.onSplitDragEnd,
+  });
 
+  /// Absolute library root; null until the session is ready.
+  final String? root;
+
+  /// Library-relative path of the selection.
   final String? selectedPath;
+
+  final bool selectedIsDir;
+
+  /// Editor setting forwards.
+  final bool showLineNumbers;
+  final bool autofocusEditor;
+
+  /// Preview layout (T-M2-08).
+  final bool splitPreview;
+  final double splitFraction;
+  final ValueChanged<double> onSplitFractionChanged;
+  final VoidCallback onSplitDragEnd;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (selectedPath == null) {
+    final path = selectedPath;
+    final root = this.root;
+    if (path == null || selectedIsDir || root == null) {
       return const Center(child: Text('Select a note'));
     }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            p.basename(selectedPath!),
-            style: theme.textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            selectedPath!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text('The editor and preview arrive in M2'),
-        ],
-      ),
+    return NoteView(
+      path: p.join(root, path),
+      showLineNumbers: showLineNumbers,
+      autofocusEditor: autofocusEditor,
+      splitPreview: splitPreview,
+      splitFraction: splitFraction,
+      onSplitFractionChanged: onSplitFractionChanged,
+      onSplitDragEnd: onSplitDragEnd,
+      libraryRoot: root,
     );
   }
 }

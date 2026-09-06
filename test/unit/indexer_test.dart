@@ -292,4 +292,27 @@ void main() {
     expect(updated.size, 7);
     expect(updated.sha256, isNot(initial.sha256));
   });
+
+  group('probePaths', () {
+    test('reports file, directory, and missing paths', () {
+      final probes = probePaths([
+        p.join(root.path, 'note1.md'),
+        p.join(root.path, 'docs'),
+        p.join(root.path, 'nope.md'),
+      ]);
+      expect(probes, hasLength(3));
+      final file = probes[0];
+      expect(file.exists, isTrue);
+      expect(file.isDir, isFalse);
+      expect(file.size, 5);
+      final dir = probes[1];
+      expect(dir.exists, isTrue);
+      expect(dir.isDir, isTrue);
+      expect(dir.size, 0);
+      final gone = probes[2];
+      expect(gone.exists, isFalse);
+      expect(gone.isDir, isFalse);
+      expect(gone.size, 0);
+    });
+  });
 }
