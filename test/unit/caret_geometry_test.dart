@@ -3,6 +3,7 @@ import 'dart:ui' show TextRange;
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/line_buffer.dart';
 import 'package:copist/src/editor/row_model.dart';
+import 'package:flutter/services.dart' show TextSelection;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -54,6 +55,33 @@ void main() {
   test('composingUnderlines: a collapsed range is empty', () {
     expect(
       geo.composingUnderlines(const TextRange(start: 3, end: 3)),
+      isEmpty,
+    );
+  });
+
+  test('selectionRects: single row hugs the glyphs with an inset (T3)', () {
+    // [3,5) = 'ab' (line 1, in-row cols 0..2, row 1): grid edges would be
+    // left 5, width 20; the inset hugs inside them.
+    final rects = geo.selectionRects(
+      const TextSelection(baseOffset: 3, extentOffset: 5),
+    );
+    expect(rects, hasLength(1));
+    final r = rects.single;
+    expect(r.left, 6); // 5 + 0 * 10 + inset 1.
+    expect(r.width, 18); // (2 - 0) * 10 - 2 * inset.
+    expect(r.top, 20); // full row height (row 1 * 20).
+    expect(r.height, 20);
+  });
+
+  test('selectionRects: collapsed or invalid is empty', () {
+    expect(
+      geo.selectionRects(const TextSelection.collapsed(offset: 3)),
+      isEmpty,
+    );
+    expect(
+      geo.selectionRects(
+        const TextSelection(baseOffset: -1, extentOffset: -1),
+      ),
       isEmpty,
     );
   });

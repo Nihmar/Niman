@@ -1,3 +1,4 @@
+import 'dart:math' show max;
 import 'dart:ui' show Rect, TextRange;
 
 import 'package:copist/src/editor/row_model.dart';
@@ -97,7 +98,8 @@ final class CaretGeometry {
 
   /// The selection-highlight rects for [selection] (empty when collapsed):
   /// full row-height rects covering the selected characters, one per visual
-  /// row the selection spans.
+  /// row the selection spans. Edges hug the glyphs (~1 px inset) instead of
+  /// the full advances (round-6 T3 — full-advance washes read too wide).
   List<Rect> selectionRects(TextSelection selection) {
     if (!selection.isValid || selection.isCollapsed) {
       return const <Rect>[];
@@ -111,15 +113,35 @@ final class CaretGeometry {
       if (to <= from) {
         continue;
       }
-      rects.add(
-        Rect.fromLTWH(
-          leftPadding + from * charWidth,
-          row * rowHeight,
-          (to - from) * charWidth,
-          rowHeight,
-        ),
-      );
+      rects.add(_selectionSpan(row, from, to));
     }
     return rects;
+  }
+
+  /// The horizontal wash inset, px per side, so the highlight hugs glyphs.
+  static const double _highlightInset = 1;
+
+  /// One highlight span over visual [row]'s columns [fromCol, toCol): the
+  /// start/end edges come from the painter over the row's exact slice when
+  /// metrics are present (at most two painter layouts per paint — bounded),
+  /// grid otherwise; middle rows span the full row width either way.
+  Rect _selectionSpan(int row, int fromCol, int toCol) {
+    final metrics = textMetrics;
+    final double left;
+    final double right;
+    if (metrics == null) {
+      left = leftPadding + fromCol * charWidth;
+      right = leftPadding + toCol * charWidth;
+    } else {
+      final slice = rowModel.rowSliceText(row);
+      left = leftPadding + metrics.caretX(slice, fromCol);
+      right = leftPadding + metrics.caretX(slice, toCol);
+    }
+    return Rect.fromLTWH(
+      left + _highlightInset,
+      row * rowHeight,
+      max(0, right - left - 2 * _highlightInset).toDouble(),
+      rowHeight,
+    );
   }
 }
