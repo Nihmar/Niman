@@ -64,6 +64,17 @@ class AppSettings extends Table {
       .named('debug_logs_enabled')
       .withDefault(const Constant(true))();
 
+  /// Whether the note editor shows the row-number column (default true).
+  BoolColumn get lineNumbers => boolean()
+      .named('line_numbers')
+      .withDefault(const Constant(true))();
+
+  /// Whether the note editor focuses (shows the keyboard) when a note
+  /// opens (default false — the keyboard appears on the first tap).
+  BoolColumn get editorAutofocus => boolean()
+      .named('editor_autofocus')
+      .withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -78,10 +89,11 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   /// Fresh databases get all tables; v1 databases gain the
-  /// `debug_logs_enabled` column.
+  /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`, and
+  /// pre-v4 databases `editor_autofocus`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
@@ -89,6 +101,18 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN debug_logs_enabled '
           'BOOLEAN NOT NULL DEFAULT 1',
+        );
+      }
+      if (from < 3) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN line_numbers '
+          'BOOLEAN NOT NULL DEFAULT 1',
+        );
+      }
+      if (from < 4) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN editor_autofocus '
+          'BOOLEAN NOT NULL DEFAULT 0',
         );
       }
     },

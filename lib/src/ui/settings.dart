@@ -24,6 +24,8 @@ final class SettingsScreen extends StatefulWidget {
 final class _SettingsScreenState extends State<SettingsScreen> {
   bool? _trash;
   bool? _debugLogs;
+  bool? _lineNumbers;
+  bool? _autofocusEditor;
 
   @override
   void initState() {
@@ -37,10 +39,14 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     if (ops == null) return;
     final enabled = await ops.trashEnabled;
     final debug = await controller.debugLogsEnabled;
+    final lineNumbers = await controller.lineNumbersEnabled;
+    final autofocus = await controller.editorAutofocusEnabled;
     if (mounted) {
       setState(() {
         _trash = enabled;
         _debugLogs = debug;
+        _lineNumbers = lineNumbers;
+        _autofocusEditor = autofocus;
       });
     }
   }
@@ -60,6 +66,28 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     await controller.setDebugLogsEnabled(enabled: value);
     if (mounted) {
       setState(() => _debugLogs = value);
+    }
+  }
+
+  Future<void> _toggleLineNumbers(bool value) async {
+    final controller = widget.controller;
+    await controller.setLineNumbersEnabled(enabled: value);
+    // Notify so the shell refreshes its cached value — an open editor
+    // shows/hides the column without reopening the note.
+    controller.notify();
+    if (mounted) {
+      setState(() => _lineNumbers = value);
+    }
+  }
+
+  Future<void> _toggleAutofocusEditor(bool value) async {
+    final controller = widget.controller;
+    await controller.setEditorAutofocusEnabled(enabled: value);
+    // Notify so the shell picks the value up; the next opened note
+    // focuses (an already-open note keeps its current keyboard state).
+    controller.notify();
+    if (mounted) {
+      setState(() => _autofocusEditor = value);
     }
   }
 
@@ -158,6 +186,22 @@ final class _SettingsScreenState extends State<SettingsScreen> {
             ),
             value: _debugLogs ?? true,
             onChanged: _toggleDebugLogs,
+          ),
+          SwitchListTile(
+            title: const Text('Line numbers'),
+            subtitle: const Text(
+              'Show the row-number column in the note editor',
+            ),
+            value: _lineNumbers ?? true,
+            onChanged: _toggleLineNumbers,
+          ),
+          SwitchListTile(
+            title: const Text('Keyboard on open'),
+            subtitle: const Text(
+              'Show the keyboard as soon as a note opens (off = on first tap)',
+            ),
+            value: _autofocusEditor ?? false,
+            onChanged: _toggleAutofocusEditor,
           ),
           const Divider(),
           ListTile(

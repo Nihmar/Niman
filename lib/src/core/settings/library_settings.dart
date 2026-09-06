@@ -84,6 +84,35 @@ final class AppSettingsRepo {
         .write(AppSettingsCompanion(debugLogsEnabled: Value(enabled)));
   }
 
+  /// Whether the note editor shows the row-number column (default true).
+  Future<bool> lineNumbersEnabled() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty || rows.first.lineNumbers;
+  }
+
+  /// Persists the line-numbers toggle.
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(lineNumbers: Value(enabled)));
+  }
+
+  /// Whether the note editor focuses (shows the keyboard) on note open
+  /// (default false).
+  Future<bool> editorAutofocusEnabled() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isNotEmpty && rows.first.editorAutofocus;
+  }
+
+  /// Persists the keyboard-on-open toggle.
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(editorAutofocus: Value(enabled)));
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

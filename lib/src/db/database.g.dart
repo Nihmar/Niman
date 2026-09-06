@@ -830,8 +830,44 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _lineNumbersMeta = const VerificationMeta(
+    'lineNumbers',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, libraryPath, debugLogsEnabled];
+  late final GeneratedColumn<bool> lineNumbers = GeneratedColumn<bool>(
+    'line_numbers',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("line_numbers" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _editorAutofocusMeta = const VerificationMeta(
+    'editorAutofocus',
+  );
+  @override
+  late final GeneratedColumn<bool> editorAutofocus = GeneratedColumn<bool>(
+    'editor_autofocus',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("editor_autofocus" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    libraryPath,
+    debugLogsEnabled,
+    lineNumbers,
+    editorAutofocus,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -865,6 +901,24 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('line_numbers')) {
+      context.handle(
+        _lineNumbersMeta,
+        lineNumbers.isAcceptableOrUnknown(
+          data['line_numbers']!,
+          _lineNumbersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('editor_autofocus')) {
+      context.handle(
+        _editorAutofocusMeta,
+        editorAutofocus.isAcceptableOrUnknown(
+          data['editor_autofocus']!,
+          _editorAutofocusMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -886,6 +940,14 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}debug_logs_enabled'],
       )!,
+      lineNumbers: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}line_numbers'],
+      )!,
+      editorAutofocus: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}editor_autofocus'],
+      )!,
     );
   }
 
@@ -905,10 +967,19 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// Whether the in-app debug log buffer records events (default true).
   final bool debugLogsEnabled;
+
+  /// Whether the note editor shows the row-number column (default true).
+  final bool lineNumbers;
+
+  /// Whether the note editor focuses (shows the keyboard) when a note
+  /// opens (default false — the keyboard appears on the first tap).
+  final bool editorAutofocus;
   const AppSetting({
     required this.id,
     this.libraryPath,
     required this.debugLogsEnabled,
+    required this.lineNumbers,
+    required this.editorAutofocus,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -918,6 +989,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['library_path'] = Variable<String>(libraryPath);
     }
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
+    map['line_numbers'] = Variable<bool>(lineNumbers);
+    map['editor_autofocus'] = Variable<bool>(editorAutofocus);
     return map;
   }
 
@@ -928,6 +1001,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? const Value.absent()
           : Value(libraryPath),
       debugLogsEnabled: Value(debugLogsEnabled),
+      lineNumbers: Value(lineNumbers),
+      editorAutofocus: Value(editorAutofocus),
     );
   }
 
@@ -940,6 +1015,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: serializer.fromJson<int>(json['id']),
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
+      lineNumbers: serializer.fromJson<bool>(json['lineNumbers']),
+      editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
     );
   }
   @override
@@ -949,6 +1026,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'id': serializer.toJson<int>(id),
       'libraryPath': serializer.toJson<String?>(libraryPath),
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
+      'lineNumbers': serializer.toJson<bool>(lineNumbers),
+      'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
     };
   }
 
@@ -956,10 +1035,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? id,
     Value<String?> libraryPath = const Value.absent(),
     bool? debugLogsEnabled,
+    bool? lineNumbers,
+    bool? editorAutofocus,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+    lineNumbers: lineNumbers ?? this.lineNumbers,
+    editorAutofocus: editorAutofocus ?? this.editorAutofocus,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -970,6 +1053,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: data.debugLogsEnabled.present
           ? data.debugLogsEnabled.value
           : this.debugLogsEnabled,
+      lineNumbers: data.lineNumbers.present
+          ? data.lineNumbers.value
+          : this.lineNumbers,
+      editorAutofocus: data.editorAutofocus.present
+          ? data.editorAutofocus.value
+          : this.editorAutofocus,
     );
   }
 
@@ -978,45 +1067,65 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return (StringBuffer('AppSetting(')
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
-          ..write('debugLogsEnabled: $debugLogsEnabled')
+          ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('lineNumbers: $lineNumbers, ')
+          ..write('editorAutofocus: $editorAutofocus')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, libraryPath, debugLogsEnabled);
+  int get hashCode => Object.hash(
+    id,
+    libraryPath,
+    debugLogsEnabled,
+    lineNumbers,
+    editorAutofocus,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AppSetting &&
           other.id == this.id &&
           other.libraryPath == this.libraryPath &&
-          other.debugLogsEnabled == this.debugLogsEnabled);
+          other.debugLogsEnabled == this.debugLogsEnabled &&
+          other.lineNumbers == this.lineNumbers &&
+          other.editorAutofocus == this.editorAutofocus);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String?> libraryPath;
   final Value<bool> debugLogsEnabled;
+  final Value<bool> lineNumbers;
+  final Value<bool> editorAutofocus;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.lineNumbers = const Value.absent(),
+    this.editorAutofocus = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.lineNumbers = const Value.absent(),
+    this.editorAutofocus = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
     Expression<String>? libraryPath,
     Expression<bool>? debugLogsEnabled,
+    Expression<bool>? lineNumbers,
+    Expression<bool>? editorAutofocus,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (libraryPath != null) 'library_path': libraryPath,
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
+      if (lineNumbers != null) 'line_numbers': lineNumbers,
+      if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
     });
   }
 
@@ -1024,11 +1133,15 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? id,
     Value<String?>? libraryPath,
     Value<bool>? debugLogsEnabled,
+    Value<bool>? lineNumbers,
+    Value<bool>? editorAutofocus,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
       libraryPath: libraryPath ?? this.libraryPath,
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+      lineNumbers: lineNumbers ?? this.lineNumbers,
+      editorAutofocus: editorAutofocus ?? this.editorAutofocus,
     );
   }
 
@@ -1044,6 +1157,12 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (debugLogsEnabled.present) {
       map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled.value);
     }
+    if (lineNumbers.present) {
+      map['line_numbers'] = Variable<bool>(lineNumbers.value);
+    }
+    if (editorAutofocus.present) {
+      map['editor_autofocus'] = Variable<bool>(editorAutofocus.value);
+    }
     return map;
   }
 
@@ -1052,7 +1171,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     return (StringBuffer('AppSettingsCompanion(')
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
-          ..write('debugLogsEnabled: $debugLogsEnabled')
+          ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('lineNumbers: $lineNumbers, ')
+          ..write('editorAutofocus: $editorAutofocus')
           ..write(')'))
         .toString();
   }
@@ -1497,12 +1618,16 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> lineNumbers,
+      Value<bool> editorAutofocus,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> lineNumbers,
+      Value<bool> editorAutofocus,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -1526,6 +1651,16 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1553,6 +1688,16 @@ class $$AppSettingsTableOrderingComposer
     column: $table.debugLogsEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1574,6 +1719,16 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get lineNumbers => $composableBuilder(
+    column: $table.lineNumbers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get editorAutofocus => $composableBuilder(
+    column: $table.editorAutofocus,
     builder: (column) => column,
   );
 }
@@ -1612,20 +1767,28 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> lineNumbers = const Value.absent(),
+                Value<bool> editorAutofocus = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                lineNumbers: lineNumbers,
+                editorAutofocus: editorAutofocus,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> lineNumbers = const Value.absent(),
+                Value<bool> editorAutofocus = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                lineNumbers: lineNumbers,
+                editorAutofocus: editorAutofocus,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

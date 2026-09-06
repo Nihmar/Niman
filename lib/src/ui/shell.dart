@@ -79,6 +79,15 @@ final class _LibraryShellState extends State<_LibraryShell> {
   final Set<String> _expanded = <String>{};
   bool _busy = false;
 
+  /// The editor settings toggles, held here so both NoteView sites get the
+  /// same values and they refresh on session events (the settings screen
+  /// calls `notify()` after a toggle), so an open editor picks them up
+  /// without reopening the note. The shell rebuilds on every session event
+  /// (the LibraryHome StreamBuilder), so a refetch happens there — no
+  /// subscription needed.
+  bool _lineNumbers = true;
+  bool _autofocusEditor = false;
+
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
@@ -86,6 +95,31 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Below this width the shell is single-pane (spec: phones are
   /// full-screen tree or editor, the split lands at 600 px and up).
   static const double _phoneBreakpoint = 600;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_refreshEditorSettings());
+  }
+
+  @override
+  void didUpdateWidget(covariant _LibraryShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    unawaited(_refreshEditorSettings());
+  }
+
+  Future<void> _refreshEditorSettings() async {
+    final controller = widget.controller;
+    final lineNumbers = await controller.lineNumbersEnabled;
+    final autofocus = await controller.editorAutofocusEnabled;
+    if (mounted &&
+        (lineNumbers != _lineNumbers || autofocus != _autofocusEditor)) {
+      setState(() {
+        _lineNumbers = lineNumbers;
+        _autofocusEditor = autofocus;
+      });
+    }
+  }
 
   /// Parent path for new note/folder creation.
   String get _createParent {
@@ -269,6 +303,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
           body: NoteView(
             path: p.join(controller.root ?? '', selectedPath),
+            showLineNumbers: _lineNumbers,
+            autofocusEditor: _autofocusEditor,
           ),
         ),
       );
@@ -313,6 +349,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
                     root: controller.root,
                     selectedPath: _selected,
                     selectedIsDir: _selectedIsDir,
+                    showLineNumbers: _lineNumbers,
+                    autofocusEditor: _autofocusEditor,
                   ),
                 ),
               ],
@@ -416,6 +454,8 @@ final class _DetailPane extends StatelessWidget {
     required this.root,
     required this.selectedPath,
     required this.selectedIsDir,
+    required this.showLineNumbers,
+    required this.autofocusEditor,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -426,6 +466,12 @@ final class _DetailPane extends StatelessWidget {
 
   final bool selectedIsDir;
 
+  /// The editor row-number toggle (settings).
+  final bool showLineNumbers;
+
+  /// The editor keyboard-on-open toggle (settings).
+  final bool autofocusEditor;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -433,7 +479,11 @@ final class _DetailPane extends StatelessWidget {
     if (path == null || selectedIsDir || root == null) {
       return const Center(child: Text('Select a note'));
     }
-    return NoteView(path: p.join(root, path));
+    return NoteView(
+      path: p.join(root, path),
+      showLineNumbers: showLineNumbers,
+      autofocusEditor: autofocusEditor,
+    );
   }
 }
 

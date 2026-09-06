@@ -107,6 +107,19 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the debug log recording toggle.
   Future<void> setDebugLogsEnabled({required bool enabled});
 
+  /// Whether the note editor shows the row-number column (default true).
+  Future<bool> get lineNumbersEnabled;
+
+  /// Sets (and persists) the editor line-numbers toggle.
+  Future<void> setLineNumbersEnabled({required bool enabled});
+
+  /// Whether the note editor focuses (shows the keyboard) when a note
+  /// opens (default false).
+  Future<bool> get editorAutofocusEnabled;
+
+  /// Sets (and persists) the keyboard-on-open toggle.
+  Future<void> setEditorAutofocusEnabled({required bool enabled});
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 

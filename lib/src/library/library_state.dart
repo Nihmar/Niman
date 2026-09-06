@@ -52,8 +52,11 @@ final class LibraryController implements LibrarySession {
   static String? currentRootPath;
 
   /// Default delay between a non-blocking resume becoming ready and its
-  /// reconciliation scan, leaving the UI time to paint the tree first.
-  static const defaultResumeReconcileDelay = Duration(milliseconds: 1000);
+  /// reconciliation scan. Five seconds: the app's first seconds (first
+  /// frame, tree render, first interaction) are calmer without a scan and
+  /// its index-bump frames; external changes still converge when it fires
+  /// (the periodic rescan covers them too).
+  static const defaultResumeReconcileDelay = Duration(seconds: 5);
 
   /// Builds the database on demand (app-support location in the app).
   final Future<CopistDatabase> Function() dbFactory;
@@ -270,6 +273,36 @@ final class LibraryController implements LibrarySession {
     final db = await database;
     await AppSettingsRepo(db).setDebugLogsEnabled(enabled: enabled);
     AppLog.enabled = enabled;
+  }
+
+  /// Whether the note editor shows the row-number column.
+  @override
+  Future<bool> get lineNumbersEnabled async {
+    final db = await database;
+    return AppSettingsRepo(db).lineNumbersEnabled();
+  }
+
+  /// Sets (and persists) the editor line-numbers toggle.
+  @override
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {
+    _log.info('editor line numbers set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setLineNumbersEnabled(enabled: enabled);
+  }
+
+  /// Whether the note editor focuses (shows the keyboard) on note open.
+  @override
+  Future<bool> get editorAutofocusEnabled async {
+    final db = await database;
+    return AppSettingsRepo(db).editorAutofocusEnabled();
+  }
+
+  /// Sets (and persists) the keyboard-on-open toggle.
+  @override
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
+    _log.info('editor keyboard-on-open set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setEditorAutofocusEnabled(enabled: enabled);
   }
 
   /// Notifies listeners that state changed without an index mutation

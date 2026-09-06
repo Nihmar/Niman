@@ -101,6 +101,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
 
   @override
+  Future<bool> get lineNumbersEnabled async => true;
+
+  @override
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {}
+
+  @override
+  Future<bool> get editorAutofocusEnabled async => false;
+
+  @override
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {}
+
+  @override
   void notify() => _bump();
 
   @override
