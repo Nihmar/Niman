@@ -1,6 +1,8 @@
 # M2 — Editor + preview
 
-**Status:** Planned · **Depends on:** M1.5 · **Spec:** *Requirements*
+**Status:** In progress (M2a editor + highlighting done — see
+[m2a-line-editor.md](m2a-line-editor.md); T-M2-01/02 below; next: T-M2-03
+katex verification, then the preview pipeline) · **Depends on:** M1.5 · **Spec:** *Requirements*
 (editor, math, layout, images), *Milestones → M2*
 
 ## Purpose
@@ -106,19 +108,32 @@ document, but build+lay out only the visible block range (a sliver) using the
 package's per-node builders. Never hand a novel-length document to
 `SmoothMarkdown`/`render()` unwindowed.
 
-- [ ] **T-M2-01** Source editor: superseded by sub-plan
-  [m2a-line-editor.md](m2a-line-editor.md) (line-based editor, E1–E9),
-  confirmed by the T-M2-00 on-device verdict. The plain-`TextField`
-  baseline (autosave, atomic writes, save-on-focus-loss) stays in place as
-  the fallback and as the save-path donor until the sub-plan's E8 lands.
-- [ ] **T-M2-02** Highlighting layer: tokenizer for Markdown tokens (headings,
-  bold/italic, code, lists, links) and math spans (`$…$`, `$$…$$`); styled
-  display over a plain-text buffer (highlighting is a display concern only).
-  *AC: tokens and math spans visually distinct; no rich-text edit model.*
-- [ ] **T-M2-03** Verify `katex_dart`: confirm the pinned pure-Dart KaTeX
-  version renders the spec coverage — matrices, `aligned`/`cases`, `\text`,
-  `\newcommand` — before building on it. *AC: demo fixture renders all four
-  cases; version decision recorded.*
+- [x] **T-M2-01** Source editor: **done** via sub-plan
+  [m2a-line-editor.md](m2a-line-editor.md) — the custom line-based editor
+  was confirmed on-device, then replaced by the re_editor switch with the
+  incremental spanBuilder highlighter (see the sub-plan Status). The
+  plain-`TextField` baseline was removed; autosave/save-path discipline
+  (debounce, atomic writes, off-isolate join/encode/write) carried over
+  unchanged.
+- [x] **T-M2-02** Highlighting layer: **done** — the M2a tokenizer
+  (`highlighting.dart`: headings, bold/italic, code, lists, links, math
+  spans) drives per-line styled `TextSpan`s through re_editor's
+  `spanBuilder` (`highlight_sync.dart` + `highlight_style.dart`); math
+  spans are styled distinctly (purple, light/dark palettes); the edit
+  model stays plain text (no rich-text model). *AC: tokens/math visually
+  distinct; no per-frame re-tokenize of the whole file — verified on the
+  931K device log (keystroke sync 0.12–0.40 ms).*
+- [x] **T-M2-03** Verify `katex_dart`: **done** — pinned `katex_dart ^0.1.1`
+  (pure-Dart KaTeX port) renders the full spec coverage; the fixed
+  `test/unit/m2_t3_katex_test.dart` renders matrices, `aligned`/`cases`,
+  `\text`, and `\newcommand` (plus `\frac`/`\sqrt`/`\sum` sanity) to SVG
+  without throwing, and a matrix's box tree has non-zero geometry.
+  **Version decision recorded: keep `katex_dart`.** The math pipeline
+  (T-M2-05) will use `renderToBox` (box tree + em metrics — no Flutter
+  dependency, runs anywhere) with the LRU cache keyed by the exact math
+  string; the SVG serializer exists as a fallback if the preview wants
+  standalone images. The `katex` Flutter painter package is NOT used —
+  the box tree is ours to paint (or vendored via the SVG path).
 - [ ] **T-M2-04** Preview pipeline: `flutter_markdown_plus` render parsed
   once per change (debounced), lazy block layout; tables, task lists,
   footnotes, strikethrough, code blocks via `flutter_highlight`. *AC:
