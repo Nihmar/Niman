@@ -5,32 +5,44 @@ import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/editor/composing_input.dart';
+import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:flutter/material.dart';
+import 'package:re_editor/re_editor.dart';
 
-/// Opens a note file in the M2a line editor and keeps disk in sync.
+/// Opens a note file in the source editor and keeps disk in sync.
 ///
 /// The file is the source of truth (design.md): the initial read happens
 /// off the UI isolate (a full-file read is a FUSE round trip on Android),
 /// and saves are atomic. Edits persist ~500 ms after the last keystroke,
 /// on focus loss, and when the app is hidden.
 ///
-/// Line endings: the buffer uses LF (the line editor is line-based); `\r`
-/// is stripped on load and the save writes LF. Restoring the file's original
-/// line ending on save is a deferred refinement (record it per note).
+/// Line endings: the buffer uses LF; `\r` is stripped on load and the save
+/// writes LF. Restoring the file's original line ending on save is a
+/// deferred refinement (record it per note).
+///
+/// [showLineNumbers] and [autofocusEditor] are the settings toggles,
+/// passed through to the editor.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
   const NoteView({
     required this.path,
+    required this.showLineNumbers,
+    required this.autofocusEditor,
     this.readNote,
     this.writeNote,
-    this.input,
+    this.controller,
     super.key,
   });
 
   /// Absolute path of the note file.
   final String path;
+
+  /// Whether the editor shows the row-number column (settings toggle).
+  final bool showLineNumbers;
+
+  /// Whether the editor shows the keyboard on open (settings toggle).
+  final bool autofocusEditor;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -38,8 +50,8 @@ final class NoteView extends StatefulWidget {
   /// Persists a note's content. Defaults to an atomic file write.
   final Future<void> Function(String path, String content)? writeNote;
 
-  /// The editor's buffer (a test seam; the editor creates one by default).
-  final ComposingInput? input;
+  /// The editor's controller (a test seam; one is created by default).
+  final CodeLineEditingController? controller;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -51,22 +63,37 @@ final class _NoteViewState extends State<NoteView>
 
   late final FocusNode _focus;
 
-  /// The editor's buffer: owned here so the save path can read the buffer
-  /// text without a full string crossing the widget tree per keystroke
-  /// (M2a fix P1) — the editor edits it, the save reads it.
-  late final ComposingInput _input;
+  /// The editor's controller: owned here so the save path can read the text
+  /// without a full string crossing the widget tree per keystroke — the
+  /// editor edits it, the save reads it. Created with a spanBuilder that
+  /// styles lines through [_highlight].
+  late final CodeLineEditingController _controller;
+
+  /// The incremental highlighter that keeps the line tokenizer
+  /// (editor/highlighting.dart) in sync with [_controller] (changed lines
+  /// only) and builds/serves each line's styled span.
+  late final EditorHighlightSync _highlight;
+
+  /// Whether a controller was supplied by the owner (a test seam the state
+  /// must not dispose) or created here.
+  late final bool _ownsController;
+
+  /// The `CodeLines` the last processed text edit produced. A controller
+  /// change that reuses the same instance is selection-only (no save).
+  /// Identity comparison keeps this O(1) at any file size.
+  CodeLines? _lastLines;
 
   bool _loading = true;
+  bool _ready = false;
   bool _saving = false;
   bool _savePending = false;
   String? _error;
-  String? _loadedContent;
   Timer? _saveTimer;
 
-  /// The buffer [ComposingInput.revision] the disk currently matches. The
-  /// dirty flag is `revision != _lastSavedRevision` (a saved note is a
-  /// revision, not a text copy).
-  int _lastSavedRevision = -1;
+  /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
+  /// is a revision, not a text copy.
+  int _revision = 0;
+  int _lastSavedRevision = 0;
 
   @override
   void initState() {
@@ -74,10 +101,16 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
-    _input = widget.input ?? ComposingInput('');
-    // A seam buffer (a test) arrives with its content already loaded; the
-    // file load below re-anchors it to the disk text.
-    _lastSavedRevision = _input.revision;
+    _ownsController = widget.controller == null;
+    _highlight = EditorHighlightSync();
+    _controller = widget.controller == null
+        ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
+        : widget.controller!;
+    // Listen to the controller itself, not CodeEditor.onChanged: the value
+    // set in _load happens BEFORE the editor field exists (its change
+    // callback would never fire for it), and the load is exactly when the
+    // buffer (and the highlight document) is first populated.
+    _controller.addListener(_onValueChanged);
     unawaited(_load());
   }
 
@@ -91,7 +124,7 @@ final class _NoteViewState extends State<NoteView>
       // replaced by the incoming one (its text is read synchronously at the
       // start of _save, before the _load below resets the buffer). An
       // in-flight save already holds the outgoing text + path: skip.
-      if (!_saving && _input.revision != _lastSavedRevision) {
+      if (!_saving && _revision != _lastSavedRevision) {
         unawaited(_save(path: oldWidget.path));
       }
       unawaited(_load());
@@ -102,8 +135,10 @@ final class _NoteViewState extends State<NoteView>
   void dispose() {
     _saveTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    if (_input.revision != _lastSavedRevision) unawaited(_save());
+    _controller.removeListener(_onValueChanged);
+    if (_revision != _lastSavedRevision) unawaited(_save());
     _focus.dispose();
+    if (_ownsController) _controller.dispose();
     super.dispose();
   }
 
@@ -116,9 +151,9 @@ final class _NoteViewState extends State<NoteView>
       await seam(path, content);
       return;
     }
-    // Encode + atomic write off the UI isolate (the ~4 s save freeze, M2a
-    // fix P3): the utf8 encode is an O(n) string pass and the write the
-    // FUSE round trips — neither may touch the UI frame.
+    // Encode + atomic write off the UI isolate: the utf8 encode is an O(n)
+    // string pass and the write the FUSE round trips — neither may touch
+    // the UI frame.
     final (bytes, encodeMs, writeMs) = await Isolate.run(() async {
       final encodeClock = Stopwatch()..start();
       final encoded = utf8.encode(content);
@@ -138,18 +173,22 @@ final class _NoteViewState extends State<NoteView>
     final path = widget.path;
     setState(() {
       _loading = true;
+      _ready = false;
       _error = null;
     });
     final clock = Stopwatch()..start();
     try {
       final content = await _read(path);
       if (!mounted || widget.path != path) return;
-      // The line editor is line-based: normalize to LF (strip \r).
+      // The buffer uses LF: normalize line endings on load.
       final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
-      _input.reset(text);
-      _loadedContent = text;
-      _lastSavedRevision = _input.revision;
-      setState(() => _loading = false);
+      _controller.text = text;
+      _lastLines = _controller.codeLines;
+      _lastSavedRevision = _revision;
+      setState(() {
+        _loading = false;
+        _ready = true;
+      });
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -164,12 +203,29 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
-  void _onUserEdit(int revision) {
+  void _onValueChanged() {
+    final clock = Stopwatch()..start();
+    final value = _controller.value;
+    final textChanged = !identical(value.codeLines, _lastLines);
+    // The incremental highlighter follows every buffer change (also the
+    // load: the document is empty until the first value arrives, then it is
+    // built from the full line list).
+    _highlight.onBufferChanged(value.codeLines);
     if (_loading) return;
-    // No text, no setState: the revision is the dirty flag and the status
-    // line follows the save state only (M2a fix P1/P3 — no parent rebuild
-    // per keystroke). The debounce lengthens while a save is in flight
-    // (typing fast: one trailing save, not a queue).
+    // Selection-only changes reuse the CodeLines instance: no text changed,
+    // no save. The identity check is O(1) at any file size — the full-text
+    // join lives on the save path only, never the keystroke path.
+    if (!textChanged) return;
+    _log.debug(
+      'keystroke: highlight+select sync '
+      '${(clock.elapsedMicroseconds / 1000).toStringAsFixed(2)} ms, '
+      'line ${value.selection.extentIndex}',
+    );
+    _lastLines = value.codeLines;
+    _revision++;
+    // No setState: the status line follows the save state only. The debounce
+    // lengthens while a save is in flight (typing fast: one trailing save,
+    // not a queue).
     _saveTimer?.cancel();
     final debounce = _saving
         ? const Duration(seconds: 1)
@@ -188,7 +244,7 @@ final class _NoteViewState extends State<NoteView>
   }
 
   Future<void> _save({String? path}) async {
-    final revision = _input.revision;
+    final revision = _revision;
     if (revision == _lastSavedRevision) return; // nothing new on disk
     if (path == null && _saving) {
       // A save is in flight: coalesce into one trailing save (the text is
@@ -200,9 +256,9 @@ final class _NoteViewState extends State<NoteView>
     final target = path ?? widget.path;
     final clock = Stopwatch()..start();
     // The full-text join (O(n)) happens here only — the save path, never
-    // the keystroke path (M2a fix P1).
+    // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final text = _input.text;
+    final text = _controller.text;
     final joinMs = joinClock.elapsedMilliseconds;
     _log.info(
       'save start: $target (${text.length} chars, join $joinMs ms)',
@@ -223,30 +279,46 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
+  /// The [CodeLineSpanBuilder] over [_highlight]: styles each line the
+  /// editor lays out, dark/light per the app brightness.
+  TextSpan _buildHighlightSpan({
+    required BuildContext context,
+    required int index,
+    required CodeLine codeLine,
+    required TextSpan textSpan,
+    required TextStyle style,
+  }) {
+    return _highlight.spanFor(
+      index: index,
+      text: codeLine.text,
+      base: style,
+      dark: Theme.of(context).brightness == Brightness.dark,
+    );
+  }
+
   String get _status {
     if (_error != null) return 'error';
     if (_loading) return 'loading…';
     if (_saving) return 'saving…';
-    if (_input.revision != _lastSavedRevision) return 'unsaved';
+    if (_revision != _lastSavedRevision) return 'unsaved';
     return 'saved';
   }
 
   @override
   Widget build(BuildContext context) {
     final error = _error;
-    final content = _loadedContent;
     return Column(
       children: [
         Expanded(
           child: error == null
-              ? (content == null || _loading
+              ? (!_ready || _loading
                   ? const Center(child: CircularProgressIndicator())
                   : NoteEditor(
                       key: ValueKey(widget.path),
-                      initialText: content,
+                      controller: _controller,
                       focusNode: _focus,
-                      onTextChanged: _onUserEdit,
-                      input: _input,
+                      showLineNumbers: widget.showLineNumbers,
+                      autofocus: widget.autofocusEditor,
                     ))
               : Center(child: Text(error)),
         ),

@@ -1,6 +1,32 @@
 # M2a — Line-based editor (sub-plan of M2)
 
-**Status:** In progress (E1–E8d done — E8a: ImeBridge + HitTest + ComposingUnderline + EditorGestures, E8c: fold-remap-on-edit, E8b's headless core is E5 + ComposingUnderline, E8a–E8d on-device: the `NoteEditor` widget (IME + caret + tap/drag + scroll sync) wired into the `NoteView` (the `SourceEditor` baseline removed); E9: microbenchmark done + editor log instrumentation done, on-device T-M2-00 re-run pending) · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
+**Status:** Done + verified 2026-09-06 (on-device, user, Android): the re_editor
+stack opens/typing/highlighting/saves on the real 931K note (evidence
+`copist-debug-log-2026-09-06-181029.587.txt`: open 86 ms + one 105 ms first
+frame; saves at 931K = join 4–8 ms + write 51–258 ms off-isolate; no slow
+frame >200 ms, no errors; speed pass re-verified in
+`copist-debug-log-2026-09-06-195842.383.txt`: keystroke sync 0.12–0.40 ms/key
+after the segment-aware anchor). The custom widget stack below was replaced by
+`re_editor` (`NoteEditor` is a thin `CodeEditor` wrapper: `wordWrap`,
+no autofocus, `NonCodeChunkAnalyzer`, stock selection toolbar; `NoteView`
+owns the `CodeLineEditingController` and keeps the off-isolate load/save +
+500 ms debounce). Highlighting uses the package's per-line `spanBuilder`
+wired to this plan's incremental tokenizer (`EditorHighlightSync` +
+`HighlightDocument.replaceLines`/lazy `lineAt`: O(visible) per edit, no
+whole-file pass — the package's codeTheme engine re-highlights the whole
+buffer per change and was measured at 3.3–5.7 s for 931K, so it is off).
+Known follow-ups: re_editor's own whole-text `edit()` path is marked "very
+very slow" in its source at novel length (typing on this 931K device was
+fine, per the evidence above; re-verify on other hardware), and a Markdown
+heading fold chunk-analyzer remains M2 work. Rounds of caret/selection/IME fixes (E8a–E8d, rounds 1–7)
+are what the switch retires; the file stays as history. Kept from this plan:
+`highlighting.dart` (tokenizer, T-M2-02), `folding.dart` + `outline.dart`
+(model halves for a future chunk analyzer / outline panel). Deleted: the
+caret/selection/IME/gesture/view model stack (`composing_input`,
+`line_buffer`, `line_editor`, `row_model`, `virtualized_text_view`,
+`hit_test`, `editor_gestures`, `caret_*`, `row_text_metrics`,
+`selection_*`, `note_editor_client`, `ime_bridge`, `composing_underline`,
+`highlight_sync`, `styled_runs`, `highlight_style`) and their tests. · **Depends on:** M2 (tokenizer T-M2-02, autosave/save
 path), M1.5 · **Spec:** *Requirements* (editor)
 
 ## Why this is its own plan

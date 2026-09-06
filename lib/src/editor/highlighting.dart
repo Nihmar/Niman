@@ -201,9 +201,12 @@ final class _Line {
 
   final String text;
 
-  late _State entering;
-  late _State exit;
-  late List<Token> tokens;
+  /// Carried block state / tokens, null until the line is materialized
+  /// (see [HighlightDocument] — tokenization is lazy so opening a 1M-char
+  /// note costs only the visible lines, not the whole file).
+  _State? entering;
+  _State? exit;
+  List<Token>? tokens;
 }
 
 /// Incremental highlighter over a plain-text buffer.
@@ -212,6 +215,11 @@ final class _Line {
 /// the single edit region. Typical cost is one or two lines.
 final class HighlightDocument {
   HighlightDocument._();
+
+  /// An empty document. The editor grows it through [replaceLines] as the
+  /// re_editor buffer is loaded/edited, so a big note costs only the lines
+  /// it actually touches instead of one eager whole-file pass at open.
+  factory HighlightDocument.empty() => HighlightDocument._();
 
   /// Tokenizes [text] fully.
   factory HighlightDocument.fromText(String text) {
@@ -223,11 +231,19 @@ final class HighlightDocument {
       _tokenizeAt(lines, lines.length, line);
       lines.add(line);
     }
-    doc._lines = lines;
+    doc
+      .._lines = lines
+      .._materializedUntil = lines.length;
     return doc;
   }
-
   List<_Line> _lines = const [];
+
+  /// The count of *materialized* leading lines: lines below this index keep
+  /// valid tokens/state for the current buffer; at and above it they are
+  /// tokenized lazily on the next [lineAt]. Edits (see [replaceLines]) drop
+  /// the materialization from the edit point on, so a keystroke re-tokenizes
+  /// only what the viewport asks for.
+  int _materializedUntil = 0;
 
   /// The current display text (lines joined with `\n`).
   String get text => _lines.map((l) => l.text).join('\n');
@@ -235,15 +251,37 @@ final class HighlightDocument {
   /// The number of lines (O(1)).
   int get lineCount => _lines.length;
 
-  /// Line [line]'s styled content (O(1)); [line] in 0..lineCount-1. This is
-  /// the per-visible-line accessor the editor view uses, in place of [lines]
-  /// (which is O(lineCount) and would break the "only visible rows" budget).
-  StyledLine lineAt(int line) =>
-      StyledLine(_lines[line].text, _lines[line].tokens);
+  /// Line [line]'s styled content (O(1) after materialization); [line] in
+  /// 0..lineCount-1. This is the per-visible-line accessor the editor view
+  /// uses, in place of [lines] (which is O(lineCount) and would break the
+  /// "only visible rows" budget).
+  StyledLine lineAt(int line) {
+    if (line < 0 || line >= _lines.length) {
+      throw RangeError.range(line, 0, _lines.length - 1, 'line');
+    }
+    _materialize(line);
+    return StyledLine(_lines[line].text, _lines[line].tokens!);
+  }
 
-  /// The styled lines (all of them; O(lineCount)).
-  List<StyledLine> get lines =>
-      _lines.map((l) => StyledLine(l.text, l.tokens)).toList();
+  /// The styled lines (all of them; O(lineCount) — materializes the whole
+  /// document).
+  List<StyledLine> get lines {
+    if (_lines.isNotEmpty) _materialize(_lines.length - 1);
+    return _lines
+        .map((l) => StyledLine(l.text, l.tokens!))
+        .toList();
+  }
+
+  /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
+  /// materialized line, walking forward so the carried state is exact.
+  void _materialize(int upTo) {
+    var i = _materializedUntil;
+    while (i <= upTo) {
+      _tokenizeAt(_lines, i, _lines[i]);
+      i++;
+    }
+    _materializedUntil = upTo + 1;
+  }
 
   /// Math spans over the current buffer; see [mathSpansIn].
   List<MathSpan> mathSpans() => mathSpansIn(text);
@@ -256,6 +294,9 @@ final class HighlightDocument {
         'edit [$start,$end) out of range for ${text.length} chars',
       );
     }
+    // The offset edit is the eager path (its convergence math needs the
+    // old states): materialize everything first.
+    if (_lines.isNotEmpty) _materialize(_lines.length - 1);
     final lineStarts = _lineStarts();
     final first = _lineAt(lineStarts, start);
     final firstOffset = start - lineStarts[first];
@@ -311,8 +352,37 @@ final class HighlightDocument {
     _lines = tail;
   }
 
+  /// Applies a line-granularity edit: [removed] lines starting at line
+  /// [first] are replaced by [replacement] (each a line without a newline).
+  ///
+  /// This is the re_editor-side entry point: the buffer is a line list, and
+  /// offsets are hard to recover across edits, so the model is always
+  /// edited line-based. Only the replaced lines (plus the following ones
+  /// until the carried state converges) are re-tokenized; the unchanged
+  /// tail is shared.
+  void replaceLines(int first, int removed, List<String> replacement) {
+    if (first < 0 || first > _lines.length) {
+      throw ArgumentError('first $first out of range 0..${_lines.length}');
+    }
+    if (removed < 0) {
+      throw ArgumentError('removed $removed < 0');
+    }
+    final end =
+        first + removed > _lines.length ? _lines.length : first + removed;
+    _lines = <_Line>[
+      ..._lines.sublist(0, first),
+      for (final text in replacement) _Line(text),
+      ..._lines.sublist(end),
+    ];
+    // The materialized prefix ends at `first`: everything at/above it is
+    // (re)tokenized lazily on the next lineAt, in order, so stale tokens
+    // are overwritten before they are ever read — no eager invalidation
+    // walk (which would be O(remaining lines) per keystroke).
+    if (_materializedUntil > first) _materializedUntil = first;
+  }
+
   static void _tokenizeAt(List<_Line> lines, int index, _Line line) {
-    final entering = index == 0 ? _State.initial : lines[index - 1].exit;
+    final entering = index == 0 ? _State.initial : lines[index - 1].exit!;
     line.entering = entering;
     line.exit = _stateAfter(line.text, entering, index);
     line.tokens = _lineTokens(line.text, entering, index);

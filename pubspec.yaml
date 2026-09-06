@@ -41,6 +41,13 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.6
 
+  # Source editor widget (Reqable's large-text editor): caret, selection,
+  # IME/composition, handles and scrolling come from the package instead of
+  # the former hand-built editor stack. Highlighting is Copist's incremental
+  # tokenizer (editor/highlighting.dart) wired through the controller's
+  # spanBuilder — NOT the package's whole-file codeTheme engine.
+  re_editor: ^0.10.0
+
   # State management (app-wide).
   riverpod: ^2.6.1
 
