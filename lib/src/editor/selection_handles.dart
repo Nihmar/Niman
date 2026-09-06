@@ -4,7 +4,6 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/caret_geometry.dart';
 import 'package:copist/src/editor/composing_input.dart';
 import 'package:copist/src/editor/selection_delegate.dart';
-import 'package:copist/src/editor/selection_handle_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -202,7 +201,10 @@ final class SelectionHandles {
       onEndHandleDragUpdate: _dragUpdateEnd,
       onEndHandleDragEnd: _dragEnd,
       selectionEndpoints: _endpoints,
-      selectionControls: CopistSelectionControls(),
+      // Stock Material drops (round-7 reverted the custom balls: at 16 px
+      // they read as plain circles; the stock 22 px teardrops hang below
+      // the word as users expect).
+      selectionControls: MaterialTextSelectionControls(),
       // Required (not deprecated): the framework routes the toolbar's
       // state (paste enabled, …) through the delegate.
       selectionDelegate: delegate,
