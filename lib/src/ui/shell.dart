@@ -340,6 +340,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
             splitFraction: _splitRatio,
             onSplitFractionChanged: _onSplitFractionChanged,
             onSplitDragEnd: _onSplitDragEnd,
+            libraryRoot: controller.root,
           ),
         ),
       );
@@ -534,6 +535,7 @@ final class _DetailPane extends StatelessWidget {
       splitFraction: splitFraction,
       onSplitFractionChanged: onSplitFractionChanged,
       onSplitDragEnd: onSplitDragEnd,
+      libraryRoot: root,
     );
   }
 }

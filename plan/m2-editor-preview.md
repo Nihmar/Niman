@@ -230,11 +230,24 @@ package's per-node builders. Never hand a novel-length document to
   drag-end persistence, shell auto/forced resolution) and the override
   persists (repo + migration tests). Tracked follow-ups: the whole-doc
   markdown parse still runs on the UI isolate at the debounce (register
-  with T-M2-05's note; off-isolate parse), and library-relative images in
-  the preview land with T-M2-09.
-- [ ] **T-M2-09** Image insert: picker → copy file into the library
-  (`assets/` or chosen folder) → insert a link (no base64 by default).
-  *AC: image visible in preview from the library-relative link.*
+  renders the package's note; off-isolate parse), library-relative images
+  in the preview landed with T-M2-09.
+- [x] **T-M2-09** Image insert: **done** — picker → copy into the library
+  → link at the caret. Picking is `file_picker` (v12, static API,
+  `FileType.image`); the copy is `lib/src/library/image_import.dart`
+  (`importImageToLibrary`): sha256 content-addressed name, the file lands
+  in `<library>/assets/` (created on demand) — same image never duplicated —
+  and the copy runs off the UI isolate (`Isolate.run`, FUSE rule). The
+  toolbar's insert button (alt text = the picked file's name; link =
+  `assets/<sha256>.<ext>`; 500 ms-debounced autosave covers the edit).
+  Preview visibility: `MarkdownPreview.imageDirectory` (library root) +
+  a resolve builder — the package's own resolver concatenates
+  `directory + uri` with **no separator** (`_functions_io.dart:42`), so
+  relative links go through our builder (`_imageFor`): `Image.file` under
+  the root, http(s)/data/resource keep package behavior, missing file =
+  empty box. AC verified: widget test renders + decodes a real 1×1 PNG
+  from a library-relative link, and the insert test copies + links at the
+  caret (+ autosave); unit tests cover the content addressing.
 - [ ] **T-M2-10** Tests: unit (scroll-mapping, KaTeX LRU, highlighter) and
   widget (editor/preview render parity, layout modes). *AC: green.*
 

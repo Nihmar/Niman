@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/preview/html_table.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:path/path.dart' as p;
 
 /// The windowed Markdown preview (M2 T-M2-04).
 ///
@@ -44,6 +46,7 @@ final class MarkdownPreview extends StatefulWidget {
     this.mathStyle = const MathStyle(),
     this.mathCache,
     this.scrollMap,
+    this.imageDirectory,
     super.key,
   });
 
@@ -57,8 +60,8 @@ final class MarkdownPreview extends StatefulWidget {
   /// `code_highlight.dart`).
   final SyntaxHighlighter? syntaxHighlighter;
 
-  /// Image builder (defaults to the package's own; library-relative image
-  /// wiring arrives with T-M2-09).
+  /// Image builder (overrides the default resolution described under
+  /// [imageDirectory]).
   final MarkdownImageBuilder? imageBuilder;
 
   /// Task checkbox builder.
@@ -90,6 +93,14 @@ final class MarkdownPreview extends StatefulWidget {
   /// render pass (structure → block start lines) and reports every block's
   /// measured height.
   final ScrollMap? scrollMap;
+
+  /// The base directory for relative image links (the library root, T-M2-09):
+  /// `![alt](assets/…png)` resolves to a file under it and renders as an
+  /// `Image.file`; null = the package's network default. The package's own
+  /// resolver concatenates `imageDirectory + uri` with no separator, so
+  /// MarkdownPreview wires its own builder when a directory is given
+  /// (see [_imageFor]).
+  final String? imageDirectory;
 
   @override
   State<MarkdownPreview> createState() => _MarkdownPreviewState();
@@ -188,8 +199,12 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       delegate: this,
       selectable: false,
       styleSheet: styleSheet,
-      imageDirectory: null,
-      imageBuilder: widget.imageBuilder,
+      imageDirectory: widget.imageDirectory,
+      imageBuilder: widget.imageBuilder ??
+          (widget.imageDirectory == null
+              ? null
+              : (uri, title, alt) =>
+                  _imageFor(uri, widget.imageDirectory)),
       checkboxBuilder: widget.checkboxBuilder,
       bulletBuilder: widget.bulletBuilder,
       builders: <String, MarkdownElementBuilder>{
@@ -281,4 +296,38 @@ final class _BlockMeasureRender extends RenderProxyBox {
     super.performLayout();
     onHeight(size.height);
   }
+}
+
+/// Resolves an image URI (T-M2-09). Relative links (`scheme` empty, e.g.
+/// `assets/pic.png`) load from [directory] — the library root — via
+/// `Image.file`; absolute http(s)/data/resource URIs keep the package's
+/// behavior. A missing/unreadable file renders as an empty box.
+Widget _imageFor(Uri uri, String? directory) {
+  final scheme = uri.scheme;
+  if (scheme == 'http' || scheme == 'https') {
+    return Image.network(uri.toString(), errorBuilder: _imageError);
+  }
+  if (scheme == 'data') {
+    final mime = uri.data?.mimeType ?? '';
+    if (mime.startsWith('image/')) {
+      return Image.memory(
+        uri.data!.contentAsBytes(),
+        errorBuilder: _imageError,
+      );
+    }
+  }
+  if (scheme == 'resource') {
+    return Image.asset(uri.path, errorBuilder: _imageError);
+  }
+  if (scheme.isEmpty && directory != null) {
+    return Image.file(
+      File(p.join(directory, uri.path)),
+      errorBuilder: _imageError,
+    );
+  }
+  return Image.network(uri.toString(), errorBuilder: _imageError);
+}
+
+Widget _imageError(BuildContext context, Object error, StackTrace? stackTrace) {
+  return const SizedBox();
 }

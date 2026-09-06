@@ -9,6 +9,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/library/image_import.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
@@ -16,7 +17,9 @@ import 'package:copist/src/preview/scroll_map.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
 /// Opens a note file in the source editor and keeps disk in sync.
@@ -45,6 +48,9 @@ final class NoteView extends StatefulWidget {
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
+    this.libraryRoot,
+    this.pickImagePath,
+    this.importImage,
     this.readNote,
     this.writeNote,
     this.controller,
@@ -71,6 +77,21 @@ final class NoteView extends StatefulWidget {
 
   /// The divider drag lifted (the shell persists the ratio).
   final VoidCallback? onSplitDragEnd;
+
+  /// The library root (T-M2-09): relative image links in the preview
+  /// resolve under it, and inserted images are copied into
+  /// `<root>/assets/`. Null (tests without a library) disables insert.
+  final String? libraryRoot;
+
+  /// Picks an image file (T-M2-09); the default is the platform picker
+  /// (file_picker). Tests inject a seam.
+  final Future<String?> Function()? pickImagePath;
+
+  /// Imports the picked file into the library (default
+  /// [importImageToLibrary]); tests inject a seam (it runs an isolate,
+  /// which FakeAsync cannot drive).
+  final Future<String> Function(String libraryRoot, String sourcePath)?
+      importImage;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -352,7 +373,41 @@ final class _NoteViewState extends State<NoteView>
         controller: _previewScroll,
         scrollMap: _previewMap,
         mathCache: _mathCache,
+        imageDirectory: widget.libraryRoot,
       );
+
+  /// T-M2-09: pick an image, copy it into the library's `assets/`, insert a
+  /// library-relative link at the caret.
+  Future<void> _insertImage() async {
+    final root = widget.libraryRoot;
+    if (root == null) return;
+    final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
+    if (source == null || !mounted) return;
+    final relative = await (widget.importImage?.call(root, source) ??
+        importImageToLibrary(libraryRoot: root, sourcePath: source));
+    if (!mounted) return;
+    // Alt text comes from the picked file's name; the link itself is the
+    // content-addressed library path, so `photo.png` keeps a readable label.
+    final label = p.basenameWithoutExtension(source);
+    final snippet = '![$label]($relative)';
+    _controller.replaceSelection(snippet);
+    _scroll.makeCenterIfInvisible(
+      CodeLinePosition(
+        index: _controller.selection.extentIndex,
+        offset: 0,
+      ),
+    );
+    _focus.requestFocus();
+    _refreshStats();
+    _refreshPreview();
+  }
+
+  Future<String?> _pickImageFile() async {
+    // Picker returns [] when canceled: static API (v12).
+    final result = await FilePicker.pickFiles(type: FileType.image);
+    final file = result.isEmpty ? null : result.first;
+    return file?.path;
+  }
 
   void _refreshStats() {
     if (!mounted || _loading) return;
@@ -519,6 +574,19 @@ final class _NoteViewState extends State<NoteView>
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
             child: Row(
               children: [
+                if (!_loading)
+                  IconButton(
+                    key: const Key('insert-image'),
+                    tooltip: AppStrings.insertImageTooltip,
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 34,
+                      minHeight: 26,
+                    ),
+                    onPressed: _insertImage,
+                  ),
                 if (!_loading)
                   IconButton(
                     key: const Key('outline-toggle'),

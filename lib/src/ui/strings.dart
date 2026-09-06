@@ -39,6 +39,7 @@ final class AppStrings {
   static const String outlineTooltip = 'Outline';
   static const String outlineNoHeadings = 'No headings';
   static const String outlineNoTitle = '(no title)';
+  static const String insertImageTooltip = 'Insert image';
 
   // Preview switch (phone mode).
   static const String showPreviewTooltip = 'Show preview';
