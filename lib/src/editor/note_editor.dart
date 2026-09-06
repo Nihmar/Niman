@@ -794,6 +794,10 @@ final class _NoteEditorState extends State<NoteEditor> {
         _appliedColumns = columns;
         _caretGeometry = _geometryFor(_rows);
         _hitTest = _hitTestFor(_rows);
+        // The gestures own a HitTest over the rows: a re-wrap replaces the
+        // model, so the gestures must follow or taps keep using the stale
+        // (pre-wrap) columns while paint/diagnostics use the new ones.
+        _gestures.hitTest = _hitTest;
       });
       _log.info(
         'columns: $previous -> $columns (re-wrap '

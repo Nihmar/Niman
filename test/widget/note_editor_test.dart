@@ -674,6 +674,57 @@ void main() {
     focus.dispose();
   });
 
+  testWidgets('tap follows the viewport re-wrap (stale HitTest regression)',
+      (tester) async {
+    // One 100-char line wraps at 80 columns (2 rows: 80+20) but at the
+    // narrowed viewport (~53) it wraps earlier. The 132223 log's systematic
+    // hit N vs resolved N+1 was the gestures still using the pre-wrap
+    // 80-column model after the 80 -> ~53 re-wrap.
+    final line = 'a' * 100;
+    final input = ComposingInput(line);
+    final focus = FocusNode();
+    const narrowWidth = 400.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: narrowWidth,
+            child: NoteEditor(
+              initialText: line,
+              focusNode: focus,
+              onTextChanged: (_) {},
+              input: input,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final charWidth = VirtualizedTextView.measureCharWidth();
+    final fitColumns =
+        ((narrowWidth - VirtualizedTextView.leftPadding) / charWidth)
+            .floor()
+            .clamp(1, 80);
+    // Sanity: the narrow viewport must actually re-wrap below 80, or this
+    // test cannot distinguish the stale model.
+    expect(fitColumns, lessThan(80));
+    // Tap row 1, col 3 in the re-wrapped grid.
+    final origin = tester.getTopLeft(find.byType(NoteEditor));
+    await tester.tapAt(
+      origin +
+          Offset(
+            VirtualizedTextView.leftPadding + 3 * charWidth,
+            VirtualizedTextView.rowHeight * 1 + 5,
+          ),
+    );
+    await tester.pump();
+    // Re-wrapped: row 1 starts at `fitColumns`, so col 3 is fitColumns + 3.
+    // Stale (pre-wrap 80): it would be 80 + 3.
+    expect(input.selection, TextSelection.collapsed(offset: fitColumns + 3));
+    focus.dispose();
+  });
+
   testWidgets('tap on a rendered glyph lands its column at 0.85 scaler (R2)',
       (tester) async {
     // A 60-column single row: far enough right that a shrunken render

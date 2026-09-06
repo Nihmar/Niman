@@ -15,8 +15,12 @@ final class EditorGestures {
   /// Wraps the pixel→offset [hitTest] and the [input] it drives.
   EditorGestures({required this.hitTest, required this.input});
 
-  /// Maps a pixel position to a buffer offset.
-  final HitTest hitTest;
+  /// Maps a pixel position to a buffer offset. Mutable: the owner re-wraps
+  /// the rows to the viewport width after layout (80 -> ~57 on a phone),
+  /// which replaces the row model; the gestures must follow the new model
+  /// or every tap lands one row off (the 132223 log's systematic
+  /// hit N vs resolved N+1).
+  HitTest hitTest;
 
   /// The caret/selection state machine the gestures edit.
   final ComposingInput input;
