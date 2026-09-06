@@ -1,4 +1,3 @@
-import 'dart:math' show max;
 import 'dart:ui' show Rect, TextRange;
 
 import 'package:copist/src/editor/row_model.dart';
@@ -14,10 +13,9 @@ import 'package:flutter/services.dart' show TextSelection;
 ///
 /// The caret x comes from [textMetrics] when given (a painter over the
 /// row's exact slice — M2a round-4 R2, so the caret lands on the glyphs);
-/// otherwise it falls back to the monospace grid. The multi-row spans
-/// ([selectionRects], [composingUnderlines]) always stay on the grid: they
-/// run on the per-frame paint path, where a painter layout per spanned row
-/// would cost O(selection) per frame.
+/// otherwise it falls back to the monospace grid. The selection highlight
+/// stays on the full-advance grid (stock-editor behavior): one full
+/// character cell per selected column, full row height.
 final class CaretGeometry {
   /// Creates the geometry over [rowModel] with the given font metrics,
   /// optionally measuring the caret x with [textMetrics].
@@ -97,9 +95,10 @@ final class CaretGeometry {
   }
 
   /// The selection-highlight rects for [selection] (empty when collapsed):
-  /// full row-height rects covering the selected characters, one per visual
-  /// row the selection spans. Edges hug the glyphs (~1 px inset) instead of
-  /// the full advances (round-6 T3 — full-advance washes read too wide).
+  /// full-advance grid rects covering the selected characters, one per
+  /// visual row the selection spans (stock-editor behavior — the round-6 T3
+  /// glyph-hug inset is reverted: the hug left visible gaps at the outer
+  /// edges next to the handles).
   List<Rect> selectionRects(TextSelection selection) {
     if (!selection.isValid || selection.isCollapsed) {
       return const <Rect>[];
@@ -113,35 +112,15 @@ final class CaretGeometry {
       if (to <= from) {
         continue;
       }
-      rects.add(_selectionSpan(row, from, to));
+      rects.add(
+        Rect.fromLTWH(
+          leftPadding + from * charWidth,
+          row * rowHeight,
+          (to - from) * charWidth,
+          rowHeight,
+        ),
+      );
     }
     return rects;
-  }
-
-  /// The horizontal wash inset, px per side, so the highlight hugs glyphs.
-  static const double _highlightInset = 1;
-
-  /// One highlight span over visual [row]'s columns [fromCol, toCol): the
-  /// start/end edges come from the painter over the row's exact slice when
-  /// metrics are present (at most two painter layouts per paint — bounded),
-  /// grid otherwise; middle rows span the full row width either way.
-  Rect _selectionSpan(int row, int fromCol, int toCol) {
-    final metrics = textMetrics;
-    final double left;
-    final double right;
-    if (metrics == null) {
-      left = leftPadding + fromCol * charWidth;
-      right = leftPadding + toCol * charWidth;
-    } else {
-      final slice = rowModel.rowSliceText(row);
-      left = leftPadding + metrics.caretX(slice, fromCol);
-      right = leftPadding + metrics.caretX(slice, toCol);
-    }
-    return Rect.fromLTWH(
-      left + _highlightInset,
-      row * rowHeight,
-      max(0, right - left - 2 * _highlightInset).toDouble(),
-      rowHeight,
-    );
   }
 }

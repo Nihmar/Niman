@@ -59,16 +59,15 @@ void main() {
     );
   });
 
-  test('selectionRects: single row hugs the glyphs with an inset (T3)', () {
-    // [3,5) = 'ab' (line 1, in-row cols 0..2, row 1): grid edges would be
-    // left 5, width 20; the inset hugs inside them.
+  test('selectionRects: single row covers the full advances (stock)', () {
+    // [3,5) = 'ab' (line 1, in-row cols 0..2, row 1): full character cells.
     final rects = geo.selectionRects(
       const TextSelection(baseOffset: 3, extentOffset: 5),
     );
     expect(rects, hasLength(1));
     final r = rects.single;
-    expect(r.left, 6); // 5 + 0 * 10 + inset 1.
-    expect(r.width, 18); // (2 - 0) * 10 - 2 * inset.
+    expect(r.left, 5); // 5 + 0 * 10.
+    expect(r.width, 20); // (2 - 0) * 10.
     expect(r.top, 20); // full row height (row 1 * 20).
     expect(r.height, 20);
   });
