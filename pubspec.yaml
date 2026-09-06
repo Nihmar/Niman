@@ -34,8 +34,16 @@ dependencies:
 
   # Pure-Dart KaTeX for math; spec coverage is verified in M2.
   flutter_smooth_markdown: 0.8.1
+
+  # The highlighter core behind flutter_highlight, used directly by the
+  # preview's code highlighter (lang rules, parse).
+  highlight: ^0.7.0
+
   katex_dart: ^0.1.1
 
+  # The Markdown parser core behind flutter_markdown_plus (AST + GFM and
+  # footnote syntax), used directly by the windowed preview.
+  markdown: ^7.3.1
   # Filesystem location for the library root.
   meta: ^1.19.0
   path: ^1.9.1
