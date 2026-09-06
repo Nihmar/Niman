@@ -5,11 +5,17 @@ import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/word_count.dart';
+import 'package:copist/src/preview/markdown_preview.dart';
+import 'package:copist/src/preview/math_cache.dart';
+import 'package:copist/src/preview/scroll_map.dart';
+import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -25,13 +31,20 @@ import 'package:re_editor/re_editor.dart';
 /// deferred refinement (record it per note).
 ///
 /// [showLineNumbers] and [autofocusEditor] are the settings toggles,
-/// passed through to the editor.
+/// passed through to the editor. T-M2-08: [splitPreview] resolves the layout
+/// (true = editor|preview side by side, false = one full-screen pane with a
+/// top switch); [splitFraction]/[onSplitFractionChanged]-[onSplitDragEnd]
+/// drive the draggable divider and its persistence.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
   const NoteView({
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    this.splitPreview = false,
+    this.splitFraction = defaultSplitRatio,
+    this.onSplitFractionChanged,
+    this.onSplitDragEnd,
     this.readNote,
     this.writeNote,
     this.controller,
@@ -46,6 +59,18 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
+
+  /// Whether the preview sits side by side (split) or behind a switch.
+  final bool splitPreview;
+
+  /// The editor's share of the split (0..1).
+  final double splitFraction;
+
+  /// Live divider-fraction changes (the shell keeps the settings value).
+  final ValueChanged<double>? onSplitFractionChanged;
+
+  /// The divider drag lifted (the shell persists the ratio).
+  final VoidCallback? onSplitDragEnd;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -103,6 +128,15 @@ final class _NoteViewState extends State<NoteView>
   List<OutlineEntry> _outline = const <OutlineEntry>[];
   bool _showOutline = false;
 
+  /// Preview pane (T-M2-08): debounced text, its own scroll + map + math
+  /// cache, and the switch-mode visibility.
+  Timer? _previewTimer;
+  String _previewText = '';
+  late final ScrollController _previewScroll = ScrollController();
+  late final ScrollMap _previewMap = ScrollMap();
+  late final MathCache _mathCache = MathCache();
+  bool _showPreview = false;
+
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
   int _revision = 0;
@@ -149,12 +183,15 @@ final class _NoteViewState extends State<NoteView>
   void dispose() {
     _saveTimer?.cancel();
     _statsTimer?.cancel();
+    _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
     _focus.dispose();
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
+    _previewScroll.dispose();
+    _mathCache.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
@@ -209,6 +246,7 @@ final class _NoteViewState extends State<NoteView>
       // Word count + outline on open: they are debounced for edits only,
       // the load path has its own refresh.
       _refreshStats();
+      _refreshPreview();
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -255,7 +293,33 @@ final class _NoteViewState extends State<NoteView>
     // debounce, never on the keystroke path.
     _statsTimer?.cancel();
     _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    // Preview text (T-M2-08): the same dry-run cadence as saves.
+    _previewTimer?.cancel();
+    _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
   }
+
+  void _refreshPreview() {
+    if (!mounted || _loading) return;
+    final text = _controller.text;
+    if (text == _previewText) return;
+    setState(() => _previewText = text);
+  }
+
+  Widget _buildEditor() => NoteEditor(
+        key: ValueKey(widget.path),
+        controller: _controller,
+        focusNode: _focus,
+        showLineNumbers: widget.showLineNumbers,
+        autofocus: widget.autofocusEditor,
+        scrollController: _scroll,
+      );
+
+  Widget _buildPreview() => MarkdownPreview(
+        data: _previewText,
+        controller: _previewScroll,
+        scrollMap: _previewMap,
+        mathCache: _mathCache,
+      );
 
   void _refreshStats() {
     if (!mounted || _loading) return;
@@ -356,20 +420,27 @@ final class _NoteViewState extends State<NoteView>
   @override
   Widget build(BuildContext context) {
     final error = _error;
+    final split = widget.splitPreview;
     return Column(
       children: [
+        if (!split) _paneSwitchBar(context),
         Expanded(
           child: error == null
               ? (!_ready || _loading
                   ? const Center(child: CircularProgressIndicator())
-                  : NoteEditor(
-                      key: ValueKey(widget.path),
-                      controller: _controller,
-                      focusNode: _focus,
-                      showLineNumbers: widget.showLineNumbers,
-                      autofocus: widget.autofocusEditor,
-                      scrollController: _scroll,
-                    ))
+                  : split
+                      ? EditorPreviewSplit(
+                          editor: _buildEditor(),
+                          preview: _buildPreview(),
+                          editorScroll: _scroll.verticalScroller,
+                          previewScroll: _previewScroll,
+                          map: _previewMap,
+                          fraction: widget.splitFraction,
+                          onFractionChanged: widget.onSplitFractionChanged ??
+                              (_) {},
+                          onDragEnd: widget.onSplitDragEnd,
+                        )
+                      : (_showPreview ? _buildPreview() : _buildEditor()))
               : Center(child: Text(error)),
         ),
         if (_showOutline && _outline.isNotEmpty)
@@ -385,7 +456,7 @@ final class _NoteViewState extends State<NoteView>
                 if (!_loading)
                   IconButton(
                     key: const Key('outline-toggle'),
-                    tooltip: 'Outline',
+                    tooltip: AppStrings.outlineTooltip,
                     icon: const Icon(Icons.toc),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -413,6 +484,26 @@ final class _NoteViewState extends State<NoteView>
           ),
         ),
       ],
+    );
+  }
+
+  /// The top switch bar (phone mode): one button flips editor ↔ preview.
+  Widget _paneSwitchBar(BuildContext context) {
+    return SizedBox(
+      height: 34,
+      child: IconButton(
+        key: const Key('preview-switch'),
+        tooltip: _showPreview
+            ? AppStrings.showEditorTooltip
+            : AppStrings.showPreviewTooltip,
+        iconSize: 18,
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        icon: Icon(
+          _showPreview ? Icons.edit : Icons.visibility,
+        ),
+        onPressed: () => setState(() => _showPreview = !_showPreview),
+      ),
     );
   }
 }

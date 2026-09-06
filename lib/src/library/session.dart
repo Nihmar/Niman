@@ -1,3 +1,4 @@
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -119,6 +120,19 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the keyboard-on-open toggle.
   Future<void> setEditorAutofocusEnabled({required bool enabled});
+
+  /// The preview layout mode (default `auto`: split on wide screens,
+  /// full-screen switch on phones).
+  Future<PreviewLayoutMode> get previewMode;
+
+  /// Sets (and persists) the preview layout mode.
+  Future<void> setPreviewMode(PreviewLayoutMode mode);
+
+  /// The editor|preview split ratio (0..1, default 0.55).
+  Future<double> get splitRatio;
+
+  /// Sets (and persists) the split ratio.
+  Future<void> setSplitRatio(double ratio);
 
   /// Notifies listeners that state changed without an index mutation.
   void notify();

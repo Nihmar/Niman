@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +28,9 @@ final class _SettingsScreenState extends State<SettingsScreen> {
   bool? _debugLogs;
   bool? _lineNumbers;
   bool? _autofocusEditor;
+  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
+  double _splitRatio = defaultSplitRatio;
+  bool _splitLoaded = false;
 
   @override
   void initState() {
@@ -41,12 +46,17 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     final debug = await controller.debugLogsEnabled;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
+    final previewMode = await controller.previewMode;
+    final splitRatio = await controller.splitRatio;
     if (mounted) {
       setState(() {
         _trash = enabled;
         _debugLogs = debug;
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
+        _previewMode = previewMode;
+        _splitRatio = splitRatio;
+        _splitLoaded = true;
       });
     }
   }
@@ -88,6 +98,24 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     controller.notify();
     if (mounted) {
       setState(() => _autofocusEditor = value);
+    }
+  }
+
+  Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
+    final controller = widget.controller;
+    await controller.setPreviewMode(mode);
+    controller.notify();
+    if (mounted) {
+      setState(() => _previewMode = mode);
+    }
+  }
+
+  Future<void> _setSplitRatio(double ratio) async {
+    final controller = widget.controller;
+    await controller.setSplitRatio(ratio);
+    controller.notify();
+    if (mounted) {
+      setState(() => _splitRatio = ratio);
     }
   }
 
@@ -172,37 +200,94 @@ final class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text('Trash'),
-            subtitle: const Text(
-              'Deletions move to .trash/ (off = hard delete)',
-            ),
+            title: const Text(AppStrings.trashTitle),
+            subtitle: const Text(AppStrings.trashSubtitle),
             value: _trash ?? true,
             onChanged: _toggleTrash,
           ),
           SwitchListTile(
-            title: const Text('Debug logs'),
-            subtitle: const Text(
-              'Record app events in an in-memory buffer',
-            ),
+            title: const Text(AppStrings.debugLogsTitle),
+            subtitle: const Text(AppStrings.debugLogsSubtitle),
             value: _debugLogs ?? true,
             onChanged: _toggleDebugLogs,
           ),
           SwitchListTile(
-            title: const Text('Line numbers'),
-            subtitle: const Text(
-              'Show the row-number column in the note editor',
-            ),
+            title: const Text(AppStrings.lineNumbersTitle),
+            subtitle: const Text(AppStrings.lineNumbersSubtitle),
             value: _lineNumbers ?? true,
             onChanged: _toggleLineNumbers,
           ),
           SwitchListTile(
-            title: const Text('Keyboard on open'),
-            subtitle: const Text(
-              'Show the keyboard as soon as a note opens (off = on first tap)',
-            ),
+            title: const Text(AppStrings.keyboardOnOpenTitle),
+            subtitle: const Text(AppStrings.keyboardOnOpenSubtitle),
             value: _autofocusEditor ?? false,
             onChanged: _toggleAutofocusEditor,
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.previewModeTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.previewModeSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<PreviewLayoutMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: PreviewLayoutMode.auto,
+                      label: Text(AppStrings.previewModeAuto),
+                    ),
+                    ButtonSegment(
+                      value: PreviewLayoutMode.split,
+                      label: Text(AppStrings.previewModeSplit),
+                    ),
+                    ButtonSegment(
+                      value: PreviewLayoutMode.fullScreen,
+                      label: Text(AppStrings.previewModeSwitch),
+                    ),
+                  ],
+                  selected: {_previewMode},
+                  onSelectionChanged: (selection) =>
+                      _setPreviewMode(selection.first),
+                ),
+              ],
+            ),
+          ),
+          if (_splitLoaded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.splitRatioTitle,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    AppStrings.splitRatioSubtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Slider(
+                    key: const Key('split-ratio'),
+                    min: minSplitRatio,
+                    max: maxSplitRatio,
+                    value: _splitRatio,
+                    onChanged: (v) => setState(() => _splitRatio = v),
+                    onChangeEnd: _setSplitRatio,
+                  ),
+                ],
+              ),
+            ),
           const Divider(),
           ListTile(
             title: const Text('Library path'),

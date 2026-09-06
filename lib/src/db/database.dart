@@ -75,6 +75,17 @@ class AppSettings extends Table {
       .named('editor_autofocus')
       .withDefault(const Constant(false))();
 
+  /// The preview layout mode: `auto` (width-based), `split` or `switch`
+  /// (forced; default `auto`).
+  TextColumn get previewMode => text()
+      .named('preview_mode')
+      .withDefault(const Constant('auto'))();
+
+  /// The editor|preview split fraction (0..1; default 0.55).
+  RealColumn get splitRatio => real()
+      .named('split_ratio')
+      .withDefault(const Constant(0.55))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -89,11 +100,12 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// Fresh databases get all tables; v1 databases gain the
-  /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`, and
-  /// pre-v4 databases `editor_autofocus`.
+  /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`,
+  /// pre-v4 databases `editor_autofocus`, and pre-v5 databases
+  /// `preview_mode` + `split_ratio`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
@@ -113,6 +125,16 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN editor_autofocus '
           'BOOLEAN NOT NULL DEFAULT 0',
+        );
+      }
+      if (from < 5) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN preview_mode '
+          "TEXT NOT NULL DEFAULT 'auto'",
+        );
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN split_ratio '
+          'REAL NOT NULL DEFAULT 0.55',
         );
       }
     },

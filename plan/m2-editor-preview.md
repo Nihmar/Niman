@@ -212,10 +212,26 @@ package's per-node builders. Never hand a novel-length document to
   tests: fold/unfold collapses the section (`chunkParent` + line count),
   outline jump lands the correct caret line. The 931K device pass stays
   pending (fold markers + outline panel on the big note).
-- [ ] **T-M2-08** Layout modes: desktop = sidebar | editor | preview
-  (draggable split); Android phone = full-screen Edit/Preview switch;
-  tablet/wide = split; user override (auto / force split / force switch) in
-  settings. *AC: all four modes reachable; override persists.*
+- [x] **T-M2-08** Layout modes: **done** — `NoteView` owns the whole
+  editor|preview area: split mode = `EditorPreviewSplit` (draggable
+  divider, session-live + persisted ratio, T-M2-06 scroll sync wrapped
+  around both panes), full-screen mode = one pane at a time with the
+  **top switch** (status-bar-adjacent, above the pane). The shell resolves
+  the effective mode (width ≥ 600 dp vs phone, × the `preview_mode`
+  override) and passes it down, plus the persisted `split_ratio`
+  (app_settings schema v5: `preview_mode` + `split_ratio`, v1–v4
+  migrations keep rows). Settings screen gained the segmented
+  Auto / Side by side / Full screen control + split-width slider (all new
+  labels in `lib/src/ui/strings.dart` — the single label file; existing
+  settings/outline labels migrated there too, the rest is gradual).
+  Preview data is debounced (500 ms cadence, same as saves) with the math
+  cache + scroll map owned per NoteView. AC: all modes reachable (widget
+  tests: split, switch toggle, divider drag → fraction callbacks +
+  drag-end persistence, shell auto/forced resolution) and the override
+  persists (repo + migration tests). Tracked follow-ups: the whole-doc
+  markdown parse still runs on the UI isolate at the debounce (register
+  with T-M2-05's note; off-isolate parse), and library-relative images in
+  the preview land with T-M2-09.
 - [ ] **T-M2-09** Image insert: picker → copy file into the library
   (`assets/` or chosen folder) → insert a link (no base64 by default).
   *AC: image visible in preview from the library-relative link.*

@@ -1,4 +1,5 @@
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// The heading outline panel (T-M2-07): a compact column listing the
@@ -37,9 +38,12 @@ final class OutlinePanel extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainerLow,
       ),
       child: entries.isEmpty
-          ? const Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('No headings'),
+          ? Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                AppStrings.outlineNoHeadings,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             )
           : ListView.builder(
               shrinkWrap: true,
@@ -70,7 +74,7 @@ final class OutlinePanel extends StatelessWidget {
                         Expanded(
                           child: Text(
                             entry.text.isEmpty
-                                ? '(no title)'
+                                ? AppStrings.outlineNoTitle
                                 : entry.text,
                             style: Theme.of(context)
                                 .textTheme

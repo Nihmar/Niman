@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -88,6 +89,12 @@ final class _LibraryShellState extends State<_LibraryShell> {
   bool _lineNumbers = true;
   bool _autofocusEditor = false;
 
+  /// Preview layout (T-M2-08): the mode override and the split ratio the
+  /// shell persists; the effective mode is resolved at build (width ×
+  /// override).
+  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
+  double _splitRatio = defaultSplitRatio;
+
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
@@ -112,13 +119,37 @@ final class _LibraryShellState extends State<_LibraryShell> {
     final controller = widget.controller;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
+    final previewMode = await controller.previewMode;
+    final splitRatio = await controller.splitRatio;
     if (mounted &&
-        (lineNumbers != _lineNumbers || autofocus != _autofocusEditor)) {
+        (lineNumbers != _lineNumbers ||
+            autofocus != _autofocusEditor ||
+            previewMode != _previewMode ||
+            splitRatio != _splitRatio)) {
       setState(() {
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
+        _previewMode = previewMode;
+        _splitRatio = splitRatio;
       });
     }
+  }
+
+  /// Live divider moves mirror into [_splitRatio]; the lift persists.
+  //ignore: use_setters_to_change_properties
+  void _onSplitFractionChanged(double value) => _splitRatio = value;
+
+  Future<void> _onSplitDragEnd() async {
+    await widget.controller.setSplitRatio(_splitRatio);
+    widget.controller.notify();
+  }
+
+  /// Resolves the effective preview layout for a width: forced modes win,
+  /// `auto` follows the width (split ≥ 600 dp, switch on phones).
+  bool _effectiveSplit({required bool narrow}) {
+    if (_previewMode == PreviewLayoutMode.split) return true;
+    if (_previewMode == PreviewLayoutMode.fullScreen) return false;
+    return !narrow;
   }
 
   /// Parent path for new note/folder creation.
@@ -305,6 +336,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
             path: p.join(controller.root ?? '', selectedPath),
             showLineNumbers: _lineNumbers,
             autofocusEditor: _autofocusEditor,
+            splitPreview: _effectiveSplit(narrow: true),
+            splitFraction: _splitRatio,
+            onSplitFractionChanged: _onSplitFractionChanged,
+            onSplitDragEnd: _onSplitDragEnd,
           ),
         ),
       );
@@ -351,6 +386,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
                     selectedIsDir: _selectedIsDir,
                     showLineNumbers: _lineNumbers,
                     autofocusEditor: _autofocusEditor,
+                    splitPreview: _effectiveSplit(narrow: false),
+                    splitFraction: _splitRatio,
+                    onSplitFractionChanged: _onSplitFractionChanged,
+                    onSplitDragEnd: _onSplitDragEnd,
                   ),
                 ),
               ],
@@ -456,6 +495,10 @@ final class _DetailPane extends StatelessWidget {
     required this.selectedIsDir,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    required this.splitPreview,
+    required this.splitFraction,
+    required this.onSplitFractionChanged,
+    required this.onSplitDragEnd,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -466,11 +509,15 @@ final class _DetailPane extends StatelessWidget {
 
   final bool selectedIsDir;
 
-  /// The editor row-number toggle (settings).
+  /// Editor setting forwards.
   final bool showLineNumbers;
-
-  /// The editor keyboard-on-open toggle (settings).
   final bool autofocusEditor;
+
+  /// Preview layout (T-M2-08).
+  final bool splitPreview;
+  final double splitFraction;
+  final ValueChanged<double> onSplitFractionChanged;
+  final VoidCallback onSplitDragEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -483,6 +530,10 @@ final class _DetailPane extends StatelessWidget {
       path: p.join(root, path),
       showLineNumbers: showLineNumbers,
       autofocusEditor: autofocusEditor,
+      splitPreview: splitPreview,
+      splitFraction: splitFraction,
+      onSplitFractionChanged: onSplitFractionChanged,
+      onSplitDragEnd: onSplitDragEnd,
     );
   }
 }

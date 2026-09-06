@@ -305,6 +305,35 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setEditorAutofocusEnabled(enabled: enabled);
   }
 
+  /// The preview layout mode.
+  @override
+  Future<PreviewLayoutMode> get previewMode async {
+    final db = await database;
+    return AppSettingsRepo(db).previewMode();
+  }
+
+  /// Sets (and persists) the preview layout mode.
+  @override
+  Future<void> setPreviewMode(PreviewLayoutMode mode) async {
+    _log.info('preview mode set to ${mode.name}');
+    final db = await database;
+    await AppSettingsRepo(db).setPreviewMode(mode);
+  }
+
+  /// The editor|preview split ratio.
+  @override
+  Future<double> get splitRatio async {
+    final db = await database;
+    return AppSettingsRepo(db).splitRatio();
+  }
+
+  /// Sets (and persists) the split ratio.
+  @override
+  Future<void> setSplitRatio(double ratio) async {
+    final db = await database;
+    await AppSettingsRepo(db).setSplitRatio(ratio);
+  }
+
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
   @override
