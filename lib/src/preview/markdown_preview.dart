@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/math_widget.dart';
+import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 
@@ -37,6 +39,7 @@ final class MarkdownPreview extends StatefulWidget {
     this.onTapLink,
     this.mathStyle = const MathStyle(),
     this.mathCache,
+    this.scrollMap,
     super.key,
   });
 
@@ -78,6 +81,11 @@ final class MarkdownPreview extends StatefulWidget {
   /// The math render cache; one is created per widget when not injected
   /// (tests inject their own with a synchronous renderer).
   final MathCache? mathCache;
+
+  /// The scroll map (T-M2-06); when given, the preview rebuilds it per
+  /// render pass (structure → block start lines) and reports every block's
+  /// measured height.
+  final ScrollMap? scrollMap;
 
   @override
   State<MarkdownPreview> createState() => _MarkdownPreviewState();
@@ -156,6 +164,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       listItemCrossAxisAlignment: MarkdownListItemCrossAxisAlignment.baseline,
     );
     _children = builder.build(nodes);
+    widget.scrollMap?.rebuild(source);
   }
 
   @override
@@ -176,6 +185,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   @override
   Widget build(BuildContext context) {
     final children = _children ?? const <Widget>[];
+    final map = widget.scrollMap;
     return CustomScrollView(
       controller: widget.controller,
       slivers: <Widget>[
@@ -183,12 +193,49 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           padding: widget.padding,
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => children[index],
+              (context, index) => map == null
+                  ? children[index]
+                  : _BlockMeasure(
+                      onHeight: (height) => map.measure(index, height),
+                      child: children[index],
+                    ),
               childCount: children.length,
             ),
           ),
         ),
       ],
     );
+  }
+}
+
+/// Reports its child's height after layout (the scroll map's per-block
+/// measurement — the mapping table's pixel side).
+final class _BlockMeasure extends SingleChildRenderObjectWidget {
+  const _BlockMeasure({required this.onHeight, required super.child});
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _BlockMeasureRender(onHeight);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _BlockMeasureRender renderObject,
+  ) {
+    renderObject.onHeight = onHeight;
+  }
+}
+
+final class _BlockMeasureRender extends RenderProxyBox {
+  _BlockMeasureRender(this.onHeight);
+
+  ValueChanged<double> onHeight;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onHeight(size.height);
   }
 }

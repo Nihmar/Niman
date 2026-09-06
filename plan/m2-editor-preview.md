@@ -183,9 +183,21 @@ package's per-node builders. Never hand a novel-length document to
   the only remaining per-edit pipeline cost, to be moved off the UI
   isolate with the T-M2-04 debounce wiring (or accepted once per
   debounce). On-device preview pass stays the E9-style follow-up.
-- [ ] **T-M2-06** Bidirectional scroll sync: line-mapping table per render pass
-  (source line → preview block); scrolling either pane moves the other.
-  *AC: sync verified in widget test on a long fixture, both directions.*
+- [x] **T-M2-06** Bidirectional scroll sync: **done** —
+  `lib/src/preview/scroll_map.dart` (structural `BlockLocator` — source
+  lines → per-block start lines, mirroring the parser's top-level blocks;
+  coverage test asserts the block count matches the AST; known subtleties
+  handled: bullet/numbered list splits after a blank, setext-vs-hr,
+  display-math/fence single blocks) + the pixel side (per-block measured
+  heights via a layout wrapper in `MarkdownPreview`) +
+  `lib/src/preview/scroll_sync.dart` (`EditorPreviewScrollSync` links the
+  re_editor vertical controller and the preview's scroll controller; both
+  directions, programmatic-jump guard, deadzone; `NoteEditor` gained a
+  `scrollController` pass-through). Mapping is line-fractional (the editor
+  word-wraps, so its pixel extent is row-relative — the AC-verified widget
+  test tolerates one block of quantization on a 300-paragraph fixture).
+  Shell wiring lands with the layout modes (T-M2-08); on-device full-pass
+  pending.
 - [ ] **T-M2-07** Word count + heading outline + folding: live word count;
   outline panel listing headings (click → jump); folding collapses sections in
   the editor. *AC: fold/unfold a section; outline jumps land correctly.*

@@ -21,7 +21,8 @@ import 'package:re_editor/re_editor.dart';
 /// and lets the owner save on focus loss. [showLineNumbers] hides the
 /// row-number column (the settings toggle); [autofocus] shows the keyboard
 /// on open (the keyboard-on-open settings toggle, default off — the
-/// keyboard appears on the first tap).
+/// keyboard appears on the first tap). [scrollController] lets the shell
+/// attach to the editor's vertical scroll (scroll sync, T-M2-06).
 final class NoteEditor extends StatelessWidget {
   /// Creates the editor over [controller].
   const NoteEditor({
@@ -29,6 +30,7 @@ final class NoteEditor extends StatelessWidget {
     required this.focusNode,
     this.showLineNumbers = true,
     this.autofocus = false,
+    this.scrollController,
     super.key,
   });
 
@@ -43,6 +45,9 @@ final class NoteEditor extends StatelessWidget {
 
   /// Whether the editor focuses (shows the keyboard) on open.
   final bool autofocus;
+
+  /// The editor's scroll controllers (vertical is the sync side).
+  final CodeScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,7 @@ final class NoteEditor extends StatelessWidget {
               );
             }
           : null,
+      scrollController: scrollController,
       // The default chunk analyzer folds `{}`/`[]` — wrong for Markdown.
       // Heading folds (folding.dart) are re-introduced through this hook.
       chunkAnalyzer: const NonCodeChunkAnalyzer(),
