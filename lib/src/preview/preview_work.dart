@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:copist/src/editor/highlighting.dart';
@@ -21,14 +22,21 @@ import 'package:markdown/markdown.dart' as md;
 /// function and the message is nothing but strings, so both directions are
 /// sendable by construction.
 ///
-/// Results: `run('parse', source)` → `List<md.Node>` (the AST), and
-/// `run('stats', source)` → a record `(int words, List<String> outline)`
-/// where outline entries encode `'line|level|text'`. Unknown task /
-/// failure → a `'__error__|<detail>'` string.
+/// Results (task → returned message):
+///
+/// * parse: `run('parse', source)` → the AST (`List` of `md.Node`s);
+/// * stats: `run('stats', source)` → a record `(int words,
+///   outline rows)` where rows are `List` of strings;
+/// * read: `run('read', path)` → `(String content, int words, rows)` — the
+///   note loads AND its stats in one isolate, so word count + outline are
+///   ready the moment the load ends;
+/// * unknown task or a thrown error → a `'__error__|detail'` string.
+///
+/// Outline rows encode `'line|level|text'`.
 final class PreviewWork {
   PreviewWork._();
 
-  /// Runs [task] ('parse' | 'stats') over [source].
+  /// Runs [task] ('parse' | 'stats' | 'read') over [source].
   static Future<Object?> run(String task, String source) {
     final receive = ReceivePort();
     final done = Completer<Object?>();
@@ -58,11 +66,12 @@ final class PreviewWork {
         case 'parse':
           message.reply.send(_parseSource(message.source));
         case 'stats':
-          final styled = HighlightDocument.fromText(message.source).lines;
-          final outline = outlineOf(styled)
-              .map((e) => '${e.line}|${e.level}|${e.text}')
-              .toList();
-          message.reply.send((countWords(message.source), outline));
+          final stats = statsFor(message.source);
+          message.reply.send(stats);
+        case 'read':
+          final text = File(message.source).readAsStringSync();
+          final stats = statsFor(text);
+          message.reply.send((text, stats.$1, stats.$2));
         default:
           message.reply.send('__error__|unknown task: ${message.task}');
       }
@@ -73,6 +82,16 @@ final class PreviewWork {
 }
 
 typedef _Work = ({SendPort reply, String task, String source});
+
+/// Word count + heading outline of [text] (the row encoding
+/// `'line|level|text'`).
+(int, List<String>) statsFor(String text) {
+  final styled = HighlightDocument.fromText(text).lines;
+  return (
+    countWords(text),
+    outlineOf(styled).map((e) => '${e.line}|${e.level}|${e.text}').toList(),
+  );
+}
 
 /// Parses [source] into the preview's AST (top-level; the isolate task).
 List<md.Node> _parseSource(String source) {

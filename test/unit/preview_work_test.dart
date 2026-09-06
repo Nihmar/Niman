@@ -1,6 +1,8 @@
 // PreviewWork: the off-isolate parse + stats entry — the whole-document
 // passes never run on the UI thread (and the top-level entry is sendable,
 // unlike a closure over a widget State).
+import 'dart:io';
+
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -14,6 +16,19 @@ void main() {
     expect(result, isA<List<md.Node>>());
     final nodes = result! as List<md.Node>;
     expect(nodes, isNotEmpty);
+  });
+
+  test('read returns content + stats from one isolate', () async {
+    final dir = await Directory.systemTemp.createTemp('copist_pw_');
+    final file = File('${dir.path}/note.md');
+    await file.writeAsString('# Alpha\n\nwords here\n\n## Beta\n');
+    final result = await PreviewWork.run('read', file.path);
+    expect(result, isA<(String, int, List<String>)>());
+    final loaded = result! as (String, int, List<String>);
+    expect(loaded.$1, contains('# Alpha'));
+    expect(loaded.$2, 6);
+    expect(loaded.$3, hasLength(2));
+    await dir.delete(recursive: true);
   });
 
   test('stats returns words and the outline', () async {

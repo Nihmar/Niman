@@ -7,10 +7,8 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
-import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/editor/word_count.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
@@ -251,9 +249,16 @@ final class _NoteViewState extends State<NoteView>
         content = await widget.readNote!(path);
         stats = null;
       } else {
-        // Production: read AND stats in the same isolate — word count +
-        // outline are ready the moment the load ends (no second spawn).
-        final loaded = await Isolate.run(() => _readWithStats(path));
+        // Production: the top-level isolate entry reads the file AND
+        // computes the stats in one pass — word count + outline are ready
+        // the moment the load ends. No closures cross the boundary (an
+        // instance closure is rejected by the isolate: the message carried
+        // _AsyncCompleter + the whole element graph and every note failed
+        // to load).
+        final loaded = await PreviewWork.run('read', path);
+        if (loaded is! (String, int, List<String>)) {
+          throw StateError('$loaded');
+        }
         content = loaded.$1;
         stats = (loaded.$2, loaded.$3);
       }
@@ -372,7 +377,7 @@ final class _NoteViewState extends State<NoteView>
     // main thread, that was the 1.2 s open stall); small ones stay
     // synchronous (deterministic for tests).
     if (text.length <= _syncWorkLimit) {
-      final result = _statsFor(text);
+      final result = statsFor(text);
       apply((result.$1, result.$2));
       return;
     }
@@ -567,23 +572,4 @@ final class _NoteViewState extends State<NoteView>
       ),
     );
   }
-}
-
-/// Reads [path] and computes the note stats in the same isolate, so word
-/// count + outline are ready the moment the load ends (top-level: sendable
-/// across isolates, unlike a closure over the State).
-(String, int, List<String>) _readWithStats(String path) {
-  final text = File(path).readAsStringSync();
-  final stats = _statsFor(text);
-  return (text, stats.$1, stats.$2);
-}
-
-/// Word count + heading outline of [text] (the row encoding
-/// `'line|level|text'` is what [_NoteViewState._parseOutlineRow] reads).
-(int, List<String>) _statsFor(String text) {
-  final styled = HighlightDocument.fromText(text).lines;
-  return (
-    countWords(text),
-    outlineOf(styled).map((e) => '${e.line}|${e.level}|${e.text}').toList(),
-  );
 }
