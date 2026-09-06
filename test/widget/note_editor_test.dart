@@ -167,7 +167,7 @@ void main() {
     focus.dispose();
   });
 
-  testWidgets('selection-active drag extends on any axis, scroll frozen (S1)',
+  testWidgets('selection-active drag scrolls, selection unchanged (round-7)',
       (tester) async {
     // 40 lines exceed the 600px viewport (row height 21): scrollable.
     final text = List.generate(40, (i) => 'line $i').join('\n');
@@ -191,25 +191,32 @@ void main() {
     final position =
         tester.state<ScrollableState>(find.byType(Scrollable)).position;
     expect(position.pixels, 0.0);
-    // Diagonal and vertical-dominant: the old direction lock would have
-    // yielded to scrolling (and the 123451 log showed the scroll running
-    // 418→475 while the selection sat frozen). With a selection active
-    // the drag selects and the list stays put.
+    // Round-7: only the selection balls change a selection. A content drag
+    // with a selection active never touches it (the 133116 log showed
+    // content drags stretching a word selection across paragraphs while
+    // the list sat frozen): horizontal moves are ignored, vertical moves
+    // scroll.
     const left = VirtualizedTextView.leftPadding;
+    const selected = TextSelection(baseOffset: 0, extentOffset: 4);
     final gesture = await tester.startGesture(const Offset(left, 10));
     await tester.pump();
-    await gesture.moveTo(const Offset(left + 30, 70));
+    await gesture.moveTo(const Offset(left + 60, 10));
     await tester.pump();
-    expect(input.selection.isCollapsed, isFalse);
-    expect(input.selection.baseOffset, 0);
+    expect(input.selection, selected);
     expect(position.pixels, 0.0);
     await gesture.up();
     await tester.pump();
-    expect(input.selection.isCollapsed, isFalse);
+    expect(input.selection, selected);
+    // And a vertical fling scrolls under the selection (the P4 scroll
+    // path, now also with a selection active).
+    await tester.fling(find.byType(NoteEditor), const Offset(0, -200), 500);
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(0));
+    expect(input.selection, selected);
     focus.dispose();
   });
 
-  testWidgets('a second finger mid-drag keeps the selection (S2)',
+  testWidgets('a second finger mid-drag keeps the caret drag (S2)',
       (tester) async {
     final input = ComposingInput('hello world');
     final focus = FocusNode();
@@ -228,23 +235,18 @@ void main() {
     );
     final charWidth = VirtualizedTextView.measureCharWidth();
     const left = VirtualizedTextView.leftPadding;
-    input.setSelection(
-      const TextSelection(baseOffset: 0, extentOffset: 5),
-    );
+    input.setSelection(const TextSelection.collapsed(offset: 0));
     await tester.pump();
-    // First finger drags from inside the selection rightward. Exact end
-    // columns are pinned by the R2 round-trip test; here only the anchor
-    // (the S2 contract) and the rightward extension matter.
+    // First finger caret-drags rightward (the collapsed stock rule).
     final first =
-        await tester.startGesture(Offset(left + 2 * charWidth, 10));
+        await tester.startGesture(const Offset(left, 10));
     await tester.pump();
     await first.moveTo(Offset(left + 9.4 * charWidth, 10));
     await tester.pump();
-    expect(input.selection.baseOffset, 2);
-    expect(input.selection.extentOffset, greaterThan(5));
+    expect(input.selection, const TextSelection.collapsed(offset: 9));
     // A second finger taps elsewhere mid-drag (the 123451 mid-drag
     // collapse: the lock reset and the next move re-anchored). It must be
-    // ignored entirely: same anchor, same extent.
+    // ignored entirely: the caret stays where the first finger left it.
     final before = input.selection;
     final second = await tester.startGesture(const Offset(left, 100));
     await tester.pump();
@@ -255,8 +257,7 @@ void main() {
     await tester.pump();
     await first.up();
     await tester.pump();
-    expect(input.selection.baseOffset, 2);
-    expect(input.selection.extentOffset, 11);
+    expect(input.selection, const TextSelection.collapsed(offset: 11));
     focus.dispose();
   });
 

@@ -14,13 +14,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// The plain-drag gesture (see the `_dragKind` field, M2a fix P4, round-5
-/// S1+S2): with an active selection every drag extends it (the list stays
-/// frozen); collapsed, horizontal drags move the caret without selecting
-/// and vertical drags scroll (the stock-editor rule — touch drags never
-/// create selections); the long-press recognizers own the long-press-extend
-/// drag.
-enum _DragKind { none, selecting, caret, scrolling, longPress }
+/// The plain-drag gesture (see the `_dragKind` field, round-7): a content
+/// drag never changes the selection — only the selection balls do (a
+/// long-press drag still extends, as the long-press gesture). Collapsed,
+/// horizontal drags move the caret without selecting and vertical drags
+/// scroll (the stock-editor rule); with a selection active every axis
+/// scrolls (the list is never frozen) and the selection persists untouched
+/// until a tap clears it. The long-press recognizers own the
+/// long-press-extend drag.
+enum _DragKind { none, caret, scrolling, longPress }
 
 /// The interactive line editor (M2a E8d): a virtualized text view over a
 /// [ComposingInput], driven by the platform IME through [NoteEditorClient].
@@ -93,14 +95,13 @@ final class _NoteEditorState extends State<NoteEditor> {
   late final EditorGestures _gestures;
   late final ScrollController _scrollController;
 
-  /// The plain-drag direction lock (M2a fix P4, round-5 S1+S2): until a
-  /// movement axis clears the touch slop the gesture is `none` (a tap may
-  /// still happen); the first axis to clear it locks the gesture —
-  /// `selecting` (a selection was active at pointer-down: any axis extends
-  /// it, the list stays frozen), `caret` (collapsed: horizontal moves the
-  /// caret, the stock-editor rule), or `scrolling` (collapsed + vertical —
-  /// the scroll recognizer owns it); `longPress` is handed to the
-  /// long-press recognizers on activation.
+  /// The plain-drag direction lock (round-7): until a movement axis clears
+  /// the touch slop the gesture is `none` (a tap may still happen); the
+  /// first axis to clear it locks the gesture — `caret` (collapsed +
+  /// horizontal: moves the caret, the stock-editor rule) or `scrolling`
+  /// (anything with a selection active, or collapsed + vertical — the
+  /// scroll recognizer owns it); `longPress` is handed to the long-press
+  /// recognizers on activation.
   _DragKind _dragKind = _DragKind.none;
 
   /// The pointer-down position (viewport-local) the direction lock measures
@@ -113,14 +114,11 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// collapsed the selection).
   int? _activePointer;
 
-  /// Whether a selection was active at pointer-down: the drag then extends
-  /// it on any axis (the user's round-5 decision: handles down = select
-  /// mode, list frozen).
+  /// Whether a selection was active at pointer-down: the drag then scrolls
+  /// on any axis (round-7 — only the selection balls change a selection;
+  /// the 133116 log showed content drags stretching `612..622` across
+  /// paragraphs while the list sat frozen).
   bool _downHadSelection = false;
-
-  /// Whether the scroll view is frozen for the current gesture (set with
-  /// [_downHadSelection], cleared on up/cancel).
-  bool _scrollLocked = false;
 
   /// The long-press activation point (viewport-local): long-press drag
   /// moves below the touch slop from it are touch jitter, not a drag
@@ -288,26 +286,23 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// [VirtualizedTextView]'s vertical-drag recognizer keeps owning vertical
   /// drags (scrolling) without an arena fight, and the lock below claims
   /// the rest. A second pointer mid-gesture is ignored (round-5 S2).
+  /// Deliberately no focus request here (round-7): a scroll must never
+  /// summon the keyboard — only an explicit tap/long-press does.
   void _handlePointerDown(PointerDownEvent event) {
     if (_activePointer != null) return;
     _activePointer = event.pointer;
-    _ensureFocus();
     _dragKind = _DragKind.none;
     _dragStart = event.localPosition;
-    // Selection active: this gesture extends it on any axis, so the list
-    // must not scroll under the finger (the 123451 drag sequences, where
-    // the scroll ran 418→475 while the selection sat frozen).
     _downHadSelection = _input.hasSelection;
-    final lock = _downHadSelection && !_scrollLocked;
-    _scrollLocked = _downHadSelection;
-    if (lock && mounted) setState(() {});
   }
 
   /// A pointer move: the direction lock (the first axis to clear the touch
   /// slop decides the gesture, then it's locked for the gesture), then the
-  /// selection extension or caret follow. No IME push here — the drag end
-  /// pushes the final selection (pushing at pointer-move rate froze the
-  /// app, M2a on-device round 3).
+  /// caret follow. With a selection active every axis scrolls (round-7 —
+  /// only the balls move a selection); collapsed, horizontal moves the
+  /// caret (the stock-editor touch-drag rule) and vertical scrolls via the
+  /// recognizer. No IME push here — the drag end pushes the final selection
+  /// (pushing at pointer-move rate froze the app, M2a on-device round 3).
   void _handlePointerMove(PointerMoveEvent event) {
     if (event.pointer != _activePointer) return;
     final start = _dragStart;
@@ -317,48 +312,36 @@ final class _NoteEditorState extends State<NoteEditor> {
       final dx = (local.dx - start.dx).abs();
       final dy = (local.dy - start.dy).abs();
       if (dx < kTouchSlop && dy < kTouchSlop) return; // below slop: no lock
-      if (_downHadSelection || dx > dy) {
-        // Selection active: any axis extends it (the list is frozen, see
-        // [_handlePointerDown]). Collapsed: horizontal moves the caret
-        // (the stock-editor touch-drag rule); the scroll recognizer
-        // rejects horizontal moves, so it stays out of the way.
-        _dragKind = _downHadSelection
-            ? _DragKind.selecting
-            : _DragKind.caret;
-        final changed = _gestures.dragStartAt(
-          _textX(start.dx),
-          start.dy + _scrollOffset,
-        );
-        _logGesture(
-          _downHadSelection ? 'dragStart' : 'dragCaretStart',
-          start,
-          changed,
-        );
-      } else {
-        // Collapsed + vertical: a scroll — the [VirtualizedTextView]'s
-        // recognizer owns the drag; we stay out of the way.
+      if (_downHadSelection || dx <= dy) {
+        // Selection active: any axis scrolls (the
+        // [VirtualizedTextView]'s recognizer owns vertical drags; horizontal
+        // moves are ignored — the selection stays put either way).
+        // Collapsed + vertical: a scroll — the recognizer owns the drag;
+        // we stay out of the way.
         _dragKind = _DragKind.scrolling;
         return;
       }
+      // Collapsed + horizontal: the caret follows (the stock-editor
+      // touch-drag rule); the scroll recognizer rejects horizontal moves,
+      // so it stays out of the way.
+      _dragKind = _DragKind.caret;
+      final changed = _gestures.dragStartAt(
+        _textX(start.dx),
+        start.dy + _scrollOffset,
+      );
+      _logGesture('dragCaretStart', start, changed);
     }
-    if (_dragKind == _DragKind.selecting) {
-      _handleDragMove('drag', local, extend: true);
-    } else if (_dragKind == _DragKind.caret) {
+    if (_dragKind == _DragKind.caret) {
       _handleDragMove('dragCaret', local, extend: false);
     }
   }
 
-  /// A pointer up: a selecting drag persists its selection (no collapse —
-  /// the handles and toolbar stay up over it, M2a fix P4) and pushes the
-  /// final selection to the IME (window-sized) so the next keystroke edits
-  /// it; a caret drag pushes the caret it followed to. Either way the
-  /// scroll freeze (if any) lifts.
+  /// A pointer up: a caret drag pushes the caret it followed to (a
+  /// selecting plain-drag no longer exists — round-7, only the balls move
+  /// a selection). The selection, if any, persists.
   void _handlePointerUp(PointerUpEvent event) {
     if (event.pointer != _activePointer) return;
-    if (_dragKind == _DragKind.selecting) {
-      _logGesture('dragEnd', event.localPosition, false);
-      _pushSelection();
-    } else if (_dragKind == _DragKind.caret) {
+    if (_dragKind == _DragKind.caret) {
       _logGesture('dragCaretEnd', event.localPosition, false);
       _pushSelection();
     }
@@ -370,22 +353,16 @@ final class _NoteEditorState extends State<NoteEditor> {
   /// lift.
   void _handlePointerCancel(PointerCancelEvent event) {
     if (event.pointer != _activePointer) return;
-    if (_dragKind == _DragKind.selecting) _pushSelection();
     _endPointerGesture();
   }
 
-  /// Resets the pointer-gesture state (up/cancel of the tracked pointer),
-  /// lifting the scroll freeze.
+  /// Resets the pointer-gesture state (up/cancel of the tracked pointer).
   void _endPointerGesture() {
     _activePointer = null;
     _dragKind = _DragKind.none;
     _dragStart = null;
     _downHadSelection = false;
     _longPressStart = null;
-    if (_scrollLocked) {
-      _scrollLocked = false;
-      if (mounted) setState(() {});
-    }
   }
 
   /// A long-press selects the word under the pointer (the long-press
@@ -414,12 +391,12 @@ final class _NoteEditorState extends State<NoteEditor> {
     _pushSelection();
   }
 
-  /// The plain-drag move path: extends the selection to the pointer when
-  /// [extend] (a selection was active at pointer-down), else moves the
-  /// caret collapsed to the pointer (the stock-editor touch-drag rule —
-  /// caret follows, never selects). No IME push here — the drag end pushes
-  /// the final selection (pushing at pointer-move rate froze the app, M2a
-  /// on-device round 3).
+  /// The drag move path: extends the selection to the pointer when [extend]
+  /// (long-press drags only, round-7 — plain content drags never extend;
+  /// only the selection balls do), else moves the caret collapsed to the
+  /// pointer (the stock-editor touch-drag rule — caret follows, never
+  /// selects). No IME push here — the drag end pushes the final selection
+  /// (pushing at pointer-move rate froze the app, M2a on-device round 3).
   void _handleDragMove(String tag, Offset local, {required bool extend}) {
     final changed = extend
         ? _gestures.dragTo(
@@ -506,21 +483,15 @@ final class _NoteEditorState extends State<NoteEditor> {
           '(row $row col $col)';
   }
 
-  /// Ensures focus without showing the keyboard (pointer-down path): the
-  /// keyboard appears on tap-up / attach (the stock timing — showing on
-  /// every pointer-down popped the keyboard for scrolls too, round-5 S5).
-  void _ensureFocus() {
-    if (!widget.focusNode.hasFocus) {
-      widget.focusNode.requestFocus();
-    }
-  }
-
-  /// Ensures the keyboard is up: requests focus when unfocused (the
-  /// focus listener attaches + shows), and when already focused but the
-  /// platform closed the connection under us (a system back/gesture
-  /// dismiss keeps Flutter focus while killing the connection — the M2a
-  /// round-4 R1 "keyboard never returns" bug) re-attaches + shows, or
-  /// re-shows on a live connection (a hide without close).
+  /// Ensures the keyboard is up (the tap/long-press path — round-7: the
+  /// only paths that summon the keyboard; pointer-downs and opens never
+  /// do, so scrolling a fresh note leaves it hidden): requests focus when
+  /// unfocused (the focus listener attaches + shows), and when already
+  /// focused but the platform closed the connection under us (a system
+  /// back/gesture dismiss keeps Flutter focus while killing the
+  /// connection — the M2a round-4 R1 "keyboard never returns" bug)
+  /// re-attaches + shows, or re-shows on a live connection (a hide
+  /// without close).
   void _focusEditor() {
     if (!widget.focusNode.hasFocus) {
       widget.focusNode.requestFocus();
@@ -827,7 +798,7 @@ final class _NoteEditorState extends State<NoteEditor> {
           // round tag identifies the APK that produced an exported log
           // (round-5 S3) — bump it per round.
           _log.info(
-            'metrics(editor-r6): charWidth '
+            'metrics(editor-r7): charWidth '
             '${_charWidth.toStringAsFixed(2)}, '
             'system scaler ${MediaQuery.textScalerOf(context).scale(12).toStringAsFixed(2)}/12, '
             'columns $_appliedColumns',
@@ -873,10 +844,6 @@ final class _NoteEditorState extends State<NoteEditor> {
                     child: VirtualizedTextView(
                       model: _rows,
                       scrollController: _scrollController,
-                      // Frozen while a select-drag is locked (round-5 S1).
-                      physics: _scrollLocked
-                          ? const NeverScrollableScrollPhysics()
-                          : null,
                     ),
                   ),
                 ),
