@@ -41,7 +41,7 @@ final class HitTest {
 
   /// The buffer (line, column) at pixel offset (x, y), clamped to the buffer.
   (int line, int col) positionAt(double x, double y) {
-    final row = _clamp((y / rowHeight).floor(), 0, rows.rowCount - 1);
+    final row = rowAt(y);
     final (line, startCol) = rows.lineAndStartColumn(row);
     final lineLen = rows.buffer.lineLength(line);
     final rowLen = min(rows.columns, lineLen - startCol);
@@ -57,6 +57,12 @@ final class HitTest {
     final (line, col) = positionAt(x, y);
     return rows.buffer.offsetOf(line, col);
   }
+
+  /// The visual row containing content [y] (clamped to the buffer) — the
+  /// row half of [positionAt], exposed so the gesture diagnostics can check
+  /// the hit row against the resolved row (round-6 S3).
+  int rowAt(double y) =>
+      _clamp((y / rowHeight).floor(), 0, rows.rowCount - 1);
 
   static int _clamp(int v, int lo, int hi) {
     return v < lo ? lo : (v > hi ? hi : v);

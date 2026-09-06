@@ -435,11 +435,13 @@ final class _NoteEditorState extends State<NoteEditor> {
 
   /// The gesture diagnostic: the pointer position (with the scroll offset —
   /// the mapping the hit test used), the resulting caret or selection (with
-  /// its visual row/column), whether it changed, and the caret-x invariant
-  /// (drawn rect x vs grid x for the caret/start offset — the M2a round-5
-  /// T1 mid-glyph forensics; kept permanently per the round-5 decision).
+  /// its visual row/column), whether it changed, the caret-x invariant, and
+  /// the hit-row check (round-6 S3): the row the pointer mapped to must be
+  /// the row the offset resolves to — a mismatch warns with all inputs
+  /// instead of guessing (the +1-row pattern across the round-4/5 logs).
   void _logGesture(String tag, Offset? local, bool changed) {
     final selection = _input.selection;
+    final contentY = local == null ? null : local.dy + _scrollOffset;
     final where = local == null
         ? '-'
         : '(${local.dx.toStringAsFixed(1)}, ${local.dy.toStringAsFixed(1)}) '
@@ -447,8 +449,33 @@ final class _NoteEditorState extends State<NoteEditor> {
     _log.debug(
       '$tag: $where -> ${_describeSelection(selection)}'
       '${_caretNumbers(selection)}'
+      '${_hitRowCheck(local, contentY, selection)}'
       '${changed ? '' : ' (unchanged)'}',
     );
+  }
+
+  /// The hit-row check for [_logGesture]: hit row (from [contentY]) vs the
+  /// resolved row of [selection]'s caret/start. Empty when they agree (or
+  /// there is no pointer/selection); a `ROW MISMATCH` warning otherwise.
+  String _hitRowCheck(
+    Offset? local,
+    double? contentY,
+    TextSelection selection,
+  ) {
+    if (local == null || contentY == null || !selection.isValid) return '';
+    final hitRow = _hitTest.rowAt(contentY);
+    final probe = selection.isCollapsed
+        ? selection.baseOffset
+        : selection.start;
+    final resolvedRow = _rows.offsetToRowColumn(probe).$1;
+    if (hitRow == resolvedRow) return '';
+    _log.warning(
+      'ROW MISMATCH: pointer y ${local.dy.toStringAsFixed(1)} + scroll '
+      '${_scrollOffset.toStringAsFixed(1)} = content '
+      '${contentY.toStringAsFixed(1)} '
+      'hit row $hitRow but offset $probe resolves to row $resolvedRow',
+    );
+    return ' ROW MISMATCH hit $hitRow != resolved $resolvedRow';
   }
 
   /// The caret-x invariant for [selection]'s caret (or selection start):
@@ -796,7 +823,7 @@ final class _NoteEditorState extends State<NoteEditor> {
           // round tag identifies the APK that produced an exported log
           // (round-5 S3) — bump it per round.
           _log.info(
-            'metrics(editor-r5): charWidth '
+            'metrics(editor-r6): charWidth '
             '${_charWidth.toStringAsFixed(2)}, '
             'system scaler ${MediaQuery.textScalerOf(context).scale(12).toStringAsFixed(2)}/12, '
             'columns $_appliedColumns',
