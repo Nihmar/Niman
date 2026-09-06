@@ -1,12 +1,16 @@
 import 'dart:collection';
-import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
-import 'package:katex_dart/katex_dart.dart' show BoxNode, KatexOptions, renderToBox;
+import 'package:katex_dart/katex_dart.dart'
+    show BoxNode, KatexOptions, renderToBox;
 
 /// The math render cache (design.md): built output keyed by the exact math
-/// string, bounded LRU, renders off the UI isolate while a preview stays
-/// fluid (pending spans show a placeholder box).
+/// string, bounded LRU. The default render is synchronous: one span takes
+/// ~0.1 ms, and only the viewport's spans are requested, so there is
+/// nothing to offload — and the isolate route proved un-sendable for the
+/// closure on AOT devices (the message car the calling zone and every span
+/// rendered its red error fallback). [asyncRenderer] remains as the timing
+/// seam for the placeholder tests.
 ///
 /// One shared instance per preview (owned by `MarkdownPreview`); editing a
 /// note reuses the cached boxes for unchanged spans (the T-M2-05 AC).
@@ -15,27 +19,27 @@ import 'package:katex_dart/katex_dart.dart' show BoxNode, KatexOptions, renderTo
 final class MathCache extends ChangeNotifier {
   /// Creates a cache with [capacity] entries.
   ///
-  /// [renderer] (synchronous seam), when given, replaces the render path
-  /// (tests); [asyncRenderer] (future seam) controls timing (placeholder
-  /// tests); the default renders on a background isolate via `katex_dart`.
+  /// [renderer] (synchronous seam) and [asyncRenderer] (future seam) replace
+  /// the render path for tests; the default renders synchronously with
+  /// `katex_dart`.
   MathCache({
     this.capacity = defaultCapacity,
     this.renderer,
     this.asyncRenderer,
   });
 
-  /// Default capacity (design.md's ~512 entries).
-  static const int defaultCapacity = 512;
-
-  /// The sync render seam; null = [asyncRenderer] or the default isolate.
+  /// The sync render seam; null = [asyncRenderer] or the default render.
   final BoxNode Function(String tex, {required bool displayMode})? renderer;
 
   /// The async render seam (placeholder tests); null = [renderer] or the
-  /// default isolate.
+  /// default synchronous render.
   final Future<BoxNode> Function(
     String tex, {
     required bool displayMode,
   })? asyncRenderer;
+
+  /// Default capacity (design.md's ~512 entries).
+  static const int defaultCapacity = 512;
 
   /// Maximum entries kept (oldest-rendered evicted first).
   final int capacity;
@@ -136,15 +140,14 @@ final class MathCache extends ChangeNotifier {
         () => asyncRenderer(tex, displayMode: displayMode),
       );
     }
-    return compute(() async {
-      final box = await Isolate.run(
-        () => renderToBox(
-          tex,
-          options: KatexOptions(displayMode: displayMode),
-        ),
-      );
-      return box;
-    });
+    // Default: synchronous render (per-span cost ~0.1 ms; only the
+    // viewport's spans are ever requested).
+    return compute(
+      () async => renderToBox(
+        tex,
+        options: KatexOptions(displayMode: displayMode),
+      ),
+    );
   }
 
   @override
