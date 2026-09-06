@@ -45,12 +45,4 @@ final class EditorGestures {
     input.extendSelectionTo(hitTest.offsetAt(x, y));
     return input.selection != before;
   }
-
-  /// Ends the drag-select: collapses the selection to the caret at the last
-  /// drag position.
-  bool dragEnd() {
-    final before = input.selection;
-    input.collapseSelection();
-    return input.selection != before;
-  }
 }

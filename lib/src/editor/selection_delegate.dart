@@ -50,8 +50,15 @@ final class NoteSelectionDelegate with TextSelectionDelegate {
   /// Hides the selection UI (handles + toolbar).
   final VoidCallback onHide;
 
+  /// The toolbar's view of the field: the selection + composing are real,
+  /// the text is empty (the copy/cut text comes from the buffer's
+  /// `selectionText`, not from here). Never materializes the buffer — the
+  /// selection UI must stay cheap on a 931 KB note (M2a fix P1).
   @override
-  TextEditingValue get textEditingValue => input.value;
+  TextEditingValue get textEditingValue => TextEditingValue(
+    selection: input.selection,
+    composing: input.composing,
+  );
 
   @override
   void userUpdateTextEditingValue(

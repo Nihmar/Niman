@@ -26,16 +26,17 @@ void main() {
     expect(input.selection, const TextSelection.collapsed(offset: 1));
   });
 
-  test('drag selects from anchor to drag position', () {
+  test('drag selects from anchor to drag position (persists on release)',
+      () {
     gestures
       ..dragStartAt(0, 15) // offset 3 (line 1 start)
       ..dragTo(2.5, 15); // offset 4
+    // The selection persists (no collapse on release, M2a fix P4): the
+    // handles and toolbar stay up over it.
     expect(
       input.selection,
       const TextSelection(baseOffset: 3, extentOffset: 4),
     );
-    gestures.dragEnd();
-    expect(input.selection, const TextSelection.collapsed(offset: 4));
   });
 
   test('drag across rows extends the selection', () {
@@ -69,7 +70,5 @@ void main() {
     expect(gestures.dragStartAt(0, 0), isTrue); // offset 0
     expect(gestures.dragTo(2.5, 5), isTrue); // offset 1
     expect(gestures.dragTo(2.5, 5), isFalse); // same offset
-    expect(gestures.dragEnd(), isTrue); // collapse to offset 1
-    expect(gestures.dragEnd(), isFalse); // already collapsed
   });
 }

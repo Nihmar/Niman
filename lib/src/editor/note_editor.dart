@@ -9,16 +9,24 @@ import 'package:copist/src/editor/row_model.dart';
 import 'package:copist/src/editor/selection_delegate.dart';
 import 'package:copist/src/editor/selection_handles.dart';
 import 'package:copist/src/editor/virtualized_text_view.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// The plain-drag direction lock (see the `_dragKind` field, M2a fix P4):
+/// horizontal/short drags select, vertical/long drags scroll, and the
+/// long-press recognizers own the long-press-extend drag.
+enum _DragKind { none, selecting, scrolling, longPress }
 
 /// The interactive line editor (M2a E8d): a virtualized text view over a
 /// [ComposingInput], driven by the platform IME through [NoteEditorClient].
 ///
-/// [initialText] is the note content. [onTextChanged] fires with the full
-/// buffer text after every *text* edit (autosave subscribes to it; selection
-/// and composing-only changes do not fire it). The [focusNode] shows/hides
-/// the IME and lets the owner save on focus loss.
+/// [initialText] is the note content. [onTextChanged] fires with the buffer's
+/// [ComposingInput.revision] after every *text* edit (the owner reads the
+/// text itself when the save fires — the revision is the dirty flag, so a
+/// keystroke never crosses the widget tree as a 931 KB string, M2a fix P1;
+/// selection and composing-only changes do not fire it). The [focusNode]
+/// shows/hides the IME and lets the owner save on focus loss.
 ///
 /// The view owns the [TextInputConnection] (attached on focus); the client
 /// reports the values it must push back through [NoteEditorClient.onPushValue].
@@ -43,8 +51,9 @@ final class NoteEditor extends StatefulWidget {
   /// The focus node; the IME shows on focus and hides on blur.
   final FocusNode focusNode;
 
-  /// Fires with the full buffer text after every text edit.
-  final ValueChanged<String> onTextChanged;
+  /// Fires with the buffer's [ComposingInput.revision] after every text edit
+  /// (the autosave dirty flag — the owner reads the buffer when it saves).
+  final ValueChanged<int> onTextChanged;
 
   /// The maximum monospace grid width in characters (the visual-row wrap
   /// width). The editor derives the actual width from the viewport — the
@@ -73,6 +82,17 @@ final class _NoteEditorState extends State<NoteEditor> {
   late HitTest _hitTest;
   late final EditorGestures _gestures;
   late final ScrollController _scrollController;
+
+  /// The plain-drag direction lock (M2a fix P4): until a movement axis
+  /// clears the touch slop the gesture is `none` (a tap may still happen);
+  /// the first axis to clear it locks `selecting` (horizontal — we own the
+  /// drag) or `scrolling` (vertical — the scroll recognizer owns it);
+  /// `longPress` is handed to the long-press recognizers on activation.
+  _DragKind _dragKind = _DragKind.none;
+
+  /// The pointer-down position (viewport-local) the direction lock measures
+  /// against; `null` when no pointer is down.
+  Offset? _dragStart;
   late final SelectionHandles _handles;
 
   /// The anchor of the selection handles/toolbar: the scroll viewport box
@@ -204,11 +224,85 @@ final class _NoteEditorState extends State<NoteEditor> {
     if (changed) _pushSelection();
   }
 
+  /// Extends the long-press selection to the pointer (the anchor stays at
+  /// the long-press end).
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) =>
+      _handleDragMove('longPressDrag', details.localPosition);
+
+  /// A pointer down (viewport-local): arms the plain-drag direction lock
+  /// for this gesture. Raw pointer callbacks, not arena recognizers (the
+  /// M2a on-device round-2 "selection doesn't work" bug): the
+  /// [VirtualizedTextView]'s vertical-drag recognizer keeps owning vertical
+  /// drags (scrolling) without an arena fight, and the horizontal lock
+  /// below claims the rest.
+  void _handlePointerDown(PointerDownEvent event) {
+    _focusEditor();
+    _dragKind = _DragKind.none;
+    _dragStart = event.localPosition;
+  }
+
+  /// A pointer move: the direction lock (the first axis to clear the touch
+  /// slop decides the gesture, then it's locked for the gesture), then the
+  /// selection extension. No IME push here — the drag end pushes the final
+  /// selection (pushing at pointer-move rate froze the app, M2a on-device
+  /// round 3).
+  void _handlePointerMove(PointerMoveEvent event) {
+    final start = _dragStart;
+    if (start == null) return;
+    final local = event.localPosition;
+    if (_dragKind == _DragKind.none) {
+      final dx = (local.dx - start.dx).abs();
+      final dy = (local.dy - start.dy).abs();
+      if (dx < kTouchSlop && dy < kTouchSlop) return; // below slop: no lock
+      if (dx > dy) {
+        // Horizontal: a selection drag (the scroll recognizer rejects
+        // horizontal moves, so it stays out of the way).
+        _dragKind = _DragKind.selecting;
+        final changed = _gestures.dragStartAt(
+          _textX(start.dx),
+          start.dy + _scrollOffset,
+        );
+        _logGesture('dragStart', start, changed);
+      } else {
+        // Vertical: a scroll — the [VirtualizedTextView]'s recognizer owns
+        // the drag; we stay out of the way.
+        _dragKind = _DragKind.scrolling;
+        return;
+      }
+    }
+    if (_dragKind == _DragKind.selecting) _handleDragMove('drag', local);
+  }
+
+  /// A pointer up: the drag selection persists (no collapse — the handles
+  /// and toolbar stay up over it, M2a fix P4), and the final selection is
+  /// pushed to the IME (window-sized) so the next keystroke edits it.
+  void _handlePointerUp(PointerUpEvent event) {
+    if (_dragKind == _DragKind.selecting) {
+      _logGesture('dragEnd', event.localPosition, false);
+      _pushSelection();
+    }
+    _dragKind = _DragKind.none;
+    _dragStart = null;
+  }
+
+  /// A pointer cancel (the system took the pointer, e.g. a scroll started
+  /// after a diagonal drag): the selection, if any, persists — same as a
+  /// lift.
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (_dragKind == _DragKind.selecting) _pushSelection();
+    _dragKind = _DragKind.none;
+    _dragStart = null;
+  }
+
   /// A long-press selects the word under the pointer (the long-press
   /// contract); the selection persists after release (a tap clears it), and
-  /// a drag extending it arrives as long-press pan updates.
+  /// a drag extending it arrives as long-press move updates.
+  ///
+  /// The direction lock is handed to the long-press: its moves are handled
+  /// by [_handleLongPressMoveUpdate], not the plain-drag path.
   void _handleLongPressStart(LongPressStartDetails details) {
     _focusEditor();
+    _dragKind = _DragKind.longPress;
     final changed = _gestures.longPressAt(
       _textX(details.localPosition.dx),
       details.localPosition.dy + _scrollOffset,
@@ -217,34 +311,6 @@ final class _NoteEditorState extends State<NoteEditor> {
     if (changed) _pushSelection();
   }
 
-  /// Extends the long-press selection to the pointer (the anchor stays at
-  /// the long-press end).
-  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) =>
-      _handleDragMove('longPressDrag', details.localPosition);
-
-  /// A drag begins a selection anchored at the drag start. No IME push
-  /// here: the drag end pushes the final selection (a full-text push at
-  /// novel length is a platform round trip — pushing at pointer-move rate
-  /// froze the app, M2a on-device round 3).
-  void _handlePanStart(DragStartDetails details) {
-    _focusEditor();
-    final changed = _gestures.dragStartAt(
-      _textX(details.localPosition.dx),
-      details.localPosition.dy + _scrollOffset,
-    );
-    _logGesture('dragStart', details.localPosition, changed);
-  }
-
-  /// A drag move extends the selection to the pointer (no IME push — see
-  /// [_handlePanStart]).
-  void _handlePanUpdate(DragUpdateDetails details) =>
-      _handleDragMove('drag', details.localPosition);
-
-  /// The drag ends: the selection collapses to its caret (the E8a
-  /// drag-select contract; a persistent selection is a later sub-step), and
-  /// the final selection is pushed to the IME.
-  void _handlePanEnd(DragEndDetails details) => _handleDragEnd('dragEnd');
-
   /// A long-press drag ends (the finger lifts): the long-press selection
   /// persists (no collapse), but its moves did not push — land the final
   /// selection so the next keystroke edits it.
@@ -252,16 +318,8 @@ final class _NoteEditorState extends State<NoteEditor> {
     _pushSelection();
   }
 
-  /// The drag-end path: collapse the drag selection to its caret and push
-  /// the change to the IME.
-  void _handleDragEnd(String tag) {
-    final changed = _gestures.dragEnd();
-    _logGesture(tag, null, changed);
-    if (changed) _pushSelection();
-  }
-
   /// The plain-drag move path: extends the selection to the pointer (no IME
-  /// push — see [_handlePanStart]).
+  /// push — see [_handlePointerMove]).
   void _handleDragMove(String tag, Offset local) {
     final changed = _gestures.dragTo(
       _textX(local.dx),
@@ -302,21 +360,21 @@ final class _NoteEditorState extends State<NoteEditor> {
     }
   }
 
-  /// Pushes the current value to the IME after a gesture-driven selection
+  /// Pushes the caret's window to the IME after a gesture-driven selection
   /// change. The platform's copy must match ours, or the next keystroke
   /// edits the stale platform selection instead of the caret the user sees
   /// (the M2a on-device round-2 data-loss bug). Skips an unchanged
-  /// selection (the platform already holds it — a full-text push is a
-  /// platform round trip at novel length).
+  /// selection (the platform already holds it — a push is a platform round
+  /// trip). Window-sized since M2a fix P2 (never a full-buffer push).
   void _pushSelection() {
     final selection = _input.selection;
     if (selection == _lastPushedSelection) return;
-    _pushValue(_input.value);
+    _client.pushValue();
   }
 
   /// The standard selection toolbar actions (the [NoteSelectionDelegate]
   /// wiring): select-all commits the selection to the IME; cut and paste
-  /// mutate the buffer directly and re-sync it with a full value push (the
+  /// mutate the buffer directly and re-sync it with a window push (the
   /// lockstep discipline).
   void _selectAll() {
     _input.setSelection(
@@ -326,20 +384,16 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   void _cutSelection() {
-    _input
-      ..deleteSelection()
-      ..commitDirectEdit();
-    _pushValue(_input.value);
+    _input.deleteSelection();
+    _client.pushValue();
     // The cut cause contract: the (collapsed) selection is scrolled into
     // view.
     _syncCaretScroll();
   }
 
   Future<void> _pasteText(String text) async {
-    _input
-      ..replaceSelection(text)
-      ..commitDirectEdit();
-    _pushValue(_input.value);
+    _input.replaceSelection(text);
+    _client.pushValue();
   }
 
   /// The toolbar's bring-into-view: scrolls so the position's row is
@@ -397,20 +451,35 @@ final class _NoteEditorState extends State<NoteEditor> {
   }
 
   /// Forwards a value to the platform (a resync from the client, the
-  /// focus-attach sync, or a gesture-driven selection change).
+  /// focus-attach sync, or a gesture-driven selection change). Window-sized
+  /// since M2a fix P2 — the log line shows the pushed window size, which is
+  /// the AC check (`ime push: N chars` must be KB, not 931K).
   void _pushValue(TextEditingValue value) {
     final clock = Stopwatch()..start();
     _connection?.setEditingState(value);
-    _lastPushedSelection = value.selection;
+    // The buffer selection (not the window-local value.selection) is what
+    // the gesture-skip comparison is against.
+    _lastPushedSelection = _input.selection;
     _log.debug(
-      'ime push: ${value.text.length} chars, '
-      '${_describeSelection(value.selection)} in '
+      'ime push: ${value.text.length} chars (window), '
+      '${_describeSelection(_input.selection)} in '
       '${_ms(clock.elapsedMicroseconds)} ms',
     );
   }
 
   void _onAction(TextInputAction action) {
-    // IME-action handling (newline / done) is a later sub-step.
+    if (action == TextInputAction.newline) {
+      // Soft Enter (the on-screen keyboard's ⏎). A hardware Enter arrives as
+      // an insertion delta (already handled in the client), so this is the
+      // IME-action path only. Same direct-edit contract as a paste, plus the
+      // caret scroll sync (the caret dropped a line).
+      _input.replaceSelection('\n');
+      _client.pushValue();
+      _syncCaretScroll();
+      return;
+    }
+    // done / go / search / ... : dismiss the keyboard.
+    widget.focusNode.unfocus();
   }
 
   void _onConnectionClosed() {
@@ -429,17 +498,24 @@ final class _NoteEditorState extends State<NoteEditor> {
         _client,
         const TextInputConfiguration(
           inputType: TextInputType.multiline,
+          // The default action is `done` (a checkmark on Gboard); a
+          // multiline note wants a real newline (the ⏎ key).
+          inputAction: TextInputAction.newline,
           enableSuggestions: false,
+          // Delta model: the platform sends a TextEditingDelta per edit
+          // instead of the whole field (the P0 keystroke fix).
+          enableDeltaModel: true,
         ),
       );
       _connection = connection;
       final clock = Stopwatch()..start();
-      connection
-        ..setEditingState(_input.value)
-        ..show();
+      // The attach push is the caret's window (KB, M2a fix P2) — the buffer
+      // size is logged for the load context, not pushed.
+      _client.pushValue();
+      connection.show();
       _log.info(
-        'ime focus: attached, pushed ${_input.textLength} chars in '
-        '${_ms(clock.elapsedMicroseconds)} ms',
+        'ime focus: attached, pushed a window of a ${_input.textLength} '
+        'char buffer in ${_ms(clock.elapsedMicroseconds)} ms',
       );
     } else {
       _log.info('ime focus: connection closed');
@@ -462,12 +538,14 @@ final class _NoteEditorState extends State<NoteEditor> {
     _syncCaretScroll();
     setState(() {});
     if (textChanged) {
+      // The revision (not the text) crosses to the parent: the full join
+      // lives on the save path only (M2a fix P1 — no O(n) string per key).
       _log.debug(
         'keystroke: fold $foldMs ms, '
         '${_ms(clock.elapsedMicroseconds)} ms total, '
         '${_input.textLength} chars, ${_rows.rowCount} rows',
       );
-      widget.onTextChanged(_input.text);
+      widget.onTextChanged(revision);
     }
   }
 
@@ -576,15 +654,22 @@ final class _NoteEditorState extends State<NoteEditor> {
                 onLongPressStart: _handleLongPressStart,
                 onLongPressMoveUpdate: _handleLongPressMoveUpdate,
                 onLongPressEnd: _handleLongPressEnd,
-                onPanStart: _handlePanStart,
-                onPanUpdate: _handlePanUpdate,
-                onPanEnd: _handlePanEnd,
-                child: CompositedTransformTarget(
-                  key: _viewportKey,
-                  link: _handles.toolbarLayerLink,
-                  child: VirtualizedTextView(
-                    model: _rows,
-                    scrollController: _scrollController,
+                child: Listener(
+                  // Raw pointer events (no arena): the plain-drag direction
+                  // lock (M2a fix P4) sees every move without fighting the
+                  // VirtualizedTextView's vertical-drag recognizer.
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: _handlePointerDown,
+                  onPointerMove: _handlePointerMove,
+                  onPointerUp: _handlePointerUp,
+                  onPointerCancel: _handlePointerCancel,
+                  child: CompositedTransformTarget(
+                    key: _viewportKey,
+                    link: _handles.toolbarLayerLink,
+                    child: VirtualizedTextView(
+                      model: _rows,
+                      scrollController: _scrollController,
+                    ),
                   ),
                 ),
               ),

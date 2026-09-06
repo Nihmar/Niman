@@ -1,5 +1,6 @@
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/composing_input.dart';
+import 'package:copist/src/editor/ime_bridge.dart';
 import 'package:flutter/services.dart';
 
 /// The delta-mode IME client over a [ComposingInput] (M2a E8d) — the
@@ -7,13 +8,19 @@ import 'package:flutter/services.dart';
 ///
 /// It is the `TextInputClient` handed to [TextInput.attach]. In delta mode
 /// the platform sends a [TextEditingDelta] per edit (never the whole field);
-/// this client forwards each to [ComposingInput.apply] and pushes a full
-/// [ComposingInput.value] exactly when lockstep with the platform copy must
-/// be re-established:
+/// this client forwards each to [ComposingInput.apply] (translating the
+/// platform's window-local offsets by the window start) and pushes exactly
+/// when lockstep with the platform copy must be re-established:
 /// - [ComposingInput.apply] reports an unrecognized delta (it re-anchors to
 ///   the platform copy and asks for a resync);
 /// - after a direct edit (reset / cut / paste / undo) the caller pushes via
-///   [pushValue].
+///   [pushValue];
+/// - the caret crossed the edge of the window the platform holds (re-center
+///   = one KB-sized push, M2a fix P2).
+///
+/// The platform never holds the full buffer: it holds the caret's
+/// [ImeWindow] (KB, clamped to line boundaries), so a keystroke on the 931 KB
+/// note ships a KB-sized delta, not a 931 KB oldText.
 ///
 /// The client does not own the [TextInputConnection]; the view does. It
 /// reports the push, the IME action, and the connection close through
@@ -38,8 +45,8 @@ final class NoteEditorClient with DeltaTextInputClient {
   /// The input model the client edits (the note's source of truth).
   final ComposingInput input;
 
-  /// Sends a full [TextEditingValue] to the platform (the view forwards it to
-  /// the [TextInputConnection]).
+  /// Sends the [TextEditingValue] to push to the platform (the view forwards
+  /// it to the [TextInputConnection]). Window-sized since M2a fix P2.
   final void Function(TextEditingValue value) onPushValue;
 
   /// Reports an IME action (e.g. the keyboard's "done"/"newline" button).
@@ -48,31 +55,73 @@ final class NoteEditorClient with DeltaTextInputClient {
   /// Reports the platform closing the connection (the keyboard dismissed).
   final VoidCallback? onConnectionClosed;
 
-  /// Pushes [ComposingInput.value] to the platform and clears the pending
+  /// The buffer offset the platform's copy starts at (the last pushed
+  /// window's start). Incoming deltas are window-local relative to it.
+  int _windowStart = 0;
+
+  /// The length of the platform's copy as it stands now (the pushed window
+  /// text, plus/minus the deltas applied since). The legacy (non-delta)
+  /// full-update path re-anchors the window region with it.
+  int _platformLength = 0;
+
+  /// Pushes the caret's [ImeWindow] to the platform and clears the pending
   /// resync flag. Call after a direct edit (cut / paste / undo) or a
-  /// [ComposingInput.reset].
+  /// [ComposingInput.reset] — and on focus attach.
   void pushValue() {
-    onPushValue(input.value);
+    final window = ImeWindow.around(input);
+    _windowStart = window.windowStart;
+    _platformLength = window.windowText.length;
+    onPushValue(window.asValue());
     input.commitDirectEdit();
   }
 
   // --- TextInputClient (delta mode) ---
 
+  /// The platform's resync pull: the caret's [ImeWindow] (KB, never the full
+  /// buffer — M2a fix P2).
   @override
-  TextEditingValue? get currentTextEditingValue => input.value;
+  TextEditingValue? get currentTextEditingValue {
+    final window = ImeWindow.around(input);
+    _windowStart = window.windowStart;
+    _platformLength = window.windowText.length;
+    return window.asValue();
+  }
 
   @override
   AutofillScope? get currentAutofillScope => null;
 
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
+    final anchor = _windowStart;
     var resync = false;
     for (final delta in deltas) {
       _log.debug('ime delta: ${_describeDelta(delta)}');
-      if (input.apply(delta)) resync = true;
+      if (input.apply(delta, anchor: anchor)) resync = true;
+      _platformLength += _lengthDelta(delta);
     }
-    if (resync) pushValue();
+    if (resync) {
+      pushValue();
+      return;
+    }
+    // Re-center when the caret crossed the window's edge (the platform copy
+    // would no longer hold the caret's line breaks): one KB-sized push, then
+    // lockstep on the new window (M2a fix P2).
+    if (ImeWindow.around(input).windowStart != anchor) pushValue();
   }
+
+  /// The platform-copy length change a [delta] carries (the window text
+  /// grows/shrinks with every edit the platform makes inside it).
+  static int _lengthDelta(TextEditingDelta delta) => switch (delta) {
+    TextEditingDeltaInsertion(:final textInserted) => textInserted.length,
+    TextEditingDeltaDeletion(:final deletedRange) =>
+        deletedRange.start - deletedRange.end,
+    TextEditingDeltaReplacement(
+      :final replacedRange,
+      :final replacementText
+    ) =>
+        replacementText.length + replacedRange.start - replacedRange.end,
+    _ => 0,
+  };
 
   /// The delta in one line: the kind, the edit, and the platform's oldText
   /// size (the cost question at novel length: how big the text the IME ships
@@ -105,10 +154,24 @@ final class NoteEditorClient with DeltaTextInputClient {
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    // Legacy (non-delta) full update: the platform sent a whole-field value
-    // (an IME that does not support the delta model, or a programmatic set).
-    // Re-anchor the buffer to that copy and re-sync.
-    input.reset(value.text, selection: value.selection);
+    // Legacy (non-delta) full update: the platform sent its whole-field copy
+    // (an IME without the delta model) — which is the window (M2a fix P2),
+    // not the buffer. Re-anchor the window region to that copy, take the
+    // platform's selection, and re-sync. No window was ever pushed (a
+    // programmatic set, or a platform that started from its own state): the
+    // value is the whole field, full reset.
+    if (_windowStart == 0 && _platformLength == 0) {
+      input.reset(value.text, selection: value.selection);
+    } else {
+      final start = _windowStart;
+      input.replaceRegion(
+        start,
+        start + _platformLength,
+        value.text,
+        selection: translateSelection(value.selection, start),
+      );
+    }
+    _platformLength = value.text.length;
     pushValue();
   }
 

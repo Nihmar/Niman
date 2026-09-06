@@ -72,22 +72,6 @@ void main() {
     });
   });
 
-  group('collapseSelection', () {
-    test('collapses to the focus', () {
-      final input = ComposingInput('hello world');
-      expect(
-        (input
-              ..setSelection(
-                const TextSelection(baseOffset: 0, extentOffset: 5),
-              )
-              ..collapseSelection())
-            .selection,
-        const TextSelection.collapsed(offset: 5),
-      );
-      expect(input.hasSelection, isFalse);
-    });
-  });
-
   group('deleteSelection (cut)', () {
     test('updates the buffer and caret, returns the text', () {
       final input = ComposingInput('say hello there');

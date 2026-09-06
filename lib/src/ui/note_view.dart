@@ -50,13 +50,23 @@ final class _NoteViewState extends State<NoteView>
   static const AppLogger _log = AppLogger(name: 'editor');
 
   late final FocusNode _focus;
+
+  /// The editor's buffer: owned here so the save path can read the buffer
+  /// text without a full string crossing the widget tree per keystroke
+  /// (M2a fix P1) — the editor edits it, the save reads it.
+  late final ComposingInput _input;
+
   bool _loading = true;
-  bool _dirty = false;
   bool _saving = false;
+  bool _savePending = false;
   String? _error;
   String? _loadedContent;
-  String? _text;
   Timer? _saveTimer;
+
+  /// The buffer [ComposingInput.revision] the disk currently matches. The
+  /// dirty flag is `revision != _lastSavedRevision` (a saved note is a
+  /// revision, not a text copy).
+  int _lastSavedRevision = -1;
 
   @override
   void initState() {
@@ -64,6 +74,10 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    _input = widget.input ?? ComposingInput('');
+    // A seam buffer (a test) arrives with its content already loaded; the
+    // file load below re-anchors it to the disk text.
+    _lastSavedRevision = _input.revision;
     unawaited(_load());
   }
 
@@ -72,9 +86,14 @@ final class _NoteViewState extends State<NoteView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.path != widget.path) {
       _saveTimer?.cancel();
+      _savePending = false;
       // Persist the outgoing note under its own path before the buffer is
-      // replaced by the incoming one.
-      unawaited(_save(path: oldWidget.path, content: _text));
+      // replaced by the incoming one (its text is read synchronously at the
+      // start of _save, before the _load below resets the buffer). An
+      // in-flight save already holds the outgoing text + path: skip.
+      if (!_saving && _input.revision != _lastSavedRevision) {
+        unawaited(_save(path: oldWidget.path));
+      }
       unawaited(_load());
     }
   }
@@ -83,7 +102,7 @@ final class _NoteViewState extends State<NoteView>
   void dispose() {
     _saveTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    if (_dirty) unawaited(_save());
+    if (_input.revision != _lastSavedRevision) unawaited(_save());
     _focus.dispose();
     super.dispose();
   }
@@ -97,15 +116,22 @@ final class _NoteViewState extends State<NoteView>
       await seam(path, content);
       return;
     }
-    // The two phases separately: the encode is a full O(n) string pass (the
-    // novel-length cost), the write the FUSE round trips.
-    final encodeClock = Stopwatch()..start();
-    final bytes = utf8.encode(content);
+    // Encode + atomic write off the UI isolate (the ~4 s save freeze, M2a
+    // fix P3): the utf8 encode is an O(n) string pass and the write the
+    // FUSE round trips — neither may touch the UI frame.
+    final (bytes, encodeMs, writeMs) = await Isolate.run(() async {
+      final encodeClock = Stopwatch()..start();
+      final encoded = utf8.encode(content);
+      final encodeMs = encodeClock.elapsedMilliseconds;
+      final writeClock = Stopwatch()..start();
+      await writeFileAtomically(File(path), encoded);
+      final writeMs = writeClock.elapsedMilliseconds;
+      return (encoded.length, encodeMs, writeMs);
+    });
     _log.debug(
-      'save write: ${bytes.length} bytes (encoded in '
-      '${encodeClock.elapsedMilliseconds} ms)',
+      'save write: $bytes bytes (encode $encodeMs ms, write $writeMs ms, '
+      'off-isolate)',
     );
-    await writeFileAtomically(File(path), bytes);
   }
 
   Future<void> _load() async {
@@ -113,7 +139,6 @@ final class _NoteViewState extends State<NoteView>
     setState(() {
       _loading = true;
       _error = null;
-      _dirty = false;
     });
     final clock = Stopwatch()..start();
     try {
@@ -121,8 +146,9 @@ final class _NoteViewState extends State<NoteView>
       if (!mounted || widget.path != path) return;
       // The line editor is line-based: normalize to LF (strip \r).
       final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+      _input.reset(text);
       _loadedContent = text;
-      _text = text;
+      _lastSavedRevision = _input.revision;
       setState(() => _loading = false);
       _log.info(
         'note loaded: $path (${text.length} chars, '
@@ -138,13 +164,17 @@ final class _NoteViewState extends State<NoteView>
     }
   }
 
-  void _onUserEdit(String text) {
+  void _onUserEdit(int revision) {
     if (_loading) return;
-    _text = text;
-    _dirty = true;
+    // No text, no setState: the revision is the dirty flag and the status
+    // line follows the save state only (M2a fix P1/P3 — no parent rebuild
+    // per keystroke). The debounce lengthens while a save is in flight
+    // (typing fast: one trailing save, not a queue).
     _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(milliseconds: 500), _save);
-    if (mounted) setState(() {});
+    final debounce = _saving
+        ? const Duration(seconds: 1)
+        : const Duration(milliseconds: 500);
+    _saveTimer = Timer(debounce, _save);
   }
 
   void _onFocusChanged() {
@@ -157,23 +187,39 @@ final class _NoteViewState extends State<NoteView>
     if (state == AppLifecycleState.paused) unawaited(_save());
   }
 
-  Future<void> _save({String? path, String? content}) async {
-    if (!_dirty || _saving) return;
-    final target = path ?? widget.path;
-    final text = content ?? _text ?? '';
+  Future<void> _save({String? path}) async {
+    final revision = _input.revision;
+    if (revision == _lastSavedRevision) return; // nothing new on disk
+    if (path == null && _saving) {
+      // A save is in flight: coalesce into one trailing save (the text is
+      // re-read from the buffer at that point, so nothing is lost).
+      _savePending = true;
+      return;
+    }
     _saving = true;
+    final target = path ?? widget.path;
     final clock = Stopwatch()..start();
-    _log.info('save start: $target (${text.length} chars)');
+    // The full-text join (O(n)) happens here only — the save path, never
+    // the keystroke path (M2a fix P1).
+    final joinClock = Stopwatch()..start();
+    final text = _input.text;
+    final joinMs = joinClock.elapsedMilliseconds;
+    _log.info(
+      'save start: $target (${text.length} chars, join $joinMs ms)',
+    );
     try {
       await _write(target, text);
-      _dirty = false;
+      if (target == widget.path) _lastSavedRevision = revision;
       _log.info(
         'note saved: $target (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
     } finally {
       _saving = false;
+      final trailing = _savePending;
+      _savePending = false;
       if (mounted) setState(() {});
+      if (trailing) unawaited(_save());
     }
   }
 
@@ -181,7 +227,7 @@ final class _NoteViewState extends State<NoteView>
     if (_error != null) return 'error';
     if (_loading) return 'loading…';
     if (_saving) return 'saving…';
-    if (_dirty) return 'unsaved';
+    if (_input.revision != _lastSavedRevision) return 'unsaved';
     return 'saved';
   }
 
@@ -200,7 +246,7 @@ final class _NoteViewState extends State<NoteView>
                       initialText: content,
                       focusNode: _focus,
                       onTextChanged: _onUserEdit,
-                      input: widget.input,
+                      input: _input,
                     ))
               : Center(child: Text(error)),
         ),

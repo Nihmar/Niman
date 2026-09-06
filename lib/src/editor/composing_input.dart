@@ -10,6 +10,25 @@ import 'package:flutter/services.dart'
         TextRange,
         TextSelection;
 
+/// A buffer [TextSelection] translated by [delta] (a negative delta maps
+/// buffer offsets into window-local ones for the windowed IME, M2a fix P2;
+/// a positive one the reverse).
+TextSelection translateSelection(TextSelection selection, int delta) {
+  if (!selection.isValid) return selection;
+  return TextSelection(
+    baseOffset: selection.baseOffset + delta,
+    extentOffset: selection.extentOffset + delta,
+    affinity: selection.affinity,
+    isDirectional: selection.isDirectional,
+  );
+}
+
+/// A buffer [TextRange] (the composing region) translated by [delta].
+TextRange translateRange(TextRange range, int delta) {
+  if (!range.isValid) return range;
+  return TextRange(start: range.start + delta, end: range.end + delta);
+}
+
 /// The pure-Dart core of the editor's text-input client (M2a E4).
 ///
 /// It owns a [LineBuffer] as the source of truth for the note text, plus the
@@ -114,9 +133,10 @@ final class ComposingInput {
   /// re-parse subscribe to.
   int get revision => _revision;
 
-  /// The current editing state as Flutter's [TextEditingValue] — for sending
-  /// to the IME (on focus, after [reset]). Materializes [text] (O(n)), so it
-  /// is not for the per-keystroke path.
+  /// The current editing state as Flutter's [TextEditingValue] — the full
+  /// buffer, for the legacy (non-windowed) IME path and tests. Materializes
+  /// [text] (O(n)), so it is not for the per-keystroke path (the windowed
+  /// client pushes window-sized values instead, M2a fix P2).
   TextEditingValue get value => TextEditingValue(
     text: _buffer.text,
     selection: _selection,
@@ -125,27 +145,42 @@ final class ComposingInput {
 
   /// Applies a platform [delta] to the buffer, selection and composing region.
   ///
-  /// Returns `true` when the client must push a full [value] update to re-sync
-  /// the IME (an unrecognized delta type), otherwise `false`.
+  /// [anchor] is the buffer offset the platform's copy starts at: in full
+  /// mode it is 0 and the platform's `oldText` is the whole buffer; in the
+  /// windowed IME (M2a fix P2) it is the window start (see `ImeWindow`)
+  /// and every offset in the delta is window-local. The delta's offsets are
+  /// translated by `+anchor` before touching the buffer.
   ///
-  /// See the class docs for the lockstep invariant this relies on.
-  bool apply(TextEditingDelta delta) {
+  /// Returns `true` when the client must push a value update to re-sync the
+  /// IME (an unrecognized delta type), otherwise `false`.
+  ///
+  /// See the class docs for the lockstep invariant this relies on (with the
+  /// window: the platform's `oldText` is exactly the window text).
+  bool apply(TextEditingDelta delta, {int anchor = 0}) {
     final selectionBefore = _selection;
     if (_needsImeSync) {
       // A direct edit (reset/cut/paste/undo) was not followed by
       // [commitDirectEdit], so the IME's copy may be stale and this delta's
-      // offsets are relative to it, not to the buffer. Re-anchor the buffer to
-      // the platform's copy (delta.oldText) so the delta applies on the right
-      // base: the pending direct edit is lost, but the delta (the latest
-      // input) is preserved and lockstep is restored — the difference between
-      // a lost paste and a silently corrupting text.
-      _buffer.replace(0, _buffer.textLength, delta.oldText);
+      // offsets are relative to it, not to the buffer. Re-anchor the window
+      // region to the platform's copy (delta.oldText) so the delta applies on
+      // the right base: the pending direct edit inside the window is lost, but
+      // the delta (the latest input) is preserved and lockstep is restored —
+      // the difference between a lost paste and a silently corrupting text.
+      // The region may have shrunk below the platform copy (a forgotten push
+      // after a delete); the replace then extends to the buffer end — the
+      // degenerate case loses the direct edit, it does not corrupt.
+      final regionEnd =
+          (anchor + delta.oldText.length).clamp(0, _buffer.textLength);
+      _buffer.replace(anchor.clamp(0, _buffer.textLength), regionEnd,
+          delta.oldText);
       _needsImeSync = false;
     }
     assert(
-      delta.oldText.length == _buffer.textLength,
-      'input client is out of lockstep with the IME; programmatic edits must '
-      'go through reset',
+      anchor >= 0 && anchor + delta.oldText.length <= _buffer.textLength,
+      'input client is out of lockstep with the IME; the window '
+      '[$anchor, ${anchor + delta.oldText.length}) exceeds the buffer '
+      '(${_buffer.textLength} chars); programmatic edits must go through '
+      'reset',
     );
     var start = 0;
     var oldText = '';
@@ -153,30 +188,31 @@ final class ComposingInput {
     var needsValueResync = false;
     switch (delta) {
       case TextEditingDeltaInsertion():
-        start = delta.insertionOffset;
+        start = delta.insertionOffset + anchor;
         newText = delta.textInserted;
         _buffer.insert(start, newText);
       case TextEditingDeltaDeletion():
-        start = delta.deletedRange.start;
-        oldText = _buffer.substring(start, delta.deletedRange.end);
+        start = delta.deletedRange.start + anchor;
+        final end = delta.deletedRange.end + anchor;
+        oldText = _buffer.substring(start, end);
         newText = '';
-        _buffer.delete(start, delta.deletedRange.end);
+        _buffer.delete(start, end);
       case TextEditingDeltaReplacement():
-        start = delta.replacedRange.start;
-        oldText = _buffer.substring(start, delta.replacedRange.end);
+        start = delta.replacedRange.start + anchor;
+        final end = delta.replacedRange.end + anchor;
+        oldText = _buffer.substring(start, end);
         newText = delta.replacementText;
-        _buffer.replace(start, delta.replacedRange.end, newText);
+        _buffer.replace(start, end, newText);
       case TextEditingDeltaNonTextUpdate():
         // A selection/composing change with no text edit — not undoable.
-        _setMeta(delta);
+        _setMeta(delta, anchor);
         return false;
       default:
         // An unrecognized delta type (a future Flutter addition) cannot be
         // applied incrementally. Don't drop it silently (lost input): apply
         // the metadata, re-anchor to the platform's last known-good copy, and
-        // tell the client to push a full [value] update so lockstep is
-        // restored. The one edit this delta carried is lost; later input is
-        // correct.
+        // tell the client to push a value update so lockstep is restored. The
+        // one edit this delta carried is lost; later input is correct.
         assert(false, 'unhandled delta: ${delta.runtimeType}');
         start = 0;
         oldText = _buffer.text;
@@ -190,9 +226,9 @@ final class ComposingInput {
       oldText: oldText,
       newText: newText,
       selectionBefore: selectionBefore,
-      selectionAfter: delta.selection,
+      selectionAfter: translateSelection(delta.selection, anchor),
     );
-    _setMeta(delta);
+    _setMeta(delta, anchor);
     return needsValueResync;
   }
 
@@ -260,13 +296,6 @@ final class ComposingInput {
     _notify();
   }
 
-  /// Collapses the selection to its focus (the caret) — ends a drag-select.
-  void collapseSelection() {
-    final focus = _selection.isValid ? _selection.extentOffset : 0;
-    _selection = TextSelection.collapsed(offset: focus);
-    _notify();
-  }
-
   /// Selects the word at [offset] (a run of non-whitespace characters) — or
   /// the nearest word when [offset] is on whitespace — the long-press
   /// selection contract. The anchor is the word end closest to [offset], so
@@ -278,53 +307,55 @@ final class ComposingInput {
   /// device as "selected from the end of the line to the next" (M2a
   /// on-device round 3).
   ///
-  /// Materializes [text] (O(n)); it is gesture-driven (rare), not per-frame.
+  /// Reads characters through [LineBuffer.locationOf] + [LineBuffer.lineAt]
+  /// only — O(word), never a full-buffer [text] join (M2a fix P1). It is
+  /// gesture-driven (rare), not per-frame.
   void selectWordAt(int offset) {
-    final text = _buffer.text;
-    final clamped = offset.clamp(0, text.length);
+    final length = textLength;
+    final clamped = offset.clamp(0, length);
     var probe = -1;
-    if (clamped < text.length && !_isSpace(text.codeUnitAt(clamped))) {
+    if (clamped < length && !_isSpace(_codeAt(clamped))) {
       probe = clamped;
-    } else if (clamped > 0 && !_isSpace(text.codeUnitAt(clamped - 1))) {
+    } else if (clamped > 0 && !_isSpace(_codeAt(clamped - 1))) {
       probe = clamped - 1;
     } else {
       // The offset is on a run of whitespace (a line gap, a blank line, the
       // buffer start/end): the nearest word, left first (a press just below
       // a line lands on the line's last word).
       var i = clamped - 1;
-      while (i >= 0 && _isSpace(text.codeUnitAt(i))) {
+      while (i >= 0 && _isSpace(_codeAt(i))) {
         i--;
       }
       if (i >= 0) {
         probe = i;
       } else {
         i = clamped;
-        while (i < text.length && _isSpace(text.codeUnitAt(i))) {
+        while (i < length && _isSpace(_codeAt(i))) {
           i++;
         }
-        if (i < text.length) probe = i;
+        if (i < length) probe = i;
       }
     }
     var start = 0;
     var end = 0;
     if (probe >= 0) {
       start = probe;
-      while (start > 0 && !_isSpace(text.codeUnitAt(start - 1))) {
+      while (start > 0 && !_isSpace(_codeAt(start - 1))) {
         start--;
       }
       end = probe + 1;
-      while (end < text.length && !_isSpace(text.codeUnitAt(end))) {
+      while (end < length && !_isSpace(_codeAt(end))) {
         end++;
       }
     } else {
       // No word anywhere in the buffer (all whitespace): the run around the
       // offset is all there is.
       start = clamped;
-      while (start > 0 && _isSpace(text.codeUnitAt(start - 1))) {
+      while (start > 0 && _isSpace(_codeAt(start - 1))) {
         start--;
       }
       end = clamped;
-      while (end < text.length && _isSpace(text.codeUnitAt(end))) {
+      while (end < length && _isSpace(_codeAt(end))) {
         end++;
       }
       if (start == end) return; // empty buffer: nothing to select.
@@ -337,6 +368,20 @@ final class ComposingInput {
         extentOffset: base == start ? end : start,
       ),
     );
+  }
+
+  /// The UTF-16 code unit at full-text [offset] — character access without
+  /// materializing the whole buffer (the [selectWordAt] O(word) rewrite,
+  /// M2a fix P1).
+  ///
+  /// A line's trailing line break is at full-text offset
+  /// `_lineStarts[line] + lineLength(line)`, which [LineBuffer.locationOf]
+  /// maps to `(line, lineLength(line))` — `col == lineLength` is the line
+  /// break itself (a real 0x0A), not a past-end column.
+  int _codeAt(int offset) {
+    final (line, col) = _buffer.locationOf(offset);
+    if (col == _buffer.lineLength(line)) return 0x0A;
+    return _buffer.lineAt(line).codeUnitAt(col);
   }
 
   /// A word-boundary whitespace: space, tab, newline, plus the Unicode
@@ -377,6 +422,36 @@ final class ComposingInput {
     );
     _notify();
     return removed;
+  }
+
+  /// Replaces the buffer region [start, end) with [text] (a direct edit —
+  /// breaks delta lockstep: the caller re-syncs with a push +
+  /// [commitDirectEdit]), undoable, and takes [selection] (or a caret at
+  /// [start]). The undoable region-replace the legacy (non-delta) IME path
+  /// uses when the platform sends back its whole-field copy — the window,
+  /// not the buffer (M2a fix P2).
+  void replaceRegion(
+    int start,
+    int end,
+    String text, {
+    TextSelection? selection,
+  }) {
+    final selectionBefore = _selection;
+    final oldText = _buffer.substring(start, end);
+    _buffer.replace(start, end, text);
+    _selection = selection ??
+        TextSelection.collapsed(offset: start.clamp(0, _buffer.textLength));
+    _composing = TextRange.empty;
+    _revision++;
+    _needsImeSync = true;
+    _recordEdit(
+      start: start,
+      oldText: oldText,
+      newText: text,
+      selectionBefore: selectionBefore,
+      selectionAfter: _selection,
+    );
+    _notify();
   }
 
   /// Replaces the current selection with [text] (a paste / replace), or
@@ -491,10 +566,12 @@ final class ComposingInput {
     _listeners.remove(listener);
   }
 
-  /// Copies the delta's selection + composing onto the client.
-  void _setMeta(TextEditingDelta delta) {
-    _selection = delta.selection;
-    _composing = delta.composing;
+  /// Copies the delta's selection + composing onto the client, translated
+  /// from the platform's window-local offsets into buffer offsets by
+  /// [anchor].
+  void _setMeta(TextEditingDelta delta, int anchor) {
+    _selection = translateSelection(delta.selection, anchor);
+    _composing = translateRange(delta.composing, anchor);
     _notify();
   }
 

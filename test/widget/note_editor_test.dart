@@ -21,10 +21,10 @@ CaretPainter? _findCaretPainter(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('reports the buffer text after a text edit', (tester) async {
+  testWidgets('reports the buffer revision after a text edit', (tester) async {
     final input = ComposingInput('hi');
     final focus = FocusNode();
-    String? reported;
+    int? reported;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -33,13 +33,14 @@ void main() {
           initialText: 'hi',  
           input: input,  
           focusNode: focus,  
-          onTextChanged: (t) => reported = t,  
+          onTextChanged: (r) => reported = r,  
           ),
         ),
       ),
     );
     focus.requestFocus();
     await tester.pump();
+    final before = input.revision;
     input.apply(
       const TextEditingDeltaInsertion(
         oldText: 'hi',
@@ -50,14 +51,14 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(reported, 'hi!');
+    expect(reported, before + 1);
     focus.dispose();
   });
 
   testWidgets('does not report on selection-only changes', (tester) async {
     final input = ComposingInput('hi');
     final focus = FocusNode();
-    String? reported;
+    int? reported;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -66,7 +67,7 @@ void main() {
           initialText: 'hi',  
           input: input,  
           focusNode: focus,  
-          onTextChanged: (t) => reported = t,  
+          onTextChanged: (r) => reported = r,  
           ),
         ),
       ),
@@ -151,20 +152,61 @@ void main() {
     final charWidth = VirtualizedTextView.measureCharWidth();
     const left = VirtualizedTextView.leftPadding;
     const rowH = VirtualizedTextView.rowHeight;
-    // Drag row 0, col 0 (offset 0) → row 1, col 2 (line 'efgh' starts at
-    // offset 5, col 2 → offset 7).
+    // Drag row 0, col 0 (offset 0) → row 1, col 4 (line 'efgh' starts at
+    // offset 5, col 4 → offset 9). Horizontal first: the direction lock
+    // (M2a fix P4) sees the horizontal axis clear the slop before the
+    // vertical one, so this is a selection drag, not a scroll.
     final gesture =
         await tester.startGesture(const Offset(left, rowH * 0.5));
+    await gesture.moveTo(Offset(left + 6 * charWidth, rowH * 0.5));
     await tester.pump();
-    await gesture.moveTo(Offset(left + 2 * charWidth, rowH * 1.5));
+    await gesture.moveTo(Offset(left + 4 * charWidth, rowH * 1.5));
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    // The drag-end collapses the selection per the E8a contract.
+    // The drag-end persists the selection (no collapse, M2a fix P4): the
+    // handles and toolbar stay up over it.
     expect(
       input.selection,
-      const TextSelection.collapsed(offset: 7),
+      const TextSelection(baseOffset: 0, extentOffset: 9),
     );
+  });
+
+  testWidgets('a vertical drag scrolls, not selects (M2a fix P4)',
+      (tester) async {
+    // 40 lines exceed the 600px viewport (row height 21): the last lines
+    // start off-screen.
+    final text = List.generate(40, (i) => 'line $i').join('\n');
+    final input = ComposingInput(text);
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: text,  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    // A vertical drag (the vertical axis clears the slop before the
+    // horizontal one): the scrollable owns the gesture, the selection is
+    // untouched. The drag is upward: a downward drag from the top of the
+    // content is an overscroll and clamps (no net scroll, here and on
+    // device).
+    await tester.fling(
+      find.byType(Scrollable),
+      const Offset(0, -200),
+      500,
+    );
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, greaterThan(90.0));
+    expect(input.selection, const TextSelection.collapsed(offset: 0));
+    focus.dispose();
   });
 
   testWidgets('the caret scroll sync keeps the caret visible', (tester) async {
@@ -345,16 +387,17 @@ void main() {
     await tester.pump();
     expect(tester.testTextInput.editingState?['selectionBase'], 0);
     expect(tester.testTextInput.editingState?['selectionExtent'], 0);
-    // The drag ends: the selection collapses to its caret (col 10 →
-    // offset 10) and is pushed once.
+    // The drag ends: the selection persists (no collapse, M2a fix P4) and
+    // is pushed once (window-sized).
     await gesture.up();
     await tester.pump();
-    expect(tester.testTextInput.editingState?['selectionBase'], 10);
+    expect(tester.testTextInput.editingState?['selectionBase'], 0);
     expect(tester.testTextInput.editingState?['selectionExtent'], 10);
     focus.dispose();
   });
 
-  testWidgets('the IME is told the field is multiline', (tester) async {
+  testWidgets('the IME is told the field is multiline with a newline action',
+      (tester) async {
     final input = ComposingInput('hi');
     final focus = FocusNode();
     await tester.pumpWidget(
@@ -378,6 +421,78 @@ void main() {
       (tester.testTextInput.setClientArgs?['inputType'] as Map?)?['name'],
       'TextInputType.multiline',
     );
+    // The action is `newline` (⏎), not the default `done` (which Gboard
+    // renders as the ✓ checkmark) — the M2a on-device keyboard complaint.
+    expect(
+      tester.testTextInput.setClientArgs?['inputAction'],
+      'TextInputAction.newline',
+    );
+    // Delta model: the platform sends a delta per edit, not the whole field.
+    expect(tester.testTextInput.setClientArgs?['enableDeltaModel'], isTrue);
+    focus.dispose();
+  });
+
+  testWidgets('performAction(newline) inserts a line break and pushes it',
+      (tester) async {
+    final input = ComposingInput('hi');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    // Caret at the end of the line (the fresh-load caret is 0).
+    input.setSelection(const TextSelection.collapsed(offset: 2));
+    await tester.pump();
+    // The soft Enter (the keyboard's ⏎) arrives as an IME action, not an
+    // insertion delta: it must split the line at the caret.
+    await tester.testTextInput.receiveAction(TextInputAction.newline);
+    await tester.pump();
+    expect(input.text, 'hi\n');
+    // The caret is after the break: the start of the new (empty) line.
+    expect(input.selection, const TextSelection.collapsed(offset: 3));
+    // And the split is pushed to the platform (lockstep for the next key).
+    expect(tester.testTextInput.editingState?['text'], 'hi\n');
+    expect(tester.testTextInput.editingState?['selectionBase'], 3);
+    expect(tester.testTextInput.editingState?['selectionExtent'], 3);
+    focus.dispose();
+  });
+
+  testWidgets('performAction(done) unfocuses (hides the keyboard)',
+      (tester) async {
+    final input = ComposingInput('hi');
+    final focus = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NoteEditor(
+
+          initialText: 'hi',  
+          focusNode: focus,  
+          onTextChanged: (_) {},  
+          input: input,  
+          ),
+        ),
+      ),
+    );
+    focus.requestFocus();
+    await tester.pump();
+    expect(focus.hasFocus, isTrue);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(focus.hasFocus, isFalse);
+    // The buffer is untouched by the action (only the keyboard dismisses).
+    expect(input.text, 'hi');
     focus.dispose();
   });
 }
