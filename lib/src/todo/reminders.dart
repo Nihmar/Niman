@@ -4,8 +4,9 @@
 /// ([wantedReminders]: open tasks with a future `rem:`) and hands it to
 /// the [ReminderService]; reconciliation runs after every publish, so
 /// external edits, deletes and reinstalls converge on the next open.
-/// Scheduling is a full replace (cancel all, schedule the wanted),
-/// idempotent and free of stored state.
+/// Scheduling is a full replace -- sweep the pending alarms the OS reports
+/// but nobody wants any more, then (re)schedule every wanted one -- so it
+/// is idempotent and free of stored state.
 ///
 /// The invariant that makes the full replace safe: [ReminderService.reconcile]
 /// is only ever called with a set derived from a *loaded* snapshot. An
@@ -278,6 +279,47 @@ final class LocalReminderService implements ReminderService {
     }
   }
 
+  /// Cancels every pending alarm that [wanted] no longer asks for.
+  ///
+  /// Never `cancelAll()`: that also dismisses notifications already sitting
+  /// in the tray, so any todo edit or app resume wiped a reminder the user
+  /// had not acted on yet. Diffing against the OS's own pending list keeps
+  /// the no-stored-state property (nothing of ours to drift from the files
+  /// or to lose across a reinstall) while touching only pending alarms.
+  ///
+  /// Ids still wanted are left alone: rescheduling the same id replaces the
+  /// pending alarm, so an edited time or body converges without a cancel.
+  /// Copist posts no notifications other than reminders, so every pending
+  /// id outside [wanted] is a stale one -- that reservation of the id space
+  /// is what makes the sweep safe.
+  Future<void> _cancelStale(Map<int, TodoReminder> wanted) async {
+    final List<PendingNotificationRequest> pending;
+    try {
+      pending = await _plugin.pendingNotificationRequests();
+    } on Object catch (error) {
+      // Better a stale alarm than a blown-away set.
+      _log.warning('todo reminders: pending query failed ($error)');
+      return;
+    }
+    var cancelled = 0;
+    for (final request in pending) {
+      if (wanted.containsKey(request.id)) {
+        continue;
+      }
+      try {
+        await _plugin.cancel(id: request.id);
+        cancelled++;
+      } on Object catch (error) {
+        _log.warning(
+          'todo reminders: cancel failed for id ${request.id} ($error)',
+        );
+      }
+    }
+    if (cancelled > 0) {
+      _log.info('todo reminders: cancelled $cancelled stale');
+    }
+  }
+
   /// One full replace pass for [wanted] (serialized by [_drain]).
   Future<void> _reconcileOnce(Map<int, TodoReminder> wanted) async {
     try {
@@ -286,14 +328,13 @@ final class LocalReminderService implements ReminderService {
       _log.warning('todo reminders unavailable: $error');
       return;
     }
-    // Grants resolve BEFORE the cancel: the exact request opens system
-    // settings (the app backgrounds), and cancelling first would leave
-    // zero alarms behind when the user returns through onResume instead
-    // of a fresh reconcile. Nothing is asked while nothing is wanted.
+    // Grants resolve BEFORE the sweep: a request dialog backgrounds the
+    // app, and cancelling first would leave nothing behind if the user
+    // came back through onResume instead of a fresh reconcile. Nothing is
+    // asked while nothing is wanted.
     final granted = wanted.isEmpty || await _ensurePermission();
     final exact = granted && wanted.isNotEmpty && await _ensureExact();
-    // Full replace: no stored scheduling state to drift from the files.
-    await _plugin.cancelAll();
+    await _cancelStale(wanted);
     if (wanted.isEmpty) {
       _log.info('todo reminders reconciled: 0 scheduled');
       return;
