@@ -8,6 +8,7 @@ import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/word_count.dart';
 import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_syntax.dart';
+import 'package:copist/src/preview/wikilink.dart';
 import 'package:markdown/markdown.dart' as md;
 
 /// Off-isolate work for the preview (T-M2-04/05/08): the whole-document
@@ -100,6 +101,7 @@ List<md.Node> _parseSource(String source) {
       const MathBlockSyntax(),
       ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
     ],
+    inlineSyntaxes: [WikilinkInlineSyntax()],
     extensionSet: md.ExtensionSet.gitHubFlavored,
     encodeHtml: false,
   );

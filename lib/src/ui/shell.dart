@@ -6,6 +6,7 @@ import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
@@ -149,6 +150,29 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// the search box; the tabs button flips it and back.
   bool _showTags = false;
 
+  /// The link-resolution source (T-M3-07), resolved from the session.
+  LinkSource? _linkSource;
+
+  /// A heading anchor to land on after the next note opens (T-M3-07).
+  String? _pendingAnchor;
+
+  Future<void> _loadLinkSource() async {
+    final source = await widget.controller.linkSource;
+    if (mounted && source != null) setState(() => _linkSource = source);
+  }
+
+  /// Opens a note reached through a link (T-M3-07): selects it, remembers
+  /// the heading anchor, and clears pending anchors for direct selections.
+  void _openNoteFromLink(String path, String? anchor) {
+    setState(() {
+      _selected = path;
+      _selectedIsDir = false;
+      _treeVisible = false;
+      _noteFromTab = _tab;
+      _pendingAnchor = anchor;
+    });
+  }
+
   /// Whether the FAB menu (New note / New folder minis) is expanded;
   /// the shell owns it so the body can be scrimmed while it is open.
   bool _fabExpanded = false;
@@ -184,6 +208,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   void initState() {
     super.initState();
     unawaited(_refreshEditorSettings());
+    unawaited(_loadLinkSource());
   }
 
   @override
@@ -254,6 +279,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
       _selectedIsDir = note.isDir;
       _treeVisible = note.isDir;
       _noteFromTab = _tab;
+      _pendingAnchor = null;
       if (note.isDir) _expanded.add(note.path);
     });
   }
@@ -355,6 +381,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;
+        _pendingAnchor = null;
       });
     });
   }
@@ -375,6 +402,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
       setState(() {
         _selected = row.path;
         _selectedIsDir = true;
+        _pendingAnchor = null;
       });
     });
   }
@@ -580,6 +608,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
                       onSplitFractionChanged: _onSplitFractionChanged,
                       onSplitDragEnd: _onSplitDragEnd,
                       libraryRoot: controller.root,
+                      linkSource: _linkSource,
+                      onOpenNote: _openNoteFromLink,
+                      initialAnchor: _pendingAnchor,
                     ),
                   ),
                 )
@@ -814,6 +845,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
             splitFraction: _splitRatio,
             onSplitFractionChanged: _onSplitFractionChanged,
             onSplitDragEnd: _onSplitDragEnd,
+            linkSource: _linkSource,
+            onOpenNote: _openNoteFromLink,
+            initialAnchor: _pendingAnchor,
           ),
         ),
       ],
@@ -873,6 +907,9 @@ final class _DetailPane extends StatelessWidget {
     required this.splitFraction,
     required this.onSplitFractionChanged,
     required this.onSplitDragEnd,
+    required this.linkSource,
+    required this.onOpenNote,
+    required this.initialAnchor,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -895,6 +932,11 @@ final class _DetailPane extends StatelessWidget {
 
   /// Editor/preview switch state (T-UI-06): the shared app bar owns it.
   final bool showPreview;
+
+  /// Link navigation (T-M3-07).
+  final LinkSource? linkSource;
+  final void Function(String path, String? anchor) onOpenNote;
+  final String? initialAnchor;
 
   @override
   Widget build(BuildContext context) {
@@ -929,6 +971,9 @@ final class _DetailPane extends StatelessWidget {
                 onSplitFractionChanged: onSplitFractionChanged,
                 onSplitDragEnd: onSplitDragEnd,
                 libraryRoot: root,
+                linkSource: linkSource,
+                onOpenNote: onOpenNote,
+                initialAnchor: initialAnchor,
               ),
             ),
     );

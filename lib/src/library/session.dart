@@ -2,6 +2,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
+import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
 
@@ -172,4 +173,8 @@ abstract interface class LibrarySession {
 
   /// The tag data source (tag list with counts, tag→notes).
   Future<TagSource?> get tagSource;
+
+  /// The link-resolution source (wiki targets + markdown hrefs against
+  /// the open index).
+  Future<LinkSource?> get linkSource;
 }

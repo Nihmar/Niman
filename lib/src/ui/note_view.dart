@@ -6,12 +6,17 @@ import 'dart:isolate';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/db/database.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
+import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/library/image_import.dart';
+import 'package:copist/src/links/parser.dart';
+import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/links/slug.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
@@ -20,9 +25,12 @@ import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
@@ -57,6 +65,9 @@ final class NoteView extends StatefulWidget {
     this.readNote,
     this.writeNote,
     this.controller,
+    this.linkSource,
+    this.onOpenNote,
+    this.initialAnchor,
     super.key,
   });
 
@@ -98,7 +109,7 @@ final class NoteView extends StatefulWidget {
   /// [importImageToLibrary]); tests inject a seam (it runs an isolate,
   /// which FakeAsync cannot drive).
   final Future<String> Function(String libraryRoot, String sourcePath)?
-      importImage;
+  importImage;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -109,12 +120,22 @@ final class NoteView extends StatefulWidget {
   /// The editor's controller (a test seam; one is created by default).
   final CodeLineEditingController? controller;
 
+  /// The link-resolution source (wiki targets + markdown hrefs against the
+  /// open index); null (tests without a session) disables link navigation.
+  final LinkSource? linkSource;
+
+  /// Opens a note by library-relative path, then (optionally) jumps to a
+  /// heading; the shell implements it (T-M3-07).
+  final void Function(String path, String? anchor)? onOpenNote;
+
+  /// A heading anchor to land on after the note loads (T-M3-07).
+  final String? initialAnchor;
+
   @override
   State<NoteView> createState() => _NoteViewState();
 }
 
-final class _NoteViewState extends State<NoteView>
-    with WidgetsBindingObserver {
+final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   static const AppLogger _log = AppLogger(name: 'editor');
 
   late final FocusNode _focus;
@@ -235,7 +256,9 @@ final class _NoteViewState extends State<NoteView>
           .whereType<OutlineEntry>()
           .toList();
     });
-  }  Future<void> _write(String path, String content) async {
+  }
+
+  Future<void> _write(String path, String content) async {
     final seam = widget.writeNote;
     if (seam != null) {
       await seam(path, content);
@@ -307,6 +330,8 @@ final class _NoteViewState extends State<NoteView>
       // uses the regular refresh).
       if (stats == null) _refreshStats();
       _refreshPreview();
+      final anchor = widget.initialAnchor;
+      if (anchor != null) _jumpToAnchor(anchor);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -365,22 +390,80 @@ final class _NoteViewState extends State<NoteView>
     setState(() => _previewText = text);
   }
 
-  Widget _buildEditor() => NoteEditor(
-        key: ValueKey(widget.path),
-        controller: _controller,
-        focusNode: _focus,
-        showLineNumbers: widget.showLineNumbers,
-        autofocus: widget.autofocusEditor,
-        scrollController: _scroll,
-      );
+  Widget _buildEditor() => Listener(
+    // Desktop Ctrl+click on a wikilink/MD link (T-M3-07): a mouse
+    // click lands the caret under the pointer through the package's
+    // own tap handling, so the token under the caret is read after
+    // this frame. Touch-like clicks stay edit-only (mobile navigates
+    // from the preview).
+    onPointerDown: (event) {
+      if (event.kind != PointerDeviceKind.mouse) return;
+      if (!HardwareKeyboard.instance.isControlPressed) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_tryOpenLinkAtCaret());
+      });
+    },
+    child: NoteEditor(
+      key: ValueKey(widget.path),
+      controller: _controller,
+      focusNode: _focus,
+      showLineNumbers: widget.showLineNumbers,
+      autofocus: widget.autofocusEditor,
+      scrollController: _scroll,
+    ),
+  );
 
   Widget _buildPreview() => MarkdownPreview(
-        data: _previewText,
-        controller: _previewScroll,
-        scrollMap: _previewMap,
-        mathCache: _mathCache,
-        imageDirectory: widget.libraryRoot,
-      );
+    data: _previewText,
+    controller: _previewScroll,
+    scrollMap: _previewMap,
+    mathCache: _mathCache,
+    imageDirectory: widget.libraryRoot,
+    onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
+    onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
+  );
+
+  /// Schedules the caret-link check for the end of a frame; the caret the
+  /// package's tap handler placed may land one frame after the pointer up,
+  /// so a miss is retried a couple of frames before giving up.
+  void _scheduleCaretCheck([int attempt = 0]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_tryOpenLinkAtCaret(attempt));
+    });
+  }
+
+  /// Editor side of link navigation: the caret sits on a wikilink or MD
+  /// link token (the package placed it under the Ctrl+click); open it.
+  Future<void> _tryOpenLinkAtCaret([int attempt = 0]) async {
+    final selection = _controller.selection;
+    final line = selection.extentIndex;
+    final offset = selection.extentOffset;
+    final tokens = _highlight.tokensOf(line);
+    Token? hit;
+    for (final token in tokens) {
+      if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
+        continue;
+      }
+      if (offset > token.start && offset <= token.end) {
+        hit = token;
+        break;
+      }
+    }
+    final token = hit;
+    if (token == null) {
+      if (attempt < 3) _scheduleCaretCheck(attempt + 1);
+      return;
+    }
+    final text = _controller.codeLines[line].text;
+    final raw = text.substring(token.start, token.end);
+    if (token.kind == TokenKind.wikilink) {
+      await _openWiki(parseWikiRef(raw.substring(2, raw.length - 2)));
+    } else {
+      final close = raw.indexOf(']');
+      final href = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
+      await _openHref(href);
+    }
+  }
 
   /// T-M2-09: pick an image, copy it into the library's `assets/`, insert a
   /// library-relative link at the caret.
@@ -389,8 +472,9 @@ final class _NoteViewState extends State<NoteView>
     if (root == null) return;
     final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
     if (source == null || !mounted) return;
-    final relative = await (widget.importImage?.call(root, source) ??
-        importImageToLibrary(libraryRoot: root, sourcePath: source));
+    final relative =
+        await (widget.importImage?.call(root, source) ??
+            importImageToLibrary(libraryRoot: root, sourcePath: source));
     if (!mounted) return;
     // Alt text comes from the picked file's name; the link itself is the
     // content-addressed library path, so `photo.png` keeps a readable label.
@@ -433,6 +517,7 @@ final class _NoteViewState extends State<NoteView>
             .toList();
       });
     }
+
     // Word count + outline are O(n) pure passes. Notes above the threshold
     // run them on an isolate (a 931K note costs ~400 ms — never on the
     // main thread, that was the 1.2 s open stall); small ones stay
@@ -463,6 +548,10 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// The outline jump: caret to the heading line, then bring it into view.
+  ///
+  /// When the preview is visible (phone switch mode) the editor caret is
+  /// off-screen — the preview is brought to the heading's block as well,
+  /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
     _controller.selection = CodeLineSelection.collapsed(
       index: line,
@@ -470,6 +559,134 @@ final class _NoteViewState extends State<NoteView>
     );
     _scroll.makeCenterIfInvisible(
       CodeLinePosition(index: line, offset: 0),
+    );
+    _syncPreviewToLine(line);
+  }
+
+  /// Scrolls the preview so the block starting at source [line] is in
+  /// view (no-op when the preview is hidden or not laid out yet).
+  void _syncPreviewToLine(int line) {
+    if (!widget.showPreview) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_previewMap.isReady) return;
+      final offset = _previewMap.previewOffsetForLine(
+        line,
+        maxExtent: _previewScroll.position.maxScrollExtent,
+      );
+      if (offset != null) _previewScroll.jumpTo(offset);
+    });
+  }
+
+  /// The preview's link handler (T-M3-07): `.md` relative links navigate
+  /// in-app, http(s) launch the browser, `#anchor` stays local.
+  Future<void> _openHref(String href) async {
+    final source = widget.linkSource;
+    if (source == null) return;
+    final resolved = await source.resolveMarkdown(href);
+    await _applyResolved(resolved);
+  }
+
+  /// The preview's wikilink handler: `[[x]]` targets resolve and open;
+  /// empty-target forms (`[[#h]]`, `[[|a]]`) stay local.
+  Future<void> _openWiki(WikiRef ref) async {
+    final source = widget.linkSource;
+    if (ref.target.isEmpty) {
+      final heading = ref.heading;
+      if (heading == null) return _linkSnack(AppStrings.unresolvedLinkTitle);
+      _jumpToAnchor(heading);
+      return;
+    }
+    if (source == null) return;
+    final resolved = await source.resolveWiki(ref.target);
+    if (resolved is ResolvedNote) {
+      // The parser splits `[[x#H]]` off before the resolver sees it, so
+      // the anchor is carried from the ref.
+      await _openNoteResult(resolved.note, ref.heading ?? resolved.heading);
+      return;
+    }
+    await _applyResolved(resolved);
+  }
+
+  Future<void> _applyResolved(ResolveResult resolved) async {
+    switch (resolved) {
+      case ExternalLink(:final url):
+        try {
+          await launchUrl(Uri.parse(url));
+        } on Object {
+          if (mounted) _linkSnack(AppStrings.openLinkFailed);
+        }
+      case LocalAnchor(:final heading):
+        _jumpToAnchor(heading);
+      case ResolvedNote(:final note, :final heading):
+        await _openNoteResult(note, heading);
+      case AmbiguousNote(:final candidates):
+        await _pickAmbiguous(candidates);
+      case UnresolvedNote():
+        if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+    }
+  }
+
+  /// Opens [note] via the shell (or jumps locally when it is already the
+  /// open note).
+  Future<void> _openNoteResult(Note note, String? anchor) async {
+    final root = widget.libraryRoot;
+    final currentRel = root == null
+        ? null
+        : p.relative(widget.path, from: root);
+    if (currentRel != null && note.path == currentRel) {
+      // Same note: stay and jump (or nothing when there is no anchor).
+      if (anchor != null) _jumpToAnchor(anchor);
+      return;
+    }
+    final open = widget.onOpenNote;
+    if (open == null) {
+      if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+      return;
+    }
+    open(note.path, anchor);
+  }
+
+  /// The minimal ambiguous-link picker (M3 list + select; polish M6).
+  Future<void> _pickAmbiguous(List<Note> candidates) async {
+    if (!mounted) return;
+    final chosen = await showDialog<Note>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text(AppStrings.ambiguousLinkTitle),
+        children: [
+          for (final note in candidates)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, note),
+              child: Text(note.path),
+            ),
+        ],
+      ),
+    );
+    if (chosen != null) await _openNoteResult(chosen, null);
+  }
+
+  /// Jumps to the heading whose slug matches [heading] (the shared slug,
+  /// so `[[x#My Heading]]` and `## My Heading` agree).
+  void _jumpToAnchor(String heading) {
+    final slug = headingSlug(heading);
+    OutlineEntry? entry;
+    for (final e in _outline) {
+      if (headingSlug(e.text) == slug) {
+        entry = e;
+        break;
+      }
+    }
+    if (entry == null) {
+      _linkSnack(AppStrings.headingNotFoundTitle);
+      return;
+    }
+    _jumpToHeading(entry.line);
+  }
+
+  void _linkSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -554,37 +771,37 @@ final class _NoteViewState extends State<NoteView>
         Expanded(
           child: error == null
               ? (!_ready || _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : split
-                      ? EditorPreviewSplit(
-                          editor: _buildEditor(),
-                          preview: _buildPreview(),
-                          editorScroll: _scroll.verticalScroller,
-                          previewScroll: _previewScroll,
-                          map: _previewMap,
-                          fraction: widget.splitFraction,
-                          onFractionChanged: widget.onSplitFractionChanged ??
-                              (_) {},
-                          onDragEnd: widget.onSplitDragEnd,
-                        )
-                      : AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 180),
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(opacity: animation, child: child),
-                          // The outgoing pane leaves immediately: an
-                          // editor and its twin must never coexist.
-                          layoutBuilder: (currentChild, previousChildren) =>
-                              currentChild ?? const SizedBox.shrink(),
-                          child: widget.showPreview
-                              ? KeyedSubtree(
-                                  key: const ValueKey('pane-preview'),
-                                  child: _buildPreview(),
-                                )
-                              : KeyedSubtree(
-                                  key: const ValueKey('pane-editor'),
-                                  child: _buildEditor(),
-                                ),
-                        ))
+                    ? const Center(child: CircularProgressIndicator())
+                    : split
+                    ? EditorPreviewSplit(
+                        editor: _buildEditor(),
+                        preview: _buildPreview(),
+                        editorScroll: _scroll.verticalScroller,
+                        previewScroll: _previewScroll,
+                        map: _previewMap,
+                        fraction: widget.splitFraction,
+                        onFractionChanged:
+                            widget.onSplitFractionChanged ?? (_) {},
+                        onDragEnd: widget.onSplitDragEnd,
+                      )
+                    : AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(opacity: animation, child: child),
+                        // The outgoing pane leaves immediately: an
+                        // editor and its twin must never coexist.
+                        layoutBuilder: (currentChild, previousChildren) =>
+                            currentChild ?? const SizedBox.shrink(),
+                        child: widget.showPreview
+                            ? KeyedSubtree(
+                                key: const ValueKey('pane-preview'),
+                                child: _buildPreview(),
+                              )
+                            : KeyedSubtree(
+                                key: const ValueKey('pane-editor'),
+                                child: _buildEditor(),
+                              ),
+                      ))
               : Center(child: Text(error)),
         ),
         // Fade + size the outline panel in and out.
@@ -744,27 +961,33 @@ final class _NoteViewState extends State<NoteView>
   }
 
   void _wrapSelection({required String left, required String right}) {
-    _applyMarkdownEdit(wrapSelection(
-      text: _controller.text,
-      selection: _textSelection(_controller.selection),
-      left: left,
-      right: right,
-    ));
+    _applyMarkdownEdit(
+      wrapSelection(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        left: left,
+        right: right,
+      ),
+    );
   }
 
   void _insertCodeBlock() {
-    _applyMarkdownEdit(codeBlock(
-      text: _controller.text,
-      selection: _textSelection(_controller.selection),
-    ));
+    _applyMarkdownEdit(
+      codeBlock(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+      ),
+    );
   }
 
   void _prefixLines({required String prefix}) {
-    _applyMarkdownEdit(prefixLines(
-      text: _controller.text,
-      selection: _textSelection(_controller.selection),
-      prefix: prefix,
-    ));
+    _applyMarkdownEdit(
+      prefixLines(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        prefix: prefix,
+      ),
+    );
   }
 
   /// Converts re_editor's line+offset selection to whole-text offsets
@@ -772,8 +995,10 @@ final class _NoteViewState extends State<NoteView>
   TextSelection _textSelection(CodeLineSelection selection) {
     return TextSelection(
       baseOffset: _globalOffset(selection.baseIndex, selection.baseOffset),
-      extentOffset:
-          _globalOffset(selection.extentIndex, selection.extentOffset),
+      extentOffset: _globalOffset(
+        selection.extentIndex,
+        selection.extentOffset,
+      ),
     );
   }
 
@@ -787,6 +1012,4 @@ final class _NoteViewState extends State<NoteView>
     }
     return index + offset;
   }
-
-
 }

@@ -66,6 +66,12 @@ final class EditorHighlightSync {
     _spans.removeWhere((index, _) => index >= first);
   }
 
+  /// The tokens of buffer line [index] (T-M3-07: the editor Ctrl+click
+  /// looks the caret's token range up here). Materializes the line if the
+  /// viewport has not asked for it yet.
+  List<Token> tokensOf(int index) =>
+      index < _doc.lineCount ? _doc.lineAt(index).tokens : const <Token>[];
+
   /// The styled span for buffer line [index] (the [CodeLineSpanBuilder]
   /// implementation): [text] is the line's text, [base] the editor's base
   /// style, [dark] the palette selection, [accent] the theme's primary
@@ -109,10 +115,9 @@ final class EditorHighlightSync {
     final oldSegments = old.segments;
     final currentSegments = current.segments;
     var offset = 0;
-    final pairs =
-        oldSegments.length < currentSegments.length
-            ? oldSegments.length
-            : currentSegments.length;
+    final pairs = oldSegments.length < currentSegments.length
+        ? oldSegments.length
+        : currentSegments.length;
     for (var s = 0; s < pairs; s++) {
       final oldLines = oldSegments[s].codeLines;
       final currentLines = currentSegments[s].codeLines;
@@ -152,10 +157,9 @@ final class EditorHighlightSync {
   static int _commonSuffix(CodeLines old, CodeLines current, int first) {
     var suffix = 0;
     var p = 0;
-    final pairs =
-        old.segments.length < current.segments.length
-            ? old.segments.length
-            : current.segments.length;
+    final pairs = old.segments.length < current.segments.length
+        ? old.segments.length
+        : current.segments.length;
     while (p < pairs) {
       final oldLines = old.segments[old.segments.length - 1 - p].codeLines;
       final currentLines =
@@ -178,15 +182,15 @@ final class EditorHighlightSync {
       suffix += k;
       break;
     }
-    final maxSuffix =
-        (old.length - first) < (current.length - first)
-            ? old.length - first
-            : current.length - first;
+    final maxSuffix = (old.length - first) < (current.length - first)
+        ? old.length - first
+        : current.length - first;
     return suffix > maxSuffix ? maxSuffix : suffix;
   }
 
-  static List<String> _texts(CodeLines lines) =>
-      <String>[for (var i = 0; i < lines.length; i++) lines[i].text];
+  static List<String> _texts(CodeLines lines) => <String>[
+    for (var i = 0; i < lines.length; i++) lines[i].text,
+  ];
 
   /// Splits one line into non-overlapping styled spans: every maximal run
   /// between token boundaries gets the covering token's style; the unmarked

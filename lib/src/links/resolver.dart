@@ -77,31 +77,31 @@ final class ExternalLink extends ResolveResult {
 }
 
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
-/// the note index.
-///
-/// Not a DAO and not stateful: callers create one per use.
-final class LinkResolver {
+/// the note index — the source the UI talks to; [LinkResolver] is the
+/// production implementation over drift, widget tests inject a fake.
+abstract interface class LinkSource {
+  /// Resolves a wiki target (the `[[…]]` content without brackets, e.g.
+  /// `note`, `folder/note`, `note.md`).
+  Future<ResolveResult> resolveWiki(String target);
+
+  /// Resolves a markdown `[text](href)`.
+  Future<ResolveResult> resolveMarkdown(String href);
+}
+
+/// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
+/// the note index. Not a DAO and not stateful: callers create one per use.
+final class LinkResolver implements LinkSource {
   /// Creates a resolver over the drift [CopistDatabase].
   LinkResolver(this._db);
 
   final CopistDatabase _db;
 
-  /// Resolves a wiki target (the `[[…]]` content without brackets, e.g.
-  /// `note`, `folder/note`, `note.md`).
-  ///
-  /// `[[wiki#heading]]` arrives here with the heading already split off by
-  /// the parser; empty-target forms (`[[#heading]]`, `[[|alias]]`) never
-  /// reach the resolver — they mean "the current note" and stay local.
+  @override
   Future<ResolveResult> resolveWiki(String target) {
     return _resolvePath(target);
   }
 
-  /// Resolves a markdown `[text](href)`.
-  ///
-  /// http(s) and other schemes → [ExternalLink]; `#anchor` →
-  /// [LocalAnchor] (the current note); a relative `.md` path (optionally
-  /// with `#Heading`) resolves like a wiki target; anything else (assets,
-  /// non-md files) → [UnresolvedNote].
+  @override
   Future<ResolveResult> resolveMarkdown(String href) {
     final h = href.trim();
     if (h.isEmpty) return Future.value(UnresolvedNote(target: href));

@@ -64,4 +64,11 @@ final class AppStrings {
       'No tags yet — add a #tag or frontmatter tags';
   static const String tagsBackTooltip = 'Back to search';
   static const String tagsNotesEmpty = 'No notes with this tag';
+
+  // Link navigation (T-M3-07).
+  static const String unresolvedLinkTitle = 'Link not found';
+  static const String headingNotFoundTitle = 'Heading not found';
+  static const String ambiguousLinkTitle = 'Several notes match';
+  static const String openLinkFailed = 'Could not open link';
+  static const String chooseNote = 'Choose a note';
 }

@@ -9,6 +9,7 @@ import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/native.dart';
@@ -142,6 +143,12 @@ final class LibraryController implements LibrarySession {
   Future<TagSource?> get tagSource async {
     final db = await database;
     return TagRepo(db);
+  }
+
+  @override
+  Future<LinkSource?> get linkSource async {
+    final db = await database;
+    return LinkResolver(db);
   }
 
   /// Resumes the last opened library (if it still exists). Best effort:
