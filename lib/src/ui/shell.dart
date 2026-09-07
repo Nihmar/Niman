@@ -14,6 +14,7 @@ import 'package:copist/src/ui/quick_note_tab.dart';
 import 'package:copist/src/ui/search_tab.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -150,6 +151,25 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Marks the main FAB so [FabScrim]'s reveal circle is centered on its
   /// icon (the shell owns it: the FAB slot and the scrim are siblings).
   final GlobalKey _fabAnchorKey = GlobalKey();
+
+  /// Editor/preview switch for the non-split layouts (T-UI-06): the eye
+  /// action lives in the shared app bar, so the shell owns the state.
+  bool _previewVisible = false;
+
+  void _togglePreview() => setState(() => _previewVisible = !_previewVisible);
+
+  /// The app-bar eye action: flips the editor/preview pane (phone
+  /// full-screen note and the wide switch override).
+  Widget _previewToggleAction() {
+    return IconButton(
+      key: const Key('editor-preview-toggle'),
+      tooltip: _previewVisible
+          ? AppStrings.showEditorTooltip
+          : AppStrings.showPreviewTooltip,
+      icon: Icon(_previewVisible ? Icons.edit : Icons.visibility),
+      onPressed: _togglePreview,
+    );
+  }
 
   /// Below this width the shell is single-pane (spec: phones are
   /// full-screen tree or editor, the split lands at 600 px and up).
@@ -515,12 +535,16 @@ final class _LibraryShellState extends State<_LibraryShell> {
             appBar: AppBar(
               leading: BackButton(onPressed: _closeFullScreenNote),
               title: Text(p.basename(selectedPath)),
+              actions: [
+                if (!_effectiveSplit(narrow: true)) _previewToggleAction(),
+              ],
             ),
             body: NoteView(
               path: p.join(controller.root ?? '', selectedPath),
               showLineNumbers: _lineNumbers,
               autofocusEditor: _autofocusEditor,
               splitPreview: _effectiveSplit(narrow: true),
+              showPreview: _previewVisible,
               splitFraction: _splitRatio,
               onSplitFractionChanged: _onSplitFractionChanged,
               onSplitDragEnd: _onSplitDragEnd,
@@ -545,6 +569,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
       appBar: AppBar(
         title: const Text('Copist'),
         actions: [
+          if (_selected != null &&
+              !_selectedIsDir &&
+              !_effectiveSplit(narrow: false))
+            _previewToggleAction(),
           IconButton(
             key: const Key('open-trash'),
             tooltip: 'Trash',
@@ -741,6 +769,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
             showLineNumbers: _lineNumbers,
             autofocusEditor: _autofocusEditor,
             splitPreview: _effectiveSplit(narrow: false),
+            showPreview: _previewVisible,
             splitFraction: _splitRatio,
             onSplitFractionChanged: _onSplitFractionChanged,
             onSplitDragEnd: _onSplitDragEnd,
@@ -786,6 +815,7 @@ final class _DetailPane extends StatelessWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     required this.splitPreview,
+    required this.showPreview,
     required this.splitFraction,
     required this.onSplitFractionChanged,
     required this.onSplitDragEnd,
@@ -809,6 +839,9 @@ final class _DetailPane extends StatelessWidget {
   final ValueChanged<double> onSplitFractionChanged;
   final VoidCallback onSplitDragEnd;
 
+  /// Editor/preview switch state (T-UI-06): the shared app bar owns it.
+  final bool showPreview;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -821,6 +854,7 @@ final class _DetailPane extends StatelessWidget {
       showLineNumbers: showLineNumbers,
       autofocusEditor: autofocusEditor,
       splitPreview: splitPreview,
+      showPreview: showPreview,
       splitFraction: splitFraction,
       onSplitFractionChanged: onSplitFractionChanged,
       onSplitDragEnd: onSplitDragEnd,

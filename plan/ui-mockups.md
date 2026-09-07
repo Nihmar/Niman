@@ -85,9 +85,12 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   *AC: all five actions + the quick-note item reachable — widget tested
   (`tab_bar_test` FAB/menu test, `library_flow_test` reworked to
   FAB/menu).*
-- [ ] **T-UI-06** Editor app bar: eye/`edit` toggle becomes an app-bar action
+- [x] **T-UI-06** Editor app bar: eye/`edit` toggle becomes an app-bar action
   (mockup: single icon, top right); delete `_paneSwitchBar` (works for the
-  wide-screen switch override too, since the app bar is shared).
+  wide-screen switch override too, since the app bar is shared). *AC: the
+  shell owns `_previewVisible`; the phone note app bar and the wide app bar
+  show one `editor-preview-toggle` action when the effective layout is not
+  split — widget tested (`layout_modes_test`).*
 - [ ] **T-UI-07** Editor status row: `N words` left, `saved`/`unsaved` right.
   Insert-image moves to the toolbar (T-UI-08); the outline toggle stays in
   this row (confirmed).

@@ -45,6 +45,7 @@ final class NoteView extends StatefulWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     this.splitPreview = false,
+    this.showPreview = false,
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
@@ -68,6 +69,10 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the preview sits side by side (split) or behind a switch.
   final bool splitPreview;
+
+  /// Preview visibility (T-UI-06): the shared app bar owns the switch
+  /// and passes the state down; NoteView just follows it.
+  final bool showPreview;
 
   /// The editor's share of the split (0..1).
   final double splitFraction;
@@ -157,7 +162,6 @@ final class _NoteViewState extends State<NoteView>
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
-  bool _showPreview = false;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
@@ -544,7 +548,6 @@ final class _NoteViewState extends State<NoteView>
     final split = widget.splitPreview;
     return Column(
       children: [
-        if (!split) _paneSwitchBar(context),
         Expanded(
           child: error == null
               ? (!_ready || _loading
@@ -561,7 +564,9 @@ final class _NoteViewState extends State<NoteView>
                               (_) {},
                           onDragEnd: widget.onSplitDragEnd,
                         )
-                      : (_showPreview ? _buildPreview() : _buildEditor()))
+                      : (widget.showPreview
+                          ? _buildPreview()
+                          : _buildEditor()))
               : Center(child: Text(error)),
         ),
         if (_showOutline && _outline.isNotEmpty)
@@ -621,23 +626,4 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// The top switch bar (phone mode): one button flips editor ↔ preview.
-  Widget _paneSwitchBar(BuildContext context) {
-    return SizedBox(
-      height: 34,
-      child: IconButton(
-        key: const Key('preview-switch'),
-        tooltip: _showPreview
-            ? AppStrings.showEditorTooltip
-            : AppStrings.showPreviewTooltip,
-        iconSize: 18,
-        visualDensity: VisualDensity.compact,
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          _showPreview ? Icons.edit : Icons.visibility,
-        ),
-        onPressed: () => setState(() => _showPreview = !_showPreview),
-      ),
-    );
-  }
 }
