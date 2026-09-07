@@ -3,6 +3,7 @@
 // switch, tap-to-edit and long-press delete, all against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
 import 'package:copist/src/todo/todo_controller.dart';
+import 'package:copist/src/ui/tag_color.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
@@ -52,16 +53,29 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
-  /// Scrolls the horizontal chip bar until [target] shows.
-  Future<void> scrollChips(WidgetTester tester, Finder target) {
-    return tester.scrollUntilVisible(
-      target,
-      200,
-      scrollable: find.descendant(
-        of: find.byKey(const Key('todo-filter-scroll')),
-        matching: find.byType(Scrollable),
-      ),
-    );
+  /// Opens the due-range dropdown and selects [keySuffix]
+  /// (a `TodoDueRange` name: `all`, `overdue`, `today`, …).
+  /// Opens the due-range dropdown, lets the menu entrance settle, then
+  /// selects [keySuffix] (a `TodoDueRange` name: `all`, `overdue`, …).
+  /// The extra settle is needed because the popup menu is scrollable and
+  /// lays out its items a frame after it opens.
+  Future<void> selectDue(WidgetTester tester, String keySuffix) async {
+    await tester.tap(find.byKey(const Key('todo-due-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(Key('todo-due-$keySuffix')));
+    await tester.pump();
+  }
+
+  /// Opens the token/sort sheet, letting the slide-up entrance settle.
+  Future<void> openSheet(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('todo-filter-button')));
+    await settle(tester);
+  }
+
+  /// Dismisses the sheet: the modal barrier closes it on tap.
+  Future<void> closeSheet(WidgetTester tester) async {
+    await tester.tapAt(const Offset(400, 30));
+    await settle(tester);
   }
 
   /// Whether [texts] render top to bottom in order.
@@ -77,26 +91,34 @@ void main() {
     return true;
   }
 
-  testWidgets('open rows show badges, chips and the due date', (
+  testWidgets('rows show the display text, the due line and the tag accent', (
     tester,
   ) async {
     await pumpTab(
       tester,
       todo: [
-        '(A) 2026-01-02 file taxes +finance @home due:2026-09-07 #bills',
+        'file taxes +finance due:2026-09-01 #bills',
+        "chiamare l'idraulico due:2026-09-07 rem:2026-09-07T09:00",
+        'renew the passaporto due:2026-10-02',
+        'remind me rem:2026-10-02T08:30',
         'plain task',
       ],
     );
-    expect(
-      find.text('file taxes +finance @home due:2026-09-07 #bills'),
-      findsOneWidget,
-    );
-    expect(find.text('(A)'), findsOneWidget);
-    expect(find.text('+finance'), findsOneWidget);
-    expect(find.text('@home'), findsOneWidget);
-    expect(find.text('#bills'), findsOneWidget);
-    expect(find.text('2026-09-07'), findsOneWidget);
+    // Titles strip tokens (the mockup's clean rows)...
+    expect(find.text('file taxes'), findsOneWidget);
     expect(find.text('plain task'), findsOneWidget);
+    // ...and carry a one-line due subtitle.
+    expect(find.text('Overdue · 1 Sep'), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.text('09:00'), findsOneWidget);
+    // The reminder-only row borrows the reminder date (2 Oct too).
+    expect(find.text('2 Oct'), findsNWidgets(2));
+    expect(find.text('08:30'), findsOneWidget);
+    expect(find.byIcon(Icons.access_time), findsNWidgets(2));
+    // The tagged row gets the left accent bar in the tag's color.
+    final accent =
+        tester.widget<ColoredBox>(find.byKey(const Key('todo-accent')));
+    expect(accent.color, tagColorFor('bills'));
   });
 
   testWidgets("checking moves the row to Done with today's date", (
@@ -166,7 +188,7 @@ void main() {
     expect(find.text('Nothing completed yet'), findsOneWidget);
   });
 
-  testWidgets('due chips narrow the list', (tester) async {
+  testWidgets('the due dropdown narrows the list', (tester) async {
     await pumpTab(
       tester,
       todo: [
@@ -177,58 +199,50 @@ void main() {
         'undated',
       ],
     );
-    // Default sort is due-soonest; the full list shows in order.
+    // Default sort is due-soonest; the full list shows in order (the
+    // display titles strip the due: tokens).
     expect(
-      order(tester, [
-        'overdue due:2026-09-01',
-        'today due:2026-09-07',
-        'soon due:2026-09-10',
-        'later due:2026-10-01',
-        'undated',
-      ]),
+      order(tester, ['overdue', 'today', 'soon', 'later', 'undated']),
       isTrue,
     );
-    await tester.tap(find.text('Overdue'));
-    await tester.pump();
-    expect(find.text('overdue due:2026-09-01'), findsOneWidget);
-    expect(find.text('today due:2026-09-07'), findsNothing);
-    await tester.tap(find.text('Today'));
-    await tester.pump();
-    expect(find.text('today due:2026-09-07'), findsOneWidget);
-    expect(find.text('soon due:2026-09-10'), findsNothing);
-    await tester.tap(find.text('Next 7 days'));
-    await tester.pump();
-    expect(find.text('today due:2026-09-07'), findsOneWidget);
-    expect(find.text('soon due:2026-09-10'), findsOneWidget);
-    expect(find.text('later due:2026-10-01'), findsNothing);
-    await tester.tap(find.text('No date'));
-    await tester.pump();
+    await selectDue(tester, 'overdue');
+    expect(find.text('overdue'), findsOneWidget);
+    expect(find.text('today'), findsNothing);
+    await selectDue(tester, 'today');
+    expect(find.text('today'), findsOneWidget);
+    expect(find.text('soon'), findsNothing);
+    await selectDue(tester, 'next7');
+    expect(find.text('today'), findsOneWidget);
+    expect(find.text('soon'), findsOneWidget);
+    expect(find.text('later'), findsNothing);
+    await selectDue(tester, 'noDate');
     expect(find.text('undated'), findsOneWidget);
-    expect(find.text('overdue due:2026-09-01'), findsNothing);
-    await tester.tap(find.text('All'));
-    await tester.pump();
+    expect(find.text('overdue'), findsNothing);
+    await selectDue(tester, 'all');
     expect(find.text('undated'), findsOneWidget);
-    expect(find.text('overdue due:2026-09-01'), findsOneWidget);
+    expect(find.text('overdue'), findsOneWidget);
   });
 
-  testWidgets('token chips show counts and AND together', (tester) async {
+  testWidgets('the sheet token chips show counts and AND together', (
+    tester,
+  ) async {
     await pumpTab(
       tester,
       todo: ['a +p +q', 'b +p', 'c'],
     );
+    expect(find.byKey(const Key('todo-filter-button')), findsOneWidget);
+    await openSheet(tester);
     expect(find.text('+p (2)'), findsOneWidget);
     expect(find.text('+q (1)'), findsOneWidget);
-    await scrollChips(tester, find.byKey(const Key('todo-token-+p')));
     await tester.tap(find.byKey(const Key('todo-token-+p')));
     await tester.pump();
-    expect(find.text('a +p +q'), findsOneWidget);
-    expect(find.text('b +p'), findsOneWidget);
+    expect(find.text('a'), findsOneWidget);
+    expect(find.text('b'), findsOneWidget);
     expect(find.text('c'), findsNothing);
-    await scrollChips(tester, find.byKey(const Key('todo-token-+q')));
     await tester.tap(find.byKey(const Key('todo-token-+q')));
     await tester.pump();
-    expect(find.text('a +p +q'), findsOneWidget);
-    expect(find.text('b +p'), findsNothing);
+    expect(find.text('a'), findsOneWidget);
+    expect(find.text('b'), findsNothing);
   });
 
   testWidgets('a combo that matches nothing shows the filtered empty', (
@@ -238,39 +252,36 @@ void main() {
       tester,
       todo: ['a +p due:2026-09-01', 'b +q due:2026-10-01'],
     );
-    await scrollChips(tester, find.byKey(const Key('todo-token-+q')));
+    await openSheet(tester);
     await tester.tap(find.byKey(const Key('todo-token-+q')));
     await tester.pump();
-    await scrollChips(tester, find.text('Overdue'));
-    await tester.tap(find.text('Overdue'));
-    await tester.pump();
+    await closeSheet(tester);
+    await selectDue(tester, 'overdue');
     expect(find.text('No tasks match'), findsOneWidget);
   });
 
-  testWidgets('the sort control reorders the list', (tester) async {
+  testWidgets('the sheet sort chips reorder the list', (tester) async {
     await pumpTab(
       tester,
       todo: ['(B) bee due:2026-09-01', '(A) aye due:2026-09-10', 'plain'],
     );
-    expect(
-      order(tester, ['bee due:2026-09-01', 'aye due:2026-09-10', 'plain']),
-      isTrue,
-    );
-    await tester.tap(find.byKey(const Key('todo-sort-button')));
-    await settle(tester);
+    // The display titles strip the priorities and due tokens.
+    expect(order(tester, ['bee', 'aye', 'plain']), isTrue);
+    await openSheet(tester);
     await tester.tap(find.byKey(const Key('todo-sort-priority')));
-    await settle(tester);
-    expect(
-      order(tester, ['aye due:2026-09-10', 'bee due:2026-09-01', 'plain']),
-      isTrue,
-    );
+    await tester.pump();
+    expect(order(tester, ['aye', 'bee', 'plain']), isTrue);
     // Sorting is display-only: the file order never moves.
     expect(source.todoLines.first, '(B) bee due:2026-09-01');
   });
 
-  testWidgets('a task with a reminder shows the alarm icon', (tester) async {
+  testWidgets('a reminder shows as clock + time in the subtitle', (
+    tester,
+  ) async {
     await pumpTab(tester, todo: ['call rem:2026-09-08T10:30', 'plain']);
-    expect(find.byIcon(Icons.alarm), findsOneWidget);
+    expect(find.text('10:30'), findsOneWidget);
+    expect(find.byIcon(Icons.access_time), findsOneWidget);
+    expect(find.byIcon(Icons.alarm), findsNothing);
   });
 
   testWidgets('due picker writes due: on save', (tester) async {
@@ -320,7 +331,7 @@ void main() {
 
   testWidgets('token completion offers known tokens', (tester) async {
     await pumpTab(tester, todo: ['buy milk +groceries']);
-    await tester.tap(find.text('buy milk +groceries'));
+    await tester.tap(find.text('buy milk'));
     await settle(tester);
     await tester.enterText(
       find.byKey(const Key('todo-dialog-field')),
@@ -339,7 +350,7 @@ void main() {
   ) async {
     const line = 'water plants rec:+1d foo:bar +p due:2026-09-01';
     await pumpTab(tester, todo: [line]);
-    await tester.tap(find.text(line));
+    await tester.tap(find.text('water plants'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('todo-dialog-save')));
     await settle(tester);
@@ -388,7 +399,7 @@ void main() {
     tester,
   ) async {
     await pumpTab(tester, todo: ['buy milk +groceries @home']);
-    await tester.tap(find.text('buy milk +groceries @home'));
+    await tester.tap(find.text('buy milk'));
     await settle(tester);
     expect(
       find.byKey(const Key('todo-token-chip-+groceries')),

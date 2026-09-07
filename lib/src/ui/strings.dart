@@ -101,6 +101,15 @@ final class AppStrings {
   // Task lists (T-TD-04).
   static const String todoOpen = 'Open';
   static const String todoDone = 'Done';
+
+  // Filter row + sheet (plan/todo-mockup.md T-TDM-03).
+  static const String todoAllDates = 'All dates';
+  static const String todoFilter = 'Filter';
+  static const String todoNoTokens = 'No tokens in this list';
+
+  // The "N open" / "N done" count (T-TDM-03).
+  static const String todoCountOpen = 'open';
+  static const String todoCountDone = 'done';
   static const String todoEmptyOpen = 'No open tasks yet';
   static const String todoEmptyDone = 'Nothing completed yet';
   static const String todoEmptyFiltered = 'No tasks match';
@@ -179,7 +188,6 @@ final class AppStrings {
   static const String todoHasReminder = 'Has reminder';
 
   // Task filters (T-TD-05).
-  static const String todoDueAll = 'All';
   static const String todoDueOverdue = 'Overdue';
   static const String todoDueToday = 'Today';
   static const String todoDueNext7 = 'Next 7 days';

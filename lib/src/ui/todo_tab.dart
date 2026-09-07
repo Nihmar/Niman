@@ -19,6 +19,7 @@ import 'package:copist/src/ui/reminder_health_banner.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_filter_bar.dart';
+import 'package:copist/src/ui/todo_filter_sheet.dart';
 import 'package:copist/src/ui/todo_row.dart';
 import 'package:flutter/material.dart';
 
@@ -148,31 +149,18 @@ final class _TodoTabState extends State<TodoTab> {
       for (final entry in (_showDone ? snapshot.done : snapshot.todo))
         if (entry.task.raw.trim().isNotEmpty) entry,
     ];
-    final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
     final visible = applyTodoFilter(fileEntries, _filter, _today);
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: TodoFilterBar(
-            filter: _filter,
-            counts: counts,
-            onDueRange: (range) {
-              _log.debug('todo filter due: ${range.name}');
-              setState(() => _filter = _filter.copyWith(dueRange: range));
-            },
-            onToggleToken: (token) {
-              final tokens = {..._filter.tokens};
-              if (!tokens.remove(token)) {
-                tokens.add(token);
-              }
-              _log.debug('todo filter tokens: $tokens');
-              setState(() => _filter = _filter.copyWith(tokens: tokens));
-            },
-            onSort: (sort) {
-              setState(() => _filter = _filter.copyWith(sort: sort));
-            },
-          ),
+        TodoFilterBar(
+          filter: _filter,
+          showDone: _showDone,
+          count: fileEntries.length,
+          onDueRange: (range) {
+            _log.debug('todo filter due: ${range.name}');
+            setState(() => _filter = _filter.copyWith(dueRange: range));
+          },
+          onOpenFilter: () => _openFilterSheet(fileEntries),
         ),
         Expanded(
           child: visible.isEmpty
@@ -198,6 +186,29 @@ final class _TodoTabState extends State<TodoTab> {
         ),
       ],
     );
+  }
+
+  /// Opens the token + sort sheet (T-TDM-03) over the visible file.
+  void _openFilterSheet(List<TodoEntry> fileEntries) {
+    final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
+    unawaited(showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => TodoFilterSheet(
+        filter: _filter,
+        counts: counts,
+        onToggleToken: (token) {
+          final tokens = {..._filter.tokens};
+          if (!tokens.remove(token)) {
+            tokens.add(token);
+          }
+          _log.debug('todo filter tokens: $tokens');
+          setState(() => _filter = _filter.copyWith(tokens: tokens));
+        },
+        onSort: (sort) {
+          setState(() => _filter = _filter.copyWith(sort: sort));
+        },
+      ),
+    ));
   }
 
   /// The empty state: the file's own when it holds nothing, the filtered

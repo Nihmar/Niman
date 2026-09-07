@@ -1,5 +1,6 @@
-/// One todo row: checkbox, description, badges and token chips
-/// (plan/todo-tab.md T-TD-04).
+/// One todo row (plan/todo-mockup.md T-TDM-02): a checkbox, the
+/// task's display text, a one-line due/reminder subtitle and — when
+/// the task carries a `#tag` — a left accent bar in the tag's color.
 ///
 /// Dumb by design: the parent owns the controller, the edit dialog and
 /// the long-press menu — the row only reports toggle, edit and menu
@@ -10,9 +11,10 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/parser.dart';
 import 'package:copist/src/todo/todo_store.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/tag_color.dart';
 import 'package:flutter/material.dart';
 
-/// The due-date state driving the badge styling (overdue and today
+/// The due-date state driving the subtitle styling (overdue and today
 /// stand out; upcoming is plain).
 enum TodoDueState {
   /// The due date is before today.
@@ -25,7 +27,7 @@ enum TodoDueState {
   upcoming,
 }
 
-/// The badge state of [due] relative to [today] (null when no due date).
+/// The due state of [due] relative to [today] (null when no due date).
 TodoDueState? todoDueState(DateTime? due, DateTime today) {
   if (due == null) {
     return null;
@@ -42,10 +44,10 @@ TodoDueState? todoDueState(DateTime? due, DateTime today) {
 final class TodoRow extends StatelessWidget {
   /// Creates a row for [entry].
   ///
-  /// [today] is the wall-clock day for the due badge (injected in
-  /// widget tests; defaults to now). [onToggle] flips the checkbox,
-  /// [onEdit] opens the edit dialog, [onShowMenu] opens the long-press
-  /// bottom sheet.
+  /// [today] is the wall-clock day for the due state and the short date
+  /// (injected in widget tests; defaults to now). [onToggle] flips the
+  /// checkbox, [onEdit] opens the edit dialog, [onShowMenu] opens the
+  /// long-press bottom sheet.
   const TodoRow({
     required this.entry,
     required this.onToggle,
@@ -67,7 +69,7 @@ final class TodoRow extends StatelessWidget {
   /// Opens the long-press bottom sheet.
   final VoidCallback onShowMenu;
 
-  /// The wall-clock day for the due badge (defaults to now).
+  /// The wall-clock day for the due state (defaults to now).
   final DateTime? today;
 
   static const AppLogger _log = AppLogger(name: 'todo');
@@ -75,9 +77,9 @@ final class TodoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final task = entry.task;
-    final theme = Theme.of(context);
     final now = today ?? DateTime.now();
-    return ListTile(
+    final display = taskDisplayText(task.description);
+    final row = ListTile(
       leading: Checkbox(
         value: task.completed,
         onChanged: (value) {
@@ -88,12 +90,12 @@ final class TodoRow extends StatelessWidget {
         },
       ),
       title: Text(
-        task.description.isEmpty ? task.raw : task.description,
+        display.isEmpty ? task.raw : display,
         style: task.completed
             ? const TextStyle(decoration: TextDecoration.lineThrough)
             : null,
       ),
-      subtitle: _Badges(task: task, today: now, theme: theme),
+      subtitle: _DueLine(task: task, today: now),
       onTap: () {
         _log.debug('todo row tap (edit): line ${entry.lineIndex}');
         onEdit();
@@ -103,72 +105,92 @@ final class TodoRow extends StatelessWidget {
         onShowMenu();
       },
     );
+    final accent = task.hashtags.isEmpty
+        ? null
+        : tagColorFor(task.hashtags.first);
+    if (accent == null) {
+      return row;
+    }
+    // The mockup's left accent bar: 3 dp, full row height, the color of
+    // the first `#tag`. IntrinsicHeight bounds the stretch against the
+    // list view's unbounded height.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 3,
+            child: ColoredBox(key: const Key('todo-accent'), color: accent),
+          ),
+          Expanded(child: row),
+        ],
+      ),
+    );
   }
 }
 
-/// Priority badge, due badge, token chips and the reminder icon.
-final class _Badges extends StatelessWidget {
-  const _Badges({
-    required this.task,
-    required this.today,
-    required this.theme,
-  });
+/// The one-line subtitle (T-TDM-02): the due state + short date, then —
+/// when the task has a reminder — the clock icon and its time (the
+/// clock + time is the reminder marker; the old alarm icon is gone).
+final class _DueLine extends StatelessWidget {
+  const _DueLine({required this.task, required this.today});
 
   final TodoTask task;
   final DateTime today;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     final dueState = todoDueState(task.due, today);
-    final chips = <Widget>[
-      if (task.priority != null) _badge('(${task.priority})', theme),
-      if (dueState != null)
-        _badge(formatTodoDate(task.due!), theme, state: dueState),
-      for (final project in task.projects) _chip('+$project', theme),
-      for (final context in task.contexts) _chip('@$context', theme),
-      for (final tag in task.hashtags) _chip('#$tag', theme),
-      if (task.reminder != null)
-        const Tooltip(
-          message: AppStrings.todoHasReminder,
-          child: Icon(Icons.alarm, size: 16),
-        ),
-    ];
-    if (chips.isEmpty) {
+    final date = task.due ?? task.reminder;
+    final reminder = task.reminder;
+    if (dueState == null && reminder == null) {
       return const SizedBox.shrink();
     }
-    return Wrap(spacing: 4, runSpacing: 4, children: chips);
-  }
-
-  /// A small outlined badge (priority, due date); the due badge takes
-  /// the error/tertiary color when overdue/today.
-  Widget _badge(String text, ThemeData theme, {TodoDueState? state}) {
-    final color = switch (state) {
-      TodoDueState.overdue => theme.colorScheme.error,
-      TodoDueState.today => theme.colorScheme.tertiary,
-      _ => theme.colorScheme.outline,
+    final scheme = Theme.of(context).colorScheme;
+    final color = switch (dueState) {
+      TodoDueState.overdue => scheme.error,
+      TodoDueState.today => scheme.tertiary,
+      _ => scheme.onSurfaceVariant,
     };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.labelSmall?.copyWith(color: color),
-      ),
+    final label = switch (dueState) {
+      TodoDueState.overdue => task.due == null
+          ? AppStrings.todoDueOverdue
+          : '${AppStrings.todoDueOverdue} · ${_shortDate(task.due!, today)}',
+      TodoDueState.today => AppStrings.todoDueToday,
+      _ => date == null ? null : _shortDate(date, today),
+    };
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: color);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null) Text(label, style: style),
+        if (reminder != null) ...[
+          const SizedBox(width: 6),
+          Icon(Icons.access_time, size: 14, color: color),
+          const SizedBox(width: 2),
+          Text(_timeOf(reminder), style: style),
+        ],
+      ],
     );
   }
+}
 
-  /// A static token chip (filtering them is T-TD-05).
-  Widget _chip(String text, ThemeData theme) {
-    return Chip(
-      label: Text(text),
-      labelStyle: theme.textTheme.labelSmall,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: EdgeInsets.zero,
-    );
-  }
+const List<String> _monthNames = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// The display form of [date] (`7 Sep`), appending the year when it
+/// differs from [today]'s — the row's display formatting (the parser's
+/// `formatTodoDate` stays the machine form).
+String _shortDate(DateTime date, DateTime today) {
+  final base = '${date.day} ${_monthNames[date.month - 1]}';
+  return date.year == today.year ? base : '$base ${date.year}';
+}
+
+/// The `HH:MM` of [stamp] (the reminder time).
+String _timeOf(DateTime stamp) {
+  final h = stamp.hour.toString().padLeft(2, '0');
+  final m = stamp.minute.toString().padLeft(2, '0');
+  return '$h:$m';
 }
