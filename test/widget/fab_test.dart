@@ -115,8 +115,9 @@ void main() {
     await tester.pump();
     await openLibrary(tester);
 
-    // Collapsed: the minis are hidden and ignore taps.
+    // Collapsed: the minis are hidden and ignore taps; no scrim.
     expect(find.byKey(const Key('new-note-fab')), findsOneWidget);
+    expect(find.byKey(const Key('fab-scrim')), findsNothing);
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
     expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
     expect(miniOpacity(tester, const Key('new-folder-action')), 0);
@@ -125,6 +126,7 @@ void main() {
     // Expand: both minis become visible and tappable.
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
+    expect(find.byKey(const Key('fab-scrim')), findsOneWidget);
     expect(miniOpacity(tester, const Key('new-note-action')), 1);
     expect(miniIgnored(tester, const Key('new-note-action')), isFalse);
     expect(miniOpacity(tester, const Key('new-folder-action')), 1);
@@ -140,6 +142,7 @@ void main() {
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('First note.md'), findsOneWidget);
+    expect(find.byKey(const Key('fab-scrim')), findsNothing);
 
     // Expand again; the New folder mini creates a folder.
     await tester.tap(find.byKey(const Key('new-note-fab')));
@@ -172,8 +175,44 @@ void main() {
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
     expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
     expect(miniOpacity(tester, const Key('new-folder-action')), 0);
+    expect(find.byKey(const Key('fab-scrim')), findsNothing);
     expect(find.byType(AlertDialog), findsNothing);
     expect(await controller.ops!.find('New note.md'), isNull);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('tapping the scrim dismisses the menu without a dialog', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester);
+
+    await tester.tap(find.byKey(const Key('new-note-fab')));
+    await settleFabMenu(tester);
+    expect(miniOpacity(tester, const Key('new-note-action')), 1);
+    expect(find.byKey(const Key('fab-scrim')), findsOneWidget);
+
+    // A tap anywhere on the body (the scrim) closes the menu.
+    await tester.tap(find.byKey(const Key('fab-scrim')));
+    await settleFabMenu(tester);
+    expect(find.byKey(const Key('fab-scrim')), findsNothing);
+    expect(miniOpacity(tester, const Key('new-note-action')), 0);
+    expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(await controller.ops!.find('New note.md'), isNull);
+
+    // The main FAB is still usable: expand, then create a note.
+    await tester.tap(find.byKey(const Key('new-note-fab')));
+    await settleFabMenu(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Scrim note');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(noteRow('Scrim note.md'), findsOneWidget);
 
     await controller.close();
     await controller.dispose();

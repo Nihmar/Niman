@@ -2,37 +2,30 @@ import 'package:flutter/material.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals two
 /// mini FABs above it — New note and New folder — instead of opening the
-/// note dialog directly. Tapping the main FAB again (or choosing an
-/// action) collapses the menu.
-final class NewItemFab extends StatefulWidget {
+/// note dialog directly. Controlled by the shell ([expanded]) so it can
+/// cover the body with a tap-to-dismiss scrim while the menu is open;
+/// tapping the main FAB again (or choosing an action) collapses the menu.
+final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   const NewItemFab({
+    required this.expanded,
+    required this.onToggle,
     required this.onNewNote,
     required this.onNewFolder,
     super.key,
   });
+
+  /// Whether the mini FABs are revealed (the shell owns this state).
+  final bool expanded;
+
+  /// Toggles [expanded] (the main FAB's tap).
+  final VoidCallback onToggle;
 
   /// Creates a new note in the FAB target folder.
   final VoidCallback onNewNote;
 
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
-
-  @override
-  State<NewItemFab> createState() => _NewItemFabState();
-}
-
-final class _NewItemFabState extends State<NewItemFab> {
-  bool _open = false;
-
-  void _toggle() => setState(() => _open = !_open);
-
-  /// Collapses the menu, then runs [action] (the dialogs the shell opens
-  /// need the menu closed first).
-  void _run(VoidCallback action) {
-    setState(() => _open = false);
-    action();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,27 +37,27 @@ final class _NewItemFabState extends State<NewItemFab> {
           key: const Key('new-note-action'),
           icon: Icons.note_add_outlined,
           tooltip: 'New note',
-          open: _open,
-          onTap: () => _run(widget.onNewNote),
+          open: expanded,
+          onTap: onNewNote,
         ),
         const SizedBox(height: 12),
         _MiniFab(
           key: const Key('new-folder-action'),
           icon: Icons.create_new_folder_outlined,
           tooltip: 'New folder',
-          open: _open,
-          onTap: () => _run(widget.onNewFolder),
+          open: expanded,
+          onTap: onNewFolder,
         ),
         const SizedBox(height: 12),
         FloatingActionButton(
           key: const Key('new-note-fab'),
-          tooltip: _open ? 'Close' : 'New',
-          onPressed: _toggle,
+          tooltip: expanded ? 'Close' : 'New',
+          onPressed: onToggle,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 150),
             child: Icon(
-              _open ? Icons.close : Icons.add,
-              key: ValueKey(_open),
+              expanded ? Icons.close : Icons.add,
+              key: ValueKey(expanded),
             ),
           ),
         ),

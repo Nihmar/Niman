@@ -117,6 +117,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
     setState(() {
       _tab = tab;
       _treeVisible = true;
+      _fabExpanded = false;
     });
   }
 
@@ -141,6 +142,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
+
+  /// Whether the FAB menu (New note / New folder minis) is expanded;
+  /// the shell owns it so the body can be scrimmed while it is open.
+  bool _fabExpanded = false;
 
   /// Below this width the shell is single-pane (spec: phones are
   /// full-screen tree or editor, the split lands at 600 px and up).
@@ -562,25 +567,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          SizedBox(width: 340, child: _treePane(controller)),
-          const VerticalDivider(width: 1),
-          Expanded(
-            child: _DetailPane(
-              root: controller.root,
-              selectedPath: _selected,
-              selectedIsDir: _selectedIsDir,
-              showLineNumbers: _lineNumbers,
-              autofocusEditor: _autofocusEditor,
-              splitPreview: _effectiveSplit(narrow: false),
-              splitFraction: _splitRatio,
-              onSplitFractionChanged: _onSplitFractionChanged,
-              onSplitDragEnd: _onSplitDragEnd,
-            ),
-          ),
-        ],
-      ),
+      body: _fabExpanded
+          ? _withFabScrim(_wideBody(controller))
+          : _wideBody(controller),
       floatingActionButton: _newItemFab(),
     );
   }
@@ -590,8 +579,39 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// selected folder, root if none (T-UI-05).
   Widget _newItemFab() {
     return NewItemFab(
-      onNewNote: _createNote,
-      onNewFolder: _createFolder,
+      expanded: _fabExpanded,
+      onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
+      onNewNote: () {
+        _closeFab();
+        unawaited(_createNote());
+      },
+      onNewFolder: () {
+        _closeFab();
+        unawaited(_createFolder());
+      },
+    );
+  }
+
+  /// Collapses the expanded FAB menu.
+  void _closeFab() => setState(() => _fabExpanded = false);
+
+  /// Covers [child] with a tap-to-dismiss scrim while the FAB menu is
+  /// expanded: any tap on the body closes the menu (the FABs live in the
+  /// Scaffold's FAB slot, above this layer, so they stay tappable).
+  Widget _withFabScrim(Widget child) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        child,
+        Positioned.fill(
+          child: GestureDetector(
+            key: const Key('fab-scrim'),
+            behavior: HitTestBehavior.opaque,
+            onTap: _closeFab,
+            child: const ColoredBox(color: Colors.black26),
+          ),
+        ),
+      ],
     );
   }
 
@@ -651,7 +671,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: body,
+      body: _fabExpanded ? _withFabScrim(body) : body,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: NavigationBar(
         key: const Key('shell-tabs'),
@@ -705,6 +725,29 @@ final class _LibraryShellState extends State<_LibraryShell> {
     _selectShellTab(tab);
   }
 
+
+  /// The wide-layout body: the tree pane and the split detail pane.
+  Widget _wideBody(LibrarySession controller) {
+    return Row(
+      children: [
+        SizedBox(width: 340, child: _treePane(controller)),
+        const VerticalDivider(width: 1),
+        Expanded(
+          child: _DetailPane(
+            root: controller.root,
+            selectedPath: _selected,
+            selectedIsDir: _selectedIsDir,
+            showLineNumbers: _lineNumbers,
+            autofocusEditor: _autofocusEditor,
+            splitPreview: _effectiveSplit(narrow: false),
+            splitFraction: _splitRatio,
+            onSplitFractionChanged: _onSplitFractionChanged,
+            onSplitDragEnd: _onSplitDragEnd,
+          ),
+        ),
+      ],
+    );
+  }
 
   /// The body of the selected tab.
   Widget _tabBody(LibrarySession controller) {
