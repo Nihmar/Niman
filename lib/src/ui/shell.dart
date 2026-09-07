@@ -526,42 +526,60 @@ final class _LibraryShellState extends State<_LibraryShell> {
     final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
 
     if (narrow) {
-      // Phone: the selected note opens full-screen (from any tab).
-      if (selectedPath != null && !_selectedIsDir && !_treeVisible) {
-        return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) => _closeFullScreenNote(),
-          child: Scaffold(
-            appBar: AppBar(
-              leading: BackButton(onPressed: _closeFullScreenNote),
-              title: Text(p.basename(selectedPath)),
-              actions: [
-                if (!_effectiveSplit(narrow: true)) _previewToggleAction(),
-              ],
-            ),
-            body: NoteView(
-              path: p.join(controller.root ?? '', selectedPath),
-              showLineNumbers: _lineNumbers,
-              autofocusEditor: _autofocusEditor,
-              splitPreview: _effectiveSplit(narrow: true),
-              showPreview: _previewVisible,
-              splitFraction: _splitRatio,
-              onSplitFractionChanged: _onSplitFractionChanged,
-              onSplitDragEnd: _onSplitDragEnd,
-              libraryRoot: controller.root,
-            ),
-          ),
-        );
-      }
-      return _tabShell(
-        title: _tabTitle,
-        actions: _tab == ShellTab.files
-            ? _filesAppBarActions(controller)
-            : const [],
-        floatingActionButton: _tab == ShellTab.files
-            ? _newItemFab()
-            : null,
-        body: _tabBody(controller),
+      // Phone: the selected note opens full-screen (from any tab). A
+      // cross-fade covers the shell -> note swap (back returns with the
+      // same fade).
+      final fullNote =
+          selectedPath != null && !_selectedIsDir && !_treeVisible;
+      return PopScope(
+        canPop: !fullNote,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _closeFullScreenNote();
+        },
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: fullNote
+              ? KeyedSubtree(
+                  key: const ValueKey('full-note'),
+                  child: Scaffold(
+                    appBar: AppBar(
+                      leading: BackButton(onPressed: _closeFullScreenNote),
+                      title: Text(p.basename(selectedPath)),
+                      actions: [
+                        if (!_effectiveSplit(narrow: true))
+                          _previewToggleAction(),
+                      ],
+                    ),
+                    body: NoteView(
+                      path: p.join(controller.root ?? '', selectedPath),
+                      showLineNumbers: _lineNumbers,
+                      autofocusEditor: _autofocusEditor,
+                      splitPreview: _effectiveSplit(narrow: true),
+                      showPreview: _previewVisible,
+                      splitFraction: _splitRatio,
+                      onSplitFractionChanged: _onSplitFractionChanged,
+                      onSplitDragEnd: _onSplitDragEnd,
+                      libraryRoot: controller.root,
+                    ),
+                  ),
+                )
+              : KeyedSubtree(
+                  key: const ValueKey('tab-shell'),
+                  child: _tabShell(
+                    title: _tabTitle,
+                    actions: _tab == ShellTab.files
+                        ? _filesAppBarActions(controller)
+                        : const [],
+                    floatingActionButton: _tab == ShellTab.files
+                        ? _newItemFab()
+                        : null,
+                    body: _tabBody(controller),
+                  ),
+                ),
+        ),
       );
     }
 
@@ -650,7 +668,11 @@ final class _LibraryShellState extends State<_LibraryShell> {
     return IconButton(
       key: const Key('toggle-sort'),
       tooltip: _treeSort == TreeSort.nameAsc ? 'Sort Z-A' : 'Sort A-Z',
-      icon: const Icon(Icons.unfold_more),
+      icon: AnimatedRotation(
+        turns: _treeSort == TreeSort.nameAsc ? 0 : 0.5,
+        duration: const Duration(milliseconds: 180),
+        child: const Icon(Icons.unfold_more),
+      ),
       onPressed: _toggleTreeSort,
     );
   }
@@ -700,7 +722,18 @@ final class _LibraryShellState extends State<_LibraryShell> {
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: _withFabScrim(body),
+      body: _withFabScrim(
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: KeyedSubtree(
+            key: ValueKey('tab-body-${_tab.index}'),
+            child: body,
+          ),
+        ),
+      ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: NavigationBar(
         key: const Key('shell-tabs'),
@@ -846,19 +879,36 @@ final class _DetailPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = selectedPath;
     final root = this.root;
-    if (path == null || selectedIsDir || root == null) {
-      return const Center(child: Text('Select a note'));
-    }
-    return NoteView(
-      path: p.join(root, path),
-      showLineNumbers: showLineNumbers,
-      autofocusEditor: autofocusEditor,
-      splitPreview: splitPreview,
-      showPreview: showPreview,
-      splitFraction: splitFraction,
-      onSplitFractionChanged: onSplitFractionChanged,
-      onSplitDragEnd: onSplitDragEnd,
-      libraryRoot: root,
+    final notePath =
+        path == null || selectedIsDir || root == null ? null : path;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 180),
+      switchInCurve: Curves.easeOutCubic,
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      // The outgoing pane leaves immediately: an editor and its twin must
+      // never coexist (same controller).
+      layoutBuilder: (currentChild, previousChildren) =>
+          currentChild ?? const SizedBox.shrink(),
+      child: notePath == null
+          ? const KeyedSubtree(
+              key: ValueKey('detail-empty'),
+              child: Center(child: Text('Select a note')),
+            )
+          : KeyedSubtree(
+              key: ValueKey('detail-note-$notePath'),
+              child: NoteView(
+                path: p.join(root!, notePath),
+                showLineNumbers: showLineNumbers,
+                autofocusEditor: autofocusEditor,
+                splitPreview: splitPreview,
+                showPreview: showPreview,
+                splitFraction: splitFraction,
+                onSplitFractionChanged: onSplitFractionChanged,
+                onSplitDragEnd: onSplitDragEnd,
+                libraryRoot: root,
+              ),
+            ),
     );
   }
 }

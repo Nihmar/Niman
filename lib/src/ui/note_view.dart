@@ -567,16 +567,49 @@ final class _NoteViewState extends State<NoteView>
                               (_) {},
                           onDragEnd: widget.onSplitDragEnd,
                         )
-                      : (widget.showPreview
-                          ? _buildPreview()
-                          : _buildEditor()))
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(opacity: animation, child: child),
+                          // The outgoing pane leaves immediately: an
+                          // editor and its twin must never coexist.
+                          layoutBuilder: (currentChild, previousChildren) =>
+                              currentChild ?? const SizedBox.shrink(),
+                          child: widget.showPreview
+                              ? KeyedSubtree(
+                                  key: const ValueKey('pane-preview'),
+                                  child: _buildPreview(),
+                                )
+                              : KeyedSubtree(
+                                  key: const ValueKey('pane-editor'),
+                                  child: _buildEditor(),
+                                ),
+                        ))
               : Center(child: Text(error)),
         ),
-        if (_showOutline && _outline.isNotEmpty)
-          OutlinePanel(
-            entries: _outline,
-            onJump: _jumpToHeading,
+        // Fade + size the outline panel in and out.
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.bottomCenter,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _showOutline && _outline.isNotEmpty
+                ? KeyedSubtree(
+                    key: const ValueKey('outline-open'),
+                    child: OutlinePanel(
+                      entries: _outline,
+                      onJump: _jumpToHeading,
+                    ),
+                  )
+                : const SizedBox(
+                    key: ValueKey('outline-closed'),
+                    width: double.infinity,
+                  ),
           ),
+        ),
         SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -695,15 +728,19 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// Applies a pure markdown command's result through the controller: the
-  /// whole text + selection are replaced in one revocable op (undo works).
+  /// Applies a pure markdown command's result through the controller's
+  /// range-replacement op: the commands only change text inside the old
+  /// selection, so the replacement is the edited range of the new text.
+  /// The editor keeps its focus (the IME stays up); focus is re-requested
+  /// defensively.
   void _applyMarkdownEdit(MarkdownEdit edit) {
-    _controller.runRevocableOp(() {
-      _controller.value = CodeLineEditingValue(
-        codeLines: CodeLines.fromText(edit.text),
-        selection: _codeLineSelection(edit.selection),
-      );
-    });
+    final sel = _controller.selection;
+    final start = _globalOffset(sel.baseIndex, sel.baseOffset);
+    final end = _globalOffset(sel.extentIndex, sel.extentOffset);
+    final delta = edit.text.length - _controller.text.length;
+    final replacement = edit.text.substring(start, end + delta);
+    _controller.replaceSelection(replacement, sel);
+    _focus.requestFocus();
   }
 
   void _wrapSelection({required String left, required String right}) {
@@ -751,34 +788,5 @@ final class _NoteViewState extends State<NoteView>
     return index + offset;
   }
 
-  /// Maps a whole-text [TextSelection] to re_editor's line+offset model
-  /// (the buffer is LF-only; the line index counts the newlines before
-  /// the offset).
-  CodeLineSelection _codeLineSelection(TextSelection selection) {
-    final text = _controller.text;
-    var line = 0;
-    var lineStart = 0;
-    for (var i = 0; i < selection.start; i++) {
-      if (text.codeUnitAt(i) == 0x0A) {
-        line++;
-        lineStart = i + 1;
-      }
-    }
-    final baseOffset = selection.start - lineStart;
-    var extentLine = line;
-    var extentStart = lineStart;
-    for (var i = selection.start; i < selection.end; i++) {
-      if (text.codeUnitAt(i) == 0x0A) {
-        extentLine++;
-        extentStart = i + 1;
-      }
-    }
-    return CodeLineSelection(
-      baseIndex: line,
-      baseOffset: baseOffset,
-      extentIndex: extentLine,
-      extentOffset: selection.end - extentStart,
-    );
-  }
 
 }
