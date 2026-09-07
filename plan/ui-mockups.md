@@ -104,9 +104,13 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   empty-selection (insert markers at caret), and list/quote prefixing per
   line — `md_editing_test.dart` (9 tests); toolbar edits run in one
   revocable op (undo works).*
-- [ ] **T-UI-09** Editor text styling: wikilinks → theme accent + underline in
+- [x] **T-UI-09** Editor text styling: wikilinks → theme accent + underline in
   `highlight_style.dart` (both palettes); heading bottom rule + frontmatter
   left rule if re_editor supports per-line decorations (else R5 fallback).
+  *re_editor 0.10.0 has no per-line decoration API (checked), so the R5
+  fallback holds: headings and frontmatter keep their current styles; the
+  mockup's two rules are deferred to R5. Wikilink accent + underline is
+  widget-tested (`highlight_sync_test`).*
 - [x] **T-UI-10** New tabs (spec-silent — confirmed): **Quick note** =
   scratch note `Quick note.md` at library root (created missing), opened in
   the note view (intro body with an "Open quick note" button;

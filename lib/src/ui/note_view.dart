@@ -533,6 +533,7 @@ final class _NoteViewState extends State<NoteView>
       text: codeLine.text,
       base: style,
       dark: Theme.of(context).brightness == Brightness.dark,
+      accent: Theme.of(context).colorScheme.primary,
     );
   }
 

@@ -23,8 +23,18 @@ enum HighlightPalette {
       const TextStyle(fontWeight: FontWeight.bold);
 
   /// The [TextStyle] override for [kind] in this palette (null = base).
-  TextStyle? styleFor(TokenKind kind) =>
-      (this == HighlightPalette.dark ? _darkStyles : _lightStyles)[kind];
+  ///
+  /// Wikilinks (T-UI-09) track the theme: [accent] is the current
+  /// ColorScheme's primary, underlined per mockup, in both palettes.
+  TextStyle? styleFor(TokenKind kind, {required Color accent}) {
+    if (kind == TokenKind.wikilink) {
+      return TextStyle(
+        color: accent,
+        decoration: TextDecoration.underline,
+      );
+    }
+    return (this == HighlightPalette.dark ? _darkStyles : _lightStyles)[kind];
+  }
 
   // Light: the M2a row-painter colors, kept as-is.
   static const Map<TokenKind, TextStyle?> _lightStyles = {
@@ -44,7 +54,6 @@ enum HighlightPalette {
       decoration: TextDecoration.underline,
     ),
     TokenKind.image: TextStyle(color: _image),
-    TokenKind.wikilink: TextStyle(color: _wikilink),
     TokenKind.listMarker: TextStyle(color: _dim),
     TokenKind.taskBox: TextStyle(color: _task),
     TokenKind.blockquote: TextStyle(
@@ -81,7 +90,6 @@ enum HighlightPalette {
       decoration: TextDecoration.underline,
     ),
     TokenKind.image: TextStyle(color: _imageDark),
-    TokenKind.wikilink: TextStyle(color: _wikilinkDark),
     TokenKind.listMarker: TextStyle(color: _dimDark),
     TokenKind.taskBox: TextStyle(color: _taskDark),
     TokenKind.blockquote: TextStyle(
@@ -107,7 +115,6 @@ enum HighlightPalette {
   static const Color _codeMuted = Color(0xFF5C6B73);
   static const Color _link = Color(0xFF1A5FB4);
   static const Color _image = Color(0xFF7B1FA2);
-  static const Color _wikilink = Color(0xFF6A3AB2);
   static const Color _task = Color(0xFF2E7D32);
   static const Color _quote = Color(0xFF6B7280);
   static const Color _math = Color(0xFFAD1457);
@@ -119,7 +126,6 @@ enum HighlightPalette {
   static const Color _codeMutedDark = Color(0xFF7A828E);
   static const Color _linkDark = Color(0xFF61AFEF);
   static const Color _imageDark = Color(0xFFD19A66);
-  static const Color _wikilinkDark = Color(0xFFC586C0);
   static const Color _taskDark = Color(0xFF98C379);
   static const Color _quoteDark = Color(0xFF80868E);
   static const Color _mathDark = Color(0xFFC678DD);
