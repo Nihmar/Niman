@@ -1,6 +1,6 @@
 # UI — mockup parity (bottom nav, toolbars, chrome)
 
-**Status:** Planned · **Depends on:** M2a done (re_editor-based editor) · **Spec:**
+**Status:** Done (implementation; on-device screenshot pass outstanding) · **Depends on:** M2a done (re_editor-based editor) · **Spec:**
 *Requirements* (layout, editor) · **Visual source of truth:** the mockups below.
 Everything in this file that the spec is silent on (bottom nav, new tabs, toolbar)
 is defined by the mockups; T-UI-11 folds those back into the spec.
@@ -124,9 +124,14 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   v6 migration) and also pickable from the Settings tile; the tree
   context menu gets a "Set as quick note" item when T-UI-05 lands. A
   stale choice (moved/renamed/deleted) is cleared on open.*
-- [ ] **T-UI-11** Update spec (*Layout*, *Editor*) and `design.md` module
+- [x] **T-UI-11** Update spec (*Layout*, *Editor*) and `design.md` module
   layout (`ui/nav` / `editor/toolbar` / `editor/md_editing`); prepare
-  `logo.svg` for launcher-icon generation in M7.
+  `logo.svg` for launcher-icon generation in M7. *Done: the spec folds the
+  mockup-confirmed chrome (bottom nav, app-bar eye, toolbar, status row)
+  back into *Layout* and *Editor conveniences*; `design.md` reflects the
+  real layout (`ui/shell.dart` + `note_view.dart`, `editor/toolbar.dart` +
+  `editor/md_editing.dart`) and gains an `Icon assets` section for the M7
+  launcher generation; `logo.svg` verified with `rsvg-convert`.*
 
 ## Technical design
 

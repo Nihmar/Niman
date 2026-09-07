@@ -41,8 +41,11 @@ lib/
       dao.dart              # note/tag/folder DAOs
       indexer.dart          # disk scan → index build + incremental apply
     editor/
-      source_editor.dart    # lightweight source editor (single buffer)
+      note_editor.dart      # NoteEditor: re_editor CodeEditor wrapper (M2a)
       highlighting.dart     # MD + math-span tokenizer → styled display
+      highlight_sync.dart   # incremental tokenizer sync → per-line spans
+      md_editing.dart       # T-UI-08: pure markdown commands (wrap/prefix)
+      toolbar.dart          # T-UI-08: EditorToolbar (evenly spaced buttons)
     preview/
       markdown_view.dart    # flutter_markdown_plus preview
       math.dart             # katex rendering + LRU cache
@@ -73,7 +76,11 @@ lib/
       merge.dart            # 3-way hunk-level merge (base from .history)
       config.dart           # destination URL + Basic auth (flutter_secure_storage)
     ui/
-      shell.dart            # app shell: sidebar | editor | preview
+      shell.dart            # app shell: sidebar | editor | preview; the
+                            #   phone bottom nav (Files/Todo/Search/Quick
+                            #   note/Settings) and the shared app bar
+      note_view.dart        # note screen: editor/preview switch, status
+                            #   row (words, saved), toolbar (T-UI-06..08)
       tree.dart             # note tree UI
       tabs.dart             # multi-tab (M6)
       theme/                # brightness × palette tokens
@@ -88,6 +95,14 @@ test/
   sync/                     # mock WebDAV server (dart:io HttpServer)
 integration_test/           # on-device E2E
 ```
+
+## Icon assets
+
+`mockup/logo.svg` (T-UI-01) is the vector source of truth for the
+launcher/window icons (verify with `rsvg-convert`): squircle tile
+(`#f9f3e6` on `#f2ead9`) as the background layer, clipboard + ring clip +
+quill nib as the foreground layer. M7 generates Android adaptive + legacy
+icons and the Linux/Windows window icons from it.
 
 ## Data model (drift: SQLite + FTS5)
 
