@@ -64,6 +64,7 @@ dependencies:
   # have a system libsqlite3 that drift's NativeDatabase can open; Windows
   # ships no sqlite3.dll, so without this the app builds and then dies on
   # its first index query.
+  sqlite3: ^3.5.2
   sqlite3_flutter_libs: ^0.5.0
   url_launcher: ^6.3.2
 

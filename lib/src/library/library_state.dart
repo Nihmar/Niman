@@ -16,6 +16,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 /// Coarse lifecycle of a library session.
 enum LibraryPhase {
@@ -37,13 +38,17 @@ enum LibraryPhase {
 /// runs every [rescanInterval]. The last opened root is persisted in
 /// `app_settings` so a restart can resume the library via [resume].
 final class LibraryController implements LibrarySession {
-  /// Creates the controller; [dbFactory] is invoked lazily on first use.
+  /// Creates the controller; [dbFactory] is invoked lazily on first use,
+  /// and [searchDbFactory] provides the search connection (a
+  /// background-isolate connection by default — see
+  /// [defaultSearchDatabase]; tests fall back to [dbFactory]).
   LibraryController(
     this.dbFactory, {
+    Future<CopistDatabase> Function()? searchDbFactory,
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
-  });
+  }) : _searchDbFactory = searchDbFactory ?? dbFactory;
 
   /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(seconds: 60);
@@ -63,6 +68,10 @@ final class LibraryController implements LibrarySession {
 
   /// Builds the database on demand (app-support location in the app).
   final Future<CopistDatabase> Function() dbFactory;
+
+  /// The search connection; defaults to [dbFactory] (tests), the app
+  /// injects the background-isolate connection.
+  final Future<CopistDatabase> Function() _searchDbFactory;
 
   /// How often the full-rescan fallback runs.
   final Duration rescanInterval;
@@ -135,8 +144,10 @@ final class LibraryController implements LibrarySession {
 
   @override
   Future<SearchSource?> get searchSource async {
-    final db = await database;
-    return SearchRepo(db);
+    // The search connection is background-isolate backed: the MATCH +
+    // snippet() work for large result sets (and novel-length bodies) never
+    // runs on the UI isolate.
+    return SearchRepo(await _searchDbFactory());
   }
 
   @override
@@ -441,13 +452,42 @@ final class LibraryController implements LibrarySession {
   }
 }
 
-/// Creates the app database in the platform application-support directory.
+/// The app database FILE in the platform application-support directory.
 ///
 /// The index lives OUTSIDE the library folder: it is a cache, and files are
 /// the source of truth.
-Future<CopistDatabase> defaultCopistDatabase() async {
+Future<File> defaultCopistDbFile() async {
   final dir = await getApplicationSupportDirectory();
-  return CopistDatabase(NativeDatabase(File(p.join(dir.path, 'copist.db'))));
+  return File(p.join(dir.path, 'copist.db'));
+}
+
+/// The one connection-level setup both the main and the search connection
+/// apply: a busy timeout (the search reader contends with indexer writes)
+/// and WAL (readers do not block the writer).
+void _databaseSetup(sqlite3.Database db) {
+  db
+    ..execute('PRAGMA busy_timeout = 5000')
+    ..execute('PRAGMA journal_mode = WAL');
+}
+
+/// Creates the app database in the platform application-support directory.
+Future<CopistDatabase> defaultCopistDatabase() async {
+  return CopistDatabase(
+    NativeDatabase(await defaultCopistDbFile(), setup: _databaseSetup),
+  );
+}
+
+/// The search connection over the same database file, with drift's
+/// background-isolate executor: `MATCH` + `snippet()` over large result
+/// sets run off the UI isolate (T-M3-09 fix: many results with
+/// novel-length bodies stalled every frame).
+Future<CopistDatabase> defaultSearchDatabase() async {
+  return CopistDatabase(
+    NativeDatabase.createInBackground(
+      await defaultCopistDbFile(),
+      setup: _databaseSetup,
+    ),
+  );
 }
 
 /// The single library session for the app session.
@@ -456,7 +496,10 @@ Future<CopistDatabase> defaultCopistDatabase() async {
 /// which substitute an in-memory fake) never depends on the concrete
 /// [LibraryController].
 final librarySessionProvider = Provider<LibrarySession>((ref) {
-  final controller = LibraryController(defaultCopistDatabase);
+  final controller = LibraryController(
+    defaultCopistDatabase,
+    searchDbFactory: defaultSearchDatabase,
+  );
   ref.onDispose(controller.dispose);
   return controller;
 });
