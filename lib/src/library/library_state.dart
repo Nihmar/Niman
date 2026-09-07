@@ -10,6 +10,7 @@ import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/native.dart';
@@ -166,6 +167,15 @@ final class LibraryController implements LibrarySession {
       _searchSource = source;
     }
     return source;
+  }
+
+  @override
+  Future<ReplaceSource?> get replaceSource async {
+    // Stateless over the index + the current root; one per call (the
+    // screen resolves it when the user asks to replace).
+    final root = _root;
+    if (root == null) return null;
+    return ReplaceRunner(await database, root);
   }
 
   @override

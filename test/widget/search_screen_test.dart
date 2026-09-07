@@ -3,12 +3,14 @@
 // note, and the Words/Contains toggle (which is T-M3-08's UI surface).
 import 'dart:async';
 
+import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/ui/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_replace_source.dart';
 import '../fakes/fake_search_source.dart';
 
 SearchHit _hit(String path, {String? title, String? snippet}) => SearchHit(
@@ -23,13 +25,14 @@ void main() {
   late FakeSearchSource source;
   final opened = <String>[];
 
-  Widget buildApp(SearchSource searchSource) {
+  Widget buildApp(SearchSource searchSource, {ReplaceSource? replace}) {
     return MaterialApp(
       home: Scaffold(
         body: SearchScreen(
           controller: session,
           onOpenNote: opened.add,
           source: searchSource,
+          replaceSource: replace,
         ),
       ),
     );
@@ -207,6 +210,108 @@ void main() {
     await tester.pump();
     expect(source.queries, ['"en"*']);
     expect(find.text('Type at least 2 characters'), findsNothing);
+  });
+
+  testWidgets('replace: only words-mode results offer the action', (
+    tester,
+  ) async {
+    final replace = FakeReplaceSource();
+    source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
+    await tester.pumpWidget(buildApp(source, replace: replace));
+    await tester.pump();
+
+    // Words mode with results: the replace action is present.
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    expect(find.byKey(const Key('search-replace')), findsOne);
+
+    // Contains mode never replaces (exact words only apply to Words).
+    await tester.tap(find.text('Contains'));
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    expect(find.byKey(const Key('search-replace')), findsNothing);
+
+    // No results: nothing to replace into.
+    await tester.tap(find.text('Words'));
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    source.hits = const [];
+    await tester.enterText(find.byKey(const Key('search-query')), 'zzz');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    expect(find.text('No matches'), findsOne);
+    expect(find.byKey(const Key('search-replace')), findsNothing);
+  });
+
+  testWidgets('replace: whole-library flow confirms, runs, and reports', (
+    tester,
+  ) async {
+    final replace = FakeReplaceSource()..noteCount = 7;
+    source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
+    await tester.pumpWidget(buildApp(source, replace: replace));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('search-replace')));
+    await tester.pumpAndSettle();
+    // The affected-notes count is shown; the term is fixed by the query.
+    expect(find.text('Replace in notes'), findsOne);
+    expect(find.textContaining('7 note(s) contain "note"'), findsOne);
+
+    await tester.enterText(find.byKey(const Key('replace-with')), 'label');
+    await tester.tap(find.byKey(const Key('replace-case')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('replace-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(replace.requests, hasLength(1));
+    final request = replace.requests.single;
+    expect(request.term, 'note');
+    expect(request.replacement, 'label');
+    expect(request.caseSensitive, isTrue);
+    expect(request.only, isNull);
+    expect(find.textContaining('Replaced 5 occurrence(s) of "note"'),
+        findsOne);
+
+    // The deferred results refresh fires once and does not leak.
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(source.queries.length, greaterThanOrEqualTo(2));
+  });
+
+  testWidgets('replace: long-press a result scopes the run to that note', (
+    tester,
+  ) async {
+    final replace = FakeReplaceSource();
+    source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
+    await tester.pumpWidget(buildApp(source, replace: replace));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+
+    await tester.longPress(
+      find.byKey(const Key('search-hit-Docs/Note One.md')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Replace in this note…'), findsOne);
+    await tester.tap(find.byKey(const Key('replace-note-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Replace in this note'), findsOne);
+    await tester.enterText(find.byKey(const Key('replace-with')), 'label');
+    await tester.tap(find.byKey(const Key('replace-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(replace.requests, hasLength(1));
+    expect(replace.requests.single.term, 'note');
+    expect(replace.requests.single.only, {'Docs/Note One.md'});
+    expect(replace.requests.single.caseSensitive, isFalse);
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump();
   });
 
   testWidgets('contains mode also needs two characters', (tester) async {

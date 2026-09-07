@@ -3,17 +3,22 @@ import 'dart:async';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/query.dart';
+import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
-/// The Search tab/screen (T-M3-05/T-M3-08 toggle).
+/// The Search tab/screen (T-M3-05/T-M3-08 toggle, T-M3-10 replace).
 ///
 /// Query box (debounced ~150 ms) with the Words/Contains mode toggle over
 /// ranked FTS results — path + snippet with `<mark>` highlighting, paged
 /// (50 at a time, "Show more") — and click-to-open. Results of a superseded
 /// query are dropped by the source's invocation id; an empty (or too
 /// short) query shows a hint instead of results.
+///
+/// Words mode also offers the optional Replace action: an exact
+/// whole-word replace of the query term across every matching note (or, by
+/// long-press, in one result's note). Contains mode never replaces.
 final class SearchScreen extends StatefulWidget {
   /// Creates the search screen.
   const SearchScreen({
@@ -21,6 +26,7 @@ final class SearchScreen extends StatefulWidget {
     required this.onOpenNote,
     this.onOpenTags,
     this.source,
+    this.replaceSource,
     super.key,
   });
 
@@ -38,6 +44,10 @@ final class SearchScreen extends StatefulWidget {
   /// screen resolves it from [controller].
   final SearchSource? source;
 
+  /// Optional replace-source override (widget tests inject a fake); when
+  /// null the screen resolves it from [controller].
+  final ReplaceSource? replaceSource;
+
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -50,6 +60,7 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   SearchSource? _source;
   Timer? _debounceTimer;
+  Timer? _replaceRefresh;
   bool _contains = false;
   bool _searched = false;
   List<SearchHit> _hits = const [];
@@ -65,6 +76,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _replaceRefresh?.cancel();
     _query.removeListener(_onQueryChanged);
     _query.dispose();
     super.dispose();
@@ -226,6 +238,13 @@ final class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const Spacer(),
+                  if (!_contains && _hits.isNotEmpty)
+                    IconButton(
+                      key: const Key('search-replace'),
+                      tooltip: AppStrings.replaceTooltip,
+                      icon: const Icon(Icons.find_replace),
+                      onPressed: _openReplaceAll,
+                    ),
                   if (widget.onOpenTags != null)
                     IconButton(
                       key: const Key('open-tags'),
@@ -291,8 +310,104 @@ final class _SearchScreenState extends State<SearchScreen> {
             ],
           ),
           onTap: () => widget.onOpenNote(hit.path),
+          onLongPress: () => _showNoteActions(hit),
         );
       },
+    );
+  }
+
+  /// The result-row long-press menu (T-M3-10): the single-note replace.
+  Future<void> _showNoteActions(SearchHit hit) async {
+    if (!mounted) return;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              key: const Key('replace-note-action'),
+              leading: const Icon(Icons.find_replace),
+              title: const Text(AppStrings.replaceInNoteAction),
+              onTap: () => Navigator.pop(context, 'replace'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == 'replace' && mounted) {
+      await _openReplace(onlyPath: hit.path);
+    }
+  }
+
+  /// The header Replace action: replace across every matching note.
+  Future<void> _openReplaceAll() => _openReplace();
+
+  /// Runs the replace flow: resolves the replace source, computes the
+  /// affected-note count (whole-library runs), asks for the replacement
+  /// text, and reports the outcome.
+  Future<void> _openReplace({String? onlyPath}) async {
+    final source = await _acquireReplace();
+    if (!mounted) return;
+    if (source == null) {
+      _snack(AppStrings.replaceUnavailable);
+      return;
+    }
+    final term = _query.text.trim();
+    int? count;
+    if (onlyPath == null) {
+      try {
+        count = await source.countNotes(term);
+      } on Object {
+        count = null;
+      }
+      if (!mounted) return;
+    }
+    final report = await showDialog<ReplaceReport>(
+      context: context,
+      builder: (context) => _ReplaceDialog(
+        source: source,
+        term: term,
+        noteCount: count,
+        onlyPath: onlyPath,
+      ),
+    );
+    if (report == null || !mounted) return;
+    final message = report.occurrences == 0
+        ? 'No whole-word match of "$term" was found'
+        : 'Replaced ${report.occurrences} occurrence(s) of "$term" in '
+            '${report.notesChanged} note(s)';
+    _snack(
+      report.skipped.isEmpty
+          ? message
+          : '$message (${report.skipped.length} open note(s) skipped)',
+    );
+    // The watcher re-indexes the rewritten files: once it has, re-run the
+    // query so the results reflect the new content.
+    _replaceRefresh?.cancel();
+    _replaceRefresh = Timer(const Duration(milliseconds: 900), () {
+      if (mounted && _query.text.trim() == term && !_contains) {
+        unawaited(_runSearch());
+      }
+    });
+  }
+
+  /// Resolves the replace source (seam first, then the session).
+  Future<ReplaceSource?> _acquireReplace() async {
+    final own = widget.replaceSource;
+    if (own != null) return own;
+    try {
+      return await widget.controller.replaceSource;
+    } on Object catch (e) {
+      const AppLogger(name: 'search.ui')
+          .warning('replace source unavailable: $e');
+      return null;
+    }
+  }
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -373,5 +488,126 @@ final class _SearchScreenState extends State<SearchScreen> {
       pos = end + close.length;
     }
     return TextSpan(children: spans);
+  }
+}
+
+/// The replace confirmation dialog (T-M3-10): the replacement text, the
+/// case toggle, and the exact-word scope note. Runs the replace from the
+/// confirm button (busy spinner) and pops with the [ReplaceReport].
+final class _ReplaceDialog extends StatefulWidget {
+  /// Creates the dialog over [source] for [term]; [noteCount] is the
+  /// affected-notes estimate for whole-library runs, [onlyPath] scopes the
+  /// run to one note.
+  const _ReplaceDialog({
+    required this.source,
+    required this.term,
+    required this.noteCount,
+    required this.onlyPath,
+  });
+
+  final ReplaceSource source;
+  final String term;
+  final int? noteCount;
+  final String? onlyPath;
+
+  @override
+  State<_ReplaceDialog> createState() => _ReplaceDialogState();
+}
+
+final class _ReplaceDialogState extends State<_ReplaceDialog> {
+  final TextEditingController _replacement = TextEditingController();
+  bool _caseSensitive = false;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _replacement.dispose();
+    super.dispose();
+  }
+
+  Future<void> _run() async {
+    setState(() => _busy = true);
+    final report = await widget.source.replaceAll(
+      term: widget.term,
+      replacement: _replacement.text,
+      caseSensitive: _caseSensitive,
+      only: widget.onlyPath == null ? null : {widget.onlyPath!},
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop(report);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final only = widget.onlyPath;
+    final scope = only == null
+        ? (widget.noteCount == null
+            ? 'Whole-word matches of "${widget.term}"'
+            : '${widget.noteCount} note(s) contain "${widget.term}"')
+        : 'Whole-word matches of "${widget.term}" in $only';
+    return AlertDialog(
+      title: Text(
+        only == null
+            ? AppStrings.replaceDialogTitle
+            : AppStrings.replaceInThisNoteTitle,
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              key: const Key('replace-with'),
+              controller: _replacement,
+              autofocus: true,
+              enabled: !_busy,
+              decoration: InputDecoration(
+                labelText: AppStrings.replaceWithLabel,
+                hintText: widget.term,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+            CheckboxListTile(
+              key: const Key('replace-case'),
+              value: _caseSensitive,
+              onChanged: _busy
+                  ? null
+                  : (value) => setState(() => _caseSensitive = value ?? false),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: const Text(AppStrings.replaceCaseSensitive),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$scope — only exact whole-word matches are replaced.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const Key('replace-cancel'),
+          onPressed: _busy ? null : () => Navigator.of(context).pop(),
+          child: const Text(AppStrings.replaceCancel),
+        ),
+        FilledButton(
+          key: const Key('replace-confirm'),
+          onPressed: _busy ? null : _run,
+          child: _busy
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text(AppStrings.replaceConfirm),
+        ),
+      ],
+    );
   }
 }

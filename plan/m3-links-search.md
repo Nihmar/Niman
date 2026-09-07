@@ -118,6 +118,19 @@ is **not wired**.
   walk + index, generous latency assertion). On-device pass on the real
   library (index build + search latency + tag list). *AC: green; release
   builds rebuilt and reported after the milestone.*
+- [ ] **T-M3-10** Replace across search results (requested during the
+  T-M3-09 on-device pass): an optional exact-word replace on the search
+  screen — Words mode only, never Contains. Header Replace… action =
+  replace in every matching note; long-press a result = replace in that
+  note only. Whole-word matching (unicode word boundaries; a multi-word
+  term matches with any whitespace between its words), case-insensitive
+  by default with a case-sensitive toggle, candidate notes from an FTS
+  phrase lookup (no prefix). The notes are rewritten on disk (read +
+  atomic write, off the UI isolate in chunks), the watcher re-indexes
+  them; the confirm dialog shows the affected-note count; a snackbar
+  reports occurrences changed. *AC: replacing `cat` never touches
+  `catalog`/`cats`/`concatenate`; unit tests on a real index + disk;
+  widget tests on the dialog and both scopes.*
 
 ## Technical design
 

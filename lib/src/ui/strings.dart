@@ -58,6 +58,17 @@ final class AppStrings {
   static const String searchNoMatches = 'No matches';
   static const String searchLoadMore = 'Show more';
 
+  // Replace (T-M3-10): the search screen's optional exact-word replace.
+  static const String replaceTooltip = 'Replace…';
+  static const String replaceInNoteAction = 'Replace in this note…';
+  static const String replaceDialogTitle = 'Replace in notes';
+  static const String replaceInThisNoteTitle = 'Replace in this note';
+  static const String replaceWithLabel = 'Replace with';
+  static const String replaceCaseSensitive = 'Case-sensitive';
+  static const String replaceConfirm = 'Replace';
+  static const String replaceCancel = 'Cancel';
+  static const String replaceUnavailable = 'Replace is unavailable right now';
+
   // Tags (T-M3-06).
   static const String openTagsTooltip = 'Tags';
   static const String tagsTitle = 'Tags';
