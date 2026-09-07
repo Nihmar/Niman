@@ -206,6 +206,49 @@ void main() {
       );
     });
 
+    test('a resume before anything loaded schedules, never cancels', () async {
+      // The shell resumes on every foreground return, including before
+      // its own open() has published. Handing the service an empty set
+      // there cancelled every pending alarm on the device.
+      writeRaw('todo.txt', 'call rem:2026-09-08T10:30\n');
+      await reminded.resyncReminders();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      expect(
+        reminders.reconciled.single.keys.single,
+        todoReminderId('call rem:2026-09-08T10:30'),
+      );
+    });
+
+    test('repeated resumes never reconcile an empty set', () async {
+      writeRaw('todo.txt', 'call rem:2026-09-08T10:30\n');
+      await reminded.resyncReminders();
+      await reminded.resyncReminders();
+      await reminded.resyncReminders();
+      await waitFor(() => reminders.reconciled.length >= 3);
+      expect(reminders.reconciled, everyElement(hasLength(1)));
+    });
+
+    test('no library open reconciles nothing at all', () async {
+      await session.close();
+      await reminded.resyncReminders();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(reminders.reconciled, isEmpty);
+    });
+
+    test('closing the library leaves the scheduled alarms alone', () async {
+      // Reminders outlive a close and converge on the next open: the
+      // clear-on-close path only ever ran in tests, and a stray empty
+      // reconcile is indistinguishable from a wipe.
+      writeRaw('todo.txt', 'call rem:2026-09-08T10:30\n');
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      final before = reminders.reconciled.length;
+      await session.close();
+      await waitFor(() => reminded.snapshot == null);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(reminders.reconciled, hasLength(before));
+    });
+
     test('resyncReminders reconciles without touching the files', () async {
       await reminded.open();
       await waitFor(() => reminders.reconciled.isNotEmpty);

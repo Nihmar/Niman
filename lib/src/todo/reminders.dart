@@ -7,6 +7,12 @@
 /// Scheduling is a full replace (cancel all, schedule the wanted),
 /// idempotent and free of stored state.
 ///
+/// The invariant that makes the full replace safe: [ReminderService.reconcile]
+/// is only ever called with a set derived from a *loaded* snapshot. An
+/// empty set means "this library wants no reminders", never "nothing is
+/// loaded yet" -- the controller drops the latter before it gets here,
+/// because reconciling it would cancel every pending alarm.
+///
 /// Platform split: Android schedules OS notifications (exact alarms
 /// via `setExactAndAllowWhileIdle`, so they fire in Doze — screen off —
 /// and with the app closed; the exact privilege comes from the

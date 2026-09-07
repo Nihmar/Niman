@@ -246,6 +246,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       reminders: widget.reminders,
       sourceFactory: widget.todoSourceFactory,
     );
+    // The controller loads here, not in TodoTab.initState: T-TD-07
+    // reconciles reminders at every library open, and the Todo tab is
+    // only reachable in the narrow layout -- a >= 600 px device would
+    // otherwise never reconcile. The tab's own open() then takes the
+    // probe-skip path instead of a second full read.
+    unawaited(_todoController.open());
     _reminderTaps = widget.reminders.taps.listen((payload) {
       if (payload == todoReminderPayload && mounted) {
         const AppLogger(name: 'todo').debug('todo tap: opening Todo tab');
@@ -270,6 +276,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// there must reschedule without waiting for the next file change.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       unawaited(_todoController.resyncReminders());
     }

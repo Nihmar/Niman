@@ -1,7 +1,9 @@
 /// Session-bound todo state: migration-on-open + revision-driven refresh
 /// (plan/todo-tab.md T-TD-03).
 ///
-/// The Todo tab owns one controller: opening it subscribes to the
+/// The shell owns one controller and opens it when it mounts, not when
+/// the Todo tab does: reminders must reconcile at every library open, and
+/// the wide layout has no Todo tab at all. Opening subscribes to the
 /// session's revision stream, loads both files and archives stray
 /// completed lines (the store migration, so an external tool writing `x`
 /// lines back into `todo.txt` self-heals on the next open).
@@ -164,25 +166,44 @@ final class TodoController extends ChangeNotifier {
     }
   }
 
-  /// Re-reconciles OS reminders with the current snapshot without
-  /// touching the files: the shell calls this on app resume, so a grant
-  /// made in system settings (exact alarms, notifications) takes effect
-  /// when the user returns instead of waiting for the next file change.
-  Future<void> resyncReminders() => _syncReminders();
+  /// Converges OS reminders with what is on disk: the shell calls this on
+  /// app resume, so a grant made in system settings (notifications, exact
+  /// alarms) takes effect when the user returns instead of waiting for the
+  /// next file change.
+  ///
+  /// Nothing loaded yet (the shell's own [open] still in flight) loads
+  /// instead, which reconciles when it publishes. Otherwise both files are
+  /// re-probed -- two stats off the UI isolate, content read skipped when
+  /// neither moved -- and reminders reconcile even when nothing changed,
+  /// because the grant might have.
+  Future<void> resyncReminders() async {
+    if (_disposed) {
+      return;
+    }
+    if (_snapshot == null) {
+      await open();
+      return;
+    }
+    await _reload();
+    await _syncReminders();
+  }
 
   /// Reconciles OS reminders with the current snapshot (fire-and-forget:
   /// scheduling never blocks the op, and a denied permission or a dead
-  /// plugin only logs). Null snapshot (library closed) clears them.
+  /// plugin only logs).
+  ///
+  /// A null snapshot means "nothing loaded", never "nothing wanted":
+  /// scheduling is a full replace, so handing the service an empty set
+  /// cancels every pending alarm. Reminders outlive a library close and
+  /// converge again on the next open.
   Future<void> _syncReminders() async {
     final service = reminders;
-    if (service == null || _disposed) {
+    final snapshot = _snapshot;
+    if (service == null || snapshot == null || _disposed) {
       return;
     }
     try {
-      final snapshot = _snapshot;
-      await service.reconcile(
-        snapshot == null ? const {} : wantedReminders(snapshot, _clock()),
-      );
+      await service.reconcile(wantedReminders(snapshot, _clock()));
     } on Object catch (error) {
       _log.warning('todo reminders sync failed: $error');
     }
@@ -210,7 +231,6 @@ final class TodoController extends ChangeNotifier {
         _probes = null;
         _error = null;
         notifyListeners();
-        unawaited(_syncReminders());
       }
       return;
     }
