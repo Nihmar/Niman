@@ -135,6 +135,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _splitRatio = ratio;
   }
 
+  TreeSort _treeSort = TreeSort.nameAsc;
+
+  @override
+  Future<TreeSort> get treeSort async => _treeSort;
+
+  @override
+  Future<void> setTreeSort(TreeSort sort) async {
+    _treeSort = sort;
+  }
+
   @override
   void notify() => _bump();
 
@@ -147,13 +157,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<List<Note>> children(int parentId) async {
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
     final kids = <_Row>[
       for (final row in _rows)
         if (!row.trashed && _parentIdOf(row.path) == parentId) row,
     ]..sort((a, b) {
       if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-      return a.name.compareTo(b.name);
+      return nameDesc
+          ? b.name.compareTo(a.name)
+          : a.name.compareTo(b.name);
     });
     return kids.map(_toNote).toList();
   }

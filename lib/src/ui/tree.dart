@@ -24,11 +24,15 @@ final class NoteTree extends StatefulWidget {
     required this.expanded,
     required this.onToggle,
     required this.onSelect,
+    this.nameDesc = false,
     super.key,
   });
 
   /// The session providing the index and the change-event stream.
   final LibrarySession controller;
+
+  /// Whether the rows sort by name descending (T-UI-03).
+  final bool nameDesc;
 
   /// Library-relative path of the selected note/folder, or null.
   final String? selectedPath;
@@ -95,7 +99,10 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   Future<void> _walk(int parentId, int depth, List<_Row> out) async {
-    final children = await widget.controller.children(parentId);
+    final children = await widget.controller.children(
+      parentId,
+      nameDesc: widget.nameDesc,
+    );
     _log.debug(
       'tree: children(parent=$parentId) -> ${children.length}: '
       '${_pathList(children.map((n) => n.path))}',

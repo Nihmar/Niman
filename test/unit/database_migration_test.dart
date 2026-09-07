@@ -44,6 +44,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
       );
       await db.close();
@@ -85,6 +88,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
       );
       await db.close();
@@ -119,6 +125,9 @@ void main() {
       );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -156,6 +165,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
       );
       await db.close();
@@ -183,6 +195,9 @@ void main() {
         'ALTER TABLE library_settings DROP COLUMN quick_note_path',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
         'INSERT INTO library_settings (path, trash_enabled, '
         "history_versions) VALUES ('/lib', 1, 10)",
       );
@@ -197,6 +212,31 @@ void main() {
     expect(row.trashEnabled, true);
     expect(row.historyVersions, 10);
     expect(row.quickNotePath, isNull);
+    await db.close();
+  });
+
+  test(
+    'v6 databases gain tree_sort on upgrade, keeping values',
+    () async {
+    // Build a v6-shaped file: create the database at v7, rewind the schema
+    // version, and drop the column v6 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 6');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    expect(row.treeSort, 'nameAsc');
     await db.close();
   });
 }

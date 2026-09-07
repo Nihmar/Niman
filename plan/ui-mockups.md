@@ -62,10 +62,14 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   *Deviation: the phone Files app bar keeps the trash icon and drops the
   settings gear (the Settings tab replaces it); on wide, the gear stays the
   way to reach settings until T-UI-03.*
-- [ ] **T-UI-03** Library app bar: replace settings gear with a sort toggle
-  (`unfold_more`-style icon) flipping name-asc ⇄ name-desc, persisted in
-  settings; settings reached from the Settings tab. *AC: toggle survives
-  restart; tree re-orders.*
+- [x] **T-UI-03** Library app bar: sort toggle (`Icons.unfold_more`, in
+  both app bars) flipping name-asc ⇄ name-desc, persisted in
+  `app_settings.tree_sort` (v7 migration). The phone Files bar is trash +
+  sort per mockup; settings stays in the Settings tab. The wide bar keeps
+  the settings gear as the only settings route (no tab bar there) and
+  gains the same toggle. *AC: toggle survives restart (`library_state_test`
+  restarts the controller); tree re-orders (widget test flips the row
+  order).*
 - [x] **T-UI-04** Tree rows per mockup: folder rows = chevron + name (drop
   `Icons.folder`); file rows = outline doc icon + name. Row height/font per
   mockup. *AC: `tree.dart` diff is style-only; no behavior change.*

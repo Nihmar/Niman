@@ -19,13 +19,15 @@ final class NoteDao {
         .get();
   }
 
-  /// Children of the row with id [parentId], directories first, then by name.
-  Future<List<Note>> children(int parentId) {
+  /// Children of the row with id [parentId], directories first, then by
+  /// name (ascending, or descending with [nameDesc]).
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) {
     return (_db.select(_db.notes)
           ..where((t) => t.parent.equals(parentId))
           ..orderBy([
             (t) => OrderingTerm.desc(t.isDir),
-            (t) => OrderingTerm.asc(t.name),
+            (t) =>
+                nameDesc ? OrderingTerm.desc(t.name) : OrderingTerm.asc(t.name),
           ]))
         .get();
   }

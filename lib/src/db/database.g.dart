@@ -947,6 +947,18 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(0.55),
   );
+  static const VerificationMeta _treeSortMeta = const VerificationMeta(
+    'treeSort',
+  );
+  @override
+  late final GeneratedColumn<String> treeSort = GeneratedColumn<String>(
+    'tree_sort',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('nameAsc'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -956,6 +968,7 @@ class $AppSettingsTable extends AppSettings
     editorAutofocus,
     previewMode,
     splitRatio,
+    treeSort,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1023,6 +1036,12 @@ class $AppSettingsTable extends AppSettings
         splitRatio.isAcceptableOrUnknown(data['split_ratio']!, _splitRatioMeta),
       );
     }
+    if (data.containsKey('tree_sort')) {
+      context.handle(
+        _treeSortMeta,
+        treeSort.isAcceptableOrUnknown(data['tree_sort']!, _treeSortMeta),
+      );
+    }
     return context;
   }
 
@@ -1060,6 +1079,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.double,
         data['${effectivePrefix}split_ratio'],
       )!,
+      treeSort: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tree_sort'],
+      )!,
     );
   }
 
@@ -1093,6 +1116,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// The editor|preview split fraction (0..1; default 0.55).
   final double splitRatio;
+
+  /// The library tree sort order (T-UI-03): the [TreeSort] `.name`
+  /// value, `nameAsc` or `nameDesc`.
+  final String treeSort;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1101,6 +1128,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.editorAutofocus,
     required this.previewMode,
     required this.splitRatio,
+    required this.treeSort,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1114,6 +1142,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['editor_autofocus'] = Variable<bool>(editorAutofocus);
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
+    map['tree_sort'] = Variable<String>(treeSort);
     return map;
   }
 
@@ -1128,6 +1157,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorAutofocus: Value(editorAutofocus),
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
+      treeSort: Value(treeSort),
     );
   }
 
@@ -1144,6 +1174,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
+      treeSort: serializer.fromJson<String>(json['treeSort']),
     );
   }
   @override
@@ -1157,6 +1188,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
+      'treeSort': serializer.toJson<String>(treeSort),
     };
   }
 
@@ -1168,6 +1200,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     bool? editorAutofocus,
     String? previewMode,
     double? splitRatio,
+    String? treeSort,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1176,6 +1209,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     editorAutofocus: editorAutofocus ?? this.editorAutofocus,
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
+    treeSort: treeSort ?? this.treeSort,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1198,6 +1232,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       splitRatio: data.splitRatio.present
           ? data.splitRatio.value
           : this.splitRatio,
+      treeSort: data.treeSort.present ? data.treeSort.value : this.treeSort,
     );
   }
 
@@ -1210,7 +1245,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
           ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio')
+          ..write('splitRatio: $splitRatio, ')
+          ..write('treeSort: $treeSort')
           ..write(')'))
         .toString();
   }
@@ -1224,6 +1260,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     editorAutofocus,
     previewMode,
     splitRatio,
+    treeSort,
   );
   @override
   bool operator ==(Object other) =>
@@ -1235,7 +1272,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.lineNumbers == this.lineNumbers &&
           other.editorAutofocus == this.editorAutofocus &&
           other.previewMode == this.previewMode &&
-          other.splitRatio == this.splitRatio);
+          other.splitRatio == this.splitRatio &&
+          other.treeSort == this.treeSort);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1246,6 +1284,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<bool> editorAutofocus;
   final Value<String> previewMode;
   final Value<double> splitRatio;
+  final Value<String> treeSort;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1254,6 +1293,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.editorAutofocus = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
+    this.treeSort = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1263,6 +1303,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.editorAutofocus = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
+    this.treeSort = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1272,6 +1313,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<bool>? editorAutofocus,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
+    Expression<String>? treeSort,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1281,6 +1323,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
+      if (treeSort != null) 'tree_sort': treeSort,
     });
   }
 
@@ -1292,6 +1335,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<bool>? editorAutofocus,
     Value<String>? previewMode,
     Value<double>? splitRatio,
+    Value<String>? treeSort,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1301,6 +1345,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
+      treeSort: treeSort ?? this.treeSort,
     );
   }
 
@@ -1328,6 +1373,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (splitRatio.present) {
       map['split_ratio'] = Variable<double>(splitRatio.value);
     }
+    if (treeSort.present) {
+      map['tree_sort'] = Variable<String>(treeSort.value);
+    }
     return map;
   }
 
@@ -1340,7 +1388,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
           ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio')
+          ..write('splitRatio: $splitRatio, ')
+          ..write('treeSort: $treeSort')
           ..write(')'))
         .toString();
   }
@@ -1810,6 +1859,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> editorAutofocus,
       Value<String> previewMode,
       Value<double> splitRatio,
+      Value<String> treeSort,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -1820,6 +1870,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> editorAutofocus,
       Value<String> previewMode,
       Value<double> splitRatio,
+      Value<String> treeSort,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -1863,6 +1914,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<double> get splitRatio => $composableBuilder(
     column: $table.splitRatio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get treeSort => $composableBuilder(
+    column: $table.treeSort,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1910,6 +1966,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.splitRatio,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get treeSort => $composableBuilder(
+    column: $table.treeSort,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1953,6 +2014,9 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.splitRatio,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get treeSort =>
+      $composableBuilder(column: $table.treeSort, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -1993,6 +2057,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> editorAutofocus = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
+                Value<String> treeSort = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -2001,6 +2066,7 @@ class $$AppSettingsTableTableManager
                 editorAutofocus: editorAutofocus,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
+                treeSort: treeSort,
               ),
           createCompanionCallback:
               ({
@@ -2011,6 +2077,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> editorAutofocus = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
+                Value<String> treeSort = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -2019,6 +2086,7 @@ class $$AppSettingsTableTableManager
                 editorAutofocus: editorAutofocus,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
+                treeSort: treeSort,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

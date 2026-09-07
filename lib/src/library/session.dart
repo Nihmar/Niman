@@ -144,6 +144,12 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the split ratio.
   Future<void> setSplitRatio(double ratio);
 
+  /// The library tree sort order (default [TreeSort.nameAsc]).
+  Future<TreeSort> get treeSort;
+
+  /// Sets (and persists) the library tree sort order.
+  Future<void> setTreeSort(TreeSort sort);
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 
@@ -151,8 +157,9 @@ abstract interface class LibrarySession {
   Future<void> dispose();
 
   /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name.
-  Future<List<Note>> children(int parentId);
+  /// directories first, then by name (ascending, or descending with
+  /// [nameDesc]).
+  Future<List<Note>> children(int parentId, {bool nameDesc = false});
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();

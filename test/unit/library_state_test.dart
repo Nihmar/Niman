@@ -149,4 +149,34 @@ void main() {
     await controller.close();
     await controller.dispose();
   });
+
+  test('treeSort persists and flips the children order', () async {
+    final first = makeController();
+    await first.open(root.path, create: false);
+    File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+    File(p.join(root.path, 'c.md')).writeAsStringSync('c');
+    await first.rescanNow();
+
+    // Default: directories first, then ascending names.
+    expect(
+      (await first.children(0)).map((note) => note.name).toList(),
+      ['a.md', 'b.md', 'c.md'],
+    );
+
+    // Descending flips the name sort (dirs stay first).
+    await first.setTreeSort(TreeSort.nameDesc);
+    expect(
+      (await first.children(0, nameDesc: true)).map((n) => n.name).toList(),
+      ['c.md', 'b.md', 'a.md'],
+    );
+    await first.close();
+    await first.dispose();
+
+    // A fresh controller (an app restart) sees the persisted choice.
+    final second = makeController();
+    await second.open(root.path, create: false);
+    expect(await second.treeSort, TreeSort.nameDesc);
+    await second.close();
+    await second.dispose();
+  });
 }

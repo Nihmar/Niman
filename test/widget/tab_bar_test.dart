@@ -4,6 +4,7 @@
 // T-UI-10 AC: the Quick note tab opens `Quick note.md` at the library root,
 // creating it when missing; the Search tab is disabled until M3 (R3).
 import 'package:copist/src/app.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -148,6 +149,44 @@ void main() {
     await tester.tap(find.byKey(const Key('tab-files')));
     await settle(tester);
     expect(noteRow(controller, 'Docs'), findsOne);
+  });
+
+  testWidgets('sort toggle flips the tree order and persists (T-UI-03)',
+      (tester) async {
+    _setPhoneSize(tester);
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester);
+
+    // Three notes created out of alphabetical order: the tree sorts them.
+    await controller.createNote(parentPath: '', name: 'charlie');
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'bravo');
+    await settle(tester);
+
+    Finder row(String name) => find.descendant(
+      of: find.byType(NoteTree),
+      matching: find.text('$name.md'),
+    );
+    double topOf(String name) => tester.getCenter(row(name)).dy;
+
+    // Ascending default.
+    expect(topOf('alpha'), lessThan(topOf('bravo')));
+    expect(topOf('bravo'), lessThan(topOf('charlie')));
+
+    await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+
+    // Descending now; persisted in the session.
+    expect(topOf('charlie'), lessThan(topOf('bravo')));
+    expect(topOf('bravo'), lessThan(topOf('alpha')));
+    expect(await controller.treeSort, TreeSort.nameDesc);
+
+    // Tapping again returns to ascending.
+    await tester.tap(find.byKey(const Key('toggle-sort')));
+    await settle(tester);
+    expect(topOf('alpha'), lessThan(topOf('charlie')));
+    expect(await controller.treeSort, TreeSort.nameAsc);
   });
 
   testWidgets('quick note: nothing opens by default, create names the note',

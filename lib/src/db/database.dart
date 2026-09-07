@@ -90,6 +90,12 @@ class AppSettings extends Table {
       .named('split_ratio')
       .withDefault(const Constant(0.55))();
 
+  /// The library tree sort order (T-UI-03): the sort enum `.name`
+  /// value (`nameAsc` or `nameDesc`).
+  TextColumn get treeSort => text()
+      .named('tree_sort')
+      .withDefault(const Constant('nameAsc'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -104,13 +110,13 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// Fresh databases get all tables; v1 databases gain the
   /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`,
   /// pre-v4 databases `editor_autofocus`, pre-v5 databases
-  /// `preview_mode` + `split_ratio`, and pre-v6 databases the
-  /// `quick_note_path` library setting.
+  /// `preview_mode` + `split_ratio`, pre-v6 databases the
+  /// `quick_note_path` library setting, and pre-v7 databases `tree_sort`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
@@ -145,6 +151,12 @@ class CopistDatabase extends _$CopistDatabase {
       if (from < 6) {
         await m.database.customStatement(
           'ALTER TABLE library_settings ADD COLUMN quick_note_path TEXT',
+        );
+      }
+      if (from < 7) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN tree_sort '
+          "TEXT NOT NULL DEFAULT 'nameAsc'",
         );
       }
     },

@@ -117,9 +117,9 @@ final class LibraryController implements LibrarySession {
   /// Children of the row with id [parentId] (0 = library root),
   /// directories first, then by name.
   @override
-  Future<List<Note>> children(int parentId) async {
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
     final db = await database;
-    return NoteDao(db).children(parentId);
+    return NoteDao(db).children(parentId, nameDesc: nameDesc);
   }
 
   /// Every indexed folder, path-ordered (for move-target pickers).
@@ -332,6 +332,20 @@ final class LibraryController implements LibrarySession {
   Future<void> setSplitRatio(double ratio) async {
     final db = await database;
     await AppSettingsRepo(db).setSplitRatio(ratio);
+  }
+
+  /// The library tree sort order.
+  @override
+  Future<TreeSort> get treeSort async {
+    final db = await database;
+    return AppSettingsRepo(db).treeSort();
+  }
+
+  /// Sets (and persists) the library tree sort order.
+  @override
+  Future<void> setTreeSort(TreeSort sort) async {
+    final db = await database;
+    await AppSettingsRepo(db).setTreeSort(sort);
   }
 
   /// Notifies listeners that state changed without an index mutation

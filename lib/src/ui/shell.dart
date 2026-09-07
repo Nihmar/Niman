@@ -134,6 +134,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
 
+  /// The library tree sort order (T-UI-03).
+  TreeSort _treeSort = TreeSort.nameAsc;
+
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
@@ -160,18 +163,31 @@ final class _LibraryShellState extends State<_LibraryShell> {
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final treeSort = await controller.treeSort;
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
             previewMode != _previewMode ||
-            splitRatio != _splitRatio)) {
+            splitRatio != _splitRatio ||
+            treeSort != _treeSort)) {
       setState(() {
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
+        _treeSort = treeSort;
       });
     }
+  }
+
+  /// Flips the tree sort direction and persists it (T-UI-03).
+  Future<void> _toggleTreeSort() async {
+    final next = _treeSort == TreeSort.nameAsc
+        ? TreeSort.nameDesc
+        : TreeSort.nameAsc;
+    setState(() => _treeSort = next);
+    await widget.controller.setTreeSort(next);
+    widget.controller.notify();
   }
 
   /// Live divider moves mirror into [_splitRatio]; the lift persists.
@@ -443,6 +459,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
               ),
             ),
           ),
+          _sortToggle(),
           IconButton(
             key: const Key('open-settings'),
             tooltip: 'Settings',
@@ -479,8 +496,19 @@ final class _LibraryShellState extends State<_LibraryShell> {
     );
   }
 
-  /// Trash/settings actions of the Files-tab app bar (trash stays; the
-  /// settings gear is replaced by the settings tab on phone, per mockup).
+  /// The sort-direction toggle (T-UI-03): the mockup's `unfold_more`
+  /// chevrons; the icon reflects the current direction.
+  Widget _sortToggle() {
+    return IconButton(
+      key: const Key('toggle-sort'),
+      tooltip: _treeSort == TreeSort.nameAsc ? 'Sort Z-A' : 'Sort A-Z',
+      icon: const Icon(Icons.unfold_more),
+      onPressed: _toggleTreeSort,
+    );
+  }
+
+  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +
+  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
     return [
       IconButton(
@@ -494,6 +522,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ),
       ),
+      _sortToggle(),
     ];
   }
 
@@ -606,6 +635,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
         Expanded(
           child: NoteTree(
             controller: controller,
+            nameDesc: _treeSort == TreeSort.nameDesc,
             selectedPath: _selected,
             expanded: _expanded,
             onToggle: _toggle,
