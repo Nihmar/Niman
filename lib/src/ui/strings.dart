@@ -135,6 +135,8 @@ final class AppStrings {
 
   // Task reminders (T-TD-07).
   static const String todoReminderChannel = 'Task reminders';
+  static const String todoReminderChannelDescription =
+      'Scheduled alerts for tasks with a reminder time.';
   static const String todoReminderBody = 'Todo reminder';
   static const String todoReminderDue = 'Due';
 }

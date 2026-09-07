@@ -42,6 +42,13 @@ import 'package:timezone/timezone.dart' as tz;
 /// The notification payload routing taps to the Todo tab.
 const String todoReminderPayload = 'todo';
 
+/// The Android channel every reminder posts on.
+///
+/// Stable for the life of the install: Android keys a channel by id and
+/// freezes its importance at creation, so a new id would strand the
+/// user's per-channel settings on the old one.
+const String todoReminderChannelId = 'copist_reminders';
+
 /// One schedulable reminder: a stable [id] with content + fire time.
 @immutable
 final class TodoReminder {
@@ -205,6 +212,25 @@ final class LocalReminderService implements ReminderService {
       onDidReceiveNotificationResponse: (response) =>
           _taps.add(response.payload),
     );
+    // Create the channel up front instead of letting the first schedule
+    // create it implicitly: that way it exists (with a description the
+    // user can read in system settings) before any notification does, and
+    // it shows in the app's notification settings even when nothing has
+    // been scheduled yet. Re-creating with the same id updates the name
+    // and description; importance stays whatever it was first created
+    // with, and Importance.max matches what installs already have.
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            todoReminderChannelId,
+            AppStrings.todoReminderChannel,
+            description: AppStrings.todoReminderChannelDescription,
+            importance: Importance.max,
+          ),
+        );
     _ready = true;
   }
 
@@ -373,7 +399,7 @@ final class LocalReminderService implements ReminderService {
           scheduledDate: tz.TZDateTime.from(reminder.when, tz.local),
           notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
-              'copist_reminders',
+              todoReminderChannelId,
               AppStrings.todoReminderChannel,
               importance: Importance.max,
               priority: Priority.high,
