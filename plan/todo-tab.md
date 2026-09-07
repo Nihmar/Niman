@@ -65,7 +65,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   `x`, missing creation date with completion date, `due:` at line end,
   unicode/emoji, trailing whitespace, CRLF; byte-stable round-trip of an
   untouched line.*
-- [ ] **T-TD-02** File store: reads off the UI isolate (Android FUSE
+- [x] **T-TD-02** File store: reads off the UI isolate (Android FUSE
   rule); one writer chain; atomic rewrites of both files; append
   preserves the file's dominant line ending. Check/uncheck + edit +
   delete are single rewrite operations on both files. *AC: unit tests
