@@ -12,9 +12,11 @@ import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/todo_controller.dart';
+import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_store.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
+import 'package:copist/src/ui/todo_filter_bar.dart';
 import 'package:copist/src/ui/todo_row.dart';
 import 'package:flutter/material.dart';
 
@@ -45,6 +47,9 @@ final class _TodoTabState extends State<TodoTab> {
 
   /// Whether the Done list shows (false = the Open list).
   bool _showDone = false;
+
+  /// The list filter (due range + token chips + sort key).
+  TodoFilter _filter = const TodoFilter();
 
   @override
   void initState() {
@@ -78,12 +83,7 @@ final class _TodoTabState extends State<TodoTab> {
                   ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
                 ],
                 selected: {_showDone},
-                onSelectionChanged: (selected) {
-                  _log.debug(
-                    'todo view: ${selected.single ? 'done' : 'open'}',
-                  );
-                  setState(() => _showDone = selected.single);
-                },
+                onSelectionChanged: (selected) => _selectView(selected.single),
               ),
             ),
             if (controller.error != null)
@@ -104,6 +104,30 @@ final class _TodoTabState extends State<TodoTab> {
     );
   }
 
+  /// Switches the visible file, pruning token chips absent from it so
+  /// a stale chip never dead-ends the list.
+  void _selectView(bool done) {
+    final snapshot = widget.controller.snapshot;
+    var filter = _filter;
+    if (snapshot != null) {
+      final entries = done ? snapshot.done : snapshot.todo;
+      final available = <String>{
+        for (final chip in tokenCountsFor(
+          entries,
+          TodoDueRange.all,
+          _today,
+        ))
+          chip.token,
+      };
+      filter = filter.pruneTokens(available);
+    }
+    _log.debug('todo view: ${done ? 'done' : 'open'}');
+    setState(() {
+      _showDone = done;
+      _filter = filter;
+    });
+  }
+
   /// The list (or loading/empty state) for the visible file.
   Widget _body(TodoSnapshot? snapshot) {
     if (snapshot == null) {
@@ -112,34 +136,69 @@ final class _TodoTabState extends State<TodoTab> {
         child: CircularProgressIndicator(),
       );
     }
-    final entries = [
+    final fileEntries = [
       for (final entry in (_showDone ? snapshot.done : snapshot.todo))
         if (entry.task.raw.trim().isNotEmpty) entry,
     ];
-    if (entries.isEmpty) {
-      return Center(
-        child: Text(
-          _showDone ? AppStrings.todoEmptyDone : AppStrings.todoEmptyOpen,
-        ),
-      );
-    }
-    return ListView.builder(
-      key: const Key('todo-list'),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final entry = entries[index];
-        return TodoRow(
-          key: Key(
-            'todo-row-${_showDone ? 'done' : 'open'}-${entry.lineIndex}',
+    final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
+    final visible = applyTodoFilter(fileEntries, _filter, _today);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: TodoFilterBar(
+            filter: _filter,
+            counts: counts,
+            onDueRange: (range) {
+              _log.debug('todo filter due: ${range.name}');
+              setState(() => _filter = _filter.copyWith(dueRange: range));
+            },
+            onToggleToken: (token) {
+              final tokens = {..._filter.tokens};
+              if (!tokens.remove(token)) {
+                tokens.add(token);
+              }
+              _log.debug('todo filter tokens: $tokens');
+              setState(() => _filter = _filter.copyWith(tokens: tokens));
+            },
+            onSort: (sort) {
+              setState(() => _filter = _filter.copyWith(sort: sort));
+            },
           ),
-          entry: entry,
-          today: _today,
-          onToggle: (checked) => _toggle(entry, checked),
-          onEdit: () => _edit(entry),
-          onShowMenu: () => _showRowMenu(entry),
-        );
-      },
+        ),
+        Expanded(
+          child: visible.isEmpty
+              ? _emptyList(fileEntries.isEmpty)
+              : ListView.builder(
+                  key: const Key('todo-list'),
+                  itemCount: visible.length,
+                  itemBuilder: (context, index) {
+                    final entry = visible[index];
+                    final view = _showDone ? 'done' : 'open';
+                    return TodoRow(
+                      key: Key(
+                        'todo-row-$view-${entry.lineIndex}',
+                      ),
+                      entry: entry,
+                      today: _today,
+                      onToggle: (checked) => _toggle(entry, checked),
+                      onEdit: () => _edit(entry),
+                      onShowMenu: () => _showRowMenu(entry),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
+  }
+
+  /// The empty state: the file's own when it holds nothing, the filtered
+  /// one when chips hide every row.
+  Widget _emptyList(bool fileEmpty) {
+    final text = fileEmpty
+        ? (_showDone ? AppStrings.todoEmptyDone : AppStrings.todoEmptyOpen)
+        : AppStrings.todoEmptyFiltered;
+    return Center(child: Text(text));
   }
 
   /// Flips a task: check from Open, uncheck from Done. A checkbox that

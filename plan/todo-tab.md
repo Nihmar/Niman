@@ -81,7 +81,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   shows edit/delete (the app's bottom-sheet pattern); Open/Done switch
   over the same list. *AC: widget tests with a fake store; checking moves
   the row to Done with today's date, unchecking restores it.*
-- [ ] **T-TD-05** Filters + sort: a horizontal chip bar — due ranges
+- [x] **T-TD-05** Filters + sort: a horizontal chip bar — due ranges
   (Overdue / Today / Next 7 days / No date / All) and one chip per
   project/context/tag found in the visible file, with counts; chips AND
   together; sort control (due → priority → creation, each with the

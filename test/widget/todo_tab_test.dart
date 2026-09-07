@@ -33,7 +33,9 @@ void main() {
       sourceFactory: (_) => source,
     );
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: TodoTab(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: TodoTab(controller: controller, clock: clock)),
+      ),
     );
     await tester.pump();
   }
@@ -46,6 +48,31 @@ void main() {
   Future<void> settle(WidgetTester tester) async {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+  }
+
+  /// Scrolls the horizontal chip bar until [target] shows.
+  Future<void> scrollChips(WidgetTester tester, Finder target) {
+    return tester.scrollUntilVisible(
+      target,
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('todo-filter-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+  }
+
+  /// Whether [texts] render top to bottom in order.
+  bool order(WidgetTester tester, List<String> texts) {
+    var lastDy = -1.0;
+    for (final text in texts) {
+      final dy = tester.getCenter(find.text(text)).dy;
+      if (dy <= lastDy) {
+        return false;
+      }
+      lastDy = dy;
+    }
+    return true;
   }
 
   testWidgets('open rows show badges, chips and the due date', (
@@ -135,5 +162,107 @@ void main() {
     await tester.tap(find.text('Done'));
     await tester.pump();
     expect(find.text('Nothing completed yet'), findsOneWidget);
+  });
+
+  testWidgets('due chips narrow the list', (tester) async {
+    await pumpTab(
+      tester,
+      todo: [
+        'overdue due:2026-09-01',
+        'today due:2026-09-07',
+        'soon due:2026-09-10',
+        'later due:2026-10-01',
+        'undated',
+      ],
+    );
+    // Default sort is due-soonest; the full list shows in order.
+    expect(
+      order(tester, [
+        'overdue due:2026-09-01',
+        'today due:2026-09-07',
+        'soon due:2026-09-10',
+        'later due:2026-10-01',
+        'undated',
+      ]),
+      isTrue,
+    );
+    await tester.tap(find.text('Overdue'));
+    await tester.pump();
+    expect(find.text('overdue due:2026-09-01'), findsOneWidget);
+    expect(find.text('today due:2026-09-07'), findsNothing);
+    await tester.tap(find.text('Today'));
+    await tester.pump();
+    expect(find.text('today due:2026-09-07'), findsOneWidget);
+    expect(find.text('soon due:2026-09-10'), findsNothing);
+    await tester.tap(find.text('Next 7 days'));
+    await tester.pump();
+    expect(find.text('today due:2026-09-07'), findsOneWidget);
+    expect(find.text('soon due:2026-09-10'), findsOneWidget);
+    expect(find.text('later due:2026-10-01'), findsNothing);
+    await tester.tap(find.text('No date'));
+    await tester.pump();
+    expect(find.text('undated'), findsOneWidget);
+    expect(find.text('overdue due:2026-09-01'), findsNothing);
+    await tester.tap(find.text('All'));
+    await tester.pump();
+    expect(find.text('undated'), findsOneWidget);
+    expect(find.text('overdue due:2026-09-01'), findsOneWidget);
+  });
+
+  testWidgets('token chips show counts and AND together', (tester) async {
+    await pumpTab(
+      tester,
+      todo: ['a +p +q', 'b +p', 'c'],
+    );
+    expect(find.text('+p (2)'), findsOneWidget);
+    expect(find.text('+q (1)'), findsOneWidget);
+    await scrollChips(tester, find.byKey(const Key('todo-token-+p')));
+    await tester.tap(find.byKey(const Key('todo-token-+p')));
+    await tester.pump();
+    expect(find.text('a +p +q'), findsOneWidget);
+    expect(find.text('b +p'), findsOneWidget);
+    expect(find.text('c'), findsNothing);
+    await scrollChips(tester, find.byKey(const Key('todo-token-+q')));
+    await tester.tap(find.byKey(const Key('todo-token-+q')));
+    await tester.pump();
+    expect(find.text('a +p +q'), findsOneWidget);
+    expect(find.text('b +p'), findsNothing);
+  });
+
+  testWidgets('a combo that matches nothing shows the filtered empty', (
+    tester,
+  ) async {
+    await pumpTab(
+      tester,
+      todo: ['a +p due:2026-09-01', 'b +q due:2026-10-01'],
+    );
+    await scrollChips(tester, find.byKey(const Key('todo-token-+q')));
+    await tester.tap(find.byKey(const Key('todo-token-+q')));
+    await tester.pump();
+    await scrollChips(tester, find.text('Overdue'));
+    await tester.tap(find.text('Overdue'));
+    await tester.pump();
+    expect(find.text('No tasks match'), findsOneWidget);
+  });
+
+  testWidgets('the sort control reorders the list', (tester) async {
+    await pumpTab(
+      tester,
+      todo: ['(B) bee due:2026-09-01', '(A) aye due:2026-09-10', 'plain'],
+    );
+    expect(
+      order(tester, ['bee due:2026-09-01', 'aye due:2026-09-10', 'plain']),
+      isTrue,
+    );
+    await tester.tap(find.byKey(const Key('todo-sort-button')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-sort-priority')));
+    await settle(tester);
+    expect(
+      order(tester, ['aye due:2026-09-10', 'bee due:2026-09-01', 'plain']),
+      isTrue,
+    );
+    // Sorting is display-only: the file order never moves.
+    expect(source.todoLines.first, '(B) bee due:2026-09-01');
   });
 }
