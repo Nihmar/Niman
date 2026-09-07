@@ -37,6 +37,26 @@ void main() {
     });
   });
 
+  test('todoReminderId matches its golden values', () {
+    // A compatibility contract, not a property. The id is the only handle
+    // on an alarm already sitting in AlarmManager: change the hash and
+    // every reminder on an installed device becomes uncancellable and
+    // gets a duplicate alongside it. Recomputing the hash in the test
+    // would just assert the code against itself, so these are frozen
+    // literals -- if one fails, the change is the bug.
+    expect(todoReminderId('call plumber'), 867842594);
+    expect(
+      todoReminderId(
+        'buy milk +home @errand due:2026-09-09 rem:2026-09-08T10:30',
+      ),
+      208725283,
+    );
+    expect(
+      todoReminderId('ripassare la lezione di matematica'),
+      1024775335,
+    );
+  });
+
   group('wantedReminders', () {
     test('covers open future reminders with due bodies', () {
       final wanted = wantedReminders(
@@ -121,7 +141,7 @@ void main() {
     });
 
     test('the no-op reconciles, taps nothing and launches nowhere', () async {
-      final service = NoopReminderService();
+      const service = NoopReminderService();
       await service.reconcile({
         1: TodoReminder(
           id: 1,
