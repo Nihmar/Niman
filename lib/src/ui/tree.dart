@@ -168,7 +168,8 @@ bool _setEquals(Set<String> a, Set<String> b) {
   return true;
 }
 
-/// One row tile: chevron (folders), icon, and name.
+/// One row tile: chevron (folders) or doc icon (files), then the name —
+/// the name column is shared, per the mockup.
 final class _RowTile extends StatelessWidget {
   const _RowTile({
     required this.note,
@@ -206,9 +207,10 @@ final class _RowTile extends StatelessWidget {
                 onPressed: () => onToggle(note.path),
               )
             else
-              const SizedBox(width: 24),
-            Icon(note.isDir ? Icons.folder : Icons.article, size: 16),
-            const SizedBox(width: 8),
+              const SizedBox(
+                width: 48,
+                child: Icon(Icons.drafts_outlined, size: 16),
+              ),
             Expanded(
               child: Text(
                 note.name,

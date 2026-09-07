@@ -62,7 +62,7 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   (`unfold_more`-style icon) flipping name-asc ⇄ name-desc, persisted in
   settings; settings reached from the Settings tab. *AC: toggle survives
   restart; tree re-orders.*
-- [ ] **T-UI-04** Tree rows per mockup: folder rows = chevron + name (drop
+- [x] **T-UI-04** Tree rows per mockup: folder rows = chevron + name (drop
   `Icons.folder`); file rows = outline doc icon + name. Row height/font per
   mockup. *AC: `tree.dart` diff is style-only; no behavior change.*
 - [ ] **T-UI-05** Home the note actions: delete `_ActionBar`; add the classic
