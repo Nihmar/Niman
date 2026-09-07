@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
@@ -164,6 +165,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Opens a note reached through a link (T-M3-07): selects it, remembers
   /// the heading anchor, and clears pending anchors for direct selections.
   void _openNoteFromLink(String path, String? anchor) {
+    const AppLogger(name: 'links').debug(
+      'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
+      '(current tab ${_tab.name})',
+    );
     setState(() {
       _selected = path;
       _selectedIsDir = false;

@@ -602,19 +602,37 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// The preview's link handler (T-M3-07): `.md` relative links navigate
   /// in-app, http(s) launch the browser, `#anchor` stays local.
   Future<void> _openHref(String href) async {
+    const log = AppLogger(name: 'links');
     final source = widget.linkSource;
+    log.debug(
+      'md link tap in ${p.basename(widget.path)}: href="$href" '
+      '(source ${source == null ? 'not loaded' : 'ready'})',
+    );
     if (source == null) return;
     final resolved = await source.resolveMarkdown(href);
+    log.debug('md link "$href" -> ${_describe(resolved)}');
     await _applyResolved(resolved);
   }
 
   /// The preview's wikilink handler: `[[x]]` targets resolve and open;
   /// empty-target forms (`[[#h]]`, `[[|a]]`) stay local.
   Future<void> _openWiki(WikiRef ref) async {
+    const log = AppLogger(name: 'links');
     final source = widget.linkSource;
+    final alias = ref.alias == null ? '-' : '"${ref.alias}"';
+    final heading = ref.heading == null ? '-' : '"${ref.heading}"';
+    final src = source == null ? 'not loaded' : 'ready';
+    log.debug(
+      'wikilink tap in ${p.basename(widget.path)}: '
+      'target="${ref.target}" alias=$alias heading=$heading (source $src)',
+    );
     if (ref.target.isEmpty) {
       final heading = ref.heading;
-      if (heading == null) return _linkSnack(AppStrings.unresolvedLinkTitle);
+      if (heading == null) {
+        log.debug('wikilink: empty target and no heading — snackbar');
+        return _linkSnack(AppStrings.unresolvedLinkTitle);
+      }
+      log.debug('wikilink: local anchor — jump to heading "$heading"');
       _jumpToAnchor(heading);
       return;
     }
@@ -622,6 +640,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // The documented form: `[[target]]`, `[[target#heading]]`,
     // `[[target|alias]]` — the first part is the target.
     var resolved = await source.resolveWiki(ref.target);
+    log.debug('wikilink target "${ref.target}" -> ${_describe(resolved)}');
     var anchor = ref.heading;
     if (resolved is! ResolvedNote && ref.alias != null) {
       // Label-first links — `[[a label|filename]]`, the display text
@@ -637,7 +656,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           ? null
           : alias.substring(hash + 1);
       if (aliasTarget.trim().isNotEmpty) {
+        log.debug(
+          'wikilink: target-first unresolved — retrying the aliased '
+          'part "$aliasTarget" as the target',
+        );
         final swapped = await source.resolveWiki(aliasTarget.trim());
+        log.debug(
+          'wikilink alias "$aliasTarget" -> ${_describe(swapped)}',
+        );
         if (swapped is ResolvedNote || swapped is AmbiguousNote) {
           resolved = swapped;
           anchor = aliasHeading;
@@ -654,21 +680,41 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     await _applyResolved(resolved);
   }
 
+  /// One-line summary of a resolution, for the link trace.
+  static String _describe(ResolveResult resolved) {
+    return switch (resolved) {
+      ExternalLink(:final url) => 'ExternalLink($url)',
+      LocalAnchor(:final heading) => 'LocalAnchor(#$heading)',
+      ResolvedNote(:final note) => 'ResolvedNote(${note.path})',
+      AmbiguousNote(:final candidates) =>
+        'AmbiguousNote(${candidates.length} candidates)',
+      UnresolvedNote(:final target) => 'UnresolvedNote("$target")',
+    };
+  }
+
   Future<void> _applyResolved(ResolveResult resolved) async {
+    const log = AppLogger(name: 'links');
     switch (resolved) {
       case ExternalLink(:final url):
+        log.debug('link outcome: launching url $url');
         try {
           await launchUrl(Uri.parse(url));
         } on Object {
           if (mounted) _linkSnack(AppStrings.openLinkFailed);
         }
       case LocalAnchor(:final heading):
+        log.debug('link outcome: jump to local heading "$heading"');
         _jumpToAnchor(heading);
       case ResolvedNote(:final note, :final heading):
         await _openNoteResult(note, heading);
       case AmbiguousNote(:final candidates):
+        log.debug(
+          'link outcome: ${candidates.length} ambiguous candidates — '
+          'picker',
+        );
         await _pickAmbiguous(candidates);
       case UnresolvedNote():
+        log.debug('link outcome: unresolved — snackbar');
         if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
     }
   }
@@ -676,20 +722,29 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// Opens [note] via the shell (or jumps locally when it is already the
   /// open note).
   Future<void> _openNoteResult(Note note, String? anchor) async {
+    const log = AppLogger(name: 'links');
     final root = widget.libraryRoot;
     final currentRel = root == null
         ? null
         : p.relative(widget.path, from: root);
     if (currentRel != null && note.path == currentRel) {
       // Same note: stay and jump (or nothing when there is no anchor).
+      log.debug(
+        'link outcome: target is the current note — '
+        '${anchor == null ? 'no-op' : 'local jump to "$anchor"'}',
+      );
       if (anchor != null) _jumpToAnchor(anchor);
       return;
     }
     final open = widget.onOpenNote;
     if (open == null) {
+      log.debug('link outcome: resolved ${note.path} but no onOpenNote — '
+          'snackbar');
       if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
       return;
     }
+    log.debug('link outcome: open ${note.path} '
+        'anchor=${anchor == null ? '-' : '"$anchor"'}');
     open(note.path, anchor);
   }
 
