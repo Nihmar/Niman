@@ -831,6 +831,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       }
     }
     if (entry == null) {
+      // Trace the outline so a dead anchor is diagnosable from the log:
+      // is the heading missing, or does its text differ from the link's?
+      final entries = _outline;
+      final shown = entries.length <= 40
+          ? entries
+          : [
+              ...entries.take(20),
+              ...entries.skip(entries.length - 20),
+            ];
+      const AppLogger(name: 'links').debug(
+        'heading "$heading" (slug "$slug") not found among '
+        '${entries.length} outline entr(ies): '
+        '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
+      );
       _linkSnack(AppStrings.headingNotFoundTitle);
       return;
     }
