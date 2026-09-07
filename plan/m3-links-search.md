@@ -131,7 +131,8 @@ is **not wired**.
   whitespace between its words), case-insensitive by default with a
   case-sensitive toggle, candidate notes from an FTS phrase lookup (no
   prefix). The notes are rewritten on disk (read + atomic write, off the
-  UI isolate in chunks), the watcher re-indexes them; a snackbar reports
+  UI isolate in chunks); each rewritten batch is re-indexed right away
+  (rescanFiles — the watcher cannot be relied on), and a snackbar reports
   occurrences changed. *AC: replacing `cat` never touches
   `catalog`/`cats`/`concatenate`; unit tests on a real index + disk;
   widget tests on the panel, both scopes, the case toggle and the

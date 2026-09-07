@@ -473,6 +473,67 @@ final class Indexer {
     });
   }
 
+  /// Re-indexes [paths] (absolute, files) even when their `(size, mtime)`
+  /// look unchanged against the stored row: an atomic rewrite of equal
+  /// size within the same second is invisible to the (size, mtime, sha)
+  /// shortcut the event and full-scan paths trust. The replace runner
+  /// calls this for every note it rewrote — it knows the content changed
+  /// because it wrote it. [onChanged] fires after the writes, when any row
+  /// changed.
+  Future<void> rescanFiles(String root, List<String> paths) {
+    return _synchronized(() async {
+      final seen = <String>{};
+      final absList = <String>[];
+      final rels = <String>[];
+      for (final abs in paths) {
+        if (!seen.add(abs)) continue;
+        final rel = _safeRel(abs, root);
+        if (rel == null) continue;
+        absList.add(abs);
+        rels.add(rel);
+      }
+      if (absList.isEmpty) return;
+
+      final probes = await _probeAll(absList);
+      final live = <String, DiskProbe>{};
+      for (var i = 0; i < rels.length; i++) {
+        if (probes[i].exists) live[rels[i]] = probes[i];
+      }
+      if (live.isEmpty) return;
+
+      // Forced content read: the (size, mtime) shortcut must not apply.
+      final contents = await _readRelContents(root, live.keys.toList());
+      var wrote = false;
+      final changed = <NoteContent>[];
+      for (final entry in live.entries) {
+        final content = contents[entry.key];
+        if (content == null) continue;
+        final probe = entry.value;
+        final updated = await (_db.update(
+          _db.notes,
+        )..where((t) => t.path.equals(entry.key))).write(
+          NotesCompanion(
+            size: Value(probe.size),
+            modified: Value(probe.modified),
+            sha256: Value(content.sha256),
+          ),
+        );
+        wrote |= updated > 0;
+        changed.add(content);
+      }
+      if (changed.isEmpty) return;
+      // Content rows (FTS, tags, stems, links) follow the forced read.
+      await _applyContent(
+        {for (final c in changed) c.rel: c},
+        paired: const {},
+      );
+      if (wrote) {
+        final cb = onChanged;
+        if (cb != null) cb();
+      }
+    });
+  }
+
   /// Reconciles [abs] with disk: if it exists as a directory the whole
   /// subtree is re-synced (covering renames/moves whose new path was not in
   /// the event batch), if it is a file it is upserted, and if it is gone its

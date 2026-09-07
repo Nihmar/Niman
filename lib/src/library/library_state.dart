@@ -171,11 +171,18 @@ final class LibraryController implements LibrarySession {
 
   @override
   Future<ReplaceSource?> get replaceSource async {
-    // Stateless over the index + the current root; one per call (the
-    // screen resolves it when the user asks to replace).
+    // Bound to the current root + indexer: rewritten notes are re-indexed
+    // through applyEvents as each write batch lands, so search reflects a
+    // replace without waiting on the (Android-unreliable) watcher or the
+    // periodic rescan.
     final root = _root;
-    if (root == null) return null;
-    return ReplaceRunner(await database, root);
+    final indexer = _indexer;
+    if (root == null || indexer == null) return null;
+    return ReplaceRunner(
+      await database,
+      root,
+      onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
+    );
   }
 
   @override

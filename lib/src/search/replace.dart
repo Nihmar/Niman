@@ -5,10 +5,12 @@
 /// index is only ever rebuilt from it. Candidate notes come from an FTS
 /// phrase lookup (the term as a phrase, no prefix), then every candidate
 /// file is read off the UI isolate, the term is replaced only where it
-/// stands as whole words, and the file is written back atomically. The
-/// file watcher picks the writes up and re-indexes, so FTS/tags/stems
-/// catch up by themselves. The preview scan runs the same pass without
-/// writing, for the screen's live before/after list.
+/// stands as whole words, and the file is written back atomically. Each
+/// batch of rewritten notes is re-indexed right away through
+/// [ReplaceRunner.onNotesReindexed] — the file watcher is unreliable on
+/// Android's emulated storage, so waiting for it would leave the search
+/// index stale until the periodic rescan. The preview scan runs the same
+/// pass without writing, for the screen's live before/after list.
 library;
 
 import 'dart:convert';
@@ -116,11 +118,21 @@ abstract interface class ReplaceSource {
 /// The production [ReplaceSource] over the library index and disk (see the
 /// class docs at the top of this file).
 final class ReplaceRunner implements ReplaceSource {
-  /// Creates a runner for the library root and index database given to it.
-  ReplaceRunner(this._db, this._root);
+  /// Creates a runner for the library root and index database given to it;
+  /// [onNotesReindexed] is invoked with the absolute paths of every note
+  /// this run rewrote, right after the batch that rewrote them.
+  ReplaceRunner(
+    this._db,
+    this._root, {
+    this.onNotesReindexed,
+  });
 
   final CopistDatabase _db;
   final String _root;
+
+  /// Called with the rewritten notes' absolute paths, per write batch, so
+  /// the caller can re-index them without waiting for the watcher.
+  final Future<void> Function(List<String> absolutePaths)? onNotesReindexed;
 
   /// How many context characters a preview sample keeps around a match.
   static const int _sampleRadius = 30;
@@ -206,21 +218,31 @@ final class ReplaceRunner implements ReplaceSource {
     final root = _root;
     const chunk = 24;
     for (var i = 0; i < todo.length; i += chunk) {
-      final end = math.min(i + chunk, todo.length);
+      final rels = todo.sublist(i, math.min(i + chunk, todo.length));
       final results = await Isolate.run(
         () => _replaceChunk(
           root,
-          todo.sublist(i, end),
+          rels,
           term,
           replacement,
           caseSensitive,
         ),
       );
-      for (final (changed, count) in results) {
-        if (changed) notesChanged++;
+      final changed = <String>[];
+      for (var j = 0; j < results.length; j++) {
+        final (wasChanged, count) = results[j];
+        if (wasChanged) {
+          notesChanged++;
+          changed.add(p.join(root, rels[j]));
+        }
         occurrences += count;
       }
-      if (end < todo.length) await Future<void>.delayed(Duration.zero);
+      // Re-index the rewritten notes right away (per batch, so a long run
+      // streams the work): the watcher cannot be relied on here.
+      if (changed.isNotEmpty) {
+        await onNotesReindexed?.call(changed);
+      }
+      if (i + chunk < todo.length) await Future<void>.delayed(Duration.zero);
     }
     log.debug(
       'replace "$term": $occurrences occurrence(s) in $notesChanged '

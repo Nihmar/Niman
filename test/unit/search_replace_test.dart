@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/search/replace.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -252,6 +253,60 @@ void main() {
       );
       expect(report.notesScanned, 0);
       expect(report.occurrences, 0);
+    });
+
+    test('rewritten notes are re-indexed through the hook per batch',
+        () async {
+      final batches = <List<String>>[];
+      final hooked = ReplaceRunner(
+        db,
+        root.path,
+        onNotesReindexed: (paths) async => batches.add(paths),
+      );
+      await hooked.replaceAll(
+        term: 'cat',
+        replacement: 'dog',
+        caseSensitive: false,
+      );
+      // One batch for the two changed notes; the unchanged note is not in
+      // it, and the paths are absolute.
+      expect(batches, hasLength(1));
+      final changed = batches.single.toSet();
+      expect(changed, {file('a.md').path, file('sub/x.md').path});
+    });
+
+    test('the index reflects a replace right away (no watcher needed)',
+        () async {
+      final indexer = Indexer(db);
+      final hooked = ReplaceRunner(
+        db,
+        root.path,
+        onNotesReindexed: (paths) => indexer.rescanFiles(root.path, paths),
+      );
+      await hooked.replaceAll(
+        term: 'cat',
+        replacement: 'dog',
+        caseSensitive: false,
+      );
+      // The rewritten notes are searchable under the new word…
+      final hits = await db
+          .customSelect(
+            'SELECT notes.path FROM notes JOIN notes_fts '
+            "ON notes.id = notes_fts.rowid WHERE notes_fts MATCH 'dog'",
+          )
+          .get();
+      expect(
+        hits.map((r) => r.read<String>('path')),
+        containsAll(['a.md', 'sub/x.md']),
+      );
+      // …and the old word is gone from the index.
+      final old = await db
+          .customSelect(
+            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+            variables: [const Variable<String>('cat')],
+          )
+          .getSingle();
+      expect(old.read<int>('c'), 0);
     });
   });
 }
