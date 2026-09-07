@@ -7,8 +7,10 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
+import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/library/image_import.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
@@ -575,54 +577,206 @@ final class _NoteViewState extends State<NoteView>
             onJump: _jumpToHeading,
           ),
         SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-            child: Row(
-              children: [
-                if (!_loading)
-                  IconButton(
-                    key: const Key('insert-image'),
-                    tooltip: AppStrings.insertImageTooltip,
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
-                    ),
-                    onPressed: _insertImage,
-                  ),
-                if (!_loading)
-                  IconButton(
-                    key: const Key('outline-toggle'),
-                    tooltip: AppStrings.outlineTooltip,
-                    icon: const Icon(Icons.toc),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
-                    ),
-                    onPressed: () =>
-                        setState(() => _showOutline = !_showOutline),
-                  ),
-                if (!_loading)
-                  Text(
-                    '$_wordCount words',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                const Spacer(),
-                Text(
-                  _status,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _statusRow(context),
+              if (!_loading) _toolbar(context),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  /// The status row (T-UI-07): outline toggle + word count left, saved/
+  /// unsaved right.
+  Widget _statusRow(BuildContext context) {
+    final labelStyle = Theme.of(context).textTheme.labelSmall;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      child: Row(
+        children: [
+          if (!_loading)
+            IconButton(
+              key: const Key('outline-toggle'),
+              tooltip: AppStrings.outlineTooltip,
+              icon: const Icon(Icons.toc),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 26,
+              ),
+              onPressed: () => setState(() => _showOutline = !_showOutline),
+            ),
+          if (!_loading)
+            Text(
+              '$_wordCount words',
+              style: labelStyle?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          const Spacer(),
+          Text(_status, style: labelStyle),
+        ],
+      ),
+    );
+  }
+
+  /// The formatting toolbar (T-UI-08): pure markdown commands applied
+  /// through the controller; the image button keeps the file-picker flow
+  /// (T-M2-09) it already had in the status row.
+  Widget _toolbar(BuildContext context) {
+    return EditorToolbar(
+      buttons: [
+        EditorToolbarButton(
+          key: const Key('toolbar-bold'),
+          icon: Icons.format_bold,
+          tooltip: 'Bold',
+          onPressed: () => _wrapSelection(left: '**', right: '**'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-italic'),
+          icon: Icons.format_italic,
+          tooltip: 'Italic',
+          onPressed: () => _wrapSelection(left: '*', right: '*'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-strike'),
+          icon: Icons.strikethrough_s,
+          tooltip: 'Strikethrough',
+          onPressed: () => _wrapSelection(left: '~~', right: '~~'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-sup'),
+          icon: Icons.superscript,
+          tooltip: 'Superscript',
+          onPressed: () => _wrapSelection(left: '<sup>', right: '</sup>'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-underline'),
+          icon: Icons.format_underline,
+          tooltip: 'Underline',
+          onPressed: () => _wrapSelection(left: '<u>', right: '</u>'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-link'),
+          icon: Icons.link,
+          tooltip: 'Link',
+          onPressed: () => _wrapSelection(left: '[[', right: ']]'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-code'),
+          icon: Icons.code,
+          tooltip: 'Code block',
+          onPressed: _insertCodeBlock,
+        ),
+        EditorToolbarButton(
+          key: const Key('insert-image'),
+          icon: Icons.add_photo_alternate_outlined,
+          tooltip: AppStrings.insertImageTooltip,
+          onPressed: _insertImage,
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-list'),
+          icon: Icons.format_list_bulleted,
+          tooltip: 'List',
+          onPressed: () => _prefixLines(prefix: '- '),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-quote'),
+          icon: Icons.format_quote,
+          tooltip: 'Quote',
+          onPressed: () => _prefixLines(prefix: '> '),
+        ),
+      ],
+    );
+  }
+
+  /// Applies a pure markdown command's result through the controller: the
+  /// whole text + selection are replaced in one revocable op (undo works).
+  void _applyMarkdownEdit(MarkdownEdit edit) {
+    _controller.runRevocableOp(() {
+      _controller.value = CodeLineEditingValue(
+        codeLines: CodeLines.fromText(edit.text),
+        selection: _codeLineSelection(edit.selection),
+      );
+    });
+  }
+
+  void _wrapSelection({required String left, required String right}) {
+    _applyMarkdownEdit(wrapSelection(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+      left: left,
+      right: right,
+    ));
+  }
+
+  void _insertCodeBlock() {
+    _applyMarkdownEdit(codeBlock(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+    ));
+  }
+
+  void _prefixLines({required String prefix}) {
+    _applyMarkdownEdit(prefixLines(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+      prefix: prefix,
+    ));
+  }
+
+  /// Converts re_editor's line+offset selection to whole-text offsets
+  /// (called once per toolbar tap, so the O(n) scan is fine).
+  TextSelection _textSelection(CodeLineSelection selection) {
+    return TextSelection(
+      baseOffset: _globalOffset(selection.baseIndex, selection.baseOffset),
+      extentOffset:
+          _globalOffset(selection.extentIndex, selection.extentOffset),
+    );
+  }
+
+  int _globalOffset(int line, int offset) {
+    final text = _controller.text;
+    var index = 0;
+    for (var current = 0; current < line; current++) {
+      final nl = text.indexOf('\n', index);
+      if (nl < 0) return text.length;
+      index = nl + 1;
+    }
+    return index + offset;
+  }
+
+  /// Maps a whole-text [TextSelection] to re_editor's line+offset model
+  /// (the buffer is LF-only; the line index counts the newlines before
+  /// the offset).
+  CodeLineSelection _codeLineSelection(TextSelection selection) {
+    final text = _controller.text;
+    var line = 0;
+    var lineStart = 0;
+    for (var i = 0; i < selection.start; i++) {
+      if (text.codeUnitAt(i) == 0x0A) {
+        line++;
+        lineStart = i + 1;
+      }
+    }
+    final baseOffset = selection.start - lineStart;
+    var extentLine = line;
+    var extentStart = lineStart;
+    for (var i = selection.start; i < selection.end; i++) {
+      if (text.codeUnitAt(i) == 0x0A) {
+        extentLine++;
+        extentStart = i + 1;
+      }
+    }
+    return CodeLineSelection(
+      baseIndex: line,
+      baseOffset: baseOffset,
+      extentIndex: extentLine,
+      extentOffset: selection.end - extentStart,
     );
   }
 

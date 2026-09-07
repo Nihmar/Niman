@@ -91,10 +91,10 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   shell owns `_previewVisible`; the phone note app bar and the wide app bar
   show one `editor-preview-toggle` action when the effective layout is not
   split — widget tested (`layout_modes_test`).*
-- [ ] **T-UI-07** Editor status row: `N words` left, `saved`/`unsaved` right.
+- [x] **T-UI-07** Editor status row: `N words` left, `saved`/`unsaved` right.
   Insert-image moves to the toolbar (T-UI-08); the outline toggle stays in
   this row (confirmed).
-- [ ] **T-UI-08** `EditorToolbar` (`lib/src/editor/toolbar.dart`) over the
+- [x] **T-UI-08** `EditorToolbar` (`lib/src/editor/toolbar.dart`) over the
   status row: bold, italic, strikethrough, superscript, underline, link,
   code, image, list, quote, **evenly spaced** (the mockup’s trailing gear
   and its uneven spacing are dropped). Each button applies a pure command
@@ -102,7 +102,8 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   (text + selection → new text + selection) through the re_editor
   `CodeLineEditingController`. *AC: unit tests for wrap-selection,
   empty-selection (insert markers at caret), and list/quote prefixing per
-  line.*
+  line — `md_editing_test.dart` (9 tests); toolbar edits run in one
+  revocable op (undo works).*
 - [ ] **T-UI-09** Editor text styling: wikilinks → theme accent + underline in
   `highlight_style.dart` (both palettes); heading bottom rule + frontmatter
   left rule if re_editor supports per-line decorations (else R5 fallback).
