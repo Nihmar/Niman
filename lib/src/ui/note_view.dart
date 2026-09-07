@@ -575,6 +575,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// off-screen — the preview is brought to the heading's block as well,
   /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
+    const AppLogger(name: 'links').debug('jump to source line $line');
     _controller.selection = CodeLineSelection.collapsed(
       index: line,
       offset: 0,
@@ -587,15 +588,61 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   /// Scrolls the preview so the block starting at source [line] is in
   /// view (no-op when the preview is hidden or not laid out yet).
-  void _syncPreviewToLine(int line) {
-    if (!widget.showPreview) return;
+  ///
+  /// The preview windowing lays out only the blocks near the viewport, so
+  /// right after open the scroll map is incomplete and the list's total
+  /// extent is an estimate: a single jump lands at the line-fraction
+  /// estimate, and the blocks it passes then measure, growing the extent.
+  /// A few post-frame passes refine the position (T-M3-09 device report:
+  /// anchor taps in the phone preview-only mode never moved — the jump
+  /// bailed on the incomplete map). The loop stops when the map is
+  /// complete, the position stops moving, or the attempts run out.
+  void _syncPreviewToLine(int line, {int attempt = 0}) {
+    if (!widget.showPreview || !mounted) return;
+    const AppLogger(name: 'links').debug(
+      'anchor jump: scheduling preview scroll to line $line '
+      '(attempt $attempt, preview ${widget.showPreview ? 'shown' : 'hidden'})',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_previewMap.isReady) return;
-      final offset = _previewMap.previewOffsetForLine(
+      const log = AppLogger(name: 'links');
+      if (!mounted) return;
+      if (!_previewScroll.hasClients) {
+        log.debug('anchor jump: preview scroll not attached — skipped');
+        return;
+      }
+      final map = _previewMap;
+      final position = _previewScroll.position;
+      final maxExtent = position.maxScrollExtent;
+      if (maxExtent <= 0 || map.lineCount == 0) {
+        log.debug(
+          'anchor jump: preview not laid out yet '
+          '(extent $maxExtent, lines ${map.lineCount}) — skipped',
+        );
+        return;
+      }
+      final offset = map.previewOffsetForLine(
         line,
-        maxExtent: _previewScroll.position.maxScrollExtent,
+        maxExtent: maxExtent,
       );
-      if (offset != null) _previewScroll.jumpTo(offset);
+      if (offset == null) {
+        log.debug('anchor jump: no blocks laid out — skipped');
+        return;
+      }
+      final moved = (position.pixels - offset).abs() > 1;
+      if (moved) {
+        log.debug(
+          'anchor jump: source line $line -> preview offset '
+          '${offset.round()}px (extent ${maxExtent.round()}px, '
+          'map ${map.isReady ? 'complete' : 'estimating'}, '
+          'attempt $attempt)',
+        );
+        position.jumpTo(offset);
+      }
+      if (moved && !map.isReady && attempt < 12 && offset > 0) {
+        // One more pass: the jump measured the blocks it passed, so the
+        // extent (and the landing) is closer now.
+        _syncPreviewToLine(line, attempt: attempt + 1);
+      }
     });
   }
 

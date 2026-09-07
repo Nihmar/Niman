@@ -156,6 +156,48 @@ void main() {
     expect(find.text('Link not found'), findsOne);
   });
 
+  testWidgets('a local-anchor tap scrolls a long note in preview-only mode', (
+    tester,
+  ) async {
+    // T-M3-09 device report: anchor links tapped in the phone preview
+    // never moved — the windowed preview's scroll map is incomplete right
+    // after open, and the jump bailed on it. The heading sits far below
+    // the initial viewport (its block is not even built yet); the tap
+    // must land close enough for the windowed list to build it.
+    final source = FakeLinkSource(notes: ['current.md']);
+    final buffer = StringBuffer('Go [[#Target Heading|target]] here.\n\n')
+      ..writeAll([
+        for (var i = 0; i < 240; i++)
+          'Filler paragraph $i with some ordinary words.\n\n',
+        '## Target Heading\n\n',
+        'The section body the jump must reveal.\n',
+      ]);
+    await tester.pumpWidget(
+      _app(
+        _view(
+          content: buffer.toString(),
+          source: source,
+          showPreview: true,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    // Not built yet: the windowed list never laid the heading out.
+    expect(find.text('Target Heading', findRichText: true), findsNothing);
+
+    await _tapParagraphAt(tester, 'Go target here.', 3, 9);
+    // The jump + its post-frame refinements. The test binding only draws
+    // a frame when one is scheduled, so each pass forces one.
+    for (var i = 0; i < 14; i++) {
+      tester.binding.scheduleFrame();
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(find.text('Target Heading', findRichText: true), findsOneWidget);
+    expect(find.text('Link not found'), findsNothing);
+    expect(find.text('Heading not found'), findsNothing);
+  });
+
   testWidgets('a wikilink with an anchor opens the note with the anchor', (
     tester,
   ) async {
