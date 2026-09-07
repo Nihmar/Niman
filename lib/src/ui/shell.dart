@@ -122,7 +122,8 @@ enum ShellTab {
   settings,
 }
 
-final class _LibraryShellState extends State<_LibraryShell> {
+final class _LibraryShellState extends State<_LibraryShell>
+    with WidgetsBindingObserver {
   String? _selected;
   bool _selectedIsDir = false;
   final Set<String> _expanded = <String>{};
@@ -239,6 +240,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _todoController = TodoController(
       session: widget.controller,
       reminders: widget.reminders,
@@ -257,9 +259,20 @@ final class _LibraryShellState extends State<_LibraryShell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     unawaited(_reminderTaps?.cancel());
     _todoController.dispose();
     super.dispose();
+  }
+
+  /// Re-reconciles reminders on return to the app: the exact-alarm and
+  /// notification grants live in system settings, so coming back from
+  /// there must reschedule without waiting for the next file change.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_todoController.resyncReminders());
+    }
   }
 
   /// A notification tap that started the app lands on the Todo tab.

@@ -205,5 +205,16 @@ void main() {
         'kept',
       );
     });
+
+    test('resyncReminders reconciles without touching the files', () async {
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      await reminded.add('call rem:2026-09-08T10:30');
+      await waitFor(() => reminders.reconciled.length == 2);
+      expect(reminders.reconciled.last, hasLength(1));
+      await reminded.resyncReminders();
+      await waitFor(() => reminders.reconciled.length == 3);
+      expect(reminders.reconciled.last, hasLength(1));
+    });
   });
 }

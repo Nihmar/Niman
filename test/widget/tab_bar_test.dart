@@ -484,6 +484,49 @@ void main() {
     await reminders.dispose();
   });
 
+  testWidgets('the Todo add button creates a task (T-TD-08)', (tester) async {
+    _setPhoneSize(tester);
+    final reminders = FakeReminderService();
+    final todos = FakeTodoSource();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          reminderServiceProvider.overrideWithValue(reminders),
+          todoSourceFactoryProvider.overrideWithValue((_) => todos),
+        ],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Todo'),
+      ),
+    );
+    await settle(tester);
+    expect(find.text('No open tasks yet'), findsOne);
+
+    await tester.tap(find.byKey(const Key('todo-add')));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('todo-dialog-field')),
+      'shell task',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(find.text('shell task'), findsOneWidget);
+    // The add stamps the creation date.
+    expect(
+      todos.todoLines.single,
+      matches(RegExp(r'^\d{4}-\d{2}-\d{2} shell task$')),
+    );
+    await reminders.dispose();
+  });
+
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();

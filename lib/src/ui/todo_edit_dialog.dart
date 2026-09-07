@@ -1,11 +1,13 @@
 /// Add/edit dialog over one todo.txt line (plan/todo-tab.md T-TD-06).
 ///
 /// The dialog edits the description text (with `+`/`@`/`#` completion
-/// from the known-token pool) plus three managed fields — priority,
-/// due date and reminder — that rewrite only their own slot ([withKeyValueTag]
-/// for `due:`/`rem:`), so unknown tags (`rec:`, `foo:bar`, …) survive
-/// verbatim. A picker the user never touches leaves its text exactly
-/// as typed. Resolves to the new raw line, or null on cancel.
+/// from the known-token pool; the current tokens also show as removable
+/// chips, and three add buttons start a new token even on a fresh task)
+/// plus three managed fields — priority, due date and reminder —
+/// that rewrite only their own slot ([withKeyValueTag] for `due:`/`rem:`),
+/// so unknown tags (`rec:`, `foo:bar`, …) survive verbatim. A picker the
+/// user never touches leaves its text exactly as typed. Resolves to the
+/// new raw line, or null on cancel.
 library;
 
 import 'package:copist/src/core/logging.dart';
@@ -70,10 +72,25 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   bool _reminderDirty = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Rebuild on focus change so the inline completion suggestions appear
+    // and disappear with the field's focus (they must not linger after a
+    // pick, which leaves the caret past any token).
+    _focus.addListener(_onFocusChanged);
+  }
+
+  @override
   void dispose() {
+    _focus.removeListener(_onFocusChanged);
     _field.dispose();
     _focus.dispose();
     super.dispose();
+  }
+
+  /// [FocusNode] callback: [setState] when focus toggles (see [initState]).
+  void _onFocusChanged() {
+    setState(() {});
   }
 
   /// The word under the caret when it opens a `+`/`@`/`#` token, else
@@ -111,7 +128,8 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     );
   }
 
-  /// Replaces the word under the caret with [selection].
+  /// Replaces the word under the caret with [selection] (the known-token
+  /// completion pick), keeping the rest of the description untouched.
   void _insertOption(String selection) {
     final text = _field.text;
     final caret = _field.selection.extentOffset;
@@ -125,6 +143,49 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       text: text.replaceRange(start[0], end, selection),
       selection: TextSelection.collapsed(offset: start[0] + selection.length),
     );
+  }
+
+  /// The distinct `+`/`@`/`#` tokens of the current field text (parsed
+  /// live, so typed tokens appear as chips immediately).
+  List<String> _fieldTokens() {
+    final task = parseTodoLine(_field.text);
+    return <String>{
+      for (final value in task.projects) '+$value',
+      for (final value in task.contexts) '@$value',
+      for (final value in task.hashtags) '#$value',
+    }.toList();
+  }
+
+  /// Removes [token] from the field text.
+  void _removeToken(String token) {
+    _log.debug('todo dialog token removed: $token');
+    final text = withoutToken(_field.text, token);
+    _field.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    setState(() {});
+  }
+
+  /// Starts a `+`/`@`/`#` token at the end of the field text and
+  /// focuses it: typing continues the token, with the known-token
+  /// completion popup offering matches (T-TD-06). The explicit buttons
+  /// matter on a fresh task, where no chips exist yet to reveal that
+  /// tokens can be typed.
+  void _insertSigil(String sigil) {
+    _log.debug('todo dialog token add: $sigil');
+    final head = _field.text;
+    final spaced =
+        head.isEmpty || head.endsWith(' ') || head.endsWith('\t')
+        ? head
+        : '$head ';
+    final text = '$spaced$sigil';
+    _field.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _focus.requestFocus();
+    setState(() {});
   }
 
   /// Picks the due date (writes/updates `due:` on save).
@@ -225,6 +286,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   @override
   Widget build(BuildContext context) {
     final adding = widget.initial == null;
+    final tokens = _fieldTokens();
     return AlertDialog(
       title: Text(
         adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle,
@@ -233,49 +295,51 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RawAutocomplete<String>(
-              textEditingController: _field,
-              focusNode: _focus,
-              optionsBuilder: _options,
-              onSelected: _insertOption,
-              fieldViewBuilder:
-                  (context, controller, focusNode, onSubmitted) {
-                    return TextField(
-                      key: const Key('todo-dialog-field'),
-                      controller: controller,
-                      focusNode: focusNode,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        hintText: AppStrings.todoDescriptionHint,
+            // Completion is per-token, not whole-value: the word under the
+            // caret is replaced, so a fresh task can type a description and
+            // then pick `+project`/`@context`/`#tag` without losing it.
+            // (flutter's RawAutocomplete would clobber the whole field with
+            // the option, so this inline list replaces it as the overlay.)
+            _fieldBox(context),
+            if (_focus.hasFocus && _completions.isNotEmpty)
+              _completionList(_completions),
+            if (tokens.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    for (final token in tokens)
+                      InputChip(
+                        key: Key('todo-token-chip-$token'),
+                        label: Text(token),
+                        deleteIcon: const Icon(Icons.cancel_outlined),
+                        visualDensity: VisualDensity.compact,
+                        onDeleted: () => _removeToken(token),
                       ),
-                      textInputAction: TextInputAction.done,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _save(),
-                    );
-                  },
-              optionsViewBuilder: (context, onSelected, options) {
-                return Align(
-                  alignment: Alignment.topLeft,
-                  child: Material(
-                    elevation: 4,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: options.length,
-                        itemBuilder: (context, index) {
-                          final option = options.elementAt(index);
-                          return ListTile(
-                            key: Key('todo-complete-$option'),
-                            title: Text(option),
-                            onTap: () => onSelected(option),
-                          );
-                        },
-                      ),
+                  ],
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: [
+                  for (final kind in <(String, String)>[
+                    ('+', AppStrings.todoAddProject),
+                    ('@', AppStrings.todoAddContext),
+                    ('#', AppStrings.todoAddHashtag),
+                  ])
+                    ActionChip(
+                      key: Key('todo-token-add-${kind.$1}'),
+                      label: Text(kind.$2),
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _insertSigil(kind.$1),
                     ),
-                  ),
-                );
-              },
+                ],
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -384,6 +448,50 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
           onPressed: _field.text.trim().isEmpty ? null : _save,
           child: const Text(AppStrings.todoSave),
         ),
+      ],
+    );
+  }
+
+  /// The known tokens completing the word under the caret, capped so a huge
+  /// vocabulary never floods the dialog.
+  List<String> get _completions => _options(_field.value).take(6).toList();
+
+  /// The description entry field (single line, Enter saves).
+  Widget _fieldBox(BuildContext context) {
+    return TextField(
+      key: const Key('todo-dialog-field'),
+      controller: _field,
+      focusNode: _focus,
+      autofocus: true,
+      decoration: const InputDecoration(
+        hintText: AppStrings.todoDescriptionHint,
+      ),
+      textInputAction: TextInputAction.done,
+      onChanged: (_) => setState(() {}),
+      onSubmitted: (_) => _save(),
+    );
+  }
+
+  /// The tap-to-pick list of completion [options] under the field.
+  ///
+  /// A plain column (no scroll viewport): the dialog is itself intrinsic-
+  /// sized, and a scrolling list inside that fails the intrinsic measure.
+  /// The pool is already capped at six, well within the dialog's scroll.
+  Widget _completionList(List<String> options) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final option in options)
+          ListTile(
+            key: Key('todo-complete-$option'),
+            dense: true,
+            visualDensity: VisualDensity.compact,
+            title: Text(option),
+            onTap: () {
+              _log.debug('todo dialog completion: $option');
+              _insertOption(option);
+            },
+          ),
       ],
     );
   }

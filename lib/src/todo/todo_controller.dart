@@ -164,6 +164,12 @@ final class TodoController extends ChangeNotifier {
     }
   }
 
+  /// Re-reconciles OS reminders with the current snapshot without
+  /// touching the files: the shell calls this on app resume, so a grant
+  /// made in system settings (exact alarms, notifications) takes effect
+  /// when the user returns instead of waiting for the next file change.
+  Future<void> resyncReminders() => _syncReminders();
+
   /// Reconciles OS reminders with the current snapshot (fire-and-forget:
   /// scheduling never blocks the op, and a denied permission or a dead
   /// plugin only logs). Null snapshot (library closed) clears them.

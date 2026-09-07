@@ -392,4 +392,32 @@ void main() {
       );
     });
   });
+
+  group('withoutToken', () {
+    test('removes every whole-word occurrence', () {
+      expect(
+        withoutToken('buy +groceries and +groceries @home', '+groceries'),
+        'buy and @home',
+      );
+    });
+
+    test('never eats longer tokens sharing the prefix', () {
+      expect(
+        withoutToken('big +projectX here', '+project'),
+        'big +projectX here',
+      );
+    });
+
+    test('sigils inside words are left alone', () {
+      expect(withoutToken('mail a+b here', '+b'), 'mail a+b here');
+    });
+
+    test('unknown tags remove like any word', () {
+      expect(withoutToken('water rec:+1d plants', 'rec:+1d'), 'water plants');
+    });
+
+    test('a bare sigil changes nothing', () {
+      expect(withoutToken('buy milk', '+'), 'buy milk');
+    });
+  });
 }

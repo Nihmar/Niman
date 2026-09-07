@@ -383,4 +383,80 @@ void main() {
     await settle(tester);
     expect(result, '2026-09-07 new task due:2026-09-07');
   });
+
+  testWidgets('dialog chips show tokens and delete removes one', (
+    tester,
+  ) async {
+    await pumpTab(tester, todo: ['buy milk +groceries @home']);
+    await tester.tap(find.text('buy milk +groceries @home'));
+    await settle(tester);
+    expect(
+      find.byKey(const Key('todo-token-chip-+groceries')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('todo-token-chip-@home')), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('todo-token-chip-+groceries')),
+        matching: find.byIcon(Icons.cancel_outlined),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('todo-token-chip-+groceries')), findsNothing);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['buy milk @home']);
+  });
+
+  testWidgets('add buttons start a token that completion can finish', (
+    tester,
+  ) async {
+    String? result;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return TextButton(
+                onPressed: () async {
+                  result = await showTodoTaskDialog(
+                    context,
+                    today: DateTime(2026, 9, 7),
+                    knownTokens: const {'+groceries'},
+                  );
+                },
+                child: const Text('open dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open dialog'));
+    await settle(tester);
+    // A fresh task has no chips yet, but the add buttons are visible.
+    expect(find.byKey(const Key('todo-token-chip-+groceries')), findsNothing);
+    expect(find.byKey(const Key('todo-token-add-+')), findsOneWidget);
+    expect(find.byKey(const Key('todo-token-add-@')), findsOneWidget);
+    expect(find.byKey(const Key('todo-token-add-#')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('todo-token-add-+')));
+    await tester.pump();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('todo-dialog-field')))
+          .controller!
+          .text,
+      '+',
+    );
+    await tester.enterText(
+      find.byKey(const Key('todo-dialog-field')),
+      'milk +g',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-complete-+groceries')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(result, '2026-09-07 milk +groceries');
+  });
 }

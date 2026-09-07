@@ -366,6 +366,22 @@ String withKeyValueTag(String description, String key, String? value) {
   return out.isEmpty ? token : '$out $token';
 }
 
+/// Returns [description] without the `+`/`@`/`#` [token] (sigil
+/// included, e.g. `+groceries`): every whole-word occurrence removed,
+/// leftover whitespace collapsed. Powers the dialog's token chips
+/// (T-TD-06): unknown tags are words like any other here, so this only
+/// ever removes the tapped token.
+String withoutToken(String description, String token) {
+  if (token.length < 2) {
+    return description;
+  }
+  final word = RegExp('(?:^|\\s)${RegExp.escape(token)}(?=\\s|\$)');
+  return description
+      .replaceAll(word, '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 /// Formats [date] as `YYYY-MM-DD` (drops any time part).
 String formatTodoDate(DateTime date) {
   final year = date.year.toString().padLeft(4, '0');

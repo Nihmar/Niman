@@ -1,7 +1,10 @@
 # Todo tab — a frontend for todo.txt / done.txt
 
-**Status:** Planned (draft — design agreed 2026-09-07; no milestone slot
-assigned yet; candidate: its own slice after M3 verification, or M6) ·
+**Status:** Implemented 2026-09-08 (T-TD-01…T-TD-08 green on host;
+finished on-device 2026-09-08: reminders now delivered with the app
+closed — the plugin's manifest receivers/boot permission, which were
+missing and silently swallowed every scheduled alarm, were added;
+project/context/tag pickable when adding a task) ·
 **Depends on:** M3 (shell, watcher, indexer, strings) · **Spec:**
 user request + the todo.txt syntax diagram in `reference/description.svg`
 (the canonical format from the todo.txt project).
@@ -96,15 +99,24 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   parser keeps.*
 - [x] **T-TD-07** Reminders (Android): flutter_local_notifications +
   timezone; `POST_NOTIFICATIONS` runtime permission flow (13+); an
-  inexact scheduled notification at `rem:` (no exact-alarm permission);
+  exact scheduled notification at `rem:` (`SCHEDULE_EXACT_ALARM`,
+  settings grant asked once while future reminders are wanted,
+  inexact fallback while denied — inexact alone proved too loose on
+  device: a same-minute alarm had not fired 6 s past the time);
   cancel on complete/delete, reschedule on edit; **reconciliation at
   every app/library open**: scheduled notifications are diffed against
   the parsed `rem:` tags (survives external edits and re-installs of the
-  files). Notification tap opens the app on the Todo tab. Desktop
-  (Linux/Windows): no OS notifications in v1 — the due badges carry the
-  state; documented limitation. *AC: on-device — reminder fires with the
-  app closed; completing the task before the time cancels it.*
-- [ ] **T-TD-08** Strings + tests: all UI text in `strings.dart`; widget
+  files). Manifest declares the plugin's
+  `ScheduledNotificationReceiver` + boots receiver and `RECEIVE_BOOT_`
+  `COMPLETED` — flutter_local_notifications (>=16) ships only the bare
+  permissions, so without the receivers alarms are scheduled but never
+  surface once the app leaves the foreground (the fix for "no
+  reminders" on device). Notification tap opens the app on the Todo
+  tab. Desktop (Linux/Windows): no OS notifications in v1 — the due
+  badges carry the state; documented limitation. *AC: on-device —
+  reminder fires with the app closed; completing the task before the
+  time cancels it.*
+- [x] **T-TD-08** Strings + tests: all UI text in `strings.dart`; widget
   tests with a fake store for dialogs, filters, Open/Done and the move
   flows; parser/store unit tests per task. *AC: green; on-device pass
   with the user's real `todo.txt`/`done.txt` in `reference/` as the
@@ -143,5 +155,3 @@ tasks live in `done.txt`, everything else in `todo.txt`.
 - Tree visibility of `todo.txt`/`done.txt` (default: keep visible;
   alternative: hide like `.trash`).
 - In-app reminder banner on desktop while running (cheap follow-up).
-- Exact alarm permission later if reminders must be precise to the
-  minute on Android 12+.

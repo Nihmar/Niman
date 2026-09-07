@@ -7,8 +7,8 @@
 /// Scheduling is a full replace (cancel all, schedule the wanted),
 /// idempotent and free of stored state.
 ///
-/// Platform split: Android schedules inexact OS notifications (no
-/// exact-alarm permission) through `flutter_local_notifications` +
+/// Platform split: Android schedules OS notifications (exact alarms
+/// once granted, inexact fallback) through `flutter_local_notifications` +
 /// `timezone`; every other platform gets [NoopReminderService] — no OS
 /// notifications in v1, the due badges carry the state (documented
 /// limitation). Widget tests inject a fake; the plugin itself is only
@@ -138,8 +138,9 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
   return service;
 });
 
-/// Android reminders via `flutter_local_notifications` (inexact alarms
-/// — no exact-alarm permission) + `timezone` for the local wall clock.
+/// Android reminders via `flutter_local_notifications` (exact alarms
+/// with an inexact fallback — see [_ensureExact]) + `timezone` for the
+/// local wall clock.
 final class LocalReminderService implements ReminderService {
   /// The plugin (method channels — on-device only, never in tests).
   final FlutterLocalNotificationsPlugin _plugin =
@@ -151,6 +152,7 @@ final class LocalReminderService implements ReminderService {
 
   bool _ready = false;
   bool _permissionAsked = false;
+  bool _exactAsked = false;
   bool _launchConsumed = false;
 
   /// Timezone database + plugin init, once (idempotent).
@@ -198,6 +200,28 @@ final class LocalReminderService implements ReminderService {
     return await android.requestNotificationsPermission() ?? false;
   }
 
+  /// Whether minute-precise (exact) alarms can be scheduled: granted in
+  /// system settings on Android 12+ (the request opens settings once per
+  /// process — only called while future reminders are wanted);
+  /// install-granted below 12 (the query answers null there).
+  Future<bool> _ensureExact() async {
+    final android = _plugin.resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin
+    >();
+    if (android == null) {
+      return true;
+    }
+    if (await android.canScheduleExactNotifications() ?? true) {
+      return true;
+    }
+    if (_exactAsked) {
+      return false;
+    }
+    _exactAsked = true;
+    _log.info('todo reminders: asking for the exact-alarm grant');
+    return await android.requestExactAlarmsPermission() ?? false;
+  }
+
   @override
   Future<void> reconcile(Map<int, TodoReminder> wanted) async {
     try {
@@ -206,41 +230,67 @@ final class LocalReminderService implements ReminderService {
       _log.warning('todo reminders unavailable: $error');
       return;
     }
-    if (!await _ensurePermission()) {
+    // Grants resolve BEFORE the cancel: the exact request opens system
+    // settings (the app backgrounds), and cancelling first would leave
+    // zero alarms behind when the user returns through onResume instead
+    // of a fresh reconcile. Nothing is asked while nothing is wanted.
+    final granted = wanted.isEmpty || await _ensurePermission();
+    final exact = granted && wanted.isNotEmpty && await _ensureExact();
+    // Full replace: no stored scheduling state to drift from the files.
+    await _plugin.cancelAll();
+    if (wanted.isEmpty) {
+      _log.info('todo reminders reconciled: 0 scheduled');
+      return;
+    }
+    if (!granted) {
       _log.info(
         'todo reminders: permission denied, '
         'clearing ${wanted.length} wanted',
       );
-      await _plugin.cancelAll();
       return;
     }
-    // Full replace: no stored scheduling state to drift from the files.
-    await _plugin.cancelAll();
+    if (!exact) {
+      _log.info('todo reminders: exact denied, falling back to inexact');
+    }
     final now = DateTime.now();
     var scheduled = 0;
     for (final reminder in wanted.values) {
       if (!reminder.when.isAfter(now)) {
         continue;
       }
-      await _plugin.zonedSchedule(
-        id: reminder.id,
-        title: reminder.title,
-        body: reminder.body,
-        scheduledDate: tz.TZDateTime.from(reminder.when, tz.local),
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'copist_reminders',
-            AppStrings.todoReminderChannel,
-            importance: Importance.max,
-            priority: Priority.high,
+      try {
+        await _plugin.zonedSchedule(
+          id: reminder.id,
+          title: reminder.title,
+          body: reminder.body,
+          scheduledDate: tz.TZDateTime.from(reminder.when, tz.local),
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'copist_reminders',
+              AppStrings.todoReminderChannel,
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
           ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        payload: todoReminderPayload,
-      );
+          androidScheduleMode: exact
+              ? AndroidScheduleMode.exactAllowWhileIdle
+              : AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: todoReminderPayload,
+        );
+      } on Object catch (error) {
+        // One bad alarm (e.g. exact without the grant) must not abort
+        // the rest of the set.
+        _log.warning(
+          'todo reminders: schedule failed for id ${reminder.id} ($error)',
+        );
+        continue;
+      }
       scheduled++;
     }
-    _log.info('todo reminders reconciled: $scheduled scheduled');
+    _log.info(
+      'todo reminders reconciled: $scheduled scheduled '
+      '(${exact ? 'exact' : 'inexact'})',
+    );
   }
 
   @override
