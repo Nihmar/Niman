@@ -106,6 +106,69 @@ final class AppStrings {
   static const String todoEmptyFiltered = 'No tasks match';
   static const String todoTitle = 'Todo';
   static const String todoAddTooltip = 'Add task';
+
+  // The todo.txt format help (T-TD-08).
+  static const String todoHelpTitle = 'The todo.txt format';
+  static const String todoHelpTooltip = 'Format help';
+  static const String todoHelpIntro =
+      'Your tasks are one plain text file, one task per line. Copist '
+      'writes the syntax for you, but nothing is hidden: you can edit '
+      'the file in any editor and Copist will read it back.';
+  static const String todoHelpFilesTitle = 'The two files';
+  static const String todoHelpFilesBody =
+      'Open tasks live in todo.txt at the root of your library. '
+      'Completing one moves its line to done.txt, so todo.txt stays '
+      'short. If a completed line ends up back in todo.txt, Copist '
+      'archives it the next time it reads the files.';
+  static const String todoHelpLineTitle = 'Anatomy of a line';
+  static const String todoHelpLineBody =
+      'Everything before the description is optional and must come in '
+      'this order:';
+  static const String todoHelpDone = 'x';
+  static const String todoHelpDoneBody =
+      'Marks the task done. Copist adds it when you tick the checkbox.';
+  static const String todoHelpPriority = '(A) to (Z)';
+  static const String todoHelpPriorityBody =
+      'Priority. A is the highest. Shown as a badge in the list.';
+  static const String todoHelpDates = '2026-09-08 2026-09-01';
+  static const String todoHelpDatesBody =
+      'Completion date, then creation date. With only one date it is the '
+      'creation date, unless the line starts with x.';
+  static const String todoHelpTokensTitle = 'Projects, contexts and tags';
+  static const String todoHelpTokensBody =
+      'Anywhere in the description, a word with one of these prefixes '
+      'becomes a chip you can filter by. Nothing is predefined: a token '
+      'exists as soon as you write it.';
+  static const String todoHelpProject = '+project';
+  static const String todoHelpProjectBody =
+      'What the task is part of, for example +kitchen or +thesis.';
+  static const String todoHelpContext = '@context';
+  static const String todoHelpContextBody =
+      'Where or how you will do it, for example @home or @calls.';
+  static const String todoHelpHashtag = '#tag';
+  static const String todoHelpHashtagBody =
+      'A free label, for anything the other two do not cover.';
+  static const String todoHelpTagsTitle = 'Dates and reminders';
+  static const String todoHelpTagsBody =
+      'These are key:value tags. Copist writes them from the task dialog, '
+      'and reads them wherever they appear on the line.';
+  static const String todoHelpDue = 'due:2026-09-09';
+  static const String todoHelpDueBody =
+      'The due date. Drives the coloured badge and the due filters.';
+  static const String todoHelpRem = 'rem:2026-09-08T14:30';
+  static const String todoHelpRemBody =
+      'When to send a notification, in your local time. It fires with '
+      'the screen off and the app closed.';
+  static const String todoHelpOther = 'anything:else';
+  static const String todoHelpOtherBody =
+      'Kept exactly as written, so tags from other todo.txt apps survive '
+      'a round trip. Copist does not act on them, rec: included: a '
+      'recurring task is not repeated yet.';
+  static const String todoHelpEditTitle = 'Editing outside Copist';
+  static const String todoHelpEditBody =
+      'A task you have not touched is written back byte for byte, odd '
+      'spacing included. Edit a line and Copist rewrites that one line in '
+      'its canonical form, leaving the rest of the file alone.';
   static const String todoAddTitle = 'Add task';
   static const String todoEditTitle = 'Edit task';
   static const String todoDescriptionHint = 'Description';

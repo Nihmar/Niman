@@ -144,6 +144,15 @@ void main() {
     expect(find.byKey(const Key('todo-view-switch')), findsOne);
   });
 
+  testWidgets('the format help is one tap from the list', (tester) async {
+    await pumpShell(tester, const Size(390, 844));
+    reminders.tap(todoReminderPayload);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-help')));
+    await settle(tester);
+    expect(find.text('The todo.txt format'), findsOne);
+  });
+
   testWidgets('the wide layout reconciles too (no Todo tab there)', (
     tester,
   ) async {

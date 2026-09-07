@@ -23,6 +23,7 @@ import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
+import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -135,6 +136,25 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
+  /// The app-bar action opening the todo.txt format reference.
+  ///
+  /// The dialog writes the syntax, so a user can go a long way without
+  /// seeing it — until they open todo.txt in another editor, or wonder
+  /// what the chips are. The reference is one tap from the list.
+  Widget _todoHelpAction() {
+    return IconButton(
+      key: const Key('todo-help'),
+      tooltip: AppStrings.todoHelpTooltip,
+      icon: const Icon(Icons.help_outline),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (context) => const TodoHelpScreen(),
+        ),
+      ),
+    );
+  }
+
   /// Shows the todo list, wherever this layout keeps it.
   ///
   /// The bottom-nav tab only exists on a phone; the wide layout pushes it
@@ -158,6 +178,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                 icon: const Icon(Icons.add),
                 onPressed: _addTodo,
               ),
+              _todoHelpAction(),
             ],
           ),
           body: TodoTab(
@@ -763,6 +784,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                               icon: const Icon(Icons.add),
                               onPressed: _addTodo,
                             ),
+                            _todoHelpAction(),
                           ]
                         : const [],
                     floatingActionButton: _tab == ShellTab.files
