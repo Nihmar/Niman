@@ -8,7 +8,11 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
+import 'package:copist/src/ui/quick_note_tab.dart';
+import 'package:copist/src/ui/search_tab.dart';
 import 'package:copist/src/ui/settings.dart';
+import 'package:copist/src/ui/settings_tab.dart';
+import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
@@ -74,11 +78,48 @@ final class _LibraryShell extends StatefulWidget {
   State<_LibraryShell> createState() => _LibraryShellState();
 }
 
+/// The bottom-navigation tabs (phone/narrow layout only).
+enum ShellTab {
+  /// The note tree plus the note-open stack (T-UI-02).
+  files,
+
+  /// Reserved tab for the todo section (T-UI-10).
+  todo,
+
+  /// Disabled until the M3 SearchScreen lands (R3).
+  search,
+
+  /// The scratch quick note at the library root (T-UI-10).
+  quickNote,
+
+  /// The library settings (the pushed SettingsScreen on wide screens).
+  settings,
+}
+
 final class _LibraryShellState extends State<_LibraryShell> {
   String? _selected;
   bool _selectedIsDir = false;
   final Set<String> _expanded = <String>{};
   bool _busy = false;
+
+  /// The currently selected bottom tab (narrow layout).
+  ShellTab _tab = ShellTab.files;
+
+  /// The tab active when the full-screen note opened (back returns there).
+  ShellTab _noteFromTab = ShellTab.files;
+
+  /// The file name of the scratch quick note (T-UI-10).
+  static const quickNoteName = 'Quick note.md';
+
+  /// Selects [tab]; a full-screen note closes to its tree (the selected
+  /// note stays highlighted).
+  void _selectShellTab(ShellTab tab) {
+    if (_tab == tab) return;
+    setState(() {
+      _tab = tab;
+      _treeVisible = true;
+    });
+  }
 
   /// The editor settings toggles, held here so both NoteView sites get the
   /// same values and they refresh on session events (the settings screen
@@ -163,7 +204,34 @@ final class _LibraryShellState extends State<_LibraryShell> {
       _selected = note.path;
       _selectedIsDir = note.isDir;
       _treeVisible = note.isDir;
+      _noteFromTab = _tab;
       if (note.isDir) _expanded.add(note.path);
+    });
+  }
+
+  /// Opens the scratch quick note, creating `Quick note.md` at the root
+  /// when missing (T-UI-10).
+  Future<void> _openQuickNote() async {
+    await _guard(() async {
+      final ops = widget.controller.ops;
+      if (ops == null) return;
+      var note = await ops.find(quickNoteName);
+      if (note == null || note.isDir) {
+        // createNote appends `.md` to the base name.
+        note = await ops.createNote(parentPath: '', name: 'Quick note');
+      }
+      if (note.isDir) {
+        throw StateError('"$quickNoteName" is a folder, not a note');
+      }
+      final path = note.path;
+      if (!mounted) return;
+      setState(() {
+        _tab = ShellTab.quickNote;
+        _noteFromTab = ShellTab.quickNote;
+        _selected = path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+      });
     });
   }
 
@@ -316,35 +384,40 @@ final class _LibraryShellState extends State<_LibraryShell> {
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
-    if (narrow &&
-        selectedPath != null &&
-        !_selectedIsDir &&
-        !_treeVisible) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) setState(() => _treeVisible = true);
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            leading: BackButton(
-              onPressed: () => setState(() => _treeVisible = true),
+
+    if (narrow) {
+      // Phone: the selected note opens full-screen (from any tab).
+      if (selectedPath != null && !_selectedIsDir && !_treeVisible) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) => _closeFullScreenNote(),
+          child: Scaffold(
+            appBar: AppBar(
+              leading: BackButton(onPressed: _closeFullScreenNote),
+              title: Text(p.basename(selectedPath)),
             ),
-            title: Text(p.basename(selectedPath)),
+            body: NoteView(
+              path: p.join(controller.root ?? '', selectedPath),
+              showLineNumbers: _lineNumbers,
+              autofocusEditor: _autofocusEditor,
+              splitPreview: _effectiveSplit(narrow: true),
+              splitFraction: _splitRatio,
+              onSplitFractionChanged: _onSplitFractionChanged,
+              onSplitDragEnd: _onSplitDragEnd,
+              libraryRoot: controller.root,
+            ),
           ),
-          body: NoteView(
-            path: p.join(controller.root ?? '', selectedPath),
-            showLineNumbers: _lineNumbers,
-            autofocusEditor: _autofocusEditor,
-            splitPreview: _effectiveSplit(narrow: true),
-            splitFraction: _splitRatio,
-            onSplitFractionChanged: _onSplitFractionChanged,
-            onSplitDragEnd: _onSplitDragEnd,
-            libraryRoot: controller.root,
-          ),
-        ),
+        );
+      }
+      return _tabShell(
+        title: _tabTitle,
+        actions: _tab == ShellTab.files
+            ? _filesAppBarActions(controller)
+            : const [],
+        body: _tabBody(controller),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Copist'),
@@ -374,28 +447,130 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: narrow
-          ? _treePane(controller)
-          : Row(
-              children: [
-                SizedBox(width: 340, child: _treePane(controller)),
-                const VerticalDivider(width: 1),
-                Expanded(
-                  child: _DetailPane(
-                    root: controller.root,
-                    selectedPath: _selected,
-                    selectedIsDir: _selectedIsDir,
-                    showLineNumbers: _lineNumbers,
-                    autofocusEditor: _autofocusEditor,
-                    splitPreview: _effectiveSplit(narrow: false),
-                    splitFraction: _splitRatio,
-                    onSplitFractionChanged: _onSplitFractionChanged,
-                    onSplitDragEnd: _onSplitDragEnd,
-                  ),
-                ),
-              ],
+      body: Row(
+        children: [
+          SizedBox(width: 340, child: _treePane(controller)),
+          const VerticalDivider(width: 1),
+          Expanded(
+            child: _DetailPane(
+              root: controller.root,
+              selectedPath: _selected,
+              selectedIsDir: _selectedIsDir,
+              showLineNumbers: _lineNumbers,
+              autofocusEditor: _autofocusEditor,
+              splitPreview: _effectiveSplit(narrow: false),
+              splitFraction: _splitRatio,
+              onSplitFractionChanged: _onSplitFractionChanged,
+              onSplitDragEnd: _onSplitDragEnd,
             ),
+          ),
+        ],
+      ),
     );
+  }
+
+  /// Trash/settings actions of the Files-tab app bar (trash stays; the
+  /// settings gear is replaced by the settings tab on phone, per mockup).
+  List<Widget> _filesAppBarActions(LibrarySession controller) {
+    return [
+      IconButton(
+        key: const Key('open-trash'),
+        tooltip: 'Trash',
+        icon: const Icon(Icons.delete),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => TrashScreen(controller: controller),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// Closes the full-screen note: returns to the tab it was opened from,
+  /// with its tree/body visible (the note stays highlighted).
+  void _closeFullScreenNote() {
+    setState(() {
+      _tab = _noteFromTab;
+      _treeVisible = true;
+    });
+  }
+
+  String get _tabTitle => switch (_tab) {
+        ShellTab.files => 'Copist',
+        ShellTab.todo => 'Todo',
+        ShellTab.search => 'Search',
+        ShellTab.quickNote => 'Quick note',
+        ShellTab.settings => 'Settings',
+      };
+
+  /// The narrow shell: app bar for the tab + the bottom navigation bar.
+  Widget _tabShell({
+    required String title,
+    required List<Widget> actions,
+    required Widget body,
+  }) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title), actions: actions),
+      body: body,
+      bottomNavigationBar: NavigationBar(
+        key: const Key('shell-tabs'),
+        selectedIndex: _tab.index,
+        onDestinationSelected: _onDestinationSelected,
+        destinations: const [
+          NavigationDestination(
+            key: Key('tab-files'),
+            icon: Icon(Icons.folder_outlined),
+            selectedIcon: Icon(Icons.folder),
+            label: 'Files',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.check_box_outlined),
+            selectedIcon: Icon(Icons.check_box),
+            label: 'Todo',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.edit_outlined),
+            selectedIcon: Icon(Icons.edit),
+            label: 'Quick note',
+          ),
+          NavigationDestination(
+            key: Key('tab-settings'),
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onDestinationSelected(int index) {
+    final tab = ShellTab.values[index];
+    if (tab == ShellTab.search) {
+      // R3: the Search tab stays disabled until M3 lands SearchScreen.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Search lands in M3')),
+      );
+      return;
+    }
+    _selectShellTab(tab);
+  }
+
+
+  /// The body of the selected tab.
+  Widget _tabBody(LibrarySession controller) {
+    return switch (_tab) {
+      ShellTab.files => _treePane(controller),
+      ShellTab.todo => const TodoTab(),
+      ShellTab.search => const SearchTab(),
+      ShellTab.quickNote => QuickNoteTab(onOpen: _openQuickNote),
+      ShellTab.settings => SettingsTab(controller: controller),
+    };
   }
 
   /// The tree pane: the action bar and the note tree — the whole body on

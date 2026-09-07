@@ -69,6 +69,10 @@ final class NoteOps implements NoteOperations {
   /// The absolute path for library-relative [rel] ('' = root).
   String _abs(String rel) => p.join(root, rel);
 
+  /// The indexed note/folder at library-relative [path], or null.
+  @override
+  Future<Note?> find(String path) => _dao.find(path);
+
   Future<Note> _mustFind(String path) async {
     final row = await _dao.find(path);
     if (row == null) throw StateError('No indexed note at "$path"');

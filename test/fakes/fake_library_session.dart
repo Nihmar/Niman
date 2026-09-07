@@ -158,6 +158,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<Note?> find(String path) {
+    final row = _findRow(path);
+    return Future<Note?>.value(row == null ? null : _toNote(row));
+  }
+
+  @override
   Future<List<Note>> folders() async {
     final dirs = <_Row>[
       for (final row in _rows)

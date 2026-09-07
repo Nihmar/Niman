@@ -29,6 +29,9 @@ abstract interface class NoteOperations {
   /// Moves the note or folder at [path] into [targetParent].
   Future<Note> move(String path, String targetParent);
 
+  /// The indexed note/folder at library-relative [path], or null.
+  Future<Note?> find(String path);
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 

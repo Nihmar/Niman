@@ -52,12 +52,16 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   gold nib with vent, ink swash). *AC: renders alongside `logo.png` (verify
   with `rsvg-convert`); colors: bg `#f2ead9`, tile `#f9f3e6`, navy
   `#1f2b3e`, gold `#d9b36a`.*
-- [ ] **T-UI-02** Bottom navigation (phone/narrow width only): 5
+- [x] **T-UI-02** Bottom navigation (phone/narrow width only): 5
   `NavigationBar` destinations — Files, Todo, Search, Quick note, Settings.
   Files tab hosts the current tree + note-open stack; Settings tab hosts the
-  existing `SettingsScreen`; Search/Todo/Quick note per T-UI-10.
-  *AC: tab switch keeps library state (expanded folders, selection); wide
-  layout (≥ `_phoneBreakpoint`) unchanged — mockups are phone-only.*
+  existing `SettingsScreen` (as a body, `SettingsBody`); Search/Todo/Quick
+  note per T-UI-10. *AC: tab switch keeps library state (expanded folders,
+  selection) — `tab_bar_test.dart` covers it; wide layout (≥
+  `_phoneBreakpoint`) unchanged — mockups are phone-only.*
+  *Deviation: the phone Files app bar keeps the trash icon and drops the
+  settings gear (the Settings tab replaces it); on wide, the gear stays the
+  way to reach settings until T-UI-03.*
 - [ ] **T-UI-03** Library app bar: replace settings gear with a sort toggle
   (`unfold_more`-style icon) flipping name-asc ⇄ name-desc, persisted in
   settings; settings reached from the Settings tab. *AC: toggle survives
@@ -90,10 +94,12 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 - [ ] **T-UI-09** Editor text styling: wikilinks → theme accent + underline in
   `highlight_style.dart` (both palettes); heading bottom rule + frontmatter
   left rule if re_editor supports per-line decorations (else R5 fallback).
-- [ ] **T-UI-10** New tabs (spec-silent — confirmed): **Quick note** =
+- [x] **T-UI-10** New tabs (spec-silent — confirmed): **Quick note** =
   scratch note `Quick note.md` at library root (created missing), opened in
-  the note view. **Todo** = tab created now with an **empty body** (the
-  section exists; implementation is deferred, still being thought through).
+  the note view (intro body with an "Open quick note" button;
+  `NoteOperations.find` added for the existence check). **Todo** = tab
+  created now with an **empty body** (the section exists; implementation is
+  deferred, still being thought through).
 - [ ] **T-UI-11** Update spec (*Layout*, *Editor*) and `design.md` module
   layout (`ui/nav` / `editor/toolbar` / `editor/md_editing`); prepare
   `logo.svg` for launcher-icon generation in M7.
