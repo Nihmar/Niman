@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resource keep file: read by the release optimizer, not packaged.
+
+     flutter_local_notifications resolves the reminder's small icon by name
+     at runtime (Resources.getIdentifier in its plugin code), so no static
+     reference to the drawable exists. R8's resource shrinking, on by
+     default in Flutter release builds, classifies the drawable as unused
+     and strips it from the APK, and the plugin falls back to a plain
+     white block in the status bar. tools:keep pins it. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_reminder" />
