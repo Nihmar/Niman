@@ -41,7 +41,7 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 | Bottom navigation | none | 5 tabs: **Files, Todo, Search, Quick note, Settings** |
 | Editor app bar | back + name; switch row below title | back + name + **eye action in app bar** |
 | Editor bottom | image, outline, word count, saved | status row (**word count** left, **saved** right) + **formatting toolbar row** |
-| Toolbar | none | `B I S T^ T̲ link <> image list quote` (mockup’s trailing gear dropped) |
+| Toolbar | none | `B I S T^ T̲ link <> image list quote`, **evenly spaced** (mockup’s trailing gear and uneven spacing dropped) |
 | Editor text | plain headings; purple wikilinks | headings w/ bottom rule; frontmatter w/ left rule; wikilinks **accent blue, underlined** |
 | Icon | PNG | vector (`logo.svg`) |
 
@@ -80,8 +80,9 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   this row (confirmed).
 - [ ] **T-UI-08** `EditorToolbar` (`lib/src/editor/toolbar.dart`) over the
   status row: bold, italic, strikethrough, superscript, underline, link,
-  code, image, list, quote (the mockup’s trailing gear is dropped). Each
-  button applies a pure command from new `lib/src/editor/md_editing.dart`
+  code, image, list, quote, **evenly spaced** (the mockup’s trailing gear
+  and its uneven spacing are dropped). Each button applies a pure command
+  from new `lib/src/editor/md_editing.dart`
   (text + selection → new text + selection) through the re_editor
   `CodeLineEditingController`. *AC: unit tests for wrap-selection,
   empty-selection (insert markers at caret), and list/quote prefixing per
@@ -127,7 +128,8 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 
 - On-device screenshot pair (library, editor) matches the two mockups plus
   the confirmed deviations (round “+” FAB; no gear FAB; no trailing toolbar
-  gear): same chrome, same icon set, dark theme.
+  gear; evenly spaced toolbar icons): same chrome, same icon set, dark
+  theme.
 - `flutter test` green, including the new `md_editing` unit tests; widget
   tests updated for moved/removed chrome (`library_flow_test` — `_ActionBar`
   keys, `layout_modes_test` — `preview-switch` key, `image_insert_test` —
@@ -158,3 +160,6 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 - **R7 (partially resolved):** the trailing gear in the editor toolbar is an
   extra — remove it. Superscript/underline keep the HTML mapping
   (`<sup>`, `<u>`); the spec's Markdown extras don't cover them.
+- **Toolbar spacing (resolved):** buttons evenly spaced
+  (`MainAxisAlignment.spaceEvenly`); the mockup’s uneven spacing is a design
+  artifact.
