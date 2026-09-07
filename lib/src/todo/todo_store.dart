@@ -21,8 +21,10 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/parser.dart';
 import 'package:copist/src/todo/todo_files.dart';
+import 'package:copist/src/todo/todo_source.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -104,7 +106,7 @@ final class TodoFileProbe {
 /// serialized writer chain, applies its transform, and atomically
 /// rewrites the files whose lines changed (a file whose lines did not
 /// change is left alone, so its mtime never churns the watcher).
-final class TodoStore {
+final class TodoStore implements TodoSource {
   /// Creates a store over the library root at [root] (absolute path).
   TodoStore({required this.root});
 
@@ -116,25 +118,34 @@ final class TodoStore {
   /// pattern the note ops use).
   Future<void> _chain = Future<void>.value();
 
+  static const AppLogger _log = AppLogger(name: 'todo');
+
   /// Loads both files (missing files read as empty) and parses every
   /// line. Not chained: atomic renames make torn reads impossible, so a
   /// load racing a mutation sees either the old or the new file, never
   /// a mix.
+  @override
   Future<TodoSnapshot> load() async {
     final bytes = await _readFiles(root);
-    return TodoSnapshot(
+    final snapshot = TodoSnapshot(
       todo: _parseLines(bytes[0]),
       done: _parseLines(bytes[1]),
     );
+    _log.debug(
+      'todo load: ${snapshot.todo.length} open, ${snapshot.done.length} done',
+    );
+    return snapshot;
   }
 
   /// Appends [line] to `todo.txt`, creating both files empty when
   /// missing. Returns the fresh snapshot.
   ///
   /// Throws [ArgumentError] when [line] holds more than one line.
+  @override
   Future<TodoSnapshot> add(String line) async {
     _requireSingleLine(line);
     return _mutate(
+      op: 'add',
       ensureFiles: true,
       allowCreate: true,
       apply: (todo, done) => todo.add(line),
@@ -145,6 +156,7 @@ final class TodoStore {
   ///
   /// The tab's revision-driven refresh calls this first and only reloads
   /// content when the probes moved.
+  @override
   Future<({TodoFileProbe todo, TodoFileProbe done})> probe() async {
     final raw = await _probeFiles(root);
     return (
@@ -161,8 +173,10 @@ final class TodoStore {
   /// Idempotent: with nothing to archive neither file is rewritten (and
   /// no file is created). A missing `done.txt` is created when lines
   /// actually move.
+  @override
   Future<TodoSnapshot> migrateCompleted() {
     return _mutate(
+      op: 'migrate',
       allowCreate: true,
       apply: (todo, done) {
         final archived = <String>[];
@@ -183,9 +197,13 @@ final class TodoStore {
   ///
   /// Throws [ArgumentError] when [line] holds more than one line and
   /// [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> updateTodoAt(int lineIndex, String line) async {
     _requireSingleLine(line);
-    return _mutate(apply: (todo, done) => todo[lineIndex] = line);
+    return _mutate(
+      op: 'edit-todo',
+      apply: (todo, done) => todo[lineIndex] = line,
+    );
   }
 
   /// Replaces the `done.txt` line at [lineIndex] with [line] (edit from
@@ -193,25 +211,37 @@ final class TodoStore {
   ///
   /// Throws [ArgumentError] when [line] holds more than one line and
   /// [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> updateDoneAt(int lineIndex, String line) async {
     _requireSingleLine(line);
-    return _mutate(apply: (todo, done) => done[lineIndex] = line);
+    return _mutate(
+      op: 'edit-done',
+      apply: (todo, done) => done[lineIndex] = line,
+    );
   }
 
   /// Removes the `todo.txt` line at [lineIndex] outright (no trash —
   /// these are todo.txt lines, not notes). Returns the fresh snapshot.
   ///
   /// Throws [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> deleteTodoAt(int lineIndex) {
-    return _mutate(apply: (todo, done) => todo.removeAt(lineIndex));
+    return _mutate(
+      op: 'delete-todo',
+      apply: (todo, done) => todo.removeAt(lineIndex),
+    );
   }
 
   /// Removes the `done.txt` line at [lineIndex] outright. Returns the
   /// fresh snapshot.
   ///
   /// Throws [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> deleteDoneAt(int lineIndex) {
-    return _mutate(apply: (todo, done) => done.removeAt(lineIndex));
+    return _mutate(
+      op: 'delete-done',
+      apply: (todo, done) => done.removeAt(lineIndex),
+    );
   }
 
   /// Checks the `todo.txt` line at [lineIndex] on [today]: removes it
@@ -222,8 +252,10 @@ final class TodoStore {
   ///
   /// Checking an already-completed line still archives it to `done.txt`.
   /// Throws [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> checkAt(int lineIndex, DateTime today) {
     return _mutate(
+      op: 'check@$lineIndex',
       ensureFiles: true,
       allowCreate: true,
       apply: (todo, done) {
@@ -240,8 +272,10 @@ final class TodoStore {
   /// snapshot.
   ///
   /// Throws [RangeError] when [lineIndex] is out of range.
+  @override
   Future<TodoSnapshot> uncheckAt(int lineIndex) {
     return _mutate(
+      op: 'uncheck@$lineIndex',
       ensureFiles: true,
       allowCreate: true,
       apply: (todo, done) {
@@ -257,8 +291,10 @@ final class TodoStore {
   /// empty even when their lines did not change (first add); with
   /// [allowCreate], a missing file is created when [apply] actually
   /// changed its lines (check/uncheck/migrate), while other ops hitting
-  /// a missing file throw a [StateError].
+  /// a missing file throw a [StateError]. [op] names the mutation in the
+  /// debug log.
   Future<TodoSnapshot> _mutate({
+    required String op,
     required void Function(List<String> todo, List<String> done) apply,
     bool ensureFiles = false,
     bool allowCreate = false,
@@ -288,6 +324,10 @@ final class TodoStore {
           allowCreate: ensureFiles || allowCreate,
         );
       }
+      _log.info(
+        'todo $op: open ${todoFile.lines.length}->${todoLines.length}, '
+        'done ${doneFile.lines.length}->${doneLines.length}',
+      );
       return TodoSnapshot(
         todo: _parseEntries(todoLines),
         done: _parseEntries(doneLines),

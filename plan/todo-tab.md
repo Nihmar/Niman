@@ -75,7 +75,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   `todo.txt` move to `done.txt`; the tab reloads when the library
   revision bumps (an external tool edited a file) and after its own ops.
   *AC: migration idempotent; external `x` line is archived on next open.*
-- [ ] **T-TD-04** List UI + check/uncheck: rows = checkbox, description,
+- [x] **T-TD-04** List UI + check/uncheck: rows = checkbox, description,
   priority badge, `+proj`/`@ctx`/`#tag` chips, due badge (overdue/today/
   upcoming styling), reminder icon; tapping the row edits, long-press
   shows edit/delete (the app's bottom-sheet pattern); Open/Done switch

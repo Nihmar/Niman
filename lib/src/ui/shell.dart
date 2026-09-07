@@ -8,6 +8,7 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
@@ -18,6 +19,7 @@ import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tags_screen.dart';
+import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -154,6 +156,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// The link-resolution source (T-M3-07), resolved from the session.
   LinkSource? _linkSource;
 
+  /// The todo state (T-TD-04): owned here so the tab body and the tab's
+  /// app-bar add action share one controller.
+  late final TodoController _todoController;
+
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
@@ -212,8 +218,15 @@ final class _LibraryShellState extends State<_LibraryShell> {
   @override
   void initState() {
     super.initState();
+    _todoController = TodoController(session: widget.controller);
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
+  }
+
+  @override
+  void dispose() {
+    _todoController.dispose();
+    super.dispose();
   }
 
   @override
@@ -491,6 +504,16 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
+  /// Adds a task from the Todo tab's app-bar action (T-TD-04).
+  Future<void> _addTodo() async {
+    const AppLogger(name: 'todo').debug('todo add pressed');
+    final line = await showTodoTaskDialog(context, today: DateTime.now());
+    if (line == null || !mounted) {
+      return;
+    }
+    await _guard(() => _todoController.add(line));
+  }
+
   /// Long-press context menu on a tree row (T-UI-05): the note actions,
   /// scoped to the pressed row. New note/folder target the row's folder.
   Future<void> _showRowMenu(Note note) async {
@@ -625,6 +648,15 @@ final class _LibraryShellState extends State<_LibraryShell> {
                     title: _tabTitle,
                     actions: _tab == ShellTab.files
                         ? _filesAppBarActions(controller)
+                        : _tab == ShellTab.todo
+                        ? [
+                            IconButton(
+                              key: const Key('todo-add'),
+                              tooltip: AppStrings.todoAddTooltip,
+                              icon: const Icon(Icons.add),
+                              onPressed: _addTodo,
+                            ),
+                          ]
                         : const [],
                     floatingActionButton: _tab == ShellTab.files
                         ? _newItemFab()
@@ -863,7 +895,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   Widget _tabBody(LibrarySession controller) {
     return switch (_tab) {
       ShellTab.files => _treePane(controller),
-      ShellTab.todo => const TodoTab(),
+      ShellTab.todo => TodoTab(controller: _todoController),
       ShellTab.search =>
         _showTags
             ? TagsScreen(

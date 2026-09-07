@@ -97,4 +97,19 @@ final class AppStrings {
   static const String ambiguousLinkTitle = 'Several notes match';
   static const String openLinkFailed = 'Could not open link';
   static const String chooseNote = 'Choose a note';
+
+  // Task lists (T-TD-04).
+  static const String todoOpen = 'Open';
+  static const String todoDone = 'Done';
+  static const String todoEmptyOpen = 'No open tasks yet';
+  static const String todoEmptyDone = 'Nothing completed yet';
+  static const String todoAddTooltip = 'Add task';
+  static const String todoAddTitle = 'Add task';
+  static const String todoEditTitle = 'Edit task';
+  static const String todoDescriptionHint = 'Description';
+  static const String todoCancel = 'Cancel';
+  static const String todoSave = 'Save';
+  static const String todoEditAction = 'Edit';
+  static const String todoDeleteAction = 'Delete';
+  static const String todoHasReminder = 'Has reminder';
 }

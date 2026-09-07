@@ -15,7 +15,9 @@ library;
 
 import 'dart:async';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter/foundation.dart';
 
@@ -27,21 +29,28 @@ final class TodoController extends ChangeNotifier {
   /// [clock] stamps check operations (defaults to [DateTime.now];
   /// tests inject a fixed time). [refreshDebounce] delays revision-
   /// driven reloads so a burst of index events causes one reload.
+  /// [sourceFactory] builds the file source per library root (defaults
+  /// to the real store; widget tests inject an in-memory fake).
   TodoController({
     required this.session,
     DateTime Function()? clock,
     this.refreshDebounce = const Duration(milliseconds: 300),
-  }) : _clock = clock ?? DateTime.now;
+    TodoSource Function(String root)? sourceFactory,
+  }) : _clock = clock ?? DateTime.now,
+       _sourceFactory = sourceFactory ?? _defaultSource;
 
   /// The library session: root path and revision events.
   final LibrarySession session;
 
   final DateTime Function() _clock;
+  final TodoSource Function(String root) _sourceFactory;
+
+  static const AppLogger _log = AppLogger(name: 'todo');
 
   /// How long revision-driven reloads wait for the event burst to settle.
   final Duration refreshDebounce;
 
-  TodoStore? _store;
+  TodoSource? _store;
   TodoSnapshot? _snapshot;
   ({TodoFileProbe todo, TodoFileProbe done})? _probes;
   String? _error;
@@ -60,60 +69,87 @@ final class TodoController extends ChangeNotifier {
   /// completed lines. Safe to call again (re-subscribes nothing,
   /// reloads).
   Future<void> open() async {
+    _log.info('todo open: root=${session.root}');
     _events ??= session.events.listen((_) => _scheduleRefresh());
     await _reload();
   }
 
   /// Appends [line] to `todo.txt`.
   Future<void> add(String line) {
-    return _apply((store) => store.add(line));
+    return _apply('add', (store) => store.add(line));
   }
 
   /// Checks an open task on the controller's clock.
   Future<void> check(TodoEntry entry) {
-    return _apply((store) => store.checkAt(entry.lineIndex, _clock()));
+    return _apply(
+      'check@${entry.lineIndex}',
+      (store) => store.checkAt(entry.lineIndex, _clock()),
+    );
   }
 
   /// Reopens a completed task back into `todo.txt`.
   Future<void> uncheck(TodoEntry entry) {
-    return _apply((store) => store.uncheckAt(entry.lineIndex));
+    return _apply(
+      'uncheck@${entry.lineIndex}',
+      (store) => store.uncheckAt(entry.lineIndex),
+    );
   }
 
   /// Replaces an open task's line (edit).
   Future<void> updateTodo(TodoEntry entry, String line) {
-    return _apply((store) => store.updateTodoAt(entry.lineIndex, line));
+    return _apply(
+      'edit-todo@${entry.lineIndex}',
+      (store) => store.updateTodoAt(entry.lineIndex, line),
+    );
   }
 
   /// Replaces a completed task's line (edit from the done view).
   Future<void> updateDone(TodoEntry entry, String line) {
-    return _apply((store) => store.updateDoneAt(entry.lineIndex, line));
+    return _apply(
+      'edit-done@${entry.lineIndex}',
+      (store) => store.updateDoneAt(entry.lineIndex, line),
+    );
   }
 
   /// Removes an open task's line outright.
   Future<void> deleteTodo(TodoEntry entry) {
-    return _apply((store) => store.deleteTodoAt(entry.lineIndex));
+    return _apply(
+      'delete-todo@${entry.lineIndex}',
+      (store) => store.deleteTodoAt(entry.lineIndex),
+    );
   }
 
   /// Removes a completed task's line outright.
   Future<void> deleteDone(TodoEntry entry) {
-    return _apply((store) => store.deleteDoneAt(entry.lineIndex));
+    return _apply(
+      'delete-done@${entry.lineIndex}',
+      (store) => store.deleteDoneAt(entry.lineIndex),
+    );
   }
 
   /// Runs [op] on the current store and publishes the returned snapshot
   /// (no-op while no library is open; failures surface on [error]).
+  /// [label] names the op in the debug log.
   Future<void> _apply(
-    Future<TodoSnapshot> Function(TodoStore store) op,
+    String label,
+    Future<TodoSnapshot> Function(TodoSource store) op,
   ) async {
     final store = _store;
     if (store == null || _disposed) {
+      _log.debug('todo $label dropped (no store)');
       return;
     }
     try {
       _snapshot = await op(store);
       _probes = await store.probe();
       _error = null;
+      _log.debug(
+        'todo $label ok: '
+        '${_snapshot!.todo.length} open, ${_snapshot!.done.length} done',
+      );
     } on Object catch (error) {
       _error = '$error';
+      _log.warning('todo $label failed: $error');
     }
     if (!_disposed) {
       notifyListeners();
@@ -136,6 +172,7 @@ final class TodoController extends ChangeNotifier {
     }
     if (root == null) {
       if (_snapshot != null || _error != null) {
+        _log.info('todo reload: library closed, clearing snapshot');
         _snapshot = null;
         _store = null;
         _probes = null;
@@ -146,30 +183,38 @@ final class TodoController extends ChangeNotifier {
     }
     final generation = ++_generation;
     try {
-      final store = TodoStore(root: root);
+      final store = _sourceFactory(root);
       if (_probes != null) {
         final probes = await store.probe();
         if (generation != _generation || _disposed) {
+          _log.debug('todo reload superseded (probe)');
           return;
         }
         if (probes == _probes) {
+          _log.debug('todo reload skipped (files unchanged)');
           return;
         }
       }
       final snapshot = await store.migrateCompleted();
       if (generation != _generation || _disposed) {
+        _log.debug('todo reload superseded (load)');
         return;
       }
       _store = store;
       _snapshot = snapshot;
       _probes = await store.probe();
       _error = null;
+      _log.info(
+        'todo reload: ${snapshot.todo.length} open, '
+        '${snapshot.done.length} done',
+      );
       notifyListeners();
     } on Object catch (error) {
       if (generation != _generation || _disposed) {
         return;
       }
       _error = '$error';
+      _log.warning('todo reload failed: $error');
       notifyListeners();
     }
   }
@@ -181,4 +226,7 @@ final class TodoController extends ChangeNotifier {
     unawaited(_events?.cancel());
     super.dispose();
   }
+
+  /// Builds the real file store for [root] (the default source factory).
+  static TodoSource _defaultSource(String root) => TodoStore(root: root);
 }
