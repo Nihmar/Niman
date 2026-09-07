@@ -11,9 +11,11 @@ library;
 import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_store.dart';
+import 'package:copist/src/ui/reminder_health_banner.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_filter_bar.dart';
@@ -28,12 +30,16 @@ final class TodoTab extends StatefulWidget {
   /// dialog (defaults to now; widget tests inject a fixed time).
   const TodoTab({
     required this.controller,
+    this.reminders,
     this.clock,
     super.key,
   });
 
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
+
+  /// The reminder service, for the health banner (null hides it).
+  final ReminderService? reminders;
 
   /// The wall-clock source for "today".
   final DateTime Function()? clock;
@@ -69,8 +75,10 @@ final class _TodoTabState extends State<TodoTab> {
       builder: (context, _) {
         final controller = widget.controller;
         final snapshot = controller.snapshot;
+        final reminders = widget.reminders;
         return Column(
           children: [
+            if (reminders != null) ReminderHealthBanner(service: reminders),
             Padding(
               padding: const EdgeInsets.all(8),
               child: SegmentedButton<bool>(

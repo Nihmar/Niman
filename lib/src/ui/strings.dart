@@ -139,5 +139,15 @@ final class AppStrings {
       'Scheduled alerts for tasks with a reminder time.';
   static const String todoReminderBody = 'Todo reminder';
   static const String todoReminderFallbackTitle = 'Task reminder';
+  static const String todoReminderBlocked =
+      'Notifications are off, so reminders will not appear.';
+  static const String todoReminderBattery =
+      'Battery optimization is on for Copist. The system may sleep the '
+      'app and drop pending reminders.';
+  static const String todoReminderInexact =
+      'This device does not allow exact alarms, so a reminder can arrive '
+      'several minutes late with the screen off.';
+  static const String todoReminderFixAction = 'Open settings';
+  static const String todoReminderDismissAction = 'Dismiss';
   static const String todoReminderDue = 'Due';
 }

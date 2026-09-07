@@ -30,12 +30,14 @@ import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/parser.dart';
+import 'package:copist/src/todo/reminder_health.dart';
+import 'package:copist/src/todo/reminder_settings.dart';
 import 'package:copist/src/todo/todo_store.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:meta/meta.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -152,6 +154,18 @@ abstract interface class ReminderService {
   /// The launch payload when a tap started the app (once, then null).
   Future<String?> consumeLaunchPayload();
 
+  /// Whether the OS-side preconditions for reminders hold.
+  ///
+  /// Refreshed on every [reconcile], so the resume-driven resync picks up
+  /// a grant made in system settings without any extra plumbing.
+  ValueListenable<ReminderHealth> get health;
+
+  /// Opens the system screen that fixes [health], if there is one.
+  ///
+  /// Returns false when the current state has no in-app remedy (only
+  /// inexact alarms available) or no activity handles the intent.
+  Future<bool> openHealthSettings();
+
   /// Releases resources.
   Future<void> dispose();
 }
@@ -182,9 +196,21 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
 /// — which is what makes a reminder fire on time with the screen off and
 /// the app closed.
 final class LocalReminderService implements ReminderService {
+  /// Creates the service; [settings] reaches the system screens that
+  /// decide whether a reminder can fire (injected in tests).
+  LocalReminderService({
+    this.settings = const PlatformReminderSettings(),
+  });
+
   /// The plugin (method channels — on-device only, never in tests).
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+
+  /// Reaches the system screens behind [health].
+  final ReminderSettings settings;
+
+  final ValueNotifier<ReminderHealth> _health =
+      ValueNotifier<ReminderHealth>(ReminderHealth.ok);
 
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
@@ -398,10 +424,22 @@ final class LocalReminderService implements ReminderService {
     // asked while nothing is wanted.
     final granted = wanted.isEmpty || await _ensurePermission();
     final exact = granted && wanted.isNotEmpty && await _ensureExact();
+    final batteryExempt = await settings.isBatteryExempt();
+    // Worst-first: a blocked notification hides the reminder outright, a
+    // battery-managed app may never get to fire it, and inexact only
+    // makes it late.
+    _health.value = !granted
+        ? ReminderHealth.notificationsBlocked
+        : !batteryExempt
+        ? ReminderHealth.batteryRestricted
+        : !exact && wanted.isNotEmpty
+        ? ReminderHealth.inexactOnly
+        : ReminderHealth.ok;
     _log.info(
       'todo reminders: reconcile ${wanted.length} wanted, '
       'notifications ${granted ? 'allowed' : 'blocked'}, '
-      'alarms ${exact ? 'exact' : 'inexact'}',
+      'alarms ${exact ? 'exact' : 'inexact'}, '
+      'battery ${batteryExempt ? 'unrestricted' : 'optimized'}',
     );
     await _cancelStale(wanted);
     if (wanted.isEmpty) {
@@ -488,6 +526,21 @@ final class LocalReminderService implements ReminderService {
   }
 
   @override
+  ValueListenable<ReminderHealth> get health => _health;
+
+  @override
+  Future<bool> openHealthSettings() async {
+    return switch (_health.value) {
+      ReminderHealth.notificationsBlocked =>
+        settings.openNotificationSettings(),
+      ReminderHealth.batteryRestricted => settings.openBatterySettings(),
+      // No in-app remedy: the exact-alarm privilege is auto-granted, so a
+      // build that still refuses it is not offering a toggle either.
+      ReminderHealth.inexactOnly || ReminderHealth.ok => false,
+    };
+  }
+
+  @override
   Stream<String?> get taps => _taps.stream;
 
   @override
@@ -511,6 +564,7 @@ final class LocalReminderService implements ReminderService {
 
   @override
   Future<void> dispose() async {
+    _health.dispose();
     await _taps.close();
   }
 }
@@ -526,6 +580,16 @@ final class NoopReminderService implements ReminderService {
 
   @override
   Future<String?> consumeLaunchPayload() async => null;
+
+  /// Always healthy: nothing is scheduled, so nothing can be blocked.
+  @override
+  ValueListenable<ReminderHealth> get health => _health;
+
+  static final ValueNotifier<ReminderHealth> _health =
+      ValueNotifier<ReminderHealth>(ReminderHealth.ok);
+
+  @override
+  Future<bool> openHealthSettings() async => false;
 
   @override
   Future<void> dispose() async {}

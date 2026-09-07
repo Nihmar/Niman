@@ -968,7 +968,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _tabBody(LibrarySession controller) {
     return switch (_tab) {
       ShellTab.files => _treePane(controller),
-      ShellTab.todo => TodoTab(controller: _todoController),
+      ShellTab.todo => TodoTab(
+        controller: _todoController,
+        reminders: widget.reminders,
+      ),
       ShellTab.search =>
         _showTags
             ? TagsScreen(

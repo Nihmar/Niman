@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:copist/src/todo/reminder_health.dart';
 import 'package:copist/src/todo/reminders.dart';
+import 'package:flutter/foundation.dart';
 
 /// In-memory [ReminderService] for controller and widget tests.
 ///
@@ -41,6 +43,22 @@ final class FakeReminderService implements ReminderService {
     );
   }
 
+  /// The reported health; tests set it to exercise the banner.
+  final ValueNotifier<ReminderHealth> healthState =
+      ValueNotifier<ReminderHealth>(ReminderHealth.ok);
+
+  /// How many times the banner asked to open a system screen.
+  int settingsOpened = 0;
+
+  @override
+  ValueListenable<ReminderHealth> get health => healthState;
+
+  @override
+  Future<bool> openHealthSettings() async {
+    settingsOpened++;
+    return true;
+  }
+
   @override
   Stream<String?> get taps => _taps.stream;
 
@@ -49,6 +67,7 @@ final class FakeReminderService implements ReminderService {
 
   @override
   Future<void> dispose() async {
+    healthState.dispose();
     await _taps.close();
   }
 }
