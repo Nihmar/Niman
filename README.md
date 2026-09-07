@@ -90,6 +90,55 @@ disk are always the source of truth.
 - **Windows:** built on a Windows host (no cross-build from Linux); SQLite
   comes bundled, since Windows has no system one.
 
+### Task reminders on Android
+
+A `rem:` reminder is an exact alarm held by the system, so it fires with
+the screen off, with the app in the background, and with the app's process
+dead. Two things can still stop it, and Copist warns about both from the
+Todo tab:
+
+- **Notifications off.** The alarm fires and nothing is shown.
+- **Battery optimization.** The banner links to the system list. Without
+  the exemption, some manufacturer builds (Xiaomi/MIUI and HyperOS,
+  Huawei/EMUI, Oppo/OnePlus/Realme ColorOS, Vivo) discard an app's pending
+  alarms when it is swiped away from recents, and may sleep it after a
+  while. Those ROMs often also need an "autostart" toggle that only the
+  user can set. See dontkillmyapp.com for the per-vendor steps.
+
+A *force stop* from Settings cancels an app's alarms on every Android
+version; they are rescheduled the next time Copist runs. Reminders survive
+a reboot.
+
+### The debug log
+
+Settings has a **Export debug log** action that writes the whole log to a
+file you choose. Recording can be turned off there too.
+
+The log is kept two ways: the last 5000 lines in memory, and an
+append-only mirror on disk under the app's private storage
+(`copist-log.txt`, one rotation, capped at 2 x 512 KB). The mirror is
+flushed when the app goes to the background, so it survives a swipe away,
+a crash, an OEM kill and a reboot. An export starts with the earlier runs
+from disk and ends with the current one, which matters for reminders:
+the interesting moment usually happens in a process that no longer exists.
+
+Each line is `<timestamp> <SEVERITY> [<component>] <message>`. For
+reminders, look for the `[todo]` lines:
+
+```text
+todo reminders: timezone Europe/Rome
+todo reminders: 2 pending at startup [208725283, 867842594]
+todo reminders: reconcile 2 wanted, notifications allowed, alarms exact, battery unrestricted
+todo reminders: armed 867842594 for 2026-09-08T10:30 (in 2h 14m) call plumber
+todo reminders reconciled: 2 scheduled (exact)
+todo reminders: 2 pending after reconcile [208725283, 867842594]
+```
+
+`pending at startup` is the one to read after a kill or a reboot: it is
+what the system still holds from the previous run, and the only evidence
+of whether the alarms survived. `pending after reconcile` is what the
+system actually has, as opposed to what Copist asked for.
+
 ## Architecture & stack
 
 - **Framework:** Flutter (stable channel), Dart with `very_good_analysis`.
