@@ -340,6 +340,31 @@ void main() {
     });
   });
 
+  group('withoutKeyValueTags', () {
+    test('drops the managed due:/rem:, keeping words and tokens', () {
+      expect(
+        withoutKeyValueTags('call mom +errands due:2026-09-09'),
+        'call mom +errands',
+      );
+      expect(
+        withoutKeyValueTags('sync rem:2026-09-08T10:30 rec:+1d @home'),
+        'sync @home',
+      );
+    });
+
+    test('removes embedded tags and collapses leftover spaces', () {
+      expect(
+        withoutKeyValueTags(' a due:1 b  due:2  c '),
+        'a b c',
+      );
+    });
+
+    test('leaves token-free plain text and empties intact', () {
+      expect(withoutKeyValueTags('call mom'), 'call mom');
+      expect(withoutKeyValueTags(''), isEmpty);
+    });
+  });
+
   group('formatTodoLine', () {
     test('builds a canonical line', () {
       expect(

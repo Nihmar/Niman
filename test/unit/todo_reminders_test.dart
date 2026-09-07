@@ -67,6 +67,22 @@ void main() {
         DateTime(2026, 9, 8, 10, 30),
       );
     });
+
+    test('title shows the entered description, not the whole raw line', () {
+      final wanted = wantedReminders(
+        snapshotOf(todo: [
+          '(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30',
+        ]),
+        DateTime(2026, 9, 7),
+      );
+      expect(wanted, hasLength(1));
+      final entry = wanted.entries.single;
+      // The id keys on the full description (stable identity); the shown text
+      // drops the priority prefix and the managed due:/rem: tags, leaving the
+      // description the user typed.
+      expect(entry.key, entry.value.id);
+      expect(entry.value.title, 'call plumber +home');
+    });
   });
 
   group('platform service', () {

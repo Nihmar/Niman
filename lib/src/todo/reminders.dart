@@ -90,7 +90,11 @@ Map<int, TodoReminder> wantedReminders(
     }
     wanted[todoReminderId(task.description)] = TodoReminder(
       id: todoReminderId(task.description),
-      title: task.description,
+      // Only the user's entered description: the id stays over the full
+      // text (stable identity), but the shown text drops the managed
+      // due:/rem:/… tags Copist appends — a reminder reads as one phrase,
+      // not the whole raw line.
+      title: withoutKeyValueTags(task.description),
       body: task.due == null
           ? AppStrings.todoReminderBody
           : '${AppStrings.todoReminderDue} ${formatTodoDate(task.due!)}',

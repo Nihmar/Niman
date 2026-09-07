@@ -382,6 +382,29 @@ String withoutToken(String description, String token) {
       .trim();
 }
 
+/// The word of a `key:value` annotation tag embedded in a description
+/// (mirrors the parser's `[A-Za-z][A-Za-z0-9_-]*:\S+` tag shape).
+final RegExp _keyValueWordPattern =
+    RegExp(r'(?:^|\s)[A-Za-z][A-Za-z0-9_-]*:[^\s]+(?=\s|$)');
+
+/// Returns [description] without its `key:value` annotation tags — the
+/// model's managed slots (`due:`, `rem:`, `rec:`, … are appended by the
+/// dialog, not typed by the user) — collapsing any leftover whitespace.
+/// Words and `+`/`@`/`#` tokens are kept.
+///
+/// Used where a task is shown out of its line (e.g. the notification
+/// title): the tags render as the full raw line instead of the user's
+/// entered text.
+String withoutKeyValueTags(String description) {
+  if (!description.contains(':')) {
+    return description.trim();
+  }
+  return description
+      .replaceAll(_keyValueWordPattern, '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 /// Formats [date] as `YYYY-MM-DD` (drops any time part).
 String formatTodoDate(DateTime date) {
   final year = date.year.toString().padLeft(4, '0');
