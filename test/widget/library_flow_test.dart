@@ -104,6 +104,10 @@ void main() {
     // Create a note via the FAB (T-UI-05).
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await tester.pump();
+    // FAB menu expansion animation, then the New note mini FAB.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await tester.pump();
     await tester.enterText(dialogField(), 'First note');
     await tester.tap(find.text('OK'));
     await settle(tester);
@@ -189,6 +193,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await tester.pump();
+    // FAB menu expansion animation, then the New note mini FAB.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await tester.pump();
     await tester.enterText(dialogField(), 'Sacrifice');
     await tester.tap(find.text('OK'));
     await settle(tester);
@@ -267,6 +275,10 @@ void main() {
     // Recreate the note, then delete it with the toggle off: hard delete.
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await tester.pump();
+    // FAB menu expansion animation, then the New note mini FAB.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await tester.pump();
     await tester.enterText(dialogField(), 'Sacrifice');
     await tester.tap(find.text('OK'));
     await settle(tester);
@@ -300,6 +312,10 @@ void main() {
 
     // A note in the trash, so the empty action is offered.
     await tester.tap(find.byKey(const Key('new-note-fab')));
+    await tester.pump();
+    // FAB menu expansion animation, then the New note mini FAB.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Victim');
     await tester.tap(find.text('OK'));
@@ -481,6 +497,10 @@ void main() {
 
     // Creating a note opens it full-screen.
     await tester.tap(find.byKey(const Key('new-note-fab')));
+    await tester.pump();
+    // FAB menu expansion animation, then the New note mini FAB.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Phone');
     await tester.tap(find.text('OK'));

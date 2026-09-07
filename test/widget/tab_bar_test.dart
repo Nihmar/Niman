@@ -340,6 +340,8 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settle(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await settle(tester);
     await tester.enterText(
       find.descendant(
         of: find.byType(AlertDialog),

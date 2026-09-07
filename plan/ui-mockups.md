@@ -73,9 +73,11 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 - [x] **T-UI-04** Tree rows per mockup: folder rows = chevron + name (drop
   `Icons.folder`); file rows = outline doc icon + name. Row height/font per
   mockup. *AC: `tree.dart` diff is style-only; no behavior change.*
-- [x] **T-UI-05** Home the note actions: `_ActionBar` deleted; the classic
-  Android round “+” FAB (bottom-right, above the bottom nav; also on the
-  wide split) → new note in the currently selected folder (root if none);
+- [x] **T-UI-05** Home the note actions: `_ActionBar` deleted; the round
+  “+” FAB (bottom-right, above the bottom nav; also on the wide split)
+  expands into New note / New folder mini FABs — user follow-up: the
+  original spec opened the note dialog directly — each creating in the
+  currently selected folder (root if none);
   long-press a row → modal context menu (New note here / New folder here
   [dir rows only] / **Set as quick note** [file rows; is the quick note,
   shows "Current quick note"] / Rename / Move / Delete→trash) reusing the

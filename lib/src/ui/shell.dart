@@ -7,6 +7,7 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
+import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/quick_note_tab.dart';
@@ -525,7 +526,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
             ? _filesAppBarActions(controller)
             : const [],
         floatingActionButton: _tab == ShellTab.files
-            ? _newNoteFab()
+            ? _newItemFab()
             : null,
         body: _tabBody(controller),
       );
@@ -580,18 +581,17 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      floatingActionButton: _newNoteFab(),
+      floatingActionButton: _newItemFab(),
     );
   }
 
-  /// The classic round "+" FAB (bottom-right, above the bottom nav):
-  /// a new note in the selected folder, root if none (T-UI-05).
-  Widget _newNoteFab() {
-    return FloatingActionButton(
-      key: const Key('new-note-fab'),
-      tooltip: 'New note',
-      onPressed: _createNote,
-      child: const Icon(Icons.add),
+  /// The expandable "+" FAB (bottom-right, above the bottom nav):
+  /// reveals New note / New folder mini FABs; each creates in the
+  /// selected folder, root if none (T-UI-05).
+  Widget _newItemFab() {
+    return NewItemFab(
+      onNewNote: _createNote,
+      onNewFolder: _createFolder,
     );
   }
 
