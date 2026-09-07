@@ -1,4 +1,5 @@
-/// File store over `todo.txt` / `done.txt` (plan/todo-tab.md T-TD-02).
+/// File store over `todo.txt` / `done.txt` (plan/todo-tab.md T-TD-02,
+/// migration + change probing in T-TD-03).
 ///
 /// The two files at the library root are the source of truth; the store
 /// keeps no cached state (every mutation re-reads inside the writer
@@ -8,10 +9,10 @@
 /// each file keeps its dominant line ending and its trailing-newline
 /// state across rewrites.
 ///
-/// Isolate discipline (the Android FUSE rule): file *content* is read off
-/// the UI isolate via [Isolate.run]; parsing the returned bytes is pure
-/// CPU work and stays on the caller. Writes are single small atomic
-/// renames through `core/files.dart`, like the note ops.
+/// Isolate discipline (the Android FUSE rule): file *content* and stats
+/// are read off the UI isolate via [Isolate.run]; parsing the returned
+/// bytes is pure CPU work and stays on the caller. Writes are single
+/// small atomic renames through `core/files.dart`, like the note ops.
 library;
 
 import 'dart:convert';
@@ -21,6 +22,8 @@ import 'dart:typed_data';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/todo/parser.dart';
+import 'package:copist/src/todo/todo_files.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// The open-tasks file at the library root.
@@ -56,6 +59,43 @@ final class TodoSnapshot {
 
   /// The `done.txt` lines, in file order.
   final List<TodoEntry> done;
+}
+
+/// Existence + size + mtime of one todo file, read off the UI isolate
+/// ([TodoStore.probe]).
+///
+/// The tab's revision-driven refresh compares these before reloading: a
+/// session event that did not move either file (any note edit anywhere)
+/// costs two stats and no content read.
+@immutable
+final class TodoFileProbe {
+  /// Creates a probe: [exists] false means the file is missing (then
+  /// [size] is -1 and [modified] null).
+  const TodoFileProbe({
+    required this.exists,
+    required this.size,
+    required this.modified,
+  });
+
+  /// Whether the file exists on disk.
+  final bool exists;
+
+  /// The file size in bytes (-1 when missing).
+  final int size;
+
+  /// The file mtime (null when missing).
+  final DateTime? modified;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TodoFileProbe &&
+        other.exists == exists &&
+        other.size == size &&
+        other.modified == modified;
+  }
+
+  @override
+  int get hashCode => Object.hash(exists, size, modified);
 }
 
 /// Reads and writes `todo.txt` / `done.txt` under [root].
@@ -94,7 +134,48 @@ final class TodoStore {
   /// Throws [ArgumentError] when [line] holds more than one line.
   Future<TodoSnapshot> add(String line) async {
     _requireSingleLine(line);
-    return _mutate(ensureFiles: true, apply: (todo, done) => todo.add(line));
+    return _mutate(
+      ensureFiles: true,
+      allowCreate: true,
+      apply: (todo, done) => todo.add(line),
+    );
+  }
+
+  /// Probes both files' existence + size + mtime off the UI isolate.
+  ///
+  /// The tab's revision-driven refresh calls this first and only reloads
+  /// content when the probes moved.
+  Future<({TodoFileProbe todo, TodoFileProbe done})> probe() async {
+    final raw = await _probeFiles(root);
+    return (
+      todo: _fileProbe(raw[0], raw[1]),
+      done: _fileProbe(raw[2], raw[3]),
+    );
+  }
+
+  /// Moves every completed (`x`) line from `todo.txt` to the end of
+  /// `done.txt`, preserving order on both sides (the T-TD-03 migration:
+  /// self-heals after external tools write `x` lines back into
+  /// `todo.txt`). Returns the fresh snapshot.
+  ///
+  /// Idempotent: with nothing to archive neither file is rewritten (and
+  /// no file is created). A missing `done.txt` is created when lines
+  /// actually move.
+  Future<TodoSnapshot> migrateCompleted() {
+    return _mutate(
+      allowCreate: true,
+      apply: (todo, done) {
+        final archived = <String>[];
+        todo.removeWhere((line) {
+          if (!parseTodoLine(line).completed) {
+            return false;
+          }
+          archived.add(line);
+          return true;
+        });
+        done.addAll(archived);
+      },
+    );
   }
 
   /// Replaces the `todo.txt` line at [lineIndex] with [line] (edit).
@@ -144,6 +225,7 @@ final class TodoStore {
   Future<TodoSnapshot> checkAt(int lineIndex, DateTime today) {
     return _mutate(
       ensureFiles: true,
+      allowCreate: true,
       apply: (todo, done) {
         final raw = todo.removeAt(lineIndex);
         done.add(completeTodoLine(raw, today));
@@ -161,6 +243,7 @@ final class TodoStore {
   Future<TodoSnapshot> uncheckAt(int lineIndex) {
     return _mutate(
       ensureFiles: true,
+      allowCreate: true,
       apply: (todo, done) {
         final raw = done.removeAt(lineIndex);
         todo.add(uncompleteTodoLine(raw));
@@ -171,15 +254,19 @@ final class TodoStore {
   /// Runs [apply] against fresh copies of both files' lines inside the
   /// writer chain, rewrites the files whose lines changed, and returns
   /// the fresh snapshot. With [ensureFiles], missing files are created
-  /// empty even when their lines did not change (first add).
+  /// empty even when their lines did not change (first add); with
+  /// [allowCreate], a missing file is created when [apply] actually
+  /// changed its lines (check/uncheck/migrate), while other ops hitting
+  /// a missing file throw a [StateError].
   Future<TodoSnapshot> _mutate({
     required void Function(List<String> todo, List<String> done) apply,
     bool ensureFiles = false,
+    bool allowCreate = false,
   }) {
     return _synchronized(() async {
       final bytes = await _readFiles(root);
-      final todoFile = _splitFile(bytes[0]);
-      final doneFile = _splitFile(bytes[1]);
+      final todoFile = splitTodoFile(bytes[0]);
+      final doneFile = splitTodoFile(bytes[1]);
       final todoLines = <String>[...todoFile.lines];
       final doneLines = <String>[...doneFile.lines];
       apply(todoLines, doneLines);
@@ -190,7 +277,7 @@ final class TodoStore {
         await _writeFile(
           todoFileName,
           todoFile.copyWith(lines: todoLines),
-          allowCreate: ensureFiles,
+          allowCreate: ensureFiles || allowCreate,
         );
       }
       if (!_sameLines(doneLines, doneFile.lines) ||
@@ -198,7 +285,7 @@ final class TodoStore {
         await _writeFile(
           doneFileName,
           doneFile.copyWith(lines: doneLines),
-          allowCreate: ensureFiles,
+          allowCreate: ensureFiles || allowCreate,
         );
       }
       return TodoSnapshot(
@@ -225,19 +312,25 @@ final class TodoStore {
     return Isolate.run(() => _readTodoFiles(rootPath));
   }
 
+  /// Stats both files off the UI isolate (same capture rule as
+  /// [_readFiles]).
+  Future<List<int>> _probeFiles(String rootPath) {
+    return Isolate.run(() => _probeTodoFiles(rootPath));
+  }
+
   /// Atomically rewrites [name] with [file]'s lines. A missing file is
-  /// only created with [allowCreate] (the first add); any other op
-  /// hitting a missing file throws a [StateError].
+  /// only created with [allowCreate]; any other op hitting a missing
+  /// file throws a [StateError].
   Future<void> _writeFile(
     String name,
-    _TodoFile file, {
+    TodoFileContent file, {
     required bool allowCreate,
   }) {
     final target = File(p.join(root, name));
     if (!target.existsSync() && !allowCreate) {
       throw StateError('Missing todo file: "$name"');
     }
-    return writeFileAtomically(target, utf8.encode(_joinFile(file)));
+    return writeFileAtomically(target, utf8.encode(joinTodoFile(file)));
   }
 }
 
@@ -260,102 +353,42 @@ List<Uint8List?> _readTodoFiles(String root) {
   return <Uint8List?>[read(todoFileName), read(doneFileName)];
 }
 
-/// One file's lines with the formatting needed for a byte-stable
-/// rewrite: the dominant line ending and whether the file ends with a
-/// newline.
-final class _TodoFile {
-  /// Creates a file view over [lines] ([exists] false = missing file).
-  const _TodoFile({
-    required this.lines,
-    required this.ending,
-    required this.endsWithNewline,
-    required this.exists,
-  });
-
-  /// The content lines (no terminators; a CRLF file's `\r`s are stripped
-  /// by the split and restored by the join).
-  final List<String> lines;
-
-  /// The dominant line ending (`\r\n` or `\n`; `\n` for new files).
-  final String ending;
-
-  /// Whether the file ends with a newline.
-  final bool endsWithNewline;
-
-  /// Whether the file exists on disk.
-  final bool exists;
-
-  /// Copies the view with new [lines].
-  _TodoFile copyWith({required List<String> lines}) {
-    return _TodoFile(
-      lines: lines,
-      ending: ending,
-      endsWithNewline: endsWithNewline,
-      exists: exists,
-    );
+/// Builds a [TodoFileProbe] from a ([size], [mtimeUs]) pair ([size] < 0 =
+/// missing file).
+TodoFileProbe _fileProbe(int size, int mtimeUs) {
+  if (size < 0) {
+    return const TodoFileProbe(exists: false, size: -1, modified: null);
   }
-}
-
-/// Splits raw [bytes] (null = missing file) into a [_TodoFile].
-_TodoFile _splitFile(Uint8List? bytes) {
-  if (bytes == null) {
-    return const _TodoFile(
-      lines: <String>[],
-      ending: '\n',
-      endsWithNewline: false,
-      exists: false,
-    );
-  }
-  final content = utf8.decode(bytes);
-  if (content.isEmpty) {
-    return const _TodoFile(
-      lines: <String>[],
-      ending: '\n',
-      endsWithNewline: false,
-      exists: true,
-    );
-  }
-  final lines = content.split('\n');
-  var endsWithNewline = false;
-  if (lines.last == '') {
-    endsWithNewline = true;
-    lines.removeLast();
-  }
-  // Dominant ending wins (ties keep CRLF, so a Windows file with one
-  // stray LF stays CRLF); files without newlines default to `\n`.
-  final crlf = '\r\n'.allMatches(content).length;
-  final loneLf = '\n'.allMatches(content).length - crlf;
-  final ending = crlf > 0 && crlf >= loneLf ? '\r\n' : '\n';
-  return _TodoFile(
-    lines: [for (final line in lines) _stripCarriageReturn(line)],
-    ending: ending,
-    endsWithNewline: endsWithNewline,
+  return TodoFileProbe(
     exists: true,
+    size: size,
+    modified: DateTime.fromMicrosecondsSinceEpoch(mtimeUs),
   );
 }
 
-/// Joins [file]'s lines back, restoring the dominant ending and the
-/// trailing-newline state (an empty file writes zero bytes).
-String _joinFile(_TodoFile file) {
-  if (file.lines.isEmpty) {
-    return '';
+/// Stats both files off the caller's isolate.
+///
+/// Top-level and fully synchronous so it can be handed to [Isolate.run];
+/// captures only the sendable [root]. Returns
+/// `[todoSize, todoMtimeUs, doneSize, doneMtimeUs]` (-1 per missing
+/// file); only plain ints cross the isolate boundary.
+List<int> _probeTodoFiles(String root) {
+  List<int> probe(String name) {
+    final file = File(p.join(root, name));
+    if (!file.existsSync()) {
+      return <int>[-1, -1];
+    }
+    final stat = file.statSync();
+    return <int>[stat.size, stat.modified.microsecondsSinceEpoch];
   }
-  final body = file.lines.join(file.ending);
-  return file.endsWithNewline ? '$body${file.ending}' : body;
-}
 
-/// Strips the `\r` a CRLF split leaves at the line end (the parser also
-/// tolerates it, but the store canonicalizes before parsing so [TodoTask]
-/// round-trips carry no stray carriage returns).
-String _stripCarriageReturn(String line) {
-  return line.endsWith('\r') ? line.substring(0, line.length - 1) : line;
+  return <int>[...probe(todoFileName), ...probe(doneFileName)];
 }
 
 /// Parses raw [bytes] (null = missing file) into snapshot entries.
 List<TodoEntry> _parseLines(Uint8List? bytes) {
-  return _parseEntries(_splitFile(bytes).lines);
+  return _parseEntries(splitTodoFile(bytes).lines);
 }
-
 /// Parses content [lines] into snapshot entries with line indices.
 List<TodoEntry> _parseEntries(List<String> lines) {
   return <TodoEntry>[

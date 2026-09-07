@@ -179,6 +179,88 @@ void main() {
     });
   });
 
+  group('migrateCompleted', () {
+    test('moves x lines to done.txt preserving order', () async {
+      writeRaw(
+        'todo.txt',
+        'open a\nx 2026-09-06 2026-01-02 stray one\nopen b\n'
+        'x 2026-09-05 stray two\n',
+      );
+      writeRaw('done.txt', 'x 2026-09-01 old\n');
+      final snapshot = await store.migrateCompleted();
+      expect(readRaw('todo.txt'), 'open a\nopen b\n');
+      expect(
+        readRaw('done.txt'),
+        'x 2026-09-01 old\n'
+        'x 2026-09-06 2026-01-02 stray one\n'
+        'x 2026-09-05 stray two\n',
+      );
+      expect(
+        [for (final entry in snapshot.todo) entry.task.description],
+        ['open a', 'open b'],
+      );
+      expect(snapshot.done, hasLength(3));
+    });
+
+    test('is idempotent: the second run writes nothing', () async {
+      writeRaw('todo.txt', 'open a\nx 2026-09-06 stray\n');
+      await store.migrateCompleted();
+      final todoBefore = readRaw('todo.txt');
+      final doneBefore = readRaw('done.txt');
+      await store.migrateCompleted();
+      expect(readRaw('todo.txt'), todoBefore);
+      expect(readRaw('done.txt'), doneBefore);
+    });
+
+    test('creates nothing when there is nothing to archive', () async {
+      final snapshot = await store.migrateCompleted();
+      expect(snapshot.todo, isEmpty);
+      expect(snapshot.done, isEmpty);
+      expect(File(p.join(root.path, 'todo.txt')).existsSync(), isFalse);
+      expect(File(p.join(root.path, 'done.txt')).existsSync(), isFalse);
+    });
+
+    test('creates a missing done.txt when lines move', () async {
+      writeRaw('todo.txt', 'open\nx 2026-09-06 stray\n');
+      await store.migrateCompleted();
+      expect(readRaw('todo.txt'), 'open\n');
+      // A created file carries no trailing newline (like a first add).
+      expect(readRaw('done.txt'), 'x 2026-09-06 stray');
+    });
+
+    test('leaves open lines in done.txt alone', () async {
+      writeRaw('todo.txt', 'open\n');
+      writeRaw('done.txt', 'not actually done\n');
+      await store.migrateCompleted();
+      expect(readRaw('todo.txt'), 'open\n');
+      expect(readRaw('done.txt'), 'not actually done\n');
+    });
+  });
+
+  group('probe', () {
+    test('missing files probe as absent', () async {
+      final probes = await store.probe();
+      expect(probes.todo.exists, isFalse);
+      expect(probes.todo.size, -1);
+      expect(probes.todo.modified, isNull);
+      expect(probes.done.exists, isFalse);
+    });
+
+    test('reports size and mtime; moves after a write', () async {
+      writeRaw('todo.txt', 'a\n');
+      final before = await store.probe();
+      expect(before.todo.exists, isTrue);
+      expect(before.todo.size, 'a\n'.length);
+      expect(before.todo.modified, isNotNull);
+      await store.add('b');
+      final after = await store.probe();
+      expect(after == before, isFalse);
+      expect(after.todo.size, 'a\nb\n'.length);
+      // A repeated probe with no writes is stable.
+      expect(await store.probe() == after, isTrue);
+    });
+  });
+
   group('serialization', () {
     test('concurrent adds land in call order', () async {
       final futures = <Future<TodoSnapshot>>[

@@ -71,7 +71,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   delete are single rewrite operations on both files. *AC: unit tests
   against a temp library root: move semantics (orders preserved,
   untouched lines byte-identical), concurrent ops serialized.*
-- [ ] **T-TD-03** Migration + refresh: on tab load, `x` lines in
+- [x] **T-TD-03** Migration + refresh: on tab load, `x` lines in
   `todo.txt` move to `done.txt`; the tab reloads when the library
   revision bumps (an external tool edited a file) and after its own ops.
   *AC: migration idempotent; external `x` line is archived on next open.*
