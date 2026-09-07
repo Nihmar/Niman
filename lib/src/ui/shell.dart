@@ -171,15 +171,16 @@ final class _LibraryShellState extends State<_LibraryShell>
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: const Text(AppStrings.todoTitle),
-            actions: [
-              IconButton(
-                key: const Key('todo-add-wide'),
-                tooltip: AppStrings.todoAddTooltip,
-                icon: const Icon(Icons.add),
-                onPressed: _addTodo,
-              ),
-              _todoHelpAction(),
-            ],
+            actions: [_todoHelpAction()],
+          ),
+          // 2026-09-07 user feedback: the add action is a FAB, not an
+          // app-bar `+` (the bar `+` read as something else).
+          floatingActionButton: FloatingActionButton(
+            key: const Key('todo-add-wide'),
+            heroTag: 'todo-add-wide',
+            tooltip: AppStrings.todoAddTooltip,
+            onPressed: _addTodo,
+            child: const Icon(Icons.add),
           ),
           body: TodoTab(
             controller: _todoController,
@@ -625,7 +626,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
   }
 
-  /// Adds a task from the Todo tab's app-bar action (T-TD-04).
+  /// Adds a task from the Todo tab's add FAB (T-TD-04).
   Future<void> _addTodo() async {
     const AppLogger(name: 'todo').debug('todo add pressed');
     final snapshot = _todoController.snapshot;
@@ -777,19 +778,13 @@ final class _LibraryShellState extends State<_LibraryShell>
                     actions: _tab == ShellTab.files
                         ? _filesAppBarActions(controller)
                         : _tab == ShellTab.todo
-                        ? [
-                            IconButton(
-                              key: const Key('todo-add'),
-                              tooltip: AppStrings.todoAddTooltip,
-                              icon: const Icon(Icons.add),
-                              onPressed: _addTodo,
-                            ),
-                            _todoHelpAction(),
-                          ]
+                        ? [_todoHelpAction()]
                         : const [],
                     floatingActionButton: _tab == ShellTab.files
                         ? _newItemFab()
-                        : null,
+                        : _tab == ShellTab.todo
+                            ? _todoAddFab()
+                            : null,
                     body: _tabBody(controller),
                   ),
                 ),
@@ -838,6 +833,18 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
       body: _withFabScrim(_wideBody(controller)),
       floatingActionButton: _newItemFab(),
+    );
+  }
+
+  /// The Todo tab's add FAB (2026-09-07 user feedback: the app-bar `+`
+  /// moved to the standard add position).
+  Widget _todoAddFab() {
+    return FloatingActionButton(
+      key: const Key('todo-add'),
+      heroTag: 'todo-add',
+      tooltip: AppStrings.todoAddTooltip,
+      onPressed: _addTodo,
+      child: const Icon(Icons.add),
     );
   }
 

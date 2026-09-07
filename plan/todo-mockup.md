@@ -92,14 +92,18 @@ truth for everything this file is silent on.
 
 - **"N open" semantics** = the entries in the visible file, *unfiltered*
   (the mockup shows "12 open" with six rows on screen).
-- **Accent bar = first tag color** (the mockup's two bared rows are the
-  tagged ones; the bar is not a due-state indicator — state stays in the
-  subtitle color).
+- **Accent bar: dropped (user feedback, 2026-09-07).** The mockup's
+  left accent bar (first `#tag`'s color) was unrecognizable — the user
+  could not tell what it meant — and is gone. The row now shows a chip
+  per `+project` / `@context` / `#tag` token instead, each dotted with
+  `tagColorFor` (the bar's color, repurposed), so the tokens are visible
+  in the row and the color still marks the token.
 - **Priority leaves the row** (mockup rows carry no badge); sorting by
   priority remains in the sheet.
-- **FAB: no.** Add stays the app-bar `+` (the mockup itself drops the
-  FAB idea): in a 5-tab shell the FAB would change meaning per tab while
-  the Files tab already owns the expandable `+` FAB; per-tab app-bar
-  actions are the consistent pattern.
+- **FAB: yes (user override, 2026-09-07).** The Todo tab's add action
+  moved from the app-bar `+` to a bottom-right `FloatingActionButton`
+  (phone tab shell and the wide pushed screen alike): the bar `+` did
+  not read as "add a task". The Files tab's expandable `+` FAB is
+  untouched; at most one FAB per tab, never two on screen.
 - **Reminder marker** = the clock + time in the subtitle (a `rem:`
   without a due date still shows its date + time).

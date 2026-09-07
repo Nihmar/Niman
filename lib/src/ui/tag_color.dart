@@ -1,7 +1,8 @@
 /// Deterministic colors for tag names (plan/todo-mockup.md T-TDM-02).
 ///
-/// The todo row's left accent bar colors a task after its first `#tag`,
-/// so the color is a visual mnemonic, not data: stable across runs and
+/// The todo row's token chips dot each `+project` / `@context` / `#tag`
+/// (the old left accent bar's color, repurposed on 2026-09-07), so the
+/// color is a visual mnemonic, not data: stable across runs and
 /// restarts, theme-independent, derived from the name alone.
 library;
 

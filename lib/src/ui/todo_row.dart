@@ -1,6 +1,9 @@
 /// One todo row (plan/todo-mockup.md T-TDM-02): a checkbox, the
-/// task's display text, a one-line due/reminder subtitle and — when
-/// the task carries a `#tag` — a left accent bar in the tag's color.
+/// task's display text, and a subtitle with the due/reminder line plus
+/// a chip per `+project` / `@context` / `#tag` token the task carries
+/// (2026-09-07 user feedback: the tokens were invisible in the row; the
+/// old left accent bar — the first `#tag`'s color — is gone, its color
+/// now dots the chips).
 ///
 /// Dumb by design: the parent owns the controller, the edit dialog and
 /// the long-press menu — the row only reports toggle, edit and menu
@@ -79,7 +82,7 @@ final class TodoRow extends StatelessWidget {
     final task = entry.task;
     final now = today ?? DateTime.now();
     final display = taskDisplayText(task.description);
-    final row = ListTile(
+    return ListTile(
       leading: Checkbox(
         value: task.completed,
         onChanged: (value) {
@@ -95,7 +98,7 @@ final class TodoRow extends StatelessWidget {
             ? const TextStyle(decoration: TextDecoration.lineThrough)
             : null,
       ),
-      subtitle: _DueLine(task: task, today: now),
+      subtitle: _RowSubtitle(task: task, today: now),
       onTap: () {
         _log.debug('todo row tap (edit): line ${entry.lineIndex}');
         onEdit();
@@ -105,24 +108,77 @@ final class TodoRow extends StatelessWidget {
         onShowMenu();
       },
     );
-    final accent = task.hashtags.isEmpty
-        ? null
-        : tagColorFor(task.hashtags.first);
-    if (accent == null) {
-      return row;
+  }
+}
+
+/// The row subtitle: the due/reminder line, then — when the task
+/// carries `+project` / `@context` / `#tag` tokens — a chip per token,
+/// so the row shows what it is filed under (2026-09-07 user feedback).
+final class _RowSubtitle extends StatelessWidget {
+  const _RowSubtitle({required this.task, required this.today});
+
+  final TodoTask task;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = <String>[
+      for (final p in task.projects) '+$p',
+      for (final c in task.contexts) '@$c',
+      for (final h in task.hashtags) '#$h',
+    ];
+    if (task.due == null && task.reminder == null && tokens.isEmpty) {
+      return const SizedBox.shrink();
     }
-    // The mockup's left accent bar: 3 dp, full row height, the color of
-    // the first `#tag`. IntrinsicHeight bounds the stretch against the
-    // list view's unbounded height.
-    return IntrinsicHeight(
+    return Wrap(
+      spacing: 6,
+      runSpacing: 2,
+      children: [
+        _DueLine(task: task, today: today),
+        for (final token in tokens) _TokenChip(token: token),
+      ],
+    );
+  }
+}
+
+/// One token chip of the row subtitle: a dot in the token's color (the
+/// same `tagColorFor` the old accent bar used) plus the token text with
+/// its sigil (`+p`, `@c`, `#t`), so the color still marks the token
+/// without a bar nobody could name.
+final class _TokenChip extends StatelessWidget {
+  const _TokenChip({required this.token});
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      key: Key('todo-row-token-$token'),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: scheme.onSurface.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 3,
-            child: ColoredBox(key: const Key('todo-accent'), color: accent),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: tagColorFor(token),
+              shape: BoxShape.circle,
+            ),
           ),
-          Expanded(child: row),
+          const SizedBox(width: 4),
+          Text(
+            token,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );

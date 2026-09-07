@@ -3,7 +3,6 @@
 // switch, tap-to-edit and long-press delete, all against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
 import 'package:copist/src/todo/todo_controller.dart';
-import 'package:copist/src/ui/tag_color.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +90,7 @@ void main() {
     return true;
   }
 
-  testWidgets('rows show the display text, the due line and the tag accent', (
+  testWidgets('rows show the display text, the due line and the tokens', (
     tester,
   ) async {
     await pumpTab(
@@ -115,10 +114,18 @@ void main() {
     expect(find.text('2 Oct'), findsNWidgets(2));
     expect(find.text('08:30'), findsOneWidget);
     expect(find.byIcon(Icons.access_time), findsNWidgets(2));
-    // The tagged row gets the left accent bar in the tag's color.
-    final accent =
-        tester.widget<ColoredBox>(find.byKey(const Key('todo-accent')));
-    expect(accent.color, tagColorFor('bills'));
+    // The tokens show as chips (+project, @context, #tag); the old
+    // left accent bar is gone.
+    expect(find.byKey(const Key('todo-accent')), findsNothing);
+    expect(find.text('+finance'), findsOneWidget);
+    expect(find.text('#bills'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('todo-row-token-+finance')),
+        matching: find.byType(Container),
+      ),
+      findsWidgets,
+    );
   });
 
   testWidgets("checking moves the row to Done with today's date", (
@@ -243,6 +250,28 @@ void main() {
     await tester.pump();
     expect(find.text('a'), findsOneWidget);
     expect(find.text('b'), findsNothing);
+  });
+
+  testWidgets('the sheet shows the live selection (no close and reopen)', (
+    tester,
+  ) async {
+    await pumpTab(
+      tester,
+      todo: ['a +p +q', 'b +p', 'c'],
+    );
+    await openSheet(tester);
+    // The token chip reflects the tap while the sheet is open...
+    final tokenChip = find.byKey(const Key('todo-token-+p'));
+    expect(tester.widget<FilterChip>(tokenChip).selected, isFalse);
+    await tester.tap(tokenChip);
+    await tester.pump();
+    expect(tester.widget<FilterChip>(tokenChip).selected, isTrue);
+    // ...and so does the sort chip.
+    final sortChip = find.byKey(const Key('todo-sort-priority'));
+    expect(tester.widget<ChoiceChip>(sortChip).selected, isFalse);
+    await tester.tap(sortChip);
+    await tester.pump();
+    expect(tester.widget<ChoiceChip>(sortChip).selected, isTrue);
   });
 
   testWidgets('a combo that matches nothing shows the filtered empty', (
