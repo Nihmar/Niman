@@ -45,7 +45,7 @@ is **not wired**.
 
 ## Tasks
 
-- [ ] **T-M3-01** Link parser + heading slug: `[[wiki]]`, `[[wiki|alias]]`,
+- [x] **T-M3-01** Link parser + heading slug: `[[wiki]]`, `[[wiki|alias]]`,
   `[[wiki#heading]]`, `[[#heading]]`, `[[|alias]]` plus standard Markdown
   links `[text](href)`, and the shared heading slug algorithm (single
   implementation in `links/` — parser, editor and preview agree on it).
