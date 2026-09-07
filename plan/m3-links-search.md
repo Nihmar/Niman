@@ -81,7 +81,7 @@ is **not wired**.
   `tags`/`note_tags`, never FTS; superseded-query guard by invocation
   id). *AC: unit tests over inputs with quotes, hyphens, parentheses,
   wildcards, empty; MATCH vs LIKE behaviors.*
-- [ ] **T-M3-05** SearchScreen: query box debounced (~150 ms), ranked
+- [x] **T-M3-05** SearchScreen: query box debounced (~150 ms), ranked
   results with path + snippet and match highlighting, paging, results of a
   superseded query dropped, click → open note. Includes the word/contains
   toggle (T-M3-08). *AC: instant results on the 10k-note fixture; typing

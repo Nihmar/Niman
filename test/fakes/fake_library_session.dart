@@ -6,7 +6,10 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/search/search_repo.dart';
 import 'package:path/path.dart' as p;
+
+import 'fake_search_source.dart';
 
 /// In-memory [LibrarySession] for widget tests.
 ///
@@ -158,15 +161,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
-    final kids = <_Row>[
-      for (final row in _rows)
-        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
-    ]..sort((a, b) {
-      if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-      return nameDesc
-          ? b.name.compareTo(a.name)
-          : a.name.compareTo(b.name);
-    });
+    final kids =
+        <_Row>[
+          for (final row in _rows)
+            if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+        ]..sort((a, b) {
+          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
+          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
+        });
     return kids.map(_toNote).toList();
   }
 
@@ -175,6 +177,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final row = _findRow(path);
     return Future<Note?>.value(row == null ? null : _toNote(row));
   }
+
+  @override
+  Future<SearchSource?> get searchSource async => FakeSearchSource();
 
   @override
   Future<List<Note>> folders() async {

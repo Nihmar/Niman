@@ -48,7 +48,11 @@ void main() {
       'zebra attacks the apple and '
           'the quick brown fox jumps over it',
     );
-    await indexNote('deep.md', 'Deep note', 'plain words only');
+    await indexNote(
+      'deep.md',
+      'Deep note',
+      'plain words only, and hello for the contains test',
+    );
     await db.into(db.tags).insert(TagsCompanion.insert(name: 'work'));
     await db.into(db.tags).insert(TagsCompanion.insert(name: 'ideas'));
     for (final (note, tag) in [
@@ -136,5 +140,51 @@ void main() {
     expect(t, 'work');
     final notes = await tags.notesWithTag(t!);
     expect(notes.map((n) => n.path).toList(), ['apple.md', 'deep.md']);
+  });
+
+  group('contains mode (searchContains)', () {
+    test('finds intra-word substrings, unlike MATCH; path order', () async {
+      final id = search.begin();
+      // 'ell' is inside 'hello' but never a term: contains finds it,
+      // word mode does not.
+      final hits = await search.searchContains('ell', id: id);
+      expect(hits.map((h) => h.path).toList(), ['deep.md']);
+      // Same input in word mode: nothing (ell is not a term).
+      final words = await search.search(buildFtsQuery('ell'), id: id);
+      expect(words, isEmpty);
+    });
+
+    test('case-insensitive, with the match marked in the excerpt', () async {
+      final id = search.begin();
+      final hits = await search.searchContains('ATTACK', id: id);
+      expect(hits, hasLength(1));
+      final hit = hits.single;
+      expect(hit.path, 'apple.md');
+      expect(hit.snippet, contains('<mark>attack</mark>'));
+      expect(hit.snippet, endsWith('…'));
+    });
+
+    test('LIKE wildcards in the pattern are literal', () async {
+      final id = search.begin();
+      expect(await search.searchContains('%', id: id), isEmpty);
+      expect(await search.searchContains('_', id: id), isEmpty);
+      // A real underscore never matches as a wildcard either.
+      final real = await search.searchContains('quick', id: id);
+      expect(real.map((h) => h.path), contains('apple.md'));
+    });
+
+    test('empty pattern returns nothing; superseded result dropped', () async {
+      final early = search.begin();
+      final late = search.begin();
+      expect(await search.searchContains('', id: late), isEmpty);
+      expect(
+        await search.searchContains('zebra', id: early),
+        isEmpty,
+      );
+      expect(
+        await search.searchContains('zebra', id: late),
+        isNotEmpty,
+      );
+    });
   });
 }

@@ -11,7 +11,7 @@ import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/quick_note_tab.dart';
-import 'package:copist/src/ui/search_tab.dart';
+import 'package:copist/src/ui/search_screen.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -89,7 +89,7 @@ enum ShellTab {
   /// Reserved tab for the todo section (T-UI-10).
   todo,
 
-  /// Disabled until the M3 SearchScreen lands (R3).
+  /// Full-text search (M3 T-M3-05); the SearchScreen tab.
   search,
 
   /// The scratch quick note at the library root (T-UI-10).
@@ -253,6 +253,18 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
+  /// Opens a search result at [path] (library-relative): phone — the
+  /// note takes the screen, back returns to the search tab; wide — the
+  /// detail pane shows it alongside the tree.
+  void _openSearchNote(String path) {
+    setState(() {
+      _selected = path;
+      _selectedIsDir = false;
+      _treeVisible = false;
+      _noteFromTab = _tab;
+    });
+  }
+
   /// Opens the quick note at [path]; back returns to the Files tab.
   /// A stale setting (the note was moved, renamed, or deleted) is cleared
   /// so the tab returns to its empty state.
@@ -323,8 +335,11 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Creates a note in [parent] (default: the FAB target). Used by the
   /// FAB and the context menu.
   Future<void> _createNote({String? parent}) async {
-    final name =
-        await _nameDialog(context, title: 'New note', initial: 'New note');
+    final name = await _nameDialog(
+      context,
+      title: 'New note',
+      initial: 'New note',
+    );
     if (name == null) return;
     await _guard(() async {
       final row = await widget.controller.ops!.createNote(
@@ -471,9 +486,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
                       : Icons.sticky_note_2_outlined,
                 ),
                 title: Text(
-                  isQuickNote
-                      ? 'Current quick note'
-                      : 'Set as quick note',
+                  isQuickNote ? 'Current quick note' : 'Set as quick note',
                 ),
                 onTap: () => Navigator.pop(context, 'quicknote'),
               ),
@@ -529,8 +542,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
       // Phone: the selected note opens full-screen (from any tab). A
       // cross-fade covers the shell -> note swap (back returns with the
       // same fade).
-      final fullNote =
-          selectedPath != null && !_selectedIsDir && !_treeVisible;
+      final fullNote = selectedPath != null && !_selectedIsDir && !_treeVisible;
       return PopScope(
         canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
@@ -610,8 +622,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (context) =>
-                    SettingsScreen(controller: controller),
+                builder: (context) => SettingsScreen(controller: controller),
               ),
             ),
           ),
@@ -706,12 +717,12 @@ final class _LibraryShellState extends State<_LibraryShell> {
   }
 
   String get _tabTitle => switch (_tab) {
-        ShellTab.files => 'Copist',
-        ShellTab.todo => 'Todo',
-        ShellTab.search => 'Search',
-        ShellTab.quickNote => 'Quick note',
-        ShellTab.settings => 'Settings',
-      };
+    ShellTab.files => 'Copist',
+    ShellTab.todo => 'Todo',
+    ShellTab.search => 'Search',
+    ShellTab.quickNote => 'Quick note',
+    ShellTab.settings => 'Settings',
+  };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
   Widget _tabShell({
@@ -773,20 +784,12 @@ final class _LibraryShellState extends State<_LibraryShell> {
 
   void _onDestinationSelected(int index) {
     final tab = ShellTab.values[index];
-    if (tab == ShellTab.search) {
-      // R3: the Search tab stays disabled until M3 lands SearchScreen.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Search lands in M3')),
-      );
-      return;
-    }
     if (tab == ShellTab.quickNote) {
       unawaited(_openQuickNoteFromTile());
       return;
     }
     _selectShellTab(tab);
   }
-
 
   /// The wide-layout body: the tree pane and the split detail pane.
   Widget _wideBody(LibrarySession controller) {
@@ -817,9 +820,14 @@ final class _LibraryShellState extends State<_LibraryShell> {
     return switch (_tab) {
       ShellTab.files => _treePane(controller),
       ShellTab.todo => const TodoTab(),
-      ShellTab.search => const SearchTab(),
-      ShellTab.quickNote =>
-        QuickNoteTab(controller: controller, onOpen: _openQuickNote),
+      ShellTab.search => SearchScreen(
+        controller: controller,
+        onOpenNote: _openSearchNote,
+      ),
+      ShellTab.quickNote => QuickNoteTab(
+        controller: controller,
+        onOpen: _openQuickNote,
+      ),
       ShellTab.settings => SettingsTab(controller: controller),
     };
   }
@@ -879,8 +887,9 @@ final class _DetailPane extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = selectedPath;
     final root = this.root;
-    final notePath =
-        path == null || selectedIsDir || root == null ? null : path;
+    final notePath = path == null || selectedIsDir || root == null
+        ? null
+        : path;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 180),
       switchInCurve: Curves.easeOutCubic,

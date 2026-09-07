@@ -65,7 +65,7 @@ final class NoteDao {
     // do not process escapes, so `'\'` is a single backslash for the
     // ESCAPE clause.
     const where = r"path = ? OR path LIKE ? ESCAPE '\'";
-    final args = [path, '${_sqlLikeEscape(path)}/%'];
+    final args = [path, '${sqlLikeEscape(path)}/%'];
     return _db.transaction(() async {
       // Dependents first (they select the ids from notes), then the notes
       // rows themselves.
@@ -98,7 +98,7 @@ final class NoteDao {
       return (_db.delete(t)..where(
             (x) =>
                 x.path.equals(path) |
-                x.path.like('${_sqlLikeEscape(path)}/%', escapeChar: r'\'),
+                x.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
           ))
           .go();
     });
@@ -111,15 +111,16 @@ final class NoteDao {
     return (_db.select(_db.notes)..where(
           (t) =>
               t.path.equals(path) |
-              t.path.like('${_sqlLikeEscape(path)}/%', escapeChar: r'\'),
+              t.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
         ))
         .get();
   }
 }
 
 /// Escapes SQL `LIKE` wildcards in [s] so it can be used safely with an
-/// `ESCAPE '\'` clause.
-String _sqlLikeEscape(String s) {
+/// `ESCAPE '\'` clause. Public: the contains-search pattern (T-M3-08) and
+/// the subtree predicates share it.
+String sqlLikeEscape(String s) {
   return s
       .replaceAll(r'\', r'\\')
       .replaceAll('%', r'\%')

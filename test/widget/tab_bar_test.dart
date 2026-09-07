@@ -94,8 +94,9 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('phone: 5 destinations show and switching preserves state',
-      (tester) async {
+  testWidgets('phone: 5 destinations show and switching preserves state', (
+    tester,
+  ) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -149,8 +150,9 @@ void main() {
     expect(noteRow(controller, 'Docs'), findsOne);
   });
 
-  testWidgets('sort toggle flips the tree order and persists (T-UI-03)',
-      (tester) async {
+  testWidgets('sort toggle flips the tree order and persists (T-UI-03)', (
+    tester,
+  ) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -187,22 +189,30 @@ void main() {
     expect(await controller.treeSort, TreeSort.nameAsc);
   });
 
-  testWidgets('quick note: nothing opens by default, create names the note',
-      (tester) async {
+  testWidgets('quick note: nothing opens by default, create names the note', (
+    tester,
+  ) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester);
 
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.text('Quick note'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
     await settle(tester);
 
     // No note is opened or created on entering the tab.
-    expect(find.text('No quick note yet. Choose an existing note, or create '
-        'a new one — the quick note opens here.'), findsOne);
+    expect(
+      find.text(
+        'No quick note yet. Choose an existing note, or create '
+        'a new one — the quick note opens here.',
+      ),
+      findsOne,
+    );
     expect(find.byType(NoteView), findsNothing);
     expect(await controller.ops!.find('Quick note.md'), isNull);
 
@@ -230,8 +240,9 @@ void main() {
     expect(noteRow(controller, 'Scratch pad.md'), findsOne);
   });
 
-  testWidgets('quick note: pick an existing note from the tree',
-      (tester) async {
+  testWidgets('quick note: pick an existing note from the tree', (
+    tester,
+  ) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -241,10 +252,12 @@ void main() {
     await controller.createNote(parentPath: '', name: 'Other');
     await settle(tester);
 
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.text('Quick note'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
     await settle(tester);
     await tester.tap(find.byKey(const Key('quick-note-choose')));
     await settle(tester);
@@ -264,8 +277,9 @@ void main() {
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
   });
 
-  testWidgets('quick note: choosing in Settings is honored by the tab',
-      (tester) async {
+  testWidgets('quick note: choosing in Settings is honored by the tab', (
+    tester,
+  ) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -310,10 +324,12 @@ void main() {
 
     // The bottom-nav tile now opens the chosen note directly (no detour
     // through the tab body).
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.text('Quick note'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
     await settle(tester);
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
@@ -389,20 +405,21 @@ void main() {
     expect(await controller.ops!.find('Docs/Renamed.md'), isNull);
   });
 
-  testWidgets('search tab is disabled until M3 (R3)', (tester) async {
+  testWidgets('search tab shows the search screen (M3)', (tester) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester);
 
-    await tester.tap(find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.text('Search'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Search'),
+      ),
+    );
     await settle(tester);
-    // The tab does not switch; the tooltip snackbar explains the delay.
-    expect(find.text('Search lands in M3'), findsOne);
-    expect(find.text('No notes yet'), findsOne);
+    expect(find.byKey(const Key('search-query')), findsOne);
+    expect(find.text('Type to search the library'), findsOne);
   });
 
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {

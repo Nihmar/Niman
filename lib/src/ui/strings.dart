@@ -13,7 +13,8 @@ final class AppStrings {
 
   // Settings: editor toggles.
   static const String trashTitle = 'Trash';
-  static const String trashSubtitle = 'Deletions move to .trash/ (off = hard delete)';
+  static const String trashSubtitle =
+      'Deletions move to .trash/ (off = hard delete)';
   static const String debugLogsTitle = 'Debug logs';
   static const String debugLogsSubtitle =
       'Record app events in an in-memory buffer';
@@ -47,4 +48,12 @@ final class AppStrings {
 
   // Raw-HTML table fallback.
   static const String htmlTableFallback = '(raw HTML table)';
+
+  // Search (T-M3-05).
+  static const String searchHint = 'Search notes';
+  static const String searchModeWords = 'Words';
+  static const String searchModeContains = 'Contains';
+  static const String searchEmptyHint = 'Type to search the library';
+  static const String searchNoMatches = 'No matches';
+  static const String searchLoadMore = 'Show more';
 }

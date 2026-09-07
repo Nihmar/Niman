@@ -7,6 +7,7 @@
 /// around the first match.
 library;
 
+import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:drift/drift.dart' show Variable;
 
@@ -34,13 +35,45 @@ final class SearchHit {
   final String snippet;
 }
 
+/// The search data source the UI talks to: FTS word search and the
+/// contains scan, both with the invocation-id guard.
+///
+/// [SearchRepo] is the production implementation over drift; widget tests
+/// inject a fake.
+abstract interface class SearchSource {
+  /// Starts a new query; the previous one's results are superseded.
+  int begin();
+
+  /// Whether [id] is still the latest query (results are still wanted).
+  bool isCurrent(int id);
+
+  /// The ranked word-search hits for an FTS [query] built by
+  /// `buildFtsQuery`; empty for a null/blank query. [id] from [begin];
+  /// superseded queries return no hits.
+  Future<List<SearchHit>> search(
+    String? query, {
+    required int id,
+    int limit = 200,
+  });
+
+  /// The contains-mode hits: notes whose FTS body copy contains [pattern]
+  /// (case-insensitive, `LIKE` semantics), in path order, each with an
+  /// excerpt cut around the first match. [id] from [begin]; superseded
+  /// queries return no hits.
+  Future<List<SearchHit>> searchContains(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  });
+}
+
 /// Runs the word search and drops the results of a superseded query.
 ///
 /// The UI starts a new query per keystroke (debounced): it calls [begin],
 /// awaits the repo, and discards the response when another `begin` has
 /// been issued in the meantime — the invocation-id guard. Not stateful
 /// beyond the counter, so one instance can back several screens.
-final class SearchRepo {
+final class SearchRepo implements SearchSource {
   /// Creates the repo over [CopistDatabase].
   SearchRepo(this._db);
 
@@ -48,15 +81,13 @@ final class SearchRepo {
 
   int _invocation = 0;
 
-  /// Starts a new query; the previous one's results are superseded.
+  @override
   int begin() => ++_invocation;
 
-  /// Whether [id] is still the latest query (results are still wanted).
+  @override
   bool isCurrent(int id) => id == _invocation;
 
-  /// The ranked hits for an FTS [query] built by `buildFtsQuery`; an
-  /// empty or malformed query returns no hits. [id] is an invocation id
-  /// from `begin`; when superseded, the result is empty.
+  @override
   Future<List<SearchHit>> search(
     String? query, {
     required int id,
@@ -84,5 +115,62 @@ final class SearchRepo {
           snippet: row.read<String?>('snippet') ?? '',
         ),
     ];
+  }
+
+  @override
+  Future<List<SearchHit>> searchContains(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) async {
+    // The scan runs against the index's own copy of the text (the FTS
+    // table's body column), never against the note files on disk. The
+    // pattern is LIKE-escaped and lowercased, and SQL's lower() does the
+    // comparison, so wildcards in the input are literal and the match is
+    // case-insensitive.
+    final lower = pattern.toLowerCase();
+    if (lower.isEmpty) return const [];
+    final rows = await _db
+        .customSelect(
+          'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
+          'notes_fts.body AS body '
+          'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
+          r"WHERE lower(notes_fts.body) LIKE ?1 ESCAPE '\'"
+          ' ORDER BY notes.path '
+          'LIMIT ?2',
+          variables: [
+            Variable<String>('%${sqlLikeEscape(lower)}%'),
+            Variable<int>(limit),
+          ],
+        )
+        .get();
+    if (!isCurrent(id)) return const [];
+    return [
+      for (final row in rows)
+        SearchHit(
+          noteId: row.read<int>('id'),
+          path: row.read<String>('path'),
+          title: row.read<String>('title'),
+          snippet: _excerpt(row.read<String>('body'), lower),
+        ),
+    ];
+  }
+
+  /// Cuts [body] around its first (case-insensitive) occurrence of
+  /// [lower] and marks it; `…` ellipses at the cut ends.
+  static String _excerpt(String body, String lower) {
+    final index = body.toLowerCase().indexOf(lower);
+    if (index < 0) return '';
+    const radius = 40;
+    var start = index - radius;
+    var end = index + lower.length + radius;
+    if (start < 0) start = 0;
+    if (end > body.length) end = body.length;
+    final before = start > 0 ? '…' : '';
+    final after = end < body.length ? '…' : '';
+    final match = body.substring(index, index + lower.length);
+    return '$before${body.substring(start, index)}'
+        '<mark>$match</mark>'
+        '${body.substring(index + lower.length, end)}$after';
   }
 }

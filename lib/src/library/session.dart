@@ -2,6 +2,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
+import 'package:copist/src/search/search_repo.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -163,4 +164,8 @@ abstract interface class LibrarySession {
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();
+
+  /// The search data source (FTS words + contains scan over the open
+  /// library's index); null while no library is ready.
+  Future<SearchSource?> get searchSource;
 }

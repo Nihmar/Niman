@@ -9,6 +9,7 @@ import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/search/search_repo.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -83,6 +84,7 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   FileWatcher? _watcher;
   Timer? _rescanTimer;
+
   /// Reconciliation scan pending after a non-blocking resume; cancelled in
   /// [_teardown] so a stale scan can never hit a different library.
   Timer? _reconcileTimer;
@@ -127,6 +129,12 @@ final class LibraryController implements LibrarySession {
   Future<List<Note>> folders() async {
     final db = await database;
     return NoteDao(db).folders();
+  }
+
+  @override
+  Future<SearchSource?> get searchSource async {
+    final db = await database;
+    return SearchRepo(db);
   }
 
   /// Resumes the last opened library (if it still exists). Best effort:
@@ -190,8 +198,7 @@ final class LibraryController implements LibrarySession {
       }
       final db = await dbFactory();
       AppLog.enabled = await AppSettingsRepo(db).debugLogsEnabled();
-      final indexer = Indexer(db)..
-        onChanged = _bump;
+      final indexer = Indexer(db)..onChanged = _bump;
       final ops = NoteOps(root: abs, db: db, indexer: indexer);
       if (blockingScan) {
         await indexer.fullScan(abs);
@@ -213,8 +220,7 @@ final class LibraryController implements LibrarySession {
       await AppSettingsRepo(db).setLastLibraryPath(abs);
       _bump();
       if (!blockingScan) {
-        _reconcileTimer =
-            Timer(resumeReconcileDelay, () => _safeRescan(abs));
+        _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
       }
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
