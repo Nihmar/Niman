@@ -52,6 +52,27 @@ final class LibrarySettingsRepo {
         .write(LibrarySettingsCompanion(trashEnabled: Value(enabled)));
   }
 
+  /// The user-chosen quick note (library-relative path), or null when the
+  /// default `Quick note.md` at the library root is used.
+  Future<String?> quickNotePath(String libraryPath) async {
+    final rows = await (
+      _db.select(_db.librarySettings)
+        ..where((t) => t.path.equals(libraryPath))
+    ).get();
+    return rows.isEmpty ? null : rows.first.quickNotePath;
+  }
+
+  /// Sets (or clears, with null) the user-chosen quick note.
+  Future<void> setQuickNotePath(
+    String libraryPath, {
+    required String? path,
+  }) async {
+    await _ensureRow(libraryPath);
+    await (_db.update(_db.librarySettings)
+          ..where((t) => t.path.equals(libraryPath)))
+        .write(LibrarySettingsCompanion(quickNotePath: Value(path)));
+  }
+
   /// Ensures a settings row exists for `libraryPath`.
   Future<void> _ensureRow(String libraryPath) async {
     final rows = await (

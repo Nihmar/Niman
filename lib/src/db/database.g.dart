@@ -544,8 +544,24 @@ class $LibrarySettingsTable extends LibrarySettings
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _quickNotePathMeta = const VerificationMeta(
+    'quickNotePath',
+  );
   @override
-  List<GeneratedColumn> get $columns => [path, trashEnabled, historyVersions];
+  late final GeneratedColumn<String> quickNotePath = GeneratedColumn<String>(
+    'quick_note_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    path,
+    trashEnabled,
+    historyVersions,
+    quickNotePath,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -588,6 +604,15 @@ class $LibrarySettingsTable extends LibrarySettings
     } else if (isInserting) {
       context.missing(_historyVersionsMeta);
     }
+    if (data.containsKey('quick_note_path')) {
+      context.handle(
+        _quickNotePathMeta,
+        quickNotePath.isAcceptableOrUnknown(
+          data['quick_note_path']!,
+          _quickNotePathMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -609,6 +634,10 @@ class $LibrarySettingsTable extends LibrarySettings
         DriftSqlType.int,
         data['${effectivePrefix}history_versions'],
       )!,
+      quickNotePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quick_note_path'],
+      ),
     );
   }
 
@@ -627,10 +656,15 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
 
   /// Number of `.history/` versions to keep (M5); default 10.
   final int historyVersions;
+
+  /// Library-relative path of the user-chosen quick note; null = the
+  /// default `Quick note.md` at the library root.
+  final String? quickNotePath;
   const LibrarySetting({
     required this.path,
     required this.trashEnabled,
     required this.historyVersions,
+    this.quickNotePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -638,6 +672,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     map['path'] = Variable<String>(path);
     map['trash_enabled'] = Variable<bool>(trashEnabled);
     map['history_versions'] = Variable<int>(historyVersions);
+    if (!nullToAbsent || quickNotePath != null) {
+      map['quick_note_path'] = Variable<String>(quickNotePath);
+    }
     return map;
   }
 
@@ -646,6 +683,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       path: Value(path),
       trashEnabled: Value(trashEnabled),
       historyVersions: Value(historyVersions),
+      quickNotePath: quickNotePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quickNotePath),
     );
   }
 
@@ -658,6 +698,7 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       path: serializer.fromJson<String>(json['path']),
       trashEnabled: serializer.fromJson<bool>(json['trashEnabled']),
       historyVersions: serializer.fromJson<int>(json['historyVersions']),
+      quickNotePath: serializer.fromJson<String?>(json['quickNotePath']),
     );
   }
   @override
@@ -667,6 +708,7 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       'path': serializer.toJson<String>(path),
       'trashEnabled': serializer.toJson<bool>(trashEnabled),
       'historyVersions': serializer.toJson<int>(historyVersions),
+      'quickNotePath': serializer.toJson<String?>(quickNotePath),
     };
   }
 
@@ -674,10 +716,14 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     String? path,
     bool? trashEnabled,
     int? historyVersions,
+    Value<String?> quickNotePath = const Value.absent(),
   }) => LibrarySetting(
     path: path ?? this.path,
     trashEnabled: trashEnabled ?? this.trashEnabled,
     historyVersions: historyVersions ?? this.historyVersions,
+    quickNotePath: quickNotePath.present
+        ? quickNotePath.value
+        : this.quickNotePath,
   );
   LibrarySetting copyWithCompanion(LibrarySettingsCompanion data) {
     return LibrarySetting(
@@ -688,6 +734,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       historyVersions: data.historyVersions.present
           ? data.historyVersions.value
           : this.historyVersions,
+      quickNotePath: data.quickNotePath.present
+          ? data.quickNotePath.value
+          : this.quickNotePath,
     );
   }
 
@@ -696,37 +745,43 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     return (StringBuffer('LibrarySetting(')
           ..write('path: $path, ')
           ..write('trashEnabled: $trashEnabled, ')
-          ..write('historyVersions: $historyVersions')
+          ..write('historyVersions: $historyVersions, ')
+          ..write('quickNotePath: $quickNotePath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(path, trashEnabled, historyVersions);
+  int get hashCode =>
+      Object.hash(path, trashEnabled, historyVersions, quickNotePath);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LibrarySetting &&
           other.path == this.path &&
           other.trashEnabled == this.trashEnabled &&
-          other.historyVersions == this.historyVersions);
+          other.historyVersions == this.historyVersions &&
+          other.quickNotePath == this.quickNotePath);
 }
 
 class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
   final Value<String> path;
   final Value<bool> trashEnabled;
   final Value<int> historyVersions;
+  final Value<String?> quickNotePath;
   final Value<int> rowid;
   const LibrarySettingsCompanion({
     this.path = const Value.absent(),
     this.trashEnabled = const Value.absent(),
     this.historyVersions = const Value.absent(),
+    this.quickNotePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LibrarySettingsCompanion.insert({
     required String path,
     required bool trashEnabled,
     required int historyVersions,
+    this.quickNotePath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : path = Value(path),
        trashEnabled = Value(trashEnabled),
@@ -735,12 +790,14 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     Expression<String>? path,
     Expression<bool>? trashEnabled,
     Expression<int>? historyVersions,
+    Expression<String>? quickNotePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (path != null) 'path': path,
       if (trashEnabled != null) 'trash_enabled': trashEnabled,
       if (historyVersions != null) 'history_versions': historyVersions,
+      if (quickNotePath != null) 'quick_note_path': quickNotePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -749,12 +806,14 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     Value<String>? path,
     Value<bool>? trashEnabled,
     Value<int>? historyVersions,
+    Value<String?>? quickNotePath,
     Value<int>? rowid,
   }) {
     return LibrarySettingsCompanion(
       path: path ?? this.path,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       historyVersions: historyVersions ?? this.historyVersions,
+      quickNotePath: quickNotePath ?? this.quickNotePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -771,6 +830,9 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     if (historyVersions.present) {
       map['history_versions'] = Variable<int>(historyVersions.value);
     }
+    if (quickNotePath.present) {
+      map['quick_note_path'] = Variable<String>(quickNotePath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -783,6 +845,7 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
           ..write('path: $path, ')
           ..write('trashEnabled: $trashEnabled, ')
           ..write('historyVersions: $historyVersions, ')
+          ..write('quickNotePath: $quickNotePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1550,6 +1613,7 @@ typedef $$LibrarySettingsTableCreateCompanionBuilder =
       required String path,
       required bool trashEnabled,
       required int historyVersions,
+      Value<String?> quickNotePath,
       Value<int> rowid,
     });
 typedef $$LibrarySettingsTableUpdateCompanionBuilder =
@@ -1557,6 +1621,7 @@ typedef $$LibrarySettingsTableUpdateCompanionBuilder =
       Value<String> path,
       Value<bool> trashEnabled,
       Value<int> historyVersions,
+      Value<String?> quickNotePath,
       Value<int> rowid,
     });
 
@@ -1581,6 +1646,11 @@ class $$LibrarySettingsTableFilterComposer
 
   ColumnFilters<int> get historyVersions => $composableBuilder(
     column: $table.historyVersions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1608,6 +1678,11 @@ class $$LibrarySettingsTableOrderingComposer
     column: $table.historyVersions,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LibrarySettingsTableAnnotationComposer
@@ -1629,6 +1704,11 @@ class $$LibrarySettingsTableAnnotationComposer
 
   GeneratedColumn<int> get historyVersions => $composableBuilder(
     column: $table.historyVersions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
     builder: (column) => column,
   );
 }
@@ -1673,11 +1753,13 @@ class $$LibrarySettingsTableTableManager
                 Value<String> path = const Value.absent(),
                 Value<bool> trashEnabled = const Value.absent(),
                 Value<int> historyVersions = const Value.absent(),
+                Value<String?> quickNotePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LibrarySettingsCompanion(
                 path: path,
                 trashEnabled: trashEnabled,
                 historyVersions: historyVersions,
+                quickNotePath: quickNotePath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1685,11 +1767,13 @@ class $$LibrarySettingsTableTableManager
                 required String path,
                 required bool trashEnabled,
                 required int historyVersions,
+                Value<String?> quickNotePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LibrarySettingsCompanion.insert(
                 path: path,
                 trashEnabled: trashEnabled,
                 historyVersions: historyVersions,
+                quickNotePath: quickNotePath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

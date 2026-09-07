@@ -5,6 +5,7 @@
 // creating it when missing; the Search tab is disabled until M3 (R3).
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
+import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
@@ -174,6 +175,68 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
     expect(find.text('Open quick note'), findsOne);
+  });
+
+  testWidgets('quick note: user-chosen note wins over the default',
+      (tester) async {
+    _setPhoneSize(tester);
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester);
+
+    // Seed two notes in the fake: the default and a user-chosen one.
+    final chosen = await controller.createNote(
+      parentPath: '',
+      name: 'Scratch',
+    );
+    await controller.createNote(parentPath: '', name: 'Other');
+    await settle(tester);
+
+    // Choose "Scratch.md" in Settings: the tile shows it after the pick.
+    await tester.tap(find.byKey(const Key('tab-settings')));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('quick-note-setting')),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text(defaultQuickNoteName), findsOne);
+    await tester.scrollUntilVisible(
+      find.text(defaultQuickNoteName),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // The tile can still sit behind the bottom NavigationBar: nudge the
+    // list up so the subtitle (the tap target) is fully visible.
+    await tester.drag(
+      find.byType(Scrollable).first,
+      const Offset(0, -120),
+    );
+    await settle(tester);
+    await tester.tap(find.text(defaultQuickNoteName));
+    await settle(tester);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NoteTree),
+        matching: find.text('Scratch.md'),
+      ),
+    );
+    await settle(tester);
+
+    expect(find.text('Scratch.md'), findsOne);
+    expect(await controller.ops!.quickNotePath, 'Scratch.md');
+
+    // The Quick note tab opens the chosen note, not the default.
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Quick note'),
+    ));
+    await settle(tester);
+    await tester.tap(find.text('Open quick note'));
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
+    expect(chosen.path, 'Scratch.md');
   });
 
   testWidgets('search tab is disabled until M3 (R3)', (tester) async {

@@ -25,9 +25,10 @@ final class QuickNoteTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'A scratch note at the library root for things to jot down '
-              'without deciding where they belong. It is created the first '
-              'time you open it.',
+              'A scratch note for things to jot down without deciding where '
+              'they belong. By default it is "Quick note.md" at the library '
+              'root, created the first time you open it — you can choose '
+              'any note in Settings.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

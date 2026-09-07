@@ -46,6 +46,10 @@ class LibrarySettings extends Table {
   /// Number of `.history/` versions to keep (M5); default 10.
   IntColumn get historyVersions => integer()();
 
+  /// Library-relative path of the user-chosen quick note; null = the
+  /// default `Quick note.md` at the library root.
+  TextColumn get quickNotePath => text().named('quick_note_path').nullable()();
+
   @override
   Set<Column> get primaryKey => {path};
 }
@@ -100,12 +104,13 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   /// Fresh databases get all tables; v1 databases gain the
   /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`,
-  /// pre-v4 databases `editor_autofocus`, and pre-v5 databases
-  /// `preview_mode` + `split_ratio`.
+  /// pre-v4 databases `editor_autofocus`, pre-v5 databases
+  /// `preview_mode` + `split_ratio`, and pre-v6 databases the
+  /// `quick_note_path` library setting.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
@@ -135,6 +140,11 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN split_ratio '
           'REAL NOT NULL DEFAULT 0.55',
+        );
+      }
+      if (from < 6) {
+        await m.database.customStatement(
+          'ALTER TABLE library_settings ADD COLUMN quick_note_path TEXT',
         );
       }
     },

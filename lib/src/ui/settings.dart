@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
+  String? _quickNotePath;
 
   @override
   void initState() {
@@ -78,6 +80,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final quickNotePath = await ops.quickNotePath;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -87,7 +90,25 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _previewMode = previewMode;
         _splitRatio = splitRatio;
         _splitLoaded = true;
+        _quickNotePath = quickNotePath;
       });
+    }
+  }
+
+  /// Opens the quick-note picker (the chosen note is set from the tree
+  /// dialog); the shell picks the value up through the session.
+  Future<void> _pickQuickNote() async {
+    final oldPath = _quickNotePath;
+    final changed = await showQuickNotePicker(
+      context,
+      controller: widget.controller,
+      currentPath: oldPath,
+    );
+    if (!changed || !mounted) return;
+    final path = await widget.controller.ops?.quickNotePath;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _quickNotePath = path);
     }
   }
 
@@ -316,6 +337,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 ],
               ),
             ),
+          const Divider(),
+          ListTile(
+            key: const Key('quick-note-setting'),
+            title: const Text('Quick note'),
+            subtitle: Text(
+              _quickNotePath == null
+                  ? defaultQuickNoteName
+                  : _quickNotePath!,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickQuickNote,
+          ),
           const Divider(),
           ListTile(
             title: const Text('Library path'),

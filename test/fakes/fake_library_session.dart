@@ -36,6 +36,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _lastError;
   bool _resumeStarted = false;
   bool _trashEnabled = true;
+  String? _quickNotePath;
 
   @override
   LibraryPhase get phase => _phase;
@@ -194,6 +195,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTrashEnabled({required bool enabled}) async {
     _trashEnabled = enabled;
+  }
+
+  @override
+  Future<String?> get quickNotePath async => _quickNotePath;
+
+  @override
+  Future<void> setQuickNotePath({required String? path}) async {
+    _quickNotePath = path;
   }
 
   @override

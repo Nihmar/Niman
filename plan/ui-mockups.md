@@ -99,7 +99,11 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   the note view (intro body with an "Open quick note" button;
   `NoteOperations.find` added for the existence check). **Todo** = tab
   created now with an **empty body** (the section exists; implementation is
-  deferred, still being thought through).
+  deferred, still being thought through). *Follow-up (user, 2026-09-07):
+  the quick note is user-chosen — a note picker in Settings
+  (`quick_note_path` library setting, v6 migration; the tree context menu
+  gets a "Set as quick note" item when T-UI-05 lands); the chosen path
+  falls back to the default when stale.*
 - [ ] **T-UI-11** Update spec (*Layout*, *Editor*) and `design.md` module
   layout (`ui/nav` / `editor/toolbar` / `editor/md_editing`); prepare
   `logo.svg` for launcher-icon generation in M7.

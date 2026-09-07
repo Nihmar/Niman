@@ -108,9 +108,6 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
-  /// The file name of the scratch quick note (T-UI-10).
-  static const quickNoteName = 'Quick note.md';
-
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).
   void _selectShellTab(ShellTab tab) {
@@ -209,26 +206,30 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  /// Opens the scratch quick note, creating `Quick note.md` at the root
-  /// when missing (T-UI-10).
+  /// Opens the quick note: the user-chosen one (set in Settings or from the
+  /// tree context menu) or the default [defaultQuickNoteName], created at
+  /// the root when missing.
   Future<void> _openQuickNote() async {
     await _guard(() async {
       final ops = widget.controller.ops;
       if (ops == null) return;
-      var note = await ops.find(quickNoteName);
+      var path = (await ops.quickNotePath)?.trim();
+      if (path == null || path.isEmpty) path = defaultQuickNoteName;
+      var note = await ops.find(path);
+      // A stale choice (moved/renamed/deleted) falls back to the default.
       if (note == null || note.isDir) {
-        // createNote appends `.md` to the base name.
+        path = defaultQuickNoteName;
+        note = await ops.find(path);
+      }
+      if (note == null || note.isDir) {
         note = await ops.createNote(parentPath: '', name: 'Quick note');
       }
-      if (note.isDir) {
-        throw StateError('"$quickNoteName" is a folder, not a note');
-      }
-      final path = note.path;
+      final target = note.path;
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
         _noteFromTab = ShellTab.quickNote;
-        _selected = path;
+        _selected = target;
         _selectedIsDir = false;
         _treeVisible = false;
       });

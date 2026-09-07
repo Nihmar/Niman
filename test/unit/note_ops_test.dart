@@ -382,4 +382,23 @@ void main() {
       expect(await repo.isTrashEnabled(root.path), isFalse);
     });
   });
+
+  group('quick note', () {
+    test('defaults to null, the built-in Quick note.md at the root',
+        () async {
+      expect(await ops.quickNotePath, isNull);
+    });
+
+    test('the chosen path persists across ops instances', () async {
+      await ops.setQuickNotePath(path: 'Inbox/Scratch.md');
+      final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
+      expect(await fresh.quickNotePath, 'Inbox/Scratch.md');
+    });
+
+    test('clearing restores the default', () async {
+      await ops.setQuickNotePath(path: 'Inbox/Scratch.md');
+      await ops.setQuickNotePath(path: null);
+      expect(await ops.quickNotePath, isNull);
+    });
+  });
 }
