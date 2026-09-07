@@ -22,14 +22,25 @@ final class TagCount {
   final int count;
 }
 
+/// The tag data source the UI talks to (T-M3-06): tag list with counts
+/// and tag→notes. [TagRepo] is the production implementation over drift;
+/// widget tests inject a fake.
+abstract interface class TagSource {
+  /// Every tag with counts, most used first (ties alphabetical).
+  Future<List<TagCount>> tagCounts();
+
+  /// The notes carrying [tag] (normalized — no `#`), in path order.
+  Future<List<Note>> notesWithTag(String tag);
+}
+
 /// The tag side of the search data (T-M3-04/T-M3-06).
-final class TagRepo {
+final class TagRepo implements TagSource {
   /// Creates the repo over [CopistDatabase].
   TagRepo(this._db);
 
   final CopistDatabase _db;
 
-  /// Every tag with counts, most used first (ties alphabetical).
+  @override
   Future<List<TagCount>> tagCounts() async {
     final rows = await _db
         .customSelect(
@@ -46,7 +57,7 @@ final class TagRepo {
     ];
   }
 
-  /// The notes carrying [tag] (normalized — no `#`), in path order.
+  @override
   Future<List<Note>> notesWithTag(String tag) {
     return (_db.select(_db.notes)
           ..where(

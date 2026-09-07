@@ -7,9 +7,11 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_search_source.dart';
+import 'fake_tag_source.dart';
 
 /// In-memory [LibrarySession] for widget tests.
 ///
@@ -180,6 +182,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<SearchSource?> get searchSource async => FakeSearchSource();
+
+  @override
+  Future<TagSource?> get tagSource async => FakeTagSource();
 
   @override
   Future<List<Note>> folders() async {

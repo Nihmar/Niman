@@ -86,7 +86,7 @@ is **not wired**.
   superseded query dropped, click → open note. Includes the word/contains
   toggle (T-M3-08). *AC: instant results on the 10k-note fixture; typing
   stays responsive.*
-- [ ] **T-M3-06** TagsScreen: tag list with counts (frontmatter + inline
+- [x] **T-M3-06** TagsScreen: tag list with counts (frontmatter + inline
   sources), tap tag → notes carrying it (join `notes`, path order) → open.
   *AC: inline `#tags` and frontmatter `tags:` both reflected; tag
   normalization (lowercase, strip leading `#`).*

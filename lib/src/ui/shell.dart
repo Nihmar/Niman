@@ -15,6 +15,7 @@ import 'package:copist/src/ui/search_screen.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -143,6 +144,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
+
+  /// Whether the Search tab shows the Tags screen (T-M3-06) instead of
+  /// the search box; the tabs button flips it and back.
+  bool _showTags = false;
 
   /// Whether the FAB menu (New note / New folder minis) is expanded;
   /// the shell owns it so the body can be scrimmed while it is open.
@@ -820,10 +825,18 @@ final class _LibraryShellState extends State<_LibraryShell> {
     return switch (_tab) {
       ShellTab.files => _treePane(controller),
       ShellTab.todo => const TodoTab(),
-      ShellTab.search => SearchScreen(
-        controller: controller,
-        onOpenNote: _openSearchNote,
-      ),
+      ShellTab.search =>
+        _showTags
+            ? TagsScreen(
+                controller: controller,
+                onOpenNote: _openSearchNote,
+                onBack: () => setState(() => _showTags = false),
+              )
+            : SearchScreen(
+                controller: controller,
+                onOpenNote: _openSearchNote,
+                onOpenTags: () => setState(() => _showTags = true),
+              ),
       ShellTab.quickNote => QuickNoteTab(
         controller: controller,
         onOpen: _openQuickNote,

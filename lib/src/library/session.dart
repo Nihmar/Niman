@@ -3,6 +3,7 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -168,4 +169,7 @@ abstract interface class LibrarySession {
   /// The search data source (FTS words + contains scan over the open
   /// library's index); null while no library is ready.
   Future<SearchSource?> get searchSource;
+
+  /// The tag data source (tag list with counts, tag→notes).
+  Future<TagSource?> get tagSource;
 }

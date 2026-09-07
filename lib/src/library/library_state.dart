@@ -10,6 +10,7 @@ import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -135,6 +136,12 @@ final class LibraryController implements LibrarySession {
   Future<SearchSource?> get searchSource async {
     final db = await database;
     return SearchRepo(db);
+  }
+
+  @override
+  Future<TagSource?> get tagSource async {
+    final db = await database;
+    return TagRepo(db);
   }
 
   /// Resumes the last opened library (if it still exists). Best effort:

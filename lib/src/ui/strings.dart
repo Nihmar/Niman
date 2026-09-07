@@ -56,4 +56,12 @@ final class AppStrings {
   static const String searchEmptyHint = 'Type to search the library';
   static const String searchNoMatches = 'No matches';
   static const String searchLoadMore = 'Show more';
+
+  // Tags (T-M3-06).
+  static const String openTagsTooltip = 'Tags';
+  static const String tagsTitle = 'Tags';
+  static const String tagsEmpty =
+      'No tags yet — add a #tag or frontmatter tags';
+  static const String tagsBackTooltip = 'Back to search';
+  static const String tagsNotesEmpty = 'No notes with this tag';
 }

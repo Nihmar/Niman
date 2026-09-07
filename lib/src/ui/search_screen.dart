@@ -18,6 +18,7 @@ final class SearchScreen extends StatefulWidget {
   const SearchScreen({
     required this.controller,
     required this.onOpenNote,
+    this.onOpenTags,
     this.source,
     super.key,
   });
@@ -27,6 +28,10 @@ final class SearchScreen extends StatefulWidget {
 
   /// Called with the note's library-relative path when a result is tapped.
   final void Function(String path) onOpenNote;
+
+  /// Opens the Tags screen (shell-provided; the tags button shows only
+  /// when set).
+  final VoidCallback? onOpenTags;
 
   /// Optional source override (widget tests inject a fake); when null the
   /// screen resolves it from [controller].
@@ -132,50 +137,58 @@ final class _SearchScreenState extends State<SearchScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Row(
+          child: Column(
             children: [
-              Expanded(
-                child: TextField(
-                  key: const Key('search-query'),
-                  controller: _query,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: AppStrings.searchHint,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _query.text.isEmpty
-                        ? null
-                        : IconButton(
-                            key: const Key('search-clear'),
-                            icon: const Icon(Icons.close),
-                            onPressed: _clearQuery,
-                          ),
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
+              TextField(
+                key: const Key('search-query'),
+                controller: _query,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: AppStrings.searchHint,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _query.text.isEmpty
+                      ? null
+                      : IconButton(
+                          key: const Key('search-clear'),
+                          icon: const Icon(Icons.close),
+                          onPressed: _clearQuery,
+                        ),
+                  border: const OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
-              const SizedBox(width: 8),
-              SegmentedButton<bool>(
-                key: const Key('search-mode'),
-                segments: const [
-                  ButtonSegment(
-                    value: false,
-                    label: Text(AppStrings.searchModeWords),
-                    icon: Icon(Icons.text_fields),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  SegmentedButton<bool>(
+                    key: const Key('search-mode'),
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        label: Text(AppStrings.searchModeWords),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        label: Text(AppStrings.searchModeContains),
+                      ),
+                    ],
+                    selected: {_contains},
+                    onSelectionChanged: (selection) =>
+                        _setContains(selection.single),
+                    showSelectedIcon: false,
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                    ),
                   ),
-                  ButtonSegment(
-                    value: true,
-                    label: Text(AppStrings.searchModeContains),
-                    icon: Icon(Icons.find_in_page),
-                  ),
+                  const Spacer(),
+                  if (widget.onOpenTags != null)
+                    IconButton(
+                      key: const Key('open-tags'),
+                      tooltip: AppStrings.openTagsTooltip,
+                      icon: const Icon(Icons.sell_outlined),
+                      onPressed: widget.onOpenTags,
+                    ),
                 ],
-                selected: {_contains},
-                onSelectionChanged: (selection) =>
-                    _setContains(selection.single),
-                showSelectedIcon: false,
-                style: const ButtonStyle(
-                  visualDensity: VisualDensity.compact,
-                ),
               ),
             ],
           ),

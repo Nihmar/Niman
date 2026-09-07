@@ -420,6 +420,17 @@ void main() {
     await settle(tester);
     expect(find.byKey(const Key('search-query')), findsOne);
     expect(find.text('Type to search the library'), findsOne);
+
+    // The tags button flips to the Tags screen and back (T-M3-06).
+    await tester.tap(find.byKey(const Key('open-tags')));
+    await settle(tester);
+    expect(
+      find.text('No tags yet — add a #tag or frontmatter tags'),
+      findsOne,
+    );
+    await tester.tap(find.byKey(const Key('tags-back')));
+    await settle(tester);
+    expect(find.byKey(const Key('search-query')), findsOne);
   });
 
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {
