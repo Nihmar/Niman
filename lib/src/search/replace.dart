@@ -7,7 +7,8 @@
 /// file is read off the UI isolate, the term is replaced only where it
 /// stands as whole words, and the file is written back atomically. The
 /// file watcher picks the writes up and re-indexes, so FTS/tags/stems
-/// catch up by themselves.
+/// catch up by themselves. The preview scan runs the same pass without
+/// writing, for the screen's live before/after list.
 library;
 
 import 'dart:convert';
@@ -16,6 +17,7 @@ import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:path/path.dart' as p;
@@ -43,13 +45,59 @@ final class ReplaceReport {
   final List<String> skipped;
 }
 
+/// One example match in a note: the raw [match] text with the trimmed
+/// surrounding context. The [before]/[after] windows are cut at ±30 chars
+/// and carry a leading/trailing `…` when trimmed.
+final class ReplaceSample {
+  /// Creates a sample.
+  const ReplaceSample({
+    required this.before,
+    required this.match,
+    required this.after,
+  });
+
+  /// The text right before the match ('' when the match starts the note).
+  final String before;
+
+  /// The matched word(s), exactly as found.
+  final String match;
+
+  /// The text right after the match ('' when the match ends the note).
+  final String after;
+}
+
+/// One note's whole-word matches: the [occurrences] count and up to two
+/// [samples] (context around the first matches) for the preview list.
+final class ReplaceMatchNote {
+  /// Creates a match note.
+  const ReplaceMatchNote({
+    required this.path,
+    required this.occurrences,
+    required this.samples,
+  });
+
+  /// The library-relative note path.
+  final String path;
+
+  /// Total whole-word occurrences of the term in the note.
+  final int occurrences;
+
+  /// Context samples around the first occurrences (≤ 2).
+  final List<ReplaceSample> samples;
+}
+
 /// The replace data source the UI talks to; [ReplaceRunner] is the
 /// production implementation over the index + disk, widget tests inject a
 /// fake.
 abstract interface class ReplaceSource {
-  /// How many notes contain [term] as a phrase (an FTS approximation —
-  /// case-insensitive; the disk scan reports exact numbers).
-  Future<int> countNotes(String term);
+  /// Scans the candidate notes for whole-word occurrences of [term] and
+  /// returns the matching notes (occurrence counts + sample contexts),
+  /// read off the UI isolate. [onlyPath] narrows the scan to one note.
+  Future<List<ReplaceMatchNote>> previewMatches(
+    String term, {
+    required bool caseSensitive,
+    String? onlyPath,
+  });
 
   /// Replaces whole-word occurrences of [term] with [replacement] in the
   /// matching notes under the library root.
@@ -74,17 +122,54 @@ final class ReplaceRunner implements ReplaceSource {
   final CopistDatabase _db;
   final String _root;
 
+  /// How many context characters a preview sample keeps around a match.
+  static const int _sampleRadius = 30;
+
+  /// How many samples a preview keeps per note.
+  static const int _samplesPerNote = 2;
+
   @override
-  Future<int> countNotes(String term) async {
-    final phrase = ftsPhraseOf(term);
-    if (phrase == null) return 0;
-    final row = await _db
-        .customSelect(
-          'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?1',
-          variables: [Variable<String>(phrase)],
-        )
-        .getSingle();
-    return row.read<int>('c');
+  Future<List<ReplaceMatchNote>> previewMatches(
+    String term, {
+    required bool caseSensitive,
+    String? onlyPath,
+  }) async {
+    final only = onlyPath == null ? null : {onlyPath};
+    final candidates = await _candidates(term, only: only);
+    const log = AppLogger(name: 'replace');
+    final clock = Stopwatch()..start();
+    log.debug(
+      'preview "$term" (${caseSensitive ? 'case' : 'any case'}, '
+      '${onlyPath ?? 'all notes'}): ${candidates.length} candidate(s)',
+    );
+
+    final notes = <ReplaceMatchNote>[];
+    // Chunked off-isolate passes: file reads never run on the UI isolate.
+    final root = _root;
+    const chunk = 16;
+    for (var i = 0; i < candidates.length; i += chunk) {
+      final end = math.min(i + chunk, candidates.length);
+      final results = await Isolate.run(
+        () => _previewChunk(
+          root,
+          candidates.sublist(i, end),
+          term,
+          caseSensitive,
+          _sampleRadius,
+          _samplesPerNote,
+        ),
+      );
+      for (final note in results) {
+        if (note != null) notes.add(note);
+      }
+      if (end < candidates.length) await Future<void>.delayed(Duration.zero);
+    }
+    log.debug(
+      'preview "$term": ${notes.length} note(s) with '
+      '${notes.fold<int>(0, (sum, n) => sum + n.occurrences)} '
+      'occurrence(s) in ${clock.elapsedMilliseconds} ms',
+    );
+    return notes;
   }
 
   @override
@@ -95,34 +180,7 @@ final class ReplaceRunner implements ReplaceSource {
     Set<String>? only,
     Set<String> skip = const {},
   }) async {
-    // Candidates: the requested paths when scoping to one note, else every
-    // md note whose text holds the term as a phrase.
-    final List<String> candidates;
-    if (only != null) {
-      candidates = [
-        for (final rel in only)
-          if (p.extension(rel).toLowerCase() == '.md') rel,
-      ]..sort();
-    } else {
-      final phrase = ftsPhraseOf(term);
-      if (phrase == null) {
-        return const ReplaceReport(
-          notesScanned: 0,
-          notesChanged: 0,
-          occurrences: 0,
-          skipped: [],
-        );
-      }
-      final rows = await _db
-          .customSelect(
-            'SELECT notes.path FROM notes_fts '
-            'JOIN notes ON notes.id = notes_fts.rowid '
-            'WHERE notes_fts MATCH ?1 ORDER BY notes.path',
-            variables: [Variable<String>(phrase)],
-          )
-          .get();
-      candidates = [for (final row in rows) row.read<String>('path')];
-    }
+    final candidates = await _candidates(term, only: only);
     final todo = <String>[
       for (final rel in candidates)
         if (!skip.contains(rel)) rel,
@@ -131,16 +189,22 @@ final class ReplaceRunner implements ReplaceSource {
       for (final rel in candidates)
         if (skip.contains(rel)) rel,
     ];
+    const log = AppLogger(name: 'replace');
+    final clock = Stopwatch()..start();
+    log.debug(
+      'replace "$term" -> "$replacement" '
+      '(${caseSensitive ? 'case' : 'any case'}): ${todo.length} note(s)',
+    );
 
     // Chunked off-isolate passes: reads and atomic writes never run on the
     // UI isolate (every listSync/stat/read is a FUSE round trip on
     // Android). One isolate per chunk of files.
     var notesChanged = 0;
     var occurrences = 0;
-    const chunk = 24;
     // The isolate closure must not capture the runner (its drift database
     // is unsendable) — only plain values cross the boundary.
     final root = _root;
+    const chunk = 24;
     for (var i = 0; i < todo.length; i += chunk) {
       final end = math.min(i + chunk, todo.length);
       final results = await Isolate.run(
@@ -158,6 +222,10 @@ final class ReplaceRunner implements ReplaceSource {
       }
       if (end < todo.length) await Future<void>.delayed(Duration.zero);
     }
+    log.debug(
+      'replace "$term": $occurrences occurrence(s) in $notesChanged '
+      'note(s), ${clock.elapsedMilliseconds} ms',
+    );
     return ReplaceReport(
       notesScanned: todo.length,
       notesChanged: notesChanged,
@@ -165,6 +233,91 @@ final class ReplaceRunner implements ReplaceSource {
       skipped: skipped,
     );
   }
+
+  /// The candidate rel paths: [only] when given (md paths only), else
+  /// every md note whose text holds [term] as an FTS phrase.
+  Future<List<String>> _candidates(String term, {Set<String>? only}) async {
+    if (only != null) {
+      return [
+        for (final rel in only)
+          if (p.extension(rel).toLowerCase() == '.md') rel,
+      ]..sort();
+    }
+    final phrase = ftsPhraseOf(term);
+    if (phrase == null) return const [];
+    final rows = await _db
+        .customSelect(
+          'SELECT notes.path FROM notes_fts '
+          'JOIN notes ON notes.id = notes_fts.rowid '
+          'WHERE notes_fts MATCH ?1 ORDER BY notes.path',
+          variables: [Variable<String>(phrase)],
+        )
+        .get();
+    return [for (final row in rows) row.read<String>('path')];
+  }
+}
+
+/// The off-isolate preview entry: whole-word scan of the files at [rels]
+/// (absolute under [root]); one match-note per file with occurrences, null
+/// for a file without matches.
+Future<List<ReplaceMatchNote?>> _previewChunk(
+  String root,
+  List<String> rels,
+  String term,
+  bool caseSensitive,
+  int radius,
+  int samplesPerNote,
+) async {
+  final out = <ReplaceMatchNote?>[];
+  for (final rel in rels) {
+    final file = File(p.join(root, rel));
+    try {
+      final text = file.readAsStringSync();
+      final pattern = wholeWordPattern(term, caseSensitive: caseSensitive);
+      if (pattern == null) {
+        out.add(null);
+        continue;
+      }
+      final samples = <ReplaceSample>[];
+      var count = 0;
+      for (final match in pattern.allMatches(text)) {
+        count++;
+        if (samples.length >= samplesPerNote) continue;
+        samples.add(_sampleAround(text, match.start, match.end, radius));
+      }
+      if (count == 0) {
+        out.add(null);
+        continue;
+      }
+      out.add(
+        ReplaceMatchNote(path: rel, occurrences: count, samples: samples),
+      );
+    } on Object {
+      out.add(null); // Unreadable or gone: leave it out of the preview.
+    }
+  }
+  return out;
+}
+
+/// The context around [start]..[end] in [text]: ±[radius] characters,
+/// with a `…` marker on each trimmed side.
+ReplaceSample _sampleAround(
+  String text,
+  int start,
+  int end,
+  int radius,
+) {
+  var from = start - radius;
+  var to = end + radius;
+  final lead = from > 0 ? '…' : '';
+  final trail = to < text.length ? '…' : '';
+  if (from < 0) from = 0;
+  if (to > text.length) to = text.length;
+  return ReplaceSample(
+    before: '$lead${text.substring(from, start)}',
+    match: text.substring(start, end),
+    after: '${text.substring(end, to)}$trail',
+  );
 }
 
 /// The off-isolate entry: replaces the term in every file of [rels]

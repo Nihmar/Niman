@@ -244,10 +244,28 @@ void main() {
     expect(find.byKey(const Key('search-replace')), findsNothing);
   });
 
-  testWidgets('replace: whole-library flow confirms, runs, and reports', (
+  testWidgets('replace: whole-library flow previews inline and reports', (
     tester,
   ) async {
-    final replace = FakeReplaceSource()..noteCount = 7;
+    final replace = FakeReplaceSource()
+      ..preview = const [
+        ReplaceMatchNote(
+          path: 'Docs/Note One.md',
+          occurrences: 3,
+          samples: [
+            ReplaceSample(
+              before: 'see ',
+              match: 'note',
+              after: ' here.',
+            ),
+          ],
+        ),
+        ReplaceMatchNote(
+          path: 'Docs/Note Two.md',
+          occurrences: 2,
+          samples: [],
+        ),
+      ];
     source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
     await tester.pumpWidget(buildApp(source, replace: replace));
     await tester.pump();
@@ -257,22 +275,43 @@ void main() {
 
     await tester.tap(find.byKey(const Key('search-replace')));
     await tester.pumpAndSettle();
-    // The affected-notes count is shown; the term is fixed by the query.
-    expect(find.text('Replace in notes'), findsOne);
-    expect(find.textContaining('7 note(s) contain "note"'), findsOne);
+    // The inline panel appears under the query box (no dialog) and the
+    // preview lists the matching notes with counts.
+    expect(find.byKey(const Key('replace-panel')), findsOne);
+    expect(find.textContaining('in 2 notes'), findsOne);
+    expect(find.textContaining('3 occurrences'), findsOne);
+    expect(find.byKey(const Key('replace-note-Docs/Note One.md')), findsOne);
+    expect(
+      find.textContaining('No exact whole-word match'),
+      findsNothing,
+    );
 
+    // Typing the replacement renders the live → preview under the sample.
     await tester.enterText(find.byKey(const Key('replace-with')), 'label');
-    await tester.tap(find.byKey(const Key('replace-case')));
     await tester.pump();
+    expect(
+      find.textContaining('see label here.', findRichText: true),
+      findsOne,
+    );
+
+    // The case toggle re-scans with the flag.
+    await tester.tap(find.byKey(const Key('replace-case')));
+    await tester.pumpAndSettle();
+    expect(replace.previews, hasLength(2));
+    expect(replace.previews.last.caseSensitive, isTrue);
+    expect(replace.previews.last.term, 'note');
+    expect(replace.previews.last.onlyPath, isNull);
+
     await tester.tap(find.byKey(const Key('replace-confirm')));
     await tester.pumpAndSettle();
-
-    expect(replace.requests, hasLength(1));
-    final request = replace.requests.single;
+    expect(replace.replaceRequests, hasLength(1));
+    final request = replace.replaceRequests.single;
     expect(request.term, 'note');
     expect(request.replacement, 'label');
     expect(request.caseSensitive, isTrue);
     expect(request.only, isNull);
+    // The panel closes and the outcome snackbar reports the run.
+    expect(find.byKey(const Key('replace-panel')), findsNothing);
     expect(find.textContaining('Replaced 5 occurrence(s) of "note"'),
         findsOne);
 
@@ -282,10 +321,40 @@ void main() {
     expect(source.queries.length, greaterThanOrEqualTo(2));
   });
 
+  testWidgets('replace: zero-match term disables the confirm and explains', (
+    tester,
+  ) async {
+    final replace = FakeReplaceSource(); // preview stays empty
+    source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
+    await tester.pumpWidget(buildApp(source, replace: replace));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'envi');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('search-replace')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('No exact whole-word match of "envi"'),
+      findsOne,
+    );
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const Key('replace-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+  });
+
   testWidgets('replace: long-press a result scopes the run to that note', (
     tester,
   ) async {
-    final replace = FakeReplaceSource();
+    final replace = FakeReplaceSource()
+      ..preview = [
+        const ReplaceMatchNote(
+          path: 'Docs/Note One.md',
+          occurrences: 2,
+          samples: [],
+        ),
+      ];
     source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
     await tester.pumpWidget(buildApp(source, replace: replace));
     await tester.pump();
@@ -301,17 +370,44 @@ void main() {
     await tester.tap(find.byKey(const Key('replace-note-action')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Replace in this note'), findsOne);
+    // The inline panel scopes the preview scan to the long-pressed note.
+    expect(find.byKey(const Key('replace-panel')), findsOne);
+    expect(find.textContaining('in Docs/Note One.md'), findsOne);
+    expect(replace.previews, hasLength(1));
+    expect(replace.previews.single.onlyPath, 'Docs/Note One.md');
+
     await tester.enterText(find.byKey(const Key('replace-with')), 'label');
     await tester.tap(find.byKey(const Key('replace-confirm')));
     await tester.pumpAndSettle();
 
-    expect(replace.requests, hasLength(1));
-    expect(replace.requests.single.term, 'note');
-    expect(replace.requests.single.only, {'Docs/Note One.md'});
-    expect(replace.requests.single.caseSensitive, isFalse);
+    expect(replace.replaceRequests, hasLength(1));
+    final request = replace.replaceRequests.single;
+    expect(request.term, 'note');
+    expect(request.only, {'Docs/Note One.md'});
+    expect(request.caseSensitive, isFalse);
+    expect(find.byKey(const Key('replace-panel')), findsNothing);
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pump();
+  });
+
+  testWidgets('replace: closing the panel restores the results', (
+    tester,
+  ) async {
+    final replace = FakeReplaceSource();
+    source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
+    await tester.pumpWidget(buildApp(source, replace: replace));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'note');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('search-replace')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('replace-panel')), findsOne);
+
+    await tester.tap(find.byKey(const Key('replace-close')));
+    await tester.pump();
+    expect(find.byKey(const Key('replace-panel')), findsNothing);
+    expect(find.byKey(const Key('search-results')), findsOne);
   });
 
   testWidgets('contains mode also needs two characters', (tester) async {

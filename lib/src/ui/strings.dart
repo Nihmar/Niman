@@ -61,12 +61,13 @@ final class AppStrings {
   // Replace (T-M3-10): the search screen's optional exact-word replace.
   static const String replaceTooltip = 'Replace…';
   static const String replaceInNoteAction = 'Replace in this note…';
-  static const String replaceDialogTitle = 'Replace in notes';
-  static const String replaceInThisNoteTitle = 'Replace in this note';
+  static const String replaceInThisNote = 'Replace in this note';
   static const String replaceWithLabel = 'Replace with';
   static const String replaceCaseSensitive = 'Case-sensitive';
+  static const String replaceWholeWordsHint =
+      'only exact whole-word matches are replaced';
   static const String replaceConfirm = 'Replace';
-  static const String replaceCancel = 'Cancel';
+  static const String replaceCancel = 'Close';
   static const String replaceUnavailable = 'Replace is unavailable right now';
 
   // Tags (T-M3-06).

@@ -114,10 +114,56 @@ void main() {
   });
 
   group('ReplaceRunner', () {
-    test('countNotes approximates the phrase matches from the index', () async {
-      expect(await replace.countNotes('cat'), 2); // a.md + sub/x.md
-      expect(await replace.countNotes('hello world'), 1); // b.md
-      expect(await replace.countNotes('absent'), 0);
+    test('preview lists matching notes with counts and samples', () async {
+      final notes = await replace.previewMatches(
+        'cat',
+        caseSensitive: false,
+      );
+      expect(notes.map((n) => n.path), ['a.md', 'sub/x.md']);
+      expect(notes[0].occurrences, 3);
+      expect(notes[0].samples, hasLength(2));
+      // The first match starts the note: no before-context, no ellipsis.
+      final first = notes[0].samples.first;
+      expect(first.before, isEmpty);
+      expect(first.match, 'cat');
+      // The second sample is the next occurrence ('Cat', different case).
+      expect(notes[0].samples[1].match, 'Cat');
+      expect(notes[1].occurrences, 1);
+      // A zero-match note is not in the preview at all.
+      expect(notes.map((n) => n.path), isNot(contains('c.md')));
+    });
+
+    test('preview honors the case flag and the single-note scope', () async {
+      final any = await replace.previewMatches(
+        'cat',
+        caseSensitive: false,
+      );
+      final exact = await replace.previewMatches(
+        'Cat',
+        caseSensitive: true,
+      );
+      expect(any.first.occurrences, 3); // cat Cat CAT
+      expect(exact.first.occurrences, 1);
+      final only = await replace.previewMatches(
+        'cat',
+        caseSensitive: false,
+        onlyPath: 'sub/x.md',
+      );
+      expect(only.single.path, 'sub/x.md');
+    });
+
+    test('preview samples carry the context around each match', () async {
+      final notes = await replace.previewMatches(
+        'hello world',
+        caseSensitive: false,
+      );
+      expect(notes, hasLength(1));
+      expect(notes.single.path, 'b.md');
+      expect(notes.single.occurrences, 2);
+      final sample = notes.single.samples.first;
+      expect(sample.before.endsWith('dog '), isTrue);
+      expect(sample.match, 'hello world');
+      expect(sample.after.startsWith(','), isTrue);
     });
 
     test('replaces whole words across every matching note', () async {

@@ -122,15 +122,20 @@ is **not wired**.
   T-M3-09 on-device pass): an optional exact-word replace on the search
   screen — Words mode only, never Contains. Header Replace… action =
   replace in every matching note; long-press a result = replace in that
-  note only. Whole-word matching (unicode word boundaries; a multi-word
-  term matches with any whitespace between its words), case-insensitive
-  by default with a case-sensitive toggle, candidate notes from an FTS
-  phrase lookup (no prefix). The notes are rewritten on disk (read +
-  atomic write, off the UI isolate in chunks), the watcher re-indexes
-  them; the confirm dialog shows the affected-note count; a snackbar
-  reports occurrences changed. *AC: replacing `cat` never touches
+  note only. Replace mode is an inline panel under the query box
+  (replacement text + case toggle), and the results list becomes a live
+  match preview: per note, the occurrence count and before/after sample
+  lines that update as the replacement is typed; the confirm button shows
+  the total and stays disabled until a scan finds matches. Whole-word
+  matching (unicode word boundaries; a multi-word term matches with any
+  whitespace between its words), case-insensitive by default with a
+  case-sensitive toggle, candidate notes from an FTS phrase lookup (no
+  prefix). The notes are rewritten on disk (read + atomic write, off the
+  UI isolate in chunks), the watcher re-indexes them; a snackbar reports
+  occurrences changed. *AC: replacing `cat` never touches
   `catalog`/`cats`/`concatenate`; unit tests on a real index + disk;
-  widget tests on the dialog and both scopes.*
+  widget tests on the panel, both scopes, the case toggle and the
+  preview.*
 
 ## Technical design
 

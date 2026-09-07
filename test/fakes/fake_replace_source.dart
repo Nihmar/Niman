@@ -1,10 +1,10 @@
 import 'package:copist/src/search/replace.dart';
 
 /// In-memory [ReplaceSource] for widget tests: records every request and
-/// returns [report] (configurable per test).
+/// returns the configured preview/report.
 final class FakeReplaceSource implements ReplaceSource {
-  /// The notes count [countNotes] reports.
-  int noteCount = 0;
+  /// The match notes [previewMatches] returns.
+  List<ReplaceMatchNote> preview = [];
 
   /// The report every [replaceAll] returns.
   ReplaceReport report = const ReplaceReport(
@@ -13,6 +13,10 @@ final class FakeReplaceSource implements ReplaceSource {
     occurrences: 5,
     skipped: [],
   );
+
+  /// Every preview request, in order.
+  final List<({String term, bool caseSensitive, String? onlyPath})>
+  previews = [];
 
   /// Every replace request, in order.
   final List<
@@ -24,10 +28,21 @@ final class FakeReplaceSource implements ReplaceSource {
       Set<String> skip,
     })
   >
-  requests = [];
+  replaceRequests = [];
 
   @override
-  Future<int> countNotes(String term) async => noteCount;
+  Future<List<ReplaceMatchNote>> previewMatches(
+    String term, {
+    required bool caseSensitive,
+    String? onlyPath,
+  }) async {
+    previews.add((
+      term: term,
+      caseSensitive: caseSensitive,
+      onlyPath: onlyPath,
+    ));
+    return preview;
+  }
 
   @override
   Future<ReplaceReport> replaceAll({
@@ -37,7 +52,7 @@ final class FakeReplaceSource implements ReplaceSource {
     Set<String>? only,
     Set<String> skip = const {},
   }) async {
-    requests.add((
+    replaceRequests.add((
       term: term,
       replacement: replacement,
       caseSensitive: caseSensitive,
