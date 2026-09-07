@@ -8,7 +8,10 @@
 /// idempotent and free of stored state.
 ///
 /// Platform split: Android schedules OS notifications (exact alarms
-/// once granted, inexact fallback) through `flutter_local_notifications` +
+/// via `setExactAndAllowWhileIdle`, so they fire in Doze — screen off —
+/// and with the app closed; the exact privilege comes from the
+/// auto-granted `USE_EXACT_ALARM` permission, with an inexact fallback
+/// if a device reports otherwise) through `flutter_local_notifications` +
 /// `timezone`; every other platform gets [NoopReminderService] — no OS
 /// notifications in v1, the due badges carry the state (documented
 /// limitation). Widget tests inject a fake; the plugin itself is only
@@ -142,9 +145,11 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
   return service;
 });
 
-/// Android reminders via `flutter_local_notifications` (exact alarms
-/// with an inexact fallback — see [_ensureExact]) + `timezone` for the
-/// local wall clock.
+/// Android reminders via `flutter_local_notifications` (exact alarms via
+/// `setExactAndAllowWhileIdle` — see [_ensureExact]) + `timezone` for
+/// the local wall clock. `USE_EXACT_ALARM` is auto-granted at install
+/// (the app targets API >= 33), so exact scheduling is normally always
+/// available without a runtime settings trip.
 final class LocalReminderService implements ReminderService {
   /// The plugin (method channels — on-device only, never in tests).
   final FlutterLocalNotificationsPlugin _plugin =
@@ -204,10 +209,11 @@ final class LocalReminderService implements ReminderService {
     return await android.requestNotificationsPermission() ?? false;
   }
 
-  /// Whether minute-precise (exact) alarms can be scheduled: granted in
-  /// system settings on Android 12+ (the request opens settings once per
-  /// process — only called while future reminders are wanted);
-  /// install-granted below 12 (the query answers null there).
+  /// Whether minute-precise (exact) alarms can be scheduled. With
+  /// `USE_EXACT_ALARM` declared (auto-granted at install on API >= 33),
+  /// this is normally already true. The request branch below is only a
+  /// last resort on OEM builds that still gate exact alarms behind the
+  /// user-grantable `SCHEDULE_EXACT_ALARM` settings toggle.
   Future<bool> _ensureExact() async {
     final android = _plugin.resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin

@@ -99,10 +99,13 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   parser keeps.*
 - [x] **T-TD-07** Reminders (Android): flutter_local_notifications +
   timezone; `POST_NOTIFICATIONS` runtime permission flow (13+); an
-  exact scheduled notification at `rem:` (`SCHEDULE_EXACT_ALARM`,
-  settings grant asked once while future reminders are wanted,
-  inexact fallback while denied — inexact alone proved too loose on
-  device: a same-minute alarm had not fired 6 s past the time);
+  exact scheduled notification at `rem:` (`USE_EXACT_ALARM`, auto-
+  granted at install on API >= 33 — Copist is a todo/reminder tool, so
+  `setExactAndAllowWhileIdle` fires even with the screen off (Doze) and
+  the app closed; `SCHEDULE_EXACT_ALARM` was instead Android 14+
+  default-deny and left an inexact fallback that Doze defers, which
+  is why reminders stopped firing); inexact stays a last resort while a
+  device reports exact unavailable)
   cancel on complete/delete, reschedule on edit; **reconciliation at
   every app/library open**: scheduled notifications are diffed against
   the parsed `rem:` tags (survives external edits and re-installs of the

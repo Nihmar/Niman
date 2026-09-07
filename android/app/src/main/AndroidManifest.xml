@@ -8,13 +8,18 @@
          filesystem. -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
-    <!-- Task reminders (T-TD-07): runtime-granted on Android 13+ (the app
-         asks when the first reminder is scheduled); install-granted below.
-         Minute precision needs the exact-alarm grant (system settings,
-         asked once when the first future reminder is scheduled); while
-         denied, alarms fall back to inexact. -->
+    <!-- Task reminders (T-TD-07): notifications are runtime-granted on
+         Android 13+ (asked when the first reminder is scheduled).
+         Minute precision needs exact alarms fired via
+         setExactAndAllowWhileIdle, which survives Doze (screen off) and
+         a closed app. Copist is a todo/reminder app (targetSdk >= 33),
+         so it requests USE_EXACT_ALARM: a normal permission auto-granted
+         at install with no runtime prompt, unlike SCHEDULE_EXACT_ALARM
+         which is denied by default on Android 14+ and needs a manual
+         system-settings toggle, silently leaving reminders unreliable
+         with the screen off. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- Let the plugin's alarm receivers survive a device reboot and an
          app re-install so scheduled task reminders are re-registered.
          flutter_local_notifications (>=16) declares only the bare minimum
