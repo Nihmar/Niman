@@ -94,7 +94,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   writes `rem:`); creation date written on add. Edit keeps unknown
   key/value tags verbatim. *AC: a round trip preserves every token the
   parser keeps.*
-- [ ] **T-TD-07** Reminders (Android): flutter_local_notifications +
+- [x] **T-TD-07** Reminders (Android): flutter_local_notifications +
   timezone; `POST_NOTIFICATIONS` runtime permission flow (13+); an
   inexact scheduled notification at `rem:` (no exact-alarm permission);
   cancel on complete/delete, reschedule on edit; **reconciliation at

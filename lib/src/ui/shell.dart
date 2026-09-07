@@ -8,8 +8,10 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
+import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
@@ -69,7 +71,11 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       stream: controller.events,
       initialData: controller.revision,
       builder: (context, _) => switch (controller.phase) {
-        LibraryPhase.ready => _LibraryShell(controller: controller),
+        LibraryPhase.ready => _LibraryShell(
+          controller: controller,
+          reminders: ref.read(reminderServiceProvider),
+          todoSourceFactory: ref.read(todoSourceFactoryProvider),
+        ),
         _ => OpenLibraryScreen(controller: controller),
       },
     );
@@ -79,9 +85,20 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
 /// The library shell: sidebar tree + action bar on the left, detail pane
 /// on the right.
 final class _LibraryShell extends StatefulWidget {
-  const _LibraryShell({required this.controller});
+  const _LibraryShell({
+    required this.controller,
+    required this.reminders,
+    required this.todoSourceFactory,
+  });
 
   final LibrarySession controller;
+
+  /// The OS reminder service (notification taps open the Todo tab).
+  final ReminderService reminders;
+
+  /// Builds the todo file source per library root (overridden with a
+  /// fake in widget tests).
+  final TodoSource Function(String root) todoSourceFactory;
 
   @override
   State<_LibraryShell> createState() => _LibraryShellState();
@@ -161,6 +178,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// app-bar add action share one controller.
   late final TodoController _todoController;
 
+  /// Notification taps while running: a todo tap opens the Todo tab.
+  StreamSubscription<String?>? _reminderTaps;
+
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
@@ -219,15 +239,35 @@ final class _LibraryShellState extends State<_LibraryShell> {
   @override
   void initState() {
     super.initState();
-    _todoController = TodoController(session: widget.controller);
+    _todoController = TodoController(
+      session: widget.controller,
+      reminders: widget.reminders,
+      sourceFactory: widget.todoSourceFactory,
+    );
+    _reminderTaps = widget.reminders.taps.listen((payload) {
+      if (payload == todoReminderPayload && mounted) {
+        const AppLogger(name: 'todo').debug('todo tap: opening Todo tab');
+        _selectShellTab(ShellTab.todo);
+      }
+    });
+    unawaited(_applyReminderLaunch());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
   }
 
   @override
   void dispose() {
+    unawaited(_reminderTaps?.cancel());
     _todoController.dispose();
     super.dispose();
+  }
+
+  /// A notification tap that started the app lands on the Todo tab.
+  Future<void> _applyReminderLaunch() async {
+    final payload = await widget.reminders.consumeLaunchPayload();
+    if (payload == todoReminderPayload && mounted) {
+      setState(() => _tab = ShellTab.todo);
+    }
   }
 
   @override

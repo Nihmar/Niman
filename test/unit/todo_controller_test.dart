@@ -3,11 +3,13 @@
 // the content read, and the tab's own ops publish without a round trip.
 import 'dart:io';
 
+import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_reminder_service.dart';
 
 void main() {
   late Directory root;
@@ -131,5 +133,77 @@ void main() {
     await session.close();
     await waitFor(() => controller.snapshot == null);
     expect(controller.snapshot, isNull);
+  });
+
+  group('reminders', () {
+    late FakeReminderService reminders;
+    late TodoController reminded;
+
+    setUp(() {
+      reminders = FakeReminderService();
+      reminded = TodoController(
+        session: session,
+        clock: () => DateTime(2026, 9, 7),
+        refreshDebounce: const Duration(milliseconds: 1),
+        reminders: reminders,
+      );
+    });
+
+    tearDown(() {
+      reminded.dispose();
+    });
+
+    test('an add with a future rem: reconciles it', () async {
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      await reminded.add('call rem:2026-09-08T10:30');
+      await waitFor(() => reminders.reconciled.length == 2);
+      final wanted = reminders.reconciled.last;
+      expect(
+        wanted.keys.single,
+        todoReminderId('call rem:2026-09-08T10:30'),
+      );
+      expect(wanted.values.single.when, DateTime(2026, 9, 8, 10, 30));
+    });
+
+    test('past reminders reconcile as nothing', () async {
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      await reminded.add('call rem:2026-09-06T10:30');
+      await waitFor(() => reminders.reconciled.length == 2);
+      expect(reminders.reconciled.last, isEmpty);
+    });
+
+    test('checking drops the reminder on the next sync', () async {
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      await reminded.add('call rem:2026-09-08T10:30');
+      await waitFor(() => reminders.reconciled.length == 2);
+      expect(reminders.reconciled.last, hasLength(1));
+      await reminded.check(reminded.snapshot!.todo.single);
+      await waitFor(() => reminders.reconciled.length == 3);
+      expect(reminders.reconciled.last, isEmpty);
+    });
+
+    test('a denied permission reconciles nothing', () async {
+      reminders.permissionGranted = false;
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      await reminded.add('call rem:2026-09-08T10:30');
+      await waitFor(() => reminders.reconciled.length == 2);
+      expect(reminders.reconciled.last, isEmpty);
+    });
+
+    test('a failing service keeps the op working', () async {
+      reminders.failReconcile = true;
+      await reminded.open();
+      await reminded.add('kept');
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(reminded.error, isNull);
+      expect(
+        reminded.snapshot!.todo.single.task.description,
+        'kept',
+      );
+    });
   });
 }

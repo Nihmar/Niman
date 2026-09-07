@@ -129,4 +129,9 @@ final class AppStrings {
   static const String todoNoPriority = 'No priority';
   static const String todoNoDueDate = 'No due date';
   static const String todoNoReminder = 'No reminder';
+
+  // Task reminders (T-TD-07).
+  static const String todoReminderChannel = 'Task reminders';
+  static const String todoReminderBody = 'Todo reminder';
+  static const String todoReminderDue = 'Due';
 }

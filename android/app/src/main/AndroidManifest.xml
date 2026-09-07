@@ -8,6 +8,11 @@
          filesystem. -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
+    <!-- Task reminders (T-TD-07): runtime-granted on Android 13+ (the app
+         asks when the first reminder is scheduled); install-granted below.
+         Scheduling is inexact (no exact-alarm permission). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="Copist"
         android:name="${applicationName}"

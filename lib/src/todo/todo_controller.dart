@@ -17,6 +17,7 @@ import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter/foundation.dart';
@@ -31,16 +32,22 @@ final class TodoController extends ChangeNotifier {
   /// driven reloads so a burst of index events causes one reload.
   /// [sourceFactory] builds the file source per library root (defaults
   /// to the real store; widget tests inject an in-memory fake).
+  /// [reminders] syncs OS notifications after every publish (null on
+  /// desktop and in tests that do not cover reminders).
   TodoController({
     required this.session,
     DateTime Function()? clock,
     this.refreshDebounce = const Duration(milliseconds: 300),
     TodoSource Function(String root)? sourceFactory,
+    this.reminders,
   }) : _clock = clock ?? DateTime.now,
        _sourceFactory = sourceFactory ?? _defaultSource;
 
   /// The library session: root path and revision events.
   final LibrarySession session;
+
+  /// The OS reminder service, or null while disabled.
+  final ReminderService? reminders;
 
   final DateTime Function() _clock;
   final TodoSource Function(String root) _sourceFactory;
@@ -153,6 +160,25 @@ final class TodoController extends ChangeNotifier {
     }
     if (!_disposed) {
       notifyListeners();
+      unawaited(_syncReminders());
+    }
+  }
+
+  /// Reconciles OS reminders with the current snapshot (fire-and-forget:
+  /// scheduling never blocks the op, and a denied permission or a dead
+  /// plugin only logs). Null snapshot (library closed) clears them.
+  Future<void> _syncReminders() async {
+    final service = reminders;
+    if (service == null || _disposed) {
+      return;
+    }
+    try {
+      final snapshot = _snapshot;
+      await service.reconcile(
+        snapshot == null ? const {} : wantedReminders(snapshot, _clock()),
+      );
+    } on Object catch (error) {
+      _log.warning('todo reminders sync failed: $error');
     }
   }
 
@@ -178,6 +204,7 @@ final class TodoController extends ChangeNotifier {
         _probes = null;
         _error = null;
         notifyListeners();
+        unawaited(_syncReminders());
       }
       return;
     }
@@ -209,6 +236,7 @@ final class TodoController extends ChangeNotifier {
         '${snapshot.done.length} done',
       );
       notifyListeners();
+      unawaited(_syncReminders());
     } on Object catch (error) {
       if (generation != _generation || _disposed) {
         return;

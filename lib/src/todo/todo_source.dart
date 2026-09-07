@@ -8,6 +8,7 @@
 library;
 
 import 'package:copist/src/todo/todo_store.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// What the todo UI layer needs from `todo.txt` / `done.txt`.
 ///
@@ -47,3 +48,17 @@ abstract interface class TodoSource {
   /// Removes the `done.txt` line at [lineIndex] outright.
   Future<TodoSnapshot> deleteDoneAt(int lineIndex);
 }
+
+/// Builds the todo file source per library root.
+///
+/// The shell reads this provider for the controller's factory so widget
+/// tests can override it with an in-memory fake (the real store's
+/// `Isolate.run` reads never complete in the fake-async test zone).
+final todoSourceFactoryProvider = Provider<TodoSource Function(String)>((
+  ref,
+) {
+  return _defaultTodoSource;
+});
+
+/// The production file source for [root].
+TodoSource _defaultTodoSource(String root) => TodoStore(root: root);

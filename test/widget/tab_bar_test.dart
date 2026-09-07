@@ -6,6 +6,8 @@
 import 'package:copist/src/app.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/library_state.dart';
+import 'package:copist/src/todo/reminders.dart';
+import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_reminder_service.dart';
+import '../fakes/fake_todo_source.dart';
 
 /// Phone-sized surface (390 x 844 logical).
 void _setPhoneSize(WidgetTester tester) {
@@ -431,6 +435,53 @@ void main() {
     await tester.tap(find.byKey(const Key('tags-back')));
     await settle(tester);
     expect(find.byKey(const Key('search-query')), findsOne);
+  });
+
+  testWidgets('a reminder tap opens the Todo tab (T-TD-07)', (tester) async {
+    _setPhoneSize(tester);
+    final reminders = FakeReminderService();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          reminderServiceProvider.overrideWithValue(reminders),
+          todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+        ],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester);
+    expect(find.text('No notes yet'), findsOne);
+
+    reminders.tap(todoReminderPayload);
+    await settle(tester);
+    expect(find.text('No open tasks yet'), findsOne);
+    await reminders.dispose();
+  });
+
+  testWidgets('a tap-started app lands on the Todo tab (T-TD-07)', (
+    tester,
+  ) async {
+    _setPhoneSize(tester);
+    final reminders = FakeReminderService(
+      launchPayload: todoReminderPayload,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          reminderServiceProvider.overrideWithValue(reminders),
+          todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+        ],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester);
+    await settle(tester);
+    expect(find.text('No open tasks yet'), findsOne);
+    await reminders.dispose();
   });
 
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {

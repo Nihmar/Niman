@@ -268,6 +268,11 @@ void main() {
     expect(source.todoLines.first, '(B) bee due:2026-09-01');
   });
 
+  testWidgets('a task with a reminder shows the alarm icon', (tester) async {
+    await pumpTab(tester, todo: ['call rem:2026-09-08T10:30', 'plain']);
+    expect(find.byIcon(Icons.alarm), findsOneWidget);
+  });
+
   testWidgets('due picker writes due: on save', (tester) async {
     await pumpTab(tester, todo: ['tasked']);
     await tester.tap(find.text('tasked'));
