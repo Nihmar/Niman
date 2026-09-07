@@ -73,13 +73,16 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
 - [x] **T-UI-04** Tree rows per mockup: folder rows = chevron + name (drop
   `Icons.folder`); file rows = outline doc icon + name. Row height/font per
   mockup. *AC: `tree.dart` diff is style-only; no behavior change.*
-- [ ] **T-UI-05** Home the note actions: delete `_ActionBar`; add the classic
-  Android round “+” FAB (bottom-right, above the bottom nav) → new note in
-  the currently selected folder (root if none); long-press a row → context
-  menu (New note here / New folder here [dirs only] / Rename / Move /
-  Delete→trash) reusing the existing `_createNote`, `_createFolder`,
-  `_rename`, `_move`, `_delete` handlers. *AC: FAB + all five actions
-  reachable and exercised by a widget test.*
+- [x] **T-UI-05** Home the note actions: `_ActionBar` deleted; the classic
+  Android round “+” FAB (bottom-right, above the bottom nav; also on the
+  wide split) → new note in the currently selected folder (root if none);
+  long-press a row → modal context menu (New note here / New folder here
+  [dir rows only] / **Set as quick note** [file rows; is the quick note,
+  shows "Current quick note"] / Rename / Move / Delete→trash) reusing the
+  `_createNote`, `_createFolder`, `_rename`, `_move`, `_delete` handlers.
+  *AC: all five actions + the quick-note item reachable — widget tested
+  (`tab_bar_test` FAB/menu test, `library_flow_test` reworked to
+  FAB/menu).*
 - [ ] **T-UI-06** Editor app bar: eye/`edit` toggle becomes an app-bar action
   (mockup: single icon, top right); delete `_paneSwitchBar` (works for the
   wide-screen switch override too, since the app bar is shared).

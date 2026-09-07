@@ -24,6 +24,7 @@ final class NoteTree extends StatefulWidget {
     required this.expanded,
     required this.onToggle,
     required this.onSelect,
+    this.onLongPress,
     this.nameDesc = false,
     super.key,
   });
@@ -45,6 +46,9 @@ final class NoteTree extends StatefulWidget {
 
   /// Called with the row's note when the row is selected.
   final void Function(Note note) onSelect;
+
+  /// Called with the row's note on long-press (context menu, T-UI-05).
+  final void Function(Note note)? onLongPress;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -157,6 +161,7 @@ final class _NoteTreeState extends State<NoteTree> {
                   selected: row.note.path == widget.selectedPath,
                   onSelect: widget.onSelect,
                   onToggle: widget.onToggle,
+                  onLongPress: widget.onLongPress,
                 );
               },
             );
@@ -185,6 +190,7 @@ final class _RowTile extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.onToggle,
+    this.onLongPress,
   });
 
   final Note note;
@@ -193,12 +199,14 @@ final class _RowTile extends StatelessWidget {
   final bool selected;
   final void Function(Note note) onSelect;
   final ValueChanged<String> onToggle;
+  final void Function(Note note)? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () => onSelect(note),
+      onLongPress: onLongPress == null ? null : () => onLongPress!(note),
       child: Container(
         height: 40,
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,

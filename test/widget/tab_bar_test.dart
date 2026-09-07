@@ -103,25 +103,23 @@ void main() {
     expect(find.text('No notes yet'), findsOne);
 
     // Create a folder, expand it, and create a note inside it.
-    for (var i = 0; i < 2; i++) {
-      await tester.tap(
-        find.byTooltip(i == 0 ? 'New folder' : 'New note'),
-      );
-      await tester.pump();
-      await tester.enterText(
-        find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.byType(TextField),
-        ),
-        i == 0 ? 'Docs' : 'In note',
-      );
-      await tester.tap(find.text('OK'));
-      await settle(tester);
-      if (i == 0) {
-        await tester.tap(noteRow(controller, 'Docs'));
-        await settle(tester);
-      }
-    }
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+    await tester.tap(noteRow(controller, 'Docs'));
+    await settle(tester);
+    await tester.longPress(noteRow(controller, 'Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-new-note')));
+    await settle(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'In note',
+    );
+    await tester.tap(find.text('OK'));
+    await settle(tester);
 
     // Back to the tree (the note opened full-screen).
     await tester.tap(find.byTooltip('Back'));
@@ -325,6 +323,68 @@ void main() {
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
     expect(noteRow(controller, 'Scratch.md'), findsOne);
+  });
+
+  testWidgets('FAB creates in the selected folder, menu offers all actions '
+      '(T-UI-05)', (tester) async {
+    _setPhoneSize(tester);
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester);
+
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await settle(tester);
+
+    // Select the folder: the FAB creates the note inside it.
+    await tester.tap(noteRow(controller, 'Docs'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('new-note-fab')));
+    await settle(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'In root', // created in Docs (its parent) — see below.
+    );
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(await controller.ops!.find('Docs/In root.md'), isNotNull);
+
+    // Long-press the note: New note here is offered; New folder is not
+    // (file row); Rename/Move/Delete are.
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    await tester.longPress(noteRow(controller, 'In root.md'));
+    await settle(tester);
+    expect(find.byKey(const Key('menu-new-note')), findsOne);
+    expect(find.byKey(const Key('menu-new-folder')), findsNothing);
+    expect(find.byKey(const Key('menu-rename')), findsOne);
+    expect(find.byKey(const Key('menu-move')), findsOne);
+    expect(find.byKey(const Key('menu-delete')), findsOne);
+
+    // Rename through the menu.
+    await tester.tap(find.byKey(const Key('menu-rename')));
+    await settle(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'Renamed',
+    );
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(await controller.ops!.find('Docs/Renamed.md'), isNotNull);
+
+    // Delete through the menu (trash toggle default on).
+    await tester.longPress(noteRow(controller, 'Renamed.md'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('menu-delete')));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await settle(tester);
+    expect(await controller.ops!.find('Docs/Renamed.md'), isNull);
   });
 
   testWidgets('search tab is disabled until M3 (R3)', (tester) async {

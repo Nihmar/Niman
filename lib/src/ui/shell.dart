@@ -290,13 +290,15 @@ final class _LibraryShellState extends State<_LibraryShell> {
     }
   }
 
-  Future<void> _createNote() async {
+  /// Creates a note in [parent] (default: the FAB target). Used by the
+  /// FAB and the context menu.
+  Future<void> _createNote({String? parent}) async {
     final name =
         await _nameDialog(context, title: 'New note', initial: 'New note');
     if (name == null) return;
     await _guard(() async {
       final row = await widget.controller.ops!.createNote(
-        parentPath: _createParent,
+        parentPath: parent ?? _createParent,
         name: name,
       );
       setState(() {
@@ -307,7 +309,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _createFolder() async {
+  /// Creates a folder in [parent] (default: the FAB target).
+  Future<void> _createFolder({String? parent}) async {
     final name = await _nameDialog(
       context,
       title: 'New folder',
@@ -316,7 +319,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
     if (name == null) return;
     await _guard(() async {
       final row = await widget.controller.ops!.createFolder(
-        parentPath: _createParent,
+        parentPath: parent ?? _createParent,
         name: name,
       );
       setState(() {
@@ -326,8 +329,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _rename() async {
-    final sel = _selected;
+  Future<void> _rename([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final name = await _nameDialog(
       context,
@@ -341,8 +344,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _move() async {
-    final sel = _selected;
+  Future<void> _move([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final folders = await widget.controller.folders();
     if (!mounted) return;
@@ -364,8 +367,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _delete() async {
-    final sel = _selected;
+  Future<void> _delete([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final ops = widget.controller.ops;
     if (ops == null) return;
@@ -405,6 +408,87 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
+  /// Long-press context menu on a tree row (T-UI-05): the note actions,
+  /// scoped to the pressed row. New note/folder target the row's folder.
+  Future<void> _showRowMenu(Note note) async {
+    final here = note.isDir ? note.path : parentOf(note.path);
+    final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
+    if (!mounted) return;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              key: const Key('menu-new-note'),
+              leading: const Icon(Icons.note_add),
+              title: const Text('New note here'),
+              onTap: () => Navigator.pop(context, 'note'),
+            ),
+            if (note.isDir)
+              ListTile(
+                key: const Key('menu-new-folder'),
+                leading: const Icon(Icons.create_new_folder),
+                title: const Text('New folder here'),
+                onTap: () => Navigator.pop(context, 'folder'),
+              ),
+            if (!note.isDir)
+              ListTile(
+                key: const Key('menu-quick-note'),
+                leading: Icon(
+                  isQuickNote
+                      ? Icons.sticky_note_2
+                      : Icons.sticky_note_2_outlined,
+                ),
+                title: Text(
+                  isQuickNote
+                      ? 'Current quick note'
+                      : 'Set as quick note',
+                ),
+                onTap: () => Navigator.pop(context, 'quicknote'),
+              ),
+            ListTile(
+              key: const Key('menu-rename'),
+              leading: const Icon(Icons.edit),
+              title: const Text('Rename'),
+              onTap: () => Navigator.pop(context, 'rename'),
+            ),
+            ListTile(
+              key: const Key('menu-move'),
+              leading: const Icon(Icons.drive_folder_upload),
+              title: const Text('Move'),
+              onTap: () => Navigator.pop(context, 'move'),
+            ),
+            ListTile(
+              key: const Key('menu-delete'),
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('Delete'),
+              onTap: () => Navigator.pop(context, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+    switch (action) {
+      case 'note':
+        await _createNote(parent: here);
+      case 'folder':
+        await _createFolder(parent: here);
+      case 'quicknote':
+        await _guard(() async {
+          await widget.controller.ops!.setQuickNotePath(path: note.path);
+          widget.controller.notify();
+        });
+      case 'rename':
+        await _rename(note.path);
+      case 'move':
+        await _move(note.path);
+      case 'delete':
+        await _delete(note.path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
@@ -440,6 +524,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
         actions: _tab == ShellTab.files
             ? _filesAppBarActions(controller)
             : const [],
+        floatingActionButton: _tab == ShellTab.files
+            ? _newNoteFab()
+            : null,
         body: _tabBody(controller),
       );
     }
@@ -493,6 +580,18 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
+      floatingActionButton: _newNoteFab(),
+    );
+  }
+
+  /// The classic round "+" FAB (bottom-right, above the bottom nav):
+  /// a new note in the selected folder, root if none (T-UI-05).
+  Widget _newNoteFab() {
+    return FloatingActionButton(
+      key: const Key('new-note-fab'),
+      tooltip: 'New note',
+      onPressed: _createNote,
+      child: const Icon(Icons.add),
     );
   }
 
@@ -548,10 +647,12 @@ final class _LibraryShellState extends State<_LibraryShell> {
     required String title,
     required List<Widget> actions,
     required Widget body,
+    Widget? floatingActionButton,
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
       body: body,
+      floatingActionButton: floatingActionButton,
       bottomNavigationBar: NavigationBar(
         key: const Key('shell-tabs'),
         selectedIndex: _tab.index,
@@ -620,90 +721,14 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// The tree pane: the action bar and the note tree — the whole body on
   /// phones, the left column on wide screens.
   Widget _treePane(LibrarySession controller) {
-    return Column(
-      children: [
-        _ActionBar(
-          hasSelection: _selected != null,
-          busy: _busy,
-          onCreateNote: _createNote,
-          onCreateFolder: _createFolder,
-          onRename: _rename,
-          onMove: _move,
-          onDelete: _delete,
-        ),
-        const SizedBox(height: 4),
-        Expanded(
-          child: NoteTree(
-            controller: controller,
-            nameDesc: _treeSort == TreeSort.nameDesc,
-            selectedPath: _selected,
-            expanded: _expanded,
-            onToggle: _toggle,
-            onSelect: _select,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// A row of action icons above the tree.
-final class _ActionBar extends StatelessWidget {
-  const _ActionBar({
-    required this.hasSelection,
-    required this.busy,
-    required this.onCreateNote,
-    required this.onCreateFolder,
-    required this.onRename,
-    required this.onMove,
-    required this.onDelete,
-  });
-
-  final bool hasSelection;
-  final bool busy;
-  final Future<void> Function() onCreateNote;
-  final Future<void> Function() onCreateFolder;
-  final Future<void> Function() onRename;
-  final Future<void> Function() onMove;
-  final Future<void> Function() onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = !busy;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        IconButton(
-          tooltip: 'New note',
-          iconSize: 18,
-          icon: const Icon(Icons.note_add),
-          onPressed: enabled ? onCreateNote : null,
-        ),
-        IconButton(
-          tooltip: 'New folder',
-          iconSize: 18,
-          icon: const Icon(Icons.create_new_folder),
-          onPressed: enabled ? onCreateFolder : null,
-        ),
-        IconButton(
-          tooltip: 'Rename',
-          iconSize: 18,
-          icon: const Icon(Icons.edit),
-          onPressed: enabled && hasSelection ? onRename : null,
-        ),
-        IconButton(
-          tooltip: 'Move',
-          iconSize: 18,
-          icon: const Icon(Icons.drive_folder_upload),
-          onPressed: enabled && hasSelection ? onMove : null,
-        ),
-        IconButton(
-          tooltip: 'Delete',
-          iconSize: 18,
-          icon: const Icon(Icons.delete_outline),
-          onPressed: enabled && hasSelection ? onDelete : null,
-        ),
-      ],
+    return NoteTree(
+      controller: controller,
+      nameDesc: _treeSort == TreeSort.nameDesc,
+      selectedPath: _selected,
+      expanded: _expanded,
+      onToggle: _toggle,
+      onSelect: _select,
+      onLongPress: _showRowMenu,
     );
   }
 }
