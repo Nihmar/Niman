@@ -250,6 +250,16 @@ package's per-node builders. Never hand a novel-length document to
   caret (+ autosave); unit tests cover the content addressing.
 - [ ] **T-M2-10** Tests: unit (scroll-mapping, KaTeX LRU, highlighter) and
   widget (editor/preview render parity, layout modes). *AC: green.*
+- [ ] **T-M2-11** In-editor find & replace (requested during the M3
+  verification pass): the classic two-row bar over the editor text —
+  re_editor's `CodeFindController` (literal search on a persistent
+  isolate, every-match highlight, current-match auto-scroll, replace-one
+  and replace-all through the undoable edit path) with a Copist-styled
+  `findBuilder` (find input + match counter + match-case toggle + prev/
+  next + close; a second row for replace). Entry: Ctrl/Cmd+F, replace via
+  Ctrl+Alt+F and Ctrl+H (non-mac), Esc closes, plus a status-row find
+  action on touch. *AC: find across a 931K note without jank;
+  replace-all is a single undoable pass; widget tests on the bar.*
 
 ## Technical design
 

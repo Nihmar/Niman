@@ -7,6 +7,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
+import 'package:copist/src/editor/find_panel.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/md_editing.dart';
@@ -155,6 +156,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// must not dispose) or created here.
   late final bool _ownsController;
 
+  /// The in-editor find & replace state (the classic bar): re_editor's
+  /// find machinery over [_controller], driven by `CopistFindPanel`.
+  late final CodeFindController _findController;
+
   /// The `CodeLines` the last processed text edit produced. A controller
   /// change that reuses the same instance is selection-only (no save).
   /// Identity comparison keeps this O(1) at any file size.
@@ -203,6 +208,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _controller = widget.controller == null
         ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
         : widget.controller!;
+    _findController = CodeFindController(_controller);
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -236,6 +242,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
+    _findController.dispose();
     _focus.dispose();
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
@@ -410,6 +417,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       showLineNumbers: widget.showLineNumbers,
       autofocus: widget.autofocusEditor,
       scrollController: _scroll,
+      findController: _findController,
+      findBuilder: (context, controller, readOnly) =>
+          CopistFindPanel(controller: controller, readOnly: readOnly),
+      shortcutsActivators: const CopistShortcutsActivatorsBuilder(),
     ),
   );
 
@@ -1028,6 +1039,21 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                 minHeight: 26,
               ),
               onPressed: () => setState(() => _showOutline = !_showOutline),
+            ),
+          // Find & replace lives in the editor pane (hidden in
+          // preview-only mode).
+          if (!_loading && (widget.splitPreview || !widget.showPreview))
+            IconButton(
+              key: const Key('editor-find-open'),
+              tooltip: AppStrings.findInNoteTooltip,
+              icon: const Icon(Icons.search),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 26,
+              ),
+              onPressed: _findController.findMode,
             ),
           if (!_loading)
             Text(

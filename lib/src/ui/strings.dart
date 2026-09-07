@@ -70,6 +70,19 @@ final class AppStrings {
   static const String replaceCancel = 'Close';
   static const String replaceUnavailable = 'Replace is unavailable right now';
 
+  // Editor find & replace (the classic in-note bar, re_editor's find
+  // controller + CopistFindPanel).
+  static const String findInNoteTooltip = 'Find in note';
+  static const String editorFindHint = 'Find';
+  static const String editorReplaceHint = 'Replace';
+  static const String editorFindCaseTooltip = 'Match case';
+  static const String editorFindPreviousTooltip = 'Previous match';
+  static const String editorFindNextTooltip = 'Next match';
+  static const String editorFindCloseTooltip = 'Close find';
+  static const String editorFindReplaceModeTooltip = 'Replace mode';
+  static const String editorReplaceOneTooltip = 'Replace this match';
+  static const String editorReplaceAllTooltip = 'Replace all matches';
+
   // Tags (T-M3-06).
   static const String openTagsTooltip = 'Tags';
   static const String tagsTitle = 'Tags';
