@@ -108,7 +108,7 @@ void main() {
       expect(wanted.values.single.title, 'Task reminder');
     });
 
-    test('title shows the entered description, not the whole raw line', () {
+    test('title shows the typed phrase, not the whole raw line', () {
       final wanted = wantedReminders(
         snapshotOf(todo: [
           '(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30',
@@ -117,11 +117,11 @@ void main() {
       );
       expect(wanted, hasLength(1));
       final entry = wanted.entries.single;
-      // The id keys on the full description (stable identity); the shown text
-      // drops the priority prefix and the managed due:/rem: tags, leaving the
-      // description the user typed.
+      // The id keys on the full description (stable identity); the shown
+      // text drops the priority prefix, the managed due:/rem: tags and the
+      // +project/@context/#tag markers, leaving the phrase the user typed.
       expect(entry.key, entry.value.id);
-      expect(entry.value.title, 'call plumber +home');
+      expect(entry.value.title, 'call plumber');
     });
   });
 

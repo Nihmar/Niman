@@ -387,20 +387,24 @@ String withoutToken(String description, String token) {
 final RegExp _keyValueWordPattern =
     RegExp(r'(?:^|\s)[A-Za-z][A-Za-z0-9_-]*:[^\s]+(?=\s|$)');
 
-/// Returns [description] without its `key:value` annotation tags — the
-/// model's managed slots (`due:`, `rem:`, `rec:`, … are appended by the
-/// dialog, not typed by the user) — collapsing any leftover whitespace.
-/// Words and `+`/`@`/`#` tokens are kept.
+/// Returns the prose of [description]: every token Copist manages or
+/// filters by removed, leftover whitespace collapsed.
 ///
-/// Used where a task is shown out of its line (e.g. the notification
-/// title): the tags render as the full raw line instead of the user's
-/// entered text.
-String withoutKeyValueTags(String description) {
-  if (!description.contains(':')) {
-    return description.trim();
-  }
+/// That means the `key:value` slots the dialog appends (`due:`, `rem:`,
+/// `rec:`, …) and the `+project` / `@context` / `#tag` markers. What is
+/// left is the phrase the user typed.
+///
+/// Used where a task is shown out of its line and out of the app — the
+/// notification title. In the list the tokens carry meaning next to the
+/// checkbox and the filter chips; on the lock screen they are syntax
+/// with nothing to explain them, so a reminder reads as one phrase
+/// rather than a raw todo.txt line.
+String taskDisplayText(String description) {
   return description
       .replaceAll(_keyValueWordPattern, '')
+      .replaceAll(_projectPattern, '')
+      .replaceAll(_contextPattern, '')
+      .replaceAll(_hashtagPattern, '')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
 }

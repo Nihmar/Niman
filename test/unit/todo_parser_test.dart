@@ -340,28 +340,53 @@ void main() {
     });
   });
 
-  group('withoutKeyValueTags', () {
-    test('drops the managed due:/rem:, keeping words and tokens', () {
+  group('taskDisplayText', () {
+    test('drops the managed due:/rem: slots', () {
       expect(
-        withoutKeyValueTags('call mom +errands due:2026-09-09'),
-        'call mom +errands',
+        taskDisplayText('call mom due:2026-09-09'),
+        'call mom',
       );
       expect(
-        withoutKeyValueTags('sync rem:2026-09-08T10:30 rec:+1d @home'),
-        'sync @home',
+        taskDisplayText('sync rem:2026-09-08T10:30 rec:+1d'),
+        'sync',
+      );
+    });
+
+    test('drops +project, @context and #tag markers', () {
+      // They read as syntax on a lock screen, where no chip or filter
+      // explains them.
+      expect(
+        taskDisplayText('call mom +errands @home #urgent'),
+        'call mom',
+      );
+      expect(
+        taskDisplayText('+home buy milk @shop due:2026-09-09'),
+        'buy milk',
+      );
+      expect(
+        taskDisplayText('plan +a +b trip'),
+        'plan trip',
+      );
+    });
+
+    test('keeps an address-like word that is not a token', () {
+      // The markers only count at a word boundary.
+      expect(
+        taskDisplayText('mail bob@example.com about c++ due:1'),
+        'mail bob@example.com about c++',
       );
     });
 
     test('removes embedded tags and collapses leftover spaces', () {
       expect(
-        withoutKeyValueTags(' a due:1 b  due:2  c '),
+        taskDisplayText(' a due:1 b  due:2  c '),
         'a b c',
       );
     });
 
     test('leaves token-free plain text and empties intact', () {
-      expect(withoutKeyValueTags('call mom'), 'call mom');
-      expect(withoutKeyValueTags(''), isEmpty);
+      expect(taskDisplayText('call mom'), 'call mom');
+      expect(taskDisplayText(''), isEmpty);
     });
   });
 
