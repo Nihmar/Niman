@@ -73,7 +73,7 @@ is **not wired**.
   (FTS/tags rewritten only when the digest changed; a rename-with-unchanged-
   content touches no FTS row); delete db → rescan reproduces FTS, tags,
   stems and links; content reads batched a few hundred per isolate call.*
-- [ ] **T-M3-04** Search data side: `search/query.dart` (user text is never
+- [x] **T-M3-04** Search data side: `search/query.dart` (user text is never
   an FTS expression — split on whitespace, quote each token doubling
   internal quotes, append `*` to the last token only, empty input = no
   query), `search/search_repo.dart` (words: `bm25(notes_fts, 10.0, 1.0)`
