@@ -7,9 +7,10 @@
 /// around the first match.
 library;
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart' show QueryRow, Variable;
 
 /// One ranked search hit.
 final class SearchHit {
@@ -94,18 +95,30 @@ final class SearchRepo implements SearchSource {
     int limit = 200,
   }) async {
     if (query == null || query.trim().isEmpty) return const [];
-    final rows = await _db
-        .customSelect(
-          'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
-          "snippet(notes_fts, 1, '<mark>', '</mark>', '…', 12) AS snippet "
-          'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
-          'WHERE notes_fts MATCH ?1 '
-          'ORDER BY bm25(notes_fts, 10.0, 1.0) '
-          'LIMIT ?2',
-          variables: [Variable<String>(query), Variable<int>(limit)],
-        )
-        .get();
+    const log = AppLogger(name: 'search');
+    final clock = Stopwatch()..start();
+    List<QueryRow> rows;
+    try {
+      rows = await _db
+          .customSelect(
+            'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
+            "snippet(notes_fts, 1, '<mark>', '</mark>', '…', 12) AS snippet "
+            'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
+            'WHERE notes_fts MATCH ?1 '
+            'ORDER BY bm25(notes_fts, 10.0, 1.0) '
+            'LIMIT ?2',
+            variables: [Variable<String>(query), Variable<int>(limit)],
+          )
+          .get();
+    } on Object catch (e) {
+      log.warning('word search failed for "$query": $e');
+      return const [];
+    }
     if (!isCurrent(id)) return const [];
+    log.debug(
+      'word "$query" -> ${rows.length} hit(s) '
+      'in ${clock.elapsedMilliseconds} ms',
+    );
     return [
       for (final row in rows)
         SearchHit(
@@ -130,21 +143,33 @@ final class SearchRepo implements SearchSource {
     // case-insensitive.
     final lower = pattern.toLowerCase();
     if (lower.isEmpty) return const [];
-    final rows = await _db
-        .customSelect(
-          'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
-          'notes_fts.body AS body '
-          'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
-          r"WHERE lower(notes_fts.body) LIKE ?1 ESCAPE '\'"
-          ' ORDER BY notes.path '
-          'LIMIT ?2',
-          variables: [
-            Variable<String>('%${sqlLikeEscape(lower)}%'),
-            Variable<int>(limit),
-          ],
-        )
-        .get();
+    const log = AppLogger(name: 'search');
+    final clock = Stopwatch()..start();
+    List<QueryRow> rows;
+    try {
+      rows = await _db
+          .customSelect(
+            'SELECT notes.id, notes.path, notes.name, notes_fts.title, '
+            'notes_fts.body AS body '
+            'FROM notes_fts JOIN notes ON notes.id = notes_fts.rowid '
+            r"WHERE lower(notes_fts.body) LIKE ?1 ESCAPE '\'"
+            ' ORDER BY notes.path '
+            'LIMIT ?2',
+            variables: [
+              Variable<String>('%${sqlLikeEscape(lower)}%'),
+              Variable<int>(limit),
+            ],
+          )
+          .get();
+    } on Object catch (e) {
+      log.warning('contains search failed for "$pattern": $e');
+      return const [];
+    }
     if (!isCurrent(id)) return const [];
+    log.debug(
+      'contains "$pattern" -> ${rows.length} hit(s) '
+      'in ${clock.elapsedMilliseconds} ms',
+    );
     return [
       for (final row in rows)
         SearchHit(

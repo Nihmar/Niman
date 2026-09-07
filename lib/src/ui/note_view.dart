@@ -434,14 +434,24 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   }
 
   /// Resolves an `![[…]]` embed: library-root-relative first (the
-  /// attachments/assets layout), then relative to the note's own folder.
-  String? _resolveEmbed(String target) {
+  /// attachments/assets layout), then relative to the note's own folder,
+  /// then by unique name through the link index (`![[foo.png]]` resolving
+  /// to `Attachments/foo.png`, the Obsidian layout).
+  Future<String?> _resolveEmbed(String target) async {
     final root = widget.libraryRoot;
     if (root == null || target.isEmpty) return null;
     var candidate = File(p.join(root, target));
     if (candidate.existsSync()) return candidate.path;
     candidate = File(p.join(p.dirname(widget.path), target));
-    return candidate.existsSync() ? candidate.path : null;
+    if (candidate.existsSync()) return candidate.path;
+    final source = widget.linkSource;
+    if (source == null) return null;
+    final resolved = await source.resolveWiki(target);
+    if (resolved is ResolvedNote) {
+      final viaIndex = File(p.join(root, resolved.note.path));
+      if (viaIndex.existsSync()) return viaIndex.path;
+    }
+    return null;
   }
 
   /// Editor side of link navigation: the caret sits on a wikilink or MD

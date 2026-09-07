@@ -93,7 +93,7 @@ final class MarkdownPreview extends StatefulWidget {
   /// Resolves an `![[…]]` embed target to an absolute file path (or null);
   /// images render inline, other targets as muted path text. When null,
   /// embeds render as plain text.
-  final String? Function(String target)? embedResolver;
+  final Future<String?> Function(String target)? embedResolver;
 
   /// Math visual style (size/color); see [MathStyle].
   final MathStyle mathStyle;
@@ -229,10 +229,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
             recognizers: _recognizers,
           ),
         if (widget.embedResolver != null)
-          'embed': EmbedBuilder(
-            onResolve: widget.embedResolver!,
-            recognizers: _recognizers,
-          ),
+          'embed': EmbedBuilder(onResolve: widget.embedResolver!),
         'math': MathInlineBuilder(cache: _mathCache, style: widget.mathStyle),
         'mathblock': MathBlockBuilder(
           cache: _mathCache,

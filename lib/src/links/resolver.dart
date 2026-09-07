@@ -244,12 +244,17 @@ final class LinkResolver implements LinkSource {
     if (notes.length == 1) {
       return ResolvedNote(note: notes.single, heading: heading);
     }
-    // Same-stem candidates: qualify by the target's path prefix.
-    final suffix = '/$t.md';
+    // Same-stem candidates: qualify by the target's path prefix. For a
+    // `.md` target the extension was already stripped, so the candidate
+    // name is `$t.md`; for non-md targets (embeds — `foo.png`) the target
+    // keeps its extension and matches as-is.
+    final withMd = '$t.md';
     final qualified = <Note>[
       for (final n in notes)
-        if (n.path.toLowerCase() == '$t.md' ||
-            n.path.toLowerCase().endsWith(suffix))
+        if (n.path.toLowerCase() == t ||
+            n.path.toLowerCase() == withMd ||
+            n.path.toLowerCase().endsWith('/$t') ||
+            n.path.toLowerCase().endsWith('/$withMd'))
           n,
     ];
     if (qualified.length == 1) {

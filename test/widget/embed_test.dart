@@ -29,21 +29,23 @@ void main() {
     await temp.delete(recursive: true);
   });
 
-  Widget app({required String data, String? Function(String)? resolve}) =>
-      MaterialApp(
-        home: Scaffold(
-          body: MarkdownPreview(
-            data: data,
-            embedResolver: resolve,
-          ),
-        ),
-      );
+  Widget app({
+    required String data,
+    Future<String?> Function(String)? resolve,
+  }) => MaterialApp(
+    home: Scaffold(
+      body: MarkdownPreview(
+        data: data,
+        embedResolver: resolve,
+      ),
+    ),
+  );
 
   testWidgets('an image embed renders inline', (tester) async {
     await tester.pumpWidget(
       app(
         data: 'before ![[img.png]] after\n',
-        resolve: (_) => png.path,
+        resolve: (_) async => png.path,
       ),
     );
     await tester.pump();
@@ -56,7 +58,7 @@ void main() {
     await tester.pumpWidget(
       app(
         data: 'see ![[book.epub]] here\n',
-        resolve: (_) => epub.path,
+        resolve: (_) async => epub.path,
       ),
     );
     await tester.pump();
@@ -69,7 +71,7 @@ void main() {
     await tester.pumpWidget(
       app(
         data: 'gone ![[nowhere.jpeg]]\n',
-        resolve: (_) => null,
+        resolve: (_) async => null,
       ),
     );
     await tester.pump();
@@ -81,7 +83,7 @@ void main() {
     await tester.pumpWidget(
       app(
         data: '![[book.epub|The book]]\n',
-        resolve: (_) => epub.path,
+        resolve: (_) async => epub.path,
       ),
     );
     await tester.pump();
@@ -98,7 +100,7 @@ void main() {
         home: Scaffold(
           body: MarkdownPreview(
             data: '![[img.png]] and [[Other]]\n',
-            embedResolver: (_) => png.path,
+            embedResolver: (_) async => png.path,
             onWikiLink: (ref, display) => wikiTaps++,
           ),
         ),

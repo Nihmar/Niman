@@ -636,10 +636,42 @@ final class Indexer {
         .customSelect(
           'SELECT (SELECT count(*) FROM notes WHERE is_dir = 0 '
           "AND lower(substr(name, -3)) = '.md') AS notes, "
-          '(SELECT count(*) FROM notes_fts) AS fts',
+          '(SELECT count(*) FROM notes_fts) AS fts, '
+          '(SELECT count(*) FROM notes WHERE is_dir = 0) AS files, '
+          "(SELECT count(*) FROM note_stems WHERE source = 'file') AS stems",
         )
         .getSingle();
-    return rows.read<int>('notes') == rows.read<int>('fts');
+    return rows.read<int>('notes') == rows.read<int>('fts') &&
+        rows.read<int>('files') == rows.read<int>('stems');
+  }
+
+  /// Writes the missing file stems (every file without one) — the one-time
+  /// repair when non-`.md` files gained stems (embeds) after an older
+  /// index was built.
+  Future<void> _repairMissingFileStems() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT notes.id, notes.name FROM notes LEFT JOIN note_stems '
+          "ON note_stems.note_id = notes.id AND note_stems.source = 'file' "
+          'WHERE note_stems.note_id IS NULL AND notes.is_dir = 0',
+        )
+        .get();
+    if (rows.isEmpty) return;
+    _log.info('contents: writing ${rows.length} missing file stem(s)');
+    for (var i = 0; i < rows.length; i += _contentChunk) {
+      final end = i + _contentChunk < rows.length
+          ? i + _contentChunk
+          : rows.length;
+      await _db.transaction(() async {
+        for (var j = i; j < end; j++) {
+          await _replaceStems(
+            rows[j].read<int>('id'),
+            rows[j].read<String>('name'),
+          );
+        }
+      });
+      if (end < rows.length) await Future<void>.delayed(Duration.zero);
+    }
   }
 
   /// The paths of md notes that have no `notes_fts` row.
@@ -756,17 +788,24 @@ final class Indexer {
   /// (T-M3-09: a big backfill must not hold frames for its whole run).
   static const _contentChunk = 64;
 
-  /// One row's stem text, or null for directories and non-note files.
-  static String? _stemFor(String name) => _isNote(name) ? noteStem(name) : null;
+  /// One row's stem text, or null for directories. Every file gets a stem
+  /// (not just `.md`): `![[…]]` embeds reference attachments by bare name,
+  /// and the resolver answers those through the same index.
+  static String? _stemFor(String name, [bool isDir = false]) =>
+      isDir ? null : noteStem(name);
 
   /// Makes the `note_stems` rows for note [noteId] match its current
   /// [name]: deletes whatever is there (a rename moves the stem rows) and
-  /// inserts the row for the new name when it is a note.
-  Future<void> _replaceStems(int noteId, String name) async {
+  /// inserts the row for the new name when the row is a file.
+  Future<void> _replaceStems(
+    int noteId,
+    String name, {
+    bool isDir = false,
+  }) async {
     await (_db.delete(
       _db.noteStems,
     )..where((s) => s.noteId.equals(noteId))).go();
-    final stem = _stemFor(name);
+    final stem = _stemFor(name, isDir);
     if (stem == null) return;
     await _db
         .into(_db.noteStems)
@@ -924,7 +963,7 @@ final class Indexer {
             ),
           );
       newIds[e.rel] = id;
-      await _replaceStems(id, e.name);
+      await _replaceStems(id, e.name, isDir: e.isDir);
       wrote = true;
     }
     for (final rel in gone) {
@@ -1217,6 +1256,7 @@ final class Indexer {
       });
       if (end < items.length) await Future<void>.delayed(Duration.zero);
     }
+    await _repairMissingFileStems();
   }
 
   /// The content-derived rows of one note within a chunk transaction:

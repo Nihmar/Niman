@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:copist/src/links/parser.dart';
@@ -32,26 +33,26 @@ final class EmbedInlineSyntax extends md.InlineSyntax {
 
 /// Renders an `![[…]]` embed: an image target renders inline (fit width), a
 /// non-image target (epub, pdf, …) renders as muted path text. The caller
-/// resolves the target to an absolute file via [onResolve].
+/// resolves the target to an absolute file via [onResolve] (async — the
+/// index-backed fallback needs a query); the placeholder shows until the
+/// resolution lands, and on failure.
 final class EmbedBuilder extends MarkdownElementBuilder {
-  /// Creates a builder resolving embeds via [onResolve]; [recognizers]
-  /// receives every gesture recognizer the preview must dispose.
-  EmbedBuilder({
-    required this.onResolve,
-    required this.recognizers,
-  });
+  /// Creates a builder resolving embeds via [onResolve].
+  EmbedBuilder({required this.onResolve});
 
   /// Resolves an embed target to an absolute file path, or null.
-  final String? Function(String target) onResolve;
-
-  /// The preview's recognizer registry (disposed with the preview).
-  final List<GestureRecognizer> recognizers;
+  final Future<String?> Function(String target) onResolve;
 
   /// Image extensions an embed renders inline.
   static final RegExp _imageExt = RegExp(
     r'\.(png|jpe?g|gif|webp|bmp)$',
     caseSensitive: false,
   );
+
+  /// Embeds are block-level (the package drops a paragraph whose only
+  /// child is a single widget — a bare `![[img.png]]` line vanished).
+  @override
+  bool isBlockElement() => true;
 
   @override
   Widget? visitElementAfterWithContext(
@@ -63,26 +64,67 @@ final class EmbedBuilder extends MarkdownElementBuilder {
     final target = element.attributes['target'] ?? element.textContent;
     final alias = element.attributes['alias'] ?? '';
     final display = alias.isNotEmpty ? alias : (element.textContent);
-    final path = onResolve(target);
-    if (path == null) {
-      return _placeholder(context, display);
-    }
-    if (_imageExt.hasMatch(target)) {
-      return Image.file(
-        File(path),
-        fit: BoxFit.fitWidth,
-        errorBuilder: (context, error, stack) => _placeholder(context, display),
-      );
-    }
-    // A binary or unknown target: the path as muted text (opening it is
-    // future work — M3 handles the link, not the file).
-    return _placeholder(context, display);
+    return _EmbedView(
+      target: target,
+      display: display,
+      onResolve: onResolve,
+    );
+  }
+}
+
+/// The stateful embed body: resolves once, then renders the image inline
+/// or the muted placeholder (binary, missing, or failed decode).
+final class _EmbedView extends StatefulWidget {
+  const _EmbedView({
+    required this.target,
+    required this.display,
+    required this.onResolve,
+  });
+
+  final String target;
+  final String display;
+  final Future<String?> Function(String target) onResolve;
+
+  @override
+  State<_EmbedView> createState() => _EmbedViewState();
+}
+
+final class _EmbedViewState extends State<_EmbedView> {
+  String? _path;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
   }
 
-  Widget _placeholder(BuildContext context, String text) {
+  Future<void> _load() async {
+    String? path;
+    try {
+      path = await widget.onResolve(widget.target);
+    } on Object {
+      path = null;
+    }
+    if (mounted && path != _path) setState(() => _path = path);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final path = _path;
+    if (path == null || !EmbedBuilder._imageExt.hasMatch(widget.target)) {
+      return _placeholder(context);
+    }
+    return Image.file(
+      File(path),
+      fit: BoxFit.fitWidth,
+      errorBuilder: (context, error, stack) => _placeholder(context),
+    );
+  }
+
+  Widget _placeholder(BuildContext context) {
     final theme = Theme.of(context);
     return Text(
-      '![[$text]]',
+      '![[${widget.display}]]',
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
