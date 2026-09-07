@@ -55,7 +55,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
 
 ## Tasks
 
-- [ ] **T-TD-01** Parser + line model: exactly the `description.svg`
+- [x] **T-TD-01** Parser + line model: exactly the `description.svg`
   grammar — completion flag, priority `(A)`…`(Z)`, completion date,
   creation date (validated: completion requires creation), `due:` date,
   `rem:` timestamp, `+project`/`@context`/`#tag` tokens anywhere in the
