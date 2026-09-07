@@ -6,6 +6,7 @@ import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/quick_note_tab.dart';
@@ -206,30 +207,23 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  /// Opens the quick note: the user-chosen one (set in Settings or from the
-  /// tree context menu) or the default [defaultQuickNoteName], created at
-  /// the root when missing.
-  Future<void> _openQuickNote() async {
+  /// Opens the quick note at [path]; a stale setting (the note was moved,
+  /// renamed, or deleted) is cleared so the tab returns to its empty state.
+  Future<void> _openQuickNote(String path) async {
     await _guard(() async {
       final ops = widget.controller.ops;
       if (ops == null) return;
-      var path = (await ops.quickNotePath)?.trim();
-      if (path == null || path.isEmpty) path = defaultQuickNoteName;
-      var note = await ops.find(path);
-      // A stale choice (moved/renamed/deleted) falls back to the default.
+      final note = await ops.find(path);
       if (note == null || note.isDir) {
-        path = defaultQuickNoteName;
-        note = await ops.find(path);
+        await ops.setQuickNotePath(path: null);
+        widget.controller.notify();
+        return;
       }
-      if (note == null || note.isDir) {
-        note = await ops.createNote(parentPath: '', name: 'Quick note');
-      }
-      final target = note.path;
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
         _noteFromTab = ShellTab.quickNote;
-        _selected = target;
+        _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
       });
@@ -569,7 +563,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
       ShellTab.files => _treePane(controller),
       ShellTab.todo => const TodoTab(),
       ShellTab.search => const SearchTab(),
-      ShellTab.quickNote => QuickNoteTab(onOpen: _openQuickNote),
+      ShellTab.quickNote =>
+        QuickNoteTab(controller: controller, onOpen: _openQuickNote),
       ShellTab.settings => SettingsTab(controller: controller),
     };
   }
@@ -722,35 +717,7 @@ Future<String?> _nameDialog(
   required String title,
   required String initial,
 }) {
-  final controller = TextEditingController(text: initial);
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        onSubmitted: (value) => Navigator.pop(context, value.trim()),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            controller.dispose();
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final value = controller.text.trim();
-            controller.dispose();
-            Navigator.pop(context, value);
-          },
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
+  return showNameDialog(context, title: title, initial: initial);
 }
 
 /// A move-target picker over all indexed folders; resolves to the target

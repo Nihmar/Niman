@@ -342,9 +342,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
             key: const Key('quick-note-setting'),
             title: const Text('Quick note'),
             subtitle: Text(
-              _quickNotePath == null
-                  ? defaultQuickNoteName
-                  : _quickNotePath!,
+              _quickNotePath == null ? 'Not set yet' : _quickNotePath!,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickQuickNote,

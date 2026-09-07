@@ -100,10 +100,13 @@ Current on-device reference: `screenshots/Screenshot_2026-09-07-00-17-…jpg`
   `NoteOperations.find` added for the existence check). **Todo** = tab
   created now with an **empty body** (the section exists; implementation is
   deferred, still being thought through). *Follow-up (user, 2026-09-07):
-  the quick note is user-chosen — a note picker in Settings
-  (`quick_note_path` library setting, v6 migration; the tree context menu
-  gets a "Set as quick note" item when T-UI-05 lands); the chosen path
-  falls back to the default when stale.*
+  the quick note is user-chosen, and **nothing is opened/created by
+  default** — the tab offers "Choose a note…" (tree dialog) and "Create a
+  new note…" (name dialog at the library root); both set the quick note
+  and open it. The choice is persisted per library (`quick_note_path`,
+  v6 migration) and also pickable from the Settings tile; the tree
+  context menu gets a "Set as quick note" item when T-UI-05 lands. A
+  stale choice (moved/renamed/deleted) is cleared on open.*
 - [ ] **T-UI-11** Update spec (*Layout*, *Editor*) and `design.md` module
   layout (`ui/nav` / `editor/toolbar` / `editor/md_editing`); prepare
   `logo.svg` for launcher-icon generation in M7.

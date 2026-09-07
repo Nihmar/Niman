@@ -41,7 +41,7 @@ final class QuickNotePicker extends StatefulWidget {
 }
 
 final class _QuickNotePickerState extends State<QuickNotePicker> {
-  final Set<String> _expanded = const <String>{};
+  final Set<String> _expanded = <String>{};
 
   void _toggle(String path) {
     setState(() {

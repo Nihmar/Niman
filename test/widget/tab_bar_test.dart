@@ -5,7 +5,6 @@
 // creating it when missing; the Search tab is disabled until M3 (R3).
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
@@ -151,7 +150,7 @@ void main() {
     expect(noteRow(controller, 'Docs'), findsOne);
   });
 
-  testWidgets('quick note: created at root when missing and opened',
+  testWidgets('quick note: nothing opens by default, create names the note',
       (tester) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
@@ -163,33 +162,79 @@ void main() {
       matching: find.text('Quick note'),
     ));
     await settle(tester);
-    expect(find.text('Open quick note'), findsOne);
 
-    await tester.tap(find.text('Open quick note'));
+    // No note is opened or created on entering the tab.
+    expect(find.text('No quick note yet. Choose an existing note, or create '
+        'a new one — the quick note opens here.'), findsOne);
+    expect(find.byType(NoteView), findsNothing);
+    expect(await controller.ops!.find('Quick note.md'), isNull);
+
+    // Create one with a custom name.
+    await tester.tap(find.byKey(const Key('quick-note-create')));
     await settle(tester);
-    expect(find.byType(NoteView), findsOneWidget);
-    expect(find.text('Quick note.md'), findsOneWidget); // app bar title.
-    expect(await controller.ops!.find('Quick note.md'), isNotNull);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'Scratch pad',
+    );
+    await tester.tap(find.text('OK'));
+    await settle(tester);
 
-    // Back returns to the Quick note tab.
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.text('Scratch pad.md'), findsOneWidget); // app bar title.
+    expect(await controller.ops!.quickNotePath, 'Scratch pad.md');
+
+    // Back returns to the Quick note tab, now showing the path + Open.
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
-    expect(find.text('Open quick note'), findsOne);
+    expect(find.text('Scratch pad.md'), findsOne);
+    expect(find.byKey(const Key('quick-note-open')), findsOne);
   });
 
-  testWidgets('quick note: user-chosen note wins over the default',
+  testWidgets('quick note: pick an existing note from the tree',
       (tester) async {
     _setPhoneSize(tester);
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester);
 
-    // Seed two notes in the fake: the default and a user-chosen one.
-    final chosen = await controller.createNote(
-      parentPath: '',
-      name: 'Scratch',
-    );
+    await controller.createNote(parentPath: '', name: 'Scratch');
     await controller.createNote(parentPath: '', name: 'Other');
+    await settle(tester);
+
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Quick note'),
+    ));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('quick-note-choose')));
+    await settle(tester);
+
+    // The dialog tree lists the notes; picking one sets + opens it.
+    expect(find.text('Choose quick note'), findsOne);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NoteTree),
+        matching: find.text('Scratch.md'),
+      ),
+    );
+    await settle(tester);
+
+    expect(await controller.ops!.quickNotePath, 'Scratch.md');
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
+  });
+
+  testWidgets('quick note: choosing in Settings is honored by the tab',
+      (tester) async {
+    _setPhoneSize(tester);
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester);
+
+    await controller.createNote(parentPath: '', name: 'Scratch');
     await settle(tester);
 
     // Choose "Scratch.md" in Settings: the tile shows it after the pick.
@@ -200,9 +245,9 @@ void main() {
       120,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text(defaultQuickNoteName), findsOne);
+    expect(find.text('Not set yet'), findsOne);
     await tester.scrollUntilVisible(
-      find.text(defaultQuickNoteName),
+      find.text('Not set yet'),
       120,
       scrollable: find.byType(Scrollable).first,
     );
@@ -213,7 +258,7 @@ void main() {
       const Offset(0, -120),
     );
     await settle(tester);
-    await tester.tap(find.text(defaultQuickNoteName));
+    await tester.tap(find.text('Not set yet'));
     await settle(tester);
     await tester.tap(
       find.descendant(
@@ -226,17 +271,16 @@ void main() {
     expect(find.text('Scratch.md'), findsOne);
     expect(await controller.ops!.quickNotePath, 'Scratch.md');
 
-    // The Quick note tab opens the chosen note, not the default.
+    // The Quick note tab opens the chosen note.
     await tester.tap(find.descendant(
       of: find.byType(NavigationBar),
       matching: find.text('Quick note'),
     ));
     await settle(tester);
-    await tester.tap(find.text('Open quick note'));
+    await tester.tap(find.byKey(const Key('quick-note-open')));
     await settle(tester);
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
-    expect(chosen.path, 'Scratch.md');
   });
 
   testWidgets('search tab is disabled until M3 (R3)', (tester) async {

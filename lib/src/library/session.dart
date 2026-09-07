@@ -3,9 +3,6 @@ import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 
-/// The default scratch quick note (library-relative path).
-const defaultQuickNoteName = 'Quick note.md';
-
 /// Operations the UI layer performs on an open library.
 ///
 /// Implemented by [NoteOps] (real disk + index, production) and by an
@@ -41,8 +38,8 @@ abstract interface class NoteOperations {
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
 
-  /// The user-chosen quick note (library-relative path), or null for the
-  /// default [defaultQuickNoteName].
+  /// The user-chosen quick note (library-relative path), or null while
+  /// none has been chosen.
   Future<String?> get quickNotePath;
 
   /// Sets (or clears, with null) the user-chosen quick note.
