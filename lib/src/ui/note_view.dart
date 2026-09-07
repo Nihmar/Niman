@@ -599,12 +599,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// complete, the position stops moving, or the attempts run out.
   void _syncPreviewToLine(int line, {int attempt = 0}) {
     if (!widget.showPreview || !mounted) return;
-    const AppLogger(name: 'links').debug(
+    const log = AppLogger(name: 'links');
+    log.debug(
       'anchor jump: scheduling preview scroll to line $line '
       '(attempt $attempt, preview ${widget.showPreview ? 'shown' : 'hidden'})',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      const log = AppLogger(name: 'links');
       if (!mounted) return;
       if (!_previewScroll.hasClients) {
         log.debug('anchor jump: preview scroll not attached — skipped');
@@ -644,6 +644,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _syncPreviewToLine(line, attempt: attempt + 1);
       }
     });
+    // In the phone preview-only layout nothing invalidates after the tap
+    // (no editor caret, no ink), so no frame is scheduled and the
+    // callback above would starve — production Flutter draws frames on
+    // demand. Guarantee the next frame runs it.
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   /// The preview's link handler (T-M3-07): `.md` relative links navigate
