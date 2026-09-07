@@ -140,6 +140,16 @@ void main() {
     });
   });
 
+  group('snapshotTokens', () {
+    test('unions both files with sigils', () {
+      final snapshot = TodoSnapshot(
+        todo: entries(['a +p @c', 'b #t +p']),
+        done: entries(['x c @c2']),
+      );
+      expect(snapshotTokens(snapshot), {'+p', '@c', '#t', '@c2'});
+    });
+  });
+
   group('sort', () {
     test('due: soonest first, overdue on top, undated last', () {
       final lines = entries([

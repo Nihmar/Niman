@@ -9,6 +9,7 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/todo/todo_controller.dart';
+import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
@@ -507,7 +508,14 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Adds a task from the Todo tab's app-bar action (T-TD-04).
   Future<void> _addTodo() async {
     const AppLogger(name: 'todo').debug('todo add pressed');
-    final line = await showTodoTaskDialog(context, today: DateTime.now());
+    final snapshot = _todoController.snapshot;
+    final line = await showTodoTaskDialog(
+      context,
+      today: DateTime.now(),
+      knownTokens: snapshot == null
+          ? const <String>{}
+          : snapshotTokens(snapshot),
+    );
     if (line == null || !mounted) {
       return;
     }

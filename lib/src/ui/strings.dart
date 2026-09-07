@@ -124,4 +124,9 @@ final class AppStrings {
   static const String todoSortDue = 'Due date';
   static const String todoSortPriority = 'Priority';
   static const String todoSortCreation = 'Creation date';
+
+  // Task dialog pickers (T-TD-06).
+  static const String todoNoPriority = 'No priority';
+  static const String todoNoDueDate = 'No due date';
+  static const String todoNoReminder = 'No reminder';
 }

@@ -342,6 +342,30 @@ String uncompleteTodoLine(String line) {
   );
 }
 
+/// Returns [description] with the `key:` tag set to [value]: every
+/// existing `key:<non-space>` token is removed and `key:value` appended;
+/// with [value] null the tags are just removed. Leftover whitespace is
+/// collapsed. Unknown tags are never touched otherwise, so an edit that
+/// only manages `due:`/`rem:` keeps them verbatim.
+///
+/// A bare `key:` (no value — plain description text per the grammar)
+/// counts as the picker's slot and is replaced too.
+///
+/// The edit dialog (T-TD-06) builds on this: picked dates rewrite their
+/// own tag while the rest of the line stays byte-identical.
+String withKeyValueTag(String description, String key, String? value) {
+  final tag = RegExp('(?:^|\\s)${RegExp.escape(key)}:(?:\\S+)?(?=\\s|\$)');
+  final out = description
+      .replaceAll(tag, '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+  if (value == null) {
+    return out;
+  }
+  final token = '$key:$value';
+  return out.isEmpty ? token : '$out $token';
+}
+
 /// Formats [date] as `YYYY-MM-DD` (drops any time part).
 String formatTodoDate(DateTime date) {
   final year = date.year.toString().padLeft(4, '0');

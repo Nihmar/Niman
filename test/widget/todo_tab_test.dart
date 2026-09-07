@@ -3,6 +3,7 @@
 // switch, tap-to-edit and long-press delete, all against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
 import 'package:copist/src/todo/todo_controller.dart';
+import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +17,7 @@ void main() {
 
   late FakeLibrarySession session;
   late FakeTodoSource source;
-  late TodoController controller;
+  TodoController? controller;
 
   Future<void> pumpTab(
     WidgetTester tester, {
@@ -34,14 +35,15 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: TodoTab(controller: controller, clock: clock)),
+        home: Scaffold(body: TodoTab(controller: controller!, clock: clock)),
       ),
     );
     await tester.pump();
   }
 
   tearDown(() {
-    controller.dispose();
+    controller?.dispose();
+    controller = null;
   });
 
   /// Pumps enough fake time for sheets/dialogs to settle.
@@ -264,5 +266,116 @@ void main() {
     );
     // Sorting is display-only: the file order never moves.
     expect(source.todoLines.first, '(B) bee due:2026-09-01');
+  });
+
+  testWidgets('due picker writes due: on save', (tester) async {
+    await pumpTab(tester, todo: ['tasked']);
+    await tester.tap(find.text('tasked'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-due')));
+    await settle(tester);
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(find.text('2026-09-07'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['tasked due:2026-09-07']);
+  });
+
+  testWidgets('priority picker rewrites the priority', (tester) async {
+    await pumpTab(tester, todo: ['(B) bee']);
+    await tester.tap(find.text('bee'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-priority')));
+    await settle(tester);
+    await tester.tap(find.text('(A)').last);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['(A) bee']);
+  });
+
+  testWidgets('reminder picker writes rem: on save', (tester) async {
+    await pumpTab(tester, todo: ['tasked']);
+    await tester.tap(find.text('tasked'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-reminder')));
+    await settle(tester);
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(
+      source.todoLines.single,
+      matches(RegExp(r'^tasked rem:2026-09-07T\d{2}:\d{2}$')),
+    );
+  });
+
+  testWidgets('token completion offers known tokens', (tester) async {
+    await pumpTab(tester, todo: ['buy milk +groceries']);
+    await tester.tap(find.text('buy milk +groceries'));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('todo-dialog-field')),
+      '+g',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-complete-+groceries')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['+groceries']);
+  });
+
+  testWidgets('an untouched edit preserves every token verbatim', (
+    tester,
+  ) async {
+    const line = 'water plants rec:+1d foo:bar +p due:2026-09-01';
+    await pumpTab(tester, todo: [line]);
+    await tester.tap(find.text(line));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, [line]);
+  });
+
+  testWidgets('add stamps creation and appends picked tags', (tester) async {
+    String? result;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return TextButton(
+                onPressed: () async {
+                  result = await showTodoTaskDialog(
+                    context,
+                    today: DateTime(2026, 9, 7),
+                    knownTokens: const {'+p'},
+                  );
+                },
+                child: const Text('open dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open dialog'));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('todo-dialog-field')),
+      'new task',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-dialog-due')));
+    await settle(tester);
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(result, '2026-09-07 new task due:2026-09-07');
   });
 }

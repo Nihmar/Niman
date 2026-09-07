@@ -88,7 +88,7 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   natural default: due soonest first, overdue on top; priority
   `(A)`→`(Z)`; creation newest first). *AC: combos narrow the list;
   counts refresh with the data.*
-- [ ] **T-TD-06** Add + edit dialogs: description field with completion
+- [x] **T-TD-06** Add + edit dialogs: description field with completion
   of known `+`/`@`/`#` tokens; due-date picker (writes/updates `due:`);
   optional priority selector; optional reminder (date + time picker,
   writes `rem:`); creation date written on add. Edit keeps unknown

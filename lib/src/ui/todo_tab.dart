@@ -217,6 +217,7 @@ final class _TodoTabState extends State<TodoTab> {
       context,
       initial: entry.task,
       today: _today,
+      knownTokens: _knownTokens(),
     );
     if (line == null || !mounted) {
       return;
@@ -227,6 +228,15 @@ final class _TodoTabState extends State<TodoTab> {
     } else {
       await widget.controller.updateTodo(entry, line);
     }
+  }
+
+  /// The completion pool for the edit dialog: every token in both
+  /// files.
+  Set<String> _knownTokens() {
+    final snapshot = widget.controller.snapshot;
+    return snapshot == null
+        ? const <String>{}
+        : snapshotTokens(snapshot);
   }
 
   /// Long-press bottom sheet (the app's menu pattern): edit or delete.

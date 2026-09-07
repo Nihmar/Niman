@@ -294,6 +294,52 @@ void main() {
     });
   });
 
+  group('withKeyValueTag', () {
+    test('replaces an existing tag where it stands', () {
+      expect(
+        withKeyValueTag('call due:2026-09-01 mom', 'due', '2026-09-08'),
+        'call mom due:2026-09-08',
+      );
+    });
+
+    test('appends a missing tag', () {
+      expect(
+        withKeyValueTag('call mom', 'due', '2026-09-08'),
+        'call mom due:2026-09-08',
+      );
+    });
+
+    test('removes every occurrence with a null value', () {
+      expect(
+        withKeyValueTag('a due:2026-09-01 b due:2026-09-02', 'due', null),
+        'a b',
+      );
+    });
+
+    test('keeps unknown tags verbatim', () {
+      expect(
+        withKeyValueTag(
+          'water rec:+1d plants due:2026-09-01 foo:bar',
+          'due',
+          '2026-09-08',
+        ),
+        'water rec:+1d plants foo:bar due:2026-09-08',
+      );
+    });
+
+    test('tag-only description reduces to the tag or nothing', () {
+      expect(withKeyValueTag('', 'due', '2026-09-08'), 'due:2026-09-08');
+      expect(withKeyValueTag('due:2026-09-01', 'due', null), isEmpty);
+    });
+
+    test('a bare key counts as the slot and is replaced', () {
+      expect(
+        withKeyValueTag('call due:', 'due', '2026-09-08'),
+        'call due:2026-09-08',
+      );
+    });
+  });
+
   group('formatTodoLine', () {
     test('builds a canonical line', () {
       expect(

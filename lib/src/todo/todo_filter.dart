@@ -119,6 +119,15 @@ final class TodoFilter {
   int get hashCode => Object.hash(dueRange, sort, Object.hashAll(tokens));
 }
 
+/// All token refs (`+project` / `@context` / `#tag`) carried by both
+/// files of [snapshot]: the completion pool for the add/edit dialog.
+Set<String> snapshotTokens(TodoSnapshot snapshot) {
+  return <String>{
+    for (final entry in [...snapshot.todo, ...snapshot.done])
+      ..._taskTokens(entry.task),
+  };
+}
+
 /// Narrows [entries] by [filter] against [today] and sorts the survivors.
 List<TodoEntry> applyTodoFilter(
   List<TodoEntry> entries,
