@@ -84,9 +84,10 @@ int todoReminderId(String description) {
 }
 
 /// The schedulable reminders of [snapshot]: open (`todo.txt`) tasks
-/// with a `rem:` after [now]. Completed tasks and past times never
-/// fire. [now] is the wall clock (the controller's injected clock in
-/// tests, real time on device).
+/// with a `rem:` after [now]. Completed tasks (archived, or still `x`
+/// in `todo.txt` awaiting migration) and past times never fire. [now]
+/// is the wall clock (the controller's injected clock in tests, real
+/// time on device).
 Map<int, TodoReminder> wantedReminders(
   TodoSnapshot snapshot,
   DateTime now,
@@ -94,6 +95,12 @@ Map<int, TodoReminder> wantedReminders(
   final wanted = <int, TodoReminder>{};
   for (final entry in snapshot.todo) {
     final task = entry.task;
+    // `todo.txt` is not guaranteed migrated: only a reload archives stray
+    // `x` lines, so an edit that completes a task in place publishes it
+    // here first. A completed task never fires.
+    if (task.completed) {
+      continue;
+    }
     final when = task.reminder;
     if (when == null || !when.isAfter(now)) {
       continue;

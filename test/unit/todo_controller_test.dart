@@ -249,6 +249,19 @@ void main() {
       expect(reminders.reconciled, hasLength(before));
     });
 
+    test('completing a task in place drops its reminder', () async {
+      writeRaw('todo.txt', 'call rem:2026-09-08T10:30\n');
+      await reminded.open();
+      await waitFor(() => reminders.reconciled.isNotEmpty);
+      expect(reminders.reconciled.last, hasLength(1));
+      await reminded.updateTodo(
+        reminded.snapshot!.todo.single,
+        'x 2026-09-07 call rem:2026-09-08T10:30',
+      );
+      await waitFor(() => reminders.reconciled.length >= 2);
+      expect(reminders.reconciled.last, isEmpty);
+    });
+
     test('resyncReminders reconciles without touching the files', () async {
       await reminded.open();
       await waitFor(() => reminders.reconciled.isNotEmpty);

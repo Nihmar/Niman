@@ -68,6 +68,18 @@ void main() {
       );
     });
 
+    test('an x line still in todo.txt never fires', () {
+      // Only a reload archives stray completed lines, so an edit that
+      // completes a task in place publishes it in `todo` first.
+      final wanted = wantedReminders(
+        snapshotOf(
+          todo: ['x 2026-09-07 done here rem:2026-09-08T10:30'],
+        ),
+        DateTime(2026, 9, 7),
+      );
+      expect(wanted, isEmpty);
+    });
+
     test('title shows the entered description, not the whole raw line', () {
       final wanted = wantedReminders(
         snapshotOf(todo: [
