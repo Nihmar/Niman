@@ -331,6 +331,7 @@ final class Indexer {
       _log.info('fullScan: tree changed, applying diff');
       final read = await _readContents(root, entries, old);
       var wrote = false;
+      var pairedRels = const <String>{};
       await _db.transaction(() async {
         final result = await _applyDiff(
           entries: entries,
@@ -339,10 +340,14 @@ final class Indexer {
           contents: read.contents,
         );
         wrote = result.wrote;
-        // Content rows (FTS, tags, links) for the notes whose content
-        // actually changed; a paired rename keeps its rows untouched.
-        await _applyContent(read.contents, paired: result.pairedRels);
+        pairedRels = result.pairedRels;
       });
+      // Content rows (FTS, tags, links) for the notes whose content
+      // actually changed; a paired rename keeps its rows untouched. Runs
+      // in its own chunked transactions (after the notes rows) so the
+      // frames stay free during a big backfill — and the completeness
+      // check repairs a partial pass on the next scan.
+      await _applyContent(read.contents, paired: pairedRels);
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb();
@@ -747,6 +752,10 @@ final class Indexer {
   /// hundred).
   static const _contentBatch = 200;
 
+  /// How many notes' content rows are written per chunk transaction
+  /// (T-M3-09: a big backfill must not hold frames for its whole run).
+  static const _contentChunk = 64;
+
   /// One row's stem text, or null for directories and non-note files.
   static String? _stemFor(String name) => _isNote(name) ? noteStem(name) : null;
 
@@ -999,6 +1008,7 @@ final class Indexer {
     };
     final read = await _readContents(root, entries, old);
     var wrote = false;
+    var pairedRels = const <String>{};
     await _db.transaction(() async {
       // The scope root's parent lives outside the walk, so it is resolved
       // from the index — the directory chain is ensured when the rows are
@@ -1015,8 +1025,9 @@ final class Indexer {
         scopeParentId: scopeParentId,
       );
       wrote = result.wrote;
-      await _applyContent(read.contents, paired: result.pairedRels);
+      pairedRels = result.pairedRels;
     });
+    await _applyContent(read.contents, paired: pairedRels);
     return wrote;
   }
 
@@ -1163,28 +1174,74 @@ final class Indexer {
     Map<String, NoteContent> contents, {
     required Set<String> paired,
   }) async {
-    if (contents.isEmpty) return;
-    final resolver = LinkResolver(_db);
-    for (final c in contents.values) {
-      if (paired.contains(c.rel)) continue;
-      final row = await _dao.find(c.rel);
-      if (row == null) continue; // deleted mid-scan
-      await _db.customStatement(
-        'DELETE FROM notes_fts WHERE rowid = ?',
-        <Object?>[row.id],
-      );
-      await _db.customStatement(
-        'INSERT INTO notes_fts (rowid, title, body) VALUES (?, ?, ?)',
-        <Object?>[row.id, c.title, c.text],
-      );
-      // The file stem (and the alias stems) are content-derived too: a
-      // v7-era restore has no stems at all, so the content pass rebuilds
-      // them instead of relying on the insert path alone.
-      await _replaceStems(row.id, row.name);
-      await _writeAliasStems(row.id, c);
-      await _writeTags(row.id, c);
-      await _writeLinks(row.id, c, resolver);
+    final items = <(Note, NoteContent)>[
+      for (final c in contents.values)
+        if (!paired.contains(c.rel))
+          if (await _dao.find(c.rel) case final Note row) (row, c),
+    ];
+    if (items.isEmpty) return;
+
+    // Link targets resolve once per pass — one stems lookup per distinct
+    // stem and one notes lookup, via [LinkResolver.resolveBatch] — instead
+    // of two queries per link (the per-link queries dominated the content
+    // pass: hundreds of notes × a dozen links each).
+    final batchTargets = <String>{};
+    for (final (_, c) in items) {
+      for (final link in c.links) {
+        final target = switch (link) {
+          final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
+          final MarkdownLink m
+              when !LinkResolver.hasScheme(m.href) &&
+                  !m.href.trim().startsWith('#') &&
+                  m.href.contains('.md') =>
+            m.href,
+          _ => null,
+        };
+        if (target != null) batchTargets.add(target);
+      }
     }
+    final resolved = await LinkResolver(_db).resolveBatch(batchTargets);
+
+    // Chunked writes: each chunk its own transaction with a yield between
+    // chunks, so a large backfill leaves frames free (typing stays
+    // responsive) — and a partial pass is repaired by the completeness
+    // check on the next scan.
+    for (var i = 0; i < items.length; i += _contentChunk) {
+      final end = i + _contentChunk < items.length
+          ? i + _contentChunk
+          : items.length;
+      await _db.transaction(() async {
+        for (final (row, c) in items.sublist(i, end)) {
+          await _writeContentRow(row, c, resolved);
+        }
+      });
+      if (end < items.length) await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  /// The content-derived rows of one note within a chunk transaction:
+  /// FTS (title + body copy), file + alias stems, tags, and the resolved
+  /// link edges from the batched resolution map.
+  Future<void> _writeContentRow(
+    Note row,
+    NoteContent c,
+    Map<String, ResolveResult> resolved,
+  ) async {
+    await _db.customStatement(
+      'DELETE FROM notes_fts WHERE rowid = ?',
+      <Object?>[row.id],
+    );
+    await _db.customStatement(
+      'INSERT INTO notes_fts (rowid, title, body) VALUES (?, ?, ?)',
+      <Object?>[row.id, c.title, c.text],
+    );
+    // The file stem (and the alias stems) are content-derived too: a
+    // v7-era restore has no stems at all, so the content pass rebuilds
+    // them instead of relying on the insert path alone.
+    await _replaceStems(row.id, row.name);
+    await _writeAliasStems(row.id, c);
+    await _writeTags(row.id, c);
+    await _writeLinks(row.id, c, resolved);
   }
 
   /// Rewrites the `note_stems` alias rows (source `alias`) of note
@@ -1257,32 +1314,43 @@ final class Indexer {
   /// [c]'s links: wiki and `.md` targets that resolve to another indexed
   /// note become edges; dead links, external URLs, anchors and self-links
   /// are skipped.
+  /// Rewrites the resolved `note_links` edges of note [noteId] to match
+  /// [c]'s links: wiki and `.md` targets that resolve to another indexed
+  /// note become edges; dead links, external URLs, anchors and self-links
+  /// are skipped. [resolved] carries the batched resolution results
+  /// (target text → outcome, same rules as the single-target path).
   Future<void> _writeLinks(
     int noteId,
     NoteContent c,
-    LinkResolver resolver,
+    Map<String, ResolveResult> resolved,
   ) async {
     await (_db.delete(
       _db.noteLinks,
     )..where((l) => l.fromNote.equals(noteId))).go();
-    for (final link in c.links) {
-      final resolved = switch (link) {
-        final WikiLink w => await resolver.resolveWiki(w.ref.target),
-        final MarkdownLink m => await resolver.resolveMarkdown(m.href),
-      };
-      if (resolved case ResolvedNote(:final note)) {
-        if (note.id == noteId) continue;
-        await _db
-            .into(_db.noteLinks)
-            .insert(
-              NoteLinksCompanion.insert(
-                fromNote: noteId,
-                toNote: note.id,
-                kind: link is WikiLink ? 'wiki' : 'md',
-              ),
-              mode: InsertMode.insertOrIgnore,
-            );
+    await _db.batch((batch) {
+      for (final link in c.links) {
+        final target = switch (link) {
+          final WikiLink w when w.ref.target.isNotEmpty => w.ref.target,
+          final MarkdownLink m
+              when !LinkResolver.hasScheme(m.href) &&
+                  !m.href.trim().startsWith('#') &&
+                  m.href.contains('.md') =>
+            m.href,
+          _ => null,
+        };
+        if (target == null) continue;
+        final outcome = resolved[target];
+        if (outcome is! ResolvedNote || outcome.note.id == noteId) continue;
+        batch.insert(
+          _db.noteLinks,
+          NoteLinksCompanion.insert(
+            fromNote: noteId,
+            toNote: outcome.note.id,
+            kind: link is WikiLink ? 'wiki' : 'md',
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
       }
-    }
+    });
   }
 }

@@ -105,7 +105,7 @@ final class LinkResolver implements LinkSource {
   Future<ResolveResult> resolveMarkdown(String href) {
     final h = href.trim();
     if (h.isEmpty) return Future.value(UnresolvedNote(target: href));
-    if (_hasScheme(h)) return Future.value(ExternalLink(url: h));
+    if (hasScheme(h)) return Future.value(ExternalLink(url: h));
     if (h.startsWith('#')) {
       return Future.value(LocalAnchor(heading: h.substring(1)));
     }
@@ -114,7 +114,7 @@ final class LinkResolver implements LinkSource {
   }
 
   /// Whether [s] starts with a URI scheme (`http://`, `https://`, …).
-  static bool _hasScheme(String s) =>
+  static bool hasScheme(String s) =>
       RegExp('^[a-zA-Z][a-zA-Z0-9+.-]*://').hasMatch(s);
 
   /// Normalizes a target for matching: backslashes to slashes, `./` and
@@ -156,6 +156,85 @@ final class LinkResolver implements LinkSource {
     final notes = await (_db.select(
       _db.notes,
     )..where((n) => n.id.isIn(ids))).get();
+    return _resolveFromCandidates(
+      raw: raw,
+      t: t,
+      heading: heading,
+      notes: notes,
+    );
+  }
+
+  /// Resolves many targets in a few queries (the indexer's content pass:
+  /// one stems lookup for every distinct last segment, one notes lookup,
+  /// then the same per-target rules — exact stem → unique? → path-prefix
+  /// filter → ambiguous — applied in Dart). Same results as calling
+  /// [resolveWiki] per target, at a fraction of the query count.
+  Future<Map<String, ResolveResult>> resolveBatch(
+    Iterable<String> targets,
+  ) async {
+    final out = <String, ResolveResult>{};
+    final byStem = <String, List<String>>{}; // stem -> raw targets
+    final specs = <String, (String t, String? heading)>{}; // raw -> normalized
+    for (final raw in targets) {
+      if (out.containsKey(raw)) continue;
+      final t0 = normalizeTarget(raw);
+      if (t0.isEmpty) {
+        out[raw] = UnresolvedNote(target: raw);
+        continue;
+      }
+      final hash = t0.indexOf('#');
+      var t = hash == -1 ? t0 : t0.substring(0, hash);
+      final heading = hash == -1 || hash == t0.length - 1
+          ? null
+          : t0.substring(hash + 1);
+      if (t.endsWith('.md')) t = t.substring(0, t.length - 3);
+      if (t.isEmpty) {
+        out[raw] = LocalAnchor(heading: heading ?? '');
+        continue;
+      }
+      final stem = t.contains('/') ? t.substring(t.lastIndexOf('/') + 1) : t;
+      (byStem[stem] ??= <String>[]).add(raw);
+      specs[raw] = (t, heading);
+    }
+    for (final group in byStem.values) {
+      final spec0 = specs[group.first]!;
+      final lastSegment = spec0.$1.contains('/')
+          ? spec0.$1.substring(spec0.$1.lastIndexOf('/') + 1)
+          : spec0.$1;
+      final stems = await (_db.select(
+        _db.noteStems,
+      )..where((s) => s.stem.equals(lastSegment))).get();
+      final ids = <int>{for (final s in stems) s.noteId};
+      final notes = ids.isEmpty
+          ? <Note>[]
+          : await (_db.select(
+              _db.notes,
+            )..where((n) => n.id.isIn(ids))).get();
+      for (final raw in group) {
+        final spec = specs[raw]!;
+        if (notes.isEmpty || ids.isEmpty) {
+          out[raw] = UnresolvedNote(target: raw);
+        } else {
+          out[raw] = _resolveFromCandidates(
+            raw: raw,
+            t: spec.$1,
+            heading: spec.$2,
+            notes: notes,
+          );
+        }
+      }
+    }
+    return out;
+  }
+
+  /// The pure resolution tail over gathered candidates: same rules for the
+  /// single-target and batched paths.
+  ResolveResult _resolveFromCandidates({
+    required String raw,
+    required String t,
+    required String? heading,
+    required List<Note> notes,
+  }) {
     // Shortest path first (a bare `[[note]]` picks the closest name); ties
     // in length are alphabetical.
     notes.sort((a, b) {
