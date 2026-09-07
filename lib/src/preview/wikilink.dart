@@ -1,8 +1,95 @@
+import 'dart:io';
+
 import 'package:copist/src/links/parser.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
+
+/// The inline syntax for `![[…]]` embeds in the preview: the note's own
+/// link style for files inside the library. Images render inline; other
+/// binaries and dead targets render as muted text. The element carries the
+/// raw target and the display text (the `|alias` form).
+final class EmbedInlineSyntax extends md.InlineSyntax {
+  /// Creates the syntax.
+  EmbedInlineSyntax() : super(r'!\[\[[^\[\]\n]*\]\]');
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    final raw = match.group(0)!;
+    final ref = parseWikiRef(raw.substring(3, raw.length - 2));
+    if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
+      return false;
+    }
+    final display = ref.alias ?? ref.target;
+    final element = md.Element.text('embed', display)
+      ..attributes['target'] = ref.target
+      ..attributes['alias'] = ref.alias ?? '';
+    parser.addNode(element);
+    return true;
+  }
+}
+
+/// Renders an `![[…]]` embed: an image target renders inline (fit width), a
+/// non-image target (epub, pdf, …) renders as muted path text. The caller
+/// resolves the target to an absolute file via [onResolve].
+final class EmbedBuilder extends MarkdownElementBuilder {
+  /// Creates a builder resolving embeds via [onResolve]; [recognizers]
+  /// receives every gesture recognizer the preview must dispose.
+  EmbedBuilder({
+    required this.onResolve,
+    required this.recognizers,
+  });
+
+  /// Resolves an embed target to an absolute file path, or null.
+  final String? Function(String target) onResolve;
+
+  /// The preview's recognizer registry (disposed with the preview).
+  final List<GestureRecognizer> recognizers;
+
+  /// Image extensions an embed renders inline.
+  static final RegExp _imageExt = RegExp(
+    r'\.(png|jpe?g|gif|webp|bmp)$',
+    caseSensitive: false,
+  );
+
+  @override
+  Widget? visitElementAfterWithContext(
+    BuildContext context,
+    md.Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle,
+  ) {
+    final target = element.attributes['target'] ?? element.textContent;
+    final alias = element.attributes['alias'] ?? '';
+    final display = alias.isNotEmpty ? alias : (element.textContent);
+    final path = onResolve(target);
+    if (path == null) {
+      return _placeholder(context, display);
+    }
+    if (_imageExt.hasMatch(target)) {
+      return Image.file(
+        File(path),
+        fit: BoxFit.fitWidth,
+        errorBuilder: (context, error, stack) => _placeholder(context, display),
+      );
+    }
+    // A binary or unknown target: the path as muted text (opening it is
+    // future work — M3 handles the link, not the file).
+    return _placeholder(context, display);
+  }
+
+  Widget _placeholder(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    return Text(
+      '![[$text]]',
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+      softWrap: true,
+    );
+  }
+}
 
 /// The inline syntax for `[[…]]` wikilinks in the preview (T-M3-07).
 ///

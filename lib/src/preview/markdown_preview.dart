@@ -46,6 +46,7 @@ final class MarkdownPreview extends StatefulWidget {
     this.controller,
     this.onTapLink,
     this.onWikiLink,
+    this.embedResolver,
     this.mathStyle = const MathStyle(),
     this.mathCache,
     this.scrollMap,
@@ -88,6 +89,11 @@ final class MarkdownPreview extends StatefulWidget {
   /// Wikilink callback (T-M3-07): called with the parsed `[[…]]` ref (and
   /// its display text) when a wikilink is tapped.
   final void Function(WikiRef ref, String display)? onWikiLink;
+
+  /// Resolves an `![[…]]` embed target to an absolute file path (or null);
+  /// images render inline, other targets as muted path text. When null,
+  /// embeds render as plain text.
+  final String? Function(String target)? embedResolver;
 
   /// Math visual style (size/color); see [MathStyle].
   final MathStyle mathStyle;
@@ -187,7 +193,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
         const MathBlockSyntax(),
         ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
       ],
-      inlineSyntaxes: [WikilinkInlineSyntax()],
+      inlineSyntaxes: [EmbedInlineSyntax(), WikilinkInlineSyntax()],
       extensionSet: md.ExtensionSet.gitHubFlavored,
       encodeHtml: false,
     );
@@ -220,6 +226,11 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
         if (widget.onWikiLink != null)
           'wikilink': WikilinkBuilder(
             onWikiRef: widget.onWikiLink!,
+            recognizers: _recognizers,
+          ),
+        if (widget.embedResolver != null)
+          'embed': EmbedBuilder(
+            onResolve: widget.embedResolver!,
             recognizers: _recognizers,
           ),
         'math': MathInlineBuilder(cache: _mathCache, style: widget.mathStyle),

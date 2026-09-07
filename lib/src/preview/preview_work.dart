@@ -101,7 +101,7 @@ List<md.Node> _parseSource(String source) {
       const MathBlockSyntax(),
       ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
     ],
-    inlineSyntaxes: [WikilinkInlineSyntax()],
+    inlineSyntaxes: [EmbedInlineSyntax(), WikilinkInlineSyntax()],
     extensionSet: md.ExtensionSet.gitHubFlavored,
     encodeHtml: false,
   );

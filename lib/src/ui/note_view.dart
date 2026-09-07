@@ -421,6 +421,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     imageDirectory: widget.libraryRoot,
     onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
     onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
+    embedResolver: _resolveEmbed,
   );
 
   /// Schedules the caret-link check for the end of a frame; the caret the
@@ -430,6 +431,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_tryOpenLinkAtCaret(attempt));
     });
+  }
+
+  /// Resolves an `![[…]]` embed: library-root-relative first (the
+  /// attachments/assets layout), then relative to the note's own folder.
+  String? _resolveEmbed(String target) {
+    final root = widget.libraryRoot;
+    if (root == null || target.isEmpty) return null;
+    var candidate = File(p.join(root, target));
+    if (candidate.existsSync()) return candidate.path;
+    candidate = File(p.join(p.dirname(widget.path), target));
+    return candidate.existsSync() ? candidate.path : null;
   }
 
   /// Editor side of link navigation: the caret sits on a wikilink or MD
