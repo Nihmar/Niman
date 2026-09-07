@@ -192,6 +192,10 @@ final class AppStrings {
   static const String todoDueToday = 'Today';
   static const String todoDueNext7 = 'Next 7 days';
   static const String todoDueNoDate = 'No date';
+  // The row's due labels (the range menu above names the ranges): the
+  // prefix keeps the due date from being read as the reminder's date.
+  static const String todoRowDue = 'Due';
+  static const String todoRowDueToday = 'Due today';
   static const String todoSortTooltip = 'Sort';
   static const String todoSortDue = 'Due date';
   static const String todoSortPriority = 'Priority';

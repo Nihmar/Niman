@@ -106,13 +106,13 @@ void main() {
     // Titles strip tokens (the mockup's clean rows)...
     expect(find.text('file taxes'), findsOneWidget);
     expect(find.text('plain task'), findsOneWidget);
-    // ...and carry a one-line due subtitle.
+    // ...and carry a due label (prefixed, state-colored)...
     expect(find.text('Overdue · 1 Sep'), findsOneWidget);
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.text('09:00'), findsOneWidget);
-    // The reminder-only row borrows the reminder date (2 Oct too).
-    expect(find.text('2 Oct'), findsNWidgets(2));
-    expect(find.text('08:30'), findsOneWidget);
+    expect(find.text('Due today'), findsOneWidget);
+    expect(find.text('Due 2 Oct'), findsOneWidget);
+    // ...and a reminder with its own date + time.
+    expect(find.text('7 Sep 09:00'), findsOneWidget);
+    expect(find.text('2 Oct 08:30'), findsOneWidget);
     expect(find.byIcon(Icons.access_time), findsNWidgets(2));
     // The tokens show as chips (+project, @context, #tag); the old
     // left accent bar is gone.
@@ -304,13 +304,25 @@ void main() {
     expect(source.todoLines.first, '(B) bee due:2026-09-01');
   });
 
-  testWidgets('a reminder shows as clock + time in the subtitle', (
+  testWidgets('a reminder shows as clock + its own date + time', (
     tester,
   ) async {
     await pumpTab(tester, todo: ['call rem:2026-09-08T10:30', 'plain']);
-    expect(find.text('10:30'), findsOneWidget);
+    expect(find.text('8 Sep 10:30'), findsOneWidget);
     expect(find.byIcon(Icons.access_time), findsOneWidget);
     expect(find.byIcon(Icons.alarm), findsNothing);
+  });
+
+  testWidgets('due and reminder keep their own dates apart', (tester) async {
+    await pumpTab(
+      tester,
+      todo: ['both due:2026-09-01 rem:2026-10-02T08:30'],
+    );
+    // The due label is state-colored and prefixed...
+    expect(find.text('Overdue · 1 Sep'), findsOneWidget);
+    // ...the reminder carries its own date, never the due date's.
+    expect(find.text('2 Oct 08:30'), findsOneWidget);
+    expect(find.text('1 Sep 08:30'), findsNothing);
   });
 
   testWidgets('due picker writes due: on save', (tester) async {

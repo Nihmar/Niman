@@ -134,8 +134,70 @@ final class _RowSubtitle extends StatelessWidget {
       spacing: 6,
       runSpacing: 2,
       children: [
-        _DueLine(task: task, today: today),
+        if (task.due != null) _DueChip(due: task.due!, today: today),
+        if (task.reminder != null)
+          _ReminderChip(stamp: task.reminder!, today: today),
         for (final token in tokens) _TokenChip(token: token),
+      ],
+    );
+  }
+}
+
+/// The due part of the row subtitle (T-TDM-02, split on 2026-09-07):
+/// the due state + short date, prefixed ("Overdue · 1 Sep", "Due
+/// today", "Due 7 Sep") so it can never be read as the reminder's date.
+final class _DueChip extends StatelessWidget {
+  const _DueChip({required this.due, required this.today});
+
+  final DateTime due;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final dueState = todoDueState(due, today)!;
+    final scheme = Theme.of(context).colorScheme;
+    final color = switch (dueState) {
+      TodoDueState.overdue => scheme.error,
+      TodoDueState.today => scheme.tertiary,
+      TodoDueState.upcoming => scheme.onSurfaceVariant,
+    };
+    final label = switch (dueState) {
+      TodoDueState.overdue =>
+        '${AppStrings.todoDueOverdue} · ${_shortDate(due, today)}',
+      TodoDueState.today => AppStrings.todoRowDueToday,
+      TodoDueState.upcoming =>
+        '${AppStrings.todoRowDue} ${_shortDate(due, today)}',
+    };
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: color,
+    );
+    return Text(label, style: style);
+  }
+}
+
+/// The reminder part of the row subtitle: the clock icon plus the
+/// reminder's *own* date + time (2026-09-07 user feedback: the old
+/// "due date + reminder time" mix read as one pair, and the borrowed
+/// date survived "No date" filters unexplained). The clock + time is
+/// the reminder marker; the old alarm icon is still gone.
+final class _ReminderChip extends StatelessWidget {
+  const _ReminderChip({required this.stamp, required this.today});
+
+  final DateTime stamp;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.access_time, size: 14, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 2),
+        Text('${_shortDate(stamp, today)} ${_timeOf(stamp)}', style: style),
       ],
     );
   }
@@ -181,52 +243,6 @@ final class _TokenChip extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// The one-line subtitle (T-TDM-02): the due state + short date, then —
-/// when the task has a reminder — the clock icon and its time (the
-/// clock + time is the reminder marker; the old alarm icon is gone).
-final class _DueLine extends StatelessWidget {
-  const _DueLine({required this.task, required this.today});
-
-  final TodoTask task;
-  final DateTime today;
-
-  @override
-  Widget build(BuildContext context) {
-    final dueState = todoDueState(task.due, today);
-    final date = task.due ?? task.reminder;
-    final reminder = task.reminder;
-    if (dueState == null && reminder == null) {
-      return const SizedBox.shrink();
-    }
-    final scheme = Theme.of(context).colorScheme;
-    final color = switch (dueState) {
-      TodoDueState.overdue => scheme.error,
-      TodoDueState.today => scheme.tertiary,
-      _ => scheme.onSurfaceVariant,
-    };
-    final label = switch (dueState) {
-      TodoDueState.overdue => task.due == null
-          ? AppStrings.todoDueOverdue
-          : '${AppStrings.todoDueOverdue} · ${_shortDate(task.due!, today)}',
-      TodoDueState.today => AppStrings.todoDueToday,
-      _ => date == null ? null : _shortDate(date, today),
-    };
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: color);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (label != null) Text(label, style: style),
-        if (reminder != null) ...[
-          const SizedBox(width: 6),
-          Icon(Icons.access_time, size: 14, color: color),
-          const SizedBox(width: 2),
-          Text(_timeOf(reminder), style: style),
-        ],
-      ],
     );
   }
 }

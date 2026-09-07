@@ -105,5 +105,10 @@ truth for everything this file is silent on.
   (phone tab shell and the wide pushed screen alike): the bar `+` did
   not read as "add a task". The Files tab's expandable `+` FAB is
   untouched; at most one FAB per tab, never two on screen.
-- **Reminder marker** = the clock + time in the subtitle (a `rem:`
-  without a due date still shows its date + time).
+- **Reminder marker** = the clock + the reminder's *own* date + time
+  (user override, 2026-09-07: the old mix — due date plus reminder time
+  as one pair, and the borrowed reminder date on `rem:`-only rows —
+  was unexplainable, including against the "No date" filter). Due and
+  reminder are now separate subtitle items; the due label is prefixed
+  ("Overdue · d MMM" / "Due today" / "Due d MMM") so the two dates can
+  never be read as one.
