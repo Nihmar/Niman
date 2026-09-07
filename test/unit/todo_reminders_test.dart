@@ -100,6 +100,27 @@ void main() {
       expect(wanted, isEmpty);
     });
 
+    test('showTokens keeps the project, context and tag markers', () {
+      // Off by default: on a lock screen the markers are syntax with
+      // nothing to explain them. On for people who file by project.
+      const line = 'call plumber +home @errand #urgent rem:2026-09-08T10:30';
+      expect(
+        wantedReminders(
+          snapshotOf(todo: [line]),
+          DateTime(2026, 9, 7),
+        ).values.single.title,
+        'call plumber',
+      );
+      expect(
+        wantedReminders(
+          snapshotOf(todo: [line]),
+          DateTime(2026, 9, 7),
+          showTokens: true,
+        ).values.single.title,
+        'call plumber +home @errand #urgent',
+      );
+    });
+
     test('a tag-only description falls back to a generic title', () {
       final wanted = wantedReminders(
         snapshotOf(todo: ['due:2026-09-09 rem:2026-09-08T10:30']),

@@ -123,6 +123,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {}
 
+  bool _reminderShowTokens = false;
+
+  @override
+  Future<bool> get reminderShowTokens async => _reminderShowTokens;
+
+  @override
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    _reminderShowTokens = enabled;
+  }
+
   // T-M2-08 preview layout, with state so settings/layout widgets can
   // exercise it in tests.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;

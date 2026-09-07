@@ -387,24 +387,34 @@ String withoutToken(String description, String token) {
 final RegExp _keyValueWordPattern =
     RegExp(r'(?:^|\s)[A-Za-z][A-Za-z0-9_-]*:[^\s]+(?=\s|$)');
 
-/// Returns the prose of [description]: every token Copist manages or
-/// filters by removed, leftover whitespace collapsed.
+/// Returns the prose of [description]: [withoutKeyValueTags] plus the
+/// `+project` / `@context` / `#tag` markers, leftover whitespace
+/// collapsed. What is left is the phrase the user typed.
 ///
-/// That means the `key:value` slots the dialog appends (`due:`, `rem:`,
-/// `rec:`, …) and the `+project` / `@context` / `#tag` markers. What is
-/// left is the phrase the user typed.
-///
-/// Used where a task is shown out of its line and out of the app — the
-/// notification title. In the list the tokens carry meaning next to the
-/// checkbox and the filter chips; on the lock screen they are syntax
-/// with nothing to explain them, so a reminder reads as one phrase
-/// rather than a raw todo.txt line.
+/// The default for the notification title, where the task is shown out of
+/// its line and out of the app: in the list the markers carry meaning next
+/// to the checkbox and the filter chips, while on a lock screen they are
+/// syntax with nothing to explain them. A setting brings them back for
+/// people who file by project.
 String taskDisplayText(String description) {
-  return description
-      .replaceAll(_keyValueWordPattern, '')
+  return withoutKeyValueTags(description)
       .replaceAll(_projectPattern, '')
       .replaceAll(_contextPattern, '')
       .replaceAll(_hashtagPattern, '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
+/// Returns [description] without its `key:value` annotation tags — the
+/// model's managed slots (`due:`, `rem:`, `rec:`, … appended by the
+/// dialog, not typed by the user) — collapsing leftover whitespace.
+/// The `+project` / `@context` / `#tag` markers are kept.
+String withoutKeyValueTags(String description) {
+  if (!description.contains(':')) {
+    return description.trim();
+  }
+  return description
+      .replaceAll(_keyValueWordPattern, '')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
 }

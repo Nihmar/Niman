@@ -923,6 +923,20 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _reminderShowTokensMeta =
+      const VerificationMeta('reminderShowTokens');
+  @override
+  late final GeneratedColumn<bool> reminderShowTokens = GeneratedColumn<bool>(
+    'reminder_show_tokens',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("reminder_show_tokens" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _previewModeMeta = const VerificationMeta(
     'previewMode',
   );
@@ -966,6 +980,7 @@ class $AppSettingsTable extends AppSettings
     debugLogsEnabled,
     lineNumbers,
     editorAutofocus,
+    reminderShowTokens,
     previewMode,
     splitRatio,
     treeSort,
@@ -1021,6 +1036,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('reminder_show_tokens')) {
+      context.handle(
+        _reminderShowTokensMeta,
+        reminderShowTokens.isAcceptableOrUnknown(
+          data['reminder_show_tokens']!,
+          _reminderShowTokensMeta,
+        ),
+      );
+    }
     if (data.containsKey('preview_mode')) {
       context.handle(
         _previewModeMeta,
@@ -1071,6 +1095,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}editor_autofocus'],
       )!,
+      reminderShowTokens: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}reminder_show_tokens'],
+      )!,
       previewMode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}preview_mode'],
@@ -1110,6 +1138,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// opens (default false — the keyboard appears on the first tap).
   final bool editorAutofocus;
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  ///
+  /// In the list they carry meaning next to the checkbox and the filter
+  /// chips; on a lock screen there is nothing to explain them, so they
+  /// are off by default — but someone who files by project may want them.
+  final bool reminderShowTokens;
+
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
   final String previewMode;
@@ -1126,6 +1162,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.debugLogsEnabled,
     required this.lineNumbers,
     required this.editorAutofocus,
+    required this.reminderShowTokens,
     required this.previewMode,
     required this.splitRatio,
     required this.treeSort,
@@ -1140,6 +1177,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
     map['line_numbers'] = Variable<bool>(lineNumbers);
     map['editor_autofocus'] = Variable<bool>(editorAutofocus);
+    map['reminder_show_tokens'] = Variable<bool>(reminderShowTokens);
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
     map['tree_sort'] = Variable<String>(treeSort);
@@ -1155,6 +1193,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: Value(debugLogsEnabled),
       lineNumbers: Value(lineNumbers),
       editorAutofocus: Value(editorAutofocus),
+      reminderShowTokens: Value(reminderShowTokens),
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
       treeSort: Value(treeSort),
@@ -1172,6 +1211,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
       lineNumbers: serializer.fromJson<bool>(json['lineNumbers']),
       editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
+      reminderShowTokens: serializer.fromJson<bool>(json['reminderShowTokens']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
       treeSort: serializer.fromJson<String>(json['treeSort']),
@@ -1186,6 +1226,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
       'lineNumbers': serializer.toJson<bool>(lineNumbers),
       'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
+      'reminderShowTokens': serializer.toJson<bool>(reminderShowTokens),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
       'treeSort': serializer.toJson<String>(treeSort),
@@ -1198,6 +1239,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     bool? debugLogsEnabled,
     bool? lineNumbers,
     bool? editorAutofocus,
+    bool? reminderShowTokens,
     String? previewMode,
     double? splitRatio,
     String? treeSort,
@@ -1207,6 +1249,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
     lineNumbers: lineNumbers ?? this.lineNumbers,
     editorAutofocus: editorAutofocus ?? this.editorAutofocus,
+    reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
     treeSort: treeSort ?? this.treeSort,
@@ -1226,6 +1269,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorAutofocus: data.editorAutofocus.present
           ? data.editorAutofocus.value
           : this.editorAutofocus,
+      reminderShowTokens: data.reminderShowTokens.present
+          ? data.reminderShowTokens.value
+          : this.reminderShowTokens,
       previewMode: data.previewMode.present
           ? data.previewMode.value
           : this.previewMode,
@@ -1244,6 +1290,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
+          ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('treeSort: $treeSort')
@@ -1258,6 +1305,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     debugLogsEnabled,
     lineNumbers,
     editorAutofocus,
+    reminderShowTokens,
     previewMode,
     splitRatio,
     treeSort,
@@ -1271,6 +1319,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.debugLogsEnabled == this.debugLogsEnabled &&
           other.lineNumbers == this.lineNumbers &&
           other.editorAutofocus == this.editorAutofocus &&
+          other.reminderShowTokens == this.reminderShowTokens &&
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
           other.treeSort == this.treeSort);
@@ -1282,6 +1331,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<bool> debugLogsEnabled;
   final Value<bool> lineNumbers;
   final Value<bool> editorAutofocus;
+  final Value<bool> reminderShowTokens;
   final Value<String> previewMode;
   final Value<double> splitRatio;
   final Value<String> treeSort;
@@ -1291,6 +1341,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.debugLogsEnabled = const Value.absent(),
     this.lineNumbers = const Value.absent(),
     this.editorAutofocus = const Value.absent(),
+    this.reminderShowTokens = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.treeSort = const Value.absent(),
@@ -1301,6 +1352,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.debugLogsEnabled = const Value.absent(),
     this.lineNumbers = const Value.absent(),
     this.editorAutofocus = const Value.absent(),
+    this.reminderShowTokens = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.treeSort = const Value.absent(),
@@ -1311,6 +1363,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<bool>? debugLogsEnabled,
     Expression<bool>? lineNumbers,
     Expression<bool>? editorAutofocus,
+    Expression<bool>? reminderShowTokens,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
     Expression<String>? treeSort,
@@ -1321,6 +1374,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
       if (lineNumbers != null) 'line_numbers': lineNumbers,
       if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
+      if (reminderShowTokens != null)
+        'reminder_show_tokens': reminderShowTokens,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
       if (treeSort != null) 'tree_sort': treeSort,
@@ -1333,6 +1388,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<bool>? debugLogsEnabled,
     Value<bool>? lineNumbers,
     Value<bool>? editorAutofocus,
+    Value<bool>? reminderShowTokens,
     Value<String>? previewMode,
     Value<double>? splitRatio,
     Value<String>? treeSort,
@@ -1343,6 +1399,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
+      reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
       treeSort: treeSort ?? this.treeSort,
@@ -1367,6 +1424,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (editorAutofocus.present) {
       map['editor_autofocus'] = Variable<bool>(editorAutofocus.value);
     }
+    if (reminderShowTokens.present) {
+      map['reminder_show_tokens'] = Variable<bool>(reminderShowTokens.value);
+    }
     if (previewMode.present) {
       map['preview_mode'] = Variable<String>(previewMode.value);
     }
@@ -1387,6 +1447,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
+          ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('treeSort: $treeSort')
@@ -2602,7 +2663,16 @@ class $$NotesTableTableManager
                 sha256: sha256,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NotesTable, Note>(table),
+                  BaseReferences<_$CopistDatabase, $NotesTable, Note>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2792,7 +2862,16 @@ class $$LibrarySettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LibrarySettingsTable, LibrarySetting>(table),
+                  BaseReferences<
+                    _$CopistDatabase,
+                    $LibrarySettingsTable,
+                    LibrarySetting
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2823,6 +2902,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> debugLogsEnabled,
       Value<bool> lineNumbers,
       Value<bool> editorAutofocus,
+      Value<bool> reminderShowTokens,
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> treeSort,
@@ -2834,6 +2914,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> debugLogsEnabled,
       Value<bool> lineNumbers,
       Value<bool> editorAutofocus,
+      Value<bool> reminderShowTokens,
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> treeSort,
@@ -2870,6 +2951,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get editorAutofocus => $composableBuilder(
     column: $table.editorAutofocus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reminderShowTokens => $composableBuilder(
+    column: $table.reminderShowTokens,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2923,6 +3009,11 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get reminderShowTokens => $composableBuilder(
+    column: $table.reminderShowTokens,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get previewMode => $composableBuilder(
     column: $table.previewMode,
     builder: (column) => ColumnOrderings(column),
@@ -2968,6 +3059,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get editorAutofocus => $composableBuilder(
     column: $table.editorAutofocus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get reminderShowTokens => $composableBuilder(
+    column: $table.reminderShowTokens,
     builder: (column) => column,
   );
 
@@ -3021,6 +3117,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> debugLogsEnabled = const Value.absent(),
                 Value<bool> lineNumbers = const Value.absent(),
                 Value<bool> editorAutofocus = const Value.absent(),
+                Value<bool> reminderShowTokens = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> treeSort = const Value.absent(),
@@ -3030,6 +3127,7 @@ class $$AppSettingsTableTableManager
                 debugLogsEnabled: debugLogsEnabled,
                 lineNumbers: lineNumbers,
                 editorAutofocus: editorAutofocus,
+                reminderShowTokens: reminderShowTokens,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 treeSort: treeSort,
@@ -3041,6 +3139,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> debugLogsEnabled = const Value.absent(),
                 Value<bool> lineNumbers = const Value.absent(),
                 Value<bool> editorAutofocus = const Value.absent(),
+                Value<bool> reminderShowTokens = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> treeSort = const Value.absent(),
@@ -3050,12 +3149,22 @@ class $$AppSettingsTableTableManager
                 debugLogsEnabled: debugLogsEnabled,
                 lineNumbers: lineNumbers,
                 editorAutofocus: editorAutofocus,
+                reminderShowTokens: reminderShowTokens,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 treeSort: treeSort,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AppSettingsTable, AppSetting>(table),
+                  BaseReferences<
+                    _$CopistDatabase,
+                    $AppSettingsTable,
+                    AppSetting
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3215,7 +3324,16 @@ class $$NoteStemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteStemsTable, NoteStem>(table),
+                  BaseReferences<_$CopistDatabase, $NoteStemsTable, NoteStem>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3322,7 +3440,16 @@ class $$TagsTableTableManager
             Value<int> rowid = const Value.absent(),
           }) => TagsCompanion.insert(name: name, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$TagsTable, Tag>(table),
+                  BaseReferences<_$CopistDatabase, $TagsTable, Tag>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3478,7 +3605,16 @@ class $$NoteTagsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteTagsTable, NoteTag>(table),
+                  BaseReferences<_$CopistDatabase, $NoteTagsTable, NoteTag>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3635,7 +3771,16 @@ class $$NoteLinksTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteLinksTable, NoteLink>(table),
+                  BaseReferences<_$CopistDatabase, $NoteLinksTable, NoteLink>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

@@ -371,6 +371,21 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setEditorAutofocusEnabled(enabled: enabled);
   }
 
+  /// Whether reminder text keeps the +project/@context/#tag markers.
+  @override
+  Future<bool> get reminderShowTokens async {
+    final db = await database;
+    return AppSettingsRepo(db).reminderShowTokens();
+  }
+
+  /// Sets (and persists) the reminder-markers toggle.
+  @override
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    _log.info('reminder markers set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setReminderShowTokens(enabled: enabled);
+  }
+
   /// The preview layout mode.
   @override
   Future<PreviewLayoutMode> get previewMode async {

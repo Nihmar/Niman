@@ -165,6 +165,21 @@ final class AppSettingsRepo {
         .write(AppSettingsCompanion(editorAutofocus: Value(enabled)));
   }
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  Future<bool> reminderShowTokens() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isNotEmpty && rows.first.reminderShowTokens;
+  }
+
+  /// Persists the reminder-markers toggle.
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(reminderShowTokens: Value(enabled)),
+    );
+  }
+
   /// The preview layout mode (default [PreviewLayoutMode.auto]).
   Future<PreviewLayoutMode> previewMode() async {
     final rows = await _db.select(_db.appSettings).get();

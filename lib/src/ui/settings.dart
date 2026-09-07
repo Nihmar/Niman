@@ -59,6 +59,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   bool? _debugLogs;
   bool? _lineNumbers;
   bool? _autofocusEditor;
+  bool? _reminderShowTokens;
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
@@ -78,6 +79,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final debug = await controller.debugLogsEnabled;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
+    final reminderTokens = await controller.reminderShowTokens;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
     final quickNotePath = await ops.quickNotePath;
@@ -87,6 +89,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _debugLogs = debug;
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
+        _reminderShowTokens = reminderTokens;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
         _splitLoaded = true;
@@ -149,6 +152,20 @@ final class _SettingsBodyState extends State<SettingsBody> {
     controller.notify();
     if (mounted) {
       setState(() => _autofocusEditor = value);
+    }
+  }
+
+  /// Persists the reminder-markers toggle.
+  ///
+  /// Takes effect on the next reconciliation, which the shell triggers on
+  /// the way back from here (a settings change bumps the session, and any
+  /// resume resyncs), so already-scheduled alarms pick up the new text.
+  Future<void> _toggleReminderTokens(bool value) async {
+    final controller = widget.controller;
+    await controller.setReminderShowTokens(enabled: value);
+    controller.notify();
+    if (mounted) {
+      setState(() => _reminderShowTokens = value);
     }
   }
 
@@ -280,6 +297,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
             subtitle: const Text(AppStrings.keyboardOnOpenSubtitle),
             value: _autofocusEditor ?? false,
             onChanged: _toggleAutofocusEditor,
+          ),
+          SwitchListTile(
+            key: const Key('reminder-show-tokens'),
+            title: const Text(AppStrings.reminderShowTokensTitle),
+            subtitle: const Text(AppStrings.reminderShowTokensSubtitle),
+            value: _reminderShowTokens ?? false,
+            onChanged: _toggleReminderTokens,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),

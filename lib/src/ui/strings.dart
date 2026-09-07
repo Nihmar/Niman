@@ -148,6 +148,11 @@ final class AppStrings {
   static const String todoReminderInexact =
       'This device does not allow exact alarms, so a reminder can arrive '
       'several minutes late with the screen off.';
+  static const String reminderShowTokensTitle =
+      'Tags in reminder notifications';
+  static const String reminderShowTokensSubtitle =
+      'Keep +project, @context and #tag in the notification text. Off '
+      'shows only the task you typed.';
   static const String todoReminderFixAction = 'Open settings';
   static const String todoReminderDismissAction = 'Dismiss';
   static const String todoReminderDue = 'Due';

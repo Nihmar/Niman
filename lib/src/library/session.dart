@@ -135,6 +135,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the keyboard-on-open toggle.
   Future<void> setEditorAutofocusEnabled({required bool enabled});
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  Future<bool> get reminderShowTokens;
+
+  /// Sets (and persists) the reminder-markers toggle.
+  Future<void> setReminderShowTokens({required bool enabled});
+
   /// The preview layout mode (default `auto`: split on wide screens,
   /// full-screen switch on phones).
   Future<PreviewLayoutMode> get previewMode;

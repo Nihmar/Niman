@@ -47,6 +47,9 @@ void main() {
           'ALTER TABLE app_settings DROP COLUMN tree_sort',
         );
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+        );
+        await db.customStatement(
           "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
         );
         await db.close();
@@ -92,6 +95,9 @@ void main() {
           'ALTER TABLE app_settings DROP COLUMN tree_sort',
         );
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+        );
+        await db.customStatement(
           "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
         );
         await db.close();
@@ -132,6 +138,9 @@ void main() {
           'ALTER TABLE app_settings DROP COLUMN tree_sort',
         );
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+        );
+        await db.customStatement(
           "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
         );
         await db.close();
@@ -169,6 +178,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+      );
+      await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
       );
       await db.close();
@@ -197,6 +209,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+      );
+      await db.customStatement(
         'INSERT INTO library_settings (path, trash_enabled, '
         "history_versions) VALUES ('/lib', 1, 10)",
       );
@@ -222,6 +237,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+      );
+      await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
       );
       await db.close();
@@ -242,6 +260,9 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+      );
       await db.customStatement('DROP TABLE IF EXISTS notes_fts');
       await db.customStatement('DROP TABLE IF EXISTS note_links');
       await db.customStatement('DROP TABLE IF EXISTS note_tags');
@@ -304,6 +325,32 @@ void main() {
       'INSERT INTO notes_fts (rowid, title, body) VALUES (1, ?1, ?2)',
       ['Title', 'Body'],
     );
+    await db.close();
+  });
+
+  test('v8 databases gain reminder_show_tokens on upgrade, keeping values',
+      () async {
+    // Build a v8-shaped file: create at v9, rewind, drop the new column.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 8');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+      );
+      await db.customStatement(
+        'INSERT INTO app_settings (id, library_path, tree_sort) '
+        "VALUES (1, '/old/root', 'nameDesc')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.libraryPath, '/old/root');
+    expect(row.treeSort, 'nameDesc');
+    // Off by default: an upgrade must not start putting +project and
+    // @context into notifications that never had them.
+    expect(row.reminderShowTokens, false);
     await db.close();
   });
 }

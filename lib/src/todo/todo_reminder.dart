@@ -76,8 +76,9 @@ int todoReminderId(String description) {
 /// time on device).
 Map<int, TodoReminder> wantedReminders(
   TodoSnapshot snapshot,
-  DateTime now,
-) {
+  DateTime now, {
+  bool showTokens = false,
+}) {
   final wanted = <int, TodoReminder>{};
   for (final entry in snapshot.todo) {
     final task = entry.task;
@@ -91,13 +92,16 @@ Map<int, TodoReminder> wantedReminders(
     if (when == null || !when.isAfter(now)) {
       continue;
     }
-    // Only the phrase the user typed: the id stays over the full text
-    // (stable identity), but the shown title drops the managed due:/rem:
-    // tags and the +project/@context/#tag markers — on a lock screen
-    // those are syntax with nothing to explain them. A line written
-    // elsewhere can be nothing but tokens, which would leave a titleless
-    // notification.
-    final title = taskDisplayText(task.description);
+    // The id stays over the full text (stable identity), but the shown
+    // title never carries the managed due:/rem: tags. The
+    // +project/@context/#tag markers are the user's call ([showTokens]):
+    // off by default, because on a lock screen they are syntax with
+    // nothing to explain them, but someone who files by project reads
+    // them as part of the task. A line written elsewhere can be nothing
+    // but tokens, which would leave a titleless notification.
+    final title = showTokens
+        ? withoutKeyValueTags(task.description)
+        : taskDisplayText(task.description);
     wanted[todoReminderId(task.description)] = TodoReminder(
       id: todoReminderId(task.description),
       title: title.isEmpty ? AppStrings.todoReminderFallbackTitle : title,

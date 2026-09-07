@@ -61,6 +61,13 @@ final class TodoController extends ChangeNotifier {
 
   TodoSource? _store;
   TodoSnapshot? _snapshot;
+
+  /// Whether reminder text keeps the +project/@context/#tag markers.
+  ///
+  /// Cached from the session so reconciliation stays synchronous with the
+  /// snapshot; refreshed on every load and resume, which is every point a
+  /// settings change can reach.
+  bool _reminderShowTokens = false;
   ({TodoFileProbe todo, TodoFileProbe done})? _probes;
   String? _error;
   StreamSubscription<int>? _events;
@@ -80,7 +87,22 @@ final class TodoController extends ChangeNotifier {
   Future<void> open() async {
     _log.info('todo open: root=${session.root}');
     _events ??= session.events.listen((_) => _scheduleRefresh());
+    await _refreshReminderSettings();
     await _reload();
+  }
+
+  /// Re-reads the reminder display setting (cheap, one settings row).
+  Future<void> _refreshReminderSettings() async {
+    try {
+      final showTokens = await session.reminderShowTokens;
+      if (!_disposed) {
+        _reminderShowTokens = showTokens;
+      }
+    } on Object catch (error) {
+      // A settings read must never stop a reload: the previous value (or
+      // the default) still produces a usable reminder.
+      _log.warning('todo reminder settings unavailable: $error');
+    }
   }
 
   /// Appends [line] to `todo.txt`.
@@ -184,6 +206,7 @@ final class TodoController extends ChangeNotifier {
       await open();
       return;
     }
+    await _refreshReminderSettings();
     await _reload();
     await _syncReminders();
   }
@@ -203,7 +226,13 @@ final class TodoController extends ChangeNotifier {
       return;
     }
     try {
-      await service.reconcile(wantedReminders(snapshot, _clock()));
+      await service.reconcile(
+        wantedReminders(
+          snapshot,
+          _clock(),
+          showTokens: _reminderShowTokens,
+        ),
+      );
     } on Object catch (error) {
       _log.warning('todo reminders sync failed: $error');
     }

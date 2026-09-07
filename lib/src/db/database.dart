@@ -76,6 +76,16 @@ class AppSettings extends Table {
   BoolColumn get editorAutofocus =>
       boolean().named('editor_autofocus').withDefault(const Constant(false))();
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  ///
+  /// In the list they carry meaning next to the checkbox and the filter
+  /// chips; on a lock screen there is nothing to explain them, so they
+  /// are off by default — but someone who files by project may want them.
+  BoolColumn get reminderShowTokens => boolean()
+      .named('reminder_show_tokens')
+      .withDefault(const Constant(false))();
+
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
   TextColumn get previewMode =>
@@ -178,7 +188,7 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -247,6 +257,12 @@ class CopistDatabase extends _$CopistDatabase {
         await m.createTable(noteTags);
         await m.createTable(noteLinks);
         await m.database.customStatement(_createFts);
+      }
+      if (from < 9) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN reminder_show_tokens '
+          'BOOLEAN NOT NULL DEFAULT 0',
+        );
       }
     },
   );
