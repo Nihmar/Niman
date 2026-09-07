@@ -119,6 +119,12 @@ tasks live in `done.txt`, everything else in `todo.txt`.
   badges carry the state; documented limitation. *AC: on-device —
   reminder fires with the app closed; completing the task before the
   time cancels it.*
+  - **Distribution note.** `USE_EXACT_ALARM` is a Google Play restricted
+    permission (alarm-clock and calendar apps only). Copist ships via
+    F-Droid or a direct APK, where no such review applies, so it stays.
+    Revisit only if the app ever targets Play: the alternative is
+    `SCHEDULE_EXACT_ALARM` plus an in-app prompt deep-linking to system
+    settings, and until the user grants it Doze defers every reminder.
 - [x] **T-TD-08** Strings + tests: all UI text in `strings.dart`; widget
   tests with a fake store for dialogs, filters, Open/Done and the move
   flows; parser/store unit tests per task. *AC: green; on-device pass

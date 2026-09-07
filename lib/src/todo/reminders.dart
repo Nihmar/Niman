@@ -161,9 +161,10 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
 
 /// Android reminders via `flutter_local_notifications` (exact alarms via
 /// `setExactAndAllowWhileIdle` — see [_ensureExact]) + `timezone` for
-/// the local wall clock. `USE_EXACT_ALARM` is auto-granted at install
-/// (the app targets API >= 33), so exact scheduling is normally always
-/// available without a runtime settings trip.
+/// the local wall clock. `USE_EXACT_ALARM` is auto-granted at install, so
+/// exact scheduling is available from the first run with no settings trip
+/// — which is what makes a reminder fire on time with the screen off and
+/// the app closed.
 final class LocalReminderService implements ReminderService {
   /// The plugin (method channels — on-device only, never in tests).
   final FlutterLocalNotificationsPlugin _plugin =
@@ -175,7 +176,6 @@ final class LocalReminderService implements ReminderService {
 
   bool _ready = false;
   bool _permissionAsked = false;
-  bool _exactAsked = false;
   bool _launchConsumed = false;
 
   /// The newest wanted set waiting for [_drain], or null when none is.
@@ -229,11 +229,16 @@ final class LocalReminderService implements ReminderService {
     return await android.requestNotificationsPermission() ?? false;
   }
 
-  /// Whether minute-precise (exact) alarms can be scheduled. With
-  /// `USE_EXACT_ALARM` declared (auto-granted at install on API >= 33),
-  /// this is normally already true. The request branch below is only a
-  /// last resort on OEM builds that still gate exact alarms behind the
-  /// user-grantable `SCHEDULE_EXACT_ALARM` settings toggle.
+  /// Whether minute-precise (exact) alarms can be scheduled.
+  ///
+  /// A defensive query, not a gate: `USE_EXACT_ALARM` is declared and
+  /// auto-granted at install, so this is true on any stock Android the app
+  /// runs on (minSdk 35). It can still come back false on an OEM build
+  /// that gates exact alarms behind its own toggle, and there is no in-app
+  /// remedy for that -- requesting `SCHEDULE_EXACT_ALARM` would need that
+  /// permission declared, which would trade an always-granted privilege
+  /// for one denied by default. The caller falls back to inexact and says
+  /// so in the log; Doze can then defer a reminder by several minutes.
   Future<bool> _ensureExact() async {
     final android = _plugin.resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin
@@ -244,12 +249,10 @@ final class LocalReminderService implements ReminderService {
     if (await android.canScheduleExactNotifications() ?? true) {
       return true;
     }
-    if (_exactAsked) {
-      return false;
-    }
-    _exactAsked = true;
-    _log.info('todo reminders: asking for the exact-alarm grant');
-    return await android.requestExactAlarmsPermission() ?? false;
+    _log.warning(
+      'todo reminders: exact alarms unavailable on this build',
+    );
+    return false;
   }
 
   @override
