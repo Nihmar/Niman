@@ -108,10 +108,15 @@ final class PluginReminderBackend implements ReminderBackend {
               _taps.add(response.payload),
         );
         _icon = candidate;
-        if (candidate != todoReminderIcon) {
+        if (candidate == todoReminderIcon) {
+          _log.info('todo reminders: icon $candidate');
+        } else {
+          // A build problem, not a device one: the drawable is in the
+          // source tree, so this means it did not reach the APK.
           _log.warning(
-            'todo reminders: icon $todoReminderIcon missing from the build, '
-            'falling back to $candidate',
+            'todo reminders: icon $todoReminderIcon missing from '
+            'the build, falling back to $candidate '
+            '(a plain white block in the status bar)',
           );
         }
         return;
