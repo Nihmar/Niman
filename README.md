@@ -96,8 +96,9 @@ disk are always the source of truth.
 - **State:** Riverpod.
 - **Rendering:** `flutter_markdown_plus` for preview, `katex_dart` (pure-Dart
   KaTeX) for math, `flutter_highlight` for code highlighting.
-- **Editor:** custom lightweight source editor (Markdown + math-span
-  highlighting) with bidirectional scroll sync via line mapping.
+- **Editor:** `re_editor` (Reqable's large-text editor) with Copist's own
+  incremental Markdown tokenizer plugged into its span builder; bidirectional
+  scroll sync via line mapping.
 - **WebDAV client:** `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match,
   Basic auth, http + https (zero dependencies).
 - **Index:** `drift` (SQLite + FTS5); files located via `path_provider`;
@@ -106,6 +107,29 @@ disk are always the source of truth.
   (Dart `HttpServer`).
 - **No CI:** analyze, test and release builds are run locally.
 - **Packaging:** APK/AAB; Linux tar.gz + AppImage + Arch pkg (PKGBUILD).
+
+### Third-party packages
+
+Copist is built on top of these external packages rather than against the raw
+Flutter SDK — they carry the core of the app, so they deserve explicit credit:
+
+| Package | Role in Copist |
+|---------|----------------|
+| [`re_editor`](https://pub.dev/packages/re_editor) | The source-editor widget (caret, selection, IME/composition, handles, scrolling). Highlighting is Copist's own tokenizer via `spanBuilder` |
+| [`flutter_markdown_plus`](https://pub.dev/packages/flutter_markdown_plus) + [`markdown`](https://pub.dev/packages/markdown) | Markdown preview: Copist's windowed preview builds on the package's AST → widget pipeline (GFM tables/task lists, footnotes); `markdown` is the AST parser |
+| [`katex`](https://pub.dev/packages/katex) / [`katex_dart`](https://pub.dev/packages/katex_dart) | Pure-Dart KaTeX for `$…$` / `$$…$$` math rendering |
+| [`flutter_highlight`](https://pub.dev/packages/flutter_highlight) + [`highlight`](https://pub.dev/packages/highlight) | Code-block syntax highlighting in the preview |
+| [`drift`](https://pub.dev/packages/drift) (+ `drift_dev`, `sqlite3_flutter_libs`) | The rebuildable SQLite index — notes tree, tags, stems, links, FTS5 search |
+| [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | App-wide state management |
+| [`file_picker`](https://pub.dev/packages/file_picker) | CHOOSING the library root folder / picking images to insert (never scans storage itself) |
+| [`path_provider`](https://pub.dev/packages/path_provider) | OS folders for app data (index, settings, caches) |
+| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | WebDAV credentials + the encryption key (M5/M6) |
+| [`crypto`](https://pub.dev/packages/crypto) | sha256 content digests (change detection, sync reconciliation) |
+
+Notable non-default choices: `flutter_smooth_markdown` (0.8.1) is pinned only as
+*the reference renderer the M2 cost-model benchmark tests against* — the app's
+preview is Copist's own windowed renderer over `flutter_markdown_plus`. `hash` and
+`path` come from the Dart team; `meta` is the Flutter SDK's annotation package.
 
 ### Sync state machine
 
