@@ -170,6 +170,12 @@ final class LocalReminderService implements ReminderService {
   bool _exactAsked = false;
   bool _launchConsumed = false;
 
+  /// The newest wanted set waiting for [_drain], or null when none is.
+  Map<int, TodoReminder>? _queued;
+
+  /// The running [_drain], or null while idle.
+  Future<void>? _running;
+
   /// Timezone database + plugin init, once (idempotent).
   Future<void> _ensureReady() async {
     if (_ready) {
@@ -239,7 +245,41 @@ final class LocalReminderService implements ReminderService {
   }
 
   @override
-  Future<void> reconcile(Map<int, TodoReminder> wanted) async {
+  Future<void> reconcile(Map<int, TodoReminder> wanted) {
+    // Single flight, newest set wins. Reconciliation is a full replace,
+    // so two overlapping calls could interleave one's cancel pass with
+    // the other's schedule pass and leave the device with no alarms at
+    // all -- a resume racing a debounced reload did exactly that. A
+    // superseded set is dropped rather than scheduled: it is stale by
+    // definition, and the set that replaced it is about to run.
+    _queued = wanted;
+    final running = _running;
+    if (running != null) {
+      return running;
+    }
+    // _drain() runs synchronously up to its first await (consuming
+    // _queued), so the assignment below always lands before the finally
+    // that clears it: no lost wakeup.
+    final drain = _drain();
+    _running = drain;
+    return drain;
+  }
+
+  /// Applies queued sets until none is left, then goes idle.
+  Future<void> _drain() async {
+    try {
+      while (_queued != null) {
+        final wanted = _queued!;
+        _queued = null;
+        await _reconcileOnce(wanted);
+      }
+    } finally {
+      _running = null;
+    }
+  }
+
+  /// One full replace pass for [wanted] (serialized by [_drain]).
+  Future<void> _reconcileOnce(Map<int, TodoReminder> wanted) async {
     try {
       await _ensureReady();
     } on Object catch (error) {
