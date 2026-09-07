@@ -191,8 +191,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
   /// and writes the buffered lines (+ a context header) to the chosen file.
   Future<void> _exportLog() async {
     final controller = widget.controller;
+    // Earlier runs first: the disk mirror holds what the process before
+    // this one recorded (a reminder firing with the app closed, an OEM
+    // kill), which the in-memory buffer can never have.
+    final persisted = await AppLog.file?.read() ?? '';
     final lines = AppLog.lines();
-    if (lines.isEmpty) {
+    if (lines.isEmpty && persisted.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('The debug log buffer is empty')),
@@ -210,6 +214,11 @@ final class _SettingsBodyState extends State<SettingsBody> {
       '# library: ${controller.root ?? '(none)'}',
       '# $phase',
       '',
+      if (persisted.isNotEmpty) ...<String>[
+        '# --- earlier runs (from disk) ---',
+        persisted.trimRight(),
+        '# --- this run ---',
+      ],
       ...lines,
     ].join('\n');
     try {

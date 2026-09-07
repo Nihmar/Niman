@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:developer' as developer;
+
+import 'package:copist/src/core/log_file.dart';
 
 /// Severity of a log event.
 enum LogSeverity {
@@ -49,8 +52,11 @@ final class AppLogger {
 ///
 /// Every recorded event becomes one formatted line
 /// (`<timestamp> <SEVERITY> [<name>] <message>`), kept oldest-first and
-/// capped at [maxLines] (oldest lines drop off first). The buffer is the
-/// source of the settings-screen log export; [enabled] is synced from the
+/// capped at [maxLines] (oldest lines drop off first). The buffer feeds
+/// the settings-screen log export, together with the [LogFile] mirror
+/// when one is set -- the buffer alone dies with the process, and
+/// a reminder firing with the app closed leaves no other trace.
+/// [enabled] is synced from the
 /// persisted app setting whenever a library session opens, so users can
 /// switch recording on or off without rebuilding anything.
 final class AppLog {
@@ -68,6 +74,20 @@ final class AppLog {
 
   static final List<String> _lines = <String>[];
 
+  /// The disk mirror every recorded line is also written to, or null
+  /// while logging is memory-only.
+  ///
+  /// The in-memory buffer dies with the process, which is precisely when
+  /// the log matters: a reminder that fired with the app closed, a kill
+  /// by an OEM battery manager, a crash, a reboot. Attaching one is
+  /// optional so tests and the desktop builds can stay memory-only.
+  static LogFile? file;
+
+  /// Writes anything the disk mirror still holds (no-op when detached).
+  ///
+  /// Called when the app backgrounds so a swipe away keeps its tail.
+  static Future<void> flush() async => file?.flush();
+
   /// Records [message] at [severity] under [name].
   ///
   /// Dropped entirely when [enabled] is false.
@@ -80,6 +100,7 @@ final class AppLog {
     if (_lines.length > maxLines) {
       _lines.removeRange(0, _lines.length - maxLines);
     }
+    file?.add(_lines.last);
     developer.log(
       message,
       name: name,
@@ -98,8 +119,11 @@ final class AppLog {
   /// The whole buffer as a single text blob, for export.
   static String dump() => _lines.join('\n');
 
-  /// Drops all buffered lines.
-  static void clear() => _lines.clear();
+  /// Drops all buffered lines, on disk too.
+  static void clear() {
+    _lines.clear();
+    unawaited(file?.clear() ?? Future<void>.value());
+  }
 
   static String _timestamp(DateTime dt) {
     String two(int v) => v.toString().padLeft(2, '0');

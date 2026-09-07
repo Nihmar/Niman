@@ -279,7 +279,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       unawaited(_todoController.resyncReminders());
+      return;
     }
+    // Leaving the foreground may be the last thing this process does (a
+    // swipe away, an OEM battery kill): get the buffered log on disk
+    // while there is still a chance to.
+    unawaited(AppLog.flush());
   }
 
   /// A notification tap that started the app lands on the Todo tab.
