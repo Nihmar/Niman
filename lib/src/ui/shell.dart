@@ -147,6 +147,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// the shell owns it so the body can be scrimmed while it is open.
   bool _fabExpanded = false;
 
+  /// Marks the main FAB so [FabScrim]'s reveal circle is centered on its
+  /// icon (the shell owns it: the FAB slot and the scrim are siblings).
+  final GlobalKey _fabAnchorKey = GlobalKey();
+
   /// Below this width the shell is single-pane (spec: phones are
   /// full-screen tree or editor, the split lands at 600 px and up).
   static const double _phoneBreakpoint = 600;
@@ -567,9 +571,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: _fabExpanded
-          ? _withFabScrim(_wideBody(controller))
-          : _wideBody(controller),
+      body: _withFabScrim(_wideBody(controller)),
       floatingActionButton: _newItemFab(),
     );
   }
@@ -579,6 +581,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// selected folder, root if none (T-UI-05).
   Widget _newItemFab() {
     return NewItemFab(
+      anchorKey: _fabAnchorKey,
       expanded: _fabExpanded,
       onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
       onNewNote: () {
@@ -595,21 +598,19 @@ final class _LibraryShellState extends State<_LibraryShell> {
   /// Collapses the expanded FAB menu.
   void _closeFab() => setState(() => _fabExpanded = false);
 
-  /// Covers [child] with a tap-to-dismiss scrim while the FAB menu is
-  /// expanded: any tap on the body closes the menu (the FABs live in the
-  /// Scaffold's FAB slot, above this layer, so they stay tappable).
+  /// Covers [child] with the FAB-menu scrim: a circle that grows out of
+  /// the main FAB icon, dims the body, and closes the menu on any tap
+  /// (the FABs live in the Scaffold's FAB slot, above this layer, so they
+  /// stay tappable). Always mounted; inert while collapsed.
   Widget _withFabScrim(Widget child) {
     return Stack(
       fit: StackFit.expand,
       children: [
         child,
-        Positioned.fill(
-          child: GestureDetector(
-            key: const Key('fab-scrim'),
-            behavior: HitTestBehavior.opaque,
-            onTap: _closeFab,
-            child: const ColoredBox(color: Colors.black26),
-          ),
+        FabScrim(
+          anchorKey: _fabAnchorKey,
+          expanded: _fabExpanded,
+          onClose: _closeFab,
         ),
       ],
     );
@@ -671,7 +672,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: _fabExpanded ? _withFabScrim(body) : body,
+      body: _withFabScrim(body),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: NavigationBar(
         key: const Key('shell-tabs'),

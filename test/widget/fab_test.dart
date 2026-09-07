@@ -74,6 +74,12 @@ bool miniIgnored(WidgetTester tester, Key key) {
       .ignoring;
 }
 
+/// Whether the FAB-menu scrim ignores taps (true = collapsed). The scrim
+/// stays mounted so the reveal can animate back to the FAB.
+bool scrimInert(WidgetTester tester) => tester
+    .widget<IgnorePointer>(find.byKey(const Key('fab-scrim')))
+    .ignoring;
+
 void main() {
   late FakeLibrarySession controller;
   late _FakeFilePicker filePicker;
@@ -115,9 +121,9 @@ void main() {
     await tester.pump();
     await openLibrary(tester);
 
-    // Collapsed: the minis are hidden and ignore taps; no scrim.
+    // Collapsed: the minis are hidden and ignore taps; inert scrim.
     expect(find.byKey(const Key('new-note-fab')), findsOneWidget);
-    expect(find.byKey(const Key('fab-scrim')), findsNothing);
+    expect(scrimInert(tester), isTrue);
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
     expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
     expect(miniOpacity(tester, const Key('new-folder-action')), 0);
@@ -126,7 +132,7 @@ void main() {
     // Expand: both minis become visible and tappable.
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
-    expect(find.byKey(const Key('fab-scrim')), findsOneWidget);
+    expect(scrimInert(tester), isFalse);
     expect(miniOpacity(tester, const Key('new-note-action')), 1);
     expect(miniIgnored(tester, const Key('new-note-action')), isFalse);
     expect(miniOpacity(tester, const Key('new-folder-action')), 1);
@@ -142,7 +148,7 @@ void main() {
     await tester.tap(find.text('OK'));
     await settle(tester);
     expect(noteRow('First note.md'), findsOneWidget);
-    expect(find.byKey(const Key('fab-scrim')), findsNothing);
+    expect(scrimInert(tester), isTrue);
 
     // Expand again; the New folder mini creates a folder.
     await tester.tap(find.byKey(const Key('new-note-fab')));
@@ -175,7 +181,7 @@ void main() {
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
     expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
     expect(miniOpacity(tester, const Key('new-folder-action')), 0);
-    expect(find.byKey(const Key('fab-scrim')), findsNothing);
+    expect(scrimInert(tester), isTrue);
     expect(find.byType(AlertDialog), findsNothing);
     expect(await controller.ops!.find('New note.md'), isNull);
 
@@ -193,12 +199,12 @@ void main() {
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
     expect(miniOpacity(tester, const Key('new-note-action')), 1);
-    expect(find.byKey(const Key('fab-scrim')), findsOneWidget);
+    expect(scrimInert(tester), isFalse);
 
     // A tap anywhere on the body (the scrim) closes the menu.
     await tester.tap(find.byKey(const Key('fab-scrim')));
     await settleFabMenu(tester);
-    expect(find.byKey(const Key('fab-scrim')), findsNothing);
+    expect(scrimInert(tester), isTrue);
     expect(miniOpacity(tester, const Key('new-note-action')), 0);
     expect(miniIgnored(tester, const Key('new-note-action')), isTrue);
     expect(find.byType(AlertDialog), findsNothing);
