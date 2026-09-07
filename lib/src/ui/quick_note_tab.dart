@@ -1,15 +1,15 @@
-import 'dart:async';
-
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:flutter/material.dart';
 
-/// The Quick note tab.
+/// The Quick note tab: the setup screen shown while no quick note is set.
 ///
-/// No note is opened by default: the user either picks an existing note
-/// from the tree dialog or creates a new one (named as they like). Both
-/// actions set the quick note and open it through [onOpen].
+/// Nothing is opened or created by default: the user either picks an
+/// existing note from the tree dialog or creates a new one (named as they
+/// like). Both set the quick note and open it through [onOpen]. Once a
+/// quick note is set, the bottom-nav tile opens it directly — this body is
+/// not shown anymore.
 final class QuickNoteTab extends StatefulWidget {
   /// Creates the quick note tab.
   const QuickNoteTab({
@@ -18,7 +18,7 @@ final class QuickNoteTab extends StatefulWidget {
     super.key,
   });
 
-  /// The session providing the current quick-note path and the ops.
+  /// The session providing the ops.
   final LibrarySession controller;
 
   /// Called with the note path once the user opens the quick note.
@@ -29,21 +29,7 @@ final class QuickNoteTab extends StatefulWidget {
 }
 
 final class _QuickNoteTabState extends State<QuickNoteTab> {
-  Future<String?>? _path;
-  int? _pathRevision;
-
-  /// The quick-note path for [revision], only re-queried when the index
-  /// revision moved.
-  Future<String?> _pathFor(int revision) {
-    final cached = _path;
-    if (cached != null && revision == _pathRevision) return cached;
-    _pathRevision = revision;
-    return _path = _read();
-  }
-
-  Future<String?> _read() async => widget.controller.ops?.quickNotePath;
-
-  /// Choose an existing note in the tree dialog (T-UI-10 follow-up).
+  /// Choose an existing note in the tree dialog.
   Future<void> _choose() async {
     final ops = widget.controller.ops;
     if (ops == null) return;
@@ -77,22 +63,6 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
-      stream: widget.controller.events,
-      initialData: widget.controller.revision,
-      builder: (context, snapshot) => FutureBuilder<String?>(
-        future: _pathFor(snapshot.data ?? widget.controller.revision),
-        builder: (context, snap) {
-          final path = snap.data;
-          if (path == null) return _empty(context);
-          return _withNote(context, path);
-        },
-      ),
-    );
-  }
-
-  /// Nothing set yet: the user must choose or create the quick note.
-  Widget _empty(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -127,52 +97,6 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
               onPressed: _create,
               icon: const Icon(Icons.note_add_outlined),
               label: const Text('Create a new note…'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// A quick note is set: show its path, offer open/change/create.
-  Widget _withNote(BuildContext context, String path) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.sticky_note_2_outlined, size: 56),
-            const SizedBox(height: 16),
-            Text(
-              'Quick note',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              path,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              key: const Key('quick-note-open'),
-              onPressed: () => widget.onOpen(path),
-              icon: const Icon(Icons.edit_outlined),
-              label: const Text('Open quick note'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              key: const Key('quick-note-choose'),
-              onPressed: _choose,
-              child: const Text('Choose a different note…'),
-            ),
-            TextButton(
-              key: const Key('quick-note-create'),
-              onPressed: _create,
-              child: const Text('Create a new note…'),
             ),
           ],
         ),

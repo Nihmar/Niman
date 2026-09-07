@@ -207,8 +207,9 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  /// Opens the quick note at [path]; a stale setting (the note was moved,
-  /// renamed, or deleted) is cleared so the tab returns to its empty state.
+  /// Opens the quick note at [path]; back returns to the Files tab.
+  /// A stale setting (the note was moved, renamed, or deleted) is cleared
+  /// so the tab returns to its empty state.
   Future<void> _openQuickNote(String path) async {
     await _guard(() async {
       final ops = widget.controller.ops;
@@ -222,12 +223,26 @@ final class _LibraryShellState extends State<_LibraryShell> {
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
-        _noteFromTab = ShellTab.quickNote;
+        _noteFromTab = ShellTab.files;
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
       });
     });
+  }
+
+  /// The bottom-nav tile: once a quick note is set it opens directly;
+  /// otherwise switch to the tab (the choose/create screen).
+  Future<void> _openQuickNoteFromTile() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final path = await ops.quickNotePath;
+    if (!mounted) return;
+    if (path == null || path.isEmpty) {
+      _selectShellTab(ShellTab.quickNote);
+      return;
+    }
+    await _openQuickNote(path);
   }
 
   void _toggle(String path) {
@@ -551,6 +566,10 @@ final class _LibraryShellState extends State<_LibraryShell> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Search lands in M3')),
       );
+      return;
+    }
+    if (tab == ShellTab.quickNote) {
+      unawaited(_openQuickNoteFromTile());
       return;
     }
     _selectShellTab(tab);

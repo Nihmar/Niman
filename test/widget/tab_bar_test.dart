@@ -186,11 +186,11 @@ void main() {
     expect(find.text('Scratch pad.md'), findsOneWidget); // app bar title.
     expect(await controller.ops!.quickNotePath, 'Scratch pad.md');
 
-    // Back returns to the Quick note tab, now showing the path + Open.
+    // Back returns to the Files tab (arrow behaves like any note-open).
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
-    expect(find.text('Scratch pad.md'), findsOne);
-    expect(find.byKey(const Key('quick-note-open')), findsOne);
+    expect(find.byType(NavigationBar), findsOne);
+    expect(noteRow(controller, 'Scratch pad.md'), findsOne);
   });
 
   testWidgets('quick note: pick an existing note from the tree',
@@ -271,16 +271,21 @@ void main() {
     expect(find.text('Scratch.md'), findsOne);
     expect(await controller.ops!.quickNotePath, 'Scratch.md');
 
-    // The Quick note tab opens the chosen note.
+    // The bottom-nav tile now opens the chosen note directly (no detour
+    // through the tab body).
     await tester.tap(find.descendant(
       of: find.byType(NavigationBar),
       matching: find.text('Quick note'),
     ));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('quick-note-open')));
-    await settle(tester);
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
+
+    // Back from the note goes to Files, not back to the Quick note tab.
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    expect(find.byType(NavigationBar), findsOne);
+    expect(noteRow(controller, 'Scratch.md'), findsOne);
   });
 
   testWidgets('search tab is disabled until M3 (R3)', (tester) async {
