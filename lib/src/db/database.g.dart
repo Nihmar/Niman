@@ -544,8 +544,24 @@ class $LibrarySettingsTable extends LibrarySettings
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _quickNotePathMeta = const VerificationMeta(
+    'quickNotePath',
+  );
   @override
-  List<GeneratedColumn> get $columns => [path, trashEnabled, historyVersions];
+  late final GeneratedColumn<String> quickNotePath = GeneratedColumn<String>(
+    'quick_note_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    path,
+    trashEnabled,
+    historyVersions,
+    quickNotePath,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -588,6 +604,15 @@ class $LibrarySettingsTable extends LibrarySettings
     } else if (isInserting) {
       context.missing(_historyVersionsMeta);
     }
+    if (data.containsKey('quick_note_path')) {
+      context.handle(
+        _quickNotePathMeta,
+        quickNotePath.isAcceptableOrUnknown(
+          data['quick_note_path']!,
+          _quickNotePathMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -609,6 +634,10 @@ class $LibrarySettingsTable extends LibrarySettings
         DriftSqlType.int,
         data['${effectivePrefix}history_versions'],
       )!,
+      quickNotePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quick_note_path'],
+      ),
     );
   }
 
@@ -627,10 +656,15 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
 
   /// Number of `.history/` versions to keep (M5); default 10.
   final int historyVersions;
+
+  /// Library-relative path of the user-chosen quick note; null = the
+  /// default `Quick note.md` at the library root.
+  final String? quickNotePath;
   const LibrarySetting({
     required this.path,
     required this.trashEnabled,
     required this.historyVersions,
+    this.quickNotePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -638,6 +672,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     map['path'] = Variable<String>(path);
     map['trash_enabled'] = Variable<bool>(trashEnabled);
     map['history_versions'] = Variable<int>(historyVersions);
+    if (!nullToAbsent || quickNotePath != null) {
+      map['quick_note_path'] = Variable<String>(quickNotePath);
+    }
     return map;
   }
 
@@ -646,6 +683,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       path: Value(path),
       trashEnabled: Value(trashEnabled),
       historyVersions: Value(historyVersions),
+      quickNotePath: quickNotePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quickNotePath),
     );
   }
 
@@ -658,6 +698,7 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       path: serializer.fromJson<String>(json['path']),
       trashEnabled: serializer.fromJson<bool>(json['trashEnabled']),
       historyVersions: serializer.fromJson<int>(json['historyVersions']),
+      quickNotePath: serializer.fromJson<String?>(json['quickNotePath']),
     );
   }
   @override
@@ -667,6 +708,7 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       'path': serializer.toJson<String>(path),
       'trashEnabled': serializer.toJson<bool>(trashEnabled),
       'historyVersions': serializer.toJson<int>(historyVersions),
+      'quickNotePath': serializer.toJson<String?>(quickNotePath),
     };
   }
 
@@ -674,10 +716,14 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     String? path,
     bool? trashEnabled,
     int? historyVersions,
+    Value<String?> quickNotePath = const Value.absent(),
   }) => LibrarySetting(
     path: path ?? this.path,
     trashEnabled: trashEnabled ?? this.trashEnabled,
     historyVersions: historyVersions ?? this.historyVersions,
+    quickNotePath: quickNotePath.present
+        ? quickNotePath.value
+        : this.quickNotePath,
   );
   LibrarySetting copyWithCompanion(LibrarySettingsCompanion data) {
     return LibrarySetting(
@@ -688,6 +734,9 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
       historyVersions: data.historyVersions.present
           ? data.historyVersions.value
           : this.historyVersions,
+      quickNotePath: data.quickNotePath.present
+          ? data.quickNotePath.value
+          : this.quickNotePath,
     );
   }
 
@@ -696,37 +745,43 @@ class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
     return (StringBuffer('LibrarySetting(')
           ..write('path: $path, ')
           ..write('trashEnabled: $trashEnabled, ')
-          ..write('historyVersions: $historyVersions')
+          ..write('historyVersions: $historyVersions, ')
+          ..write('quickNotePath: $quickNotePath')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(path, trashEnabled, historyVersions);
+  int get hashCode =>
+      Object.hash(path, trashEnabled, historyVersions, quickNotePath);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LibrarySetting &&
           other.path == this.path &&
           other.trashEnabled == this.trashEnabled &&
-          other.historyVersions == this.historyVersions);
+          other.historyVersions == this.historyVersions &&
+          other.quickNotePath == this.quickNotePath);
 }
 
 class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
   final Value<String> path;
   final Value<bool> trashEnabled;
   final Value<int> historyVersions;
+  final Value<String?> quickNotePath;
   final Value<int> rowid;
   const LibrarySettingsCompanion({
     this.path = const Value.absent(),
     this.trashEnabled = const Value.absent(),
     this.historyVersions = const Value.absent(),
+    this.quickNotePath = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LibrarySettingsCompanion.insert({
     required String path,
     required bool trashEnabled,
     required int historyVersions,
+    this.quickNotePath = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : path = Value(path),
        trashEnabled = Value(trashEnabled),
@@ -735,12 +790,14 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     Expression<String>? path,
     Expression<bool>? trashEnabled,
     Expression<int>? historyVersions,
+    Expression<String>? quickNotePath,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (path != null) 'path': path,
       if (trashEnabled != null) 'trash_enabled': trashEnabled,
       if (historyVersions != null) 'history_versions': historyVersions,
+      if (quickNotePath != null) 'quick_note_path': quickNotePath,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -749,12 +806,14 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     Value<String>? path,
     Value<bool>? trashEnabled,
     Value<int>? historyVersions,
+    Value<String?>? quickNotePath,
     Value<int>? rowid,
   }) {
     return LibrarySettingsCompanion(
       path: path ?? this.path,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       historyVersions: historyVersions ?? this.historyVersions,
+      quickNotePath: quickNotePath ?? this.quickNotePath,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -771,6 +830,9 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
     if (historyVersions.present) {
       map['history_versions'] = Variable<int>(historyVersions.value);
     }
+    if (quickNotePath.present) {
+      map['quick_note_path'] = Variable<String>(quickNotePath.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -783,6 +845,7 @@ class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
           ..write('path: $path, ')
           ..write('trashEnabled: $trashEnabled, ')
           ..write('historyVersions: $historyVersions, ')
+          ..write('quickNotePath: $quickNotePath, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -884,6 +947,18 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(0.55),
   );
+  static const VerificationMeta _treeSortMeta = const VerificationMeta(
+    'treeSort',
+  );
+  @override
+  late final GeneratedColumn<String> treeSort = GeneratedColumn<String>(
+    'tree_sort',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('nameAsc'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -893,6 +968,7 @@ class $AppSettingsTable extends AppSettings
     editorAutofocus,
     previewMode,
     splitRatio,
+    treeSort,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -960,6 +1036,12 @@ class $AppSettingsTable extends AppSettings
         splitRatio.isAcceptableOrUnknown(data['split_ratio']!, _splitRatioMeta),
       );
     }
+    if (data.containsKey('tree_sort')) {
+      context.handle(
+        _treeSortMeta,
+        treeSort.isAcceptableOrUnknown(data['tree_sort']!, _treeSortMeta),
+      );
+    }
     return context;
   }
 
@@ -997,6 +1079,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.double,
         data['${effectivePrefix}split_ratio'],
       )!,
+      treeSort: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tree_sort'],
+      )!,
     );
   }
 
@@ -1030,6 +1116,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// The editor|preview split fraction (0..1; default 0.55).
   final double splitRatio;
+
+  /// The library tree sort order (T-UI-03): the [TreeSort] `.name`
+  /// value, `nameAsc` or `nameDesc`.
+  final String treeSort;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1038,6 +1128,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.editorAutofocus,
     required this.previewMode,
     required this.splitRatio,
+    required this.treeSort,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1051,6 +1142,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['editor_autofocus'] = Variable<bool>(editorAutofocus);
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
+    map['tree_sort'] = Variable<String>(treeSort);
     return map;
   }
 
@@ -1065,6 +1157,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorAutofocus: Value(editorAutofocus),
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
+      treeSort: Value(treeSort),
     );
   }
 
@@ -1081,6 +1174,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
+      treeSort: serializer.fromJson<String>(json['treeSort']),
     );
   }
   @override
@@ -1094,6 +1188,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
+      'treeSort': serializer.toJson<String>(treeSort),
     };
   }
 
@@ -1105,6 +1200,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     bool? editorAutofocus,
     String? previewMode,
     double? splitRatio,
+    String? treeSort,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1113,6 +1209,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     editorAutofocus: editorAutofocus ?? this.editorAutofocus,
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
+    treeSort: treeSort ?? this.treeSort,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1135,6 +1232,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       splitRatio: data.splitRatio.present
           ? data.splitRatio.value
           : this.splitRatio,
+      treeSort: data.treeSort.present ? data.treeSort.value : this.treeSort,
     );
   }
 
@@ -1147,7 +1245,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
           ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio')
+          ..write('splitRatio: $splitRatio, ')
+          ..write('treeSort: $treeSort')
           ..write(')'))
         .toString();
   }
@@ -1161,6 +1260,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     editorAutofocus,
     previewMode,
     splitRatio,
+    treeSort,
   );
   @override
   bool operator ==(Object other) =>
@@ -1172,7 +1272,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.lineNumbers == this.lineNumbers &&
           other.editorAutofocus == this.editorAutofocus &&
           other.previewMode == this.previewMode &&
-          other.splitRatio == this.splitRatio);
+          other.splitRatio == this.splitRatio &&
+          other.treeSort == this.treeSort);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1183,6 +1284,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<bool> editorAutofocus;
   final Value<String> previewMode;
   final Value<double> splitRatio;
+  final Value<String> treeSort;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1191,6 +1293,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.editorAutofocus = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
+    this.treeSort = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1200,6 +1303,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.editorAutofocus = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
+    this.treeSort = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1209,6 +1313,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<bool>? editorAutofocus,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
+    Expression<String>? treeSort,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1218,6 +1323,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
+      if (treeSort != null) 'tree_sort': treeSort,
     });
   }
 
@@ -1229,6 +1335,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<bool>? editorAutofocus,
     Value<String>? previewMode,
     Value<double>? splitRatio,
+    Value<String>? treeSort,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1238,6 +1345,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
+      treeSort: treeSort ?? this.treeSort,
     );
   }
 
@@ -1265,6 +1373,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (splitRatio.present) {
       map['split_ratio'] = Variable<double>(splitRatio.value);
     }
+    if (treeSort.present) {
+      map['tree_sort'] = Variable<String>(treeSort.value);
+    }
     return map;
   }
 
@@ -1277,7 +1388,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('lineNumbers: $lineNumbers, ')
           ..write('editorAutofocus: $editorAutofocus, ')
           ..write('previewMode: $previewMode, ')
-          ..write('splitRatio: $splitRatio')
+          ..write('splitRatio: $splitRatio, ')
+          ..write('treeSort: $treeSort')
           ..write(')'))
         .toString();
   }
@@ -1550,6 +1662,7 @@ typedef $$LibrarySettingsTableCreateCompanionBuilder =
       required String path,
       required bool trashEnabled,
       required int historyVersions,
+      Value<String?> quickNotePath,
       Value<int> rowid,
     });
 typedef $$LibrarySettingsTableUpdateCompanionBuilder =
@@ -1557,6 +1670,7 @@ typedef $$LibrarySettingsTableUpdateCompanionBuilder =
       Value<String> path,
       Value<bool> trashEnabled,
       Value<int> historyVersions,
+      Value<String?> quickNotePath,
       Value<int> rowid,
     });
 
@@ -1581,6 +1695,11 @@ class $$LibrarySettingsTableFilterComposer
 
   ColumnFilters<int> get historyVersions => $composableBuilder(
     column: $table.historyVersions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1608,6 +1727,11 @@ class $$LibrarySettingsTableOrderingComposer
     column: $table.historyVersions,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LibrarySettingsTableAnnotationComposer
@@ -1629,6 +1753,11 @@ class $$LibrarySettingsTableAnnotationComposer
 
   GeneratedColumn<int> get historyVersions => $composableBuilder(
     column: $table.historyVersions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get quickNotePath => $composableBuilder(
+    column: $table.quickNotePath,
     builder: (column) => column,
   );
 }
@@ -1673,11 +1802,13 @@ class $$LibrarySettingsTableTableManager
                 Value<String> path = const Value.absent(),
                 Value<bool> trashEnabled = const Value.absent(),
                 Value<int> historyVersions = const Value.absent(),
+                Value<String?> quickNotePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LibrarySettingsCompanion(
                 path: path,
                 trashEnabled: trashEnabled,
                 historyVersions: historyVersions,
+                quickNotePath: quickNotePath,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1685,11 +1816,13 @@ class $$LibrarySettingsTableTableManager
                 required String path,
                 required bool trashEnabled,
                 required int historyVersions,
+                Value<String?> quickNotePath = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LibrarySettingsCompanion.insert(
                 path: path,
                 trashEnabled: trashEnabled,
                 historyVersions: historyVersions,
+                quickNotePath: quickNotePath,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1726,6 +1859,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> editorAutofocus,
       Value<String> previewMode,
       Value<double> splitRatio,
+      Value<String> treeSort,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -1736,6 +1870,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> editorAutofocus,
       Value<String> previewMode,
       Value<double> splitRatio,
+      Value<String> treeSort,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -1779,6 +1914,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<double> get splitRatio => $composableBuilder(
     column: $table.splitRatio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get treeSort => $composableBuilder(
+    column: $table.treeSort,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1826,6 +1966,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.splitRatio,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get treeSort => $composableBuilder(
+    column: $table.treeSort,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1869,6 +2014,9 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.splitRatio,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get treeSort =>
+      $composableBuilder(column: $table.treeSort, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -1909,6 +2057,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> editorAutofocus = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
+                Value<String> treeSort = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -1917,6 +2066,7 @@ class $$AppSettingsTableTableManager
                 editorAutofocus: editorAutofocus,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
+                treeSort: treeSort,
               ),
           createCompanionCallback:
               ({
@@ -1927,6 +2077,7 @@ class $$AppSettingsTableTableManager
                 Value<bool> editorAutofocus = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
+                Value<String> treeSort = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -1935,6 +2086,7 @@ class $$AppSettingsTableTableManager
                 editorAutofocus: editorAutofocus,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
+                treeSort: treeSort,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

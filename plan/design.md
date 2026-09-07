@@ -41,8 +41,11 @@ lib/
       dao.dart              # note/tag/folder DAOs
       indexer.dart          # disk scan → index build + incremental apply
     editor/
-      source_editor.dart    # lightweight source editor (single buffer)
+      note_editor.dart      # NoteEditor: re_editor CodeEditor wrapper (M2a)
       highlighting.dart     # MD + math-span tokenizer → styled display
+      highlight_sync.dart   # incremental tokenizer sync → per-line spans
+      md_editing.dart       # T-UI-08: pure markdown commands (wrap/prefix)
+      toolbar.dart          # T-UI-08: EditorToolbar (evenly spaced buttons)
     preview/
       markdown_view.dart    # flutter_markdown_plus preview
       math.dart             # katex rendering + LRU cache
@@ -50,6 +53,7 @@ lib/
     links/
       parser.dart           # [[…]] / [[…|alias]] / [[…#heading]] parsing
       resolver.dart         # unique filename, path fallback, aliases
+      slug.dart             # shared heading slug (parser = editor = preview)
     search/
       query.dart            # user text → FTS5 MATCH / LIKE pattern
       search_repo.dart      # FTS5 queries (title + body) + contains scan
@@ -72,7 +76,11 @@ lib/
       merge.dart            # 3-way hunk-level merge (base from .history)
       config.dart           # destination URL + Basic auth (flutter_secure_storage)
     ui/
-      shell.dart            # app shell: sidebar | editor | preview
+      shell.dart            # app shell: sidebar | editor | preview; the
+                            #   phone bottom nav (Files/Todo/Search/Quick
+                            #   note/Settings) and the shared app bar
+      note_view.dart        # note screen: editor/preview switch, status
+                            #   row (words, saved), toolbar (T-UI-06..08)
       tree.dart             # note tree UI
       tabs.dart             # multi-tab (M6)
       theme/                # brightness × palette tokens
@@ -87,6 +95,14 @@ test/
   sync/                     # mock WebDAV server (dart:io HttpServer)
 integration_test/           # on-device E2E
 ```
+
+## Icon assets
+
+`mockup/logo.svg` (T-UI-01) is the vector source of truth for the
+launcher/window icons (verify with `rsvg-convert`): squircle tile
+(`#f9f3e6` on `#f2ead9`) as the background layer, clipboard + ring clip +
+quill nib as the foreground layer. M7 generates Android adaptive + legacy
+icons and the Linux/Windows window icons from it.
 
 ## Data model (drift: SQLite + FTS5)
 
@@ -123,10 +139,19 @@ frontmatter_fields
 
 tags            name UNIQUE   -- normalized (lowercase, no leading #)
 note_tags       tag, note_id, is_frontmatter(bool)
+note_stems      stem text COLLATE NOCASE, note_id, source(file|alias)
+note_links      from_note, to_note, kind(wiki|md), UNIQUE(from_note, to_note, kind)
 ```
 
 Frontmatter `tags:` and inline `#tags` both land in `note_tags`; the tag list
 UI reads from it. Tag search queries `tags`/`note_tags`, not FTS.
+
+`note_stems` is M3's link-resolution index: a `COLLATE NOCASE` row per note
+filename (stem, lowercase) and — from M4 on — per alias. `note_links` holds
+**resolved** link edges from index-time extraction (dead links are skipped;
+references/backlinks UI is future work). M3 reads a minimal frontmatter
+block (key:value; title, tags, aliases) without `frontmatter_fields`; M4's
+full YAML parser + fields table supersede it.
 
 ### Search (FTS5)
 
@@ -148,8 +173,9 @@ lookup; tags are answered from `tags`/`note_tags`, not from FTS.
   [m1_5-correctness.md](m1_5-correctness.md) comes first — today every
   scan reassigns them and every FTS row would point at the wrong note.
 - **Title is its own column** so ranking can weight it above the body
-  (`bm25(notes_fts, 10.0, 1.0)`). Filename for now, frontmatter title
-  from M4.
+  (`bm25(notes_fts, 10.0, 1.0)`). M3 reads the frontmatter title with the
+  minimal frontmatter reader (filename fallback); M4's fields table takes
+  it over.
 - **The table keeps its own copy of the text** (a standalone FTS5 table,
   not `content='notes'` and not contentless). That copy is what makes
   `snippet()` free of disk reads, and it is what substring search scans.

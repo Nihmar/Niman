@@ -78,9 +78,10 @@ void main() {
       contains(countWords(_note).toString()),
     );
 
-    // Open the outline: the headings are listed.
+    // Open the outline: the headings are listed (the panel slides in).
     await tester.tap(find.byKey(const Key('outline-toggle')));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
     expect(find.text('Alpha', findRichText: true), findsOneWidget);
     expect(find.text('Gamma', findRichText: true), findsOneWidget);
 

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ import 'package:flutter/material.dart';
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
 /// Global theme/layout settings arrive with the M6 token system.
-final class SettingsScreen extends StatefulWidget {
+final class SettingsScreen extends StatelessWidget {
   /// Creates the settings screen.
   const SettingsScreen({required this.controller, super.key});
 
@@ -20,10 +21,40 @@ final class SettingsScreen extends StatefulWidget {
   final LibrarySession controller;
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: SettingsBody(
+        controller: controller,
+        onClosed: () {
+          // The pushed screen returns to the shell (which then re-renders
+          // into the open-library screen since the session is closed).
+          if (context.mounted) Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
 }
 
-final class _SettingsScreenState extends State<SettingsScreen> {
+/// The settings content: the same list is shown pushed (wide app-bar
+/// button) and embedded as the bottom-nav Settings tab (T-UI-02).
+final class SettingsBody extends StatefulWidget {
+  /// Creates the settings body.
+  const SettingsBody({required this.controller, this.onClosed, super.key});
+
+  /// The session of the library whose settings this body edits.
+  final LibrarySession controller;
+
+  /// Called after "Close library" closes the session; the pushed screen
+  /// pops its own route, the shell tab returns to the Files tab. When null
+  /// the caller must handle closing the screen itself.
+  final VoidCallback? onClosed;
+
+  @override
+  State<SettingsBody> createState() => _SettingsBodyState();
+}
+
+final class _SettingsBodyState extends State<SettingsBody> {
   bool? _trash;
   bool? _debugLogs;
   bool? _lineNumbers;
@@ -31,6 +62,7 @@ final class _SettingsScreenState extends State<SettingsScreen> {
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
+  String? _quickNotePath;
 
   @override
   void initState() {
@@ -48,6 +80,7 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final quickNotePath = await ops.quickNotePath;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -57,7 +90,25 @@ final class _SettingsScreenState extends State<SettingsScreen> {
         _previewMode = previewMode;
         _splitRatio = splitRatio;
         _splitLoaded = true;
+        _quickNotePath = quickNotePath;
       });
+    }
+  }
+
+  /// Opens the quick-note picker (the chosen note is set from the tree
+  /// dialog); the shell picks the value up through the session.
+  Future<void> _pickQuickNote() async {
+    final oldPath = _quickNotePath;
+    final changed = await showQuickNotePicker(
+      context,
+      controller: widget.controller,
+      currentPath: oldPath,
+    );
+    if (!changed || !mounted) return;
+    final path = await widget.controller.ops?.quickNotePath;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _quickNotePath = path);
     }
   }
 
@@ -194,9 +245,7 @@ final class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
+    return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
@@ -290,6 +339,16 @@ final class _SettingsScreenState extends State<SettingsScreen> {
             ),
           const Divider(),
           ListTile(
+            key: const Key('quick-note-setting'),
+            title: const Text('Quick note'),
+            subtitle: Text(
+              _quickNotePath == null ? 'Not set yet' : _quickNotePath!,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickQuickNote,
+          ),
+          const Divider(),
+          ListTile(
             title: const Text('Library path'),
             subtitle: Text(controller.root ?? ''),
           ),
@@ -311,13 +370,10 @@ final class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.link_off),
             onTap: () async {
               await controller.close();
-              if (mounted) {
-                Navigator.of(this.context).pop();
-              }
+              widget.onClosed?.call();
             },
           ),
         ],
-      ),
     );
   }
 }

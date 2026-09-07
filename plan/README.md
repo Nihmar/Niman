@@ -19,6 +19,7 @@ which is the **source of truth for requirements**; this folder plans the work.
 | [m5-sync.md](m5-sync.md) | M5 — Sync | Planned |
 | [m6-scale-polish.md](m6-scale-polish.md) | M6 — Scale & polish | Planned |
 | [m7-packaging-release.md](m7-packaging-release.md) | M7 — Packaging & release | Planned |
+| [ui-mockups.md](ui-mockups.md) | UI — mockup parity (bottom nav, toolbars) | **Planned** |
 
 ## Conventions
 
@@ -40,6 +41,10 @@ M0 → M1 → M1.5 → M2 → M3 → M4 → M5 → M6 → M7
 
 Strictly sequential: each milestone builds on the previous one's modules
 (`lib/src/…`) and tests. Stretch goals are not on the critical path.
+
+[ui-mockups.md](ui-mockups.md) is a cross-cutting UI pass, not part of the
+M0→M7 chain: it needs M2a's editor surface but can run any time after, and
+should land before M6 (polish) so the perf work runs on the final chrome.
 
 M1.5 is not a feature milestone: it closes correctness gaps found in the
 M1 indexer once the app ran on a real Android library. It blocks M2

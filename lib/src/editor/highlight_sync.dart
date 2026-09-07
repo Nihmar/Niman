@@ -68,12 +68,14 @@ final class EditorHighlightSync {
 
   /// The styled span for buffer line [index] (the [CodeLineSpanBuilder]
   /// implementation): [text] is the line's text, [base] the editor's base
-  /// style, [dark] the palette selection.
+  /// style, [dark] the palette selection, [accent] the theme's primary
+  /// (wikilinks, T-UI-09).
   TextSpan spanFor({
     required int index,
     required String text,
     required TextStyle base,
     required bool dark,
+    required Color accent,
   }) {
     if (dark != _dark) {
       _dark = dark;
@@ -84,7 +86,7 @@ final class EditorHighlightSync {
     final styled = index < _doc.lineCount
         ? _doc.lineAt(index)
         : StyledLine(text, const <Token>[]);
-    final span = _buildSpan(styled, base);
+    final span = _buildSpan(styled, base, accent);
     _spans[index] = span;
     return span;
   }
@@ -190,7 +192,7 @@ final class EditorHighlightSync {
   /// between token boundaries gets the covering token's style; the unmarked
   /// region after a heading marker gets the heading style; the rest is
   /// plain (the base style shows).
-  TextSpan _buildSpan(StyledLine styled, TextStyle base) {
+  TextSpan _buildSpan(StyledLine styled, TextStyle base, Color accent) {
     final textLength = styled.text.length;
     if (textLength == 0) {
       return TextSpan(text: '', style: base);
@@ -222,7 +224,7 @@ final class EditorHighlightSync {
       children.add(
         TextSpan(
           text: styled.text.substring(start, end),
-          style: _styleAt(styled.tokens, start, headingStart),
+          style: _styleAt(styled.tokens, start, headingStart, accent),
         ),
       );
     }
@@ -233,10 +235,17 @@ final class EditorHighlightSync {
   /// override, the heading style for the unmarked heading text, null (base)
   /// otherwise. [headingStart] is the first unmarked heading position (-1 =
   /// no heading).
-  TextStyle? _styleAt(List<Token> tokens, int pos, int headingStart) {
+  TextStyle? _styleAt(
+    List<Token> tokens,
+    int pos,
+    int headingStart,
+    Color accent,
+  ) {
     for (final token in tokens) {
       if (token.start > pos) break;
-      if (pos < token.end) return _palette.styleFor(token.kind);
+      if (pos < token.end) {
+        return _palette.styleFor(token.kind, accent: accent);
+      }
     }
     if (headingStart >= 0 && pos >= headingStart) return _palette.headingStyle;
     return null;

@@ -7,8 +7,10 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
+import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/library/image_import.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
@@ -45,6 +47,7 @@ final class NoteView extends StatefulWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     this.splitPreview = false,
+    this.showPreview = false,
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
@@ -68,6 +71,10 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the preview sits side by side (split) or behind a switch.
   final bool splitPreview;
+
+  /// Preview visibility (T-UI-06): the shared app bar owns the switch
+  /// and passes the state down; NoteView just follows it.
+  final bool showPreview;
 
   /// The editor's share of the split (0..1).
   final double splitFraction;
@@ -157,7 +164,6 @@ final class _NoteViewState extends State<NoteView>
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
-  bool _showPreview = false;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
@@ -527,6 +533,7 @@ final class _NoteViewState extends State<NoteView>
       text: codeLine.text,
       base: style,
       dark: Theme.of(context).brightness == Brightness.dark,
+      accent: Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -544,7 +551,6 @@ final class _NoteViewState extends State<NoteView>
     final split = widget.splitPreview;
     return Column(
       children: [
-        if (!split) _paneSwitchBar(context),
         Expanded(
           child: error == null
               ? (!_ready || _loading
@@ -561,83 +567,226 @@ final class _NoteViewState extends State<NoteView>
                               (_) {},
                           onDragEnd: widget.onSplitDragEnd,
                         )
-                      : (_showPreview ? _buildPreview() : _buildEditor()))
+                      : AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(opacity: animation, child: child),
+                          // The outgoing pane leaves immediately: an
+                          // editor and its twin must never coexist.
+                          layoutBuilder: (currentChild, previousChildren) =>
+                              currentChild ?? const SizedBox.shrink(),
+                          child: widget.showPreview
+                              ? KeyedSubtree(
+                                  key: const ValueKey('pane-preview'),
+                                  child: _buildPreview(),
+                                )
+                              : KeyedSubtree(
+                                  key: const ValueKey('pane-editor'),
+                                  child: _buildEditor(),
+                                ),
+                        ))
               : Center(child: Text(error)),
         ),
-        if (_showOutline && _outline.isNotEmpty)
-          OutlinePanel(
-            entries: _outline,
-            onJump: _jumpToHeading,
+        // Fade + size the outline panel in and out.
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.bottomCenter,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _showOutline && _outline.isNotEmpty
+                ? KeyedSubtree(
+                    key: const ValueKey('outline-open'),
+                    child: OutlinePanel(
+                      entries: _outline,
+                      onJump: _jumpToHeading,
+                    ),
+                  )
+                : const SizedBox(
+                    key: ValueKey('outline-closed'),
+                    width: double.infinity,
+                  ),
           ),
+        ),
         SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-            child: Row(
-              children: [
-                if (!_loading)
-                  IconButton(
-                    key: const Key('insert-image'),
-                    tooltip: AppStrings.insertImageTooltip,
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
-                    ),
-                    onPressed: _insertImage,
-                  ),
-                if (!_loading)
-                  IconButton(
-                    key: const Key('outline-toggle'),
-                    tooltip: AppStrings.outlineTooltip,
-                    icon: const Icon(Icons.toc),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
-                    ),
-                    onPressed: () =>
-                        setState(() => _showOutline = !_showOutline),
-                  ),
-                if (!_loading)
-                  Text(
-                    '$_wordCount words',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                const Spacer(),
-                Text(
-                  _status,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _statusRow(context),
+              if (!_loading) _toolbar(context),
+            ],
           ),
         ),
       ],
     );
   }
 
-  /// The top switch bar (phone mode): one button flips editor ↔ preview.
-  Widget _paneSwitchBar(BuildContext context) {
-    return SizedBox(
-      height: 34,
-      child: IconButton(
-        key: const Key('preview-switch'),
-        tooltip: _showPreview
-            ? AppStrings.showEditorTooltip
-            : AppStrings.showPreviewTooltip,
-        iconSize: 18,
-        visualDensity: VisualDensity.compact,
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          _showPreview ? Icons.edit : Icons.visibility,
-        ),
-        onPressed: () => setState(() => _showPreview = !_showPreview),
+  /// The status row (T-UI-07): outline toggle + word count left, saved/
+  /// unsaved right.
+  Widget _statusRow(BuildContext context) {
+    final labelStyle = Theme.of(context).textTheme.labelSmall;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      child: Row(
+        children: [
+          if (!_loading)
+            IconButton(
+              key: const Key('outline-toggle'),
+              tooltip: AppStrings.outlineTooltip,
+              icon: const Icon(Icons.toc),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 26,
+              ),
+              onPressed: () => setState(() => _showOutline = !_showOutline),
+            ),
+          if (!_loading)
+            Text(
+              '$_wordCount words',
+              style: labelStyle?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          const Spacer(),
+          Text(_status, style: labelStyle),
+        ],
       ),
     );
   }
+
+  /// The formatting toolbar (T-UI-08): pure markdown commands applied
+  /// through the controller; the image button keeps the file-picker flow
+  /// (T-M2-09) it already had in the status row.
+  Widget _toolbar(BuildContext context) {
+    return EditorToolbar(
+      buttons: [
+        EditorToolbarButton(
+          key: const Key('toolbar-bold'),
+          icon: Icons.format_bold,
+          tooltip: 'Bold',
+          onPressed: () => _wrapSelection(left: '**', right: '**'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-italic'),
+          icon: Icons.format_italic,
+          tooltip: 'Italic',
+          onPressed: () => _wrapSelection(left: '*', right: '*'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-strike'),
+          icon: Icons.strikethrough_s,
+          tooltip: 'Strikethrough',
+          onPressed: () => _wrapSelection(left: '~~', right: '~~'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-sup'),
+          icon: Icons.superscript,
+          tooltip: 'Superscript',
+          onPressed: () => _wrapSelection(left: '<sup>', right: '</sup>'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-underline'),
+          icon: Icons.format_underline,
+          tooltip: 'Underline',
+          onPressed: () => _wrapSelection(left: '<u>', right: '</u>'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-link'),
+          icon: Icons.link,
+          tooltip: 'Link',
+          onPressed: () => _wrapSelection(left: '[[', right: ']]'),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-code'),
+          icon: Icons.code,
+          tooltip: 'Code block',
+          onPressed: _insertCodeBlock,
+        ),
+        EditorToolbarButton(
+          key: const Key('insert-image'),
+          icon: Icons.add_photo_alternate_outlined,
+          tooltip: AppStrings.insertImageTooltip,
+          onPressed: _insertImage,
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-list'),
+          icon: Icons.format_list_bulleted,
+          tooltip: 'List',
+          onPressed: () => _prefixLines(prefix: '- '),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-quote'),
+          icon: Icons.format_quote,
+          tooltip: 'Quote',
+          onPressed: () => _prefixLines(prefix: '> '),
+        ),
+      ],
+    );
+  }
+
+  /// Applies a pure markdown command's result through the controller's
+  /// range-replacement op: the commands only change text inside the old
+  /// selection, so the replacement is the edited range of the new text.
+  /// The editor keeps its focus (the IME stays up); focus is re-requested
+  /// defensively.
+  void _applyMarkdownEdit(MarkdownEdit edit) {
+    final sel = _controller.selection;
+    final start = _globalOffset(sel.baseIndex, sel.baseOffset);
+    final end = _globalOffset(sel.extentIndex, sel.extentOffset);
+    final delta = edit.text.length - _controller.text.length;
+    final replacement = edit.text.substring(start, end + delta);
+    _controller.replaceSelection(replacement, sel);
+    _focus.requestFocus();
+  }
+
+  void _wrapSelection({required String left, required String right}) {
+    _applyMarkdownEdit(wrapSelection(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+      left: left,
+      right: right,
+    ));
+  }
+
+  void _insertCodeBlock() {
+    _applyMarkdownEdit(codeBlock(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+    ));
+  }
+
+  void _prefixLines({required String prefix}) {
+    _applyMarkdownEdit(prefixLines(
+      text: _controller.text,
+      selection: _textSelection(_controller.selection),
+      prefix: prefix,
+    ));
+  }
+
+  /// Converts re_editor's line+offset selection to whole-text offsets
+  /// (called once per toolbar tap, so the O(n) scan is fine).
+  TextSelection _textSelection(CodeLineSelection selection) {
+    return TextSelection(
+      baseOffset: _globalOffset(selection.baseIndex, selection.baseOffset),
+      extentOffset:
+          _globalOffset(selection.extentIndex, selection.extentOffset),
+    );
+  }
+
+  int _globalOffset(int line, int offset) {
+    final text = _controller.text;
+    var index = 0;
+    for (var current = 0; current < line; current++) {
+      final nl = text.indexOf('\n', index);
+      if (nl < 0) return text.length;
+      index = nl + 1;
+    }
+    return index + offset;
+  }
+
+
 }

@@ -14,6 +14,15 @@ enum PreviewLayoutMode {
   fullScreen,
 }
 
+/// The library tree sort order (T-UI-03).
+enum TreeSort {
+  /// Name ascending (default).
+  nameAsc,
+
+  /// Name descending.
+  nameDesc,
+}
+
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
 
@@ -50,6 +59,27 @@ final class LibrarySettingsRepo {
     await (_db.update(_db.librarySettings)
           ..where((t) => t.path.equals(libraryPath)))
         .write(LibrarySettingsCompanion(trashEnabled: Value(enabled)));
+  }
+
+  /// The user-chosen quick note (library-relative path), or null when the
+  /// default `Quick note.md` at the library root is used.
+  Future<String?> quickNotePath(String libraryPath) async {
+    final rows = await (
+      _db.select(_db.librarySettings)
+        ..where((t) => t.path.equals(libraryPath))
+    ).get();
+    return rows.isEmpty ? null : rows.first.quickNotePath;
+  }
+
+  /// Sets (or clears, with null) the user-chosen quick note.
+  Future<void> setQuickNotePath(
+    String libraryPath, {
+    required String? path,
+  }) async {
+    await _ensureRow(libraryPath);
+    await (_db.update(_db.librarySettings)
+          ..where((t) => t.path.equals(libraryPath)))
+        .write(LibrarySettingsCompanion(quickNotePath: Value(path)));
   }
 
   /// Ensures a settings row exists for `libraryPath`.
@@ -171,6 +201,24 @@ final class AppSettingsRepo {
     await (_db.update(_db.appSettings)
           ..where((t) => t.id.equals(1)))
         .write(AppSettingsCompanion(splitRatio: Value(clamped)));
+  }
+
+  /// The library tree sort order (default [TreeSort.nameAsc]).
+  Future<TreeSort> treeSort() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) return TreeSort.nameAsc;
+    return switch (rows.first.treeSort) {
+      'nameDesc' => TreeSort.nameDesc,
+      _ => TreeSort.nameAsc,
+    };
+  }
+
+  /// Persists the library tree sort order.
+  Future<void> setTreeSort(TreeSort sort) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(treeSort: Value(sort.name)));
   }
 
   Future<void> _ensureRow() async {

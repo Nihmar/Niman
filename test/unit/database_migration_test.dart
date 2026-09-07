@@ -29,6 +29,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN debug_logs_enabled',
       );
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN quick_note_path',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN line_numbers',
       );
       await db.customStatement(
@@ -39,6 +42,9 @@ void main() {
       );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -70,6 +76,9 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN line_numbers',
       );
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN quick_note_path',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
       );
       await db.customStatement(
@@ -77,6 +86,9 @@ void main() {
       );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -106,10 +118,16 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
       );
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN quick_note_path',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN preview_mode',
       );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -141,7 +159,13 @@ void main() {
         'ALTER TABLE app_settings DROP COLUMN preview_mode',
       );
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN quick_note_path',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN split_ratio',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
         "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
@@ -155,6 +179,64 @@ void main() {
     expect(row.libraryPath, '/old/root');
     expect(row.previewMode, 'auto');
     expect(row.splitRatio, 0.55);
+    await db.close();
+  });
+
+  test(
+    'v5 databases gain quick_note_path on upgrade, keeping library '
+    'settings',
+    () async {
+    // Build a v5-shaped file: create the database at v6, rewind the schema
+    // version, and drop the column v5 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 5');
+      await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN quick_note_path',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
+        'INSERT INTO library_settings (path, trash_enabled, '
+        "history_versions) VALUES ('/lib', 1, 10)",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (
+      await db.select(db.librarySettings).get()
+    ).single;
+    expect(row.path, '/lib');
+    expect(row.trashEnabled, true);
+    expect(row.historyVersions, 10);
+    expect(row.quickNotePath, isNull);
+    await db.close();
+  });
+
+  test(
+    'v6 databases gain tree_sort on upgrade, keeping values',
+    () async {
+    // Build a v6-shaped file: create the database at v7, rewind the schema
+    // version, and drop the column v6 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 6');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN tree_sort',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    expect(row.treeSort, 'nameAsc');
     await db.close();
   });
 }

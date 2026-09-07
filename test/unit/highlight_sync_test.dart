@@ -10,19 +10,27 @@ const TextStyle _base = TextStyle(
   fontSize: 13,
 );
 
-Color? _colorOf(TextSpan span, String want) {
+Color? _colorOf(TextSpan span, String want) => _styleOf(span, want)?.color;
+
+TextStyle? _styleOf(TextSpan span, String want) {
   final walk = <TextSpan>[span];
   while (walk.isNotEmpty) {
     final s = walk.removeLast();
-    if (s.text == want) return s.style?.color;
+    if (s.text == want) return s.style;
     walk.addAll(s.children?.whereType<TextSpan>() ?? const []);
   }
   return null;
 }
 
 TextSpan _spanFor(EditorHighlightSync sync, int index, String text,
-        {bool dark = false}) =>
-    sync.spanFor(index: index, text: text, base: _base, dark: dark);
+        {bool dark = false, Color accent = const Color(0xFF445E91)}) =>
+    sync.spanFor(
+      index: index,
+      text: text,
+      base: _base,
+      dark: dark,
+      accent: accent,
+    );
 
 void main() {
   test('the first buffer load gets styled tokens per line', () {
@@ -94,6 +102,28 @@ void main() {
     expect(child.text, 'new inside');
     expect(child.style?.color, const Color(0xFF5C6B73));
     controller.dispose();
+  });
+
+  test('wikilinks use the theme accent, underlined, in both palettes '
+      '(T-UI-09)', () {
+    const accentLight = Color(0xFF1A73E8);
+    const accentDark = Color(0xFF8AB4F8);
+    for (final (dark, accent) in <(bool, Color)>[
+      (false, accentLight),
+      (true, accentDark),
+    ]) {
+      final sync = EditorHighlightSync();
+      final controller = CodeLineEditingController()
+        ..text = '[[La stella Pyrale|Pyrale]]';
+      sync.onBufferChanged(controller.codeLines);
+      // The token covers the whole [[...]] (brackets included).
+      final span = _spanFor(sync, 0, '[[La stella Pyrale|Pyrale]]',
+          dark: dark, accent: accent);
+      final token = _styleOf(span, '[[La stella Pyrale|Pyrale]]');
+      expect(token?.color, accent);
+      expect(token?.decoration, TextDecoration.underline);
+      controller.dispose();
+    }
   });
 
   test('frontmatter lines are styled as the block', () {

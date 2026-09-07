@@ -29,11 +29,21 @@ abstract interface class NoteOperations {
   /// Moves the note or folder at [path] into [targetParent].
   Future<Note> move(String path, String targetParent);
 
+  /// The indexed note/folder at library-relative [path], or null.
+  Future<Note?> find(String path);
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
+
+  /// The user-chosen quick note (library-relative path), or null while
+  /// none has been chosen.
+  Future<String?> get quickNotePath;
+
+  /// Sets (or clears, with null) the user-chosen quick note.
+  Future<void> setQuickNotePath({required String? path});
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   Future<void> setTrashEnabled({required bool enabled});
@@ -134,6 +144,12 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the split ratio.
   Future<void> setSplitRatio(double ratio);
 
+  /// The library tree sort order (default [TreeSort.nameAsc]).
+  Future<TreeSort> get treeSort;
+
+  /// Sets (and persists) the library tree sort order.
+  Future<void> setTreeSort(TreeSort sort);
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 
@@ -141,8 +157,9 @@ abstract interface class LibrarySession {
   Future<void> dispose();
 
   /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name.
-  Future<List<Note>> children(int parentId);
+  /// directories first, then by name (ascending, or descending with
+  /// [nameDesc]).
+  Future<List<Note>> children(int parentId, {bool nameDesc = false});
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();

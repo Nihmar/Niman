@@ -36,6 +36,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _lastError;
   bool _resumeStarted = false;
   bool _trashEnabled = true;
+  String? _quickNotePath;
 
   @override
   LibraryPhase get phase => _phase;
@@ -134,6 +135,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _splitRatio = ratio;
   }
 
+  TreeSort _treeSort = TreeSort.nameAsc;
+
+  @override
+  Future<TreeSort> get treeSort async => _treeSort;
+
+  @override
+  Future<void> setTreeSort(TreeSort sort) async {
+    _treeSort = sort;
+  }
+
   @override
   void notify() => _bump();
 
@@ -146,15 +157,23 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<List<Note>> children(int parentId) async {
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
     final kids = <_Row>[
       for (final row in _rows)
         if (!row.trashed && _parentIdOf(row.path) == parentId) row,
     ]..sort((a, b) {
       if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-      return a.name.compareTo(b.name);
+      return nameDesc
+          ? b.name.compareTo(a.name)
+          : a.name.compareTo(b.name);
     });
     return kids.map(_toNote).toList();
+  }
+
+  @override
+  Future<Note?> find(String path) {
+    final row = _findRow(path);
+    return Future<Note?>.value(row == null ? null : _toNote(row));
   }
 
   @override
@@ -188,6 +207,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTrashEnabled({required bool enabled}) async {
     _trashEnabled = enabled;
+  }
+
+  @override
+  Future<String?> get quickNotePath async => _quickNotePath;
+
+  @override
+  Future<void> setQuickNotePath({required String? path}) async {
+    _quickNotePath = path;
   }
 
   @override

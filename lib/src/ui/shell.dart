@@ -6,9 +6,16 @@ import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/name_dialog.dart';
+import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
+import 'package:copist/src/ui/quick_note_tab.dart';
+import 'package:copist/src/ui/search_tab.dart';
 import 'package:copist/src/ui/settings.dart';
+import 'package:copist/src/ui/settings_tab.dart';
+import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
@@ -74,11 +81,46 @@ final class _LibraryShell extends StatefulWidget {
   State<_LibraryShell> createState() => _LibraryShellState();
 }
 
+/// The bottom-navigation tabs (phone/narrow layout only).
+enum ShellTab {
+  /// The note tree plus the note-open stack (T-UI-02).
+  files,
+
+  /// Reserved tab for the todo section (T-UI-10).
+  todo,
+
+  /// Disabled until the M3 SearchScreen lands (R3).
+  search,
+
+  /// The scratch quick note at the library root (T-UI-10).
+  quickNote,
+
+  /// The library settings (the pushed SettingsScreen on wide screens).
+  settings,
+}
+
 final class _LibraryShellState extends State<_LibraryShell> {
   String? _selected;
   bool _selectedIsDir = false;
   final Set<String> _expanded = <String>{};
   bool _busy = false;
+
+  /// The currently selected bottom tab (narrow layout).
+  ShellTab _tab = ShellTab.files;
+
+  /// The tab active when the full-screen note opened (back returns there).
+  ShellTab _noteFromTab = ShellTab.files;
+
+  /// Selects [tab]; a full-screen note closes to its tree (the selected
+  /// note stays highlighted).
+  void _selectShellTab(ShellTab tab) {
+    if (_tab == tab) return;
+    setState(() {
+      _tab = tab;
+      _treeVisible = true;
+      _fabExpanded = false;
+    });
+  }
 
   /// The editor settings toggles, held here so both NoteView sites get the
   /// same values and they refresh on session events (the settings screen
@@ -95,9 +137,39 @@ final class _LibraryShellState extends State<_LibraryShell> {
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
 
+  /// The library tree sort order (T-UI-03).
+  TreeSort _treeSort = TreeSort.nameAsc;
+
   /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
+
+  /// Whether the FAB menu (New note / New folder minis) is expanded;
+  /// the shell owns it so the body can be scrimmed while it is open.
+  bool _fabExpanded = false;
+
+  /// Marks the main FAB so [FabScrim]'s reveal circle is centered on its
+  /// icon (the shell owns it: the FAB slot and the scrim are siblings).
+  final GlobalKey _fabAnchorKey = GlobalKey();
+
+  /// Editor/preview switch for the non-split layouts (T-UI-06): the eye
+  /// action lives in the shared app bar, so the shell owns the state.
+  bool _previewVisible = false;
+
+  void _togglePreview() => setState(() => _previewVisible = !_previewVisible);
+
+  /// The app-bar eye action: flips the editor/preview pane (phone
+  /// full-screen note and the wide switch override).
+  Widget _previewToggleAction() {
+    return IconButton(
+      key: const Key('editor-preview-toggle'),
+      tooltip: _previewVisible
+          ? AppStrings.showEditorTooltip
+          : AppStrings.showPreviewTooltip,
+      icon: Icon(_previewVisible ? Icons.edit : Icons.visibility),
+      onPressed: _togglePreview,
+    );
+  }
 
   /// Below this width the shell is single-pane (spec: phones are
   /// full-screen tree or editor, the split lands at 600 px and up).
@@ -121,18 +193,31 @@ final class _LibraryShellState extends State<_LibraryShell> {
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final treeSort = await controller.treeSort;
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
             previewMode != _previewMode ||
-            splitRatio != _splitRatio)) {
+            splitRatio != _splitRatio ||
+            treeSort != _treeSort)) {
       setState(() {
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
+        _treeSort = treeSort;
       });
     }
+  }
+
+  /// Flips the tree sort direction and persists it (T-UI-03).
+  Future<void> _toggleTreeSort() async {
+    final next = _treeSort == TreeSort.nameAsc
+        ? TreeSort.nameDesc
+        : TreeSort.nameAsc;
+    setState(() => _treeSort = next);
+    await widget.controller.setTreeSort(next);
+    widget.controller.notify();
   }
 
   /// Live divider moves mirror into [_splitRatio]; the lift persists.
@@ -163,8 +248,47 @@ final class _LibraryShellState extends State<_LibraryShell> {
       _selected = note.path;
       _selectedIsDir = note.isDir;
       _treeVisible = note.isDir;
+      _noteFromTab = _tab;
       if (note.isDir) _expanded.add(note.path);
     });
+  }
+
+  /// Opens the quick note at [path]; back returns to the Files tab.
+  /// A stale setting (the note was moved, renamed, or deleted) is cleared
+  /// so the tab returns to its empty state.
+  Future<void> _openQuickNote(String path) async {
+    await _guard(() async {
+      final ops = widget.controller.ops;
+      if (ops == null) return;
+      final note = await ops.find(path);
+      if (note == null || note.isDir) {
+        await ops.setQuickNotePath(path: null);
+        widget.controller.notify();
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _tab = ShellTab.quickNote;
+        _noteFromTab = ShellTab.files;
+        _selected = note.path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+      });
+    });
+  }
+
+  /// The bottom-nav tile: once a quick note is set it opens directly;
+  /// otherwise switch to the tab (the choose/create screen).
+  Future<void> _openQuickNoteFromTile() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final path = await ops.quickNotePath;
+    if (!mounted) return;
+    if (path == null || path.isEmpty) {
+      _selectShellTab(ShellTab.quickNote);
+      return;
+    }
+    await _openQuickNote(path);
   }
 
   void _toggle(String path) {
@@ -196,13 +320,15 @@ final class _LibraryShellState extends State<_LibraryShell> {
     }
   }
 
-  Future<void> _createNote() async {
+  /// Creates a note in [parent] (default: the FAB target). Used by the
+  /// FAB and the context menu.
+  Future<void> _createNote({String? parent}) async {
     final name =
         await _nameDialog(context, title: 'New note', initial: 'New note');
     if (name == null) return;
     await _guard(() async {
       final row = await widget.controller.ops!.createNote(
-        parentPath: _createParent,
+        parentPath: parent ?? _createParent,
         name: name,
       );
       setState(() {
@@ -213,7 +339,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _createFolder() async {
+  /// Creates a folder in [parent] (default: the FAB target).
+  Future<void> _createFolder({String? parent}) async {
     final name = await _nameDialog(
       context,
       title: 'New folder',
@@ -222,7 +349,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
     if (name == null) return;
     await _guard(() async {
       final row = await widget.controller.ops!.createFolder(
-        parentPath: _createParent,
+        parentPath: parent ?? _createParent,
         name: name,
       );
       setState(() {
@@ -232,8 +359,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _rename() async {
-    final sel = _selected;
+  Future<void> _rename([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final name = await _nameDialog(
       context,
@@ -247,8 +374,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _move() async {
-    final sel = _selected;
+  Future<void> _move([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final folders = await widget.controller.folders();
     if (!mounted) return;
@@ -270,8 +397,8 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
-  Future<void> _delete() async {
-    final sel = _selected;
+  Future<void> _delete([String? path]) async {
+    final sel = path ?? _selected;
     if (sel == null) return;
     final ops = widget.controller.ops;
     if (ops == null) return;
@@ -311,44 +438,159 @@ final class _LibraryShellState extends State<_LibraryShell> {
     });
   }
 
+  /// Long-press context menu on a tree row (T-UI-05): the note actions,
+  /// scoped to the pressed row. New note/folder target the row's folder.
+  Future<void> _showRowMenu(Note note) async {
+    final here = note.isDir ? note.path : parentOf(note.path);
+    final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
+    if (!mounted) return;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              key: const Key('menu-new-note'),
+              leading: const Icon(Icons.note_add),
+              title: const Text('New note here'),
+              onTap: () => Navigator.pop(context, 'note'),
+            ),
+            if (note.isDir)
+              ListTile(
+                key: const Key('menu-new-folder'),
+                leading: const Icon(Icons.create_new_folder),
+                title: const Text('New folder here'),
+                onTap: () => Navigator.pop(context, 'folder'),
+              ),
+            if (!note.isDir)
+              ListTile(
+                key: const Key('menu-quick-note'),
+                leading: Icon(
+                  isQuickNote
+                      ? Icons.sticky_note_2
+                      : Icons.sticky_note_2_outlined,
+                ),
+                title: Text(
+                  isQuickNote
+                      ? 'Current quick note'
+                      : 'Set as quick note',
+                ),
+                onTap: () => Navigator.pop(context, 'quicknote'),
+              ),
+            ListTile(
+              key: const Key('menu-rename'),
+              leading: const Icon(Icons.edit),
+              title: const Text('Rename'),
+              onTap: () => Navigator.pop(context, 'rename'),
+            ),
+            ListTile(
+              key: const Key('menu-move'),
+              leading: const Icon(Icons.drive_folder_upload),
+              title: const Text('Move'),
+              onTap: () => Navigator.pop(context, 'move'),
+            ),
+            ListTile(
+              key: const Key('menu-delete'),
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('Delete'),
+              onTap: () => Navigator.pop(context, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+    switch (action) {
+      case 'note':
+        await _createNote(parent: here);
+      case 'folder':
+        await _createFolder(parent: here);
+      case 'quicknote':
+        await _guard(() async {
+          await widget.controller.ops!.setQuickNotePath(path: note.path);
+          widget.controller.notify();
+        });
+      case 'rename':
+        await _rename(note.path);
+      case 'move':
+        await _move(note.path);
+      case 'delete':
+        await _delete(note.path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
-    if (narrow &&
-        selectedPath != null &&
-        !_selectedIsDir &&
-        !_treeVisible) {
+
+    if (narrow) {
+      // Phone: the selected note opens full-screen (from any tab). A
+      // cross-fade covers the shell -> note swap (back returns with the
+      // same fade).
+      final fullNote =
+          selectedPath != null && !_selectedIsDir && !_treeVisible;
       return PopScope(
-        canPop: false,
+        canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) setState(() => _treeVisible = true);
+          if (!didPop) _closeFullScreenNote();
         },
-        child: Scaffold(
-          appBar: AppBar(
-            leading: BackButton(
-              onPressed: () => setState(() => _treeVisible = true),
-            ),
-            title: Text(p.basename(selectedPath)),
-          ),
-          body: NoteView(
-            path: p.join(controller.root ?? '', selectedPath),
-            showLineNumbers: _lineNumbers,
-            autofocusEditor: _autofocusEditor,
-            splitPreview: _effectiveSplit(narrow: true),
-            splitFraction: _splitRatio,
-            onSplitFractionChanged: _onSplitFractionChanged,
-            onSplitDragEnd: _onSplitDragEnd,
-            libraryRoot: controller.root,
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: fullNote
+              ? KeyedSubtree(
+                  key: const ValueKey('full-note'),
+                  child: Scaffold(
+                    appBar: AppBar(
+                      leading: BackButton(onPressed: _closeFullScreenNote),
+                      title: Text(p.basename(selectedPath)),
+                      actions: [
+                        if (!_effectiveSplit(narrow: true))
+                          _previewToggleAction(),
+                      ],
+                    ),
+                    body: NoteView(
+                      path: p.join(controller.root ?? '', selectedPath),
+                      showLineNumbers: _lineNumbers,
+                      autofocusEditor: _autofocusEditor,
+                      splitPreview: _effectiveSplit(narrow: true),
+                      showPreview: _previewVisible,
+                      splitFraction: _splitRatio,
+                      onSplitFractionChanged: _onSplitFractionChanged,
+                      onSplitDragEnd: _onSplitDragEnd,
+                      libraryRoot: controller.root,
+                    ),
+                  ),
+                )
+              : KeyedSubtree(
+                  key: const ValueKey('tab-shell'),
+                  child: _tabShell(
+                    title: _tabTitle,
+                    actions: _tab == ShellTab.files
+                        ? _filesAppBarActions(controller)
+                        : const [],
+                    floatingActionButton: _tab == ShellTab.files
+                        ? _newItemFab()
+                        : null,
+                    body: _tabBody(controller),
+                  ),
+                ),
         ),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Copist'),
         actions: [
+          if (_selected != null &&
+              !_selectedIsDir &&
+              !_effectiveSplit(narrow: false))
+            _previewToggleAction(),
           IconButton(
             key: const Key('open-trash'),
             tooltip: 'Trash',
@@ -360,6 +602,7 @@ final class _LibraryShellState extends State<_LibraryShell> {
               ),
             ),
           ),
+          _sortToggle(),
           IconButton(
             key: const Key('open-settings'),
             tooltip: 'Settings',
@@ -374,116 +617,224 @@ final class _LibraryShellState extends State<_LibraryShell> {
           ),
         ],
       ),
-      body: narrow
-          ? _treePane(controller)
-          : Row(
-              children: [
-                SizedBox(width: 340, child: _treePane(controller)),
-                const VerticalDivider(width: 1),
-                Expanded(
-                  child: _DetailPane(
-                    root: controller.root,
-                    selectedPath: _selected,
-                    selectedIsDir: _selectedIsDir,
-                    showLineNumbers: _lineNumbers,
-                    autofocusEditor: _autofocusEditor,
-                    splitPreview: _effectiveSplit(narrow: false),
-                    splitFraction: _splitRatio,
-                    onSplitFractionChanged: _onSplitFractionChanged,
-                    onSplitDragEnd: _onSplitDragEnd,
-                  ),
-                ),
-              ],
-            ),
+      body: _withFabScrim(_wideBody(controller)),
+      floatingActionButton: _newItemFab(),
     );
   }
 
-  /// The tree pane: the action bar and the note tree — the whole body on
-  /// phones, the left column on wide screens.
-  Widget _treePane(LibrarySession controller) {
-    return Column(
+  /// The expandable "+" FAB (bottom-right, above the bottom nav):
+  /// reveals New note / New folder mini FABs; each creates in the
+  /// selected folder, root if none (T-UI-05).
+  Widget _newItemFab() {
+    return NewItemFab(
+      anchorKey: _fabAnchorKey,
+      expanded: _fabExpanded,
+      onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
+      onNewNote: () {
+        _closeFab();
+        unawaited(_createNote());
+      },
+      onNewFolder: () {
+        _closeFab();
+        unawaited(_createFolder());
+      },
+    );
+  }
+
+  /// Collapses the expanded FAB menu.
+  void _closeFab() => setState(() => _fabExpanded = false);
+
+  /// Covers [child] with the FAB-menu scrim: a circle that grows out of
+  /// the main FAB icon, dims the body, and closes the menu on any tap
+  /// (the FABs live in the Scaffold's FAB slot, above this layer, so they
+  /// stay tappable). Always mounted; inert while collapsed.
+  Widget _withFabScrim(Widget child) {
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        _ActionBar(
-          hasSelection: _selected != null,
-          busy: _busy,
-          onCreateNote: _createNote,
-          onCreateFolder: _createFolder,
-          onRename: _rename,
-          onMove: _move,
-          onDelete: _delete,
+        child,
+        FabScrim(
+          anchorKey: _fabAnchorKey,
+          expanded: _fabExpanded,
+          onClose: _closeFab,
         ),
-        const SizedBox(height: 4),
+      ],
+    );
+  }
+
+  /// The sort-direction toggle (T-UI-03): the mockup's `unfold_more`
+  /// chevrons; the icon reflects the current direction.
+  Widget _sortToggle() {
+    return IconButton(
+      key: const Key('toggle-sort'),
+      tooltip: _treeSort == TreeSort.nameAsc ? 'Sort Z-A' : 'Sort A-Z',
+      icon: AnimatedRotation(
+        turns: _treeSort == TreeSort.nameAsc ? 0 : 0.5,
+        duration: const Duration(milliseconds: 180),
+        child: const Icon(Icons.unfold_more),
+      ),
+      onPressed: _toggleTreeSort,
+    );
+  }
+
+  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +
+  /// sort chevrons; the settings gear moved to the Settings tab).
+  List<Widget> _filesAppBarActions(LibrarySession controller) {
+    return [
+      IconButton(
+        key: const Key('open-trash'),
+        tooltip: 'Trash',
+        icon: const Icon(Icons.delete),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => TrashScreen(controller: controller),
+          ),
+        ),
+      ),
+      _sortToggle(),
+    ];
+  }
+
+  /// Closes the full-screen note: returns to the tab it was opened from,
+  /// with its tree/body visible (the note stays highlighted).
+  void _closeFullScreenNote() {
+    setState(() {
+      _tab = _noteFromTab;
+      _treeVisible = true;
+    });
+  }
+
+  String get _tabTitle => switch (_tab) {
+        ShellTab.files => 'Copist',
+        ShellTab.todo => 'Todo',
+        ShellTab.search => 'Search',
+        ShellTab.quickNote => 'Quick note',
+        ShellTab.settings => 'Settings',
+      };
+
+  /// The narrow shell: app bar for the tab + the bottom navigation bar.
+  Widget _tabShell({
+    required String title,
+    required List<Widget> actions,
+    required Widget body,
+    Widget? floatingActionButton,
+  }) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title), actions: actions),
+      body: _withFabScrim(
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: KeyedSubtree(
+            key: ValueKey('tab-body-${_tab.index}'),
+            child: body,
+          ),
+        ),
+      ),
+      floatingActionButton: floatingActionButton,
+      bottomNavigationBar: NavigationBar(
+        key: const Key('shell-tabs'),
+        selectedIndex: _tab.index,
+        onDestinationSelected: _onDestinationSelected,
+        destinations: const [
+          NavigationDestination(
+            key: Key('tab-files'),
+            icon: Icon(Icons.folder_outlined),
+            selectedIcon: Icon(Icons.folder),
+            label: 'Files',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.check_box_outlined),
+            selectedIcon: Icon(Icons.check_box),
+            label: 'Todo',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.edit_outlined),
+            selectedIcon: Icon(Icons.edit),
+            label: 'Quick note',
+          ),
+          NavigationDestination(
+            key: Key('tab-settings'),
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onDestinationSelected(int index) {
+    final tab = ShellTab.values[index];
+    if (tab == ShellTab.search) {
+      // R3: the Search tab stays disabled until M3 lands SearchScreen.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Search lands in M3')),
+      );
+      return;
+    }
+    if (tab == ShellTab.quickNote) {
+      unawaited(_openQuickNoteFromTile());
+      return;
+    }
+    _selectShellTab(tab);
+  }
+
+
+  /// The wide-layout body: the tree pane and the split detail pane.
+  Widget _wideBody(LibrarySession controller) {
+    return Row(
+      children: [
+        SizedBox(width: 340, child: _treePane(controller)),
+        const VerticalDivider(width: 1),
         Expanded(
-          child: NoteTree(
-            controller: controller,
+          child: _DetailPane(
+            root: controller.root,
             selectedPath: _selected,
-            expanded: _expanded,
-            onToggle: _toggle,
-            onSelect: _select,
+            selectedIsDir: _selectedIsDir,
+            showLineNumbers: _lineNumbers,
+            autofocusEditor: _autofocusEditor,
+            splitPreview: _effectiveSplit(narrow: false),
+            showPreview: _previewVisible,
+            splitFraction: _splitRatio,
+            onSplitFractionChanged: _onSplitFractionChanged,
+            onSplitDragEnd: _onSplitDragEnd,
           ),
         ),
       ],
     );
   }
-}
 
-/// A row of action icons above the tree.
-final class _ActionBar extends StatelessWidget {
-  const _ActionBar({
-    required this.hasSelection,
-    required this.busy,
-    required this.onCreateNote,
-    required this.onCreateFolder,
-    required this.onRename,
-    required this.onMove,
-    required this.onDelete,
-  });
+  /// The body of the selected tab.
+  Widget _tabBody(LibrarySession controller) {
+    return switch (_tab) {
+      ShellTab.files => _treePane(controller),
+      ShellTab.todo => const TodoTab(),
+      ShellTab.search => const SearchTab(),
+      ShellTab.quickNote =>
+        QuickNoteTab(controller: controller, onOpen: _openQuickNote),
+      ShellTab.settings => SettingsTab(controller: controller),
+    };
+  }
 
-  final bool hasSelection;
-  final bool busy;
-  final Future<void> Function() onCreateNote;
-  final Future<void> Function() onCreateFolder;
-  final Future<void> Function() onRename;
-  final Future<void> Function() onMove;
-  final Future<void> Function() onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = !busy;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        IconButton(
-          tooltip: 'New note',
-          iconSize: 18,
-          icon: const Icon(Icons.note_add),
-          onPressed: enabled ? onCreateNote : null,
-        ),
-        IconButton(
-          tooltip: 'New folder',
-          iconSize: 18,
-          icon: const Icon(Icons.create_new_folder),
-          onPressed: enabled ? onCreateFolder : null,
-        ),
-        IconButton(
-          tooltip: 'Rename',
-          iconSize: 18,
-          icon: const Icon(Icons.edit),
-          onPressed: enabled && hasSelection ? onRename : null,
-        ),
-        IconButton(
-          tooltip: 'Move',
-          iconSize: 18,
-          icon: const Icon(Icons.drive_folder_upload),
-          onPressed: enabled && hasSelection ? onMove : null,
-        ),
-        IconButton(
-          tooltip: 'Delete',
-          iconSize: 18,
-          icon: const Icon(Icons.delete_outline),
-          onPressed: enabled && hasSelection ? onDelete : null,
-        ),
-      ],
+  /// The tree pane: the action bar and the note tree — the whole body on
+  /// phones, the left column on wide screens.
+  Widget _treePane(LibrarySession controller) {
+    return NoteTree(
+      controller: controller,
+      nameDesc: _treeSort == TreeSort.nameDesc,
+      selectedPath: _selected,
+      expanded: _expanded,
+      onToggle: _toggle,
+      onSelect: _select,
+      onLongPress: _showRowMenu,
     );
   }
 }
@@ -497,6 +848,7 @@ final class _DetailPane extends StatelessWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     required this.splitPreview,
+    required this.showPreview,
     required this.splitFraction,
     required this.onSplitFractionChanged,
     required this.onSplitDragEnd,
@@ -520,22 +872,43 @@ final class _DetailPane extends StatelessWidget {
   final ValueChanged<double> onSplitFractionChanged;
   final VoidCallback onSplitDragEnd;
 
+  /// Editor/preview switch state (T-UI-06): the shared app bar owns it.
+  final bool showPreview;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
     final root = this.root;
-    if (path == null || selectedIsDir || root == null) {
-      return const Center(child: Text('Select a note'));
-    }
-    return NoteView(
-      path: p.join(root, path),
-      showLineNumbers: showLineNumbers,
-      autofocusEditor: autofocusEditor,
-      splitPreview: splitPreview,
-      splitFraction: splitFraction,
-      onSplitFractionChanged: onSplitFractionChanged,
-      onSplitDragEnd: onSplitDragEnd,
-      libraryRoot: root,
+    final notePath =
+        path == null || selectedIsDir || root == null ? null : path;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 180),
+      switchInCurve: Curves.easeOutCubic,
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      // The outgoing pane leaves immediately: an editor and its twin must
+      // never coexist (same controller).
+      layoutBuilder: (currentChild, previousChildren) =>
+          currentChild ?? const SizedBox.shrink(),
+      child: notePath == null
+          ? const KeyedSubtree(
+              key: ValueKey('detail-empty'),
+              child: Center(child: Text('Select a note')),
+            )
+          : KeyedSubtree(
+              key: ValueKey('detail-note-$notePath'),
+              child: NoteView(
+                path: p.join(root!, notePath),
+                showLineNumbers: showLineNumbers,
+                autofocusEditor: autofocusEditor,
+                splitPreview: splitPreview,
+                showPreview: showPreview,
+                splitFraction: splitFraction,
+                onSplitFractionChanged: onSplitFractionChanged,
+                onSplitDragEnd: onSplitDragEnd,
+                libraryRoot: root,
+              ),
+            ),
     );
   }
 }
@@ -546,35 +919,7 @@ Future<String?> _nameDialog(
   required String title,
   required String initial,
 }) {
-  final controller = TextEditingController(text: initial);
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        onSubmitted: (value) => Navigator.pop(context, value.trim()),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            controller.dispose();
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final value = controller.text.trim();
-            controller.dispose();
-            Navigator.pop(context, value);
-          },
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
+  return showNameDialog(context, title: title, initial: initial);
 }
 
 /// A move-target picker over all indexed folders; resolves to the target
