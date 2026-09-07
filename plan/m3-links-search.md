@@ -100,7 +100,10 @@ is **not wired**.
   `NoteView.onOpenNote(relPath, {anchor})` — wide: select + expand in the
   tree; phone: push the note screen; unresolved link → snackbar (strings in
   `strings.dart`). *AC: navigating opens the right note on the 10k-note
-  fixture; heading anchors land; external links launch the browser.*
+  fixture; heading anchors land; external links launch the browser.* A
+  label-first wikilink (`[[display text|file]]`) opens the file too: when
+  the target-first parse resolves to nothing, the click falls back to the
+  aliased part as the target (verification finding).
 - [x] **T-M3-08** Contains mode: explicit "contains" search beside word
   search, scanning the index's own copy of the text with `LIKE` (pattern
   escaped with the existing `_sqlLikeEscape` in `db/dao.dart`), results in

@@ -85,6 +85,77 @@ void main() {
     expect(opened, ['Other.md|null']);
   });
 
+  testWidgets('a wikilink with an alias opens the target, not the alias', (
+    tester,
+  ) async {
+    final source = FakeLinkSource(notes: ['filename.md', 'current.md']);
+    final opened = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _view(
+          content: 'See [[filename|a label]] here.\n',
+          source: source,
+          opened: opened,
+          showPreview: true,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // The preview renders the alias ('a label' spans 4..11).
+    await _tapParagraphAt(tester, 'See a label here.', 4, 11);
+    expect(source.queries, contains('wiki:filename'));
+    expect(opened, ['filename.md|null']);
+  });
+
+  testWidgets('a label-first wikilink [[display text|file]] opens the file', (
+    tester,
+  ) async {
+    // Notes written with the display text first (the Markdown-link
+    // ordering) parse as target='display text': the click falls back to
+    // the aliased part when the first part resolves to nothing.
+    final source = FakeLinkSource(notes: ['filename.md', 'current.md']);
+    final opened = <String>[];
+    await tester.pumpWidget(
+      _app(
+        _view(
+          content: 'See [[a label|filename]] here.\n',
+          source: source,
+          opened: opened,
+          showPreview: true,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await _tapParagraphAt(tester, 'See filename here.', 4, 12);
+    expect(source.queries, contains('wiki:a label'));
+    expect(source.queries, contains('wiki:filename'));
+    expect(opened, ['filename.md|null']);
+  });
+
+  testWidgets('a label-first link stays unresolved when both parts fail', (
+    tester,
+  ) async {
+    final source = FakeLinkSource(notes: ['current.md']);
+    await tester.pumpWidget(
+      _app(
+        _view(
+          content: 'See [[gone|missing]] here.\n',
+          source: source,
+          showPreview: true,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await _tapParagraphAt(tester, 'See missing here.', 4, 11);
+    expect(find.text('Link not found'), findsOne);
+  });
+
   testWidgets('a wikilink with an anchor opens the note with the anchor', (
     tester,
   ) async {

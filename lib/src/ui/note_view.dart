@@ -619,11 +619,36 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       return;
     }
     if (source == null) return;
-    final resolved = await source.resolveWiki(ref.target);
+    // The documented form: `[[target]]`, `[[target#heading]]`,
+    // `[[target|alias]]` — the first part is the target.
+    var resolved = await source.resolveWiki(ref.target);
+    var anchor = ref.heading;
+    if (resolved is! ResolvedNote && ref.alias != null) {
+      // Label-first links — `[[a label|filename]]`, the display text
+      // first — parse with the target and alias swapped, so when the
+      // target-first interpretation finds nothing, the aliased part is
+      // tried as the target (an optional `#heading` rides on it) before
+      // the link is declared dead. A link whose first part resolves
+      // never reaches this fallback.
+      final alias = ref.alias!;
+      final hash = alias.indexOf('#');
+      final aliasTarget = hash == -1 ? alias : alias.substring(0, hash);
+      final aliasHeading = hash == -1 || hash == alias.length - 1
+          ? null
+          : alias.substring(hash + 1);
+      if (aliasTarget.trim().isNotEmpty) {
+        final swapped = await source.resolveWiki(aliasTarget.trim());
+        if (swapped is ResolvedNote || swapped is AmbiguousNote) {
+          resolved = swapped;
+          anchor = aliasHeading;
+        }
+      }
+    }
     if (resolved is ResolvedNote) {
       // The parser splits `[[x#H]]` off before the resolver sees it, so
-      // the anchor is carried from the ref.
-      await _openNoteResult(resolved.note, ref.heading ?? resolved.heading);
+      // the anchor is carried from the ref (or from a label-first
+      // `#heading` on the aliased target).
+      await _openNoteResult(resolved.note, anchor ?? resolved.heading);
       return;
     }
     await _applyResolved(resolved);
