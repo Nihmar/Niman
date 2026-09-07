@@ -211,8 +211,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
     // Earlier runs first: the disk mirror holds what the process before
     // this one recorded (a reminder firing with the app closed, an OEM
     // kill), which the in-memory buffer can never have.
+    //
+    // The two overlap: reading the mirror flushes it, so everything this
+    // run has logged since the file was attached is in BOTH. Keep only
+    // the memory lines the mirror does not already carry -- in practice
+    // the handful recorded before the attach landed. Timestamps run to
+    // the millisecond, so identical lines are the same event.
     final persisted = await AppLog.file?.read() ?? '';
-    final lines = AppLog.lines();
+    final onDisk = persisted.split('\n').toSet();
+    final lines = <String>[
+      for (final line in AppLog.lines())
+        if (!onDisk.contains(line)) line,
+    ];
     if (lines.isEmpty && persisted.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -231,11 +241,9 @@ final class _SettingsBodyState extends State<SettingsBody> {
       '# library: ${controller.root ?? '(none)'}',
       '# $phase',
       '',
-      if (persisted.isNotEmpty) ...<String>[
-        '# --- earlier runs (from disk) ---',
-        persisted.trimRight(),
-        '# --- this run ---',
-      ],
+      if (persisted.isNotEmpty) persisted.trimRight(),
+      if (persisted.isNotEmpty && lines.isNotEmpty)
+        '# --- not yet on disk ---',
       ...lines,
     ].join('\n');
     try {
