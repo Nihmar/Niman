@@ -21,12 +21,17 @@ const String todoReminderPayload = 'todo';
 /// user's per-channel settings on the old one.
 const String todoReminderChannelId = 'copist_reminders';
 
-/// The status-bar icon for reminders.
+/// The status-bar icon for reminders: a BARE drawable resource name.
 ///
 /// Android masks a small icon to its alpha channel and tints the result,
-/// so it has to be a flat silhouette. The launcher icon (used here before)
-/// is fully opaque and came out as a plain white square.
-const String todoReminderIcon = '@drawable/ic_stat_reminder';
+/// so it has to be a flat silhouette; the launcher icon is fully opaque
+/// and came out as a plain white square.
+///
+/// The plugin resolves this with `getIdentifier(name, "drawable", pkg)`,
+/// so it must be the bare entry name. An `@drawable/…` or `@mipmap/…`
+/// string does not resolve — it throws `invalid_icon` out of
+/// `initialize`, which took the whole reminder system down with it.
+const String todoReminderIcon = 'ic_stat_reminder';
 
 /// One schedulable reminder: a stable [id] with content + fire time.
 @immutable

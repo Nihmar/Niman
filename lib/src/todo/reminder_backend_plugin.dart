@@ -39,6 +39,20 @@ final class PluginReminderBackend implements ReminderBackend {
   bool _permissionAsked = false;
   bool _launchConsumed = false;
 
+  /// The icon that actually resolved (see [_iconCandidates]).
+  String _icon = todoReminderIcon;
+
+  /// Icons to try at init, best first.
+  ///
+  /// An icon the build does not carry throws out of `initialize`, and a
+  /// failed init means no reminders at all — a cosmetic resource must
+  /// never cost the feature. `launch_background` is the app's own
+  /// drawable: wrong shape for a status bar, but it is always there.
+  static const List<String> _iconCandidates = <String>[
+    todoReminderIcon,
+    'launch_background',
+  ];
+
   /// The Android side of the plugin, or null off Android.
   AndroidFlutterLocalNotificationsPlugin? get _android =>
       _plugin.resolvePlatformSpecificImplementation<
@@ -60,13 +74,7 @@ final class PluginReminderBackend implements ReminderBackend {
       // since a TZDateTime.from conversion preserves them, but say so.
       _log.warning('todo reminders: local timezone unknown ($error)');
     }
-    await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: AndroidInitializationSettings(todoReminderIcon),
-      ),
-      onDidReceiveNotificationResponse: (response) =>
-          _taps.add(response.payload),
-    );
+    await _initializeWithIcon();
     // Create the channel up front instead of letting the first schedule
     // create it implicitly: it then exists, with a description the user
     // can read, before any notification does, and shows in the app's
@@ -82,6 +90,37 @@ final class PluginReminderBackend implements ReminderBackend {
       ),
     );
     _ready = true;
+  }
+
+  /// Initializes the plugin, falling back through [_iconCandidates].
+  ///
+  /// Rethrows only when every candidate fails, so the caller still knows
+  /// the platform is unusable.
+  Future<void> _initializeWithIcon() async {
+    Exception? failure;
+    for (final candidate in _iconCandidates) {
+      try {
+        await _plugin.initialize(
+          settings: InitializationSettings(
+            android: AndroidInitializationSettings(candidate),
+          ),
+          onDidReceiveNotificationResponse: (response) =>
+              _taps.add(response.payload),
+        );
+        _icon = candidate;
+        if (candidate != todoReminderIcon) {
+          _log.warning(
+            'todo reminders: icon $todoReminderIcon missing from the build, '
+            'falling back to $candidate',
+          );
+        }
+        return;
+      } on Object catch (error) {
+        _log.warning('todo reminders: icon $candidate rejected ($error)');
+        failure = Exception('$error');
+      }
+    }
+    throw failure ?? Exception('todo reminders: no usable icon');
   }
 
   /// The runtime permission state (Android 13+): granted at install
@@ -143,11 +182,11 @@ final class PluginReminderBackend implements ReminderBackend {
       // Instant-preserving: even on the UTC fallback above, the alarm
       // lands at the right moment in real time.
       scheduledDate: tz.TZDateTime.from(reminder.when, tz.local),
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           todoReminderChannelId,
           AppStrings.todoReminderChannel,
-          icon: todoReminderIcon,
+          icon: _icon,
           importance: Importance.max,
           priority: Priority.high,
         ),
