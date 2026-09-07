@@ -54,6 +54,7 @@ final class AppStrings {
   static const String searchModeWords = 'Words';
   static const String searchModeContains = 'Contains';
   static const String searchEmptyHint = 'Type to search the library';
+  static const String searchTooShortHint = 'Type at least 2 characters';
   static const String searchNoMatches = 'No matches';
   static const String searchLoadMore = 'Show more';
 

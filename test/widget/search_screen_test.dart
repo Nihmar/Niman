@@ -1,6 +1,8 @@
 // T-M3-05 AC: debounced (~150 ms) query box, ranked results with path +
 // highlighted snippet, paging, superseded queries dropped, click opens the
 // note, and the Words/Contains toggle (which is T-M3-08's UI surface).
+import 'dart:async';
+
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/ui/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +174,7 @@ void main() {
     source.hits = [for (var i = 0; i < 60; i++) _hit('n$i.md', title: 'n$i')];
     await tester.pumpWidget(buildApp(source));
     await tester.pump();
-    await tester.enterText(find.byKey(const Key('search-query')), 'n');
+    await tester.enterText(find.byKey(const Key('search-query')), 'n1');
     await tester.pump(const Duration(milliseconds: 160));
     await tester.pump();
 
@@ -183,6 +185,68 @@ void main() {
     await tester.pump();
     expect(find.text('n50'), findsOne);
     expect(find.byKey(const Key('search-load-more')), findsNothing);
+  });
+
+  testWidgets('one-character queries are not issued; the box hints', (
+    tester,
+  ) async {
+    // A one-character FTS prefix ("e"*) expands to every term starting
+    // with that letter — multi-second MATCHes on a real library — so the
+    // screen never issues them (T-M3-09 device report).
+    await tester.pumpWidget(buildApp(source));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'e');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(source.queries, isEmpty);
+    expect(find.text('Type at least 2 characters'), findsOne);
+
+    // Two characters search normally.
+    await tester.enterText(find.byKey(const Key('search-query')), 'en');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(source.queries, ['"en"*']);
+    expect(find.text('Type at least 2 characters'), findsNothing);
+  });
+
+  testWidgets('contains mode also needs two characters', (tester) async {
+    await tester.pumpWidget(buildApp(source));
+    await tester.pump();
+    await tester.tap(find.text('Contains'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('search-query')), 'x');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(source.queries, isEmpty);
+    expect(find.text('Type at least 2 characters'), findsOne);
+
+    await tester.enterText(find.byKey(const Key('search-query')), 'xy');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(source.queries, ['xy']);
+  });
+
+  testWidgets('a pending query superseded by a too-short term never lands', (
+    tester,
+  ) async {
+    final hang = _HangingSource();
+    await tester.pumpWidget(buildApp(hang));
+    await tester.pump();
+
+    // The first query starts and stays pending...
+    await tester.enterText(find.byKey(const Key('search-query')), 'first');
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(hang.started, 1);
+    // ...then the user deletes down to a single character: the in-flight
+    // query is superseded so its late results cannot replace the hint.
+    await tester.enterText(find.byKey(const Key('search-query')), 'f');
+    await tester.pump();
+    expect(find.text('Type at least 2 characters'), findsOne);
+    hang.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('First hit'), findsNothing);
+    expect(find.text('Type at least 2 characters'), findsOne);
   });
 }
 
@@ -218,6 +282,46 @@ final class _SlowSource implements SearchSource {
             ]
           : const [],
     );
+  }
+
+  @override
+  Future<List<SearchHit>> searchContains(
+    String pattern, {
+    required int id,
+    int limit = 200,
+  }) {
+    return search(pattern, id: id, limit: limit);
+  }
+}
+
+/// A source whose queries stay pending until [complete] — for the
+/// supersede assertion on the too-short path (the late result must not
+/// replace the hint).
+final class _HangingSource implements SearchSource {
+  int _id = 0;
+  int started = 0;
+  final Completer<void> _gate = Completer<void>();
+
+  @override
+  int begin() => ++_id;
+
+  @override
+  bool isCurrent(int id) => id == _id;
+
+  void complete() {
+    if (!_gate.isCompleted) _gate.complete();
+  }
+
+  @override
+  Future<List<SearchHit>> search(
+    String? query, {
+    required int id,
+    int limit = 200,
+  }) async {
+    started++;
+    await _gate.future;
+    if (!isCurrent(id)) return const [];
+    return [_hit('first.md', title: 'First hit')];
   }
 
   @override

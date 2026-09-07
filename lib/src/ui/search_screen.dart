@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 /// Query box (debounced ~150 ms) with the Words/Contains mode toggle over
 /// ranked FTS results — path + snippet with `<mark>` highlighting, paged
 /// (50 at a time, "Show more") — and click-to-open. Results of a superseded
-/// query are dropped by the source's invocation id; an empty query shows
-/// the hint instead of results.
+/// query are dropped by the source's invocation id; an empty (or too
+/// short) query shows a hint instead of results.
 final class SearchScreen extends StatefulWidget {
   /// Creates the search screen.
   const SearchScreen({
@@ -98,7 +98,11 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   void _onQueryChanged() {
     _debounceTimer?.cancel();
-    if (_query.text.trim().isEmpty) {
+    final text = _query.text.trim();
+    if (text.isEmpty || !_canSearch(text)) {
+      // Nothing will be (re)searched: clear the results and supersede any
+      // in-flight query, so its results cannot land on the hint state.
+      _source?.begin();
       setState(() {
         _searched = false;
         _hits = const [];
@@ -115,7 +119,18 @@ final class _SearchScreenState extends State<SearchScreen> {
   void _setContains(bool value) {
     if (_contains == value) return;
     setState(() => _contains = value);
-    if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
+    final text = _query.text.trim();
+    if (text.isEmpty) return;
+    if (!_canSearch(text)) {
+      _source?.begin();
+      setState(() {
+        _searched = false;
+        _hits = const [];
+        _shown = 0;
+      });
+      return;
+    }
+    unawaited(_runSearch());
   }
 
   void _clearQuery() {
@@ -129,7 +144,7 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> _runSearch() async {
     final text = _query.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || !_canSearch(text)) return;
     var source = _source;
     if (source == null) {
       source = await _acquireSource();
@@ -229,16 +244,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _results(ThemeData theme) {
-    if (!_searched) {
-      return Center(
-        child: Text(
-          AppStrings.searchEmptyHint,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
+    if (!_searched) return _hint(theme);
     if (_hits.isEmpty) {
       return Center(
         child: Text(
@@ -288,6 +294,43 @@ final class _SearchScreenState extends State<SearchScreen> {
         );
       },
     );
+  }
+
+  /// The pre-search hint: the empty state, the too-short state (the box
+  /// holds text that cannot be searched yet), or nothing while a runnable
+  /// query waits out the debounce.
+  Widget _hint(ThemeData theme) {
+    final text = _query.text.trim();
+    final String message;
+    if (text.isEmpty) {
+      message = AppStrings.searchEmptyHint;
+    } else if (!_canSearch(text)) {
+      message = AppStrings.searchTooShortHint;
+    } else {
+      return const SizedBox.shrink();
+    }
+    return Center(
+      child: Text(
+        message,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  /// Whether [text] is a search worth running. A one-character FTS prefix
+  /// (words mode) expands to every term starting with that letter — a
+  /// multi-second MATCH on a real library, with every query typed after it
+  /// queueing behind it (T-M3-09 device report: `"e"*`/`"p"*` took 9–18 s
+  /// and the follow-up queries "returned nothing"). Two characters is the
+  /// floor for both modes; in words mode the last (growing) token must be
+  /// two characters too, whatever came before it.
+  bool _canSearch(String text) {
+    if (text.length < 2) return false;
+    if (_contains) return true;
+    final last = text.split(RegExp(r'\s+')).last;
+    return last.length >= 2;
   }
 
   /// Renders a `snippet()`/excerpt string: `<mark>…</mark>` spans get the
