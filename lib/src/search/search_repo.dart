@@ -114,7 +114,12 @@ final class SearchRepo implements SearchSource {
       log.warning('word search failed for "$query": $e');
       return const [];
     }
-    if (!isCurrent(id)) return const [];
+    if (!isCurrent(id)) {
+      log.debug(
+        'word "$query" (id $id): superseded by id $_invocation — dropped',
+      );
+      return const [];
+    }
     log.debug(
       'word "$query" -> ${rows.length} hit(s) '
       'in ${clock.elapsedMilliseconds} ms',
@@ -165,7 +170,12 @@ final class SearchRepo implements SearchSource {
       log.warning('contains search failed for "$pattern": $e');
       return const [];
     }
-    if (!isCurrent(id)) return const [];
+    if (!isCurrent(id)) {
+      log.debug(
+        'contains "$pattern" (id $id): superseded by id $_invocation — dropped',
+      );
+      return const [];
+    }
     log.debug(
       'contains "$pattern" -> ${rows.length} hit(s) '
       'in ${clock.elapsedMilliseconds} ms',

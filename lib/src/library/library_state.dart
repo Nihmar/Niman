@@ -123,6 +123,14 @@ final class LibraryController implements LibrarySession {
   /// The session database; completes when the first library is opened.
   Future<CopistDatabase> get database => _database ??= dbFactory();
 
+  /// The cached search source; the background-isolate worker connection is
+  /// created once per session and reused (see [searchSource]).
+  SearchSource? _searchSource;
+
+  /// The search connection when it is a distinct database from the main
+  /// one; closed on [dispose].
+  CopistDatabase? _searchDb;
+
   /// CRUD ops for the open library, or null while closed.
   @override
   NoteOps? get ops => _ops;
@@ -146,8 +154,18 @@ final class LibraryController implements LibrarySession {
   Future<SearchSource?> get searchSource async {
     // The search connection is background-isolate backed: the MATCH +
     // snippet() work for large result sets (and novel-length bodies) never
-    // runs on the UI isolate.
-    return SearchRepo(await _searchDbFactory());
+    // runs on the UI isolate. One connection per session, created once:
+    // a fresh connection per call leaked one worker isolate per
+    // SearchScreen mount (drift keeps the worker alive until closed) and
+    // left nothing to recover when its startup failed.
+    var source = _searchSource;
+    if (source == null) {
+      final db = await _searchDbFactory();
+      _searchDb = identical(db, await database) ? null : db;
+      source = SearchRepo(db);
+      _searchSource = source;
+    }
+    return source;
   }
 
   @override
@@ -391,6 +409,10 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       await _events.close();
     }
+    // The search worker isolate (when separate from the main connection).
+    await _searchDb?.close();
+    _searchDb = null;
+    _searchSource = null;
   }
 
   void _bump() {

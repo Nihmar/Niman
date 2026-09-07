@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/query.dart';
 import 'package:copist/src/search/search_repo.dart';
@@ -57,8 +58,8 @@ final class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(_loadSource());
     _query.addListener(_onQueryChanged);
+    if (widget.source == null) unawaited(_loadSource());
   }
 
   @override
@@ -69,11 +70,30 @@ final class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
+  /// Resolves the search source once; a failed load leaves [_source] null
+  /// and [_runSearch] retries on the next query — a transient startup
+  /// failure must not wedge the box into issuing queries that go nowhere.
   Future<void> _loadSource() async {
-    final source = widget.source ?? await widget.controller.searchSource;
-    if (!mounted) return;
+    final source = await _acquireSource();
+    if (!mounted || source == null) return;
     setState(() => _source = source);
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
+  }
+
+  Future<SearchSource?> _acquireSource() async {
+    final own = widget.source;
+    if (own != null) return own;
+    final cached = _source;
+    if (cached != null) return cached;
+    try {
+      return await widget.controller.searchSource;
+    } on Object catch (e) {
+      // The session owns one cached background connection, so a failure
+      // here is a real (rare) startup problem; the next query retries.
+      const AppLogger(name: 'search.ui')
+          .warning('search source unavailable: $e');
+      return null;
+    }
   }
 
   void _onQueryChanged() {
@@ -108,14 +128,24 @@ final class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _runSearch() async {
-    final source = _source;
     final text = _query.text.trim();
-    if (source == null || text.isEmpty) return;
+    if (text.isEmpty) return;
+    var source = _source;
+    if (source == null) {
+      source = await _acquireSource();
+      if (source == null || !mounted) return;
+      setState(() => _source = source);
+    }
     final id = source.begin();
-    final results = _contains
+    final contains = _contains;
+    const AppLogger(name: 'search.ui').debug(
+      'issue id $id (${contains ? 'contains' : 'words'}) "$text"',
+    );
+    final results = contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
-    if (!source.isCurrent(id) || !mounted) return;
+    if (!source.isCurrent(id)) return; // a newer query superseded this one
+    if (!mounted) return;
     setState(() {
       _searched = true;
       _hits = results;
