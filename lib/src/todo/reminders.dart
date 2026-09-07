@@ -119,13 +119,15 @@ Map<int, TodoReminder> wantedReminders(
     if (when == null || !when.isAfter(now)) {
       continue;
     }
+    // Only the user's entered description: the id stays over the full
+    // text (stable identity), but the shown text drops the managed
+    // due:/rem:/… tags Copist appends — a reminder reads as one phrase,
+    // not the whole raw line. A line written elsewhere can be nothing but
+    // those tags, which would leave a titleless notification.
+    final title = withoutKeyValueTags(task.description);
     wanted[todoReminderId(task.description)] = TodoReminder(
       id: todoReminderId(task.description),
-      // Only the user's entered description: the id stays over the full
-      // text (stable identity), but the shown text drops the managed
-      // due:/rem:/… tags Copist appends — a reminder reads as one phrase,
-      // not the whole raw line.
-      title: withoutKeyValueTags(task.description),
+      title: title.isEmpty ? AppStrings.todoReminderFallbackTitle : title,
       body: task.due == null
           ? AppStrings.todoReminderBody
           : '${AppStrings.todoReminderDue} ${formatTodoDate(task.due!)}',

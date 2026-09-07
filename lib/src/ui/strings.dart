@@ -138,5 +138,6 @@ final class AppStrings {
   static const String todoReminderChannelDescription =
       'Scheduled alerts for tasks with a reminder time.';
   static const String todoReminderBody = 'Todo reminder';
+  static const String todoReminderFallbackTitle = 'Task reminder';
   static const String todoReminderDue = 'Due';
 }

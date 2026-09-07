@@ -80,6 +80,14 @@ void main() {
       expect(wanted, isEmpty);
     });
 
+    test('a tag-only description falls back to a generic title', () {
+      final wanted = wantedReminders(
+        snapshotOf(todo: ['due:2026-09-09 rem:2026-09-08T10:30']),
+        DateTime(2026, 9, 7),
+      );
+      expect(wanted.values.single.title, 'Task reminder');
+    });
+
     test('title shows the entered description, not the whole raw line', () {
       final wanted = wantedReminders(
         snapshotOf(todo: [
