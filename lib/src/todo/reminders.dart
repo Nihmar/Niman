@@ -209,6 +209,7 @@ final class LocalReminderService implements ReminderService {
     try {
       final local = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(local.identifier));
+      _log.info('todo reminders: timezone ${local.identifier}');
     } on Object catch (error) {
       // The schedule below falls back to tz.local (UTC): wrong wall
       // clock, but loud in the logs instead of silent.
@@ -241,6 +242,24 @@ final class LocalReminderService implements ReminderService {
           ),
         );
     _ready = true;
+    // What the OS still holds from the run before this one. After a kill,
+    // a swipe away or a reboot this is the only evidence of whether the
+    // alarms survived, and the process that would have logged it is gone.
+    await _logPending('at startup');
+  }
+
+  /// Logs the ids the OS reports as pending, tagged with [stage].
+  ///
+  /// The authoritative answer to "is this reminder actually armed?" --
+  /// everything else in this file is what Copist *asked* for.
+  Future<void> _logPending(String stage) async {
+    try {
+      final pending = await _plugin.pendingNotificationRequests();
+      final ids = pending.map((r) => r.id).toList()..sort();
+      _log.info('todo reminders: ${ids.length} pending $stage $ids');
+    } on Object catch (error) {
+      _log.warning('todo reminders: pending query failed ($error)');
+    }
   }
 
   /// The runtime permission state (Android 13+): granted at install
@@ -379,6 +398,11 @@ final class LocalReminderService implements ReminderService {
     // asked while nothing is wanted.
     final granted = wanted.isEmpty || await _ensurePermission();
     final exact = granted && wanted.isNotEmpty && await _ensureExact();
+    _log.info(
+      'todo reminders: reconcile ${wanted.length} wanted, '
+      'notifications ${granted ? 'allowed' : 'blocked'}, '
+      'alarms ${exact ? 'exact' : 'inexact'}',
+    );
     await _cancelStale(wanted);
     if (wanted.isEmpty) {
       _log.info('todo reminders reconciled: 0 scheduled');
@@ -398,6 +422,10 @@ final class LocalReminderService implements ReminderService {
     var scheduled = 0;
     for (final reminder in wanted.values) {
       if (!reminder.when.isAfter(now)) {
+        _log.info(
+          'todo reminders: skipped ${reminder.id}, '
+          '${reminder.when.toIso8601String()} already passed',
+        );
         continue;
       }
       try {
@@ -420,6 +448,11 @@ final class LocalReminderService implements ReminderService {
               : AndroidScheduleMode.inexactAllowWhileIdle,
           payload: todoReminderPayload,
         );
+        _log.info(
+          'todo reminders: armed ${reminder.id} '
+          'for ${reminder.when.toIso8601String()} '
+          '(in ${_since(reminder.when.difference(now))}) ${reminder.title}',
+        );
       } on Object catch (error) {
         // One bad alarm (e.g. exact without the grant) must not abort
         // the rest of the set.
@@ -434,6 +467,24 @@ final class LocalReminderService implements ReminderService {
       'todo reminders reconciled: $scheduled scheduled '
       '(${exact ? 'exact' : 'inexact'})',
     );
+    // Read back what the OS actually holds: everything above is what
+    // Copist asked for, and the two can differ (a rejected alarm, an OEM
+    // limit). This line is what makes an exported log conclusive.
+    await _logPending('after reconcile');
+  }
+
+  /// A compact "2h 14m" for a wait, for the schedule log.
+  static String _since(Duration d) {
+    final days = d.inDays;
+    final hours = d.inHours % 24;
+    final minutes = d.inMinutes % 60;
+    if (days > 0) {
+      return '${days}d ${hours}h';
+    }
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    }
+    return '${minutes}m';
   }
 
   @override
