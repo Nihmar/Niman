@@ -107,7 +107,7 @@ is **not wired**.
   path order, excerpt cut around the first match in Dart (`snippet()` only
   works with `MATCH`). Mode visible in the UI, never a silent fallback.
   *AC: `ell` finds `hello` in contains mode and nothing in word mode.*
-- [ ] **T-M3-09** Tests + verification: unit (parser, slug, resolver,
+- [x] **T-M3-09** Tests + verification: unit (parser, slug, resolver,
   query builder, FTS incremental/rebuild/cascade, tag normalization, v6
   migration); widget (search screen both modes + debounce + supersede,
   preview link tap, editor Ctrl+click, anchor landing, tags counts + tap);
