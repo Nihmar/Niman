@@ -4,6 +4,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -374,13 +375,20 @@ void main() {
               kind: 'wiki',
             ),
           );
-      await db.customStatement(
-        'INSERT INTO notes_fts (rowid, title, body) VALUES (?1, ?2, ?3)',
-        [doc1.id, 'Deep', 'deep note'],
-      );
+      // The pipeline already wrote the note's FTS row (title + body copy).
       expect(
         (await db.select(db.noteStems).get()).where((s) => s.noteId == doc1.id),
         hasLength(1),
+      );
+      expect(
+        (await db
+                .customSelect(
+                  'SELECT count(*) c FROM notes_fts WHERE rowid = ?',
+                  variables: [Variable<int>(doc1.id)],
+                )
+                .getSingle())
+            .read<int>('c'),
+        1,
       );
 
       // The whole folder goes away: one deleteSubtree must wipe the note's
@@ -411,4 +419,230 @@ void main() {
       expect(fts.read<int>('c'), 0);
     });
   });
+
+  group('content pipeline (T-M3-03)', () {
+    test('a full scan indexes FTS, tags, links and alias stems', () async {
+      File(p.join(root.path, 'other.md')).writeAsStringSync(
+        '## Other\n\n#othertag\n',
+      );
+      File(p.join(root.path, 'linked.md')).writeAsStringSync('linked body');
+      File(p.join(root.path, 'indexed.md')).writeAsStringSync(
+        '---\ntitle: Indexed Title\ntags: [Alpha, beta]\n'
+        'aliases: [nickname]\n---\nbody with #gamma and #Alpha\n\n'
+        '[[other]] [md](linked.md) [[missing]] [[#Local]] [[indexed|Self]]',
+      );
+      await indexer.fullScan(root.path);
+
+      final indexed = (await dao.find('indexed.md'))!;
+      final other = (await dao.find('other.md'))!;
+      final linked = (await dao.find('linked.md'))!;
+
+      // FTS: title and body both searchable, rowid = notes.id.
+      final fts = await db
+          .customSelect(
+            'SELECT rowid, title FROM notes_fts WHERE notes_fts MATCH ?',
+            variables: [const Variable<String>('"Indexed Title"')],
+          )
+          .get();
+      expect(fts.map((r) => r.read<int>('rowid')), contains(indexed.id));
+      final bodyHit = await db
+          .customSelect(
+            'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
+            variables: [const Variable<String>('gamma')],
+          )
+          .get();
+      expect(bodyHit.map((r) => r.read<int>('rowid')), contains(indexed.id));
+
+      // Tags: frontmatter (both) + inline (gamma, Alpha), source-tagged.
+      final noteTags = await (db.select(
+        db.noteTags,
+      )..where((t) => t.noteId.equals(indexed.id))).get();
+      final asSet = noteTags.map((t) => '${t.tag}:${t.isFrontmatter}').toSet();
+      expect(asSet, {'alpha:true', 'beta:true', 'gamma:false', 'alpha:false'});
+      final tagRows = await db.select(db.tags).get();
+      expect(
+        tagRows.map((t) => t.name),
+        containsAll(['alpha', 'beta', 'gamma']),
+      );
+
+      // Links: resolved edges only — wiki for [[other]], md for the
+      // markdown link; missing, #Local and self are skipped.
+      final links = await (db.select(
+        db.noteLinks,
+      )..where((l) => l.fromNote.equals(indexed.id))).get();
+      expect(links.map((l) => '${l.toNote}:${l.kind}').toSet(), {
+        '${other.id}:wiki',
+        '${linked.id}:md',
+      });
+
+      // Stems: file stems + the alias row (source alias)
+      final stems = await (db.select(
+        db.noteStems,
+      )..where((s) => s.noteId.equals(indexed.id))).get();
+      expect(stems.map((s) => '${s.stem}:${s.source}').toSet(), {
+        'indexed:file',
+        'nickname:alias',
+      });
+
+      // The alias resolves.
+      final resolved = await LinkResolver(db).resolveWiki('nickname');
+      expect((resolved as ResolvedNote).note.id, indexed.id);
+    });
+
+    test(
+      'delete db → a fresh rescan reproduces FTS, tags, links, stems',
+      () async {
+        File(p.join(root.path, 'other.md')).writeAsStringSync('## Other\n');
+        File(p.join(root.path, 'source.md')).writeAsStringSync(
+          '---\ntags: [x]\n---\nlink [[other]]\n',
+        );
+        await indexer.fullScan(root.path);
+        final before = await _indexState(db, dao);
+
+        final db2 = CopistDatabase(NativeDatabase.memory());
+        addTearDown(db2.close);
+        final indexer2 = Indexer(db2);
+        await indexer2.fullScan(root.path);
+        final after = await _indexState(db2, indexer2.dao);
+        expect(after, before);
+      },
+    );
+
+    test(
+      'a content-only edit keeps the note id and searches the new text',
+      () async {
+        File(p.join(root.path, 'note1.md')).writeAsStringSync('old words');
+        await indexer.fullScan(root.path);
+        final before = (await dao.find('note1.md'))!;
+
+        File(p.join(root.path, 'note1.md'))
+            .writeAsStringSync('brand new words');
+        // An edit also bumps the mtime, so the digest cannot be reused.
+        final stat = File(p.join(root.path, 'note1.md')).statSync();
+        if (stat.modified == toStoredSecond(before.modified)) {
+          await File(p.join(root.path, 'note1.md')).setLastModified(
+            stat.modified.add(const Duration(seconds: 2)),
+          );
+        }
+        await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
+
+        final after = (await dao.find('note1.md'))!;
+        expect(after.id, before.id);
+        final hit = await db
+            .customSelect(
+              'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('"brand new"')],
+            )
+            .get();
+        expect(hit.map((r) => r.read<int>('rowid')), contains(after.id));
+        expect(
+          (await db
+                  .customSelect(
+                    'SELECT count(*) c FROM notes_fts WHERE rowid = ?',
+                    variables: [Variable<int>(after.id)],
+                  )
+                  .getSingle())
+              .read<int>('c'),
+          1,
+        );
+      },
+    );
+
+    test('a rename keeps the note id and its FTS rows', () async {
+      File(p.join(root.path, 'note1.md')).writeAsStringSync(
+        '---\ntitle: Renamable\n---\nbody text here\n',
+      );
+      await indexer.fullScan(root.path);
+      final before = (await dao.find('note1.md'))!;
+      final ftsBefore = await db
+          .customSelect(
+            'SELECT title FROM notes_fts WHERE rowid = ?',
+            variables: [Variable<int>(before.id)],
+          )
+          .getSingle();
+      expect(ftsBefore.read<String>('title'), 'Renamable');
+
+      File(p.join(root.path, 'note1.md'))
+          .renameSync(p.join(root.path, 'renamed.md'));
+      await indexer.applyEvents(root.path, [
+        p.join(root.path, 'renamed.md'),
+        p.join(root.path, 'note1.md'),
+      ]);
+
+      final after = (await dao.find('renamed.md'))!;
+      expect(after.id, before.id); // the rename kept the row id
+      final ftsAfter = await db
+          .customSelect(
+            'SELECT title FROM notes_fts WHERE rowid = ?',
+            variables: [Variable<int>(after.id)],
+          )
+          .getSingle();
+      expect(ftsAfter.read<String>('title'), 'Renamable');
+      // And the old stem is gone, the new one present.
+      final stems = await db.select(db.noteStems).get();
+      expect(stems.map((s) => s.stem).toSet(), containsAll(['renamed']));
+      expect(stems.map((s) => s.stem), isNot(contains('note1')));
+    });
+
+    test('an unchanged rescan never rewrites content rows', () async {
+      File(p.join(root.path, 'note1.md')).writeAsStringSync(
+        '---\ntags: [keep]\n---\nstable\n',
+      );
+      await indexer.fullScan(root.path);
+      final row = (await dao.find('note1.md'))!;
+
+      // Touch with identical content: digest unchanged, so the content
+      // rows must stay as they are (same tag rows, same FTS title).
+      final stat = File(p.join(root.path, 'note1.md')).statSync();
+      await File(p.join(root.path, 'note1.md')).setLastModified(
+        stat.modified.add(const Duration(seconds: 5)),
+      );
+      await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
+
+      final tags = await (db.select(
+        db.noteTags,
+      )..where((t) => t.noteId.equals(row.id))).get();
+      expect(tags.map((t) => t.tag), ['keep']);
+      final title = await db
+          .customSelect(
+            'SELECT title FROM notes_fts WHERE rowid = ?',
+            variables: [Variable<int>(row.id)],
+          )
+          .getSingle();
+      expect(title.read<String>('title'), 'note1');
+    });
+  });
+}
+
+/// The index state a rebuild reproduces: per-note content rows.
+Future<Map<String, List<String>>> _indexState(
+  CopistDatabase db,
+  NoteDao dao,
+) async {
+  final notes = await dao.allRows();
+  final state = <String, List<String>>{};
+  for (final note in notes.where((n) => !n.isDir)) {
+    final fts = await db
+        .customSelect(
+          'SELECT title FROM notes_fts WHERE rowid = ?',
+          variables: [Variable<int>(note.id)],
+        )
+        .getSingle();
+    final tags = await (db.select(
+      db.noteTags,
+    )..where((t) => t.noteId.equals(note.id))).get();
+    final links = await (db.select(
+      db.noteLinks,
+    )..where((l) => l.fromNote.equals(note.id))).get();
+    final stems = await (db.select(
+      db.noteStems,
+    )..where((s) => s.noteId.equals(note.id))).get();
+    state[note.path] = [
+      fts.read<String>('title'),
+      ...tags.map((t) => '${t.tag}:${t.isFrontmatter}'),
+      ...links.map((l) => '${l.toNote}:${l.kind}'),
+      ...stems.map((s) => '${s.stem}:${s.source}'),
+    ]..sort();
+  }
+  return state;
 }

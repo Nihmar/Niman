@@ -60,7 +60,7 @@ is **not wired**.
   fills `note_stems` on insert/rename/delete. *AC: resolves in O(log n) on
   the index; ambiguous names disambiguated by path; a rename moves the
   stem rows; migration v5→v6 keeps app_settings rows.*
-- [ ] **T-M3-03** Indexer content pipeline: one isolate read per *changed*
+- [x] **T-M3-03** Indexer content pipeline: one isolate read per *changed*
   note returns digest **and** text; parse frontmatter (title/tags/aliases,
   `frontmatter/parser.dart`) and inline `#tags` (skip fences/math — reuse
   `HighlightDocument`) on that isolate; one transaction writes notes rows +

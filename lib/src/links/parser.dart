@@ -79,7 +79,15 @@ final class WikiRef {
 /// (via the shared tokenizer), so only links the user would see as links are
 /// returned. Markdown images (`![alt](src)`) are not links and are skipped.
 List<ParsedLink> parseLinks(String text) {
-  final doc = HighlightDocument.fromText(text);
+  return linksInDocument(HighlightDocument.fromText(text));
+}
+
+/// The links of an already-tokenized [doc], in document order.
+///
+/// Same rules as [parseLinks]; callers that need the tokens anyway (the
+/// indexer: links + inline tags from one tokenization pass) pass their
+/// document in and avoid a second one.
+List<ParsedLink> linksInDocument(HighlightDocument doc) {
   final out = <ParsedLink>[];
   var lineStart = 0;
   for (final line in doc.lines) {

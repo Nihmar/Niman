@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -6,7 +7,11 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
+import 'package:copist/src/editor/highlighting.dart';
+import 'package:copist/src/frontmatter/parser.dart';
+import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
@@ -160,21 +165,98 @@ DiskProbe _probePath(String path) {
   );
 }
 
-/// Digests the files at [rels] (library-relative) under [root].
+/// One note's content after a read on the index isolate: the digest, the
+/// full text (the FTS body copy) and everything the index derives from it
+/// (title, tags, aliases, links) — parsed off the UI isolate and off the
+/// main flow, so a scan costs one read per changed note and no more.
+final class NoteContent {
+  /// Creates a parsed note content.
+  const NoteContent({
+    required this.rel,
+    required this.sha256,
+    required this.text,
+    required this.title,
+    required this.frontmatterTags,
+    required this.inlineTags,
+    required this.aliases,
+    required this.links,
+  });
+
+  /// Library-relative note path.
+  final String rel;
+
+  /// Content sha256 (hex).
+  final String sha256;
+
+  /// The full note text (FTS `body` copy).
+  final String text;
+
+  /// The search title: frontmatter `title`, else the filename without
+  /// `.md` (case preserved).
+  final String title;
+
+  /// Normalized tags from frontmatter `tags:`.
+  final List<String> frontmatterTags;
+
+  /// Normalized inline `#tags`.
+  final List<String> inlineTags;
+
+  /// Raw frontmatter `aliases:` values.
+  final List<String> aliases;
+
+  /// The note's links, in document order.
+  final List<ParsedLink> links;
+}
+
+/// Reads and parses the notes at [rels] (library-relative, under [root]) —
+/// one file read per note returning digest **and** text, with frontmatter,
+/// inline tags and links extracted on this (index) isolate.
 ///
-/// Top-level for [Isolate.run]: hashing reads whole files, so it is the
-/// most expensive thing a scan does. A file that cannot be read (deleted
-/// or replaced mid-scan) is left out; the next scan picks it up.
-Future<Map<String, String>> hashFiles(String root, List<String> rels) async {
-  final out = <String, String>{};
+/// Top-level for [Isolate.run]; batched by the caller (a few hundred per
+/// call). A note that cannot be read (deleted or replaced mid-scan) is left
+/// out; the next scan picks it up.
+Future<List<NoteContent>> readNoteContents(
+  String root,
+  List<String> rels,
+) async {
+  final out = <NoteContent>[];
   for (final rel in rels) {
     try {
-      out[rel] = await hashFileSha256(File(p.join(root, rel)));
-    } on FileSystemException catch (_) {
+      final bytes = await File(p.join(root, rel)).readAsBytes();
+      var text = utf8.decode(bytes, allowMalformed: true);
+      // A UTF-8 BOM is content for FTS but noise for matching the editor.
+      if (text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF) {
+        text = text.substring(1);
+      }
+      final sha = sha256.convert(bytes).toString();
+      out.add(_extractContent(rel, sha, text));
+    } on FileSystemException {
       continue;
     }
   }
   return out;
+}
+
+/// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
+NoteContent _extractContent(String rel, String sha, String text) {
+  final doc = HighlightDocument.fromText(text);
+  final fm = parseFrontmatter(text);
+  return NoteContent(
+    rel: rel,
+    sha256: sha,
+    text: text,
+    title: fm?.title ?? _titleFromName(rel),
+    frontmatterTags: fm?.tags ?? const [],
+    inlineTags: inlineTagsOf(doc),
+    aliases: fm?.aliases ?? const [],
+    links: linksInDocument(doc),
+  );
+}
+
+/// The filename without the `.md` extension, case preserved.
+String _titleFromName(String rel) {
+  final name = p.basename(rel);
+  return name.endsWith('.md') ? name.substring(0, name.length - 3) : name;
 }
 
 /// Builds and maintains the notes index so it mirrors the library on disk.
@@ -241,10 +323,19 @@ final class Indexer {
         return;
       }
       _log.info('fullScan: tree changed, applying diff');
-      final shas = await _digests(root, entries, old);
+      final read = await _readContents(root, entries, old);
       var wrote = false;
       await _db.transaction(() async {
-        wrote = await _applyDiff(entries: entries, old: old, shas: shas);
+        final result = await _applyDiff(
+          entries: entries,
+          old: old,
+          shas: read.shas,
+          contents: read.contents,
+        );
+        wrote = result.wrote;
+        // Content rows (FTS, tags, links) for the notes whose content
+        // actually changed; a paired rename keeps its rows untouched.
+        await _applyContent(read.contents, paired: result.pairedRels);
       });
       if (wrote) {
         final cb = onChanged;
@@ -255,15 +346,20 @@ final class Indexer {
 
   /// Applies a batch of changed absolute paths incrementally.
   ///
-  /// Each path is reconciled against disk: existing directories resync their
-  /// whole subtree, existing files are upserted, and absent paths are pruned
-  /// (with their subtree). Dot components (`.trash/`, `.history/`, dotfiles)
-  /// are ignored. [onChanged] fires once per call, after the writes, and
-  /// only when the batch actually changed the index.
+  /// The batch is reconciled in one pass: probes batched on a background
+  /// isolate, changed-and-new notes read once (digest + text) in batches of
+  /// a few hundred, renames-with-unchanged-content paired so the note id
+  /// and its FTS/tags/links rows survive, and only then deletes applied —
+  /// so a link inside the batch can resolve against notes written earlier
+  /// in it. Dot components (`.trash/`, `.history/`, dotfiles) are ignored.
+  /// [onChanged] fires once per call, after the writes, and only when the
+  /// batch actually changed the index.
   Future<void> applyEvents(String root, List<String> paths) {
     return _synchronized(() async {
       var wrote = false;
       final seen = <String>{};
+      final absList = <String>[];
+      final rels = <String>[];
       for (final abs in paths) {
         if (!seen.add(abs)) continue;
         final rel = _safeRel(abs, root);
@@ -273,7 +369,91 @@ final class Indexer {
           );
           continue;
         }
-        wrote |= await _reconcile(root, abs, rel, 'applyEvents');
+        absList.add(abs);
+        rels.add(rel);
+      }
+      if (absList.isEmpty) return;
+
+      // One probe batch for the whole event set (each stat is a FUSE round
+      // trip on Android, so they must be off the UI isolate and together).
+      final probes = await _probeAll(absList);
+      final live = <String, DiskProbe>{};
+      final gone = <String>{};
+      for (var i = 0; i < rels.length; i++) {
+        if (probes[i].exists) {
+          live[rels[i]] = probes[i];
+        } else {
+          gone.add(rels[i]);
+        }
+      }
+
+      // New and changed notes read once: digest + text, batched. New notes
+      // are candidates for a rename pair; changed existing notes recompute
+      // their content rows.
+      final contents = await _readBatchContents(root, live);
+
+      // Pair renames with unchanged content: the old row keeps its id (and
+      // with it its FTS/tags/links rows) and is repointed at the new path.
+      final paired = await _pairRenames(root, live, gone, contents);
+      final pairedOld = <String>{for (final o in paired.values) o};
+      for (final pair in paired.entries) {
+        final oldRow = await _dao.find(pair.value);
+        if (oldRow == null) continue;
+        final probe = live[pair.key]!;
+        final newParentRel = parentOf(pair.key);
+        final parentId = newParentRel.isEmpty
+            ? 0
+            : await _ensureDirChain(root, newParentRel);
+        await (_db.update(
+          _db.notes,
+        )..where((t) => t.id.equals(oldRow.id))).write(
+          NotesCompanion(
+            path: Value(pair.key),
+            parent: Value(parentId),
+            name: Value(p.basename(pair.key)),
+            isDir: const Value(false),
+            size: Value(probe.size),
+            modified: Value(probe.modified),
+          ),
+        );
+        await _replaceStems(oldRow.id, p.basename(pair.key));
+        wrote = true;
+      }
+
+      // Dirs resync their subtrees; files are upserted with the precomputed
+      // content; vanished paths are pruned (pairs applied above count as
+      // pruned and are left alone).
+      final changed = <NoteContent>[];
+      for (final entry in live.entries) {
+        if (paired.containsKey(entry.key)) continue;
+        if (entry.value.isDir) {
+          _log.debug('applyEvents: "$root/${entry.key}" -> resync dir');
+          wrote |= await _syncDirSubtree(root, p.join(root, entry.key));
+        } else {
+          _log.debug('applyEvents: "${entry.key}" -> upsert file');
+          final result = await _upsertFile(
+            root,
+            p.join(root, entry.key),
+            entry.key,
+            entry.value,
+            expected: contents[entry.key],
+          );
+          wrote |= result.wrote;
+          if (result.content != null) changed.add(result.content!);
+        }
+      }
+      for (final rel in gone) {
+        if (pairedOld.contains(rel)) continue;
+        final deleted = await _dao.deleteSubtree(rel);
+        if (deleted > 0) {
+          _log.debug('applyEvents: pruned "$rel" ($deleted row(s))');
+        }
+        wrote |= deleted > 0;
+      }
+      // Content rows for everything whose digest actually changed — after
+      // the row writes, so links resolve against the whole batch.
+      for (final c in changed) {
+        await _applyContent({c.rel: c}, paired: paired.keys.toSet());
       }
       if (wrote) {
         final cb = onChanged;
@@ -322,7 +502,11 @@ final class Indexer {
     }
     if (probe.exists) {
       _log.debug('$tag: "$abs" -> upsert file "$rel"');
-      return _upsertFile(root, abs, rel, probe);
+      final result = await _upsertFile(root, abs, rel, probe);
+      if (result.content != null) {
+        await _applyContent({rel: result.content!}, paired: const {});
+      }
+      return result.wrote;
     }
     _log.debug('$tag: "$abs" -> prune "$rel"');
     final deleted = await _dao.deleteSubtree(rel);
@@ -351,10 +535,10 @@ final class Indexer {
   /// Includes the parent links: an index written by an older build can hold
   /// the right paths with wrong parents, and the diff repairs those, so the
   /// no-write check has to see them. Digests take no part in this:
-  /// [_digests] only ever reuses a stored one when `(size, mtime)` already
-  /// proves the content unchanged, so a digest can never be the deciding
-  /// difference — and comparing it would force a rewrite of every index
-  /// written by an older build.
+  /// [_readContents] only ever reuses a stored one when `(size, mtime)`
+  /// already proves the content unchanged, so a digest can never be the
+  /// deciding difference — and comparing it would force a rewrite of every
+  /// index written by an older build.
   bool _treeChanged(Map<String, Note> old, List<DiskEntry> entries) {
     if (old.length != entries.length) return true;
     for (final e in entries) {
@@ -382,7 +566,20 @@ final class Indexer {
   ///
   /// [old] holds the current index rows keyed root-relative, which serves
   /// both a full scan and a subtree walk.
-  Future<Map<String, String>> _digests(
+  /// Reads the content of the notes in [entries] whose digest cannot be
+  /// reused: new notes and notes whose `(size, mtime)` differs from the
+  /// stored row. One read per changed note (digest + text, parsed on the
+  /// index isolate), batched a few hundred per isolate call; unchanged
+  /// notes reuse their stored digest and are never read (the incremental
+  /// AC). Only notes are read — an attachment folder full of images and
+  /// e-books would otherwise be read end to end on every first scan,
+  /// which is what made the app freeze for seconds.
+  ///
+  /// Returns the parsed contents and the digest map for every entry
+  /// [old] is keyed root-relative, which serves both a full scan and a
+  /// subtree walk.
+  Future<({Map<String, NoteContent> contents, Map<String, String> shas})>
+  _readContents(
     String root,
     List<DiskEntry> entries,
     Map<String, Note> old,
@@ -401,11 +598,110 @@ final class Indexer {
         todo.add(e.rel);
       }
     }
-    if (todo.isEmpty) return shas;
-    _log.debug('digests: hashing ${todo.length} note(s)');
-    shas.addAll(await Isolate.run(() => hashFiles(root, todo)));
-    return shas;
+    final contents = await _readRelContents(root, todo);
+    for (final c in contents.values) {
+      shas[c.rel] = c.sha256;
+    }
+    return (contents: contents, shas: shas);
   }
+
+  /// Probes a batch of absolute paths on a background isolate.
+  ///
+  /// Kept as its own method (no instance members referenced) so the
+  /// [Isolate.run] closure captures only the sendable path list — the
+  /// indexer itself holds an unsendable future chain.
+  Future<List<DiskProbe>> _probeAll(List<String> absPaths) {
+    final paths = List<String>.of(absPaths);
+    return Isolate.run(() => probePaths(paths));
+  }
+
+  /// Reads [rels] in batches of [_contentBatch] on the index isolate.
+  Future<Map<String, NoteContent>> _readRelContents(
+    String root,
+    List<String> rels,
+  ) async {
+    if (rels.isEmpty) return const {};
+    final contents = <String, NoteContent>{};
+    _log.debug('contents: reading ${rels.length} note(s)');
+    for (var i = 0; i < rels.length; i += _contentBatch) {
+      final end = i + _contentBatch < rels.length
+          ? i + _contentBatch
+          : rels.length;
+      final read = await Isolate.run(
+        () => readNoteContents(root, rels.sublist(i, end)),
+      );
+      for (final c in read) {
+        contents[c.rel] = c;
+      }
+    }
+    return contents;
+  }
+
+  /// Reads the notes of an event batch that need content: new note files
+  /// and existing notes whose `(size, mtime)` no longer proves the content
+  /// unchanged — one read per note, parsed off the UI isolate.
+  Future<Map<String, NoteContent>> _readBatchContents(
+    String root,
+    Map<String, DiskProbe> live,
+  ) async {
+    final todo = <String>[];
+    for (final entry in live.entries) {
+      if (entry.value.isDir || !_isNote(p.basename(entry.key))) continue;
+      final row = await _dao.find(entry.key);
+      if (row == null ||
+          row.size != entry.value.size ||
+          row.modified != toStoredSecond(entry.value.modified)) {
+        todo.add(entry.key);
+      }
+    }
+    return _readRelContents(root, todo);
+  }
+
+  /// Pairs newly-appeared note files with vanished ones from the same
+  /// batch when the content is provably unchanged: same size, same mtime
+  /// (a rename keeps both) and — verified by the read — the same digest.
+  ///
+  /// Returns `newRel → oldRel`; pairs are one-to-one and unique, so a
+  /// scan that moved two files onto each other's paths pairs nothing.
+  Future<Map<String, String>> _pairRenames(
+    String root,
+    Map<String, DiskProbe> live,
+    Set<String> gone,
+    Map<String, NoteContent> contents,
+  ) async {
+    final paired = <String, String>{};
+    for (final entry in live.entries) {
+      final content = contents[entry.key];
+      if (content == null) continue;
+      String? candidate;
+      for (final goneRel in gone) {
+        final row = await _dao.find(goneRel);
+        if (row == null || row.isDir || row.sha256 != content.sha256) {
+          continue;
+        }
+        if (row.size != entry.value.size ||
+            row.modified != toStoredSecond(entry.value.modified)) {
+          continue;
+        }
+        if (candidate != null) {
+          candidate = null; // ambiguous — pair nothing
+          break;
+        }
+        candidate = goneRel;
+      }
+      if (candidate != null) {
+        paired[entry.key] = candidate;
+        _log.debug(
+          'pair: "$candidate" -> "${entry.key}" (content unchanged)',
+        );
+      }
+    }
+    return paired;
+  }
+
+  /// How many changed notes are read per isolate call (T-M3-03: a few
+  /// hundred).
+  static const _contentBatch = 200;
 
   /// One row's stem text, or null for directories and non-note files.
   static String? _stemFor(String name) => _isNote(name) ? noteStem(name) : null;
@@ -455,17 +751,73 @@ final class Indexer {
   /// highest gone ancestor so a removed directory takes its descendants with
   /// it. Every surviving path keeps its id, so parent links pointing into
   /// the index stay valid and only genuinely re-parented rows are updated.
-  Future<bool> _applyDiff({
+  /// Applies the difference between the desired tree [entries] (a walk of
+  /// [scope], keyed root-relative) and the current index rows [old] (scoped
+  /// to [scope]), returning whether anything was written and which rels
+  /// came in as content-preserving rename pairs.
+  ///
+  /// New paths are inserted, rows whose name, size, mtime, parent link or
+  /// digest changed are updated, and gone paths are deleted through their
+  /// highest gone ancestor so a removed directory takes its descendants with
+  /// it. Every surviving path keeps its id, so parent links pointing into
+  /// the index stay valid and only genuinely re-parented rows are updated.
+  ///
+  /// A vanished note whose content reappears unchanged under a new path
+  /// (rename: same size, same mtime, same digest — [shas] holds the fresh
+  /// digest because the path is new) is paired: the old row is repointed
+  /// at the new path in place, keeping its id — and with the id its FTS,
+  /// tags and links rows, which key on it.
+  Future<({bool wrote, Set<String> pairedRels})> _applyDiff({
     required List<DiskEntry> entries,
     required Map<String, Note> old,
     required Map<String, String> shas,
+    required Map<String, NoteContent> contents,
     String scope = '',
     int scopeParentId = 0,
   }) async {
     final scopeParentRel = parentOf(scope);
+    final entryRels = <String>{for (final e in entries) e.rel};
+    final gone = <String>{
+      for (final rel in old.keys)
+        if (!entryRels.contains(rel)) rel,
+    };
     final newIds = <String, int>{};
+    final pairedRels = <String>{};
+    final pairedOld = <String>{};
     var wrote = false;
     for (final e in entries) {
+      final prev = old[e.rel];
+      if (prev != null) {
+        final parentId = _resolveParent(
+          parentOf(e.rel),
+          scopeParentRel,
+          scopeParentId,
+          old,
+          newIds,
+          e.rel,
+        );
+        final changed =
+            prev.parent != parentId ||
+            prev.name != e.name ||
+            prev.isDir != e.isDir ||
+            prev.size != e.size ||
+            prev.modified != toStoredSecond(e.modified) ||
+            prev.sha256 != shas[e.rel];
+        if (!changed) continue;
+        await (_db.update(_db.notes)..where((t) => t.path.equals(e.rel))).write(
+          NotesCompanion(
+            parent: Value(parentId),
+            name: Value(e.name),
+            isDir: Value(e.isDir),
+            size: Value(e.size),
+            modified: Value(e.modified),
+            sha256: Value(shas[e.rel]),
+          ),
+        );
+        wrote = true;
+        continue;
+      }
+
       final parentId = _resolveParent(
         parentOf(e.rel),
         scopeParentRel,
@@ -474,57 +826,86 @@ final class Indexer {
         newIds,
         e.rel,
       );
-      final prev = old[e.rel];
-      if (prev == null) {
-        final id = await _db
-            .into(_db.notes)
-            .insert(
-              NotesCompanion.insert(
-                path: e.rel,
-                parent: parentId,
-                name: e.name,
-                isDir: e.isDir,
-                size: e.size,
-                modified: e.modified,
-                sha256: Value(shas[e.rel]),
-              ),
-            );
-        newIds[e.rel] = id;
-        await _replaceStems(id, e.name);
+      final pairOld = _pairCandidate(
+        e,
+        shas[e.rel],
+        old,
+        gone,
+        pairedOld,
+      );
+      if (pairOld != null) {
+        // Rename with unchanged content: the old row keeps its id.
+        final oldRow = old[pairOld]!;
+        await (_db.update(
+          _db.notes,
+        )..where((t) => t.id.equals(oldRow.id))).write(
+          NotesCompanion(
+            path: Value(e.rel),
+            parent: Value(parentId),
+            name: Value(e.name),
+            isDir: const Value(false),
+            size: Value(e.size),
+            modified: Value(e.modified),
+            sha256: Value(shas[e.rel]),
+          ),
+        );
+        newIds[e.rel] = oldRow.id;
+        pairedRels.add(e.rel);
+        pairedOld.add(pairOld);
+        await _replaceStems(oldRow.id, e.name);
         wrote = true;
         continue;
       }
-      final changed =
-          prev.parent != parentId ||
-          prev.name != e.name ||
-          prev.isDir != e.isDir ||
-          prev.size != e.size ||
-          prev.modified != toStoredSecond(e.modified) ||
-          prev.sha256 != shas[e.rel];
-      if (!changed) continue;
-      await (_db.update(_db.notes)..where((t) => t.path.equals(e.rel))).write(
-        NotesCompanion(
-          parent: Value(parentId),
-          name: Value(e.name),
-          isDir: Value(e.isDir),
-          size: Value(e.size),
-          modified: Value(e.modified),
-          sha256: Value(shas[e.rel]),
-        ),
-      );
+
+      final id = await _db
+          .into(_db.notes)
+          .insert(
+            NotesCompanion.insert(
+              path: e.rel,
+              parent: parentId,
+              name: e.name,
+              isDir: e.isDir,
+              size: e.size,
+              modified: e.modified,
+              sha256: Value(shas[e.rel]),
+            ),
+          );
+      newIds[e.rel] = id;
+      await _replaceStems(id, e.name);
       wrote = true;
     }
-    final entryRels = <String>{for (final e in entries) e.rel};
-    final gone = <String>{
-      for (final rel in old.keys)
-        if (!entryRels.contains(rel)) rel,
-    };
     for (final rel in gone) {
       if (gone.contains(parentOf(rel))) continue;
+      if (pairedOld.contains(rel)) continue;
       await _dao.deleteSubtree(rel);
       wrote = true;
     }
-    return wrote;
+    return (wrote: wrote, pairedRels: pairedRels);
+  }
+
+  /// The gone-path candidate for a content-preserving rename of [e]: a
+  /// vanished note — not yet paired — with the same size, the same mtime
+  /// and the same fresh digest as the new entry. Unique match only.
+  String? _pairCandidate(
+    DiskEntry e,
+    String? sha,
+    Map<String, Note> old,
+    Set<String> gone,
+    Set<String> alreadyPaired,
+  ) {
+    if (sha == null || e.isDir) return null;
+    String? found;
+    for (final goneRel in gone) {
+      if (alreadyPaired.contains(goneRel)) continue;
+      final row = old[goneRel];
+      if (row == null || row.isDir || row.sha256 != sha) continue;
+      if (row.size != e.size || row.modified != toStoredSecond(e.modified)) {
+        continue;
+      }
+      if (found != null) return null; // ambiguous
+      found = goneRel;
+    }
+    return found;
   }
 
   /// The parent id for the entry at [rel]: 0 for the walk root's parent,
@@ -572,7 +953,7 @@ final class Indexer {
           in rel.isEmpty ? await _dao.allRows() : await _dao.subtreeRows(rel))
         row.path: row,
     };
-    final shas = await _digests(root, entries, old);
+    final read = await _readContents(root, entries, old);
     var wrote = false;
     await _db.transaction(() async {
       // The scope root's parent lives outside the walk, so it is resolved
@@ -581,13 +962,16 @@ final class Indexer {
       final scopeParentId = rel.isEmpty
           ? 0
           : await _ensureDirChain(root, parentOf(rel));
-      wrote = await _applyDiff(
+      final result = await _applyDiff(
         entries: entries,
         old: old,
-        shas: shas,
+        shas: read.shas,
+        contents: read.contents,
         scope: rel,
         scopeParentId: scopeParentId,
       );
+      wrote = result.wrote;
+      await _applyContent(read.contents, paired: result.pairedRels);
     });
     return wrote;
   }
@@ -640,32 +1024,47 @@ final class Indexer {
   }
 
   /// Inserts or updates the row for the file at [abs] (root-relative path
-  /// [rel], on-disk state [probe]) and returns whether the index changed.
-  /// The directory chain is ensured first, so a file appearing outside the
+  /// [rel], on-disk state [probe]) and returns whether the index changed,
+  /// plus the parsed content when the note's content changed (insert or
+  /// digest change — the caller writes FTS/tags/links from it). The
+  /// directory chain is ensured first, so a file appearing outside the
   /// app comes in with its parents.
-  Future<bool> _upsertFile(
+  ///
+  /// [expected] is the content already read for this rel (an event batch
+  /// reads before it writes); without it a changed note is read once here
+  /// (digest + text on the index isolate). Notes only, as everywhere in
+  /// the content pipeline; the stored digest is reused when `(size,
+  /// mtime)` prove the content unchanged, so our own save of a large note
+  /// is not re-read end to end on every watcher event.
+  Future<({bool wrote, NoteContent? content})> _upsertFile(
     String root,
     String abs,
     String rel,
-    DiskProbe probe,
-  ) async {
+    DiskProbe probe, {
+    NoteContent? expected,
+  }) async {
     final parentRel = parentOf(rel);
     final parentId = parentRel.isEmpty
         ? 0
         : await _ensureDirChain(root, parentRel);
     final existing = await _dao.find(rel);
-    // Notes only, as in [_digests]; the stored digest is reused when
-    // (size, mtime) prove the content unchanged, so our own save of a
-    // large note is not re-read end to end on every watcher event.
     String? sha;
+    NoteContent? content;
     if (_isNote(p.basename(abs))) {
-      sha =
-          existing != null &&
-              existing.sha256 != null &&
-              existing.size == probe.size &&
-              existing.modified == toStoredSecond(probe.modified)
-          ? existing.sha256
-          : (await Isolate.run(() => hashFiles(root, <String>[rel])))[rel];
+      final expectedContent = expected;
+      if (existing != null &&
+          existing.sha256 != null &&
+          existing.size == probe.size &&
+          existing.modified == toStoredSecond(probe.modified)) {
+        sha = existing.sha256;
+      } else if (expectedContent != null) {
+        sha = expectedContent.sha256;
+        content = expectedContent;
+      } else {
+        final read = await _readRelContents(root, <String>[rel]);
+        content = read[rel];
+        sha = content?.sha256;
+      }
     }
     if (existing == null) {
       _log.debug('upsert "$rel": insert (parent "$parentRel")');
@@ -683,7 +1082,7 @@ final class Indexer {
             ),
           );
       await _replaceStems(id, p.basename(abs));
-      return true;
+      return (wrote: true, content: content);
     }
     final changed =
         existing.parent != parentId ||
@@ -694,7 +1093,7 @@ final class Indexer {
         existing.sha256 != sha;
     if (!changed) {
       _log.debug('upsert "$rel": unchanged');
-      return false;
+      return (wrote: false, content: null);
     }
     _log.debug('upsert "$rel": update (parent "$parentRel")');
     await (_db.update(_db.notes)..where((t) => t.path.equals(rel))).write(
@@ -707,6 +1106,135 @@ final class Indexer {
         sha256: Value(sha),
       ),
     );
-    return true;
+    return (wrote: true, content: content);
+  }
+
+  /// Writes the content-derived rows — `notes_fts` (title + body copy),
+  /// `note_tags` (+ the `tags` table) and the resolved `note_links` edges
+  /// — for changed notes. Runs after the notes rows of the batch are
+  /// written, so links pointing at notes indexed later in the same walk
+  /// resolve; [paired] rels keep their existing rows (their content did
+  /// not change — the rename only moved the path).
+  Future<void> _applyContent(
+    Map<String, NoteContent> contents, {
+    required Set<String> paired,
+  }) async {
+    if (contents.isEmpty) return;
+    final resolver = LinkResolver(_db);
+    for (final c in contents.values) {
+      if (paired.contains(c.rel)) continue;
+      final row = await _dao.find(c.rel);
+      if (row == null) continue; // deleted mid-scan
+      await _db.customStatement(
+        'DELETE FROM notes_fts WHERE rowid = ?',
+        <Object?>[row.id],
+      );
+      await _db.customStatement(
+        'INSERT INTO notes_fts (rowid, title, body) VALUES (?, ?, ?)',
+        <Object?>[row.id, c.title, c.text],
+      );
+      await _writeAliasStems(row.id, c);
+      await _writeTags(row.id, c);
+      await _writeLinks(row.id, c, resolver);
+    }
+  }
+
+  /// Rewrites the `note_stems` alias rows (source `alias`) of note
+  /// [noteId] to match [c]'s frontmatter aliases — the same index the
+  /// resolver reads, so `[[alias]]` resolves by alias from M3 on.
+  Future<void> _writeAliasStems(int noteId, NoteContent c) async {
+    await (_db.delete(_db.noteStems)..where(
+          (s) => s.noteId.equals(noteId) & s.source.equals('alias'),
+        ))
+        .go();
+    for (final alias in c.aliases) {
+      await _db
+          .into(_db.noteStems)
+          .insert(
+            NoteStemsCompanion.insert(
+              stem: alias.toLowerCase(),
+              noteId: noteId,
+              source: 'alias',
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+    }
+  }
+
+  /// Rewrites the `note_tags` rows (and the `tags` table) of note
+  /// [noteId] to match [c]'s frontmatter and inline tags.
+  Future<void> _writeTags(int noteId, NoteContent c) async {
+    await (_db.delete(
+      _db.noteTags,
+    )..where((t) => t.noteId.equals(noteId))).go();
+    for (final tag in c.frontmatterTags) {
+      await _db
+          .into(_db.tags)
+          .insert(
+            TagsCompanion.insert(name: tag),
+            mode: InsertMode.insertOrIgnore,
+          );
+      await _db
+          .into(_db.noteTags)
+          .insert(
+            NoteTagsCompanion.insert(
+              tag: tag,
+              noteId: noteId,
+              isFrontmatter: true,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+    }
+    for (final tag in c.inlineTags) {
+      await _db
+          .into(_db.tags)
+          .insert(
+            TagsCompanion.insert(name: tag),
+            mode: InsertMode.insertOrIgnore,
+          );
+      await _db
+          .into(_db.noteTags)
+          .insert(
+            NoteTagsCompanion.insert(
+              tag: tag,
+              noteId: noteId,
+              isFrontmatter: false,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+    }
+  }
+
+  /// Rewrites the resolved `note_links` edges of note [noteId] to match
+  /// [c]'s links: wiki and `.md` targets that resolve to another indexed
+  /// note become edges; dead links, external URLs, anchors and self-links
+  /// are skipped.
+  Future<void> _writeLinks(
+    int noteId,
+    NoteContent c,
+    LinkResolver resolver,
+  ) async {
+    await (_db.delete(
+      _db.noteLinks,
+    )..where((l) => l.fromNote.equals(noteId))).go();
+    for (final link in c.links) {
+      final resolved = switch (link) {
+        final WikiLink w => await resolver.resolveWiki(w.ref.target),
+        final MarkdownLink m => await resolver.resolveMarkdown(m.href),
+      };
+      if (resolved case ResolvedNote(:final note)) {
+        if (note.id == noteId) continue;
+        await _db
+            .into(_db.noteLinks)
+            .insert(
+              NoteLinksCompanion.insert(
+                fromNote: noteId,
+                toNote: note.id,
+                kind: link is WikiLink ? 'wiki' : 'md',
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+      }
+    }
   }
 }
