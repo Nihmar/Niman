@@ -1218,6 +1218,14 @@ final class Indexer {
         if (!paired.contains(c.rel))
           if (await _dao.find(c.rel) case final Note row) (row, c),
     ];
+
+    // One-time repair, before the early return: an index built before
+    // files gained stems (embeds — `![[foo.png]]` by bare name) has every
+    // FTS row but no attachment stems, so an unchanged rescan must still
+    // write the missing ones. Sitting after the `items.isEmpty` return it
+    // never ran — content rows were complete, nothing else was rewritten
+    // (T-M3-09 device report: `![[…]]` images stayed placeholders).
+    await _repairMissingFileStems();
     if (items.isEmpty) return;
 
     // Link targets resolve once per pass — one stems lookup per distinct
@@ -1256,7 +1264,6 @@ final class Indexer {
       });
       if (end < items.length) await Future<void>.delayed(Duration.zero);
     }
-    await _repairMissingFileStems();
   }
 
   /// The content-derived rows of one note within a chunk transaction:

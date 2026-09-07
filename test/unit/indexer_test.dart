@@ -636,6 +636,44 @@ void main() {
       },
     );
 
+    test(
+      'a pre-file-stem index (attachments without stems) is repaired by '
+      'one unchanged rescan',
+      () async {
+        // An attachment (non-md) — the embed target of `![[pic.png]]`.
+        File(p.join(root.path, 'pic.png')).writeAsStringSync('img');
+        await indexer.fullScan(root.path);
+        expect(
+          (await db.select(db.noteStems).get()).map((s) => s.stem),
+          contains('pic.png'),
+        );
+
+        // Simulate an index built before file stems existed: attachment
+        // rows have no stem row, but every content row (FTS) is present.
+        await db.customStatement(
+          'DELETE FROM note_stems WHERE note_id IN '
+          '(SELECT id FROM notes WHERE is_dir = 0 AND '
+          "lower(substr(name, -3)) != '.md')",
+        );
+        expect(
+          (await db.select(db.noteStems).get()).map((s) => s.stem),
+          isNot(contains('pic.png')),
+        );
+
+        // The unchanged rescan must notice the gap (files != stems in the
+        // completeness check) and write the missing stems back — this is
+        // what makes `![[pic.png]]` embeds resolvable after an upgrade.
+        await indexer.fullScan(root.path);
+
+        final pic = (await dao.find('pic.png'))!;
+        final stems = await (db.select(
+          db.noteStems,
+        )..where((s) => s.noteId.equals(pic.id))).get();
+        expect(stems.map((s) => s.stem), ['pic.png']);
+        expect(stems.single.source, 'file');
+      },
+    );
+
     test('an unchanged rescan never rewrites content rows', () async {
       File(p.join(root.path, 'note1.md')).writeAsStringSync(
         '---\ntags: [keep]\n---\nstable\n',
