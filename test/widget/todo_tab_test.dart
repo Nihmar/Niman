@@ -459,4 +459,51 @@ void main() {
     await settle(tester);
     expect(result, '2026-09-07 milk +groceries');
   });
+
+  testWidgets('add buttons surface already-used projects to pick (done too)', (
+    tester,
+  ) async {
+    // `knownTokens` is what the tab hands the dialog (a snapshotTokens
+    // merge of the open file + done.txt), so previously-used kinds from
+    // either file are present.
+    String? result;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return TextButton(
+                onPressed: () async {
+                  result = await showTodoTaskDialog(
+                    context,
+                    today: DateTime(2026, 9, 7),
+                    knownTokens: const {'+errands', '+archive'},
+                  );
+                },
+                child: const Text('open dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open dialog'));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('todo-dialog-field')),
+      'file the docs',
+    );
+    await tester.pump();
+    // A bare sigil alone already opens the used-kind pool: no need to
+    // retype an old +project. +archive is offered as a previous project.
+    await tester.tap(find.byKey(const Key('todo-token-add-+')));
+    await tester.pump();
+    expect(find.byKey(const Key('todo-complete-+errands')), findsOneWidget);
+    expect(find.byKey(const Key('todo-complete-+archive')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('todo-complete-+archive')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(result, '2026-09-07 file the docs +archive');
+  });
 }

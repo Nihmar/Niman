@@ -95,13 +95,18 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
 
   /// The word under the caret when it opens a `+`/`@`/`#` token, else
   /// null. [start] receives the word's start offset for replacement.
+  ///
+  /// A lone sigil (e.g. `+`) counts too: right after the toolbar's add
+  /// buttons insert a sigil, the whole pool of that kind shows so an
+  /// already-used project/context/tag can be tapped without typing,
+  /// or typing can narrow it.
   String? _tokenWord(String text, int caret, List<int> start) {
     final head = caret < 0 || caret > text.length
         ? text
         : text.substring(0, caret);
     final boundary = head.lastIndexOf(RegExp(r'\s'));
     final word = head.substring(boundary + 1);
-    if (word.length < 2 ||
+    if (word.isEmpty ||
         (word[0] != '+' && word[0] != '@' && word[0] != '#')) {
       return null;
     }
