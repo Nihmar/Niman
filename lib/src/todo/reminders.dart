@@ -196,11 +196,15 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
 /// — which is what makes a reminder fire on time with the screen off and
 /// the app closed.
 final class LocalReminderService implements ReminderService {
-  /// Creates the service; [settings] reaches the system screens that
-  /// decide whether a reminder can fire (injected in tests).
+  /// Creates the service.
+  ///
+  /// [settings] reaches the system screens that decide whether a reminder
+  /// can fire; [clock] is the wall clock guarding against scheduling into
+  /// the past. Both are injected in tests.
   LocalReminderService({
     this.settings = const PlatformReminderSettings(),
-  });
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now;
 
   /// The plugin (method channels — on-device only, never in tests).
   final FlutterLocalNotificationsPlugin _plugin =
@@ -208,6 +212,13 @@ final class LocalReminderService implements ReminderService {
 
   /// Reaches the system screens behind [health].
   final ReminderSettings settings;
+
+  /// The wall clock guarding against scheduling into the past.
+  ///
+  /// Separate from the controller's clock, which stamps the wanted set:
+  /// a set computed before a permission round trip can be stale by the
+  /// time it lands here.
+  final DateTime Function() _clock;
 
   final ValueNotifier<ReminderHealth> _health =
       ValueNotifier<ReminderHealth>(ReminderHealth.ok);
@@ -456,7 +467,7 @@ final class LocalReminderService implements ReminderService {
     if (!exact) {
       _log.info('todo reminders: exact denied, falling back to inexact');
     }
-    final now = DateTime.now();
+    final now = _clock();
     var scheduled = 0;
     for (final reminder in wanted.values) {
       if (!reminder.when.isAfter(now)) {
