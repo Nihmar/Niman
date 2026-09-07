@@ -104,6 +104,7 @@ final class AppStrings {
   static const String todoEmptyOpen = 'No open tasks yet';
   static const String todoEmptyDone = 'Nothing completed yet';
   static const String todoEmptyFiltered = 'No tasks match';
+  static const String todoTitle = 'Todo';
   static const String todoAddTooltip = 'Add task';
   static const String todoAddTitle = 'Add task';
   static const String todoEditTitle = 'Edit task';

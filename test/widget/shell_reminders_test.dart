@@ -123,6 +123,27 @@ void main() {
     expect(lastWanted(), <int>[todoReminderId(line)]);
   });
 
+  testWidgets('the wide layout opens the todo list from the app bar', (
+    tester,
+  ) async {
+    await pumpShell(tester, const Size(1200, 900));
+    expect(find.byKey(const Key('open-todo')), findsOne);
+    await tester.tap(find.byKey(const Key('open-todo')));
+    await settle(tester);
+    expect(find.byKey(const Key('todo-view-switch')), findsOne);
+  });
+
+  testWidgets('a reminder tap opens the todo list on a wide layout', (
+    tester,
+  ) async {
+    // The tap used to set the bottom-nav tab, which the wide build
+    // ignores: the app came up on the file tree with no hint of why.
+    await pumpShell(tester, const Size(1200, 900));
+    reminders.tap(todoReminderPayload);
+    await settle(tester);
+    expect(find.byKey(const Key('todo-view-switch')), findsOne);
+  });
+
   testWidgets('the wide layout reconciles too (no Todo tab there)', (
     tester,
   ) async {

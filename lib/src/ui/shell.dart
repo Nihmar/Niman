@@ -135,6 +135,40 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
+  /// Shows the todo list, wherever this layout keeps it.
+  ///
+  /// The bottom-nav tab only exists on a phone; the wide layout pushes it
+  /// as a screen instead. Reminder taps land here, so a tablet no longer
+  /// opens the app on the file tree with no hint of why.
+  void _openTodo() {
+    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+      _selectShellTab(ShellTab.todo);
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text(AppStrings.todoTitle),
+            actions: [
+              IconButton(
+                key: const Key('todo-add-wide'),
+                tooltip: AppStrings.todoAddTooltip,
+                icon: const Icon(Icons.add),
+                onPressed: _addTodo,
+              ),
+            ],
+          ),
+          body: TodoTab(
+            controller: _todoController,
+            reminders: widget.reminders,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).
   void _selectShellTab(ShellTab tab) {
@@ -254,8 +288,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_todoController.open());
     _reminderTaps = widget.reminders.taps.listen((payload) {
       if (payload == todoReminderPayload && mounted) {
-        const AppLogger(name: 'todo').debug('todo tap: opening Todo tab');
-        _selectShellTab(ShellTab.todo);
+        const AppLogger(name: 'todo').debug('todo tap: opening the todo list');
+        _openTodo();
       }
     });
     unawaited(_applyReminderLaunch());
@@ -291,7 +325,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _applyReminderLaunch() async {
     final payload = await widget.reminders.consumeLaunchPayload();
     if (payload == todoReminderPayload && mounted) {
-      setState(() => _tab = ShellTab.todo);
+      _openTodo();
     }
   }
 
@@ -760,6 +794,12 @@ final class _LibraryShellState extends State<_LibraryShell>
               ),
             ),
           ),
+          IconButton(
+            key: const Key('open-todo'),
+            tooltip: AppStrings.todoTitle,
+            icon: const Icon(Icons.checklist),
+            onPressed: _openTodo,
+          ),
           _sortToggle(),
           IconButton(
             key: const Key('open-settings'),
@@ -864,7 +904,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   String get _tabTitle => switch (_tab) {
     ShellTab.files => 'Copist',
-    ShellTab.todo => 'Todo',
+    ShellTab.todo => AppStrings.todoTitle,
     ShellTab.search => 'Search',
     ShellTab.quickNote => 'Quick note',
     ShellTab.settings => 'Settings',
