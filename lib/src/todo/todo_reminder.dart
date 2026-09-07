@@ -31,6 +31,11 @@ const String todoReminderChannelId = 'copist_reminders';
 /// so it must be the bare entry name. An `@drawable/…` or `@mipmap/…`
 /// string does not resolve — it throws `invalid_icon` out of
 /// `initialize`, which took the whole reminder system down with it.
+///
+/// Shipped as density PNGs (`tool/make_reminder_icon.py`), not as a
+/// vector: a `VectorDrawable` under `res/drawable/` never reached the
+/// resource table on the build machine, even from a clean build, while
+/// the density-qualified buckets resolve.
 const String todoReminderIcon = 'ic_stat_reminder';
 
 /// One schedulable reminder: a stable [id] with content + fire time.
