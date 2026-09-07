@@ -584,6 +584,58 @@ void main() {
       expect(stems.map((s) => s.stem), isNot(contains('note1')));
     });
 
+    test(
+      'a v7-era index (tree without content rows) is rebuilt by one '
+      'unchanged rescan',
+      () async {
+        // A note with a tag, so the rebuild reproduces tags too.
+        File(p.join(root.path, 'note1.md')).writeAsStringSync(
+          '---\ntags: [marker]\n---\nhello tagged\n',
+        );
+        await indexer.fullScan(root.path);
+        final beforeFts = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts',
+            )
+            .getSingle();
+        expect(beforeFts.read<int>('c'), 3); // note1, note2, docs/doc1
+
+        // Simulate the migration case: the tree rows exist (v7 index) but
+        // the M3 content rows are gone.
+        await db.customStatement('DELETE FROM notes_fts');
+        await db.customStatement('DELETE FROM note_tags');
+        await db.customStatement('DELETE FROM note_links');
+        await db.customStatement('DELETE FROM note_stems');
+
+        // The rescan itself changes nothing on disk.
+        await indexer.fullScan(root.path);
+
+        final afterFts = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts',
+            )
+            .getSingle();
+        expect(afterFts.read<int>('c'), 3);
+        // Search actually finds the rebuilt content.
+        final hit = await db
+            .customSelect(
+              'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('tagged')],
+            )
+            .get();
+        expect(hit.map((r) => r.read<int>('rowid')), isNotEmpty);
+        // Stems and tags came back with it.
+        expect(
+          (await db.select(db.noteStems).get()).map((s) => s.stem),
+          containsAll(['note1', 'note2', 'doc1']),
+        );
+        expect(
+          (await db.select(db.noteTags).get()).map((t) => t.tag),
+          contains('marker'),
+        );
+      },
+    );
+
     test('an unchanged rescan never rewrites content rows', () async {
       File(p.join(root.path, 'note1.md')).writeAsStringSync(
         '---\ntags: [keep]\n---\nstable\n',

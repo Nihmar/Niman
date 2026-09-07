@@ -318,9 +318,15 @@ final class Indexer {
       _log.debug('fullScan entries: ${_entryList(entries)}');
       // Checked before the digests: a rescan that changes nothing — the
       // common case, once a minute — then costs the walk and no reads.
+      // The content index can still be incomplete (a v7-era database
+      // predates the M3 tables): in that case the no-write exit is skipped
+      // and the content pass rebuilds FTS/tags/links for every note.
       if (!_treeChanged(old, entries)) {
-        _log.info('fullScan: index already mirrors disk, no write');
-        return;
+        if (await _contentIndexComplete()) {
+          _log.info('fullScan: index already mirrors disk, no write');
+          return;
+        }
+        _log.info('fullScan: content index incomplete — building content rows');
       }
       _log.info('fullScan: tree changed, applying diff');
       final read = await _readContents(root, entries, old);
@@ -598,11 +604,49 @@ final class Indexer {
         todo.add(e.rel);
       }
     }
+    // Notes without a content row (the v7-era index or a half-rebuilt db)
+    // are read once here, so the content pass can build their rows — even
+    // when their (size, mtime) did not change.
+    if (!await _contentIndexComplete()) {
+      _log.info('contents: content index incomplete, rebuilding missing rows');
+      for (final rel in await _missingFtsPaths()) {
+        if (!todo.contains(rel)) todo.add(rel);
+      }
+    }
     final contents = await _readRelContents(root, todo);
     for (final c in contents.values) {
       shas[c.rel] = c.sha256;
     }
     return (contents: contents, shas: shas);
+  }
+
+  /// Whether every md note has a content row (`notes_fts.rowid`
+  /// = `notes.id`, same for tags/links — they are written together).
+  ///
+  /// Count-based; the join runs only when the counts differ. The mismatch
+  /// is the migration case: a v7-era index has the tree but no content
+  /// rows, and an unchanged rescan must still build them once.
+  Future<bool> _contentIndexComplete() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT (SELECT count(*) FROM notes WHERE is_dir = 0 '
+          "AND lower(substr(name, -3)) = '.md') AS notes, "
+          '(SELECT count(*) FROM notes_fts) AS fts',
+        )
+        .getSingle();
+    return rows.read<int>('notes') == rows.read<int>('fts');
+  }
+
+  /// The paths of md notes that have no `notes_fts` row.
+  Future<List<String>> _missingFtsPaths() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT notes.path FROM notes LEFT JOIN notes_fts '
+          'ON notes.id = notes_fts.rowid WHERE notes_fts.rowid IS NULL '
+          "AND notes.is_dir = 0 AND lower(substr(notes.name, -3)) = '.md'",
+        )
+        .get();
+    return [for (final r in rows) r.read<String>('path')];
   }
 
   /// Probes a batch of absolute paths on a background isolate.
@@ -1133,6 +1177,10 @@ final class Indexer {
         'INSERT INTO notes_fts (rowid, title, body) VALUES (?, ?, ?)',
         <Object?>[row.id, c.title, c.text],
       );
+      // The file stem (and the alias stems) are content-derived too: a
+      // v7-era restore has no stems at all, so the content pass rebuilds
+      // them instead of relying on the insert path alone.
+      await _replaceStems(row.id, row.name);
       await _writeAliasStems(row.id, c);
       await _writeTags(row.id, c);
       await _writeLinks(row.id, c, resolver);
