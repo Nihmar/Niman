@@ -49,6 +49,13 @@ const String todoReminderPayload = 'todo';
 /// user's per-channel settings on the old one.
 const String todoReminderChannelId = 'copist_reminders';
 
+/// The status-bar icon for reminders.
+///
+/// Android masks a small icon to its alpha channel and tints the result,
+/// so it has to be a flat silhouette. The launcher icon (used here before)
+/// is fully opaque and came out as a plain white square.
+const String todoReminderIcon = '@drawable/ic_stat_reminder';
+
 /// One schedulable reminder: a stable [id] with content + fire time.
 @immutable
 final class TodoReminder {
@@ -207,7 +214,7 @@ final class LocalReminderService implements ReminderService {
     }
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings(todoReminderIcon),
       ),
       onDidReceiveNotificationResponse: (response) =>
           _taps.add(response.payload),
@@ -401,6 +408,7 @@ final class LocalReminderService implements ReminderService {
             android: AndroidNotificationDetails(
               todoReminderChannelId,
               AppStrings.todoReminderChannel,
+              icon: todoReminderIcon,
               importance: Importance.max,
               priority: Priority.high,
             ),
