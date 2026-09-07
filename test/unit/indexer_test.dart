@@ -4,6 +4,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -61,9 +62,12 @@ void main() {
     expect(note1.parent, 0);
     expect(note1.size, 5);
     expect(note1.sha256, isNotNull);
-    expect(note1.modified, toStoredSecond(
-      File(p.join(root.path, 'note1.md')).statSync().modified,
-    ));
+    expect(
+      note1.modified,
+      toStoredSecond(
+        File(p.join(root.path, 'note1.md')).statSync().modified,
+      ),
+    );
 
     final docs = rows.firstWhere((n) => n.path == 'docs');
     expect(docs.isDir, true);
@@ -79,8 +83,7 @@ void main() {
     expect(empty.parent, 0);
   });
 
-  test('a scan landing mid-write never indexes the atomic temp file',
-      () async {
+  test('a scan landing mid-write never indexes the atomic temp file', () async {
     // The temp file as it exists between the write and the rename.
     final target = File(p.join(root.path, 'inflight.md'));
     atomicTempPath(target, 42).writeAsStringSync('partial');
@@ -174,41 +177,43 @@ void main() {
     expect(await dao.find('m/n/o/z.md'), isNotNull);
   });
 
-  test('onChanged fires once per entry point, only when the index wrote',
-      () async {
-    await indexer.fullScan(root.path);
-    var fires = 0;
-    indexer.onChanged = () => fires++;
+  test(
+    'onChanged fires once per entry point, only when the index wrote',
+    () async {
+      await indexer.fullScan(root.path);
+      var fires = 0;
+      indexer.onChanged = () => fires++;
 
-    // A no-change rescan writes nothing and fires nothing.
-    await indexer.fullScan(root.path);
-    expect(fires, 0);
+      // A no-change rescan writes nothing and fires nothing.
+      await indexer.fullScan(root.path);
+      expect(fires, 0);
 
-    final newAbs = p.join(root.path, 'note3.md');
-    File(newAbs).writeAsStringSync('new');
-    await indexer.applyEvents(root.path, [newAbs]);
-    expect(fires, 1);
+      final newAbs = p.join(root.path, 'note3.md');
+      File(newAbs).writeAsStringSync('new');
+      await indexer.applyEvents(root.path, [newAbs]);
+      expect(fires, 1);
 
-    // A batch that changes nothing fires nothing.
-    await indexer.applyEvents(
-      root.path,
-      [p.join(root.path, 'note1.md')],
-    );
-    expect(fires, 1);
+      // A batch that changes nothing fires nothing.
+      await indexer.applyEvents(
+        root.path,
+        [p.join(root.path, 'note1.md')],
+      );
+      expect(fires, 1);
 
-    // A directory resync that changes nothing fires nothing.
-    await indexer.resync(root.path, p.join(root.path, 'docs'));
-    expect(fires, 1);
+      // A directory resync that changes nothing fires nothing.
+      await indexer.resync(root.path, p.join(root.path, 'docs'));
+      expect(fires, 1);
 
-    // A batch with one prune and one upsert fires once for the batch.
-    File(newAbs).deleteSync();
-    File(p.join(root.path, 'note4.md')).writeAsStringSync('four');
-    await indexer.applyEvents(root.path, [
-      newAbs,
-      p.join(root.path, 'note4.md'),
-    ]);
-    expect(fires, 2);
-  });
+      // A batch with one prune and one upsert fires once for the batch.
+      File(newAbs).deleteSync();
+      File(p.join(root.path, 'note4.md')).writeAsStringSync('four');
+      await indexer.applyEvents(root.path, [
+        newAbs,
+        p.join(root.path, 'note4.md'),
+      ]);
+      expect(fires, 2);
+    },
+  );
 
   test('applyEvents picks up external create and delete', () async {
     await indexer.fullScan(root.path);
@@ -240,10 +245,8 @@ void main() {
     expect(renamed!.name, 'renamed.md');
   });
 
-  test(
-    'a renamed directory is pruned via the stale path; '
-    'the full rescan recovers the destination',
-    () async {
+  test('a renamed directory is pruned via the stale path; '
+      'the full rescan recovers the destination', () async {
     await indexer.fullScan(root.path);
     await Directory(p.join(root.path, 'docs')).rename(
       p.join(root.path, 'books'),
@@ -267,19 +270,20 @@ void main() {
   test(
     'applyEvents ignores paths outside the library and dot components',
     () async {
-    await indexer.fullScan(root.path);
-    final outside = await Directory.current.createTemp('copist_outside_');
-    addTearDown(() => outside.delete(recursive: true));
-    File(p.join(outside.path, 'x.md')).writeAsStringSync('x');
+      await indexer.fullScan(root.path);
+      final outside = await Directory.current.createTemp('copist_outside_');
+      addTearDown(() => outside.delete(recursive: true));
+      File(p.join(outside.path, 'x.md')).writeAsStringSync('x');
 
-    await indexer.applyEvents(root.path, [
-      p.join(outside.path, 'x.md'),
-      p.join(root.path, '.trash/secret.md'),
-      p.join(root.path, '.hidden.md'),
-    ]);
-    // Nothing changed: the index still holds exactly the seeded rows.
-    expect(await dao.allRows(), hasLength(5));
-  });
+      await indexer.applyEvents(root.path, [
+        p.join(outside.path, 'x.md'),
+        p.join(root.path, '.trash/secret.md'),
+        p.join(root.path, '.hidden.md'),
+      ]);
+      // Nothing changed: the index still holds exactly the seeded rows.
+      expect(await dao.allRows(), hasLength(5));
+    },
+  );
 
   test('content change updates size and digest', () async {
     await indexer.fullScan(root.path);
@@ -313,6 +317,98 @@ void main() {
       expect(gone.exists, isFalse);
       expect(gone.isDir, isFalse);
       expect(gone.size, 0);
+    });
+  });
+
+  group('note_stems', () {
+    test('a full scan indexes one stem per note, none for dirs', () async {
+      await indexer.fullScan(root.path);
+      final stems = await db.select(db.noteStems).get();
+      expect(stems.map((s) => s.stem).toSet(), {'note1', 'note2', 'doc1'});
+      expect(stems.every((s) => s.source == 'file'), isTrue);
+      final doc1 = (await dao.find('docs/doc1.md'))!;
+      expect(stems.singleWhere((s) => s.stem == 'doc1').noteId, doc1.id);
+    });
+
+    test('a rename moves the stem rows', () async {
+      await indexer.fullScan(root.path);
+      File(p.join(root.path, 'note1.md'))
+          .renameSync(p.join(root.path, 'renamed.md'));
+      await indexer.applyEvents(root.path, [
+        p.join(root.path, 'renamed.md'),
+        p.join(root.path, 'note1.md'),
+      ]);
+      final stems = await db.select(db.noteStems).get();
+      final texts = stems.map((s) => s.stem).toSet();
+      expect(texts, {'renamed', 'note2', 'doc1'});
+      final renamed = (await dao.find('renamed.md'))!;
+      expect(stems.singleWhere((s) => s.stem == 'renamed').noteId, renamed.id);
+    });
+
+    test('a delete wipes the stem rows of the removed note', () async {
+      await indexer.fullScan(root.path);
+      File(p.join(root.path, 'note2.md')).deleteSync();
+      await indexer.applyEvents(root.path, [p.join(root.path, 'note2.md')]);
+      final stems = await db.select(db.noteStems).get();
+      expect(stems.map((s) => s.stem).toSet(), {'note1', 'doc1'});
+    });
+
+    test('a subtree delete wipes stems, tags, links and FTS rows', () async {
+      await indexer.fullScan(root.path);
+      final doc1 = (await dao.find('docs/doc1.md'))!;
+      await db
+          .into(db.noteTags)
+          .insert(
+            NoteTagsCompanion.insert(
+              tag: 'x',
+              noteId: doc1.id,
+              isFrontmatter: true,
+            ),
+          );
+      await db
+          .into(db.noteLinks)
+          .insert(
+            NoteLinksCompanion.insert(
+              fromNote: doc1.id,
+              toNote: doc1.id,
+              kind: 'wiki',
+            ),
+          );
+      await db.customStatement(
+        'INSERT INTO notes_fts (rowid, title, body) VALUES (?1, ?2, ?3)',
+        [doc1.id, 'Deep', 'deep note'],
+      );
+      expect(
+        (await db.select(db.noteStems).get()).where((s) => s.noteId == doc1.id),
+        hasLength(1),
+      );
+
+      // The whole folder goes away: one deleteSubtree must wipe the note's
+      // dependent rows (stems, tags, links, FTS) in the same transaction.
+      Directory(p.join(root.path, 'docs')).deleteSync(recursive: true);
+      await indexer.applyEvents(root.path, [p.join(root.path, 'docs')]);
+
+      expect(
+        (await db.select(db.noteStems).get()).where((s) => s.noteId == doc1.id),
+        isEmpty,
+      );
+      expect(
+        (await db.select(db.noteTags).get()).where((s) => s.noteId == doc1.id),
+        isEmpty,
+      );
+      expect(
+        (await db.select(db.noteLinks).get()).where(
+          (l) => l.fromNote == doc1.id || l.toNote == doc1.id,
+        ),
+        isEmpty,
+      );
+      final fts = await db
+          .customSelect(
+            'SELECT count(*) c FROM notes_fts WHERE rowid = ?1',
+            variables: [Variable<int>(doc1.id)],
+          )
+          .getSingle();
+      expect(fts.read<int>('c'), 0);
     });
   });
 }

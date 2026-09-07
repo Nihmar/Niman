@@ -51,7 +51,7 @@ is **not wired**.
   implementation in `links/` — parser, editor and preview agree on it).
   *AC: unit tests cover all forms + edge cases (empty, unicode, unclosed);
   the slug matches the same heading in editor, outline, and preview.*
-- [ ] **T-M3-02** Schema v6 (all M3 tables) + resolution: `note_stems`,
+- [x] **T-M3-02** Schema v6 (all M3 tables) + resolution: `note_stems`,
   `tags`, `note_tags`, `note_links` (drift) and `notes_fts`
   (`CREATE VIRTUAL TABLE … fts5(title, body, tokenize = 'unicode61
   remove_diacritics 2')`, raw SQL — no drift class; rowid = `notes.id`);

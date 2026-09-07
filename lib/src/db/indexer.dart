@@ -6,6 +6,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
+import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
@@ -148,7 +149,8 @@ DiskProbe _probePath(String path) {
   final st = File(path).statSync();
   final type = st.type;
   // A symlink probes through to its target, as the old existsSync calls did.
-  final isDir = type == FileSystemEntityType.directory ||
+  final isDir =
+      type == FileSystemEntityType.directory ||
       (type == FileSystemEntityType.link && Directory(path).existsSync());
   return DiskProbe(
     exists: type != FileSystemEntityType.notFound,
@@ -183,9 +185,8 @@ Future<Map<String, String>> hashFiles(String root, List<String> rels) async {
 final class Indexer {
   /// Creates the indexer over the given [CopistDatabase].
   Indexer(this._db)
-      :
-        _dao = NoteDao(_db),
-        _log = const AppLogger(name: 'indexer');
+    : _dao = NoteDao(_db),
+      _log = const AppLogger(name: 'indexer');
 
   final CopistDatabase _db;
 
@@ -406,9 +407,28 @@ final class Indexer {
     return shas;
   }
 
+  /// One row's stem text, or null for directories and non-note files.
+  static String? _stemFor(String name) => _isNote(name) ? noteStem(name) : null;
+
+  /// Makes the `note_stems` rows for note [noteId] match its current
+  /// [name]: deletes whatever is there (a rename moves the stem rows) and
+  /// inserts the row for the new name when it is a note.
+  Future<void> _replaceStems(int noteId, String name) async {
+    await (_db.delete(
+      _db.noteStems,
+    )..where((s) => s.noteId.equals(noteId))).go();
+    final stem = _stemFor(name);
+    if (stem == null) return;
+    await _db
+        .into(_db.noteStems)
+        .insert(
+          NoteStemsCompanion.insert(stem: stem, noteId: noteId, source: 'file'),
+          mode: InsertMode.insertOrIgnore,
+        );
+  }
+
   /// Whether [name] is a note file, the only kind the index digests.
-  static bool _isNote(String name) =>
-      p.extension(name).toLowerCase() == '.md';
+  static bool _isNote(String name) => p.extension(name).toLowerCase() == '.md';
 
   /// Walks [start] on a background isolate and replays its log lines.
   Future<List<DiskEntry>> _walk(String root, String start) async {
@@ -456,18 +476,21 @@ final class Indexer {
       );
       final prev = old[e.rel];
       if (prev == null) {
-        final id = await _db.into(_db.notes).insert(
-          NotesCompanion.insert(
-            path: e.rel,
-            parent: parentId,
-            name: e.name,
-            isDir: e.isDir,
-            size: e.size,
-            modified: e.modified,
-            sha256: Value(shas[e.rel]),
-          ),
-        );
+        final id = await _db
+            .into(_db.notes)
+            .insert(
+              NotesCompanion.insert(
+                path: e.rel,
+                parent: parentId,
+                name: e.name,
+                isDir: e.isDir,
+                size: e.size,
+                modified: e.modified,
+                sha256: Value(shas[e.rel]),
+              ),
+            );
         newIds[e.rel] = id;
+        await _replaceStems(id, e.name);
         wrote = true;
         continue;
       }
@@ -479,19 +502,16 @@ final class Indexer {
           prev.modified != toStoredSecond(e.modified) ||
           prev.sha256 != shas[e.rel];
       if (!changed) continue;
-      await (_db
-            .update(_db.notes)
-            ..where((t) => t.path.equals(e.rel)))
-          .write(
-            NotesCompanion(
-              parent: Value(parentId),
-              name: Value(e.name),
-              isDir: Value(e.isDir),
-              size: Value(e.size),
-              modified: Value(e.modified),
-              sha256: Value(shas[e.rel]),
-            ),
-          );
+      await (_db.update(_db.notes)..where((t) => t.path.equals(e.rel))).write(
+        NotesCompanion(
+          parent: Value(parentId),
+          name: Value(e.name),
+          isDir: Value(e.isDir),
+          size: Value(e.size),
+          modified: Value(e.modified),
+          sha256: Value(shas[e.rel]),
+        ),
+      );
       wrote = true;
     }
     final entryRels = <String>{for (final e in entries) e.rel};
@@ -548,9 +568,8 @@ final class Indexer {
     final entries = await _walk(root, abs);
     _log.debug('syncDirSubtree "$rel": ${entries.length} entr(ies)');
     final old = <String, Note>{
-      for (final row in rel.isEmpty
-          ? await _dao.allRows()
-          : await _dao.subtreeRows(rel))
+      for (final row
+          in rel.isEmpty ? await _dao.allRows() : await _dao.subtreeRows(rel))
         row.path: row,
     };
     final shas = await _digests(root, entries, old);
@@ -601,16 +620,18 @@ final class Indexer {
       final row = await _dao.find(prefix);
       if (row == null) {
         final probe = probes[probeIndex++];
-        currentId = await _db.into(_db.notes).insert(
-          NotesCompanion.insert(
-            path: prefix,
-            parent: currentId,
-            name: seg,
-            isDir: true,
-            size: 0,
-            modified: probe.modified,
-          ),
-        );
+        currentId = await _db
+            .into(_db.notes)
+            .insert(
+              NotesCompanion.insert(
+                path: prefix,
+                parent: currentId,
+                name: seg,
+                isDir: true,
+                size: 0,
+                modified: probe.modified,
+              ),
+            );
       } else {
         currentId = row.id;
       }
@@ -640,28 +661,32 @@ final class Indexer {
     if (_isNote(p.basename(abs))) {
       sha =
           existing != null &&
-                  existing.sha256 != null &&
-                  existing.size == probe.size &&
-                  existing.modified == toStoredSecond(probe.modified)
-              ? existing.sha256
-              : (await Isolate.run(() => hashFiles(root, <String>[rel])))[rel];
+              existing.sha256 != null &&
+              existing.size == probe.size &&
+              existing.modified == toStoredSecond(probe.modified)
+          ? existing.sha256
+          : (await Isolate.run(() => hashFiles(root, <String>[rel])))[rel];
     }
     if (existing == null) {
       _log.debug('upsert "$rel": insert (parent "$parentRel")');
-      await _db.into(_db.notes).insert(
-        NotesCompanion.insert(
-          path: rel,
-          parent: parentId,
-          name: p.basename(abs),
-          isDir: false,
-          size: probe.size,
-          modified: probe.modified,
-          sha256: Value(sha),
-        ),
-      );
+      final id = await _db
+          .into(_db.notes)
+          .insert(
+            NotesCompanion.insert(
+              path: rel,
+              parent: parentId,
+              name: p.basename(abs),
+              isDir: false,
+              size: probe.size,
+              modified: probe.modified,
+              sha256: Value(sha),
+            ),
+          );
+      await _replaceStems(id, p.basename(abs));
       return true;
     }
-    final changed = existing.parent != parentId ||
+    final changed =
+        existing.parent != parentId ||
         existing.name != p.basename(abs) ||
         existing.isDir || // a stale directory row at a file path
         existing.size != probe.size ||
@@ -672,17 +697,16 @@ final class Indexer {
       return false;
     }
     _log.debug('upsert "$rel": update (parent "$parentRel")');
-    await (_db.update(_db.notes)..where((t) => t.path.equals(rel)))
-        .write(
-          NotesCompanion(
-            parent: Value(parentId),
-            name: Value(p.basename(abs)),
-            isDir: const Value(false),
-            size: Value(probe.size),
-            modified: Value(probe.modified),
-            sha256: Value(sha),
-          ),
-        );
+    await (_db.update(_db.notes)..where((t) => t.path.equals(rel))).write(
+      NotesCompanion(
+        parent: Value(parentId),
+        name: Value(p.basename(abs)),
+        isDir: const Value(false),
+        size: Value(probe.size),
+        modified: Value(probe.modified),
+        sha256: Value(sha),
+      ),
+    );
     return true;
   }
 }

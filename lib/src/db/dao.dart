@@ -34,10 +34,9 @@ final class NoteDao {
 
   /// The row at library-relative `path`, or null when absent.
   Future<Note?> find(String path) async {
-    final rows = await (
-      _db.select(_db.notes)
-        ..where((t) => t.path.equals(path))
-    ).get();
+    final rows = await (_db.select(
+      _db.notes,
+    )..where((t) => t.path.equals(path))).get();
     return rows.isEmpty ? null : rows.first;
   }
 
@@ -56,27 +55,65 @@ final class NoteDao {
 
   /// Deletes the row at `path` and every descendant row, returning the
   /// number of rows deleted.
+  ///
+  /// The subtree's dependent rows (FTS by `rowid`, stems/tags/links by
+  /// note id) are wiped in the same transaction, through subqueries over
+  /// the still-present notes rows — so a subtree of any size costs a
+  /// constant number of statements, never an argument-list per note.
   Future<int> deleteSubtree(String path) {
-    final t = _db.notes;
-    return (_db.delete(t)
-          ..where(
-            (x) => x.path.equals(path) |
+    // Both statements bind the same two arguments; SQLite string literals
+    // do not process escapes, so `'\'` is a single backslash for the
+    // ESCAPE clause.
+    const where = r"path = ? OR path LIKE ? ESCAPE '\'";
+    final args = [path, '${_sqlLikeEscape(path)}/%'];
+    return _db.transaction(() async {
+      // Dependents first (they select the ids from notes), then the notes
+      // rows themselves.
+      await _db.customStatement(
+        'DELETE FROM notes_fts WHERE rowid IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_stems WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_tags WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_links WHERE from_note IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
+        'DELETE FROM note_links WHERE to_note IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      final t = _db.notes;
+      return (_db.delete(t)..where(
+            (x) =>
+                x.path.equals(path) |
                 x.path.like('${_sqlLikeEscape(path)}/%', escapeChar: r'\'),
           ))
-      .go();
+          .go();
+    });
   }
 
   /// The row at `path` and every descendant row (the directory subtree),
   /// or every row when [path] is empty.
   Future<List<Note>> subtreeRows(String path) async {
     if (path.isEmpty) return allRows();
-    return (
-      _db.select(_db.notes)
-        ..where(
-          (t) => t.path.equals(path) |
+    return (_db.select(_db.notes)..where(
+          (t) =>
+              t.path.equals(path) |
               t.path.like('${_sqlLikeEscape(path)}/%', escapeChar: r'\'),
-        )
-    ).get();
+        ))
+        .get();
   }
 }
 
