@@ -90,7 +90,7 @@ is **not wired**.
   sources), tap tag → notes carrying it (join `notes`, path order) → open.
   *AC: inline `#tags` and frontmatter `tags:` both reflected; tag
   normalization (lowercase, strip leading `#`).*
-- [ ] **T-M3-07** Click-to-navigate: wikilinks render clickable in the
+- [x] **T-M3-07** Click-to-navigate: wikilinks render clickable in the
   preview (custom inline syntax + element builder — the math pipeline's
   pattern) and `onTapLink` is wired (`…md` relative → in-app,
   http(s) → `url_launcher`); editor desktop Ctrl+click (Listener around
@@ -101,7 +101,7 @@ is **not wired**.
   tree; phone: push the note screen; unresolved link → snackbar (strings in
   `strings.dart`). *AC: navigating opens the right note on the 10k-note
   fixture; heading anchors land; external links launch the browser.*
-- [ ] **T-M3-08** Contains mode: explicit "contains" search beside word
+- [x] **T-M3-08** Contains mode: explicit "contains" search beside word
   search, scanning the index's own copy of the text with `LIKE` (pattern
   escaped with the existing `_sqlLikeEscape` in `db/dao.dart`), results in
   path order, excerpt cut around the first match in Dart (`snippet()` only
