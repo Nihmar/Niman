@@ -128,6 +128,14 @@ final class _SearchScreenState extends State<SearchScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted || source == null) return;
     setState(() => _source = source);
+    // T-TS-09 marker: brackets the deferred rebuild so a slow frame can
+    // be attributed to it rather than to the fade that just ended.
+    if (since != null) {
+      const AppLogger(name: 'search.ui').debug(
+        'source applied ${DateTime.now().difference(since).inMilliseconds}ms '
+        'after mount',
+      );
+    }
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
   }
 

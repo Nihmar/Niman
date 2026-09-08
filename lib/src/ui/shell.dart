@@ -252,6 +252,20 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = true;
       _fabExpanded = false;
     });
+    // T-TS-09 marker: brackets the fade so a slow frame can be attributed
+    // to the switch itself (before it) or to what settles after it. Only
+    // the latest switch reports: a rapid double-tap's stale marker would
+    // misattribute the frames.
+    final settled = tab;
+    unawaited(
+      Future<void>.delayed(TabBodyStack.fade + const Duration(milliseconds: 20))
+          .then((_) {
+            if (mounted && _tab == settled) {
+              const AppLogger(name: 'shell')
+                  .debug('tab fade settled: ${settled.name}');
+            }
+          }),
+    );
   }
 
   /// The editor settings toggles, held here so both NoteView sites get the

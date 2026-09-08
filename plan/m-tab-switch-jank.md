@@ -81,8 +81,10 @@ when the source arrives.
 - [ ] **T-TS-09** Name the 2-frame residue after pure switches. `214413`
   shows one pair (~19 ms, `build` ~15 ms, no mounts) 176 ms after
   files→settings at 21:44:11.485, plus a lone raster blip a second after
-  the last tap. Small and intermittent; measure around the fade end and
-  the deferred hidden-search rebuild before changing anything.
+  the last tap. Markers in place (`shell: tab fade settled`, `search.ui:
+  source applied`): take a log with a few files→settings switches and see
+  whether the frames cluster at the fade end or at the deferred rebuild,
+  before changing anything.
 
 ## Notes
 

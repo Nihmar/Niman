@@ -19,8 +19,9 @@ final class TabBodyStack extends StatelessWidget {
   /// One body per tab, in tab order, each with a stable identity.
   final List<Widget> children;
 
-  /// Matches the old tab-switch fade.
-  static const _fade = Duration(milliseconds: 180);
+  /// Matches the old tab-switch fade; the shell reuses it to mark the
+  /// fade end in the log (T-TS-09).
+  static const fade = Duration(milliseconds: 180);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ final class TabBodyStack extends StatelessWidget {
             child: TickerMode(
               enabled: i == currentIndex,
               child: AnimatedOpacity(
-                duration: _fade,
+                duration: fade,
                 curve: Curves.easeOutCubic,
                 opacity: i == currentIndex ? 1 : 0,
                 child: children[i],
