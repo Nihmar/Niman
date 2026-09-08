@@ -228,6 +228,7 @@ final class LocalReminderService implements ReminderService {
       'alarms ${exact ? 'exact' : 'inexact'}, '
       'battery ${batteryExempt ? 'unrestricted' : 'optimized'}',
     );
+    await _logOverdue(wanted, exact: exact, batteryExempt: batteryExempt);
     await _cancelStale(wanted);
     if (wanted.isEmpty) {
       _log.info('todo reminders reconciled: 0 scheduled');
@@ -245,6 +246,51 @@ final class LocalReminderService implements ReminderService {
     // Copist asked for, and the two can differ (a rejected alarm, an OEM
     // limit). This line is what makes an exported log conclusive.
     await _logPending('after reconcile');
+  }
+
+  /// Logs the reminders whose moment has already passed (T-RL-01).
+  ///
+  /// Reminders are reported arriving minutes late, and nothing in the app
+  /// sees a delivery: the plugin reports no "delivered at". What it does
+  /// report is what the OS still holds, and that is enough to tell the
+  /// two cases apart. An id still pending after its own time never fired,
+  /// which is what a deferred alarm looks like; an id that is gone did
+  /// fire, so any lateness was in the delivery, not in the alarm. Each
+  /// line carries the two settings that decide which — exact alarms and
+  /// the battery exemption — so one exported log answers the question
+  /// instead of narrowing it.
+  ///
+  /// Only runs when something is actually overdue, so a healthy set costs
+  /// nothing.
+  Future<void> _logOverdue(
+    Map<int, TodoReminder> wanted, {
+    required bool exact,
+    required bool batteryExempt,
+  }) async {
+    final now = _clock();
+    final overdue = [
+      for (final reminder in wanted.values)
+        if (!reminder.when.isAfter(now)) reminder,
+    ];
+    if (overdue.isEmpty) return;
+    final List<int> pending;
+    try {
+      pending = await _backend.pendingIds();
+    } on Object catch (error) {
+      _log.warning('todo reminders: pending query failed ($error)');
+      return;
+    }
+    for (final reminder in overdue) {
+      final held = pending.contains(reminder.id);
+      _log.warning(
+        'todo reminders: overdue ${reminder.id} '
+        'due ${reminder.when.toIso8601String()} '
+        '(${_since(now.difference(reminder.when))} ago), '
+        '${held ? 'STILL PENDING, never fired' : 'no longer pending, fired'}, '
+        'alarms ${exact ? 'exact' : 'inexact'}, '
+        'battery ${batteryExempt ? 'unrestricted' : 'optimized'}',
+      );
+    }
   }
 
   /// The worst precondition currently failing.

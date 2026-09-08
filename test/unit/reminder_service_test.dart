@@ -4,6 +4,7 @@
 // interleaving, and a stale set scheduling into the past.
 import 'dart:async';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/reminder_health.dart';
 import 'package:copist/src/todo/reminder_settings.dart';
 import 'package:copist/src/todo/reminders.dart';
@@ -236,5 +237,64 @@ void main() {
     await service.reconcile(wanted([reminderAt(1, hours: -1), reminderAt(2)]));
     expect(backend.scheduled.single.id, 2);
     await service.dispose();
+  });
+
+  // T-RL-01: the user reports reminders arriving minutes late, and
+  // nothing in the app sees a delivery. What the OS still holds after a
+  // reminder's own time is the evidence, so it goes in the log.
+  group('the overdue report', () {
+    /// The lines the reconcile logged about overdue reminders.
+    List<String> overdueLines() => [
+      for (final line in AppLog.lines())
+        if (line.contains('todo reminders: overdue')) line,
+    ];
+
+    setUp(AppLog.clear);
+    tearDown(AppLog.clear);
+
+    test('an alarm the OS still holds past its time never fired', () async {
+      backend = FakeReminderBackend(pending: [1]);
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: -1)]));
+
+      final line = overdueLines().single;
+      expect(line, contains('overdue 1'));
+      expect(line, contains('STILL PENDING'));
+      expect(line, contains('1h 0m ago'));
+      expect(line, contains('alarms exact'));
+      expect(line, contains('battery unrestricted'));
+      await service.dispose();
+    });
+
+    test('an alarm the OS no longer holds did fire', () async {
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: -1)]));
+
+      expect(overdueLines().single, contains('no longer pending, fired'));
+      await service.dispose();
+    });
+
+    test('the line carries what would defer an alarm', () async {
+      backend = FakeReminderBackend(pending: [1])..exact = false;
+      settings.batteryExempt = false;
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1, hours: -2)]));
+
+      final line = overdueLines().single;
+      expect(line, contains('alarms inexact'));
+      expect(line, contains('battery optimized'));
+      await service.dispose();
+    });
+
+    test('nothing is logged while every reminder is still ahead', () async {
+      final service = serviceOf();
+      await service.reconcile(wanted([reminderAt(1), reminderAt(2)]));
+
+      expect(overdueLines(), isEmpty);
+      // And it costs no extra query: the three reads are the startup
+      // report, the cancel sweep and the read-back, as before.
+      expect(backend.calls.where((c) => c == 'pending').length, 3);
+      await service.dispose();
+    });
   });
 }
