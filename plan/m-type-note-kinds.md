@@ -142,15 +142,21 @@ syncs like one).
   (list parser, registry fallback, byte-stable round-trip) and widget tests
   (toggle persistence, pencil→editor, FAB choice). *AC: green; a mixed
   library opens each note with the right GUI.*
-- [ ] **T-TK-09** Drag to reorder + sub-lists. Long-press a row and drag:
-  the top quarter of a target row moves before it, the bottom quarter moves
-  after its subtree, the middle makes the dragged item a child of the target
-  (sub-list, +2 spaces of indent); above the first row / below the last row
-  moves to root level. The item's whole subtree (its children and the prose
-  lines between them) moves with it; moved lines keep their bytes apart from
-  the leading spaces. *AC: widget tests — dragging reorders, makes sub-lists,
-  moves a subtree with its children, and is a no-op on its own subtree;
-  parser unit tests for the move/outdent operations.*
+- [ ] **T-TK-09** Drag to reorder + sub-lists. Each row carries a **drag
+  handle** at its leading edge; a drag starts there and nowhere else (the
+  rest of the row keeps tap-to-edit, and a drag elsewhere scrolls the
+  list). The top quarter of a target row moves before it, the bottom
+  quarter moves after its subtree, the middle makes the dragged item a
+  child of the target (sub-list, +2 spaces of indent); above the first row
+  / below the last row moves to root level. The landing place is shown by
+  a dot-and-bar marker drawn at the indent the item will take, overlaid on
+  the row edges so rows never shift under the finger, plus a tint on the
+  target row for the "child of" drop. The item's whole subtree (its
+  children and the prose lines between them) moves with it; moved lines
+  keep their bytes apart from the leading spaces. *AC: widget tests —
+  dragging the handle reorders, makes sub-lists, moves a subtree with its
+  children, and is a no-op on its own subtree; dragging the row body does
+  not reorder; parser unit tests for the move/outdent operations.*
 
 ## Technical design
 

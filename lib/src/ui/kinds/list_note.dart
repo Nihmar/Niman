@@ -65,7 +65,8 @@ final class _DropTarget {
   final ListDropMode mode;
 }
 
-class _ListNoteViewState extends State<ListNoteView> {
+class _ListNoteViewState extends State<ListNoteView>
+    with SingleTickerProviderStateMixin {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
   final ScrollController _scroll = ScrollController();
@@ -75,10 +76,34 @@ class _ListNoteViewState extends State<ListNoteView> {
   _Drag? _drag;
   _DropTarget? _drop;
 
+  /// Drives the add row's show/hide: it steps aside while a row is being
+  /// edited in place, so the edited row is never hidden behind it.
+  late final AnimationController _addRowController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 180),
+    value: 1,
+  );
+  late final CurvedAnimation _addRowShown = CurvedAnimation(
+    parent: _addRowController,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
   @override
   void initState() {
     super.initState();
     _items = parseListItems(widget.text);
+  }
+
+  /// Opens ([index]) or closes (null) the in-place edit, animating the
+  /// add row out of the way with it.
+  void _setEditing(int? index) {
+    _editingIndex = index;
+    if (index == null) {
+      _addRowController.forward();
+    } else {
+      _addRowController.reverse();
+    }
   }
 
   @override
@@ -94,7 +119,7 @@ class _ListNoteViewState extends State<ListNoteView> {
       final e = _editingIndex;
       if (e != null &&
           (e >= _items.length || oldItems[e].text != _items[e].text)) {
-        _editingIndex = null;
+        _setEditing(null);
       }
     }
   }
@@ -103,6 +128,8 @@ class _ListNoteViewState extends State<ListNoteView> {
   void dispose() {
     _newItem.dispose();
     _scroll.dispose();
+    _addRowShown.dispose();
+    _addRowController.dispose();
     super.dispose();
   }
 
@@ -121,7 +148,7 @@ class _ListNoteViewState extends State<ListNoteView> {
 
   void _beginEdit(int index) {
     if (_drag != null) return;
-    setState(() => _editingIndex = index);
+    setState(() => _setEditing(index));
   }
 
   void _commitEdit(int index, String raw) {
@@ -129,7 +156,7 @@ class _ListNoteViewState extends State<ListNoteView> {
     final text = raw.trim();
     final item = _items[index];
     if (text == item.text) {
-      if (_editingIndex == index) setState(() => _editingIndex = null);
+      if (_editingIndex == index) setState(() => _setEditing(null));
       return;
     }
     widget.onChanged(editItemText(widget.text, item, text));
@@ -282,8 +309,8 @@ class _ListNoteViewState extends State<ListNoteView> {
     return Padding(
       padding: EdgeInsets.only(
         // Raised above the bottom edge: phones with rounded screen
-        // corners clip content there.
-        bottom: 8 + MediaQuery.of(context).viewPadding.bottom,
+        // corners clip the add row's own corners there.
+        bottom: 16 + MediaQuery.of(context).viewPadding.bottom,
       ),
       child: Column(
         children: [
@@ -340,8 +367,21 @@ class _ListNoteViewState extends State<ListNoteView> {
   }
 
   Widget _addRow(BuildContext context) {
+    return SizeTransition(
+      key: const Key('list-add-row'),
+      sizeFactor: _addRowShown,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(
+        opacity: _addRowShown,
+        child: _addField(context),
+      ),
+    );
+  }
+
+  Widget _addField(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      // Inset from the screen edges, which are rounded on most phones.
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: TextField(
         controller: _newItem,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(

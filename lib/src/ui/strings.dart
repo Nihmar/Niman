@@ -50,6 +50,7 @@ final class AppStrings {
   static const String listAddHint = 'Add an item';
   static const String listAddTooltip = 'Add an item';
   static const String listEmpty = 'No items yet';
+  static const String listDragHandleLabel = 'Reorder item';
 
   // Editor status bar.
   static const String outlineTooltip = 'Outline';

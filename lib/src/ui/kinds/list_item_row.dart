@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:copist/src/ui/kinds/list_drag_handle.dart';
+import 'package:copist/src/ui/kinds/list_drop_indicator.dart';
 import 'package:copist/src/ui/kinds/list_parser.dart';
 import 'package:flutter/material.dart';
 
-/// One row of the list-kind GUI: the checkbox (tapping it flips the
-/// item), the item text (tapping it edits the text in place) and the
-/// whole row as a long-press drag source (T-TK-09).
+/// One row of the list-kind GUI: the drag handle (dragging it moves the
+/// row, T-TK-09), the checkbox (tapping it flips the item) and the item
+/// text (tapping it edits the text in place).
 class ListItemRow extends StatefulWidget {
   /// Creates the row.
   const ListItemRow({
@@ -44,8 +46,7 @@ class ListItemRow extends StatefulWidget {
   /// Commits the edited text (submit, focus loss, or the edit ending).
   final ValueChanged<String> onCommitEdit;
 
-  /// The long press started at the given global position (the row's
-  /// drag).
+  /// The drag started at the given global position (the handle's drag).
   final ValueChanged<Offset> onDragStart;
 
   /// The drag moved to the given global position.
@@ -121,8 +122,17 @@ class _ListItemRowState extends State<ListItemRow> {
     final theme = Theme.of(context);
     final item = widget.item;
     final indent = 8.0 + item.depth * 24;
+    final under = widget.indicator == ListDropMode.under;
     final row = Row(
       children: [
+        ListDragHandle(
+          key: const Key('list-drag-handle'),
+          active: widget.isDragSource,
+          onDragStart: widget.onDragStart,
+          onDragMove: widget.onDragMove,
+          onDragEnd: widget.onDragEnd,
+          onDragCancel: widget.onDragCancel,
+        ),
         Checkbox(
           value: item.checked,
           onChanged: (_) => widget.onToggle(),
@@ -144,54 +154,53 @@ class _ListItemRowState extends State<ListItemRow> {
         ),
       ],
     );
-    final padded = Padding(
-      padding: EdgeInsets.only(
-        left: indent,
-        right: 8,
-        top: 4,
-        bottom: 4,
+    // The "under" drop tints the target row: the dragged item is about to
+    // become its child, which no line between rows can say on its own.
+    final body = AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      margin: EdgeInsets.only(left: indent, right: 8, top: 2, bottom: 2),
+      decoration: BoxDecoration(
+        color: under
+            ? theme.colorScheme.primary.withValues(alpha: 0.14)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: row,
     );
     final content = widget.isEditing
-        ? padded
+        ? body
         : GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onBeginEdit,
-            onLongPressStart: (d) => widget.onDragStart(d.globalPosition),
-            onLongPressMoveUpdate: (d) => widget.onDragMove(
-              d.globalPosition,
-            ),
-            onLongPressEnd: (_) => widget.onDragEnd(),
-            onLongPressCancel: widget.onDragCancel,
-            child: padded,
+            child: body,
           );
     return Opacity(
-      opacity: widget.isDragSource ? 0.35 : 1,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      opacity: widget.isDragSource ? 0.3 : 1,
+      // The indicators overlay the row's edges instead of taking space:
+      // rows keep their height and position while a drag hovers them.
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          if (widget.indicator == ListDropMode.before) _indicator(theme),
           content,
-          if (widget.indicator == ListDropMode.after ||
-              widget.indicator == ListDropMode.under)
-            _indicator(
-              theme,
-              under: widget.indicator == ListDropMode.under,
-            ),
+          if (widget.indicator == ListDropMode.before)
+            _indicatorAt(top: true, indent: indent),
+          if (widget.indicator == ListDropMode.after)
+            _indicatorAt(top: false, indent: indent),
+          if (under) _indicatorAt(top: false, indent: indent + 24),
         ],
       ),
     );
   }
 
-  /// The drop indicator line: full width for before/after, indented for
-  /// under (the item will become a child).
-  Widget _indicator(ThemeData theme, {bool under = false}) {
-    final indent = 8.0 + widget.item.depth * 24 + (under ? 24 : 0);
-    return Container(
-      height: 2,
-      margin: EdgeInsets.only(left: indent, right: 8),
-      color: theme.colorScheme.primary,
+  /// A drop indicator centred on the row's top or bottom edge.
+  Widget _indicatorAt({required bool top, required double indent}) {
+    const overhang = -ListDropIndicator.height / 2;
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: top ? overhang : null,
+      bottom: top ? null : overhang,
+      child: ListDropIndicator(indent: indent),
     );
   }
 

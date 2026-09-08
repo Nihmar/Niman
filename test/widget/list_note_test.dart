@@ -1,5 +1,6 @@
 // T-TK-04/09: the list-kind GUI — checkable rows, nesting, the add row,
 // in-place text editing and drag reordering/sub-lists.
+import 'package:copist/src/ui/kinds/list_drag_handle.dart';
 import 'package:copist/src/ui/kinds/list_item_row.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -16,15 +17,20 @@ Finder _rowCheckbox(int index) => find.descendant(
   matching: find.byType(Checkbox),
 );
 
+Finder _rowHandle(int index) => find.descendant(
+  of: _row(index),
+  matching: find.byType(ListDragHandle),
+);
+
 Finder _rowEditField() => find.descendant(
   of: find.byType(ListItemRow),
   matching: find.byType(TextField),
 );
 
-/// Long-presses [from] and drags to [to] (the row drag of T-TK-09).
-Future<void> _longPressDrag(WidgetTester tester, Finder from, Offset to) async {
+/// Drags [from] to [to] (the handle drag of T-TK-09).
+Future<void> _drag(WidgetTester tester, Finder from, Offset to) async {
   final gesture = await tester.startGesture(tester.getCenter(from));
-  await tester.pump(const Duration(milliseconds: 600));
+  await tester.pump();
   await gesture.moveTo(to);
   await tester.pump();
   await gesture.up();
@@ -146,7 +152,9 @@ void main() {
     );
   });
 
-  testWidgets('dragging a row below another reorders it', (tester) async {
+  testWidgets('dragging the handle below another row reorders it', (
+    tester,
+  ) async {
     String? out;
     const text = '- [ ] one\n- [ ] two\n';
     await tester.pumpWidget(
@@ -155,12 +163,28 @@ void main() {
     final center = tester.getCenter(_row(1));
     final height = tester.getSize(_row(1)).height;
     // Lower quarter of row 1: the "after" zone.
-    await _longPressDrag(
+    await _drag(
       tester,
-      _row(0),
+      _rowHandle(0),
       Offset(center.dx, center.dy + height * 0.4),
     );
     expect(out, '- [ ] two\n- [ ] one\n');
+  });
+
+  testWidgets('dragging the row body does not reorder', (tester) async {
+    String? out;
+    const text = '- [ ] one\n- [ ] two\n';
+    await tester.pumpWidget(
+      _app(ListNoteView(text: text, onChanged: (t) => out = t)),
+    );
+    final center = tester.getCenter(_row(1));
+    final height = tester.getSize(_row(1)).height;
+    await _drag(
+      tester,
+      find.text('one'),
+      Offset(center.dx, center.dy + height * 0.4),
+    );
+    expect(out, isNull);
   });
 
   testWidgets('dragging a row onto another makes a sub-list', (tester) async {
@@ -170,7 +194,7 @@ void main() {
       _app(ListNoteView(text: text, onChanged: (t) => out = t)),
     );
     // Center of row 1: the "under" zone.
-    await _longPressDrag(tester, _row(0), tester.getCenter(_row(1)));
+    await _drag(tester, _rowHandle(0), tester.getCenter(_row(1)));
     expect(out, '- [ ] two\n  - [ ] one\n');
   });
 
@@ -182,9 +206,9 @@ void main() {
     );
     final center = tester.getCenter(_row(2));
     final height = tester.getSize(_row(2)).height;
-    await _longPressDrag(
+    await _drag(
       tester,
-      _row(0),
+      _rowHandle(0),
       Offset(center.dx, center.dy + height * 0.4),
     );
     expect(out, '- [ ] two\n- [ ] one\n  - [ ] child\n');
@@ -196,7 +220,7 @@ void main() {
     await tester.pumpWidget(
       _app(ListNoteView(text: text, onChanged: (t) => out = t)),
     );
-    await _longPressDrag(tester, _row(0), tester.getCenter(_row(1)));
+    await _drag(tester, _rowHandle(0), tester.getCenter(_row(1)));
     expect(out, isNull);
   });
 
@@ -227,6 +251,26 @@ void main() {
     await tester.tap(find.byKey(const Key('list-add-button')));
     await tester.pump();
     expect(out, '---\ntype: list\n---\n- [ ] one\n- [ ] three\n');
+  });
+
+  testWidgets('the add row slides away while a row is edited', (tester) async {
+    var text = '---\ntype: list\n---\n- [ ] one\n';
+    Widget app() => _app(ListNoteView(text: text, onChanged: (t) {
+          text = t;
+        }));
+    await tester.pumpWidget(app());
+    Size addRow() => tester.getSize(find.byKey(const Key('list-add-row')));
+    final shown = addRow().height;
+    expect(shown, greaterThan(0));
+
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    expect(addRow().height, 0);
+
+    // Committing the edit brings it back.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(addRow().height, shown);
   });
 
   testWidgets('a note without task items shows the empty state', (
