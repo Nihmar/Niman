@@ -462,6 +462,27 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
+    unawaited(_warmSearchSource());
+  }
+
+  /// Opens the background search connection before anything asks for it.
+  ///
+  /// The first `SearchScreen` asks the session for its source, and that
+  /// call is what spawns drift's background isolate and opens a second
+  /// SQLite connection on the database file. It is awaited rather than
+  /// blocking, but an isolate spawn is not free on a phone: it competes
+  /// for the same cores as the frame being drawn, and the frame being
+  /// drawn is the tab-switch animation (2026-09-08 user feedback: moving
+  /// to and from Search sometimes stutters).
+  ///
+  /// Doing it here costs the same work at a moment nothing is animating.
+  /// After a delay, not in `initState`: opening a library is already the
+  /// heaviest stretch of a run, and this has no deadline — whoever gets
+  /// there first still gets a source, since the session caches one.
+  Future<void> _warmSearchSource() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    await widget.controller.searchSource;
   }
 
   @override
