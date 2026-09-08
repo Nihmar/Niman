@@ -32,6 +32,33 @@ final class NoteDao {
         .get();
   }
 
+  /// Every note that belongs to the root or to one of the [expandedPaths],
+  /// in tree order (directories first, then name).
+  ///
+  /// Used for single-query tree flattening: one round-trip to the database
+  /// returns every potentially visible row.
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  }) {
+    return (_db.select(_db.notes)
+          ..where(
+            (t) =>
+                t.parent.equals(0) |
+                t.parent.isInQuery(
+                  _db.selectOnly(_db.notes)
+                    ..addColumns([_db.notes.id])
+                    ..where(_db.notes.path.isIn(expandedPaths)),
+                ),
+          )
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.isDir),
+            (t) =>
+                nameDesc ? OrderingTerm.desc(t.name) : OrderingTerm.asc(t.name),
+          ]))
+        .get();
+  }
+
   /// The row at library-relative `path`, or null when absent.
   Future<Note?> find(String path) async {
     final rows = await (_db.select(

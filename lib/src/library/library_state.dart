@@ -145,6 +145,15 @@ final class LibraryController implements LibrarySession {
     return await NoteDao(db).children(parentId, nameDesc: nameDesc);
   }
 
+  @override
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  }) async {
+    final db = await database;
+    return await NoteDao(db).tree(expandedPaths, nameDesc: nameDesc);
+  }
+
   /// Every indexed folder, path-ordered (for move-target pickers).
   @override
   Future<List<Note>> folders() async {

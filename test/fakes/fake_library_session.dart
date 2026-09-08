@@ -228,6 +228,26 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  }) async {
+    final expanded = Set<String>.from(expandedPaths);
+    final results =
+        <_Row>[
+          for (final row in _rows)
+            if (!row.trashed &&
+                (parentOf(row.path).isEmpty ||
+                    expanded.contains(parentOf(row.path))))
+              row,
+        ]..sort((a, b) {
+          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
+          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
+        });
+    return results.map(_toNote).toList();
+  }
+
+  @override
   Future<Note?> find(String path) {
     final row = _findRow(path);
     return Future<Note?>.value(row == null ? null : _toNote(row));

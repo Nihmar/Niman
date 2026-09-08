@@ -205,6 +205,12 @@ abstract interface class LibrarySession {
   /// [nameDesc]).
   Future<List<Note>> children(int parentId, {bool nameDesc = false});
 
+  /// Every note that belongs to the root or to one of the [expandedPaths].
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  });
+
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();
 
