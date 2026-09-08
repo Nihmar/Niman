@@ -7,7 +7,6 @@ import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_source.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,31 +14,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';
 import '../fakes/fake_todo_source.dart';
-
-/// A [FilePickerPlatform] stub returning [directory] from
-/// `getDirectoryPath` (the "Create new" flow needs a parent folder).
-final class _FakeFilePicker extends FilePickerPlatform {
-  String? directory;
-
-  @override
-  Future<String?> getDirectoryPath({
-    String? dialogTitle,
-    String? initialDirectory,
-    AndroidOptions androidOptions = const AndroidOptions(),
-    WindowsOptions windowsOptions = const WindowsOptions(),
-    LinuxOptions linuxOptions = const LinuxOptions(),
-    WebOptions webOptions = const WebOptions(),
-  }) async {
-    return directory;
-  }
-}
+import '../fakes/shell_harness.dart';
 
 void main() {
   late FakeLibrarySession controller;
   late FakeReminderService reminders;
   late FakeTodoSource todos;
-  late _FakeFilePicker filePicker;
-  late FilePickerPlatform previousPicker;
+  late FakeFilePicker filePicker;
 
   const line = 'call rem:2099-09-08T10:30';
 
@@ -47,47 +28,15 @@ void main() {
     controller = FakeLibrarySession();
     reminders = FakeReminderService();
     todos = FakeTodoSource(todo: <String>[line]);
-    filePicker = _FakeFilePicker();
-    previousPicker = FilePickerPlatform.instance;
-    FilePickerPlatform.instance = filePicker;
+    filePicker = useFakeFilePicker();
   });
 
   tearDown(() async {
-    FilePickerPlatform.instance = previousPicker;
     await reminders.dispose();
   });
 
-  void setSize(WidgetTester tester, Size size) {
-    tester.view.physicalSize = size;
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-  }
-
-  Future<void> settle(WidgetTester tester) async {
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 4));
-    await tester.pump(const Duration(seconds: 1));
-  }
-
-  Future<void> openLibrary(WidgetTester tester) async {
-    filePicker.directory = '/fake';
-    await tester.tap(find.text('Create new'));
-    await settle(tester);
-    await tester.enterText(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
-      ),
-      'library',
-    );
-    await tester.pump();
-    await tester.tap(find.text('Create'));
-    await settle(tester);
-  }
-
   Future<void> pumpShell(WidgetTester tester, Size size) async {
-    setSize(tester, size);
+    setSurfaceSize(tester, size);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -99,7 +48,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
   }
 
   /// The wanted ids of the last recorded reconcile.

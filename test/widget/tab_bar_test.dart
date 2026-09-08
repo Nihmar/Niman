@@ -10,7 +10,6 @@ import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/tree.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,60 +17,15 @@ import 'package:flutter_test/flutter_test.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';
 import '../fakes/fake_todo_source.dart';
-
-/// Phone-sized surface (390 x 844 logical).
-void _setPhoneSize(WidgetTester tester) {
-  tester.view.physicalSize = const Size(390, 844);
-  tester.view.devicePixelRatio = 1.0;
-  addTearDown(tester.view.resetPhysicalSize);
-  addTearDown(tester.view.resetDevicePixelRatio);
-}
-
-/// A [FilePickerPlatform] stub: [directory] is what
-/// `getDirectoryPath` returns (`null` = the user canceled).
-final class _FakeFilePicker extends FilePickerPlatform {
-  String? directory;
-
-  @override
-  Future<String?> getDirectoryPath({
-    String? dialogTitle,
-    String? initialDirectory,
-    AndroidOptions androidOptions = const AndroidOptions(),
-    WindowsOptions windowsOptions = const WindowsOptions(),
-    LinuxOptions linuxOptions = const LinuxOptions(),
-    WebOptions webOptions = const WebOptions(),
-  }) async {
-    return directory;
-  }
-}
-
-Future<void> settle(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 4));
-  await tester.pump(const Duration(seconds: 1));
-}
-
-Finder noteRow(FakeLibrarySession controller, String name) {
-  return find.descendant(
-    of: find.byType(NoteTree),
-    matching: find.text(name),
-  );
-}
+import '../fakes/shell_harness.dart';
 
 void main() {
   late FakeLibrarySession controller;
-  late _FakeFilePicker filePicker;
-  late FilePickerPlatform previousPicker;
+  late FakeFilePicker filePicker;
 
   setUp(() {
     controller = FakeLibrarySession();
-    filePicker = _FakeFilePicker();
-    previousPicker = FilePickerPlatform.instance;
-    FilePickerPlatform.instance = filePicker;
-  });
-
-  tearDown(() {
-    FilePickerPlatform.instance = previousPicker;
+    filePicker = useFakeFilePicker();
   });
 
   Widget buildApp() {
@@ -81,38 +35,21 @@ void main() {
     );
   }
 
-  /// Opens a library at /fake/library through the "Create new" flow.
-  Future<void> openLibrary(WidgetTester tester) async {
-    filePicker.directory = '/fake';
-    await tester.tap(find.text('Create new'));
-    await settle(tester);
-    await tester.enterText(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
-      ),
-      'library',
-    );
-    await tester.pump();
-    await tester.tap(find.text('Create'));
-    await settle(tester);
-  }
-
   testWidgets('phone: 5 destinations show and switching preserves state', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
     expect(find.text('No notes yet'), findsOne);
 
     // Create a folder, expand it, and create a note inside it.
     await controller.createFolder(parentPath: '', name: 'Docs');
     await settle(tester);
-    await tester.tap(noteRow(controller, 'Docs'));
+    await tester.tap(noteRow('Docs'));
     await settle(tester);
-    await tester.longPress(noteRow(controller, 'Docs'));
+    await tester.longPress(noteRow('Docs'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('menu-new-note')));
     await settle(tester);
@@ -151,16 +88,16 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('tab-files')));
     await settle(tester);
-    expect(noteRow(controller, 'Docs'), findsOne);
+    expect(noteRow('Docs'), findsOne);
   });
 
   testWidgets('sort toggle flips the tree order and persists (T-UI-03)', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     // Three notes created out of alphabetical order: the tree sorts them.
     await controller.createNote(parentPath: '', name: 'charlie');
@@ -196,10 +133,10 @@ void main() {
   testWidgets('quick note: nothing opens by default, create names the note', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await tester.tap(
       find.descendant(
@@ -241,16 +178,16 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
-    expect(noteRow(controller, 'Scratch pad.md'), findsOne);
+    expect(noteRow('Scratch pad.md'), findsOne);
   });
 
   testWidgets('quick note: pick an existing note from the tree', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await controller.createNote(parentPath: '', name: 'Scratch');
     await controller.createNote(parentPath: '', name: 'Other');
@@ -284,10 +221,10 @@ void main() {
   testWidgets('quick note: choosing in Settings is honored by the tab', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await controller.createNote(parentPath: '', name: 'Scratch');
     await settle(tester);
@@ -342,21 +279,21 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
-    expect(noteRow(controller, 'Scratch.md'), findsOne);
+    expect(noteRow('Scratch.md'), findsOne);
   });
 
   testWidgets('FAB creates in the selected folder, menu offers all actions '
       '(T-UI-05)', (tester) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await controller.createFolder(parentPath: '', name: 'Docs');
     await settle(tester);
 
     // Select the folder: the FAB creates the note inside it.
-    await tester.tap(noteRow(controller, 'Docs'));
+    await tester.tap(noteRow('Docs'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settle(tester);
@@ -377,7 +314,7 @@ void main() {
     // (file row); Rename/Move/Delete are.
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
-    await tester.longPress(noteRow(controller, 'In root.md'));
+    await tester.longPress(noteRow('In root.md'));
     await settle(tester);
     expect(find.byKey(const Key('menu-new-note')), findsOne);
     expect(find.byKey(const Key('menu-new-folder')), findsNothing);
@@ -400,7 +337,7 @@ void main() {
     expect(await controller.ops!.find('Docs/Renamed.md'), isNotNull);
 
     // Delete through the menu (trash toggle default on).
-    await tester.longPress(noteRow(controller, 'Renamed.md'));
+    await tester.longPress(noteRow('Renamed.md'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('menu-delete')));
     await settle(tester);
@@ -410,10 +347,10 @@ void main() {
   });
 
   testWidgets('search tab shows the search screen (M3)', (tester) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await tester.tap(
       find.descendant(
@@ -438,7 +375,7 @@ void main() {
   });
 
   testWidgets('a reminder tap opens the Todo tab (T-TD-07)', (tester) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     final reminders = FakeReminderService();
     await tester.pumpWidget(
       ProviderScope(
@@ -451,7 +388,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
     expect(find.text('No notes yet'), findsOne);
 
     reminders.tap(todoReminderPayload);
@@ -463,7 +400,7 @@ void main() {
   testWidgets('a tap-started app lands on the Todo tab (T-TD-07)', (
     tester,
   ) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     final reminders = FakeReminderService(
       launchPayload: todoReminderPayload,
     );
@@ -478,14 +415,14 @@ void main() {
       ),
     );
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
     await settle(tester);
     expect(find.text('No open tasks yet'), findsOne);
     await reminders.dispose();
   });
 
   testWidgets('the Todo add button creates a task (T-TD-08)', (tester) async {
-    _setPhoneSize(tester);
+    setSurfaceSize(tester, const Size(390, 844));
     final reminders = FakeReminderService();
     final todos = FakeTodoSource();
     await tester.pumpWidget(
@@ -499,7 +436,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
     await tester.tap(
       find.descendant(
         of: find.byType(NavigationBar),
@@ -530,7 +467,7 @@ void main() {
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     // No bottom navigation on the wide split layout.
     expect(find.byType(NavigationBar), findsNothing);

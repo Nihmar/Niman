@@ -652,7 +652,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Creates a note in [parent] (default: the FAB target). Used by the
   /// FAB and the context menu.
   Future<void> _createNote({String? parent}) async {
-    final name = await _nameDialog(
+    final name = await showNameDialog(
       context,
       title: 'New note',
       initial: 'New note',
@@ -674,7 +674,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Creates a folder in [parent] (default: the FAB target).
   Future<void> _createFolder({String? parent}) async {
-    final name = await _nameDialog(
+    final name = await showNameDialog(
       context,
       title: 'New folder',
       initial: 'New folder',
@@ -696,7 +696,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _rename([String? path]) async {
     final sel = path ?? _selected;
     if (sel == null) return;
-    final name = await _nameDialog(
+    final name = await showNameDialog(
       context,
       title: 'Rename',
       initial: p.basename(sel),
@@ -1029,7 +1029,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// frontmatter in the configured list folder (default `Lists`),
   /// regardless of the selected folder.
   Future<void> _createListNote() async {
-    final name = await _nameDialog(
+    final name = await showNameDialog(
       context,
       title: 'New list note',
       initial: 'My list',
@@ -1386,15 +1386,6 @@ final class _DetailPane extends StatelessWidget {
             ),
     );
   }
-}
-
-/// A name-entry dialog; resolves to the trimmed text or null.
-Future<String?> _nameDialog(
-  BuildContext context, {
-  required String title,
-  required String initial,
-}) {
-  return showNameDialog(context, title: title, initial: initial);
 }
 
 /// A move-target picker over all indexed folders; resolves to the target

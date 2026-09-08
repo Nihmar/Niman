@@ -3,72 +3,20 @@
 // library setting) and opens it.
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/tree.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
-
-/// A [FilePickerPlatform] stub: [directory] is what
-/// getDirectoryPath returns (null = the user canceled).
-final class _FakeFilePicker extends FilePickerPlatform {
-  String? directory;
-
-  @override
-  Future<String?> getDirectoryPath({
-    String? dialogTitle,
-    String? initialDirectory,
-    AndroidOptions androidOptions = const AndroidOptions(),
-    WindowsOptions windowsOptions = const WindowsOptions(),
-    LinuxOptions linuxOptions = const LinuxOptions(),
-    WebOptions webOptions = const WebOptions(),
-  }) async {
-    return directory;
-  }
-}
-
-/// The text input of whichever dialog is open.
-Finder dialogField() => find.descendant(
-      of: find.byType(AlertDialog),
-      matching: find.byType(TextField),
-    );
-
-/// The tree row (not the detail pane) showing [name].
-Finder noteRow(String name) => find.descendant(
-      of: find.byType(NoteTree),
-      matching: find.text(name),
-    );
-
-/// Pumps enough fake time for streams/dialogs to settle and snackbars to
-/// auto-dismiss.
-Future<void> settle(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(seconds: 4));
-  await tester.pump(const Duration(seconds: 1));
-}
-
-/// Animates the FAB menu to its resting state (the minis take 150 ms).
-Future<void> settleFabMenu(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 200));
-}
+import '../fakes/shell_harness.dart';
 
 void main() {
   late FakeLibrarySession controller;
-  late _FakeFilePicker filePicker;
-  late FilePickerPlatform previousPicker;
+  late FakeFilePicker filePicker;
 
   setUp(() {
     controller = FakeLibrarySession();
-    filePicker = _FakeFilePicker();
-    previousPicker = FilePickerPlatform.instance;
-    FilePickerPlatform.instance = filePicker;
-  });
-
-  tearDown(() {
-    FilePickerPlatform.instance = previousPicker;
+    filePicker = useFakeFilePicker();
   });
 
   Widget buildApp() {
@@ -78,23 +26,12 @@ void main() {
     );
   }
 
-  /// Opens a library at /fake/library through the "Create new" flow.
-  Future<void> openLibrary(WidgetTester tester) async {
-    filePicker.directory = '/fake';
-    await tester.tap(find.text('Create new'));
-    await settle(tester);
-    await tester.enterText(dialogField(), 'library');
-    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
-    await tester.tap(find.text('Create'));
-    await settle(tester);
-  }
-
   testWidgets('the FAB expands into note, folder and list-note actions', (
     tester,
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
@@ -111,7 +48,7 @@ void main() {
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
@@ -144,7 +81,7 @@ void main() {
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
-    await openLibrary(tester);
+    await openLibrary(tester, filePicker);
 
     await controller.ops!.setListNoteFolder(folder: 'Checklists');
 

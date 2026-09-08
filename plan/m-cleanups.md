@@ -1,6 +1,7 @@
 # Cleanups — what a read through the code turned up
 
-**Status:** Planned (2026-09-08, review pass) · **Depends on:** nothing ·
+**Status:** T-CL-01 and T-CL-02 done 2026-09-08; T-CL-03 (measure the
+list parser) and T-CL-04 (the oversized files) open · **Depends on:** nothing ·
 **Spec:** user request: look over the code and list the quick wins.
 
 ## What this is
@@ -18,14 +19,14 @@ list stays honest about what remains. Nothing here is a feature.
 
 ## Tasks
 
-- [ ] **T-CL-01** One shell test harness. `_FakeFilePicker`, `settle()`,
+- [x] **T-CL-01** One shell test harness. `_FakeFilePicker`, `settle()`,
   `dialogField()` and `openLibrary()` are copy-pasted across six widget
   test files (`fab`, `library_flow`, `list_note_shell`, `shell_reminders`,
   `tab_bar`, `shortcuts_shell`), with `settle()` in a seventh. Move them
   to `test/fakes/shell_harness.dart` and delete the copies. *AC: the six
   files import the harness, the suite stays green, ~150 duplicated lines
   go.*
-- [ ] **T-CL-02** Drop the `_nameDialog` indirection. `ui/shell.dart`
+- [x] **T-CL-02** Drop the `_nameDialog` indirection. `ui/shell.dart`
   wraps `showNameDialog` in a private function that adds nothing, called
   from four places. Call the real one. *AC: analyze clean, tests green.*
 - [ ] **T-CL-03** The list parser tokenizes the whole note per edit.
