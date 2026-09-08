@@ -1,6 +1,7 @@
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/file_icon.dart';
 import 'package:flutter/material.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -222,9 +223,9 @@ final class _RowTile extends StatelessWidget {
                 onPressed: () => onToggle(note.path),
               )
             else
-              const SizedBox(
+              SizedBox(
                 width: 48,
-                child: Icon(Icons.drafts_outlined, size: 16),
+                child: Icon(fileIconFor(note.name), size: 16),
               ),
             Expanded(
               child: Text(
