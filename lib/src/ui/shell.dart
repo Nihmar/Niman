@@ -25,6 +25,7 @@ import 'package:copist/src/ui/search_screen.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_help.dart';
@@ -166,6 +167,17 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The currently selected bottom tab (narrow layout).
   ShellTab _tab = ShellTab.files;
 
+  /// Every tab visited so far: bodies mount on first visit and stay
+  /// mounted afterwards, so a switch only flips visibility instead of
+  /// disposing one state and inflating another mid-animation (the
+  /// 2026-09-08 device log put that inflate at 14-17 ms of frame build).
+  /// Query, results, and scroll therefore survive a switch, by choice.
+  final Set<ShellTab> _visitedTabs = <ShellTab>{ShellTab.files};
+
+  /// Whether the Tags screen has ever been opened: like the tabs, it
+  /// mounts once and stays alive so the search query survives the flip.
+  bool _tagsVisited = false;
+
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
@@ -231,8 +243,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     // specific to Search, and until this line existed nothing in the log
     // said when Search was entered.
     const AppLogger(name: 'shell').debug('tab: ${_tab.name} -> ${tab.name}');
+    // A kept-alive search field would otherwise hold focus (and the
+    // keyboard) on the next tab: disposing used to drop it for free.
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _tab = tab;
+      _visitedTabs.add(tab);
       _treeVisible = true;
       _fabExpanded = false;
     });
@@ -669,6 +685,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
+        _visitedTabs.add(ShellTab.quickNote);
         _noteFromTab = ShellTab.files;
         _selected = note.path;
         _selectedIsDir = false;
@@ -1059,6 +1076,7 @@ final class _LibraryShellState extends State<_LibraryShell>
               : KeyedSubtree(
                   key: const ValueKey('tab-shell'),
                   child: _tabShell(
+                    controller: controller,
                     title: _tabTitle,
                     actions: _tab == ShellTab.files
                         ? _filesAppBarActions(controller)
@@ -1066,7 +1084,6 @@ final class _LibraryShellState extends State<_LibraryShell>
                         ? [_todoHelpAction()]
                         : const [],
                     floatingActionButton: _tabFab(),
-                    body: _tabBody(controller),
                   ),
                 ),
         ),
@@ -1238,6 +1255,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// optimisation: the scrim resolves the FAB's anchor key during layout,
   /// and since the Files and Todo tabs now share one FAB slot, a scrim
   /// left mounted on Todo reaches for an anchor that tab does not have.
+  ///
+  /// Never toggle this wrapper around a kept-alive subtree (like the tab
+  /// stack): swapping between the bare child and the [Stack] reparents it
+  /// and remounts every state inside. The Files slot below is always
+  /// wrapped; hiding it via [Offstage] skips layout, so the anchor is only
+  /// resolved while Files is visible.
   Widget _withFabScrim(Widget child, {bool enabled = true}) {
     if (!enabled) return child;
     return Stack(
@@ -1294,6 +1317,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _closeFullScreenNote() {
     setState(() {
       _tab = _noteFromTab;
+      _visitedTabs.add(_noteFromTab);
       _treeVisible = true;
       _resetNoteKind();
     });
@@ -1309,26 +1333,20 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
   Widget _tabShell({
+    required LibrarySession controller,
     required String title,
     required List<Widget> actions,
-    required Widget body,
     Widget? floatingActionButton,
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: _withFabScrim(
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 180),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: KeyedSubtree(
-            key: ValueKey('tab-body-${_tab.index}'),
-            child: body,
-          ),
-        ),
-        enabled: _tab == ShellTab.files,
-      ),
+      // Bodies stay mounted once visited (see TabBodyStack): the switch
+      // only flips visibility and fades the incoming body in, instead of
+      // rebuilding two transparency layers mid-animation. The stack itself
+      // stays the direct body child on every tab: wrapping it in anything
+      // conditional (like the FAB scrim was) reparents the whole subtree
+      // and remounts every body, defeating the keep-alive.
+      body: _tabBodies(controller),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: _shellTabs(),
     );
@@ -1423,32 +1441,74 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
-  /// The body of the selected tab.
-  Widget _tabBody(LibrarySession controller) {
-    return switch (_tab) {
-      ShellTab.files => _treePane(controller),
+  /// All five tab bodies: each mounts on its first visit and stays
+  /// mounted (query, results, and scroll survive a switch), while the
+  /// fade only covers the incoming body — no cross-fade of two
+  /// transparency layers, and no re-inflate mid-animation.
+  Widget _tabBodies(LibrarySession controller) {
+    return TabBodyStack(
+      currentIndex: _tab.index,
+      children: [
+        for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
+      ],
+    );
+  }
+
+  /// The body for [tab], or a placeholder until its first visit (lazy so
+  /// opening a library does not inflate all five tabs up front).
+  Widget _tabBodyFor(ShellTab tab, LibrarySession controller) {
+    if (!_visitedTabs.contains(tab)) return const SizedBox.shrink();
+    return switch (tab) {
+      // Always scrim-wrapped (never toggled): see [_withFabScrim].
+      ShellTab.files => _withFabScrim(_treePane(controller)),
       ShellTab.todo => TodoTab(
         controller: _todoController,
         reminders: widget.reminders,
       ),
-      ShellTab.search =>
-        _showTags
-            ? TagsScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onBack: () => setState(() => _showTags = false),
-              )
-            : SearchScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onOpenTags: () => setState(() => _showTags = true),
-              ),
+      ShellTab.search => _searchSlot(controller),
       ShellTab.quickNote => QuickNoteTab(
         controller: controller,
         onOpen: _openQuickNote,
       ),
       ShellTab.settings => SettingsTab(controller: controller),
     };
+  }
+
+  /// The search tab: Search and Tags side by side, Tags mounting once.
+  /// The flip stays instant (as before — same tab, no transition); the
+  /// outer fade already covered entering the tab.
+  Widget _searchSlot(LibrarySession controller) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Offstage(
+          offstage: _showTags,
+          child: TickerMode(
+            enabled: !_showTags,
+            child: SearchScreen(
+              controller: controller,
+              onOpenNote: _openSearchNote,
+              onOpenTags: () => setState(() {
+                _showTags = true;
+                _tagsVisited = true;
+              }),
+            ),
+          ),
+        ),
+        if (_tagsVisited)
+          Offstage(
+            offstage: !_showTags,
+            child: TickerMode(
+              enabled: _showTags,
+              child: TagsScreen(
+                controller: controller,
+                onOpenNote: _openSearchNote,
+                onBack: () => setState(() => _showTags = false),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   /// The tree pane: the action bar and the note tree — the whole body on

@@ -114,12 +114,18 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (since != null) {
       // Near zero means the session had it already (the shell warms it
       // after a library opens); anything larger is this tab paying for
-      // the isolate spawn on the frame that animates it in.
+      // the background connection on the frame that animates it in.
       const AppLogger(name: 'search.ui').info(
         'source ready ${DateTime.now().difference(since).inMilliseconds}ms '
         'after mount',
       );
     }
+    // Bodies stay mounted, so this runs once on the first mount — still
+    // mid-fade. The empty state looks identical with or without a source,
+    // so let the 180 ms fade finish first rather than rebuilding into it.
+    // A query typed in the meantime still works: [_runSearch] acquires
+    // the source on demand.
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted || source == null) return;
     setState(() => _source = source);
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
