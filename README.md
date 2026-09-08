@@ -221,6 +221,15 @@ spellcheck, E2E.
 Copist must work unbounded: **1,000,000 notes and novel-length files** are a hard
 requirement, driving the rebuildable-index, FTS5, and LRU-cache strategies above.
 
+## Acknowledgments
+
+- [Markor](https://github.com/gsantner/markor) — the offline Markdown editor for
+  Android that keeps notes as ordinary files and puts a todo.txt view next to
+  them. A reference for what a notes app owes its user: no lock-in, no database
+  standing between them and their text.
+- Obsidian — a behavioral reference only. Copist keeps its own vocabulary (the
+  root folder is the **Library**) and none of its code.
+
 ## License
 
 Copist is open source under the MIT license.
