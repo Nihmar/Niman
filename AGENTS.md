@@ -21,6 +21,7 @@ done, **M1.5 is next and blocks M2**).
 
 ## Verify
 - No CI: nothing runs the checks for you, so `./scripts/copist.sh check` (analyze + tests) before every commit. Terse output; full log `/tmp/copist/copist-check.log`.
+- On a Windows host: `scripts\copist.bat <analyze|test|check|apk|windows>` (same output discipline, logs under `%TEMP%\copist`). ~23 tests fail there on path separators (`/fake/library` vs `\`) and on temp-dir cleanup — pre-existing and platform-only, not a regression; the suite is green on Linux.
 - `flutter analyze --fatal-infos` (infos are fatal; keep it clean).
 - `flutter test` (`test/unit/`, `test/widget/`). Single: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
 - `integration_test/` = on-device E2E; not part of the default run.
