@@ -289,18 +289,29 @@ class _ListNoteViewState extends State<ListNoteView>
 
   /// Keeps the drop zone reachable: scrolls while the pointer is near a
   /// list edge.
+  ///
+  /// [ScrollPosition.jumpTo], not `correctBy`: the latter is a layout-time
+  /// correction that moves the offset without notifying anyone, so the
+  /// list only actually scrolled on the frames something else happened to
+  /// rebuild it.
   void _autoScroll(Offset global) {
     final box = _listBox();
     if (box == null || !_scroll.hasClients) return;
     final local = box.globalToLocal(global);
     const edge = 60.0;
     final position = _scroll.position;
-    if (local.dy < edge && position.pixels > 0) {
-      position.correctBy(-(edge - local.dy) * 0.5);
-    } else if (local.dy > box.size.height - edge &&
-        position.pixels < position.maxScrollExtent) {
-      position.correctBy((local.dy - (box.size.height - edge)) * 0.5);
+    var delta = 0.0;
+    if (local.dy < edge) {
+      delta = -(edge - local.dy) * 0.5;
+    } else if (local.dy > box.size.height - edge) {
+      delta = (local.dy - (box.size.height - edge)) * 0.5;
     }
+    if (delta == 0) return;
+    final target = (position.pixels + delta).clamp(
+      0.0,
+      position.maxScrollExtent,
+    );
+    if (target != position.pixels) _scroll.jumpTo(target);
   }
 
   @override
