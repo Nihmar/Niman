@@ -146,7 +146,7 @@ syncs like one).
   (list parser, registry fallback, byte-stable round-trip) and widget tests
   (toggle persistence, pencil→editor, FAB choice). *AC: green; a mixed
   library opens each note with the right GUI.*
-- [ ] **T-TK-09** Drag to reorder + sub-lists. Each row carries a **drag
+- [x] **T-TK-09** Drag to reorder + sub-lists. Each row carries a **drag
   handle** at its leading edge; a drag starts there and nowhere else (the
   rest of the row keeps tap-to-edit, and a drag elsewhere scrolls the
   list). The top quarter of a target row moves before it, the bottom
