@@ -326,6 +326,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _resetNoteKind() {
     _noteKind = null;
     _kindRawMode = false;
+    // Fullscreen is a property of the note being previewed, not of the
+    // app: the next note opens with its chrome.
+    _previewFullScreen = false;
   }
 
   Future<void> _loadLinkSource() async {
@@ -362,7 +365,57 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// action lives in the shared app bar, so the shell owns the state.
   bool _previewVisible = false;
 
-  void _togglePreview() => setState(() => _previewVisible = !_previewVisible);
+  void _togglePreview() => setState(() {
+    _previewVisible = !_previewVisible;
+    // Fullscreen belongs to the preview: switching back to the editor
+    // must not leave a chromeless editor with no way out.
+    if (!_previewVisible) _previewFullScreen = false;
+  });
+
+  /// Whether the preview has taken over the phone screen (2026-09-08
+  /// user request): app bar and tab bar hidden, the note's own text left.
+  ///
+  /// Phone-only. On the wide layout the note already shares the window
+  /// with the tree, and "fullscreen" there would mean something else.
+  bool _previewFullScreen = false;
+
+  /// The app-bar fullscreen action, next to the editor/preview eye.
+  Widget _previewFullScreenAction() {
+    return IconButton(
+      key: const Key('preview-fullscreen'),
+      tooltip: AppStrings.enterFullScreenTooltip,
+      icon: const Icon(Icons.fullscreen),
+      onPressed: () => setState(() => _previewFullScreen = true),
+    );
+  }
+
+  /// The way back out of [_previewFullScreen], floating over the preview.
+  ///
+  /// The chrome that would normally carry this action is exactly what is
+  /// hidden, so the button rides above the content instead — inside the
+  /// safe area, so a notch or a rounded corner never eats it.
+  Widget _exitFullScreenButton() {
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Material(
+            type: MaterialType.circle,
+            color: Theme.of(context).colorScheme.surface
+                .withValues(alpha: 0.85),
+            elevation: 2,
+            child: IconButton(
+              key: const Key('preview-fullscreen-exit'),
+              tooltip: AppStrings.exitFullScreenTooltip,
+              icon: const Icon(Icons.fullscreen_exit),
+              onPressed: () => setState(() => _previewFullScreen = false),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   /// The app-bar eye action: flips the editor/preview pane (phone
   /// full-screen note and the wide switch override).
@@ -899,10 +952,26 @@ final class _LibraryShellState extends State<_LibraryShell>
       // cross-fade covers the shell -> note swap (back returns with the
       // same fade).
       final fullNote = selectedPath != null && !_selectedIsDir && !_treeVisible;
+      // The preview may show without its chrome; only a note that is
+      // actually previewing (not split, not a kind GUI) can get there, so
+      // the flag alone never decides it.
+      final immersive =
+          fullNote &&
+          _previewFullScreen &&
+          _previewVisible &&
+          _previewToggleVisible &&
+          !_effectiveSplit(narrow: true);
       return PopScope(
         canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _closeFullScreenNote();
+          if (didPop) return;
+          // Back leaves fullscreen before it leaves the note: one gesture,
+          // one layer of chrome, the way every other fullscreen behaves.
+          if (immersive) {
+            setState(() => _previewFullScreen = false);
+            return;
+          }
+          _closeFullScreenNote();
         },
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
@@ -913,36 +982,47 @@ final class _LibraryShellState extends State<_LibraryShell>
               ? KeyedSubtree(
                   key: const ValueKey('full-note'),
                   child: Scaffold(
-                    appBar: AppBar(
-                      leading: BackButton(onPressed: _closeFullScreenNote),
-                      title: Text(p.basename(selectedPath)),
-                      actions: [
-                        ..._kindActions,
-                        if (!_effectiveSplit(narrow: true) &&
-                            _previewToggleVisible)
-                          _previewToggleAction(),
+                    appBar: immersive
+                        ? null
+                        : AppBar(
+                            leading: BackButton(
+                              onPressed: _closeFullScreenNote,
+                            ),
+                            title: Text(p.basename(selectedPath)),
+                            actions: [
+                              ..._kindActions,
+                              if (!_effectiveSplit(narrow: true) &&
+                                  _previewToggleVisible) ...[
+                                _previewToggleAction(),
+                                if (_previewVisible) _previewFullScreenAction(),
+                              ],
+                            ],
+                          ),
+                    body: Stack(
+                      children: [
+                        NoteView(
+                          path: p.join(controller.root ?? '', selectedPath),
+                          showLineNumbers: _lineNumbers,
+                          autofocusEditor: _autofocusEditor,
+                          linkType: _linkType,
+                          indentWidth: _indentWidth,
+                          toolbarLayout: _toolbarLayout,
+                          splitPreview: _effectiveSplit(narrow: true),
+                          showPreview: _previewVisible,
+                          splitFraction: _splitRatio,
+                          onSplitFractionChanged: _onSplitFractionChanged,
+                          onSplitDragEnd: _onSplitDragEnd,
+                          libraryRoot: controller.root,
+                          linkSource: _linkSource,
+                          onOpenNote: _openNoteFromLink,
+                          initialAnchor: _pendingAnchor,
+                          kindMode: !_kindRawMode,
+                          onNoteKindChanged: _onNoteKindChanged,
+                        ),
+                        if (immersive) _exitFullScreenButton(),
                       ],
                     ),
-                    body: NoteView(
-                      path: p.join(controller.root ?? '', selectedPath),
-                      showLineNumbers: _lineNumbers,
-                      autofocusEditor: _autofocusEditor,
-                      linkType: _linkType,
-                      indentWidth: _indentWidth,
-                      toolbarLayout: _toolbarLayout,
-                      splitPreview: _effectiveSplit(narrow: true),
-                      showPreview: _previewVisible,
-                      splitFraction: _splitRatio,
-                      onSplitFractionChanged: _onSplitFractionChanged,
-                      onSplitDragEnd: _onSplitDragEnd,
-                      libraryRoot: controller.root,
-                      linkSource: _linkSource,
-                      onOpenNote: _openNoteFromLink,
-                      initialAnchor: _pendingAnchor,
-                      kindMode: !_kindRawMode,
-                      onNoteKindChanged: _onNoteKindChanged,
-                    ),
-                    bottomNavigationBar: _shellTabs(),
+                    bottomNavigationBar: immersive ? null : _shellTabs(),
                   ),
                 )
               : KeyedSubtree(
@@ -954,11 +1034,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                         : _tab == ShellTab.todo
                         ? [_todoHelpAction()]
                         : const [],
-                    floatingActionButton: _tab == ShellTab.files
-                        ? _newItemFab()
-                        : _tab == ShellTab.todo
-                        ? _todoAddFab()
-                        : null,
+                    floatingActionButton: _tabFab(),
                     body: _tabBody(controller),
                   ),
                 ),
@@ -1010,6 +1086,28 @@ final class _LibraryShellState extends State<_LibraryShell>
       body: _withFabScrim(_wideBody(controller)),
       floatingActionButton: _newItemFab(),
     );
+  }
+
+  /// The current tab's FAB, or null for the tabs that have none.
+  ///
+  /// Files and Todo both put a `+` in the same corner, so scaling one out
+  /// and the next one in reads as a flicker on a button that never moved
+  /// (2026-09-08 user feedback). `Scaffold` decides whether to animate by
+  /// comparing the old and new FAB's key, so one shared key here is the
+  /// whole fix: the slot rebuilds in place between those two tabs and
+  /// still animates on the way to a tab that has no FAB, which is right —
+  /// there the button really is leaving.
+  ///
+  /// The inner keys stay as they were: they identify which `+` this is,
+  /// to the tests and to `Scaffold`'s hero.
+  Widget? _tabFab() {
+    final fab = switch (_tab) {
+      ShellTab.files => _newItemFab(),
+      ShellTab.todo => _todoAddFab(),
+      ShellTab.search || ShellTab.quickNote || ShellTab.settings => null,
+    };
+    if (fab == null) return null;
+    return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
   }
 
   /// The Todo tab's add FAB (2026-09-07 user feedback: the app-bar `+`
@@ -1103,7 +1201,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the main FAB icon, dims the body, and closes the menu on any tap
   /// (the FABs live in the Scaffold's FAB slot, above this layer, so they
   /// stay tappable). Always mounted; inert while collapsed.
-  Widget _withFabScrim(Widget child) {
+  /// Wraps [child] in the FAB menu's tap-to-dismiss scrim.
+  ///
+  /// [enabled] is false on the tabs that have no expandable FAB. Not an
+  /// optimisation: the scrim resolves the FAB's anchor key during layout,
+  /// and since the Files and Todo tabs now share one FAB slot, a scrim
+  /// left mounted on Todo reaches for an anchor that tab does not have.
+  Widget _withFabScrim(Widget child, {bool enabled = true}) {
+    if (!enabled) return child;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -1191,6 +1296,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             child: body,
           ),
         ),
+        enabled: _tab == ShellTab.files,
       ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: _shellTabs(),

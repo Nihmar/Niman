@@ -72,4 +72,76 @@ void main() {
     await controller.close();
     await controller.dispose();
   });
+
+  // 2026-09-08 user request: a fullscreen action beside the preview eye,
+  // giving the note's text the whole phone screen.
+  group('the preview fullscreen', () {
+    /// Opens the note and switches it from the editor to the preview.
+    Future<void> pumpPreviewing(WidgetTester tester) async {
+      await pumpWithNote(tester);
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await settle(tester);
+    }
+
+    testWidgets('is offered only while the preview is showing', (tester) async {
+      await pumpWithNote(tester);
+      expect(find.byKey(const Key('preview-fullscreen')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await settle(tester);
+      expect(find.byKey(const Key('preview-fullscreen')), findsOneWidget);
+
+      await controller.close();
+      await controller.dispose();
+    });
+
+    testWidgets('hides the app bar and the tab bar', (tester) async {
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byKey(const Key('shell-tabs')), findsNothing);
+      // The note itself is still there, and so is the way out.
+      expect(find.byType(NoteView), findsOneWidget);
+      expect(find.byKey(const Key('preview-fullscreen-exit')), findsOneWidget);
+
+      await controller.close();
+      await controller.dispose();
+    });
+
+    testWidgets('the exit button brings the chrome back', (tester) async {
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen-exit')));
+      await settle(tester);
+
+      expect(find.byKey(const Key('shell-tabs')), findsOneWidget);
+      expect(find.byKey(const Key('preview-fullscreen')), findsOneWidget);
+
+      await controller.close();
+      await controller.dispose();
+    });
+
+    testWidgets('switching back to the editor leaves fullscreen', (
+      tester,
+    ) async {
+      // Otherwise the editor would open chromeless, with no eye to
+      // press and no obvious way back.
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen-exit')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
+      await settle(tester);
+
+      expect(find.byKey(const Key('shell-tabs')), findsOneWidget);
+      expect(find.byKey(const Key('preview-fullscreen')), findsNothing);
+
+      await controller.close();
+      await controller.dispose();
+    });
+  });
 }

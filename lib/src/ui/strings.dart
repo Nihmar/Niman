@@ -142,6 +142,10 @@ final class AppStrings {
   static String get showPreviewTooltip =>
       _t('Show preview', 'Mostra anteprima');
   static String get showEditorTooltip => _t('Show editor', 'Mostra editor');
+  static String get enterFullScreenTooltip =>
+      _t('Full screen', 'Schermo intero');
+  static String get exitFullScreenTooltip =>
+      _t('Exit full screen', 'Esci da schermo intero');
 
   // Raw-HTML table fallback.
   static String get htmlTableFallback =>

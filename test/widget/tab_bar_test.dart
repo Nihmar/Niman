@@ -456,6 +456,45 @@ void main() {
     await reminders.dispose();
   });
 
+  // 2026-09-08 user feedback: Files and Todo put a `+` in the same
+  // corner, so scaling one out and the next one in read as a flicker on a
+  // button that never moved. Scaffold decides by comparing the FAB's key,
+  // so one shared key is what keeps the slot still.
+  testWidgets('the Files and Todo FABs share one Scaffold slot', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    Key? fabSlotKey() {
+      final scaffold = tester.widget<Scaffold>(
+        find
+            .byType(Scaffold)
+            .at(tester.widgetList<Scaffold>(find.byType(Scaffold)).length - 1),
+      );
+      return scaffold.floatingActionButton?.key;
+    }
+
+    expect(find.byKey(const Key('new-note-fab')), findsOne);
+    final onFiles = fabSlotKey();
+    expect(onFiles, isNotNull);
+
+    await tester.tap(find.byIcon(Icons.check_box_outlined));
+    await settle(tester);
+
+    // Same slot key, different button inside it.
+    expect(fabSlotKey(), onFiles);
+    expect(find.byKey(const Key('todo-add')), findsOne);
+    expect(find.byKey(const Key('new-note-fab')), findsNothing);
+
+    // Search has no FAB at all, and there the slot really does empty.
+    await tester.tap(find.byIcon(Icons.search));
+    await settle(tester);
+    expect(fabSlotKey(), isNull);
+  });
+
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();

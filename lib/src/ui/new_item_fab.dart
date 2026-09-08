@@ -187,8 +187,18 @@ final class FabScrim extends StatelessWidget {
   /// Resolved from [anchorKey] so it stays exact for any FAB location or
   /// size; the fallback is the default endFloat geometry (16 px margin,
   /// 56 px FAB) for the unlikely frame where the FAB is not laid out yet.
+  ///
+  /// The anchor can be defunct rather than merely absent. The shell now
+  /// reuses one FAB slot across the Files and the todo tabs, so leaving
+  /// Files tears this FAB down while the scrim is still laid out, and a
+  /// `currentContext` that is non-null but unmounted makes
+  /// `findRenderObject` assert. Hence the [BuildContext.mounted] check:
+  /// the fallback is right for that frame, and the next one has no scrim.
   Offset _fabCenter(BuildContext context, Size size) {
-    final fabBox = anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = anchorKey.currentContext;
+    final fabBox = anchor != null && anchor.mounted
+        ? anchor.findRenderObject() as RenderBox?
+        : null;
     if (fabBox == null || !fabBox.hasSize) {
       return Offset(size.width - 44, size.height - 44);
     }
