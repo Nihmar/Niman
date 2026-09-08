@@ -76,6 +76,18 @@ final class _NoteTreeState extends State<NoteTree> {
   Set<String> _rowsExpanded = const <String>{};
 
   @override
+  void initState() {
+    super.initState();
+    const AppLogger(name: 'tree.ui').debug('mount');
+  }
+
+  @override
+  void dispose() {
+    const AppLogger(name: 'tree.ui').debug('dispose');
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(NoteTree oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
@@ -99,8 +111,13 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// Flattens the visible tree from the index.
   Future<List<_Row>> _flatten() async {
+    final started = DateTime.now();
     final out = <_Row>[];
     await _walk(0, 0, out);
+    const AppLogger(name: 'tree.ui').debug(
+      'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
+      '(${out.length} rows)',
+    );
     return out;
   }
 
@@ -138,7 +155,8 @@ final class _NoteTreeState extends State<NoteTree> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
+    final started = DateTime.now();
+    final child = StreamBuilder<int>(
       stream: widget.controller.events,
       initialData: widget.controller.revision,
       builder: (context, snapshot) {
@@ -171,6 +189,9 @@ final class _NoteTreeState extends State<NoteTree> {
         );
       },
     );
+    const AppLogger(name: 'tree.ui')
+        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
+    return child;
   }
 }
 

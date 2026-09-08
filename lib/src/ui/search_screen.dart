@@ -96,6 +96,7 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    const AppLogger(name: 'search.ui').debug('dispose');
     _debounceTimer?.cancel();
     _replaceRefresh?.cancel();
     _query.removeListener(_onQueryChanged);
@@ -225,8 +226,9 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final started = DateTime.now();
     final theme = Theme.of(context);
-    return Column(
+    final child = Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
@@ -299,6 +301,9 @@ final class _SearchScreenState extends State<SearchScreen> {
         ),
       ],
     );
+    const AppLogger(name: 'search.ui')
+        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
+    return child;
   }
 
   Widget _results(ThemeData theme) {

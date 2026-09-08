@@ -467,6 +467,32 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
+    unawaited(_warmSearchSource());
+  }
+
+  /// Opens the background search connection before anything asks for it.
+  ///
+  /// The first `SearchScreen` asks the session for its source, and that
+  /// call is what spawns drift's background isolate and opens a second
+  /// SQLite connection on the database file. It is awaited rather than
+  /// blocking, but an isolate spawn is not free on a phone: it competes
+  /// for the same cores as the frame being drawn, and the frame being
+  /// drawn is the tab-switch animation (2026-09-08 user feedback: moving
+  /// to and from Search sometimes stutters).
+  ///
+  /// Doing it here costs the same work at a moment nothing is animating.
+  /// After a delay, not in `initState`: opening a library is already the
+  /// heaviest stretch of a run, and this has no deadline — whoever gets
+  /// there first still gets a source, since the session caches one.
+  Future<void> _warmSearchSource() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    final started = DateTime.now();
+    final source = await widget.controller.searchSource;
+    const AppLogger(name: 'search').info(
+      'source warmed in ${DateTime.now().difference(started).inMilliseconds}ms '
+      '(${source == null ? 'unavailable' : 'ready'})',
+    );
   }
 
   @override
@@ -1290,25 +1316,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      // T-TS-03: Put the motion back with a slide. Bit less pretty than a
-      // cross-fade, but it doesn't force offscreen compositing for
-      // transparency, which is what ate the frame budget. 180ms matches the
-      // sort-toggle and fab-scrim durations.
       body: _withFabScrim(
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 180),
           switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) {
-            return SlideTransition(
-              position: animation.drive(
-                Tween<Offset>(
-                  begin: const Offset(0.05, 0),
-                  end: Offset.zero,
-                ).chain(CurveTween(curve: Curves.easeOutCubic)),
-              ),
-              child: child,
-            );
-          },
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
           child: KeyedSubtree(
             key: ValueKey('tab-body-${_tab.index}'),
             child: body,
@@ -1364,6 +1377,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   void _onDestinationSelected(int index) {
     final tab = ShellTab.values[index];
+    const AppLogger(name: 'shell').debug('tap tab: ${tab.name}');
     if (tab == ShellTab.quickNote) {
       unawaited(_openQuickNoteFromTile());
       return;
