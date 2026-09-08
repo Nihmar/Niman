@@ -467,32 +467,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
-    unawaited(_warmSearchSource());
-  }
-
-  /// Opens the background search connection before anything asks for it.
-  ///
-  /// The first `SearchScreen` asks the session for its source, and that
-  /// call is what spawns drift's background isolate and opens a second
-  /// SQLite connection on the database file. It is awaited rather than
-  /// blocking, but an isolate spawn is not free on a phone: it competes
-  /// for the same cores as the frame being drawn, and the frame being
-  /// drawn is the tab-switch animation (2026-09-08 user feedback: moving
-  /// to and from Search sometimes stutters).
-  ///
-  /// Doing it here costs the same work at a moment nothing is animating.
-  /// After a delay, not in `initState`: opening a library is already the
-  /// heaviest stretch of a run, and this has no deadline — whoever gets
-  /// there first still gets a source, since the session caches one.
-  Future<void> _warmSearchSource() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    final started = DateTime.now();
-    final source = await widget.controller.searchSource;
-    const AppLogger(name: 'search').info(
-      'source warmed in ${DateTime.now().difference(started).inMilliseconds}ms '
-      '(${source == null ? 'unavailable' : 'ready'})',
-    );
   }
 
   @override
@@ -1316,19 +1290,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: _withFabScrim(
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 180),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: KeyedSubtree(
-            key: ValueKey('tab-body-${_tab.index}'),
-            child: body,
-          ),
-        ),
-        enabled: _tab == ShellTab.files,
-      ),
+      // No cross-fade between tab bodies. It kept both of them built and
+      // painted for its whole 180 ms, and a device log put build alone at
+      // 13 to 18 ms on the frames right after a switch — the entire 60 Hz
+      // budget, before painting. Going to Search was the worst of them,
+      // which is the tab the stutter was reported on: the note tree of a
+      // 987-entry library was still being built while the search screen
+      // was building too.
+      body: _withFabScrim(body, enabled: _tab == ShellTab.files),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: _shellTabs(),
     );
