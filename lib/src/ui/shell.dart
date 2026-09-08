@@ -939,6 +939,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                       kindMode: !_kindRawMode,
                       onNoteKindChanged: _onNoteKindChanged,
                     ),
+                    bottomNavigationBar: _shellTabs(),
                   ),
                 )
               : KeyedSubtree(
@@ -1187,39 +1188,48 @@ final class _LibraryShellState extends State<_LibraryShell>
         ),
       ),
       floatingActionButton: floatingActionButton,
-      bottomNavigationBar: NavigationBar(
-        key: const Key('shell-tabs'),
-        selectedIndex: _tab.index,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: const [
-          NavigationDestination(
-            key: Key('tab-files'),
-            icon: Icon(Icons.folder_outlined),
-            selectedIcon: Icon(Icons.folder),
-            label: 'Files',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.check_box_outlined),
-            selectedIcon: Icon(Icons.check_box),
-            label: 'Todo',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.edit_outlined),
-            selectedIcon: Icon(Icons.edit),
-            label: 'Quick note',
-          ),
-          NavigationDestination(
-            key: Key('tab-settings'),
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
+      bottomNavigationBar: _shellTabs(),
+    );
+  }
+
+  /// The bottom tab bar.
+  ///
+  /// Shown by the tab shell *and* by an open note: the tabs are how the
+  /// app is navigated, so having them vanish behind a note meant going
+  /// back before going anywhere.
+  Widget _shellTabs() {
+    return NavigationBar(
+      key: const Key('shell-tabs'),
+      selectedIndex: _tab.index,
+      onDestinationSelected: _onDestinationSelected,
+      destinations: const [
+        NavigationDestination(
+          key: Key('tab-files'),
+          icon: Icon(Icons.folder_outlined),
+          selectedIcon: Icon(Icons.folder),
+          label: 'Files',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.check_box_outlined),
+          selectedIcon: Icon(Icons.check_box),
+          label: 'Todo',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.search),
+          label: 'Search',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.edit_outlined),
+          selectedIcon: Icon(Icons.edit),
+          label: 'Quick note',
+        ),
+        NavigationDestination(
+          key: Key('tab-settings'),
+          icon: Icon(Icons.settings_outlined),
+          selectedIcon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
+      ],
     );
   }
 
@@ -1227,6 +1237,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     final tab = ShellTab.values[index];
     if (tab == ShellTab.quickNote) {
       unawaited(_openQuickNoteFromTile());
+      return;
+    }
+    // Tapping the tab a note was opened from closes the note: the tab is
+    // already selected, so nothing else would happen.
+    if (tab == _tab && !_treeVisible) {
+      _closeFullScreenNote();
       return;
     }
     _selectShellTab(tab);
