@@ -52,6 +52,12 @@ final class AppStrings {
   static const String listEmpty = 'No items yet';
   static const String listDragHandleLabel = 'Reorder item';
 
+  // Launcher quick actions (T-SC-02), in the order they are published.
+  static const String shortcutQuickNote = 'Quick note';
+  static const String shortcutNewTodo = 'New todo';
+  static const String shortcutNewNote = 'New note';
+  static const String shortcutNewList = 'New list';
+
   // Editor status bar.
   static const String outlineTooltip = 'Outline';
   static const String outlineNoHeadings = 'No headings';

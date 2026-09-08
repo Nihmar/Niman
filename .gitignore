@@ -131,3 +131,6 @@ app.*.symbols
 # Test scratch dirs from a failed run (library_state_test creates them
 # in the repo root and cleans them up on success).
 /copist_state_*/
+
+# Kotlin compiler session state, written during a Gradle build.
+**/android/.kotlin/

@@ -14,9 +14,14 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private var pendingResult: MethodChannel.Result? = null
     private val manageStorageRequestCode = 1
+    private val shortcuts = ShortcutsBridge(this)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        shortcuts.attach(flutterEngine.dartExecutor.binaryMessenger)
+        // Cold start: this runs while Dart is still booting, so the
+        // launching intent's action waits until Dart asks for it.
+        shortcuts.handleIntent(intent, running = false)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "copist/storage")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -39,6 +44,19 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    // A shortcut tapped while the app is alive: singleTop delivers it
+    // here instead of recreating the activity.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        shortcuts.handleIntent(intent, running = true)
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        shortcuts.detach()
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     /**

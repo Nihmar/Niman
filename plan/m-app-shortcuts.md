@@ -1,11 +1,11 @@
 # App quick actions — launcher long-press shortcuts
 
-**Status:** Planned (draft — design agreed 2026-09-07; no milestone slot
-assigned yet; candidate: its own slice, or M6/polish) · **Depends on:** M4
-(frontmatter, for the `new list` action's `type: list` note) and the Todo
-tab (todo-tab.md, for the `new todo` action) — see the shortcut-by-shortcut
-table below · **Spec:** user request (quick actions in the launcher
-long-press menu, Android).
+**Status:** Implemented 2026-09-08 (Android host + Dart routing + icons;
+analyze and tests green) — the on-device launcher check is still to be
+done by the user · **Depends on:** M4 (frontmatter, for the `new list`
+action's `type: list` note) and the Todo tab (todo-tab.md, for the
+`new todo` action), both landed · **Spec:** user request (quick actions in
+the launcher long-press menu, Android).
 
 ## Purpose
 
@@ -73,24 +73,22 @@ are out of scope and noted below).
 |----------|---------------|-----------|
 | Quick note | Quick note tab (library root scratch note) | exists today |
 | New note   | shell `_createNote` (FAB "New note") | exists today |
-| New todo   | Todo tab **add-task dialog** | **Todo tab** (`todo-tab.md`) — not built |
-| New list   | `type: list` note creation | **`type` notes** (`m-type-note-kinds.md`) + M4 frontmatter |
+| New todo   | Todo tab **add-task dialog** | Todo tab (`todo-tab.md`) — landed |
+| New list   | `type: list` note creation | `type` notes (`m-type-note-kinds.md`) + M4 frontmatter — landed |
 
-So the two "new" actions that are genuinely new surface today have
-dependencies: `new todo` needs the Todo tab, `new list` needs the
-`type: list` note creation. The other two (`quicknote`, `new note`) are
-ready as soon as the shortcut plumbing is.
+Both dependencies were in place when this shipped, so all four actions
+publish; nothing had to be deferred.
 
 ## Tasks
 
-- [ ] **T-SC-01** Method channel plumbing. A `MethodChannel` (`copist/shortcuts`)
+- [x] **T-SC-01** Method channel plumbing. A `MethodChannel` (`copist/shortcuts`)
   between Dart and the host `MainActivity`: Dart registers a handler for
   incoming shortcut intents; Kotlin overrides `onCreate`/`onNewIntent` to
   read the shortcut `action`/`extra` and forward it to the channel. Also a
   Dart→Kotlin method to publish/refresh the dynamic shortcut set. *AC: a
   test shortcut intent received by the activity surfaces a callback in
   Dart.*
-- [ ] **T-SC-02** Shortcut model + publish. `core/shortcuts.dart` (or
+- [x] **T-SC-02** Shortcut model + publish. `core/shortcuts.dart` (or
   `ui/shortcuts.dart`): a `ShortcutAction` enum (quickNote, newTodo,
   newNote, newList), each with id, label, icon. A `publishShortcuts()`
   method builds the four `ShortcutInfoCompat`/`ShortcutInfo` objects (via
@@ -98,33 +96,33 @@ ready as soon as the shortcut plumbing is.
   (and on library/settings changes that affect the target paths, e.g. the
   quick-note path). *AC: publishing pushes four dynamic shortcuts; the
   launcher long-press shows them.*
-- [ ] **T-SC-03** Routing: shortcut → in-app navigation. Map each incoming
+- [x] **T-SC-03** Routing: shortcut → in-app navigation. Map each incoming
   `ShortcutAction` to the existing app flow (switch on the enum, reuse the
   shell's tab select / `_createNote` / list-creation / todo-add). Landing on
   a creation flow opens the same dialog the FAB uses. *AC: each shortcut
   lands on the matching screen; a cold start and a warm start both work.*
-- [ ] **T-SC-04** Quick note shortcut. Foregrounds the app and selects the
+- [x] **T-SC-04** Quick note shortcut. Foregrounds the app and selects the
   Quick note tab (widening to the scratch note if the tab isn't focused).
   *AC: quicknote lands on the quick note.*
-- [ ] **T-SC-05** New note shortcut. Launches the shell's new-note flow
+- [x] **T-SC-05** New note shortcut. Launches the shell's new-note flow
   (the same `_nameDialog` + `createNote` the FAB uses). *AC: newnote shows
   the new-note dialog and creates on confirm.*
-- [ ] **T-SC-06** New todo shortcut. Opens the **Todo tab's add-task dialog**
+- [x] **T-SC-06** New todo shortcut. Opens the **Todo tab's add-task dialog**
   (the same dialog the Todo tab's "add" control opens), not just the tab.
   Blocked on the Todo tab; when it lands, this taps the same add path. If
   the Todo tab is still a stub, defer this shortcut — a v1 can ship with
   three shortcuts (quicknote, newnote, newlist) plus a disabled/absent
   new-todo. *AC: newtodo opens the todo add-task dialog ready to type a
   new task.*
-- [ ] **T-SC-07** New list shortcut. Opens the `type: list` creation flow
+- [x] **T-SC-07** New list shortcut. Opens the `type: list` creation flow
   (reusing `m-type-note-kinds.md`'s "New list note": creates a note with
   `type: list` in the configured `Lists/` folder and opens the list GUI).
   Blocked on that feature. *AC: newlist creates a `type: list` note in the
   configured folder and opens it.*
-- [ ] **T-SC-08** Adaptive/maskable shortcut icons. Vector shortcut icons for
+- [x] **T-SC-08** Adaptive/maskable shortcut icons. Vector shortcut icons for
   each action (API 33+ correct display), drawn from the app's mockup glyphs.
   *AC: shortcuts render correctly on an API 33+ emulator/device.*
-- [ ] **T-SC-09** Strings + tests. Strings in `strings.dart`; Dart-side unit
+- [x] **T-SC-09** Strings + tests. Strings in `strings.dart`; Dart-side unit
   tests for the action→flow mapping and the publish payload; an
   Android-side test for the intent → channel handoff where feasible. *AC:
   mapping tests green; on-device long-press shows the four shortcuts and
@@ -171,10 +169,8 @@ ready as soon as the shortcut plumbing is.
 
 ## Risks / open questions
 
-- **Dependency gating.** `new todo` and `new list` are blocked on the Todo
-  tab and the `type: list` feature. v1 may ship with a reduced set
-  (quicknote, newnote) and add the rest as those features land. Confirm
-  whether the plan should be a single shortcut batch or grow incrementally.
+- **Dependency gating.** Resolved: the Todo tab and the `type: list`
+  feature both landed first, so all four shipped in one batch.
 - **Launcher cap/visibility.** Some launchers show fewer than four shortcuts;
   behaviour is launcher-dependent and can't be fully controlled. Accept the
   platform's cap.

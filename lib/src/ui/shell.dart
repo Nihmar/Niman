@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -52,6 +53,20 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       _resumeStarted = true;
       unawaited(_resume());
     }
+    unawaited(_publishShortcuts());
+  }
+
+  /// Publishes the launcher quick actions (T-SC-02).
+  ///
+  /// Here rather than in the shell: they belong to the app, not to an
+  /// open library, so they are there on the very first launch too.
+  Future<void> _publishShortcuts() {
+    return ref.read(shortcutServiceProvider).publish(const {
+      ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
+      ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
+      ShortcutAction.newNote: AppStrings.shortcutNewNote,
+      ShortcutAction.newList: AppStrings.shortcutNewList,
+    });
   }
 
   /// Resumes the last library, unless Android is withholding the
@@ -76,6 +91,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
         LibraryPhase.ready => _LibraryShell(
           controller: controller,
           reminders: ref.read(reminderServiceProvider),
+          shortcuts: ref.read(shortcutServiceProvider),
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
         ),
         _ => OpenLibraryScreen(controller: controller),
@@ -90,6 +106,7 @@ final class _LibraryShell extends StatefulWidget {
   const _LibraryShell({
     required this.controller,
     required this.reminders,
+    required this.shortcuts,
     required this.todoSourceFactory,
   });
 
@@ -97,6 +114,10 @@ final class _LibraryShell extends StatefulWidget {
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
+
+  /// The launcher quick actions (T-SC-03: each one lands on the flow its
+  /// in-app control uses).
+  final ShortcutService shortcuts;
 
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
@@ -242,6 +263,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
+  StreamSubscription<ShortcutAction>? _shortcutTaps;
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -368,7 +390,11 @@ final class _LibraryShellState extends State<_LibraryShell>
         _openTodo();
       }
     });
+    _shortcutTaps = widget.shortcuts.actions.listen(
+      (action) => unawaited(_runShortcut(action)),
+    );
     unawaited(_applyReminderLaunch());
+    unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
   }
@@ -377,6 +403,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_reminderTaps?.cancel());
+    unawaited(_shortcutTaps?.cancel());
     _todoController.dispose();
     super.dispose();
   }
@@ -402,6 +429,35 @@ final class _LibraryShellState extends State<_LibraryShell>
     final payload = await widget.reminders.consumeLaunchPayload();
     if (payload == todoReminderPayload && mounted) {
       _openTodo();
+    }
+  }
+
+  /// A launcher quick action that started the app (T-SC-03, cold start).
+  ///
+  /// Asked for here rather than at app start because the action needs an
+  /// open library: the shell mounts once the library is ready, so a first
+  /// run that has to pick a library first still runs the action after.
+  Future<void> _applyShortcutLaunch() async {
+    final action = await widget.shortcuts.consumeLaunchAction();
+    if (action == null) return;
+    await _runShortcut(action);
+  }
+
+  /// Runs [action]'s in-app flow: the same one the equivalent control
+  /// uses, so a shortcut cannot drift from the button it mirrors.
+  Future<void> _runShortcut(ShortcutAction action) async {
+    if (!mounted) return;
+    const AppLogger(name: 'shortcuts').debug('running ${action.id}');
+    switch (action) {
+      case ShortcutAction.quickNote:
+        await _openQuickNoteFromTile();
+      case ShortcutAction.newTodo:
+        _openTodo();
+        await _addTodo();
+      case ShortcutAction.newNote:
+        await _createNote();
+      case ShortcutAction.newList:
+        await _createListNote();
     }
   }
 
@@ -531,10 +587,37 @@ final class _LibraryShellState extends State<_LibraryShell>
     final path = await ops.quickNotePath;
     if (!mounted) return;
     if (path == null || path.isEmpty) {
-      _selectShellTab(ShellTab.quickNote);
+      _openQuickNoteChooser();
       return;
     }
     await _openQuickNote(path);
+  }
+
+  /// Shows the choose/create screen, wherever this layout keeps it.
+  ///
+  /// The bottom-nav tab is phone-only, so a wide layout pushes it as a
+  /// screen — otherwise the launcher's Quick note action would land
+  /// nowhere on a tablet with no quick note set yet.
+  void _openQuickNoteChooser() {
+    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+      _selectShellTab(ShellTab.quickNote);
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: const Text('Quick note')),
+          body: QuickNoteTab(
+            controller: widget.controller,
+            onOpen: (path) {
+              Navigator.pop(context);
+              unawaited(_openQuickNote(path));
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   void _toggle(String path) {
