@@ -88,6 +88,28 @@ void main() {
       );
     });
 
+    // T-RL-03: the wanted set is a full replace, so anything it drops has
+    // its pending alarm cancelled. A device log caught an alarm the OS
+    // was still holding three minutes after its time, cancelled by the
+    // next reconcile before it could ring.
+    test('a reminder just past is still wanted, so its alarm survives', () {
+      final wanted = wantedReminders(
+        snapshotOf(todo: ['deferred rem:2026-09-08T14:50']),
+        DateTime(2026, 9, 8, 14, 53),
+      );
+      expect(wanted, hasLength(1));
+      expect(wanted.values.single.when, DateTime(2026, 9, 8, 14, 50));
+    });
+
+    test('a reminder past the grace window is dropped', () {
+      final at = DateTime(2026, 9, 8, 14, 50);
+      final wanted = wantedReminders(
+        snapshotOf(todo: ['stale rem:2026-09-08T14:50']),
+        at.add(reminderGrace).add(const Duration(minutes: 1)),
+      );
+      expect(wanted, isEmpty);
+    });
+
     test('an x line still in todo.txt never fires', () {
       // Only a reload archives stray completed lines, so an edit that
       // completes a task in place publishes it in `todo` first.

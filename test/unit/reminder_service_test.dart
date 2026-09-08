@@ -41,12 +41,17 @@ void main() {
 
   final now = DateTime(2026, 9, 7, 12);
 
-  TodoReminder reminderAt(int id, {int hours = 2, String title = 'task'}) {
+  TodoReminder reminderAt(
+    int id, {
+    int hours = 2,
+    int minutes = 0,
+    String title = 'task',
+  }) {
     return TodoReminder(
       id: id,
       title: title,
       body: 'Todo reminder',
-      when: now.add(Duration(hours: hours)),
+      when: now.add(Duration(hours: hours, minutes: minutes)),
     );
   }
 
@@ -236,6 +241,20 @@ void main() {
     final service = serviceOf();
     await service.reconcile(wanted([reminderAt(1, hours: -1), reminderAt(2)]));
     expect(backend.scheduled.single.id, 2);
+    await service.dispose();
+  });
+
+  // T-RL-03. The sweep cancels every pending alarm outside the wanted
+  // set, so a reminder the OS is holding past its time must stay in the
+  // set while it could still ring. `wantedReminders` keeps it there for
+  // `reminderGrace`; what the service owes is to leave it alone.
+  test('an overdue alarm the OS still holds is not cancelled', () async {
+    backend = FakeReminderBackend(pending: [1]);
+    final service = serviceOf();
+    await service.reconcile(wanted([reminderAt(1, hours: 0, minutes: -3)]));
+
+    expect(backend.cancelled, isEmpty);
+    expect(backend.scheduled, isEmpty, reason: 'a past instant cannot arm');
     await service.dispose();
   });
 

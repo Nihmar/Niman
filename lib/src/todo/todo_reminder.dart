@@ -79,11 +79,30 @@ int todoReminderId(String description) {
   return hash & 0x7FFFFFFF;
 }
 
-/// The schedulable reminders of [snapshot]: open (`todo.txt`) tasks
-/// with a `rem:` after [now]. Completed tasks (archived, or still `x`
-/// in `todo.txt` awaiting migration) and past times never fire. [now]
-/// is the wall clock (the controller's injected clock in tests, real
-/// time on device).
+/// How long a reminder stays wanted after its own moment (T-RL-03).
+///
+/// The wanted set is a full replace: anything outside it has its pending
+/// alarm cancelled. Dropping a reminder the instant its time passes
+/// therefore cancels an alarm the OS has not fired yet, and Android does
+/// hold alarms past their time — a device log caught one still pending
+/// three minutes after it was due, cancelled by the next reconcile
+/// before it could ring. Whether the user heard the reminder came down
+/// to which happened first.
+///
+/// An hour is longer than any deferral `setExactAndAllowWhileIdle`
+/// admits to, and costs nothing while nothing is deferred: a reminder
+/// that already fired is no longer pending, so the sweep skips it, and
+/// one the user completes or edits leaves the set on its own merits.
+const reminderGrace = Duration(hours: 1);
+
+/// The schedulable reminders of [snapshot]: open (`todo.txt`) tasks with
+/// a `rem:` no more than [reminderGrace] before [now]. Completed tasks
+/// (archived, or still `x` in `todo.txt` awaiting migration) and times
+/// older than that never fire. [now] is the wall clock (the controller's
+/// injected clock in tests, real time on device).
+///
+/// Reminders inside the grace window are kept so the sweep leaves their
+/// alarms alone; scheduling skips them, since their moment has passed.
 Map<int, TodoReminder> wantedReminders(
   TodoSnapshot snapshot,
   DateTime now, {
@@ -99,7 +118,7 @@ Map<int, TodoReminder> wantedReminders(
       continue;
     }
     final when = task.reminder;
-    if (when == null || !when.isAfter(now)) {
+    if (when == null || when.isBefore(now.subtract(reminderGrace))) {
       continue;
     }
     // The id stays over the full text (stable identity), but the shown

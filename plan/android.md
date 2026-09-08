@@ -176,3 +176,31 @@ open went from 6.8 s to 1.7 s, and what is left runs off the UI isolate:
 without ever being read. The 60 s periodic rescan is not in that log's
 window — it stays worth a look on a longer session, though it now takes
 the same isolate path.
+
+## 4. Reminders that never rang (fixed)
+
+**Symptom:** todo reminders arrived 5–10 minutes late, and sometimes not
+at all.
+
+**Cause, from a device log of 2026-09-08:** not Android alone. Android
+did hold an exact `setExactAndAllowWhileIdle` alarm at least three
+minutes past its own time — the deferral is real — but what turned a
+late reminder into a missing one was Copist. Reconciliation is a full
+replace: every pending alarm outside the wanted set is cancelled, and
+`wantedReminders` dropped a reminder the moment its time passed. So the
+first reconcile after 14:50 — a todo reload, a resume, a file change —
+cancelled an alarm the OS was still going to fire.
+
+**Fix:** `reminderGrace` (one hour) in `todo/todo_reminder.dart`. A
+reminder stays in the wanted set for that long past its moment, so the
+sweep leaves its alarm alone; scheduling still skips it, because an
+instant already past cannot be armed.
+
+**The trap to remember:** anything that computes a "wanted" set feeding a
+full-replace sweep must be told the difference between *no longer wanted*
+and *already due*. The same shape would bite any future scheduler here.
+
+**Secondary trap:** `_reconcileOnce` short-circuits `exact` to false when
+the wanted set is empty, so most log lines read `alarms inexact` without
+the platform ever having been asked. Only a line with reminders in it
+says anything about exactness.
