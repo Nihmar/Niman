@@ -81,9 +81,17 @@ final class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    // Timed because entering this tab is reported as stuttering, and the
+    // two suspects leave different traces: acquiring the source (the
+    // background isolate and a second SQLite connection) shows up here as
+    // milliseconds, while the cost of building and painting the screen
+    // shows up as slow frames after a mount that took no time at all.
+    final started = DateTime.now();
     _query.addListener(_onQueryChanged);
     _replacement.addListener(_onReplacementChanged);
-    if (widget.source == null) unawaited(_loadSource());
+    if (widget.source == null) unawaited(_loadSource(since: started));
+    const AppLogger(name: 'search.ui')
+        .debug('mount: ${DateTime.now().difference(started).inMilliseconds}ms');
   }
 
   @override
@@ -100,8 +108,17 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Resolves the search source once; a failed load leaves [_source] null
   /// and [_runSearch] retries on the next query — a transient startup
   /// failure must not wedge the box into issuing queries that go nowhere.
-  Future<void> _loadSource() async {
+  Future<void> _loadSource({DateTime? since}) async {
     final source = await _acquireSource();
+    if (since != null) {
+      // Near zero means the session had it already (the shell warms it
+      // after a library opens); anything larger is this tab paying for
+      // the isolate spawn on the frame that animates it in.
+      const AppLogger(name: 'search.ui').info(
+        'source ready ${DateTime.now().difference(since).inMilliseconds}ms '
+        'after mount',
+      );
+    }
     if (!mounted || source == null) return;
     setState(() => _source = source);
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());

@@ -226,6 +226,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note stays highlighted).
   void _selectShellTab(ShellTab tab) {
     if (_tab == tab) return;
+    // The switch is logged so a slow frame in an exported log can be
+    // attributed to a tab rather than guessed at: the reported stutter is
+    // specific to Search, and until this line existed nothing in the log
+    // said when Search was entered.
+    const AppLogger(name: 'shell').debug('tab: ${_tab.name} -> ${tab.name}');
     setState(() {
       _tab = tab;
       _treeVisible = true;
@@ -482,7 +487,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _warmSearchSource() async {
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    await widget.controller.searchSource;
+    final started = DateTime.now();
+    final source = await widget.controller.searchSource;
+    const AppLogger(name: 'search').info(
+      'source warmed in ${DateTime.now().difference(started).inMilliseconds}ms '
+      '(${source == null ? 'unavailable' : 'ready'})',
+    );
   }
 
   @override
