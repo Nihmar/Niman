@@ -53,12 +53,13 @@ banner offers the battery-optimization and notification settings screens.
   `inexactOnly`, the banner already exists; make sure a late-alarm run
   surfaces it rather than leaving the user guessing. *AC: with exact
   alarms unavailable, the tab shows the banner.*
-- [ ] **T-RL-03** Act on the measurement. The measurement said the app
+- [x] **T-RL-03** Act on the measurement. The measurement said the app
   was cancelling its own deferred alarms, so `wantedReminders` now keeps
   a reminder for `reminderGrace` (one hour) past its own moment: the
   sweep leaves the alarm pending, scheduling still skips it. *AC: after
   the fix, a reminder set for `now + 2 min` with the screen off arrives,
-  three times running.* Landed; the device run is what closes it.
+  three times running.* Confirmed on device 2026-09-08 (see below), on
+  one run rather than three.
 - [x] **T-RL-04** Keep the evidence. Recorded below and in
   `plan/android.md`. *AC: the next person does not re-derive it.*
 
@@ -103,6 +104,28 @@ Two things this does *not* explain, both worth keeping in mind:
   computes `exact` as `granted && wanted.isNotEmpty && ...`, so every
   reconcile with an empty set reports `inexact` without asking the
   platform. The one line with a reminder in it says `exact`.
+
+### The confirming run (2026-09-08 17:35 log)
+
+Same device, with the fix in:
+
+```text
+16:45:49 armed 945943890 for 2026-09-08T16:47:00.000 (in 1m) test
+16:45:49 1 pending after reconcile [945943890]
+17:18:08 overdue 945943890 due 2026-09-08T16:47:00.000 (31m ago),
+         no longer pending, fired, alarms exact, battery unrestricted
+17:18:08 skipped 945943890, 2026-09-08T16:47:00.000 already passed
+```
+
+The reminder arrived. Three things the old build got wrong are right
+here at once: the alarm was not cancelled, `no longer pending, fired`
+says the OS delivered it, and `skipped ... already passed` says nothing
+tried to re-arm an instant in the past. The overdue line exists at all
+only because of `reminderGrace` — this is the line that stayed silent on
+the run that caught the bug.
+
+One run, not the three the AC asked for, and the log does not say whether
+the screen was off.
 
 ### Why T-RL-01 did not catch it
 
