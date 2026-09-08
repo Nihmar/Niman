@@ -1290,14 +1290,32 @@ final class _LibraryShellState extends State<_LibraryShell>
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      // No cross-fade between tab bodies. It kept both of them built and
-      // painted for its whole 180 ms, and a device log put build alone at
-      // 13 to 18 ms on the frames right after a switch — the entire 60 Hz
-      // budget, before painting. Going to Search was the worst of them,
-      // which is the tab the stutter was reported on: the note tree of a
-      // 987-entry library was still being built while the search screen
-      // was building too.
-      body: _withFabScrim(body, enabled: _tab == ShellTab.files),
+      // T-TS-03: Put the motion back with a slide. Bit less pretty than a
+      // cross-fade, but it doesn't force offscreen compositing for
+      // transparency, which is what ate the frame budget. 180ms matches the
+      // sort-toggle and fab-scrim durations.
+      body: _withFabScrim(
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder: (child, animation) {
+            return SlideTransition(
+              position: animation.drive(
+                Tween<Offset>(
+                  begin: const Offset(0.05, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic)),
+              ),
+              child: child,
+            );
+          },
+          child: KeyedSubtree(
+            key: ValueKey('tab-body-${_tab.index}'),
+            child: body,
+          ),
+        ),
+        enabled: _tab == ShellTab.files,
+      ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: _shellTabs(),
     );
