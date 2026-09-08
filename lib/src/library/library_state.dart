@@ -459,6 +459,21 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setIndentWidth(width);
   }
 
+  /// The stored editor-toolbar layout (empty = the shipped toolbar).
+  @override
+  Future<String> get editorToolbar async {
+    final db = await database;
+    return AppSettingsRepo(db).editorToolbar();
+  }
+
+  /// Sets (and persists) the editor-toolbar layout.
+  @override
+  Future<void> setEditorToolbar(String layout) async {
+    _log.info('editor toolbar set to "$layout"');
+    final db = await database;
+    await AppSettingsRepo(db).setEditorToolbar(layout);
+  }
+
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
   @override

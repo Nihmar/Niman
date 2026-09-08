@@ -6,6 +6,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/db/database.dart';
+import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
@@ -243,6 +244,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
 
+  /// The editor toolbar the user arranged (settings, T-TB-04).
+  ToolbarLayout _toolbarLayout = ToolbarLayout.defaults;
+
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
 
@@ -476,6 +480,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final linkType = await controller.linkType;
     final indentWidth = await controller.indentWidth;
     final treeSort = await controller.treeSort;
+    final toolbar = await controller.editorToolbar;
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
@@ -483,7 +488,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             splitRatio != _splitRatio ||
             linkType != _linkType ||
             indentWidth != _indentWidth ||
-            treeSort != _treeSort)) {
+            treeSort != _treeSort ||
+            toolbar != _toolbarLayout.encode())) {
       setState(() {
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
@@ -492,6 +498,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _linkType = linkType;
         _indentWidth = indentWidth;
         _treeSort = treeSort;
+        _toolbarLayout = ToolbarLayout.parse(toolbar);
       });
     }
   }
@@ -909,6 +916,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                       autofocusEditor: _autofocusEditor,
                       linkType: _linkType,
                       indentWidth: _indentWidth,
+                      toolbarLayout: _toolbarLayout,
                       splitPreview: _effectiveSplit(narrow: true),
                       showPreview: _previewVisible,
                       splitFraction: _splitRatio,
@@ -1229,6 +1237,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             autofocusEditor: _autofocusEditor,
             linkType: _linkType,
             indentWidth: _indentWidth,
+            toolbarLayout: _toolbarLayout,
             splitPreview: _effectiveSplit(narrow: false),
             showPreview: _previewVisible,
             splitFraction: _splitRatio,
@@ -1298,6 +1307,7 @@ final class _DetailPane extends StatelessWidget {
     required this.autofocusEditor,
     required this.linkType,
     required this.indentWidth,
+    required this.toolbarLayout,
     required this.splitPreview,
     required this.showPreview,
     required this.splitFraction,
@@ -1323,6 +1333,7 @@ final class _DetailPane extends StatelessWidget {
   final bool autofocusEditor;
   final LinkType linkType;
   final int indentWidth;
+  final ToolbarLayout toolbarLayout;
 
   /// Preview layout (T-M2-08).
   final bool splitPreview;
@@ -1371,6 +1382,7 @@ final class _DetailPane extends StatelessWidget {
                 autofocusEditor: autofocusEditor,
                 linkType: linkType,
                 indentWidth: indentWidth,
+                toolbarLayout: toolbarLayout,
                 splitPreview: splitPreview,
                 showPreview: showPreview,
                 splitFraction: splitFraction,

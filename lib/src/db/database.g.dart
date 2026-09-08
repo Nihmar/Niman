@@ -1055,6 +1055,18 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(2),
   );
+  static const VerificationMeta _editorToolbarMeta = const VerificationMeta(
+    'editorToolbar',
+  );
+  @override
+  late final GeneratedColumn<String> editorToolbar = GeneratedColumn<String>(
+    'editor_toolbar',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1068,6 +1080,7 @@ class $AppSettingsTable extends AppSettings
     treeSort,
     linkType,
     indentWidth,
+    editorToolbar,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1165,6 +1178,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('editor_toolbar')) {
+      context.handle(
+        _editorToolbarMeta,
+        editorToolbar.isAcceptableOrUnknown(
+          data['editor_toolbar']!,
+          _editorToolbarMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1218,6 +1240,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}indent_width'],
       )!,
+      editorToolbar: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}editor_toolbar'],
+      )!,
     );
   }
 
@@ -1270,6 +1296,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// The editor's indent/outdent width in spaces (default 2).
   final int indentWidth;
+
+  /// The editor toolbar the user arranged: every button id in their
+  /// order, a `-` prefix marking a hidden one (see `ToolbarLayout`).
+  /// Empty means the shipped toolbar.
+  final String editorToolbar;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1282,6 +1313,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.treeSort,
     required this.linkType,
     required this.indentWidth,
+    required this.editorToolbar,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1299,6 +1331,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['tree_sort'] = Variable<String>(treeSort);
     map['link_type'] = Variable<String>(linkType);
     map['indent_width'] = Variable<int>(indentWidth);
+    map['editor_toolbar'] = Variable<String>(editorToolbar);
     return map;
   }
 
@@ -1317,6 +1350,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       treeSort: Value(treeSort),
       linkType: Value(linkType),
       indentWidth: Value(indentWidth),
+      editorToolbar: Value(editorToolbar),
     );
   }
 
@@ -1337,6 +1371,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       treeSort: serializer.fromJson<String>(json['treeSort']),
       linkType: serializer.fromJson<String>(json['linkType']),
       indentWidth: serializer.fromJson<int>(json['indentWidth']),
+      editorToolbar: serializer.fromJson<String>(json['editorToolbar']),
     );
   }
   @override
@@ -1354,6 +1389,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'treeSort': serializer.toJson<String>(treeSort),
       'linkType': serializer.toJson<String>(linkType),
       'indentWidth': serializer.toJson<int>(indentWidth),
+      'editorToolbar': serializer.toJson<String>(editorToolbar),
     };
   }
 
@@ -1369,6 +1405,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? treeSort,
     String? linkType,
     int? indentWidth,
+    String? editorToolbar,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1381,6 +1418,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     treeSort: treeSort ?? this.treeSort,
     linkType: linkType ?? this.linkType,
     indentWidth: indentWidth ?? this.indentWidth,
+    editorToolbar: editorToolbar ?? this.editorToolbar,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1411,6 +1449,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       indentWidth: data.indentWidth.present
           ? data.indentWidth.value
           : this.indentWidth,
+      editorToolbar: data.editorToolbar.present
+          ? data.editorToolbar.value
+          : this.editorToolbar,
     );
   }
 
@@ -1427,7 +1468,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('splitRatio: $splitRatio, ')
           ..write('treeSort: $treeSort, ')
           ..write('linkType: $linkType, ')
-          ..write('indentWidth: $indentWidth')
+          ..write('indentWidth: $indentWidth, ')
+          ..write('editorToolbar: $editorToolbar')
           ..write(')'))
         .toString();
   }
@@ -1445,6 +1487,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     treeSort,
     linkType,
     indentWidth,
+    editorToolbar,
   );
   @override
   bool operator ==(Object other) =>
@@ -1460,7 +1503,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.splitRatio == this.splitRatio &&
           other.treeSort == this.treeSort &&
           other.linkType == this.linkType &&
-          other.indentWidth == this.indentWidth);
+          other.indentWidth == this.indentWidth &&
+          other.editorToolbar == this.editorToolbar);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1475,6 +1519,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> treeSort;
   final Value<String> linkType;
   final Value<int> indentWidth;
+  final Value<String> editorToolbar;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1487,6 +1532,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.treeSort = const Value.absent(),
     this.linkType = const Value.absent(),
     this.indentWidth = const Value.absent(),
+    this.editorToolbar = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1500,6 +1546,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.treeSort = const Value.absent(),
     this.linkType = const Value.absent(),
     this.indentWidth = const Value.absent(),
+    this.editorToolbar = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1513,6 +1560,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? treeSort,
     Expression<String>? linkType,
     Expression<int>? indentWidth,
+    Expression<String>? editorToolbar,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1527,6 +1575,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (treeSort != null) 'tree_sort': treeSort,
       if (linkType != null) 'link_type': linkType,
       if (indentWidth != null) 'indent_width': indentWidth,
+      if (editorToolbar != null) 'editor_toolbar': editorToolbar,
     });
   }
 
@@ -1542,6 +1591,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? treeSort,
     Value<String>? linkType,
     Value<int>? indentWidth,
+    Value<String>? editorToolbar,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1555,6 +1605,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
       indentWidth: indentWidth ?? this.indentWidth,
+      editorToolbar: editorToolbar ?? this.editorToolbar,
     );
   }
 
@@ -1594,6 +1645,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (indentWidth.present) {
       map['indent_width'] = Variable<int>(indentWidth.value);
     }
+    if (editorToolbar.present) {
+      map['editor_toolbar'] = Variable<String>(editorToolbar.value);
+    }
     return map;
   }
 
@@ -1610,7 +1664,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('splitRatio: $splitRatio, ')
           ..write('treeSort: $treeSort, ')
           ..write('linkType: $linkType, ')
-          ..write('indentWidth: $indentWidth')
+          ..write('indentWidth: $indentWidth, ')
+          ..write('editorToolbar: $editorToolbar')
           ..write(')'))
         .toString();
   }
@@ -2823,7 +2878,16 @@ class $$NotesTableTableManager
                 sha256: sha256,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NotesTable, Note>(table),
+                  BaseReferences<_$CopistDatabase, $NotesTable, Note>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3034,7 +3098,16 @@ class $$LibrarySettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LibrarySettingsTable, LibrarySetting>(table),
+                  BaseReferences<
+                    _$CopistDatabase,
+                    $LibrarySettingsTable,
+                    LibrarySetting
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3071,6 +3144,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> treeSort,
       Value<String> linkType,
       Value<int> indentWidth,
+      Value<String> editorToolbar,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -3085,6 +3159,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> treeSort,
       Value<String> linkType,
       Value<int> indentWidth,
+      Value<String> editorToolbar,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -3148,6 +3223,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<int> get indentWidth => $composableBuilder(
     column: $table.indentWidth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get editorToolbar => $composableBuilder(
+    column: $table.editorToolbar,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3215,6 +3295,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.indentWidth,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get editorToolbar => $composableBuilder(
+    column: $table.editorToolbar,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -3274,6 +3359,11 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.indentWidth,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get editorToolbar => $composableBuilder(
+    column: $table.editorToolbar,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -3318,6 +3408,7 @@ class $$AppSettingsTableTableManager
                 Value<String> treeSort = const Value.absent(),
                 Value<String> linkType = const Value.absent(),
                 Value<int> indentWidth = const Value.absent(),
+                Value<String> editorToolbar = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -3330,6 +3421,7 @@ class $$AppSettingsTableTableManager
                 treeSort: treeSort,
                 linkType: linkType,
                 indentWidth: indentWidth,
+                editorToolbar: editorToolbar,
               ),
           createCompanionCallback:
               ({
@@ -3344,6 +3436,7 @@ class $$AppSettingsTableTableManager
                 Value<String> treeSort = const Value.absent(),
                 Value<String> linkType = const Value.absent(),
                 Value<int> indentWidth = const Value.absent(),
+                Value<String> editorToolbar = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -3356,9 +3449,19 @@ class $$AppSettingsTableTableManager
                 treeSort: treeSort,
                 linkType: linkType,
                 indentWidth: indentWidth,
+                editorToolbar: editorToolbar,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AppSettingsTable, AppSetting>(table),
+                  BaseReferences<
+                    _$CopistDatabase,
+                    $AppSettingsTable,
+                    AppSetting
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3518,7 +3621,16 @@ class $$NoteStemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteStemsTable, NoteStem>(table),
+                  BaseReferences<_$CopistDatabase, $NoteStemsTable, NoteStem>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3625,7 +3737,16 @@ class $$TagsTableTableManager
             Value<int> rowid = const Value.absent(),
           }) => TagsCompanion.insert(name: name, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$TagsTable, Tag>(table),
+                  BaseReferences<_$CopistDatabase, $TagsTable, Tag>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3781,7 +3902,16 @@ class $$NoteTagsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteTagsTable, NoteTag>(table),
+                  BaseReferences<_$CopistDatabase, $NoteTagsTable, NoteTag>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3938,7 +4068,16 @@ class $$NoteLinksTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$NoteLinksTable, NoteLink>(table),
+                  BaseReferences<_$CopistDatabase, $NoteLinksTable, NoteLink>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

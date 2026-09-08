@@ -26,6 +26,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 1');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+        );
+        await db.customStatement(
           'ALTER TABLE library_settings DROP COLUMN list_note_folder',
         );
         await db.customStatement(
@@ -86,6 +89,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 2');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+        );
+        await db.customStatement(
           'ALTER TABLE library_settings DROP COLUMN list_note_folder',
         );
         await db.customStatement(
@@ -141,6 +147,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 3');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+        );
+        await db.customStatement(
           'ALTER TABLE library_settings DROP COLUMN list_note_folder',
         );
         await db.customStatement(
@@ -193,6 +202,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 4');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -239,6 +251,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 5');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -279,6 +294,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 6');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -314,6 +332,9 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
       await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
@@ -398,6 +419,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 8');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -433,6 +457,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 9');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -465,6 +492,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 10');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN list_note_folder',
       );
       await db.customStatement(
@@ -483,4 +513,32 @@ void main() {
     expect(row.listNoteFolder, 'Lists');
     await db.close();
   });
+
+  test(
+    'v11 databases gain editor_toolbar on upgrade, keeping the settings',
+    () async {
+      // Build a v11-shaped file: the current schema minus the one column
+      // v12 adds.
+      {
+        final db = CopistDatabase(NativeDatabase(dbFile));
+        await db.customStatement('PRAGMA user_version = 11');
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+        );
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, indent_width) '
+          "VALUES (1, '/old/root', 4)",
+        );
+        await db.close();
+      }
+
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      final row = (await db.select(db.appSettings).get()).single;
+      expect(row.libraryPath, '/old/root');
+      expect(row.indentWidth, 4);
+      // Empty is "the shipped toolbar"; nothing to migrate into it.
+      expect(row.editorToolbar, '');
+      await db.close();
+    },
+  );
 }

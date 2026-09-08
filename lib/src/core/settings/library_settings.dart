@@ -323,6 +323,23 @@ final class AppSettingsRepo {
         .write(AppSettingsCompanion(indentWidth: Value(clamped)));
   }
 
+  /// The stored editor-toolbar layout (empty = the shipped toolbar).
+  ///
+  /// Kept as the raw stored string: parsing it is the editor's business,
+  /// so the settings layer does not depend on the toolbar catalogue.
+  Future<String> editorToolbar() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? '' : rows.first.editorToolbar;
+  }
+
+  /// Persists the editor-toolbar layout.
+  Future<void> setEditorToolbar(String layout) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(editorToolbar: Value(layout)),
+    );
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

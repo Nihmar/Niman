@@ -1,6 +1,7 @@
 # Editor toolbar — user-ordered, user-hidden buttons
 
-**Status:** Planned (2026-09-08, user request) · **Depends on:** T-UI-08
+**Status:** Implemented 2026-09-08 (analyze + tests green) — the
+on-device check is the user's · **Depends on:** T-UI-08
 (the toolbar itself, landed) · **Spec:** user request: reorder the editor
 toolbar and hide buttons from the settings.
 
@@ -28,8 +29,11 @@ persists.
    renaming one is a migration.
 2. **One setting, app-scoped.** Order and visibility are one value in
    `app_settings` (not per library): the user's habits do not change with
-   the library. Stored as a single text column — the visible ids in
-   order, then the hidden ones, so both facts survive in one string.
+   the library. Stored as a single text column: every id in the user's
+   order, a `-` prefix marking a hidden one. (The plan first said
+   "visible ids, then hidden ones"; one ordered list won because it is
+   what the settings screen shows, and it keeps a hidden button's place
+   so unhiding puts it back where it was.)
 3. **Unknown ids are dropped, missing ids are appended.** A stored value
    from an older or newer build still yields a usable toolbar: ids the
    build does not know are ignored, and buttons the value never mentions
@@ -44,31 +48,31 @@ persists.
 
 ## Tasks
 
-- [ ] **T-TB-01** `ToolbarItem` enum + defaults. `editor/toolbar_item.dart`:
+- [x] **T-TB-01** `ToolbarItem` enum + defaults. `editor/toolbar_item.dart`:
   the fourteen items with a stable id, an `IconData`, a `strings.dart`
   label, and the current order as the default. *AC: unit test — the
   default order matches what ships today, every id is unique.*
-- [ ] **T-TB-02** The stored layout. A `ToolbarLayout` value object
+- [x] **T-TB-02** The stored layout. A `ToolbarLayout` value object
   (visible ids in order + hidden ids) with `parse`/`encode` over the
   single stored string, applying decision 3 for unknown/missing ids.
   *AC: unit tests — round trip, unknown id dropped, new id appended
   visible, empty/absent value gives the default.*
-- [ ] **T-TB-03** Persistence. `editor_toolbar` text column in
+- [x] **T-TB-03** Persistence. `editor_toolbar` text column in
   `app_settings` (schema 12 + migration), repo getter/setter, exposed on
   the session like `indentWidth`. *AC: set, reopen, still there;
   migration test from the previous schema.*
-- [ ] **T-TB-04** The note view honours it. `_toolbar()` builds from the
+- [x] **T-TB-04** The note view honours it. `_toolbar()` builds from the
   layout: an id→callback map replaces the inline list, hidden ids are
   skipped, and no visible button means no toolbar. *AC: widget tests —
   a reordered layout renders in that order, a hidden button is absent,
   an all-hidden layout renders no toolbar.*
-- [ ] **T-TB-05** The settings editor. A screen (pushed from the settings
+- [x] **T-TB-05** The settings editor. A screen (pushed from the settings
   list) with a `ReorderableListView` of the items: icon + name + drag
   handle + eye toggle; hidden rows are dimmed. Changes save immediately
   and the open editor picks them up through the existing settings
   refresh. *AC: widget tests — a drag reorders and persists, the eye
   toggles and persists, an open editor reflects both without reopening.*
-- [ ] **T-TB-06** Strings + a reset. Every name in `strings.dart`; a
+- [x] **T-TB-06** Strings + a reset. Every name in `strings.dart`; a
   "Restore default order" action on the screen. *AC: analyze clean;
   reset writes the default and the toolbar follows.*
 
@@ -77,9 +81,9 @@ persists.
 - **Where the callbacks stay.** The note view keeps owning the markdown
   commands; only the *ordering* moves out. The enum carries no behaviour,
   so `editor/` gains no dependency on the note view.
-- **Encoding.** `id,id,id|hiddenId,hiddenId` — visible before the pipe,
-  hidden after. Readable in the database, trivially parseable, and it
-  keeps the hidden buttons' relative order for when they come back.
+- **Encoding.** `bold,italic,-strike,…` — one ordered list, a `-`
+  prefix meaning hidden. Readable in the database, trivially parseable,
+  and a hidden button keeps its slot.
 - **No per-library variant.** `app_settings` already holds the editor
   toggles that are about the person rather than the library (line
   numbers, autofocus, indent width); this joins them.

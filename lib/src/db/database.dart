@@ -114,6 +114,12 @@ class AppSettings extends Table {
   IntColumn get indentWidth =>
       integer().named('indent_width').withDefault(const Constant(2))();
 
+  /// The editor toolbar the user arranged: every button id in their
+  /// order, a `-` prefix marking a hidden one (see `ToolbarLayout`).
+  /// Empty means the shipped toolbar.
+  TextColumn get editorToolbar =>
+      text().named('editor_toolbar').withDefault(const Constant(''))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -202,7 +208,7 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -221,7 +227,7 @@ class CopistDatabase extends _$CopistDatabase {
   /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
   /// `reminder_show_tokens`, pre-v10 databases `link_type` +
   /// `indent_width`, and pre-v11 databases the `list_note_folder`
-  /// library setting.
+  /// library setting, and pre-v12 databases `editor_toolbar`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -295,6 +301,12 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE library_settings ADD COLUMN list_note_folder '
           "TEXT NOT NULL DEFAULT 'Lists'",
+        );
+      }
+      if (from < 12) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN editor_toolbar '
+          "TEXT NOT NULL DEFAULT ''",
         );
       }
     },

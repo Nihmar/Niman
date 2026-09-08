@@ -134,3 +134,4 @@ app.*.symbols
 
 # Kotlin compiler session state, written during a Gradle build.
 **/android/.kotlin/
+/copist_migrate_*/

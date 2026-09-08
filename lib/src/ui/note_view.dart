@@ -14,6 +14,8 @@ import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/toolbar.dart';
+import 'package:copist/src/editor/toolbar_item.dart';
+import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/frontmatter/note_kind.dart';
 import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/image_import.dart';
@@ -59,6 +61,7 @@ final class NoteView extends StatefulWidget {
     required this.autofocusEditor,
     this.linkType = LinkType.wikilink,
     this.indentWidth = 2,
+    this.toolbarLayout = ToolbarLayout.defaults,
     this.splitPreview = false,
     this.showPreview = false,
     this.splitFraction = defaultSplitRatio,
@@ -92,6 +95,10 @@ final class NoteView extends StatefulWidget {
 
   /// The indent/outdent width in spaces (settings).
   final int indentWidth;
+
+  /// The toolbar the user arranged (settings, T-TB-04): which buttons
+  /// show and in what order.
+  final ToolbarLayout toolbarLayout;
 
   /// Whether the preview sits side by side (split) or behind a switch.
   final bool splitPreview;
@@ -995,7 +1002,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final split = widget.splitPreview;
     // The toolbar formats the editor: it stays in split mode (the editor
     // is on screen) and hides in full-screen preview mode.
-    final showToolbar = split || !widget.showPreview;
+    // Hiding every button hides the toolbar itself; the editor keeps its
+    // keyboard shortcuts.
+    final showToolbar = (split || !widget.showPreview) &&
+        widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
     // note is a list, not a document, on screen.
@@ -1150,96 +1160,44 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// and re-showed the keyboard), so the toolbar joins the editor's tap
   /// region and tapping it keeps the editor focused.
   Widget _toolbar(BuildContext context) {
+    final actions = _toolbarActions();
     return CodeEditorTapRegion(
       child: EditorToolbar(
         buttons: [
-          EditorToolbarButton(
-            key: const Key('toolbar-bold'),
-            icon: Icons.format_bold,
-            tooltip: 'Bold',
-            onPressed: () => _wrapSelection(left: '**', right: '**'),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-italic'),
-            icon: Icons.format_italic,
-            tooltip: 'Italic',
-            onPressed: () => _wrapSelection(left: '*', right: '*'),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-strike'),
-            icon: Icons.strikethrough_s,
-            tooltip: 'Strikethrough',
-            onPressed: () => _wrapSelection(left: '~~', right: '~~'),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-sup'),
-            icon: Icons.superscript,
-            tooltip: 'Superscript',
-            onPressed: () => _wrapSelection(left: '<sup>', right: '</sup>'),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-underline'),
-            icon: Icons.format_underline,
-            tooltip: 'Underline',
-            onPressed: () => _wrapSelection(left: '<u>', right: '</u>'),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-link'),
-            icon: Icons.link,
-            tooltip: 'Link',
-            onPressed: _insertLink,
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-code'),
-            icon: Icons.code,
-            tooltip: 'Code block',
-            onPressed: _insertCodeBlock,
-          ),
-          EditorToolbarButton(
-            key: const Key('insert-image'),
-            icon: Icons.add_photo_alternate_outlined,
-            tooltip: AppStrings.insertImageTooltip,
-            onPressed: _insertImage,
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-heading'),
-            icon: Icons.title,
-            tooltip: AppStrings.toolbarHeadingTooltip,
-            onPressed: _showHeadingDialog,
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-list'),
-            icon: Icons.format_list_bulleted,
-            tooltip: 'List',
-            onPressed: () => _prefixLines(prefix: '- '),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-ordered-list'),
-            icon: Icons.format_list_numbered,
-            tooltip: AppStrings.toolbarOrderedListTooltip,
-            onPressed: _insertOrderedList,
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-quote'),
-            icon: Icons.format_quote,
-            tooltip: 'Quote',
-            onPressed: () => _prefixLines(prefix: '> '),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-outdent'),
-            icon: Icons.format_indent_decrease,
-            tooltip: AppStrings.toolbarOutdentTooltip,
-            onPressed: () => _indentLines(outdent: true),
-          ),
-          EditorToolbarButton(
-            key: const Key('toolbar-indent'),
-            icon: Icons.format_indent_increase,
-            tooltip: AppStrings.toolbarIndentTooltip,
-            onPressed: () => _indentLines(outdent: false),
-          ),
+          for (final item in widget.toolbarLayout.visible)
+            EditorToolbarButton(
+              key: item.widgetKey,
+              icon: item.icon,
+              tooltip: item.label,
+              onPressed: actions[item]!,
+            ),
         ],
       ),
     );
+  }
+
+  /// What each toolbar button does. The catalogue and the order live in
+  /// `editor/toolbar_item.dart`; the commands stay here, with the
+  /// controller they act on.
+  Map<ToolbarItem, VoidCallback> _toolbarActions() {
+    return {
+      ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
+      ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
+      ToolbarItem.strikethrough: () =>
+          _wrapSelection(left: '~~', right: '~~'),
+      ToolbarItem.superscript: () =>
+          _wrapSelection(left: '<sup>', right: '</sup>'),
+      ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),
+      ToolbarItem.link: _insertLink,
+      ToolbarItem.code: _insertCodeBlock,
+      ToolbarItem.image: _insertImage,
+      ToolbarItem.heading: _showHeadingDialog,
+      ToolbarItem.list: () => _prefixLines(prefix: '- '),
+      ToolbarItem.orderedList: _insertOrderedList,
+      ToolbarItem.quote: () => _prefixLines(prefix: '> '),
+      ToolbarItem.outdent: () => _indentLines(outdent: true),
+      ToolbarItem.indent: () => _indentLines(outdent: false),
+    };
   }
 
   /// Applies a pure markdown command's result: the whole text is set

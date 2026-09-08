@@ -47,6 +47,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashEnabled = true;
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
+  String _editorToolbar = '';
 
   @override
   LibraryPhase get phase => _phase;
@@ -182,6 +183,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setIndentWidth(int width) async {
     _indentWidth = width;
+  }
+
+  @override
+  Future<String> get editorToolbar async => _editorToolbar;
+
+  @override
+  Future<void> setEditorToolbar(String layout) async {
+    _editorToolbar = layout;
   }
 
   @override

@@ -62,14 +62,34 @@ final class AppStrings {
   static const String outlineTooltip = 'Outline';
   static const String outlineNoHeadings = 'No headings';
   static const String outlineNoTitle = '(no title)';
-  static const String insertImageTooltip = 'Insert image';
 
-  // Editor toolbar.
-  static const String toolbarHeadingTooltip = 'Heading';
-  static const String toolbarOrderedListTooltip = 'Numbered list';
-  static const String toolbarIndentTooltip = 'Indent';
-  static const String toolbarOutdentTooltip = 'Outdent';
+  // Editor toolbar: one name per button, used as its tooltip in the
+  // editor and as its row title in the toolbar settings.
+  static const String toolbarBold = 'Bold';
+  static const String toolbarItalic = 'Italic';
+  static const String toolbarStrikethrough = 'Strikethrough';
+  static const String toolbarSuperscript = 'Superscript';
+  static const String toolbarUnderline = 'Underline';
+  static const String toolbarLink = 'Link';
+  static const String toolbarCode = 'Code block';
+  static const String toolbarImage = 'Insert image';
+  static const String toolbarHeading = 'Heading';
+  static const String toolbarList = 'List';
+  static const String toolbarOrderedList = 'Numbered list';
+  static const String toolbarQuote = 'Quote';
+  static const String toolbarIndent = 'Indent';
+  static const String toolbarOutdent = 'Outdent';
   static const String headingDialogTitle = 'Heading level';
+
+  // Toolbar settings (T-TB-05).
+  static const String toolbarSettingsTitle = 'Editor toolbar';
+  static const String toolbarSettingsSubtitle =
+      'Order the buttons and hide the ones you do not use';
+  static const String toolbarSettingsHint =
+      'Drag to reorder; the eye shows or hides a button.';
+  static const String toolbarShowButton = 'Show';
+  static const String toolbarHideButton = 'Hide';
+  static const String toolbarResetOrder = 'Restore defaults';
 
   // Preview switch (phone mode).
   static const String showPreviewTooltip = 'Show preview';

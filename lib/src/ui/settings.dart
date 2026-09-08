@@ -8,6 +8,7 @@ import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -494,6 +495,19 @@ final class _SettingsBodyState extends State<SettingsBody> {
                       _setIndentWidth(selection.first),
                 ),
               ],
+            ),
+          ),
+          ListTile(
+            key: const Key('toolbar-setting'),
+            title: const Text(AppStrings.toolbarSettingsTitle),
+            subtitle: const Text(AppStrings.toolbarSettingsSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) =>
+                    ToolbarSettingsScreen(controller: widget.controller),
+              ),
             ),
           ),
           const Divider(),

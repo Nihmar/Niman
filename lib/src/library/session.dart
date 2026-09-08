@@ -183,6 +183,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the indent/outdent width.
   Future<void> setIndentWidth(int width);
 
+  /// The stored editor-toolbar layout (empty = the shipped toolbar);
+  /// `ToolbarLayout.parse` turns it into the toolbar.
+  Future<String> get editorToolbar;
+
+  /// Sets (and persists) the editor-toolbar layout.
+  Future<void> setEditorToolbar(String layout);
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 
