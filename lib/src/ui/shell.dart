@@ -311,14 +311,14 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: 'Show list',
+          tooltip: AppStrings.showListTooltip,
           icon: const Icon(Icons.checklist),
           onPressed: () => setState(() => _kindRawMode = false),
         )
       else
         IconButton(
           key: const Key('kind-edit-raw'),
-          tooltip: 'Edit raw',
+          tooltip: AppStrings.editRawTooltip,
           icon: const Icon(Icons.edit_outlined),
           onPressed: () => setState(() => _kindRawMode = true),
         ),
@@ -624,7 +624,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       context,
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Quick note')),
+          appBar: AppBar(title: Text(AppStrings.quickNoteTitle)),
           body: QuickNoteTab(
             controller: widget.controller,
             onOpen: (path) {
@@ -671,8 +671,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _createNote({String? parent}) async {
     final name = await showNameDialog(
       context,
-      title: 'New note',
-      initial: 'New note',
+      title: AppStrings.newNoteTitle,
+      initial: AppStrings.newNoteTitle,
     );
     if (name == null) return;
     await _guard(() async {
@@ -693,8 +693,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _createFolder({String? parent}) async {
     final name = await showNameDialog(
       context,
-      title: 'New folder',
-      initial: 'New folder',
+      title: AppStrings.newFolderTitle,
+      initial: AppStrings.newFolderTitle,
     );
     if (name == null) return;
     await _guard(() async {
@@ -715,7 +715,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (sel == null) return;
     final name = await showNameDialog(
       context,
-      title: 'Rename',
+      title: AppStrings.actionRename,
       initial: p.basename(sel),
     );
     if (name == null) return;
@@ -759,20 +759,20 @@ final class _LibraryShellState extends State<_LibraryShell>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete'),
+        title: Text(AppStrings.actionDelete),
         content: Text(
           trash
-              ? '$name will be moved to .trash/'
-              : '$name will be permanently deleted',
+              ? AppStrings.deleteToTrashConfirm(name)
+              : AppStrings.deleteForeverConfirm(name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppStrings.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(AppStrings.actionDelete),
           ),
         ],
       ),
@@ -783,7 +783,11 @@ final class _LibraryShellState extends State<_LibraryShell>
       setState(() => _selected = null);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(trash ? 'Moved to trash' : 'Deleted')),
+          SnackBar(
+            content: Text(
+              trash ? AppStrings.movedToTrash : AppStrings.deletedMessage,
+            ),
+          ),
         );
       }
     });
@@ -820,14 +824,14 @@ final class _LibraryShellState extends State<_LibraryShell>
             ListTile(
               key: const Key('menu-new-note'),
               leading: const Icon(Icons.note_add),
-              title: const Text('New note here'),
+              title: Text(AppStrings.newNoteHere),
               onTap: () => Navigator.pop(context, 'note'),
             ),
             if (note.isDir)
               ListTile(
                 key: const Key('menu-new-folder'),
                 leading: const Icon(Icons.create_new_folder),
-                title: const Text('New folder here'),
+                title: Text(AppStrings.newFolderHere),
                 onTap: () => Navigator.pop(context, 'folder'),
               ),
             if (!note.isDir)
@@ -839,26 +843,28 @@ final class _LibraryShellState extends State<_LibraryShell>
                       : Icons.sticky_note_2_outlined,
                 ),
                 title: Text(
-                  isQuickNote ? 'Current quick note' : 'Set as quick note',
+                  isQuickNote
+                      ? AppStrings.currentQuickNote
+                      : AppStrings.setAsQuickNote,
                 ),
                 onTap: () => Navigator.pop(context, 'quicknote'),
               ),
             ListTile(
               key: const Key('menu-rename'),
               leading: const Icon(Icons.edit),
-              title: const Text('Rename'),
+              title: Text(AppStrings.actionRename),
               onTap: () => Navigator.pop(context, 'rename'),
             ),
             ListTile(
               key: const Key('menu-move'),
               leading: const Icon(Icons.drive_folder_upload),
-              title: const Text('Move'),
+              title: Text(AppStrings.actionMove),
               onTap: () => Navigator.pop(context, 'move'),
             ),
             ListTile(
               key: const Key('menu-delete'),
               leading: const Icon(Icons.delete_outline),
-              title: const Text('Delete'),
+              title: Text(AppStrings.actionDelete),
               onTap: () => Navigator.pop(context, 'delete'),
             ),
           ],
@@ -965,7 +971,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Copist'),
+        title: const Text(AppStrings.appTitle),
         actions: [
           if (_selected != null && !_selectedIsDir) ..._kindActions,
           if (_selected != null &&
@@ -975,7 +981,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             _previewToggleAction(),
           IconButton(
             key: const Key('open-trash'),
-            tooltip: 'Trash',
+            tooltip: AppStrings.trashTitle,
             icon: const Icon(Icons.delete),
             onPressed: () => Navigator.push(
               context,
@@ -993,7 +999,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           _sortToggle(),
           IconButton(
             key: const Key('open-settings'),
-            tooltip: 'Settings',
+            tooltip: AppStrings.tabSettings,
             icon: const Icon(Icons.settings),
             onPressed: () => Navigator.push(
               context,
@@ -1050,8 +1056,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _createListNote() async {
     final name = await showNameDialog(
       context,
-      title: 'New list note',
-      initial: 'My list',
+      title: AppStrings.newListNoteTitle,
+      initial: AppStrings.newListNoteDefault,
     );
     if (name == null) return;
     await _guard(() async {
@@ -1119,7 +1125,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _sortToggle() {
     return IconButton(
       key: const Key('toggle-sort'),
-      tooltip: _treeSort == TreeSort.nameAsc ? 'Sort Z-A' : 'Sort A-Z',
+      tooltip: _treeSort == TreeSort.nameAsc
+          ? AppStrings.sortDescTooltip
+          : AppStrings.sortAscTooltip,
       icon: AnimatedRotation(
         turns: _treeSort == TreeSort.nameAsc ? 0 : 0.5,
         duration: const Duration(milliseconds: 180),
@@ -1135,7 +1143,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     return [
       IconButton(
         key: const Key('open-trash'),
-        tooltip: 'Trash',
+        tooltip: AppStrings.trashTitle,
         icon: const Icon(Icons.delete),
         onPressed: () => Navigator.push(
           context,
@@ -1159,11 +1167,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   String get _tabTitle => switch (_tab) {
-    ShellTab.files => 'Copist',
+    ShellTab.files => AppStrings.appTitle,
     ShellTab.todo => AppStrings.todoTitle,
-    ShellTab.search => 'Search',
-    ShellTab.quickNote => 'Quick note',
-    ShellTab.settings => 'Settings',
+    ShellTab.search => AppStrings.tabSearch,
+    ShellTab.quickNote => AppStrings.quickNoteTitle,
+    ShellTab.settings => AppStrings.tabSettings,
   };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
@@ -1202,32 +1210,32 @@ final class _LibraryShellState extends State<_LibraryShell>
       key: const Key('shell-tabs'),
       selectedIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
-      destinations: const [
+      destinations: [
         NavigationDestination(
-          key: Key('tab-files'),
-          icon: Icon(Icons.folder_outlined),
-          selectedIcon: Icon(Icons.folder),
-          label: 'Files',
+          key: const Key('tab-files'),
+          icon: const Icon(Icons.folder_outlined),
+          selectedIcon: const Icon(Icons.folder),
+          label: AppStrings.tabFiles,
         ),
         NavigationDestination(
-          icon: Icon(Icons.check_box_outlined),
-          selectedIcon: Icon(Icons.check_box),
-          label: 'Todo',
+          icon: const Icon(Icons.check_box_outlined),
+          selectedIcon: const Icon(Icons.check_box),
+          label: AppStrings.todoTitle,
         ),
         NavigationDestination(
-          icon: Icon(Icons.search),
-          label: 'Search',
+          icon: const Icon(Icons.search),
+          label: AppStrings.tabSearch,
         ),
         NavigationDestination(
-          icon: Icon(Icons.edit_outlined),
-          selectedIcon: Icon(Icons.edit),
-          label: 'Quick note',
+          icon: const Icon(Icons.edit_outlined),
+          selectedIcon: const Icon(Icons.edit),
+          label: AppStrings.quickNoteTitle,
         ),
         NavigationDestination(
-          key: Key('tab-settings'),
-          icon: Icon(Icons.settings_outlined),
-          selectedIcon: Icon(Icons.settings),
-          label: 'Settings',
+          key: const Key('tab-settings'),
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          label: AppStrings.tabSettings,
         ),
       ],
     );
@@ -1396,9 +1404,9 @@ final class _DetailPane extends StatelessWidget {
       layoutBuilder: (currentChild, previousChildren) =>
           currentChild ?? const SizedBox.shrink(),
       child: notePath == null
-          ? const KeyedSubtree(
-              key: ValueKey('detail-empty'),
-              child: Center(child: Text('Select a note')),
+          ? KeyedSubtree(
+              key: const ValueKey('detail-empty'),
+              child: Center(child: Text(AppStrings.selectANote)),
             )
           : KeyedSubtree(
               key: ValueKey('detail-note-$notePath'),
@@ -1455,17 +1463,17 @@ final class _MovePickerState extends State<_MovePicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Move ${widget.name}'),
+      title: Text(AppStrings.moveTitle(widget.name)),
       content: SizedBox(
         width: 320,
         child: DropdownButton<String>(
           value: _target,
-          hint: const Text('Choose destination'),
+          hint: Text(AppStrings.chooseDestination),
           onChanged: (value) => setState(() => _target = value),
           items: [
-            const DropdownMenuItem<String>(
+            DropdownMenuItem<String>(
               value: '',
-              child: Text('Library root'),
+              child: Text(AppStrings.libraryRoot),
             ),
             for (final folder in widget.folders)
               DropdownMenuItem<String>(
@@ -1478,13 +1486,13 @@ final class _MovePickerState extends State<_MovePicker> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.actionCancel),
         ),
         FilledButton(
           onPressed: _target == null
               ? null
               : () => Navigator.pop(context, _target),
-          child: const Text('Move'),
+          child: Text(AppStrings.actionMove),
         ),
       ],
     );

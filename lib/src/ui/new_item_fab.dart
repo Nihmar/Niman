@@ -1,3 +1,4 @@
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals three
@@ -49,7 +50,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-note-action'),
           icon: Icons.note_add_outlined,
-          tooltip: 'New note',
+          tooltip: AppStrings.newNoteTitle,
           open: expanded,
           onTap: onNewNote,
         ),
@@ -57,7 +58,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-list-note-action'),
           icon: Icons.checklist_outlined,
-          tooltip: 'New list note',
+          tooltip: AppStrings.newListNoteTitle,
           open: expanded,
           onTap: onNewListNote,
         ),
@@ -65,7 +66,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-folder-action'),
           icon: Icons.create_new_folder_outlined,
-          tooltip: 'New folder',
+          tooltip: AppStrings.newFolderTitle,
           open: expanded,
           onTap: onNewFolder,
         ),

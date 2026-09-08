@@ -2,6 +2,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/file_icon.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -149,7 +150,7 @@ final class _NoteTreeState extends State<NoteTree> {
             }
             final rows = snap.data!;
             if (rows.isEmpty) {
-              return const Center(child: Text('No notes yet'));
+              return Center(child: Text(AppStrings.treeEmpty));
             }
             return ListView.builder(
               itemCount: rows.length,

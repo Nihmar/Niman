@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// Picks one of the library's folders; resolves to its library-relative
@@ -74,7 +75,7 @@ final class _FolderPickerState extends State<FolderPicker> {
     final parent = _selected ?? '';
     final name = await showNameDialog(
       context,
-      title: 'New folder',
+      title: AppStrings.folderPickerNewFolder,
       initial: 'Lists',
     );
     if (name == null) return;
@@ -99,7 +100,7 @@ final class _FolderPickerState extends State<FolderPicker> {
         width: 320,
         height: 400,
         child: _paths.isEmpty
-            ? const Center(child: Text('No folders yet'))
+            ? Center(child: Text(AppStrings.folderPickerEmpty))
             : ListView.builder(
                 itemCount: _paths.length,
                 itemBuilder: (context, index) {
@@ -118,18 +119,18 @@ final class _FolderPickerState extends State<FolderPicker> {
       actions: [
         TextButton(
           onPressed: () => unawaited(_newFolder()),
-          child: const Text('New folder'),
+          child: Text(AppStrings.folderPickerNewFolder),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.actionCancel),
         ),
         FilledButton(
           key: const Key('folder-picker-choose'),
           onPressed: _selected == null
               ? null
               : () => Navigator.pop(context, _selected),
-          child: const Text('Choose'),
+          child: Text(AppStrings.actionChoose),
         ),
       ],
     );

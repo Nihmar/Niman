@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 
@@ -64,7 +65,7 @@ final class _QuickNotePickerState extends State<QuickNotePicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Choose quick note'),
+      title: Text(AppStrings.quickNotePickerTitle),
       content: SizedBox(
         width: 320,
         height: 400,
@@ -85,7 +86,7 @@ final class _QuickNotePickerState extends State<QuickNotePicker> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.actionCancel),
         ),
       ],
     );

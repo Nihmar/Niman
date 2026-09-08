@@ -1373,7 +1373,7 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
             key: ValueKey<int>(level),
             onPressed: () => Navigator.of(context).pop(level),
             child: Text(
-              'Heading $level',
+              AppStrings.headingLevelLabel(level),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 26.0 - level * 2,
               ),

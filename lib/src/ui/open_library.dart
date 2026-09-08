@@ -6,6 +6,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -67,8 +68,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     setState(() {
       _needsAccess = !granted;
       if (!granted) {
-        _pickerError = 'Copist cannot read your notes without'
-            ' "All files access". Grant it to open a library.';
+        _pickerError = AppStrings.storageAccessNeeded;
       }
     });
   }
@@ -81,7 +81,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     final active = opening || _busy;
     final narrow = MediaQuery.sizeOf(context).width < 600;
     return Scaffold(
-      appBar: AppBar(title: const Text('Copist')),
+      appBar: AppBar(title: const Text(AppStrings.appTitle)),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -95,10 +95,13 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   width: 72,
                 ),
                 const SizedBox(height: 12),
-                Text('Copist', style: theme.textTheme.headlineMedium),
+                Text(
+                  AppStrings.appTitle,
+                  style: theme.textTheme.headlineMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
-                  'Open a folder of Markdown notes as your library',
+                  AppStrings.openLibraryIntro,
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
@@ -111,12 +114,12 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                     children: [
                       FilledButton(
                         onPressed: active ? null : _openExisting,
-                        child: const Text('Open existing'),
+                        child: Text(AppStrings.openLibraryExisting),
                       ),
                       const SizedBox(height: 8),
                       FilledButton.tonal(
                         onPressed: active ? null : _createNew,
-                        child: const Text('Create new'),
+                        child: Text(AppStrings.openLibraryCreate),
                       ),
                     ],
                   )
@@ -126,12 +129,12 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                     children: [
                       FilledButton(
                         onPressed: active ? null : _openExisting,
-                        child: const Text('Open existing'),
+                        child: Text(AppStrings.openLibraryExisting),
                       ),
                       const SizedBox(width: 8),
                       FilledButton.tonal(
                         onPressed: active ? null : _createNew,
-                        child: const Text('Create new'),
+                        child: Text(AppStrings.openLibraryCreate),
                       ),
                     ],
                   ),
@@ -158,7 +161,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _openExisting() async {
     _pickerError = null;
-    final path = await _pickDirectory('Choose the library folder');
+    final path = await _pickDirectory(AppStrings.openLibraryChooseFolder);
     if (path == null) return;
     await widget.controller.open(path, create: false);
     // The controller's event stream drives the rebuild (phase/lastError).
@@ -167,7 +170,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   Future<void> _createNew() async {
     _pickerError = null;
     final parent = await _pickDirectory(
-      'Choose the folder the library will be created in',
+      AppStrings.openLibraryChooseParent,
     );
     if (parent == null) return;
     final name = await _promptName();
@@ -198,8 +201,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
       // path; the library is read by path, so map it to the real one.
       final path = resolveLibraryRoot(raw);
       if (path == null) {
-        _pickerError = 'That folder is not supported.'
-            ' Pick a folder on the device storage.';
+        _pickerError = AppStrings.openLibraryUnsupported;
         return null;
       }
       if (Platform.isAndroid) {
@@ -208,7 +210,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
         try {
           Directory(path).statSync();
         } on FileSystemException catch (e) {
-          _pickerError = 'The system did not give access to the folder: $e';
+          _pickerError = AppStrings.folderAccessDenied(e);
           return null;
         }
       }
@@ -216,7 +218,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     } on Object catch (error) {
       // For example "unknown_path" from SAF for protected trees.
       _setBusy(false);
-      _pickerError = 'Could not pick a folder: $error';
+      _pickerError = AppStrings.folderPickFailed(error);
       return null;
     }
   }
@@ -247,9 +249,7 @@ final class _AccessPrompt extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Copist reads your notes as ordinary files, so Android needs to'
-          ' allow it access to all files. Nothing is uploaded, and only the'
-          ' library folder you pick is read.',
+          AppStrings.storageAccessExplained,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
@@ -257,7 +257,7 @@ final class _AccessPrompt extends StatelessWidget {
         FilledButton(
           key: const Key('grant-storage-access'),
           onPressed: onGrant,
-          child: const Text('Grant file access'),
+          child: Text(AppStrings.storageAccessAction),
         ),
       ],
     );
@@ -293,20 +293,22 @@ final class _NewLibraryDialogState extends State<_NewLibraryDialog> {
   Widget build(BuildContext context) {
     final name = _text.text.trim();
     return AlertDialog(
-      title: const Text('Create new library'),
+      title: Text(AppStrings.openLibraryCreateTitle),
       content: TextField(
         controller: _text,
         autofocus: true,
-        decoration: const InputDecoration(labelText: 'Folder name'),
+        decoration: InputDecoration(
+          labelText: AppStrings.openLibraryFolderName,
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.actionCancel),
         ),
         FilledButton(
           onPressed: name.isEmpty ? null : _submit,
-          child: const Text('Create'),
+          child: Text(AppStrings.actionCreate),
         ),
       ],
     );

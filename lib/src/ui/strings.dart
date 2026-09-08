@@ -441,6 +441,192 @@ final class AppStrings {
   static String get todoReminderDismissAction => _t('Dismiss', 'Ignora');
   static String get todoReminderDue => _t('Due', 'Scade');
 
+  // Actions and buttons shared by the dialogs (T-L10N-06).
+  static String get actionOk => _t('OK', 'OK');
+  static String get actionCancel => _t('Cancel', 'Annulla');
+  static String get actionCreate => _t('Create', 'Crea');
+  static String get actionChoose => _t('Choose', 'Scegli');
+  static String get actionDelete => _t('Delete', 'Elimina');
+  static String get actionRename => _t('Rename', 'Rinomina');
+  static String get actionMove => _t('Move', 'Sposta');
+  static String get actionRestore => _t('Restore', 'Ripristina');
+  static String get actionEmpty => _t('Empty', 'Svuota');
+
+  // The shell: app bar, tabs and tree actions.
+  static const String appTitle = 'Copist';
+  static String get tabFiles => _t('Files', 'File');
+  static String get tabSearch => _t('Search', 'Cerca');
+  static String get tabSettings => _t('Settings', 'Impostazioni');
+  static String get quickNoteTitle => _t('Quick note', 'Nota rapida');
+  static String get treeEmpty => _t('No notes yet', 'Nessuna nota');
+  static String get selectANote => _t('Select a note', 'Seleziona una nota');
+  static String get showListTooltip => _t('Show list', 'Mostra elenco');
+  static String get editRawTooltip => _t('Edit raw', 'Modifica il sorgente');
+  static String get sortAscTooltip => _t('Sort A-Z', 'Ordina A-Z');
+  static String get sortDescTooltip => _t('Sort Z-A', 'Ordina Z-A');
+  static String get newNoteTitle => _t('New note', 'Nuova nota');
+  static String get newFolderTitle => _t('New folder', 'Nuova cartella');
+  static String get newNoteHere => _t('New note here', 'Nuova nota qui');
+  static String get newFolderHere =>
+      _t('New folder here', 'Nuova cartella qui');
+  static String get newListNoteTitle => _t('New list note', 'Nuova lista');
+  static String get newListNoteDefault => _t('My list', 'La mia lista');
+  static String get setAsQuickNote =>
+      _t('Set as quick note', 'Imposta come nota rapida');
+  static String get currentQuickNote =>
+      _t('Current quick note', 'Nota rapida attuale');
+  static String get movedToTrash =>
+      _t('Moved to trash', 'Spostato nel cestino');
+  static String get deletedMessage => _t('Deleted', 'Eliminato');
+  static String deleteToTrashConfirm(String name) => _t(
+    '$name will be moved to .trash/',
+    '$name verrà spostato in .trash/',
+  );
+  static String deleteForeverConfirm(String name) => _t(
+    '$name will be permanently deleted',
+    '$name verrà eliminato definitivamente',
+  );
+  static String get chooseDestination =>
+      _t('Choose destination', 'Scegli la destinazione');
+  static String get libraryRoot =>
+      _t('Library root', 'Radice della libreria');
+  static String moveTitle(String name) => _t('Move $name', 'Sposta $name');
+  static String headingLevelLabel(int level) =>
+      _t('Heading $level', 'Titolo $level');
+
+  // Quick note tab and picker.
+  static String get quickNoteEmpty => _t(
+    'No quick note yet. Choose an existing note, or create a new '
+        'one — the quick note opens here.',
+    'Nessuna nota rapida. Scegline una esistente o creane una nuova: '
+        'la nota rapida si apre qui.',
+  );
+  static String get quickNoteChooseAction =>
+      _t('Choose a note…', 'Scegli una nota…');
+  static String get quickNoteCreateAction =>
+      _t('Create a new note…', 'Crea una nuova nota…');
+  static String get quickNoteNewTitle =>
+      _t('New quick note', 'Nuova nota rapida');
+  static String get quickNotePickerTitle =>
+      _t('Choose quick note', 'Scegli la nota rapida');
+
+  // Folder picker (T-TK-07).
+  static String get folderPickerNewFolder =>
+      _t('New folder', 'Nuova cartella');
+  static String get folderPickerEmpty =>
+      _t('No folders yet', 'Nessuna cartella');
+  static String get listFolderTitle =>
+      _t('List folder', 'Cartella delle liste');
+
+  // Trash (M1).
+  static String get trashEmpty => _t('Trash is empty', 'Il cestino è vuoto');
+  static String get trashEmptyAction => _t('Empty trash', 'Svuota il cestino');
+  static String get trashEmptyConfirm => _t(
+    'This deletes everything in the trash folder permanently, '
+        'including items Copist did not put there.',
+    'Elimina definitivamente tutto ciò che è nel cestino, compreso '
+        'ciò che non ci ha messo Copist.',
+  );
+  static String trashDeleteConfirm(String name) => _t(
+    '$name will be deleted permanently (no restore)',
+    '$name verrà eliminato definitivamente, senza ripristino',
+  );
+  static String get trashDeletePermanently =>
+      _t('Delete permanently', 'Elimina definitivamente');
+
+  // The open/create library screen.
+  static String get openLibraryIntro => _t(
+    'Open a folder of Markdown notes as your library',
+    'Apri una cartella di note Markdown come libreria',
+  );
+  static String get openLibraryExisting =>
+      _t('Open existing', 'Apri esistente');
+  static String get openLibraryCreate => _t('Create new', 'Creane una nuova');
+  static String get openLibraryCreateTitle =>
+      _t('Create new library', 'Crea una nuova libreria');
+  static String get openLibraryFolderName =>
+      _t('Folder name', 'Nome della cartella');
+  static String get openLibraryChooseFolder =>
+      _t('Choose the library folder', 'Scegli la cartella della libreria');
+  static String get openLibraryChooseParent => _t(
+    'Choose the folder the library will be created in',
+    'Scegli la cartella in cui creare la libreria',
+  );
+  static String get openLibraryUnsupported => _t(
+    'That folder is not supported. Pick a folder on the device storage.',
+    'Quella cartella non è supportata. Scegline una nella memoria del '
+        'dispositivo.',
+  );
+  static String get storageAccessAction =>
+      _t('Grant file access', 'Concedi l’accesso ai file');
+  static String get storageAccessNeeded => _t(
+    'Copist cannot read your notes without "All files access". Grant it '
+        'to open a library.',
+    'Senza l’accesso a tutti i file Copist non può leggere le tue '
+        'note. Concedilo per aprire una libreria.',
+  );
+  static String get storageAccessExplained => _t(
+    'Copist reads your notes as ordinary files, so Android needs to '
+        'allow it access to all files. Nothing is uploaded, and only the '
+        'library folder you pick is read.',
+    'Copist legge le note come file normali, quindi Android deve '
+        'concedergli l’accesso a tutti i file. Non viene caricato '
+        'niente, e viene letta solo la cartella che scegli.',
+  );
+  static String folderAccessDenied(Object error) => _t(
+    'The system did not give access to the folder: $error',
+    'Il sistema non ha dato accesso alla cartella: $error',
+  );
+  static String folderPickFailed(Object error) => _t(
+    'Could not pick a folder: $error',
+    'Impossibile scegliere una cartella: $error',
+  );
+
+  // Settings screen rows and messages.
+  static String get settingsTitle => _t('Settings', 'Impostazioni');
+  static String get libraryPathTitle =>
+      _t('Library path', 'Percorso della libreria');
+  static String get reindexTitle => _t('Re-index now', 'Reindicizza ora');
+  static String get reindexDone =>
+      _t('Re-index complete', 'Reindicizzazione completata');
+  static String get closeLibraryTitle =>
+      _t('Close library', 'Chiudi la libreria');
+  static String get exportLogTitle =>
+      _t('Export debug log', 'Esporta il log di debug');
+  static String get exportLogSubtitle => _t(
+    'Save the recorded events to a file you choose',
+    'Salva gli eventi registrati in un file a tua scelta',
+  );
+  static String get exportLogEmpty => _t(
+    'The debug log buffer is empty',
+    'Il buffer del log di debug è vuoto',
+  );
+  static String get quickNoteUnset => _t('Not set yet', 'Non impostata');
+  static String exportLogDone(Object target) =>
+      _t('Debug log exported to $target', 'Log di debug esportato in $target');
+  static String exportLogFailed(Object error) =>
+      _t('Export failed: $error', 'Esportazione non riuscita: $error');
+
+  // Replace results (T-M3-10).
+  static String replaceNoMatch(String term) => _t(
+    'No whole-word match of "$term" was found',
+    'Nessuna parola intera "$term" trovata',
+  );
+  static String replaceDone(int occurrences, String term, int notes) => _t(
+    'Replaced $occurrences occurrence(s) of "$term" in $notes note(s)',
+    'Sostituite $occurrences occorrenze di "$term" in $notes note',
+  );
+  static String replaceSkipped(int skipped) => _t(
+    ' ($skipped open note(s) skipped)',
+    ' ($skipped note aperte saltate)',
+  );
+  static String replacePreviewEmpty(String term, String? only) => _t(
+    'No exact whole-word match of "$term" '
+        '${only == null ? 'was found' : 'found in $only'}',
+    'Nessuna parola intera esatta "$term" '
+        '${only == null ? 'trovata' : 'trovata in $only'}',
+  );
+
   /// The short month names used by the task rows, January first.
   static List<String> get monthNames => AppLanguages.isItalian
       ? const [

@@ -1,6 +1,7 @@
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// The Quick note tab: the setup screen shown while no quick note is set.
@@ -51,8 +52,8 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
     if (ops == null) return;
     final name = await showNameDialog(
       context,
-      title: 'New quick note',
-      initial: 'Quick note',
+      title: AppStrings.quickNoteNewTitle,
+      initial: AppStrings.quickNoteTitle,
     );
     if (name == null || name.isEmpty || !mounted) return;
     final row = await ops.createNote(parentPath: '', name: name);
@@ -72,13 +73,12 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
             const Icon(Icons.sticky_note_2_outlined, size: 56),
             const SizedBox(height: 16),
             Text(
-              'Quick note',
+              AppStrings.quickNoteTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'No quick note yet. Choose an existing note, or create a new '
-              'one — the quick note opens here.',
+              AppStrings.quickNoteEmpty,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -89,14 +89,14 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
               key: const Key('quick-note-choose'),
               onPressed: _choose,
               icon: const Icon(Icons.folder_open_outlined),
-              label: const Text('Choose a note…'),
+              label: Text(AppStrings.quickNoteChooseAction),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               key: const Key('quick-note-create'),
               onPressed: _create,
               icon: const Icon(Icons.note_add_outlined),
-              label: const Text('Create a new note…'),
+              label: Text(AppStrings.quickNoteCreateAction),
             ),
           ],
         ),

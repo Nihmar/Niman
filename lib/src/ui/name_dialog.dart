@@ -1,3 +1,4 @@
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// A name-entry dialog; resolves to the trimmed text or null.
@@ -51,9 +52,9 @@ final class _NameDialogState extends State<_NameDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(AppStrings.actionCancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('OK')),
+        FilledButton(onPressed: _submit, child: Text(AppStrings.actionOk)),
       ],
     );
   }

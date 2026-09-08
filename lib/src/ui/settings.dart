@@ -26,7 +26,7 @@ final class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(AppStrings.settingsTitle)),
       body: SettingsBody(
         controller: controller,
         onClosed: () {
@@ -133,7 +133,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (!mounted) return;
     final folder = await showFolderPicker(
       context,
-      title: 'List folder',
+      title: AppStrings.listFolderTitle,
       folders: folders,
       ops: ops,
       current: _listFolder ?? defaultListFolder,
@@ -259,7 +259,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
       await widget.controller.rescanNow();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Re-index complete')),
+          SnackBar(content: Text(AppStrings.reindexDone)),
         );
       }
     } on Object catch (error) {
@@ -293,7 +293,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (lines.isEmpty && persisted.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('The debug log buffer is empty')),
+          SnackBar(content: Text(AppStrings.exportLogEmpty)),
         );
       }
       return;
@@ -318,18 +318,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
         fileName: 'copist-debug-log-$stamp.txt',
         bytes: Uint8List.fromList(utf8.encode(content)),
         mimeType: 'text/plain',
-        dialogTitle: 'Export debug log',
+        dialogTitle: AppStrings.exportLogTitle,
       );
       if (uri == null) return; // The user canceled; nothing to report.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Debug log exported to $uri')),
+          SnackBar(content: Text(AppStrings.exportLogDone(uri))),
         );
       }
     } on Object catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $error')),
+          SnackBar(content: Text(AppStrings.exportLogFailed(error))),
         );
       }
     }
@@ -567,40 +567,38 @@ final class _SettingsBodyState extends State<SettingsBody> {
           const Divider(),
           ListTile(
             key: const Key('quick-note-setting'),
-            title: const Text('Quick note'),
+            title: Text(AppStrings.quickNoteTitle),
             subtitle: Text(
-              _quickNotePath == null ? 'Not set yet' : _quickNotePath!,
+              _quickNotePath ?? AppStrings.quickNoteUnset,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickQuickNote,
           ),
           ListTile(
             key: const Key('list-folder-setting'),
-            title: const Text('List folder'),
+            title: Text(AppStrings.listFolderTitle),
             subtitle: Text(_listFolder ?? defaultListFolder),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickListFolder,
           ),
           const Divider(),
           ListTile(
-            title: const Text('Library path'),
+            title: Text(AppStrings.libraryPathTitle),
             subtitle: Text(controller.root ?? ''),
           ),
           ListTile(
-            title: const Text('Re-index now'),
+            title: Text(AppStrings.reindexTitle),
             leading: const Icon(Icons.refresh),
             onTap: _rescan,
           ),
           ListTile(
-            title: const Text('Export debug log'),
+            title: Text(AppStrings.exportLogTitle),
             leading: const Icon(Icons.save_alt),
-            subtitle: const Text(
-              'Save the recorded events to a file you choose',
-            ),
+            subtitle: Text(AppStrings.exportLogSubtitle),
             onTap: _exportLog,
           ),
           ListTile(
-            title: const Text('Close library'),
+            title: Text(AppStrings.closeLibraryTitle),
             leading: const Icon(Icons.link_off),
             onTap: () async {
               await controller.close();

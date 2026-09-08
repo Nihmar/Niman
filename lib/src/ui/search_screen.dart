@@ -441,13 +441,16 @@ final class _SearchScreenState extends State<SearchScreen> {
     );
     if (!mounted) return;
     final message = report.occurrences == 0
-        ? 'No whole-word match of "$term" was found'
-        : 'Replaced ${report.occurrences} occurrence(s) of "$term" in '
-            '${report.notesChanged} note(s)';
+        ? AppStrings.replaceNoMatch(term)
+        : AppStrings.replaceDone(
+            report.occurrences,
+            term,
+            report.notesChanged,
+          );
     _snack(
       report.skipped.isEmpty
           ? message
-          : '$message (${report.skipped.length} open note(s) skipped)',
+          : '$message${AppStrings.replaceSkipped(report.skipped.length)}',
     );
     _leaveReplaceMode();
     // The watcher re-indexes the rewritten files: once it has, re-run the
@@ -597,8 +600,10 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (notes.isEmpty) {
       return Center(
         child: Text(
-          'No exact whole-word match of "${_query.text.trim()}" '
-          '${_replaceOnly == null ? 'was found' : 'found in $_replaceOnly'}',
+          AppStrings.replacePreviewEmpty(
+            _query.text.trim(),
+            _replaceOnly,
+          ),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
