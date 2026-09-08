@@ -36,11 +36,28 @@ final class AppStrings {
   static const String splitRatioSubtitle =
       'The editor’s share when the preview is side by side';
 
+  // Settings: editor formatting.
+  static const String linkTypeTitle = 'Link format';
+  static const String linkTypeSubtitle =
+      'What the link button in the editor inserts';
+  static const String linkTypeWikilink = 'Wikilink';
+  static const String linkTypeMarkdown = 'Markdown';
+  static const String indentWidthTitle = 'Indent width';
+  static const String indentWidthSubtitle =
+      'Spaces added per indent level in the editor';
+
   // Editor status bar.
   static const String outlineTooltip = 'Outline';
   static const String outlineNoHeadings = 'No headings';
   static const String outlineNoTitle = '(no title)';
   static const String insertImageTooltip = 'Insert image';
+
+  // Editor toolbar.
+  static const String toolbarHeadingTooltip = 'Heading';
+  static const String toolbarOrderedListTooltip = 'Numbered list';
+  static const String toolbarIndentTooltip = 'Indent';
+  static const String toolbarOutdentTooltip = 'Outdent';
+  static const String headingDialogTitle = 'Heading level';
 
   // Preview switch (phone mode).
   static const String showPreviewTooltip = 'Show preview';

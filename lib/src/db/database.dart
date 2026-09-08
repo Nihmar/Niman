@@ -100,6 +100,15 @@ class AppSettings extends Table {
   TextColumn get treeSort =>
       text().named('tree_sort').withDefault(const Constant('nameAsc'))();
 
+  /// The link format the editor's link button inserts: `wikilink`
+  /// (`[[…]]`) or `markdown` (`[…](…)`; default `wikilink`).
+  TextColumn get linkType =>
+      text().named('link_type').withDefault(const Constant('wikilink'))();
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  IntColumn get indentWidth =>
+      integer().named('indent_width').withDefault(const Constant(2))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -188,7 +197,7 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -204,7 +213,9 @@ class CopistDatabase extends _$CopistDatabase {
   /// `preview_mode` + `split_ratio`, pre-v6 databases the
   /// `quick_note_path` library setting, pre-v7 databases `tree_sort`, and
   /// pre-v8 databases the M3 tables (`note_stems`, `tags`, `note_tags`,
-  /// `note_links`) plus the `notes_fts` FTS5 index.
+  /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
+  /// `reminder_show_tokens`, and pre-v10 databases `link_type` +
+  /// `indent_width`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -262,6 +273,16 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN reminder_show_tokens '
           'BOOLEAN NOT NULL DEFAULT 0',
+        );
+      }
+      if (from < 10) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN link_type '
+          "TEXT NOT NULL DEFAULT 'wikilink'",
+        );
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN indent_width '
+          'INTEGER NOT NULL DEFAULT 2',
         );
       }
     },

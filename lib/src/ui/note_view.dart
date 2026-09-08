@@ -55,6 +55,8 @@ final class NoteView extends StatefulWidget {
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    this.linkType = LinkType.wikilink,
+    this.indentWidth = 2,
     this.splitPreview = false,
     this.showPreview = false,
     this.splitFraction = defaultSplitRatio,
@@ -80,6 +82,12 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
+
+  /// The link format the link button inserts (settings).
+  final LinkType linkType;
+
+  /// The indent/outdent width in spaces (settings).
+  final int indentWidth;
 
   /// Whether the preview sits side by side (split) or behind a switch.
   final bool splitPreview;
@@ -945,6 +953,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final error = _error;
     final split = widget.splitPreview;
+    // The toolbar formats the editor: it stays in split mode (the editor
+    // is on screen) and hides in full-screen preview mode.
+    final showToolbar = split || !widget.showPreview;
     return Column(
       children: [
         Expanded(
@@ -1011,7 +1022,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.min,
             children: [
               _statusRow(context),
-              if (!_loading) _toolbar(context),
+              // The toolbar fades + sizes in and out (hidden in preview
+              // mode). It is only mounted once loaded, so it appears
+              // immediately on load and animates only when preview mode
+              // toggles.
+              if (!_loading)
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: showToolbar
+                      ? _toolbar(context)
+                      : const SizedBox(width: double.infinity),
+                ),
             ],
           ),
         ),
@@ -1109,7 +1132,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           key: const Key('toolbar-link'),
           icon: Icons.link,
           tooltip: 'Link',
-          onPressed: () => _wrapSelection(left: '[[', right: ']]'),
+          onPressed: _insertLink,
         ),
         EditorToolbarButton(
           key: const Key('toolbar-code'),
@@ -1124,10 +1147,22 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           onPressed: _insertImage,
         ),
         EditorToolbarButton(
+          key: const Key('toolbar-heading'),
+          icon: Icons.title,
+          tooltip: AppStrings.toolbarHeadingTooltip,
+          onPressed: _showHeadingDialog,
+        ),
+        EditorToolbarButton(
           key: const Key('toolbar-list'),
           icon: Icons.format_list_bulleted,
           tooltip: 'List',
           onPressed: () => _prefixLines(prefix: '- '),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-ordered-list'),
+          icon: Icons.format_list_numbered,
+          tooltip: AppStrings.toolbarOrderedListTooltip,
+          onPressed: _insertOrderedList,
         ),
         EditorToolbarButton(
           key: const Key('toolbar-quote'),
@@ -1135,23 +1170,60 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           tooltip: 'Quote',
           onPressed: () => _prefixLines(prefix: '> '),
         ),
+        EditorToolbarButton(
+          key: const Key('toolbar-outdent'),
+          icon: Icons.format_indent_decrease,
+          tooltip: AppStrings.toolbarOutdentTooltip,
+          onPressed: () => _indentLines(outdent: true),
+        ),
+        EditorToolbarButton(
+          key: const Key('toolbar-indent'),
+          icon: Icons.format_indent_increase,
+          tooltip: AppStrings.toolbarIndentTooltip,
+          onPressed: () => _indentLines(outdent: false),
+        ),
       ],
     );
   }
 
-  /// Applies a pure markdown command's result through the controller's
-  /// range-replacement op: the commands only change text inside the old
-  /// selection, so the replacement is the edited range of the new text.
-  /// The editor keeps its focus (the IME stays up); focus is re-requested
+  /// Applies a pure markdown command's result: the whole text is set
+  /// (undoable) and the selection lands where the command put it — inside
+  /// the markers for wraps, the same lines for line edits. The editor
+  /// keeps its focus (the IME stays up); focus is re-requested
   /// defensively.
   void _applyMarkdownEdit(MarkdownEdit edit) {
-    final sel = _controller.selection;
-    final start = _globalOffset(sel.baseIndex, sel.baseOffset);
-    final end = _globalOffset(sel.extentIndex, sel.extentOffset);
-    final delta = edit.text.length - _controller.text.length;
-    final replacement = edit.text.substring(start, end + delta);
-    _controller.replaceSelection(replacement, sel);
+    _controller.text = edit.text;
+    _controller.selection = _codeLineSelection(edit.selection);
     _focus.requestFocus();
+  }
+
+  /// Converts a whole-text [selection] to the controller's line+offset
+  /// form (the inverse of [_textSelection]).
+  CodeLineSelection _codeLineSelection(TextSelection selection) {
+    final text = _controller.text;
+    final (baseIndex, baseOffset) =
+        _lineAndOffset(text, selection.baseOffset);
+    final (extentIndex, extentOffset) =
+        _lineAndOffset(text, selection.extentOffset);
+    return CodeLineSelection(
+      baseIndex: baseIndex,
+      baseOffset: baseOffset,
+      extentIndex: extentIndex,
+      extentOffset: extentOffset,
+    );
+  }
+
+  /// The (line, offset-within-line) for the absolute [offset] in [text].
+  (int, int) _lineAndOffset(String text, int offset) {
+    var line = 0;
+    var lineStart = 0;
+    for (var i = 0; i < offset && i < text.length; i++) {
+      if (text.codeUnitAt(i) == 0x0A) {
+        line++;
+        lineStart = i + 1;
+      }
+    }
+    return (line, offset - lineStart);
   }
 
   void _wrapSelection({required String left, required String right}) {
@@ -1184,6 +1256,57 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
   }
 
+  /// Inserts a link in the format chosen in settings (wikilink `[[…]]`
+  /// or markdown `[…](…)`).
+  void _insertLink() {
+    final markdown = widget.linkType == LinkType.markdown;
+    _applyMarkdownEdit(
+      wrapSelection(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        left: markdown ? '[' : '[[',
+        right: markdown ? '](...)' : ']]',
+      ),
+    );
+  }
+
+  /// Numbers the selected line(s) as an ordered list.
+  void _insertOrderedList() {
+    _applyMarkdownEdit(
+      orderedList(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+      ),
+    );
+  }
+
+  /// Indents (or outdents, [outdent] true) the selected line(s) by the
+  /// width chosen in settings.
+  void _indentLines({required bool outdent}) {
+    _applyMarkdownEdit(
+      indentLines(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        width: widget.indentWidth,
+        outdent: outdent,
+      ),
+    );
+  }
+
+  /// Shows the heading-level picker (H1..H6) and applies the chosen level
+  /// to the selected line(s).
+  Future<void> _showHeadingDialog() async {
+    final level = await showHeadingLevelDialog(context);
+    if (level == null) return;
+    _applyMarkdownEdit(
+      setHeading(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        level: level,
+      ),
+    );
+  }
+
   /// Converts re_editor's line+offset selection to whole-text offsets
   /// (called once per toolbar tap, so the O(n) scan is fine).
   TextSelection _textSelection(CodeLineSelection selection) {
@@ -1206,4 +1329,28 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
     return index + offset;
   }
+}
+
+/// Shows the heading-level picker (H1..H6); resolves to the chosen level
+/// (1..6) or null (dismissed).
+Future<int?> showHeadingLevelDialog(BuildContext context) {
+  return showDialog<int>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      title: const Text(AppStrings.headingDialogTitle),
+      children: [
+        for (var level = 1; level <= 6; level++)
+          SimpleDialogOption(
+            key: ValueKey<int>(level),
+            onPressed: () => Navigator.of(context).pop(level),
+            child: Text(
+              'Heading $level',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 26.0 - level * 2,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }

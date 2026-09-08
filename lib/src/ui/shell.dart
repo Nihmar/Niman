@@ -217,6 +217,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
 
+  /// The editor's link format and indent width (settings).
+  LinkType _linkType = LinkType.wikilink;
+  int _indentWidth = 2;
+
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
 
@@ -363,18 +367,24 @@ final class _LibraryShellState extends State<_LibraryShell>
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final linkType = await controller.linkType;
+    final indentWidth = await controller.indentWidth;
     final treeSort = await controller.treeSort;
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
             previewMode != _previewMode ||
             splitRatio != _splitRatio ||
+            linkType != _linkType ||
+            indentWidth != _indentWidth ||
             treeSort != _treeSort)) {
       setState(() {
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
+        _linkType = linkType;
+        _indentWidth = indentWidth;
         _treeSort = treeSort;
       });
     }
@@ -759,6 +769,8 @@ final class _LibraryShellState extends State<_LibraryShell>
                       path: p.join(controller.root ?? '', selectedPath),
                       showLineNumbers: _lineNumbers,
                       autofocusEditor: _autofocusEditor,
+                      linkType: _linkType,
+                      indentWidth: _indentWidth,
                       splitPreview: _effectiveSplit(narrow: true),
                       showPreview: _previewVisible,
                       splitFraction: _splitRatio,
@@ -1019,6 +1031,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             selectedIsDir: _selectedIsDir,
             showLineNumbers: _lineNumbers,
             autofocusEditor: _autofocusEditor,
+            linkType: _linkType,
+            indentWidth: _indentWidth,
             splitPreview: _effectiveSplit(narrow: false),
             showPreview: _previewVisible,
             splitFraction: _splitRatio,
@@ -1084,6 +1098,8 @@ final class _DetailPane extends StatelessWidget {
     required this.selectedIsDir,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    required this.linkType,
+    required this.indentWidth,
     required this.splitPreview,
     required this.showPreview,
     required this.splitFraction,
@@ -1105,6 +1121,8 @@ final class _DetailPane extends StatelessWidget {
   /// Editor setting forwards.
   final bool showLineNumbers;
   final bool autofocusEditor;
+  final LinkType linkType;
+  final int indentWidth;
 
   /// Preview layout (T-M2-08).
   final bool splitPreview;
@@ -1147,6 +1165,8 @@ final class _DetailPane extends StatelessWidget {
                 path: p.join(root!, notePath),
                 showLineNumbers: showLineNumbers,
                 autofocusEditor: autofocusEditor,
+                linkType: linkType,
+                indentWidth: indentWidth,
                 splitPreview: splitPreview,
                 showPreview: showPreview,
                 splitFraction: splitFraction,

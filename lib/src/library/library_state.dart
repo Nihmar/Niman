@@ -429,6 +429,36 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setTreeSort(sort);
   }
 
+  /// The link format the editor's link button inserts.
+  @override
+  Future<LinkType> get linkType async {
+    final db = await database;
+    return AppSettingsRepo(db).linkType();
+  }
+
+  /// Sets (and persists) the link format.
+  @override
+  Future<void> setLinkType(LinkType type) async {
+    _log.info('link type set to ${type.name}');
+    final db = await database;
+    await AppSettingsRepo(db).setLinkType(type);
+  }
+
+  /// The editor's indent/outdent width in spaces.
+  @override
+  Future<int> get indentWidth async {
+    final db = await database;
+    return AppSettingsRepo(db).indentWidth();
+  }
+
+  /// Sets (and persists) the indent/outdent width.
+  @override
+  Future<void> setIndentWidth(int width) async {
+    _log.info('indent width set to $width');
+    final db = await database;
+    await AppSettingsRepo(db).setIndentWidth(width);
+  }
+
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
   @override

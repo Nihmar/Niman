@@ -973,6 +973,30 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('nameAsc'),
   );
+  static const VerificationMeta _linkTypeMeta = const VerificationMeta(
+    'linkType',
+  );
+  @override
+  late final GeneratedColumn<String> linkType = GeneratedColumn<String>(
+    'link_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('wikilink'),
+  );
+  static const VerificationMeta _indentWidthMeta = const VerificationMeta(
+    'indentWidth',
+  );
+  @override
+  late final GeneratedColumn<int> indentWidth = GeneratedColumn<int>(
+    'indent_width',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -984,6 +1008,8 @@ class $AppSettingsTable extends AppSettings
     previewMode,
     splitRatio,
     treeSort,
+    linkType,
+    indentWidth,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1066,6 +1092,21 @@ class $AppSettingsTable extends AppSettings
         treeSort.isAcceptableOrUnknown(data['tree_sort']!, _treeSortMeta),
       );
     }
+    if (data.containsKey('link_type')) {
+      context.handle(
+        _linkTypeMeta,
+        linkType.isAcceptableOrUnknown(data['link_type']!, _linkTypeMeta),
+      );
+    }
+    if (data.containsKey('indent_width')) {
+      context.handle(
+        _indentWidthMeta,
+        indentWidth.isAcceptableOrUnknown(
+          data['indent_width']!,
+          _indentWidthMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1110,6 +1151,14 @@ class $AppSettingsTable extends AppSettings
       treeSort: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tree_sort'],
+      )!,
+      linkType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link_type'],
+      )!,
+      indentWidth: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}indent_width'],
       )!,
     );
   }
@@ -1156,6 +1205,13 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// The library tree sort order (T-UI-03): the sort enum `.name`
   /// value (`nameAsc` or `nameDesc`).
   final String treeSort;
+
+  /// The link format the editor's link button inserts: `wikilink`
+  /// (`[[…]]`) or `markdown` (`[…](…)`; default `wikilink`).
+  final String linkType;
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  final int indentWidth;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1166,6 +1222,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.previewMode,
     required this.splitRatio,
     required this.treeSort,
+    required this.linkType,
+    required this.indentWidth,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1181,6 +1239,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
     map['tree_sort'] = Variable<String>(treeSort);
+    map['link_type'] = Variable<String>(linkType);
+    map['indent_width'] = Variable<int>(indentWidth);
     return map;
   }
 
@@ -1197,6 +1257,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
       treeSort: Value(treeSort),
+      linkType: Value(linkType),
+      indentWidth: Value(indentWidth),
     );
   }
 
@@ -1215,6 +1277,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
       treeSort: serializer.fromJson<String>(json['treeSort']),
+      linkType: serializer.fromJson<String>(json['linkType']),
+      indentWidth: serializer.fromJson<int>(json['indentWidth']),
     );
   }
   @override
@@ -1230,6 +1294,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
       'treeSort': serializer.toJson<String>(treeSort),
+      'linkType': serializer.toJson<String>(linkType),
+      'indentWidth': serializer.toJson<int>(indentWidth),
     };
   }
 
@@ -1243,6 +1309,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? previewMode,
     double? splitRatio,
     String? treeSort,
+    String? linkType,
+    int? indentWidth,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1253,6 +1321,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
     treeSort: treeSort ?? this.treeSort,
+    linkType: linkType ?? this.linkType,
+    indentWidth: indentWidth ?? this.indentWidth,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1279,6 +1349,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? data.splitRatio.value
           : this.splitRatio,
       treeSort: data.treeSort.present ? data.treeSort.value : this.treeSort,
+      linkType: data.linkType.present ? data.linkType.value : this.linkType,
+      indentWidth: data.indentWidth.present
+          ? data.indentWidth.value
+          : this.indentWidth,
     );
   }
 
@@ -1293,7 +1367,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
-          ..write('treeSort: $treeSort')
+          ..write('treeSort: $treeSort, ')
+          ..write('linkType: $linkType, ')
+          ..write('indentWidth: $indentWidth')
           ..write(')'))
         .toString();
   }
@@ -1309,6 +1385,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     previewMode,
     splitRatio,
     treeSort,
+    linkType,
+    indentWidth,
   );
   @override
   bool operator ==(Object other) =>
@@ -1322,7 +1400,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.reminderShowTokens == this.reminderShowTokens &&
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
-          other.treeSort == this.treeSort);
+          other.treeSort == this.treeSort &&
+          other.linkType == this.linkType &&
+          other.indentWidth == this.indentWidth);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1335,6 +1415,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> previewMode;
   final Value<double> splitRatio;
   final Value<String> treeSort;
+  final Value<String> linkType;
+  final Value<int> indentWidth;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1345,6 +1427,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.treeSort = const Value.absent(),
+    this.linkType = const Value.absent(),
+    this.indentWidth = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1356,6 +1440,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.treeSort = const Value.absent(),
+    this.linkType = const Value.absent(),
+    this.indentWidth = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1367,6 +1453,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
     Expression<String>? treeSort,
+    Expression<String>? linkType,
+    Expression<int>? indentWidth,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1379,6 +1467,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
       if (treeSort != null) 'tree_sort': treeSort,
+      if (linkType != null) 'link_type': linkType,
+      if (indentWidth != null) 'indent_width': indentWidth,
     });
   }
 
@@ -1392,6 +1482,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? previewMode,
     Value<double>? splitRatio,
     Value<String>? treeSort,
+    Value<String>? linkType,
+    Value<int>? indentWidth,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1403,6 +1495,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
       treeSort: treeSort ?? this.treeSort,
+      linkType: linkType ?? this.linkType,
+      indentWidth: indentWidth ?? this.indentWidth,
     );
   }
 
@@ -1436,6 +1530,12 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (treeSort.present) {
       map['tree_sort'] = Variable<String>(treeSort.value);
     }
+    if (linkType.present) {
+      map['link_type'] = Variable<String>(linkType.value);
+    }
+    if (indentWidth.present) {
+      map['indent_width'] = Variable<int>(indentWidth.value);
+    }
     return map;
   }
 
@@ -1450,7 +1550,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
-          ..write('treeSort: $treeSort')
+          ..write('treeSort: $treeSort, ')
+          ..write('linkType: $linkType, ')
+          ..write('indentWidth: $indentWidth')
           ..write(')'))
         .toString();
   }
@@ -2663,16 +2765,7 @@ class $$NotesTableTableManager
                 sha256: sha256,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$NotesTable, Note>(table),
-                  BaseReferences<_$CopistDatabase, $NotesTable, Note>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2862,16 +2955,7 @@ class $$LibrarySettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$LibrarySettingsTable, LibrarySetting>(table),
-                  BaseReferences<
-                    _$CopistDatabase,
-                    $LibrarySettingsTable,
-                    LibrarySetting
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2906,6 +2990,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> treeSort,
+      Value<String> linkType,
+      Value<int> indentWidth,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -2918,6 +3004,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> treeSort,
+      Value<String> linkType,
+      Value<int> indentWidth,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -2971,6 +3059,16 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get treeSort => $composableBuilder(
     column: $table.treeSort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkType => $composableBuilder(
+    column: $table.linkType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get indentWidth => $composableBuilder(
+    column: $table.indentWidth,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3028,6 +3126,16 @@ class $$AppSettingsTableOrderingComposer
     column: $table.treeSort,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get linkType => $composableBuilder(
+    column: $table.linkType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get indentWidth => $composableBuilder(
+    column: $table.indentWidth,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -3079,6 +3187,14 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get treeSort =>
       $composableBuilder(column: $table.treeSort, builder: (column) => column);
+
+  GeneratedColumn<String> get linkType =>
+      $composableBuilder(column: $table.linkType, builder: (column) => column);
+
+  GeneratedColumn<int> get indentWidth => $composableBuilder(
+    column: $table.indentWidth,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -3121,6 +3237,8 @@ class $$AppSettingsTableTableManager
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> treeSort = const Value.absent(),
+                Value<String> linkType = const Value.absent(),
+                Value<int> indentWidth = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -3131,6 +3249,8 @@ class $$AppSettingsTableTableManager
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 treeSort: treeSort,
+                linkType: linkType,
+                indentWidth: indentWidth,
               ),
           createCompanionCallback:
               ({
@@ -3143,6 +3263,8 @@ class $$AppSettingsTableTableManager
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> treeSort = const Value.absent(),
+                Value<String> linkType = const Value.absent(),
+                Value<int> indentWidth = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -3153,18 +3275,11 @@ class $$AppSettingsTableTableManager
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 treeSort: treeSort,
+                linkType: linkType,
+                indentWidth: indentWidth,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$AppSettingsTable, AppSetting>(table),
-                  BaseReferences<
-                    _$CopistDatabase,
-                    $AppSettingsTable,
-                    AppSetting
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3324,16 +3439,7 @@ class $$NoteStemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$NoteStemsTable, NoteStem>(table),
-                  BaseReferences<_$CopistDatabase, $NoteStemsTable, NoteStem>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3440,16 +3546,7 @@ class $$TagsTableTableManager
             Value<int> rowid = const Value.absent(),
           }) => TagsCompanion.insert(name: name, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$TagsTable, Tag>(table),
-                  BaseReferences<_$CopistDatabase, $TagsTable, Tag>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3605,16 +3702,7 @@ class $$NoteTagsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$NoteTagsTable, NoteTag>(table),
-                  BaseReferences<_$CopistDatabase, $NoteTagsTable, NoteTag>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3771,16 +3859,7 @@ class $$NoteLinksTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$NoteLinksTable, NoteLink>(table),
-                  BaseReferences<_$CopistDatabase, $NoteLinksTable, NoteLink>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),

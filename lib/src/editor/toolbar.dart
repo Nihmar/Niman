@@ -23,12 +23,13 @@ final class EditorToolbarButton {
   final VoidCallback onPressed;
 }
 
-/// The editor formatting toolbar (T-UI-08): one evenly spaced row of
-/// buttons at the bottom (mockup's uneven spacing and trailing gear are
-/// dropped). Dumb: the owner supplies the buttons and applies the
-/// markdown commands (editor/md_editing.dart) through the controller.
+/// The editor formatting toolbar (T-UI-08): a horizontally scrollable row
+/// of buttons at the bottom (no scrollbar). The buttons are non-focusable
+/// so tapping one never takes focus from the editor (the keyboard stays
+/// up). Dumb: the owner supplies the buttons and applies the markdown
+/// commands (editor/md_editing.dart) through the controller.
 final class EditorToolbar extends StatelessWidget {
-  /// Creates the toolbar; [buttons] are laid out evenly across the width.
+  /// Creates the toolbar; [buttons] scroll horizontally when they overflow.
   const EditorToolbar({required this.buttons, super.key});
 
   /// The toolbar buttons, in display order.
@@ -36,21 +37,27 @@ final class EditorToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final button in buttons)
-          Expanded(
-            child: IconButton(
-              key: button.key,
-              tooltip: button.tooltip,
-              icon: Icon(button.icon),
-              iconSize: 20,
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              onPressed: button.onPressed,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final button in buttons)
+            Tooltip(
+              message: button.tooltip,
+              child: InkWell(
+                key: button.key,
+                onTap: button.onPressed,
+                canRequestFocus: false,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Icon(button.icon, size: 20),
+                ),
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

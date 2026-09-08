@@ -161,6 +161,19 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
 
+  /// The link format the editor's link button inserts
+  /// (default [LinkType.wikilink]).
+  Future<LinkType> get linkType;
+
+  /// Sets (and persists) the link format.
+  Future<void> setLinkType(LinkType type);
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  Future<int> get indentWidth;
+
+  /// Sets (and persists) the indent/outdent width.
+  Future<void> setIndentWidth(int width);
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 

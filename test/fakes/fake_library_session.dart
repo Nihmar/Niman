@@ -164,6 +164,25 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _treeSort = sort;
   }
 
+  LinkType _linkType = LinkType.wikilink;
+  int _indentWidth = 2;
+
+  @override
+  Future<LinkType> get linkType async => _linkType;
+
+  @override
+  Future<void> setLinkType(LinkType type) async {
+    _linkType = type;
+  }
+
+  @override
+  Future<int> get indentWidth async => _indentWidth;
+
+  @override
+  Future<void> setIndentWidth(int width) async {
+    _indentWidth = width;
+  }
+
   @override
   void notify() => _bump();
 

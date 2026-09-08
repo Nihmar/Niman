@@ -23,6 +23,15 @@ enum TreeSort {
   nameDesc,
 }
 
+/// The link format the editor's link button inserts.
+enum LinkType {
+  /// A wikilink `[[…]]` (the default).
+  wikilink,
+
+  /// A markdown link `[…](…)`.
+  markdown,
+}
+
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
 
@@ -234,6 +243,40 @@ final class AppSettingsRepo {
     await (_db.update(_db.appSettings)
           ..where((t) => t.id.equals(1)))
         .write(AppSettingsCompanion(treeSort: Value(sort.name)));
+  }
+
+  /// The link format the editor's link button inserts
+  /// (default [LinkType.wikilink]).
+  Future<LinkType> linkType() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) return LinkType.wikilink;
+    return switch (rows.first.linkType) {
+      'markdown' => LinkType.markdown,
+      _ => LinkType.wikilink,
+    };
+  }
+
+  /// Persists the link format.
+  Future<void> setLinkType(LinkType type) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(linkType: Value(type.name)));
+  }
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  Future<int> indentWidth() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? 2 : rows.first.indentWidth;
+  }
+
+  /// Persists the indent/outdent width (clamped to 2..8).
+  Future<void> setIndentWidth(int width) async {
+    await _ensureRow();
+    final clamped = width < 2 ? 2 : width > 8 ? 8 : width;
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(indentWidth: Value(clamped)));
   }
 
   Future<void> _ensureRow() async {

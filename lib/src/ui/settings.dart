@@ -63,6 +63,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
+  LinkType _linkType = LinkType.wikilink;
+  int _indentWidth = 2;
   String? _quickNotePath;
 
   @override
@@ -82,6 +84,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final reminderTokens = await controller.reminderShowTokens;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final linkType = await controller.linkType;
+    final indentWidth = await controller.indentWidth;
     final quickNotePath = await ops.quickNotePath;
     if (mounted) {
       setState(() {
@@ -93,6 +97,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _previewMode = previewMode;
         _splitRatio = splitRatio;
         _splitLoaded = true;
+        _linkType = linkType;
+        _indentWidth = indentWidth;
         _quickNotePath = quickNotePath;
       });
     }
@@ -184,6 +190,24 @@ final class _SettingsBodyState extends State<SettingsBody> {
     controller.notify();
     if (mounted) {
       setState(() => _splitRatio = ratio);
+    }
+  }
+
+  Future<void> _setLinkType(LinkType type) async {
+    final controller = widget.controller;
+    await controller.setLinkType(type);
+    controller.notify();
+    if (mounted) {
+      setState(() => _linkType = type);
+    }
+  }
+
+  Future<void> _setIndentWidth(int width) async {
+    final controller = widget.controller;
+    await controller.setIndentWidth(width);
+    controller.notify();
+    if (mounted) {
+      setState(() => _indentWidth = width);
     }
   }
 
@@ -378,6 +402,72 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 ],
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.linkTypeTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.linkTypeSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<LinkType>(
+                  key: const Key('link-type'),
+                  segments: const [
+                    ButtonSegment(
+                      value: LinkType.wikilink,
+                      label: Text(AppStrings.linkTypeWikilink),
+                    ),
+                    ButtonSegment(
+                      value: LinkType.markdown,
+                      label: Text(AppStrings.linkTypeMarkdown),
+                    ),
+                  ],
+                  selected: {_linkType},
+                  onSelectionChanged: (selection) =>
+                      _setLinkType(selection.first),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.indentWidthTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.indentWidthSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<int>(
+                  key: const Key('indent-width'),
+                  segments: const [
+                    ButtonSegment(value: 2, label: Text('2')),
+                    ButtonSegment(value: 4, label: Text('4')),
+                    ButtonSegment(value: 6, label: Text('6')),
+                    ButtonSegment(value: 8, label: Text('8')),
+                  ],
+                  selected: {_indentWidth},
+                  onSelectionChanged: (selection) =>
+                      _setIndentWidth(selection.first),
+                ),
+              ],
+            ),
+          ),
           const Divider(),
           ListTile(
             key: const Key('quick-note-setting'),

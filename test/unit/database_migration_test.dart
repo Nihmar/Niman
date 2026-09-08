@@ -26,6 +26,12 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 1');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN link_type',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN indent_width',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN debug_logs_enabled',
         );
         await db.customStatement(
@@ -77,6 +83,12 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 2');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN link_type',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN indent_width',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN line_numbers',
         );
         await db.customStatement(
@@ -123,6 +135,12 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 3');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN link_type',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN indent_width',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN editor_autofocus',
         );
         await db.customStatement(
@@ -166,6 +184,12 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 4');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN preview_mode',
       );
       await db.customStatement(
@@ -203,6 +227,12 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 5');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
+      await db.customStatement(
         'ALTER TABLE library_settings DROP COLUMN quick_note_path',
       );
       await db.customStatement(
@@ -234,6 +264,12 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 6');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN tree_sort',
       );
       await db.customStatement(
@@ -260,6 +296,12 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
       );
@@ -335,6 +377,12 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 8');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
       );
       await db.customStatement(
@@ -351,6 +399,34 @@ void main() {
     // Off by default: an upgrade must not start putting +project and
     // @context into notifications that never had them.
     expect(row.reminderShowTokens, false);
+    await db.close();
+  });
+
+  test('v9 databases gain link_type and indent_width on upgrade, keeping '
+      'values', () async {
+    // Build a v9-shaped file: create at v10, rewind, drop the new columns.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 9');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN link_type',
+      );
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN indent_width',
+      );
+      await db.customStatement(
+        "INSERT INTO app_settings (id, library_path) VALUES (1, '/old/root')",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.appSettings).get()).single;
+    expect(row.id, 1);
+    expect(row.libraryPath, '/old/root');
+    // Wikilink by default; a 2-space indent (the pre-M5 default).
+    expect(row.linkType, 'wikilink');
+    expect(row.indentWidth, 2);
     await db.close();
   });
 }
