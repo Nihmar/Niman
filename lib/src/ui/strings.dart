@@ -89,8 +89,7 @@ final class AppStrings {
   // List note kind (T-TK-02).
   static String get listAddHint => _t('Add an item', 'Aggiungi un elemento');
   static String get listAddTooltip => _t('Add an item', 'Aggiungi un elemento');
-  static String get listEmpty =>
-      _t('No items yet', 'Nessun elemento per ora');
+  static String get listEmpty => _t('No items yet', 'Nessun elemento per ora');
   static String get listDragHandleLabel =>
       _t('Reorder item', 'Riordina l’elemento');
 
@@ -102,8 +101,7 @@ final class AppStrings {
 
   // Editor status bar.
   static String get outlineTooltip => _t('Outline', 'Struttura');
-  static String get outlineNoHeadings =>
-      _t('No headings', 'Nessun titolo');
+  static String get outlineNoHeadings => _t('No headings', 'Nessun titolo');
   static String get outlineNoTitle => _t('(no title)', '(senza titolo)');
 
   // Editor toolbar: one name per button, used as its tooltip in the
@@ -185,8 +183,7 @@ final class AppStrings {
 
   // Editor find & replace (the classic in-note bar, re_editor's find
   // controller + CopistFindPanel).
-  static String get findInNoteTooltip =>
-      _t('Find in note', 'Trova nella nota');
+  static String get findInNoteTooltip => _t('Find in note', 'Trova nella nota');
   static String get editorFindHint => _t('Find', 'Trova');
   static String get editorReplaceHint => _t('Replace', 'Sostituisci');
   static String get editorFindCaseTooltip =>
@@ -252,8 +249,7 @@ final class AppStrings {
   // The todo.txt format help (T-TD-08).
   static String get todoHelpTitle =>
       _t('The todo.txt format', 'Il formato todo.txt');
-  static String get todoHelpTooltip =>
-      _t('Format help', 'Guida al formato');
+  static String get todoHelpTooltip => _t('Format help', 'Guida al formato');
   static String get todoHelpIntro => _t(
     'Your tasks are one plain text file, one task per line. Copist '
         'writes the syntax for you, but nothing is hidden: you can edit '
@@ -488,8 +484,7 @@ final class AppStrings {
   );
   static String get chooseDestination =>
       _t('Choose destination', 'Scegli la destinazione');
-  static String get libraryRoot =>
-      _t('Library root', 'Radice della libreria');
+  static String get libraryRoot => _t('Library root', 'Radice della libreria');
   static String moveTitle(String name) => _t('Move $name', 'Sposta $name');
   static String headingLevelLabel(int level) =>
       _t('Heading $level', 'Titolo $level');
@@ -511,8 +506,7 @@ final class AppStrings {
       _t('Choose quick note', 'Scegli la nota rapida');
 
   // Folder picker (T-TK-07).
-  static String get folderPickerNewFolder =>
-      _t('New folder', 'Nuova cartella');
+  static String get folderPickerNewFolder => _t('New folder', 'Nuova cartella');
   static String get folderPickerEmpty =>
       _t('No folders yet', 'Nessuna cartella');
   static String get listFolderTitle =>
@@ -630,11 +624,31 @@ final class AppStrings {
   /// The short month names used by the task rows, January first.
   static List<String> get monthNames => AppLanguages.isItalian
       ? const [
-          'gen', 'feb', 'mar', 'apr', 'mag', 'giu',
-          'lug', 'ago', 'set', 'ott', 'nov', 'dic',
+          'gen',
+          'feb',
+          'mar',
+          'apr',
+          'mag',
+          'giu',
+          'lug',
+          'ago',
+          'set',
+          'ott',
+          'nov',
+          'dic',
         ]
       : const [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
         ];
 }

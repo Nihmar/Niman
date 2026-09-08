@@ -57,8 +57,7 @@ final class _ReminderHealthBannerState extends State<ReminderHealthBanner> {
             if (_fixable(health))
               TextButton(
                 key: const Key('todo-reminder-health-fix'),
-                onPressed: () =>
-                    unawaited(widget.service.openHealthSettings()),
+                onPressed: () => unawaited(widget.service.openHealthSettings()),
                 child: Text(AppStrings.todoReminderFixAction),
               ),
             TextButton(

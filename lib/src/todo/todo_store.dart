@@ -429,6 +429,7 @@ List<int> _probeTodoFiles(String root) {
 List<TodoEntry> _parseLines(Uint8List? bytes) {
   return _parseEntries(splitTodoFile(bytes).lines);
 }
+
 /// Parses content [lines] into snapshot entries with line indices.
 List<TodoEntry> _parseEntries(List<String> lines) {
   return <TodoEntry>[

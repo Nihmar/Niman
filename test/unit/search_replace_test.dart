@@ -255,8 +255,7 @@ void main() {
       expect(report.occurrences, 0);
     });
 
-    test('rewritten notes are re-indexed through the hook per batch',
-        () async {
+    test('rewritten notes are re-indexed through the hook per batch', () async {
       final batches = <List<String>>[];
       final hooked = ReplaceRunner(
         db,
@@ -275,38 +274,40 @@ void main() {
       expect(changed, {file('a.md').path, file('sub/x.md').path});
     });
 
-    test('the index reflects a replace right away (no watcher needed)',
-        () async {
-      final indexer = Indexer(db);
-      final hooked = ReplaceRunner(
-        db,
-        root.path,
-        onNotesReindexed: (paths) => indexer.rescanFiles(root.path, paths),
-      );
-      await hooked.replaceAll(
-        term: 'cat',
-        replacement: 'dog',
-        caseSensitive: false,
-      );
-      // The rewritten notes are searchable under the new word…
-      final hits = await db
-          .customSelect(
-            'SELECT notes.path FROM notes JOIN notes_fts '
-            "ON notes.id = notes_fts.rowid WHERE notes_fts MATCH 'dog'",
-          )
-          .get();
-      expect(
-        hits.map((r) => r.read<String>('path')),
-        containsAll(['a.md', 'sub/x.md']),
-      );
-      // …and the old word is gone from the index.
-      final old = await db
-          .customSelect(
-            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
-            variables: [const Variable<String>('cat')],
-          )
-          .getSingle();
-      expect(old.read<int>('c'), 0);
-    });
+    test(
+      'the index reflects a replace right away (no watcher needed)',
+      () async {
+        final indexer = Indexer(db);
+        final hooked = ReplaceRunner(
+          db,
+          root.path,
+          onNotesReindexed: (paths) => indexer.rescanFiles(root.path, paths),
+        );
+        await hooked.replaceAll(
+          term: 'cat',
+          replacement: 'dog',
+          caseSensitive: false,
+        );
+        // The rewritten notes are searchable under the new word…
+        final hits = await db
+            .customSelect(
+              'SELECT notes.path FROM notes JOIN notes_fts '
+              "ON notes.id = notes_fts.rowid WHERE notes_fts MATCH 'dog'",
+            )
+            .get();
+        expect(
+          hits.map((r) => r.read<String>('path')),
+          containsAll(['a.md', 'sub/x.md']),
+        );
+        // …and the old word is gone from the index.
+        final old = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('cat')],
+            )
+            .getSingle();
+        expect(old.read<int>('c'), 0);
+      },
+    );
   });
 }

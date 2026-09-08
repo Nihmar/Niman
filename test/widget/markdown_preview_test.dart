@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _app(Widget child) =>
-    MaterialApp(home: Scaffold(body: SizedBox(height: 600, child: child)));
+Widget _app(Widget child) => MaterialApp(
+  home: Scaffold(body: SizedBox(height: 600, child: child)),
+);
 
 const String _extras = r'''
 # Heading
@@ -93,8 +94,7 @@ void main() {
       );
     });
 
-    testWidgets('only visible blocks are laid out (windowing)',
-        (tester) async {
+    testWidgets('only visible blocks are laid out (windowing)', (tester) async {
       final long = StringBuffer();
       for (var i = 0; i < 300; i++) {
         long.write('Paragraph number $i with some text to fill a line.\n\n');
@@ -141,10 +141,12 @@ void main() {
       expect(find.text('Two', findRichText: true), findsOneWidget);
     });
 
-    testWidgets('the CommonMark corpus parses and builds without errors',
-        (tester) async {
-      final json =
-          jsonDecode(File('test/spec.json').readAsStringSync()) as List<dynamic>;
+    testWidgets('the CommonMark corpus parses and builds without errors', (
+      tester,
+    ) async {
+      final json = jsonDecode(
+        File('test/spec.json').readAsStringSync(),
+      ) as List<dynamic>;
       expect(json.length, 652);
       for (final example in json.cast<Map<String, dynamic>>()) {
         final markdown = example['markdown'] as String;
@@ -155,7 +157,8 @@ void main() {
         expect(
           error,
           isNull,
-          reason: 'spec example ${example['example']} '
+          reason:
+              'spec example ${example['example']} '
               '(${example['section']}) crashed: '
               '${markdown.length > 60 ? markdown.substring(0, 60) : markdown}',
         );

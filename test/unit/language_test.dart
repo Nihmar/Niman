@@ -68,8 +68,10 @@ void main() {
         AppLanguages.fromLocales(const [Locale('de'), Locale('it')]),
         AppLanguage.italian,
       );
-      expect(AppLanguages.fromLocales(const [Locale('de')]),
-          AppLanguage.english);
+      expect(
+        AppLanguages.fromLocales(const [Locale('de')]),
+        AppLanguage.english,
+      );
       expect(AppLanguages.fromLocales(null), AppLanguage.english);
     });
   });

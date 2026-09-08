@@ -30,8 +30,7 @@ final class StorageAccess {
   /// Always `true` off Android, where there is no such restriction.
   static Future<bool> hasAllFilesAccess() async {
     if (!Platform.isAndroid) return true;
-    final granted =
-        await _channel.invokeMethod<bool>('hasManageStorageAccess');
+    final granted = await _channel.invokeMethod<bool>('hasManageStorageAccess');
     return granted ?? false;
   }
 
@@ -43,8 +42,9 @@ final class StorageAccess {
   /// permission: it can only be flipped there.
   static Future<bool> ensureAllFilesAccess() async {
     if (await hasAllFilesAccess()) return true;
-    final granted =
-        await _channel.invokeMethod<bool>('requestManageStorageAccess');
+    final granted = await _channel.invokeMethod<bool>(
+      'requestManageStorageAccess',
+    );
     return granted ?? false;
   }
 }

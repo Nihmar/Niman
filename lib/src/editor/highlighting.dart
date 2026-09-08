@@ -19,6 +19,7 @@ library;
 
 import 'package:copist/src/editor/math_rule.dart';
 import 'package:meta/meta.dart';
+
 /// The kind of a styled run within a line.
 enum TokenKind {
   /// Plain text. Not emitted as a token: any offset not covered by a token
@@ -267,9 +268,7 @@ final class HighlightDocument {
   /// document).
   List<StyledLine> get lines {
     if (_lines.isNotEmpty) _materialize(_lines.length - 1);
-    return _lines
-        .map((l) => StyledLine(l.text, l.tokens!))
-        .toList();
+    return _lines.map((l) => StyledLine(l.text, l.tokens!)).toList();
   }
 
   /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
@@ -367,8 +366,9 @@ final class HighlightDocument {
     if (removed < 0) {
       throw ArgumentError('removed $removed < 0');
     }
-    final end =
-        first + removed > _lines.length ? _lines.length : first + removed;
+    final end = first + removed > _lines.length
+        ? _lines.length
+        : first + removed;
     _lines = <_Line>[
       ..._lines.sublist(0, first),
       for (final text in replacement) _Line(text),
@@ -445,8 +445,7 @@ final class HighlightDocument {
     return _State.initial;
   }
 
-  static bool _isSingleLineMath(String trimmed) =>
-      isSingleLineDisplay(trimmed);
+  static bool _isSingleLineMath(String trimmed) => isSingleLineDisplay(trimmed);
 
   static _Fence? _fenceOpen(String text) {
     final info = _fenceOpenInfo(text);

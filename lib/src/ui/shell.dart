@@ -960,8 +960,8 @@ final class _LibraryShellState extends State<_LibraryShell>
                     floatingActionButton: _tab == ShellTab.files
                         ? _newItemFab()
                         : _tab == ShellTab.todo
-                            ? _todoAddFab()
-                            : null,
+                        ? _todoAddFab()
+                        : null,
                     body: _tabBody(controller),
                   ),
                 ),

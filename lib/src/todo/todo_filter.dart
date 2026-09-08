@@ -160,12 +160,13 @@ List<({String token, int count})> tokenCountsFor(
       counts[token] = (counts[token] ?? 0) + 1;
     }
   }
-  final ranked = <({String token, int count})>[
-    for (final e in counts.entries) (token: e.key, count: e.value),
-  ]..sort((a, b) {
-    final byCount = b.count.compareTo(a.count);
-    return byCount != 0 ? byCount : a.token.compareTo(b.token);
-  });
+  final ranked =
+      <({String token, int count})>[
+        for (final e in counts.entries) (token: e.key, count: e.value),
+      ]..sort((a, b) {
+        final byCount = b.count.compareTo(a.count);
+        return byCount != 0 ? byCount : a.token.compareTo(b.token);
+      });
   return ranked;
 }
 
@@ -244,9 +245,7 @@ int _compareEntries(TodoEntry a, TodoEntry b, TodoSort sort) {
         result = _compareDue(a.task.due, b.task.due);
       }
   }
-  return result != 0
-      ? result
-      : a.lineIndex.compareTo(b.lineIndex);
+  return result != 0 ? result : a.lineIndex.compareTo(b.lineIndex);
 }
 
 /// Due soonest first, tasks without a due date last.

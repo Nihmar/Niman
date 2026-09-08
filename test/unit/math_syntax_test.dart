@@ -101,14 +101,16 @@ void main() {
       expect(_maths(nodes), isEmpty);
     });
 
-    test(r'$n$ digit math is extracted (the corpus uses $1$, $2 \times 2$)',
-        () {
-      final nodes = _parse(r'ha dimensione $1$ e $2 \times 2$');
-      final maths = _maths(nodes);
-      expect(maths, hasLength(2));
-      expect(_latex(maths[0] as md.Element), '1');
-      expect(_latex(maths[1] as md.Element), r'2 \times 2');
-    });
+    test(
+      r'$n$ digit math is extracted (the corpus uses $1$, $2 \times 2$)',
+      () {
+        final nodes = _parse(r'ha dimensione $1$ e $2 \times 2$');
+        final maths = _maths(nodes);
+        expect(maths, hasLength(2));
+        expect(_latex(maths[0] as md.Element), '1');
+        expect(_latex(maths[1] as md.Element), r'2 \times 2');
+      },
+    );
 
     test('inline code and fenced code keep their dollars', () {
       final nodes = _parse(

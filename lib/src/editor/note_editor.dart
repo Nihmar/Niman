@@ -119,52 +119,53 @@ final class NoteEditor extends StatelessWidget {
       findBuilder: findBuilder,
       shortcutsActivatorsBuilder: shortcutsActivators,
       toolbarController: MobileSelectionToolbarController(
-        builder: ({
-          required context,
-          required anchors,
-          required controller,
-          required onDismiss,
-          required onRefresh,
-        }) {
-          final items = <ContextMenuButtonItem>[
-            // Cut/copy of a collapsed caret would eat the whole line, so
-            // they are offered for a real selection only.
-            if (!controller.selection.isCollapsed)
-              ContextMenuButtonItem(
-                type: ContextMenuButtonType.cut,
-                onPressed: () {
-                  controller.cut();
-                  onDismiss();
-                },
-              ),
-            if (!controller.selection.isCollapsed)
-              ContextMenuButtonItem(
-                type: ContextMenuButtonType.copy,
-                onPressed: () {
-                  unawaited(controller.copy());
-                  onDismiss();
-                },
-              ),
-            ContextMenuButtonItem(
-              type: ContextMenuButtonType.paste,
-              onPressed: () {
-                controller.paste();
-                onDismiss();
-              },
-            ),
-            ContextMenuButtonItem(
-              type: ContextMenuButtonType.selectAll,
-              onPressed: () {
-                controller.selectAll();
-                onDismiss();
-              },
-            ),
-          ];
-          return AdaptiveTextSelectionToolbar.buttonItems(
-            anchors: anchors,
-            buttonItems: items,
-          );
-        },
+        builder:
+            ({
+              required context,
+              required anchors,
+              required controller,
+              required onDismiss,
+              required onRefresh,
+            }) {
+              final items = <ContextMenuButtonItem>[
+                // Cut/copy of a collapsed caret would eat the whole line, so
+                // they are offered for a real selection only.
+                if (!controller.selection.isCollapsed)
+                  ContextMenuButtonItem(
+                    type: ContextMenuButtonType.cut,
+                    onPressed: () {
+                      controller.cut();
+                      onDismiss();
+                    },
+                  ),
+                if (!controller.selection.isCollapsed)
+                  ContextMenuButtonItem(
+                    type: ContextMenuButtonType.copy,
+                    onPressed: () {
+                      unawaited(controller.copy());
+                      onDismiss();
+                    },
+                  ),
+                ContextMenuButtonItem(
+                  type: ContextMenuButtonType.paste,
+                  onPressed: () {
+                    controller.paste();
+                    onDismiss();
+                  },
+                ),
+                ContextMenuButtonItem(
+                  type: ContextMenuButtonType.selectAll,
+                  onPressed: () {
+                    controller.selectAll();
+                    onDismiss();
+                  },
+                ),
+              ];
+              return AdaptiveTextSelectionToolbar.buttonItems(
+                anchors: anchors,
+                buttonItems: items,
+              );
+            },
       ),
     );
   }

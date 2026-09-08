@@ -191,24 +191,26 @@ final class _TodoTabState extends State<TodoTab> {
   /// Opens the token + sort sheet (T-TDM-03) over the visible file.
   void _openFilterSheet(List<TodoEntry> fileEntries) {
     final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => TodoFilterSheet(
-        filter: _filter,
-        counts: counts,
-        onToggleToken: (token) {
-          final tokens = {..._filter.tokens};
-          if (!tokens.remove(token)) {
-            tokens.add(token);
-          }
-          _log.debug('todo filter tokens: $tokens');
-          setState(() => _filter = _filter.copyWith(tokens: tokens));
-        },
-        onSort: (sort) {
-          setState(() => _filter = _filter.copyWith(sort: sort));
-        },
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (context) => TodoFilterSheet(
+          filter: _filter,
+          counts: counts,
+          onToggleToken: (token) {
+            final tokens = {..._filter.tokens};
+            if (!tokens.remove(token)) {
+              tokens.add(token);
+            }
+            _log.debug('todo filter tokens: $tokens');
+            setState(() => _filter = _filter.copyWith(tokens: tokens));
+          },
+          onSort: (sort) {
+            setState(() => _filter = _filter.copyWith(sort: sort));
+          },
+        ),
       ),
-    ));
+    );
   }
 
   /// The empty state: the file's own when it holds nothing, the filtered
@@ -253,9 +255,7 @@ final class _TodoTabState extends State<TodoTab> {
   /// files.
   Set<String> _knownTokens() {
     final snapshot = widget.controller.snapshot;
-    return snapshot == null
-        ? const <String>{}
-        : snapshotTokens(snapshot);
+    return snapshot == null ? const <String>{} : snapshotTokens(snapshot);
   }
 
   /// Long-press bottom sheet (the app's menu pattern): edit or delete.

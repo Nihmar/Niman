@@ -247,8 +247,8 @@ class _ListNoteViewState extends State<ListNoteView>
         rel < 0.25
             ? ListDropMode.before
             : rel > 0.75
-                ? ListDropMode.after
-                : ListDropMode.under,
+            ? ListDropMode.after
+            : ListDropMode.under,
       );
     }
 

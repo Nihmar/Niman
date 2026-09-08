@@ -116,8 +116,7 @@ void main() {
     });
 
     test('ready only once every block is measured', () {
-      final map = ScrollMap()
-        ..rebuild('a\n\nb\n\nc');
+      final map = ScrollMap()..rebuild('a\n\nb\n\nc');
       expect(map.isReady, isFalse);
       for (var i = 0; i < map.blockStartLines.length; i++) {
         map.measure(i, 20);

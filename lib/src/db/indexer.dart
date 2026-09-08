@@ -509,15 +509,16 @@ final class Indexer {
         final content = contents[entry.key];
         if (content == null) continue;
         final probe = entry.value;
-        final updated = await (_db.update(
-          _db.notes,
-        )..where((t) => t.path.equals(entry.key))).write(
-          NotesCompanion(
-            size: Value(probe.size),
-            modified: Value(probe.modified),
-            sha256: Value(content.sha256),
-          ),
-        );
+        final updated =
+            await (_db.update(
+              _db.notes,
+            )..where((t) => t.path.equals(entry.key))).write(
+              NotesCompanion(
+                size: Value(probe.size),
+                modified: Value(probe.modified),
+                sha256: Value(content.sha256),
+              ),
+            );
         wrote |= updated > 0;
         changed.add(content);
       }

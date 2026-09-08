@@ -23,10 +23,9 @@ final class PreviewCodeHighlighter implements SyntaxHighlighter {
   TextSpan format(String code) {
     final trimmed = code.replaceAll(RegExp(r'\n$'), '');
     final language = this.language.toLowerCase();
-    final nodes =
-        language.isEmpty
-            ? <Node>[]
-            : highlight.parse(trimmed, language: language).nodes ?? <Node>[];
+    final nodes = language.isEmpty
+        ? <Node>[]
+        : highlight.parse(trimmed, language: language).nodes ?? <Node>[];
     final root = theme['root'];
     return TextSpan(
       style: TextStyle(

@@ -51,8 +51,10 @@ void main() {
       final doc = HighlightDocument.fromText('see ![alt](img.png) end');
       final t = doc.lines.single.tokens.single;
       expect(t.kind, TokenKind.image);
-      expect('see ![alt](img.png) end'.substring(t.start, t.end),
-          '![alt](img.png)');
+      expect(
+        'see ![alt](img.png) end'.substring(t.start, t.end),
+        '![alt](img.png)',
+      );
     });
 
     test('bold wins over italic at the same position', () {
@@ -113,13 +115,15 @@ void main() {
       }
     });
 
-    test('space-adjacent delimiters are math (the corpus writes dollar spans)',
-        () {
-      final doc = HighlightDocument.fromText(r'5 $ 3 $');
-      final tokens = doc.lines.single.tokens;
-      expect(tokens, hasLength(1));
-      expect(tokens.single.kind, TokenKind.mathInline);
-    });
+    test(
+      'space-adjacent delimiters are math (the corpus writes dollar spans)',
+      () {
+        final doc = HighlightDocument.fromText(r'5 $ 3 $');
+        final tokens = doc.lines.single.tokens;
+        expect(tokens, hasLength(1));
+        expect(tokens.single.kind, TokenKind.mathInline);
+      },
+    );
 
     test('escaped dollar is not math', () {
       final doc = HighlightDocument.fromText(r'a \$5 b');
@@ -143,9 +147,9 @@ void main() {
       );
       final lines = doc.lines;
       expect(lines[1].tokens.first.kind, TokenKind.codeFence);
-      final lang = lines[1]
-          .tokens
-          .firstWhere((t) => t.kind == TokenKind.codeLanguage);
+      final lang = lines[1].tokens.firstWhere(
+        (t) => t.kind == TokenKind.codeLanguage,
+      );
       expect(lines[1].text.substring(lang.start, lang.end), 'dart');
       expect(lines[2].tokens.single.kind, TokenKind.codeFence);
       expect(lines[3].tokens.single.kind, TokenKind.codeFence);
@@ -189,7 +193,8 @@ void main() {
 
     test('mathSpansIn finds block and inline spans with markers', () {
       const text = 'a \$x\$ mid\n\$\$\n\\int f\n\$\$\n\$\$a+b\$\$';
-      final spans = mathSpansIn(text).map((s) => text.substring(s.start, s.end))
+      final spans = mathSpansIn(text)
+          .map((s) => text.substring(s.start, s.end))
           .toList();
       expect(
         spans,
@@ -208,8 +213,7 @@ void main() {
   group('frontmatter', () {
     test('leading block is frontmatter', () {
       final doc = HighlightDocument.fromText('---\nt: 1\n---\nbody');
-      final kinds =
-          doc.lines.map((l) => l.tokens.singleOrNull?.kind).toList();
+      final kinds = doc.lines.map((l) => l.tokens.singleOrNull?.kind).toList();
       expect(kinds, [
         TokenKind.frontmatter,
         TokenKind.frontmatter,
@@ -258,8 +262,7 @@ void main() {
 
   group('incremental replace', () {
     test('single-character insert matches full re-tokenize', () {
-      final doc = HighlightDocument.fromText('abc\ndef')
-        ..replace(4, 4, 'X');
+      final doc = HighlightDocument.fromText('abc\ndef')..replace(4, 4, 'X');
       expect(doc.text, 'abc\nXdef');
       expect(
         doc.lines.map((l) => l.text).toList(),
@@ -267,8 +270,7 @@ void main() {
       );
     });
 
-    test('typed fence opening re-styles following lines incrementally',
-        () {
+    test('typed fence opening re-styles following lines incrementally', () {
       final doc = HighlightDocument.fromText('a\nb\nc');
       // The buffer ends with an open fence; the incremental path must
       // re-style the lines after the edit exactly like a full re-tokenize.

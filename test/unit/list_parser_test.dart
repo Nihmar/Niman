@@ -94,9 +94,13 @@ void main() {
         '- [ ] a\n  - [ ] b\nprose\n- [ ] c\n',
       );
       expect(
-          subtreeEnd(
-              items, 0, listLineCount('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n')),
-          3);
+        subtreeEnd(
+          items,
+          0,
+          listLineCount('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n'),
+        ),
+        3,
+      );
       expect(subtreeEnd(items, 2, 4), 4);
     });
   });

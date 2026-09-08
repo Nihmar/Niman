@@ -56,10 +56,9 @@ final class LibrarySettingsRepo {
 
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> isTrashEnabled(String libraryPath) async {
-    final rows = await (
-      _db.select(_db.librarySettings)
-        ..where((t) => t.path.equals(libraryPath))
-    ).get();
+    final rows = await (_db.select(
+      _db.librarySettings,
+    )..where((t) => t.path.equals(libraryPath))).get();
     return rows.isEmpty || rows.first.trashEnabled;
   }
 
@@ -77,10 +76,9 @@ final class LibrarySettingsRepo {
   /// The user-chosen quick note (library-relative path), or null when the
   /// default `Quick note.md` at the library root is used.
   Future<String?> quickNotePath(String libraryPath) async {
-    final rows = await (
-      _db.select(_db.librarySettings)
-        ..where((t) => t.path.equals(libraryPath))
-    ).get();
+    final rows = await (_db.select(
+      _db.librarySettings,
+    )..where((t) => t.path.equals(libraryPath))).get();
     return rows.isEmpty ? null : rows.first.quickNotePath;
   }
 
@@ -98,10 +96,9 @@ final class LibrarySettingsRepo {
   /// The folder (library-relative) that holds the list notes
   /// (T-TK-06); default [defaultListFolder].
   Future<String> listNoteFolder(String libraryPath) async {
-    final rows = await (
-      _db.select(_db.librarySettings)
-        ..where((t) => t.path.equals(libraryPath))
-    ).get();
+    final rows = await (_db.select(
+      _db.librarySettings,
+    )..where((t) => t.path.equals(libraryPath))).get();
     return rows.isEmpty ? defaultListFolder : rows.first.listNoteFolder;
   }
 
@@ -112,11 +109,11 @@ final class LibrarySettingsRepo {
     required String folder,
   }) async {
     await _ensureRow(libraryPath);
-    await (_db.update(_db.librarySettings)
-          ..where((t) => t.path.equals(libraryPath)))
-        .write(
-          LibrarySettingsCompanion(listNoteFolder: Value(_cleanFolder(folder))),
-        );
+    await (_db.update(
+      _db.librarySettings,
+    )..where((t) => t.path.equals(libraryPath))).write(
+      LibrarySettingsCompanion(listNoteFolder: Value(_cleanFolder(folder))),
+    );
   }
 
   /// Sanitizes a list-folder path: trims, drops leading/trailing slashes
@@ -138,20 +135,21 @@ final class LibrarySettingsRepo {
 
   /// Ensures a settings row exists for `libraryPath`.
   Future<void> _ensureRow(String libraryPath) async {
-    final rows = await (
-      _db.select(_db.librarySettings)
-        ..where((t) => t.path.equals(libraryPath))
-    ).get();
+    final rows = await (_db.select(
+      _db.librarySettings,
+    )..where((t) => t.path.equals(libraryPath))).get();
     if (rows.isNotEmpty) {
       return;
     }
-    await _db.into(_db.librarySettings).insert(
-      LibrarySettingsCompanion.insert(
-        path: libraryPath,
-        trashEnabled: true,
-        historyVersions: 10,
-      ),
-    );
+    await _db
+        .into(_db.librarySettings)
+        .insert(
+          LibrarySettingsCompanion.insert(
+            path: libraryPath,
+            trashEnabled: true,
+            historyVersions: 10,
+          ),
+        );
   }
 }
 
@@ -171,9 +169,9 @@ final class AppSettingsRepo {
   /// Persists `path` as the last opened library root.
   Future<void> setLastLibraryPath(String? path) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(libraryPath: Value(path)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(libraryPath: Value(path)),
+    );
   }
 
   /// Whether the debug log buffer records events (default true).
@@ -185,9 +183,9 @@ final class AppSettingsRepo {
   /// Persists the debug log recording toggle.
   Future<void> setDebugLogsEnabled({required bool enabled}) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(debugLogsEnabled: Value(enabled)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(debugLogsEnabled: Value(enabled)),
+    );
   }
 
   /// Whether the note editor shows the row-number column (default true).
@@ -199,9 +197,9 @@ final class AppSettingsRepo {
   /// Persists the line-numbers toggle.
   Future<void> setLineNumbersEnabled({required bool enabled}) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(lineNumbers: Value(enabled)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(lineNumbers: Value(enabled)),
+    );
   }
 
   /// Whether the note editor focuses (shows the keyboard) on note open
@@ -214,9 +212,9 @@ final class AppSettingsRepo {
   /// Persists the keyboard-on-open toggle.
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(editorAutofocus: Value(enabled)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(editorAutofocus: Value(enabled)),
+    );
   }
 
   /// Whether a reminder's notification text keeps the `+project`,
@@ -248,9 +246,9 @@ final class AppSettingsRepo {
   /// Persists the preview layout mode.
   Future<void> setPreviewMode(PreviewLayoutMode mode) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(previewMode: Value(mode.name)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(previewMode: Value(mode.name)),
+    );
   }
 
   /// The editor|preview split ratio (0..1; default [defaultSplitRatio]).
@@ -267,9 +265,9 @@ final class AppSettingsRepo {
         : ratio > maxSplitRatio
         ? maxSplitRatio
         : ratio;
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(splitRatio: Value(clamped)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(splitRatio: Value(clamped)),
+    );
   }
 
   /// The library tree sort order (default [TreeSort.nameAsc]).
@@ -285,9 +283,9 @@ final class AppSettingsRepo {
   /// Persists the library tree sort order.
   Future<void> setTreeSort(TreeSort sort) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(treeSort: Value(sort.name)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(treeSort: Value(sort.name)),
+    );
   }
 
   /// The link format the editor's link button inserts
@@ -304,9 +302,9 @@ final class AppSettingsRepo {
   /// Persists the link format.
   Future<void> setLinkType(LinkType type) async {
     await _ensureRow();
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(linkType: Value(type.name)));
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(linkType: Value(type.name)),
+    );
   }
 
   /// The editor's indent/outdent width in spaces (default 2).
@@ -318,10 +316,14 @@ final class AppSettingsRepo {
   /// Persists the indent/outdent width (clamped to 2..8).
   Future<void> setIndentWidth(int width) async {
     await _ensureRow();
-    final clamped = width < 2 ? 2 : width > 8 ? 8 : width;
-    await (_db.update(_db.appSettings)
-          ..where((t) => t.id.equals(1)))
-        .write(AppSettingsCompanion(indentWidth: Value(clamped)));
+    final clamped = width < 2
+        ? 2
+        : width > 8
+        ? 8
+        : width;
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(indentWidth: Value(clamped)),
+    );
   }
 
   /// The stored editor-toolbar layout (empty = the shipped toolbar).
@@ -362,11 +364,13 @@ final class AppSettingsRepo {
     if (rows.isNotEmpty) {
       return;
     }
-    await _db.into(_db.appSettings).insert(
-      AppSettingsCompanion.insert(
-        id: const Value(1),
-        libraryPath: const Value(null),
-      ),
-    );
+    await _db
+        .into(_db.appSettings)
+        .insert(
+          AppSettingsCompanion.insert(
+            id: const Value(1),
+            libraryPath: const Value(null),
+          ),
+        );
   }
 }

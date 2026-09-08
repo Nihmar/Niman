@@ -41,8 +41,8 @@ final class NoteOps implements NoteOperations {
     required this.root,
     required CopistDatabase db,
     required this.indexer,
-  })  : _dao = NoteDao(db),
-        _settings = LibrarySettingsRepo(db);
+  }) : _dao = NoteDao(db),
+       _settings = LibrarySettingsRepo(db);
 
   /// Absolute path of the library root.
   final String root;
@@ -416,8 +416,7 @@ final class NoteOps implements NoteOperations {
         if (_existsInTrash(entry.key)) entry.key: entry.value,
     };
     final payload = jsonEncode({
-      for (final entry in kept.entries)
-        entry.key: entry.value.toJson(),
+      for (final entry in kept.entries) entry.key: entry.value.toJson(),
     });
     await writeFileAtomically(
       File(_abs('.trash/$manifestFileName')),

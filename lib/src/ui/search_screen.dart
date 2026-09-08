@@ -506,7 +506,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     final confirmLabel = only != null
         ? AppStrings.replaceInThisNote
         : '${AppStrings.replaceConfirm} '
-            '(${hasMatches ? '$occurrences' : '…'})';
+              '(${hasMatches ? '$occurrences' : '…'})';
     return Container(
       key: const Key('replace-panel'),
       margin: const EdgeInsets.only(top: 8),
@@ -573,8 +573,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ),
               FilledButton(
                 key: const Key('replace-confirm'),
-                onPressed:
-                    _previewBusy || !hasMatches ? null : _runReplace,
+                onPressed: _previewBusy || !hasMatches ? null : _runReplace,
                 child: Text(confirmLabel),
               ),
             ],

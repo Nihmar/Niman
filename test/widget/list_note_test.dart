@@ -7,8 +7,7 @@ import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _app(ListNoteView view) =>
-    MaterialApp(home: Scaffold(body: view));
+Widget _app(ListNoteView view) => MaterialApp(home: Scaffold(body: view));
 
 Finder _row(int index) => find.byType(ListItemRow).at(index);
 
@@ -44,9 +43,14 @@ void main() {
     // The host feeds the edited text back, like NoteView does (the
     // controller's text changes and the kind body re-parses).
     var text = '---\ntype: list\n---\n- [ ] one\n  - [x] two\n';
-    Widget app() => _app(ListNoteView(text: text, onChanged: (t) {
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
           text = t;
-        }));
+        },
+      ),
+    );
     await tester.pumpWidget(app());
     expect(find.text('one'), findsOneWidget);
     expect(find.text('two'), findsOneWidget);
@@ -64,9 +68,14 @@ void main() {
 
   testWidgets('tapping the text edits it in place', (tester) async {
     var text = '---\ntype: list\n---\n- [ ] one\n  - [x] two\n';
-    Widget app() => _app(ListNoteView(text: text, onChanged: (t) {
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
           text = t;
-        }));
+        },
+      ),
+    );
     await tester.pumpWidget(app());
 
     // Tapping the text (not the checkbox) starts the in-place edit.
@@ -86,16 +95,20 @@ void main() {
     expect(find.text('one edited'), findsOneWidget);
   });
 
-  testWidgets('an open edit commits when another row is tapped',
-      (tester) async {
+  testWidgets('an open edit commits when another row is tapped', (
+    tester,
+  ) async {
     String? out;
     var text = '---\ntype: list\n---\n- [ ] one\n- [ ] two\n';
     Widget app() => MaterialApp(
       home: Scaffold(
-        body: ListNoteView(text: text, onChanged: (t) {
-          text = t;
-          out = t;
-        }),
+        body: ListNoteView(
+          text: text,
+          onChanged: (t) {
+            text = t;
+            out = t;
+          },
+        ),
       ),
     );
     await tester.pumpWidget(app());
@@ -237,15 +250,24 @@ void main() {
   testWidgets('the add row appends an unchecked item', (tester) async {
     String? out;
     const text = '---\ntype: list\n---\n- [ ] one\n';
-    await tester.pumpWidget(_app(ListNoteView(text: text, onChanged: (t) {
-      out = t;
-    })));
+    await tester.pumpWidget(
+      _app(
+        ListNoteView(
+          text: text,
+          onChanged: (t) {
+            out = t;
+          },
+        ),
+      ),
+    );
     // The add field is the TextField outside the item rows.
     await tester.enterText(
-      find.descendant(
-        of: find.byType(ListNoteView),
-        matching: find.byType(TextField),
-      ).last,
+      find
+          .descendant(
+            of: find.byType(ListNoteView),
+            matching: find.byType(TextField),
+          )
+          .last,
       'three',
     );
     await tester.tap(find.byKey(const Key('list-add-button')));
@@ -255,9 +277,14 @@ void main() {
 
   testWidgets('the add row slides away while a row is edited', (tester) async {
     var text = '---\ntype: list\n---\n- [ ] one\n';
-    Widget app() => _app(ListNoteView(text: text, onChanged: (t) {
+    Widget app() => _app(
+      ListNoteView(
+        text: text,
+        onChanged: (t) {
           text = t;
-        }));
+        },
+      ),
+    );
     await tester.pumpWidget(app());
     Size addRow() => tester.getSize(find.byKey(const Key('list-add-row')));
     final shown = addRow().height;

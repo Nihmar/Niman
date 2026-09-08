@@ -19,8 +19,7 @@ enum HighlightPalette {
 
   /// The style of the *heading text* — the region after a `#…` marker,
   /// which the tokenizer leaves unmarked: bold, at the base row size.
-  TextStyle? get headingStyle =>
-      const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle? get headingStyle => const TextStyle(fontWeight: FontWeight.bold);
 
   /// The [TextStyle] override for [kind] in this palette (null = base).
   ///

@@ -125,8 +125,9 @@ final class LocalReminderService implements ReminderService {
   /// time it lands here.
   final DateTime Function() _clock;
 
-  final ValueNotifier<ReminderHealth> _health =
-      ValueNotifier<ReminderHealth>(ReminderHealth.ok);
+  final ValueNotifier<ReminderHealth> _health = ValueNotifier<ReminderHealth>(
+    ReminderHealth.ok,
+  );
 
   static const AppLogger _log = AppLogger(name: 'todo');
 
@@ -213,8 +214,7 @@ final class LocalReminderService implements ReminderService {
     // came back through onResume instead of a fresh reconcile. Nothing is
     // asked while nothing is wanted.
     final granted = wanted.isEmpty || await _backend.notificationsAllowed();
-    final exact =
-        granted && wanted.isNotEmpty && await _backend.exactAllowed();
+    final exact = granted && wanted.isNotEmpty && await _backend.exactAllowed();
     final batteryExempt = await settings.isBatteryExempt();
     _health.value = _healthOf(
       granted: granted,

@@ -32,20 +32,17 @@ final class AppLogger {
   final String name;
 
   /// Emits [message] at [LogSeverity.debug].
-  void debug(String message) =>
-      AppLog.record(LogSeverity.debug, name, message);
+  void debug(String message) => AppLog.record(LogSeverity.debug, name, message);
 
   /// Emits [message] at [LogSeverity.info].
-  void info(String message) =>
-      AppLog.record(LogSeverity.info, name, message);
+  void info(String message) => AppLog.record(LogSeverity.info, name, message);
 
   /// Emits [message] at [LogSeverity.warning].
   void warning(String message) =>
       AppLog.record(LogSeverity.warning, name, message);
 
   /// Emits [message] at [LogSeverity.error].
-  void error(String message) =>
-      AppLog.record(LogSeverity.error, name, message);
+  void error(String message) => AppLog.record(LogSeverity.error, name, message);
 }
 
 /// The process-wide, in-memory log buffer behind [AppLogger].

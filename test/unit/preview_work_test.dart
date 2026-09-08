@@ -7,7 +7,8 @@ import 'package:copist/src/preview/preview_work.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 
-const String _note = '# Alpha\n\ntext \$x^\$ in prose\n\n'
+const String _note =
+    '# Alpha\n\ntext \$x^\$ in prose\n\n'
     '# Beta\n\nmore\n\n### Deep\n';
 
 void main() {

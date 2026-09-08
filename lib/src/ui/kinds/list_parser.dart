@@ -140,15 +140,15 @@ int subtreeEnd(List<ListItem> items, int index, int lineCount) {
   int lineCount,
 ) {
   if (target == -1) {
-    return items.isEmpty
-        ? null
-        : (insertLine: items.first.line, indent: 0);
+    return items.isEmpty ? null : (insertLine: items.first.line, indent: 0);
   }
   if (target == items.length) {
     return items.isEmpty
         ? null
-        : (insertLine: subtreeEnd(items, items.length - 1, lineCount),
-          indent: 0);
+        : (
+            insertLine: subtreeEnd(items, items.length - 1, lineCount),
+            indent: 0,
+          );
   }
   if (target == index) return null;
   final end = subtreeEnd(items, index, lineCount);

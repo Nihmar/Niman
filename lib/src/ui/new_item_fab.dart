@@ -191,8 +191,7 @@ final class FabScrim extends StatelessWidget {
   /// size; the fallback is the default endFloat geometry (16 px margin,
   /// 56 px FAB) for the unlikely frame where the FAB is not laid out yet.
   Offset _fabCenter(BuildContext context, Size size) {
-    final fabBox =
-        anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    final fabBox = anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (fabBox == null || !fabBox.hasSize) {
       return Offset(size.width - 44, size.height - 44);
     }

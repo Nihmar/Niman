@@ -15,8 +15,8 @@ final class FakeReplaceSource implements ReplaceSource {
   );
 
   /// Every preview request, in order.
-  final List<({String term, bool caseSensitive, String? onlyPath})>
-  previews = [];
+  final List<({String term, bool caseSensitive, String? onlyPath})> previews =
+      [];
 
   /// Every replace request, in order.
   final List<

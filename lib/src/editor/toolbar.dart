@@ -50,8 +50,10 @@ final class EditorToolbar extends StatelessWidget {
                 onTap: button.onPressed,
                 canRequestFocus: false,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                   child: Icon(button.icon, size: 20),
                 ),
               ),

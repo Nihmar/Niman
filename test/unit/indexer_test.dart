@@ -584,47 +584,49 @@ void main() {
       expect(stems.map((s) => s.stem), isNot(contains('note1')));
     });
 
-    test('rescanFiles catches a rewrite the (size, mtime) shortcut misses',
-        () async {
-      // A same-size rewrite with an unchanged mtime: applyEvents trusts
-      // the stored digest and skips it; rescanFiles reads unconditionally.
-      File(p.join(root.path, 'note1.md')).writeAsStringSync('hello');
-      await indexer.fullScan(root.path);
-      final stamp = File(p.join(root.path, 'note1.md')).statSync().modified;
+    test(
+      'rescanFiles catches a rewrite the (size, mtime) shortcut misses',
+      () async {
+        // A same-size rewrite with an unchanged mtime: applyEvents trusts
+        // the stored digest and skips it; rescanFiles reads unconditionally.
+        File(p.join(root.path, 'note1.md')).writeAsStringSync('hello');
+        await indexer.fullScan(root.path);
+        final stamp = File(p.join(root.path, 'note1.md')).statSync().modified;
 
-      File(p.join(root.path, 'note1.md')).writeAsStringSync('hullo');
-      // Pin the mtime: (size, mtime) now prove nothing changed to the
-      // shortcut, whatever the wall clock says.
-      await File(p.join(root.path, 'note1.md')).setLastModified(stamp);
-      await indexer.applyEvents(root.path, [
-        p.join(root.path, 'note1.md'),
-      ]);
-      var hit = await db
-          .customSelect(
-            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
-            variables: [const Variable<String>('hullo')],
-          )
-          .getSingle();
-      expect(hit.read<int>('c'), 0); // skipped: still the old content
+        File(p.join(root.path, 'note1.md')).writeAsStringSync('hullo');
+        // Pin the mtime: (size, mtime) now prove nothing changed to the
+        // shortcut, whatever the wall clock says.
+        await File(p.join(root.path, 'note1.md')).setLastModified(stamp);
+        await indexer.applyEvents(root.path, [
+          p.join(root.path, 'note1.md'),
+        ]);
+        var hit = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('hullo')],
+            )
+            .getSingle();
+        expect(hit.read<int>('c'), 0); // skipped: still the old content
 
-      await indexer.rescanFiles(root.path, [
-        p.join(root.path, 'note1.md'),
-      ]);
-      hit = await db
-          .customSelect(
-            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
-            variables: [const Variable<String>('hullo')],
-          )
-          .getSingle();
-      expect(hit.read<int>('c'), 1);
-      hit = await db
-          .customSelect(
-            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
-            variables: [const Variable<String>('hello')],
-          )
-          .getSingle();
-      expect(hit.read<int>('c'), 0);
-    });
+        await indexer.rescanFiles(root.path, [
+          p.join(root.path, 'note1.md'),
+        ]);
+        hit = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('hullo')],
+            )
+            .getSingle();
+        expect(hit.read<int>('c'), 1);
+        hit = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('hello')],
+            )
+            .getSingle();
+        expect(hit.read<int>('c'), 0);
+      },
+    );
 
     test(
       'a v7-era index (tree without content rows) is rebuilt by one '

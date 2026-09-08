@@ -122,8 +122,7 @@ class AppSettings extends Table {
 
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
-  TextColumn get language =>
-      text().withDefault(const Constant('system'))();
+  TextColumn get language => text().withDefault(const Constant('system'))();
 
   @override
   Set<Column> get primaryKey => {id};

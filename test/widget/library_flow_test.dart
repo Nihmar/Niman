@@ -210,7 +210,10 @@ void main() {
     // Switch the trash toggle off in settings.
     await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
-    expect(find.text('Deletions move to .trash/ (off = hard delete)'), findsOne);
+    expect(
+      find.text('Deletions move to .trash/ (off = hard delete)'),
+      findsOne,
+    );
     final trashRow = find.ancestor(
       of: find.text('Deletions move to .trash/ (off = hard delete)'),
       matching: find.byType(SwitchListTile),
@@ -298,8 +301,9 @@ void main() {
     await controller.dispose();
   });
 
-  testWidgets('the move picker does not offer a folder as its own target',
-      (tester) async {
+  testWidgets('the move picker does not offer a folder as its own target', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     filePicker.directory = '/fake';
@@ -424,8 +428,9 @@ void main() {
     await session.dispose();
   });
 
-  testWidgets('phone width: notes open full-screen, back returns to tree',
-      (tester) async {
+  testWidgets('phone width: notes open full-screen, back returns to tree', (
+    tester,
+  ) async {
     // Phone-sized surface (390 x 844 logical).
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;

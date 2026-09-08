@@ -28,11 +28,13 @@ void main() {
 
   setUp(() {
     session = FakeLibrarySession();
-    source = FakeTagSource(tags: {
-      'work': ['Docs/a.md', 'b.md'],
-      'ideas': ['Docs/a.md', 'Docs/b.md', 'c.md'],
-      'solo': ['x.md'],
-    });
+    source = FakeTagSource(
+      tags: {
+        'work': ['Docs/a.md', 'b.md'],
+        'ideas': ['Docs/a.md', 'Docs/b.md', 'c.md'],
+        'solo': ['x.md'],
+      },
+    );
     opened.clear();
   });
 
@@ -69,14 +71,14 @@ void main() {
       ),
     );
     final paths = [
-      for (final tile in tiles)
-        (tile.subtitle! as Text).data!,
+      for (final tile in tiles) (tile.subtitle! as Text).data!,
     ];
     expect(paths, ['Docs/a.md', 'b.md']); // path order, not map order
   });
 
-  testWidgets('tapping a note opens it; back returns to the tag list',
-      (tester) async {
+  testWidgets('tapping a note opens it; back returns to the tag list', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await tester.pump();

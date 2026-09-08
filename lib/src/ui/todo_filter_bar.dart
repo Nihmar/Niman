@@ -119,9 +119,8 @@ final class _DueRangeMenu extends StatelessWidget {
 
   Future<void> _openMenu(BuildContext context) async {
     final button = context.findRenderObject()! as RenderBox;
-    final overlay = Navigator.of(context).overlay!
-        .context
-        .findRenderObject()! as RenderBox;
+    final overlay =
+        Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),

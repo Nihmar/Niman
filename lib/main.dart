@@ -59,5 +59,4 @@ void _reportSlowFrames() {
   });
 }
 
-String _ms(Duration d) =>
-    '${(d.inMicroseconds / 1000).toStringAsFixed(1)} ms';
+String _ms(Duration d) => '${(d.inMicroseconds / 1000).toStringAsFixed(1)} ms';

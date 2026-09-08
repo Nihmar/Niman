@@ -35,7 +35,9 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: TodoTab(controller: controller!, clock: clock)),
+        home: Scaffold(
+          body: TodoTab(controller: controller!, clock: clock),
+        ),
       ),
     );
     await tester.pump();

@@ -76,9 +76,7 @@ final class OutlinePanel extends StatelessWidget {
                             entry.text.isEmpty
                                 ? AppStrings.outlineNoTitle
                                 : entry.text,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   fontWeight: entry.level == 1
                                       ? FontWeight.w600

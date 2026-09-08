@@ -40,7 +40,6 @@ final class ToolbarLayout {
     return ToolbarLayout(order: order, hidden: hidden);
   }
 
-
   /// The toolbar as it ships: every button, in the catalogue's order,
   /// nothing hidden.
   static const ToolbarLayout defaults = ToolbarLayout(

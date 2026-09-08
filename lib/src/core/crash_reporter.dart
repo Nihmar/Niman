@@ -53,7 +53,8 @@ final class CrashReporter {
 
   static Future<void> _persist(String errorAndTrace) async {
     final now = DateTime.now();
-    final stamp = '${now.year.toString().padLeft(4, '0')}'
+    final stamp =
+        '${now.year.toString().padLeft(4, '0')}'
         '${now.month.toString().padLeft(2, '0')}'
         '${now.day.toString().padLeft(2, '0')}-'
         '${now.hour.toString().padLeft(2, '0')}'

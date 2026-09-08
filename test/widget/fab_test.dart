@@ -12,28 +12,31 @@ import '../fakes/shell_harness.dart';
 /// The mini FAB [key]'s AnimatedOpacity target (0 = hidden, 1 = shown).
 double miniOpacity(WidgetTester tester, Key key) {
   return tester
-      .widget<AnimatedOpacity>(find.descendant(
-        of: find.byKey(key),
-        matching: find.byType(AnimatedOpacity),
-      ))
+      .widget<AnimatedOpacity>(
+        find.descendant(
+          of: find.byKey(key),
+          matching: find.byType(AnimatedOpacity),
+        ),
+      )
       .opacity;
 }
 
 /// Whether the mini FAB [key] ignores taps (true = collapsed).
 bool miniIgnored(WidgetTester tester, Key key) {
   return tester
-      .widget<IgnorePointer>(find.descendant(
-        of: find.byKey(key),
-        matching: find.byType(IgnorePointer),
-      ))
+      .widget<IgnorePointer>(
+        find.descendant(
+          of: find.byKey(key),
+          matching: find.byType(IgnorePointer),
+        ),
+      )
       .ignoring;
 }
 
 /// Whether the FAB-menu scrim ignores taps (true = collapsed). The scrim
 /// stays mounted so the reveal can animate back to the FAB.
-bool scrimInert(WidgetTester tester) => tester
-    .widget<IgnorePointer>(find.byKey(const Key('fab-scrim')))
-    .ignoring;
+bool scrimInert(WidgetTester tester) =>
+    tester.widget<IgnorePointer>(find.byKey(const Key('fab-scrim'))).ignoring;
 
 void main() {
   late FakeLibrarySession controller;

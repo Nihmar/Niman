@@ -13,15 +13,14 @@ NoteView _view({
   CodeLineEditingController? controller,
   bool showLineNumbers = true,
   bool autofocusEditor = false,
-}) =>
-    NoteView(
-      showLineNumbers: showLineNumbers,
-      autofocusEditor: autofocusEditor,
-      path: path,
-      readNote: readNote,
-      writeNote: writeNote,
-      controller: controller,
-    );
+}) => NoteView(
+  showLineNumbers: showLineNumbers,
+  autofocusEditor: autofocusEditor,
+  path: path,
+  readNote: readNote,
+  writeNote: writeNote,
+  controller: controller,
+);
 
 String _editorText(WidgetTester tester) =>
     tester.widget<NoteEditor>(find.byType(NoteEditor)).controller.text;
@@ -72,8 +71,9 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('a selection-only change does not schedule a save',
-        (tester) async {
+    testWidgets('a selection-only change does not schedule a save', (
+      tester,
+    ) async {
       final writes = <String>[];
       final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
@@ -112,8 +112,9 @@ void main() {
       expect(editor.showLineNumbers, isFalse);
     });
 
-    testWidgets('the keyboard-on-open toggle reaches the editor',
-        (tester) async {
+    testWidgets('the keyboard-on-open toggle reaches the editor', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _app(
           _view(
@@ -132,8 +133,9 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('saves on dispose when the debounce has not fired',
-        (tester) async {
+    testWidgets('saves on dispose when the debounce has not fired', (
+      tester,
+    ) async {
       final writes = <String>[];
       final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(

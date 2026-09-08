@@ -140,8 +140,9 @@ final RegExp _dateHead = RegExp(r'^(\d{4})-(\d{2})-(\d{2})(?=\s|$)');
 final RegExp _priorityHead = RegExp(r'^\(([A-Z])\)(?=\s|$)');
 
 /// The key of a `key:value` tag.
-final RegExp _keyValuePattern =
-    RegExp(r'(?:^|\s)([A-Za-z][A-Za-z0-9_-]*):(\S+)');
+final RegExp _keyValuePattern = RegExp(
+  r'(?:^|\s)([A-Za-z][A-Za-z0-9_-]*):(\S+)',
+);
 
 /// Token patterns: the sigil must open the line or follow whitespace, so
 /// `a+b`, `a@b` and `C#` stay plain description text.
@@ -154,8 +155,7 @@ final RegExp _hashtagPattern = RegExp(r'(?:^|\s)#(\S+)');
 final RegExp _dateValue = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
 
 /// A strict `YYYY-MM-DDTHH:MM` local-time value for `rem:`.
-final RegExp _stampValue =
-    RegExp(r'^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$');
+final RegExp _stampValue = RegExp(r'^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$');
 
 /// Leading horizontal whitespace (tolerant: indented lines are tasks too).
 final RegExp _leadingSpace = RegExp(r'^[ \t]+');
@@ -213,7 +213,9 @@ TodoTask parseTodoLine(String line) {
           );
           if (second != null) {
             secondDate = second;
-            rest = rest.substring(secondMatch.end).replaceFirst(
+            rest = rest
+                .substring(secondMatch.end)
+                .replaceFirst(
                   _leadingSpace,
                   '',
                 );
@@ -384,8 +386,9 @@ String withoutToken(String description, String token) {
 
 /// The word of a `key:value` annotation tag embedded in a description
 /// (mirrors the parser's `[A-Za-z][A-Za-z0-9_-]*:\S+` tag shape).
-final RegExp _keyValueWordPattern =
-    RegExp(r'(?:^|\s)[A-Za-z][A-Za-z0-9_-]*:[^\s]+(?=\s|$)');
+final RegExp _keyValueWordPattern = RegExp(
+  r'(?:^|\s)[A-Za-z][A-Za-z0-9_-]*:[^\s]+(?=\s|$)',
+);
 
 /// Returns the prose of [description]: [withoutKeyValueTags] plus the
 /// `+project` / `@context` / `#tag` markers, leftover whitespace

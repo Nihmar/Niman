@@ -98,25 +98,26 @@ void main() {
   test(
     'directory create events cover the child, directly or via the parent',
     () async {
-    final batches = await runWith(
-      FileWatcher(root.path, debounce: const Duration(milliseconds: 50)),
-      (b) async {
-        Directory(p.join(root.path, 'newdir')).createSync();
-        // Let the recursive watch register on the new directory before the
-        // child appears (a write that wins this race is still covered, via
-        // the parent event's subtree resync).
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-        File(p.join(root.path, 'newdir/inner.md')).writeAsStringSync('x');
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-      },
-    );
-    final allPaths = batches.expand((b) => b.paths).toSet();
-    expect(
-      allPaths.contains(p.join(root.path, 'newdir/inner.md')) ||
-          allPaths.contains(p.join(root.path, 'newdir')),
-      isTrue,
-    );
-  });
+      final batches = await runWith(
+        FileWatcher(root.path, debounce: const Duration(milliseconds: 50)),
+        (b) async {
+          Directory(p.join(root.path, 'newdir')).createSync();
+          // Let the recursive watch register on the new directory before the
+          // child appears (a write that wins this race is still covered, via
+          // the parent event's subtree resync).
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          File(p.join(root.path, 'newdir/inner.md')).writeAsStringSync('x');
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+        },
+      );
+      final allPaths = batches.expand((b) => b.paths).toSet();
+      expect(
+        allPaths.contains(p.join(root.path, 'newdir/inner.md')) ||
+            allPaths.contains(p.join(root.path, 'newdir')),
+        isTrue,
+      );
+    },
+  );
 
   test('stop closes the events stream', () async {
     final watcher = FileWatcher(root.path);

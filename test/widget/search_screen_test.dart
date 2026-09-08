@@ -312,8 +312,7 @@ void main() {
     expect(request.only, isNull);
     // The panel closes and the outcome snackbar reports the run.
     expect(find.byKey(const Key('replace-panel')), findsNothing);
-    expect(find.textContaining('Replaced 5 occurrence(s) of "note"'),
-        findsOne);
+    expect(find.textContaining('Replaced 5 occurrence(s) of "note"'), findsOne);
 
     // The deferred results refresh fires once and does not leak.
     await tester.pump(const Duration(milliseconds: 900));

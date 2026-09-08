@@ -1004,7 +1004,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // is on screen) and hides in full-screen preview mode.
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
-    final showToolbar = (split || !widget.showPreview) &&
+    final showToolbar =
+        (split || !widget.showPreview) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
@@ -1052,50 +1053,50 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               : Center(child: Text(error)),
         ),
         if (!kindBody) ...[
-        // Fade + size the outline panel in and out.
-        AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.bottomCenter,
-          child: AnimatedSwitcher(
+          // Fade + size the outline panel in and out.
+          AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation) =>
-                FadeTransition(opacity: animation, child: child),
-            child: _showOutline && _outline.isNotEmpty
-                ? KeyedSubtree(
-                    key: const ValueKey('outline-open'),
-                    child: OutlinePanel(
-                      entries: _outline,
-                      onJump: _jumpToHeading,
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.bottomCenter,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: _showOutline && _outline.isNotEmpty
+                  ? KeyedSubtree(
+                      key: const ValueKey('outline-open'),
+                      child: OutlinePanel(
+                        entries: _outline,
+                        onJump: _jumpToHeading,
+                      ),
+                    )
+                  : const SizedBox(
+                      key: ValueKey('outline-closed'),
+                      width: double.infinity,
                     ),
-                  )
-                : const SizedBox(
-                    key: ValueKey('outline-closed'),
-                    width: double.infinity,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _statusRow(context),
+                // The toolbar fades + sizes in and out (hidden in preview
+                // mode). It is only mounted once loaded, so it appears
+                // immediately on load and animates only when preview mode
+                // toggles.
+                if (!_loading)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: showToolbar
+                        ? _toolbar(context)
+                        : const SizedBox(width: double.infinity),
                   ),
+              ],
+            ),
           ),
-        ),
-        SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _statusRow(context),
-              // The toolbar fades + sizes in and out (hidden in preview
-              // mode). It is only mounted once loaded, so it appears
-              // immediately on load and animates only when preview mode
-              // toggles.
-              if (!_loading)
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  alignment: Alignment.topCenter,
-                  child: showToolbar
-                      ? _toolbar(context)
-                      : const SizedBox(width: double.infinity),
-                ),
-            ],
-          ),
-        ),
         ],
       ],
     );
@@ -1183,8 +1184,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     return {
       ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
       ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
-      ToolbarItem.strikethrough: () =>
-          _wrapSelection(left: '~~', right: '~~'),
+      ToolbarItem.strikethrough: () => _wrapSelection(left: '~~', right: '~~'),
       ToolbarItem.superscript: () =>
           _wrapSelection(left: '<sup>', right: '</sup>'),
       ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),

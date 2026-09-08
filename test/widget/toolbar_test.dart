@@ -51,8 +51,9 @@ void _select(
 }
 
 void main() {
-  testWidgets('the editor keeps focus after a toolbar tap (IME stays open)',
-      (tester) async {
+  testWidgets('the editor keeps focus after a toolbar tap (IME stays open)', (
+    tester,
+  ) async {
     final controller = await _pumpFresh(tester);
     final focusNode =
         tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode
@@ -94,8 +95,9 @@ void main() {
     }
   });
 
-  testWidgets('code block: a selection is fenced; a caret opens a block',
-      (tester) async {
+  testWidgets('code block: a selection is fenced; a caret opens a block', (
+    tester,
+  ) async {
     // Selection fenced.
     final controller = await _pumpFresh(tester);
     _select(controller, index: 2, offset: 0, extentOffset: 11);

@@ -53,11 +53,13 @@ final class MathBlockSyntax extends md.BlockSyntax {
     return _element(tex: lines.join('\n').trim());
   }
 
-  static md.Element _element({required String tex}) => md.Element.text(
-        'mathblock',
-        tex,
-      )..attributes['latex'] = tex
-       ..attributes['display'] = 'true';
+  static md.Element _element({required String tex}) =>
+      md.Element.text(
+          'mathblock',
+          tex,
+        )
+        ..attributes['latex'] = tex
+        ..attributes['display'] = 'true';
 }
 
 /// Replaces inline math (`$…$`) in parsed inline text with `math` elements,

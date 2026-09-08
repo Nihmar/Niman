@@ -119,27 +119,29 @@ void main() {
       expect(await dao.find('Docs/X_1.md'), isNotNull);
     });
 
-    test('moving a folder into itself or its own subtree is rejected',
-        () async {
-      await ops.createFolder(parentPath: '', name: 'Docs');
-      await ops.createFolder(parentPath: 'Docs', name: 'Inner');
+    test(
+      'moving a folder into itself or its own subtree is rejected',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'Docs');
+        await ops.createFolder(parentPath: 'Docs', name: 'Inner');
 
-      await expectLater(
-        () => ops.move('Docs', 'Docs'),
-        throwsA(isA<ArgumentError>()),
-      );
-      await expectLater(
-        () => ops.move('Docs', 'Docs/Inner'),
-        throwsA(isA<ArgumentError>()),
-      );
-      // The move was never attempted: nothing moved, nothing renamed.
-      expect(await dao.find('Docs'), isNotNull);
-      expect(await dao.find('Docs/Inner'), isNotNull);
-      expect(
-        Directory(p.join(root.path, 'Docs/Inner')).existsSync(),
-        isTrue,
-      );
-    });
+        await expectLater(
+          () => ops.move('Docs', 'Docs'),
+          throwsA(isA<ArgumentError>()),
+        );
+        await expectLater(
+          () => ops.move('Docs', 'Docs/Inner'),
+          throwsA(isA<ArgumentError>()),
+        );
+        // The move was never attempted: nothing moved, nothing renamed.
+        expect(await dao.find('Docs'), isNotNull);
+        expect(await dao.find('Docs/Inner'), isNotNull);
+        expect(
+          Directory(p.join(root.path, 'Docs/Inner')).existsSync(),
+          isTrue,
+        );
+      },
+    );
   });
 
   group('delete (trash on by default)', () {
@@ -211,8 +213,9 @@ void main() {
       await ops.createNote(parentPath: 'Docs', name: 'One');
       await ops.delete('Docs/One.md'); // → .trash/One.md
       await ops.delete('Docs'); // its original parent → .trash/Docs
-      final item = (await ops.trashItems())
-          .firstWhere((i) => i.name == 'One.md');
+      final item = (await ops.trashItems()).firstWhere(
+        (i) => i.name == 'One.md',
+      );
       final restored = await ops.restoreTrash(item.name);
       expect(restored.path, 'One.md');
       expect(await dao.find('One.md'), isNotNull);
@@ -287,24 +290,26 @@ void main() {
       );
     });
 
-    test('a corrupt manifest entry is skipped, the rest still listed',
-        () async {
-      await ops.createNote(parentPath: '', name: 'A');
-      await ops.createNote(parentPath: '', name: 'B');
-      await ops.delete('A.md');
-      await ops.delete('B.md');
-      final manifestFile = File(
-        p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
-      );
-      final raw =
-          jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
-      raw['A.md'] = <String, dynamic>{'originalPath': 'A.md'};
-      manifestFile.writeAsStringSync(jsonEncode(raw));
+    test(
+      'a corrupt manifest entry is skipped, the rest still listed',
+      () async {
+        await ops.createNote(parentPath: '', name: 'A');
+        await ops.createNote(parentPath: '', name: 'B');
+        await ops.delete('A.md');
+        await ops.delete('B.md');
+        final manifestFile = File(
+          p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
+        );
+        final raw =
+            jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+        raw['A.md'] = <String, dynamic>{'originalPath': 'A.md'};
+        manifestFile.writeAsStringSync(jsonEncode(raw));
 
-      final items = await ops.trashItems();
+        final items = await ops.trashItems();
 
-      expect(items.map((i) => i.name).toList(), ['B.md']);
-    });
+        expect(items.map((i) => i.name).toList(), ['B.md']);
+      },
+    );
 
     test('a non-JSON manifest file yields an empty listing', () async {
       await ops.createNote(parentPath: '', name: 'A');
@@ -315,8 +320,7 @@ void main() {
       expect(await ops.trashItems(), isEmpty);
     });
 
-    test('writing the manifest prunes items that left the trash',
-        () async {
+    test('writing the manifest prunes items that left the trash', () async {
       await ops.createNote(parentPath: '', name: 'A');
       await ops.createNote(parentPath: '', name: 'B');
       await ops.delete('A.md');
@@ -384,8 +388,7 @@ void main() {
   });
 
   group('quick note', () {
-    test('defaults to null, the built-in Quick note.md at the root',
-        () async {
+    test('defaults to null, the built-in Quick note.md at the root', () async {
       expect(await ops.quickNotePath, isNull);
     });
 

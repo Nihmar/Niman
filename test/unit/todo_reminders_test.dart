@@ -153,9 +153,11 @@ void main() {
 
     test('title shows the typed phrase, not the whole raw line', () {
       final wanted = wantedReminders(
-        snapshotOf(todo: [
-          '(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30',
-        ]),
+        snapshotOf(
+          todo: [
+            '(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30',
+          ],
+        ),
         DateTime(2026, 9, 7),
       );
       expect(wanted, hasLength(1));

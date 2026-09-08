@@ -72,34 +72,35 @@ void main() {
     await controller.dispose();
   });
 
-  test('a non-blocking open is ready from the last index, then reconciles',
-      () async {
-    // A previous session indexed the library and closed cleanly.
-    final first = makeController();
-    await first.open(root.path, create: false);
-    await first.close();
-    await first.dispose();
+  test(
+    'a non-blocking open is ready from the last index, then reconciles',
+    () async {
+      // A previous session indexed the library and closed cleanly.
+      final first = makeController();
+      await first.open(root.path, create: false);
+      await first.close();
+      await first.dispose();
 
-    // While it was closed, a note appeared on disk.
-    File(p.join(root.path, 'b.md')).writeAsStringSync('b');
+      // While it was closed, a note appeared on disk.
+      File(p.join(root.path, 'b.md')).writeAsStringSync('b');
 
-    // A non-blocking open becomes ready from the (stale) index without
-    // waiting for the scan.
-    final second = makeController();
-    await second.open(root.path, create: false, blockingScan: false);
-    expect(second.phase, LibraryPhase.ready);
-    expect(await names(second), ['a.md']);
+      // A non-blocking open becomes ready from the (stale) index without
+      // waiting for the scan.
+      final second = makeController();
+      await second.open(root.path, create: false, blockingScan: false);
+      expect(second.phase, LibraryPhase.ready);
+      expect(await names(second), ['a.md']);
 
-    // The background reconciliation converges the index with the disk.
-    await expectConverged(
-      () async => (await names(second)).contains('b.md'),
-    );
-    await second.close();
-    await second.dispose();
-  });
+      // The background reconciliation converges the index with the disk.
+      await expectConverged(
+        () async => (await names(second)).contains('b.md'),
+      );
+      await second.close();
+      await second.dispose();
+    },
+  );
 
-  test('resume becomes ready from the last index, then reconciles',
-      () async {
+  test('resume becomes ready from the last index, then reconciles', () async {
     // A previous session indexed the library...
     final first = makeController();
     await first.open(root.path, create: false);

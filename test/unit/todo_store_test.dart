@@ -184,7 +184,7 @@ void main() {
       writeRaw(
         'todo.txt',
         'open a\nx 2026-09-06 2026-01-02 stray one\nopen b\n'
-        'x 2026-09-05 stray two\n',
+            'x 2026-09-05 stray two\n',
       );
       writeRaw('done.txt', 'x 2026-09-01 old\n');
       final snapshot = await store.migrateCompleted();

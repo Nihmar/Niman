@@ -92,9 +92,11 @@ Future<String> hashFileSha256(File file) async {
   try {
     final collector = _DigestCollector();
     final sink = sha256.startChunkedConversion(collector);
-    for (var chunk = raf.readSync(_hashChunkSize);
-        chunk.isNotEmpty;
-        chunk = raf.readSync(_hashChunkSize)) {
+    for (
+      var chunk = raf.readSync(_hashChunkSize);
+      chunk.isNotEmpty;
+      chunk = raf.readSync(_hashChunkSize)
+    ) {
       sink.add(chunk);
     }
     sink.close();

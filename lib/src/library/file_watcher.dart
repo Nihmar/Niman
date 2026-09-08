@@ -44,6 +44,7 @@ final class FileWatcher {
       StreamController<WatchBatch>.broadcast();
   final Set<String> _paths = <String>{};
   final Set<String> _resyncDirs = <String>{};
+
   /// Cancelled in [stop]; the lint cannot see the cross-method lifecycle.
   // ignore: cancel_subscriptions
   StreamSubscription<FileSystemEvent>? _subscription;

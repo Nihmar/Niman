@@ -54,8 +54,8 @@ final class PluginReminderBackend implements ReminderBackend {
   ];
 
   /// The Android side of the plugin, or null off Android.
-  AndroidFlutterLocalNotificationsPlugin? get _android =>
-      _plugin.resolvePlatformSpecificImplementation<
+  AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
+      .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
       >();
 

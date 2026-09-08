@@ -10,8 +10,7 @@ import 'package:copist/src/todo/todo_reminder.dart';
 /// force two reconciles to overlap.
 final class FakeReminderBackend implements ReminderBackend {
   /// Creates a backend that already holds [pending] alarms.
-  FakeReminderBackend({List<int>? pending})
-    : _pending = <int>{...?pending};
+  FakeReminderBackend({List<int>? pending}) : _pending = <int>{...?pending};
 
   final Set<int> _pending;
 

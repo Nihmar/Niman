@@ -9,7 +9,8 @@ import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 
-const String _note = '# Alpha\n\nparagraph one\n\n'
+const String _note =
+    '# Alpha\n\nparagraph one\n\n'
     '## Beta\n\ncontent\n\n# Gamma\n\nlast';
 
 void main() {
@@ -20,8 +21,9 @@ void main() {
     expect(countCharacters('héllo'), 5);
   });
 
-  testWidgets('the editor marks heading chunks and folds a section',
-      (tester) async {
+  testWidgets('the editor marks heading chunks and folds a section', (
+    tester,
+  ) async {
     final controller = CodeLineEditingController.fromText(_note);
     final focus = FocusNode();
     await tester.pumpWidget(
@@ -54,8 +56,9 @@ void main() {
     focus.dispose();
   });
 
-  testWidgets('outline panel lists headings and a jump lands the caret',
-      (tester) async {
+  testWidgets('outline panel lists headings and a jump lands the caret', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _app(
         NoteView(

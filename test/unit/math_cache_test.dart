@@ -8,9 +8,9 @@ import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
 
 BoxNode _realRender(String tex, {required bool displayMode}) => renderToBox(
-      tex,
-      options: KatexOptions(displayMode: displayMode),
-    );
+  tex,
+  options: KatexOptions(displayMode: displayMode),
+);
 
 void main() {
   test('renders once and reuses unchanged spans (the edit-reuse AC)', () async {

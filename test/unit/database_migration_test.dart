@@ -433,46 +433,48 @@ void main() {
     await db.close();
   });
 
-  test('v8 databases gain reminder_show_tokens on upgrade, keeping values',
-      () async {
-    // Build a v8-shaped file: create at v9, rewind, drop the new column.
-    {
-      final db = CopistDatabase(NativeDatabase(dbFile));
-      await db.customStatement('PRAGMA user_version = 8');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
-      );
-      await db.customStatement(
-        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
-      );
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN link_type',
-      );
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN indent_width',
-      );
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
-      );
-      await db.customStatement(
-        'INSERT INTO app_settings (id, library_path, tree_sort) '
-        "VALUES (1, '/old/root', 'nameDesc')",
-      );
-      await db.close();
-    }
+  test(
+    'v8 databases gain reminder_show_tokens on upgrade, keeping values',
+    () async {
+      // Build a v8-shaped file: create at v9, rewind, drop the new column.
+      {
+        final db = CopistDatabase(NativeDatabase(dbFile));
+        await db.customStatement('PRAGMA user_version = 8');
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
+        );
+        await db.customStatement(
+          'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN link_type',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN indent_width',
+        );
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN reminder_show_tokens',
+        );
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, tree_sort) '
+          "VALUES (1, '/old/root', 'nameDesc')",
+        );
+        await db.close();
+      }
 
-    final db = CopistDatabase(NativeDatabase(dbFile));
-    final row = (await db.select(db.appSettings).get()).single;
-    expect(row.libraryPath, '/old/root');
-    expect(row.treeSort, 'nameDesc');
-    // Off by default: an upgrade must not start putting +project and
-    // @context into notifications that never had them.
-    expect(row.reminderShowTokens, false);
-    await db.close();
-  });
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      final row = (await db.select(db.appSettings).get()).single;
+      expect(row.libraryPath, '/old/root');
+      expect(row.treeSort, 'nameDesc');
+      // Off by default: an upgrade must not start putting +project and
+      // @context into notifications that never had them.
+      expect(row.reminderShowTokens, false);
+      await db.close();
+    },
+  );
 
   test('v9 databases gain link_type and indent_width on upgrade, keeping '
       'values', () async {

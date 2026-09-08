@@ -36,7 +36,8 @@ final class MathCache extends ChangeNotifier {
   final Future<BoxNode> Function(
     String tex, {
     required bool displayMode,
-  })? asyncRenderer;
+  })?
+  asyncRenderer;
 
   /// Default capacity (design.md's ~512 entries).
   static const int defaultCapacity = 512;
