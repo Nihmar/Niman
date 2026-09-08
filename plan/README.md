@@ -41,6 +41,7 @@ header rather than on the next one in the chain.
 | [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | **Done** |
 | [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Planned |
 | [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | Planned |
+| [m-multi-library.md](m-multi-library.md) | Several libraries, each describing itself | Planned |
 
 ## Conventions
 
