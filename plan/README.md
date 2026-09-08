@@ -12,13 +12,36 @@ which is the **source of truth for requirements**; this folder plans the work.
 | [android.md](android.md) | Cross-cutting — Android storage & startup issues | **Fixed** |
 | [m0-scaffold.md](m0-scaffold.md) | M0 — Scaffold | **Done** |
 | [m1-library-core.md](m1-library-core.md) | M1 — Library core | **Done** |
-| [m1_5-correctness.md](m1_5-correctness.md) | M1.5 — Correctness pass | **Next** |
-| [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | Planned |
-| [m3-links-search.md](m3-links-search.md) | M3 — Links & search | Planned |
-| [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | Planned |
+| [m1_5-correctness.md](m1_5-correctness.md) | M1.5 — Correctness pass | **Done** |
+| [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | **Done** |
+| [m3-links-search.md](m3-links-search.md) | M3 — Links & search | **Done** |
+| [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | **Next** |
 | [m5-sync.md](m5-sync.md) | M5 — Sync | Planned |
 | [m6-scale-polish.md](m6-scale-polish.md) | M6 — Scale & polish | Planned |
 | [m7-packaging-release.md](m7-packaging-release.md) | M7 — Packaging & release | Planned |
+| [ui-mockups.md](ui-mockups.md) | UI — mockup parity (bottom nav, toolbars) | **Done** |
+
+Everything before M4 is done and verified on the user's device (2026-09-08).
+
+### Slices outside the M0→M7 chain
+
+Each one grew out of on-device use and depends on the milestone in its own
+header rather than on the next one in the chain.
+
+| File | Slice | Status |
+|------|-------|--------|
+| [m2a-line-editor.md](m2a-line-editor.md) | M2a — the custom line editor | **Done** |
+| [m2a-fix-selection-perf.md](m2a-fix-selection-perf.md) | M2a — selection + perf on a 931 KB note | **Done** |
+| [m2a-round4-fixes.md](m2a-round4-fixes.md) … [round7](m2a-round7-fixes.md) | M2a — the four device-feedback rounds | **Done** |
+| [todo-tab.md](todo-tab.md) | Todo tab over `todo.txt` + reminders | **Done** |
+| [todo-mockup.md](todo-mockup.md) | Todo tab — mockup parity | **Done** |
+| [m-type-note-kinds.md](m-type-note-kinds.md) | `type:` note kinds (the `list` GUI) | **Done** |
+| [m-app-shortcuts.md](m-app-shortcuts.md) | Launcher quick actions (Android) | **Done** |
+| [m-toolbar-customization.md](m-toolbar-customization.md) | Editor toolbar — user order + hiding | **Done** |
+| [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | **Done** |
+| [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Planned |
+| [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | Planned |
+| [m-multi-library.md](m-multi-library.md) | Several libraries, each describing itself | Planned |
 
 ## Conventions
 
@@ -40,6 +63,10 @@ M0 → M1 → M1.5 → M2 → M3 → M4 → M5 → M6 → M7
 
 Strictly sequential: each milestone builds on the previous one's modules
 (`lib/src/…`) and tests. Stretch goals are not on the critical path.
+
+[ui-mockups.md](ui-mockups.md) is a cross-cutting UI pass, not part of the
+M0→M7 chain: it needs M2a's editor surface but can run any time after, and
+should land before M6 (polish) so the perf work runs on the final chrome.
 
 M1.5 is not a feature milestone: it closes correctness gaps found in the
 M1 indexer once the app ran on a real Android library. It blocks M2

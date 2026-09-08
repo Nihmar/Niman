@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/dao.dart';
@@ -9,10 +10,15 @@ import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/search/replace.dart';
+import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 /// Coarse lifecycle of a library session.
 enum LibraryPhase {
@@ -34,13 +40,17 @@ enum LibraryPhase {
 /// runs every [rescanInterval]. The last opened root is persisted in
 /// `app_settings` so a restart can resume the library via [resume].
 final class LibraryController implements LibrarySession {
-  /// Creates the controller; [dbFactory] is invoked lazily on first use.
+  /// Creates the controller; [dbFactory] is invoked lazily on first use,
+  /// and [searchDbFactory] provides the search connection (a
+  /// background-isolate connection by default — see
+  /// [defaultSearchDatabase]; tests fall back to [dbFactory]).
   LibraryController(
     this.dbFactory, {
+    Future<CopistDatabase> Function()? searchDbFactory,
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
-  });
+  }) : _searchDbFactory = searchDbFactory ?? dbFactory;
 
   /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
   static const defaultRescanInterval = Duration(seconds: 60);
@@ -60,6 +70,10 @@ final class LibraryController implements LibrarySession {
 
   /// Builds the database on demand (app-support location in the app).
   final Future<CopistDatabase> Function() dbFactory;
+
+  /// The search connection; defaults to [dbFactory] (tests), the app
+  /// injects the background-isolate connection.
+  final Future<CopistDatabase> Function() _searchDbFactory;
 
   /// How often the full-rescan fallback runs.
   final Duration rescanInterval;
@@ -83,6 +97,7 @@ final class LibraryController implements LibrarySession {
   NoteOps? _ops;
   FileWatcher? _watcher;
   Timer? _rescanTimer;
+
   /// Reconciliation scan pending after a non-blocking resume; cancelled in
   /// [_teardown] so a stale scan can never hit a different library.
   Timer? _reconcileTimer;
@@ -110,6 +125,14 @@ final class LibraryController implements LibrarySession {
   /// The session database; completes when the first library is opened.
   Future<CopistDatabase> get database => _database ??= dbFactory();
 
+  /// The cached search source; the background-isolate worker connection is
+  /// created once per session and reused (see [searchSource]).
+  SearchSource? _searchSource;
+
+  /// The search connection when it is a distinct database from the main
+  /// one; closed on [dispose].
+  CopistDatabase? _searchDb;
+
   /// CRUD ops for the open library, or null while closed.
   @override
   NoteOps? get ops => _ops;
@@ -117,9 +140,9 @@ final class LibraryController implements LibrarySession {
   /// Children of the row with id [parentId] (0 = library root),
   /// directories first, then by name.
   @override
-  Future<List<Note>> children(int parentId) async {
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
     final db = await database;
-    return NoteDao(db).children(parentId);
+    return NoteDao(db).children(parentId, nameDesc: nameDesc);
   }
 
   /// Every indexed folder, path-ordered (for move-target pickers).
@@ -127,6 +150,52 @@ final class LibraryController implements LibrarySession {
   Future<List<Note>> folders() async {
     final db = await database;
     return NoteDao(db).folders();
+  }
+
+  @override
+  Future<SearchSource?> get searchSource async {
+    // The search connection is background-isolate backed: the MATCH +
+    // snippet() work for large result sets (and novel-length bodies) never
+    // runs on the UI isolate. One connection per session, created once:
+    // a fresh connection per call leaked one worker isolate per
+    // SearchScreen mount (drift keeps the worker alive until closed) and
+    // left nothing to recover when its startup failed.
+    var source = _searchSource;
+    if (source == null) {
+      final db = await _searchDbFactory();
+      _searchDb = identical(db, await database) ? null : db;
+      source = SearchRepo(db);
+      _searchSource = source;
+    }
+    return source;
+  }
+
+  @override
+  Future<ReplaceSource?> get replaceSource async {
+    // Bound to the current root + indexer: rewritten notes are re-indexed
+    // through applyEvents as each write batch lands, so search reflects a
+    // replace without waiting on the (Android-unreliable) watcher or the
+    // periodic rescan.
+    final root = _root;
+    final indexer = _indexer;
+    if (root == null || indexer == null) return null;
+    return ReplaceRunner(
+      await database,
+      root,
+      onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
+    );
+  }
+
+  @override
+  Future<TagSource?> get tagSource async {
+    final db = await database;
+    return TagRepo(db);
+  }
+
+  @override
+  Future<LinkSource?> get linkSource async {
+    final db = await database;
+    return LinkResolver(db);
   }
 
   /// Resumes the last opened library (if it still exists). Best effort:
@@ -190,8 +259,7 @@ final class LibraryController implements LibrarySession {
       }
       final db = await dbFactory();
       AppLog.enabled = await AppSettingsRepo(db).debugLogsEnabled();
-      final indexer = Indexer(db)..
-        onChanged = _bump;
+      final indexer = Indexer(db)..onChanged = _bump;
       final ops = NoteOps(root: abs, db: db, indexer: indexer);
       if (blockingScan) {
         await indexer.fullScan(abs);
@@ -213,8 +281,7 @@ final class LibraryController implements LibrarySession {
       await AppSettingsRepo(db).setLastLibraryPath(abs);
       _bump();
       if (!blockingScan) {
-        _reconcileTimer =
-            Timer(resumeReconcileDelay, () => _safeRescan(abs));
+        _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
       }
       _log.info('open complete: ready root=$abs');
     } on Object catch (error) {
@@ -305,6 +372,21 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setEditorAutofocusEnabled(enabled: enabled);
   }
 
+  /// Whether reminder text keeps the +project/@context/#tag markers.
+  @override
+  Future<bool> get reminderShowTokens async {
+    final db = await database;
+    return AppSettingsRepo(db).reminderShowTokens();
+  }
+
+  /// Sets (and persists) the reminder-markers toggle.
+  @override
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    _log.info('reminder markers set to $enabled');
+    final db = await database;
+    await AppSettingsRepo(db).setReminderShowTokens(enabled: enabled);
+  }
+
   /// The preview layout mode.
   @override
   Future<PreviewLayoutMode> get previewMode async {
@@ -334,6 +416,80 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(db).setSplitRatio(ratio);
   }
 
+  /// The library tree sort order.
+  @override
+  Future<TreeSort> get treeSort async {
+    final db = await database;
+    return AppSettingsRepo(db).treeSort();
+  }
+
+  /// Sets (and persists) the library tree sort order.
+  @override
+  Future<void> setTreeSort(TreeSort sort) async {
+    final db = await database;
+    await AppSettingsRepo(db).setTreeSort(sort);
+  }
+
+  /// The link format the editor's link button inserts.
+  @override
+  Future<LinkType> get linkType async {
+    final db = await database;
+    return AppSettingsRepo(db).linkType();
+  }
+
+  /// Sets (and persists) the link format.
+  @override
+  Future<void> setLinkType(LinkType type) async {
+    _log.info('link type set to ${type.name}');
+    final db = await database;
+    await AppSettingsRepo(db).setLinkType(type);
+  }
+
+  /// The editor's indent/outdent width in spaces.
+  @override
+  Future<int> get indentWidth async {
+    final db = await database;
+    return AppSettingsRepo(db).indentWidth();
+  }
+
+  /// Sets (and persists) the indent/outdent width.
+  @override
+  Future<void> setIndentWidth(int width) async {
+    _log.info('indent width set to $width');
+    final db = await database;
+    await AppSettingsRepo(db).setIndentWidth(width);
+  }
+
+  /// The stored editor-toolbar layout (empty = the shipped toolbar).
+  @override
+  Future<String> get editorToolbar async {
+    final db = await database;
+    return AppSettingsRepo(db).editorToolbar();
+  }
+
+  /// Sets (and persists) the editor-toolbar layout.
+  @override
+  Future<void> setEditorToolbar(String layout) async {
+    _log.info('editor toolbar set to "$layout"');
+    final db = await database;
+    await AppSettingsRepo(db).setEditorToolbar(layout);
+  }
+
+  /// The UI language.
+  @override
+  Future<AppLanguage> get language async {
+    final db = await database;
+    return AppSettingsRepo(db).language();
+  }
+
+  /// Sets (and persists) the UI language.
+  @override
+  Future<void> setLanguage(AppLanguage language) async {
+    _log.info('language set to ${language.id}');
+    final db = await database;
+    await AppSettingsRepo(db).setLanguage(language);
+  }
+
   /// Notifies listeners that state changed without an index mutation
   /// (e.g. a settings change the tree UI should react to).
   @override
@@ -346,6 +502,10 @@ final class LibraryController implements LibrarySession {
     if (!_events.isClosed) {
       await _events.close();
     }
+    // The search worker isolate (when separate from the main connection).
+    await _searchDb?.close();
+    _searchDb = null;
+    _searchSource = null;
   }
 
   void _bump() {
@@ -407,13 +567,42 @@ final class LibraryController implements LibrarySession {
   }
 }
 
-/// Creates the app database in the platform application-support directory.
+/// The app database FILE in the platform application-support directory.
 ///
 /// The index lives OUTSIDE the library folder: it is a cache, and files are
 /// the source of truth.
-Future<CopistDatabase> defaultCopistDatabase() async {
+Future<File> defaultCopistDbFile() async {
   final dir = await getApplicationSupportDirectory();
-  return CopistDatabase(NativeDatabase(File(p.join(dir.path, 'copist.db'))));
+  return File(p.join(dir.path, 'copist.db'));
+}
+
+/// The one connection-level setup both the main and the search connection
+/// apply: a busy timeout (the search reader contends with indexer writes)
+/// and WAL (readers do not block the writer).
+void _databaseSetup(sqlite3.Database db) {
+  db
+    ..execute('PRAGMA busy_timeout = 5000')
+    ..execute('PRAGMA journal_mode = WAL');
+}
+
+/// Creates the app database in the platform application-support directory.
+Future<CopistDatabase> defaultCopistDatabase() async {
+  return CopistDatabase(
+    NativeDatabase(await defaultCopistDbFile(), setup: _databaseSetup),
+  );
+}
+
+/// The search connection over the same database file, with drift's
+/// background-isolate executor: `MATCH` + `snippet()` over large result
+/// sets run off the UI isolate (T-M3-09 fix: many results with
+/// novel-length bodies stalled every frame).
+Future<CopistDatabase> defaultSearchDatabase() async {
+  return CopistDatabase(
+    NativeDatabase.createInBackground(
+      await defaultCopistDbFile(),
+      setup: _databaseSetup,
+    ),
+  );
 }
 
 /// The single library session for the app session.
@@ -422,7 +611,10 @@ Future<CopistDatabase> defaultCopistDatabase() async {
 /// which substitute an in-memory fake) never depends on the concrete
 /// [LibraryController].
 final librarySessionProvider = Provider<LibrarySession>((ref) {
-  final controller = LibraryController(defaultCopistDatabase);
+  final controller = LibraryController(
+    defaultCopistDatabase,
+    searchDbFactory: defaultSearchDatabase,
+  );
   ref.onDispose(controller.dispose);
   return controller;
 });

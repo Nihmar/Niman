@@ -1,7 +1,12 @@
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
+import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/search/replace.dart';
+import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -11,10 +16,12 @@ import 'package:copist/src/library/note_ops.dart';
 /// exercised against the fake while the real implementation is covered
 /// by unit tests.
 abstract interface class NoteOperations {
-  /// Creates an empty `<name>.md` note in [parentPath].
+  /// Creates a `<name>.md` note in [parentPath]; [content] is the
+  /// initial file content (default empty).
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   });
 
   /// Creates a folder in [parentPath].
@@ -29,11 +36,28 @@ abstract interface class NoteOperations {
   /// Moves the note or folder at [path] into [targetParent].
   Future<Note> move(String path, String targetParent);
 
+  /// The indexed note/folder at library-relative [path], or null.
+  Future<Note?> find(String path);
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
+
+  /// The user-chosen quick note (library-relative path), or null while
+  /// none has been chosen.
+  Future<String?> get quickNotePath;
+
+  /// The folder (library-relative) that holds the list notes
+  /// (default `Lists`).
+  Future<String> get listNoteFolder;
+
+  /// Sets the list-note folder.
+  Future<void> setListNoteFolder({required String folder});
+
+  /// Sets (or clears, with null) the user-chosen quick note.
+  Future<void> setQuickNotePath({required String? path});
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   Future<void> setTrashEnabled({required bool enabled});
@@ -121,6 +145,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the keyboard-on-open toggle.
   Future<void> setEditorAutofocusEnabled({required bool enabled});
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  Future<bool> get reminderShowTokens;
+
+  /// Sets (and persists) the reminder-markers toggle.
+  Future<void> setReminderShowTokens({required bool enabled});
+
   /// The preview layout mode (default `auto`: split on wide screens,
   /// full-screen switch on phones).
   Future<PreviewLayoutMode> get previewMode;
@@ -134,6 +165,38 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the split ratio.
   Future<void> setSplitRatio(double ratio);
 
+  /// The library tree sort order (default [TreeSort.nameAsc]).
+  Future<TreeSort> get treeSort;
+
+  /// Sets (and persists) the library tree sort order.
+  Future<void> setTreeSort(TreeSort sort);
+
+  /// The link format the editor's link button inserts
+  /// (default [LinkType.wikilink]).
+  Future<LinkType> get linkType;
+
+  /// Sets (and persists) the link format.
+  Future<void> setLinkType(LinkType type);
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  Future<int> get indentWidth;
+
+  /// Sets (and persists) the indent/outdent width.
+  Future<void> setIndentWidth(int width);
+
+  /// The stored editor-toolbar layout (empty = the shipped toolbar);
+  /// `ToolbarLayout.parse` turns it into the toolbar.
+  Future<String> get editorToolbar;
+
+  /// Sets (and persists) the editor-toolbar layout.
+  Future<void> setEditorToolbar(String layout);
+
+  /// The UI language ([AppLanguage.system] by default).
+  Future<AppLanguage> get language;
+
+  /// Sets (and persists) the UI language.
+  Future<void> setLanguage(AppLanguage language);
+
   /// Notifies listeners that state changed without an index mutation.
   void notify();
 
@@ -141,9 +204,25 @@ abstract interface class LibrarySession {
   Future<void> dispose();
 
   /// Children of the row with id [parentId] (0 = library root),
-  /// directories first, then by name.
-  Future<List<Note>> children(int parentId);
+  /// directories first, then by name (ascending, or descending with
+  /// [nameDesc]).
+  Future<List<Note>> children(int parentId, {bool nameDesc = false});
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();
+
+  /// The search data source (FTS words + contains scan over the open
+  /// library's index); null while no library is ready.
+  Future<SearchSource?> get searchSource;
+
+  /// The replace data source (exact whole-word replace across the open
+  /// library's notes, T-M3-10); null while no library is ready.
+  Future<ReplaceSource?> get replaceSource;
+
+  /// The tag data source (tag list with counts, tag→notes).
+  Future<TagSource?> get tagSource;
+
+  /// The link-resolution source (wiki targets + markdown hrefs against
+  /// the open index).
+  Future<LinkSource?> get linkSource;
 }

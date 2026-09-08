@@ -1,0 +1,24 @@
+<!-- Launcher quick action: New list (T-SC-08).
+     108x108 with the glyph inside the central 72x72 safe zone, so the
+     launcher's circular mask never cuts into it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#45475A"
+        android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineJoin="round"
+        android:pathData="M31,35L41,35L41,45L31,45ZM31,51L41,51L41,61L31,61ZM31,67L41,67L41,77L31,77Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M51,40L77,40M51,56L77,56M51,72L77,72" />
+</vector>

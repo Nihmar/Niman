@@ -1,6 +1,8 @@
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/file_icon.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
@@ -24,11 +26,16 @@ final class NoteTree extends StatefulWidget {
     required this.expanded,
     required this.onToggle,
     required this.onSelect,
+    this.onLongPress,
+    this.nameDesc = false,
     super.key,
   });
 
   /// The session providing the index and the change-event stream.
   final LibrarySession controller;
+
+  /// Whether the rows sort by name descending (T-UI-03).
+  final bool nameDesc;
 
   /// Library-relative path of the selected note/folder, or null.
   final String? selectedPath;
@@ -41,6 +48,9 @@ final class NoteTree extends StatefulWidget {
 
   /// Called with the row's note when the row is selected.
   final void Function(Note note) onSelect;
+
+  /// Called with the row's note on long-press (context menu, T-UI-05).
+  final void Function(Note note)? onLongPress;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -95,7 +105,10 @@ final class _NoteTreeState extends State<NoteTree> {
   }
 
   Future<void> _walk(int parentId, int depth, List<_Row> out) async {
-    final children = await widget.controller.children(parentId);
+    final children = await widget.controller.children(
+      parentId,
+      nameDesc: widget.nameDesc,
+    );
     _log.debug(
       'tree: children(parent=$parentId) -> ${children.length}: '
       '${_pathList(children.map((n) => n.path))}',
@@ -137,7 +150,7 @@ final class _NoteTreeState extends State<NoteTree> {
             }
             final rows = snap.data!;
             if (rows.isEmpty) {
-              return const Center(child: Text('No notes yet'));
+              return Center(child: Text(AppStrings.treeEmpty));
             }
             return ListView.builder(
               itemCount: rows.length,
@@ -150,6 +163,7 @@ final class _NoteTreeState extends State<NoteTree> {
                   selected: row.note.path == widget.selectedPath,
                   onSelect: widget.onSelect,
                   onToggle: widget.onToggle,
+                  onLongPress: widget.onLongPress,
                 );
               },
             );
@@ -168,7 +182,8 @@ bool _setEquals(Set<String> a, Set<String> b) {
   return true;
 }
 
-/// One row tile: chevron (folders), icon, and name.
+/// One row tile: chevron (folders) or doc icon (files), then the name —
+/// the name column is shared, per the mockup.
 final class _RowTile extends StatelessWidget {
   const _RowTile({
     required this.note,
@@ -177,6 +192,7 @@ final class _RowTile extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.onToggle,
+    this.onLongPress,
   });
 
   final Note note;
@@ -185,12 +201,14 @@ final class _RowTile extends StatelessWidget {
   final bool selected;
   final void Function(Note note) onSelect;
   final ValueChanged<String> onToggle;
+  final void Function(Note note)? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () => onSelect(note),
+      onLongPress: onLongPress == null ? null : () => onLongPress!(note),
       child: Container(
         height: 40,
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,
@@ -206,9 +224,10 @@ final class _RowTile extends StatelessWidget {
                 onPressed: () => onToggle(note.path),
               )
             else
-              const SizedBox(width: 24),
-            Icon(note.isDir ? Icons.folder : Icons.article, size: 16),
-            const SizedBox(width: 8),
+              SizedBox(
+                width: 48,
+                child: Icon(fileIconFor(note.name), size: 16),
+              ),
             Expanded(
               child: Text(
                 note.name,

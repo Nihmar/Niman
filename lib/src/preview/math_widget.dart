@@ -248,7 +248,7 @@ class _BlockMathViewState extends State<BlockMathView> {
   Widget build(BuildContext context) {
     final box = widget.cache.boxFor(widget.tex, displayMode: true);
     if (box != null) {
-      return _mathBoxFromCache(box: box, style: widget.style);
+      return _mathBoxFromCache(context, box: box, style: widget.style);
     }
     if (widget.cache.isError(widget.tex, displayMode: true)) {
       return Text(
@@ -269,7 +269,15 @@ class _BlockMathViewState extends State<BlockMathView> {
 
 /// Paints a cached box with the katex box painter, sized with the same ink
 /// pad the katex `Math` widget uses (so glyph overflow is never clipped).
-Widget _mathBoxFromCache({required BoxNode box, required MathStyle style}) {
+///
+/// The color follows the ambient text style (dark mode!): an explicit
+/// [MathStyle.color] wins, the surrounding [BuildContext]'s default text
+/// color is inherited otherwise, and black is only the last resort.
+Widget _mathBoxFromCache(
+  BuildContext context, {
+  required BoxNode box,
+  required MathStyle style,
+}) {
   final size = boxSizePxPadded(box, style.fontSize);
   return SizedBox.fromSize(
     size: size,
@@ -278,7 +286,7 @@ Widget _mathBoxFromCache({required BoxNode box, required MathStyle style}) {
       painter: KatexBoxPainter(
         box,
         fontSize: style.fontSize,
-        color: style.color ?? const Color(0xFF000000),
+        color: _resolveColor(context, style),
         inkPadEm: kInkOverflowPadEm,
       ),
     ),
@@ -309,12 +317,15 @@ final class _InlineMathBox extends LeafRenderObjectWidget {
       ..style = style
       ..color = _resolveColor(context, style);
   }
-
-  static Color _resolveColor(BuildContext context, MathStyle style) =>
-      style.color ??
-      DefaultTextStyle.of(context).style.color ??
-      const Color(0xFF000000);
 }
+
+/// The math color for [style] in [context]: an explicit [MathStyle.color]
+/// wins, the ambient default text color (dark mode!) is inherited
+/// otherwise, and black is only the last resort.
+Color _resolveColor(BuildContext context, MathStyle style) =>
+    style.color ??
+    DefaultTextStyle.of(context).style.color ??
+    const Color(0xFF000000);
 
 final class _RenderInlineMath extends RenderBox {
   _RenderInlineMath(this.box, this.style, this.color);
@@ -343,8 +354,11 @@ final class _RenderInlineMath extends RenderBox {
     context.canvas
       ..save()
       ..translate(offset.dx, offset.dy);
-    KatexBoxPainter(box, fontSize: style.fontSize, color: color)
-        .paint(context.canvas, size);
+    KatexBoxPainter(
+      box,
+      fontSize: style.fontSize,
+      color: color,
+    ).paint(context.canvas, size);
     context.canvas.restore();
   }
 }

@@ -8,6 +8,24 @@
          filesystem. -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
+    <!-- Task reminders (T-TD-07): notifications are runtime-granted on
+         Android 13+ (asked when the first reminder is scheduled).
+         Minute precision needs exact alarms fired via
+         setExactAndAllowWhileIdle, which survives Doze (screen off) and
+         a closed app. Copist is a todo/reminder app (targetSdk >= 33),
+         so it requests USE_EXACT_ALARM: a normal permission auto-granted
+         at install with no runtime prompt, unlike SCHEDULE_EXACT_ALARM
+         which is denied by default on Android 14+ and needs a manual
+         system-settings toggle, silently leaving reminders unreliable
+         with the screen off. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Let the plugin's alarm receivers survive a device reboot and an
+         app re-install so scheduled task reminders are re-registered.
+         flutter_local_notifications (>=16) declares only the bare minimum
+         in its own manifest, so the app must add these itself. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:label="Copist"
         android:name="${applicationName}"
@@ -34,6 +52,26 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Scheduled task reminders (T-TD-07): flutter_local_notifications
+             needs these receivers actually declared in the app manifest to
+             deliver zoned notifications after the app leaves the foreground
+             (without them the alarms are scheduled but never surface). The
+             boot receiver re-registers pending reminders after a reboot or
+             a package re-install. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

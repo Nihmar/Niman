@@ -1,3 +1,4 @@
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:drift/drift.dart';
 
@@ -14,8 +15,29 @@ enum PreviewLayoutMode {
   fullScreen,
 }
 
+/// The library tree sort order (T-UI-03).
+enum TreeSort {
+  /// Name ascending (default).
+  nameAsc,
+
+  /// Name descending.
+  nameDesc,
+}
+
+/// The link format the editor's link button inserts.
+enum LinkType {
+  /// A wikilink `[[…]]` (the default).
+  wikilink,
+
+  /// A markdown link `[…](…)`.
+  markdown,
+}
+
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
+
+/// The default folder (library-relative) of the list notes (T-TK-06).
+const String defaultListFolder = 'Lists';
 
 /// The lower bound of the allowed split range.
 const double minSplitRatio = 0.2;
@@ -50,6 +72,68 @@ final class LibrarySettingsRepo {
     await (_db.update(_db.librarySettings)
           ..where((t) => t.path.equals(libraryPath)))
         .write(LibrarySettingsCompanion(trashEnabled: Value(enabled)));
+  }
+
+  /// The user-chosen quick note (library-relative path), or null when the
+  /// default `Quick note.md` at the library root is used.
+  Future<String?> quickNotePath(String libraryPath) async {
+    final rows = await (
+      _db.select(_db.librarySettings)
+        ..where((t) => t.path.equals(libraryPath))
+    ).get();
+    return rows.isEmpty ? null : rows.first.quickNotePath;
+  }
+
+  /// Sets (or clears, with null) the user-chosen quick note.
+  Future<void> setQuickNotePath(
+    String libraryPath, {
+    required String? path,
+  }) async {
+    await _ensureRow(libraryPath);
+    await (_db.update(_db.librarySettings)
+          ..where((t) => t.path.equals(libraryPath)))
+        .write(LibrarySettingsCompanion(quickNotePath: Value(path)));
+  }
+
+  /// The folder (library-relative) that holds the list notes
+  /// (T-TK-06); default [defaultListFolder].
+  Future<String> listNoteFolder(String libraryPath) async {
+    final rows = await (
+      _db.select(_db.librarySettings)
+        ..where((t) => t.path.equals(libraryPath))
+    ).get();
+    return rows.isEmpty ? defaultListFolder : rows.first.listNoteFolder;
+  }
+
+  /// Sets the list-note folder (sanitized; an empty result falls back to
+  /// [defaultListFolder]).
+  Future<void> setListNoteFolder(
+    String libraryPath, {
+    required String folder,
+  }) async {
+    await _ensureRow(libraryPath);
+    await (_db.update(_db.librarySettings)
+          ..where((t) => t.path.equals(libraryPath)))
+        .write(
+          LibrarySettingsCompanion(listNoteFolder: Value(_cleanFolder(folder))),
+        );
+  }
+
+  /// Sanitizes a list-folder path: trims, drops leading/trailing slashes
+  /// and empty/`.`/`..` segments; an empty result is [defaultListFolder].
+  static String _cleanFolder(String folder) {
+    var f = folder.trim();
+    while (f.startsWith('/')) {
+      f = f.substring(1);
+    }
+    while (f.endsWith('/')) {
+      f = f.substring(0, f.length - 1);
+    }
+    final parts = f
+        .split('/')
+        .where((s) => s.isNotEmpty && s != '.' && s != '..')
+        .toList();
+    return parts.isEmpty ? defaultListFolder : parts.join('/');
   }
 
   /// Ensures a settings row exists for `libraryPath`.
@@ -135,6 +219,21 @@ final class AppSettingsRepo {
         .write(AppSettingsCompanion(editorAutofocus: Value(enabled)));
   }
 
+  /// Whether a reminder's notification text keeps the `+project`,
+  /// `@context` and `#tag` markers (default false).
+  Future<bool> reminderShowTokens() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isNotEmpty && rows.first.reminderShowTokens;
+  }
+
+  /// Persists the reminder-markers toggle.
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(reminderShowTokens: Value(enabled)),
+    );
+  }
+
   /// The preview layout mode (default [PreviewLayoutMode.auto]).
   Future<PreviewLayoutMode> previewMode() async {
     final rows = await _db.select(_db.appSettings).get();
@@ -171,6 +270,91 @@ final class AppSettingsRepo {
     await (_db.update(_db.appSettings)
           ..where((t) => t.id.equals(1)))
         .write(AppSettingsCompanion(splitRatio: Value(clamped)));
+  }
+
+  /// The library tree sort order (default [TreeSort.nameAsc]).
+  Future<TreeSort> treeSort() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) return TreeSort.nameAsc;
+    return switch (rows.first.treeSort) {
+      'nameDesc' => TreeSort.nameDesc,
+      _ => TreeSort.nameAsc,
+    };
+  }
+
+  /// Persists the library tree sort order.
+  Future<void> setTreeSort(TreeSort sort) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(treeSort: Value(sort.name)));
+  }
+
+  /// The link format the editor's link button inserts
+  /// (default [LinkType.wikilink]).
+  Future<LinkType> linkType() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) return LinkType.wikilink;
+    return switch (rows.first.linkType) {
+      'markdown' => LinkType.markdown,
+      _ => LinkType.wikilink,
+    };
+  }
+
+  /// Persists the link format.
+  Future<void> setLinkType(LinkType type) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(linkType: Value(type.name)));
+  }
+
+  /// The editor's indent/outdent width in spaces (default 2).
+  Future<int> indentWidth() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? 2 : rows.first.indentWidth;
+  }
+
+  /// Persists the indent/outdent width (clamped to 2..8).
+  Future<void> setIndentWidth(int width) async {
+    await _ensureRow();
+    final clamped = width < 2 ? 2 : width > 8 ? 8 : width;
+    await (_db.update(_db.appSettings)
+          ..where((t) => t.id.equals(1)))
+        .write(AppSettingsCompanion(indentWidth: Value(clamped)));
+  }
+
+  /// The stored editor-toolbar layout (empty = the shipped toolbar).
+  ///
+  /// Kept as the raw stored string: parsing it is the editor's business,
+  /// so the settings layer does not depend on the toolbar catalogue.
+  Future<String> editorToolbar() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? '' : rows.first.editorToolbar;
+  }
+
+  /// Persists the editor-toolbar layout.
+  Future<void> setEditorToolbar(String layout) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(editorToolbar: Value(layout)),
+    );
+  }
+
+  /// The stored UI language id (`system`, `en` or `it`).
+  Future<AppLanguage> language() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty
+        ? AppLanguage.system
+        : AppLanguage.fromId(rows.first.language);
+  }
+
+  /// Persists the UI language.
+  Future<void> setLanguage(AppLanguage language) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(language: Value(language.id)),
+    );
   }
 
   Future<void> _ensureRow() async {

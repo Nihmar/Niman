@@ -6,10 +6,22 @@ import 'dart:isolate';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/db/database.dart';
+import 'package:copist/src/editor/find_panel.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
+import 'package:copist/src/editor/highlighting.dart';
+import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/editor/toolbar.dart';
+import 'package:copist/src/editor/toolbar_item.dart';
+import 'package:copist/src/editor/toolbar_layout.dart';
+import 'package:copist/src/frontmatter/note_kind.dart';
+import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/image_import.dart';
+import 'package:copist/src/links/parser.dart';
+import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/links/slug.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
@@ -18,9 +30,12 @@ import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
@@ -44,7 +59,11 @@ final class NoteView extends StatefulWidget {
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    this.linkType = LinkType.wikilink,
+    this.indentWidth = 2,
+    this.toolbarLayout = ToolbarLayout.defaults,
     this.splitPreview = false,
+    this.showPreview = false,
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
@@ -54,6 +73,11 @@ final class NoteView extends StatefulWidget {
     this.readNote,
     this.writeNote,
     this.controller,
+    this.linkSource,
+    this.onOpenNote,
+    this.initialAnchor,
+    this.kindMode = true,
+    this.onNoteKindChanged,
     super.key,
   });
 
@@ -66,8 +90,22 @@ final class NoteView extends StatefulWidget {
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
 
+  /// The link format the link button inserts (settings).
+  final LinkType linkType;
+
+  /// The indent/outdent width in spaces (settings).
+  final int indentWidth;
+
+  /// The toolbar the user arranged (settings, T-TB-04): which buttons
+  /// show and in what order.
+  final ToolbarLayout toolbarLayout;
+
   /// Whether the preview sits side by side (split) or behind a switch.
   final bool splitPreview;
+
+  /// Preview visibility (T-UI-06): the shared app bar owns the switch
+  /// and passes the state down; NoteView just follows it.
+  final bool showPreview;
 
   /// The editor's share of the split (0..1).
   final double splitFraction;
@@ -91,7 +129,7 @@ final class NoteView extends StatefulWidget {
   /// [importImageToLibrary]); tests inject a seam (it runs an isolate,
   /// which FakeAsync cannot drive).
   final Future<String> Function(String libraryRoot, String sourcePath)?
-      importImage;
+  importImage;
 
   /// Reads a note's content. Defaults to an off-isolate file read.
   final Future<String> Function(String path)? readNote;
@@ -102,12 +140,31 @@ final class NoteView extends StatefulWidget {
   /// The editor's controller (a test seam; one is created by default).
   final CodeLineEditingController? controller;
 
+  /// The link-resolution source (wiki targets + markdown hrefs against the
+  /// open index); null (tests without a session) disables link navigation.
+  final LinkSource? linkSource;
+
+  /// Opens a note by library-relative path, then (optionally) jumps to a
+  /// heading; the shell implements it (T-M3-07).
+  final void Function(String path, String? anchor)? onOpenNote;
+
+  /// A heading anchor to land on after the note loads (T-M3-07).
+  final String? initialAnchor;
+
+  /// Whether the note-kind GUIs are shown (T-TK-02): a note whose
+  /// frontmatter declares a known `type` opens in its kind GUI instead of
+  /// the editor. False = always the raw editor.
+  final bool kindMode;
+
+  /// Reports the loaded note's kind (the frontmatter `type` value, null =
+  /// plain note); the shell shows the kind toggle for known kinds.
+  final void Function(String? type)? onNoteKindChanged;
+
   @override
   State<NoteView> createState() => _NoteViewState();
 }
 
-final class _NoteViewState extends State<NoteView>
-    with WidgetsBindingObserver {
+final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   static const AppLogger _log = AppLogger(name: 'editor');
 
   late final FocusNode _focus;
@@ -126,6 +183,10 @@ final class _NoteViewState extends State<NoteView>
   /// Whether a controller was supplied by the owner (a test seam the state
   /// must not dispose) or created here.
   late final bool _ownsController;
+
+  /// The in-editor find & replace state (the classic bar): re_editor's
+  /// find machinery over [_controller], driven by `CopistFindPanel`.
+  late final CodeFindController _findController;
 
   /// The `CodeLines` the last processed text edit produced. A controller
   /// change that reuses the same instance is selection-only (no save).
@@ -157,12 +218,18 @@ final class _NoteViewState extends State<NoteView>
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
-  bool _showPreview = false;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
   int _revision = 0;
   int _lastSavedRevision = 0;
+
+  /// The loaded note's kind (the frontmatter `type` value, null = plain
+  /// note); null again while a load is in flight.
+  String? _noteKind;
+
+  /// The kind GUIs' window onto the note (T-TK-02).
+  late final _NoteKindHost _kindHost;
 
   @override
   void initState() {
@@ -176,6 +243,8 @@ final class _NoteViewState extends State<NoteView>
     _controller = widget.controller == null
         ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
         : widget.controller!;
+    _findController = CodeFindController(_controller);
+    _kindHost = _NoteKindHost(this);
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -209,6 +278,7 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
+    _findController.dispose();
     _focus.dispose();
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
@@ -229,7 +299,9 @@ final class _NoteViewState extends State<NoteView>
           .whereType<OutlineEntry>()
           .toList();
     });
-  }  Future<void> _write(String path, String content) async {
+  }
+
+  Future<void> _write(String path, String content) async {
     final seam = widget.writeNote;
     if (seam != null) {
       await seam(path, content);
@@ -259,6 +331,7 @@ final class _NoteViewState extends State<NoteView>
       _loading = true;
       _ready = false;
       _error = null;
+      _noteKind = null;
     });
     final clock = Stopwatch()..start();
     try {
@@ -286,6 +359,10 @@ final class _NoteViewState extends State<NoteView>
       if (!mounted || widget.path != path) return;
       // The buffer uses LF: normalize line endings on load.
       final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+      // The note kind (T-TK-02): the frontmatter `type` decides the body
+      // (kind GUI or plain editor); detection scans the leading block
+      // only, never the whole text.
+      _noteKind = frontmatterTypeOf(text);
       if (stats != null) {
         _applyStats(text, stats.$1, stats.$2);
       }
@@ -296,11 +373,14 @@ final class _NoteViewState extends State<NoteView>
         _loading = false;
         _ready = true;
       });
+      widget.onNoteKindChanged?.call(_noteKind);
       // Word count + outline on open: debounced for edits only; the
       // production load already has them from its isolate (the seam path
       // uses the regular refresh).
       if (stats == null) _refreshStats();
       _refreshPreview();
+      final anchor = widget.initialAnchor;
+      if (anchor != null) _jumpToAnchor(anchor);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -359,22 +439,106 @@ final class _NoteViewState extends State<NoteView>
     setState(() => _previewText = text);
   }
 
-  Widget _buildEditor() => NoteEditor(
-        key: ValueKey(widget.path),
-        controller: _controller,
-        focusNode: _focus,
-        showLineNumbers: widget.showLineNumbers,
-        autofocus: widget.autofocusEditor,
-        scrollController: _scroll,
-      );
+  Widget _buildEditor() => Listener(
+    // Desktop Ctrl+click on a wikilink/MD link (T-M3-07): a mouse
+    // click lands the caret under the pointer through the package's
+    // own tap handling, so the token under the caret is read after
+    // this frame. Touch-like clicks stay edit-only (mobile navigates
+    // from the preview).
+    onPointerDown: (event) {
+      if (event.kind != PointerDeviceKind.mouse) return;
+      if (!HardwareKeyboard.instance.isControlPressed) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_tryOpenLinkAtCaret());
+      });
+    },
+    child: NoteEditor(
+      key: ValueKey(widget.path),
+      controller: _controller,
+      focusNode: _focus,
+      showLineNumbers: widget.showLineNumbers,
+      autofocus: widget.autofocusEditor,
+      scrollController: _scroll,
+      findController: _findController,
+      findBuilder: (context, controller, readOnly) =>
+          CopistFindPanel(controller: controller, readOnly: readOnly),
+      shortcutsActivators: const CopistShortcutsActivatorsBuilder(),
+    ),
+  );
 
   Widget _buildPreview() => MarkdownPreview(
-        data: _previewText,
-        controller: _previewScroll,
-        scrollMap: _previewMap,
-        mathCache: _mathCache,
-        imageDirectory: widget.libraryRoot,
-      );
+    data: _previewText,
+    controller: _previewScroll,
+    scrollMap: _previewMap,
+    mathCache: _mathCache,
+    imageDirectory: widget.libraryRoot,
+    onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
+    onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
+    embedResolver: _resolveEmbed,
+  );
+
+  /// Schedules the caret-link check for the end of a frame; the caret the
+  /// package's tap handler placed may land one frame after the pointer up,
+  /// so a miss is retried a couple of frames before giving up.
+  void _scheduleCaretCheck([int attempt = 0]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_tryOpenLinkAtCaret(attempt));
+    });
+  }
+
+  /// Resolves an `![[…]]` embed: library-root-relative first (the
+  /// attachments/assets layout), then relative to the note's own folder,
+  /// then by unique name through the link index (`![[foo.png]]` resolving
+  /// to `Attachments/foo.png`, the Obsidian layout).
+  Future<String?> _resolveEmbed(String target) async {
+    final root = widget.libraryRoot;
+    if (root == null || target.isEmpty) return null;
+    var candidate = File(p.join(root, target));
+    if (candidate.existsSync()) return candidate.path;
+    candidate = File(p.join(p.dirname(widget.path), target));
+    if (candidate.existsSync()) return candidate.path;
+    final source = widget.linkSource;
+    if (source == null) return null;
+    final resolved = await source.resolveWiki(target);
+    if (resolved is ResolvedNote) {
+      final viaIndex = File(p.join(root, resolved.note.path));
+      if (viaIndex.existsSync()) return viaIndex.path;
+    }
+    return null;
+  }
+
+  /// Editor side of link navigation: the caret sits on a wikilink or MD
+  /// link token (the package placed it under the Ctrl+click); open it.
+  Future<void> _tryOpenLinkAtCaret([int attempt = 0]) async {
+    final selection = _controller.selection;
+    final line = selection.extentIndex;
+    final offset = selection.extentOffset;
+    final tokens = _highlight.tokensOf(line);
+    Token? hit;
+    for (final token in tokens) {
+      if (token.kind != TokenKind.wikilink && token.kind != TokenKind.link) {
+        continue;
+      }
+      if (offset > token.start && offset <= token.end) {
+        hit = token;
+        break;
+      }
+    }
+    final token = hit;
+    if (token == null) {
+      if (attempt < 3) _scheduleCaretCheck(attempt + 1);
+      return;
+    }
+    final text = _controller.codeLines[line].text;
+    final raw = text.substring(token.start, token.end);
+    if (token.kind == TokenKind.wikilink) {
+      await _openWiki(parseWikiRef(raw.substring(2, raw.length - 2)));
+    } else {
+      final close = raw.indexOf(']');
+      final href = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
+      await _openHref(href);
+    }
+  }
 
   /// T-M2-09: pick an image, copy it into the library's `assets/`, insert a
   /// library-relative link at the caret.
@@ -383,8 +547,9 @@ final class _NoteViewState extends State<NoteView>
     if (root == null) return;
     final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
     if (source == null || !mounted) return;
-    final relative = await (widget.importImage?.call(root, source) ??
-        importImageToLibrary(libraryRoot: root, sourcePath: source));
+    final relative =
+        await (widget.importImage?.call(root, source) ??
+            importImageToLibrary(libraryRoot: root, sourcePath: source));
     if (!mounted) return;
     // Alt text comes from the picked file's name; the link itself is the
     // content-addressed library path, so `photo.png` keeps a readable label.
@@ -427,6 +592,7 @@ final class _NoteViewState extends State<NoteView>
             .toList();
       });
     }
+
     // Word count + outline are O(n) pure passes. Notes above the threshold
     // run them on an isolate (a 931K note costs ~400 ms — never on the
     // main thread, that was the 1.2 s open stall); small ones stay
@@ -457,13 +623,295 @@ final class _NoteViewState extends State<NoteView>
   }
 
   /// The outline jump: caret to the heading line, then bring it into view.
+  ///
+  /// When the preview is visible (phone switch mode) the editor caret is
+  /// off-screen — the preview is brought to the heading's block as well,
+  /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
+    const AppLogger(name: 'links').debug('jump to source line $line');
     _controller.selection = CodeLineSelection.collapsed(
       index: line,
       offset: 0,
     );
     _scroll.makeCenterIfInvisible(
       CodeLinePosition(index: line, offset: 0),
+    );
+    _syncPreviewToLine(line);
+  }
+
+  /// Scrolls the preview so the block starting at source [line] is in
+  /// view (no-op when the preview is hidden or not laid out yet).
+  ///
+  /// The preview windowing lays out only the blocks near the viewport, so
+  /// right after open the scroll map is incomplete and the list's total
+  /// extent is an estimate: a single jump lands at the line-fraction
+  /// estimate, and the blocks it passes then measure, growing the extent.
+  /// A few post-frame passes refine the position (T-M3-09 device report:
+  /// anchor taps in the phone preview-only mode never moved — the jump
+  /// bailed on the incomplete map). The loop stops when the map is
+  /// complete, the position stops moving, or the attempts run out.
+  void _syncPreviewToLine(int line, {int attempt = 0}) {
+    if (!widget.showPreview || !mounted) return;
+    const log = AppLogger(name: 'links');
+    log.debug(
+      'anchor jump: scheduling preview scroll to line $line '
+      '(attempt $attempt, preview ${widget.showPreview ? 'shown' : 'hidden'})',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_previewScroll.hasClients) {
+        log.debug('anchor jump: preview scroll not attached — skipped');
+        return;
+      }
+      final map = _previewMap;
+      final position = _previewScroll.position;
+      final maxExtent = position.maxScrollExtent;
+      if (maxExtent <= 0 || map.lineCount == 0) {
+        log.debug(
+          'anchor jump: preview not laid out yet '
+          '(extent $maxExtent, lines ${map.lineCount}) — skipped',
+        );
+        return;
+      }
+      final offset = map.previewOffsetForLine(
+        line,
+        maxExtent: maxExtent,
+      );
+      if (offset == null) {
+        log.debug('anchor jump: no blocks laid out — skipped');
+        return;
+      }
+      final moved = (position.pixels - offset).abs() > 1;
+      if (moved) {
+        log.debug(
+          'anchor jump: source line $line -> preview offset '
+          '${offset.round()}px (extent ${maxExtent.round()}px, '
+          'map ${map.isReady ? 'complete' : 'estimating'}, '
+          'attempt $attempt)',
+        );
+        position.jumpTo(offset);
+      }
+      if (moved && !map.isReady && attempt < 12 && offset > 0) {
+        // One more pass: the jump measured the blocks it passed, so the
+        // extent (and the landing) is closer now.
+        _syncPreviewToLine(line, attempt: attempt + 1);
+      }
+    });
+    // In the phone preview-only layout nothing invalidates after the tap
+    // (no editor caret, no ink), so no frame is scheduled and the
+    // callback above would starve — production Flutter draws frames on
+    // demand. Guarantee the next frame runs it.
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  /// The preview's link handler (T-M3-07): `.md` relative links navigate
+  /// in-app, http(s) launch the browser, `#anchor` stays local.
+  Future<void> _openHref(String href) async {
+    const log = AppLogger(name: 'links');
+    final source = widget.linkSource;
+    log.debug(
+      'md link tap in ${p.basename(widget.path)}: href="$href" '
+      '(source ${source == null ? 'not loaded' : 'ready'})',
+    );
+    if (source == null) return;
+    final resolved = await source.resolveMarkdown(href);
+    log.debug('md link "$href" -> ${_describe(resolved)}');
+    await _applyResolved(resolved);
+  }
+
+  /// The preview's wikilink handler: `[[x]]` targets resolve and open;
+  /// empty-target forms (`[[#h]]`, `[[|a]]`) stay local.
+  Future<void> _openWiki(WikiRef ref) async {
+    const log = AppLogger(name: 'links');
+    final source = widget.linkSource;
+    final alias = ref.alias == null ? '-' : '"${ref.alias}"';
+    final heading = ref.heading == null ? '-' : '"${ref.heading}"';
+    final src = source == null ? 'not loaded' : 'ready';
+    log.debug(
+      'wikilink tap in ${p.basename(widget.path)}: '
+      'target="${ref.target}" alias=$alias heading=$heading (source $src)',
+    );
+    if (ref.target.isEmpty) {
+      final heading = ref.heading;
+      if (heading == null) {
+        log.debug('wikilink: empty target and no heading — snackbar');
+        return _linkSnack(AppStrings.unresolvedLinkTitle);
+      }
+      log.debug('wikilink: local anchor — jump to heading "$heading"');
+      _jumpToAnchor(heading);
+      return;
+    }
+    if (source == null) return;
+    // The documented form: `[[target]]`, `[[target#heading]]`,
+    // `[[target|alias]]` — the first part is the target.
+    var resolved = await source.resolveWiki(ref.target);
+    log.debug('wikilink target "${ref.target}" -> ${_describe(resolved)}');
+    var anchor = ref.heading;
+    if (resolved is! ResolvedNote && ref.alias != null) {
+      // Label-first links — `[[a label|filename]]`, the display text
+      // first — parse with the target and alias swapped, so when the
+      // target-first interpretation finds nothing, the aliased part is
+      // tried as the target (an optional `#heading` rides on it) before
+      // the link is declared dead. A link whose first part resolves
+      // never reaches this fallback.
+      final alias = ref.alias!;
+      final hash = alias.indexOf('#');
+      final aliasTarget = hash == -1 ? alias : alias.substring(0, hash);
+      final aliasHeading = hash == -1 || hash == alias.length - 1
+          ? null
+          : alias.substring(hash + 1);
+      if (aliasTarget.trim().isNotEmpty) {
+        log.debug(
+          'wikilink: target-first unresolved — retrying the aliased '
+          'part "$aliasTarget" as the target',
+        );
+        final swapped = await source.resolveWiki(aliasTarget.trim());
+        log.debug(
+          'wikilink alias "$aliasTarget" -> ${_describe(swapped)}',
+        );
+        if (swapped is ResolvedNote || swapped is AmbiguousNote) {
+          resolved = swapped;
+          anchor = aliasHeading;
+        }
+      }
+    }
+    if (resolved is ResolvedNote) {
+      // The parser splits `[[x#H]]` off before the resolver sees it, so
+      // the anchor is carried from the ref (or from a label-first
+      // `#heading` on the aliased target).
+      await _openNoteResult(resolved.note, anchor ?? resolved.heading);
+      return;
+    }
+    await _applyResolved(resolved);
+  }
+
+  /// One-line summary of a resolution, for the link trace.
+  static String _describe(ResolveResult resolved) {
+    return switch (resolved) {
+      ExternalLink(:final url) => 'ExternalLink($url)',
+      LocalAnchor(:final heading) => 'LocalAnchor(#$heading)',
+      ResolvedNote(:final note) => 'ResolvedNote(${note.path})',
+      AmbiguousNote(:final candidates) =>
+        'AmbiguousNote(${candidates.length} candidates)',
+      UnresolvedNote(:final target) => 'UnresolvedNote("$target")',
+    };
+  }
+
+  Future<void> _applyResolved(ResolveResult resolved) async {
+    const log = AppLogger(name: 'links');
+    switch (resolved) {
+      case ExternalLink(:final url):
+        log.debug('link outcome: launching url $url');
+        try {
+          await launchUrl(Uri.parse(url));
+        } on Object {
+          if (mounted) _linkSnack(AppStrings.openLinkFailed);
+        }
+      case LocalAnchor(:final heading):
+        log.debug('link outcome: jump to local heading "$heading"');
+        _jumpToAnchor(heading);
+      case ResolvedNote(:final note, :final heading):
+        await _openNoteResult(note, heading);
+      case AmbiguousNote(:final candidates):
+        log.debug(
+          'link outcome: ${candidates.length} ambiguous candidates — '
+          'picker',
+        );
+        await _pickAmbiguous(candidates);
+      case UnresolvedNote():
+        log.debug('link outcome: unresolved — snackbar');
+        if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+    }
+  }
+
+  /// Opens [note] via the shell (or jumps locally when it is already the
+  /// open note).
+  Future<void> _openNoteResult(Note note, String? anchor) async {
+    const log = AppLogger(name: 'links');
+    final root = widget.libraryRoot;
+    final currentRel = root == null
+        ? null
+        : p.relative(widget.path, from: root);
+    if (currentRel != null && note.path == currentRel) {
+      // Same note: stay and jump (or nothing when there is no anchor).
+      log.debug(
+        'link outcome: target is the current note — '
+        '${anchor == null ? 'no-op' : 'local jump to "$anchor"'}',
+      );
+      if (anchor != null) _jumpToAnchor(anchor);
+      return;
+    }
+    final open = widget.onOpenNote;
+    if (open == null) {
+      log.debug(
+        'link outcome: resolved ${note.path} but no onOpenNote — '
+        'snackbar',
+      );
+      if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+      return;
+    }
+    log.debug(
+      'link outcome: open ${note.path} '
+      'anchor=${anchor == null ? '-' : '"$anchor"'}',
+    );
+    open(note.path, anchor);
+  }
+
+  /// The minimal ambiguous-link picker (M3 list + select; polish M6).
+  Future<void> _pickAmbiguous(List<Note> candidates) async {
+    if (!mounted) return;
+    final chosen = await showDialog<Note>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(AppStrings.ambiguousLinkTitle),
+        children: [
+          for (final note in candidates)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, note),
+              child: Text(note.path),
+            ),
+        ],
+      ),
+    );
+    if (chosen != null) await _openNoteResult(chosen, null);
+  }
+
+  /// Jumps to the heading whose slug matches [heading] (the shared slug,
+  /// so `[[x#My Heading]]` and `## My Heading` agree).
+  void _jumpToAnchor(String heading) {
+    final slug = headingSlug(heading);
+    OutlineEntry? entry;
+    for (final e in _outline) {
+      if (headingSlug(e.text) == slug) {
+        entry = e;
+        break;
+      }
+    }
+    if (entry == null) {
+      // Trace the outline so a dead anchor is diagnosable from the log:
+      // is the heading missing, or does its text differ from the link's?
+      final entries = _outline;
+      final shown = entries.length <= 40
+          ? entries
+          : [
+              ...entries.take(20),
+              ...entries.skip(entries.length - 20),
+            ];
+      const AppLogger(name: 'links').debug(
+        'heading "$heading" (slug "$slug") not found among '
+        '${entries.length} outline entr(ies): '
+        '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
+      );
+      _linkSnack(AppStrings.headingNotFoundTitle);
+      return;
+    }
+    _jumpToHeading(entry.line);
+  }
+
+  void _linkSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -527,6 +975,7 @@ final class _NoteViewState extends State<NoteView>
       text: codeLine.text,
       base: style,
       dark: Theme.of(context).brightness == Brightness.dark,
+      accent: Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -538,106 +987,399 @@ final class _NoteViewState extends State<NoteView>
     return 'saved';
   }
 
+  /// A kind GUI's byte-stable edit: the buffer takes the new text (the
+  /// highlighter, stats and preview follow it as with any edit) and the
+  /// note is saved immediately.
+  void _applyKindEdit(String newText) {
+    _controller.text = newText;
+    setState(() {});
+    unawaited(_save());
+  }
+
   @override
   Widget build(BuildContext context) {
     final error = _error;
     final split = widget.splitPreview;
+    // The toolbar formats the editor: it stays in split mode (the editor
+    // is on screen) and hides in full-screen preview mode.
+    // Hiding every button hides the toolbar itself; the editor keeps its
+    // keyboard shortcuts.
+    final showToolbar = (split || !widget.showPreview) &&
+        widget.toolbarLayout.visible.isNotEmpty;
+    // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
+    // and hides the editor chrome (outline, status row, toolbar) — the
+    // note is a list, not a document, on screen.
+    final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
+    final kindBody = widget.kindMode && kindGui != null;
     return Column(
       children: [
-        if (!split) _paneSwitchBar(context),
         Expanded(
           child: error == null
               ? (!_ready || _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : split
-                      ? EditorPreviewSplit(
-                          editor: _buildEditor(),
-                          preview: _buildPreview(),
-                          editorScroll: _scroll.verticalScroller,
-                          previewScroll: _previewScroll,
-                          map: _previewMap,
-                          fraction: widget.splitFraction,
-                          onFractionChanged: widget.onSplitFractionChanged ??
-                              (_) {},
-                          onDragEnd: widget.onSplitDragEnd,
-                        )
-                      : (_showPreview ? _buildPreview() : _buildEditor()))
+                    ? const Center(child: CircularProgressIndicator())
+                    : kindBody
+                    ? kindGui.buildBody(context, _kindHost)
+                    : split
+                    ? EditorPreviewSplit(
+                        editor: _buildEditor(),
+                        preview: _buildPreview(),
+                        editorScroll: _scroll.verticalScroller,
+                        previewScroll: _previewScroll,
+                        map: _previewMap,
+                        fraction: widget.splitFraction,
+                        onFractionChanged:
+                            widget.onSplitFractionChanged ?? (_) {},
+                        onDragEnd: widget.onSplitDragEnd,
+                      )
+                    : AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(opacity: animation, child: child),
+                        // The outgoing pane leaves immediately: an
+                        // editor and its twin must never coexist.
+                        layoutBuilder: (currentChild, previousChildren) =>
+                            currentChild ?? const SizedBox.shrink(),
+                        child: widget.showPreview
+                            ? KeyedSubtree(
+                                key: const ValueKey('pane-preview'),
+                                child: _buildPreview(),
+                              )
+                            : KeyedSubtree(
+                                key: const ValueKey('pane-editor'),
+                                child: _buildEditor(),
+                              ),
+                      ))
               : Center(child: Text(error)),
         ),
-        if (_showOutline && _outline.isNotEmpty)
-          OutlinePanel(
-            entries: _outline,
-            onJump: _jumpToHeading,
-          ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-            child: Row(
-              children: [
-                if (!_loading)
-                  IconButton(
-                    key: const Key('insert-image'),
-                    tooltip: AppStrings.insertImageTooltip,
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
+        if (!kindBody) ...[
+        // Fade + size the outline panel in and out.
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.bottomCenter,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _showOutline && _outline.isNotEmpty
+                ? KeyedSubtree(
+                    key: const ValueKey('outline-open'),
+                    child: OutlinePanel(
+                      entries: _outline,
+                      onJump: _jumpToHeading,
                     ),
-                    onPressed: _insertImage,
+                  )
+                : const SizedBox(
+                    key: ValueKey('outline-closed'),
+                    width: double.infinity,
                   ),
-                if (!_loading)
-                  IconButton(
-                    key: const Key('outline-toggle'),
-                    tooltip: AppStrings.outlineTooltip,
-                    icon: const Icon(Icons.toc),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 34,
-                      minHeight: 26,
-                    ),
-                    onPressed: () =>
-                        setState(() => _showOutline = !_showOutline),
-                  ),
-                if (!_loading)
-                  Text(
-                    '$_wordCount words',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                const Spacer(),
-                Text(
-                  _status,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
-            ),
           ),
         ),
+        SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _statusRow(context),
+              // The toolbar fades + sizes in and out (hidden in preview
+              // mode). It is only mounted once loaded, so it appears
+              // immediately on load and animates only when preview mode
+              // toggles.
+              if (!_loading)
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: showToolbar
+                      ? _toolbar(context)
+                      : const SizedBox(width: double.infinity),
+                ),
+            ],
+          ),
+        ),
+        ],
       ],
     );
   }
 
-  /// The top switch bar (phone mode): one button flips editor ↔ preview.
-  Widget _paneSwitchBar(BuildContext context) {
-    return SizedBox(
-      height: 34,
-      child: IconButton(
-        key: const Key('preview-switch'),
-        tooltip: _showPreview
-            ? AppStrings.showEditorTooltip
-            : AppStrings.showPreviewTooltip,
-        iconSize: 18,
-        visualDensity: VisualDensity.compact,
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          _showPreview ? Icons.edit : Icons.visibility,
-        ),
-        onPressed: () => setState(() => _showPreview = !_showPreview),
+  /// The status row (T-UI-07): outline toggle + word count left, saved/
+  /// unsaved right.
+  Widget _statusRow(BuildContext context) {
+    final labelStyle = Theme.of(context).textTheme.labelSmall;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      child: Row(
+        children: [
+          if (!_loading)
+            IconButton(
+              key: const Key('outline-toggle'),
+              tooltip: AppStrings.outlineTooltip,
+              icon: const Icon(Icons.toc),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 26,
+              ),
+              onPressed: () => setState(() => _showOutline = !_showOutline),
+            ),
+          // Find & replace lives in the editor pane (hidden in
+          // preview-only mode).
+          if (!_loading && (widget.splitPreview || !widget.showPreview))
+            IconButton(
+              key: const Key('editor-find-open'),
+              tooltip: AppStrings.findInNoteTooltip,
+              icon: const Icon(Icons.search),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 34,
+                minHeight: 26,
+              ),
+              onPressed: _findController.findMode,
+            ),
+          if (!_loading)
+            Text(
+              '$_wordCount words',
+              style: labelStyle?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          const Spacer(),
+          Text(_status, style: labelStyle),
+        ],
       ),
     );
   }
+
+  /// The formatting toolbar (T-UI-08): pure markdown commands applied
+  /// through the controller; the image button keeps the file-picker flow
+  /// (T-M2-09) it already had in the status row.
+  ///
+  /// The toolbar is an extension of the keyboard: re_editor unfocuses the
+  /// editor on any tap outside its tap region (every toolbar tap dismissed
+  /// and re-showed the keyboard), so the toolbar joins the editor's tap
+  /// region and tapping it keeps the editor focused.
+  Widget _toolbar(BuildContext context) {
+    final actions = _toolbarActions();
+    return CodeEditorTapRegion(
+      child: EditorToolbar(
+        buttons: [
+          for (final item in widget.toolbarLayout.visible)
+            EditorToolbarButton(
+              key: item.widgetKey,
+              icon: item.icon,
+              tooltip: item.label,
+              onPressed: actions[item]!,
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// What each toolbar button does. The catalogue and the order live in
+  /// `editor/toolbar_item.dart`; the commands stay here, with the
+  /// controller they act on.
+  Map<ToolbarItem, VoidCallback> _toolbarActions() {
+    return {
+      ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
+      ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
+      ToolbarItem.strikethrough: () =>
+          _wrapSelection(left: '~~', right: '~~'),
+      ToolbarItem.superscript: () =>
+          _wrapSelection(left: '<sup>', right: '</sup>'),
+      ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),
+      ToolbarItem.link: _insertLink,
+      ToolbarItem.code: _insertCodeBlock,
+      ToolbarItem.image: _insertImage,
+      ToolbarItem.heading: _showHeadingDialog,
+      ToolbarItem.list: () => _prefixLines(prefix: '- '),
+      ToolbarItem.orderedList: _insertOrderedList,
+      ToolbarItem.quote: () => _prefixLines(prefix: '> '),
+      ToolbarItem.outdent: () => _indentLines(outdent: true),
+      ToolbarItem.indent: () => _indentLines(outdent: false),
+    };
+  }
+
+  /// Applies a pure markdown command's result: the whole text is set
+  /// (undoable) and the selection lands where the command put it — inside
+  /// the markers for wraps, the same lines for line edits. The editor
+  /// keeps its focus (the IME stays up); focus is re-requested
+  /// defensively.
+  void _applyMarkdownEdit(MarkdownEdit edit) {
+    _controller.text = edit.text;
+    _controller.selection = _codeLineSelection(edit.selection);
+    _focus.requestFocus();
+  }
+
+  /// Converts a whole-text [selection] to the controller's line+offset
+  /// form (the inverse of [_textSelection]).
+  CodeLineSelection _codeLineSelection(TextSelection selection) {
+    final text = _controller.text;
+    final (baseIndex, baseOffset) = _lineAndOffset(text, selection.baseOffset);
+    final (extentIndex, extentOffset) = _lineAndOffset(
+      text,
+      selection.extentOffset,
+    );
+    return CodeLineSelection(
+      baseIndex: baseIndex,
+      baseOffset: baseOffset,
+      extentIndex: extentIndex,
+      extentOffset: extentOffset,
+    );
+  }
+
+  /// The (line, offset-within-line) for the absolute [offset] in [text].
+  (int, int) _lineAndOffset(String text, int offset) {
+    var line = 0;
+    var lineStart = 0;
+    for (var i = 0; i < offset && i < text.length; i++) {
+      if (text.codeUnitAt(i) == 0x0A) {
+        line++;
+        lineStart = i + 1;
+      }
+    }
+    return (line, offset - lineStart);
+  }
+
+  void _wrapSelection({required String left, required String right}) {
+    _applyMarkdownEdit(
+      wrapSelection(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        left: left,
+        right: right,
+      ),
+    );
+  }
+
+  void _insertCodeBlock() {
+    _applyMarkdownEdit(
+      codeBlock(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+      ),
+    );
+  }
+
+  void _prefixLines({required String prefix}) {
+    _applyMarkdownEdit(
+      prefixLines(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        prefix: prefix,
+      ),
+    );
+  }
+
+  /// Inserts a link in the format chosen in settings (wikilink `[[…]]`
+  /// or markdown `[…](…)`).
+  void _insertLink() {
+    final markdown = widget.linkType == LinkType.markdown;
+    _applyMarkdownEdit(
+      wrapSelection(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        left: markdown ? '[' : '[[',
+        right: markdown ? '](...)' : ']]',
+      ),
+    );
+  }
+
+  /// Numbers the selected line(s) as an ordered list.
+  void _insertOrderedList() {
+    _applyMarkdownEdit(
+      orderedList(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+      ),
+    );
+  }
+
+  /// Indents (or outdents, [outdent] true) the selected line(s) by the
+  /// width chosen in settings.
+  void _indentLines({required bool outdent}) {
+    _applyMarkdownEdit(
+      indentLines(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        width: widget.indentWidth,
+        outdent: outdent,
+      ),
+    );
+  }
+
+  /// Shows the heading-level picker (H1..H6) and applies the chosen level
+  /// to the selected line(s).
+  Future<void> _showHeadingDialog() async {
+    final level = await showHeadingLevelDialog(context);
+    if (level == null) return;
+    _applyMarkdownEdit(
+      setHeading(
+        text: _controller.text,
+        selection: _textSelection(_controller.selection),
+        level: level,
+      ),
+    );
+  }
+
+  /// Converts re_editor's line+offset selection to whole-text offsets
+  /// (called once per toolbar tap, so the O(n) scan is fine).
+  TextSelection _textSelection(CodeLineSelection selection) {
+    return TextSelection(
+      baseOffset: _globalOffset(selection.baseIndex, selection.baseOffset),
+      extentOffset: _globalOffset(
+        selection.extentIndex,
+        selection.extentOffset,
+      ),
+    );
+  }
+
+  int _globalOffset(int line, int offset) {
+    final text = _controller.text;
+    var index = 0;
+    for (var current = 0; current < line; current++) {
+      final nl = text.indexOf('\n', index);
+      if (nl < 0) return text.length;
+      index = nl + 1;
+    }
+    return index + offset;
+  }
+}
+
+/// The kind GUIs' window onto the note (T-TK-02): the buffer text, and
+/// byte-stable edits that persist through the regular save path.
+final class _NoteKindHost implements NoteKindHost {
+  _NoteKindHost(this._state);
+
+  final _NoteViewState _state;
+
+  @override
+  String get text => _state._controller.text;
+
+  @override
+  void applyEdit(String newText) => _state._applyKindEdit(newText);
+}
+
+/// Shows the heading-level picker (H1..H6); resolves to the chosen level
+/// (1..6) or null (dismissed).
+Future<int?> showHeadingLevelDialog(BuildContext context) {
+  return showDialog<int>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      title: Text(AppStrings.headingDialogTitle),
+      children: [
+        for (var level = 1; level <= 6; level++)
+          SimpleDialogOption(
+            key: ValueKey<int>(level),
+            onPressed: () => Navigator.of(context).pop(level),
+            child: Text(
+              AppStrings.headingLevelLabel(level),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 26.0 - level * 2,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }

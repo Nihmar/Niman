@@ -26,6 +26,13 @@ dependencies:
 
   # Preview rendering: Markdown.
   # State management (Flutter integration).
+  flutter_local_notifications: ^22.3.0
+
+  # Flutter's own widget strings (date/time pickers, the selection menu)
+  # in the app's language.
+  flutter_localizations:
+    sdk: flutter
+
   flutter_markdown_plus: ^1.0.12
   flutter_riverpod: ^2.6.1
 
@@ -37,6 +44,7 @@ dependencies:
 
   # The highlighter core behind flutter_highlight, used directly by the
   # preview's code highlighter (lang rules, parse).
+  flutter_timezone: ^5.1.0
   highlight: ^0.7.0
 
   katex: ^1.0.0
@@ -64,7 +72,10 @@ dependencies:
   # have a system libsqlite3 that drift's NativeDatabase can open; Windows
   # ships no sqlite3.dll, so without this the app builds and then dies on
   # its first index query.
+  sqlite3: ^3.5.2
   sqlite3_flutter_libs: ^0.5.0
+  timezone: ^0.11.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   build_runner: ^2.16.0

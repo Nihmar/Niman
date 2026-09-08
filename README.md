@@ -4,6 +4,8 @@
 
 # Copist
 
+<img src="assets/branding/feather.png" alt="Copist app icon" width="140" align="right">
+
 Copist is a multiplatform Markdown note-taking app. Notes are plain files: one note
 is one `.md` file on disk, organized in nested folders. The app's SQLite database is
 only a **rebuildable index** (search, tags, frontmatter, sync state) — the files on
@@ -90,14 +92,64 @@ disk are always the source of truth.
 - **Windows:** built on a Windows host (no cross-build from Linux); SQLite
   comes bundled, since Windows has no system one.
 
+### Task reminders on Android
+
+A `rem:` reminder is an exact alarm held by the system, so it fires with
+the screen off, with the app in the background, and with the app's process
+dead. Two things can still stop it, and Copist warns about both from the
+Todo tab:
+
+- **Notifications off.** The alarm fires and nothing is shown.
+- **Battery optimization.** The banner links to the system list. Without
+  the exemption, some manufacturer builds (Xiaomi/MIUI and HyperOS,
+  Huawei/EMUI, Oppo/OnePlus/Realme ColorOS, Vivo) discard an app's pending
+  alarms when it is swiped away from recents, and may sleep it after a
+  while. Those ROMs often also need an "autostart" toggle that only the
+  user can set. See dontkillmyapp.com for the per-vendor steps.
+
+A *force stop* from Settings cancels an app's alarms on every Android
+version; they are rescheduled the next time Copist runs. Reminders survive
+a reboot.
+
+### The debug log
+
+Settings has a **Export debug log** action that writes the whole log to a
+file you choose. Recording can be turned off there too.
+
+The log is kept two ways: the last 5000 lines in memory, and an
+append-only mirror on disk under the app's private storage
+(`copist-log.txt`, one rotation, capped at 2 x 512 KB). The mirror is
+flushed when the app goes to the background, so it survives a swipe away,
+a crash, an OEM kill and a reboot. An export starts with the earlier runs
+from disk and ends with the current one, which matters for reminders:
+the interesting moment usually happens in a process that no longer exists.
+
+Each line is `<timestamp> <SEVERITY> [<component>] <message>`. For
+reminders, look for the `[todo]` lines:
+
+```text
+todo reminders: timezone Europe/Rome
+todo reminders: 2 pending at startup [208725283, 867842594]
+todo reminders: reconcile 2 wanted, notifications allowed, alarms exact, battery unrestricted
+todo reminders: armed 867842594 for 2026-09-08T10:30 (in 2h 14m) call plumber
+todo reminders reconciled: 2 scheduled (exact)
+todo reminders: 2 pending after reconcile [208725283, 867842594]
+```
+
+`pending at startup` is the one to read after a kill or a reboot: it is
+what the system still holds from the previous run, and the only evidence
+of whether the alarms survived. `pending after reconcile` is what the
+system actually has, as opposed to what Copist asked for.
+
 ## Architecture & stack
 
 - **Framework:** Flutter (stable channel), Dart with `very_good_analysis`.
 - **State:** Riverpod.
 - **Rendering:** `flutter_markdown_plus` for preview, `katex_dart` (pure-Dart
   KaTeX) for math, `flutter_highlight` for code highlighting.
-- **Editor:** custom lightweight source editor (Markdown + math-span
-  highlighting) with bidirectional scroll sync via line mapping.
+- **Editor:** `re_editor` (Reqable's large-text editor) with Copist's own
+  incremental Markdown tokenizer plugged into its span builder; bidirectional
+  scroll sync via line mapping.
 - **WebDAV client:** `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match,
   Basic auth, http + https (zero dependencies).
 - **Index:** `drift` (SQLite + FTS5); files located via `path_provider`;
@@ -106,6 +158,29 @@ disk are always the source of truth.
   (Dart `HttpServer`).
 - **No CI:** analyze, test and release builds are run locally.
 - **Packaging:** APK/AAB; Linux tar.gz + AppImage + Arch pkg (PKGBUILD).
+
+### Third-party packages
+
+Copist is built on top of these external packages rather than against the raw
+Flutter SDK — they carry the core of the app, so they deserve explicit credit:
+
+| Package | Role in Copist |
+|---------|----------------|
+| [`re_editor`](https://pub.dev/packages/re_editor) | The source-editor widget (caret, selection, IME/composition, handles, scrolling). Highlighting is Copist's own tokenizer via `spanBuilder` |
+| [`flutter_markdown_plus`](https://pub.dev/packages/flutter_markdown_plus) + [`markdown`](https://pub.dev/packages/markdown) | Markdown preview: Copist's windowed preview builds on the package's AST → widget pipeline (GFM tables/task lists, footnotes); `markdown` is the AST parser |
+| [`katex`](https://pub.dev/packages/katex) / [`katex_dart`](https://pub.dev/packages/katex_dart) | Pure-Dart KaTeX for `$…$` / `$$…$$` math rendering |
+| [`flutter_highlight`](https://pub.dev/packages/flutter_highlight) + [`highlight`](https://pub.dev/packages/highlight) | Code-block syntax highlighting in the preview |
+| [`drift`](https://pub.dev/packages/drift) (+ `drift_dev`, `sqlite3_flutter_libs`) | The rebuildable SQLite index — notes tree, tags, stems, links, FTS5 search |
+| [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | App-wide state management |
+| [`file_picker`](https://pub.dev/packages/file_picker) | CHOOSING the library root folder / picking images to insert (never scans storage itself) |
+| [`path_provider`](https://pub.dev/packages/path_provider) | OS folders for app data (index, settings, caches) |
+| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | WebDAV credentials + the encryption key (M5/M6) |
+| [`crypto`](https://pub.dev/packages/crypto) | sha256 content digests (change detection, sync reconciliation) |
+
+Notable non-default choices: `flutter_smooth_markdown` (0.8.1) is pinned only as
+*the reference renderer the M2 cost-model benchmark tests against* — the app's
+preview is Copist's own windowed renderer over `flutter_markdown_plus`. `hash` and
+`path` come from the Dart team; `meta` is the Flutter SDK's annotation package.
 
 ### Sync state machine
 
@@ -145,6 +220,15 @@ spellcheck, E2E.
 
 Copist must work unbounded: **1,000,000 notes and novel-length files** are a hard
 requirement, driving the rebuildable-index, FTS5, and LRU-cache strategies above.
+
+## Acknowledgments
+
+- [Markor](https://github.com/gsantner/markor) — the offline Markdown editor for
+  Android that keeps notes as ordinary files and puts a todo.txt view next to
+  them. A reference for what a notes app owes its user: no lock-in, no database
+  standing between them and their text.
+- Obsidian — a behavioral reference only. Copist keeps its own vocabulary (the
+  root folder is the **Library**) and none of its code.
 
 ## License
 

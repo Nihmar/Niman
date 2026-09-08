@@ -21,7 +21,7 @@
     
 *   **Scale:** unbound — 1,000,000 notes and novel-length files (hard requirement).
     
-*   **Frontmatter:** general YAML. Known fields: `title`, `tags`, `date`, `pinned`, `aliases`; any other key is indexed/filterable.
+*   **Frontmatter:** general YAML. Known fields: `title`, `tags`, `date`, `pinned`, `aliases`, `type`; any other key is indexed/filterable.
     
 *   **Tags:** frontmatter `tags:` + inline `#tags`; both searchable.
     
@@ -37,13 +37,13 @@
     
 *   **Math:** `$…$` inline, `$$…$$` display; coverage = whatever KaTeX supports (matrices, aligned/cases, `\text`, `\newcommand`); math spans highlighted in source pane.
     
-*   **Layout:** desktop = sidebar | editor | preview (draggable split); Android phone = full-screen Edit/Preview switch, tablet/wide = split; user override (auto / force split / force switch).
+*   **Layout:** desktop = sidebar | editor | preview (draggable split); Android phone = bottom nav (Files, Todo, Search, Quick note, Settings — the Files tab hosts the library) with the full-screen Edit/Preview switch in the app bar (eye action); tablet/wide = split; user override (auto / force split / force switch).
     
 *   **Tabs:** multiple open notes at once.
     
 *   **Markdown extras:** tables, task lists, footnotes, strikethrough, code blocks with syntax highlighting.
     
-*   **Editor conveniences:** spellcheck (where available), word count, heading outline + folding. LaTeX autocomplete = backlog.
+*   **Editor conveniences:** spellcheck (where available), word count, heading outline + folding, and the formatting toolbar (bold, italic, strikethrough, superscript, underline, link, code, image, list, quote — mockup-confirmed, evenly spaced). LaTeX autocomplete = backlog.
     
 *   **Mermaid:** stretch goal (bundled offline webview renderer).
     

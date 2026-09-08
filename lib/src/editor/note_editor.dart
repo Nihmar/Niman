@@ -24,6 +24,10 @@ import 'package:re_editor/re_editor.dart';
 /// on open (the keyboard-on-open settings toggle, default off — the
 /// keyboard appears on the first tap). [scrollController] lets the shell
 /// attach to the editor's vertical scroll (scroll sync, T-M2-06).
+///
+/// [findController] + [findBuilder] wire the in-editor find & replace
+/// (the owner's [CodeFindController] and its bar); [shortcutsActivators]
+/// extends the package's default editor shortcuts (Ctrl+H = replace).
 final class NoteEditor extends StatelessWidget {
   /// Creates the editor over [controller].
   const NoteEditor({
@@ -32,6 +36,9 @@ final class NoteEditor extends StatelessWidget {
     this.showLineNumbers = true,
     this.autofocus = false,
     this.scrollController,
+    this.findController,
+    this.findBuilder,
+    this.shortcutsActivators,
     super.key,
   });
 
@@ -49,6 +56,15 @@ final class NoteEditor extends StatelessWidget {
 
   /// The editor's scroll controllers (vertical is the sync side).
   final CodeScrollController? scrollController;
+
+  /// The note's find state; when null the editor makes its own.
+  final CodeFindController? findController;
+
+  /// The find bar builder (the owner supplies `CopistFindPanel`).
+  final CodeFindBuilder? findBuilder;
+
+  /// Editor shortcut activators (defaults + Ctrl+H replace).
+  final CodeShortcutsActivatorsBuilder? shortcutsActivators;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +115,9 @@ final class NoteEditor extends StatelessWidget {
       // frontmatter are never anchors), not `{}`/`[]`.
       chunkAnalyzer: const MarkdownChunkAnalyzer(),
       scrollController: scrollController,
+      findController: findController,
+      findBuilder: findBuilder,
+      shortcutsActivatorsBuilder: shortcutsActivators,
       toolbarController: MobileSelectionToolbarController(
         builder: ({
           required context,

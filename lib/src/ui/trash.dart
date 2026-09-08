@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
 /// Lists trash items and supports restoring / permanent deletion.
@@ -62,18 +63,16 @@ final class _TrashScreenState extends State<TrashScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete permanently'),
-        content: Text(
-          '${item.name} will be deleted permanently (no restore)',
-        ),
+        title: Text(AppStrings.trashDeletePermanently),
+        content: Text(AppStrings.trashDeleteConfirm(item.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppStrings.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(AppStrings.actionDelete),
           ),
         ],
       ),
@@ -88,19 +87,16 @@ final class _TrashScreenState extends State<TrashScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Empty trash'),
-        content: const Text(
-          'This deletes everything in the trash folder permanently, '
-          'including items Copist did not put there.',
-        ),
+        title: Text(AppStrings.trashEmptyAction),
+        content: Text(AppStrings.trashEmptyConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppStrings.actionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Empty'),
+            child: Text(AppStrings.actionEmpty),
           ),
         ],
       ),
@@ -127,11 +123,11 @@ final class _TrashScreenState extends State<TrashScreen> {
   Widget build(BuildContext context) {
     final items = _items;
     return Scaffold(
-      appBar: AppBar(title: const Text('Trash')),
+      appBar: AppBar(title: Text(AppStrings.trashTitle)),
       body: items == null
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
-              ? const Center(child: Text('Trash is empty'))
+              ? Center(child: Text(AppStrings.trashEmpty))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: items.length,
@@ -150,7 +146,7 @@ final class _TrashScreenState extends State<TrashScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              tooltip: 'Restore',
+                              tooltip: AppStrings.actionRestore,
                               icon: const Icon(Icons.restore),
                               onPressed: _busy
                                   ? null
@@ -163,7 +159,7 @@ final class _TrashScreenState extends State<TrashScreen> {
                                       ),
                             ),
                             IconButton(
-                              tooltip: 'Delete permanently',
+                              tooltip: AppStrings.trashDeletePermanently,
                               icon: const Icon(Icons.delete_forever),
                               onPressed: _busy
                                   ? null
@@ -177,7 +173,7 @@ final class _TrashScreenState extends State<TrashScreen> {
                 ),
       floatingActionButton: items != null && items.isNotEmpty
           ? FloatingActionButton(
-              tooltip: 'Empty trash',
+              tooltip: AppStrings.trashEmptyAction,
               onPressed: _busy ? null : _confirmEmptyTrash,
               child: const Icon(Icons.delete_sweep),
             )

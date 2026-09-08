@@ -66,14 +66,22 @@ final class EditorHighlightSync {
     _spans.removeWhere((index, _) => index >= first);
   }
 
+  /// The tokens of buffer line [index] (T-M3-07: the editor Ctrl+click
+  /// looks the caret's token range up here). Materializes the line if the
+  /// viewport has not asked for it yet.
+  List<Token> tokensOf(int index) =>
+      index < _doc.lineCount ? _doc.lineAt(index).tokens : const <Token>[];
+
   /// The styled span for buffer line [index] (the [CodeLineSpanBuilder]
   /// implementation): [text] is the line's text, [base] the editor's base
-  /// style, [dark] the palette selection.
+  /// style, [dark] the palette selection, [accent] the theme's primary
+  /// (wikilinks, T-UI-09).
   TextSpan spanFor({
     required int index,
     required String text,
     required TextStyle base,
     required bool dark,
+    required Color accent,
   }) {
     if (dark != _dark) {
       _dark = dark;
@@ -84,7 +92,7 @@ final class EditorHighlightSync {
     final styled = index < _doc.lineCount
         ? _doc.lineAt(index)
         : StyledLine(text, const <Token>[]);
-    final span = _buildSpan(styled, base);
+    final span = _buildSpan(styled, base, accent);
     _spans[index] = span;
     return span;
   }
@@ -107,10 +115,9 @@ final class EditorHighlightSync {
     final oldSegments = old.segments;
     final currentSegments = current.segments;
     var offset = 0;
-    final pairs =
-        oldSegments.length < currentSegments.length
-            ? oldSegments.length
-            : currentSegments.length;
+    final pairs = oldSegments.length < currentSegments.length
+        ? oldSegments.length
+        : currentSegments.length;
     for (var s = 0; s < pairs; s++) {
       final oldLines = oldSegments[s].codeLines;
       final currentLines = currentSegments[s].codeLines;
@@ -150,10 +157,9 @@ final class EditorHighlightSync {
   static int _commonSuffix(CodeLines old, CodeLines current, int first) {
     var suffix = 0;
     var p = 0;
-    final pairs =
-        old.segments.length < current.segments.length
-            ? old.segments.length
-            : current.segments.length;
+    final pairs = old.segments.length < current.segments.length
+        ? old.segments.length
+        : current.segments.length;
     while (p < pairs) {
       final oldLines = old.segments[old.segments.length - 1 - p].codeLines;
       final currentLines =
@@ -176,21 +182,21 @@ final class EditorHighlightSync {
       suffix += k;
       break;
     }
-    final maxSuffix =
-        (old.length - first) < (current.length - first)
-            ? old.length - first
-            : current.length - first;
+    final maxSuffix = (old.length - first) < (current.length - first)
+        ? old.length - first
+        : current.length - first;
     return suffix > maxSuffix ? maxSuffix : suffix;
   }
 
-  static List<String> _texts(CodeLines lines) =>
-      <String>[for (var i = 0; i < lines.length; i++) lines[i].text];
+  static List<String> _texts(CodeLines lines) => <String>[
+    for (var i = 0; i < lines.length; i++) lines[i].text,
+  ];
 
   /// Splits one line into non-overlapping styled spans: every maximal run
   /// between token boundaries gets the covering token's style; the unmarked
   /// region after a heading marker gets the heading style; the rest is
   /// plain (the base style shows).
-  TextSpan _buildSpan(StyledLine styled, TextStyle base) {
+  TextSpan _buildSpan(StyledLine styled, TextStyle base, Color accent) {
     final textLength = styled.text.length;
     if (textLength == 0) {
       return TextSpan(text: '', style: base);
@@ -222,7 +228,7 @@ final class EditorHighlightSync {
       children.add(
         TextSpan(
           text: styled.text.substring(start, end),
-          style: _styleAt(styled.tokens, start, headingStart),
+          style: _styleAt(styled.tokens, start, headingStart, accent),
         ),
       );
     }
@@ -233,10 +239,17 @@ final class EditorHighlightSync {
   /// override, the heading style for the unmarked heading text, null (base)
   /// otherwise. [headingStart] is the first unmarked heading position (-1 =
   /// no heading).
-  TextStyle? _styleAt(List<Token> tokens, int pos, int headingStart) {
+  TextStyle? _styleAt(
+    List<Token> tokens,
+    int pos,
+    int headingStart,
+    Color accent,
+  ) {
     for (final token in tokens) {
       if (token.start > pos) break;
-      if (pos < token.end) return _palette.styleFor(token.kind);
+      if (pos < token.end) {
+        return _palette.styleFor(token.kind, accent: accent);
+      }
     }
     if (headingStart >= 0 && pos >= headingStart) return _palette.headingStyle;
     return null;

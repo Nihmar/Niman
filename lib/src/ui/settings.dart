@@ -2,17 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/folder_picker.dart';
+import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
 /// Global theme/layout settings arrive with the M6 token system.
-final class SettingsScreen extends StatefulWidget {
+final class SettingsScreen extends StatelessWidget {
   /// Creates the settings screen.
   const SettingsScreen({required this.controller, super.key});
 
@@ -20,17 +24,53 @@ final class SettingsScreen extends StatefulWidget {
   final LibrarySession controller;
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(AppStrings.settingsTitle)),
+      body: SettingsBody(
+        controller: controller,
+        onClosed: () {
+          // The pushed screen returns to the shell (which then re-renders
+          // into the open-library screen since the session is closed).
+          if (context.mounted) Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
 }
 
-final class _SettingsScreenState extends State<SettingsScreen> {
+/// The settings content: the same list is shown pushed (wide app-bar
+/// button) and embedded as the bottom-nav Settings tab (T-UI-02).
+final class SettingsBody extends StatefulWidget {
+  /// Creates the settings body.
+  const SettingsBody({required this.controller, this.onClosed, super.key});
+
+  /// The session of the library whose settings this body edits.
+  final LibrarySession controller;
+
+  /// Called after "Close library" closes the session; the pushed screen
+  /// pops its own route, the shell tab returns to the Files tab. When null
+  /// the caller must handle closing the screen itself.
+  final VoidCallback? onClosed;
+
+  @override
+  State<SettingsBody> createState() => _SettingsBodyState();
+}
+
+final class _SettingsBodyState extends State<SettingsBody> {
   bool? _trash;
   bool? _debugLogs;
   bool? _lineNumbers;
   bool? _autofocusEditor;
+  bool? _reminderShowTokens;
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
+  LinkType _linkType = LinkType.wikilink;
+  int _indentWidth = 2;
+  String? _quickNotePath;
+  String? _listFolder;
+  AppLanguage _language = AppLanguage.system;
 
   @override
   void initState() {
@@ -46,18 +86,81 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     final debug = await controller.debugLogsEnabled;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
+    final reminderTokens = await controller.reminderShowTokens;
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
+    final linkType = await controller.linkType;
+    final indentWidth = await controller.indentWidth;
+    final quickNotePath = await ops.quickNotePath;
+    final listFolder = await ops.listNoteFolder;
+    final language = await controller.language;
     if (mounted) {
       setState(() {
         _trash = enabled;
         _debugLogs = debug;
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
+        _reminderShowTokens = reminderTokens;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
         _splitLoaded = true;
+        _linkType = linkType;
+        _indentWidth = indentWidth;
+        _quickNotePath = quickNotePath;
+        _listFolder = listFolder;
+        _language = language;
       });
+    }
+  }
+
+  /// Persists the UI language and applies it immediately (T-L10N-04):
+  /// the app root listens to [AppLanguages] and rebuilds every screen.
+  Future<void> _setLanguage(AppLanguage language) async {
+    await widget.controller.setLanguage(language);
+    AppLanguages.choice = language;
+    if (mounted) {
+      setState(() => _language = language);
+    }
+  }
+
+  /// Opens the list-folder picker (T-TK-06): the folder new list notes
+  /// are created in, chosen from the library's folders rather than
+  /// typed.
+  Future<void> _pickListFolder() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final folders = await widget.controller.folders();
+    if (!mounted) return;
+    final folder = await showFolderPicker(
+      context,
+      title: AppStrings.listFolderTitle,
+      folders: folders,
+      ops: ops,
+      current: _listFolder ?? defaultListFolder,
+    );
+    if (folder == null) return;
+    await ops.setListNoteFolder(folder: folder);
+    final saved = await ops.listNoteFolder;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _listFolder = saved);
+    }
+  }
+
+  /// Opens the quick-note picker (the chosen note is set from the tree
+  /// dialog); the shell picks the value up through the session.
+  Future<void> _pickQuickNote() async {
+    final oldPath = _quickNotePath;
+    final changed = await showQuickNotePicker(
+      context,
+      controller: widget.controller,
+      currentPath: oldPath,
+    );
+    if (!changed || !mounted) return;
+    final path = await widget.controller.ops?.quickNotePath;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _quickNotePath = path);
     }
   }
 
@@ -101,6 +204,20 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  /// Persists the reminder-markers toggle.
+  ///
+  /// Takes effect on the next reconciliation, which the shell triggers on
+  /// the way back from here (a settings change bumps the session, and any
+  /// resume resyncs), so already-scheduled alarms pick up the new text.
+  Future<void> _toggleReminderTokens(bool value) async {
+    final controller = widget.controller;
+    await controller.setReminderShowTokens(enabled: value);
+    controller.notify();
+    if (mounted) {
+      setState(() => _reminderShowTokens = value);
+    }
+  }
+
   Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
     final controller = widget.controller;
     await controller.setPreviewMode(mode);
@@ -119,12 +236,30 @@ final class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _setLinkType(LinkType type) async {
+    final controller = widget.controller;
+    await controller.setLinkType(type);
+    controller.notify();
+    if (mounted) {
+      setState(() => _linkType = type);
+    }
+  }
+
+  Future<void> _setIndentWidth(int width) async {
+    final controller = widget.controller;
+    await controller.setIndentWidth(width);
+    controller.notify();
+    if (mounted) {
+      setState(() => _indentWidth = width);
+    }
+  }
+
   Future<void> _rescan() async {
     try {
       await widget.controller.rescanNow();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Re-index complete')),
+          SnackBar(content: Text(AppStrings.reindexDone)),
         );
       }
     } on Object catch (error) {
@@ -140,11 +275,25 @@ final class _SettingsScreenState extends State<SettingsScreen> {
   /// and writes the buffered lines (+ a context header) to the chosen file.
   Future<void> _exportLog() async {
     final controller = widget.controller;
-    final lines = AppLog.lines();
-    if (lines.isEmpty) {
+    // Earlier runs first: the disk mirror holds what the process before
+    // this one recorded (a reminder firing with the app closed, an OEM
+    // kill), which the in-memory buffer can never have.
+    //
+    // The two overlap: reading the mirror flushes it, so everything this
+    // run has logged since the file was attached is in BOTH. Keep only
+    // the memory lines the mirror does not already carry -- in practice
+    // the handful recorded before the attach landed. Timestamps run to
+    // the millisecond, so identical lines are the same event.
+    final persisted = await AppLog.file?.read() ?? '';
+    final onDisk = persisted.split('\n').toSet();
+    final lines = <String>[
+      for (final line in AppLog.lines())
+        if (!onDisk.contains(line)) line,
+    ];
+    if (lines.isEmpty && persisted.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('The debug log buffer is empty')),
+          SnackBar(content: Text(AppStrings.exportLogEmpty)),
         );
       }
       return;
@@ -159,6 +308,9 @@ final class _SettingsScreenState extends State<SettingsScreen> {
       '# library: ${controller.root ?? '(none)'}',
       '# $phase',
       '',
+      if (persisted.isNotEmpty) persisted.trimRight(),
+      if (persisted.isNotEmpty && lines.isNotEmpty)
+        '# --- not yet on disk ---',
       ...lines,
     ].join('\n');
     try {
@@ -166,18 +318,18 @@ final class _SettingsScreenState extends State<SettingsScreen> {
         fileName: 'copist-debug-log-$stamp.txt',
         bytes: Uint8List.fromList(utf8.encode(content)),
         mimeType: 'text/plain',
-        dialogTitle: 'Export debug log',
+        dialogTitle: AppStrings.exportLogTitle,
       );
       if (uri == null) return; // The user canceled; nothing to report.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Debug log exported to $uri')),
+          SnackBar(content: Text(AppStrings.exportLogDone(uri))),
         );
       }
     } on Object catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $error')),
+          SnackBar(content: Text(AppStrings.exportLogFailed(error))),
         );
       }
     }
@@ -194,34 +346,39 @@ final class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
+    return ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text(AppStrings.trashTitle),
-            subtitle: const Text(AppStrings.trashSubtitle),
+            title: Text(AppStrings.trashTitle),
+            subtitle: Text(AppStrings.trashSubtitle),
             value: _trash ?? true,
             onChanged: _toggleTrash,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.debugLogsTitle),
-            subtitle: const Text(AppStrings.debugLogsSubtitle),
+            title: Text(AppStrings.debugLogsTitle),
+            subtitle: Text(AppStrings.debugLogsSubtitle),
             value: _debugLogs ?? true,
             onChanged: _toggleDebugLogs,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.lineNumbersTitle),
-            subtitle: const Text(AppStrings.lineNumbersSubtitle),
+            title: Text(AppStrings.lineNumbersTitle),
+            subtitle: Text(AppStrings.lineNumbersSubtitle),
             value: _lineNumbers ?? true,
             onChanged: _toggleLineNumbers,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.keyboardOnOpenTitle),
-            subtitle: const Text(AppStrings.keyboardOnOpenSubtitle),
+            title: Text(AppStrings.keyboardOnOpenTitle),
+            subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
             value: _autofocusEditor ?? false,
             onChanged: _toggleAutofocusEditor,
+          ),
+          SwitchListTile(
+            key: const Key('reminder-show-tokens'),
+            title: Text(AppStrings.reminderShowTokensTitle),
+            subtitle: Text(AppStrings.reminderShowTokensSubtitle),
+            value: _reminderShowTokens ?? false,
+            onChanged: _toggleReminderTokens,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -240,7 +397,7 @@ final class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<PreviewLayoutMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: PreviewLayoutMode.auto,
                       label: Text(AppStrings.previewModeAuto),
@@ -288,36 +445,167 @@ final class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.linkTypeTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.linkTypeSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<LinkType>(
+                  key: const Key('link-type'),
+                  segments: [
+                    ButtonSegment(
+                      value: LinkType.wikilink,
+                      label: Text(AppStrings.linkTypeWikilink),
+                    ),
+                    ButtonSegment(
+                      value: LinkType.markdown,
+                      label: Text(AppStrings.linkTypeMarkdown),
+                    ),
+                  ],
+                  selected: {_linkType},
+                  onSelectionChanged: (selection) =>
+                      _setLinkType(selection.first),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.indentWidthTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.indentWidthSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<int>(
+                  key: const Key('indent-width'),
+                  segments: const [
+                    ButtonSegment(value: 2, label: Text('2')),
+                    ButtonSegment(value: 4, label: Text('4')),
+                    ButtonSegment(value: 6, label: Text('6')),
+                    ButtonSegment(value: 8, label: Text('8')),
+                  ],
+                  selected: {_indentWidth},
+                  onSelectionChanged: (selection) =>
+                      _setIndentWidth(selection.first),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.languageTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.languageSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<AppLanguage>(
+                  key: const Key('language-choice'),
+                  segments: [
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.system,
+                      label: Text(AppStrings.languageSystem),
+                    ),
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.english,
+                      label: Text(AppStrings.languageEnglish),
+                    ),
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.italian,
+                      label: Text(AppStrings.languageItalian),
+                    ),
+                  ],
+                  selected: {_language},
+                  onSelectionChanged: (values) =>
+                      unawaited(_setLanguage(values.first)),
+                ),
+              ],
+            ),
+          ),
           const Divider(),
           ListTile(
-            title: const Text('Library path'),
+            key: const Key('toolbar-setting'),
+            title: Text(AppStrings.toolbarSettingsTitle),
+            subtitle: Text(AppStrings.toolbarSettingsSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) =>
+                    ToolbarSettingsScreen(controller: widget.controller),
+              ),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            key: const Key('quick-note-setting'),
+            title: Text(AppStrings.quickNoteTitle),
+            subtitle: Text(
+              _quickNotePath ?? AppStrings.quickNoteUnset,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickQuickNote,
+          ),
+          ListTile(
+            key: const Key('list-folder-setting'),
+            title: Text(AppStrings.listFolderTitle),
+            subtitle: Text(_listFolder ?? defaultListFolder),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickListFolder,
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(AppStrings.libraryPathTitle),
             subtitle: Text(controller.root ?? ''),
           ),
           ListTile(
-            title: const Text('Re-index now'),
+            title: Text(AppStrings.reindexTitle),
             leading: const Icon(Icons.refresh),
             onTap: _rescan,
           ),
           ListTile(
-            title: const Text('Export debug log'),
+            title: Text(AppStrings.exportLogTitle),
             leading: const Icon(Icons.save_alt),
-            subtitle: const Text(
-              'Save the recorded events to a file you choose',
-            ),
+            subtitle: Text(AppStrings.exportLogSubtitle),
             onTap: _exportLog,
           ),
           ListTile(
-            title: const Text('Close library'),
+            title: Text(AppStrings.closeLibraryTitle),
             leading: const Icon(Icons.link_off),
             onTap: () async {
               await controller.close();
-              if (mounted) {
-                Navigator.of(this.context).pop();
-              }
+              widget.onClosed?.call();
             },
           ),
         ],
-      ),
     );
   }
 }

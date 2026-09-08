@@ -1,6 +1,6 @@
 // T-M2-08 AC: all layout modes reachable — split (editor + preview side by
-// side), full-screen switch with the top toggle, divider drag persistence,
-// and the shell's auto/forced resolution from the fake session.
+// side), full-screen switch with the app-bar toggle (T-UI-06), divider drag
+// persistence, and the shell's auto/forced resolution from the fake session.
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
@@ -41,19 +41,42 @@ void main() {
       expect(find.byType(EditorPreviewSplit), findsOneWidget);
     });
 
-    testWidgets('switch mode shows one pane and the top toggle flips (AC)',
-        (tester) async {
-      await tester.pumpWidget(_app(_noteView(splitPreview: false)));
+    testWidgets('switch mode shows one pane and the app-bar action flips '
+        '(AC, T-UI-06)', (tester) async {
+      var preview = false;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) => MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(
+                actions: [
+                  IconButton(
+                    key: const Key('editor-preview-toggle'),
+                    icon: Icon(preview ? Icons.edit : Icons.visibility),
+                    onPressed: () => setState(() => preview = !preview),
+                  ),
+                ],
+              ),
+              body: NoteView(
+                path: '/notes/a.md',
+                showLineNumbers: true,
+                autofocusEditor: false,
+                showPreview: preview,
+                readNote: (_) async => '# Head\n\nbody text',
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.pump();
       await tester.pump();
       expect(find.byType(NoteEditor), findsOneWidget);
       expect(find.byType(MarkdownPreview), findsNothing);
-      // The top switch: one tap shows the preview, one tap returns.
-      await tester.tap(find.byKey(const Key('preview-switch')));
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
       await tester.pump();
       expect(find.byType(MarkdownPreview), findsOneWidget);
       expect(find.byType(NoteEditor), findsNothing);
-      await tester.tap(find.byKey(const Key('preview-switch')));
+      await tester.tap(find.byKey(const Key('editor-preview-toggle')));
       await tester.pump();
       expect(find.byType(NoteEditor), findsOneWidget);
       expect(find.byType(MarkdownPreview), findsNothing);

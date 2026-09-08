@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
@@ -69,6 +68,10 @@ final class NoteOps implements NoteOperations {
   /// The absolute path for library-relative [rel] ('' = root).
   String _abs(String rel) => p.join(root, rel);
 
+  /// The indexed note/folder at library-relative [path], or null.
+  @override
+  Future<Note?> find(String path) => _dao.find(path);
+
   Future<Note> _mustFind(String path) async {
     final row = await _dao.find(path);
     if (row == null) throw StateError('No indexed note at "$path"');
@@ -84,19 +87,38 @@ final class NoteOps implements NoteOperations {
   Future<void> setTrashEnabled({required bool enabled}) =>
       _settings.setTrashEnabled(root, enabled: enabled);
 
-  /// Creates an empty `<name>.md` note in [parentPath], uniquifying the
-  /// name. Returns the indexed row.
+  /// The list-note folder (library-relative).
+  @override
+  Future<String> get listNoteFolder => _settings.listNoteFolder(root);
+
+  /// Sets the list-note folder.
+  @override
+  Future<void> setListNoteFolder({required String folder}) =>
+      _settings.setListNoteFolder(root, folder: folder);
+
+  /// The user-chosen quick note, or null for the default.
+  @override
+  Future<String?> get quickNotePath => _settings.quickNotePath(root);
+
+  /// Sets (or clears) the user-chosen quick note.
+  @override
+  Future<void> setQuickNotePath({required String? path}) =>
+      _settings.setQuickNotePath(root, path: path);
+
+  /// Creates a `<name>.md` note in [parentPath] with [content] as its
+  /// initial content, uniquifying the name. Returns the indexed row.
   @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   }) {
     return _synchronized(() async {
       final clean = sanitizeName(name, fallback: defaultNoteName);
       final dir = Directory(_abs(parentPath));
       final unique = await uniqueFileName(dir, clean, '.md');
       final file = File(_abs(resolvePath(parentPath, unique)));
-      await writeFileAtomically(file, Uint8List(0));
+      await writeFileAtomically(file, utf8.encode(content));
       await indexer.applyEvents(root, [file.path]);
       return _mustFind(resolvePath(parentPath, unique));
     });

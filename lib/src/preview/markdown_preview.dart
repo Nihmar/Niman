@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/math_widget.dart';
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
+import 'package:copist/src/preview/wikilink.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -43,6 +45,8 @@ final class MarkdownPreview extends StatefulWidget {
     this.padding = const EdgeInsets.all(16),
     this.controller,
     this.onTapLink,
+    this.onWikiLink,
+    this.embedResolver,
     this.mathStyle = const MathStyle(),
     this.mathCache,
     this.scrollMap,
@@ -81,6 +85,15 @@ final class MarkdownPreview extends StatefulWidget {
 
   /// Link callback (M3 link handling).
   final MarkdownTapLinkCallback? onTapLink;
+
+  /// Wikilink callback (T-M3-07): called with the parsed `[[…]]` ref (and
+  /// its display text) when a wikilink is tapped.
+  final void Function(WikiRef ref, String display)? onWikiLink;
+
+  /// Resolves an `![[…]]` embed target to an absolute file path (or null);
+  /// images render inline, other targets as muted path text. When null,
+  /// embeds render as plain text.
+  final Future<String?> Function(String target)? embedResolver;
 
   /// Math visual style (size/color); see [MathStyle].
   final MathStyle mathStyle;
@@ -180,6 +193,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
         const MathBlockSyntax(),
         ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
       ],
+      inlineSyntaxes: [EmbedInlineSyntax(), WikilinkInlineSyntax()],
       extensionSet: md.ExtensionSet.gitHubFlavored,
       encodeHtml: false,
     );
@@ -200,15 +214,22 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       selectable: false,
       styleSheet: styleSheet,
       imageDirectory: widget.imageDirectory,
-      imageBuilder: widget.imageBuilder ??
+      imageBuilder:
+          widget.imageBuilder ??
           (widget.imageDirectory == null
               ? null
-              : (uri, title, alt) =>
-                  _imageFor(uri, widget.imageDirectory)),
+              : (uri, title, alt) => _imageFor(uri, widget.imageDirectory)),
       checkboxBuilder: widget.checkboxBuilder,
       bulletBuilder: widget.bulletBuilder,
       builders: <String, MarkdownElementBuilder>{
         ...widget.builders,
+        if (widget.onWikiLink != null)
+          'wikilink': WikilinkBuilder(
+            onWikiRef: widget.onWikiLink!,
+            recognizers: _recognizers,
+          ),
+        if (widget.embedResolver != null)
+          'embed': EmbedBuilder(onResolve: widget.embedResolver!),
         'math': MathInlineBuilder(cache: _mathCache, style: widget.mathStyle),
         'mathblock': MathBlockBuilder(
           cache: _mathCache,

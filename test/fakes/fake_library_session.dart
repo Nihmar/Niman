@@ -1,12 +1,22 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/search/replace.dart';
+import 'package:copist/src/search/search_repo.dart';
+import 'package:copist/src/search/tag_repo.dart';
 import 'package:path/path.dart' as p;
+
+import 'fake_link_source.dart';
+import 'fake_replace_source.dart';
+import 'fake_search_source.dart';
+import 'fake_tag_source.dart';
 
 /// In-memory [LibrarySession] for widget tests.
 ///
@@ -36,6 +46,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _lastError;
   bool _resumeStarted = false;
   bool _trashEnabled = true;
+  String? _quickNotePath;
+  String _listNoteFolder = 'Lists';
+  String _editorToolbar = '';
+  AppLanguage _language = AppLanguage.system;
 
   @override
   LibraryPhase get phase => _phase;
@@ -113,6 +127,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {}
 
+  bool _reminderShowTokens = false;
+
+  @override
+  Future<bool> get reminderShowTokens async => _reminderShowTokens;
+
+  @override
+  Future<void> setReminderShowTokens({required bool enabled}) async {
+    _reminderShowTokens = enabled;
+  }
+
   // T-M2-08 preview layout, with state so settings/layout widgets can
   // exercise it in tests.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
@@ -134,6 +158,51 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _splitRatio = ratio;
   }
 
+  TreeSort _treeSort = TreeSort.nameAsc;
+
+  @override
+  Future<TreeSort> get treeSort async => _treeSort;
+
+  @override
+  Future<void> setTreeSort(TreeSort sort) async {
+    _treeSort = sort;
+  }
+
+  LinkType _linkType = LinkType.wikilink;
+  int _indentWidth = 2;
+
+  @override
+  Future<LinkType> get linkType async => _linkType;
+
+  @override
+  Future<void> setLinkType(LinkType type) async {
+    _linkType = type;
+  }
+
+  @override
+  Future<int> get indentWidth async => _indentWidth;
+
+  @override
+  Future<void> setIndentWidth(int width) async {
+    _indentWidth = width;
+  }
+
+  @override
+  Future<String> get editorToolbar async => _editorToolbar;
+
+  @override
+  Future<void> setEditorToolbar(String layout) async {
+    _editorToolbar = layout;
+  }
+
+  @override
+  Future<AppLanguage> get language async => _language;
+
+  @override
+  Future<void> setLanguage(AppLanguage language) async {
+    _language = language;
+  }
+
   @override
   void notify() => _bump();
 
@@ -146,16 +215,35 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<List<Note>> children(int parentId) async {
-    final kids = <_Row>[
-      for (final row in _rows)
-        if (!row.trashed && _parentIdOf(row.path) == parentId) row,
-    ]..sort((a, b) {
-      if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
-      return a.name.compareTo(b.name);
-    });
+  Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
+    final kids =
+        <_Row>[
+          for (final row in _rows)
+            if (!row.trashed && _parentIdOf(row.path) == parentId) row,
+        ]..sort((a, b) {
+          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
+          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
+        });
     return kids.map(_toNote).toList();
   }
+
+  @override
+  Future<Note?> find(String path) {
+    final row = _findRow(path);
+    return Future<Note?>.value(row == null ? null : _toNote(row));
+  }
+
+  @override
+  Future<SearchSource?> get searchSource async => FakeSearchSource();
+
+  @override
+  Future<ReplaceSource?> get replaceSource async => FakeReplaceSource();
+
+  @override
+  Future<TagSource?> get tagSource async => FakeTagSource();
+
+  @override
+  Future<LinkSource?> get linkSource async => FakeLinkSource();
 
   @override
   Future<List<Note>> folders() async {
@@ -191,15 +279,35 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<String?> get quickNotePath async => _quickNotePath;
+
+  @override
+  Future<void> setQuickNotePath({required String? path}) async {
+    _quickNotePath = path;
+  }
+
+  /// The stored content of the note at [path], or null (test aid).
+  String? contentOf(String path) => _findRow(path)?.content;
+
+  @override
+  Future<String> get listNoteFolder async => _listNoteFolder;
+
+  @override
+  Future<void> setListNoteFolder({required String folder}) async {
+    _listNoteFolder = folder;
+  }
+
+  @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   }) async {
     _checkParent(parentPath);
     final clean = sanitizeName(name, fallback: defaultNoteName);
     final unique = _uniqueInParent(parentPath, clean, '.md');
     final rel = resolvePath(parentPath, unique);
-    _addRow(rel, isDir: false);
+    _addRow(rel, isDir: false).content = content;
     _bump();
     return _noteAt(rel);
   }
@@ -424,8 +532,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashNameTaken(String name) =>
       _rows.any((row) => row.trashed && row.trashName == name);
 
-  void _addRow(String path, {required bool isDir}) {
-    _rows.add(_Row(id: _nextId++, path: path, isDir: isDir));
+  _Row _addRow(String path, {required bool isDir}) {
+    final row = _Row(id: _nextId++, path: path, isDir: isDir);
+    _rows.add(row);
+    return row;
   }
 
   void _repath(String oldPath, String newPath) {
@@ -522,6 +632,9 @@ final class _Row {
 
   final int id;
   final bool isDir;
+
+  /// The note's content (created notes; the fake never edits it).
+  String content = '';
 
   /// Library-relative slash path; kept on its original value while trashed.
   String path;
