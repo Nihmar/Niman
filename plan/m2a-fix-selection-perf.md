@@ -1,6 +1,6 @@
 # M2a fix — slow typing + broken selection on large notes (Geometria 1, 931 KB)
 
-**Status:** Planned · **Depends on:** M2a E8d (NoteEditor wired into NoteView) · **Evidence:** `copist-debug-log-2026-09-06-072437.613.txt` (Geometria 1, 931580 chars) · **Decisions locked:** plain-drag persists + tap clears; windowed IME; target 931 KB @ 60 fps (harder highlight/autosave debounce OK); scripted on-device pass will be run.
+**Status:** Done + verified on device 2026-09-08 (user) · **Depends on:** M2a E8d (NoteEditor wired into NoteView) · **Evidence:** `copist-debug-log-2026-09-06-072437.613.txt` (Geometria 1, 931580 chars) · **Decisions locked:** plain-drag persists + tap clears; windowed IME; target 931 KB @ 60 fps (harder highlight/autosave debounce OK); scripted on-device pass will be run.
 
 ## Why
 

@@ -1,7 +1,8 @@
 # Type-kinded notes — per-note custom GUIs via `type:` frontmatter
 
-**Status:** Planned (draft — design agreed 2026-09-07; no milestone slot
-assigned yet; candidate: its own slice after M4 verification, or M6) ·
+**Status:** Done + verified on device 2026-09-08 (user): T-TK-01…T-TK-09,
+the `list` kind end to end — registry, parser, checklist GUI, pencil,
+FAB entry, folder setting, drag reordering ·
 **Depends on:** M4 (frontmatter parser/index) for reading `type`; M3 shell,
 watcher, indexer, strings. The first renderer (`list`) needs M2's
 editor/preview surface (the note screen) · **Spec:** user request +
@@ -90,27 +91,27 @@ syncs like one).
 
 ## Tasks
 
-- [ ] **T-TK-01** Reserved `type` key + docs. Add `type` (string) to the known
+- [x] **T-TK-01** Reserved `type` key + docs. Add `type` (string) to the known
   frontmatter fields in `frontmatter/fields.dart`; note it in the spec's
   frontmatter list. Value is free-form for now (`list`, later others);
   unknown values fall back to the default editor. *AC: `type: list` is read
   by the M4 frontmatter parser; an unknown `type` value does not break
   anything.*
-- [ ] **T-TK-02** Type → renderer registry. A small
+- [x] **T-TK-02** Type → renderer registry. A small
   `frontmatter/note_kind.dart` (or `ui/kinds/`): `abstract class NoteKindGUI`
   (renders into the note body slot + exposes the app-bar extras, e.g. the
   pencil), a `Map<String, NoteKindGUI>` keyed by `type` value, and a
   `forType(String?)` that returns the default when absent/unknown. The
   shell (or note screen) asks the registry at open. *AC: default (no type)
   is byte-identical behaviour to today; unknown type = default.*
-- [ ] **T-TK-03** List renderer: parse. Parse the note body into a tree of
+- [x] **T-TK-03** List renderer: parse. Parse the note body into a tree of
   items from task lines: `- [ ]` / `- [x]` (leading `[ ]`/`[x]`, any fence,
   with `+`/`*`); indentation defines nesting. **Non-task lines (paragraphs,
   headings, blank lines) are ignored — not rendered.** They stay in the file
   untouched but are invisible in the list view. *AC: unit tests over flat,
   nested, and mixed (task + prose) bodies; round-trip of an untouched line
   is byte-stable; prose-only file renders as an empty checklist.*
-- [ ] **T-TK-04** List renderer: GUI. A `ListView` of checkbox rows with
+- [x] **T-TK-04** List renderer: GUI. A `ListView` of checkbox rows with
   indentation, showing the item text; `[x]` shows checked. Tapping the
   **checkbox** flips `[ ]`↔`[x]` on disk (write the whole note back, off the
   UI isolate, atomic temp-file write via `core/files.dart`; follow the
@@ -123,18 +124,18 @@ syncs like one).
   bottom safe area (rounded screen corners). *AC: widget tests with a fake
   write; a checkbox tap flips the line and persists; a text tap edits the
   line and persists; the add row appends a new item.*
-- [ ] **T-TK-05** Pencil → raw editor. A top-right pencil icon (only for
+- [x] **T-TK-05** Pencil → raw editor. A top-right pencil icon (only for
   type-kinded notes) opens the note straight to the app's normal source
   editor (the existing `NoteView` path, editor; not the preview). Editing in
   the editor is authoritative; returning to the list re-parses. *AC:
   from a list note, pencil opens the editor; a change made in the editor
   shows up as the new list state when returning.*
-- [ ] **T-TK-06** Files FAB "New list note". The expandable FAB gains a
+- [x] **T-TK-06** Files FAB "New list note". The expandable FAB gains a
   mini-FAB (or a menu entry) for "New list note"; it creates a note in the
   configured folder with `type: list` in frontmatter and opens it in the
   list GUI. *AC: choosing it in a folder ≠ the configured folder still
   creates the note under the configured folder; the note opens as a list.*
-- [ ] **T-TK-07** List-folder setting (library-scoped). A library setting
+- [x] **T-TK-07** List-folder setting (library-scoped). A library setting
   (alongside trash/history/template folder, in `library_settings`) defaulting
   to `Lists/`; settings UI to change it — a **picker over the library's
   folders** (with a "New folder" action), never a typed path. Creation
@@ -142,7 +143,7 @@ syncs like one).
   back to the settings, so a library where none was ever chosen ends up
   with `Lists` created and shown. *AC: changing the folder re-targets
   subsequent "New list note".*
-- [ ] **T-TK-08** Strings + tests. All UI text in `strings.dart`; unit tests
+- [x] **T-TK-08** Strings + tests. All UI text in `strings.dart`; unit tests
   (list parser, registry fallback, byte-stable round-trip) and widget tests
   (toggle persistence, pencil→editor, FAB choice). *AC: green; a mixed
   library opens each note with the right GUI.*

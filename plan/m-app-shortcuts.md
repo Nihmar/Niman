@@ -1,8 +1,7 @@
 # App quick actions — launcher long-press shortcuts
 
-**Status:** Implemented 2026-09-08 (Android host + Dart routing + icons;
-analyze and tests green) — the on-device launcher check is still to be
-done by the user · **Depends on:** M4 (frontmatter, for the `new list`
+**Status:** Done + verified on device 2026-09-08 (user): the four
+actions publish and each lands on its flow · **Depends on:** M4 (frontmatter, for the `new list`
 action's `type: list` note) and the Todo tab (todo-tab.md, for the
 `new todo` action), both landed · **Spec:** user request (quick actions in
 the launcher long-press menu, Android).

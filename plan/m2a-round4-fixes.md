@@ -1,6 +1,6 @@
 # M2a round 4 — keyboard re-show, grid metrics lock, selection slop (Geometria 1)
 
-**Status:** R1–R3 done (`402d003` R1+R3, `5135140` R2) · R4 device pass outstanding · **Depends on:** M2a fix P0–P4 (committed: `542585b` + `7551eae`) · **Evidence:** `copist-debug-log-2026-09-06-121736.027.txt` (931581 chars; pushes now `2224 chars (window) in 0.2–0.6 ms`, no ~2 s stalls) + user reports: keyboard showed once then never again (Enter key itself correct); caret renders mid-glyph; selection never matches intent; taps never land where tapped · **Decisions locked:** user font size = system minimum (~0.85×); editor grid owns its metrics (`TextScaler.noScaling` on rows); tap = keyboard; plain-drag persists + tap clears (unchanged).
+**Status:** R1–R3 done (`402d003` R1+R3, `5135140` R2) · R4 device pass done 2026-09-08 (user) · **Depends on:** M2a fix P0–P4 (committed: `542585b` + `7551eae`) · **Evidence:** `copist-debug-log-2026-09-06-121736.027.txt` (931581 chars; pushes now `2224 chars (window) in 0.2–0.6 ms`, no ~2 s stalls) + user reports: keyboard showed once then never again (Enter key itself correct); caret renders mid-glyph; selection never matches intent; taps never land where tapped · **Decisions locked:** user font size = system minimum (~0.85×); editor grid owns its metrics (`TextScaler.noScaling` on rows); tap = keyboard; plain-drag persists + tap clears (unchanged).
 
 ## Why a new round
 

@@ -1,8 +1,9 @@
 # AGENTS.md
 Copist: Flutter Markdown notes (Android + Linux + Windows).
 Spec: `Copist - spec & plan.md`. Design: `plan/design.md`. Plan: `plan/m*.md`
-(M0→M1→M1.5→M2→…→M7, sequential; check each file's Status line — M0 and M1
-done, **M1.5 is next and blocks M2**).
+(M0→M1→M1.5→M2→…→M7, sequential; check each file's Status line — everything
+up to M3 is done and device-verified, **M4 is next**). `plan/README.md`
+indexes them, including the slices outside the chain.
 
 ## Language
 - Whatever the conversation language, everything in the repo is written in English: code, comments, documentation, commit messages.

@@ -1,6 +1,6 @@
 # M2a round 7 — selection-UX corrections (133116 log + screenshots)
 
-**Status:** In progress · **Depends on:** round 6 (T3 reverted to stock
+**Status:** Done · R7 device re-pass done 2026-09-08 (user) · **Depends on:** round 6 (T3 reverted to stock
 full-advance in `98e65d2`; stale-HitTest fix in `517ff16`) · **Evidence:**
 `copist-debug-log-2026-09-06-133116.618.txt` + screenshots 13:29–13:31
 

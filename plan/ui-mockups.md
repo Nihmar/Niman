@@ -1,6 +1,6 @@
 # UI — mockup parity (bottom nav, toolbars, chrome)
 
-**Status:** Done (implementation; on-device screenshot pass outstanding) · **Depends on:** M2a done (re_editor-based editor) · **Spec:**
+**Status:** Done + verified on device 2026-09-08 (user) · **Depends on:** M2a done (re_editor-based editor) · **Spec:**
 *Requirements* (layout, editor) · **Visual source of truth:** the mockups below.
 Everything in this file that the spec is silent on (bottom nav, new tabs, toolbar)
 is defined by the mockups; T-UI-11 folds those back into the spec.

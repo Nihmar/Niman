@@ -1,6 +1,10 @@
 # Todo tab — mockup parity (filter row, rows, app bar overflow)
 
-**Status:** In progress (implementation) · **Depends on:** `todo-tab.md`
+**Status:** T-TDM-01…03 and 05 done + verified on device 2026-09-08
+(user); **T-TDM-04 (the app-bar ⋮) is not built** — the view switch is
+still the tab's `SegmentedButton`. T-TDM-02 shipped with a later
+correction: the left accent bar became colored token chips on the row ·
+**Depends on:** `todo-tab.md`
 (T-TD-01…T-TD-08 done) · **Spec:** the mockup below is the source of
 truth for everything this file is silent on.
 
@@ -31,10 +35,10 @@ truth for everything this file is silent on.
 
 ## Tasks
 
-- [ ] **T-TDM-01** Strings: `todoAllDates` ("All dates"), `todoFilter`
+- [x] **T-TDM-01** Strings: `todoAllDates` ("All dates"), `todoFilter`
   ("Filter"), count suffixes (`open` / `done`), `todoNoTokens`; drop the
   chip-bar-only `todoDueAll` ("All"). *AC: analyze clean, no dead strings.*
-- [ ] **T-TDM-02** Row per mockup: one-line subtitle — overdue:
+- [x] **T-TDM-02** Row per mockup: one-line subtitle — overdue:
   `Overdue · d MMM` (error color); today: `Today` (tertiary) + clock +
   `HH:MM` when the task has a reminder; upcoming: `d MMM`
   (onSurfaceVariant) + clock + time; no due date and no reminder: no
@@ -44,7 +48,7 @@ truth for everything this file is silent on.
   no tag → no bar. Checkbox, tap-to-edit, long-press menu, completion
   strikethrough unchanged. *AC: widget test per due state + accent bar +
   no-subtitle case.*
-- [ ] **T-TDM-03** Filter row + sheet: `TodoFilterBar` rebuilt —
+- [x] **T-TDM-03** Filter row + sheet: `TodoFilterBar` rebuilt —
   due-range dropdown pill (outlined button, `expand_more`, popup menu
   with the five ranges, checked state), `Filter` outlined pill
   (`filter_alt` + "Filter") opening a **bottom sheet** (the app's menu
@@ -61,7 +65,7 @@ truth for everything this file is silent on.
   keeps pruning tokens when the view flips. The old `ⓘ` action and the
   `SegmentedButton` are gone. *AC: widget test — overflow flips the
   list, help still opens (shell test).*
-- [ ] **T-TDM-05** Test sweep: `todo_tab_test.dart` rewritten for the
+- [x] **T-TDM-05** Test sweep: `todo_tab_test.dart` rewritten for the
   new shapes (dropdown, sheet, overflow-driven view switch);
   `shell_reminders_test.dart` (`todo-help` key) and
   `tab_bar_test.dart` updated. *AC: `flutter test` green.*

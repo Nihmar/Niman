@@ -1,7 +1,7 @@
 # M3 — Links & search
 
-**Status:** Planned (plan of record updated 2026-09-06 — task order
-re sequenced, decisions locked in *Decisions* below) · **Depends on:** M2
+**Status:** Done + verified on device 2026-09-08 (user): T-M3-01…T-M3-10,
+decisions locked in *Decisions* below · **Depends on:** M2
 (and on the stable row ids from M1.5) · **Spec:** *Requirements* (links,
 tags, search), *Milestones → M3*
 
@@ -118,7 +118,7 @@ is **not wired**.
   walk + index, generous latency assertion). On-device pass on the real
   library (index build + search latency + tag list). *AC: green; release
   builds rebuilt and reported after the milestone.*
-- [ ] **T-M3-10** Replace across search results (requested during the
+- [x] **T-M3-10** Replace across search results (requested during the
   T-M3-09 on-device pass): an optional exact-word replace on the search
   screen — Words mode only, never Contains. Header Replace… action =
   replace in every matching note; long-press a result = replace in that
