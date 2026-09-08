@@ -21,7 +21,7 @@
     
 *   **Scale:** unbound — 1,000,000 notes and novel-length files (hard requirement).
     
-*   **Frontmatter:** general YAML. Known fields: `title`, `tags`, `date`, `pinned`, `aliases`; any other key is indexed/filterable.
+*   **Frontmatter:** general YAML. Known fields: `title`, `tags`, `date`, `pinned`, `aliases`, `type`; any other key is indexed/filterable.
     
 *   **Tags:** frontmatter `tags:` + inline `#tags`; both searchable.
     

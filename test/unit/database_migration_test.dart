@@ -26,6 +26,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 1');
         await db.customStatement(
+          'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN link_type',
         );
         await db.customStatement(
@@ -83,6 +86,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 2');
         await db.customStatement(
+          'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN link_type',
         );
         await db.customStatement(
@@ -135,6 +141,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 3');
         await db.customStatement(
+          'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN link_type',
         );
         await db.customStatement(
@@ -184,6 +193,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 4');
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
       await db.customStatement(
@@ -227,6 +239,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 5');
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
       await db.customStatement(
@@ -264,6 +279,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 6');
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
       await db.customStatement(
@@ -296,6 +314,9 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
+      await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
@@ -377,6 +398,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 8');
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
       await db.customStatement(
@@ -409,6 +433,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 9');
       await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN link_type',
       );
       await db.customStatement(
@@ -427,6 +454,33 @@ void main() {
     // Wikilink by default; a 2-space indent (the pre-M5 default).
     expect(row.linkType, 'wikilink');
     expect(row.indentWidth, 2);
+    await db.close();
+  });
+
+  test('v10 databases gain list_note_folder on upgrade, keeping library '
+      'settings', () async {
+    // Build a v10-shaped file: create the database at v11, rewind the
+    // schema version, and drop the column v10 never had.
+    {
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      await db.customStatement('PRAGMA user_version = 10');
+      await db.customStatement(
+        'ALTER TABLE library_settings DROP COLUMN list_note_folder',
+      );
+      await db.customStatement(
+        'INSERT INTO library_settings (path, trash_enabled, '
+        "history_versions) VALUES ('/lib', 1, 10)",
+      );
+      await db.close();
+    }
+
+    final db = CopistDatabase(NativeDatabase(dbFile));
+    final row = (await db.select(db.librarySettings).get()).single;
+    expect(row.path, '/lib');
+    expect(row.trashEnabled, true);
+    expect(row.historyVersions, 10);
+    // The default list folder appears on upgrade.
+    expect(row.listNoteFolder, 'Lists');
     await db.close();
   });
 }

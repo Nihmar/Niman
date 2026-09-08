@@ -14,6 +14,8 @@ import 'package:copist/src/editor/md_editing.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/toolbar.dart';
+import 'package:copist/src/frontmatter/note_kind.dart';
+import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/image_import.dart';
 import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/links/resolver.dart';
@@ -71,6 +73,8 @@ final class NoteView extends StatefulWidget {
     this.linkSource,
     this.onOpenNote,
     this.initialAnchor,
+    this.kindMode = true,
+    this.onNoteKindChanged,
     super.key,
   });
 
@@ -140,6 +144,15 @@ final class NoteView extends StatefulWidget {
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
 
+  /// Whether the note-kind GUIs are shown (T-TK-02): a note whose
+  /// frontmatter declares a known `type` opens in its kind GUI instead of
+  /// the editor. False = always the raw editor.
+  final bool kindMode;
+
+  /// Reports the loaded note's kind (the frontmatter `type` value, null =
+  /// plain note); the shell shows the kind toggle for known kinds.
+  final void Function(String? type)? onNoteKindChanged;
+
   @override
   State<NoteView> createState() => _NoteViewState();
 }
@@ -204,6 +217,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   int _revision = 0;
   int _lastSavedRevision = 0;
 
+  /// The loaded note's kind (the frontmatter `type` value, null = plain
+  /// note); null again while a load is in flight.
+  String? _noteKind;
+
+  /// The kind GUIs' window onto the note (T-TK-02).
+  late final _NoteKindHost _kindHost;
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +237,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
         : widget.controller!;
     _findController = CodeFindController(_controller);
+    _kindHost = _NoteKindHost(this);
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -303,6 +324,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       _loading = true;
       _ready = false;
       _error = null;
+      _noteKind = null;
     });
     final clock = Stopwatch()..start();
     try {
@@ -330,6 +352,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       if (!mounted || widget.path != path) return;
       // The buffer uses LF: normalize line endings on load.
       final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+      // The note kind (T-TK-02): the frontmatter `type` decides the body
+      // (kind GUI or plain editor); detection scans the leading block
+      // only, never the whole text.
+      _noteKind = frontmatterTypeOf(text);
       if (stats != null) {
         _applyStats(text, stats.$1, stats.$2);
       }
@@ -340,6 +366,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _loading = false;
         _ready = true;
       });
+      widget.onNoteKindChanged?.call(_noteKind);
       // Word count + outline on open: debounced for edits only; the
       // production load already has them from its isolate (the seam path
       // uses the regular refresh).
@@ -953,6 +980,15 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     return 'saved';
   }
 
+  /// A kind GUI's byte-stable edit: the buffer takes the new text (the
+  /// highlighter, stats and preview follow it as with any edit) and the
+  /// note is saved immediately.
+  void _applyKindEdit(String newText) {
+    _controller.text = newText;
+    setState(() {});
+    unawaited(_save());
+  }
+
   @override
   Widget build(BuildContext context) {
     final error = _error;
@@ -960,12 +996,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // The toolbar formats the editor: it stays in split mode (the editor
     // is on screen) and hides in full-screen preview mode.
     final showToolbar = split || !widget.showPreview;
+    // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
+    // and hides the editor chrome (outline, status row, toolbar) — the
+    // note is a list, not a document, on screen.
+    final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
+    final kindBody = widget.kindMode && kindGui != null;
     return Column(
       children: [
         Expanded(
           child: error == null
               ? (!_ready || _loading
                     ? const Center(child: CircularProgressIndicator())
+                    : kindBody
+                    ? kindGui.buildBody(context, _kindHost)
                     : split
                     ? EditorPreviewSplit(
                         editor: _buildEditor(),
@@ -998,6 +1041,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                       ))
               : Center(child: Text(error)),
         ),
+        if (!kindBody) ...[
         // Fade + size the outline panel in and out.
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
@@ -1042,6 +1086,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ],
           ),
         ),
+        ],
       ],
     );
   }
@@ -1341,6 +1386,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
     return index + offset;
   }
+}
+
+/// The kind GUIs' window onto the note (T-TK-02): the buffer text, and
+/// byte-stable edits that persist through the regular save path.
+final class _NoteKindHost implements NoteKindHost {
+  _NoteKindHost(this._state);
+
+  final _NoteViewState _state;
+
+  @override
+  String get text => _state._controller.text;
+
+  @override
+  void applyEdit(String newText) => _state._applyKindEdit(newText);
 }
 
 /// Shows the heading-level picker (H1..H6); resolves to the chosen level

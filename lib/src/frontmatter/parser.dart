@@ -1,19 +1,26 @@
 /// Minimal frontmatter reader (M3 plan, decision 1 — M4's T-M4-01 replaces
 /// this with the `yaml` package and adds `frontmatter_fields`).
 ///
-/// Reads only the leading `---`…`---` block and only three keys: `title`
+/// Reads only the leading `---`…`---` block and only four keys: `title`
 /// (a scalar), `tags` and `aliases` (a YAML flow list `[a, b]` or a
-/// comma-separated scalar). Nothing else is parsed, and nothing is written
-/// to a fields table — the M3 reader feeds the FTS index (`title`), the
-/// tag tables and the `note_stems` alias rows.
+/// comma-separated scalar) and `type` (a scalar — the note kind; unknown
+/// kinds fall back to a plain note and the value is preserved). Nothing
+/// else is parsed, and nothing is written to a fields table — the reader
+/// feeds the FTS index (`title`), the tag tables, the `note_stems` alias
+/// rows and the note-kind detection ([frontmatterTypeOf]).
 library;
 
 import 'package:copist/src/editor/highlighting.dart';
 
-/// The three M3 frontmatter values.
+/// The four M3 frontmatter values.
 final class Frontmatter {
   /// Creates a frontmatter value.
-  const Frontmatter({required this.tags, required this.aliases, this.title});
+  const Frontmatter({
+    required this.tags,
+    required this.aliases,
+    this.title,
+    this.type,
+  });
 
   /// The `title:` value (trimmed, quotes stripped), or null when absent
   /// or empty. The FTS title falls back to the filename when null.
@@ -25,6 +32,10 @@ final class Frontmatter {
 
   /// The `aliases:` values (trimmed, deduplicated), in document order.
   final List<String> aliases;
+
+  /// The `type:` value (trimmed, quotes stripped), or null when absent or
+  /// empty. See [Frontmatter.type].
+  final String? type;
 }
 
 /// Parses the leading frontmatter block of [text], or returns null when
@@ -42,6 +53,7 @@ Frontmatter? parseFrontmatter(String text) {
   final lines = text.split('\n');
   if (lines.isEmpty || lines.first.trim() != '---') return null;
   String? title;
+  String? type;
   final tags = <String>[];
   final aliases = <String>[];
   var closed = false;
@@ -62,6 +74,8 @@ Frontmatter? parseFrontmatter(String text) {
         tags.addAll(_listValues(value).map(normalizeTag));
       case 'aliases':
         aliases.addAll(_listValues(value));
+      case 'type':
+        type ??= _unquote(value);
       default:
         break;
     }
@@ -71,7 +85,35 @@ Frontmatter? parseFrontmatter(String text) {
     title: (title == null || title.isEmpty) ? null : title,
     tags: _dedupe(tags),
     aliases: _dedupe(aliases),
+    type: (type == null || type.isEmpty) ? null : type,
   );
+}
+
+/// The `type:` value of the leading frontmatter block, or null when the
+/// note has no frontmatter block, no `type` key or an empty value.
+///
+/// Scans only the leading `---`…`---` block (never the whole text), so
+/// detecting a note's kind costs its frontmatter even on a novel-length
+/// note. Same block rules as [parseFrontmatter]: the value counts only
+/// when the block is closed.
+String? frontmatterTypeOf(String text) {
+  final lines = text.split('\n');
+  if (lines.isEmpty || lines.first.trim() != '---') return null;
+  String? type;
+  for (final line in lines.skip(1)) {
+    final trimmed = line.trim();
+    if (trimmed == '---' || trimmed == '...') {
+      // Closed block: the first `type:` seen (if any) is the kind.
+      return (type == null || type.isEmpty) ? null : type;
+    }
+    if (type != null) continue;
+    final colon = trimmed.indexOf(':');
+    if (colon <= 0) continue;
+    if (trimmed.substring(0, colon).trim().toLowerCase() != 'type') continue;
+    type = _unquote(trimmed.substring(colon + 1).trim());
+  }
+  // The block never closed: not frontmatter, no kind.
+  return null;
 }
 
 /// The normalized tag form: lowercased, no leading `#`, trimmed.

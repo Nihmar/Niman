@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
@@ -66,6 +67,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
   String? _quickNotePath;
+  String? _listFolder;
 
   @override
   void initState() {
@@ -87,6 +89,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final linkType = await controller.linkType;
     final indentWidth = await controller.indentWidth;
     final quickNotePath = await ops.quickNotePath;
+    final listFolder = await ops.listNoteFolder;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -100,7 +103,26 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _linkType = linkType;
         _indentWidth = indentWidth;
         _quickNotePath = quickNotePath;
+        _listFolder = listFolder;
       });
+    }
+  }
+
+  /// Opens the list-folder name dialog (T-TK-06): the folder new list
+  /// notes are created in.
+  Future<void> _pickListFolder() async {
+    final folder = await showNameDialog(
+      context,
+      title: 'List folder',
+      initial: _listFolder ?? 'Lists',
+    );
+    if (folder == null) return;
+    final ops = widget.controller.ops!;
+    await ops.setListNoteFolder(folder: folder);
+    final saved = await ops.listNoteFolder;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _listFolder = saved);
     }
   }
 
@@ -477,6 +499,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickQuickNote,
+          ),
+          ListTile(
+            key: const Key('list-folder-setting'),
+            title: const Text('List folder'),
+            subtitle: Text(_listFolder ?? 'Lists'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickListFolder,
           ),
           const Divider(),
           ListTile(

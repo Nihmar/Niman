@@ -46,6 +46,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _resumeStarted = false;
   bool _trashEnabled = true;
   String? _quickNotePath;
+  String _listNoteFolder = 'Lists';
 
   @override
   LibraryPhase get phase => _phase;
@@ -266,16 +267,28 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _quickNotePath = path;
   }
 
+  /// The stored content of the note at [path], or null (test aid).
+  String? contentOf(String path) => _findRow(path)?.content;
+
+  @override
+  Future<String> get listNoteFolder async => _listNoteFolder;
+
+  @override
+  Future<void> setListNoteFolder({required String folder}) async {
+    _listNoteFolder = folder;
+  }
+
   @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   }) async {
     _checkParent(parentPath);
     final clean = sanitizeName(name, fallback: defaultNoteName);
     final unique = _uniqueInParent(parentPath, clean, '.md');
     final rel = resolvePath(parentPath, unique);
-    _addRow(rel, isDir: false);
+    _addRow(rel, isDir: false).content = content;
     _bump();
     return _noteAt(rel);
   }
@@ -500,8 +513,10 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashNameTaken(String name) =>
       _rows.any((row) => row.trashed && row.trashName == name);
 
-  void _addRow(String path, {required bool isDir}) {
-    _rows.add(_Row(id: _nextId++, path: path, isDir: isDir));
+  _Row _addRow(String path, {required bool isDir}) {
+    final row = _Row(id: _nextId++, path: path, isDir: isDir);
+    _rows.add(row);
+    return row;
   }
 
   void _repath(String oldPath, String newPath) {
@@ -598,6 +613,9 @@ final class _Row {
 
   final int id;
   final bool isDir;
+
+  /// The note's content (created notes; the fake never edits it).
+  String content = '';
 
   /// Library-relative slash path; kept on its original value while trashed.
   String path;

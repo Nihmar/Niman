@@ -15,10 +15,12 @@ import 'package:copist/src/search/tag_repo.dart';
 /// exercised against the fake while the real implementation is covered
 /// by unit tests.
 abstract interface class NoteOperations {
-  /// Creates an empty `<name>.md` note in [parentPath].
+  /// Creates a `<name>.md` note in [parentPath]; [content] is the
+  /// initial file content (default empty).
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   });
 
   /// Creates a folder in [parentPath].
@@ -45,6 +47,13 @@ abstract interface class NoteOperations {
   /// The user-chosen quick note (library-relative path), or null while
   /// none has been chosen.
   Future<String?> get quickNotePath;
+
+  /// The folder (library-relative) that holds the list notes
+  /// (default `Lists`).
+  Future<String> get listNoteFolder;
+
+  /// Sets the list-note folder.
+  Future<void> setListNoteFolder({required String folder});
 
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});

@@ -46,6 +46,11 @@ final class AppStrings {
   static const String indentWidthSubtitle =
       'Spaces added per indent level in the editor';
 
+  // List note kind (T-TK-02).
+  static const String listAddHint = 'Add an item';
+  static const String listAddTooltip = 'Add an item';
+  static const String listEmpty = 'No items yet';
+
   // Editor status bar.
   static const String outlineTooltip = 'Outline';
   static const String outlineNoHeadings = 'No headings';

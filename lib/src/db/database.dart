@@ -50,6 +50,11 @@ class LibrarySettings extends Table {
   /// default `Quick note.md` at the library root.
   TextColumn get quickNotePath => text().named('quick_note_path').nullable()();
 
+  /// Library-relative folder of the list notes (T-TK-06); default
+  /// `Lists`.
+  TextColumn get listNoteFolder =>
+      text().named('list_note_folder').withDefault(const Constant('Lists'))();
+
   @override
   Set<Column> get primaryKey => {path};
 }
@@ -197,7 +202,7 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -211,11 +216,12 @@ class CopistDatabase extends _$CopistDatabase {
   /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`,
   /// pre-v4 databases `editor_autofocus`, pre-v5 databases
   /// `preview_mode` + `split_ratio`, pre-v6 databases the
-  /// `quick_note_path` library setting, pre-v7 databases `tree_sort`, and
+  /// `quick_note_path` library setting, pre-v7 databases `tree_sort`,
   /// pre-v8 databases the M3 tables (`note_stems`, `tags`, `note_tags`,
   /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
-  /// `reminder_show_tokens`, and pre-v10 databases `link_type` +
-  /// `indent_width`.
+  /// `reminder_show_tokens`, pre-v10 databases `link_type` +
+  /// `indent_width`, and pre-v11 databases the `list_note_folder`
+  /// library setting.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -283,6 +289,12 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN indent_width '
           'INTEGER NOT NULL DEFAULT 2',
+        );
+      }
+      if (from < 11) {
+        await m.database.customStatement(
+          'ALTER TABLE library_settings ADD COLUMN list_note_folder '
+          "TEXT NOT NULL DEFAULT 'Lists'",
         );
       }
     },

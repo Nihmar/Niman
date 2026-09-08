@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
@@ -88,6 +87,15 @@ final class NoteOps implements NoteOperations {
   Future<void> setTrashEnabled({required bool enabled}) =>
       _settings.setTrashEnabled(root, enabled: enabled);
 
+  /// The list-note folder (library-relative).
+  @override
+  Future<String> get listNoteFolder => _settings.listNoteFolder(root);
+
+  /// Sets the list-note folder.
+  @override
+  Future<void> setListNoteFolder({required String folder}) =>
+      _settings.setListNoteFolder(root, folder: folder);
+
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath => _settings.quickNotePath(root);
@@ -97,19 +105,20 @@ final class NoteOps implements NoteOperations {
   Future<void> setQuickNotePath({required String? path}) =>
       _settings.setQuickNotePath(root, path: path);
 
-  /// Creates an empty `<name>.md` note in [parentPath], uniquifying the
-  /// name. Returns the indexed row.
+  /// Creates a `<name>.md` note in [parentPath] with [content] as its
+  /// initial content, uniquifying the name. Returns the indexed row.
   @override
   Future<Note> createNote({
     required String parentPath,
     required String name,
+    String content = '',
   }) {
     return _synchronized(() async {
       final clean = sanitizeName(name, fallback: defaultNoteName);
       final dir = Directory(_abs(parentPath));
       final unique = await uniqueFileName(dir, clean, '.md');
       final file = File(_abs(resolvePath(parentPath, unique)));
-      await writeFileAtomically(file, Uint8List(0));
+      await writeFileAtomically(file, utf8.encode(content));
       await indexer.applyEvents(root, [file.path]);
       return _mustFind(resolvePath(parentPath, unique));
     });

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// The expandable "+" FAB (T-UI-05): the main round button reveals two
-/// mini FABs above it — New note and New folder — instead of opening the
-/// note dialog directly. Controlled by the shell ([expanded]) so it can
-/// cover the body with a tap-to-dismiss scrim while the menu is open;
-/// tapping the main FAB again (or choosing an action) collapses the menu.
+/// The expandable "+" FAB (T-UI-05): the main round button reveals three
+/// mini FABs above it — New note, New list note and New folder — instead
+/// of opening the note dialog directly. Controlled by the shell
+/// ([expanded]) so it can cover the body with a tap-to-dismiss scrim
+/// while the menu is open; tapping the main FAB again (or choosing an
+/// action) collapses the menu.
 final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   ///
@@ -15,6 +16,7 @@ final class NewItemFab extends StatelessWidget {
     required this.expanded,
     required this.onToggle,
     required this.onNewNote,
+    required this.onNewListNote,
     required this.onNewFolder,
     super.key,
   });
@@ -32,6 +34,9 @@ final class NewItemFab extends StatelessWidget {
   /// Creates a new note in the FAB target folder.
   final VoidCallback onNewNote;
 
+  /// Creates a new list note in the configured list folder.
+  final VoidCallback onNewListNote;
+
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
 
@@ -47,6 +52,14 @@ final class NewItemFab extends StatelessWidget {
           tooltip: 'New note',
           open: expanded,
           onTap: onNewNote,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('new-list-note-action'),
+          icon: Icons.checklist_outlined,
+          tooltip: 'New list note',
+          open: expanded,
+          onTap: onNewListNote,
         ),
         const SizedBox(height: 12),
         _MiniFab(

@@ -12,6 +12,7 @@ import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_source.dart';
+import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
 import 'package:copist/src/ui/note_view.dart';
@@ -245,6 +246,54 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
+  /// The open note's kind (the frontmatter `type`, null = plain note or
+  /// no note); reported by the open NoteView (T-TK-02).
+  String? _noteKind;
+
+  /// Whether the open note shows the raw editor instead of its kind GUI
+  /// (the app-bar pencil toggle, T-TK-05).
+  bool _kindRawMode = false;
+
+  /// The open NoteView reports the note's kind; the app bar shows the
+  /// kind toggle for known kinds.
+  void _onNoteKindChanged(String? type) {
+    if (!mounted) return;
+    setState(() => _noteKind = type);
+  }
+
+  /// Whether the app bar shows the editor/preview eye action: hidden in
+  /// kind mode (the note is a list, not a document) unless the user is
+  /// in raw-edit mode.
+  bool get _previewToggleVisible => _noteKind == null || _kindRawMode;
+
+  /// The kind toggle actions (T-TK-05): a kinded note offers the raw
+  /// editor (pencil); in raw mode the kind GUI is offered back. Empty
+  /// when no kinded note is open.
+  List<Widget> get _kindActions {
+    if (_noteKind == null) return const [];
+    return [
+      if (_kindRawMode)
+        IconButton(
+          key: const Key('kind-show-list'),
+          tooltip: 'Show list',
+          icon: const Icon(Icons.checklist),
+          onPressed: () => setState(() => _kindRawMode = false),
+        )
+      else
+        IconButton(
+          key: const Key('kind-edit-raw'),
+          tooltip: 'Edit raw',
+          icon: const Icon(Icons.edit_outlined),
+          onPressed: () => setState(() => _kindRawMode = true),
+        ),
+    ];
+  }
+
+  void _resetNoteKind() {
+    _noteKind = null;
+    _kindRawMode = false;
+  }
+
   Future<void> _loadLinkSource() async {
     final source = await widget.controller.linkSource;
     if (mounted && source != null) setState(() => _linkSource = source);
@@ -263,6 +312,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = false;
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
+      _resetNoteKind();
     });
   }
 
@@ -430,6 +480,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = note.isDir;
       _noteFromTab = _tab;
       _pendingAnchor = null;
+      _resetNoteKind();
       if (note.isDir) _expanded.add(note.path);
     });
   }
@@ -443,6 +494,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
+      _resetNoteKind();
     });
   }
 
@@ -466,6 +518,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
+        _resetNoteKind();
       });
     });
   }
@@ -761,7 +814,9 @@ final class _LibraryShellState extends State<_LibraryShell>
                       leading: BackButton(onPressed: _closeFullScreenNote),
                       title: Text(p.basename(selectedPath)),
                       actions: [
-                        if (!_effectiveSplit(narrow: true))
+                        ..._kindActions,
+                        if (!_effectiveSplit(narrow: true) &&
+                            _previewToggleVisible)
                           _previewToggleAction(),
                       ],
                     ),
@@ -780,6 +835,8 @@ final class _LibraryShellState extends State<_LibraryShell>
                       linkSource: _linkSource,
                       onOpenNote: _openNoteFromLink,
                       initialAnchor: _pendingAnchor,
+                      kindMode: !_kindRawMode,
+                      onNoteKindChanged: _onNoteKindChanged,
                     ),
                   ),
                 )
@@ -808,8 +865,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       appBar: AppBar(
         title: const Text('Copist'),
         actions: [
+          if (_selected != null && !_selectedIsDir) ..._kindActions,
           if (_selected != null &&
               !_selectedIsDir &&
+              _previewToggleVisible &&
               !_effectiveSplit(narrow: false))
             _previewToggleAction(),
           IconButton(
@@ -872,11 +931,59 @@ final class _LibraryShellState extends State<_LibraryShell>
         _closeFab();
         unawaited(_createNote());
       },
+      onNewListNote: () {
+        _closeFab();
+        unawaited(_createListNote());
+      },
       onNewFolder: () {
         _closeFab();
         unawaited(_createFolder());
       },
     );
+  }
+
+  /// Creates a list note (T-TK-06): a note file with `type: list`
+  /// frontmatter in the configured list folder (default `Lists`),
+  /// regardless of the selected folder.
+  Future<void> _createListNote() async {
+    final name = await _nameDialog(
+      context,
+      title: 'New list note',
+      initial: 'My list',
+    );
+    if (name == null) return;
+    await _guard(() async {
+      final ops = widget.controller.ops!;
+      final folder = await _ensureListFolder(ops);
+      final row = await ops.createNote(
+        parentPath: folder,
+        name: name,
+        content: listNoteContent(),
+      );
+      setState(() {
+        _selected = row.path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+        _pendingAnchor = null;
+        _resetNoteKind();
+      });
+    });
+  }
+
+  /// The configured list-note folder, creating it (and any missing
+  /// ancestors) when absent.
+  Future<String> _ensureListFolder(NoteOperations ops) async {
+    final folder = await ops.listNoteFolder;
+    var prefix = '';
+    for (final part in folder.split('/')) {
+      if (part.isEmpty) continue;
+      prefix = prefix.isEmpty ? part : '$prefix/$part';
+      final existing = await ops.find(prefix);
+      if (existing == null || !existing.isDir) {
+        await ops.createFolder(parentPath: parentOf(prefix), name: part);
+      }
+    }
+    return folder;
   }
 
   /// Collapses the expanded FAB menu.
@@ -940,6 +1047,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     setState(() {
       _tab = _noteFromTab;
       _treeVisible = true;
+      _resetNoteKind();
     });
   }
 
@@ -1041,6 +1149,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             linkSource: _linkSource,
             onOpenNote: _openNoteFromLink,
             initialAnchor: _pendingAnchor,
+            kindMode: !_kindRawMode,
+            onNoteKindChanged: _onNoteKindChanged,
           ),
         ),
       ],
@@ -1108,6 +1218,8 @@ final class _DetailPane extends StatelessWidget {
     required this.linkSource,
     required this.onOpenNote,
     required this.initialAnchor,
+    required this.kindMode,
+    required this.onNoteKindChanged,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -1137,6 +1249,10 @@ final class _DetailPane extends StatelessWidget {
   final LinkSource? linkSource;
   final void Function(String path, String? anchor) onOpenNote;
   final String? initialAnchor;
+
+  /// Note kind mode (T-TK-02).
+  final bool kindMode;
+  final void Function(String? type) onNoteKindChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1176,6 +1292,8 @@ final class _DetailPane extends StatelessWidget {
                 linkSource: linkSource,
                 onOpenNote: onOpenNote,
                 initialAnchor: initialAnchor,
+                kindMode: kindMode,
+                onNoteKindChanged: onNoteKindChanged,
               ),
             ),
     );

@@ -35,6 +35,9 @@ enum LinkType {
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
 
+/// The default folder (library-relative) of the list notes (T-TK-06).
+const String defaultListFolder = 'Lists';
+
 /// The lower bound of the allowed split range.
 const double minSplitRatio = 0.2;
 
@@ -89,6 +92,47 @@ final class LibrarySettingsRepo {
     await (_db.update(_db.librarySettings)
           ..where((t) => t.path.equals(libraryPath)))
         .write(LibrarySettingsCompanion(quickNotePath: Value(path)));
+  }
+
+  /// The folder (library-relative) that holds the list notes
+  /// (T-TK-06); default [defaultListFolder].
+  Future<String> listNoteFolder(String libraryPath) async {
+    final rows = await (
+      _db.select(_db.librarySettings)
+        ..where((t) => t.path.equals(libraryPath))
+    ).get();
+    return rows.isEmpty ? defaultListFolder : rows.first.listNoteFolder;
+  }
+
+  /// Sets the list-note folder (sanitized; an empty result falls back to
+  /// [defaultListFolder]).
+  Future<void> setListNoteFolder(
+    String libraryPath, {
+    required String folder,
+  }) async {
+    await _ensureRow(libraryPath);
+    await (_db.update(_db.librarySettings)
+          ..where((t) => t.path.equals(libraryPath)))
+        .write(
+          LibrarySettingsCompanion(listNoteFolder: Value(_cleanFolder(folder))),
+        );
+  }
+
+  /// Sanitizes a list-folder path: trims, drops leading/trailing slashes
+  /// and empty/`.`/`..` segments; an empty result is [defaultListFolder].
+  static String _cleanFolder(String folder) {
+    var f = folder.trim();
+    while (f.startsWith('/')) {
+      f = f.substring(1);
+    }
+    while (f.endsWith('/')) {
+      f = f.substring(0, f.length - 1);
+    }
+    final parts = f
+        .split('/')
+        .where((s) => s.isNotEmpty && s != '.' && s != '..')
+        .toList();
+    return parts.isEmpty ? defaultListFolder : parts.join('/');
   }
 
   /// Ensures a settings row exists for `libraryPath`.
