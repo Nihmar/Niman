@@ -809,13 +809,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
     final open = widget.onOpenNote;
     if (open == null) {
-      log.debug('link outcome: resolved ${note.path} but no onOpenNote — '
-          'snackbar');
+      log.debug(
+        'link outcome: resolved ${note.path} but no onOpenNote — '
+        'snackbar',
+      );
       if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
       return;
     }
-    log.debug('link outcome: open ${note.path} '
-        'anchor=${anchor == null ? '-' : '"$anchor"'}');
+    log.debug(
+      'link outcome: open ${note.path} '
+      'anchor=${anchor == null ? '-' : '"$anchor"'}',
+    );
     open(note.path, anchor);
   }
 
@@ -1095,94 +1099,101 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// The formatting toolbar (T-UI-08): pure markdown commands applied
   /// through the controller; the image button keeps the file-picker flow
   /// (T-M2-09) it already had in the status row.
+  ///
+  /// The toolbar is an extension of the keyboard: re_editor unfocuses the
+  /// editor on any tap outside its tap region (every toolbar tap dismissed
+  /// and re-showed the keyboard), so the toolbar joins the editor's tap
+  /// region and tapping it keeps the editor focused.
   Widget _toolbar(BuildContext context) {
-    return EditorToolbar(
-      buttons: [
-        EditorToolbarButton(
-          key: const Key('toolbar-bold'),
-          icon: Icons.format_bold,
-          tooltip: 'Bold',
-          onPressed: () => _wrapSelection(left: '**', right: '**'),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-italic'),
-          icon: Icons.format_italic,
-          tooltip: 'Italic',
-          onPressed: () => _wrapSelection(left: '*', right: '*'),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-strike'),
-          icon: Icons.strikethrough_s,
-          tooltip: 'Strikethrough',
-          onPressed: () => _wrapSelection(left: '~~', right: '~~'),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-sup'),
-          icon: Icons.superscript,
-          tooltip: 'Superscript',
-          onPressed: () => _wrapSelection(left: '<sup>', right: '</sup>'),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-underline'),
-          icon: Icons.format_underline,
-          tooltip: 'Underline',
-          onPressed: () => _wrapSelection(left: '<u>', right: '</u>'),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-link'),
-          icon: Icons.link,
-          tooltip: 'Link',
-          onPressed: _insertLink,
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-code'),
-          icon: Icons.code,
-          tooltip: 'Code block',
-          onPressed: _insertCodeBlock,
-        ),
-        EditorToolbarButton(
-          key: const Key('insert-image'),
-          icon: Icons.add_photo_alternate_outlined,
-          tooltip: AppStrings.insertImageTooltip,
-          onPressed: _insertImage,
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-heading'),
-          icon: Icons.title,
-          tooltip: AppStrings.toolbarHeadingTooltip,
-          onPressed: _showHeadingDialog,
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-list'),
-          icon: Icons.format_list_bulleted,
-          tooltip: 'List',
-          onPressed: () => _prefixLines(prefix: '- '),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-ordered-list'),
-          icon: Icons.format_list_numbered,
-          tooltip: AppStrings.toolbarOrderedListTooltip,
-          onPressed: _insertOrderedList,
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-quote'),
-          icon: Icons.format_quote,
-          tooltip: 'Quote',
-          onPressed: () => _prefixLines(prefix: '> '),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-outdent'),
-          icon: Icons.format_indent_decrease,
-          tooltip: AppStrings.toolbarOutdentTooltip,
-          onPressed: () => _indentLines(outdent: true),
-        ),
-        EditorToolbarButton(
-          key: const Key('toolbar-indent'),
-          icon: Icons.format_indent_increase,
-          tooltip: AppStrings.toolbarIndentTooltip,
-          onPressed: () => _indentLines(outdent: false),
-        ),
-      ],
+    return CodeEditorTapRegion(
+      child: EditorToolbar(
+        buttons: [
+          EditorToolbarButton(
+            key: const Key('toolbar-bold'),
+            icon: Icons.format_bold,
+            tooltip: 'Bold',
+            onPressed: () => _wrapSelection(left: '**', right: '**'),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-italic'),
+            icon: Icons.format_italic,
+            tooltip: 'Italic',
+            onPressed: () => _wrapSelection(left: '*', right: '*'),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-strike'),
+            icon: Icons.strikethrough_s,
+            tooltip: 'Strikethrough',
+            onPressed: () => _wrapSelection(left: '~~', right: '~~'),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-sup'),
+            icon: Icons.superscript,
+            tooltip: 'Superscript',
+            onPressed: () => _wrapSelection(left: '<sup>', right: '</sup>'),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-underline'),
+            icon: Icons.format_underline,
+            tooltip: 'Underline',
+            onPressed: () => _wrapSelection(left: '<u>', right: '</u>'),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-link'),
+            icon: Icons.link,
+            tooltip: 'Link',
+            onPressed: _insertLink,
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-code'),
+            icon: Icons.code,
+            tooltip: 'Code block',
+            onPressed: _insertCodeBlock,
+          ),
+          EditorToolbarButton(
+            key: const Key('insert-image'),
+            icon: Icons.add_photo_alternate_outlined,
+            tooltip: AppStrings.insertImageTooltip,
+            onPressed: _insertImage,
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-heading'),
+            icon: Icons.title,
+            tooltip: AppStrings.toolbarHeadingTooltip,
+            onPressed: _showHeadingDialog,
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-list'),
+            icon: Icons.format_list_bulleted,
+            tooltip: 'List',
+            onPressed: () => _prefixLines(prefix: '- '),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-ordered-list'),
+            icon: Icons.format_list_numbered,
+            tooltip: AppStrings.toolbarOrderedListTooltip,
+            onPressed: _insertOrderedList,
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-quote'),
+            icon: Icons.format_quote,
+            tooltip: 'Quote',
+            onPressed: () => _prefixLines(prefix: '> '),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-outdent'),
+            icon: Icons.format_indent_decrease,
+            tooltip: AppStrings.toolbarOutdentTooltip,
+            onPressed: () => _indentLines(outdent: true),
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-indent'),
+            icon: Icons.format_indent_increase,
+            tooltip: AppStrings.toolbarIndentTooltip,
+            onPressed: () => _indentLines(outdent: false),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1201,10 +1212,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// form (the inverse of [_textSelection]).
   CodeLineSelection _codeLineSelection(TextSelection selection) {
     final text = _controller.text;
-    final (baseIndex, baseOffset) =
-        _lineAndOffset(text, selection.baseOffset);
-    final (extentIndex, extentOffset) =
-        _lineAndOffset(text, selection.extentOffset);
+    final (baseIndex, baseOffset) = _lineAndOffset(text, selection.baseOffset);
+    final (extentIndex, extentOffset) = _lineAndOffset(
+      text,
+      selection.extentOffset,
+    );
     return CodeLineSelection(
       baseIndex: baseIndex,
       baseOffset: baseOffset,
