@@ -84,9 +84,9 @@ want, independent of the preview's styling and constraints.
 - The "list notes" folder setting (library-scoped) + settings UI.
 - Strings + unit/widget tests.
 
-Non-goals (v1): other `type` kinds beyond `list`, reordering/drag of items,
-a separate index for checkboxes, any sync-specific behaviour (a list note is
-an ordinary note and syncs like one).
+Non-goals (v1): other `type` kinds beyond `list`, a separate index for
+checkboxes, any sync-specific behaviour (a list note is an ordinary note and
+syncs like one).
 
 ## Tasks
 
@@ -111,13 +111,18 @@ an ordinary note and syncs like one).
   nested, and mixed (task + prose) bodies; round-trip of an untouched line
   is byte-stable; prose-only file renders as an empty checklist.*
 - [ ] **T-TK-04** List renderer: GUI. A `ListView` of checkbox rows with
-  indentation, showing the item text; `[x]` shows checked. Tapping a
-  checkbox flips `[ ]`↔`[x]` on disk (write the whole note back, off the UI
-  isolate, atomic temp-file write via `core/files.dart`; follow the
-  single-writer rule). Optimistic local update so taps feel instant. Plus an
+  indentation, showing the item text; `[x]` shows checked. Tapping the
+  **checkbox** flips `[ ]`↔`[x]` on disk (write the whole note back, off the
+  UI isolate, atomic temp-file write via `core/files.dart`; follow the
+  single-writer rule); tapping the **item text** edits it in place (single
+  line field, commit on submit/focus loss, the row's other bytes stay). Both
+  are optimistic local updates so taps feel instant. Plus an
   **inline "add item" input** at the bottom (styled distinctly from the
-  editor) that writes a new `- [ ]` line. *AC: widget tests with a fake
-  write; a tap flips the line and persists; the add row appends a new item.*
+  editor) that writes a new `- [ ]` line — its submit button is a **check
+  icon** (a plus is ambiguous with "add"), and the add row sits above the
+  bottom safe area (rounded screen corners). *AC: widget tests with a fake
+  write; a checkbox tap flips the line and persists; a text tap edits the
+  line and persists; the add row appends a new item.*
 - [ ] **T-TK-05** Pencil → raw editor. A top-right pencil icon (only for
   type-kinded notes) opens the note straight to the app's normal source
   editor (the existing `NoteView` path, editor; not the preview). Editing in
@@ -137,6 +142,15 @@ an ordinary note and syncs like one).
   (list parser, registry fallback, byte-stable round-trip) and widget tests
   (toggle persistence, pencil→editor, FAB choice). *AC: green; a mixed
   library opens each note with the right GUI.*
+- [ ] **T-TK-09** Drag to reorder + sub-lists. Long-press a row and drag:
+  the top quarter of a target row moves before it, the bottom quarter moves
+  after its subtree, the middle makes the dragged item a child of the target
+  (sub-list, +2 spaces of indent); above the first row / below the last row
+  moves to root level. The item's whole subtree (its children and the prose
+  lines between them) moves with it; moved lines keep their bytes apart from
+  the leading spaces. *AC: widget tests — dragging reorders, makes sub-lists,
+  moves a subtree with its children, and is a no-op on its own subtree;
+  parser unit tests for the move/outdent operations.*
 
 ## Technical design
 

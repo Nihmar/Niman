@@ -153,7 +153,8 @@ void main() {
     );
     await tester.pump(); // Let the async load land.
     await tester.pump();
-    await tester.tap(find.text('one'));
+    // Tapping the checkbox (not the text) flips the item.
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
     await tester.pump();
     expect(writes, ['---\ntype: list\n---\n- [x] one\n']);

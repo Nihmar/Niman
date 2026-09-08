@@ -79,6 +79,201 @@ void main() {
     });
   });
 
+  group('listLineCount', () {
+    test('a trailing newline is not a line', () {
+      expect(listLineCount(''), 0);
+      expect(listLineCount('a'), 1);
+      expect(listLineCount('a\n'), 1);
+      expect(listLineCount('a\n\n'), 2);
+    });
+  });
+
+  group('subtreeEnd', () {
+    test('the subtree runs to the next smaller-or-equal item', () {
+      final items = parseListItems(
+        '- [ ] a\n  - [ ] b\nprose\n- [ ] c\n',
+      );
+      expect(
+          subtreeEnd(
+              items, 0, listLineCount('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n')),
+          3);
+      expect(subtreeEnd(items, 2, 4), 4);
+    });
+  });
+
+  group('resolveListDrop', () {
+    test('before/after/under resolve to sibling indents', () {
+      const text = '- [ ] a\n- [ ] b\n';
+      final items = parseListItems(text);
+      final n = listLineCount(text);
+      expect(
+        resolveListDrop(items, 0, 1, ListDropMode.before, n),
+        (insertLine: 1, indent: 0),
+      );
+      expect(
+        resolveListDrop(items, 0, 1, ListDropMode.after, n),
+        (insertLine: 2, indent: 0),
+      );
+      expect(
+        resolveListDrop(items, 0, 1, ListDropMode.under, n),
+        (insertLine: 2, indent: 2),
+      );
+    });
+
+    test('the list edges resolve to root level', () {
+      const text = '- [ ] a\n- [ ] b\n';
+      final items = parseListItems(text);
+      final n = listLineCount(text);
+      expect(
+        resolveListDrop(items, 1, -1, ListDropMode.before, n),
+        (insertLine: 0, indent: 0),
+      );
+      expect(
+        resolveListDrop(items, 0, items.length, ListDropMode.after, n),
+        (insertLine: 2, indent: 0),
+      );
+    });
+
+    test('dropping on itself or its own child is a no-op', () {
+      const text = '- [ ] a\n  - [ ] b\n';
+      final items = parseListItems(text);
+      final n = listLineCount(text);
+      expect(resolveListDrop(items, 0, 0, ListDropMode.under, n), isNull);
+      expect(resolveListDrop(items, 0, 1, ListDropMode.under, n), isNull);
+      expect(
+        resolveListDrop(items, 0, 1, ListDropMode.before, n),
+        isNull,
+      );
+    });
+  });
+
+  group('moveSubtree', () {
+    test('reordering keeps every line byte-identical', () {
+      const text = '- [ ] a\n- [ ] b\n';
+      final items = parseListItems(text);
+      final drop = resolveListDrop(
+        items,
+        0,
+        1,
+        ListDropMode.after,
+        listLineCount(text),
+      )!;
+      expect(
+        moveSubtree(
+          text,
+          items,
+          0,
+          insertLine: drop.insertLine,
+          indent: drop.indent,
+        ),
+        '- [ ] b\n- [ ] a\n',
+      );
+    });
+
+    test('a moved item takes its children and prose with it', () {
+      const text = '- [ ] a\n  - [ ] b\nprose\n- [ ] c\n';
+      final items = parseListItems(text);
+      final drop = resolveListDrop(
+        items,
+        0,
+        2,
+        ListDropMode.after,
+        listLineCount(text),
+      )!;
+      expect(
+        moveSubtree(
+          text,
+          items,
+          0,
+          insertLine: drop.insertLine,
+          indent: drop.indent,
+        ),
+        '- [ ] c\n- [ ] a\n  - [ ] b\nprose\n',
+      );
+    });
+
+    test('dropping under re-indents the whole subtree', () {
+      const text = '- [ ] a\n  - [ ] b\n- [ ] c\n';
+      final items = parseListItems(text);
+      final drop = resolveListDrop(
+        items,
+        0,
+        2,
+        ListDropMode.under,
+        listLineCount(text),
+      )!;
+      expect(
+        moveSubtree(
+          text,
+          items,
+          0,
+          insertLine: drop.insertLine,
+          indent: drop.indent,
+        ),
+        '- [ ] c\n  - [ ] a\n    - [ ] b\n',
+      );
+    });
+
+    test('dropping before a shallower item outdents the subtree', () {
+      const text = '- [ ] a\n  - [ ] b\n- [ ] c\n';
+      final items = parseListItems(text);
+      final drop = resolveListDrop(
+        items,
+        1,
+        2,
+        ListDropMode.before,
+        listLineCount(text),
+      )!;
+      expect(
+        moveSubtree(
+          text,
+          items,
+          1,
+          insertLine: drop.insertLine,
+          indent: drop.indent,
+        ),
+        '- [ ] a\n- [ ] b\n- [ ] c\n',
+      );
+    });
+
+    test('a trailing newline is preserved', () {
+      const text = '- [ ] a\n- [ ] b\n';
+      final items = parseListItems(text);
+      final drop = resolveListDrop(
+        items,
+        1,
+        -1,
+        ListDropMode.before,
+        listLineCount(text),
+      )!;
+      expect(
+        moveSubtree(
+          text,
+          items,
+          1,
+          insertLine: drop.insertLine,
+          indent: drop.indent,
+        ),
+        '- [ ] b\n- [ ] a\n',
+      );
+    });
+  });
+
+  group('editItemText', () {
+    test('replaces only the item text, byte-stable otherwise', () {
+      const text = 'prose\n- [ ] one\n- [x] two\n';
+      final items = parseListItems(text);
+      expect(
+        editItemText(text, items[0], 'one edited'),
+        'prose\n- [ ] one edited\n- [x] two\n',
+      );
+      expect(
+        editItemText(text, items[1], ''),
+        'prose\n- [ ] one\n- [x] \n',
+      );
+    });
+  });
+
   group('listNoteContent', () {
     test('is a closed type: list frontmatter block', () {
       expect(listNoteContent(), '---\ntype: list\n---\n');
