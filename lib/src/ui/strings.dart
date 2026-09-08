@@ -43,6 +43,21 @@ final class AppStrings {
     'Mostra la tastiera appena si apre una nota (off = al primo tocco)',
   );
 
+  // Settings: the section headings the list is grouped under.
+  static String get settingsSectionAppearance => _t('Appearance', 'Aspetto');
+  static String get settingsSectionEditor => _t('Editor', 'Editor');
+  static String get settingsSectionLibrary => _t('Library', 'Libreria');
+  static String get settingsSectionReminders => _t('Reminders', 'Promemoria');
+  static String get settingsSectionDiagnostics =>
+      _t('Diagnostics', 'Diagnostica');
+
+  /// The indent width as a row's value, e.g. "4 spaces".
+  static String indentWidthValue(int spaces) =>
+      _t('$spaces spaces', '$spaces spazi');
+
+  /// The editor's share of a split, as a row's value, e.g. "50%".
+  static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
+
   // Settings: preview mode.
   static String get previewModeTitle =>
       _t('Preview mode', 'Modalità anteprima');
@@ -439,6 +454,7 @@ final class AppStrings {
   static String get actionOk => _t('OK', 'OK');
   static String get actionCancel => _t('Cancel', 'Annulla');
   static String get actionCreate => _t('Create', 'Crea');
+  static String get actionSave => _t('Save', 'Salva');
   static String get actionChoose => _t('Choose', 'Scegli');
   static String get actionDelete => _t('Delete', 'Elimina');
   static String get actionRename => _t('Rename', 'Rinomina');

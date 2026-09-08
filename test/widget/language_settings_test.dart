@@ -2,7 +2,6 @@
 // once, and is remembered.
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,14 +49,24 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens the language row's dialog and picks [language].
+  ///
+  /// The row shows the current language and the choice happens in a
+  /// dialog, so a bare `find.text` would match the row's own value.
+  Future<void> chooseLanguage(WidgetTester tester, AppLanguage language) async {
+    await tester.tap(find.byKey(const Key('language-choice')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('settings-choice-$language')));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('choosing Italian translates the app and persists', (
     tester,
   ) async {
     await pump(tester);
     expect(find.text('Trash'), findsOneWidget);
 
-    await tester.tap(find.text('Italiano'));
-    await tester.pumpAndSettle();
+    await chooseLanguage(tester, AppLanguage.italian);
 
     expect(find.text('Cestino'), findsOneWidget);
     expect(find.text('Trash'), findsNothing);
@@ -71,8 +80,7 @@ void main() {
     await pump(tester);
     expect(find.text('Cestino'), findsOneWidget);
 
-    await tester.tap(find.text(AppStrings.languageEnglish));
-    await tester.pumpAndSettle();
+    await chooseLanguage(tester, AppLanguage.english);
 
     expect(find.text('Trash'), findsOneWidget);
     expect(await controller.language, AppLanguage.english);
@@ -85,8 +93,7 @@ void main() {
     await pump(tester);
     expect(find.text('Trash'), findsOneWidget);
 
-    await tester.tap(find.text(AppStrings.languageSystem));
-    await tester.pumpAndSettle();
+    await chooseLanguage(tester, AppLanguage.system);
 
     // The OS is Italian, so "System" means Italian.
     expect(find.text('Cestino'), findsOneWidget);

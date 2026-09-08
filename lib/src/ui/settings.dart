@@ -8,6 +8,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
+import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
@@ -340,24 +341,144 @@ final class _SettingsBodyState extends State<SettingsBody> {
         '.${three(dt.millisecond)}';
   }
 
+  /// Asks for the preview mode.
+  Future<void> _choosePreviewMode() async {
+    final mode = await showSettingsChoice<PreviewLayoutMode>(
+      context,
+      dialogKey: const Key('preview-mode-dialog'),
+      title: AppStrings.previewModeTitle,
+      subtitle: AppStrings.previewModeSubtitle,
+      current: _previewMode,
+      options: [
+        SettingsOption(PreviewLayoutMode.auto, AppStrings.previewModeAuto),
+        SettingsOption(PreviewLayoutMode.split, AppStrings.previewModeSplit),
+        SettingsOption(
+          PreviewLayoutMode.fullScreen,
+          AppStrings.previewModeSwitch,
+        ),
+      ],
+    );
+    if (mode != null) await _setPreviewMode(mode);
+  }
+
+  /// Asks for the editor's share of a side-by-side split.
+  Future<void> _chooseSplitRatio() async {
+    final ratio = await showSettingsSlider(
+      context,
+      dialogKey: const Key('split-ratio-dialog'),
+      title: AppStrings.splitRatioTitle,
+      subtitle: AppStrings.splitRatioSubtitle,
+      current: _splitRatio,
+      min: minSplitRatio,
+      max: maxSplitRatio,
+      format: AppStrings.splitRatioValue,
+    );
+    if (ratio != null) await _setSplitRatio(ratio);
+  }
+
+  /// Asks for the link format the editor's link button inserts.
+  Future<void> _chooseLinkType() async {
+    final type = await showSettingsChoice<LinkType>(
+      context,
+      dialogKey: const Key('link-type-dialog'),
+      title: AppStrings.linkTypeTitle,
+      subtitle: AppStrings.linkTypeSubtitle,
+      current: _linkType,
+      options: [
+        SettingsOption(LinkType.wikilink, AppStrings.linkTypeWikilink),
+        SettingsOption(LinkType.markdown, AppStrings.linkTypeMarkdown),
+      ],
+    );
+    if (type != null) await _setLinkType(type);
+  }
+
+  /// Asks for the spaces added per indent level.
+  Future<void> _chooseIndentWidth() async {
+    final width = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('indent-width-dialog'),
+      title: AppStrings.indentWidthTitle,
+      subtitle: AppStrings.indentWidthSubtitle,
+      current: _indentWidth,
+      options: [
+        for (final spaces in const [2, 4, 6, 8])
+          SettingsOption(spaces, AppStrings.indentWidthValue(spaces)),
+      ],
+    );
+    if (width != null) await _setIndentWidth(width);
+  }
+
+  /// Asks for the app's language.
+  Future<void> _chooseLanguage() async {
+    final language = await showSettingsChoice<AppLanguage>(
+      context,
+      dialogKey: const Key('language-dialog'),
+      title: AppStrings.languageTitle,
+      subtitle: AppStrings.languageSubtitle,
+      current: _language,
+      options: [
+        SettingsOption(AppLanguage.system, AppStrings.languageSystem),
+        SettingsOption(AppLanguage.english, AppStrings.languageEnglish),
+        SettingsOption(AppLanguage.italian, AppStrings.languageItalian),
+      ],
+    );
+    if (language != null) await _setLanguage(language);
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    // Grouped, and every setting one row of the same height (2026-09-08
+    // user feedback). Switches stay switches; everything with more than
+    // two choices reads its value on the right and opens a dialog, which
+    // is also where its explanation went.
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(bottom: 16),
       children: [
-        SwitchListTile(
-          title: Text(AppStrings.trashTitle),
-          subtitle: Text(AppStrings.trashSubtitle),
-          value: _trash ?? true,
-          onChanged: _toggleTrash,
+        SettingsSection(AppStrings.settingsSectionAppearance),
+        SettingsValueRow(
+          key: const Key('language-choice'),
+          title: AppStrings.languageTitle,
+          value: switch (_language) {
+            AppLanguage.system => AppStrings.languageSystem,
+            AppLanguage.english => AppStrings.languageEnglish,
+            AppLanguage.italian => AppStrings.languageItalian,
+          },
+          onTap: () => unawaited(_chooseLanguage()),
         ),
-        SwitchListTile(
-          title: Text(AppStrings.debugLogsTitle),
-          subtitle: Text(AppStrings.debugLogsSubtitle),
-          value: _debugLogs ?? true,
-          onChanged: _toggleDebugLogs,
+        SettingsValueRow(
+          key: const Key('preview-mode-setting'),
+          title: AppStrings.previewModeTitle,
+          value: switch (_previewMode) {
+            PreviewLayoutMode.auto => AppStrings.previewModeAuto,
+            PreviewLayoutMode.split => AppStrings.previewModeSplit,
+            PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
+          },
+          onTap: () => unawaited(_choosePreviewMode()),
         ),
+        if (_splitLoaded)
+          SettingsValueRow(
+            key: const Key('split-ratio-setting'),
+            title: AppStrings.splitRatioTitle,
+            value: AppStrings.splitRatioValue(_splitRatio),
+            onTap: () => unawaited(_chooseSplitRatio()),
+          ),
+        SettingsValueRow(
+          key: const Key('toolbar-setting'),
+          title: AppStrings.toolbarSettingsTitle,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) =>
+                  ToolbarSettingsScreen(controller: widget.controller),
+            ),
+          ),
+        ),
+
+        SettingsSection(AppStrings.settingsSectionEditor),
+        // Switches keep their subtitle: a switch has no dialog to move
+        // the explanation into, and "off = on first tap" is exactly what
+        // someone reads the row for.
         SwitchListTile(
           title: Text(AppStrings.lineNumbersTitle),
           subtitle: Text(AppStrings.lineNumbersSubtitle),
@@ -370,6 +491,66 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: _autofocusEditor ?? false,
           onChanged: _toggleAutofocusEditor,
         ),
+        SettingsValueRow(
+          key: const Key('link-type'),
+          title: AppStrings.linkTypeTitle,
+          value: switch (_linkType) {
+            LinkType.wikilink => AppStrings.linkTypeWikilink,
+            LinkType.markdown => AppStrings.linkTypeMarkdown,
+          },
+          onTap: () => unawaited(_chooseLinkType()),
+        ),
+        SettingsValueRow(
+          key: const Key('indent-width'),
+          title: AppStrings.indentWidthTitle,
+          value: AppStrings.indentWidthValue(_indentWidth),
+          onTap: () => unawaited(_chooseIndentWidth()),
+        ),
+
+        SettingsSection(AppStrings.settingsSectionLibrary),
+        // The one row with nothing to change: a fact about the open
+        // library, kept here because this is where you go looking for it.
+        ListTile(
+          key: const Key('library-path'),
+          title: Text(AppStrings.libraryPathTitle),
+          subtitle: Text(controller.root ?? ''),
+        ),
+        SettingsValueRow(
+          key: const Key('quick-note-setting'),
+          title: AppStrings.quickNoteTitle,
+          value: _quickNotePath ?? AppStrings.quickNoteUnset,
+          onTap: _pickQuickNote,
+        ),
+        SettingsValueRow(
+          key: const Key('list-folder-setting'),
+          title: AppStrings.listFolderTitle,
+          value: _listFolder ?? defaultListFolder,
+          onTap: _pickListFolder,
+        ),
+        SwitchListTile(
+          key: const Key('trash-setting'),
+          title: Text(AppStrings.trashTitle),
+          subtitle: Text(AppStrings.trashSubtitle),
+          value: _trash ?? true,
+          onChanged: _toggleTrash,
+        ),
+        ListTile(
+          key: const Key('reindex-setting'),
+          leading: const Icon(Icons.refresh),
+          title: Text(AppStrings.reindexTitle),
+          onTap: _rescan,
+        ),
+        ListTile(
+          key: const Key('close-library-setting'),
+          leading: const Icon(Icons.link_off),
+          title: Text(AppStrings.closeLibraryTitle),
+          onTap: () async {
+            await controller.close();
+            widget.onClosed?.call();
+          },
+        ),
+
+        SettingsSection(AppStrings.settingsSectionReminders),
         SwitchListTile(
           key: const Key('reminder-show-tokens'),
           title: Text(AppStrings.reminderShowTokensTitle),
@@ -377,228 +558,20 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: _reminderShowTokens ?? false,
           onChanged: _toggleReminderTokens,
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.previewModeTitle,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                AppStrings.previewModeSubtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<PreviewLayoutMode>(
-                segments: [
-                  ButtonSegment(
-                    value: PreviewLayoutMode.auto,
-                    label: Text(AppStrings.previewModeAuto),
-                  ),
-                  ButtonSegment(
-                    value: PreviewLayoutMode.split,
-                    label: Text(AppStrings.previewModeSplit),
-                  ),
-                  ButtonSegment(
-                    value: PreviewLayoutMode.fullScreen,
-                    label: Text(AppStrings.previewModeSwitch),
-                  ),
-                ],
-                selected: {_previewMode},
-                onSelectionChanged: (selection) =>
-                    _setPreviewMode(selection.first),
-              ),
-            ],
-          ),
-        ),
-        if (_splitLoaded)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.splitRatioTitle,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Text(
-                  AppStrings.splitRatioSubtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Slider(
-                  key: const Key('split-ratio'),
-                  min: minSplitRatio,
-                  max: maxSplitRatio,
-                  value: _splitRatio,
-                  onChanged: (v) => setState(() => _splitRatio = v),
-                  onChangeEnd: _setSplitRatio,
-                ),
-              ],
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.linkTypeTitle,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                AppStrings.linkTypeSubtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<LinkType>(
-                key: const Key('link-type'),
-                segments: [
-                  ButtonSegment(
-                    value: LinkType.wikilink,
-                    label: Text(AppStrings.linkTypeWikilink),
-                  ),
-                  ButtonSegment(
-                    value: LinkType.markdown,
-                    label: Text(AppStrings.linkTypeMarkdown),
-                  ),
-                ],
-                selected: {_linkType},
-                onSelectionChanged: (selection) =>
-                    _setLinkType(selection.first),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.indentWidthTitle,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                AppStrings.indentWidthSubtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<int>(
-                key: const Key('indent-width'),
-                segments: const [
-                  ButtonSegment(value: 2, label: Text('2')),
-                  ButtonSegment(value: 4, label: Text('4')),
-                  ButtonSegment(value: 6, label: Text('6')),
-                  ButtonSegment(value: 8, label: Text('8')),
-                ],
-                selected: {_indentWidth},
-                onSelectionChanged: (selection) =>
-                    _setIndentWidth(selection.first),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.languageTitle,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Text(
-                AppStrings.languageSubtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<AppLanguage>(
-                key: const Key('language-choice'),
-                segments: [
-                  ButtonSegment<AppLanguage>(
-                    value: AppLanguage.system,
-                    label: Text(AppStrings.languageSystem),
-                  ),
-                  ButtonSegment<AppLanguage>(
-                    value: AppLanguage.english,
-                    label: Text(AppStrings.languageEnglish),
-                  ),
-                  ButtonSegment<AppLanguage>(
-                    value: AppLanguage.italian,
-                    label: Text(AppStrings.languageItalian),
-                  ),
-                ],
-                selected: {_language},
-                onSelectionChanged: (values) =>
-                    unawaited(_setLanguage(values.first)),
-              ),
-            ],
-          ),
-        ),
-        const Divider(),
-        ListTile(
-          key: const Key('toolbar-setting'),
-          title: Text(AppStrings.toolbarSettingsTitle),
-          subtitle: Text(AppStrings.toolbarSettingsSubtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) =>
-                  ToolbarSettingsScreen(controller: widget.controller),
-            ),
-          ),
-        ),
-        const Divider(),
-        ListTile(
-          key: const Key('quick-note-setting'),
-          title: Text(AppStrings.quickNoteTitle),
-          subtitle: Text(_quickNotePath ?? AppStrings.quickNoteUnset),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: _pickQuickNote,
+
+        SettingsSection(AppStrings.settingsSectionDiagnostics),
+        SwitchListTile(
+          title: Text(AppStrings.debugLogsTitle),
+          subtitle: Text(AppStrings.debugLogsSubtitle),
+          value: _debugLogs ?? true,
+          onChanged: _toggleDebugLogs,
         ),
         ListTile(
-          key: const Key('list-folder-setting'),
-          title: Text(AppStrings.listFolderTitle),
-          subtitle: Text(_listFolder ?? defaultListFolder),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: _pickListFolder,
-        ),
-        const Divider(),
-        ListTile(
-          title: Text(AppStrings.libraryPathTitle),
-          subtitle: Text(controller.root ?? ''),
-        ),
-        ListTile(
-          title: Text(AppStrings.reindexTitle),
-          leading: const Icon(Icons.refresh),
-          onTap: _rescan,
-        ),
-        ListTile(
-          title: Text(AppStrings.exportLogTitle),
+          key: const Key('export-log-setting'),
           leading: const Icon(Icons.save_alt),
+          title: Text(AppStrings.exportLogTitle),
           subtitle: Text(AppStrings.exportLogSubtitle),
           onTap: _exportLog,
-        ),
-        ListTile(
-          title: Text(AppStrings.closeLibraryTitle),
-          leading: const Icon(Icons.link_off),
-          onTap: () async {
-            await controller.close();
-            widget.onClosed?.call();
-          },
         ),
       ],
     );

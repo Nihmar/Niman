@@ -9,6 +9,7 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/note_view.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,10 +83,8 @@ void main() {
     // Go to the Settings tab and back: the tree keeps its expansion.
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
-    expect(
-      find.text('Deletions move to .trash/ (off = hard delete)'),
-      findsOne,
-    );
+    // The first section heading: what the settings list opens on.
+    expect(find.text(AppStrings.settingsSectionAppearance), findsOne);
     await tester.tap(find.byKey(const Key('tab-files')));
     await settle(tester);
     expect(noteRow('Docs'), findsOne);

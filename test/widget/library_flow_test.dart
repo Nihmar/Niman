@@ -210,14 +210,11 @@ void main() {
     // Switch the trash toggle off in settings.
     await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
-    expect(
-      find.text('Deletions move to .trash/ (off = hard delete)'),
-      findsOne,
-    );
-    final trashRow = find.ancestor(
-      of: find.text('Deletions move to .trash/ (off = hard delete)'),
-      matching: find.byType(SwitchListTile),
-    );
+    // The settings list is grouped and lazy, and the trash toggle sits
+    // under Library, so it may be below the fold.
+    final trashRow = find.byKey(const Key('trash-setting'));
+    await tester.scrollUntilVisible(trashRow, 200);
+    await settle(tester);
     await tester.tap(
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
