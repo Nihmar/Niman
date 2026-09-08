@@ -41,28 +41,25 @@ Future<void> _attachLogFile() async {
 
 /// Logs the timing of every rendered frame, not just the slow ones.
 ///
-/// The warning still catches the frames that miss the 60 Hz budget; the
-/// debug line logs every frame with the gap since the previous one, so the
-/// exported log carries the whole frame timeline of an animation — which
-/// frame landed when, and where the rhythm broke. Without it the 2026-09-08
-/// search-tab lag showed up as a warning that said how long a frame took,
-/// never when it landed or what it delayed.
+/// The engine batches frame metrics and reports each burst in one call —
+/// roughly every 100 ms in debug and profile, roughly every second in
+/// release — so the lines cluster at batch boundaries rather than tracing
+/// one line per vsync. Each line still says how long that frame ran, so a
+/// burst shows how many frames a stretch of the UI took and how long the
+/// worst one ran, which is what the 2026-09-08 search-tab round needed:
+/// the single slow-frame warning said how long a frame took, never how
+/// many frames the animation took at all.
 void _reportFrames() {
   const logger = AppLogger(name: 'frames');
   const budget = Duration(milliseconds: 16);
-  DateTime? lastFrame;
   SchedulerBinding.instance.addTimingsCallback((timings) {
     for (final timing in timings) {
       final total = timing.totalSpan;
-      final now = DateTime.now();
-      final gap = lastFrame == null ? null : now.difference(lastFrame!);
-      lastFrame = now;
       logger.debug(
         'frame: total ${_ms(total)} '
         '(build ${_ms(timing.buildDuration)}, '
         'raster ${_ms(timing.rasterDuration)}, '
-        'vsync ${_ms(timing.vsyncOverhead)})'
-        '${gap == null ? '' : ', gap ${_ms(gap)} since previous'}',
+        'vsync ${_ms(timing.vsyncOverhead)})',
       );
       if (total < budget) continue;
       logger.warning(

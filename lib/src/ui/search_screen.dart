@@ -121,22 +121,13 @@ final class _SearchScreenState extends State<SearchScreen> {
         'after mount',
       );
     }
-    // Bodies stay mounted, so this runs once on the first mount — still
-    // mid-fade. The empty state looks identical with or without a source,
-    // so let the 180 ms fade finish first rather than rebuilding into it.
-    // A query typed in the meantime still works: [_runSearch] acquires
-    // the source on demand. The defer start/end split the wall time of
-    // 'source applied' — a large gap between the two lines means the 200 ms
-    // timer itself landed late (event loop / frame contention), not the
-    // rebuild after it.
-    const AppLogger(name: 'search.ui')
-        .debug('source apply deferred 200ms (fade still running)');
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+    // Applied straight away, even mid-fade. An earlier round deferred the
+    // apply 200 ms so the fade would finish first; the frame log proved
+    // the rebuild it guarded costs nothing (0 ms build, a few ms to the
+    // first frame) while the wait was itself the whole perceived lag of
+    // the first search visit, so the defer went.
     if (!mounted || source == null) return;
-    const AppLogger(name: 'search.ui').debug('source apply defer ended');
     setState(() => _source = source);
-    // T-TS-09 marker: brackets the deferred rebuild so a slow frame can
-    // be attributed to it rather than to the fade that just ended.
     if (since != null) {
       const AppLogger(name: 'search.ui').debug(
         'source applied ${DateTime.now().difference(since).inMilliseconds}ms '
