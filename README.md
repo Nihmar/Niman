@@ -4,6 +4,8 @@
 
 # Copist
 
+<img src="assets/branding/feather.png" alt="Copist app icon" width="140" align="right">
+
 Copist is a multiplatform Markdown note-taking app. Notes are plain files: one note
 is one `.md` file on disk, organized in nested folders. The app's SQLite database is
 only a **rebuildable index** (search, tags, frontmatter, sync state) — the files on
