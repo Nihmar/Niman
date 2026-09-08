@@ -18,11 +18,7 @@ void main() {
     await db.customStatement(
       'INSERT INTO notes (path, parent, name, is_dir, size, modified) '
       'VALUES (?1, 0, ?2, 0, ?3, 0)',
-      [
-        path,
-        path.split('/').last,
-        body.length,
-      ],
+      [path, path.split('/').last, body.length],
     );
     final row = await db
         .customSelect(
@@ -119,10 +115,7 @@ void main() {
   test('punctuation in the query is literal, not FTS syntax', () async {
     final id = search.begin();
     // 'zebra (attacks)' — the parens are quoted; the terms still match.
-    final hits = await search.search(
-      buildFtsQuery('zebra (attacks)'),
-      id: id,
-    );
+    final hits = await search.search(buildFtsQuery('zebra (attacks)'), id: id);
     expect(hits, isNotEmpty);
     expect(hits.map((h) => h.path), contains('apple.md'));
   });
@@ -177,14 +170,8 @@ void main() {
       final early = search.begin();
       final late = search.begin();
       expect(await search.searchContains('', id: late), isEmpty);
-      expect(
-        await search.searchContains('zebra', id: early),
-        isEmpty,
-      );
-      expect(
-        await search.searchContains('zebra', id: late),
-        isNotEmpty,
-      );
+      expect(await search.searchContains('zebra', id: early), isEmpty);
+      expect(await search.searchContains('zebra', id: late), isNotEmpty);
     });
   });
 }

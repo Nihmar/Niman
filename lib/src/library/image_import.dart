@@ -26,9 +26,8 @@ String _copyIntoLibrary(String libraryRoot, String sourcePath) {
   final bytes = source.readAsBytesSync();
   final digest = sha256.convert(bytes).toString();
   final extension = p.extension(sourcePath); // '' or '.png'
-  final assets = Directory(
-    p.join(libraryRoot, 'assets'),
-  )..createSync(recursive: true);
+  final assets = Directory(p.join(libraryRoot, 'assets'))
+    ..createSync(recursive: true);
   final target = p.join(assets.path, '$digest$extension');
   if (!File(target).existsSync()) {
     File(target).writeAsBytesSync(bytes);

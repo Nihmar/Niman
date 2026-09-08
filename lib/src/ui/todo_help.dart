@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 /// A read-only reference for the todo.txt syntax Copist understands.
 final class TodoHelpScreen extends StatelessWidget {
   /// Creates the help screen.
-  const TodoHelpScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ final class TodoHelpScreen extends StatelessWidget {
 
 /// A section heading.
 final class _Section extends StatelessWidget {
-  const _Section(this.text);
+  const new(this.text);
 
   final String text;
 
@@ -70,7 +70,7 @@ final class _Section extends StatelessWidget {
 
 /// A block of prose.
 final class _Paragraph extends StatelessWidget {
-  const _Paragraph(this.text);
+  const new(this.text);
 
   final String text;
 
@@ -85,7 +85,7 @@ final class _Paragraph extends StatelessWidget {
 
 /// A monospaced sample line, scrollable so a long one never clips.
 final class _Example extends StatelessWidget {
-  const _Example(this.line);
+  const new(this.line);
 
   final String line;
 
@@ -103,10 +103,7 @@ final class _Example extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Text(
           line,
-          style: TextStyle(
-            fontFamily: 'monospace',
-            color: scheme.onSurface,
-          ),
+          style: TextStyle(fontFamily: 'monospace', color: scheme.onSurface),
         ),
       ),
     );
@@ -115,7 +112,7 @@ final class _Example extends StatelessWidget {
 
 /// One piece of syntax and what it means.
 final class _Row extends StatelessWidget {
-  const _Row(this.syntax, this.meaning);
+  const new(this.syntax, this.meaning);
 
   final String syntax;
   final String meaning;

@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 final class FakeReminderService implements ReminderService {
   /// Creates a fake; [launchPayload] is returned once per
   /// [consumeLaunchPayload] caller (a tap-started app in tests).
-  FakeReminderService({this.launchPayload});
+  new({this.launchPayload});
 
   /// The payload a tap-started app would deliver.
   final String? launchPayload;

@@ -17,7 +17,7 @@ Future<String?> showNameDialog(
 /// as the dialog (a disposed controller would break the exit animation
 /// while the [TextField] rebuilds).
 final class _NameDialog extends StatefulWidget {
-  const _NameDialog({required this.title, required this.initial});
+  const new({required this.title, required this.initial});
 
   final String title;
   final String initial;

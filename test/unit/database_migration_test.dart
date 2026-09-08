@@ -210,9 +210,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 4');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -262,9 +260,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 5');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -308,9 +304,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 6');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -350,9 +344,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -395,11 +387,7 @@ void main() {
           ),
         );
     expect(id, isPositive);
-    await db
-        .into(db.tags)
-        .insert(
-          TagsCompanion.insert(name: 'migrated'),
-        );
+    await db.into(db.tags).insert(TagsCompanion.insert(name: 'migrated'));
     await db
         .into(db.noteTags)
         .insert(
@@ -412,18 +400,12 @@ void main() {
     await db
         .into(db.noteLinks)
         .insert(
-          NoteLinksCompanion.insert(
-            fromNote: 1,
-            toNote: 2,
-            kind: 'wiki',
-          ),
+          NoteLinksCompanion.insert(fromNote: 1, toNote: 2, kind: 'wiki'),
         );
 
     // The FTS index exists and accepts a note row (rowid = notes.id).
     final count = await db
-        .customSelect(
-          'SELECT count(*) FROM notes_fts WHERE rowid = 1',
-        )
+        .customSelect('SELECT count(*) FROM notes_fts WHERE rowid = 1')
         .getSingle();
     expect(count.read<int>('count(*)'), 0);
     await db.customStatement(
@@ -482,9 +464,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 9');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -520,9 +500,7 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 10');
-      await db.customStatement(
-        'ALTER TABLE app_settings DROP COLUMN language',
-      );
+      await db.customStatement('ALTER TABLE app_settings DROP COLUMN language');
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );

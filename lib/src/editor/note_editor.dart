@@ -30,7 +30,7 @@ import 'package:re_editor/re_editor.dart';
 /// extends the package's default editor shortcuts (Ctrl+H = replace).
 final class NoteEditor extends StatelessWidget {
   /// Creates the editor over [controller].
-  const NoteEditor({
+  const new({
     required this.controller,
     required this.focusNode,
     this.showLineNumbers = true,
@@ -85,11 +85,7 @@ final class NoteEditor extends StatelessWidget {
       // tokenizer instead.
       style: const CodeEditorStyle(
         fontFamily: 'monospace',
-        fontFamilyFallback: [
-          'Consolas',
-          'DejaVu Sans Mono',
-          'Roboto Mono',
-        ],
+        fontFamilyFallback: ['Consolas', 'DejaVu Sans Mono', 'Roboto Mono'],
       ),
       // The row-number column + fold markers (settings + T-M2-07): heading
       // chunks come from MarkdownChunkAnalyzer (the header folds), not the

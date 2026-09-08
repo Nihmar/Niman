@@ -13,11 +13,7 @@ import 'package:flutter/material.dart';
 /// not shown anymore.
 final class QuickNoteTab extends StatefulWidget {
   /// Creates the quick note tab.
-  const QuickNoteTab({
-    required this.controller,
-    required this.onOpen,
-    super.key,
-  });
+  const new({required this.controller, required this.onOpen, super.key});
 
   /// The session providing the ops.
   final LibrarySession controller;

@@ -44,7 +44,7 @@ final class LibraryController implements LibrarySession {
   /// and [searchDbFactory] provides the search connection (a
   /// background-isolate connection by default — see
   /// [defaultSearchDatabase]; tests fall back to [dbFactory]).
-  LibraryController(
+  new(
     this.dbFactory, {
     Future<CopistDatabase> Function()? searchDbFactory,
     this.rescanInterval = defaultRescanInterval,
@@ -142,14 +142,14 @@ final class LibraryController implements LibrarySession {
   @override
   Future<List<Note>> children(int parentId, {bool nameDesc = false}) async {
     final db = await database;
-    return NoteDao(db).children(parentId, nameDesc: nameDesc);
+    return await NoteDao(db).children(parentId, nameDesc: nameDesc);
   }
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   @override
   Future<List<Note>> folders() async {
     final db = await database;
-    return NoteDao(db).folders();
+    return await NoteDao(db).folders();
   }
 
   @override
@@ -346,7 +346,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<bool> get lineNumbersEnabled async {
     final db = await database;
-    return AppSettingsRepo(db).lineNumbersEnabled();
+    return await AppSettingsRepo(db).lineNumbersEnabled();
   }
 
   /// Sets (and persists) the editor line-numbers toggle.
@@ -361,7 +361,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<bool> get editorAutofocusEnabled async {
     final db = await database;
-    return AppSettingsRepo(db).editorAutofocusEnabled();
+    return await AppSettingsRepo(db).editorAutofocusEnabled();
   }
 
   /// Sets (and persists) the keyboard-on-open toggle.
@@ -376,7 +376,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<bool> get reminderShowTokens async {
     final db = await database;
-    return AppSettingsRepo(db).reminderShowTokens();
+    return await AppSettingsRepo(db).reminderShowTokens();
   }
 
   /// Sets (and persists) the reminder-markers toggle.
@@ -391,7 +391,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<PreviewLayoutMode> get previewMode async {
     final db = await database;
-    return AppSettingsRepo(db).previewMode();
+    return await AppSettingsRepo(db).previewMode();
   }
 
   /// Sets (and persists) the preview layout mode.
@@ -406,7 +406,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<double> get splitRatio async {
     final db = await database;
-    return AppSettingsRepo(db).splitRatio();
+    return await AppSettingsRepo(db).splitRatio();
   }
 
   /// Sets (and persists) the split ratio.
@@ -420,7 +420,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<TreeSort> get treeSort async {
     final db = await database;
-    return AppSettingsRepo(db).treeSort();
+    return await AppSettingsRepo(db).treeSort();
   }
 
   /// Sets (and persists) the library tree sort order.
@@ -434,7 +434,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<LinkType> get linkType async {
     final db = await database;
-    return AppSettingsRepo(db).linkType();
+    return await AppSettingsRepo(db).linkType();
   }
 
   /// Sets (and persists) the link format.
@@ -449,7 +449,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<int> get indentWidth async {
     final db = await database;
-    return AppSettingsRepo(db).indentWidth();
+    return await AppSettingsRepo(db).indentWidth();
   }
 
   /// Sets (and persists) the indent/outdent width.
@@ -464,7 +464,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<String> get editorToolbar async {
     final db = await database;
-    return AppSettingsRepo(db).editorToolbar();
+    return await AppSettingsRepo(db).editorToolbar();
   }
 
   /// Sets (and persists) the editor-toolbar layout.
@@ -479,7 +479,7 @@ final class LibraryController implements LibrarySession {
   @override
   Future<AppLanguage> get language async {
     final db = await database;
-    return AppSettingsRepo(db).language();
+    return await AppSettingsRepo(db).language();
   }
 
   /// Sets (and persists) the UI language.

@@ -32,7 +32,7 @@ enum ShortcutAction {
   /// Opens the new list-note flow (the Files FAB's "New list note").
   newList('new_list');
 
-  const ShortcutAction(this.id);
+  new(this.id);
 
   /// The platform-side shortcut id.
   final String id;
@@ -84,7 +84,7 @@ final shortcutServiceProvider = Provider<ShortcutService>((ref) {
 /// Android quick actions over the `copist/shortcuts` method channel.
 final class PlatformShortcutService implements ShortcutService {
   /// Creates the service; [channel] is injected in tests.
-  PlatformShortcutService({MethodChannel? channel})
+  new({MethodChannel? channel})
     : _channel = channel ?? const MethodChannel('copist/shortcuts') {
     _channel.setMethodCallHandler(_onCall);
   }
@@ -150,7 +150,7 @@ final class PlatformShortcutService implements ShortcutService {
 /// The off-Android service: nothing to publish, nothing ever arrives.
 final class NoopShortcutService implements ShortcutService {
   /// Creates the no-op service.
-  const NoopShortcutService();
+  const new();
 
   @override
   Future<void> publish(Map<ShortcutAction, String> labels) async {}

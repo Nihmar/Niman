@@ -29,12 +29,7 @@ final class TodoTab extends StatefulWidget {
   ///
   /// [clock] fixes the wall-clock day for due badges and the edit
   /// dialog (defaults to now; widget tests inject a fixed time).
-  const TodoTab({
-    required this.controller,
-    this.reminders,
-    this.clock,
-    super.key,
-  });
+  const new({required this.controller, this.reminders, this.clock, super.key});
 
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
@@ -85,10 +80,7 @@ final class _TodoTabState extends State<TodoTab> {
               child: SegmentedButton<bool>(
                 key: const Key('todo-view-switch'),
                 segments: [
-                  ButtonSegment(
-                    value: false,
-                    label: Text(AppStrings.todoOpen),
-                  ),
+                  ButtonSegment(value: false, label: Text(AppStrings.todoOpen)),
                   ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
                 ],
                 selected: {_showDone},
@@ -101,9 +93,7 @@ final class _TodoTabState extends State<TodoTab> {
                 child: Text(
                   key: const Key('todo-error'),
                   controller.error!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             Expanded(child: _body(snapshot)),
@@ -121,11 +111,7 @@ final class _TodoTabState extends State<TodoTab> {
     if (snapshot != null) {
       final entries = done ? snapshot.done : snapshot.todo;
       final available = <String>{
-        for (final chip in tokenCountsFor(
-          entries,
-          TodoDueRange.all,
-          _today,
-        ))
+        for (final chip in tokenCountsFor(entries, TodoDueRange.all, _today))
           chip.token,
       };
       filter = filter.pruneTokens(available);
@@ -172,9 +158,7 @@ final class _TodoTabState extends State<TodoTab> {
                     final entry = visible[index];
                     final view = _showDone ? 'done' : 'open';
                     return TodoRow(
-                      key: Key(
-                        'todo-row-$view-${entry.lineIndex}',
-                      ),
+                      key: Key('todo-row-$view-${entry.lineIndex}'),
                       entry: entry,
                       today: _today,
                       onToggle: (checked) => _toggle(entry, checked),

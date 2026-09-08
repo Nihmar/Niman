@@ -11,7 +11,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 /// language switch reaches every open screen at once.
 class CopistApp extends StatefulWidget {
   /// Creates the application root.
-  const CopistApp({super.key});
+  const new({super.key});
 
   @override
   State<CopistApp> createState() => _CopistAppState();
@@ -77,8 +77,5 @@ ThemeData buildAppTheme(Brightness brightness) {
     seedColor: const Color(0xFF45475A),
     brightness: brightness,
   );
-  return ThemeData(
-    brightness: brightness,
-    colorScheme: colorScheme,
-  );
+  return ThemeData(brightness: brightness, colorScheme: colorScheme);
 }

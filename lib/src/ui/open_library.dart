@@ -21,7 +21,7 @@ import 'package:path/path.dart' as p;
 /// root on shared storage is usable, and the screen asks for it up front.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
-  const OpenLibraryScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session that opens or creates the library for this screen.
   final LibrarySession controller;
@@ -106,9 +106,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                 ),
                 const SizedBox(height: 24),
                 if (_needsAccess)
-                  _AccessPrompt(
-                    onGrant: active ? null : _grantAccess,
-                  )
+                  _AccessPrompt(onGrant: active ? null : _grantAccess)
                 else if (narrow)
                   Column(
                     children: [
@@ -169,9 +167,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _createNew() async {
     _pickerError = null;
-    final parent = await _pickDirectory(
-      AppStrings.openLibraryChooseParent,
-    );
+    final parent = await _pickDirectory(AppStrings.openLibraryChooseParent);
     if (parent == null) return;
     final name = await _promptName();
     if (name == null || name.isEmpty) return;
@@ -239,7 +235,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 /// Shown instead of the open/create buttons while Android withholds the
 /// shared-storage permission.
 final class _AccessPrompt extends StatelessWidget {
-  const _AccessPrompt({required this.onGrant});
+  const new({required this.onGrant});
 
   /// Opens the system settings screen; null while a request is in flight.
   final Future<void> Function()? onGrant;
@@ -267,7 +263,7 @@ final class _AccessPrompt extends StatelessWidget {
 /// Dialog that asks for the name of the new library folder.
 final class _NewLibraryDialog extends StatefulWidget {
   /// Creates the dialog.
-  const _NewLibraryDialog();
+  const new();
 
   @override
   State<_NewLibraryDialog> createState() => _NewLibraryDialogState();

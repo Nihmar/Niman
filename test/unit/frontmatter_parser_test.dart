@@ -31,14 +31,11 @@ void main() {
     );
 
     test('list and comma-separated tags, empty entries dropped', () {
-      expect(
-        parseFrontmatter('---\ntags: [Foo, #Bar]\n---')!.tags,
-        ['foo', 'bar'],
-      );
-      expect(
-        parseFrontmatter('---\ntags: a, , b\n---')!.tags,
-        ['a', 'b'],
-      );
+      expect(parseFrontmatter('---\ntags: [Foo, #Bar]\n---')!.tags, [
+        'foo',
+        'bar',
+      ]);
+      expect(parseFrontmatter('---\ntags: a, , b\n---')!.tags, ['a', 'b']);
       expect(parseFrontmatter('---\ntags: []\n---')!.tags, isEmpty);
       expect(parseFrontmatter('---\ntags:\n---')!.tags, isEmpty);
     });

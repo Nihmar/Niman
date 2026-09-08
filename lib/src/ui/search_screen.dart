@@ -24,7 +24,7 @@ import 'package:flutter/material.dart';
 /// confirm button rewrites the notes.
 final class SearchScreen extends StatefulWidget {
   /// Creates the search screen.
-  const SearchScreen({
+  const new({
     required this.controller,
     required this.onOpenNote,
     this.onOpenTags,
@@ -139,10 +139,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     // Editing the term invalidates the replace preview: leave the mode.
     _leaveReplaceMode();
-    _debounceTimer = Timer(
-      _debounce,
-      () => unawaited(_runSearch()),
-    );
+    _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
   }
 
   void _onReplacementChanged() {
@@ -188,9 +185,8 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     final id = source.begin();
     final contains = _contains;
-    const AppLogger(name: 'search.ui').debug(
-      'issue id $id (${contains ? 'contains' : 'words'}) "$text"',
-    );
+    const AppLogger(name: 'search.ui')
+        .debug('issue id $id (${contains ? 'contains' : 'words'}) "$text"');
     final results = contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
@@ -442,11 +438,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (!mounted) return;
     final message = report.occurrences == 0
         ? AppStrings.replaceNoMatch(term)
-        : AppStrings.replaceDone(
-            report.occurrences,
-            term,
-            report.notesChanged,
-          );
+        : AppStrings.replaceDone(report.occurrences, term, report.notesChanged);
     _snack(
       report.skipped.isEmpty
           ? message
@@ -478,9 +470,8 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   void _snack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   /// The inline replace panel under the query box: replacement text, the
@@ -599,10 +590,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (notes.isEmpty) {
       return Center(
         child: Text(
-          AppStrings.replacePreviewEmpty(
-            _query.text.trim(),
-            _replaceOnly,
-          ),
+          AppStrings.replacePreviewEmpty(_query.text.trim(), _replaceOnly),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -679,10 +667,7 @@ final class _SearchScreenState extends State<SearchScreen> {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: '→ ',
-                  style: matchStyle,
-                ),
+                TextSpan(text: '→ ', style: matchStyle),
                 context(replacement.isEmpty ? ' ' : replacement),
               ],
             ),

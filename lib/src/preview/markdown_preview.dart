@@ -34,7 +34,7 @@ import 'package:path/path.dart' as p;
 /// highlighted by [syntaxHighlighter].
 final class MarkdownPreview extends StatefulWidget {
   /// Creates a preview over [data].
-  const MarkdownPreview({
+  const new({
     required this.data,
     this.styleSheet,
     this.syntaxHighlighter,
@@ -177,9 +177,8 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       PreviewWork.run('parse', source).then((result) {
         if (!mounted || revision != _parseRevision) return;
         if (result is! List<md.Node>) {
-          const AppLogger(name: 'preview').error(
-            'async parse failed (${source.length} chars): $result',
-          );
+          const AppLogger(name: 'preview')
+              .error('async parse failed (${source.length} chars): $result');
           return;
         }
         _applyParse(revision, source, result);
@@ -206,9 +205,8 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 
   void _applyParse(int revision, String source, List<md.Node> nodes) {
     if (!mounted || revision != _parseRevision) return;
-    final styleSheet = MarkdownStyleSheet.fromTheme(
-      Theme.of(context),
-    ).merge(widget.styleSheet);
+    final styleSheet = MarkdownStyleSheet.fromTheme(Theme.of(context))
+        .merge(widget.styleSheet);
     final builder = MarkdownBuilder(
       delegate: this,
       selectable: false,
@@ -290,7 +288,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 /// Reports its child's height after layout (the scroll map's per-block
 /// measurement — the mapping table's pixel side).
 final class _BlockMeasure extends SingleChildRenderObjectWidget {
-  const _BlockMeasure({required this.onHeight, required super.child});
+  const new({required this.onHeight, required super.child});
 
   final ValueChanged<double> onHeight;
 
@@ -308,7 +306,7 @@ final class _BlockMeasure extends SingleChildRenderObjectWidget {
 }
 
 final class _BlockMeasureRender extends RenderProxyBox {
-  _BlockMeasureRender(this.onHeight);
+  new(this.onHeight);
 
   ValueChanged<double> onHeight;
 

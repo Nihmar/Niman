@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 /// if the problem is still there.
 final class ReminderHealthBanner extends StatefulWidget {
   /// Creates the banner for [service].
-  const ReminderHealthBanner({required this.service, super.key});
+  const new({required this.service, super.key});
 
   /// The service whose health is reported.
   final ReminderService service;

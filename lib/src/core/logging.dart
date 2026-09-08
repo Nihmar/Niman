@@ -26,7 +26,7 @@ enum LogSeverity {
 /// events are dropped entirely (no buffering, no console output).
 final class AppLogger {
   /// Creates a logger identified by [name].
-  const AppLogger({this.name = 'copist'});
+  const new({this.name = 'copist'});
 
   /// Component name attached to every event this logger emits.
   final String name;
@@ -58,7 +58,7 @@ final class AppLogger {
 /// switch recording on or off without rebuilding anything.
 final class AppLog {
   /// The buffer is process-wide; no instances.
-  AppLog._();
+  new _();
 
   /// Maximum number of lines kept in the buffer.
   static const int maxLines = 5000;
@@ -83,7 +83,7 @@ final class AppLog {
   /// Writes anything the disk mirror still holds (no-op when detached).
   ///
   /// Called when the app backgrounds so a swipe away keeps its tail.
-  static Future<void> flush() async => file?.flush();
+  static Future<void> flush() async => await file?.flush();
 
   /// Records [message] at [severity] under [name].
   ///

@@ -13,7 +13,7 @@ import 'package:markdown/markdown.dart' as md;
 /// the editor's tokenizer (math_rule.dart).
 final class MathBlockSyntax extends md.BlockSyntax {
   /// Creates the syntax.
-  const MathBlockSyntax();
+  const new();
 
   /// The pattern used by [parseChildLines] (not used by [parse]).
   @override
@@ -54,10 +54,7 @@ final class MathBlockSyntax extends md.BlockSyntax {
   }
 
   static md.Element _element({required String tex}) =>
-      md.Element.text(
-          'mathblock',
-          tex,
-        )
+      md.Element.text('mathblock', tex)
         ..attributes['latex'] = tex
         ..attributes['display'] = 'true';
 }

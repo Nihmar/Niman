@@ -25,10 +25,7 @@ abstract interface class NoteOperations {
   });
 
   /// Creates a folder in [parentPath].
-  Future<Note> createFolder({
-    required String parentPath,
-    required String name,
-  });
+  Future<Note> createFolder({required String parentPath, required String name});
 
   /// Renames the note or folder at [path] to [newName].
   Future<Note> rename(String path, String newName);

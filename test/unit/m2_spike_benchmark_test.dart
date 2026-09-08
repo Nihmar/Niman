@@ -52,11 +52,7 @@ TextSpan _lineSpan(StyledLine line) {
   }
   return TextSpan(
     children: runs,
-    style: const TextStyle(
-      fontFamily: 'monospace',
-      fontSize: 13,
-      height: 1.5,
-    ),
+    style: const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.5),
   );
 }
 

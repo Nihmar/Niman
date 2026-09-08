@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// to that heading line. A folded heading is shown with a filled chevron.
 final class OutlinePanel extends StatelessWidget {
   /// Creates the panel.
-  const OutlinePanel({
+  const new({
     required this.entries,
     required this.onJump,
     this.foldedLines = const <int>{},
@@ -32,9 +32,7 @@ final class OutlinePanel extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Theme.of(context).dividerColor),
-        ),
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
         color: Theme.of(context).colorScheme.surfaceContainerLow,
       ),
       child: entries.isEmpty
@@ -60,9 +58,7 @@ final class OutlinePanel extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        SizedBox(
-                          width: 8 + (entry.level - 1) * 12.0,
-                        ),
+                        SizedBox(width: 8 + (entry.level - 1) * 12.0),
                         Icon(
                           folded
                               ? Icons.keyboard_arrow_down

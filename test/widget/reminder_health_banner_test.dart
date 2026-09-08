@@ -55,10 +55,7 @@ void main() {
     reminders.healthState.value = ReminderHealth.notificationsBlocked;
     await pumpTab(tester);
     expect(find.byKey(const Key('todo-reminder-health')), findsOne);
-    expect(
-      find.textContaining('Notifications are off'),
-      findsOne,
-    );
+    expect(find.textContaining('Notifications are off'), findsOne);
     await tester.tap(find.byKey(const Key('todo-reminder-health-fix')));
     await tester.pump();
     expect(reminders.settingsOpened, 1);

@@ -36,7 +36,7 @@ final class TodoController extends ChangeNotifier {
   /// to the real store; widget tests inject an in-memory fake).
   /// [reminders] syncs OS notifications after every publish (null on
   /// desktop and in tests that do not cover reminders).
-  TodoController({
+  new({
     required this.session,
     DateTime Function()? clock,
     this.refreshDebounce = const Duration(milliseconds: 300),
@@ -227,11 +227,7 @@ final class TodoController extends ChangeNotifier {
     }
     try {
       await service.reconcile(
-        wantedReminders(
-          snapshot,
-          _clock(),
-          showTokens: _reminderShowTokens,
-        ),
+        wantedReminders(snapshot, _clock(), showTokens: _reminderShowTokens),
       );
     } on Object catch (error) {
       _log.warning('todo reminders sync failed: $error');

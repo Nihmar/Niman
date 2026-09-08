@@ -106,7 +106,7 @@ final class LocalReminderService implements ReminderService {
   /// wall clock guarding against scheduling into the past. All three are
   /// injected in tests, which is what lets the logic below run without a
   /// device.
-  LocalReminderService({
+  new({
     ReminderBackend? backend,
     this.settings = const PlatformReminderSettings(),
     DateTime Function()? clock,
@@ -426,7 +426,7 @@ final class LocalReminderService implements ReminderService {
 
   @override
   Future<bool> openHealthSettings() async {
-    return switch (_health.value) {
+    return await switch (_health.value) {
       ReminderHealth.notificationsBlocked =>
         settings.openNotificationSettings(),
       ReminderHealth.batteryRestricted => settings.openBatterySettings(),
@@ -461,7 +461,7 @@ final class LocalReminderService implements ReminderService {
 /// the due badges carry the state (documented limitation, T-TD-07).
 final class NoopReminderService implements ReminderService {
   /// Creates the no-op service.
-  const NoopReminderService();
+  const new();
 
   @override
   Future<void> reconcile(Map<int, TodoReminder> wanted) async {}

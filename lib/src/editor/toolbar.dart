@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// One button of the editor toolbar (T-UI-08).
 final class EditorToolbarButton {
   /// Creates a toolbar button definition.
-  const EditorToolbarButton({
+  const new({
     required this.key,
     required this.icon,
     required this.tooltip,
@@ -30,7 +30,7 @@ final class EditorToolbarButton {
 /// commands (editor/md_editing.dart) through the controller.
 final class EditorToolbar extends StatelessWidget {
   /// Creates the toolbar; [buttons] scroll horizontally when they overflow.
-  const EditorToolbar({required this.buttons, super.key});
+  const new({required this.buttons, super.key});
 
   /// The toolbar buttons, in display order.
   final List<EditorToolbarButton> buttons;

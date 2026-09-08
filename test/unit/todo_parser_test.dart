@@ -172,10 +172,7 @@ void main() {
       final task = parseTodoLine('water plants rec:+1d due:2026-09-08');
       expect(task.keyValues.single.token, 'rec:+1d');
       expect(task.due, DateTime(2026, 9, 8));
-      expect(
-        task.toLine(),
-        'water plants rec:+1d due:2026-09-08',
-      );
+      expect(task.toLine(), 'water plants rec:+1d due:2026-09-08');
     });
 
     test('arbitrary key/values are kept in order', () {
@@ -342,31 +339,19 @@ void main() {
 
   group('taskDisplayText', () {
     test('drops the managed due:/rem: slots', () {
-      expect(
-        taskDisplayText('call mom due:2026-09-09'),
-        'call mom',
-      );
-      expect(
-        taskDisplayText('sync rem:2026-09-08T10:30 rec:+1d'),
-        'sync',
-      );
+      expect(taskDisplayText('call mom due:2026-09-09'), 'call mom');
+      expect(taskDisplayText('sync rem:2026-09-08T10:30 rec:+1d'), 'sync');
     });
 
     test('drops +project, @context and #tag markers', () {
       // They read as syntax on a lock screen, where no chip or filter
       // explains them.
-      expect(
-        taskDisplayText('call mom +errands @home #urgent'),
-        'call mom',
-      );
+      expect(taskDisplayText('call mom +errands @home #urgent'), 'call mom');
       expect(
         taskDisplayText('+home buy milk @shop due:2026-09-09'),
         'buy milk',
       );
-      expect(
-        taskDisplayText('plan +a +b trip'),
-        'plan trip',
-      );
+      expect(taskDisplayText('plan +a +b trip'), 'plan trip');
     });
 
     test('keeps an address-like word that is not a token', () {
@@ -378,10 +363,7 @@ void main() {
     });
 
     test('removes embedded tags and collapses leftover spaces', () {
-      expect(
-        taskDisplayText(' a due:1 b  due:2  c '),
-        'a b c',
-      );
+      expect(taskDisplayText(' a due:1 b  due:2  c '), 'a b c');
     });
 
     test('leaves token-free plain text and empties intact', () {
@@ -417,11 +399,8 @@ void main() {
 
     test('rejects a malformed priority', () {
       expect(
-        () => formatTodoLine(
-          completed: false,
-          priority: 'a',
-          description: 'foo',
-        ),
+        () =>
+            formatTodoLine(completed: false, priority: 'a', description: 'foo'),
         throwsArgumentError,
       );
       expect(
@@ -436,10 +415,7 @@ void main() {
 
     test('formats dates and stamps', () {
       expect(formatTodoDate(DateTime(2026, 1, 2)), '2026-01-02');
-      expect(
-        formatTodoStamp(DateTime(2026, 1, 2, 3, 4)),
-        '2026-01-02T03:04',
-      );
+      expect(formatTodoStamp(DateTime(2026, 1, 2, 3, 4)), '2026-01-02T03:04');
     });
   });
 

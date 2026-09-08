@@ -9,7 +9,7 @@ import 'package:copist/src/links/resolver.dart';
 /// unresolved. External URLs stay external.
 final class FakeLinkSource implements LinkSource {
   /// Creates a fake source over [notes] (library-relative paths).
-  FakeLinkSource({List<String>? notes}) : notes = notes ?? [];
+  new({List<String>? notes}) : notes = notes ?? [];
 
   /// The known note paths (library-relative, `.md` included).
   List<String> notes;
@@ -54,7 +54,7 @@ final class FakeLinkSource implements LinkSource {
       return ExternalLink(url: h);
     }
     if (h.startsWith('#')) return LocalAnchor(heading: h.substring(1));
-    return resolveWiki(h.replaceAll('.md', ''));
+    return await resolveWiki(h.replaceAll('.md', ''));
   }
 
   static String _stemOf(String path) {

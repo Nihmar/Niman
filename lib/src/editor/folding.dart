@@ -15,13 +15,10 @@ import 'package:copist/src/editor/outline.dart';
 final class FoldState {
   /// Creates a fold state over [outline] (the document's headings) and
   /// [lineCount] logical lines, with the heading lines in [folded] folded.
-  FoldState(
-    this._outline,
-    int lineCount, {
-    Iterable<int> folded = const <int>{},
-  }) : _lineCount = lineCount,
-       _indexByLine = <int, int>{},
-       _folded = Set<int>.of(folded) {
+  new(this._outline, int lineCount, {Iterable<int> folded = const <int>{}})
+    : _lineCount = lineCount,
+      _indexByLine = <int, int>{},
+      _folded = Set<int>.of(folded) {
     for (var i = 0; i < _outline.length; i++) {
       _indexByLine[_outline[i].line] = i;
     }

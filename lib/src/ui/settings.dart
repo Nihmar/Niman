@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 /// Global theme/layout settings arrive with the M6 token system.
 final class SettingsScreen extends StatelessWidget {
   /// Creates the settings screen.
-  const SettingsScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session of the library whose settings this screen edits.
   final LibrarySession controller;
@@ -43,7 +43,7 @@ final class SettingsScreen extends StatelessWidget {
 /// button) and embedded as the bottom-nav Settings tab (T-UI-02).
 final class SettingsBody extends StatefulWidget {
   /// Creates the settings body.
-  const SettingsBody({required this.controller, this.onClosed, super.key});
+  const new({required this.controller, this.onClosed, super.key});
 
   /// The session of the library whose settings this body edits.
   final LibrarySession controller;
@@ -258,15 +258,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
     try {
       await widget.controller.rescanNow();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.reindexDone)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
       }
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     }
   }
@@ -292,9 +290,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     ];
     if (lines.isEmpty && persisted.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.exportLogEmpty)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(AppStrings.exportLogEmpty)));
       }
       return;
     }
@@ -322,9 +319,9 @@ final class _SettingsBodyState extends State<SettingsBody> {
       );
       if (uri == null) return; // The user canceled; nothing to report.
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.exportLogDone(uri))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppStrings.exportLogDone(uri))));
       }
     } on Object catch (error) {
       if (mounted) {
@@ -568,9 +565,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         ListTile(
           key: const Key('quick-note-setting'),
           title: Text(AppStrings.quickNoteTitle),
-          subtitle: Text(
-            _quickNotePath ?? AppStrings.quickNoteUnset,
-          ),
+          subtitle: Text(_quickNotePath ?? AppStrings.quickNoteUnset),
           trailing: const Icon(Icons.chevron_right),
           onTap: _pickQuickNote,
         ),

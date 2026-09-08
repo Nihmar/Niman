@@ -35,7 +35,7 @@ import 'package:markdown/markdown.dart' as md;
 ///
 /// Outline rows encode `'line|level|text'`.
 final class PreviewWork {
-  PreviewWork._();
+  new _();
 
   /// Runs [task] ('parse' | 'stats' | 'read') over [source].
   static Future<Object?> run(String task, String source) {
@@ -46,10 +46,11 @@ final class PreviewWork {
       receive.close();
     });
     unawaited(
-      Isolate.spawn<({SendPort reply, String task, String source})>(
-        _entry,
-        (reply: receive.sendPort, task: task, source: source),
-      ),
+      Isolate.spawn<({SendPort reply, String task, String source})>(_entry, (
+        reply: receive.sendPort,
+        task: task,
+        source: source,
+      )),
     );
     return done.future;
   }
@@ -106,8 +107,6 @@ List<md.Node> _parseSource(String source) {
     encodeHtml: false,
   );
   return splitHtmlTables(
-    splitInlineMath(
-      document.parseLines(const LineSplitter().convert(source)),
-    ),
+    splitInlineMath(document.parseLines(const LineSplitter().convert(source))),
   );
 }

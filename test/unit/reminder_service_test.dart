@@ -82,10 +82,7 @@ void main() {
       await service.reconcile(wanted([reminderAt(2), reminderAt(3)]));
 
       expect(backend.cancelled, <int>[1]);
-      expect(
-        backend.scheduled.map((r) => r.id).toList()..sort(),
-        <int>[2, 3],
-      );
+      expect(backend.scheduled.map((r) => r.id).toList()..sort(), <int>[2, 3]);
       expect(backend.pending, <int>[2, 3]);
       await service.dispose();
     });
@@ -124,10 +121,7 @@ void main() {
       await service.reconcile(
         wanted([reminderAt(1), reminderAt(2), reminderAt(3)]),
       );
-      expect(
-        backend.scheduled.map((r) => r.id).toList()..sort(),
-        <int>[1, 3],
-      );
+      expect(backend.scheduled.map((r) => r.id).toList()..sort(), <int>[1, 3]);
       await service.dispose();
     });
   });

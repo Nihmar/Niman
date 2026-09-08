@@ -21,7 +21,7 @@ import 'package:flutter/services.dart';
 /// Whether Copist may read every file on shared storage.
 final class StorageAccess {
   /// Creates the gate; use the static methods.
-  const StorageAccess._();
+  const new _();
 
   static const MethodChannel _channel = MethodChannel('copist/storage');
 

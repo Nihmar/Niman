@@ -78,10 +78,7 @@ void main() {
       );
       // The table: its "1" cell lands in a separate cell widget below the
       // heading text; the fixture's table must not throw and must render.
-      expect(
-        find.textContaining('Col B', findRichText: true),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Col B', findRichText: true), findsOneWidget);
       // Code fence: the highlighter produced a monospace RichText.
       expect(
         find.textContaining('void main()', findRichText: true),
@@ -99,9 +96,7 @@ void main() {
       for (var i = 0; i < 300; i++) {
         long.write('Paragraph number $i with some text to fill a line.\n\n');
       }
-      await tester.pumpWidget(
-        _app(MarkdownPreview(data: long.toString())),
-      );
+      await tester.pumpWidget(_app(MarkdownPreview(data: long.toString())));
       await tester.pump();
       expect(
         find.textContaining('Paragraph number 0', findRichText: true),
@@ -114,10 +109,7 @@ void main() {
         findsNothing,
       );
       // Scrolling brings the far block into the viewport.
-      await tester.drag(
-        find.byType(CustomScrollView),
-        const Offset(0, -20000),
-      );
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -20000));
       await tester.pump();
       await tester.pump();
       expect(tester.takeException(), isNull);
@@ -128,14 +120,10 @@ void main() {
     });
 
     testWidgets('rebuilds when the data changes', (tester) async {
-      await tester.pumpWidget(
-        _app(const MarkdownPreview(data: '# One')),
-      );
+      await tester.pumpWidget(_app(const MarkdownPreview(data: '# One')));
       await tester.pump();
       expect(find.text('One', findRichText: true), findsOneWidget);
-      await tester.pumpWidget(
-        _app(const MarkdownPreview(data: '# Two')),
-      );
+      await tester.pumpWidget(_app(const MarkdownPreview(data: '# Two')));
       await tester.pump();
       expect(find.text('One', findRichText: true), findsNothing);
       expect(find.text('Two', findRichText: true), findsOneWidget);
@@ -150,9 +138,7 @@ void main() {
       expect(json.length, 652);
       for (final example in json.cast<Map<String, dynamic>>()) {
         final markdown = example['markdown'] as String;
-        await tester.pumpWidget(
-          _app(MarkdownPreview(data: markdown)),
-        );
+        await tester.pumpWidget(_app(MarkdownPreview(data: markdown)));
         final error = tester.takeException();
         expect(
           error,

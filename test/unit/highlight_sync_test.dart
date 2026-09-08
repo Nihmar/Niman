@@ -5,10 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:re_editor/re_editor.dart';
 
-const TextStyle _base = TextStyle(
-  fontFamily: 'monospace',
-  fontSize: 13,
-);
+const TextStyle _base = TextStyle(fontFamily: 'monospace', fontSize: 13);
 
 Color? _colorOf(TextSpan span, String want) => _styleOf(span, want)?.color;
 

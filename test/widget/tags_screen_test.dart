@@ -49,10 +49,7 @@ void main() {
     expect(find.text('#solo'), findsOne);
     // ideas (3) before work (2) before solo (1); the trailing count text.
     final ideasTile = tester.widget<ListTile>(find.byKey(const Key('tag-0')));
-    expect(
-      (ideasTile.trailing! as Text).data,
-      '3',
-    );
+    expect((ideasTile.trailing! as Text).data, '3');
   });
 
   testWidgets('tapping a tag shows its notes in path order', (tester) async {
@@ -70,9 +67,7 @@ void main() {
         (w) => w is ListTile && w.key.toString().contains('tag-note-'),
       ),
     );
-    final paths = [
-      for (final tile in tiles) (tile.subtitle! as Text).data!,
-    ];
+    final paths = [for (final tile in tiles) (tile.subtitle! as Text).data!];
     expect(paths, ['Docs/a.md', 'b.md']); // path order, not map order
   });
 
@@ -99,9 +94,6 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await tester.pump();
-    expect(
-      find.text('No tags yet — add a #tag or frontmatter tags'),
-      findsOne,
-    );
+    expect(find.text('No tags yet — add a #tag or frontmatter tags'), findsOne);
   });
 }

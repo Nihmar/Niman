@@ -34,9 +34,7 @@ void main() {
         extensionSet: md.ExtensionSet.gitHubFlavored,
       );
       if (_normalize(actual) != _normalize(expected)) {
-        failures.add(
-          '#${example['example']} (${example['section']})',
-        );
+        failures.add('#${example['example']} (${example['section']})');
       }
     }
 

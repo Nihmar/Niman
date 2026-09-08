@@ -51,7 +51,7 @@ typedef TodoTokenRef = String;
 @immutable
 final class TodoFilter {
   /// Creates a filter (defaults: everything, due-soonest first).
-  const TodoFilter({
+  const new({
     this.dueRange = TodoDueRange.all,
     this.tokens = const <String>{},
     this.sort = TodoSort.due,

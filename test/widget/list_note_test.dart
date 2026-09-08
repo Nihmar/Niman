@@ -11,15 +11,11 @@ Widget _app(ListNoteView view) => MaterialApp(home: Scaffold(body: view));
 
 Finder _row(int index) => find.byType(ListItemRow).at(index);
 
-Finder _rowCheckbox(int index) => find.descendant(
-  of: _row(index),
-  matching: find.byType(Checkbox),
-);
+Finder _rowCheckbox(int index) =>
+    find.descendant(of: _row(index), matching: find.byType(Checkbox));
 
-Finder _rowHandle(int index) => find.descendant(
-  of: _row(index),
-  matching: find.byType(ListDragHandle),
-);
+Finder _rowHandle(int index) =>
+    find.descendant(of: _row(index), matching: find.byType(ListDragHandle));
 
 Finder _rowEditField() => find.descendant(
   of: find.byType(ListItemRow),

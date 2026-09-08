@@ -15,7 +15,7 @@ import 'package:copist/src/core/language.dart';
 /// documentation.
 // ignore_for_file: public_member_api_docs
 final class AppStrings {
-  const AppStrings._();
+  const new _();
 
   /// The English or the Italian text, per [AppLanguages].
   static String _t(String en, String it) => AppLanguages.isItalian ? it : en;
@@ -76,10 +76,8 @@ final class AppStrings {
 
   // Settings: language (T-L10N-04).
   static String get languageTitle => _t('Language', 'Lingua');
-  static String get languageSubtitle => _t(
-    'The language of the app’s own text',
-    'La lingua dei testi dell’app',
-  );
+  static String get languageSubtitle =>
+      _t('The language of the app’s own text', 'La lingua dei testi dell’app');
   static String get languageSystem => _t('System', 'Sistema');
   // Language names stay in their own language: someone who landed in the
   // wrong one has to be able to find their way back.
@@ -295,10 +293,8 @@ final class AppStrings {
     'Data di completamento, poi data di creazione. Con una sola data è '
         'quella di creazione, a meno che la riga inizi con x.',
   );
-  static String get todoHelpTokensTitle => _t(
-    'Projects, contexts and tags',
-    'Progetti, contesti e tag',
-  );
+  static String get todoHelpTokensTitle =>
+      _t('Projects, contexts and tags', 'Progetti, contesti e tag');
   static String get todoHelpTokensBody => _t(
     'Anywhere in the description, a word with one of these prefixes '
         'becomes a chip you can filter by. Nothing is predefined: a token '
@@ -351,10 +347,8 @@ final class AppStrings {
         'todo.txt sopravvivono al giro. Copist non li interpreta, rec: '
         'compreso: un’attività ricorrente non viene ancora ripetuta.',
   );
-  static String get todoHelpEditTitle => _t(
-    'Editing outside Copist',
-    'Modifiche fuori da Copist',
-  );
+  static String get todoHelpEditTitle =>
+      _t('Editing outside Copist', 'Modifiche fuori da Copist');
   static String get todoHelpEditBody => _t(
     'A task you have not touched is written back byte for byte, odd '
         'spacing included. Edit a line and Copist rewrites that one line in '
@@ -474,10 +468,8 @@ final class AppStrings {
   static String get movedToTrash =>
       _t('Moved to trash', 'Spostato nel cestino');
   static String get deletedMessage => _t('Deleted', 'Eliminato');
-  static String deleteToTrashConfirm(String name) => _t(
-    '$name will be moved to .trash/',
-    '$name verrà spostato in .trash/',
-  );
+  static String deleteToTrashConfirm(String name) =>
+      _t('$name will be moved to .trash/', '$name verrà spostato in .trash/');
   static String deleteForeverConfirm(String name) => _t(
     '$name will be permanently deleted',
     '$name verrà eliminato definitivamente',
@@ -591,10 +583,8 @@ final class AppStrings {
     'Save the recorded events to a file you choose',
     'Salva gli eventi registrati in un file a tua scelta',
   );
-  static String get exportLogEmpty => _t(
-    'The debug log buffer is empty',
-    'Il buffer del log di debug è vuoto',
-  );
+  static String get exportLogEmpty =>
+      _t('The debug log buffer is empty', 'Il buffer del log di debug è vuoto');
   static String get quickNoteUnset => _t('Not set yet', 'Non impostata');
   static String exportLogDone(Object target) =>
       _t('Debug log exported to $target', 'Log di debug esportato in $target');
@@ -610,10 +600,8 @@ final class AppStrings {
     'Replaced $occurrences occurrence(s) of "$term" in $notes note(s)',
     'Sostituite $occurrences occorrenze di "$term" in $notes note',
   );
-  static String replaceSkipped(int skipped) => _t(
-    ' ($skipped open note(s) skipped)',
-    ' ($skipped note aperte saltate)',
-  );
+  static String replaceSkipped(int skipped) =>
+      _t(' ($skipped open note(s) skipped)', ' ($skipped note aperte saltate)');
   static String replacePreviewEmpty(String term, String? only) => _t(
     'No exact whole-word match of "$term" '
         '${only == null ? 'was found' : 'found in $only'}',

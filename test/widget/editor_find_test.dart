@@ -67,9 +67,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
   });
 
-  testWidgets('the find action is absent in preview-only mode', (
-    tester,
-  ) async {
+  testWidgets('the find action is absent in preview-only mode', (tester) async {
     await tester.pumpWidget(
       _app(
         NoteView(

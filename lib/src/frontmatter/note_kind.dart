@@ -27,11 +27,9 @@ abstract interface class NoteKindGUI {
 /// the editor, with no kind GUI. Adding a kind = adding a file here and
 /// registering it in [_all].
 final class NoteKinds {
-  NoteKinds._();
+  new _();
 
-  static final List<NoteKindGUI> _all = [
-    ListKindGui(),
-  ];
+  static final List<NoteKindGUI> _all = [ListKindGui()];
 
   /// The GUI for [type], or null for an unknown or absent kind.
   static NoteKindGUI? forType(String? type) {

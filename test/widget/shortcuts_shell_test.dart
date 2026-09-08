@@ -60,9 +60,7 @@ void main() {
     await close();
   });
 
-  testWidgets('New note opens the new-note dialog and creates', (
-    tester,
-  ) async {
+  testWidgets('New note opens the new-note dialog and creates', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
@@ -92,10 +90,7 @@ void main() {
     await settle(tester);
 
     expect(await controller.ops!.find('Lists/Packing.md'), isNotNull);
-    expect(
-      controller.contentOf('Lists/Packing.md'),
-      '---\ntype: list\n---\n',
-    );
+    expect(controller.contentOf('Lists/Packing.md'), '---\ntype: list\n---\n');
     await close();
   });
 

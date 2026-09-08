@@ -34,19 +34,13 @@ void main() {
     Future<String?> Function(String)? resolve,
   }) => MaterialApp(
     home: Scaffold(
-      body: MarkdownPreview(
-        data: data,
-        embedResolver: resolve,
-      ),
+      body: MarkdownPreview(data: data, embedResolver: resolve),
     ),
   );
 
   testWidgets('an image embed renders inline', (tester) async {
     await tester.pumpWidget(
-      app(
-        data: 'before ![[img.png]] after\n',
-        resolve: (_) async => png.path,
-      ),
+      app(data: 'before ![[img.png]] after\n', resolve: (_) async => png.path),
     );
     await tester.pump();
     await tester.pump();
@@ -56,10 +50,7 @@ void main() {
 
   testWidgets('a binary embed renders muted path text', (tester) async {
     await tester.pumpWidget(
-      app(
-        data: 'see ![[book.epub]] here\n',
-        resolve: (_) async => epub.path,
-      ),
+      app(data: 'see ![[book.epub]] here\n', resolve: (_) async => epub.path),
     );
     await tester.pump();
     await tester.pump();
@@ -69,10 +60,7 @@ void main() {
 
   testWidgets('a missing target renders path text (no crash)', (tester) async {
     await tester.pumpWidget(
-      app(
-        data: 'gone ![[nowhere.jpeg]]\n',
-        resolve: (_) async => null,
-      ),
+      app(data: 'gone ![[nowhere.jpeg]]\n', resolve: (_) async => null),
     );
     await tester.pump();
     await tester.pump();
@@ -81,10 +69,7 @@ void main() {
 
   testWidgets('an alias displays instead of the raw target', (tester) async {
     await tester.pumpWidget(
-      app(
-        data: '![[book.epub|The book]]\n',
-        resolve: (_) async => epub.path,
-      ),
+      app(data: '![[book.epub|The book]]\n', resolve: (_) async => epub.path),
     );
     await tester.pump();
     await tester.pump();

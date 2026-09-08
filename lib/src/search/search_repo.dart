@@ -15,7 +15,7 @@ import 'package:drift/drift.dart' show QueryRow, Variable;
 /// One ranked search hit.
 final class SearchHit {
   /// Creates a hit.
-  const SearchHit({
+  const new({
     required this.noteId,
     required this.path,
     required this.title,
@@ -76,7 +76,7 @@ abstract interface class SearchSource {
 /// beyond the counter, so one instance can back several screens.
 final class SearchRepo implements SearchSource {
   /// Creates the repo over [CopistDatabase].
-  SearchRepo(this._db);
+  new(this._db);
 
   final CopistDatabase _db;
 

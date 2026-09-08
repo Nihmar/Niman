@@ -113,9 +113,7 @@ void main() {
     );
 
     test('inline code and fenced code keep their dollars', () {
-      final nodes = _parse(
-        'with `\$x\$` and\n\n```\n\$y\$\n```',
-      );
+      final nodes = _parse('with `\$x\$` and\n\n```\n\$y\$\n```');
       expect(_maths(nodes), isEmpty);
     });
 

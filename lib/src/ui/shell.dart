@@ -39,7 +39,7 @@ import 'package:path/path.dart' as p;
 /// sidebar | detail shell (editor/preview arrive in M2).
 final class LibraryHome extends ConsumerStatefulWidget {
   /// Creates the root screen.
-  const LibraryHome({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<LibraryHome> createState() => _LibraryHomeState();
@@ -114,7 +114,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
 /// The library shell: sidebar tree + action bar on the left, detail pane
 /// on the right.
 final class _LibraryShell extends StatefulWidget {
-  const _LibraryShell({
+  const new({
     required this.controller,
     required this.reminders,
     required this.shortcuts,
@@ -181,9 +181,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       icon: const Icon(Icons.help_outline),
       onPressed: () => Navigator.push(
         context,
-        MaterialPageRoute<void>(
-          builder: (context) => const TodoHelpScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
       ),
     );
   }
@@ -654,9 +652,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       await action();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
       return;
     } finally {
@@ -1333,7 +1330,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
 /// Right-hand pane: the note editor, or a prompt until a note is chosen.
 final class _DetailPane extends StatelessWidget {
-  const _DetailPane({
+  const new({
     required this.root,
     required this.selectedPath,
     required this.selectedIsDir,
@@ -1448,7 +1445,7 @@ Future<String?> _showMoveDialog(
 }
 
 final class _MovePicker extends StatefulWidget {
-  const _MovePicker({required this.name, required this.folders});
+  const new({required this.name, required this.folders});
 
   final String name;
   final List<Note> folders;

@@ -8,10 +8,7 @@ import 'package:highlight/highlight.dart' show Node, highlight;
 /// `atomOneDarkTheme`); [language] is the fence's info string.
 final class PreviewCodeHighlighter implements SyntaxHighlighter {
   /// Creates a highlighter for [language] with [theme].
-  const PreviewCodeHighlighter({
-    required this.language,
-    required this.theme,
-  });
+  const new({required this.language, required this.theme});
 
   /// The fence's language tag (empty = plain text).
   final String language;

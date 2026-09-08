@@ -33,7 +33,7 @@ Future<String?> showFolderPicker(
 /// The folder picker dialog body.
 final class FolderPicker extends StatefulWidget {
   /// Creates the dialog.
-  const FolderPicker({
+  const new({
     required this.title,
     required this.folders,
     required this.ops,

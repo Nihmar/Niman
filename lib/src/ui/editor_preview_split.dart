@@ -12,7 +12,7 @@ final class EditorPreviewSplit extends StatefulWidget {
   /// the editor's share (0..1, clamped to the allowed range); dragging the
   /// divider calls [onFractionChanged] continuously and [onDragEnd] when
   /// the drag lifts (the owner persists it).
-  const EditorPreviewSplit({
+  const new({
     required this.editor,
     required this.preview,
     required this.editorScroll,
@@ -108,10 +108,7 @@ final class _EditorPreviewSplitState extends State<EditorPreviewSplit> {
       map: widget.map,
       child: Row(
         children: [
-          Expanded(
-            flex: (1000 * fraction).round(),
-            child: widget.editor,
-          ),
+          Expanded(flex: (1000 * fraction).round(), child: widget.editor),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onHorizontalDragUpdate: (details) =>

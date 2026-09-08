@@ -50,7 +50,7 @@ const double maxSplitRatio = 0.8;
 /// Defaults: trash enabled, 10 history versions.
 final class LibrarySettingsRepo {
   /// Creates the repo over the given [CopistDatabase].
-  LibrarySettingsRepo(this._db);
+  new(this._db);
 
   final CopistDatabase _db;
 
@@ -156,7 +156,7 @@ final class LibrarySettingsRepo {
 /// Global app settings, a single row (id 1).
 final class AppSettingsRepo {
   /// Creates the repo over the given [CopistDatabase].
-  AppSettingsRepo(this._db);
+  new(this._db);
 
   final CopistDatabase _db;
 

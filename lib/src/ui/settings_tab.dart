@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// Scaffold — the shell provides the app bar.
 final class SettingsTab extends StatelessWidget {
   /// Creates the settings tab.
-  const SettingsTab({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session of the library whose settings this tab edits.
   final LibrarySession controller;

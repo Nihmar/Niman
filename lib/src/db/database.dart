@@ -209,7 +209,7 @@ class NoteLinks extends Table {
 )
 class CopistDatabase extends _$CopistDatabase {
   /// Creates the database on top of [e].
-  CopistDatabase(super.e);
+  new(super.e);
 
   @override
   int get schemaVersion => 13;

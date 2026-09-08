@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
-  const _Row({required this.note, required this.depth});
+  const new({required this.note, required this.depth});
 
   final Note note;
   final int depth;
@@ -20,7 +20,7 @@ final class _Row {
 /// the visible rows (T-M1-04).
 final class NoteTree extends StatefulWidget {
   /// Creates the note tree.
-  const NoteTree({
+  const new({
     required this.controller,
     required this.selectedPath,
     required this.expanded,
@@ -185,7 +185,7 @@ bool _setEquals(Set<String> a, Set<String> b) {
 /// One row tile: chevron (folders) or doc icon (files), then the name —
 /// the name column is shared, per the mockup.
 final class _RowTile extends StatelessWidget {
-  const _RowTile({
+  const new({
     required this.note,
     required this.depth,
     required this.isExpanded,

@@ -29,10 +29,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: NoteEditor(
-            controller: controller,
-            focusNode: focus,
-          ),
+          body: NoteEditor(controller: controller, focusNode: focus),
         ),
       ),
     );

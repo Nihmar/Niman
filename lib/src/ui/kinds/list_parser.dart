@@ -3,7 +3,7 @@ import 'package:copist/src/editor/highlighting.dart';
 /// One task-list item parsed from a note's text.
 final class ListItem {
   /// Creates an item.
-  const ListItem({
+  const new({
     required this.line,
     required this.depth,
     required this.indent,

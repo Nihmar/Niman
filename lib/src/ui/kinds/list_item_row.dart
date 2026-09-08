@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 /// text (tapping it edits the text in place).
 class ListItemRow extends StatefulWidget {
   /// Creates the row.
-  const ListItemRow({
+  const new({
     required this.item,
     required this.isDragSource,
     required this.isEditing,
@@ -80,9 +80,7 @@ class _ListItemRowState extends State<ListItemRow> {
       _committed = false;
       _text
         ..text = widget.item.text
-        ..selection = TextSelection.collapsed(
-          offset: widget.item.text.length,
-        );
+        ..selection = TextSelection.collapsed(offset: widget.item.text.length);
       _focus.requestFocus();
     } else if (!widget.isEditing && old.isEditing && !_committed) {
       // The edit ended without a submit (another row started editing and
@@ -133,10 +131,7 @@ class _ListItemRowState extends State<ListItemRow> {
           onDragEnd: widget.onDragEnd,
           onDragCancel: widget.onDragCancel,
         ),
-        Checkbox(
-          value: item.checked,
-          onChanged: (_) => widget.onToggle(),
-        ),
+        Checkbox(value: item.checked, onChanged: (_) => widget.onToggle()),
         Expanded(
           child: widget.isEditing
               ? _editField()

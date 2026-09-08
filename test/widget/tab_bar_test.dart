@@ -245,10 +245,7 @@ void main() {
     );
     // The tile can still sit behind the bottom NavigationBar: nudge the
     // list up so the subtitle (the tap target) is fully visible.
-    await tester.drag(
-      find.byType(Scrollable).first,
-      const Offset(0, -120),
-    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
     await settle(tester);
     await tester.tap(find.text('Not set yet'));
     await settle(tester);
@@ -365,10 +362,7 @@ void main() {
     // The tags button flips to the Tags screen and back (T-M3-06).
     await tester.tap(find.byKey(const Key('open-tags')));
     await settle(tester);
-    expect(
-      find.text('No tags yet — add a #tag or frontmatter tags'),
-      findsOne,
-    );
+    expect(find.text('No tags yet — add a #tag or frontmatter tags'), findsOne);
     await tester.tap(find.byKey(const Key('tags-back')));
     await settle(tester);
     expect(find.byKey(const Key('search-query')), findsOne);
@@ -401,9 +395,7 @@ void main() {
     tester,
   ) async {
     setSurfaceSize(tester, const Size(390, 844));
-    final reminders = FakeReminderService(
-      launchPayload: todoReminderPayload,
-    );
+    final reminders = FakeReminderService(launchPayload: todoReminderPayload);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

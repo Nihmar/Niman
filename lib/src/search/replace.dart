@@ -27,7 +27,7 @@ import 'package:path/path.dart' as p;
 /// One replace run's outcome.
 final class ReplaceReport {
   /// Creates a report.
-  const ReplaceReport({
+  const new({
     required this.notesScanned,
     required this.notesChanged,
     required this.occurrences,
@@ -52,11 +52,7 @@ final class ReplaceReport {
 /// and carry a leading/trailing `…` when trimmed.
 final class ReplaceSample {
   /// Creates a sample.
-  const ReplaceSample({
-    required this.before,
-    required this.match,
-    required this.after,
-  });
+  const new({required this.before, required this.match, required this.after});
 
   /// The text right before the match ('' when the match starts the note).
   final String before;
@@ -72,7 +68,7 @@ final class ReplaceSample {
 /// [samples] (context around the first matches) for the preview list.
 final class ReplaceMatchNote {
   /// Creates a match note.
-  const ReplaceMatchNote({
+  const new({
     required this.path,
     required this.occurrences,
     required this.samples,
@@ -121,11 +117,7 @@ final class ReplaceRunner implements ReplaceSource {
   /// Creates a runner for the library root and index database given to it;
   /// [onNotesReindexed] is invoked with the absolute paths of every note
   /// this run rewrote, right after the batch that rewrote them.
-  ReplaceRunner(
-    this._db,
-    this._root, {
-    this.onNotesReindexed,
-  });
+  new(this._db, this._root, {this.onNotesReindexed});
 
   final CopistDatabase _db;
   final String _root;
@@ -220,13 +212,7 @@ final class ReplaceRunner implements ReplaceSource {
     for (var i = 0; i < todo.length; i += chunk) {
       final rels = todo.sublist(i, math.min(i + chunk, todo.length));
       final results = await Isolate.run(
-        () => _replaceChunk(
-          root,
-          rels,
-          term,
-          replacement,
-          caseSensitive,
-        ),
+        () => _replaceChunk(root, rels, term, replacement, caseSensitive),
       );
       final changed = <String>[];
       for (var j = 0; j < results.length; j++) {
@@ -323,12 +309,7 @@ Future<List<ReplaceMatchNote?>> _previewChunk(
 
 /// The context around [start]..[end] in [text]: ±[radius] characters,
 /// with a `…` marker on each trimmed side.
-ReplaceSample _sampleAround(
-  String text,
-  int start,
-  int end,
-  int radius,
-) {
+ReplaceSample _sampleAround(String text, int start, int end, int radius) {
   var from = start - radius;
   var to = end + radius;
   final lead = from > 0 ? '…' : '';

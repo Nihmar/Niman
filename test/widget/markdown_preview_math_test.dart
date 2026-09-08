@@ -21,10 +21,8 @@ MarkdownPreview _preview(String data, MathCache cache) => MarkdownPreview(
 );
 
 MathCache _syncCache() => MathCache(
-  renderer: (tex, {required displayMode}) => renderToBox(
-    tex,
-    options: KatexOptions(displayMode: displayMode),
-  ),
+  renderer: (tex, {required displayMode}) =>
+      renderToBox(tex, options: KatexOptions(displayMode: displayMode)),
 );
 
 void main() {
@@ -50,8 +48,7 @@ void tests() {
       final cache = _syncCache();
       await tester.pumpWidget(
         _app(
-          _preview(
-            r'''
+          _preview(r'''
 Before
 
 $$
@@ -61,9 +58,7 @@ $$
 - item with display: $$
   x
   $$
-''',
-            cache,
-          ),
+''', cache),
         ),
       );
       await tester.pump();
@@ -76,9 +71,7 @@ $$
       tester,
     ) async {
       final cache = _syncCache();
-      await tester.pumpWidget(
-        _app(_preview(r'A $x^2$ and b', cache)),
-      );
+      await tester.pumpWidget(_app(_preview(r'A $x^2$ and b', cache)));
       await tester.pump();
       final missesAfterFirst = cache.misses;
       // The same tex keeps rendering unchanged while only prose changes.
@@ -96,9 +89,7 @@ $$
         renderer: (tex, {required displayMode}) =>
             throw const FormatException('bad'),
       );
-      await tester.pumpWidget(
-        _app(_preview(r'bad $\frac{a}{}$ math', cache)),
-      );
+      await tester.pumpWidget(_app(_preview(r'bad $\frac{a}{}$ math', cache)));
       await tester.pump();
       await tester.pump();
       expect(tester.takeException(), isNull);

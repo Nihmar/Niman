@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 /// The bottom sheet: token chips with counts + the sort choice chips.
 final class TodoFilterSheet extends StatefulWidget {
   /// Creates the sheet for [filter] with ranked [counts].
-  const TodoFilterSheet({
+  const new({
     required this.filter,
     required this.counts,
     required this.onToggleToken,
@@ -78,9 +78,7 @@ final class _TodoFilterSheetState extends State<TodoFilterSheet> {
                     FilterChip(
                       key: Key('todo-token-${entry.token}'),
                       label: Text('${entry.token} (${entry.count})'),
-                      labelPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                      ),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
                       selected: _tokens.contains(entry.token),
                       onSelected: (_) {
                         _log.debug('todo token chip: ${entry.token}');
@@ -95,10 +93,7 @@ final class _TodoFilterSheetState extends State<TodoFilterSheet> {
                 ],
               ),
             const SizedBox(height: 16),
-            Text(
-              AppStrings.todoSortTooltip,
-              style: theme.textTheme.titleSmall,
-            ),
+            Text(AppStrings.todoSortTooltip, style: theme.textTheme.titleSmall),
             const SizedBox(height: 4),
             Wrap(
               spacing: 8,

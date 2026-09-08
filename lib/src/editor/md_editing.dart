@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 /// The result of a Markdown editing command.
 final class MarkdownEdit {
   /// Creates an edit result.
-  const MarkdownEdit({required this.text, required this.selection});
+  const new({required this.text, required this.selection});
 
   /// The new full text.
   final String text;

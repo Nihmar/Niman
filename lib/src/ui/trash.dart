@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Lists trash items and supports restoring / permanent deletion.
 final class TrashScreen extends StatefulWidget {
   /// Creates the trash screen.
-  const TrashScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session of the library whose trash this screen lists.
   final LibrarySession controller;
@@ -46,9 +46,8 @@ final class _TrashScreenState extends State<TrashScreen> {
       await _load();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) {
@@ -108,9 +107,8 @@ final class _TrashScreenState extends State<TrashScreen> {
       await _load();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) {
@@ -140,9 +138,7 @@ final class _TrashScreenState extends State<TrashScreen> {
                 return Card(
                   child: ListTile(
                     title: Text(item.name),
-                    subtitle: Text(
-                      'was: ${item.originalPath}\n$deletedOn',
-                    ),
+                    subtitle: Text('was: ${item.originalPath}\n$deletedOn'),
                     isThreeLine: true,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

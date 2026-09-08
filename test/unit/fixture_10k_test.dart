@@ -77,11 +77,7 @@ void main() {
       'first', () async {
     final id = search.begin();
     final clock = Stopwatch()..start();
-    final hits = await search.search(
-      buildFtsQuery('unique'),
-      id: id,
-      limit: 5,
-    );
+    final hits = await search.search(buildFtsQuery('unique'), id: id, limit: 5);
     final elapsed = clock.elapsedMilliseconds;
     expect(elapsed, lessThan(2000), reason: 'search took $elapsed ms');
     expect(hits, hasLength(5));

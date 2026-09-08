@@ -8,7 +8,7 @@ import 'package:copist/src/search/tag_repo.dart';
 /// the map). Entries are mutable, so tests can reshape the data.
 final class FakeTagSource implements TagSource {
   /// Creates a fake source over [tags] (tag → note paths).
-  FakeTagSource({Map<String, List<String>>? tags})
+  new({Map<String, List<String>>? tags})
     : tags = tags ?? <String, List<String>>{};
 
   /// tag → note paths (mutable).

@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 /// without being reopened.
 final class ToolbarSettingsScreen extends StatefulWidget {
   /// Creates the screen over [controller]'s stored layout.
-  const ToolbarSettingsScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session holding the setting.
   final LibrarySession controller;
@@ -117,9 +117,8 @@ final class _ToolbarSettingsScreenState extends State<ToolbarSettingsScreen> {
                   : Icons.visibility_off_outlined,
               color: color,
             ),
-            onPressed: () => unawaited(
-              _save(_layout.withVisible(item, visible: !visible)),
-            ),
+            onPressed: () =>
+                unawaited(_save(_layout.withVisible(item, visible: !visible))),
           ),
           ReorderableDragStartListener(
             index: index,

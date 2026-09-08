@@ -42,7 +42,7 @@ const String todoReminderIcon = 'ic_stat_reminder';
 @immutable
 final class TodoReminder {
   /// Creates a reminder firing at [when] (local wall-clock time).
-  const TodoReminder({
+  const new({
     required this.id,
     required this.title,
     required this.body,

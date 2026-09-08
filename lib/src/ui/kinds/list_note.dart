@@ -31,11 +31,7 @@ final class ListKindGui implements NoteKindGUI {
 /// keeps its bytes apart from the leading spaces.
 class ListNoteView extends StatefulWidget {
   /// Creates the view; [onChanged] receives the new full note text.
-  const ListNoteView({
-    required this.text,
-    required this.onChanged,
-    super.key,
-  });
+  const new({required this.text, required this.onChanged, super.key});
 
   /// The full note text.
   final String text;
@@ -50,7 +46,7 @@ class ListNoteView extends StatefulWidget {
 
 /// The item being dragged (T-TK-09).
 final class _Drag {
-  _Drag(this.index);
+  new(this.index);
 
   final int index;
   Offset? position;
@@ -59,7 +55,7 @@ final class _Drag {
 /// Where a dragged item will land: the target item index in [mode], or
 /// -1 (the zone above the list) / the item count (below it).
 final class _DropTarget {
-  const _DropTarget(this.item, this.mode);
+  const new(this.item, this.mode);
 
   final int item;
   final ListDropMode mode;
@@ -382,10 +378,7 @@ class _ListNoteViewState extends State<ListNoteView>
       key: const Key('list-add-row'),
       sizeFactor: _addRowShown,
       alignment: Alignment.topCenter,
-      child: FadeTransition(
-        opacity: _addRowShown,
-        child: _addField(context),
-      ),
+      child: FadeTransition(opacity: _addRowShown, child: _addField(context)),
     );
   }
 
@@ -395,9 +388,8 @@ class _ListNoteViewState extends State<ListNoteView>
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: TextField(
         controller: _newItem,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         decoration: InputDecoration(
           hintText: AppStrings.listAddHint,
           prefixIcon: const Icon(Icons.add),
@@ -407,9 +399,7 @@ class _ListNoteViewState extends State<ListNoteView>
             tooltip: AppStrings.listAddTooltip,
             onPressed: _add,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onSubmitted: (_) => _add(),
       ),

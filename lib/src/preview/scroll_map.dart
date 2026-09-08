@@ -94,7 +94,7 @@ final class ScrollMap {
 /// count matches the parser's AST over the coverage fixture.
 final class BlockLocator {
   /// Creates the locator.
-  BlockLocator();
+  new();
 
   final RegExp _setext = RegExp(r'^(=+|-+)\s*$');
   final RegExp _hr = RegExp(r'^\s{0,3}(-{3,}|_{3,}|\*{3,})\s*$');

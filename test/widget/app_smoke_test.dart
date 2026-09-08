@@ -12,9 +12,7 @@ void main() {
     addTearDown(session.dispose);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          librarySessionProvider.overrideWithValue(session),
-        ],
+        overrides: [librarySessionProvider.overrideWithValue(session)],
         child: const CopistApp(),
       ),
     );

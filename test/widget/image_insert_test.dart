@@ -115,10 +115,7 @@ void main() {
         expect(fileImage.file.path.endsWith('pic.png'), isTrue);
 
         // Prove it decodes (i.e. the image is actually visible):
-        await precacheImage(
-          fileImage,
-          tester.element(find.byType(Image)),
-        );
+        await precacheImage(fileImage, tester.element(find.byType(Image)));
       } finally {
         await dir.delete(recursive: true);
       }
@@ -154,9 +151,8 @@ void main() {
               importImage: (root, src) {
                 final assets = Directory(p.join(root, 'assets'));
                 if (!assets.existsSync()) assets.createSync(recursive: true);
-                File(p.join(assets.path, 'xx.png')).writeAsBytesSync(
-                  File(src).readAsBytesSync(),
-                );
+                File(p.join(assets.path, 'xx.png'))
+                    .writeAsBytesSync(File(src).readAsBytesSync());
                 return Future.value('assets/xx.png');
               },
             ),
@@ -169,10 +165,7 @@ void main() {
       await tester.pump(); // snippet lands in the editor.
       expect(tester.takeException(), isNull);
       expect(controller.text, contains('![pic](assets/xx.png)'));
-      expect(
-        File(p.join(dir.path, 'assets/xx.png')).existsSync(),
-        isTrue,
-      );
+      expect(File(p.join(dir.path, 'assets/xx.png')).existsSync(), isTrue);
       // The inserted link autosaves like any edit:
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes.single, contains('![pic](assets/xx.png)'));

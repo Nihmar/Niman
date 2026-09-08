@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 /// The compact filter row over the todo list.
 final class TodoFilterBar extends StatelessWidget {
   /// Creates the row for [filter].
-  const TodoFilterBar({
+  const new({
     required this.filter,
     required this.showDone,
     required this.count,
@@ -85,7 +85,7 @@ final class TodoFilterBar extends StatelessWidget {
 /// The due-range dropdown pill ("All dates ⌄"): an outlined button
 /// opening the five-range popup menu (checked = the current range).
 final class _DueRangeMenu extends StatelessWidget {
-  const _DueRangeMenu({required this.range, required this.onDueRange});
+  const new({required this.range, required this.onDueRange});
 
   final TodoDueRange range;
   final ValueChanged<TodoDueRange> onDueRange;
@@ -107,11 +107,7 @@ final class _DueRangeMenu extends StatelessWidget {
         children: [
           Text(_label(range)),
           const SizedBox(width: 4),
-          Icon(
-            Icons.expand_more,
-            size: 16,
-            color: scheme.onSurfaceVariant,
-          ),
+          Icon(Icons.expand_more, size: 16, color: scheme.onSurfaceVariant),
         ],
       ),
     );
@@ -142,11 +138,7 @@ final class _DueRangeMenu extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(child: Text(_label(r))),
-                if (r == range)
-                  const Icon(
-                    Icons.check,
-                    size: 16,
-                  ),
+                if (r == range) const Icon(Icons.check, size: 16),
               ],
             ),
           ),

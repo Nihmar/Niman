@@ -19,7 +19,7 @@ import 'package:re_editor/re_editor.dart';
 /// is incremental; only folding is capped).
 final class MarkdownChunkAnalyzer implements CodeChunkAnalyzer {
   /// Creates the analyzer.
-  const MarkdownChunkAnalyzer({this.lineLimit = 20000});
+  const new({this.lineLimit = 20000});
 
   /// Lines above which the analyzer returns no chunks.
   final int lineLimit;

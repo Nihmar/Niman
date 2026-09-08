@@ -18,7 +18,7 @@ import 'dart:io';
 /// away keeps its tail) and whenever the pending buffer gets large.
 final class LogFile {
   /// Creates a log file at [path], rotating past [maxBytes].
-  LogFile({
+  new({
     required this.path,
     this.maxBytes = 512 * 1024,
     this.flushInterval = const Duration(seconds: 3),

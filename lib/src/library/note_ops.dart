@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 /// One item in `.trash/`, mapped back to its library-relative origin.
 final class TrashItem {
   /// Creates a trash listing entry.
-  const TrashItem({
+  const new({
     required this.name,
     required this.originalPath,
     required this.deletedAt,
@@ -37,12 +37,9 @@ final class TrashItem {
 /// can be restored to their original location.
 final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
-  NoteOps({
-    required this.root,
-    required CopistDatabase db,
-    required this.indexer,
-  }) : _dao = NoteDao(db),
-       _settings = LibrarySettingsRepo(db);
+  new({required this.root, required CopistDatabase db, required this.indexer})
+    : _dao = NoteDao(db),
+      _settings = LibrarySettingsRepo(db);
 
   /// Absolute path of the library root.
   final String root;
@@ -120,7 +117,7 @@ final class NoteOps implements NoteOperations {
       final file = File(_abs(resolvePath(parentPath, unique)));
       await writeFileAtomically(file, utf8.encode(content));
       await indexer.applyEvents(root, [file.path]);
-      return _mustFind(resolvePath(parentPath, unique));
+      return await _mustFind(resolvePath(parentPath, unique));
     });
   }
 
@@ -137,7 +134,7 @@ final class NoteOps implements NoteOperations {
       final newDir = Directory(_abs(resolvePath(parentPath, unique)));
       await newDir.create(recursive: true);
       await indexer.applyEvents(root, [newDir.path]);
-      return _mustFind(resolvePath(parentPath, unique));
+      return await _mustFind(resolvePath(parentPath, unique));
     });
   }
 
@@ -157,11 +154,7 @@ final class NoteOps implements NoteOperations {
       String target;
       if (row.isDir) {
         final clean = sanitizeName(base, fallback: defaultFolderName);
-        target = await uniqueFolderName(
-          parentDir,
-          clean,
-          exclude: _abs(path),
-        );
+        target = await uniqueFolderName(parentDir, clean, exclude: _abs(path));
       } else {
         final clean = sanitizeName(base, fallback: defaultNoteName);
         target = await uniqueFileName(
@@ -180,7 +173,7 @@ final class NoteOps implements NoteOperations {
         await File(oldAbs).rename(_abs(newRel));
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -216,7 +209,7 @@ final class NoteOps implements NoteOperations {
         await File(oldAbs).rename(_abs(newRel));
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -317,7 +310,7 @@ final class NoteOps implements NoteOperations {
       manifest.remove(trashName);
       await _writeManifest(manifest);
       await indexer.applyEvents(root, [trashAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -441,10 +434,7 @@ final class NoteOps implements NoteOperations {
 /// One manifest entry: where a trash item came from.
 final class _ManifestEntry {
   /// Creates a manifest entry.
-  const _ManifestEntry({
-    required this.originalPath,
-    required this.deletedAt,
-  });
+  const new({required this.originalPath, required this.deletedAt});
 
   /// Library-relative path before the delete.
   final String originalPath;

@@ -21,8 +21,9 @@ indexes them, including the slices outside the chain.
   - Windows (`flutter build windows --release` → `build\windows\x64\runner\Release\`) needs a Windows host; it cannot be cross-built from Linux, so verify it there when the change touches platform code.
 
 ## Verify
+- **Before analyze and tests, run `dart fix --apply` then `dart format lib test tool`.** Both are idempotent and safe to repeat. `dart fix` is what keeps the tree on the current Dart style — the unnamed constructor is declared `new(...)`, not by repeating the type name — and it settles most new lints from an `analysis_options` bump without hand edits. Formatting first also keeps a later reflow from burying a real diff.
 - No CI: nothing runs the checks for you, so `./scripts/copist.sh check` (analyze + tests) before every commit. Terse output; full log `/tmp/copist/copist-check.log`.
-- On a Windows host: `scripts\copist.bat <analyze|test|check|apk|windows>` (same output discipline, logs under `%TEMP%\copist`). ~23 tests fail there on path separators (`/fake/library` vs `\`) and on temp-dir cleanup — pre-existing and platform-only, not a regression; the suite is green on Linux.
+- On a Windows host: `scripts\copist.bat <analyze|test|check|apk|windows>` (same output discipline, logs under `%TEMP%\copist`). ~23 tests fail there on path separators (`/fake/library` vs `\`) and on temp-dir cleanup — pre-existing and platform-only, not a regression; the suite is green on Linux. `file_watcher_test` "coalesces rapid events into a single batch" also flakes there under full-suite load and passes on its own — check a suspect failure in isolation before calling it a regression.
 - `flutter analyze --fatal-infos` (infos are fatal; keep it clean).
 - `flutter test` (`test/unit/`, `test/widget/`). Single: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
 - `integration_test/` = on-device E2E; not part of the default run.

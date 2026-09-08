@@ -34,7 +34,7 @@ import 'package:meta/meta.dart';
 @immutable
 final class TodoToken {
   /// Creates a token of [kind] with [value] (without the sigil).
-  const TodoToken({required this.kind, required this.value});
+  const new({required this.kind, required this.value});
 
   /// The token kind: `+`, `@` or `#`.
   final String kind;
@@ -49,7 +49,7 @@ final class TodoToken {
 @immutable
 final class TodoKeyValue {
   /// Creates an unknown tag with [key] and [value].
-  const TodoKeyValue({required this.key, required this.value});
+  const new({required this.key, required this.value});
 
   /// The tag key before the colon.
   final String key;
@@ -65,7 +65,7 @@ final class TodoKeyValue {
 @immutable
 final class TodoTask {
   /// Creates a task; use [parseTodoLine], not this constructor directly.
-  const TodoTask({
+  const new({
     required this.raw,
     required this.completed,
     required this.description,
@@ -215,10 +215,7 @@ TodoTask parseTodoLine(String line) {
             secondDate = second;
             rest = rest
                 .substring(secondMatch.end)
-                .replaceFirst(
-                  _leadingSpace,
-                  '',
-                );
+                .replaceFirst(_leadingSpace, '');
           }
         }
       }

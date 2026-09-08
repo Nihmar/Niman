@@ -136,10 +136,7 @@ void main() {
         // The move was never attempted: nothing moved, nothing renamed.
         expect(await dao.find('Docs'), isNotNull);
         expect(await dao.find('Docs/Inner'), isNotNull);
-        expect(
-          Directory(p.join(root.path, 'Docs/Inner')).existsSync(),
-          isTrue,
-        );
+        expect(Directory(p.join(root.path, 'Docs/Inner')).existsSync(), isTrue);
       },
     );
   });
@@ -149,10 +146,7 @@ void main() {
       await ops.createNote(parentPath: '', name: 'Gone');
       await ops.delete('Gone.md');
       expect(File(p.join(root.path, 'Gone.md')).existsSync(), isFalse);
-      expect(
-        File(p.join(root.path, '.trash/Gone.md')).existsSync(),
-        isTrue,
-      );
+      expect(File(p.join(root.path, '.trash/Gone.md')).existsSync(), isTrue);
       final items = await ops.trashItems();
       expect(items, hasLength(1));
       expect(items.first.name, 'Gone.md');
@@ -163,10 +157,7 @@ void main() {
       await ops.createFolder(parentPath: '', name: 'Docs');
       await ops.createNote(parentPath: 'Docs', name: 'One');
       await ops.delete('Docs');
-      expect(
-        Directory(p.join(root.path, '.trash/Docs')).existsSync(),
-        isTrue,
-      );
+      expect(Directory(p.join(root.path, '.trash/Docs')).existsSync(), isTrue);
       expect(
         File(p.join(root.path, '.trash/Docs/One.md')).existsSync(),
         isTrue,
@@ -267,10 +258,7 @@ void main() {
       final item = (await ops.trashItems()).single;
       await ops.deleteTrashPermanently(item.name);
       expect(await ops.trashItems(), isEmpty);
-      expect(
-        File(p.join(root.path, '.trash/Gone.md')).existsSync(),
-        isFalse,
-      );
+      expect(File(p.join(root.path, '.trash/Gone.md')).existsSync(), isFalse);
     });
 
     test('emptyTrash removes every item', () async {
@@ -280,14 +268,8 @@ void main() {
       await ops.delete('B.md');
       await ops.emptyTrash();
       expect(await ops.trashItems(), isEmpty);
-      expect(
-        File(p.join(root.path, '.trash/A.md')).existsSync(),
-        isFalse,
-      );
-      expect(
-        File(p.join(root.path, '.trash/B.md')).existsSync(),
-        isFalse,
-      );
+      expect(File(p.join(root.path, '.trash/A.md')).existsSync(), isFalse);
+      expect(File(p.join(root.path, '.trash/B.md')).existsSync(), isFalse);
     });
 
     test(
@@ -359,9 +341,8 @@ void main() {
       );
       expect(
         jsonDecode(
-          File(
-            p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
-          ).readAsStringSync(),
+          File(p.join(root.path, '.trash/${NoteOps.manifestFileName}'))
+              .readAsStringSync(),
         ),
         isEmpty,
       );

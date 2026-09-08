@@ -16,7 +16,7 @@ import 'package:path_provider/path_provider.dart';
 /// `copist-crash-<stamp>.txt` in the open library (falling back to the app
 /// documents directory), where the user can send it back for analysis.
 final class CrashReporter {
-  CrashReporter._();
+  new _();
 
   /// The crash diagnostics.
   static const AppLogger _log = AppLogger(name: 'crash');

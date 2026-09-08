@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// position — and its future nesting level — are both visible.
 class ListDropIndicator extends StatelessWidget {
   /// Creates the marker, inset by [indent] logical pixels.
-  const ListDropIndicator({required this.indent, super.key});
+  const new({required this.indent, super.key});
 
   /// The left inset: the indentation the dropped item will have.
   final double indent;

@@ -16,9 +16,7 @@ void main() {
   });
 
   test('a # line inside a code fence is not a heading', () {
-    final doc = HighlightDocument.fromText(
-      '```\n# not a heading\n```\n# Real',
-    );
+    final doc = HighlightDocument.fromText('```\n# not a heading\n```\n# Real');
     final o = outlineOf(doc.lines);
     expect(o, hasLength(1));
     expect(o[0].line, 3);

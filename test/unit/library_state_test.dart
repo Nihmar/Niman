@@ -30,9 +30,8 @@ void main() {
   /// A factory over one shared on-disk database, so a "fresh" controller
   /// (simulating an app restart) sees the same index and settings.
   Future<CopistDatabase> Function() sharedDb() {
-    return () async => CopistDatabase(
-      NativeDatabase(File(p.join(tmp.path, 'copist.db'))),
-    );
+    return () async =>
+        CopistDatabase(NativeDatabase(File(p.join(tmp.path, 'copist.db'))));
   }
 
   /// A controller with a long periodic rescan and the given
@@ -92,9 +91,7 @@ void main() {
       expect(await names(second), ['a.md']);
 
       // The background reconciliation converges the index with the disk.
-      await expectConverged(
-        () async => (await names(second)).contains('b.md'),
-      );
+      await expectConverged(() async => (await names(second)).contains('b.md'));
       await second.close();
       await second.dispose();
     },
@@ -124,9 +121,7 @@ void main() {
     expect(await names(second), ['a.md']);
 
     // ...and the background reconciliation converges.
-    await expectConverged(
-      () async => (await names(second)).contains('b.md'),
-    );
+    await expectConverged(() async => (await names(second)).contains('b.md'));
     await second.close();
     await second.dispose();
   });
@@ -159,10 +154,11 @@ void main() {
     await first.rescanNow();
 
     // Default: directories first, then ascending names.
-    expect(
-      (await first.children(0)).map((note) => note.name).toList(),
-      ['a.md', 'b.md', 'c.md'],
-    );
+    expect((await first.children(0)).map((note) => note.name).toList(), [
+      'a.md',
+      'b.md',
+      'c.md',
+    ]);
 
     // Descending flips the name sort (dirs stay first).
     await first.setTreeSort(TreeSort.nameDesc);

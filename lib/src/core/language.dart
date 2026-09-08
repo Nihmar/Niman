@@ -20,7 +20,7 @@ enum AppLanguage {
   /// Italian.
   italian('it');
 
-  const AppLanguage(this.id);
+  new(this.id);
 
   /// The persisted id (also the locale code for the real languages).
   final String id;
@@ -36,7 +36,7 @@ enum AppLanguage {
 
 /// The active language: the user's choice, resolved against the OS.
 final class AppLanguages {
-  const AppLanguages._();
+  const new _();
 
   /// The languages the app ships, in menu order.
   static const List<AppLanguage> supported = [

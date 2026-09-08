@@ -8,10 +8,7 @@ void main() {
     test('heading marker, then plain content', () {
       final doc = HighlightDocument.fromText('## Title');
       final line = doc.lines.single;
-      expect(
-        line.tokens,
-        [const Token(TokenKind.headingMarker, 0, 2)],
-      );
+      expect(line.tokens, [const Token(TokenKind.headingMarker, 0, 2)]);
     });
 
     test('heading with inline math and bold', () {
@@ -22,10 +19,11 @@ void main() {
         TokenKind.bold,
         TokenKind.mathInline,
       ]);
-      expect(
-        line.tokens.map((t) => '${t.start}-${t.end}').toList(),
-        ['0-1', '4-9', '10-13'],
-      );
+      expect(line.tokens.map((t) => '${t.start}-${t.end}').toList(), [
+        '0-1',
+        '4-9',
+        '10-13',
+      ]);
     });
 
     test('bold, italic, strike, code, links, wikilink, tag', () {
@@ -33,18 +31,15 @@ void main() {
         '**b** *i* ~~s~~ `c` [t](u) [[w]] #tag',
       );
       final kinds = doc.lines.single.tokens.map((t) => t.kind).toList();
-      expect(
-        kinds,
-        [
-          TokenKind.bold,
-          TokenKind.italic,
-          TokenKind.strike,
-          TokenKind.codeInline,
-          TokenKind.link,
-          TokenKind.wikilink,
-          TokenKind.tag,
-        ],
-      );
+      expect(kinds, [
+        TokenKind.bold,
+        TokenKind.italic,
+        TokenKind.strike,
+        TokenKind.codeInline,
+        TokenKind.link,
+        TokenKind.wikilink,
+        TokenKind.tag,
+      ]);
     });
 
     test('image token covers the whole ![alt](url)', () {
@@ -196,10 +191,7 @@ void main() {
       final spans = mathSpansIn(text)
           .map((s) => text.substring(s.start, s.end))
           .toList();
-      expect(
-        spans,
-        [r'$x$', '\$\$\n\\int f\n\$\$', r'$$a+b$$'],
-      );
+      expect(spans, [r'$x$', '\$\$\n\\int f\n\$\$', r'$$a+b$$']);
     });
 
     test('mathSpansIn skips fences and frontmatter', () {
@@ -248,15 +240,12 @@ void main() {
 
     test('horizontal rules', () {
       final doc = HighlightDocument.fromText('***\n___\n---\ntext');
-      expect(
-        doc.lines.map((l) => l.tokens.firstOrNull?.kind),
-        [
-          TokenKind.horizontalRule,
-          TokenKind.horizontalRule,
-          TokenKind.horizontalRule,
-          null,
-        ],
-      );
+      expect(doc.lines.map((l) => l.tokens.firstOrNull?.kind), [
+        TokenKind.horizontalRule,
+        TokenKind.horizontalRule,
+        TokenKind.horizontalRule,
+        null,
+      ]);
     });
   });
 
@@ -321,7 +310,7 @@ void main() {
 
 /// A tiny deterministic PRNG (no dart:math import needed in the test).
 class _SeededRandom {
-  _SeededRandom(this._state);
+  new(this._state);
 
   int _state;
 

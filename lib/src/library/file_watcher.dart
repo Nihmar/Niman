@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 /// A batch of filesystem changes delivered by a [FileWatcher].
 final class WatchBatch {
   /// Creates a batch of changed paths.
-  const WatchBatch({required this.paths, required this.resyncDirs});
+  const new({required this.paths, required this.resyncDirs});
 
   /// Changed absolute paths; for renames this is the OLD path (the new
   /// path is unknown to the OS event).
@@ -27,7 +27,7 @@ final class WatchBatch {
 /// safety net (see the M1 plan risks).
 final class FileWatcher {
   /// Creates a watcher for [root] with the given [debounce] window.
-  FileWatcher(this.root, {this.debounce = defaultDebounce});
+  new(this.root, {this.debounce = defaultDebounce});
 
   /// The debounce window between the last event and the batch emission.
   static const defaultDebounce = Duration(milliseconds: 250);

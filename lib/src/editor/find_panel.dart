@@ -24,11 +24,7 @@ import 'package:re_editor/re_editor.dart';
 final class CopistFindPanel extends StatelessWidget
     implements PreferredSizeWidget {
   /// Creates the panel over [controller].
-  const CopistFindPanel({
-    required this.controller,
-    required this.readOnly,
-    super.key,
-  });
+  const new({required this.controller, required this.readOnly, super.key});
 
   /// The find state + actions (the note's own [CodeFindController]).
   final CodeFindController controller;
@@ -212,13 +208,11 @@ final class CopistFindPanel extends StatelessWidget
 final class CopistShortcutsActivatorsBuilder
     extends CodeShortcutsActivatorsBuilder {
   /// Creates the builder.
-  const CopistShortcutsActivatorsBuilder();
+  const new();
 
   @override
   List<ShortcutActivator>? build(CodeShortcutType type) {
-    final defaults = const DefaultCodeShortcutsActivatorsBuilder().build(
-      type,
-    );
+    final defaults = const DefaultCodeShortcutsActivatorsBuilder().build(type);
     if (!kIsMacOS && type == CodeShortcutType.replace) {
       return [
         ...?defaults,

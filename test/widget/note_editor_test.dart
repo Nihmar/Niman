@@ -6,9 +6,7 @@ import 'package:re_editor/re_editor.dart';
 Widget _app(NoteEditor editor) => MaterialApp(home: Scaffold(body: editor));
 
 Future<void> _unmount(WidgetTester tester) async {
-  await tester.pumpWidget(
-    const MaterialApp(home: Scaffold(body: SizedBox())),
-  );
+  await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 }
 
 void main() {
@@ -19,12 +17,7 @@ void main() {
       final controller = CodeLineEditingController.fromText('hi');
       final focus = FocusNode();
       await tester.pumpWidget(
-        _app(
-          NoteEditor(
-            controller: controller,
-            focusNode: focus,
-          ),
-        ),
+        _app(NoteEditor(controller: controller, focusNode: focus)),
       );
       final editor = tester.widget<CodeEditor>(find.byType(CodeEditor));
       expect(editor.controller, same(controller));
@@ -54,11 +47,7 @@ void main() {
       final focus = FocusNode();
       await tester.pumpWidget(
         _app(
-          NoteEditor(
-            controller: controller,
-            focusNode: focus,
-            autofocus: true,
-          ),
+          NoteEditor(controller: controller, focusNode: focus, autofocus: true),
         ),
       );
       final editor = tester.widget<CodeEditor>(find.byType(CodeEditor));
@@ -121,12 +110,7 @@ void main() {
       )..text = '# Hi\n\nbody';
       final focus = FocusNode();
       await tester.pumpWidget(
-        _app(
-          NoteEditor(
-            controller: controller,
-            focusNode: focus,
-          ),
-        ),
+        _app(NoteEditor(controller: controller, focusNode: focus)),
       );
       await tester.pump();
       await tester.pump();

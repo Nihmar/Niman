@@ -73,9 +73,7 @@ void main() {
     // All five writes happened within one debounce window: at least one
     // batch carries every path together.
     expect(
-      batches.where(
-        (b) => wanted.every((path) => b.paths.contains(path)),
-      ),
+      batches.where((b) => wanted.every((path) => b.paths.contains(path))),
       isNotEmpty,
     );
   });

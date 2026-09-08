@@ -12,7 +12,7 @@ final class NewItemFab extends StatelessWidget {
   ///
   /// [anchorKey] marks the main FAB's icon so [FabScrim]'s circular
   /// reveal can be centered on it.
-  const NewItemFab({
+  const new({
     required this.anchorKey,
     required this.expanded,
     required this.onToggle,
@@ -95,7 +95,7 @@ final class NewItemFab extends StatelessWidget {
 /// Kept in the tree while closed (IgnorePointer + scale 0) so expanding
 /// is a simple animation with no layout jump.
 final class _MiniFab extends StatelessWidget {
-  const _MiniFab({
+  const new({
     required this.icon,
     required this.tooltip,
     required this.open,
@@ -139,7 +139,7 @@ final class _MiniFab extends StatelessWidget {
 /// mounted; paints nothing and ignores taps while collapsed.
 final class FabScrim extends StatelessWidget {
   /// Creates the FAB-menu scrim; [onClose] collapses the menu.
-  const FabScrim({
+  const new({
     required this.anchorKey,
     required this.expanded,
     required this.onClose,
@@ -165,10 +165,7 @@ final class FabScrim extends StatelessWidget {
         onTap: onClose,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final size = Size(
-              constraints.maxWidth,
-              constraints.maxHeight,
-            );
+            final size = Size(constraints.maxWidth, constraints.maxHeight);
             final center = _fabCenter(context, size);
             return TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: expanded ? 1 : 0),
@@ -205,7 +202,7 @@ final class FabScrim extends StatelessWidget {
 /// Paints the FAB-menu scrim: a translucent circle, centered on the main
 /// FAB icon, growing with [progress] (0-1) until it covers the body.
 final class _RevealPainter extends CustomPainter {
-  _RevealPainter({required this.center, required this.progress});
+  new({required this.center, required this.progress});
 
   final Offset center;
   final double progress;

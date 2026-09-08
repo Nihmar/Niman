@@ -15,12 +15,7 @@ import 'package:copist/src/editor/highlighting.dart';
 /// The four M3 frontmatter values.
 final class Frontmatter {
   /// Creates a frontmatter value.
-  const Frontmatter({
-    required this.tags,
-    required this.aliases,
-    this.title,
-    this.type,
-  });
+  const new({required this.tags, required this.aliases, this.title, this.type});
 
   /// The `title:` value (trimmed, quotes stripped), or null when absent
   /// or empty. The FTS title falls back to the filename when null.

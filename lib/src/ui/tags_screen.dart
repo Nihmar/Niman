@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 /// list reflects them together; tags are normalized (lowercase, no `#`).
 final class TagsScreen extends StatefulWidget {
   /// Creates the tags screen.
-  const TagsScreen({
+  const new({
     required this.controller,
     required this.onOpenNote,
     required this.onBack,
@@ -122,9 +122,8 @@ final class _TagsScreenState extends State<TagsScreen> {
       return Center(
         child: Text(
           AppStrings.tagsEmpty,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }
@@ -187,9 +186,8 @@ final class _TagsScreenState extends State<TagsScreen> {
       return Center(
         child: Text(
           AppStrings.tagsNotesEmpty,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }

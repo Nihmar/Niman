@@ -14,11 +14,11 @@ import 'package:copist/src/editor/toolbar_item.dart';
 /// later a non-event.
 final class ToolbarLayout {
   /// Creates a layout from an explicit order and hidden set.
-  const ToolbarLayout({required this.order, required this.hidden});
+  const new({required this.order, required this.hidden});
 
   /// Reads a stored value; anything unparseable falls back to
   /// [defaults].
-  factory ToolbarLayout.parse(String? stored) {
+  factory parse(String? stored) {
     if (stored == null || stored.trim().isEmpty) return defaults;
     final order = <ToolbarItem>[];
     final hidden = <ToolbarItem>{};

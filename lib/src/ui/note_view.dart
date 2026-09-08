@@ -55,7 +55,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// drive the draggable divider and its persistence.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
-  const NoteView({
+  const new({
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
@@ -557,10 +557,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final snippet = '![$label]($relative)';
     _controller.replaceSelection(snippet);
     _scroll.makeCenterIfInvisible(
-      CodeLinePosition(
-        index: _controller.selection.extentIndex,
-        offset: 0,
-      ),
+      CodeLinePosition(index: _controller.selection.extentIndex, offset: 0),
     );
     _focus.requestFocus();
     _refreshStats();
@@ -629,13 +626,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
     const AppLogger(name: 'links').debug('jump to source line $line');
-    _controller.selection = CodeLineSelection.collapsed(
-      index: line,
-      offset: 0,
-    );
-    _scroll.makeCenterIfInvisible(
-      CodeLinePosition(index: line, offset: 0),
-    );
+    _controller.selection = CodeLineSelection.collapsed(index: line, offset: 0);
+    _scroll.makeCenterIfInvisible(CodeLinePosition(index: line, offset: 0));
     _syncPreviewToLine(line);
   }
 
@@ -673,10 +665,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         );
         return;
       }
-      final offset = map.previewOffsetForLine(
-        line,
-        maxExtent: maxExtent,
-      );
+      final offset = map.previewOffsetForLine(line, maxExtent: maxExtent);
       if (offset == null) {
         log.debug('anchor jump: no blocks laid out — skipped');
         return;
@@ -766,9 +755,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           'part "$aliasTarget" as the target',
         );
         final swapped = await source.resolveWiki(aliasTarget.trim());
-        log.debug(
-          'wikilink alias "$aliasTarget" -> ${_describe(swapped)}',
-        );
+        log.debug('wikilink alias "$aliasTarget" -> ${_describe(swapped)}');
         if (swapped is ResolvedNote || swapped is AmbiguousNote) {
           resolved = swapped;
           anchor = aliasHeading;
@@ -893,10 +880,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       final entries = _outline;
       final shown = entries.length <= 40
           ? entries
-          : [
-              ...entries.take(20),
-              ...entries.skip(entries.length - 20),
-            ];
+          : [...entries.take(20), ...entries.skip(entries.length - 20)];
       const AppLogger(name: 'links').debug(
         'heading "$heading" (slug "$slug") not found among '
         '${entries.length} outline entr(ies): '
@@ -910,9 +894,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   void _linkSnack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _onFocusChanged() {
@@ -942,9 +925,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final joinClock = Stopwatch()..start();
     final text = _controller.text;
     final joinMs = joinClock.elapsedMilliseconds;
-    _log.info(
-      'save start: $target (${text.length} chars, join $joinMs ms)',
-    );
+    _log.info('save start: $target (${text.length} chars, join $joinMs ms)');
     try {
       await _write(target, text);
       if (target == widget.path) _lastSavedRevision = revision;
@@ -1117,10 +1098,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               icon: const Icon(Icons.toc),
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 34,
-                minHeight: 26,
-              ),
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: () => setState(() => _showOutline = !_showOutline),
             ),
           // Find & replace lives in the editor pane (hidden in
@@ -1132,10 +1110,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               icon: const Icon(Icons.search),
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 34,
-                minHeight: 26,
-              ),
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: _findController.findMode,
             ),
           if (!_loading)
@@ -1349,7 +1324,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 /// The kind GUIs' window onto the note (T-TK-02): the buffer text, and
 /// byte-stable edits that persist through the regular save path.
 final class _NoteKindHost implements NoteKindHost {
-  _NoteKindHost(this._state);
+  new(this._state);
 
   final _NoteViewState _state;
 
@@ -1374,9 +1349,8 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
             onPressed: () => Navigator.of(context).pop(level),
             child: Text(
               AppStrings.headingLevelLabel(level),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 26.0 - level * 2,
-              ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontSize: 26.0 - level * 2),
             ),
           ),
       ],

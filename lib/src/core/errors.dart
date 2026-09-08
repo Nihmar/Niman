@@ -4,7 +4,7 @@
 /// to specific failure modes (sync, library, sync conflicts, ...).
 sealed class AppError implements Exception {
   /// Creates an app error carrying a human-readable [message].
-  const AppError(this.message);
+  const new(this.message);
 
   /// Human-readable description of the error.
   final String message;
@@ -13,5 +13,5 @@ sealed class AppError implements Exception {
 /// Error used for conditions that do not yet have a dedicated type.
 final class UnknownAppError extends AppError {
   /// Creates an unknown app error.
-  const UnknownAppError(super.message);
+  const new(super.message);
 }

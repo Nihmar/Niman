@@ -13,7 +13,7 @@ import 'package:copist/src/todo/todo_store.dart';
 /// mutation.
 final class FakeTodoSource implements TodoSource {
   /// Creates a fake seeded with [todo] + [done] raw lines.
-  FakeTodoSource({List<String>? todo, List<String>? done})
+  new({List<String>? todo, List<String>? done})
     : _todo = <String>[...?todo],
       _done = <String>[...?done];
 

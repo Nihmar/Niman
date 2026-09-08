@@ -31,7 +31,7 @@ import 'fake_tag_source.dart';
 final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// Creates a fake session; [resumePath] is auto-opened by [resume] when
   /// non-null (simulates the persisted last-library path).
-  FakeLibrarySession({this.resumePath});
+  new({this.resumePath});
 
   /// The path [resume] opens, simulating a persisted last-library path.
   final String? resumePath;
@@ -357,9 +357,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);
     if (targetParent == path || isUnder(path, targetParent)) {
-      throw ArgumentError(
-        'Cannot move "$path" into itself or its own subtree',
-      );
+      throw ArgumentError('Cannot move "$path" into itself or its own subtree');
     }
     _checkParent(targetParent);
     final name = p.basename(path);
@@ -628,7 +626,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 /// One in-memory row of the fake index (a live or trashed note/folder).
 final class _Row {
   /// Creates a row at library-relative [path].
-  _Row({required this.id, required this.path, required this.isDir});
+  new({required this.id, required this.path, required this.isDir});
 
   final int id;
   final bool isDir;
@@ -651,7 +649,7 @@ final class _Row {
 /// One manifest entry of the fake trash.
 final class _TrashEntry {
   /// Creates a manifest entry for the trashed subtree rooted at [rootId].
-  _TrashEntry({
+  new({
     required this.name,
     required this.originalPath,
     required this.deletedAt,

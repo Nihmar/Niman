@@ -23,12 +23,10 @@ void main() {
     db = CopistDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     // The corpus: word-boundary traps and a multi-word phrase.
-    await file('a.md').writeAsString(
-      'cat catalog concatenate cats. Cat CAT.\n',
-    );
-    await file('b.md').writeAsString(
-      'dog hello world, hello\nworld — città cittàx.\n',
-    );
+    await file('a.md')
+        .writeAsString('cat catalog concatenate cats. Cat CAT.\n');
+    await file('b.md')
+        .writeAsString('dog hello world, hello\nworld — città cittàx.\n');
     await file('c.md').writeAsString('nothing here\n');
     await Directory(p.join(root.path, 'sub')).create();
     await file('sub/x.md').writeAsString('deep cat\n');
@@ -116,10 +114,7 @@ void main() {
 
   group('ReplaceRunner', () {
     test('preview lists matching notes with counts and samples', () async {
-      final notes = await replace.previewMatches(
-        'cat',
-        caseSensitive: false,
-      );
+      final notes = await replace.previewMatches('cat', caseSensitive: false);
       expect(notes.map((n) => n.path), ['a.md', 'sub/x.md']);
       expect(notes[0].occurrences, 3);
       expect(notes[0].samples, hasLength(2));
@@ -135,14 +130,8 @@ void main() {
     });
 
     test('preview honors the case flag and the single-note scope', () async {
-      final any = await replace.previewMatches(
-        'cat',
-        caseSensitive: false,
-      );
-      final exact = await replace.previewMatches(
-        'Cat',
-        caseSensitive: true,
-      );
+      final any = await replace.previewMatches('cat', caseSensitive: false);
+      final exact = await replace.previewMatches('Cat', caseSensitive: true);
       expect(any.first.occurrences, 3); // cat Cat CAT
       expect(exact.first.occurrences, 1);
       final only = await replace.previewMatches(
@@ -204,10 +193,7 @@ void main() {
       expect(report.occurrences, 2); // 'hello world' + 'hello\nworld'
       // The second match spans the newline, so it is replaced by the
       // single-space replacement text.
-      expect(
-        await read('b.md'),
-        'dog bye moon, bye moon — città cittàx.\n',
-      );
+      expect(await read('b.md'), 'dog bye moon, bye moon — città cittàx.\n');
     });
 
     test('only limits the run to the given note', () async {

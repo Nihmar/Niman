@@ -1005,7 +1005,7 @@ const List<String> _tags = <String>[
 
 /// One fixture: target size in bytes and the seed that generates it.
 final class FixtureSpec {
-  const FixtureSpec(this.fileName, this.targetBytes, this.seed);
+  const new(this.fileName, this.targetBytes, this.seed);
 
   final String fileName;
   final int targetBytes;
@@ -1023,7 +1023,7 @@ const List<FixtureSpec> fixtures = <FixtureSpec>[
 ];
 
 final class _Gen {
-  _Gen(this.rand, this.out) {
+  new(this.rand, this.out) {
     _headingCounter = _randInt(0, 40);
   }
 
@@ -1118,17 +1118,14 @@ final class _Gen {
     final cols = _randInt(2, 5);
     final headers = List<String>.generate(cols, (_) => _word().capitalizeFirst);
     _emitLine('| ${headers.join(' | ')} |');
-    final aligns = List<String>.generate(
-      cols,
-      (_) {
-        final a = _randInt(0, 3);
-        return a == 0
-            ? '---'
-            : a == 1
-            ? ':---'
-            : '---:';
-      },
-    );
+    final aligns = List<String>.generate(cols, (_) {
+      final a = _randInt(0, 3);
+      return a == 0
+          ? '---'
+          : a == 1
+          ? ':---'
+          : '---:';
+    });
     _emitLine('| ${aligns.join(' | ')} |');
     for (var r = 0; r < _randInt(2, 6); r++) {
       final cells = List<String>.generate(cols, (_) => _word());
@@ -1239,22 +1236,19 @@ final class _Gen {
         tagLines.add('  - $t');
       }
     }
-    out.writeAll(
-      <String>[
-        '---',
-        'title: "$title"',
-        'tags:',
-        ...tagLines,
-        'date: ${_date()}',
-        'pinned: ${rand.nextBool()}',
-        'aliases:',
-        '  - "${_word().capitalizeFirst} ${_word().capitalizeFirst}"',
-        '---',
-        '',
-        '',
-      ],
-      '\n',
-    );
+    out.writeAll(<String>[
+      '---',
+      'title: "$title"',
+      'tags:',
+      ...tagLines,
+      'date: ${_date()}',
+      'pinned: ${rand.nextBool()}',
+      'aliases:',
+      '  - "${_word().capitalizeFirst} ${_word().capitalizeFirst}"',
+      '---',
+      '',
+      '',
+    ], '\n');
   }
 
   String _date() {

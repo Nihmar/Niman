@@ -46,16 +46,13 @@ void main() {
     expect(rows, hasLength(5));
 
     final paths = rows.map((n) => n.path).toSet();
-    expect(
-      paths,
-      {
-        'note1.md',
-        'note2.md',
-        'docs',
-        'docs/doc1.md',
-        'empty_folder',
-      },
-    );
+    expect(paths, {
+      'note1.md',
+      'note2.md',
+      'docs',
+      'docs/doc1.md',
+      'empty_folder',
+    });
 
     final note1 = rows.firstWhere((n) => n.path == 'note1.md');
     expect(note1.name, 'note1.md');
@@ -65,9 +62,7 @@ void main() {
     expect(note1.sha256, isNotNull);
     expect(
       note1.modified,
-      toStoredSecond(
-        File(p.join(root.path, 'note1.md')).statSync().modified,
-      ),
+      toStoredSecond(File(p.join(root.path, 'note1.md')).statSync().modified),
     );
 
     final docs = rows.firstWhere((n) => n.path == 'docs');
@@ -195,10 +190,7 @@ void main() {
       expect(fires, 1);
 
       // A batch that changes nothing fires nothing.
-      await indexer.applyEvents(
-        root.path,
-        [p.join(root.path, 'note1.md')],
-      );
+      await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
       expect(fires, 1);
 
       // A directory resync that changes nothing fires nothing.
@@ -249,9 +241,8 @@ void main() {
   test('a renamed directory is pruned via the stale path; '
       'the full rescan recovers the destination', () async {
     await indexer.fullScan(root.path);
-    await Directory(p.join(root.path, 'docs')).rename(
-      p.join(root.path, 'books'),
-    );
+    await Directory(p.join(root.path, 'docs'))
+        .rename(p.join(root.path, 'books'));
 
     // Mimic the watcher batch when the OS did not report the destination:
     // parent resync + the stale path.
@@ -422,9 +413,8 @@ void main() {
 
   group('content pipeline (T-M3-03)', () {
     test('a full scan indexes FTS, tags, links and alias stems', () async {
-      File(p.join(root.path, 'other.md')).writeAsStringSync(
-        '## Other\n\n#othertag\n',
-      );
+      File(p.join(root.path, 'other.md'))
+          .writeAsStringSync('## Other\n\n#othertag\n');
       File(p.join(root.path, 'linked.md')).writeAsStringSync('linked body');
       File(p.join(root.path, 'indexed.md')).writeAsStringSync(
         '---\ntitle: Indexed Title\ntags: [Alpha, beta]\n'
@@ -493,9 +483,8 @@ void main() {
       'delete db → a fresh rescan reproduces FTS, tags, links, stems',
       () async {
         File(p.join(root.path, 'other.md')).writeAsStringSync('## Other\n');
-        File(p.join(root.path, 'source.md')).writeAsStringSync(
-          '---\ntags: [x]\n---\nlink [[other]]\n',
-        );
+        File(p.join(root.path, 'source.md'))
+            .writeAsStringSync('---\ntags: [x]\n---\nlink [[other]]\n');
         await indexer.fullScan(root.path);
         final before = await _indexState(db, dao);
 
@@ -520,9 +509,8 @@ void main() {
         // An edit also bumps the mtime, so the digest cannot be reused.
         final stat = File(p.join(root.path, 'note1.md')).statSync();
         if (stat.modified == toStoredSecond(before.modified)) {
-          await File(p.join(root.path, 'note1.md')).setLastModified(
-            stat.modified.add(const Duration(seconds: 2)),
-          );
+          await File(p.join(root.path, 'note1.md'))
+              .setLastModified(stat.modified.add(const Duration(seconds: 2)));
         }
         await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
 
@@ -549,9 +537,8 @@ void main() {
     );
 
     test('a rename keeps the note id and its FTS rows', () async {
-      File(p.join(root.path, 'note1.md')).writeAsStringSync(
-        '---\ntitle: Renamable\n---\nbody text here\n',
-      );
+      File(p.join(root.path, 'note1.md'))
+          .writeAsStringSync('---\ntitle: Renamable\n---\nbody text here\n');
       await indexer.fullScan(root.path);
       final before = (await dao.find('note1.md'))!;
       final ftsBefore = await db
@@ -597,9 +584,7 @@ void main() {
         // Pin the mtime: (size, mtime) now prove nothing changed to the
         // shortcut, whatever the wall clock says.
         await File(p.join(root.path, 'note1.md')).setLastModified(stamp);
-        await indexer.applyEvents(root.path, [
-          p.join(root.path, 'note1.md'),
-        ]);
+        await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
         var hit = await db
             .customSelect(
               'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
@@ -608,9 +593,7 @@ void main() {
             .getSingle();
         expect(hit.read<int>('c'), 0); // skipped: still the old content
 
-        await indexer.rescanFiles(root.path, [
-          p.join(root.path, 'note1.md'),
-        ]);
+        await indexer.rescanFiles(root.path, [p.join(root.path, 'note1.md')]);
         hit = await db
             .customSelect(
               'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
@@ -628,109 +611,96 @@ void main() {
       },
     );
 
-    test(
-      'a v7-era index (tree without content rows) is rebuilt by one '
-      'unchanged rescan',
-      () async {
-        // A note with a tag, so the rebuild reproduces tags too.
-        File(p.join(root.path, 'note1.md')).writeAsStringSync(
-          '---\ntags: [marker]\n---\nhello tagged\n',
-        );
-        await indexer.fullScan(root.path);
-        final beforeFts = await db
-            .customSelect(
-              'SELECT count(*) c FROM notes_fts',
-            )
-            .getSingle();
-        expect(beforeFts.read<int>('c'), 3); // note1, note2, docs/doc1
+    test('a v7-era index (tree without content rows) is rebuilt by one '
+        'unchanged rescan', () async {
+      // A note with a tag, so the rebuild reproduces tags too.
+      File(p.join(root.path, 'note1.md'))
+          .writeAsStringSync('---\ntags: [marker]\n---\nhello tagged\n');
+      await indexer.fullScan(root.path);
+      final beforeFts = await db
+          .customSelect('SELECT count(*) c FROM notes_fts')
+          .getSingle();
+      expect(beforeFts.read<int>('c'), 3); // note1, note2, docs/doc1
 
-        // Simulate the migration case: the tree rows exist (v7 index) but
-        // the M3 content rows are gone.
-        await db.customStatement('DELETE FROM notes_fts');
-        await db.customStatement('DELETE FROM note_tags');
-        await db.customStatement('DELETE FROM note_links');
-        await db.customStatement('DELETE FROM note_stems');
+      // Simulate the migration case: the tree rows exist (v7 index) but
+      // the M3 content rows are gone.
+      await db.customStatement('DELETE FROM notes_fts');
+      await db.customStatement('DELETE FROM note_tags');
+      await db.customStatement('DELETE FROM note_links');
+      await db.customStatement('DELETE FROM note_stems');
 
-        // The rescan itself changes nothing on disk.
-        await indexer.fullScan(root.path);
+      // The rescan itself changes nothing on disk.
+      await indexer.fullScan(root.path);
 
-        final afterFts = await db
-            .customSelect(
-              'SELECT count(*) c FROM notes_fts',
-            )
-            .getSingle();
-        expect(afterFts.read<int>('c'), 3);
-        // Search actually finds the rebuilt content.
-        final hit = await db
-            .customSelect(
-              'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
-              variables: [const Variable<String>('tagged')],
-            )
-            .get();
-        expect(hit.map((r) => r.read<int>('rowid')), isNotEmpty);
-        // Stems and tags came back with it.
-        expect(
-          (await db.select(db.noteStems).get()).map((s) => s.stem),
-          containsAll(['note1', 'note2', 'doc1']),
-        );
-        expect(
-          (await db.select(db.noteTags).get()).map((t) => t.tag),
-          contains('marker'),
-        );
-      },
-    );
+      final afterFts = await db
+          .customSelect('SELECT count(*) c FROM notes_fts')
+          .getSingle();
+      expect(afterFts.read<int>('c'), 3);
+      // Search actually finds the rebuilt content.
+      final hit = await db
+          .customSelect(
+            'SELECT rowid FROM notes_fts WHERE notes_fts MATCH ?',
+            variables: [const Variable<String>('tagged')],
+          )
+          .get();
+      expect(hit.map((r) => r.read<int>('rowid')), isNotEmpty);
+      // Stems and tags came back with it.
+      expect(
+        (await db.select(db.noteStems).get()).map((s) => s.stem),
+        containsAll(['note1', 'note2', 'doc1']),
+      );
+      expect(
+        (await db.select(db.noteTags).get()).map((t) => t.tag),
+        contains('marker'),
+      );
+    });
 
-    test(
-      'a pre-file-stem index (attachments without stems) is repaired by '
-      'one unchanged rescan',
-      () async {
-        // An attachment (non-md) — the embed target of `![[pic.png]]`.
-        File(p.join(root.path, 'pic.png')).writeAsStringSync('img');
-        await indexer.fullScan(root.path);
-        expect(
-          (await db.select(db.noteStems).get()).map((s) => s.stem),
-          contains('pic.png'),
-        );
+    test('a pre-file-stem index (attachments without stems) is repaired by '
+        'one unchanged rescan', () async {
+      // An attachment (non-md) — the embed target of `![[pic.png]]`.
+      File(p.join(root.path, 'pic.png')).writeAsStringSync('img');
+      await indexer.fullScan(root.path);
+      expect(
+        (await db.select(db.noteStems).get()).map((s) => s.stem),
+        contains('pic.png'),
+      );
 
-        // Simulate an index built before file stems existed: attachment
-        // rows have no stem row, but every content row (FTS) is present.
-        await db.customStatement(
-          'DELETE FROM note_stems WHERE note_id IN '
-          '(SELECT id FROM notes WHERE is_dir = 0 AND '
-          "lower(substr(name, -3)) != '.md')",
-        );
-        expect(
-          (await db.select(db.noteStems).get()).map((s) => s.stem),
-          isNot(contains('pic.png')),
-        );
+      // Simulate an index built before file stems existed: attachment
+      // rows have no stem row, but every content row (FTS) is present.
+      await db.customStatement(
+        'DELETE FROM note_stems WHERE note_id IN '
+        '(SELECT id FROM notes WHERE is_dir = 0 AND '
+        "lower(substr(name, -3)) != '.md')",
+      );
+      expect(
+        (await db.select(db.noteStems).get()).map((s) => s.stem),
+        isNot(contains('pic.png')),
+      );
 
-        // The unchanged rescan must notice the gap (files != stems in the
-        // completeness check) and write the missing stems back — this is
-        // what makes `![[pic.png]]` embeds resolvable after an upgrade.
-        await indexer.fullScan(root.path);
+      // The unchanged rescan must notice the gap (files != stems in the
+      // completeness check) and write the missing stems back — this is
+      // what makes `![[pic.png]]` embeds resolvable after an upgrade.
+      await indexer.fullScan(root.path);
 
-        final pic = (await dao.find('pic.png'))!;
-        final stems = await (db.select(
-          db.noteStems,
-        )..where((s) => s.noteId.equals(pic.id))).get();
-        expect(stems.map((s) => s.stem), ['pic.png']);
-        expect(stems.single.source, 'file');
-      },
-    );
+      final pic = (await dao.find('pic.png'))!;
+      final stems = await (db.select(
+        db.noteStems,
+      )..where((s) => s.noteId.equals(pic.id))).get();
+      expect(stems.map((s) => s.stem), ['pic.png']);
+      expect(stems.single.source, 'file');
+    });
 
     test('an unchanged rescan never rewrites content rows', () async {
-      File(p.join(root.path, 'note1.md')).writeAsStringSync(
-        '---\ntags: [keep]\n---\nstable\n',
-      );
+      File(p.join(root.path, 'note1.md'))
+          .writeAsStringSync('---\ntags: [keep]\n---\nstable\n');
       await indexer.fullScan(root.path);
       final row = (await dao.find('note1.md'))!;
 
       // Touch with identical content: digest unchanged, so the content
       // rows must stay as they are (same tag rows, same FTS title).
       final stat = File(p.join(root.path, 'note1.md')).statSync();
-      await File(p.join(root.path, 'note1.md')).setLastModified(
-        stat.modified.add(const Duration(seconds: 5)),
-      );
+      await File(p.join(root.path, 'note1.md'))
+          .setLastModified(stat.modified.add(const Duration(seconds: 5)));
       await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
 
       final tags = await (db.select(

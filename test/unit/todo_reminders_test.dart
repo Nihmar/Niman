@@ -51,10 +51,7 @@ void main() {
       ),
       208725283,
     );
-    expect(
-      todoReminderId('ripassare la lezione di matematica'),
-      1024775335,
-    );
+    expect(todoReminderId('ripassare la lezione di matematica'), 1024775335);
   });
 
   group('wantedReminders', () {
@@ -114,9 +111,7 @@ void main() {
       // Only a reload archives stray completed lines, so an edit that
       // completes a task in place publishes it in `todo` first.
       final wanted = wantedReminders(
-        snapshotOf(
-          todo: ['x 2026-09-07 done here rem:2026-09-08T10:30'],
-        ),
+        snapshotOf(todo: ['x 2026-09-07 done here rem:2026-09-08T10:30']),
         DateTime(2026, 9, 7),
       );
       expect(wanted, isEmpty);
@@ -154,9 +149,7 @@ void main() {
     test('title shows the typed phrase, not the whole raw line', () {
       final wanted = wantedReminders(
         snapshotOf(
-          todo: [
-            '(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30',
-          ],
+          todo: ['(B) call plumber +home due:2026-09-09 rem:2026-09-08T10:30'],
         ),
         DateTime(2026, 9, 7),
       );

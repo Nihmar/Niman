@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 /// Query helpers over the materialized notes tree.
 final class NoteDao {
   /// Creates the DAO backed by the given [CopistDatabase].
-  NoteDao(this._db);
+  new(this._db);
 
   final CopistDatabase _db;
 
@@ -95,7 +95,7 @@ final class NoteDao {
         args,
       );
       final t = _db.notes;
-      return (_db.delete(t)..where(
+      return await (_db.delete(t)..where(
             (x) =>
                 x.path.equals(path) |
                 x.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
@@ -107,8 +107,8 @@ final class NoteDao {
   /// The row at `path` and every descendant row (the directory subtree),
   /// or every row when [path] is empty.
   Future<List<Note>> subtreeRows(String path) async {
-    if (path.isEmpty) return allRows();
-    return (_db.select(_db.notes)..where(
+    if (path.isEmpty) return await allRows();
+    return await (_db.select(_db.notes)..where(
           (t) =>
               t.path.equals(path) |
               t.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
