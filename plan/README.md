@@ -38,7 +38,7 @@ header rather than on the next one in the chain.
 | [m-type-note-kinds.md](m-type-note-kinds.md) | `type:` note kinds (the `list` GUI) | **Done** |
 | [m-app-shortcuts.md](m-app-shortcuts.md) | Launcher quick actions (Android) | **Done** |
 | [m-toolbar-customization.md](m-toolbar-customization.md) | Editor toolbar — user order + hiding | **Done** |
-| [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | Planned |
+| [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | **Done** |
 | [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Planned |
 | [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | Planned |
 

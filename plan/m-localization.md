@@ -1,6 +1,7 @@
 # Localization — Italian and English
 
-**Status:** Planned (2026-09-08, user request) · **Depends on:** nothing
+**Status:** Implemented 2026-09-08 (analyze + tests green) — the
+on-device check is the user's · **Depends on:** nothing
 (`ui/strings.dart` was built for this) · **Spec:** user request: the app
 in Italian and English, chosen in the settings, defaulting to the OS
 language.
@@ -50,27 +51,27 @@ selection menu) are English regardless of the phone's language.
 
 ## Tasks
 
-- [ ] **T-L10N-01** The mechanism. `AppLanguage` enum (system, english,
+- [x] **T-L10N-01** The mechanism. `AppLanguage` enum (system, english,
   italian), the active language as app state, and the `_(en, it)` helper
   behind it. *AC: unit tests — the helper follows the active language;
   system resolves from the platform locale; an unsupported platform
   locale gives English.*
-- [ ] **T-L10N-02** Persistence. `language` text column in
+- [x] **T-L10N-02** Persistence. `language` text column in
   `app_settings` (schema 12 + migration), repo getter/setter on the
   session. *AC: set, reopen, still there.*
-- [ ] **T-L10N-03** App wiring. `flutter_localizations` +
+- [x] **T-L10N-03** App wiring. `flutter_localizations` +
   `supportedLocales` + `locale` on `MaterialApp`; a language change
   rebuilds the whole app. *AC: widget test — switching the setting
   changes a visible label without restarting; a date picker follows.*
-- [ ] **T-L10N-04** The settings entry. A three-way choice (System /
+- [x] **T-L10N-04** The settings entry. A three-way choice (System /
   English / Italiano) in the settings list, showing the resolved
   language when it is on System. *AC: widget test — the choice persists
   and the UI follows.*
-- [ ] **T-L10N-05** The translation. All 156 strings turned into
+- [x] **T-L10N-05** The translation. All 156 strings turned into
   `_(en, it)` getters, the 23 `const` call sites fixed. *AC: analyze
   clean; a test asserts every getter returns a non-empty string in both
   languages, so a half-translated constant cannot ship.*
-- [ ] **T-L10N-06** The strings the file does not own yet. Sweep the
+- [x] **T-L10N-06** The strings the file does not own yet. Sweep the
   literals still inline in widgets (dialog titles like `New note`,
   `Move`, `Choose quick note`, the tab titles) into `strings.dart` as
   part of the pass. *AC: a test or a grep gate — no bare user-facing
