@@ -1010,9 +1010,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
 
     if (narrow) {
-      // Phone: the selected note opens full-screen (from any tab). A
-      // cross-fade covers the shell -> note swap (back returns with the
-      // same fade).
+      // Phone: the selected note opens full-screen (from any tab) over the
+      // tab shell, which stays mounted underneath (T-TS-08): swapping it
+      // out used to dispose all five kept-alive bodies at once, and going
+      // back remounted them mid-animation. The note fades in and out with
+      // the same fade as before.
       final fullNote = selectedPath != null && !_selectedIsDir && !_treeVisible;
       // The preview may show without its chrome; only a note that is
       // actually previewing (not split, not a kind GUI) can get there, so
@@ -1035,59 +1037,16 @@ final class _LibraryShellState extends State<_LibraryShell>
           }
           _closeFullScreenNote();
         },
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: fullNote
-              ? KeyedSubtree(
-                  key: const ValueKey('full-note'),
-                  child: Scaffold(
-                    appBar: immersive
-                        ? null
-                        : AppBar(
-                            leading: BackButton(
-                              onPressed: _closeFullScreenNote,
-                            ),
-                            title: Text(p.basename(selectedPath)),
-                            actions: [
-                              ..._kindActions,
-                              if (!_effectiveSplit(narrow: true) &&
-                                  _previewToggleVisible) ...[
-                                _previewToggleAction(),
-                                if (_previewVisible) _previewFullScreenAction(),
-                              ],
-                            ],
-                          ),
-                    body: Stack(
-                      children: [
-                        NoteView(
-                          path: p.join(controller.root ?? '', selectedPath),
-                          showLineNumbers: _lineNumbers,
-                          autofocusEditor: _autofocusEditor,
-                          linkType: _linkType,
-                          indentWidth: _indentWidth,
-                          toolbarLayout: _toolbarLayout,
-                          splitPreview: _effectiveSplit(narrow: true),
-                          showPreview: _previewVisible,
-                          splitFraction: _splitRatio,
-                          onSplitFractionChanged: _onSplitFractionChanged,
-                          onSplitDragEnd: _onSplitDragEnd,
-                          libraryRoot: controller.root,
-                          linkSource: _linkSource,
-                          onOpenNote: _openNoteFromLink,
-                          initialAnchor: _pendingAnchor,
-                          kindMode: !_kindRawMode,
-                          onNoteKindChanged: _onNoteKindChanged,
-                        ),
-                        if (immersive) _exitFullScreenButton(),
-                      ],
-                    ),
-                    bottomNavigationBar: immersive ? null : _shellTabs(),
-                  ),
-                )
-              : KeyedSubtree(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // The tab shell never unmounts: hidden it skips layout, paint,
+            // and tickers, and the fullscreen note above is opaque.
+            Offstage(
+              offstage: fullNote,
+              child: TickerMode(
+                enabled: !fullNote,
+                child: KeyedSubtree(
                   key: const ValueKey('tab-shell'),
                   child: _tabShell(
                     controller: controller,
@@ -1100,6 +1059,64 @@ final class _LibraryShellState extends State<_LibraryShell>
                     floatingActionButton: _tabFab(),
                   ),
                 ),
+              ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOutCubic,
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: fullNote
+                  ? KeyedSubtree(
+                      key: const ValueKey('full-note'),
+                      child: Scaffold(
+                        appBar: immersive
+                            ? null
+                            : AppBar(
+                                leading: BackButton(
+                                  onPressed: _closeFullScreenNote,
+                                ),
+                                title: Text(p.basename(selectedPath)),
+                                actions: [
+                                  ..._kindActions,
+                                  if (!_effectiveSplit(narrow: true) &&
+                                      _previewToggleVisible) ...[
+                                    _previewToggleAction(),
+                                    if (_previewVisible)
+                                      _previewFullScreenAction(),
+                                  ],
+                                ],
+                              ),
+                        body: Stack(
+                          children: [
+                            NoteView(
+                              path: p.join(controller.root ?? '', selectedPath),
+                              showLineNumbers: _lineNumbers,
+                              autofocusEditor: _autofocusEditor,
+                              linkType: _linkType,
+                              indentWidth: _indentWidth,
+                              toolbarLayout: _toolbarLayout,
+                              splitPreview: _effectiveSplit(narrow: true),
+                              showPreview: _previewVisible,
+                              splitFraction: _splitRatio,
+                              onSplitFractionChanged: _onSplitFractionChanged,
+                              onSplitDragEnd: _onSplitDragEnd,
+                              libraryRoot: controller.root,
+                              linkSource: _linkSource,
+                              onOpenNote: _openNoteFromLink,
+                              initialAnchor: _pendingAnchor,
+                              kindMode: !_kindRawMode,
+                              onNoteKindChanged: _onNoteKindChanged,
+                            ),
+                            if (immersive) _exitFullScreenButton(),
+                          ],
+                        ),
+                        bottomNavigationBar: immersive ? null : _shellTabs(),
+                      ),
+                    )
+                  : null,
+            ),
+          ],
         ),
       );
     }
@@ -1458,10 +1475,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// All five tab bodies: each mounts on its first visit and stays
   /// mounted (query, results, and scroll survive a switch), while the
   /// fade only covers the incoming body — no cross-fade of two
-  /// transparency layers, and no re-inflate mid-animation.
+  /// transparency layers, and no re-inflate mid-animation. Only the
+  /// search slot retains layout while hidden (T-TS-10): it is the one
+  /// whose show-layout costs frames; the plain lists relayout cheaply.
   Widget _tabBodies(LibrarySession controller) {
     return TabBodyStack(
       currentIndex: _tab.index,
+      retainLayout: <int>{ShellTab.search.index},
       children: [
         for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
       ],
@@ -1490,13 +1510,18 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The search tab: Search and Tags side by side, Tags mounting once.
   /// The flip stays instant (as before — same tab, no transition); the
-  /// outer fade already covered entering the tab.
+  /// outer fade already covered entering the tab. Search retains layout
+  /// while Tags shows (T-TS-10): flipping back is then paint-only,
+  /// matching the tab-level switch into Search.
   Widget _searchSlot(LibrarySession controller) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Offstage(
-          offstage: _showTags,
+        Visibility(
+          visible: !_showTags,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
           child: TickerMode(
             enabled: !_showTags,
             child: SearchScreen(

@@ -77,14 +77,26 @@ when the source arrives.
   tab-shell always mounted (`Offstage` while a note is open), the note
   pushed over it and still disposed on close. *AC: opening/closing a note
   logs no `tree.ui`/`search.ui` mount; the return shows no slow frame
-  with `build` > 12 ms.*
-- [ ] **T-TS-09** Name the 2-frame residue after pure switches. `214413`
-  shows one pair (~19 ms, `build` ~15 ms, no mounts) 176 ms after
+  with `build` > 12 ms.* Shipped, awaiting device log.
+- [x] **T-TS-09** Name the 2-frame residue after pure switches. `214413`
+  showed one pair (~19 ms, `build` ~15 ms, no mounts) 176 ms after
   files→settings at 21:44:11.485, plus a lone raster blip a second after
-  the last tap. Markers in place (`shell: tab fade settled`, `search.ui:
-  source applied`): take a log with a few files→settings switches and see
-  whether the frames cluster at the fade end or at the deferred rebuild,
-  before changing anything.
+  the last tap. `215148` settled it with the new markers: todo→search at
+  21:51:45.705 shows 3 slow frames (`build` 10-16 ms) 16 ms after the tap
+  — 185 ms *before* `tab fade settled`, with no mounts and no `source
+  applied` nearby. So neither the fade end nor the deferred rebuild: it
+  is the switch frame itself re-laying-out the unhidden SearchScreen
+  (`TextField` + `SegmentedButton` intrinsics over 2-3 frames), just over
+  budget, while the fade end stays clean. Same switch was clean in
+  `214413`, so it is borderline (device variance decides).
+- [ ] **T-TS-10** Keep hidden bodies laid out. `TabBodyStack` hides with
+  `Offstage`, which drops layout: every show pays a full relayout of the
+  incoming tab. `Visibility(visible:, maintainSize: true)` keeps layout
+  (paint/semantics still off) so a switch is paint-only. *AC: same
+  protocol — pure todo→search switches show no frame with `build` > 12 ms
+  across several tries, not just once.* Shipped (`retainLayout`, search
+  slot only — retaining everywhere would relayout every hidden tab on
+  each window resize and keyboard frame), awaiting device log.
 
 ## Notes
 

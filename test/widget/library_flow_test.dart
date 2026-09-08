@@ -459,7 +459,10 @@ void main() {
     await settle(tester);
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Phone.md'), findsOneWidget); // app bar title.
-    expect(noteRow('Phone.md', offstage: true), findsNothing);
+    // The tree stays mounted under the note (T-TS-08): hidden from the
+    // user, kept alive for the way back.
+    expect(noteRow('Phone.md'), findsNothing);
+    expect(noteRow('Phone.md', offstage: true), findsOne);
 
     // Back returns to the tree; the selection is kept.
     await tester.tap(find.byTooltip('Back'));
