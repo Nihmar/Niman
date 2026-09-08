@@ -34,7 +34,7 @@ header rather than on the next one in the chain.
 | [m2a-fix-selection-perf.md](m2a-fix-selection-perf.md) | M2a — selection + perf on a 931 KB note | **Done** |
 | [m2a-round4-fixes.md](m2a-round4-fixes.md) … [round7](m2a-round7-fixes.md) | M2a — the four device-feedback rounds | **Done** |
 | [todo-tab.md](todo-tab.md) | Todo tab over `todo.txt` + reminders | **Done** |
-| [todo-mockup.md](todo-mockup.md) | Todo tab — mockup parity | T-TDM-04 open |
+| [todo-mockup.md](todo-mockup.md) | Todo tab — mockup parity | **Done** |
 | [m-type-note-kinds.md](m-type-note-kinds.md) | `type:` note kinds (the `list` GUI) | **Done** |
 | [m-app-shortcuts.md](m-app-shortcuts.md) | Launcher quick actions (Android) | **Done** |
 

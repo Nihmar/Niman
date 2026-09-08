@@ -1,9 +1,10 @@
 # Todo tab — mockup parity (filter row, rows, app bar overflow)
 
-**Status:** T-TDM-01…03 and 05 done + verified on device 2026-09-08
-(user); **T-TDM-04 (the app-bar ⋮) is not built** — the view switch is
-still the tab's `SegmentedButton`. T-TDM-02 shipped with a later
-correction: the left accent bar became colored token chips on the row ·
+**Status:** Done + verified on device 2026-09-08 (user). Two of the five
+tasks settled differently from the mockup, both on the user's call in
+use: T-TDM-04 (the app-bar ⋮) is **obsolete** — the `SegmentedButton`
+view switch and the `?` help action stay as they are — and T-TDM-02's
+left accent bar became colored token chips on the row ·
 **Depends on:** `todo-tab.md`
 (T-TD-01…T-TD-08 done) · **Spec:** the mockup below is the source of
 truth for everything this file is silent on.
@@ -58,15 +59,14 @@ truth for everything this file is silent on.
   `N open` / `N done` (entries of the visible file, unfiltered). *AC:
   widget tests — dropdown narrows the list, sheet chips toggle tokens,
   sort chips re-sort.*
-- [ ] **T-TDM-04** App bar ⋮: phone tab shell **and** the wide pushed
-  screen get `+` + `PopupMenuButton` (⋮) with Open/Done (checked item)
-  and Format help; the shell owns `_todoShowDone` (mirrors
-  `_showTags`); `TodoTab` receives `showDone` + `onShowDoneChanged` and
-  keeps pruning tokens when the view flips. The old `ⓘ` action and the
-  `SegmentedButton` are gone. *AC: widget test — overflow flips the
-  list, help still opens (shell test).*
+- [x] **T-TDM-04** ~~App bar ⋮~~ — **obsolete, dropped 2026-09-08 (user).**
+  The plan was to move the view switch and the format help into a
+  `PopupMenuButton` (⋮) owned by the shell, retiring the
+  `SegmentedButton` and the `?` action. In use the user prefers what is
+  already there: the switch stays in the tab, the `?` stays in the app
+  bar, and `_todoShowDone` stays tab-local. Nothing to build.
 - [x] **T-TDM-05** Test sweep: `todo_tab_test.dart` rewritten for the
-  new shapes (dropdown, sheet, overflow-driven view switch);
+  new shapes (dropdown, sheet, the kept view switch);
   `shell_reminders_test.dart` (`todo-help` key) and
   `tab_bar_test.dart` updated. *AC: `flutter test` green.*
 
