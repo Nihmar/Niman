@@ -136,8 +136,12 @@ syncs like one).
   creates the note under the configured folder; the note opens as a list.*
 - [ ] **T-TK-07** List-folder setting (library-scoped). A library setting
   (alongside trash/history/template folder, in `library_settings`) defaulting
-  to `Lists/`; settings UI to change it. Creation honours it. *AC: changing
-  the folder re-targets subsequent "New list note".*
+  to `Lists/`; settings UI to change it — a **picker over the library's
+  folders** (with a "New folder" action), never a typed path. Creation
+  honours it: the configured folder is created when missing and written
+  back to the settings, so a library where none was ever chosen ends up
+  with `Lists` created and shown. *AC: changing the folder re-targets
+  subsequent "New list note".*
 - [ ] **T-TK-08** Strings + tests. All UI text in `strings.dart`; unit tests
   (list parser, registry fallback, byte-stable round-trip) and widget tests
   (toggle persistence, pencil→editor, FAB choice). *AC: green; a mixed

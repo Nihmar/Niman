@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/name_dialog.dart';
+import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
@@ -108,16 +108,22 @@ final class _SettingsBodyState extends State<SettingsBody> {
     }
   }
 
-  /// Opens the list-folder name dialog (T-TK-06): the folder new list
-  /// notes are created in.
+  /// Opens the list-folder picker (T-TK-06): the folder new list notes
+  /// are created in, chosen from the library's folders rather than
+  /// typed.
   Future<void> _pickListFolder() async {
-    final folder = await showNameDialog(
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final folders = await widget.controller.folders();
+    if (!mounted) return;
+    final folder = await showFolderPicker(
       context,
       title: 'List folder',
-      initial: _listFolder ?? 'Lists',
+      folders: folders,
+      ops: ops,
+      current: _listFolder ?? defaultListFolder,
     );
     if (folder == null) return;
-    final ops = widget.controller.ops!;
     await ops.setListNoteFolder(folder: folder);
     final saved = await ops.listNoteFolder;
     widget.controller.notify();
@@ -503,7 +509,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
           ListTile(
             key: const Key('list-folder-setting'),
             title: const Text('List folder'),
-            subtitle: Text(_listFolder ?? 'Lists'),
+            subtitle: Text(_listFolder ?? defaultListFolder),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickListFolder,
           ),

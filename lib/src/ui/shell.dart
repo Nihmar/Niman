@@ -972,6 +972,10 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The configured list-note folder, creating it (and any missing
   /// ancestors) when absent.
+  ///
+  /// The folder is written back to the settings, so a library where none
+  /// was ever chosen ends up with the default one (`Lists`) created on
+  /// disk and shown in the settings, not just implied.
   Future<String> _ensureListFolder(NoteOperations ops) async {
     final folder = await ops.listNoteFolder;
     var prefix = '';
@@ -983,6 +987,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         await ops.createFolder(parentPath: parentOf(prefix), name: part);
       }
     }
+    await ops.setListNoteFolder(folder: folder);
     return folder;
   }
 
