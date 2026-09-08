@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/query.dart';
@@ -124,9 +125,15 @@ final class _SearchScreenState extends State<SearchScreen> {
     // mid-fade. The empty state looks identical with or without a source,
     // so let the 180 ms fade finish first rather than rebuilding into it.
     // A query typed in the meantime still works: [_runSearch] acquires
-    // the source on demand.
+    // the source on demand. The defer start/end split the wall time of
+    // 'source applied' — a large gap between the two lines means the 200 ms
+    // timer itself landed late (event loop / frame contention), not the
+    // rebuild after it.
+    const AppLogger(name: 'search.ui')
+        .debug('source apply deferred 200ms (fade still running)');
     await Future<void>.delayed(const Duration(milliseconds: 200));
     if (!mounted || source == null) return;
+    const AppLogger(name: 'search.ui').debug('source apply defer ended');
     setState(() => _source = source);
     // T-TS-09 marker: brackets the deferred rebuild so a slow frame can
     // be attributed to it rather than to the fade that just ended.
@@ -136,6 +143,7 @@ final class _SearchScreenState extends State<SearchScreen> {
         'after mount',
       );
     }
+    logNextFrame('search.ui', 'source applied first frame');
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
   }
 
@@ -171,6 +179,8 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     // Editing the term invalidates the replace preview: leave the mode.
     _leaveReplaceMode();
+    const AppLogger(name: 'search.ui')
+        .debug('debouncing "$text" (${_debounce.inMilliseconds}ms)');
     _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
   }
 
@@ -219,16 +229,25 @@ final class _SearchScreenState extends State<SearchScreen> {
     final contains = _contains;
     const AppLogger(name: 'search.ui')
         .debug('issue id $id (${contains ? 'contains' : 'words'}) "$text"');
+    final clock = Stopwatch()..start();
     final results = contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
     if (!source.isCurrent(id)) return; // a newer query superseded this one
     if (!mounted) return;
+    // The repo already logs the SQL time; this is issue → results landed,
+    // i.e. what a keystroke waits for on the UI side (debounce included
+    // in the gap back to the 'debouncing' line).
+    const AppLogger(name: 'search.ui').debug(
+      'id $id landed in ${clock.elapsedMilliseconds}ms '
+      '(${results.length} hits)',
+    );
     setState(() {
       _searched = true;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
     });
+    logNextFrame('search.ui', 'results first frame (id $id)');
   }
 
   void _loadMore() {

@@ -15,7 +15,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
   unawaited(_attachLogFile());
-  _reportSlowFrames();
+  _reportFrames();
   runApp(const ProviderScope(child: CopistApp()));
 }
 
@@ -39,15 +39,31 @@ Future<void> _attachLogFile() async {
   }
 }
 
-/// Logs every frame whose total UI work misses the 60 Hz budget, so jank
-/// (while editing novel-length notes, scrolling, …) is visible in the
-/// exported debug log together with the build/layout/paint breakdown.
-void _reportSlowFrames() {
+/// Logs the timing of every rendered frame, not just the slow ones.
+///
+/// The warning still catches the frames that miss the 60 Hz budget; the
+/// debug line logs every frame with the gap since the previous one, so the
+/// exported log carries the whole frame timeline of an animation — which
+/// frame landed when, and where the rhythm broke. Without it the 2026-09-08
+/// search-tab lag showed up as a warning that said how long a frame took,
+/// never when it landed or what it delayed.
+void _reportFrames() {
   const logger = AppLogger(name: 'frames');
   const budget = Duration(milliseconds: 16);
+  DateTime? lastFrame;
   SchedulerBinding.instance.addTimingsCallback((timings) {
     for (final timing in timings) {
       final total = timing.totalSpan;
+      final now = DateTime.now();
+      final gap = lastFrame == null ? null : now.difference(lastFrame!);
+      lastFrame = now;
+      logger.debug(
+        'frame: total ${_ms(total)} '
+        '(build ${_ms(timing.buildDuration)}, '
+        'raster ${_ms(timing.rasterDuration)}, '
+        'vsync ${_ms(timing.vsyncOverhead)})'
+        '${gap == null ? '' : ', gap ${_ms(gap)} since previous'}',
+      );
       if (total < budget) continue;
       logger.warning(
         'slow frame: total ${_ms(total)} '

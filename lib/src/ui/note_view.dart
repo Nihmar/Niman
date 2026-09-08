@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
@@ -385,6 +386,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
+      // The read time above is what the disk/isolate cost; this is what the
+      // user waited for — load plus the frame that paints the loaded note.
+      logNextFrame('editor', 'note open first frame (${text.length} chars)');
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {

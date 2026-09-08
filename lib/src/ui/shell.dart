@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
@@ -252,6 +253,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = true;
       _fabExpanded = false;
     });
+    // Time-to-visible of the switch itself: the 'tap tab' line above is the
+    // input, this is when the first new frame actually painted (with the
+    // navigation-bar selection animation the user said lags on Search).
+    logNextFrame('shell', 'tab ${tab.name} first frame');
     // T-TS-09 marker: brackets the fade so a slow frame can be attributed
     // to the switch itself (before it) or to what settles after it. Only
     // the latest switch reports: a rapid double-tap's stale marker would
@@ -681,6 +686,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _resetNoteKind();
     });
+    logNextFrame('shell', 'search result open first frame');
   }
 
   /// Opens the quick note at [path]; back returns to the Files tab.
@@ -706,6 +712,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _treeVisible = false;
         _resetNoteKind();
       });
+      logNextFrame('shell', 'quick note open first frame');
     });
   }
 
@@ -1352,6 +1359,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = true;
       _resetNoteKind();
     });
+    logNextFrame('shell', 'note close first frame');
   }
 
   String get _tabTitle => switch (_tab) {

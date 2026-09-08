@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:copist/src/core/frame_log.dart';
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/tag_repo.dart';
@@ -49,18 +51,25 @@ final class _TagsScreenState extends State<TagsScreen> {
   @override
   void initState() {
     super.initState();
+    const AppLogger(name: 'tags.ui').debug('mount');
     unawaited(_load());
   }
 
   Future<void> _load() async {
+    final started = DateTime.now();
     final source = widget.sourceOverride ?? await widget.controller.tagSource;
     if (source == null) return;
     final counts = await source.tagCounts();
     if (!mounted) return;
+    const AppLogger(name: 'tags.ui').debug(
+      'tag counts: ${counts.length} tags in '
+      '${DateTime.now().difference(started).inMilliseconds}ms',
+    );
     setState(() {
       _source = source;
       _counts = counts;
     });
+    logNextFrame('tags.ui', 'tag list first frame');
   }
 
   Future<void> _openTag(String tag) async {
@@ -81,9 +90,12 @@ final class _TagsScreenState extends State<TagsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final started = DateTime.now();
     final tag = _selectedTag;
-    if (tag == null) return _tagList();
-    return _noteList(tag);
+    final child = tag == null ? _tagList() : _noteList(tag);
+    const AppLogger(name: 'tags.ui')
+        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
+    return child;
   }
 
   Widget _tagList() {
