@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
@@ -55,6 +56,15 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       unawaited(_resume());
     }
     unawaited(_publishShortcuts());
+    unawaited(_applyLanguage());
+  }
+
+  /// Applies the stored UI language (T-L10N-03).
+  ///
+  /// Read once at start: the app renders in the OS language until it
+  /// lands, which is the same answer whenever the user never chose one.
+  Future<void> _applyLanguage() async {
+    AppLanguages.choice = await ref.read(librarySessionProvider).language;
   }
 
   /// Publishes the launcher quick actions (T-SC-02).
@@ -62,7 +72,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// Here rather than in the shell: they belong to the app, not to an
   /// open library, so they are there on the very first launch too.
   Future<void> _publishShortcuts() {
-    return ref.read(shortcutServiceProvider).publish(const {
+    return ref.read(shortcutServiceProvider).publish({
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
@@ -193,7 +203,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: const Text(AppStrings.todoTitle),
+            title: Text(AppStrings.todoTitle),
             actions: [_todoHelpAction()],
           ),
           // 2026-09-07 user feedback: the add action is a FAB, not an

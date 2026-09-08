@@ -59,12 +59,12 @@ final class _ReminderHealthBannerState extends State<ReminderHealthBanner> {
                 key: const Key('todo-reminder-health-fix'),
                 onPressed: () =>
                     unawaited(widget.service.openHealthSettings()),
-                child: const Text(AppStrings.todoReminderFixAction),
+                child: Text(AppStrings.todoReminderFixAction),
               ),
             TextButton(
               key: const Key('todo-reminder-health-dismiss'),
               onPressed: () => setState(() => _dismissed = true),
-              child: const Text(AppStrings.todoReminderDismissAction),
+              child: Text(AppStrings.todoReminderDismissAction),
             ),
           ],
         );

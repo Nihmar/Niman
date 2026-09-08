@@ -66,7 +66,7 @@ final class TodoFilterBar extends StatelessWidget {
             },
             style: pill,
             icon: const Icon(Icons.filter_alt_outlined, size: 16),
-            label: const Text(AppStrings.todoFilter),
+            label: Text(AppStrings.todoFilter),
           ),
           const Spacer(),
           Text(

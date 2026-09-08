@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
@@ -69,6 +70,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   int _indentWidth = 2;
   String? _quickNotePath;
   String? _listFolder;
+  AppLanguage _language = AppLanguage.system;
 
   @override
   void initState() {
@@ -91,6 +93,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final indentWidth = await controller.indentWidth;
     final quickNotePath = await ops.quickNotePath;
     final listFolder = await ops.listNoteFolder;
+    final language = await controller.language;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -105,7 +108,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _indentWidth = indentWidth;
         _quickNotePath = quickNotePath;
         _listFolder = listFolder;
+        _language = language;
       });
+    }
+  }
+
+  /// Persists the UI language and applies it immediately (T-L10N-04):
+  /// the app root listens to [AppLanguages] and rebuilds every screen.
+  Future<void> _setLanguage(AppLanguage language) async {
+    await widget.controller.setLanguage(language);
+    AppLanguages.choice = language;
+    if (mounted) {
+      setState(() => _language = language);
     }
   }
 
@@ -336,33 +350,33 @@ final class _SettingsBodyState extends State<SettingsBody> {
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
-            title: const Text(AppStrings.trashTitle),
-            subtitle: const Text(AppStrings.trashSubtitle),
+            title: Text(AppStrings.trashTitle),
+            subtitle: Text(AppStrings.trashSubtitle),
             value: _trash ?? true,
             onChanged: _toggleTrash,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.debugLogsTitle),
-            subtitle: const Text(AppStrings.debugLogsSubtitle),
+            title: Text(AppStrings.debugLogsTitle),
+            subtitle: Text(AppStrings.debugLogsSubtitle),
             value: _debugLogs ?? true,
             onChanged: _toggleDebugLogs,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.lineNumbersTitle),
-            subtitle: const Text(AppStrings.lineNumbersSubtitle),
+            title: Text(AppStrings.lineNumbersTitle),
+            subtitle: Text(AppStrings.lineNumbersSubtitle),
             value: _lineNumbers ?? true,
             onChanged: _toggleLineNumbers,
           ),
           SwitchListTile(
-            title: const Text(AppStrings.keyboardOnOpenTitle),
-            subtitle: const Text(AppStrings.keyboardOnOpenSubtitle),
+            title: Text(AppStrings.keyboardOnOpenTitle),
+            subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
             value: _autofocusEditor ?? false,
             onChanged: _toggleAutofocusEditor,
           ),
           SwitchListTile(
             key: const Key('reminder-show-tokens'),
-            title: const Text(AppStrings.reminderShowTokensTitle),
-            subtitle: const Text(AppStrings.reminderShowTokensSubtitle),
+            title: Text(AppStrings.reminderShowTokensTitle),
+            subtitle: Text(AppStrings.reminderShowTokensSubtitle),
             value: _reminderShowTokens ?? false,
             onChanged: _toggleReminderTokens,
           ),
@@ -383,7 +397,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<PreviewLayoutMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: PreviewLayoutMode.auto,
                       label: Text(AppStrings.previewModeAuto),
@@ -449,7 +463,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 const SizedBox(height: 8),
                 SegmentedButton<LinkType>(
                   key: const Key('link-type'),
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: LinkType.wikilink,
                       label: Text(AppStrings.linkTypeWikilink),
@@ -497,10 +511,50 @@ final class _SettingsBodyState extends State<SettingsBody> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.languageTitle,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Text(
+                  AppStrings.languageSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<AppLanguage>(
+                  key: const Key('language-choice'),
+                  segments: [
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.system,
+                      label: Text(AppStrings.languageSystem),
+                    ),
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.english,
+                      label: Text(AppStrings.languageEnglish),
+                    ),
+                    ButtonSegment<AppLanguage>(
+                      value: AppLanguage.italian,
+                      label: Text(AppStrings.languageItalian),
+                    ),
+                  ],
+                  selected: {_language},
+                  onSelectionChanged: (values) =>
+                      unawaited(_setLanguage(values.first)),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
           ListTile(
             key: const Key('toolbar-setting'),
-            title: const Text(AppStrings.toolbarSettingsTitle),
-            subtitle: const Text(AppStrings.toolbarSettingsSubtitle),
+            title: Text(AppStrings.toolbarSettingsTitle),
+            subtitle: Text(AppStrings.toolbarSettingsSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.push(
               context,

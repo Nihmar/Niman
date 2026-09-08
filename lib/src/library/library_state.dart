@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/dao.dart';
@@ -472,6 +473,21 @@ final class LibraryController implements LibrarySession {
     _log.info('editor toolbar set to "$layout"');
     final db = await database;
     await AppSettingsRepo(db).setEditorToolbar(layout);
+  }
+
+  /// The UI language.
+  @override
+  Future<AppLanguage> get language async {
+    final db = await database;
+    return AppSettingsRepo(db).language();
+  }
+
+  /// Sets (and persists) the UI language.
+  @override
+  Future<void> setLanguage(AppLanguage language) async {
+    _log.info('language set to ${language.id}');
+    final db = await database;
+    await AppSettingsRepo(db).setLanguage(language);
   }
 
   /// Notifies listeners that state changed without an index mutation

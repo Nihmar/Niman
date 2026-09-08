@@ -53,14 +53,14 @@ final class _ToolbarSettingsScreenState extends State<ToolbarSettingsScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.toolbarSettingsTitle),
+        title: Text(AppStrings.toolbarSettingsTitle),
         actions: [
           TextButton(
             key: const Key('toolbar-reset'),
             onPressed: _loaded
                 ? () => unawaited(_save(ToolbarLayout.defaults))
                 : null,
-            child: const Text(AppStrings.toolbarResetOrder),
+            child: Text(AppStrings.toolbarResetOrder),
           ),
         ],
       ),

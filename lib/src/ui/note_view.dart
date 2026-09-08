@@ -863,7 +863,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final chosen = await showDialog<Note>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text(AppStrings.ambiguousLinkTitle),
+        title: Text(AppStrings.ambiguousLinkTitle),
         children: [
           for (final note in candidates)
             SimpleDialogOption(
@@ -1366,7 +1366,7 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
   return showDialog<int>(
     context: context,
     builder: (context) => SimpleDialog(
-      title: const Text(AppStrings.headingDialogTitle),
+      title: Text(AppStrings.headingDialogTitle),
       children: [
         for (var level = 1; level <= 6; level++)
           SimpleDialogOption(

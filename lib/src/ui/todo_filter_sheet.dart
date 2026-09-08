@@ -65,8 +65,8 @@ final class _TodoFilterSheetState extends State<TodoFilterSheet> {
             Text(AppStrings.todoFilter, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             if (widget.counts.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(AppStrings.todoNoTokens),
               )
             else

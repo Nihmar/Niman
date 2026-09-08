@@ -247,16 +247,11 @@ final class _TokenChip extends StatelessWidget {
   }
 }
 
-const List<String> _monthNames = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
 /// The display form of [date] (`7 Sep`), appending the year when it
 /// differs from [today]'s — the row's display formatting (the parser's
 /// `formatTodoDate` stays the machine form).
 String _shortDate(DateTime date, DateTime today) {
-  final base = '${date.day} ${_monthNames[date.month - 1]}';
+  final base = '${date.day} ${AppStrings.monthNames[date.month - 1]}';
   return date.year == today.year ? base : '$base ${date.year}';
 }
 

@@ -1,3 +1,4 @@
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -189,6 +190,12 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the editor-toolbar layout.
   Future<void> setEditorToolbar(String layout);
+
+  /// The UI language ([AppLanguage.system] by default).
+  Future<AppLanguage> get language;
+
+  /// Sets (and persists) the UI language.
+  Future<void> setLanguage(AppLanguage language);
 
   /// Notifies listeners that state changed without an index mutation.
   void notify();

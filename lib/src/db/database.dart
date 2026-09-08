@@ -120,6 +120,11 @@ class AppSettings extends Table {
   TextColumn get editorToolbar =>
       text().named('editor_toolbar').withDefault(const Constant(''))();
 
+  /// The UI language: `system` (follow the OS, the default), `en` or
+  /// `it`.
+  TextColumn get language =>
+      text().withDefault(const Constant('system'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -208,7 +213,7 @@ class CopistDatabase extends _$CopistDatabase {
   CopistDatabase(super.e);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -227,7 +232,8 @@ class CopistDatabase extends _$CopistDatabase {
   /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
   /// `reminder_show_tokens`, pre-v10 databases `link_type` +
   /// `indent_width`, and pre-v11 databases the `list_note_folder`
-  /// library setting, and pre-v12 databases `editor_toolbar`.
+  /// library setting, pre-v12 databases `editor_toolbar`, and pre-v13
+  /// databases `language`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -307,6 +313,12 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN editor_toolbar '
           "TEXT NOT NULL DEFAULT ''",
+        );
+      }
+      if (from < 13) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN language '
+          "TEXT NOT NULL DEFAULT 'system'",
         );
       }
     },

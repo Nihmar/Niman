@@ -82,7 +82,7 @@ final class PluginReminderBackend implements ReminderBackend {
     // Re-creating with the same id updates name and description;
     // importance is frozen at creation, and max is what installs have.
     await _android?.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         todoReminderChannelId,
         AppStrings.todoReminderChannel,
         description: AppStrings.todoReminderChannelDescription,

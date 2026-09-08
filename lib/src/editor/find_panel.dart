@@ -95,7 +95,7 @@ final class CopistFindPanel extends StatelessWidget
               controller: controller.findInputController,
               focusNode: controller.findInputFocusNode,
               style: theme.textTheme.bodyMedium,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: AppStrings.editorFindHint,
                 border: InputBorder.none,
                 isDense: true,
@@ -155,7 +155,7 @@ final class CopistFindPanel extends StatelessWidget
               controller: controller.replaceInputController,
               focusNode: controller.replaceInputFocusNode,
               style: theme.textTheme.bodyMedium,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: AppStrings.editorReplaceHint,
                 border: InputBorder.none,
                 isDense: true,

@@ -27,6 +27,12 @@ dependencies:
   # Preview rendering: Markdown.
   # State management (Flutter integration).
   flutter_local_notifications: ^22.3.0
+
+  # Flutter's own widget strings (date/time pickers, the selection menu)
+  # in the app's language.
+  flutter_localizations:
+    sdk: flutter
+
   flutter_markdown_plus: ^1.0.12
   flutter_riverpod: ^2.6.1
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -48,6 +49,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
   String _editorToolbar = '';
+  AppLanguage _language = AppLanguage.system;
 
   @override
   LibraryPhase get phase => _phase;
@@ -191,6 +193,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setEditorToolbar(String layout) async {
     _editorToolbar = layout;
+  }
+
+  @override
+  Future<AppLanguage> get language async => _language;
+
+  @override
+  Future<void> setLanguage(AppLanguage language) async {
+    _language = language;
   }
 
   @override

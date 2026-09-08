@@ -242,7 +242,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   SegmentedButton<bool>(
                     key: const Key('search-mode'),
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: false,
                         label: Text(AppStrings.searchModeWords),
@@ -308,7 +308,7 @@ final class _SearchScreenState extends State<SearchScreen> {
           return ListTile(
             key: const Key('search-load-more'),
             leading: const Icon(Icons.expand_more),
-            title: const Text(AppStrings.searchLoadMore),
+            title: Text(AppStrings.searchLoadMore),
             onTap: _loadMore,
           );
         }
@@ -353,7 +353,7 @@ final class _SearchScreenState extends State<SearchScreen> {
             ListTile(
               key: const Key('replace-note-action'),
               leading: const Icon(Icons.find_replace),
-              title: const Text(AppStrings.replaceInNoteAction),
+              title: Text(AppStrings.replaceInNoteAction),
               onTap: () => Navigator.pop(context, 'replace'),
             ),
           ],

@@ -357,7 +357,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
                     value: _priority,
                     isExpanded: true,
                     items: [
-                      const DropdownMenuItem<String?>(
+                      DropdownMenuItem<String?>(
                         child: Text(AppStrings.todoNoPriority),
                       ),
                       for (var code = 65; code <= 90; code++)
@@ -446,12 +446,12 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text(AppStrings.todoCancel),
+          child: Text(AppStrings.todoCancel),
         ),
         FilledButton(
           key: const Key('todo-dialog-save'),
           onPressed: _field.text.trim().isEmpty ? null : _save,
-          child: const Text(AppStrings.todoSave),
+          child: Text(AppStrings.todoSave),
         ),
       ],
     );
@@ -468,7 +468,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       controller: _field,
       focusNode: _focus,
       autofocus: true,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: AppStrings.todoDescriptionHint,
       ),
       textInputAction: TextInputAction.done,

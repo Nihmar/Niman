@@ -21,17 +21,17 @@ final class TodoHelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.todoHelpTitle)),
+      appBar: AppBar(title: Text(AppStrings.todoHelpTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: const [
+        children: [
           _Paragraph(AppStrings.todoHelpIntro),
-          _Example('buy milk +groceries @errands due:2026-09-09'),
+          const _Example('buy milk +groceries @errands due:2026-09-09'),
           _Section(AppStrings.todoHelpFilesTitle),
           _Paragraph(AppStrings.todoHelpFilesBody),
           _Section(AppStrings.todoHelpLineTitle),
           _Paragraph(AppStrings.todoHelpLineBody),
-          _Example('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
+          const _Example('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
           _Row(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
           _Row(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
           _Row(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),

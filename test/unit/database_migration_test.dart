@@ -26,6 +26,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 1');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
         );
         await db.customStatement(
@@ -89,6 +92,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 2');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
         );
         await db.customStatement(
@@ -147,6 +153,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 3');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
         );
         await db.customStatement(
@@ -202,6 +211,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 4');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -251,6 +263,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 5');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -294,6 +309,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 6');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -332,6 +350,9 @@ void main() {
     {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 7');
+      await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
       await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
@@ -419,6 +440,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 8');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -457,6 +481,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 9');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -492,6 +519,9 @@ void main() {
       final db = CopistDatabase(NativeDatabase(dbFile));
       await db.customStatement('PRAGMA user_version = 10');
       await db.customStatement(
+        'ALTER TABLE app_settings DROP COLUMN language',
+      );
+      await db.customStatement(
         'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
       );
       await db.customStatement(
@@ -523,6 +553,9 @@ void main() {
         final db = CopistDatabase(NativeDatabase(dbFile));
         await db.customStatement('PRAGMA user_version = 11');
         await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
           'ALTER TABLE app_settings DROP COLUMN editor_toolbar',
         );
         await db.customStatement(
@@ -538,6 +571,35 @@ void main() {
       expect(row.indentWidth, 4);
       // Empty is "the shipped toolbar"; nothing to migrate into it.
       expect(row.editorToolbar, '');
+      await db.close();
+    },
+  );
+
+  test(
+    'v12 databases gain language on upgrade, keeping the settings',
+    () async {
+      // Build a v12-shaped file: the current schema minus the one column
+      // v13 adds.
+      {
+        final db = CopistDatabase(NativeDatabase(dbFile));
+        await db.customStatement('PRAGMA user_version = 12');
+        await db.customStatement(
+          'ALTER TABLE app_settings DROP COLUMN language',
+        );
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, editor_toolbar) '
+          "VALUES (1, '/old/root', 'link,-bold')",
+        );
+        await db.close();
+      }
+
+      final db = CopistDatabase(NativeDatabase(dbFile));
+      final row = (await db.select(db.appSettings).get()).single;
+      expect(row.libraryPath, '/old/root');
+      expect(row.editorToolbar, 'link,-bold');
+      // An existing library follows the OS, as it did before the setting
+      // existed.
+      expect(row.language, 'system');
       await db.close();
     },
   );

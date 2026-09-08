@@ -1,3 +1,4 @@
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:drift/drift.dart';
 
@@ -337,6 +338,22 @@ final class AppSettingsRepo {
     await _ensureRow();
     await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
       AppSettingsCompanion(editorToolbar: Value(layout)),
+    );
+  }
+
+  /// The stored UI language id (`system`, `en` or `it`).
+  Future<AppLanguage> language() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty
+        ? AppLanguage.system
+        : AppLanguage.fromId(rows.first.language);
+  }
+
+  /// Persists the UI language.
+  Future<void> setLanguage(AppLanguage language) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(language: Value(language.id)),
     );
   }
 

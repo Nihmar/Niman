@@ -1067,6 +1067,18 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('system'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1081,6 +1093,7 @@ class $AppSettingsTable extends AppSettings
     linkType,
     indentWidth,
     editorToolbar,
+    language,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1187,6 +1200,12 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
+      );
+    }
     return context;
   }
 
@@ -1243,6 +1262,10 @@ class $AppSettingsTable extends AppSettings
       editorToolbar: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}editor_toolbar'],
+      )!,
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
       )!,
     );
   }
@@ -1301,6 +1324,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// order, a `-` prefix marking a hidden one (see `ToolbarLayout`).
   /// Empty means the shipped toolbar.
   final String editorToolbar;
+
+  /// The UI language: `system` (follow the OS, the default), `en` or
+  /// `it`.
+  final String language;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1314,6 +1341,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.linkType,
     required this.indentWidth,
     required this.editorToolbar,
+    required this.language,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1332,6 +1360,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['link_type'] = Variable<String>(linkType);
     map['indent_width'] = Variable<int>(indentWidth);
     map['editor_toolbar'] = Variable<String>(editorToolbar);
+    map['language'] = Variable<String>(language);
     return map;
   }
 
@@ -1351,6 +1380,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       linkType: Value(linkType),
       indentWidth: Value(indentWidth),
       editorToolbar: Value(editorToolbar),
+      language: Value(language),
     );
   }
 
@@ -1372,6 +1402,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       linkType: serializer.fromJson<String>(json['linkType']),
       indentWidth: serializer.fromJson<int>(json['indentWidth']),
       editorToolbar: serializer.fromJson<String>(json['editorToolbar']),
+      language: serializer.fromJson<String>(json['language']),
     );
   }
   @override
@@ -1390,6 +1421,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'linkType': serializer.toJson<String>(linkType),
       'indentWidth': serializer.toJson<int>(indentWidth),
       'editorToolbar': serializer.toJson<String>(editorToolbar),
+      'language': serializer.toJson<String>(language),
     };
   }
 
@@ -1406,6 +1438,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? linkType,
     int? indentWidth,
     String? editorToolbar,
+    String? language,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1419,6 +1452,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     linkType: linkType ?? this.linkType,
     indentWidth: indentWidth ?? this.indentWidth,
     editorToolbar: editorToolbar ?? this.editorToolbar,
+    language: language ?? this.language,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1452,6 +1486,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       editorToolbar: data.editorToolbar.present
           ? data.editorToolbar.value
           : this.editorToolbar,
+      language: data.language.present ? data.language.value : this.language,
     );
   }
 
@@ -1469,7 +1504,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('treeSort: $treeSort, ')
           ..write('linkType: $linkType, ')
           ..write('indentWidth: $indentWidth, ')
-          ..write('editorToolbar: $editorToolbar')
+          ..write('editorToolbar: $editorToolbar, ')
+          ..write('language: $language')
           ..write(')'))
         .toString();
   }
@@ -1488,6 +1524,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     linkType,
     indentWidth,
     editorToolbar,
+    language,
   );
   @override
   bool operator ==(Object other) =>
@@ -1504,7 +1541,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.treeSort == this.treeSort &&
           other.linkType == this.linkType &&
           other.indentWidth == this.indentWidth &&
-          other.editorToolbar == this.editorToolbar);
+          other.editorToolbar == this.editorToolbar &&
+          other.language == this.language);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1520,6 +1558,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> linkType;
   final Value<int> indentWidth;
   final Value<String> editorToolbar;
+  final Value<String> language;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1533,6 +1572,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.linkType = const Value.absent(),
     this.indentWidth = const Value.absent(),
     this.editorToolbar = const Value.absent(),
+    this.language = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1547,6 +1587,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.linkType = const Value.absent(),
     this.indentWidth = const Value.absent(),
     this.editorToolbar = const Value.absent(),
+    this.language = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1561,6 +1602,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? linkType,
     Expression<int>? indentWidth,
     Expression<String>? editorToolbar,
+    Expression<String>? language,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1576,6 +1618,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (linkType != null) 'link_type': linkType,
       if (indentWidth != null) 'indent_width': indentWidth,
       if (editorToolbar != null) 'editor_toolbar': editorToolbar,
+      if (language != null) 'language': language,
     });
   }
 
@@ -1592,6 +1635,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? linkType,
     Value<int>? indentWidth,
     Value<String>? editorToolbar,
+    Value<String>? language,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1606,6 +1650,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       linkType: linkType ?? this.linkType,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
+      language: language ?? this.language,
     );
   }
 
@@ -1648,6 +1693,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (editorToolbar.present) {
       map['editor_toolbar'] = Variable<String>(editorToolbar.value);
     }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
     return map;
   }
 
@@ -1665,7 +1713,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('treeSort: $treeSort, ')
           ..write('linkType: $linkType, ')
           ..write('indentWidth: $indentWidth, ')
-          ..write('editorToolbar: $editorToolbar')
+          ..write('editorToolbar: $editorToolbar, ')
+          ..write('language: $language')
           ..write(')'))
         .toString();
   }
@@ -3145,6 +3194,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> linkType,
       Value<int> indentWidth,
       Value<String> editorToolbar,
+      Value<String> language,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -3160,6 +3210,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> linkType,
       Value<int> indentWidth,
       Value<String> editorToolbar,
+      Value<String> language,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -3228,6 +3279,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get editorToolbar => $composableBuilder(
     column: $table.editorToolbar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3300,6 +3356,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.editorToolbar,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -3364,6 +3425,9 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.editorToolbar,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -3409,6 +3473,7 @@ class $$AppSettingsTableTableManager
                 Value<String> linkType = const Value.absent(),
                 Value<int> indentWidth = const Value.absent(),
                 Value<String> editorToolbar = const Value.absent(),
+                Value<String> language = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -3422,6 +3487,7 @@ class $$AppSettingsTableTableManager
                 linkType: linkType,
                 indentWidth: indentWidth,
                 editorToolbar: editorToolbar,
+                language: language,
               ),
           createCompanionCallback:
               ({
@@ -3437,6 +3503,7 @@ class $$AppSettingsTableTableManager
                 Value<String> linkType = const Value.absent(),
                 Value<int> indentWidth = const Value.absent(),
                 Value<String> editorToolbar = const Value.absent(),
+                Value<String> language = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -3450,6 +3517,7 @@ class $$AppSettingsTableTableManager
                 linkType: linkType,
                 indentWidth: indentWidth,
                 editorToolbar: editorToolbar,
+                language: language,
               ),
           withReferenceMapper: (p0) => p0
               .map(

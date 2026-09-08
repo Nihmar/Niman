@@ -84,7 +84,7 @@ final class _TodoTabState extends State<TodoTab> {
               padding: const EdgeInsets.all(8),
               child: SegmentedButton<bool>(
                 key: const Key('todo-view-switch'),
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: false,
                     label: Text(AppStrings.todoOpen),
@@ -268,13 +268,13 @@ final class _TodoTabState extends State<TodoTab> {
             ListTile(
               key: const Key('todo-menu-edit'),
               leading: const Icon(Icons.edit),
-              title: const Text(AppStrings.todoEditAction),
+              title: Text(AppStrings.todoEditAction),
               onTap: () => Navigator.pop(context, 'edit'),
             ),
             ListTile(
               key: const Key('todo-menu-delete'),
               leading: const Icon(Icons.delete_outline),
-              title: const Text(AppStrings.todoDeleteAction),
+              title: Text(AppStrings.todoDeleteAction),
               onTap: () => Navigator.pop(context, 'delete'),
             ),
           ],
