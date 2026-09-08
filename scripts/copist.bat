@@ -44,6 +44,13 @@ call "%~f0" test
 exit /b %errorlevel%
 
 :apk
+rem A security agent that watches the temp directory (Trend Micro here)
+rem blocks the unix-domain socket the JVM opens there for every Selector,
+rem and Gradle then dies with "Unable to establish loopback connection"
+rem before compiling anything. Moving those sockets under the profile
+rem fixes it and is inert where nothing blocks them.
+if not exist "%USERPROFILE%\.javasock" mkdir "%USERPROFILE%\.javasock"
+if not defined JAVA_TOOL_OPTIONS set "JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=%USERPROFILE%\.javasock"
 call flutter build apk --release >"%log%" 2>&1
 set "status=%errorlevel%"
 powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"
