@@ -609,6 +609,16 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
   }
 
+  /// Whether the tree's pinned section is rolled up.
+  @override
+  Future<bool> get pinnedCollapsed async => (await _library).pinnedCollapsed;
+
+  /// Sets (and persists) the pinned section's rolled-up state.
+  @override
+  Future<void> setPinnedCollapsed({required bool collapsed}) async {
+    await _editLibrary((c) => c.copyWith(pinnedCollapsed: collapsed));
+  }
+
   /// The link format the editor's link button inserts.
   @override
   Future<LinkType> get linkType async => (await _library).linkType;

@@ -219,6 +219,15 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
 
+  /// Whether the tree's pinned section is rolled up (default false).
+  ///
+  /// Per library, like the sort order: which notes are worth pinning — and
+  /// how many — is a property of the library, not of the app.
+  Future<bool> get pinnedCollapsed;
+
+  /// Sets (and persists) the pinned section's rolled-up state.
+  Future<void> setPinnedCollapsed({required bool collapsed});
+
   /// The link format the editor's link button inserts
   /// (default [LinkType.wikilink]).
   Future<LinkType> get linkType;

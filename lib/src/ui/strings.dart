@@ -483,6 +483,8 @@ final class AppStrings {
   static String get currentQuickNote =>
       _t('Current quick note', 'Nota rapida attuale');
   static String get pinnedSection => _t('Pinned', 'Fissate');
+  static String pinnedSectionCount(int count) =>
+      '${_t('Pinned', 'Fissate')} · $count';
   static String get templateFolderTitle =>
       _t('Template folder', 'Cartella dei modelli');
   static String get newFromTemplateTitle =>

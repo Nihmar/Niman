@@ -154,6 +154,48 @@ void main() {
     expect(find.byKey(const Key('menu-pin')), findsNothing);
   });
 
+  testWidgets('the heading counts what is behind it', (tester) async {
+    await openWith(tester, {
+      'a': '---\npinned: true\n---\nbody',
+      'b': '---\npinned: true\n---\nbody',
+    });
+
+    expect(find.text('Pinned · 2'), findsOneWidget);
+  });
+
+  testWidgets('tapping the heading rolls the section up and down', (
+    tester,
+  ) async {
+    await openWith(tester, {'pinned': '---\npinned: true\n---\nbody'});
+    expect(find.byKey(const Key('pinned-pinned.md')), findsOneWidget);
+
+    await tester.tap(pinnedHeading());
+    await settle(tester);
+
+    // Rolled up: the rows are gone, the heading and its count stay.
+    expect(find.byKey(const Key('pinned-pinned.md')), findsNothing);
+    expect(find.text('Pinned · 1'), findsOneWidget);
+    expect(await controller.pinnedCollapsed, isTrue);
+
+    await tester.tap(pinnedHeading());
+    await settle(tester);
+
+    expect(find.byKey(const Key('pinned-pinned.md')), findsOneWidget);
+    expect(await controller.pinnedCollapsed, isFalse);
+  });
+
+  testWidgets('a library that was left rolled up opens rolled up', (
+    tester,
+  ) async {
+    await controller.setPinnedCollapsed(collapsed: true);
+    await openWith(tester, {'pinned': '---\npinned: true\n---\nbody'});
+
+    expect(find.text('Pinned · 1'), findsOneWidget);
+    expect(find.byKey(const Key('pinned-pinned.md')), findsNothing);
+    // The tree below it is untouched by the roll-up.
+    expect(noteRow('pinned.md'), findsOneWidget);
+  });
+
   testWidgets('tapping a pinned row selects that note', (tester) async {
     await openWith(tester, {
       'pinned': '---\npinned: true\ntitle: Pinned One\n---\nbody',

@@ -105,6 +105,7 @@ final class LibraryConfig {
     required this.quickNotePath,
     required this.listNoteFolder,
     this.templateFolder = defaultTemplateFolder,
+    this.pinnedCollapsed = false,
     this.lineNumbers = true,
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
@@ -146,6 +147,7 @@ final class LibraryConfig {
       templateFolder: templates is String
           ? cleanTemplateFolder(templates)
           : defaultTemplateFolder,
+      pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
@@ -194,6 +196,9 @@ final class LibraryConfig {
   /// The folder (library-relative) holding the note templates.
   final String templateFolder;
 
+  /// Whether the tree's pinned section is rolled up (default false).
+  final bool pinnedCollapsed;
+
   /// Whether the editor shows the row-number column (default true).
   final bool lineNumbers;
 
@@ -227,6 +232,7 @@ final class LibraryConfig {
     bool clearQuickNotePath = false,
     String? listNoteFolder,
     String? templateFolder,
+    bool? pinnedCollapsed,
     bool? lineNumbers,
     bool? editorAutofocus,
     bool? reminderShowTokens,
@@ -243,6 +249,7 @@ final class LibraryConfig {
           : quickNotePath ?? this.quickNotePath,
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
       templateFolder: templateFolder ?? this.templateFolder,
+      pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
@@ -260,6 +267,7 @@ final class LibraryConfig {
     'quickNotePath',
     'listNoteFolder',
     'templateFolder',
+    'pinnedCollapsed',
     'lineNumbers',
     'editorAutofocus',
     'reminderShowTokens',
@@ -285,6 +293,7 @@ final class LibraryConfig {
       'historyVersions': historyVersions,
       'listNoteFolder': listNoteFolder,
       'templateFolder': templateFolder,
+      'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
@@ -351,6 +360,7 @@ final class LibraryConfig {
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
         templateFolder == other.templateFolder &&
+        pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&

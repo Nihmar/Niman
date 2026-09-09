@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
@@ -79,6 +81,14 @@ final class _NoteTreeState extends State<NoteTree> {
   int? _rowsRevision;
   Set<String> _rowsExpanded = const <String>{};
 
+  /// Whether the pinned section is rolled up, once the library has been
+  /// asked. Null until then, and the section builds expanded — the common
+  /// answer, and the one that does not make the tree jump when the real
+  /// value lands.
+  bool? _pinnedCollapsed;
+
+  bool get _collapsed => _pinnedCollapsed ?? false;
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +133,10 @@ final class _NoteTreeState extends State<NoteTree> {
     );
     final fields = await widget.controller.fieldSource;
     final pinned = await fields?.pinnedNotes() ?? const <Note>[];
+    // Asked once per session, not per flatten: after the first answer the
+    // state lives here, so a toggle repaints instead of round-tripping
+    // through the settings file.
+    _pinnedCollapsed ??= await widget.controller.pinnedCollapsed;
 
     final nodesByParent = <int, List<Note>>{};
     for (final node in allNodes) {
@@ -173,8 +187,11 @@ final class _NoteTreeState extends State<NoteTree> {
             // The pinned notes sit above the tree with a heading of their
             // own; below the divider the tree is unchanged, so a pinned
             // note appears twice — once where it is kept, once where it
-            // is wanted.
-            final header = rows.pinned.isEmpty ? 0 : rows.pinned.length + 2;
+            // is wanted. Rolled up, the heading and the divider stay: the
+            // count is still worth seeing, and the tree keeps the room.
+            final header = rows.pinned.isEmpty
+                ? 0
+                : (_collapsed ? 2 : rows.pinned.length + 2);
             return ListView.builder(
               key: const Key('note-tree-list'),
               itemCount: header + rows.tree.length,
@@ -201,19 +218,8 @@ final class _NoteTreeState extends State<NoteTree> {
   /// One item of the pinned block: the heading, a pinned note, or the
   /// divider that closes it off from the tree.
   Widget _pinnedItem(List<Note> pinned, int index) {
-    if (index == 0) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        child: Text(
-          AppStrings.pinnedSection,
-          key: const Key('pinned-heading'),
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-    }
-    if (index == pinned.length + 1) {
+    if (index == 0) return _pinnedHeading(pinned.length);
+    if (index == (_collapsed ? 1 : pinned.length + 1)) {
       return const Divider(height: 9);
     }
     final note = pinned[index - 1];
@@ -230,6 +236,44 @@ final class _NoteTreeState extends State<NoteTree> {
       onLongPress: widget.onLongPress,
       icon: Icons.push_pin_outlined,
     );
+  }
+
+  /// The pinned section's heading: a chevron, the word, and how many are
+  /// in there. Tapping it rolls the section up or down.
+  ///
+  /// The count is what makes rolling it up bearable — closed, the heading
+  /// still says how much is behind it, so the section is a thing you put
+  /// away rather than a thing you lose.
+  Widget _pinnedHeading(int count) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.labelMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return InkWell(
+      key: const Key('pinned-heading'),
+      onTap: () => _togglePinned(collapsed: !_collapsed),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 16, 4),
+        child: Row(
+          children: [
+            Icon(
+              _collapsed ? Icons.chevron_right : Icons.expand_more,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Text(AppStrings.pinnedSectionCount(count), style: style),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Rolls the pinned section up or down, and remembers it for the
+  /// library. The repaint does not wait on the write.
+  void _togglePinned({required bool collapsed}) {
+    setState(() => _pinnedCollapsed = collapsed);
+    unawaited(widget.controller.setPinnedCollapsed(collapsed: collapsed));
   }
 }
 

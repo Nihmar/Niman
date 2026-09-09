@@ -228,6 +228,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get pinnedCollapsed async => _config.pinnedCollapsed;
+
+  @override
+  Future<void> setPinnedCollapsed({required bool collapsed}) async {
+    _config = _config.copyWith(pinnedCollapsed: collapsed);
+  }
+
+  @override
   Future<LinkType> get linkType async => _config.linkType;
 
   @override
