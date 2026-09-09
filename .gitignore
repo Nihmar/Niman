@@ -17,7 +17,7 @@ copist-debug-log-*.txt
 .buildlog/
 .history
 screenshots/
-
+.idea
 
 # Flutter repo-specific
 /bin/cache/
