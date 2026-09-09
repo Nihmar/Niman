@@ -48,6 +48,14 @@ void main() {
       expect(find.text(AppStrings.knownLibrariesTitle), findsNothing);
     });
 
+    testWidgets('has no app bar repeating the name below it', (tester) async {
+      // The feather and the name are a few pixels down (user,
+      // 2026-09-09); the bar cost a bar's worth of the list.
+      await pump(tester);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.text(AppStrings.appTitle), findsOne);
+    });
+
     testWidgets('offers open and create as the main action', (tester) async {
       await pump(tester);
       expect(find.byType(FilledButton), findsWidgets);

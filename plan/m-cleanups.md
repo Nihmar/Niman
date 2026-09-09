@@ -56,9 +56,12 @@ list stays honest about what remains. Nothing here is a feature.
   control with no effect. Keep the stored value untouched while it is
   hidden — plugging in a monitor should bring back the ratio the user
   chose, not a default. *AC: widget tests — the row is absent on a phone
-  width at `auto` and present at a tablet width; present at any width
-  when the mode is forced to `split`; the stored ratio survives being
-  hidden.*
+  width and present at a tablet width; the stored ratio survives being
+  hidden.* Extended the same day, on the same reasoning: the **preview
+  mode** row goes with it below 600 dp, and a narrow screen no longer
+  honours a forced split at all. Hiding the row alone would have left a
+  phone that once forced the split with a two-pane layout and no visible
+  control to undo it.
 
 - [x] **T-CL-06** The first index names what it is reading (user,
   2026-09-09). A large library's first open was a progress bar over
@@ -69,6 +72,14 @@ list stays honest about what remains. Nothing here is a feature.
   since the report costs a message per note; the redraw is throttled to
   twenty a second, which is already a blur. *Done: unit tests on the
   reporting, widget tests on the line.*
+
+- [ ] **T-CL-07** "Side by side" and "Auto" are the same choice. Since
+  T-CL-05 made a narrow screen never split, the forced `split` mode
+  differs from `auto` nowhere: above 600 dp both split, below it neither
+  does. The settings dialog offers three options where there are two.
+  Either drop the mode and map a stored `split` to `auto`, or find a
+  width where the distinction earns its place. *AC: the choice a user is
+  offered has no two entries that do the same thing.*
 
 ## Not worth doing (recorded so it is not re-found)
 

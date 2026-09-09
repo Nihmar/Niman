@@ -450,6 +450,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     // Grouped, and every setting one row of the same height (2026-09-08
     // user feedback). Switches stay switches; everything with more than
     // two choices reads its value on the right and opens a dialog, which
@@ -468,25 +469,23 @@ final class _SettingsBodyState extends State<SettingsBody> {
           },
           onTap: () => unawaited(_chooseLanguage()),
         ),
-        SettingsValueRow(
-          key: const Key('preview-mode-setting'),
-          title: AppStrings.previewModeTitle,
-          value: switch (_previewMode) {
-            PreviewLayoutMode.auto => AppStrings.previewModeAuto,
-            PreviewLayoutMode.split => AppStrings.previewModeSplit,
-            PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
-          },
-          onTap: () => unawaited(_choosePreviewMode()),
-        ),
-        // Only where the two panes actually share a screen (T-CL-05):
-        // on a phone in the switch layout this slider moves a number
-        // nothing reads. The stored ratio is untouched while it is
-        // hidden, so plugging in a monitor brings back the chosen split.
-        if (_splitLoaded &&
-            previewSplits(
-              _previewMode,
-              narrow: MediaQuery.sizeOf(context).width < splitBreakpoint,
-            ))
+        // Both rows are about a layout a narrow screen cannot have
+        // (T-CL-05): the mode decides nothing below 600 dp, and the
+        // ratio moves a number nothing reads. Their stored values are
+        // untouched while they are hidden, so plugging in a monitor
+        // brings back the layout the user chose.
+        if (!narrow)
+          SettingsValueRow(
+            key: const Key('preview-mode-setting'),
+            title: AppStrings.previewModeTitle,
+            value: switch (_previewMode) {
+              PreviewLayoutMode.auto => AppStrings.previewModeAuto,
+              PreviewLayoutMode.split => AppStrings.previewModeSplit,
+              PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
+            },
+            onTap: () => unawaited(_choosePreviewMode()),
+          ),
+        if (_splitLoaded && previewSplits(_previewMode, narrow: narrow))
           SettingsValueRow(
             key: const Key('split-ratio-setting'),
             title: AppStrings.splitRatioTitle,

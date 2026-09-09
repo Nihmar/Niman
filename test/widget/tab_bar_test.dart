@@ -237,16 +237,13 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Not set yet'), findsOne);
-    await tester.scrollUntilVisible(
-      find.text('Not set yet'),
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
-    // The tile can still sit behind the bottom NavigationBar: nudge the
-    // list up so the subtitle (the tap target) is fully visible.
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    // Scrolled to a known place and tapped by key rather than by its
+    // subtitle: the rows above it come and go with the width (the
+    // preview layout ones are hidden on a phone), so any fixed nudge is
+    // wrong on some layout.
+    await tester.ensureVisible(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
-    await tester.tap(find.text('Not set yet'));
+    await tester.tap(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
     await tester.tap(
       find.descendant(

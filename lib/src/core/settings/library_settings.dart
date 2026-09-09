@@ -39,16 +39,15 @@ const double splitBreakpoint = 600;
 
 /// Whether the editor and the preview actually sit side by side.
 ///
-/// The forced modes win; `auto` follows the width. It lives here rather
-/// than in the shell because the settings screen asks the same question:
-/// the split-ratio row means nothing when the panes never share a screen
-/// (T-CL-05).
+/// A narrow screen never splits, whatever the mode says: two panes of a
+/// Markdown editor at phone width are two unusable panes, and the spec
+/// puts the split at 600 dp for that reason. Above it, the mode decides.
+///
+/// It lives here rather than in the shell because the settings screen
+/// asks the same question: neither the layout row nor the split-ratio row
+/// means anything where the panes cannot share a screen (T-CL-05).
 bool previewSplits(PreviewLayoutMode mode, {required bool narrow}) =>
-    switch (mode) {
-      PreviewLayoutMode.split => true,
-      PreviewLayoutMode.fullScreen => false,
-      PreviewLayoutMode.auto => !narrow,
-    };
+    !narrow && mode != PreviewLayoutMode.fullScreen;
 
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;

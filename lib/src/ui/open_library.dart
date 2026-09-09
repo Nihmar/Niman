@@ -115,71 +115,75 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     final active = opening || _busy;
     final narrow = MediaQuery.sizeOf(context).width < 600;
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.appTitle)),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/branding/feather.png',
-                  key: const Key('branding'),
-                  width: 72,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  AppStrings.appTitle,
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                // The one line of explanation gives way to the list: on a
-                // phone the two together push the libraries below the
-                // fold, and someone with a list of them does not need it.
-                if (_known.isEmpty)
+      // No app bar: it carried the app's name and nothing else, and the
+      // name is already under the feather a few pixels below. What it
+      // cost was a bar's worth of the list.
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/branding/feather.png',
+                    key: const Key('branding'),
+                    width: 72,
+                  ),
+                  const SizedBox(height: 12),
                   Text(
-                    AppStrings.openLibraryIntro,
-                    style: theme.textTheme.bodyMedium,
+                    AppStrings.appTitle,
+                    style: theme.textTheme.headlineMedium,
                   ),
-                const SizedBox(height: 24),
-                if (!_needsAccess && _known.isNotEmpty) ...[
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: KnownLibraryList(
-                      entries: _known,
-                      unreachable: _unreachable,
-                      enabled: !active,
-                      onOpen: (path) => unawaited(_openKnown(path)),
-                      onForget: (path) => unawaited(_forget(path)),
+                  const SizedBox(height: 8),
+                  // The one line of explanation gives way to the list: on a
+                  // phone the two together push the libraries below the
+                  // fold, and someone with a list of them does not need it.
+                  if (_known.isEmpty)
+                    Text(
+                      AppStrings.openLibraryIntro,
+                      style: theme.textTheme.bodyMedium,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (_needsAccess)
-                  _AccessPrompt(onGrant: active ? null : _grantAccess)
-                else
-                  _actions(active: active, narrow: narrow),
-                if (active) ...[
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: LinearProgressIndicator(),
-                  ),
-                  // The first index of a large library is a long silent
-                  // wait; naming what it is reading turns it into
-                  // something to watch, and says the app is not stuck.
-                  if (widget.controller.indexProgress case final progress?)
-                    _IndexingLine(progress: progress),
-                ],
-                if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(
-                      error,
-                      style: const TextStyle(color: Colors.red),
+                  const SizedBox(height: 24),
+                  if (!_needsAccess && _known.isNotEmpty) ...[
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: KnownLibraryList(
+                        entries: _known,
+                        unreachable: _unreachable,
+                        enabled: !active,
+                        onOpen: (path) => unawaited(_openKnown(path)),
+                        onForget: (path) => unawaited(_forget(path)),
+                      ),
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 16),
+                  ],
+                  if (_needsAccess)
+                    _AccessPrompt(onGrant: active ? null : _grantAccess)
+                  else
+                    _actions(active: active, narrow: narrow),
+                  if (active) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: LinearProgressIndicator(),
+                    ),
+                    // The first index of a large library is a long silent
+                    // wait; naming what it is reading turns it into
+                    // something to watch, and says the app is not stuck.
+                    if (widget.controller.indexProgress case final progress?)
+                      _IndexingLine(progress: progress),
+                  ],
+                  if (error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

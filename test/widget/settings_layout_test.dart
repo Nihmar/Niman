@@ -136,6 +136,8 @@ void main() {
 
     final row = find.byKey(const Key('split-ratio-setting'));
 
+    final modeRow = find.byKey(const Key('preview-mode-setting'));
+
     testWidgets('hidden on a phone, where auto never splits', (tester) async {
       await pumpAt(tester, 400);
       expect(row, findsNothing);
@@ -146,10 +148,24 @@ void main() {
       expect(row, findsOne);
     });
 
-    testWidgets('shown on a phone when the split is forced', (tester) async {
+    testWidgets('the layout row goes with it on a phone', (tester) async {
+      // Below 600 dp the panes cannot share the screen, so the mode
+      // decides nothing (user, 2026-09-09).
+      await pumpAt(tester, 400);
+      expect(modeRow, findsNothing);
+      await pumpAt(tester, 900);
+      expect(modeRow, findsOne);
+    });
+
+    testWidgets('a forced split does not bring either row back', (
+      tester,
+    ) async {
+      // Otherwise a phone that once forced the split would be stuck with
+      // a two-pane layout and a hidden control to undo it.
       await controller.setPreviewMode(PreviewLayoutMode.split);
       await pumpAt(tester, 400);
-      expect(row, findsOne);
+      expect(modeRow, findsNothing);
+      expect(row, findsNothing);
     });
 
     testWidgets('hidden on a tablet when the switch layout is forced', (
