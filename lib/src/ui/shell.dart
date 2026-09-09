@@ -478,6 +478,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// layout and paint follow the fade.
   bool _noteHidingTabs = false;
 
+  /// Whether the Quick note tab body is the choose/create screen.
+  ///
+  /// It is only ever wanted when no quick note is set. With one set, the
+  /// tab is a way of opening that note, and the tab shell stays painted
+  /// under the opening note for the length of the fade — long enough for
+  /// the chooser to flash behind a note the user had already chosen.
+  bool _showQuickNoteChooser = false;
+
   /// The pending tab-hide after a note open (canceled on close).
   Timer? _noteHideTimer;
 
@@ -765,14 +773,18 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (ops == null) return;
       final note = await ops.find(path);
       if (note == null || note.isDir) {
+        // The note it pointed at is gone: forget it and ask again, rather
+        // than leaving the tap with nothing to show for itself.
         await ops.setQuickNotePath(path: null);
         widget.controller.notify();
+        if (mounted) _openQuickNoteChooser();
         return;
       }
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
         _visitedTabs.add(ShellTab.quickNote);
+        _showQuickNoteChooser = false;
         _noteFromTab = ShellTab.files;
         _selected = note.path;
         _selectedIsDir = false;
@@ -805,6 +817,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// nowhere on a tablet with no quick note set yet.
   void _openQuickNoteChooser() {
     if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
+      setState(() => _showQuickNoteChooser = true);
       _selectShellTab(ShellTab.quickNote);
       return;
     }
@@ -1685,10 +1698,11 @@ final class _LibraryShellState extends State<_LibraryShell>
         reminders: widget.reminders,
       ),
       ShellTab.search => _searchSlot(controller),
-      ShellTab.quickNote => QuickNoteTab(
-        controller: controller,
-        onOpen: _openQuickNote,
-      ),
+      // Empty unless the shell actually sent the user here to choose: an
+      // open quick note leaves this body painted under the opening note.
+      ShellTab.quickNote => _showQuickNoteChooser
+          ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+          : const SizedBox.shrink(),
       ShellTab.settings => SettingsTab(controller: controller),
     };
   }

@@ -217,6 +217,64 @@ void main() {
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
   });
 
+  testWidgets('quick note: the chooser never flashes behind the note', (
+    tester,
+  ) async {
+    // The tab shell stays painted under the opening note for the length
+    // of the fade, so a Quick note tab body that still held the
+    // choose/create screen showed through it — a screen the user had
+    // already answered (user, 2026-09-09).
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    await controller.createNote(parentPath: '', name: 'Scratch');
+    await controller.ops!.setQuickNotePath(path: 'Scratch.md');
+    await settle(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
+    // Mid-fade: the shell is still painted under the note.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('quick-note-choose')), findsNothing);
+    expect(find.byKey(const Key('quick-note-create')), findsNothing);
+
+    await settle(tester);
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(find.byKey(const Key('quick-note-choose')), findsNothing);
+  });
+
+  testWidgets('quick note: a quick note that is gone asks again', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    await controller.createNote(parentPath: '', name: 'Scratch');
+    await controller.ops!.setQuickNotePath(path: 'Scratch.md');
+    await controller.delete('Scratch.md');
+    await settle(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
+    await settle(tester);
+
+    expect(find.byKey(const Key('quick-note-choose')), findsOneWidget);
+    expect(await controller.ops!.quickNotePath, isNull);
+  });
+
   testWidgets('each tab names itself in the app bar', (tester) async {
     // The Files tab said "Copist", which named the app on a screen that
     // is about the tree (user, 2026-09-09).
