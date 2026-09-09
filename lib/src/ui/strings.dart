@@ -489,6 +489,10 @@ final class AppStrings {
       _t('New from template', 'Nuova da modello');
   static String get newFromTemplateHere =>
       _t('New from template here', 'Nuova da modello qui');
+  static String frontmatterInvalid(String reason) => _t(
+    'Frontmatter not read: $reason',
+    'Frontmatter non letto: $reason',
+  );
   static String get templatePickerTitle =>
       _t('Choose a template', 'Scegli un modello');
   static String templatePickerEmpty(String folder) => _t(

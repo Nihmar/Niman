@@ -212,6 +212,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   String? _lastStatsText;
   bool _showOutline = false;
 
+  /// Why the note's frontmatter block does not parse, or null when it
+  /// does (or when there is no block). Refreshed on the stats debounce.
+  String? _frontmatterError;
+
   /// Preview pane (T-M2-08): debounced text, its own scroll + map + math
   /// cache, and the switch-mode visibility.
   Timer? _previewTimer;
@@ -300,6 +304,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   void _applyStats(String text, int words, List<String> outlineRows) {
     _lastStatsText = text;
     setState(() {
+      _frontmatterError = frontmatterErrorIn(text);
       _wordCount = words;
       _outline = outlineRows
           .map(_parseOutlineRow)
@@ -600,6 +605,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     if (text == _lastStatsText) return;
     _lastStatsText = text;
     final revision = ++_statsRevision;
+    // The frontmatter check rides the stats debounce (T-M4-01: parsed on
+    // edit, debounced). It reads only the leading block, so it stays on
+    // this isolate whatever the note's size.
+    final frontmatterError = frontmatterErrorIn(text);
+    if (frontmatterError != _frontmatterError) {
+      setState(() => _frontmatterError = frontmatterError);
+    }
     void apply(Object? result) {
       if (!mounted || revision != _statsRevision) return;
       final stats = PreviewWork.statsOf(result);
@@ -1088,6 +1100,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (!_loading && _frontmatterError != null)
+                  _frontmatterWarning(context, _frontmatterError!),
                 _statusRow(context),
                 // The toolbar fades + sizes in and out (hidden in preview
                 // mode). It is only mounted once loaded, so it appears
@@ -1107,6 +1121,42 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           ),
         ],
       ],
+    );
+  }
+
+  /// The malformed-frontmatter line (T-M4-01).
+  ///
+  /// A block that does not parse is indexed as if it were not there —
+  /// no title, no tags, no fields — and nothing else in the app would say
+  /// so. This does, with the parser's own message, while the note is open
+  /// and the mistake is still in front of the person who made it.
+  Widget _frontmatterWarning(BuildContext context, String message) {
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('frontmatter-error'),
+      width: double.infinity,
+      color: theme.colorScheme.errorContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_outlined,
+            size: 16,
+            color: theme.colorScheme.onErrorContainer,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              AppStrings.frontmatterInvalid(message),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

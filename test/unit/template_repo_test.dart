@@ -116,6 +116,23 @@ void main() {
     expect(await other.templateFolder, 'Modelli');
   });
 
+  test('nothing under .trash or .history is ever a template', () async {
+    // The plan's open question: a template folder that ends up inside a
+    // dot folder must not come back. The indexer skips hidden entries, so
+    // the repo never sees them — pinned here so it stays that way.
+    await seed({
+      'Templates/Daily.md': 'daily',
+      '.trash/Templates/Deleted.md': 'deleted',
+      '.history/Templates/Old.md': 'old',
+    });
+
+    expect((await repo.templates()).map((t) => t.name), ['Daily']);
+
+    // Even pointed straight at one, there is nothing there to list.
+    await ops.setTemplateFolder(folder: '.trash/Templates');
+    expect(await repo.templates(), isEmpty);
+  });
+
   test('the settings file carries the key, defaulted when absent', () async {
     final store = LibraryConfigStore(root.path);
     await store.write(LibraryConfig.defaults);

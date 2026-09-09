@@ -108,19 +108,33 @@ Frontmatter? parseFrontmatter(String text) {
 ///
 /// `startLine` is the `---` opener and `endLine` the closing `---`/`...`,
 /// both zero-based — what an editor needs to point at the block.
+/// Scanned rather than split: the editor asks this question after every
+/// keystroke, and splitting a novel-length note into lines to look at its
+/// first few is a cost per keystroke that grows with the note. The scan
+/// reads only as far as the closing fence.
 ({String text, int startLine, int endLine})? frontmatterBlock(String text) {
-  final lines = text.split('\n');
-  if (lines.isEmpty || lines.first.trim() != '---') return null;
-  for (var i = 1; i < lines.length; i++) {
-    final trimmed = lines[i].trim();
-    if (trimmed == '---' || trimmed == '...') {
+  var lineStart = 0;
+  var line = 0;
+  while (lineStart <= text.length) {
+    final newline = text.indexOf('\n', lineStart);
+    final lineEnd = newline < 0 ? text.length : newline;
+    final trimmed = text.substring(lineStart, lineEnd).trim();
+    if (line == 0) {
+      // Only a leading `---` opens a block; anything else is body.
+      if (trimmed != '---') return null;
+    } else if (trimmed == '---' || trimmed == '...') {
+      // The block's YAML is everything between the fences.
       return (
-        text: lines.sublist(1, i).join('\n'),
+        text: text.substring(text.indexOf('\n') + 1, lineStart).trimRight(),
         startLine: 0,
-        endLine: i,
+        endLine: line,
       );
     }
+    if (newline < 0) break;
+    lineStart = newline + 1;
+    line++;
   }
+  // The block never closed: not frontmatter, just a rule and some text.
   return null;
 }
 
@@ -164,6 +178,13 @@ Frontmatter parseFrontmatterBlock(String source) {
   );
 }
 
+/// Why the leading frontmatter block of [text] does not parse, or null
+/// when it parses (or when there is no block).
+///
+/// The editor's question, asked after every edit: it only wants to know
+/// whether to warn, so it does not build the fields.
+String? frontmatterErrorIn(String text) => parseFrontmatter(text)?.error;
+
 /// The `type:` value of the leading frontmatter block, or null when the
 /// note has no frontmatter block, no `type` key or an empty value.
 ///
@@ -173,22 +194,16 @@ Frontmatter parseFrontmatterBlock(String source) {
 /// the indexer pays for the full parse. Same block rules as
 /// [parseFrontmatter] — the value counts only when the block is closed.
 String? frontmatterTypeOf(String text) {
-  final lines = text.split('\n');
-  if (lines.isEmpty || lines.first.trim() != '---') return null;
-  String? type;
-  for (final line in lines.skip(1)) {
+  final block = frontmatterBlock(text);
+  if (block == null) return null;
+  for (final line in block.text.split('\n')) {
     final trimmed = line.trim();
-    if (trimmed == '---' || trimmed == '...') {
-      // Closed block: the first `type:` seen (if any) is the kind.
-      return (type == null || type.isEmpty) ? null : type;
-    }
-    if (type != null) continue;
     final colon = trimmed.indexOf(':');
     if (colon <= 0) continue;
     if (trimmed.substring(0, colon).trim().toLowerCase() != 'type') continue;
-    type = _unquote(trimmed.substring(colon + 1).trim());
+    final type = _unquote(trimmed.substring(colon + 1).trim());
+    return type.isEmpty ? null : type;
   }
-  // The block never closed: not frontmatter, no kind.
   return null;
 }
 
