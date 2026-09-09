@@ -41,8 +41,14 @@ disk are always the source of truth.
 - A **library** is a folder of Markdown notes, and it describes itself: its
   own settings live inside it as `<library>/.copist/settings.json`, plain
   JSON you can read and fix in any editor. Copy the folder to another
-  machine and its trash toggle, history depth, quick note and list folder
-  travel with it.
+  machine and they travel with it — the trash toggle, the history depth,
+  the quick note and the list folder, and everything about how you write
+  there: the editor toolbar, the line numbers, the indent width, the link
+  format, the tree order, the reminder markers. Each library is
+  configured on its own, starting from the defaults.
+- What stays with the app rather than the library is what does not depend
+  on it: the interface language, the debug-log switch, and the preview
+  layout, which follows the screen.
 - Copist remembers the libraries you have opened and starts on a list of
   them: name, path, and when each was last opened. Tapping one opens it;
   a long press forgets it, which removes it from the list and touches

@@ -1,7 +1,7 @@
 # Multiple libraries — a library is a folder that describes itself
 
-**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-09
-done 2026-09-09, T-ML-10 open) · **Depends on:** M1
+**Status:** Done (2026-09-08 request, T-ML-01 to T-ML-10 landed
+2026-09-09) · **Depends on:** M1
 (library core), M3 (index) · **Blocks:** nothing, but it changes where
 settings live, so it wants to land before M5 sync writes anything of its
 own · **Spec:** user request: several libraries like Obsidian's vaults —
@@ -31,9 +31,10 @@ tap rather than a folder picker.
 - ~~**Per-library settings are database rows.**~~ Done in T-ML-02: the
   four of them live in `<library>/.copist/settings.json` and travel with
   the folder. The `library_settings` table is gone.
-- **App-wide settings are separate already** (`app_settings`: language,
-  editor toolbar, line numbers, preview mode, indent width, …), and stay
-  where they are.
+- ~~**App-wide settings are separate already.**~~ Half of them were not
+  app-wide at all. T-ML-10 moved the seven that describe how you write in
+  a library into its folder; `app_settings` keeps the language, the debug
+  switch, the resume pointer and the preview layout.
 
 ## Agreed decisions
 
@@ -144,35 +145,38 @@ tap rather than a folder picker.
     library is open, and a cold start opens the resumed library — which
     `app_settings.library_path` has always held. A switch moves the
     shortcuts with it because it moves the shell.
-- [ ] **T-ML-10** Any setting can be overridden per library (user
-  request, 2026-09-09). The four settings T-ML-02 moved have no app-wide
-  meaning, but most of the others do and are still a single global value:
-  a creative-writing library wants a toolbar without code blocks and
-  headings, the programming-notes library next to it wants exactly those.
-  Chosen model: **an app default with a per-library override**, the
-  user/workspace split VS Code and Obsidian use. Every setting keeps its
-  app-wide value; a library may override some in its own
-  `settings.json`, and a key that is absent means "follow the app". A
-  user with one library sees no change; a user with five does not
-  reconfigure the toolbar five times.
-  - *Overridable:* `editorToolbar`, `lineNumbers`, `editorAutofocus`,
-    `indentWidth`, `linkType`, `treeSort`, `reminderShowTokens`,
-    `previewMode`, `splitRatio`.
-  - *App-wide only:* `language` (it is about the reader, not the
-    library), `debugLogsEnabled` (diagnostics), and the resume pointer.
-  - *Neither:* the four T-ML-02 settings stay plain per-library values —
-    there is no sensible app-wide "history versions".
-  - The reader is one resolver consulted by the session getters:
-    library override first, app value second. `LibraryConfig` grows a
-    nullable field per overridable setting; absent stays absent through a
-    write, so a library that overrides nothing keeps a small file.
-  - The settings screen needs a way to say "in this library" on a row,
-    and to show which rows are overridden. Design it with the mockups
-    the settings redesign used, not in passing.
-  - *AC: a setting overridden in library A and left alone in B reads A's
-    value in A and the app value in B; changing the app value moves B and
-    not A; clearing an override makes A follow the app again; unit tests
-    on the resolver, a widget test on the row.*
+- [x] **T-ML-10** The settings that describe a library live in it (user
+  request, 2026-09-09). The four T-ML-02 moved were not the only ones: a
+  library of creative writing wants a toolbar without code blocks and
+  headings, the programming notes next to it want exactly those, and
+  those settings were a single app-wide value.
+  - **No scopes.** The first design gave every setting an app value plus
+    an optional per-library override, with a badge and a gesture to move
+    a row between them. The user cut it: "chi se ne frega se specifico o
+    meno" — a library simply has its own settings, seeded from the
+    defaults, and the screen edits them. No override model, no scope
+    affordance, no second view. The mechanism that was built for it was
+    removed the same day.
+  - *Moved into the library:* `lineNumbers`, `editorAutofocus`,
+    `reminderShowTokens`, `treeSort`, `linkType`, `indentWidth`,
+    `editorToolbar`. They describe how you write in this library.
+  - *Still app-wide:* `language` (about the reader), `debugLogsEnabled`
+    (a diagnostic switch for the installation), the resume pointer, and
+    `previewMode` + `splitRatio` — those two follow the screen, not the
+    library, so carrying them in the folder would move a tablet's layout
+    onto a phone.
+  - The settings screen needed no change at all: the same rows now read
+    and write the open library's file.
+  - `settings.json` is written whole, every key present, so a user who
+    opens it sees the complete set rather than only what they changed.
+  - Schema v17 drops the seven columns after parking their values for
+    every known library, and `LegacyLibrarySettings` now merges the
+    parked keys a file lacks instead of skipping a library that has one —
+    which is what carries an existing user's configuration across.
+  - *AC: unit tests — the seven round trip through the file, a fresh
+    library gets the shipped defaults, an unreadable value falls back, an
+    out-of-range indent is clamped, and the v17 migration hands the
+    current values to every known library.*
 - [x] **T-ML-09** Strings + docs. Everything in `strings.dart`, in both
   languages; `README.md` gains the `.copist/` folder and the multi-library
   behaviour. *AC: analyze clean; no user-facing literal outside the

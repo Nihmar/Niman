@@ -1,5 +1,4 @@
 import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_setting.dart';
 
 /// The open library's settings, read once from
 /// `<library>/.copist/settings.json` and written back on every change
@@ -26,29 +25,6 @@ final class LibraryConfigRepo {
   /// The library's settings; the first call reads the file, later ones
   /// return the cached value.
   Future<LibraryConfig> get config => _config ??= _store.read();
-
-  /// Whether this library answers [setting] for itself (T-ML-10).
-  Future<bool> overrides(LibrarySetting setting) async =>
-      (await config).overrides.containsKey(setting.name);
-
-  /// The library's answer for [setting], or null while it follows the
-  /// app.
-  Future<Object?> overrideOf(LibrarySetting setting) async =>
-      (await config).overrides[setting.name];
-
-  /// Starts answering [setting] here, with [value].
-  Future<void> setOverride(LibrarySetting setting, Object value) {
-    return update(
-      (c) => c.copyWith(overrides: {...c.overrides, setting.name: value}),
-    );
-  }
-
-  /// Stops answering [setting] here; the library follows the app again.
-  Future<void> clearOverride(LibrarySetting setting) {
-    return update(
-      (c) => c.copyWith(overrides: {...c.overrides}..remove(setting.name)),
-    );
-  }
 
   /// Applies [change] to the current settings and persists the result.
   ///

@@ -5,10 +5,9 @@ import 'dart:io';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/legacy_library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_config_repo.dart';
-import 'package:copist/src/core/settings/library_setting.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/settings/settings_resolver.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -504,133 +503,128 @@ final class LibraryController implements LibrarySession {
     AppLog.enabled = enabled;
   }
 
-  /// Reads and writes the settings a library may answer for itself
-  /// (T-ML-10): the open library's file while it overrides one, the app
-  /// database otherwise.
-  Future<SettingsResolver> get _settings async =>
-      SettingsResolver(AppSettingsRepo(await appDatabase), _configRepo);
+  /// The open library's settings, or the shipped defaults while none is
+  /// open (T-ML-10).
+  ///
+  /// The settings screen only exists inside an open library, so the
+  /// defaults branch is what a startup read sees before the first open,
+  /// not a state a user can edit from.
+  Future<LibraryConfig> get _library async =>
+      await _configRepo?.config ?? LibraryConfig.defaults;
 
-  /// The settings this library answers for itself.
-  @override
-  Future<Set<LibrarySetting>> overriddenSettings() async =>
-      await (await _settings).overridden();
-
-  /// Starts answering [setting] in this library, at the app's value.
-  @override
-  Future<void> overrideHere(LibrarySetting setting) async {
-    _log.info('override ${setting.name} in $_root');
-    await (await _settings).overrideHere(setting);
-    _bump();
-  }
-
-  /// Stops answering [setting] here; the library follows the app again.
-  @override
-  Future<void> followApp(LibrarySetting setting) async {
-    _log.info('follow app for ${setting.name} in $_root');
-    await (await _settings).followApp(setting);
-    _bump();
+  /// Applies [change] to the open library's settings; a no-op with none
+  /// open, since there is nothing to write it to.
+  Future<void> _editLibrary(
+    LibraryConfig Function(LibraryConfig) change,
+  ) async {
+    await _configRepo?.update(change);
   }
 
   /// Whether the note editor shows the row-number column.
   @override
-  Future<bool> get lineNumbersEnabled async =>
-      await (await _settings).lineNumbers();
+  Future<bool> get lineNumbersEnabled async => (await _library).lineNumbers;
 
   /// Sets (and persists) the editor line-numbers toggle.
   @override
   Future<void> setLineNumbersEnabled({required bool enabled}) async {
     _log.info('editor line numbers set to $enabled');
-    await (await _settings).setLineNumbers(enabled: enabled);
+    await _editLibrary((c) => c.copyWith(lineNumbers: enabled));
   }
 
   /// Whether the note editor focuses (shows the keyboard) on note open.
   @override
   Future<bool> get editorAutofocusEnabled async =>
-      await (await _settings).editorAutofocus();
+      (await _library).editorAutofocus;
 
   /// Sets (and persists) the keyboard-on-open toggle.
   @override
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
     _log.info('editor keyboard-on-open set to $enabled');
-    await (await _settings).setEditorAutofocus(enabled: enabled);
+    await _editLibrary((c) => c.copyWith(editorAutofocus: enabled));
   }
 
   /// Whether reminder text keeps the +project/@context/#tag markers.
   @override
   Future<bool> get reminderShowTokens async =>
-      await (await _settings).reminderShowTokens();
+      (await _library).reminderShowTokens;
 
   /// Sets (and persists) the reminder-markers toggle.
   @override
   Future<void> setReminderShowTokens({required bool enabled}) async {
     _log.info('reminder markers set to $enabled');
-    await (await _settings).setReminderShowTokens(enabled: enabled);
+    await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
   }
 
   /// The preview layout mode.
+  ///
+  /// App-wide, with the split ratio: both follow the screen rather than
+  /// the library, so carrying them in the library folder would move a
+  /// tablet's layout onto a phone.
   @override
   Future<PreviewLayoutMode> get previewMode async =>
-      await (await _settings).previewMode();
+      await AppSettingsRepo(await appDatabase).previewMode();
 
   /// Sets (and persists) the preview layout mode.
   @override
   Future<void> setPreviewMode(PreviewLayoutMode mode) async {
     _log.info('preview mode set to ${mode.name}');
-    await (await _settings).setPreviewMode(mode);
+    await AppSettingsRepo(await appDatabase).setPreviewMode(mode);
   }
 
   /// The editor|preview split ratio.
   @override
-  Future<double> get splitRatio async => await (await _settings).splitRatio();
+  Future<double> get splitRatio async =>
+      await AppSettingsRepo(await appDatabase).splitRatio();
 
   /// Sets (and persists) the split ratio.
   @override
   Future<void> setSplitRatio(double ratio) async {
-    await (await _settings).setSplitRatio(ratio);
+    await AppSettingsRepo(await appDatabase).setSplitRatio(ratio);
   }
 
   /// The library tree sort order.
   @override
-  Future<TreeSort> get treeSort async => await (await _settings).treeSort();
+  Future<TreeSort> get treeSort async => (await _library).treeSort;
 
   /// Sets (and persists) the library tree sort order.
   @override
   Future<void> setTreeSort(TreeSort sort) async {
-    await (await _settings).setTreeSort(sort);
+    await _editLibrary((c) => c.copyWith(treeSort: sort));
   }
 
   /// The link format the editor's link button inserts.
   @override
-  Future<LinkType> get linkType async => await (await _settings).linkType();
+  Future<LinkType> get linkType async => (await _library).linkType;
 
   /// Sets (and persists) the link format.
   @override
   Future<void> setLinkType(LinkType type) async {
     _log.info('link type set to ${type.name}');
-    await (await _settings).setLinkType(type);
+    await _editLibrary((c) => c.copyWith(linkType: type));
   }
 
   /// The editor's indent/outdent width in spaces.
   @override
-  Future<int> get indentWidth async => await (await _settings).indentWidth();
+  Future<int> get indentWidth async => (await _library).indentWidth;
 
-  /// Sets (and persists) the indent/outdent width.
+  /// Sets (and persists) the indent/outdent width, clamped to its range.
   @override
   Future<void> setIndentWidth(int width) async {
     _log.info('indent width set to $width');
-    await (await _settings).setIndentWidth(width);
+    await _editLibrary(
+      (c) => c.copyWith(indentWidth: normalizeIndentWidth(width)),
+    );
   }
 
   /// The stored editor-toolbar layout (empty = the shipped toolbar).
   @override
-  Future<String> get editorToolbar async =>
-      await (await _settings).editorToolbar();
+  Future<String> get editorToolbar async => (await _library).editorToolbar;
 
   /// Sets (and persists) the editor-toolbar layout.
   @override
   Future<void> setEditorToolbar(String layout) async {
     _log.info('editor toolbar set to "$layout"');
-    await (await _settings).setEditorToolbar(layout);
+    await _editLibrary((c) => c.copyWith(editorToolbar: layout));
   }
 
   /// The UI language.

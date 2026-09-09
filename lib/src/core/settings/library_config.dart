@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
-    show defaultListFolder;
+    show LinkType, TreeSort, defaultListFolder;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -33,6 +33,31 @@ int normalizeHistoryVersions(Object? raw) {
   return count;
 }
 
+/// The editor's indent width in a fresh library.
+const int defaultIndentWidth = 2;
+
+/// The smallest accepted `indentWidth`.
+const int minIndentWidth = 2;
+
+/// The largest accepted `indentWidth`.
+const int maxIndentWidth = 8;
+
+/// Reads an `indentWidth` out of the settings file, into range.
+///
+/// Unlike `historyVersions` this one is clamped rather than defaulted: 1
+/// and 40 are both plausible things to type, and the nearest legal width
+/// is closer to what was meant than a jump back to 2.
+int normalizeIndentWidth(Object? raw) {
+  if (raw is! num) return defaultIndentWidth;
+  final width = raw.toInt();
+  if (width < minIndentWidth) return minIndentWidth;
+  if (width > maxIndentWidth) return maxIndentWidth;
+  return width;
+}
+
+/// The bool in [raw], or [fallback] when it is anything else.
+bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
+
 /// Sanitizes a list-folder path: trims, drops leading/trailing slashes
 /// and empty/`.`/`..` segments; an empty result is [defaultListFolder].
 String cleanListFolder(String folder) {
@@ -45,13 +70,21 @@ String cleanListFolder(String folder) {
 }
 
 /// The per-library settings, stored in the library folder itself as
-/// `<library>/.copist/settings.json` (T-ML-01).
+/// `<library>/.copist/settings.json` (T-ML-01, T-ML-10).
 ///
 /// A library is a self-describing folder: these settings travel with it,
 /// survive a sync, and can be read and fixed in any editor — the same
 /// bargain the notes get. Keys this build does not understand are preserved
 /// on read and written back untouched, so a newer build's settings survive
 /// an older one opening the library.
+///
+/// Every setting that describes how you write in *this* library is here,
+/// not only the four T-ML-02 moved: the toolbar, the editor toggles, the
+/// tree order, the reminder markers. There is no notion of a library
+/// "overriding" the app — a library simply has its own answers, seeded
+/// from the defaults the first time it is opened. What stays app-wide is
+/// what does not depend on the library at all: the language, the debug
+/// switch, and the preview layout, which follows the screen.
 @immutable
 final class LibraryConfig {
   /// Creates a library config. [extra] holds keys this build does not
@@ -61,7 +94,13 @@ final class LibraryConfig {
     required this.historyVersions,
     required this.quickNotePath,
     required this.listNoteFolder,
-    this.overrides = const {},
+    this.lineNumbers = true,
+    this.editorAutofocus = false,
+    this.reminderShowTokens = false,
+    this.treeSort = TreeSort.nameAsc,
+    this.linkType = LinkType.wikilink,
+    this.indentWidth = defaultIndentWidth,
+    this.editorToolbar = '',
     this.extra = const {},
   });
 
@@ -92,11 +131,21 @@ final class LibraryConfig {
       listNoteFolder: folder is String
           ? cleanListFolder(folder)
           : defaultListFolder,
-      overrides: switch (json['overrides']) {
-        final Map<Object?, Object?> map => {
-          for (final entry in map.entries) entry.key.toString(): entry.value,
-        },
-        _ => const {},
+      lineNumbers: _boolOr(json['lineNumbers'], true),
+      editorAutofocus: _boolOr(json['editorAutofocus'], false),
+      reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
+      treeSort: switch (json['treeSort']) {
+        'nameDesc' => TreeSort.nameDesc,
+        _ => TreeSort.nameAsc,
+      },
+      linkType: switch (json['linkType']) {
+        'markdown' => LinkType.markdown,
+        _ => LinkType.wikilink,
+      },
+      indentWidth: normalizeIndentWidth(json['indentWidth']),
+      editorToolbar: switch (json['editorToolbar']) {
+        final String layout => layout,
+        _ => '',
       },
       extra: extra,
     );
@@ -126,14 +175,27 @@ final class LibraryConfig {
   /// The folder (library-relative) holding the list notes.
   final String listNoteFolder;
 
-  /// The app-wide settings this library answers for itself (T-ML-10),
-  /// keyed by the `LibrarySetting` name; an absent key means "follow the
-  /// app".
-  ///
-  /// Kept verbatim rather than parsed into fields: a key this build does
-  /// not know is a newer build's override, and dropping it on write
-  /// would break the same bargain [extra] keeps for the rest of the file.
-  final Map<String, Object?> overrides;
+  /// Whether the editor shows the row-number column (default true).
+  final bool lineNumbers;
+
+  /// Whether opening a note raises the keyboard (default false).
+  final bool editorAutofocus;
+
+  /// Whether a reminder's notification keeps the `+project`, `@context`
+  /// and `#tag` markers (default false).
+  final bool reminderShowTokens;
+
+  /// The tree's sort order (default [TreeSort.nameAsc]).
+  final TreeSort treeSort;
+
+  /// What the editor's link button inserts (default a wikilink).
+  final LinkType linkType;
+
+  /// Spaces added per indent level (default 2).
+  final int indentWidth;
+
+  /// The arranged editor toolbar; empty means the shipped one.
+  final String editorToolbar;
 
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
@@ -145,7 +207,13 @@ final class LibraryConfig {
     String? quickNotePath,
     bool clearQuickNotePath = false,
     String? listNoteFolder,
-    Map<String, Object?>? overrides,
+    bool? lineNumbers,
+    bool? editorAutofocus,
+    bool? reminderShowTokens,
+    TreeSort? treeSort,
+    LinkType? linkType,
+    int? indentWidth,
+    String? editorToolbar,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -154,7 +222,13 @@ final class LibraryConfig {
           ? null
           : quickNotePath ?? this.quickNotePath,
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
-      overrides: overrides ?? this.overrides,
+      lineNumbers: lineNumbers ?? this.lineNumbers,
+      editorAutofocus: editorAutofocus ?? this.editorAutofocus,
+      reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
+      treeSort: treeSort ?? this.treeSort,
+      linkType: linkType ?? this.linkType,
+      indentWidth: indentWidth ?? this.indentWidth,
+      editorToolbar: editorToolbar ?? this.editorToolbar,
       extra: extra,
     );
   }
@@ -164,7 +238,13 @@ final class LibraryConfig {
     'historyVersions',
     'quickNotePath',
     'listNoteFolder',
-    'overrides',
+    'lineNumbers',
+    'editorAutofocus',
+    'reminderShowTokens',
+    'treeSort',
+    'linkType',
+    'indentWidth',
+    'editorToolbar',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -182,15 +262,16 @@ final class LibraryConfig {
       'trashEnabled': trashEnabled,
       'historyVersions': historyVersions,
       'listNoteFolder': listNoteFolder,
+      'lineNumbers': lineNumbers,
+      'editorAutofocus': editorAutofocus,
+      'reminderShowTokens': reminderShowTokens,
+      'treeSort': treeSort.name,
+      'linkType': linkType.name,
+      'indentWidth': indentWidth,
+      'editorToolbar': editorToolbar,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
-    }
-    // Omitted when empty: a library that overrides nothing — which is
-    // every library until someone asks for one — keeps a file of four
-    // lines.
-    if (overrides.isNotEmpty) {
-      json['overrides'] = overrides;
     }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
@@ -246,7 +327,13 @@ final class LibraryConfig {
         historyVersions == other.historyVersions &&
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
-        _deepEquals(overrides, other.overrides) &&
+        lineNumbers == other.lineNumbers &&
+        editorAutofocus == other.editorAutofocus &&
+        reminderShowTokens == other.reminderShowTokens &&
+        treeSort == other.treeSort &&
+        linkType == other.linkType &&
+        indentWidth == other.indentWidth &&
+        editorToolbar == other.editorToolbar &&
         _deepEquals(extra, other.extra);
   }
 

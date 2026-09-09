@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/settings/legacy_library_settings.dart';
 import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -87,7 +88,7 @@ void main() {
     expect(LibraryConfigStore(lib.path).file.existsSync(), isFalse);
   });
 
-  test('an existing settings file wins and the entry is dropped', () async {
+  test('an existing settings file wins where the two overlap', () async {
     final store = LibraryConfigStore(lib.path);
     await store.write(LibraryConfig.defaults.copyWith(historyVersions: 42));
     await park({
@@ -96,8 +97,33 @@ void main() {
 
     await LegacyLibrarySettings(db).seed(lib.path);
 
-    // The file is the newer of the two; the old row does not overwrite it.
+    // The file is the newer of the two; the parked value does not
+    // overwrite what it already answers.
     expect((await store.read()).historyVersions, 42);
+    expect(await parkedNow(), '');
+  });
+
+  test('a key the file lacks is taken from the parked entry', () async {
+    // T-ML-10: an existing library already has the four T-ML-02 settings
+    // and none of the seven, so the merge is what carries the user's
+    // editor configuration into it.
+    final store = LibraryConfigStore(lib.path);
+    await store.file.create(recursive: true);
+    store.file.writeAsStringSync('{"trashEnabled": false}');
+    await park({
+      lib.path: {
+        'trashEnabled': true,
+        'indentWidth': 6,
+        'linkType': 'markdown',
+      },
+    });
+
+    await LegacyLibrarySettings(db).seed(lib.path);
+
+    final config = await store.read();
+    expect(config.trashEnabled, isFalse);
+    expect(config.indentWidth, 6);
+    expect(config.linkType, LinkType.markdown);
     expect(await parkedNow(), '');
   });
 

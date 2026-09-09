@@ -18,27 +18,12 @@ class AppSettings extends Table {
   BoolColumn get debugLogsEnabled =>
       boolean().named('debug_logs_enabled').withDefault(const Constant(true))();
 
-  /// Whether the note editor shows the row-number column (default true).
-  BoolColumn get lineNumbers =>
-      boolean().named('line_numbers').withDefault(const Constant(true))();
-
-  /// Whether the note editor focuses (shows the keyboard) when a note
-  /// opens (default false — the keyboard appears on the first tap).
-  BoolColumn get editorAutofocus =>
-      boolean().named('editor_autofocus').withDefault(const Constant(false))();
-
-  /// Whether a reminder's notification text keeps the `+project`,
-  /// `@context` and `#tag` markers (default false).
-  ///
-  /// In the list they carry meaning next to the checkbox and the filter
-  /// chips; on a lock screen there is nothing to explain them, so they
-  /// are off by default — but someone who files by project may want them.
-  BoolColumn get reminderShowTokens => boolean()
-      .named('reminder_show_tokens')
-      .withDefault(const Constant(false))();
-
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
+  ///
+  /// App-wide, with the split ratio: unlike the editor settings T-ML-10
+  /// moved into the library folder, these two follow the screen. Carrying
+  /// them in the folder would move a tablet's layout onto a phone.
   TextColumn get previewMode =>
       text().named('preview_mode').withDefault(const Constant('auto'))();
 
@@ -46,32 +31,13 @@ class AppSettings extends Table {
   RealColumn get splitRatio =>
       real().named('split_ratio').withDefault(const Constant(0.55))();
 
-  /// The library tree sort order (T-UI-03): the sort enum `.name`
-  /// value (`nameAsc` or `nameDesc`).
-  TextColumn get treeSort =>
-      text().named('tree_sort').withDefault(const Constant('nameAsc'))();
-
-  /// The link format the editor's link button inserts: `wikilink`
-  /// (`[[…]]`) or `markdown` (`[…](…)`; default `wikilink`).
-  TextColumn get linkType =>
-      text().named('link_type').withDefault(const Constant('wikilink'))();
-
-  /// The editor's indent/outdent width in spaces (default 2).
-  IntColumn get indentWidth =>
-      integer().named('indent_width').withDefault(const Constant(2))();
-
-  /// The editor toolbar the user arranged: every button id in their
-  /// order, a `-` prefix marking a hidden one (see `ToolbarLayout`).
-  /// Empty means the shipped toolbar.
-  TextColumn get editorToolbar =>
-      text().named('editor_toolbar').withDefault(const Constant(''))();
-
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   TextColumn get language => text().withDefault(const Constant('system'))();
 
-  /// The settings the dropped `library_settings` table held, waiting to
-  /// reach the libraries they belong to (T-ML-02).
+  /// The settings waiting to reach the libraries they belong to: the
+  /// dropped `library_settings` rows (T-ML-02) and the editor settings
+  /// that used to be one value for every library (T-ML-10).
   ///
   /// A JSON object keyed by absolute library path; empty (`''`) once
   /// every one of them has been opened at least once, and on any install
@@ -123,7 +89,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -148,7 +114,9 @@ class AppDatabase extends _$AppDatabase {
   /// `legacy_library_settings`, pre-v15 databases lose the index
   /// tables (T-ML-03), which each library now keeps in its own file, and
   /// pre-v16 databases gain `known_libraries` (T-ML-04), seeded with the
-  /// library they were about to resume.
+  /// library they were about to resume, and pre-v17 databases lose the
+  /// seven editor settings that were one value for every library
+  /// (T-ML-10), after parking them for each known library to collect.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -249,8 +217,78 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(knownLibraries);
         await _seedRegistry();
       }
+      if (from < 17) {
+        await _parkEditorSettings();
+        for (final column in _librarySettingColumns) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings DROP COLUMN $column',
+          );
+        }
+      }
     },
   );
+
+  /// The columns v17 hands to the libraries (T-ML-10).
+  ///
+  /// They were one value for every library, which is wrong for settings
+  /// that describe how you write in a particular one: a library of prose
+  /// wants a toolbar without code blocks, the notes on programming next
+  /// to it want exactly those.
+  static const _librarySettingColumns = [
+    'line_numbers',
+    'editor_autofocus',
+    'reminder_show_tokens',
+    'tree_sort',
+    'link_type',
+    'indent_width',
+    'editor_toolbar',
+  ];
+
+  /// Parks the app-wide editor settings for every library the app knows,
+  /// so each collects the user's current configuration on its next open
+  /// rather than dropping to the defaults.
+  Future<void> _parkEditorSettings() async {
+    final settings = await customSelect(
+      'SELECT ${_librarySettingColumns.join(', ')} FROM app_settings',
+    ).get();
+    if (settings.isEmpty) return;
+    final row = settings.first;
+    final values = <String, Object?>{
+      'lineNumbers': row.read<int>('line_numbers') != 0,
+      'editorAutofocus': row.read<int>('editor_autofocus') != 0,
+      'reminderShowTokens': row.read<int>('reminder_show_tokens') != 0,
+      'treeSort': row.read<String>('tree_sort'),
+      'linkType': row.read<String>('link_type'),
+      'indentWidth': row.read<int>('indent_width'),
+      'editorToolbar': row.read<String>('editor_toolbar'),
+    };
+    final libraries = await select(knownLibraries).get();
+    if (libraries.isEmpty) return;
+    final parked = await _parkedNow();
+    for (final library in libraries) {
+      parked[library.path] = {...?parked[library.path], ...values};
+    }
+    await (update(appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(legacyLibrarySettings: Value(jsonEncode(parked))),
+    );
+  }
+
+  /// Whatever an earlier migration already parked, so v17 adds to it
+  /// rather than replacing it.
+  Future<Map<String, Map<String, Object?>>> _parkedNow() async {
+    final rows = await select(appSettings).get();
+    if (rows.isEmpty || rows.first.legacyLibrarySettings.isEmpty) return {};
+    final decoded = jsonDecode(rows.first.legacyLibrarySettings);
+    if (decoded is! Map) return {};
+    return {
+      for (final entry in decoded.entries)
+        if (entry.value case final Map<Object?, Object?> value)
+          entry.key.toString(): {
+            for (final field in value.entries)
+              field.key.toString(): field.value,
+          },
+    };
+  }
 
   /// Puts the library the app was already resuming into the new registry,
   /// so an upgrade lands on a home screen that lists it rather than an

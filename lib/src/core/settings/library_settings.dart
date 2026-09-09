@@ -97,50 +97,6 @@ final class AppSettingsRepo {
     );
   }
 
-  /// Whether the note editor shows the row-number column (default true).
-  Future<bool> lineNumbersEnabled() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty || rows.first.lineNumbers;
-  }
-
-  /// Persists the line-numbers toggle.
-  Future<void> setLineNumbersEnabled({required bool enabled}) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(lineNumbers: Value(enabled)),
-    );
-  }
-
-  /// Whether the note editor focuses (shows the keyboard) on note open
-  /// (default false).
-  Future<bool> editorAutofocusEnabled() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isNotEmpty && rows.first.editorAutofocus;
-  }
-
-  /// Persists the keyboard-on-open toggle.
-  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(editorAutofocus: Value(enabled)),
-    );
-  }
-
-  /// Whether a reminder's notification text keeps the `+project`,
-  /// `@context` and `#tag` markers (default false).
-  Future<bool> reminderShowTokens() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isNotEmpty && rows.first.reminderShowTokens;
-  }
-
-  /// Persists the reminder-markers toggle.
-  Future<void> setReminderShowTokens({required bool enabled}) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(reminderShowTokens: Value(enabled)),
-    );
-  }
-
   /// The preview layout mode (default [PreviewLayoutMode.auto]).
   Future<PreviewLayoutMode> previewMode() async {
     final rows = await _db.select(_db.appSettings).get();
@@ -176,79 +132,6 @@ final class AppSettingsRepo {
         : ratio;
     await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
       AppSettingsCompanion(splitRatio: Value(clamped)),
-    );
-  }
-
-  /// The library tree sort order (default [TreeSort.nameAsc]).
-  Future<TreeSort> treeSort() async {
-    final rows = await _db.select(_db.appSettings).get();
-    if (rows.isEmpty) return TreeSort.nameAsc;
-    return switch (rows.first.treeSort) {
-      'nameDesc' => TreeSort.nameDesc,
-      _ => TreeSort.nameAsc,
-    };
-  }
-
-  /// Persists the library tree sort order.
-  Future<void> setTreeSort(TreeSort sort) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(treeSort: Value(sort.name)),
-    );
-  }
-
-  /// The link format the editor's link button inserts
-  /// (default [LinkType.wikilink]).
-  Future<LinkType> linkType() async {
-    final rows = await _db.select(_db.appSettings).get();
-    if (rows.isEmpty) return LinkType.wikilink;
-    return switch (rows.first.linkType) {
-      'markdown' => LinkType.markdown,
-      _ => LinkType.wikilink,
-    };
-  }
-
-  /// Persists the link format.
-  Future<void> setLinkType(LinkType type) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(linkType: Value(type.name)),
-    );
-  }
-
-  /// The editor's indent/outdent width in spaces (default 2).
-  Future<int> indentWidth() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty ? 2 : rows.first.indentWidth;
-  }
-
-  /// Persists the indent/outdent width (clamped to 2..8).
-  Future<void> setIndentWidth(int width) async {
-    await _ensureRow();
-    final clamped = width < 2
-        ? 2
-        : width > 8
-        ? 8
-        : width;
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(indentWidth: Value(clamped)),
-    );
-  }
-
-  /// The stored editor-toolbar layout (empty = the shipped toolbar).
-  ///
-  /// Kept as the raw stored string: parsing it is the editor's business,
-  /// so the settings layer does not depend on the toolbar catalogue.
-  Future<String> editorToolbar() async {
-    final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty ? '' : rows.first.editorToolbar;
-  }
-
-  /// Persists the editor-toolbar layout.
-  Future<void> setEditorToolbar(String layout) async {
-    await _ensureRow();
-    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
-      AppSettingsCompanion(editorToolbar: Value(layout)),
     );
   }
 

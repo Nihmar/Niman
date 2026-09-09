@@ -44,50 +44,6 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _lineNumbersMeta = const VerificationMeta(
-    'lineNumbers',
-  );
-  @override
-  late final GeneratedColumn<bool> lineNumbers = GeneratedColumn<bool>(
-    'line_numbers',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("line_numbers" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _editorAutofocusMeta = const VerificationMeta(
-    'editorAutofocus',
-  );
-  @override
-  late final GeneratedColumn<bool> editorAutofocus = GeneratedColumn<bool>(
-    'editor_autofocus',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("editor_autofocus" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _reminderShowTokensMeta =
-      const VerificationMeta('reminderShowTokens');
-  @override
-  late final GeneratedColumn<bool> reminderShowTokens = GeneratedColumn<bool>(
-    'reminder_show_tokens',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("reminder_show_tokens" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
   static const VerificationMeta _previewModeMeta = const VerificationMeta(
     'previewMode',
   );
@@ -111,54 +67,6 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.double,
     requiredDuringInsert: false,
     defaultValue: const Constant(0.55),
-  );
-  static const VerificationMeta _treeSortMeta = const VerificationMeta(
-    'treeSort',
-  );
-  @override
-  late final GeneratedColumn<String> treeSort = GeneratedColumn<String>(
-    'tree_sort',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('nameAsc'),
-  );
-  static const VerificationMeta _linkTypeMeta = const VerificationMeta(
-    'linkType',
-  );
-  @override
-  late final GeneratedColumn<String> linkType = GeneratedColumn<String>(
-    'link_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('wikilink'),
-  );
-  static const VerificationMeta _indentWidthMeta = const VerificationMeta(
-    'indentWidth',
-  );
-  @override
-  late final GeneratedColumn<int> indentWidth = GeneratedColumn<int>(
-    'indent_width',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(2),
-  );
-  static const VerificationMeta _editorToolbarMeta = const VerificationMeta(
-    'editorToolbar',
-  );
-  @override
-  late final GeneratedColumn<String> editorToolbar = GeneratedColumn<String>(
-    'editor_toolbar',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
   );
   static const VerificationMeta _languageMeta = const VerificationMeta(
     'language',
@@ -189,15 +97,8 @@ class $AppSettingsTable extends AppSettings
     id,
     libraryPath,
     debugLogsEnabled,
-    lineNumbers,
-    editorAutofocus,
-    reminderShowTokens,
     previewMode,
     splitRatio,
-    treeSort,
-    linkType,
-    indentWidth,
-    editorToolbar,
     language,
     legacyLibrarySettings,
   ];
@@ -234,33 +135,6 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
-    if (data.containsKey('line_numbers')) {
-      context.handle(
-        _lineNumbersMeta,
-        lineNumbers.isAcceptableOrUnknown(
-          data['line_numbers']!,
-          _lineNumbersMeta,
-        ),
-      );
-    }
-    if (data.containsKey('editor_autofocus')) {
-      context.handle(
-        _editorAutofocusMeta,
-        editorAutofocus.isAcceptableOrUnknown(
-          data['editor_autofocus']!,
-          _editorAutofocusMeta,
-        ),
-      );
-    }
-    if (data.containsKey('reminder_show_tokens')) {
-      context.handle(
-        _reminderShowTokensMeta,
-        reminderShowTokens.isAcceptableOrUnknown(
-          data['reminder_show_tokens']!,
-          _reminderShowTokensMeta,
-        ),
-      );
-    }
     if (data.containsKey('preview_mode')) {
       context.handle(
         _previewModeMeta,
@@ -274,36 +148,6 @@ class $AppSettingsTable extends AppSettings
       context.handle(
         _splitRatioMeta,
         splitRatio.isAcceptableOrUnknown(data['split_ratio']!, _splitRatioMeta),
-      );
-    }
-    if (data.containsKey('tree_sort')) {
-      context.handle(
-        _treeSortMeta,
-        treeSort.isAcceptableOrUnknown(data['tree_sort']!, _treeSortMeta),
-      );
-    }
-    if (data.containsKey('link_type')) {
-      context.handle(
-        _linkTypeMeta,
-        linkType.isAcceptableOrUnknown(data['link_type']!, _linkTypeMeta),
-      );
-    }
-    if (data.containsKey('indent_width')) {
-      context.handle(
-        _indentWidthMeta,
-        indentWidth.isAcceptableOrUnknown(
-          data['indent_width']!,
-          _indentWidthMeta,
-        ),
-      );
-    }
-    if (data.containsKey('editor_toolbar')) {
-      context.handle(
-        _editorToolbarMeta,
-        editorToolbar.isAcceptableOrUnknown(
-          data['editor_toolbar']!,
-          _editorToolbarMeta,
-        ),
       );
     }
     if (data.containsKey('language')) {
@@ -342,18 +186,6 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}debug_logs_enabled'],
       )!,
-      lineNumbers: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}line_numbers'],
-      )!,
-      editorAutofocus: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}editor_autofocus'],
-      )!,
-      reminderShowTokens: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}reminder_show_tokens'],
-      )!,
       previewMode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}preview_mode'],
@@ -361,22 +193,6 @@ class $AppSettingsTable extends AppSettings
       splitRatio: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}split_ratio'],
-      )!,
-      treeSort: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}tree_sort'],
-      )!,
-      linkType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}link_type'],
-      )!,
-      indentWidth: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}indent_width'],
-      )!,
-      editorToolbar: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}editor_toolbar'],
       )!,
       language: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -406,50 +222,24 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// Whether the in-app debug log buffer records events (default true).
   final bool debugLogsEnabled;
 
-  /// Whether the note editor shows the row-number column (default true).
-  final bool lineNumbers;
-
-  /// Whether the note editor focuses (shows the keyboard) when a note
-  /// opens (default false — the keyboard appears on the first tap).
-  final bool editorAutofocus;
-
-  /// Whether a reminder's notification text keeps the `+project`,
-  /// `@context` and `#tag` markers (default false).
-  ///
-  /// In the list they carry meaning next to the checkbox and the filter
-  /// chips; on a lock screen there is nothing to explain them, so they
-  /// are off by default — but someone who files by project may want them.
-  final bool reminderShowTokens;
-
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
+  ///
+  /// App-wide, with the split ratio: unlike the editor settings T-ML-10
+  /// moved into the library folder, these two follow the screen. Carrying
+  /// them in the folder would move a tablet's layout onto a phone.
   final String previewMode;
 
   /// The editor|preview split fraction (0..1; default 0.55).
   final double splitRatio;
 
-  /// The library tree sort order (T-UI-03): the sort enum `.name`
-  /// value (`nameAsc` or `nameDesc`).
-  final String treeSort;
-
-  /// The link format the editor's link button inserts: `wikilink`
-  /// (`[[…]]`) or `markdown` (`[…](…)`; default `wikilink`).
-  final String linkType;
-
-  /// The editor's indent/outdent width in spaces (default 2).
-  final int indentWidth;
-
-  /// The editor toolbar the user arranged: every button id in their
-  /// order, a `-` prefix marking a hidden one (see `ToolbarLayout`).
-  /// Empty means the shipped toolbar.
-  final String editorToolbar;
-
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   final String language;
 
-  /// The settings the dropped `library_settings` table held, waiting to
-  /// reach the libraries they belong to (T-ML-02).
+  /// The settings waiting to reach the libraries they belong to: the
+  /// dropped `library_settings` rows (T-ML-02) and the editor settings
+  /// that used to be one value for every library (T-ML-10).
   ///
   /// A JSON object keyed by absolute library path; empty (`''`) once
   /// every one of them has been opened at least once, and on any install
@@ -463,15 +253,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.id,
     this.libraryPath,
     required this.debugLogsEnabled,
-    required this.lineNumbers,
-    required this.editorAutofocus,
-    required this.reminderShowTokens,
     required this.previewMode,
     required this.splitRatio,
-    required this.treeSort,
-    required this.linkType,
-    required this.indentWidth,
-    required this.editorToolbar,
     required this.language,
     required this.legacyLibrarySettings,
   });
@@ -483,15 +266,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['library_path'] = Variable<String>(libraryPath);
     }
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
-    map['line_numbers'] = Variable<bool>(lineNumbers);
-    map['editor_autofocus'] = Variable<bool>(editorAutofocus);
-    map['reminder_show_tokens'] = Variable<bool>(reminderShowTokens);
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
-    map['tree_sort'] = Variable<String>(treeSort);
-    map['link_type'] = Variable<String>(linkType);
-    map['indent_width'] = Variable<int>(indentWidth);
-    map['editor_toolbar'] = Variable<String>(editorToolbar);
     map['language'] = Variable<String>(language);
     map['legacy_library_settings'] = Variable<String>(legacyLibrarySettings);
     return map;
@@ -504,15 +280,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? const Value.absent()
           : Value(libraryPath),
       debugLogsEnabled: Value(debugLogsEnabled),
-      lineNumbers: Value(lineNumbers),
-      editorAutofocus: Value(editorAutofocus),
-      reminderShowTokens: Value(reminderShowTokens),
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
-      treeSort: Value(treeSort),
-      linkType: Value(linkType),
-      indentWidth: Value(indentWidth),
-      editorToolbar: Value(editorToolbar),
       language: Value(language),
       legacyLibrarySettings: Value(legacyLibrarySettings),
     );
@@ -527,15 +296,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: serializer.fromJson<int>(json['id']),
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
-      lineNumbers: serializer.fromJson<bool>(json['lineNumbers']),
-      editorAutofocus: serializer.fromJson<bool>(json['editorAutofocus']),
-      reminderShowTokens: serializer.fromJson<bool>(json['reminderShowTokens']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
-      treeSort: serializer.fromJson<String>(json['treeSort']),
-      linkType: serializer.fromJson<String>(json['linkType']),
-      indentWidth: serializer.fromJson<int>(json['indentWidth']),
-      editorToolbar: serializer.fromJson<String>(json['editorToolbar']),
       language: serializer.fromJson<String>(json['language']),
       legacyLibrarySettings: serializer.fromJson<String>(
         json['legacyLibrarySettings'],
@@ -549,15 +311,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'id': serializer.toJson<int>(id),
       'libraryPath': serializer.toJson<String?>(libraryPath),
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
-      'lineNumbers': serializer.toJson<bool>(lineNumbers),
-      'editorAutofocus': serializer.toJson<bool>(editorAutofocus),
-      'reminderShowTokens': serializer.toJson<bool>(reminderShowTokens),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
-      'treeSort': serializer.toJson<String>(treeSort),
-      'linkType': serializer.toJson<String>(linkType),
-      'indentWidth': serializer.toJson<int>(indentWidth),
-      'editorToolbar': serializer.toJson<String>(editorToolbar),
       'language': serializer.toJson<String>(language),
       'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
     };
@@ -567,30 +322,16 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? id,
     Value<String?> libraryPath = const Value.absent(),
     bool? debugLogsEnabled,
-    bool? lineNumbers,
-    bool? editorAutofocus,
-    bool? reminderShowTokens,
     String? previewMode,
     double? splitRatio,
-    String? treeSort,
-    String? linkType,
-    int? indentWidth,
-    String? editorToolbar,
     String? language,
     String? legacyLibrarySettings,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
-    lineNumbers: lineNumbers ?? this.lineNumbers,
-    editorAutofocus: editorAutofocus ?? this.editorAutofocus,
-    reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
-    treeSort: treeSort ?? this.treeSort,
-    linkType: linkType ?? this.linkType,
-    indentWidth: indentWidth ?? this.indentWidth,
-    editorToolbar: editorToolbar ?? this.editorToolbar,
     language: language ?? this.language,
     legacyLibrarySettings: legacyLibrarySettings ?? this.legacyLibrarySettings,
   );
@@ -603,29 +344,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: data.debugLogsEnabled.present
           ? data.debugLogsEnabled.value
           : this.debugLogsEnabled,
-      lineNumbers: data.lineNumbers.present
-          ? data.lineNumbers.value
-          : this.lineNumbers,
-      editorAutofocus: data.editorAutofocus.present
-          ? data.editorAutofocus.value
-          : this.editorAutofocus,
-      reminderShowTokens: data.reminderShowTokens.present
-          ? data.reminderShowTokens.value
-          : this.reminderShowTokens,
       previewMode: data.previewMode.present
           ? data.previewMode.value
           : this.previewMode,
       splitRatio: data.splitRatio.present
           ? data.splitRatio.value
           : this.splitRatio,
-      treeSort: data.treeSort.present ? data.treeSort.value : this.treeSort,
-      linkType: data.linkType.present ? data.linkType.value : this.linkType,
-      indentWidth: data.indentWidth.present
-          ? data.indentWidth.value
-          : this.indentWidth,
-      editorToolbar: data.editorToolbar.present
-          ? data.editorToolbar.value
-          : this.editorToolbar,
       language: data.language.present ? data.language.value : this.language,
       legacyLibrarySettings: data.legacyLibrarySettings.present
           ? data.legacyLibrarySettings.value
@@ -639,15 +363,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
-          ..write('lineNumbers: $lineNumbers, ')
-          ..write('editorAutofocus: $editorAutofocus, ')
-          ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
-          ..write('treeSort: $treeSort, ')
-          ..write('linkType: $linkType, ')
-          ..write('indentWidth: $indentWidth, ')
-          ..write('editorToolbar: $editorToolbar, ')
           ..write('language: $language, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
@@ -659,15 +376,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     id,
     libraryPath,
     debugLogsEnabled,
-    lineNumbers,
-    editorAutofocus,
-    reminderShowTokens,
     previewMode,
     splitRatio,
-    treeSort,
-    linkType,
-    indentWidth,
-    editorToolbar,
     language,
     legacyLibrarySettings,
   );
@@ -678,15 +388,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.id == this.id &&
           other.libraryPath == this.libraryPath &&
           other.debugLogsEnabled == this.debugLogsEnabled &&
-          other.lineNumbers == this.lineNumbers &&
-          other.editorAutofocus == this.editorAutofocus &&
-          other.reminderShowTokens == this.reminderShowTokens &&
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
-          other.treeSort == this.treeSort &&
-          other.linkType == this.linkType &&
-          other.indentWidth == this.indentWidth &&
-          other.editorToolbar == this.editorToolbar &&
           other.language == this.language &&
           other.legacyLibrarySettings == this.legacyLibrarySettings);
 }
@@ -695,30 +398,16 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String?> libraryPath;
   final Value<bool> debugLogsEnabled;
-  final Value<bool> lineNumbers;
-  final Value<bool> editorAutofocus;
-  final Value<bool> reminderShowTokens;
   final Value<String> previewMode;
   final Value<double> splitRatio;
-  final Value<String> treeSort;
-  final Value<String> linkType;
-  final Value<int> indentWidth;
-  final Value<String> editorToolbar;
   final Value<String> language;
   final Value<String> legacyLibrarySettings;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
-    this.lineNumbers = const Value.absent(),
-    this.editorAutofocus = const Value.absent(),
-    this.reminderShowTokens = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
-    this.treeSort = const Value.absent(),
-    this.linkType = const Value.absent(),
-    this.indentWidth = const Value.absent(),
-    this.editorToolbar = const Value.absent(),
     this.language = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
   });
@@ -726,15 +415,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
-    this.lineNumbers = const Value.absent(),
-    this.editorAutofocus = const Value.absent(),
-    this.reminderShowTokens = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
-    this.treeSort = const Value.absent(),
-    this.linkType = const Value.absent(),
-    this.indentWidth = const Value.absent(),
-    this.editorToolbar = const Value.absent(),
     this.language = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
   });
@@ -742,15 +424,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<int>? id,
     Expression<String>? libraryPath,
     Expression<bool>? debugLogsEnabled,
-    Expression<bool>? lineNumbers,
-    Expression<bool>? editorAutofocus,
-    Expression<bool>? reminderShowTokens,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
-    Expression<String>? treeSort,
-    Expression<String>? linkType,
-    Expression<int>? indentWidth,
-    Expression<String>? editorToolbar,
     Expression<String>? language,
     Expression<String>? legacyLibrarySettings,
   }) {
@@ -758,16 +433,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (id != null) 'id': id,
       if (libraryPath != null) 'library_path': libraryPath,
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
-      if (lineNumbers != null) 'line_numbers': lineNumbers,
-      if (editorAutofocus != null) 'editor_autofocus': editorAutofocus,
-      if (reminderShowTokens != null)
-        'reminder_show_tokens': reminderShowTokens,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
-      if (treeSort != null) 'tree_sort': treeSort,
-      if (linkType != null) 'link_type': linkType,
-      if (indentWidth != null) 'indent_width': indentWidth,
-      if (editorToolbar != null) 'editor_toolbar': editorToolbar,
       if (language != null) 'language': language,
       if (legacyLibrarySettings != null)
         'legacy_library_settings': legacyLibrarySettings,
@@ -778,15 +445,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? id,
     Value<String?>? libraryPath,
     Value<bool>? debugLogsEnabled,
-    Value<bool>? lineNumbers,
-    Value<bool>? editorAutofocus,
-    Value<bool>? reminderShowTokens,
     Value<String>? previewMode,
     Value<double>? splitRatio,
-    Value<String>? treeSort,
-    Value<String>? linkType,
-    Value<int>? indentWidth,
-    Value<String>? editorToolbar,
     Value<String>? language,
     Value<String>? legacyLibrarySettings,
   }) {
@@ -794,15 +454,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       id: id ?? this.id,
       libraryPath: libraryPath ?? this.libraryPath,
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
-      lineNumbers: lineNumbers ?? this.lineNumbers,
-      editorAutofocus: editorAutofocus ?? this.editorAutofocus,
-      reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
-      treeSort: treeSort ?? this.treeSort,
-      linkType: linkType ?? this.linkType,
-      indentWidth: indentWidth ?? this.indentWidth,
-      editorToolbar: editorToolbar ?? this.editorToolbar,
       language: language ?? this.language,
       legacyLibrarySettings:
           legacyLibrarySettings ?? this.legacyLibrarySettings,
@@ -821,32 +474,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (debugLogsEnabled.present) {
       map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled.value);
     }
-    if (lineNumbers.present) {
-      map['line_numbers'] = Variable<bool>(lineNumbers.value);
-    }
-    if (editorAutofocus.present) {
-      map['editor_autofocus'] = Variable<bool>(editorAutofocus.value);
-    }
-    if (reminderShowTokens.present) {
-      map['reminder_show_tokens'] = Variable<bool>(reminderShowTokens.value);
-    }
     if (previewMode.present) {
       map['preview_mode'] = Variable<String>(previewMode.value);
     }
     if (splitRatio.present) {
       map['split_ratio'] = Variable<double>(splitRatio.value);
-    }
-    if (treeSort.present) {
-      map['tree_sort'] = Variable<String>(treeSort.value);
-    }
-    if (linkType.present) {
-      map['link_type'] = Variable<String>(linkType.value);
-    }
-    if (indentWidth.present) {
-      map['indent_width'] = Variable<int>(indentWidth.value);
-    }
-    if (editorToolbar.present) {
-      map['editor_toolbar'] = Variable<String>(editorToolbar.value);
     }
     if (language.present) {
       map['language'] = Variable<String>(language.value);
@@ -865,15 +497,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
-          ..write('lineNumbers: $lineNumbers, ')
-          ..write('editorAutofocus: $editorAutofocus, ')
-          ..write('reminderShowTokens: $reminderShowTokens, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
-          ..write('treeSort: $treeSort, ')
-          ..write('linkType: $linkType, ')
-          ..write('indentWidth: $indentWidth, ')
-          ..write('editorToolbar: $editorToolbar, ')
           ..write('language: $language, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
@@ -1170,15 +795,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
-      Value<bool> lineNumbers,
-      Value<bool> editorAutofocus,
-      Value<bool> reminderShowTokens,
       Value<String> previewMode,
       Value<double> splitRatio,
-      Value<String> treeSort,
-      Value<String> linkType,
-      Value<int> indentWidth,
-      Value<String> editorToolbar,
       Value<String> language,
       Value<String> legacyLibrarySettings,
     });
@@ -1187,15 +805,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
-      Value<bool> lineNumbers,
-      Value<bool> editorAutofocus,
-      Value<bool> reminderShowTokens,
       Value<String> previewMode,
       Value<double> splitRatio,
-      Value<String> treeSort,
-      Value<String> linkType,
-      Value<int> indentWidth,
-      Value<String> editorToolbar,
       Value<String> language,
       Value<String> legacyLibrarySettings,
     });
@@ -1224,21 +835,6 @@ class $$AppSettingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get lineNumbers => $composableBuilder(
-    column: $table.lineNumbers,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get editorAutofocus => $composableBuilder(
-    column: $table.editorAutofocus,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get reminderShowTokens => $composableBuilder(
-    column: $table.reminderShowTokens,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get previewMode => $composableBuilder(
     column: $table.previewMode,
     builder: (column) => ColumnFilters(column),
@@ -1246,26 +842,6 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<double> get splitRatio => $composableBuilder(
     column: $table.splitRatio,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get treeSort => $composableBuilder(
-    column: $table.treeSort,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get linkType => $composableBuilder(
-    column: $table.linkType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get indentWidth => $composableBuilder(
-    column: $table.indentWidth,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get editorToolbar => $composableBuilder(
-    column: $table.editorToolbar,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1304,21 +880,6 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get lineNumbers => $composableBuilder(
-    column: $table.lineNumbers,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get editorAutofocus => $composableBuilder(
-    column: $table.editorAutofocus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get reminderShowTokens => $composableBuilder(
-    column: $table.reminderShowTokens,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get previewMode => $composableBuilder(
     column: $table.previewMode,
     builder: (column) => ColumnOrderings(column),
@@ -1326,26 +887,6 @@ class $$AppSettingsTableOrderingComposer
 
   ColumnOrderings<double> get splitRatio => $composableBuilder(
     column: $table.splitRatio,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get treeSort => $composableBuilder(
-    column: $table.treeSort,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get linkType => $composableBuilder(
-    column: $table.linkType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get indentWidth => $composableBuilder(
-    column: $table.indentWidth,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get editorToolbar => $composableBuilder(
-    column: $table.editorToolbar,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1382,21 +923,6 @@ class $$AppSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get lineNumbers => $composableBuilder(
-    column: $table.lineNumbers,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get editorAutofocus => $composableBuilder(
-    column: $table.editorAutofocus,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get reminderShowTokens => $composableBuilder(
-    column: $table.reminderShowTokens,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get previewMode => $composableBuilder(
     column: $table.previewMode,
     builder: (column) => column,
@@ -1404,22 +930,6 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<double> get splitRatio => $composableBuilder(
     column: $table.splitRatio,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get treeSort =>
-      $composableBuilder(column: $table.treeSort, builder: (column) => column);
-
-  GeneratedColumn<String> get linkType =>
-      $composableBuilder(column: $table.linkType, builder: (column) => column);
-
-  GeneratedColumn<int> get indentWidth => $composableBuilder(
-    column: $table.indentWidth,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get editorToolbar => $composableBuilder(
-    column: $table.editorToolbar,
     builder: (column) => column,
   );
 
@@ -1466,30 +976,16 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
-                Value<bool> lineNumbers = const Value.absent(),
-                Value<bool> editorAutofocus = const Value.absent(),
-                Value<bool> reminderShowTokens = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
-                Value<String> treeSort = const Value.absent(),
-                Value<String> linkType = const Value.absent(),
-                Value<int> indentWidth = const Value.absent(),
-                Value<String> editorToolbar = const Value.absent(),
                 Value<String> language = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
-                lineNumbers: lineNumbers,
-                editorAutofocus: editorAutofocus,
-                reminderShowTokens: reminderShowTokens,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
-                treeSort: treeSort,
-                linkType: linkType,
-                indentWidth: indentWidth,
-                editorToolbar: editorToolbar,
                 language: language,
                 legacyLibrarySettings: legacyLibrarySettings,
               ),
@@ -1498,30 +994,16 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
-                Value<bool> lineNumbers = const Value.absent(),
-                Value<bool> editorAutofocus = const Value.absent(),
-                Value<bool> reminderShowTokens = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
-                Value<String> treeSort = const Value.absent(),
-                Value<String> linkType = const Value.absent(),
-                Value<int> indentWidth = const Value.absent(),
-                Value<String> editorToolbar = const Value.absent(),
                 Value<String> language = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
-                lineNumbers: lineNumbers,
-                editorAutofocus: editorAutofocus,
-                reminderShowTokens: reminderShowTokens,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
-                treeSort: treeSort,
-                linkType: linkType,
-                indentWidth: indentWidth,
-                editorToolbar: editorToolbar,
                 language: language,
                 legacyLibrarySettings: legacyLibrarySettings,
               ),

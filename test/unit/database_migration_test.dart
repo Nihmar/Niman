@@ -50,6 +50,18 @@ const List<String> _createIndexTables = [
   _createNotesFts,
 ];
 
+/// The seven editor settings as `app_settings` columns, before T-ML-10
+/// moved them into each library's own file.
+const List<String> _editorSettingColumns = [
+  'line_numbers BOOLEAN NOT NULL DEFAULT 1',
+  'editor_autofocus BOOLEAN NOT NULL DEFAULT 0',
+  'reminder_show_tokens BOOLEAN NOT NULL DEFAULT 0',
+  "tree_sort TEXT NOT NULL DEFAULT 'nameAsc'",
+  "link_type TEXT NOT NULL DEFAULT 'wikilink'",
+  'indent_width INTEGER NOT NULL DEFAULT 2',
+  "editor_toolbar TEXT NOT NULL DEFAULT ''",
+];
+
 /// The names of those tables, for asserting they are gone.
 const List<String> _indexTableNames = [
   'notes',
@@ -71,6 +83,12 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 17) {
+    // The seven settings v17 hands to the libraries were columns here.
+    for (final column in _editorSettingColumns) {
+      await db.customStatement('ALTER TABLE app_settings ADD COLUMN $column');
+    }
+  }
   if (version < 16) await db.customStatement('DROP TABLE known_libraries');
   if (version < 15) {
     for (final statement in _createIndexTables) {
@@ -150,8 +168,6 @@ void main() {
       expect(row.id, 1);
       expect(row.libraryPath, '/old/root');
       expect(row.debugLogsEnabled, true);
-      expect(row.lineNumbers, true);
-      expect(row.editorAutofocus, false);
       expect(row.previewMode, 'auto');
       expect(row.splitRatio, 0.55);
       await db.close();
@@ -174,8 +190,6 @@ void main() {
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.id, 1);
       expect(row.libraryPath, '/old/root');
-      expect(row.lineNumbers, true);
-      expect(row.editorAutofocus, false);
       expect(row.debugLogsEnabled, true);
       await db.close();
     },
@@ -197,8 +211,6 @@ void main() {
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.id, 1);
       expect(row.libraryPath, '/old/root');
-      expect(row.lineNumbers, true);
-      expect(row.editorAutofocus, false);
       expect(row.previewMode, 'auto');
       expect(row.splitRatio, 0.55);
       await db.close();
@@ -262,7 +274,6 @@ void main() {
     final row = (await db.select(db.appSettings).get()).single;
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
-    expect(row.treeSort, 'nameAsc');
     await db.close();
   });
 
@@ -284,7 +295,6 @@ void main() {
     final row = (await db.select(db.appSettings).get()).single;
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
-    expect(row.reminderShowTokens, false);
     expect(row.language, 'system');
     await db.close();
   });
@@ -305,10 +315,8 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
-      expect(row.treeSort, 'nameDesc');
       // Off by default: an upgrade must not start putting +project and
       // @context into notifications that never had them.
-      expect(row.reminderShowTokens, false);
       await db.close();
     },
   );
@@ -329,8 +337,6 @@ void main() {
     expect(row.id, 1);
     expect(row.libraryPath, '/old/root');
     // Wikilink by default; a 2-space indent (the pre-M5 default).
-    expect(row.linkType, 'wikilink');
-    expect(row.indentWidth, 2);
     await db.close();
   });
 
@@ -372,9 +378,7 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
-      expect(row.indentWidth, 4);
       // Empty is "the shipped toolbar"; nothing to migrate into it.
-      expect(row.editorToolbar, '');
       await db.close();
     },
   );
@@ -395,10 +399,8 @@ void main() {
       final db = AppDatabase(NativeDatabase(dbFile));
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
-      expect(row.editorToolbar, 'link,-bold');
       // An existing library follows the OS, as it did before the setting
       // existed.
-      expect(row.language, 'system');
       await db.close();
     },
   );
@@ -530,7 +532,6 @@ void main() {
       final row = (await db.select(db.appSettings).get()).single;
       expect(row.libraryPath, '/old/root');
       expect(row.language, 'it');
-      expect(row.editorToolbar, 'link,-bold');
       await db.close();
     });
 
@@ -591,6 +592,100 @@ void main() {
 
       final db = AppDatabase(NativeDatabase(dbFile));
       expect(await db.select(db.knownLibraries).get(), isEmpty);
+      await db.close();
+    });
+  });
+
+  group('v16 → v17: the editor settings go to the libraries', () {
+    test('every known library is handed the current values', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 16);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, line_numbers, '
+          'indent_width, link_type, editor_toolbar) '
+          "VALUES (1, '/lib/Work', 0, 6, 'markdown', 'link,-bold')",
+        );
+        for (final path in ['/lib/Work', '/lib/Personal']) {
+          await db.customStatement(
+            'INSERT INTO known_libraries (path, name, last_opened) '
+            "VALUES ('$path', 'x', 0)",
+          );
+        }
+        await db.close();
+      }
+
+      // They were one value for every library; each one now gets its own
+      // copy, so nobody's configuration is lost by the move.
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final parked = await _parked(db);
+      expect(parked.keys, unorderedEquals(['/lib/Work', '/lib/Personal']));
+      for (final entry in parked.values) {
+        expect(entry['lineNumbers'], false);
+        expect(entry['indentWidth'], 6);
+        expect(entry['linkType'], 'markdown');
+        expect(entry['editorToolbar'], 'link,-bold');
+      }
+      await db.close();
+    });
+
+    test('the columns are gone from the table', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 16);
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final columns = await db
+          .customSelect("SELECT name FROM pragma_table_info('app_settings')")
+          .get();
+      final names = columns.map((r) => r.read<String>('name'));
+      expect(names, isNot(contains('line_numbers')));
+      expect(names, isNot(contains('editor_toolbar')));
+      // The two that follow the screen rather than the library stay.
+      expect(names, contains('preview_mode'));
+      expect(names, contains('split_ratio'));
+      await db.close();
+    });
+
+    test('an install with no library parks nothing', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 16);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) VALUES (1, NULL)',
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(await _parked(db), isEmpty);
+      await db.close();
+    });
+
+    test('what an earlier migration parked is kept', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 13);
+        await db.customStatement(
+          'INSERT INTO library_settings (path, trash_enabled, '
+          "history_versions) VALUES ('/lib/Work', 0, 3)",
+        );
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, indent_width) '
+          "VALUES (1, '/lib/Work', 6)",
+        );
+        await db.close();
+      }
+
+      // v14 parks the trash toggle, v16 registers the library, v17 adds
+      // the editor settings to the same entry rather than replacing it.
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final entry = (await _parked(db))['/lib/Work']!;
+      expect(entry['trashEnabled'], false);
+      expect(entry['historyVersions'], 3);
+      expect(entry['indentWidth'], 6);
       await db.close();
     });
   });

@@ -16,9 +16,14 @@ import 'package:drift/drift.dart';
 /// after which the library's own `.copist/settings.json` is the only
 /// source and the parked entry is gone.
 ///
-/// A library that already has a settings file keeps it: the file is
-/// newer than the table by construction, so the parked entry is
-/// discarded rather than applied.
+/// Two migrations use it now. T-ML-02 moved four settings out of a
+/// table; T-ML-10 moved seven more out of `app_settings`, where they had
+/// been one value for every library. Both park what they had and let the
+/// first open of each library collect it.
+///
+/// A library that already has a settings file keeps every key it has and
+/// gains only the ones it lacks. The file is newer than whatever was
+/// parked, so it wins where the two overlap.
 final class LegacyLibrarySettings {
   /// Creates the migrator over the app database.
   new(this._db);
@@ -30,7 +35,8 @@ final class LegacyLibrarySettings {
   /// Writes the parked settings for [libraryPath] into its
   /// `.copist/settings.json`, then forgets them.
   ///
-  /// Does nothing when there is nothing parked for that library, and
+  /// Keys the file already has are left alone: it is the newer of the
+  /// two. Does nothing when there is nothing parked for that library, and
   /// leaves the entry parked when the write fails, so an unwritable
   /// library is retried on its next open rather than losing its settings.
   Future<void> seed(String libraryPath) async {
@@ -39,19 +45,34 @@ final class LegacyLibrarySettings {
     if (entry == null) return;
 
     final store = LibraryConfigStore(libraryPath);
-    if (store.file.existsSync()) {
-      _log.info('legacy settings: $libraryPath already has a file, dropping');
-      await _save(parked..remove(libraryPath));
-      return;
-    }
+    final merged = <String, Object?>{...entry, ..._rawFile(store)};
     try {
-      await store.write(LibraryConfig.fromJsonMap(entry));
+      await store.write(LibraryConfig.fromJsonMap(merged));
     } on Object catch (error) {
       _log.warning('legacy settings: $libraryPath not written ($error)');
       return;
     }
     _log.info('legacy settings: $libraryPath migrated into its folder');
     await _save(parked..remove(libraryPath));
+  }
+
+  /// The settings file exactly as it stands, or empty when there is none
+  /// or it cannot be read as an object.
+  ///
+  /// Read raw rather than through [LibraryConfig]: parsing fills every
+  /// missing key with a default, and a default is precisely what the
+  /// parked value should be allowed to replace.
+  Map<String, Object?> _rawFile(LibraryConfigStore store) {
+    try {
+      if (!store.file.existsSync()) return const {};
+      final decoded = jsonDecode(store.file.readAsStringSync());
+      if (decoded is! Map) return const {};
+      return {
+        for (final entry in decoded.entries) entry.key.toString(): entry.value,
+      };
+    } on Object catch (_) {
+      return const {};
+    }
   }
 
   /// The parked settings, by absolute library path; empty when there is

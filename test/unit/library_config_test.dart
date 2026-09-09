@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
-    show defaultListFolder;
+    show LinkType, TreeSort, defaultListFolder;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
@@ -162,6 +162,49 @@ void main() {
       expect(read.extra, {'editorTheme': 'dark'});
     });
 
+    test('the editor settings round trip through the file', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: defaultListFolder,
+        lineNumbers: false,
+        editorAutofocus: true,
+        reminderShowTokens: true,
+        treeSort: TreeSort.nameDesc,
+        linkType: LinkType.markdown,
+        indentWidth: 4,
+        editorToolbar: 'link,-bold',
+      );
+      await store.write(config);
+      expect(await store.read(), config);
+    });
+
+    test('every setting is written, so the file explains itself', () async {
+      // A user opening it in an editor sees the whole set, not only what
+      // has been changed away from a default.
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.write(LibraryConfig.defaults);
+      final content = store.file.readAsStringSync();
+      for (final key in [
+        'trashEnabled',
+        'historyVersions',
+        'listNoteFolder',
+        'lineNumbers',
+        'editorAutofocus',
+        'reminderShowTokens',
+        'treeSort',
+        'linkType',
+        'indentWidth',
+        'editorToolbar',
+      ]) {
+        expect(content, contains('"$key"'), reason: key);
+      }
+    });
+
     test('writes indented, human-readable JSON', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
@@ -221,6 +264,38 @@ void main() {
       expect(folderOf('../../etc'), 'etc');
       expect(folderOf('//'), defaultListFolder);
       expect(folderOf('  '), defaultListFolder);
+    });
+
+    test('a fresh library gets the shipped editor settings', () {
+      // T-ML-10: they are the library's own, seeded from these.
+      const config = LibraryConfig.defaults;
+      expect(config.lineNumbers, isTrue);
+      expect(config.editorAutofocus, isFalse);
+      expect(config.reminderShowTokens, isFalse);
+      expect(config.treeSort, TreeSort.nameAsc);
+      expect(config.linkType, LinkType.wikilink);
+      expect(config.indentWidth, defaultIndentWidth);
+      expect(config.editorToolbar, '');
+    });
+
+    test('an out-of-range indentWidth is brought into range', () {
+      // Clamped rather than defaulted: 1 and 40 are both plausible things
+      // to type, and the nearest legal width is closer to what was meant.
+      expect(normalizeIndentWidth(1), minIndentWidth);
+      expect(normalizeIndentWidth(40), maxIndentWidth);
+      expect(normalizeIndentWidth(4), 4);
+      expect(normalizeIndentWidth('four'), defaultIndentWidth);
+    });
+
+    test('an unreadable enum falls back to its default', () {
+      final config = LibraryConfig.fromJsonMap(const {
+        'treeSort': 'byVibes',
+        'linkType': 42,
+        'lineNumbers': 'yes',
+      });
+      expect(config.treeSort, TreeSort.nameAsc);
+      expect(config.linkType, LinkType.wikilink);
+      expect(config.lineNumbers, isTrue);
     });
 
     test('value equality', () {

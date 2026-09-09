@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/settings/library_setting.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -165,134 +165,85 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
 
-  /// The app-wide values, and the ones this library answers for itself
-  /// (T-ML-10). Two maps rather than fields, so the fake resolves the way
-  /// the real session does without repeating it nine times.
-  final Map<LibrarySetting, Object> _appValues = <LibrarySetting, Object>{};
-  final Map<LibrarySetting, Object> _libraryValues = <LibrarySetting, Object>{};
+  /// The settings a library keeps for itself (T-ML-10), in memory. A
+  /// fresh fake starts at the shipped defaults, as a fresh library does.
+  LibraryConfig _config = LibraryConfig.defaults;
 
   @override
-  Future<Set<LibrarySetting>> overriddenSettings() async =>
-      _libraryValues.keys.toSet();
-
-  @override
-  Future<void> overrideHere(LibrarySetting setting) async {
-    _libraryValues[setting] = _appValues[setting] ?? _defaultOf(setting);
-    _bump();
-  }
-
-  @override
-  Future<void> followApp(LibrarySetting setting) async {
-    _libraryValues.remove(setting);
-    _bump();
-  }
-
-  /// The value in force for [setting]: the library's while it has one.
-  T _valueOf<T>(LibrarySetting setting) {
-    final value = _libraryValues[setting] ?? _appValues[setting];
-    return (value ?? _defaultOf(setting)) as T;
-  }
-
-  /// Writes [value] where [setting] lives, as the real resolver does.
-  void _setValue(LibrarySetting setting, Object value) {
-    if (_libraryValues.containsKey(setting)) {
-      _libraryValues[setting] = value;
-    } else {
-      _appValues[setting] = value;
-    }
-  }
-
-  Object _defaultOf(LibrarySetting setting) => switch (setting) {
-    LibrarySetting.lineNumbers => true,
-    LibrarySetting.editorAutofocus => false,
-    LibrarySetting.reminderShowTokens => false,
-    LibrarySetting.previewMode => PreviewLayoutMode.auto,
-    LibrarySetting.splitRatio => defaultSplitRatio,
-    LibrarySetting.treeSort => TreeSort.nameAsc,
-    LibrarySetting.linkType => LinkType.wikilink,
-    LibrarySetting.indentWidth => 2,
-    LibrarySetting.editorToolbar => '',
-  };
-
-  @override
-  Future<bool> get lineNumbersEnabled async =>
-      _valueOf<bool>(LibrarySetting.lineNumbers);
+  Future<bool> get lineNumbersEnabled async => _config.lineNumbers;
 
   @override
   Future<void> setLineNumbersEnabled({required bool enabled}) async {
-    _setValue(LibrarySetting.lineNumbers, enabled);
+    _config = _config.copyWith(lineNumbers: enabled);
   }
 
   @override
-  Future<bool> get editorAutofocusEnabled async =>
-      _valueOf<bool>(LibrarySetting.editorAutofocus);
+  Future<bool> get editorAutofocusEnabled async => _config.editorAutofocus;
 
   @override
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
-    _setValue(LibrarySetting.editorAutofocus, enabled);
+    _config = _config.copyWith(editorAutofocus: enabled);
   }
 
   @override
-  Future<bool> get reminderShowTokens async =>
-      _valueOf<bool>(LibrarySetting.reminderShowTokens);
+  Future<bool> get reminderShowTokens async => _config.reminderShowTokens;
 
   @override
   Future<void> setReminderShowTokens({required bool enabled}) async {
-    _setValue(LibrarySetting.reminderShowTokens, enabled);
+    _config = _config.copyWith(reminderShowTokens: enabled);
   }
 
+  // The preview layout is app-wide: it follows the screen, not the
+  // library.
+  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
+  double _splitRatio = defaultSplitRatio;
+
   @override
-  Future<PreviewLayoutMode> get previewMode async =>
-      _valueOf<PreviewLayoutMode>(LibrarySetting.previewMode);
+  Future<PreviewLayoutMode> get previewMode async => _previewMode;
 
   @override
   Future<void> setPreviewMode(PreviewLayoutMode mode) async {
-    _setValue(LibrarySetting.previewMode, mode);
+    _previewMode = mode;
   }
 
   @override
-  Future<double> get splitRatio async =>
-      _valueOf<double>(LibrarySetting.splitRatio);
+  Future<double> get splitRatio async => _splitRatio;
 
   @override
   Future<void> setSplitRatio(double ratio) async {
-    _setValue(LibrarySetting.splitRatio, ratio);
+    _splitRatio = ratio;
   }
 
   @override
-  Future<TreeSort> get treeSort async =>
-      _valueOf<TreeSort>(LibrarySetting.treeSort);
+  Future<TreeSort> get treeSort async => _config.treeSort;
 
   @override
   Future<void> setTreeSort(TreeSort sort) async {
-    _setValue(LibrarySetting.treeSort, sort);
+    _config = _config.copyWith(treeSort: sort);
   }
 
   @override
-  Future<LinkType> get linkType async =>
-      _valueOf<LinkType>(LibrarySetting.linkType);
+  Future<LinkType> get linkType async => _config.linkType;
 
   @override
   Future<void> setLinkType(LinkType type) async {
-    _setValue(LibrarySetting.linkType, type);
+    _config = _config.copyWith(linkType: type);
   }
 
   @override
-  Future<int> get indentWidth async =>
-      _valueOf<int>(LibrarySetting.indentWidth);
+  Future<int> get indentWidth async => _config.indentWidth;
 
   @override
   Future<void> setIndentWidth(int width) async {
-    _setValue(LibrarySetting.indentWidth, width);
+    _config = _config.copyWith(indentWidth: normalizeIndentWidth(width));
   }
 
   @override
-  Future<String> get editorToolbar async =>
-      _valueOf<String>(LibrarySetting.editorToolbar);
+  Future<String> get editorToolbar async => _config.editorToolbar;
 
   @override
   Future<void> setEditorToolbar(String layout) async {
-    _setValue(LibrarySetting.editorToolbar, layout);
+    _config = _config.copyWith(editorToolbar: layout);
   }
 
   @override
