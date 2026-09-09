@@ -6,15 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('frontmatterTypeOf', () {
     test('detects type: list in a closed block', () {
-      expect(
-        frontmatterTypeOf('---\ntype: list\n---\n- [ ] a\n'),
-        'list',
-      );
+      expect(frontmatterTypeOf('---\ntype: list\n---\n- [ ] a\n'), 'list');
       // Quotes are stripped, like every other frontmatter value.
-      expect(
-        frontmatterTypeOf('---\ntype: "list"\n---\n'),
-        'list',
-      );
+      expect(frontmatterTypeOf('---\ntype: "list"\n---\n'), 'list');
     });
 
     test('no block, no key, unclosed block: null', () {

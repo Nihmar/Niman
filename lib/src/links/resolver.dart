@@ -7,7 +7,7 @@
 /// picker.
 library;
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 
 /// The normalized stem of a note file name: lowercased, with the `.md`
 /// extension (case-insensitive) stripped. `My Note.md` → `my note`.
@@ -24,14 +24,14 @@ String noteStem(String name) {
 /// The outcome of resolving a link target.
 sealed class ResolveResult {
   /// Creates a result.
-  const ResolveResult();
+  const new();
 }
 
 /// The target is one note (exactly one candidate).
 final class ResolvedNote extends ResolveResult {
   /// Creates a resolved result for [note], optionally with a heading
   /// anchor (`note.md#Heading`).
-  const ResolvedNote({required this.note, this.heading});
+  const new({required this.note, this.heading});
 
   /// The resolved note row.
   final Note note;
@@ -43,7 +43,7 @@ final class ResolvedNote extends ResolveResult {
 /// The target is a heading anchor in the current note (`#Heading`).
 final class LocalAnchor extends ResolveResult {
   /// Creates a local-anchor result for [heading].
-  const LocalAnchor({required this.heading});
+  const new({required this.heading});
 
   /// The anchor text.
   final String heading;
@@ -52,7 +52,7 @@ final class LocalAnchor extends ResolveResult {
 /// The target matches more than one note; the caller shows a picker.
 final class AmbiguousNote extends ResolveResult {
   /// Creates an ambiguous result with [candidates] (shortest path first).
-  const AmbiguousNote({required this.candidates});
+  const new({required this.candidates});
 
   /// Candidate note rows.
   final List<Note> candidates;
@@ -61,7 +61,7 @@ final class AmbiguousNote extends ResolveResult {
 /// No note matches the target (a dead link — M3 has no dead-link UI yet).
 final class UnresolvedNote extends ResolveResult {
   /// Creates an unresolved result for the raw [target] text.
-  const UnresolvedNote({required this.target});
+  const new({required this.target});
 
   /// The target as the user wrote it.
   final String target;
@@ -70,7 +70,7 @@ final class UnresolvedNote extends ResolveResult {
 /// The link points outside the library (an http/https or other URL).
 final class ExternalLink extends ResolveResult {
   /// Creates an external result for [url].
-  const ExternalLink({required this.url});
+  const new({required this.url});
 
   /// The URL to open.
   final String url;
@@ -91,10 +91,10 @@ abstract interface class LinkSource {
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
 /// the note index. Not a DAO and not stateful: callers create one per use.
 final class LinkResolver implements LinkSource {
-  /// Creates a resolver over the drift [CopistDatabase].
-  LinkResolver(this._db);
+  /// Creates a resolver over the drift [IndexDatabase].
+  new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   @override
   Future<ResolveResult> resolveWiki(String target) {
@@ -207,9 +207,7 @@ final class LinkResolver implements LinkSource {
       final ids = <int>{for (final s in stems) s.noteId};
       final notes = ids.isEmpty
           ? <Note>[]
-          : await (_db.select(
-              _db.notes,
-            )..where((n) => n.id.isIn(ids))).get();
+          : await (_db.select(_db.notes)..where((n) => n.id.isIn(ids))).get();
       for (final raw in group) {
         final spec = specs[raw]!;
         if (notes.isEmpty || ids.isEmpty) {

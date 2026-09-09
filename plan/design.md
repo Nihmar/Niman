@@ -219,13 +219,18 @@ sync_ops       -- persisted queue (survives app restart / offline)
   next_retry  datetime
 ```
 
-### Local settings (not synced, never in the library folder)
+### Settings
 
 ```
-library_settings   -- keyed by library path: trash toggle, history versions (N),
-                     template folder path
-app_settings       -- global: theme (brightness × palette), layout mode, ...
+app_settings       -- global, app-side: theme (brightness × palette), layout
+                      mode, language, ...   Not synced.
 ```
+
+Per-library settings — trash toggle, history versions (N), quick note,
+list-note folder — are **not** app-side: they live in the library folder
+as `<library>/.copist/settings.json`, so they travel with it (T-ML-01,
+T-ML-02). The `library_settings` table this section used to describe was
+dropped in schema v14.
 
 Credentials (WebDAV URL + Basic auth, encryption key) go to
 `flutter_secure_storage`, never into drift.

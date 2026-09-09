@@ -18,7 +18,10 @@ void main() {
     expect(line, contains('INFO'));
     expect(line, contains('[unit]'));
     expect(line, endsWith('hello world'));
-    expect(line, matches(RegExp(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} ')));
+    expect(
+      line,
+      matches(RegExp(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} ')),
+    );
   });
 
   test('severity labels are uppercased per level', () {

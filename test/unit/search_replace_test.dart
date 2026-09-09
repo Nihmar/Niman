@@ -1,7 +1,7 @@
 // T-M3-10: the exact whole-word replace runner over a real index + disk.
 import 'dart:io';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:drift/drift.dart' show Variable;
@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 
 void main() {
   late Directory root;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late ReplaceRunner replace;
 
   File file(String rel) => File(p.join(root.path, rel));
@@ -20,15 +20,13 @@ void main() {
 
   setUp(() async {
     root = await Directory.current.createTemp('copist_replace_');
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     // The corpus: word-boundary traps and a multi-word phrase.
-    await file('a.md').writeAsString(
-      'cat catalog concatenate cats. Cat CAT.\n',
-    );
-    await file('b.md').writeAsString(
-      'dog hello world, hello\nworld — città cittàx.\n',
-    );
+    await file('a.md')
+        .writeAsString('cat catalog concatenate cats. Cat CAT.\n');
+    await file('b.md')
+        .writeAsString('dog hello world, hello\nworld — città cittàx.\n');
     await file('c.md').writeAsString('nothing here\n');
     await Directory(p.join(root.path, 'sub')).create();
     await file('sub/x.md').writeAsString('deep cat\n');
@@ -116,10 +114,7 @@ void main() {
 
   group('ReplaceRunner', () {
     test('preview lists matching notes with counts and samples', () async {
-      final notes = await replace.previewMatches(
-        'cat',
-        caseSensitive: false,
-      );
+      final notes = await replace.previewMatches('cat', caseSensitive: false);
       expect(notes.map((n) => n.path), ['a.md', 'sub/x.md']);
       expect(notes[0].occurrences, 3);
       expect(notes[0].samples, hasLength(2));
@@ -135,14 +130,8 @@ void main() {
     });
 
     test('preview honors the case flag and the single-note scope', () async {
-      final any = await replace.previewMatches(
-        'cat',
-        caseSensitive: false,
-      );
-      final exact = await replace.previewMatches(
-        'Cat',
-        caseSensitive: true,
-      );
+      final any = await replace.previewMatches('cat', caseSensitive: false);
+      final exact = await replace.previewMatches('Cat', caseSensitive: true);
       expect(any.first.occurrences, 3); // cat Cat CAT
       expect(exact.first.occurrences, 1);
       final only = await replace.previewMatches(
@@ -204,10 +193,7 @@ void main() {
       expect(report.occurrences, 2); // 'hello world' + 'hello\nworld'
       // The second match spans the newline, so it is replaced by the
       // single-space replacement text.
-      expect(
-        await read('b.md'),
-        'dog bye moon, bye moon — città cittàx.\n',
-      );
+      expect(await read('b.md'), 'dog bye moon, bye moon — città cittàx.\n');
     });
 
     test('only limits the run to the given note', () async {
@@ -255,8 +241,7 @@ void main() {
       expect(report.occurrences, 0);
     });
 
-    test('rewritten notes are re-indexed through the hook per batch',
-        () async {
+    test('rewritten notes are re-indexed through the hook per batch', () async {
       final batches = <List<String>>[];
       final hooked = ReplaceRunner(
         db,
@@ -275,38 +260,40 @@ void main() {
       expect(changed, {file('a.md').path, file('sub/x.md').path});
     });
 
-    test('the index reflects a replace right away (no watcher needed)',
-        () async {
-      final indexer = Indexer(db);
-      final hooked = ReplaceRunner(
-        db,
-        root.path,
-        onNotesReindexed: (paths) => indexer.rescanFiles(root.path, paths),
-      );
-      await hooked.replaceAll(
-        term: 'cat',
-        replacement: 'dog',
-        caseSensitive: false,
-      );
-      // The rewritten notes are searchable under the new word…
-      final hits = await db
-          .customSelect(
-            'SELECT notes.path FROM notes JOIN notes_fts '
-            "ON notes.id = notes_fts.rowid WHERE notes_fts MATCH 'dog'",
-          )
-          .get();
-      expect(
-        hits.map((r) => r.read<String>('path')),
-        containsAll(['a.md', 'sub/x.md']),
-      );
-      // …and the old word is gone from the index.
-      final old = await db
-          .customSelect(
-            'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
-            variables: [const Variable<String>('cat')],
-          )
-          .getSingle();
-      expect(old.read<int>('c'), 0);
-    });
+    test(
+      'the index reflects a replace right away (no watcher needed)',
+      () async {
+        final indexer = Indexer(db);
+        final hooked = ReplaceRunner(
+          db,
+          root.path,
+          onNotesReindexed: (paths) => indexer.rescanFiles(root.path, paths),
+        );
+        await hooked.replaceAll(
+          term: 'cat',
+          replacement: 'dog',
+          caseSensitive: false,
+        );
+        // The rewritten notes are searchable under the new word…
+        final hits = await db
+            .customSelect(
+              'SELECT notes.path FROM notes JOIN notes_fts '
+              "ON notes.id = notes_fts.rowid WHERE notes_fts MATCH 'dog'",
+            )
+            .get();
+        expect(
+          hits.map((r) => r.read<String>('path')),
+          containsAll(['a.md', 'sub/x.md']),
+        );
+        // …and the old word is gone from the index.
+        final old = await db
+            .customSelect(
+              'SELECT count(*) c FROM notes_fts WHERE notes_fts MATCH ?',
+              variables: [const Variable<String>('cat')],
+            )
+            .getSingle();
+        expect(old.read<int>('c'), 0);
+      },
+    );
   });
 }

@@ -1,7 +1,7 @@
 // T-M3-04 AC: word search ranks (bm25, title over body) with snippets;
 // #tag search answers from tags/note_tags, never FTS; superseded queries
 // are dropped by invocation id; MATCH vs LIKE behaviors.
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/search/query.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
@@ -10,7 +10,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late CopistDatabase db;
+  late IndexDatabase db;
   late SearchRepo search;
   late TagRepo tags;
 
@@ -18,11 +18,7 @@ void main() {
     await db.customStatement(
       'INSERT INTO notes (path, parent, name, is_dir, size, modified) '
       'VALUES (?1, 0, ?2, 0, ?3, 0)',
-      [
-        path,
-        path.split('/').last,
-        body.length,
-      ],
+      [path, path.split('/').last, body.length],
     );
     final row = await db
         .customSelect(
@@ -37,7 +33,7 @@ void main() {
   }
 
   setUp(() async {
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     search = SearchRepo(db);
     tags = TagRepo(db);
@@ -119,10 +115,7 @@ void main() {
   test('punctuation in the query is literal, not FTS syntax', () async {
     final id = search.begin();
     // 'zebra (attacks)' — the parens are quoted; the terms still match.
-    final hits = await search.search(
-      buildFtsQuery('zebra (attacks)'),
-      id: id,
-    );
+    final hits = await search.search(buildFtsQuery('zebra (attacks)'), id: id);
     expect(hits, isNotEmpty);
     expect(hits.map((h) => h.path), contains('apple.md'));
   });
@@ -177,14 +170,8 @@ void main() {
       final early = search.begin();
       final late = search.begin();
       expect(await search.searchContains('', id: late), isEmpty);
-      expect(
-        await search.searchContains('zebra', id: early),
-        isEmpty,
-      );
-      expect(
-        await search.searchContains('zebra', id: late),
-        isNotEmpty,
-      );
+      expect(await search.searchContains('zebra', id: early), isEmpty);
+      expect(await search.searchContains('zebra', id: late), isNotEmpty);
     });
   });
 }

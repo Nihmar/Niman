@@ -55,10 +55,7 @@ const defaultFolderName = 'New folder';
 /// file.
 File atomicTempPath(File file, int micros) {
   return File(
-    p.join(
-      file.parent.path,
-      '.${p.basename(file.path)}$_tempMarker-$micros',
-    ),
+    p.join(file.parent.path, '.${p.basename(file.path)}$_tempMarker-$micros'),
   );
 }
 
@@ -68,10 +65,7 @@ File atomicTempPath(File file, int micros) {
 /// which is then renamed over [file]. A rename within one filesystem is
 /// atomic on Android and Linux, so readers never observe a partial write.
 Future<void> writeFileAtomically(File file, List<int> data) async {
-  final tmp = atomicTempPath(
-    file,
-    DateTime.now().microsecondsSinceEpoch,
-  );
+  final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
   try {
     await tmp.writeAsBytes(data, flush: true);
     await tmp.rename(file.path);
@@ -92,9 +86,11 @@ Future<String> hashFileSha256(File file) async {
   try {
     final collector = _DigestCollector();
     final sink = sha256.startChunkedConversion(collector);
-    for (var chunk = raf.readSync(_hashChunkSize);
-        chunk.isNotEmpty;
-        chunk = raf.readSync(_hashChunkSize)) {
+    for (
+      var chunk = raf.readSync(_hashChunkSize);
+      chunk.isNotEmpty;
+      chunk = raf.readSync(_hashChunkSize)
+    ) {
       sink.add(chunk);
     }
     sink.close();
@@ -261,8 +257,5 @@ Future<String> trashDirName(Directory dir, String base) async {
   if (dot <= 0) {
     return (base: fileName, ext: '');
   }
-  return (
-    base: fileName.substring(0, dot),
-    ext: fileName.substring(dot),
-  );
+  return (base: fileName.substring(0, dot), ext: fileName.substring(dot));
 }

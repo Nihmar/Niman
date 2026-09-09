@@ -1,0 +1,34 @@
+# Tests known to fail on a Windows host, for reasons that are not the
+# code: path separators (p.join gives '\' where the fixture spells
+# '/'), temp-dir cleanup, and a 10k-note fixture that times out. The
+# suite is green on Linux.
+#
+# '~' marks a flake: tolerated whether or not it fails on a given run,
+# and kept across `newfail.ps1 -Update`. Several of them are the same
+# Windows fault under full-suite load: a rename or a delete on a file
+# another process still holds ("Accesso negato", errno 5/32). They pass
+# in isolation, and the error is never an assertion — check a suspect one
+# on its own before believing it.
+~test/unit/file_watcher_test.dart: coalesces rapid events into a single batch [E]
+~test/unit/fixture_10k_test.dart: word search on the fixture is instant; bm25 ranks the title hit first [E]
+test/unit/fixture_10k_test.dart: a 10k-note library indexes (walk + content pass) in well under a minute, with FTS/tags/stems populated [E]
+test/unit/fixture_10k_test.dart: incremental: one edited note re-indexes without touching the rest [E]
+test/unit/fixture_10k_test.dart: tag counts and tag→notes are instant on the fixture [E]
+test/unit/library_root_test.dart: resolveLibraryRoot accepts the single-slash content form [E]
+test/unit/library_root_test.dart: resolveLibraryRoot maps a primary-volume tree URI to the FUSE path [E]
+test/unit/library_root_test.dart: resolveLibraryRoot maps other volumes under /storage/<volume> [E]
+test/unit/m2_spike_benchmark_test.dart: preview cost model SmoothMarkdown eager render (parse+build+layout+paint) [E]
+test/unit/m2_spike_benchmark_test.dart: preview cost model SmoothMarkdown parse (MarkdownParser only) [E]
+test/unit/note_ops_test.dart: create creates folders and nested notes [E]
+test/unit/note_ops_test.dart: delete (trash on by default) moves a folder subtree into .trash as a directory [E]
+test/unit/note_ops_test.dart: move moves a note into a folder [E]
+test/unit/note_ops_test.dart: move uniquifies when the target already holds the name [E]
+test/unit/note_ops_test.dart: rename renaming a folder reindexes its subtree [E]
+test/unit/note_ops_test.dart: restore falls back to the root when the original parent is gone [E]
+test/unit/note_ops_test.dart: restore restores a dotted folder name whole [E]
+test/unit/note_ops_test.dart: restore restores a folder with its contents reindexed [E]
+test/unit/search_replace_test.dart: ReplaceRunner the index reflects a replace right away (no watcher needed) [E]
+~test/unit/search_replace_test.dart: ReplaceRunner case-sensitive run touches only the exact case [E]
+~test/unit/note_ops_test.dart: trash management deleteTrashPermanently removes the manifest item and disk [E]
+~test/unit/settings_resolver_test.dart: every overridable setting round trips booleans [E]
+test/widget/library_flow_test.dart: open, create, rename, and move work end to end [E]

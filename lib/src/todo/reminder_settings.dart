@@ -46,7 +46,7 @@ abstract interface class ReminderSettings {
 /// The real gate: a method channel on Android, inert elsewhere.
 final class PlatformReminderSettings implements ReminderSettings {
   /// Creates the platform gate.
-  const PlatformReminderSettings();
+  const new();
 
   static const MethodChannel _channel = MethodChannel('copist/reminders');
 

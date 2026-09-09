@@ -76,9 +76,7 @@ void main() {
     await controller.dispose();
   });
 
-  testWidgets('changing the list folder re-targets creation', (
-    tester,
-  ) async {
+  testWidgets('changing the list folder re-targets creation', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);

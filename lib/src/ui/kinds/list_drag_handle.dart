@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 /// recognizer, so it wins the gesture arena on the handle.
 class ListDragHandle extends StatelessWidget {
   /// Creates the handle.
-  const ListDragHandle({
+  const new({
     required this.active,
     required this.onDragStart,
     required this.onDragMove,

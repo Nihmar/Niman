@@ -1,9 +1,9 @@
 # Todo reminders — the 5 to 10 minute delay
 
-**Status:** T-RL-01 and T-RL-02 done 2026-09-08; the next device log
-decides T-RL-03 · **Depends on:**
-`todo-tab.md` T-TD-07 (reminders, landed) · **Evidence so far:** the user
-reports notifications arriving, but sometimes 5–10 minutes late.
+**Status:** cause found 2026-09-08 from a device log; the fix is in,
+device confirmation outstanding · **Depends on:**
+`todo-tab.md` T-TD-07 (reminders, landed) · **Evidence:** a device log of
+a reminder set for 14:50 that never rang.
 
 ## The symptom
 
@@ -53,17 +53,87 @@ banner offers the battery-optimization and notification settings screens.
   `inexactOnly`, the banner already exists; make sure a late-alarm run
   surfaces it rather than leaving the user guessing. *AC: with exact
   alarms unavailable, the tab shows the banner.*
-- [ ] **T-RL-03** Act on the measurement. One of: force the exact branch
-  when the permission is actually granted (candidate 1); prompt for the
-  battery exemption when a late alarm is detected (candidate 3); or, if
-  the platform is simply deferring, say so in the UI rather than
-  pretending minute precision. *AC: after the fix, a reminder set for
-  `now + 2 min` with the screen off arrives inside the minute, three
-  times running.*
-- [ ] **T-RL-04** Keep the evidence. Whatever the cause turns out to be,
-  record it in this file and in `plan/android.md`, which is where the
-  platform traps of this project live. *AC: the next person does not
-  re-derive it.*
+- [x] **T-RL-03** Act on the measurement. The measurement said the app
+  was cancelling its own deferred alarms, so `wantedReminders` now keeps
+  a reminder for `reminderGrace` (one hour) past its own moment: the
+  sweep leaves the alarm pending, scheduling still skips it. *AC: after
+  the fix, a reminder set for `now + 2 min` with the screen off arrives,
+  three times running.* Confirmed on device 2026-09-08 (see below), on
+  one run rather than three.
+- [x] **T-RL-04** Keep the evidence. Recorded below and in
+  `plan/android.md`. *AC: the next person does not re-derive it.*
+
+## The answer (2026-09-08 device log)
+
+None of the four candidates. **Copist was cancelling its own alarms.**
+
+The log of a reminder set for 14:50, with the app in the foreground the
+whole time:
+
+```text
+14:43:32 reconcile 1 wanted, alarms exact, battery unrestricted
+14:43:32 armed 1424219112 for 2026-09-08T14:50:00.000 (in 6m) test
+14:43:32 1 pending after reconcile [1424219112]
+...
+14:53:12 reconcile 0 wanted, ...
+14:53:12 cancelled 1 stale
+```
+
+The alarm was armed exact and the OS still held it at 14:53 — three
+minutes past its own time, which is a deferral. `cancelled 1 stale`
+proves both halves at once: the sweep only cancels ids the OS reports as
+pending, so the alarm had not fired, and Copist then removed it.
+
+Why it was considered stale: `wantedReminders` dropped any reminder whose
+moment had passed, and reconciliation is a full replace — anything
+outside the wanted set gets its pending alarm cancelled. So every
+reconcile after a reminder's time (a todo reload, a resume, a file
+change) silently killed an alarm that was still going to ring. Whether
+the user heard the reminder came down to whether Android fired before
+Copist swept.
+
+This also explains the shape of the complaint. A short deferral that beat
+the next reconcile arrived late; one that did not arrived never.
+
+Two things this does *not* explain, both worth keeping in mind:
+
+- **The deferral itself.** Android held an exact,
+  allow-while-idle alarm at least three minutes past its time. The fix
+  stops Copist from making that fatal; it does not make Android prompt.
+- **`alarms inexact` in most lines.** Noise, not a finding: `_reconcileOnce`
+  computes `exact` as `granted && wanted.isNotEmpty && ...`, so every
+  reconcile with an empty set reports `inexact` without asking the
+  platform. The one line with a reminder in it says `exact`.
+
+### The confirming run (2026-09-08 17:35 log)
+
+Same device, with the fix in:
+
+```text
+16:45:49 armed 945943890 for 2026-09-08T16:47:00.000 (in 1m) test
+16:45:49 1 pending after reconcile [945943890]
+17:18:08 overdue 945943890 due 2026-09-08T16:47:00.000 (31m ago),
+         no longer pending, fired, alarms exact, battery unrestricted
+17:18:08 skipped 945943890, 2026-09-08T16:47:00.000 already passed
+```
+
+The reminder arrived. Three things the old build got wrong are right
+here at once: the alarm was not cancelled, `no longer pending, fired`
+says the OS delivered it, and `skipped ... already passed` says nothing
+tried to re-arm an instant in the past. The overdue line exists at all
+only because of `reminderGrace` — this is the line that stayed silent on
+the run that caught the bug.
+
+One run, not the three the AC asked for, and the log does not say whether
+the screen was off.
+
+### Why T-RL-01 did not catch it
+
+`_logOverdue` takes the *wanted* set, which by construction could not
+contain a past reminder — so on the very run that caught the bug it
+logged nothing. The instrumentation was downstream of the thing it was
+measuring. With `reminderGrace` in place the wanted set does carry
+overdue reminders and the line now fires.
 
 ## What the log now says
 

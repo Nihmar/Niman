@@ -51,8 +51,9 @@ void _select(
 }
 
 void main() {
-  testWidgets('the editor keeps focus after a toolbar tap (IME stays open)',
-      (tester) async {
+  testWidgets('the editor keeps focus after a toolbar tap (IME stays open)', (
+    tester,
+  ) async {
     final controller = await _pumpFresh(tester);
     final focusNode =
         tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode
@@ -94,18 +95,16 @@ void main() {
     }
   });
 
-  testWidgets('code block: a selection is fenced; a caret opens a block',
-      (tester) async {
+  testWidgets('code block: a selection is fenced; a caret opens a block', (
+    tester,
+  ) async {
     // Selection fenced.
     final controller = await _pumpFresh(tester);
     _select(controller, index: 2, offset: 0, extentOffset: 11);
     await tester.pump();
     await tester.tap(find.byKey(const Key('toolbar-code')));
     await tester.pump();
-    expect(
-      controller.text,
-      '# Head\n\n```\nhello world\n```\nsecond line',
-    );
+    expect(controller.text, '# Head\n\n```\nhello world\n```\nsecond line');
     await tester.pump(const Duration(seconds: 1));
 
     // Collapsed caret on the blank line: fences around a blank line.
@@ -114,30 +113,18 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('toolbar-code')));
     await tester.pump();
-    expect(
-      caret.text,
-      '# Head\n```\n\n```\nhello world\nsecond line',
-    );
+    expect(caret.text, '# Head\n```\n\n```\nhello world\nsecond line');
     await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('list and quote prefix the touched lines', (tester) async {
     // List: lines 2 and 3 get "- ".
     final controller = await _pumpFresh(tester);
-    _select(
-      controller,
-      index: 2,
-      offset: 0,
-      extentIndex: 3,
-      extentOffset: 11,
-    );
+    _select(controller, index: 2, offset: 0, extentIndex: 3, extentOffset: 11);
     await tester.pump();
     await tester.tap(find.byKey(const Key('toolbar-list')));
     await tester.pump();
-    expect(
-      controller.text,
-      '# Head\n\n- hello world\n- second line',
-    );
+    expect(controller.text, '# Head\n\n- hello world\n- second line');
     await tester.pump(const Duration(seconds: 1));
 
     // Quote: the caret line gets "> ".
@@ -146,10 +133,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('toolbar-quote')));
     await tester.pump();
-    expect(
-      caret.text,
-      '# Head\n\nhello world\n> second line',
-    );
+    expect(caret.text, '# Head\n\nhello world\n> second line');
     await tester.pump(const Duration(seconds: 1));
   });
 }

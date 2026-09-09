@@ -13,7 +13,7 @@ import 'package:markdown/markdown.dart' as md;
 /// raw target and the display text (the `|alias` form).
 final class EmbedInlineSyntax extends md.InlineSyntax {
   /// Creates the syntax.
-  EmbedInlineSyntax() : super(r'!\[\[[^\[\]\n]*\]\]');
+  new() : super(r'!\[\[[^\[\]\n]*\]\]');
 
   @override
   bool onMatch(md.InlineParser parser, Match match) {
@@ -38,7 +38,7 @@ final class EmbedInlineSyntax extends md.InlineSyntax {
 /// resolution lands, and on failure.
 final class EmbedBuilder extends MarkdownElementBuilder {
   /// Creates a builder resolving embeds via [onResolve].
-  EmbedBuilder({required this.onResolve});
+  new({required this.onResolve});
 
   /// Resolves an embed target to an absolute file path, or null.
   final Future<String?> Function(String target) onResolve;
@@ -64,18 +64,14 @@ final class EmbedBuilder extends MarkdownElementBuilder {
     final target = element.attributes['target'] ?? element.textContent;
     final alias = element.attributes['alias'] ?? '';
     final display = alias.isNotEmpty ? alias : (element.textContent);
-    return _EmbedView(
-      target: target,
-      display: display,
-      onResolve: onResolve,
-    );
+    return _EmbedView(target: target, display: display, onResolve: onResolve);
   }
 }
 
 /// The stateful embed body: resolves once, then renders the image inline
 /// or the muted placeholder (binary, missing, or failed decode).
 final class _EmbedView extends StatefulWidget {
-  const _EmbedView({
+  const new({
     required this.target,
     required this.display,
     required this.onResolve,
@@ -142,7 +138,7 @@ final class _EmbedViewState extends State<_EmbedView> {
 /// the caller.
 final class WikilinkInlineSyntax extends md.InlineSyntax {
   /// Creates the syntax.
-  WikilinkInlineSyntax() : super(r'(?<!!)\[\[[^\[\]\n]*\]\]');
+  new() : super(r'(?<!!)\[\[[^\[\]\n]*\]\]');
 
   @override
   bool onMatch(md.InlineParser parser, Match match) {
@@ -167,10 +163,7 @@ final class WikilinkInlineSyntax extends md.InlineSyntax {
 final class WikilinkBuilder extends MarkdownElementBuilder {
   /// Creates a builder reporting [onWikiRef]; [recognizers] receives every
   /// gesture recognizer the preview must dispose.
-  WikilinkBuilder({
-    required this.onWikiRef,
-    required this.recognizers,
-  });
+  new({required this.onWikiRef, required this.recognizers});
 
   /// Called with the parsed ref (and its display text) on tap.
   final void Function(WikiRef ref, String display) onWikiRef;

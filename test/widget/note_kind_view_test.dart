@@ -14,16 +14,15 @@ NoteView _view({
   bool kindMode = true,
   void Function(String?)? onNoteKindChanged,
   Future<void> Function(String path, String content)? writeNote,
-}) =>
-    NoteView(
-      path: path,
-      showLineNumbers: true,
-      autofocusEditor: false,
-      kindMode: kindMode,
-      onNoteKindChanged: onNoteKindChanged,
-      readNote: (_) async => content,
-      writeNote: writeNote,
-    );
+}) => NoteView(
+  path: path,
+  showLineNumbers: true,
+  autofocusEditor: false,
+  kindMode: kindMode,
+  onNoteKindChanged: onNoteKindChanged,
+  readNote: (_) async => content,
+  writeNote: writeNote,
+);
 
 void main() {
   testWidgets('a type: list note shows the list GUI, not the editor', (

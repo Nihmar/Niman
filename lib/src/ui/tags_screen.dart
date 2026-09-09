@@ -1,6 +1,8 @@
 import 'dart:async';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/core/frame_log.dart';
+import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/tag_repo.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -15,7 +17,7 @@ import 'package:flutter/material.dart';
 /// list reflects them together; tags are normalized (lowercase, no `#`).
 final class TagsScreen extends StatefulWidget {
   /// Creates the tags screen.
-  const TagsScreen({
+  const new({
     required this.controller,
     required this.onOpenNote,
     required this.onBack,
@@ -49,18 +51,25 @@ final class _TagsScreenState extends State<TagsScreen> {
   @override
   void initState() {
     super.initState();
+    const AppLogger(name: 'tags.ui').debug('mount');
     unawaited(_load());
   }
 
   Future<void> _load() async {
+    final started = DateTime.now();
     final source = widget.sourceOverride ?? await widget.controller.tagSource;
     if (source == null) return;
     final counts = await source.tagCounts();
     if (!mounted) return;
+    const AppLogger(name: 'tags.ui').debug(
+      'tag counts: ${counts.length} tags in '
+      '${DateTime.now().difference(started).inMilliseconds}ms',
+    );
     setState(() {
       _source = source;
       _counts = counts;
     });
+    logNextFrame('tags.ui', 'tag list first frame');
   }
 
   Future<void> _openTag(String tag) async {
@@ -82,8 +91,7 @@ final class _TagsScreenState extends State<TagsScreen> {
   @override
   Widget build(BuildContext context) {
     final tag = _selectedTag;
-    if (tag == null) return _tagList();
-    return _noteList(tag);
+    return tag == null ? _tagList() : _noteList(tag);
   }
 
   Widget _tagList() {
@@ -122,9 +130,8 @@ final class _TagsScreenState extends State<TagsScreen> {
       return Center(
         child: Text(
           AppStrings.tagsEmpty,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }
@@ -187,9 +194,8 @@ final class _TagsScreenState extends State<TagsScreen> {
       return Center(
         child: Text(
           AppStrings.tagsNotesEmpty,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }

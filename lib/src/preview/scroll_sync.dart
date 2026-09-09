@@ -15,7 +15,7 @@ final class EditorPreviewScrollSync extends StatefulWidget {
   /// [editorScroll] is re_editor's vertical scroll controller;
   /// [previewScroll] the preview's [ScrollController]; [map] the scroll map
   /// the preview feeds.
-  const EditorPreviewScrollSync({
+  const new({
     required this.editorScroll,
     required this.previewScroll,
     required this.map,

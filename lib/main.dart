@@ -41,7 +41,21 @@ Future<void> _attachLogFile() async {
 
 /// Logs every frame whose total UI work misses the 60 Hz budget, so jank
 /// (while editing novel-length notes, scrolling, …) is visible in the
-/// exported debug log together with the build/layout/paint breakdown.
+/// exported debug log together with the build/raster/vsync breakdown.
+///
+/// Only the slow ones. A round of tab-switch profiling briefly logged
+/// every rendered frame, which answered "how many frames did that
+/// animation take" but cost more than it was worth: at 60 lines a second
+/// while anything moves, it fills the 5000-line buffer in under two
+/// minutes and rotates the 512 KB disk mirror about as fast. That mirror
+/// exists to survive the process — a reminder that fired with the app
+/// closed, an OEM kill — and an export taken after a few minutes of
+/// ordinary use no longer held any of it. Formatting a line per frame on
+/// the UI isolate also charges the very frames it measures.
+///
+/// Timing every frame is the right tool for a profiling round, not for a
+/// build someone uses. Put it back behind its own switch if a later round
+/// wants it.
 void _reportSlowFrames() {
   const logger = AppLogger(name: 'frames');
   const budget = Duration(milliseconds: 16);
@@ -59,5 +73,4 @@ void _reportSlowFrames() {
   });
 }
 
-String _ms(Duration d) =>
-    '${(d.inMicroseconds / 1000).toStringAsFixed(1)} ms';
+String _ms(Duration d) => '${(d.inMicroseconds / 1000).toStringAsFixed(1)} ms';

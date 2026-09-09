@@ -60,10 +60,7 @@ void main() {
         'prose\n- [x] one\n  - [x] two\nmore\n',
       );
       // Flipping twice restores the note.
-      expect(
-        flipListItem(flipListItem(text, items[0]), items[0]),
-        text,
-      );
+      expect(flipListItem(flipListItem(text, items[0]), items[0]), text);
       expect(
         flipListItem(text, items[1]),
         'prose\n- [ ] one\n  - [ ] two\nmore\n',
@@ -90,13 +87,15 @@ void main() {
 
   group('subtreeEnd', () {
     test('the subtree runs to the next smaller-or-equal item', () {
-      final items = parseListItems(
-        '- [ ] a\n  - [ ] b\nprose\n- [ ] c\n',
-      );
+      final items = parseListItems('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n');
       expect(
-          subtreeEnd(
-              items, 0, listLineCount('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n')),
-          3);
+        subtreeEnd(
+          items,
+          0,
+          listLineCount('- [ ] a\n  - [ ] b\nprose\n- [ ] c\n'),
+        ),
+        3,
+      );
       expect(subtreeEnd(items, 2, 4), 4);
     });
   });
@@ -106,32 +105,32 @@ void main() {
       const text = '- [ ] a\n- [ ] b\n';
       final items = parseListItems(text);
       final n = listLineCount(text);
-      expect(
-        resolveListDrop(items, 0, 1, ListDropMode.before, n),
-        (insertLine: 1, indent: 0),
-      );
-      expect(
-        resolveListDrop(items, 0, 1, ListDropMode.after, n),
-        (insertLine: 2, indent: 0),
-      );
-      expect(
-        resolveListDrop(items, 0, 1, ListDropMode.under, n),
-        (insertLine: 2, indent: 2),
-      );
+      expect(resolveListDrop(items, 0, 1, ListDropMode.before, n), (
+        insertLine: 1,
+        indent: 0,
+      ));
+      expect(resolveListDrop(items, 0, 1, ListDropMode.after, n), (
+        insertLine: 2,
+        indent: 0,
+      ));
+      expect(resolveListDrop(items, 0, 1, ListDropMode.under, n), (
+        insertLine: 2,
+        indent: 2,
+      ));
     });
 
     test('the list edges resolve to root level', () {
       const text = '- [ ] a\n- [ ] b\n';
       final items = parseListItems(text);
       final n = listLineCount(text);
-      expect(
-        resolveListDrop(items, 1, -1, ListDropMode.before, n),
-        (insertLine: 0, indent: 0),
-      );
-      expect(
-        resolveListDrop(items, 0, items.length, ListDropMode.after, n),
-        (insertLine: 2, indent: 0),
-      );
+      expect(resolveListDrop(items, 1, -1, ListDropMode.before, n), (
+        insertLine: 0,
+        indent: 0,
+      ));
+      expect(resolveListDrop(items, 0, items.length, ListDropMode.after, n), (
+        insertLine: 2,
+        indent: 0,
+      ));
     });
 
     test('dropping on itself or its own child is a no-op', () {
@@ -140,10 +139,7 @@ void main() {
       final n = listLineCount(text);
       expect(resolveListDrop(items, 0, 0, ListDropMode.under, n), isNull);
       expect(resolveListDrop(items, 0, 1, ListDropMode.under, n), isNull);
-      expect(
-        resolveListDrop(items, 0, 1, ListDropMode.before, n),
-        isNull,
-      );
+      expect(resolveListDrop(items, 0, 1, ListDropMode.before, n), isNull);
     });
   });
 
@@ -267,10 +263,7 @@ void main() {
         editItemText(text, items[0], 'one edited'),
         'prose\n- [ ] one edited\n- [x] two\n',
       );
-      expect(
-        editItemText(text, items[1], ''),
-        'prose\n- [ ] one\n- [x] \n',
-      );
+      expect(editItemText(text, items[1], ''), 'prose\n- [ ] one\n- [x] \n');
     });
   });
 

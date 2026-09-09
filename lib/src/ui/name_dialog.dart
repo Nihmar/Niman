@@ -17,7 +17,7 @@ Future<String?> showNameDialog(
 /// as the dialog (a disposed controller would break the exit animation
 /// while the [TextField] rebuilds).
 final class _NameDialog extends StatefulWidget {
-  const _NameDialog({required this.title, required this.initial});
+  const new({required this.title, required this.initial});
 
   final String title;
   final String initial;
@@ -27,8 +27,9 @@ final class _NameDialog extends StatefulWidget {
 }
 
 final class _NameDialogState extends State<_NameDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initial);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial,
+  );
 
   @override
   void dispose() {

@@ -10,10 +10,7 @@ import 'package:markdown/markdown.dart' as md;
 /// Visual style for the preview's math (text size in px-per-em, color).
 final class MathStyle {
   /// Creates the style.
-  const MathStyle({
-    this.fontSize = 15,
-    this.color,
-  });
+  const new({this.fontSize = 15, this.color});
 
   /// Logical pixels per em (match the surrounding text's font size).
   final double fontSize;
@@ -28,7 +25,7 @@ final class MathStyle {
 /// is in flight.
 final class MathInlineBuilder extends MarkdownElementBuilder {
   /// Creates an inline builder over [cache] with [style].
-  MathInlineBuilder({required this.cache, required this.style});
+  new({required this.cache, required this.style});
 
   /// The render cache the builder serves from.
   final MathCache cache;
@@ -43,11 +40,7 @@ final class MathInlineBuilder extends MarkdownElementBuilder {
     TextStyle? preferredStyle,
     TextStyle? parentStyle,
   ) {
-    return InlineMathView(
-      cache: cache,
-      tex: _latexOf(element),
-      style: style,
-    );
+    return InlineMathView(cache: cache, tex: _latexOf(element), style: style);
   }
 }
 
@@ -55,7 +48,7 @@ final class MathInlineBuilder extends MarkdownElementBuilder {
 /// MathBlockSyntax) centered, as its own block widget.
 final class MathBlockBuilder extends MarkdownElementBuilder {
   /// Creates a block builder over [cache] with [style].
-  MathBlockBuilder({required this.cache, required this.style});
+  new({required this.cache, required this.style});
 
   /// The cache the block builder serves from.
   final MathCache cache;
@@ -99,7 +92,7 @@ String _latexOf(md.Element element) {
 /// A baselined inline math widget, rendering from [cache].
 final class InlineMathView extends StatefulWidget {
   /// Creates the inline view.
-  const InlineMathView({
+  const new({
     required this.cache,
     required this.tex,
     required this.style,
@@ -196,7 +189,7 @@ class _InlineMathViewState extends State<InlineMathView> {
 /// A centered display-math box, rendering from [cache].
 final class BlockMathView extends StatefulWidget {
   /// Creates the display view.
-  const BlockMathView({
+  const new({
     required this.cache,
     required this.tex,
     required this.style,
@@ -251,10 +244,7 @@ class _BlockMathViewState extends State<BlockMathView> {
       return _mathBoxFromCache(context, box: box, style: widget.style);
     }
     if (widget.cache.isError(widget.tex, displayMode: true)) {
-      return Text(
-        widget.tex,
-        style: const TextStyle(color: Color(0xFFCC0000)),
-      );
+      return Text(widget.tex, style: const TextStyle(color: Color(0xFFCC0000)));
     }
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
@@ -297,7 +287,7 @@ Widget _mathBoxFromCache(
 /// below the top), so inline math rests on the text baseline — the katex
 /// package's own inline strategy, implemented on its public painter APIs.
 final class _InlineMathBox extends LeafRenderObjectWidget {
-  const _InlineMathBox({required this.box, required this.style});
+  const new({required this.box, required this.style});
 
   final BoxNode box;
   final MathStyle style;
@@ -328,7 +318,7 @@ Color _resolveColor(BuildContext context, MathStyle style) =>
     const Color(0xFF000000);
 
 final class _RenderInlineMath extends RenderBox {
-  _RenderInlineMath(this.box, this.style, this.color);
+  new(this.box, this.style, this.color);
 
   BoxNode box;
   MathStyle style;

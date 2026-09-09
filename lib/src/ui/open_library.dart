@@ -4,16 +4,26 @@ import 'dart:io';
 import 'package:copist/src/core/library_root.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/storage_access.dart';
+import 'package:copist/src/db/app_database.dart';
+import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/known_library_list.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
-/// The open/create screen.
+/// The home screen: the libraries the app knows about, and the two ways
+/// to reach one it does not (T-ML-05).
 ///
-/// Both flows go through the native directory picker (Storage Access
+/// It is where the app starts when nothing resumes. On a first run the
+/// list is empty and what is left is the screen this used to be —
+/// branding, one line of explanation, open and create — so the welcome
+/// is unchanged and the list takes the place of the explanation only
+/// once there is something to list.
+///
+/// Both open flows go through the native directory picker (Storage Access
 /// Framework on Android, xdg-desktop-portal on Linux) — no manual path
 /// entry, so a library root can only ever be a real, readable folder.
 /// The picker only *chooses* the folder: on Android the library is read
@@ -21,7 +31,7 @@ import 'package:path/path.dart' as p;
 /// root on shared storage is usable, and the screen asks for it up front.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
-  const OpenLibraryScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session that opens or creates the library for this screen.
   final LibrarySession controller;
@@ -44,10 +54,34 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   /// A picker/open failure that the session does not know about.
   String? _pickerError;
 
+  /// The known libraries, most recently opened first; empty until the
+  /// first load lands, which is also a first run's final state.
+  List<KnownLibrary> _known = const [];
+
+  /// Of those, the ones whose folder is not there right now.
+  Set<String> _unreachable = const {};
+
   @override
   void initState() {
     super.initState();
     unawaited(_refreshAccess());
+    unawaited(_loadKnown());
+  }
+
+  /// Reads the known-library list and checks which folders are there.
+  Future<void> _loadKnown() async {
+    final loaded = await loadKnownLibraries(widget.controller);
+    if (!mounted) return;
+    setState(() {
+      _known = loaded.entries;
+      _unreachable = loaded.missing;
+    });
+  }
+
+  /// Forgets [libraryPath] and refreshes the list.
+  Future<void> _forget(String libraryPath) async {
+    await widget.controller.forgetLibrary(libraryPath);
+    await _loadKnown();
   }
 
   /// Re-reads the shared-storage permission state into [_needsAccess].
@@ -81,82 +115,128 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     final active = opening || _busy;
     final narrow = MediaQuery.sizeOf(context).width < 600;
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.appTitle)),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/branding/feather.png',
-                  key: const Key('branding'),
-                  width: 72,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  AppStrings.appTitle,
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  AppStrings.openLibraryIntro,
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
-                if (_needsAccess)
-                  _AccessPrompt(
-                    onGrant: active ? null : _grantAccess,
-                  )
-                else if (narrow)
-                  Column(
-                    children: [
-                      FilledButton(
-                        onPressed: active ? null : _openExisting,
-                        child: Text(AppStrings.openLibraryExisting),
-                      ),
-                      const SizedBox(height: 8),
-                      FilledButton.tonal(
-                        onPressed: active ? null : _createNew,
-                        child: Text(AppStrings.openLibraryCreate),
-                      ),
-                    ],
-                  )
-                else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                        onPressed: active ? null : _openExisting,
-                        child: Text(AppStrings.openLibraryExisting),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.tonal(
-                        onPressed: active ? null : _createNew,
-                        child: Text(AppStrings.openLibraryCreate),
-                      ),
-                    ],
+      // No app bar: it carried the app's name and nothing else, and the
+      // name is already under the feather a few pixels below. What it
+      // cost was a bar's worth of the list.
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/branding/feather.png',
+                    key: const Key('branding'),
+                    width: 72,
                   ),
-                if (active)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: LinearProgressIndicator(),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppStrings.appTitle,
+                    style: theme.textTheme.headlineMedium,
                   ),
-                if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(
-                      error,
-                      style: const TextStyle(color: Colors.red),
+                  const SizedBox(height: 8),
+                  // The one line of explanation gives way to the list: on a
+                  // phone the two together push the libraries below the
+                  // fold, and someone with a list of them does not need it.
+                  if (_known.isEmpty)
+                    Text(
+                      AppStrings.openLibraryIntro,
+                      style: theme.textTheme.bodyMedium,
                     ),
-                  ),
-              ],
+                  const SizedBox(height: 24),
+                  if (!_needsAccess && _known.isNotEmpty) ...[
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: KnownLibraryList(
+                        entries: _known,
+                        unreachable: _unreachable,
+                        enabled: !active,
+                        onOpen: (path) => unawaited(_openKnown(path)),
+                        onForget: (path) => unawaited(_forget(path)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (_needsAccess)
+                    _AccessPrompt(onGrant: active ? null : _grantAccess)
+                  else
+                    _actions(active: active, narrow: narrow),
+                  if (active) ...[
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: LinearProgressIndicator(),
+                    ),
+                    // The first index of a large library is a long silent
+                    // wait; naming what it is reading turns it into
+                    // something to watch, and says the app is not stuck.
+                    if (widget.controller.indexProgress case final progress?)
+                      _IndexingLine(progress: progress),
+                  ],
+                  if (error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  /// Open and create, side by side where there is room.
+  ///
+  /// They carry the screen on a first run, so they are filled buttons
+  /// there. Once a list is above them the list is what the screen is
+  /// about, and two filled buttons under it would compete with it for
+  /// the eye, so they step back to plain ones.
+  Widget _actions({required bool active, required bool narrow}) {
+    final prominent = _known.isEmpty;
+    final open = prominent
+        ? FilledButton(
+            key: const Key('open-existing-library'),
+            onPressed: active ? null : _openExisting,
+            child: Text(AppStrings.openLibraryExisting),
+          )
+        : TextButton(
+            key: const Key('open-existing-library'),
+            onPressed: active ? null : _openExisting,
+            child: Text(AppStrings.openLibraryExisting),
+          );
+    final create = prominent
+        ? FilledButton.tonal(
+            key: const Key('create-library'),
+            onPressed: active ? null : _createNew,
+            child: Text(AppStrings.openLibraryCreate),
+          )
+        : TextButton(
+            key: const Key('create-library'),
+            onPressed: active ? null : _createNew,
+            child: Text(AppStrings.openLibraryCreate),
+          );
+    // Stacked on a phone only while they are the whole screen; as a pair
+    // of plain buttons they fit on one line at any width.
+    if (narrow && prominent) {
+      return Column(children: [open, const SizedBox(height: 8), create]);
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [open, const SizedBox(width: 8), create],
+    );
+  }
+
+  /// Opens a library the user picked off the known list.
+  Future<void> _openKnown(String path) async {
+    _pickerError = null;
+    await widget.controller.open(path, create: false);
+    // The controller's event stream drives the rebuild (phase/lastError).
   }
 
   Future<void> _openExisting() async {
@@ -169,9 +249,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
 
   Future<void> _createNew() async {
     _pickerError = null;
-    final parent = await _pickDirectory(
-      AppStrings.openLibraryChooseParent,
-    );
+    final parent = await _pickDirectory(AppStrings.openLibraryChooseParent);
     if (parent == null) return;
     final name = await _promptName();
     if (name == null || name.isEmpty) return;
@@ -236,10 +314,55 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   }
 }
 
+/// The note the first index is reading, under the progress bar.
+///
+/// One line, fixed height and no wrapping: the names change many times a
+/// second, and a line that grew or shrank with each one would make the
+/// whole screen jump.
+final class _IndexingLine extends StatelessWidget {
+  const new({required this.progress});
+
+  /// The scan's latest report.
+  final IndexProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Column(
+        children: [
+          const SizedBox(height: 8),
+          Text(
+            AppStrings.indexingCount(progress.done, progress.of),
+            style: style,
+          ),
+          const SizedBox(height: 2),
+          SizedBox(
+            height: 18,
+            child: Text(
+              progress.file,
+              key: const Key('indexing-file'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              textAlign: TextAlign.center,
+              style: style?.copyWith(fontFamily: 'monospace'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Shown instead of the open/create buttons while Android withholds the
 /// shared-storage permission.
 final class _AccessPrompt extends StatelessWidget {
-  const _AccessPrompt({required this.onGrant});
+  const new({required this.onGrant});
 
   /// Opens the system settings screen; null while a request is in flight.
   final Future<void> Function()? onGrant;
@@ -267,7 +390,7 @@ final class _AccessPrompt extends StatelessWidget {
 /// Dialog that asks for the name of the new library folder.
 final class _NewLibraryDialog extends StatefulWidget {
   /// Creates the dialog.
-  const _NewLibraryDialog();
+  const new();
 
   @override
   State<_NewLibraryDialog> createState() => _NewLibraryDialogState();

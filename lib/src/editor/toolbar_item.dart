@@ -59,7 +59,7 @@ enum ToolbarItem {
   /// Indent the selected lines.
   indent('indent', 'toolbar-indent', Icons.format_indent_increase);
 
-  const ToolbarItem(this.id, this._key, this.icon);
+  new(this.id, this._key, this.icon);
 
   /// The persisted id.
   final String id;

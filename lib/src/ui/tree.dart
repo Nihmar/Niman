@@ -1,5 +1,5 @@
 import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/file_icon.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {
-  const _Row({required this.note, required this.depth});
+  const new({required this.note, required this.depth});
 
   final Note note;
   final int depth;
@@ -20,7 +20,7 @@ final class _Row {
 /// the visible rows (T-M1-04).
 final class NoteTree extends StatefulWidget {
   /// Creates the note tree.
-  const NoteTree({
+  const new({
     required this.controller,
     required this.selectedPath,
     required this.expanded,
@@ -57,12 +57,6 @@ final class NoteTree extends StatefulWidget {
 }
 
 final class _NoteTreeState extends State<NoteTree> {
-  static const AppLogger _log = AppLogger(name: 'tree');
-
-  /// How many paths are listed in a single debug log line before the rest
-  /// is summarized, keeping huge folders from flooding the buffer.
-  static const _logPathCap = 12;
-
   /// The rows currently being shown, and the inputs they were built from.
   ///
   /// The flatten runs one `children` query per expanded level, so it must
@@ -74,6 +68,18 @@ final class _NoteTreeState extends State<NoteTree> {
   Future<List<_Row>>? _rows;
   int? _rowsRevision;
   Set<String> _rowsExpanded = const <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    const AppLogger(name: 'tree.ui').debug('mount');
+  }
+
+  @override
+  void dispose() {
+    const AppLogger(name: 'tree.ui').debug('dispose');
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(NoteTree oldWidget) {
@@ -99,41 +105,40 @@ final class _NoteTreeState extends State<NoteTree> {
 
   /// Flattens the visible tree from the index.
   Future<List<_Row>> _flatten() async {
+    final started = DateTime.now();
+    final allNodes = await widget.controller.tree(
+      widget.expanded,
+      nameDesc: widget.nameDesc,
+    );
+
+    final nodesByParent = <int, List<Note>>{};
+    for (final node in allNodes) {
+      nodesByParent.putIfAbsent(node.parent, () => []).add(node);
+    }
+
     final out = <_Row>[];
-    await _walk(0, 0, out);
+    _walkSync(0, 0, nodesByParent, out);
+
+    const AppLogger(name: 'tree.ui').debug(
+      'flatten: ${DateTime.now().difference(started).inMilliseconds}ms '
+      '(${out.length} rows)',
+    );
     return out;
   }
 
-  Future<void> _walk(int parentId, int depth, List<_Row> out) async {
-    final children = await widget.controller.children(
-      parentId,
-      nameDesc: widget.nameDesc,
-    );
-    _log.debug(
-      'tree: children(parent=$parentId) -> ${children.length}: '
-      '${_pathList(children.map((n) => n.path))}',
-    );
+  void _walkSync(
+    int parentId,
+    int depth,
+    Map<int, List<Note>> nodesByParent,
+    List<_Row> out,
+  ) {
+    final children = nodesByParent[parentId] ?? const [];
     for (final note in children) {
       out.add(_Row(note: note, depth: depth));
       if (note.isDir && widget.expanded.contains(note.path)) {
-        await _walk(note.id, depth + 1, out);
+        _walkSync(note.id, depth + 1, nodesByParent, out);
       }
     }
-  }
-
-  static String _pathList(Iterable<String> paths) {
-    final iterator = paths.iterator;
-    if (!iterator.moveNext()) return '(none)';
-    final shown = <String>[iterator.current];
-    var extra = 0;
-    while (iterator.moveNext() && shown.length < _logPathCap) {
-      shown.add(iterator.current);
-    }
-    while (iterator.moveNext()) {
-      extra++;
-    }
-    final list = shown.join(', ');
-    return extra > 0 ? '$list, … (+$extra more)' : list;
   }
 
   @override
@@ -185,7 +190,7 @@ bool _setEquals(Set<String> a, Set<String> b) {
 /// One row tile: chevron (folders) or doc icon (files), then the name —
 /// the name column is shared, per the mockup.
 final class _RowTile extends StatelessWidget {
-  const _RowTile({
+  const new({
     required this.note,
     required this.depth,
     required this.isExpanded,

@@ -34,10 +34,7 @@ void main() {
 
     test('all passes everything', () {
       const filter = TodoFilter();
-      expect(
-        descriptions(applyTodoFilter(lines, filter, today)),
-        hasLength(5),
-      );
+      expect(descriptions(applyTodoFilter(lines, filter, today)), hasLength(5));
     });
 
     test('overdue / today / next7 / noDate', () {
@@ -85,18 +82,13 @@ void main() {
   });
 
   group('token chips', () {
-    final lines = entries([
-      'a +p1 @c1',
-      'b +p1 +p2',
-      'c @c1 #t1',
-    ]);
+    final lines = entries(['a +p1 @c1', 'b +p1 +p2', 'c @c1 #t1']);
 
     test('chips AND together', () {
       const filter = TodoFilter(tokens: {'+p1', '@c1'});
-      expect(
-        descriptions(applyTodoFilter(lines, filter, today)),
-        ['a +p1 @c1'],
-      );
+      expect(descriptions(applyTodoFilter(lines, filter, today)), [
+        'a +p1 @c1',
+      ]);
     });
 
     test('project/context/tag namespaces stay apart', () {
@@ -105,11 +97,7 @@ void main() {
     });
 
     test('counts rank by task count, then token', () {
-      final counts = tokenCountsFor(
-        lines,
-        TodoDueRange.all,
-        today,
-      );
+      final counts = tokenCountsFor(lines, TodoDueRange.all, today);
       expect(
         [for (final c in counts) '${c.token}:${c.count}'],
         ['+p1:2', '@c1:2', '#t1:1', '+p2:1'],
@@ -117,10 +105,7 @@ void main() {
     });
 
     test('counts ignore the token selection but honor the due range', () {
-      const dated = [
-        'a +p1 due:2026-09-01',
-        'b +p1 +p2',
-      ];
+      const dated = ['a +p1 due:2026-09-01', 'b +p1 +p2'];
       final counts = tokenCountsFor(
         entries(dated),
         TodoDueRange.overdue,
@@ -133,10 +118,7 @@ void main() {
       const filter = TodoFilter(tokens: {'+p1', '+gone'});
       final pruned = filter.pruneTokens({'+p1'});
       expect(pruned.tokens, {'+p1'});
-      expect(
-        filter.pruneTokens({'+p1', '+gone'}),
-        filter,
-      );
+      expect(filter.pruneTokens({'+p1', '+gone'}), filter);
     });
   });
 
@@ -158,17 +140,12 @@ void main() {
         'overdue due:2026-09-01',
         'today due:2026-09-07',
       ]);
-      expect(
-        descriptions(
-          applyTodoFilter(lines, const TodoFilter(), today),
-        ),
-        [
-          'overdue due:2026-09-01',
-          'today due:2026-09-07',
-          'later due:2026-09-10',
-          'undated',
-        ],
-      );
+      expect(descriptions(applyTodoFilter(lines, const TodoFilter(), today)), [
+        'overdue due:2026-09-01',
+        'today due:2026-09-07',
+        'later due:2026-09-10',
+        'undated',
+      ]);
     });
 
     test('due ties break by priority, then creation, then file order', () {
@@ -178,29 +155,17 @@ void main() {
         '(A) 2026-01-03 pri due:2026-09-07',
         'second plain due:2026-09-07',
       ]);
-      expect(
-        descriptions(
-          applyTodoFilter(lines, const TodoFilter(), today),
-        ),
-        [
-          'pri due:2026-09-07',
-          'pri due:2026-09-07',
-          'plain due:2026-09-07',
-          'second plain due:2026-09-07',
-        ],
-      );
-      expect(
-        applyTodoFilter(lines, const TodoFilter(), today)[0].lineIndex,
-        2,
-      );
+      expect(descriptions(applyTodoFilter(lines, const TodoFilter(), today)), [
+        'pri due:2026-09-07',
+        'pri due:2026-09-07',
+        'plain due:2026-09-07',
+        'second plain due:2026-09-07',
+      ]);
+      expect(applyTodoFilter(lines, const TodoFilter(), today)[0].lineIndex, 2);
     });
 
     test('priority: (A) first, unprioritized last', () {
-      final lines = entries([
-        'plain',
-        '(B) bee',
-        '(A) aye',
-      ]);
+      final lines = entries(['plain', '(B) bee', '(A) aye']);
       expect(
         descriptions(
           applyTodoFilter(

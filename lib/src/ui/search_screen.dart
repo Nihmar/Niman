@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/query.dart';
@@ -24,7 +25,7 @@ import 'package:flutter/material.dart';
 /// confirm button rewrites the notes.
 final class SearchScreen extends StatefulWidget {
   /// Creates the search screen.
-  const SearchScreen({
+  const new({
     required this.controller,
     required this.onOpenNote,
     this.onOpenTags,
@@ -81,13 +82,22 @@ final class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    // Timed because entering this tab is reported as stuttering, and the
+    // two suspects leave different traces: acquiring the source (the
+    // background isolate and a second SQLite connection) shows up here as
+    // milliseconds, while the cost of building and painting the screen
+    // shows up as slow frames after a mount that took no time at all.
+    final started = DateTime.now();
     _query.addListener(_onQueryChanged);
     _replacement.addListener(_onReplacementChanged);
-    if (widget.source == null) unawaited(_loadSource());
+    if (widget.source == null) unawaited(_loadSource(since: started));
+    const AppLogger(name: 'search.ui')
+        .debug('mount: ${DateTime.now().difference(started).inMilliseconds}ms');
   }
 
   @override
   void dispose() {
+    const AppLogger(name: 'search.ui').debug('dispose');
     _debounceTimer?.cancel();
     _replaceRefresh?.cancel();
     _query.removeListener(_onQueryChanged);
@@ -100,10 +110,31 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// Resolves the search source once; a failed load leaves [_source] null
   /// and [_runSearch] retries on the next query — a transient startup
   /// failure must not wedge the box into issuing queries that go nowhere.
-  Future<void> _loadSource() async {
+  Future<void> _loadSource({DateTime? since}) async {
     final source = await _acquireSource();
+    if (since != null) {
+      // Near zero means the session had it already (the shell warms it
+      // after a library opens); anything larger is this tab paying for
+      // the background connection on the frame that animates it in.
+      const AppLogger(name: 'search.ui').info(
+        'source ready ${DateTime.now().difference(since).inMilliseconds}ms '
+        'after mount',
+      );
+    }
+    // Applied straight away, even mid-fade. An earlier round deferred the
+    // apply 200 ms so the fade would finish first; the frame log proved
+    // the rebuild it guarded costs nothing (0 ms build, a few ms to the
+    // first frame) while the wait was itself the whole perceived lag of
+    // the first search visit, so the defer went.
     if (!mounted || source == null) return;
     setState(() => _source = source);
+    if (since != null) {
+      const AppLogger(name: 'search.ui').debug(
+        'source applied ${DateTime.now().difference(since).inMilliseconds}ms '
+        'after mount',
+      );
+    }
+    logNextFrame('search.ui', 'source applied first frame');
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
   }
 
@@ -139,10 +170,9 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     // Editing the term invalidates the replace preview: leave the mode.
     _leaveReplaceMode();
-    _debounceTimer = Timer(
-      _debounce,
-      () => unawaited(_runSearch()),
-    );
+    const AppLogger(name: 'search.ui')
+        .debug('debouncing "$text" (${_debounce.inMilliseconds}ms)');
+    _debounceTimer = Timer(_debounce, () => unawaited(_runSearch()));
   }
 
   void _onReplacementChanged() {
@@ -188,19 +218,27 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     final id = source.begin();
     final contains = _contains;
-    const AppLogger(name: 'search.ui').debug(
-      'issue id $id (${contains ? 'contains' : 'words'}) "$text"',
-    );
+    const AppLogger(name: 'search.ui')
+        .debug('issue id $id (${contains ? 'contains' : 'words'}) "$text"');
+    final clock = Stopwatch()..start();
     final results = contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
     if (!source.isCurrent(id)) return; // a newer query superseded this one
     if (!mounted) return;
+    // The repo already logs the SQL time; this is issue → results landed,
+    // i.e. what a keystroke waits for on the UI side (debounce included
+    // in the gap back to the 'debouncing' line).
+    const AppLogger(name: 'search.ui').debug(
+      'id $id landed in ${clock.elapsedMilliseconds}ms '
+      '(${results.length} hits)',
+    );
     setState(() {
       _searched = true;
       _hits = results;
       _shown = _pageSize < results.length ? _pageSize : results.length;
     });
+    logNextFrame('search.ui', 'results first frame (id $id)');
   }
 
   void _loadMore() {
@@ -212,8 +250,9 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final started = DateTime.now();
     final theme = Theme.of(context);
-    return Column(
+    final child = Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
@@ -286,6 +325,9 @@ final class _SearchScreenState extends State<SearchScreen> {
         ),
       ],
     );
+    const AppLogger(name: 'search.ui')
+        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
+    return child;
   }
 
   Widget _results(ThemeData theme) {
@@ -442,11 +484,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (!mounted) return;
     final message = report.occurrences == 0
         ? AppStrings.replaceNoMatch(term)
-        : AppStrings.replaceDone(
-            report.occurrences,
-            term,
-            report.notesChanged,
-          );
+        : AppStrings.replaceDone(report.occurrences, term, report.notesChanged);
     _snack(
       report.skipped.isEmpty
           ? message
@@ -478,9 +516,8 @@ final class _SearchScreenState extends State<SearchScreen> {
 
   void _snack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   /// The inline replace panel under the query box: replacement text, the
@@ -506,7 +543,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     final confirmLabel = only != null
         ? AppStrings.replaceInThisNote
         : '${AppStrings.replaceConfirm} '
-            '(${hasMatches ? '$occurrences' : '…'})';
+              '(${hasMatches ? '$occurrences' : '…'})';
     return Container(
       key: const Key('replace-panel'),
       margin: const EdgeInsets.only(top: 8),
@@ -573,8 +610,7 @@ final class _SearchScreenState extends State<SearchScreen> {
                 ),
               FilledButton(
                 key: const Key('replace-confirm'),
-                onPressed:
-                    _previewBusy || !hasMatches ? null : _runReplace,
+                onPressed: _previewBusy || !hasMatches ? null : _runReplace,
                 child: Text(confirmLabel),
               ),
             ],
@@ -600,10 +636,7 @@ final class _SearchScreenState extends State<SearchScreen> {
     if (notes.isEmpty) {
       return Center(
         child: Text(
-          AppStrings.replacePreviewEmpty(
-            _query.text.trim(),
-            _replaceOnly,
-          ),
+          AppStrings.replacePreviewEmpty(_query.text.trim(), _replaceOnly),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -680,10 +713,7 @@ final class _SearchScreenState extends State<SearchScreen> {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: '→ ',
-                  style: matchStyle,
-                ),
+                TextSpan(text: '→ ', style: matchStyle),
                 context(replacement.isEmpty ? ' ' : replacement),
               ],
             ),

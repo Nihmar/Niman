@@ -21,14 +21,15 @@ indexes them, including the slices outside the chain.
   - Windows (`flutter build windows --release` → `build\windows\x64\runner\Release\`) needs a Windows host; it cannot be cross-built from Linux, so verify it there when the change touches platform code.
 
 ## Verify
+- **Before analyze and tests, run `dart fix --apply` then `dart format lib test tool`.** Both are idempotent and safe to repeat. `dart fix` is what keeps the tree on the current Dart style — the unnamed constructor is declared `new(...)`, not by repeating the type name — and it settles most new lints from an `analysis_options` bump without hand edits. Formatting first also keeps a later reflow from burying a real diff.
 - No CI: nothing runs the checks for you, so `./scripts/copist.sh check` (analyze + tests) before every commit. Terse output; full log `/tmp/copist/copist-check.log`.
-- On a Windows host: `scripts\copist.bat <analyze|test|check|apk|windows>` (same output discipline, logs under `%TEMP%\copist`). ~23 tests fail there on path separators (`/fake/library` vs `\`) and on temp-dir cleanup — pre-existing and platform-only, not a regression; the suite is green on Linux.
+- On a Windows host: `scripts\copist.bat <analyze|test|check|apk|windows>` (same output discipline, logs under `%TEMP%\copist`). ~20 tests fail there on path separators (`/fake/library` vs `\`) and on temp-dir cleanup — pre-existing and platform-only, not a regression; the suite is green on Linux. **Use `pwsh scripts/newfail.ps1` instead of reading a raw run**: it runs the suite and prints only the failures that are not in `scripts/known-failures.txt`, so "No new failures" is one line rather than a judgement call over ~24 red ones. Takes optional paths (`pwsh scripts/newfail.ps1 test/widget`); `-Update` rewrites the baseline after a deliberate change; exit code 1 means something new broke. In the baseline `#` is a comment and `~` marks a flake, tolerated either way — `file_watcher_test` "coalesces rapid events into a single batch" fails only under full-suite load, and `fixture_10k_test` times out building its 10k-note fixture (a `TimeoutException` with a partial count, not a failed assertion), so that file shows 3 or 4 failures depending on the run. Check a suspect failure in isolation before calling it a regression. **New tests must be portable**: build expected paths with `p.join`, never a literal `/`, and reach for a real I/O error (a directory where a file belongs) rather than shelling out to `chmod`, which does not exist here.
 - `flutter analyze --fatal-infos` (infos are fatal; keep it clean).
 - `flutter test` (`test/unit/`, `test/widget/`). Single: `flutter test test/unit/<f>.dart --plain-name "<name>"`.
 - `integration_test/` = on-device E2E; not part of the default run.
 
 ## Codegen
-- drift DB in `lib/src/db/`; `database.g.dart` committed. After schema/DAO changes: `dart run build_runner build`.
+- drift DBs in `lib/src/db/`, two of them, with their `.g.dart` committed. `AppDatabase` (`app_database.dart`) is `copist.db` in app support: the settings, the only rows that are not rebuildable, and the one long migration chain. `IndexDatabase` (`index_database.dart`) is one file per library under `indexes/`, schema 1 and no migrations — a shape change there means bumping nothing and deleting the file, since a rescan rebuilds it. After schema/DAO changes: `dart run build_runner build`.
 
 ## Output discipline
 - Never dump large output into context. Redirect, then read selectively. Scratch: `mkdir -p /tmp/copist`.

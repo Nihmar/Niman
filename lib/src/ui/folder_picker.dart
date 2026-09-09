@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -33,7 +33,7 @@ Future<String?> showFolderPicker(
 /// The folder picker dialog body.
 final class FolderPicker extends StatefulWidget {
   /// Creates the dialog.
-  const FolderPicker({
+  const new({
     required this.title,
     required this.folders,
     required this.ops,

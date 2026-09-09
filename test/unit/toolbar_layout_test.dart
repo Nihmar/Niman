@@ -33,12 +33,15 @@ void main() {
     });
 
     test('an empty or absent value is the default', () {
-      expect(ToolbarLayout.parse(null).encode(),
-          ToolbarLayout.defaults.encode());
-      expect(ToolbarLayout.parse('').encode(),
-          ToolbarLayout.defaults.encode());
-      expect(ToolbarLayout.parse('   ').encode(),
-          ToolbarLayout.defaults.encode());
+      expect(
+        ToolbarLayout.parse(null).encode(),
+        ToolbarLayout.defaults.encode(),
+      );
+      expect(ToolbarLayout.parse('').encode(), ToolbarLayout.defaults.encode());
+      expect(
+        ToolbarLayout.parse('   ').encode(),
+        ToolbarLayout.defaults.encode(),
+      );
     });
 
     test('order and hidden survive a round trip', () {
@@ -73,8 +76,10 @@ void main() {
     });
 
     test('hiding and showing a button leaves its place alone', () {
-      final hidden = ToolbarLayout.defaults
-          .withVisible(ToolbarItem.italic, visible: false);
+      final hidden = ToolbarLayout.defaults.withVisible(
+        ToolbarItem.italic,
+        visible: false,
+      );
       expect(hidden.visible.contains(ToolbarItem.italic), isFalse);
       expect(hidden.order, ToolbarLayout.defaults.order);
 

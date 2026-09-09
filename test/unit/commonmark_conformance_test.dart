@@ -34,9 +34,7 @@ void main() {
         extensionSet: md.ExtensionSet.gitHubFlavored,
       );
       if (_normalize(actual) != _normalize(expected)) {
-        failures.add(
-          '#${example['example']} (${example['section']})',
-        );
+        failures.add('#${example['example']} (${example['section']})');
       }
     }
 
@@ -52,13 +50,16 @@ void main() {
     expect(
       passed,
       greaterThanOrEqualTo(639),
-      reason: 'CommonMark: $passed/${examples.length} '
+      reason:
+          'CommonMark: $passed/${examples.length} '
           '(${failures.take(10).join(', ')}'
           '${failures.length > 10 ? ', ...' : ''})',
     );
     // The measured number is logged (read from the test log).
     // ignore: avoid_print
-    print('CommonMark (GFM): $passed/${examples.length} '
-        '(${(passed * 100 / examples.length).toStringAsFixed(1)}%)');
+    print(
+      'CommonMark (GFM): $passed/${examples.length} '
+      '(${(passed * 100 / examples.length).toStringAsFixed(1)}%)',
+    );
   });
 }

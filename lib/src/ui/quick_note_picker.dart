@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -25,11 +25,7 @@ Future<bool> showQuickNotePicker(
 /// The picker dialog body.
 final class QuickNotePicker extends StatefulWidget {
   /// Creates the picker dialog.
-  const QuickNotePicker({
-    required this.controller,
-    required this.currentPath,
-    super.key,
-  });
+  const new({required this.controller, required this.currentPath, super.key});
 
   /// The session providing the tree rows and the ops.
   final LibrarySession controller;

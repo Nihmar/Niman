@@ -21,7 +21,7 @@ import 'package:flutter/services.dart';
 /// Whether Copist may read every file on shared storage.
 final class StorageAccess {
   /// Creates the gate; use the static methods.
-  const StorageAccess._();
+  const new _();
 
   static const MethodChannel _channel = MethodChannel('copist/storage');
 
@@ -30,8 +30,7 @@ final class StorageAccess {
   /// Always `true` off Android, where there is no such restriction.
   static Future<bool> hasAllFilesAccess() async {
     if (!Platform.isAndroid) return true;
-    final granted =
-        await _channel.invokeMethod<bool>('hasManageStorageAccess');
+    final granted = await _channel.invokeMethod<bool>('hasManageStorageAccess');
     return granted ?? false;
   }
 
@@ -43,8 +42,9 @@ final class StorageAccess {
   /// permission: it can only be flipped there.
   static Future<bool> ensureAllFilesAccess() async {
     if (await hasAllFilesAccess()) return true;
-    final granted =
-        await _channel.invokeMethod<bool>('requestManageStorageAccess');
+    final granted = await _channel.invokeMethod<bool>(
+      'requestManageStorageAccess',
+    );
     return granted ?? false;
   }
 }

@@ -69,10 +69,7 @@ void main() {
       // First block at line 0, blocks strictly increasing, all in range.
       expect(map.blockStartLines.first, 0);
       for (var i = 1; i < map.blockStartLines.length; i++) {
-        expect(
-          map.blockStartLines[i],
-          greaterThan(map.blockStartLines[i - 1]),
-        );
+        expect(map.blockStartLines[i], greaterThan(map.blockStartLines[i - 1]));
       }
       expect(map.blockStartLines.last, lessThan(_lines(_coverage).length));
     });
@@ -99,10 +96,7 @@ void main() {
         ..rebuild(List.generate(40, (i) => 'line $i').join('\n\n'));
       expect(map.blockStartLines.length, 40);
       expect(map.blockForLine(0), 0);
-      final offset = map.previewOffsetForLine(
-        20,
-        maxExtent: 1000,
-      );
+      final offset = map.previewOffsetForLine(20, maxExtent: 1000);
       expect(offset, greaterThan(0));
     });
 
@@ -116,8 +110,7 @@ void main() {
     });
 
     test('ready only once every block is measured', () {
-      final map = ScrollMap()
-        ..rebuild('a\n\nb\n\nc');
+      final map = ScrollMap()..rebuild('a\n\nb\n\nc');
       expect(map.isReady, isFalse);
       for (var i = 0; i < map.blockStartLines.length; i++) {
         map.measure(i, 20);

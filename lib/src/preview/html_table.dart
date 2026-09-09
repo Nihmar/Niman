@@ -87,9 +87,7 @@ md.Node _parseTable(String inner) {
     final cells = <md.Node>[];
     for (final cellMatch in _cellRe.allMatches(rowMatch.group(1)!)) {
       final text = cellMatch.group(1)!.replaceAll(_tagRe, '').trim();
-      cells.add(
-        md.Element.text('htmlcell', _unescape(text)),
-      );
+      cells.add(md.Element.text('htmlcell', _unescape(text)));
     }
     if (cells.isNotEmpty) rows.add(md.Element('htmlrow', cells));
   }
@@ -107,7 +105,7 @@ String _unescape(String s) => s
 /// Renders the `htmlblock` element (from [splitHtmlTables]) as a [Table].
 final class HtmlTableBuilder extends MarkdownElementBuilder {
   /// Creates the builder.
-  HtmlTableBuilder();
+  new();
 
   @override
   bool isBlockElement() => true;
@@ -132,10 +130,7 @@ final class HtmlTableBuilder extends MarkdownElementBuilder {
         cells.add(
           Padding(
             padding: const EdgeInsets.all(6),
-            child: Text(
-              text.isEmpty ? '' : text,
-              style: preferredStyle,
-            ),
+            child: Text(text.isEmpty ? '' : text, style: preferredStyle),
           ),
         );
       }

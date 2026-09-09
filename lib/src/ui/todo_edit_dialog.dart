@@ -40,7 +40,7 @@ Future<String?> showTodoTaskDialog(
 /// reminder pickers, Cancel/Save (Save stays disabled while the
 /// description is blank).
 final class _TodoTaskDialog extends StatefulWidget {
-  const _TodoTaskDialog({
+  const new({
     required this.initial,
     required this.today,
     required this.knownTokens,
@@ -106,8 +106,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
         : text.substring(0, caret);
     final boundary = head.lastIndexOf(RegExp(r'\s'));
     final word = head.substring(boundary + 1);
-    if (word.isEmpty ||
-        (word[0] != '+' && word[0] != '@' && word[0] != '#')) {
+    if (word.isEmpty || (word[0] != '+' && word[0] != '@' && word[0] != '#')) {
       return null;
     }
     start[0] = boundary + 1;
@@ -117,19 +116,12 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   /// Known tokens completing the word under the caret.
   Iterable<String> _options(TextEditingValue value) {
     final start = <int>[0];
-    final word = _tokenWord(
-      value.text,
-      value.selection.extentOffset,
-      start,
-    );
+    final word = _tokenWord(value.text, value.selection.extentOffset, start);
     if (word == null) {
       return const Iterable<String>.empty();
     }
     return widget.knownTokens.where(
-      (token) =>
-          token.startsWith(word) &&
-          token != word &&
-          token[0] == word[0],
+      (token) => token.startsWith(word) && token != word && token[0] == word[0],
     );
   }
 
@@ -180,8 +172,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   void _insertSigil(String sigil) {
     _log.debug('todo dialog token add: $sigil');
     final head = _field.text;
-    final spaced =
-        head.isEmpty || head.endsWith(' ') || head.endsWith('\t')
+    final spaced = head.isEmpty || head.endsWith(' ') || head.endsWith('\t')
         ? head
         : '$head ';
     final text = '$spaced$sigil';
@@ -293,9 +284,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
     final adding = widget.initial == null;
     final tokens = _fieldTokens();
     return AlertDialog(
-      title: Text(
-        adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle,
-      ),
+      title: Text(adding ? AppStrings.todoAddTitle : AppStrings.todoEditTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -468,9 +457,7 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
       controller: _field,
       focusNode: _focus,
       autofocus: true,
-      decoration: InputDecoration(
-        hintText: AppStrings.todoDescriptionHint,
-      ),
+      decoration: InputDecoration(hintText: AppStrings.todoDescriptionHint),
       textInputAction: TextInputAction.done,
       onChanged: (_) => setState(() {}),
       onSubmitted: (_) => _save(),

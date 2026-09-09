@@ -9,6 +9,7 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/note_view.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,10 +83,8 @@ void main() {
     // Go to the Settings tab and back: the tree keeps its expansion.
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
-    expect(
-      find.text('Deletions move to .trash/ (off = hard delete)'),
-      findsOne,
-    );
+    // The first section heading: what the settings list opens on.
+    expect(find.text(AppStrings.settingsSectionAppearance), findsOne);
     await tester.tap(find.byKey(const Key('tab-files')));
     await settle(tester);
     expect(noteRow('Docs'), findsOne);
@@ -218,6 +217,21 @@ void main() {
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
   });
 
+  testWidgets('each tab names itself in the app bar', (tester) async {
+    // The Files tab said "Copist", which named the app on a screen that
+    // is about the tree (user, 2026-09-09).
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    expect(find.widgetWithText(AppBar, AppStrings.tabFiles), findsOne);
+    expect(find.widgetWithText(AppBar, AppStrings.appTitle), findsNothing);
+
+    await tester.tap(find.byKey(const Key('tab-settings')));
+    await settle(tester);
+    expect(find.widgetWithText(AppBar, AppStrings.tabSettings), findsOne);
+  });
+
   testWidgets('quick note: choosing in Settings is honored by the tab', (
     tester,
   ) async {
@@ -238,19 +252,13 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Not set yet'), findsOne);
-    await tester.scrollUntilVisible(
-      find.text('Not set yet'),
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
-    // The tile can still sit behind the bottom NavigationBar: nudge the
-    // list up so the subtitle (the tap target) is fully visible.
-    await tester.drag(
-      find.byType(Scrollable).first,
-      const Offset(0, -120),
-    );
+    // Scrolled to a known place and tapped by key rather than by its
+    // subtitle: the rows above it come and go with the width (the
+    // preview layout ones are hidden on a phone), so any fixed nudge is
+    // wrong on some layout.
+    await tester.ensureVisible(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
-    await tester.tap(find.text('Not set yet'));
+    await tester.tap(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
     await tester.tap(
       find.descendant(
@@ -365,10 +373,7 @@ void main() {
     // The tags button flips to the Tags screen and back (T-M3-06).
     await tester.tap(find.byKey(const Key('open-tags')));
     await settle(tester);
-    expect(
-      find.text('No tags yet — add a #tag or frontmatter tags'),
-      findsOne,
-    );
+    expect(find.text('No tags yet — add a #tag or frontmatter tags'), findsOne);
     await tester.tap(find.byKey(const Key('tags-back')));
     await settle(tester);
     expect(find.byKey(const Key('search-query')), findsOne);
@@ -401,9 +406,7 @@ void main() {
     tester,
   ) async {
     setSurfaceSize(tester, const Size(390, 844));
-    final reminders = FakeReminderService(
-      launchPayload: todoReminderPayload,
-    );
+    final reminders = FakeReminderService(launchPayload: todoReminderPayload);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -462,6 +465,45 @@ void main() {
       matches(RegExp(r'^\d{4}-\d{2}-\d{2} shell task$')),
     );
     await reminders.dispose();
+  });
+
+  // 2026-09-08 user feedback: Files and Todo put a `+` in the same
+  // corner, so scaling one out and the next one in read as a flicker on a
+  // button that never moved. Scaffold decides by comparing the FAB's key,
+  // so one shared key is what keeps the slot still.
+  testWidgets('the Files and Todo FABs share one Scaffold slot', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    Key? fabSlotKey() {
+      final scaffold = tester.widget<Scaffold>(
+        find
+            .byType(Scaffold)
+            .at(tester.widgetList<Scaffold>(find.byType(Scaffold)).length - 1),
+      );
+      return scaffold.floatingActionButton?.key;
+    }
+
+    expect(find.byKey(const Key('new-note-fab')), findsOne);
+    final onFiles = fabSlotKey();
+    expect(onFiles, isNotNull);
+
+    await tester.tap(find.byIcon(Icons.check_box_outlined));
+    await settle(tester);
+
+    // Same slot key, different button inside it.
+    expect(fabSlotKey(), onFiles);
+    expect(find.byKey(const Key('todo-add')), findsOne);
+    expect(find.byKey(const Key('new-note-fab')), findsNothing);
+
+    // Search has no FAB at all, and there the slot really does empty.
+    await tester.tap(find.byIcon(Icons.search));
+    await settle(tester);
+    expect(fabSlotKey(), isNull);
   });
 
   testWidgets('wide layout keeps the split, with no tab bar', (tester) async {

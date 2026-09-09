@@ -12,8 +12,7 @@ import 'dart:io';
 void main(List<String> args) {
   const sizes = ['1kb', '10kb', '50kb', '200kb', '500kb', '1mb'];
   if (args.isEmpty) {
-    stderr.writeln(
-        'usage: make_perf_note <libraryDir> [${sizes.join('|')}]');
+    stderr.writeln('usage: make_perf_note <libraryDir> [${sizes.join('|')}]');
     exitCode = 1;
     return;
   }

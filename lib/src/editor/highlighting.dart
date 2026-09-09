@@ -19,6 +19,7 @@ library;
 
 import 'package:copist/src/editor/math_rule.dart';
 import 'package:meta/meta.dart';
+
 /// The kind of a styled run within a line.
 enum TokenKind {
   /// Plain text. Not emitted as a token: any offset not covered by a token
@@ -88,7 +89,7 @@ enum TokenKind {
 @immutable
 final class Token {
   /// Creates a token of [kind] covering [start]..[end).
-  const Token(this.kind, this.start, this.end);
+  const new(this.kind, this.start, this.end);
 
   /// The style of the run.
   final TokenKind kind;
@@ -118,7 +119,7 @@ final class Token {
 /// token is [TokenKind.plain].
 final class StyledLine {
   /// Creates a styled line.
-  const StyledLine(this.text, this.tokens);
+  const new(this.text, this.tokens);
 
   /// The line text (without newline).
   final String text;
@@ -130,7 +131,7 @@ final class StyledLine {
 /// A math span in absolute text offsets, markers included (`$…$` / `$$…$$`).
 final class MathSpan {
   /// Creates a math span covering [start]..[end).
-  const MathSpan(this.start, this.end, {required this.block});
+  const new(this.start, this.end, {required this.block});
 
   /// Offset of the opening marker.
   final int start;
@@ -145,7 +146,7 @@ final class MathSpan {
 /// The fence a line is inside.
 @immutable
 final class _Fence {
-  const _Fence(this.char, this.len);
+  const new(this.char, this.len);
 
   /// Code unit of the fence char (backtick or tilde).
   final int char;
@@ -164,7 +165,7 @@ final class _Fence {
 /// The carried block state.
 @immutable
 final class _State {
-  const _State({this.fence, this.inMath = false, this.inFrontmatter = false});
+  const new({this.fence, this.inMath = false, this.inFrontmatter = false});
 
   final _Fence? fence;
   final bool inMath;
@@ -197,7 +198,7 @@ final class _State {
 }
 
 final class _Line {
-  _Line(this.text);
+  new(this.text);
 
   final String text;
 
@@ -214,15 +215,15 @@ final class _Line {
 /// Build once with `fromText`; after every buffer edit call `replace` with
 /// the single edit region. Typical cost is one or two lines.
 final class HighlightDocument {
-  HighlightDocument._();
+  new _();
 
   /// An empty document. The editor grows it through [replaceLines] as the
   /// re_editor buffer is loaded/edited, so a big note costs only the lines
   /// it actually touches instead of one eager whole-file pass at open.
-  factory HighlightDocument.empty() => HighlightDocument._();
+  factory empty() => HighlightDocument._();
 
   /// Tokenizes [text] fully.
-  factory HighlightDocument.fromText(String text) {
+  factory fromText(String text) {
     final doc = HighlightDocument._();
     final raw = text.isEmpty ? <String>[''] : text.split('\n');
     final lines = <_Line>[];
@@ -267,9 +268,7 @@ final class HighlightDocument {
   /// document).
   List<StyledLine> get lines {
     if (_lines.isNotEmpty) _materialize(_lines.length - 1);
-    return _lines
-        .map((l) => StyledLine(l.text, l.tokens!))
-        .toList();
+    return _lines.map((l) => StyledLine(l.text, l.tokens!)).toList();
   }
 
   /// Tokenizes lines up to [upTo] (inclusive) — only the gap since the last
@@ -367,8 +366,9 @@ final class HighlightDocument {
     if (removed < 0) {
       throw ArgumentError('removed $removed < 0');
     }
-    final end =
-        first + removed > _lines.length ? _lines.length : first + removed;
+    final end = first + removed > _lines.length
+        ? _lines.length
+        : first + removed;
     _lines = <_Line>[
       ..._lines.sublist(0, first),
       for (final text in replacement) _Line(text),
@@ -445,8 +445,7 @@ final class HighlightDocument {
     return _State.initial;
   }
 
-  static bool _isSingleLineMath(String trimmed) =>
-      isSingleLineDisplay(trimmed);
+  static bool _isSingleLineMath(String trimmed) => isSingleLineDisplay(trimmed);
 
   static _Fence? _fenceOpen(String text) {
     final info = _fenceOpenInfo(text);
@@ -456,11 +455,7 @@ final class HighlightDocument {
   static bool _isFenceClose(String text, _Fence fence) =>
       _isFenceCloseInfo(text, fence.char, fence.len);
 
-  static List<Token> _lineTokens(
-    String text,
-    _State inState,
-    int lineIndex,
-  ) {
+  static List<Token> _lineTokens(String text, _State inState, int lineIndex) {
     final tokens = <Token>[];
     final fence = inState.fence;
     final trimmed = text.trim();
@@ -487,11 +482,7 @@ final class HighlightDocument {
       final info = text.substring(infoStart).trim();
       if (info.isNotEmpty) {
         tokens.add(
-          Token(
-            TokenKind.codeLanguage,
-            infoStart,
-            infoStart + info.length,
-          ),
+          Token(TokenKind.codeLanguage, infoStart, infoStart + info.length),
         );
       }
       return tokens;
@@ -651,13 +642,7 @@ List<MathSpan> mathSpansIn(String text) {
     if (inMath) {
       if (trimmed.startsWith(r'$$')) {
         final indent = line.length - line.trimLeft().length;
-        spans.add(
-          MathSpan(
-            mathStart,
-            lineStart + indent + 2,
-            block: true,
-          ),
-        );
+        spans.add(MathSpan(mathStart, lineStart + indent + 2, block: true));
         inMath = false;
       } else if (i == lines.length - 1) {
         spans.add(MathSpan(mathStart, lineEnd, block: true));

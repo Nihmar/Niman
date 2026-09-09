@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 /// The result of a Markdown editing command.
 final class MarkdownEdit {
   /// Creates an edit result.
-  const MarkdownEdit({required this.text, required this.selection});
+  const new({required this.text, required this.selection});
 
   /// The new full text.
   final String text;
@@ -116,9 +116,7 @@ MarkdownEdit setHeading({
     final match = _headingPrefix.matchAsPrefix(line);
     final stripped = match == null ? line : line.substring(match[0]!.length);
     final existing = match == null ? 0 : match[1]!.length;
-    newLines[i] = existing == level
-        ? stripped
-        : '${'#' * level} $stripped';
+    newLines[i] = existing == level ? stripped : '${'#' * level} $stripped';
   }
   final newText = newLines.join('\n');
   return MarkdownEdit(
@@ -223,9 +221,19 @@ TextSelection _shiftSelectionForLines({
 }) {
   return TextSelection(
     baseOffset: _mapEndpoint(
-      oldText, newText, selection.baseOffset, startLine, endLine),
+      oldText,
+      newText,
+      selection.baseOffset,
+      startLine,
+      endLine,
+    ),
     extentOffset: _mapEndpoint(
-      oldText, newText, selection.extentOffset, startLine, endLine),
+      oldText,
+      newText,
+      selection.extentOffset,
+      startLine,
+      endLine,
+    ),
   );
 }
 
@@ -240,8 +248,8 @@ int _mapEndpoint(
   if (line < startLine || line > endLine) {
     return _lineStart(newText, line) + off;
   }
-  final delta = newText.split('\n')[line].length -
-      oldText.split('\n')[line].length;
+  final delta =
+      newText.split('\n')[line].length - oldText.split('\n')[line].length;
   final newOff = off + delta;
   return _lineStart(newText, line) + (newOff < 0 ? 0 : newOff);
 }

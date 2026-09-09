@@ -6,19 +6,20 @@ import 'dart:isolate';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// A note file or folder observed on disk during a scan.
 final class DiskEntry {
   /// Creates a disk entry for the entry at `rel`.
-  const DiskEntry({
+  const new({
     required this.rel,
     required this.name,
     required this.isDir,
@@ -50,7 +51,7 @@ final class DiskEntry {
 /// caller instead.
 final class ScanResult {
   /// Creates a walk result.
-  const ScanResult({required this.entries, required this.logs});
+  const new({required this.entries, required this.logs});
 
   /// The entries found, directories and files, in traversal order.
   final List<DiskEntry> entries;
@@ -121,7 +122,7 @@ void _walkDir(
 /// The on-disk state of one path, as probed by [probePaths].
 final class DiskProbe {
   /// Creates a probe result.
-  const DiskProbe({
+  const new({
     required this.exists,
     required this.isDir,
     required this.modified,
@@ -171,7 +172,7 @@ DiskProbe _probePath(String path) {
 /// main flow, so a scan costs one read per changed note and no more.
 final class NoteContent {
   /// Creates a parsed note content.
-  const NoteContent({
+  const new({
     required this.rel,
     required this.sha256,
     required this.text,
@@ -215,12 +216,20 @@ final class NoteContent {
 /// Top-level for [Isolate.run]; batched by the caller (a few hundred per
 /// call). A note that cannot be read (deleted or replaced mid-scan) is left
 /// out; the next scan picks it up.
+///
+/// [progress] receives each library-relative path as it comes up, so a
+/// first index can name what it is reading. A `SendPort` is sendable, so
+/// the isolate closure can carry one.
 Future<List<NoteContent>> readNoteContents(
   String root,
-  List<String> rels,
-) async {
+  List<String> rels, {
+  SendPort? progress,
+}) async {
   final out = <NoteContent>[];
   for (final rel in rels) {
+    // Posted before the read, so what the screen names is the note being
+    // worked on rather than the one just finished.
+    progress?.send(rel);
     try {
       final bytes = await File(p.join(root, rel)).readAsBytes();
       var text = utf8.decode(bytes, allowMalformed: true);
@@ -235,6 +244,20 @@ Future<List<NoteContent>> readNoteContents(
     }
   }
   return out;
+}
+
+/// Runs one [readNoteContents] batch on a background isolate.
+///
+/// Top-level so the [Isolate.run] closure captures only these three
+/// sendable values. Inlined in the caller it captured that method's
+/// context, which holds the async body's future — unsendable, and the
+/// open failed with it.
+Future<List<NoteContent>> _readBatchOnIsolate(
+  String root,
+  List<String> batch,
+  SendPort? progress,
+) {
+  return Isolate.run(() => readNoteContents(root, batch, progress: progress));
 }
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
@@ -259,18 +282,36 @@ String _titleFromName(String rel) {
   return name.endsWith('.md') ? name.substring(0, name.length - 3) : name;
 }
 
+/// How far a scan has got, and on which note.
+///
+/// It exists for the first index of a library, which is the one long
+/// enough to watch: the alternative is a progress bar with nothing behind
+/// it while the app reads a few thousand files.
+@immutable
+final class IndexProgress {
+  /// Creates a progress report.
+  const new({required this.file, required this.done, required this.of});
+
+  /// The library-relative path being read.
+  final String file;
+
+  /// Notes reached so far, including this one.
+  final int done;
+
+  /// Notes this pass will read in total.
+  final int of;
+}
+
 /// Builds and maintains the notes index so it mirrors the library on disk.
 ///
 /// Every mutation is serialized through an internal mutex, so
 /// app-originated operations and disk-originated events converge identically
 /// (T-M1-07).
 final class Indexer {
-  /// Creates the indexer over the given [CopistDatabase].
-  Indexer(this._db)
-    : _dao = NoteDao(_db),
-      _log = const AppLogger(name: 'indexer');
+  /// Creates the indexer over the given [IndexDatabase].
+  new(this._db) : _dao = NoteDao(_db), _log = const AppLogger(name: 'indexer');
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   final NoteDao _dao;
 
@@ -285,6 +326,13 @@ final class Indexer {
 
   /// Callback invoked after each successful index mutation.
   void Function()? onChanged;
+
+  /// Called with each note a content pass reads, while it is set.
+  ///
+  /// Every content read reports, not only a full scan. The session sets
+  /// it around a first index and clears it after, because it costs a
+  /// message per note and is worth paying only when someone is looking.
+  void Function(IndexProgress)? onProgress;
 
   Future<void> _chain = Future<void>.value();
 
@@ -509,24 +557,24 @@ final class Indexer {
         final content = contents[entry.key];
         if (content == null) continue;
         final probe = entry.value;
-        final updated = await (_db.update(
-          _db.notes,
-        )..where((t) => t.path.equals(entry.key))).write(
-          NotesCompanion(
-            size: Value(probe.size),
-            modified: Value(probe.modified),
-            sha256: Value(content.sha256),
-          ),
-        );
+        final updated =
+            await (_db.update(
+              _db.notes,
+            )..where((t) => t.path.equals(entry.key))).write(
+              NotesCompanion(
+                size: Value(probe.size),
+                modified: Value(probe.modified),
+                sha256: Value(content.sha256),
+              ),
+            );
         wrote |= updated > 0;
         changed.add(content);
       }
       if (changed.isEmpty) return;
       // Content rows (FTS, tags, stems, links) follow the forced read.
-      await _applyContent(
-        {for (final c in changed) c.rel: c},
-        paired: const {},
-      );
+      await _applyContent({
+        for (final c in changed) c.rel: c,
+      }, paired: const {});
       if (wrote) {
         final cb = onChanged;
         if (cb != null) cb();
@@ -570,7 +618,7 @@ final class Indexer {
     final probe = await Isolate.run(() => probePaths(<String>[abs]).single);
     if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
-      return _syncDirSubtree(root, abs);
+      return await _syncDirSubtree(root, abs);
     }
     if (probe.exists) {
       _log.debug('$tag: "$abs" -> upsert file "$rel"');
@@ -758,6 +806,10 @@ final class Indexer {
   }
 
   /// Reads [rels] in batches of [_contentBatch] on the index isolate.
+  ///
+  /// While [onProgress] is set, the read isolate reports each note as it
+  /// reaches it. The port is opened only then: a scan nobody is watching
+  /// should not pay for a message per note.
   Future<Map<String, NoteContent>> _readRelContents(
     String root,
     List<String> rels,
@@ -765,16 +817,39 @@ final class Indexer {
     if (rels.isEmpty) return const {};
     final contents = <String, NoteContent>{};
     _log.debug('contents: reading ${rels.length} note(s)');
-    for (var i = 0; i < rels.length; i += _contentBatch) {
-      final end = i + _contentBatch < rels.length
-          ? i + _contentBatch
-          : rels.length;
-      final read = await Isolate.run(
-        () => readNoteContents(root, rels.sublist(i, end)),
-      );
-      for (final c in read) {
-        contents[c.rel] = c;
+    final report = onProgress;
+    ReceivePort? port;
+    if (report != null) {
+      var done = 0;
+      port = ReceivePort()
+        ..listen((message) {
+          done++;
+          report(
+            IndexProgress(
+              file: message! as String,
+              done: done,
+              of: rels.length,
+            ),
+          );
+        });
+    }
+    final send = port?.sendPort;
+    try {
+      for (var i = 0; i < rels.length; i += _contentBatch) {
+        final end = i + _contentBatch < rels.length
+            ? i + _contentBatch
+            : rels.length;
+        final read = await _readBatchOnIsolate(
+          root,
+          rels.sublist(i, end),
+          send,
+        );
+        for (final c in read) {
+          contents[c.rel] = c;
+        }
       }
+    } finally {
+      port?.close();
     }
     return contents;
   }
@@ -796,7 +871,7 @@ final class Indexer {
         todo.add(entry.key);
       }
     }
-    return _readRelContents(root, todo);
+    return await _readRelContents(root, todo);
   }
 
   /// Pairs newly-appeared note files with vanished ones from the same
@@ -833,9 +908,7 @@ final class Indexer {
       }
       if (candidate != null) {
         paired[entry.key] = candidate;
-        _log.debug(
-          'pair: "$candidate" -> "${entry.key}" (content unchanged)',
-        );
+        _log.debug('pair: "$candidate" -> "${entry.key}" (content unchanged)');
       }
     }
     return paired;
@@ -979,13 +1052,7 @@ final class Indexer {
         newIds,
         e.rel,
       );
-      final pairOld = _pairCandidate(
-        e,
-        shas[e.rel],
-        old,
-        gone,
-        pairedOld,
-      );
+      final pairOld = _pairCandidate(e, shas[e.rel], old, gone, pairedOld);
       if (pairOld != null) {
         // Rename with unchanged content: the old row keeps its id.
         final oldRow = old[pairOld]!;
@@ -1147,9 +1214,7 @@ final class Indexer {
     final probes = missing.isEmpty
         ? const <DiskProbe>[]
         : await Isolate.run(
-            () => probePaths(
-              [for (final m in missing) p.join(root, m)],
-            ),
+            () => probePaths([for (final m in missing) p.join(root, m)]),
           );
     var probeIndex = 0;
     var currentId = 0;
@@ -1356,10 +1421,9 @@ final class Indexer {
   /// [noteId] to match [c]'s frontmatter aliases — the same index the
   /// resolver reads, so `[[alias]]` resolves by alias from M3 on.
   Future<void> _writeAliasStems(int noteId, NoteContent c) async {
-    await (_db.delete(_db.noteStems)..where(
-          (s) => s.noteId.equals(noteId) & s.source.equals('alias'),
-        ))
-        .go();
+    await (_db.delete(
+      _db.noteStems,
+    )..where((s) => s.noteId.equals(noteId) & s.source.equals('alias'))).go();
     for (final alias in c.aliases) {
       await _db
           .into(_db.noteStems)

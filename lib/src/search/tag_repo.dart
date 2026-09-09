@@ -5,13 +5,13 @@
 /// so the same note folder grouping applies everywhere.
 library;
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 
 /// A tag with its note count.
 final class TagCount {
   /// Creates a tag count.
-  const TagCount({required this.name, required this.count});
+  const new({required this.name, required this.count});
 
   /// The normalized tag name.
   final String name;
@@ -35,10 +35,10 @@ abstract interface class TagSource {
 
 /// The tag side of the search data (T-M3-04/T-M3-06).
 final class TagRepo implements TagSource {
-  /// Creates the repo over [CopistDatabase].
-  TagRepo(this._db);
+  /// Creates the repo over [IndexDatabase].
+  new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   @override
   Future<List<TagCount>> tagCounts() async {
@@ -50,10 +50,7 @@ final class TagRepo implements TagSource {
         .get();
     return [
       for (final row in rows)
-        TagCount(
-          name: row.read<String>('tag'),
-          count: row.read<int>('c'),
-        ),
+        TagCount(name: row.read<String>('tag'), count: row.read<int>('c')),
     ];
   }
 

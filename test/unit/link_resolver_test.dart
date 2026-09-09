@@ -1,14 +1,14 @@
 // T-M3-02 AC: the resolver resolves exact stem → shortest unique path prefix
 // → ambiguous candidate list, in O(log n) over the stems index; aliases go
 // through the same table (source `alias`).
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart' show InsertMode;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late CopistDatabase db;
+  late IndexDatabase db;
   late LinkResolver resolver;
 
   Future<Note> addNote(
@@ -41,7 +41,7 @@ void main() {
   }
 
   setUp(() async {
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     resolver = LinkResolver(db);
   });

@@ -31,11 +31,7 @@ final class ListKindGui implements NoteKindGUI {
 /// keeps its bytes apart from the leading spaces.
 class ListNoteView extends StatefulWidget {
   /// Creates the view; [onChanged] receives the new full note text.
-  const ListNoteView({
-    required this.text,
-    required this.onChanged,
-    super.key,
-  });
+  const new({required this.text, required this.onChanged, super.key});
 
   /// The full note text.
   final String text;
@@ -50,7 +46,7 @@ class ListNoteView extends StatefulWidget {
 
 /// The item being dragged (T-TK-09).
 final class _Drag {
-  _Drag(this.index);
+  new(this.index);
 
   final int index;
   Offset? position;
@@ -59,14 +55,14 @@ final class _Drag {
 /// Where a dragged item will land: the target item index in [mode], or
 /// -1 (the zone above the list) / the item count (below it).
 final class _DropTarget {
-  const _DropTarget(this.item, this.mode);
+  const new(this.item, this.mode);
 
   final int item;
   final ListDropMode mode;
 }
 
 class _ListNoteViewState extends State<ListNoteView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
   final ScrollController _scroll = ScrollController();
@@ -89,10 +85,43 @@ class _ListNoteViewState extends State<ListNoteView>
     reverseCurve: Curves.easeInCubic,
   );
 
+  /// Whether the software keyboard was up at the last metrics change.
+  ///
+  /// Dismissals are edge-triggered (open, then closed) so a stray
+  /// zero-inset frame around gaining focus can never end an edit.
+  bool _keyboardOpen = false;
+
   @override
   void initState() {
     super.initState();
     _items = parseListItems(widget.text);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Ends an in-place edit when the software keyboard is dismissed
+  /// (issue #5).
+  ///
+  /// On Android the back gesture closes the IME but leaves the field
+  /// focused, so the row's focus-loss commit never runs and the add row
+  /// stays hidden until the note is reopened. Closing the edit here takes
+  /// the same path as any other finish: the row sees `isEditing` go false
+  /// and commits.
+  ///
+  /// One observer for the whole list, not one per row. Every row used to
+  /// register its own, so a hundred-item list registered a hundred
+  /// observers and each keyboard or rotation event walked all of them —
+  /// and only one row is ever editing, which this state already knows.
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final open = WidgetsBinding.instance.platformDispatcher.views.any(
+      (view) => view.viewInsets.bottom / view.devicePixelRatio > 0,
+    );
+    final dismissed = _keyboardOpen && !open;
+    _keyboardOpen = open;
+    if (dismissed && _editingIndex != null && mounted) {
+      setState(() => _setEditing(null));
+    }
   }
 
   /// Opens ([index]) or closes (null) the in-place edit, animating the
@@ -126,6 +155,7 @@ class _ListNoteViewState extends State<ListNoteView>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _newItem.dispose();
     _scroll.dispose();
     _addRowShown.dispose();
@@ -247,8 +277,8 @@ class _ListNoteViewState extends State<ListNoteView>
         rel < 0.25
             ? ListDropMode.before
             : rel > 0.75
-                ? ListDropMode.after
-                : ListDropMode.under,
+            ? ListDropMode.after
+            : ListDropMode.under,
       );
     }
 
@@ -382,10 +412,7 @@ class _ListNoteViewState extends State<ListNoteView>
       key: const Key('list-add-row'),
       sizeFactor: _addRowShown,
       alignment: Alignment.topCenter,
-      child: FadeTransition(
-        opacity: _addRowShown,
-        child: _addField(context),
-      ),
+      child: FadeTransition(opacity: _addRowShown, child: _addField(context)),
     );
   }
 
@@ -395,9 +422,8 @@ class _ListNoteViewState extends State<ListNoteView>
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: TextField(
         controller: _newItem,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         decoration: InputDecoration(
           hintText: AppStrings.listAddHint,
           prefixIcon: const Icon(Icons.add),
@@ -407,9 +433,7 @@ class _ListNoteViewState extends State<ListNoteView>
             tooltip: AppStrings.listAddTooltip,
             onPressed: _add,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onSubmitted: (_) => _add(),
       ),

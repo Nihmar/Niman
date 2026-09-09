@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Lists trash items and supports restoring / permanent deletion.
 final class TrashScreen extends StatefulWidget {
   /// Creates the trash screen.
-  const TrashScreen({required this.controller, super.key});
+  const new({required this.controller, super.key});
 
   /// The session of the library whose trash this screen lists.
   final LibrarySession controller;
@@ -46,9 +46,8 @@ final class _TrashScreenState extends State<TrashScreen> {
       await _load();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) {
@@ -108,9 +107,8 @@ final class _TrashScreenState extends State<TrashScreen> {
       await _load();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
     } finally {
       if (mounted) {
@@ -127,50 +125,49 @@ final class _TrashScreenState extends State<TrashScreen> {
       body: items == null
           ? const Center(child: CircularProgressIndicator())
           : items.isEmpty
-              ? Center(child: Text(AppStrings.trashEmpty))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    final deletedOn =
-                        item.deletedAt.toIso8601String().substring(0, 10);
-                    return Card(
-                      child: ListTile(
-                        title: Text(item.name),
-                        subtitle: Text(
-                          'was: ${item.originalPath}\n$deletedOn',
+          ? Center(child: Text(AppStrings.trashEmpty))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                final deletedOn = item.deletedAt.toIso8601String().substring(
+                  0,
+                  10,
+                );
+                return Card(
+                  child: ListTile(
+                    title: Text(item.name),
+                    subtitle: Text('was: ${item.originalPath}\n$deletedOn'),
+                    isThreeLine: true,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: AppStrings.actionRestore,
+                          icon: const Icon(Icons.restore),
+                          onPressed: _busy
+                              ? null
+                              : () => _act(
+                                  (item) => widget.controller.ops!.restoreTrash(
+                                    item.name,
+                                  ),
+                                  item,
+                                ),
                         ),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              tooltip: AppStrings.actionRestore,
-                              icon: const Icon(Icons.restore),
-                              onPressed: _busy
-                                  ? null
-                                  : () =>
-                                      _act(
-                                        (item) =>
-                                            widget.controller.ops!
-                                                .restoreTrash(item.name),
-                                        item,
-                                      ),
-                            ),
-                            IconButton(
-                              tooltip: AppStrings.trashDeletePermanently,
-                              icon: const Icon(Icons.delete_forever),
-                              onPressed: _busy
-                                  ? null
-                                  : () => _confirmPermanently(item),
-                            ),
-                          ],
+                        IconButton(
+                          tooltip: AppStrings.trashDeletePermanently,
+                          icon: const Icon(Icons.delete_forever),
+                          onPressed: _busy
+                              ? null
+                              : () => _confirmPermanently(item),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
       floatingActionButton: items != null && items.isNotEmpty
           ? FloatingActionButton(
               tooltip: AppStrings.trashEmptyAction,

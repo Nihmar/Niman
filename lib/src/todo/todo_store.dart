@@ -41,7 +41,7 @@ const String doneFileName = 'done.txt';
 /// disturbs file order.
 final class TodoEntry {
   /// Creates an entry for [task] at file line [lineIndex].
-  const TodoEntry({required this.lineIndex, required this.task});
+  const new({required this.lineIndex, required this.task});
 
   /// The 0-based line index in `todo.txt` or `done.txt`.
   final int lineIndex;
@@ -54,7 +54,7 @@ final class TodoEntry {
 /// in file order) paired with its line index.
 final class TodoSnapshot {
   /// Creates a snapshot of the open ([todo]) and completed ([done]) tasks.
-  const TodoSnapshot({required this.todo, required this.done});
+  const new({required this.todo, required this.done});
 
   /// The `todo.txt` lines, in file order.
   final List<TodoEntry> todo;
@@ -73,11 +73,7 @@ final class TodoSnapshot {
 final class TodoFileProbe {
   /// Creates a probe: [exists] false means the file is missing (then
   /// [size] is -1 and [modified] null).
-  const TodoFileProbe({
-    required this.exists,
-    required this.size,
-    required this.modified,
-  });
+  const new({required this.exists, required this.size, required this.modified});
 
   /// Whether the file exists on disk.
   final bool exists;
@@ -108,7 +104,7 @@ final class TodoFileProbe {
 /// change is left alone, so its mtime never churns the watcher).
 final class TodoStore implements TodoSource {
   /// Creates a store over the library root at [root] (absolute path).
-  TodoStore({required this.root});
+  new({required this.root});
 
   /// The absolute library root path.
   final String root;
@@ -144,7 +140,7 @@ final class TodoStore implements TodoSource {
   @override
   Future<TodoSnapshot> add(String line) async {
     _requireSingleLine(line);
-    return _mutate(
+    return await _mutate(
       op: 'add',
       ensureFiles: true,
       allowCreate: true,
@@ -159,10 +155,7 @@ final class TodoStore implements TodoSource {
   @override
   Future<({TodoFileProbe todo, TodoFileProbe done})> probe() async {
     final raw = await _probeFiles(root);
-    return (
-      todo: _fileProbe(raw[0], raw[1]),
-      done: _fileProbe(raw[2], raw[3]),
-    );
+    return (todo: _fileProbe(raw[0], raw[1]), done: _fileProbe(raw[2], raw[3]));
   }
 
   /// Moves every completed (`x`) line from `todo.txt` to the end of
@@ -200,7 +193,7 @@ final class TodoStore implements TodoSource {
   @override
   Future<TodoSnapshot> updateTodoAt(int lineIndex, String line) async {
     _requireSingleLine(line);
-    return _mutate(
+    return await _mutate(
       op: 'edit-todo',
       apply: (todo, done) => todo[lineIndex] = line,
     );
@@ -214,7 +207,7 @@ final class TodoStore implements TodoSource {
   @override
   Future<TodoSnapshot> updateDoneAt(int lineIndex, String line) async {
     _requireSingleLine(line);
-    return _mutate(
+    return await _mutate(
       op: 'edit-done',
       apply: (todo, done) => done[lineIndex] = line,
     );
@@ -429,6 +422,7 @@ List<int> _probeTodoFiles(String root) {
 List<TodoEntry> _parseLines(Uint8List? bytes) {
   return _parseEntries(splitTodoFile(bytes).lines);
 }
+
 /// Parses content [lines] into snapshot entries with line indices.
 List<TodoEntry> _parseEntries(List<String> lines) {
   return <TodoEntry>[

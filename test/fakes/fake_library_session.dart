@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/language.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
+import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
@@ -31,7 +34,7 @@ import 'fake_tag_source.dart';
 final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// Creates a fake session; [resumePath] is auto-opened by [resume] when
   /// non-null (simulates the persisted last-library path).
-  FakeLibrarySession({this.resumePath});
+  new({this.resumePath});
 
   /// The path [resume] opens, simulating a persisted last-library path.
   final String? resumePath;
@@ -48,7 +51,6 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashEnabled = true;
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
-  String _editorToolbar = '';
   AppLanguage _language = AppLanguage.system;
 
   @override
@@ -62,6 +64,13 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   int get revision => _revision;
+
+  /// The fake indexes nothing, so there is never a scan to report on.
+  /// Tests that need the indexing line set this and pump.
+  IndexProgress? indexing;
+
+  @override
+  IndexProgress? get indexProgress => indexing;
 
   @override
   Stream<int> get events => _events.stream;
@@ -92,16 +101,57 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _phase = LibraryPhase.opening;
     _lastError = null;
     _bump();
+    // Held while a test wants to look at the opening screen: the progress
+    // bar and the line naming the note being indexed only exist there.
+    final gate = openGate;
+    if (gate != null) await gate.future;
     _root = path;
     _phase = LibraryPhase.ready;
     _bump();
   }
+
+  /// Set to pause [open] in its opening phase; complete it to finish.
+  Completer<void>? openGate;
 
   @override
   Future<void> close() async {
     _root = null;
     _phase = LibraryPhase.none;
     _bump();
+  }
+
+  @override
+  Future<void> switchTo(String libraryPath) async {
+    if (libraryPath == _root) return;
+    if (_phase != LibraryPhase.none) await close();
+    await open(libraryPath, create: false, blockingScan: false);
+  }
+
+  /// The known-library list, newest first (T-ML-04).
+  final List<KnownLibrary> _known = <KnownLibrary>[];
+
+  @override
+  Future<List<KnownLibrary>> knownLibraries() async => List.of(_known);
+
+  @override
+  Future<void> forgetLibrary(String libraryPath) async {
+    _known.removeWhere((entry) => entry.path == libraryPath);
+    _bump();
+  }
+
+  /// Test-only seeding of the known list, so the home screen has rows
+  /// without a real registry behind it.
+  void seedKnownLibrary(String path, {String? name, DateTime? lastOpened}) {
+    _known
+      ..removeWhere((entry) => entry.path == path)
+      ..insert(
+        0,
+        KnownLibrary(
+          path: path,
+          name: name ?? p.basename(path),
+          lastOpened: lastOpened ?? DateTime.now(),
+        ),
+      );
   }
 
   @override
@@ -115,30 +165,36 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
 
-  @override
-  Future<bool> get lineNumbersEnabled async => true;
+  /// The settings a library keeps for itself (T-ML-10), in memory. A
+  /// fresh fake starts at the shipped defaults, as a fresh library does.
+  LibraryConfig _config = LibraryConfig.defaults;
 
   @override
-  Future<void> setLineNumbersEnabled({required bool enabled}) async {}
+  Future<bool> get lineNumbersEnabled async => _config.lineNumbers;
 
   @override
-  Future<bool> get editorAutofocusEnabled async => false;
+  Future<void> setLineNumbersEnabled({required bool enabled}) async {
+    _config = _config.copyWith(lineNumbers: enabled);
+  }
 
   @override
-  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {}
-
-  bool _reminderShowTokens = false;
+  Future<bool> get editorAutofocusEnabled async => _config.editorAutofocus;
 
   @override
-  Future<bool> get reminderShowTokens async => _reminderShowTokens;
+  Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
+    _config = _config.copyWith(editorAutofocus: enabled);
+  }
+
+  @override
+  Future<bool> get reminderShowTokens async => _config.reminderShowTokens;
 
   @override
   Future<void> setReminderShowTokens({required bool enabled}) async {
-    _reminderShowTokens = enabled;
+    _config = _config.copyWith(reminderShowTokens: enabled);
   }
 
-  // T-M2-08 preview layout, with state so settings/layout widgets can
-  // exercise it in tests.
+  // The preview layout is app-wide: it follows the screen, not the
+  // library.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
 
@@ -158,41 +214,36 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _splitRatio = ratio;
   }
 
-  TreeSort _treeSort = TreeSort.nameAsc;
-
   @override
-  Future<TreeSort> get treeSort async => _treeSort;
+  Future<TreeSort> get treeSort async => _config.treeSort;
 
   @override
   Future<void> setTreeSort(TreeSort sort) async {
-    _treeSort = sort;
+    _config = _config.copyWith(treeSort: sort);
   }
 
-  LinkType _linkType = LinkType.wikilink;
-  int _indentWidth = 2;
-
   @override
-  Future<LinkType> get linkType async => _linkType;
+  Future<LinkType> get linkType async => _config.linkType;
 
   @override
   Future<void> setLinkType(LinkType type) async {
-    _linkType = type;
+    _config = _config.copyWith(linkType: type);
   }
 
   @override
-  Future<int> get indentWidth async => _indentWidth;
+  Future<int> get indentWidth async => _config.indentWidth;
 
   @override
   Future<void> setIndentWidth(int width) async {
-    _indentWidth = width;
+    _config = _config.copyWith(indentWidth: normalizeIndentWidth(width));
   }
 
   @override
-  Future<String> get editorToolbar async => _editorToolbar;
+  Future<String> get editorToolbar async => _config.editorToolbar;
 
   @override
   Future<void> setEditorToolbar(String layout) async {
-    _editorToolbar = layout;
+    _config = _config.copyWith(editorToolbar: layout);
   }
 
   @override
@@ -225,6 +276,26 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
           return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
         });
     return kids.map(_toNote).toList();
+  }
+
+  @override
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  }) async {
+    final expanded = Set<String>.from(expandedPaths);
+    final results =
+        <_Row>[
+          for (final row in _rows)
+            if (!row.trashed &&
+                (parentOf(row.path).isEmpty ||
+                    expanded.contains(parentOf(row.path))))
+              row,
+        ]..sort((a, b) {
+          if (a.isDir != b.isDir) return a.isDir ? -1 : 1;
+          return nameDesc ? b.name.compareTo(a.name) : a.name.compareTo(b.name);
+        });
+    return results.map(_toNote).toList();
   }
 
   @override
@@ -357,9 +428,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final same = resolvePath(targetParent, p.basename(path)) == path;
     if (same) return _noteAt(path);
     if (targetParent == path || isUnder(path, targetParent)) {
-      throw ArgumentError(
-        'Cannot move "$path" into itself or its own subtree',
-      );
+      throw ArgumentError('Cannot move "$path" into itself or its own subtree');
     }
     _checkParent(targetParent);
     final name = p.basename(path);
@@ -628,7 +697,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 /// One in-memory row of the fake index (a live or trashed note/folder).
 final class _Row {
   /// Creates a row at library-relative [path].
-  _Row({required this.id, required this.path, required this.isDir});
+  new({required this.id, required this.path, required this.isDir});
 
   final int id;
   final bool isDir;
@@ -651,7 +720,7 @@ final class _Row {
 /// One manifest entry of the fake trash.
 final class _TrashEntry {
   /// Creates a manifest entry for the trashed subtree rooted at [rootId].
-  _TrashEntry({
+  new({
     required this.name,
     required this.originalPath,
     required this.deletedAt,

@@ -13,7 +13,7 @@ import 'dart:typed_data';
 /// rewrite.
 final class TodoFileContent {
   /// Creates a file view over [lines] ([exists] false = missing file).
-  const TodoFileContent({
+  const new({
     required this.lines,
     required this.ending,
     required this.endsWithNewline,

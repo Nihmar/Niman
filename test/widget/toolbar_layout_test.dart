@@ -46,10 +46,9 @@ List<Key?> _renderedKeys(WidgetTester tester) {
 void main() {
   testWidgets('the editor renders every button by default', (tester) async {
     await _pumpEditor(tester, ToolbarLayout.defaults);
-    expect(
-      _renderedKeys(tester),
-      [for (final item in ToolbarItem.values) item.widgetKey],
-    );
+    expect(_renderedKeys(tester), [
+      for (final item in ToolbarItem.values) item.widgetKey,
+    ]);
   });
 
   testWidgets('a stored order is the render order', (tester) async {
@@ -161,10 +160,7 @@ void main() {
       await tester.tap(find.text(AppStrings.toolbarResetOrder));
       await tester.pumpAndSettle();
 
-      expect(
-        await controller.editorToolbar,
-        ToolbarLayout.defaults.encode(),
-      );
+      expect(await controller.editorToolbar, ToolbarLayout.defaults.encode());
     });
   });
 }

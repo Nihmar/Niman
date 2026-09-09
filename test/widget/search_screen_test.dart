@@ -253,18 +253,10 @@ void main() {
           path: 'Docs/Note One.md',
           occurrences: 3,
           samples: [
-            ReplaceSample(
-              before: 'see ',
-              match: 'note',
-              after: ' here.',
-            ),
+            ReplaceSample(before: 'see ', match: 'note', after: ' here.'),
           ],
         ),
-        ReplaceMatchNote(
-          path: 'Docs/Note Two.md',
-          occurrences: 2,
-          samples: [],
-        ),
+        ReplaceMatchNote(path: 'Docs/Note Two.md', occurrences: 2, samples: []),
       ];
     source.hits = [_hit('Docs/Note One.md', title: 'Note One')];
     await tester.pumpWidget(buildApp(source, replace: replace));
@@ -281,10 +273,7 @@ void main() {
     expect(find.textContaining('in 2 notes'), findsOne);
     expect(find.textContaining('3 occurrences'), findsOne);
     expect(find.byKey(const Key('replace-note-Docs/Note One.md')), findsOne);
-    expect(
-      find.textContaining('No exact whole-word match'),
-      findsNothing,
-    );
+    expect(find.textContaining('No exact whole-word match'), findsNothing);
 
     // Typing the replacement renders the live → preview under the sample.
     await tester.enterText(find.byKey(const Key('replace-with')), 'label');
@@ -312,8 +301,7 @@ void main() {
     expect(request.only, isNull);
     // The panel closes and the outcome snackbar reports the run.
     expect(find.byKey(const Key('replace-panel')), findsNothing);
-    expect(find.textContaining('Replaced 5 occurrence(s) of "note"'),
-        findsOne);
+    expect(find.textContaining('Replaced 5 occurrence(s) of "note"'), findsOne);
 
     // The deferred results refresh fires once and does not leak.
     await tester.pump(const Duration(milliseconds: 900));

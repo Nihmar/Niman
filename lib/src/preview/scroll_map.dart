@@ -94,14 +94,15 @@ final class ScrollMap {
 /// count matches the parser's AST over the coverage fixture.
 final class BlockLocator {
   /// Creates the locator.
-  BlockLocator();
+  new();
 
   final RegExp _setext = RegExp(r'^(=+|-+)\s*$');
   final RegExp _hr = RegExp(r'^\s{0,3}(-{3,}|_{3,}|\*{3,})\s*$');
   final RegExp _quote = RegExp(r'^\s{0,3}>');
   final RegExp _listMarker = RegExp(r'^\s{0,3}(?:[-*+]|\d{1,9}[.)])(?:\s|$)');
-  final RegExp _tableDelimiter =
-      RegExp(r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?)*\|\s*$');
+  final RegExp _tableDelimiter = RegExp(
+    r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?)*\|\s*$',
+  );
   final RegExp _header = RegExp(r'^\s{0,3}(#{1,6})(?:\s|$)');
 
   /// The located blocks' start lines, in parse order.
@@ -129,8 +130,8 @@ final class BlockLocator {
         i++;
         continue;
       }
-      final setextLine = i + 1 < lines.length &&
-          _setext.hasMatch(lines[i + 1].trim());
+      final setextLine =
+          i + 1 < lines.length && _setext.hasMatch(lines[i + 1].trim());
       if (setextLine) {
         starts.add(i);
         i += 2;
@@ -143,8 +144,7 @@ final class BlockLocator {
       }
       if (_quote.hasMatch(lines[i])) {
         starts.add(i);
-        while (i + 1 < lines.length &&
-            _quote.hasMatch(lines[i + 1])) {
+        while (i + 1 < lines.length && _quote.hasMatch(lines[i + 1])) {
           i++;
         }
         i++;

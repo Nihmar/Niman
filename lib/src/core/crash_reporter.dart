@@ -16,7 +16,7 @@ import 'package:path_provider/path_provider.dart';
 /// `copist-crash-<stamp>.txt` in the open library (falling back to the app
 /// documents directory), where the user can send it back for analysis.
 final class CrashReporter {
-  CrashReporter._();
+  new _();
 
   /// The crash diagnostics.
   static const AppLogger _log = AppLogger(name: 'crash');
@@ -53,7 +53,8 @@ final class CrashReporter {
 
   static Future<void> _persist(String errorAndTrace) async {
     final now = DateTime.now();
-    final stamp = '${now.year.toString().padLeft(4, '0')}'
+    final stamp =
+        '${now.year.toString().padLeft(4, '0')}'
         '${now.month.toString().padLeft(2, '0')}'
         '${now.day.toString().padLeft(2, '0')}-'
         '${now.hour.toString().padLeft(2, '0')}'

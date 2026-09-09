@@ -17,7 +17,7 @@ copist-debug-log-*.txt
 .buildlog/
 .history
 screenshots/
-
+.idea
 
 # Flutter repo-specific
 /bin/cache/
@@ -128,10 +128,14 @@ app.*.symbols
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
 
-# Test scratch dirs from a failed run (library_state_test creates them
-# in the repo root and cleans them up on success).
+# Test scratch dirs from a failed run: the tests create them in the repo
+# root and clean them up on success, which on Windows they often cannot.
+# The 10k and watcher ones hold files, so without this they land in a
+# `git add -A` -- 185 of them did once.
 /copist_state_*/
+/copist_migrate_*/
+/copist_10k_*/
+/copist_watch_*/
 
 # Kotlin compiler session state, written during a Gradle build.
 **/android/.kotlin/
-/copist_migrate_*/

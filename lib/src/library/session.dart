@@ -1,6 +1,8 @@
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
+import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/links/resolver.dart';
@@ -25,10 +27,7 @@ abstract interface class NoteOperations {
   });
 
   /// Creates a folder in [parentPath].
-  Future<Note> createFolder({
-    required String parentPath,
-    required String name,
-  });
+  Future<Note> createFolder({required String parentPath, required String name});
 
   /// Renames the note or folder at [path] to [newName].
   Future<Note> rename(String path, String newName);
@@ -93,6 +92,10 @@ abstract interface class LibrarySession {
   /// Bumped after every index change.
   int get revision;
 
+  /// The note the first index is reading, or null when no scan is
+  /// running. Reported only for the blocking scan of an opening library.
+  IndexProgress? get indexProgress;
+
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;
 
@@ -120,6 +123,27 @@ abstract interface class LibrarySession {
 
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();
+
+  /// Closes the open library and opens the one at [libraryPath]
+  /// (T-ML-06).
+  ///
+  /// One library is open at a time, so a switch is a close and an open —
+  /// but it is one operation for the caller, and it takes the fast path:
+  /// the target keeps its own index (T-ML-03), so it comes up from that
+  /// and reconciles in the background rather than waiting on a scan.
+  /// Switching to the library already open does nothing.
+  Future<void> switchTo(String libraryPath);
+
+  /// The libraries the app knows about, most recently opened first
+  /// (T-ML-04); what the home screen lists.
+  Future<List<KnownLibrary>> knownLibraries();
+
+  /// Drops [libraryPath] from that list.
+  ///
+  /// Forgetting is a list operation: the folder, its notes and its
+  /// `.copist/settings.json` are untouched, so opening it again lists it
+  /// again with its settings.
+  Future<void> forgetLibrary(String libraryPath);
 
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
@@ -207,6 +231,12 @@ abstract interface class LibrarySession {
   /// directories first, then by name (ascending, or descending with
   /// [nameDesc]).
   Future<List<Note>> children(int parentId, {bool nameDesc = false});
+
+  /// Every note that belongs to the root or to one of the [expandedPaths].
+  Future<List<Note>> tree(
+    Iterable<String> expandedPaths, {
+    bool nameDesc = false,
+  });
 
   /// Every indexed folder, path-ordered (for move-target pickers).
   Future<List<Note>> folders();

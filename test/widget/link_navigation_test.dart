@@ -174,11 +174,7 @@ void main() {
       ]);
     await tester.pumpWidget(
       _app(
-        _view(
-          content: buffer.toString(),
-          source: source,
-          showPreview: true,
-        ),
+        _view(content: buffer.toString(), source: source, showPreview: true),
       ),
     );
     await tester.pump();
@@ -283,9 +279,7 @@ void main() {
     // package's own tap handling), inside the `[[Target]]` token. The
     // Listener reads the caret after the frame.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    final gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     // Calibrated against the editor's glyph metrics: at y=12 (line 0),
     // x=150 lands the caret at offset ~6 — inside `[[Target]]` (5..14).
     await gesture.down(const Offset(150, 12));

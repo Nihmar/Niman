@@ -16,9 +16,7 @@ library;
 
 /// Whether [trimmed] is a single-line display block (`$$…$$`).
 bool isSingleLineDisplay(String trimmed) =>
-    trimmed.length >= 4 &&
-    trimmed.startsWith(r'$$') &&
-    trimmed.endsWith(r'$$');
+    trimmed.length >= 4 && trimmed.startsWith(r'$$') && trimmed.endsWith(r'$$');
 
 /// Whether a *line* (trimmed) starts a display-math block — single-line or
 /// multi-line. The block runs until [isDisplayClose] (or EOF).

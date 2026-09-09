@@ -99,10 +99,7 @@ void main() {
       final snapshot = await store.checkAt(1, DateTime(2026, 9, 7, 15, 30));
       // Untouched todo lines byte-identical, order preserved.
       expect(readRaw('todo.txt'), '(A) 2026-01-02 first\n(B) third\n');
-      expect(
-        readRaw('done.txt'),
-        'x 2026-09-01 old\nx 2026-09-07 second +p\n',
-      );
+      expect(readRaw('done.txt'), 'x 2026-09-01 old\nx 2026-09-07 second +p\n');
       expect(snapshot.todo, hasLength(2));
       expect(snapshot.done, hasLength(2));
       expect(snapshot.done[1].task.completionDate, DateTime(2026, 9, 7));
@@ -184,7 +181,7 @@ void main() {
       writeRaw(
         'todo.txt',
         'open a\nx 2026-09-06 2026-01-02 stray one\nopen b\n'
-        'x 2026-09-05 stray two\n',
+            'x 2026-09-05 stray two\n',
       );
       writeRaw('done.txt', 'x 2026-09-01 old\n');
       final snapshot = await store.migrateCompleted();

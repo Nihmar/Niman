@@ -210,11 +210,11 @@ void main() {
     // Switch the trash toggle off in settings.
     await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
-    expect(find.text('Deletions move to .trash/ (off = hard delete)'), findsOne);
-    final trashRow = find.ancestor(
-      of: find.text('Deletions move to .trash/ (off = hard delete)'),
-      matching: find.byType(SwitchListTile),
-    );
+    // The settings list is grouped and lazy, and the trash toggle sits
+    // under Library, so it may be below the fold.
+    final trashRow = find.byKey(const Key('trash-setting'));
+    await tester.scrollUntilVisible(trashRow, 200);
+    await settle(tester);
     await tester.tap(
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
@@ -298,8 +298,9 @@ void main() {
     await controller.dispose();
   });
 
-  testWidgets('the move picker does not offer a folder as its own target',
-      (tester) async {
+  testWidgets('the move picker does not offer a folder as its own target', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     filePicker.directory = '/fake';
@@ -424,8 +425,9 @@ void main() {
     await session.dispose();
   });
 
-  testWidgets('phone width: notes open full-screen, back returns to tree',
-      (tester) async {
+  testWidgets('phone width: notes open full-screen, back returns to tree', (
+    tester,
+  ) async {
     // Phone-sized surface (390 x 844 logical).
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
@@ -457,7 +459,10 @@ void main() {
     await settle(tester);
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Phone.md'), findsOneWidget); // app bar title.
-    expect(noteRow('Phone.md', offstage: true), findsNothing);
+    // The tree stays mounted under the note (T-TS-08): hidden from the
+    // user, kept alive for the way back.
+    expect(noteRow('Phone.md'), findsNothing);
+    expect(noteRow('Phone.md', offstage: true), findsOne);
 
     // Back returns to the tree; the selection is kept.
     await tester.tap(find.byTooltip('Back'));

@@ -22,21 +22,15 @@ final class MathCache extends ChangeNotifier {
   /// [renderer] (synchronous seam) and [asyncRenderer] (future seam) replace
   /// the render path for tests; the default renders synchronously with
   /// `katex_dart`.
-  MathCache({
-    this.capacity = defaultCapacity,
-    this.renderer,
-    this.asyncRenderer,
-  });
+  new({this.capacity = defaultCapacity, this.renderer, this.asyncRenderer});
 
   /// The sync render seam; null = [asyncRenderer] or the default render.
   final BoxNode Function(String tex, {required bool displayMode})? renderer;
 
   /// The async render seam (placeholder tests); null = [renderer] or the
   /// default synchronous render.
-  final Future<BoxNode> Function(
-    String tex, {
-    required bool displayMode,
-  })? asyncRenderer;
+  final Future<BoxNode> Function(String tex, {required bool displayMode})?
+  asyncRenderer;
 
   /// Default capacity (design.md's ~512 entries).
   static const int defaultCapacity = 512;
@@ -130,23 +124,17 @@ final class MathCache extends ChangeNotifier {
     }
 
     if (renderer != null) {
-      return compute(
-        () async => renderer!(tex, displayMode: displayMode),
-      );
+      return compute(() async => renderer!(tex, displayMode: displayMode));
     }
     final asyncRenderer = this.asyncRenderer;
     if (asyncRenderer != null) {
-      return compute(
-        () => asyncRenderer(tex, displayMode: displayMode),
-      );
+      return compute(() => asyncRenderer(tex, displayMode: displayMode));
     }
     // Default: synchronous render (per-span cost ~0.1 ms; only the
     // viewport's spans are ever requested).
     return compute(
-      () async => renderToBox(
-        tex,
-        options: KatexOptions(displayMode: displayMode),
-      ),
+      () async =>
+          renderToBox(tex, options: KatexOptions(displayMode: displayMode)),
     );
   }
 

@@ -47,6 +47,42 @@ list stays honest about what remains. Nothing here is a feature.
   with each piece. *AC: no behaviour change; each extracted piece keeps
   its tests.*
 
+- [x] **T-CL-05** The split-ratio row is shown where it cannot apply
+  (user, 2026-09-09). The editor|preview split only exists when the two
+  panes are side by side: at `auto` that needs a window at least 600 dp
+  wide, and on a phone in the switch layout the slider moves a number
+  nothing reads. Show the row only when the current preview mode and
+  width can actually split, so the settings screen stops offering a
+  control with no effect. Keep the stored value untouched while it is
+  hidden — plugging in a monitor should bring back the ratio the user
+  chose, not a default. *AC: widget tests — the row is absent on a phone
+  width and present at a tablet width; the stored ratio survives being
+  hidden.* Extended the same day, on the same reasoning: the **preview
+  mode** row goes with it below 600 dp, and a narrow screen no longer
+  honours a forced split at all. Hiding the row alone would have left a
+  phone that once forced the split with a two-pane layout and no visible
+  control to undo it.
+
+- [x] **T-CL-06** The first index names what it is reading (user,
+  2026-09-09). A large library's first open was a progress bar over
+  nothing for a long time, which reads as a hang. The content pass now
+  reports each note as it reaches it, over a `SendPort` handed to the
+  read isolate, and the open screen shows the count and the note's path
+  under the bar. The session listens only around the blocking first scan,
+  since the report costs a message per note; the redraw is throttled to
+  twenty a second, which is already a blur. *Done: unit tests on the
+  reporting, widget tests on the line.*
+
+- [x] **T-CL-07** "Side by side" and "Auto" were the same choice. Since
+  T-CL-05 made a narrow screen never split, the forced `split` mode
+  differed from `auto` nowhere: above 600 dp both split, below it neither
+  does. *AC: the choice a user is offered has no two entries that do the
+  same thing.* Done: the mode is gone and a stored `split` reads back as
+  `auto`, which is what it now means. With two values left, "Auto" was
+  the wrong name for one of them — above the breakpoint it is the side by
+  side layout and the other is the full-screen one, so the labels say
+  that.
+
 ## Not worth doing (recorded so it is not re-found)
 
 - The list drag's hit testing walks every row per pointer move

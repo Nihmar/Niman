@@ -18,17 +18,79 @@ import 'package:re_editor/re_editor.dart';
 
 /// A real 1x1 PNG (so Image.file can decode it in tests).
 final Uint8List _png = Uint8List.fromList(const [
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
-  0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
-  0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 void main() {
-  testWidgets('the preview renders a library-relative image link',
-      (tester) async {
+  testWidgets('the preview renders a library-relative image link', (
+    tester,
+  ) async {
     await tester.runAsync(() async {
       final dir = await Directory.systemTemp.createTemp('copist_pv_');
       try {
@@ -53,18 +115,16 @@ void main() {
         expect(fileImage.file.path.endsWith('pic.png'), isTrue);
 
         // Prove it decodes (i.e. the image is actually visible):
-        await precacheImage(
-          fileImage,
-          tester.element(find.byType(Image)),
-        );
+        await precacheImage(fileImage, tester.element(find.byType(Image)));
       } finally {
         await dir.delete(recursive: true);
       }
     });
   });
 
-  testWidgets('the insert action copies and links at the caret (AC)',
-      (tester) async {
+  testWidgets('the insert action copies and links at the caret (AC)', (
+    tester,
+  ) async {
     final dir = (await tester.runAsync(
       () => Directory.systemTemp.createTemp('copist_ins_'),
     ))!;
@@ -91,9 +151,8 @@ void main() {
               importImage: (root, src) {
                 final assets = Directory(p.join(root, 'assets'));
                 if (!assets.existsSync()) assets.createSync(recursive: true);
-                File(p.join(assets.path, 'xx.png')).writeAsBytesSync(
-                  File(src).readAsBytesSync(),
-                );
+                File(p.join(assets.path, 'xx.png'))
+                    .writeAsBytesSync(File(src).readAsBytesSync());
                 return Future.value('assets/xx.png');
               },
             ),
@@ -106,10 +165,7 @@ void main() {
       await tester.pump(); // snippet lands in the editor.
       expect(tester.takeException(), isNull);
       expect(controller.text, contains('![pic](assets/xx.png)'));
-      expect(
-        File(p.join(dir.path, 'assets/xx.png')).existsSync(),
-        isTrue,
-      );
+      expect(File(p.join(dir.path, 'assets/xx.png')).existsSync(), isTrue);
       // The inserted link autosaves like any edit:
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes.single, contains('![pic](assets/xx.png)'));

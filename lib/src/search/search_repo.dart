@@ -9,13 +9,13 @@ library;
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show QueryRow, Variable;
 
 /// One ranked search hit.
 final class SearchHit {
   /// Creates a hit.
-  const SearchHit({
+  const new({
     required this.noteId,
     required this.path,
     required this.title,
@@ -75,10 +75,10 @@ abstract interface class SearchSource {
 /// been issued in the meantime — the invocation-id guard. Not stateful
 /// beyond the counter, so one instance can back several screens.
 final class SearchRepo implements SearchSource {
-  /// Creates the repo over [CopistDatabase].
-  SearchRepo(this._db);
+  /// Creates the repo over [IndexDatabase].
+  new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   int _invocation = 0;
 

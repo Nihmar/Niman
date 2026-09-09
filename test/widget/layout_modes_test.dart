@@ -8,30 +8,29 @@ import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _app(Widget child) =>
-    MaterialApp(home: Scaffold(body: child));
+Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 NoteView _noteView({
   required bool splitPreview,
   double splitFraction = 0.55,
   ValueChanged<double>? onSplitFractionChanged,
   VoidCallback? onSplitDragEnd,
-}) =>
-    NoteView(
-      path: '/notes/a.md',
-      showLineNumbers: true,
-      autofocusEditor: false,
-      splitPreview: splitPreview,
-      splitFraction: splitFraction,
-      onSplitFractionChanged: onSplitFractionChanged,
-      onSplitDragEnd: onSplitDragEnd,
-      readNote: (_) async => '# Head\n\nbody text',
-    );
+}) => NoteView(
+  path: '/notes/a.md',
+  showLineNumbers: true,
+  autofocusEditor: false,
+  splitPreview: splitPreview,
+  splitFraction: splitFraction,
+  onSplitFractionChanged: onSplitFractionChanged,
+  onSplitDragEnd: onSplitDragEnd,
+  readNote: (_) async => '# Head\n\nbody text',
+);
 
 void main() {
   group('NoteView layout', () {
-    testWidgets('split mode renders the editor and the preview side by side',
-        (tester) async {
+    testWidgets('split mode renders the editor and the preview side by side', (
+      tester,
+    ) async {
       await tester.pumpWidget(_app(_noteView(splitPreview: true)));
       await tester.pump();
       await tester.pump();
@@ -82,8 +81,7 @@ void main() {
       expect(find.byType(MarkdownPreview), findsNothing);
     });
 
-    testWidgets('the preview follows the editor in split mode',
-        (tester) async {
+    testWidgets('the preview follows the editor in split mode', (tester) async {
       await tester.pumpWidget(_app(_noteView(splitPreview: true)));
       await tester.pump();
       await tester.pump();
@@ -93,8 +91,9 @@ void main() {
       expect(preview.data, contains('body text'));
     });
 
-    testWidgets('the divider drag reports the fraction and calls onDragEnd',
-        (tester) async {
+    testWidgets('the divider drag reports the fraction and calls onDragEnd', (
+      tester,
+    ) async {
       final fractions = <double>[];
       var dragEnded = false;
       await tester.pumpWidget(
@@ -129,8 +128,9 @@ void main() {
   });
 
   group('shell resolution', () {
-    testWidgets('auto mode is split on wide screens, switch on phones',
-        (tester) async {
+    testWidgets('auto mode is split on wide screens, switch on phones', (
+      tester,
+    ) async {
       // Auto + forced side-by-side reachable through the effective mode
       // resolution (narrow width + auto => switch; any width + split =>
       // split). The resolution helper is shell-internal; the NoteView

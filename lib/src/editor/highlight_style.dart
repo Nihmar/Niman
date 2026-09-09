@@ -19,8 +19,7 @@ enum HighlightPalette {
 
   /// The style of the *heading text* — the region after a `#…` marker,
   /// which the tokenizer leaves unmarked: bold, at the base row size.
-  TextStyle? get headingStyle =>
-      const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle? get headingStyle => const TextStyle(fontWeight: FontWeight.bold);
 
   /// The [TextStyle] override for [kind] in this palette (null = base).
   ///
@@ -28,10 +27,7 @@ enum HighlightPalette {
   /// ColorScheme's primary, underlined per mockup, in both palettes.
   TextStyle? styleFor(TokenKind kind, {required Color accent}) {
     if (kind == TokenKind.wikilink) {
-      return TextStyle(
-        color: accent,
-        decoration: TextDecoration.underline,
-      );
+      return TextStyle(color: accent, decoration: TextDecoration.underline);
     }
     return (this == HighlightPalette.dark ? _darkStyles : _lightStyles)[kind];
   }
@@ -56,18 +52,12 @@ enum HighlightPalette {
     TokenKind.image: TextStyle(color: _image),
     TokenKind.listMarker: TextStyle(color: _dim),
     TokenKind.taskBox: TextStyle(color: _task),
-    TokenKind.blockquote: TextStyle(
-      color: _quote,
-      fontStyle: FontStyle.italic,
-    ),
+    TokenKind.blockquote: TextStyle(color: _quote, fontStyle: FontStyle.italic),
     TokenKind.horizontalRule: TextStyle(color: _dim),
     TokenKind.mathInline: TextStyle(color: _math),
     TokenKind.mathBlock: TextStyle(color: _math, fontStyle: FontStyle.italic),
     TokenKind.tag: TextStyle(color: _tag),
-    TokenKind.frontmatter: TextStyle(
-      color: _dim,
-      fontStyle: FontStyle.italic,
-    ),
+    TokenKind.frontmatter: TextStyle(color: _dim, fontStyle: FontStyle.italic),
   };
 
   // Dark: same structure, brighter hues on dark backgrounds. The two math

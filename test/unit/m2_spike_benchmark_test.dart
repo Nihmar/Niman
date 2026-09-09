@@ -39,10 +39,12 @@ TextSpan _lineSpan(StyledLine line) {
     if (t.start > pos) {
       runs.add(TextSpan(text: text.substring(pos, t.start)));
     }
-    runs.add(TextSpan(
-      text: text.substring(t.start, t.end),
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    ));
+    runs.add(
+      TextSpan(
+        text: text.substring(t.start, t.end),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
     pos = t.end;
   }
   if (pos < text.length) {
@@ -50,11 +52,7 @@ TextSpan _lineSpan(StyledLine line) {
   }
   return TextSpan(
     children: runs,
-    style: const TextStyle(
-      fontFamily: 'monospace',
-      fontSize: 13,
-      height: 1.5,
-    ),
+    style: const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.5),
   );
 }
 
@@ -118,12 +116,12 @@ void main() {
       sw.stop();
       final perUs = sw.elapsed.inMicroseconds / lines.length;
       print(
-          '  line layout+paint:    ${_msf(sw.elapsed).toStringAsFixed(1)} ms '
-          'for ${lines.length} lines = ${perUs.toStringAsFixed(1)} us/line');
+        '  line layout+paint:    ${_msf(sw.elapsed).toStringAsFixed(1)} ms '
+        'for ${lines.length} lines = ${perUs.toStringAsFixed(1)} us/line',
+      );
     });
 
-    test('TextPainter whole buffer as one span (single-blob alternative)',
-        () {
+    test('TextPainter whole buffer as one span (single-blob alternative)', () {
       final d = _best(1, () {
         final sw = Stopwatch()..start();
         TextPainter(
@@ -152,8 +150,9 @@ void main() {
       print('  smooth parse:         ${_msf(d).toStringAsFixed(1)} ms');
     });
 
-    testWidgets('SmoothMarkdown eager render (parse+build+layout+paint)',
-        (tester) async {
+    testWidgets('SmoothMarkdown eager render (parse+build+layout+paint)', (
+      tester,
+    ) async {
       // First frame is the cost the preview pays per (debounced) re-render.
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: SizedBox())),
@@ -170,7 +169,8 @@ void main() {
       await tester.pump(); // build + layout + paint
       sw.stop();
       print(
-          '  smooth eager frame:   ${_msf(sw.elapsed).toStringAsFixed(1)} ms');
+        '  smooth eager frame:   ${_msf(sw.elapsed).toStringAsFixed(1)} ms',
+      );
     });
   });
 }

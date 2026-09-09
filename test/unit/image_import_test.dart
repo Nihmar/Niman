@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
-  test('copies into <library>/assets/ with a content-addressed name',
-      () async {
+  test('copies into <library>/assets/ with a content-addressed name', () async {
     final dir = await Directory.systemTemp.createTemp('copist_img_');
     final source = File(p.join(dir.path, 'photo.png'));
     final bytes = List<int>.generate(64, (i) => i * 7 % 256);

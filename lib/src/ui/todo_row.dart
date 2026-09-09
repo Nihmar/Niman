@@ -51,7 +51,7 @@ final class TodoRow extends StatelessWidget {
   /// (injected in widget tests; defaults to now). [onToggle] flips the
   /// checkbox, [onEdit] opens the edit dialog, [onShowMenu] opens the
   /// long-press bottom sheet.
-  const TodoRow({
+  const new({
     required this.entry,
     required this.onToggle,
     required this.onEdit,
@@ -115,7 +115,7 @@ final class TodoRow extends StatelessWidget {
 /// carries `+project` / `@context` / `#tag` tokens — a chip per token,
 /// so the row shows what it is filed under (2026-09-07 user feedback).
 final class _RowSubtitle extends StatelessWidget {
-  const _RowSubtitle({required this.task, required this.today});
+  const new({required this.task, required this.today});
 
   final TodoTask task;
   final DateTime today;
@@ -147,7 +147,7 @@ final class _RowSubtitle extends StatelessWidget {
 /// the due state + short date, prefixed ("Overdue · 1 Sep", "Due
 /// today", "Due 7 Sep") so it can never be read as the reminder's date.
 final class _DueChip extends StatelessWidget {
-  const _DueChip({required this.due, required this.today});
+  const new({required this.due, required this.today});
 
   final DateTime due;
   final DateTime today;
@@ -168,9 +168,7 @@ final class _DueChip extends StatelessWidget {
       TodoDueState.upcoming =>
         '${AppStrings.todoRowDue} ${_shortDate(due, today)}',
     };
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: color,
-    );
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: color);
     return Text(label, style: style);
   }
 }
@@ -181,7 +179,7 @@ final class _DueChip extends StatelessWidget {
 /// date survived "No date" filters unexplained). The clock + time is
 /// the reminder marker; the old alarm icon is still gone.
 final class _ReminderChip extends StatelessWidget {
-  const _ReminderChip({required this.stamp, required this.today});
+  const new({required this.stamp, required this.today});
 
   final DateTime stamp;
   final DateTime today;
@@ -189,9 +187,8 @@ final class _ReminderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-    );
+    final style = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(color: scheme.onSurfaceVariant);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -208,7 +205,7 @@ final class _ReminderChip extends StatelessWidget {
 /// its sigil (`+p`, `@c`, `#t`), so the color still marks the token
 /// without a bar nobody could name.
 final class _TokenChip extends StatelessWidget {
-  const _TokenChip({required this.token});
+  const new({required this.token});
 
   final String token;
 

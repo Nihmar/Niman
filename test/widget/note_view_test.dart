@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
@@ -13,15 +15,14 @@ NoteView _view({
   CodeLineEditingController? controller,
   bool showLineNumbers = true,
   bool autofocusEditor = false,
-}) =>
-    NoteView(
-      showLineNumbers: showLineNumbers,
-      autofocusEditor: autofocusEditor,
-      path: path,
-      readNote: readNote,
-      writeNote: writeNote,
-      controller: controller,
-    );
+}) => NoteView(
+  showLineNumbers: showLineNumbers,
+  autofocusEditor: autofocusEditor,
+  path: path,
+  readNote: readNote,
+  writeNote: writeNote,
+  controller: controller,
+);
 
 String _editorText(WidgetTester tester) =>
     tester.widget<NoteEditor>(find.byType(NoteEditor)).controller.text;
@@ -72,8 +73,9 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('a selection-only change does not schedule a save',
-        (tester) async {
+    testWidgets('a selection-only change does not schedule a save', (
+      tester,
+    ) async {
       final writes = <String>[];
       final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
@@ -112,8 +114,9 @@ void main() {
       expect(editor.showLineNumbers, isFalse);
     });
 
-    testWidgets('the keyboard-on-open toggle reaches the editor',
-        (tester) async {
+    testWidgets('the keyboard-on-open toggle reaches the editor', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _app(
           _view(
@@ -132,8 +135,9 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('saves on dispose when the debounce has not fired',
-        (tester) async {
+    testWidgets('saves on dispose when the debounce has not fired', (
+      tester,
+    ) async {
       final writes = <String>[];
       final controller = CodeLineEditingController.fromText('start');
       await tester.pumpWidget(
@@ -155,6 +159,92 @@ void main() {
       await tester.pump();
       expect(writes, ['start!']);
       controller.dispose();
+    });
+
+    // The preview has no editable: flipping the switch must dismiss the
+    // keyboard instead of leaving it up over a read-only pane.
+    testWidgets('flipping to preview dismisses the keyboard', (tester) async {
+      var showPreview = false;
+      late StateSetter flip;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                flip = setState;
+                return NoteView(
+                  path: '/notes/a.md',
+                  showLineNumbers: false,
+                  autofocusEditor: true,
+                  showPreview: showPreview,
+                  readNote: (_) async => 'hello',
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump(); // load lands, the editor mounts and autofocuses.
+      await tester.pump();
+      final editorFocus = tester
+          .widget<NoteEditor>(find.byType(NoteEditor))
+          .focusNode;
+      expect(editorFocus.hasPrimaryFocus, isTrue);
+      // Let the focus-driven blink one-shot lapse while the editor is
+      // still mounted (re_editor never cancels it, so disposing the
+      // editor first would fire it use-after-dispose).
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(editorFocus.hasPrimaryFocus, isTrue);
+
+      // Straight after the flip (the fade has not advanced, so the editor
+      // is still mounted): the IME target is already gone.
+      flip(() => showPreview = true);
+      await tester.pump();
+      expect(editorFocus.hasPrimaryFocus, isFalse);
+      // Step past the fade in small frames: the fade disposes the editor
+      // at 180 ms, leaving no timer pending at teardown.
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+    });
+
+    // Opening straight into the preview must dismiss an existing focus
+    // once the load lands (e.g. the search field behind the new note).
+    testWidgets('opening in preview dismisses an existing focus', (
+      tester,
+    ) async {
+      final gate = Completer<String>();
+      final fieldFocus = FocusNode();
+      addTearDown(fieldFocus.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                TextField(focusNode: fieldFocus),
+                Expanded(
+                  child: NoteView(
+                    path: '/notes/a.md',
+                    showLineNumbers: false,
+                    autofocusEditor: false,
+                    showPreview: true,
+                    readNote: (_) => gate.future,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump(); // load pending behind the gate.
+      fieldFocus.requestFocus();
+      await tester.pump();
+      expect(fieldFocus.hasFocus, isTrue);
+
+      gate.complete('hello');
+      await tester.pump();
+      await tester.pump();
+      expect(fieldFocus.hasFocus, isFalse);
     });
   });
 }

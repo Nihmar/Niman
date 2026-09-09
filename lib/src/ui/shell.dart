@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
@@ -25,6 +26,7 @@ import 'package:copist/src/ui/search_screen.dart';
 import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_help.dart';
@@ -39,7 +41,7 @@ import 'package:path/path.dart' as p;
 /// sidebar | detail shell (editor/preview arrive in M2).
 final class LibraryHome extends ConsumerStatefulWidget {
   /// Creates the root screen.
-  const LibraryHome({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<LibraryHome> createState() => _LibraryHomeState();
@@ -114,7 +116,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
 /// The library shell: sidebar tree + action bar on the left, detail pane
 /// on the right.
 final class _LibraryShell extends StatefulWidget {
-  const _LibraryShell({
+  const new({
     required this.controller,
     required this.reminders,
     required this.shortcuts,
@@ -166,6 +168,17 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The currently selected bottom tab (narrow layout).
   ShellTab _tab = ShellTab.files;
 
+  /// Every tab visited so far: bodies mount on first visit and stay
+  /// mounted afterwards, so a switch only flips visibility instead of
+  /// disposing one state and inflating another mid-animation (the
+  /// 2026-09-08 device log put that inflate at 14-17 ms of frame build).
+  /// Query, results, and scroll therefore survive a switch, by choice.
+  final Set<ShellTab> _visitedTabs = <ShellTab>{ShellTab.files};
+
+  /// Whether the Tags screen has ever been opened: like the tabs, it
+  /// mounts once and stays alive so the search query survives the flip.
+  bool _tagsVisited = false;
+
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
@@ -181,9 +194,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       icon: const Icon(Icons.help_outline),
       onPressed: () => Navigator.push(
         context,
-        MaterialPageRoute<void>(
-          builder: (context) => const TodoHelpScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
       ),
     );
   }
@@ -194,7 +205,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// as a screen instead. Reminder taps land here, so a tablet no longer
   /// opens the app on the file tree with no hint of why.
   void _openTodo() {
-    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
       _selectShellTab(ShellTab.todo);
       return;
     }
@@ -228,11 +239,40 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note stays highlighted).
   void _selectShellTab(ShellTab tab) {
     if (_tab == tab) return;
+    // The switch is logged so a slow frame in an exported log can be
+    // attributed to a tab rather than guessed at: the reported stutter is
+    // specific to Search, and until this line existed nothing in the log
+    // said when Search was entered.
+    const AppLogger(name: 'shell').debug('tab: ${_tab.name} -> ${tab.name}');
+    // A kept-alive search field would otherwise hold focus (and the
+    // keyboard) on the next tab: disposing used to drop it for free.
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _tab = tab;
+      _visitedTabs.add(tab);
       _treeVisible = true;
       _fabExpanded = false;
+      // Leaving any open note: the tabs show at once (issue #4).
+      _noteClosed();
     });
+    // Time-to-visible of the switch itself: the 'tap tab' line above is the
+    // input, this is when the first new frame actually painted (with the
+    // navigation-bar selection animation the user said lags on Search).
+    logNextFrame('shell', 'tab ${tab.name} first frame');
+    // T-TS-09 marker: brackets the fade so a slow frame can be attributed
+    // to the switch itself (before it) or to what settles after it. Only
+    // the latest switch reports: a rapid double-tap's stale marker would
+    // misattribute the frames.
+    final settled = tab;
+    unawaited(
+      Future<void>.delayed(TabBodyStack.fade + const Duration(milliseconds: 20))
+          .then((_) {
+            if (mounted && _tab == settled) {
+              const AppLogger(name: 'shell')
+                  .debug('tab fade settled: ${settled.name}');
+            }
+          }),
+    );
   }
 
   /// The editor settings toggles, held here so both NoteView sites get the
@@ -260,7 +300,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
 
-  /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
+  /// Phone (< [splitBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
 
@@ -328,6 +368,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _resetNoteKind() {
     _noteKind = null;
     _kindRawMode = false;
+    // Fullscreen is a property of the note being previewed, not of the
+    // app: the next note opens with its chrome.
+    _previewFullScreen = false;
   }
 
   Future<void> _loadLinkSource() async {
@@ -342,6 +385,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
       '(current tab ${_tab.name})',
     );
+    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = path;
       _selectedIsDir = false;
@@ -349,6 +393,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
       _resetNoteKind();
+      _noteOpened();
     });
   }
 
@@ -364,7 +409,140 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// action lives in the shared app bar, so the shell owns the state.
   bool _previewVisible = false;
 
-  void _togglePreview() => setState(() => _previewVisible = !_previewVisible);
+  void _togglePreview() {
+    // The preview has no editable: flipping to it dismisses the keyboard
+    // instead of leaving the IME up over a read-only pane.
+    if (!_previewVisible) FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _previewVisible = !_previewVisible;
+      // Fullscreen belongs to the preview: switching back to the editor
+      // must not leave a chromeless editor with no way out.
+      if (!_previewVisible) _previewFullScreen = false;
+    });
+  }
+
+  /// Whether a note opened right now would show only the preview (the
+  /// editor hidden): the IME has no target and must go before the
+  /// transition, or its resize lands mid-fade.
+  bool _opensPreviewOnly() {
+    if (!_previewVisible) return false;
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    return !previewSplits(_previewMode, narrow: narrow);
+  }
+
+  /// Records a note open: the tabs stay painted under the fading note
+  /// (issue #4, see [_noteHidingTabs]) and hide once it has covered them.
+  /// A no-op when they are already hidden (opening another note while one
+  /// is open swaps the content opaquely — no fade, nothing to cover).
+  void _noteOpened() {
+    if (_noteHidingTabs) return;
+    _noteHidingTabs = false;
+    _noteHideTimer?.cancel();
+    final token = ++_noteHideRevision;
+    _noteHideTimer = Timer(
+      _fullNoteFade + const Duration(milliseconds: 40),
+      () {
+        _noteHideTimer = null;
+        if (!mounted || token != _noteHideRevision) return;
+        if (_selected == null || _selectedIsDir || _treeVisible) return;
+        setState(() => _noteHidingTabs = true);
+      },
+    );
+  }
+
+  /// Records a note close: the tabs show at once so the fading note
+  /// cross-fades over them instead of over the window background.
+  void _noteClosed() {
+    _noteHideTimer?.cancel();
+    _noteHideTimer = null;
+    _noteHideRevision++;
+    _noteHidingTabs = false;
+  }
+
+  /// Whether the preview has taken over the phone screen (2026-09-08
+  /// user request): app bar and tab bar hidden, the note's own text left.
+  ///
+  /// Phone-only. On the wide layout the note already shares the window
+  /// with the tree, and "fullscreen" there would mean something else.
+  bool _previewFullScreen = false;
+
+  /// The full-note open fade (matches the AnimatedSwitcher below).
+  static const _fullNoteFade = Duration(milliseconds: 220);
+
+  /// Whether the tab shell stays hidden under the open note. It flips on
+  /// only once the open fade has covered it (issue #4): hiding the shell
+  /// in the same frame as the open exposes the window background through
+  /// the fading note — a black frame in dark mode. Tickers stop at once;
+  /// layout and paint follow the fade.
+  bool _noteHidingTabs = false;
+
+  /// The pending tab-hide after a note open (canceled on close).
+  Timer? _noteHideTimer;
+
+  /// Guards the pending hide against a rapid close/reopen.
+  int _noteHideRevision = 0;
+
+  /// The app-bar fullscreen action, next to the editor/preview eye.
+  Widget _previewFullScreenAction() {
+    return IconButton(
+      key: const Key('preview-fullscreen'),
+      tooltip: AppStrings.enterFullScreenTooltip,
+      icon: const Icon(Icons.fullscreen),
+      onPressed: () => setState(() => _previewFullScreen = true),
+    );
+  }
+
+  /// The phone full-screen note body (one builder for both the chromed
+  /// and the immersive variants: only the Scaffold around it changes).
+  Widget _fullNoteView(LibrarySession controller, String selectedPath) {
+    return NoteView(
+      path: p.join(controller.root ?? '', selectedPath),
+      showLineNumbers: _lineNumbers,
+      autofocusEditor: _autofocusEditor,
+      linkType: _linkType,
+      indentWidth: _indentWidth,
+      toolbarLayout: _toolbarLayout,
+      splitPreview: previewSplits(_previewMode, narrow: true),
+      showPreview: _previewVisible,
+      splitFraction: _splitRatio,
+      onSplitFractionChanged: _onSplitFractionChanged,
+      onSplitDragEnd: _onSplitDragEnd,
+      libraryRoot: controller.root,
+      linkSource: _linkSource,
+      onOpenNote: _openNoteFromLink,
+      initialAnchor: _pendingAnchor,
+      kindMode: !_kindRawMode,
+      onNoteKindChanged: _onNoteKindChanged,
+    );
+  }
+
+  /// The way back out of [_previewFullScreen], floating over the preview.
+  ///
+  /// The chrome that would normally carry this action is exactly what is
+  /// hidden, so the button rides above the content instead — inside the
+  /// safe area, so a notch or a rounded corner never eats it.
+  Widget _exitFullScreenButton() {
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Material(
+            type: MaterialType.circle,
+            color: Theme.of(context).colorScheme.surface
+                .withValues(alpha: 0.85),
+            elevation: 2,
+            child: IconButton(
+              key: const Key('preview-fullscreen-exit'),
+              tooltip: AppStrings.exitFullScreenTooltip,
+              icon: const Icon(Icons.fullscreen_exit),
+              onPressed: () => setState(() => _previewFullScreen = false),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   /// The app-bar eye action: flips the editor/preview pane (phone
   /// full-screen note and the wide switch override).
@@ -378,10 +556,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       onPressed: _togglePreview,
     );
   }
-
-  /// Below this width the shell is single-pane (spec: phones are
-  /// full-screen tree or editor, the split lands at 600 px and up).
-  static const double _phoneBreakpoint = 600;
 
   @override
   void initState() {
@@ -416,6 +590,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _noteHideTimer?.cancel();
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     _todoController.dispose();
@@ -532,14 +707,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Resolves the effective preview layout for a width: forced modes win,
-  /// `auto` follows the width (split ≥ 600 dp, switch on phones).
-  bool _effectiveSplit({required bool narrow}) {
-    if (_previewMode == PreviewLayoutMode.split) return true;
-    if (_previewMode == PreviewLayoutMode.fullScreen) return false;
-    return !narrow;
-  }
-
   /// Parent path for new note/folder creation.
   String get _createParent {
     if (_selected == null) return '';
@@ -547,6 +714,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   void _select(Note note) {
+    // A note opening in preview-only has no editable for the IME.
+    final previewOnly = !note.isDir && _opensPreviewOnly();
+    if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = note.path;
       _selectedIsDir = note.isDir;
@@ -554,7 +724,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = null;
       _resetNoteKind();
-      if (note.isDir) _expanded.add(note.path);
+      if (note.isDir) {
+        _noteClosed();
+        _expanded.add(note.path);
+      } else {
+        _noteOpened();
+      }
     });
   }
 
@@ -562,19 +737,27 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note takes the screen, back returns to the search tab; wide — the
   /// detail pane shows it alongside the tree.
   void _openSearchNote(String path) {
+    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
       _resetNoteKind();
+      _noteOpened();
     });
+    logNextFrame('shell', 'search result open first frame');
   }
 
   /// Opens the quick note at [path]; back returns to the Files tab.
   /// A stale setting (the note was moved, renamed, or deleted) is cleared
   /// so the tab returns to its empty state.
   Future<void> _openQuickNote(String path) async {
+    // Closes the keyboard before the transition (issue #4): opening the
+    // overlay over a live IME rips focus mid-fade while adjustResize
+    // reshapes the window, which flashes on device. Tab switches already
+    // do this in _selectShellTab.
+    FocusManager.instance.primaryFocus?.unfocus();
     await _guard(() async {
       final ops = widget.controller.ops;
       if (ops == null) return;
@@ -587,12 +770,15 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
+        _visitedTabs.add(ShellTab.quickNote);
         _noteFromTab = ShellTab.files;
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
         _resetNoteKind();
+        _noteOpened();
       });
+      logNextFrame('shell', 'quick note open first frame');
     });
   }
 
@@ -616,7 +802,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// screen — otherwise the launcher's Quick note action would land
   /// nowhere on a tablet with no quick note set yet.
   void _openQuickNoteChooser() {
-    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
       _selectShellTab(ShellTab.quickNote);
       return;
     }
@@ -648,21 +834,21 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   Future<void> _guard(Future<void> Function() action) async {
+    // Pure reentrancy flag (no UI reads it): no setState around it, so a
+    // guarded action rebuilds once for its own state instead of three
+    // times around the transition it animates (issue #4).
     if (_busy) return;
-    setState(() => _busy = true);
+    _busy = true;
     try {
       await action();
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
       return;
     } finally {
-      if (mounted) {
-        setState(() => _busy = false);
-      }
+      _busy = false;
     }
   }
 
@@ -680,11 +866,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         parentPath: parent ?? _createParent,
         name: name,
       );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _noteOpened();
       });
     });
   }
@@ -780,7 +969,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (confirmed != true) return;
     await _guard(() async {
       await ops.delete(sel);
-      setState(() => _selected = null);
+      setState(() {
+        _selected = null;
+        // Deleting the open note closes it: the tabs show at once.
+        _noteClosed();
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -895,76 +1088,127 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final selectedPath = _selected;
-    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
 
     if (narrow) {
-      // Phone: the selected note opens full-screen (from any tab). A
-      // cross-fade covers the shell -> note swap (back returns with the
-      // same fade).
+      // Phone: the selected note opens full-screen (from any tab) over the
+      // tab shell, which stays mounted underneath (T-TS-08): swapping it
+      // out used to dispose all five kept-alive bodies at once, and going
+      // back remounted them mid-animation. The note fades in and out with
+      // the same fade as before.
       final fullNote = selectedPath != null && !_selectedIsDir && !_treeVisible;
+      // The preview may show without its chrome; only a note that is
+      // actually previewing (not split, not a kind GUI) can get there, so
+      // the flag alone never decides it.
+      final immersive =
+          fullNote &&
+          _previewFullScreen &&
+          _previewVisible &&
+          _previewToggleVisible &&
+          !previewSplits(_previewMode, narrow: true);
       return PopScope(
         canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _closeFullScreenNote();
+          if (didPop) return;
+          // Back leaves fullscreen before it leaves the note: one gesture,
+          // one layer of chrome, the way every other fullscreen behaves.
+          if (immersive) {
+            setState(() => _previewFullScreen = false);
+            return;
+          }
+          _closeFullScreenNote();
         },
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: fullNote
-              ? KeyedSubtree(
-                  key: const ValueKey('full-note'),
-                  child: Scaffold(
-                    appBar: AppBar(
-                      leading: BackButton(onPressed: _closeFullScreenNote),
-                      title: Text(p.basename(selectedPath)),
-                      actions: [
-                        ..._kindActions,
-                        if (!_effectiveSplit(narrow: true) &&
-                            _previewToggleVisible)
-                          _previewToggleAction(),
-                      ],
+        child: ColoredBox(
+          // Opaque surface behind every phone transition (issue #4): the
+          // full-note fade starts from transparent, and without this the
+          // first frames expose the black Android window instead.
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // The tab shell never unmounts: hidden it skips layout, paint,
+              // and tickers, and the fullscreen note above is opaque. The
+              // hiding waits out the open fade (issue #4): the note fades
+              // in over the tabs instead of over the window background.
+              Offstage(
+                key: const ValueKey('tab-shell-offstage'),
+                offstage: fullNote && _noteHidingTabs,
+                child: TickerMode(
+                  enabled: !fullNote,
+                  child: KeyedSubtree(
+                    key: const ValueKey('tab-shell'),
+                    child: _tabShell(
+                      controller: controller,
+                      title: _tabTitle,
+                      actions: _tab == ShellTab.files
+                          ? _filesAppBarActions(controller)
+                          : _tab == ShellTab.todo
+                          ? [_todoHelpAction()]
+                          : const [],
+                      floatingActionButton: _tabFab(),
                     ),
-                    body: NoteView(
-                      path: p.join(controller.root ?? '', selectedPath),
-                      showLineNumbers: _lineNumbers,
-                      autofocusEditor: _autofocusEditor,
-                      linkType: _linkType,
-                      indentWidth: _indentWidth,
-                      toolbarLayout: _toolbarLayout,
-                      splitPreview: _effectiveSplit(narrow: true),
-                      showPreview: _previewVisible,
-                      splitFraction: _splitRatio,
-                      onSplitFractionChanged: _onSplitFractionChanged,
-                      onSplitDragEnd: _onSplitDragEnd,
-                      libraryRoot: controller.root,
-                      linkSource: _linkSource,
-                      onOpenNote: _openNoteFromLink,
-                      initialAnchor: _pendingAnchor,
-                      kindMode: !_kindRawMode,
-                      onNoteKindChanged: _onNoteKindChanged,
-                    ),
-                    bottomNavigationBar: _shellTabs(),
-                  ),
-                )
-              : KeyedSubtree(
-                  key: const ValueKey('tab-shell'),
-                  child: _tabShell(
-                    title: _tabTitle,
-                    actions: _tab == ShellTab.files
-                        ? _filesAppBarActions(controller)
-                        : _tab == ShellTab.todo
-                        ? [_todoHelpAction()]
-                        : const [],
-                    floatingActionButton: _tab == ShellTab.files
-                        ? _newItemFab()
-                        : _tab == ShellTab.todo
-                            ? _todoAddFab()
-                            : null,
-                    body: _tabBody(controller),
                   ),
                 ),
+              ),
+              AnimatedSwitcher(
+                duration: _fullNoteFade,
+                switchInCurve: Curves.easeOutCubic,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                child: fullNote
+                    ? KeyedSubtree(
+                        key: const ValueKey('full-note'),
+                        child: Scaffold(
+                          appBar: immersive
+                              ? null
+                              : AppBar(
+                                  leading: BackButton(
+                                    onPressed: _closeFullScreenNote,
+                                  ),
+                                  title: Text(p.basename(selectedPath)),
+                                  actions: [
+                                    ..._kindActions,
+                                    if (!previewSplits(
+                                          _previewMode,
+                                          narrow: true,
+                                        ) &&
+                                        _previewToggleVisible) ...[
+                                      _previewToggleAction(),
+                                      if (_previewVisible)
+                                        _previewFullScreenAction(),
+                                    ],
+                                  ],
+                                ),
+                          body: Stack(
+                            children: [
+                              // Stable subtree across the immersive toggle:
+                              // only the top inset flips, so entering or
+                              // leaving fullscreen never reparents (and
+                              // disposes) the open note's state, focus and
+                              // scroll. The all-false SafeArea is a layout
+                              // no-op.
+                              Positioned.fill(
+                                child: SafeArea(
+                                  top: immersive,
+                                  bottom: false,
+                                  left: false,
+                                  right: false,
+                                  child: _fullNoteView(
+                                    controller,
+                                    selectedPath,
+                                  ),
+                                ),
+                              ),
+                              if (immersive) _exitFullScreenButton(),
+                            ],
+                          ),
+                          bottomNavigationBar: immersive ? null : _shellTabs(),
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -977,7 +1221,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           if (_selected != null &&
               !_selectedIsDir &&
               _previewToggleVisible &&
-              !_effectiveSplit(narrow: false))
+              !previewSplits(_previewMode, narrow: false))
             _previewToggleAction(),
           IconButton(
             key: const Key('open-trash'),
@@ -1013,6 +1257,28 @@ final class _LibraryShellState extends State<_LibraryShell>
       body: _withFabScrim(_wideBody(controller)),
       floatingActionButton: _newItemFab(),
     );
+  }
+
+  /// The current tab's FAB, or null for the tabs that have none.
+  ///
+  /// Files and Todo both put a `+` in the same corner, so scaling one out
+  /// and the next one in reads as a flicker on a button that never moved
+  /// (2026-09-08 user feedback). `Scaffold` decides whether to animate by
+  /// comparing the old and new FAB's key, so one shared key here is the
+  /// whole fix: the slot rebuilds in place between those two tabs and
+  /// still animates on the way to a tab that has no FAB, which is right —
+  /// there the button really is leaving.
+  ///
+  /// The inner keys stay as they were: they identify which `+` this is,
+  /// to the tests and to `Scaffold`'s hero.
+  Widget? _tabFab() {
+    final fab = switch (_tab) {
+      ShellTab.files => _newItemFab(),
+      ShellTab.todo => _todoAddFab(),
+      ShellTab.search || ShellTab.quickNote || ShellTab.settings => null,
+    };
+    if (fab == null) return null;
+    return KeyedSubtree(key: const Key('shell-tab-fab'), child: fab);
   }
 
   /// The Todo tab's add FAB (2026-09-07 user feedback: the app-bar `+`
@@ -1068,12 +1334,15 @@ final class _LibraryShellState extends State<_LibraryShell>
         name: name,
         content: listNoteContent(),
       );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
         _resetNoteKind();
+        _noteOpened();
       });
     });
   }
@@ -1106,7 +1375,20 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the main FAB icon, dims the body, and closes the menu on any tap
   /// (the FABs live in the Scaffold's FAB slot, above this layer, so they
   /// stay tappable). Always mounted; inert while collapsed.
-  Widget _withFabScrim(Widget child) {
+  /// Wraps [child] in the FAB menu's tap-to-dismiss scrim.
+  ///
+  /// [enabled] is false on the tabs that have no expandable FAB. Not an
+  /// optimisation: the scrim resolves the FAB's anchor key during layout,
+  /// and since the Files and Todo tabs now share one FAB slot, a scrim
+  /// left mounted on Todo reaches for an anchor that tab does not have.
+  ///
+  /// Never toggle this wrapper around a kept-alive subtree (like the tab
+  /// stack): swapping between the bare child and the [Stack] reparents it
+  /// and remounts every state inside. The Files slot below is always
+  /// wrapped; hiding it via [Offstage] skips layout, so the anchor is only
+  /// resolved while Files is visible.
+  Widget _withFabScrim(Widget child, {bool enabled = true}) {
+    if (!enabled) return child;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -1161,13 +1443,19 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _closeFullScreenNote() {
     setState(() {
       _tab = _noteFromTab;
+      _visitedTabs.add(_noteFromTab);
       _treeVisible = true;
       _resetNoteKind();
+      _noteClosed();
     });
+    logNextFrame('shell', 'note close first frame');
   }
 
+  /// The app bar's title on each tab: the tab's own name, matching the
+  /// label under the icon that got you there. The Files tab used to say
+  /// "Copist", which named the app on a screen that is about the tree.
   String get _tabTitle => switch (_tab) {
-    ShellTab.files => AppStrings.appTitle,
+    ShellTab.files => AppStrings.tabFiles,
     ShellTab.todo => AppStrings.todoTitle,
     ShellTab.search => AppStrings.tabSearch,
     ShellTab.quickNote => AppStrings.quickNoteTitle,
@@ -1176,25 +1464,20 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
   Widget _tabShell({
+    required LibrarySession controller,
     required String title,
     required List<Widget> actions,
-    required Widget body,
     Widget? floatingActionButton,
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
-      body: _withFabScrim(
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 180),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: KeyedSubtree(
-            key: ValueKey('tab-body-${_tab.index}'),
-            child: body,
-          ),
-        ),
-      ),
+      // Bodies stay mounted once visited (see TabBodyStack): the switch
+      // only flips visibility and fades the incoming body in, instead of
+      // rebuilding two transparency layers mid-animation. The stack itself
+      // stays the direct body child on every tab: wrapping it in anything
+      // conditional (like the FAB scrim was) reparents the whole subtree
+      // and remounts every body, defeating the keep-alive.
+      body: _tabBodies(controller),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: _shellTabs(),
     );
@@ -1243,6 +1526,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   void _onDestinationSelected(int index) {
     final tab = ShellTab.values[index];
+    const AppLogger(name: 'shell').debug('tap tab: ${tab.name}');
     if (tab == ShellTab.quickNote) {
       unawaited(_openQuickNoteFromTile());
       return;
@@ -1272,7 +1556,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             linkType: _linkType,
             indentWidth: _indentWidth,
             toolbarLayout: _toolbarLayout,
-            splitPreview: _effectiveSplit(narrow: false),
+            splitPreview: previewSplits(_previewMode, narrow: false),
             showPreview: _previewVisible,
             splitFraction: _splitRatio,
             onSplitFractionChanged: _onSplitFractionChanged,
@@ -1288,32 +1572,82 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
-  /// The body of the selected tab.
-  Widget _tabBody(LibrarySession controller) {
-    return switch (_tab) {
-      ShellTab.files => _treePane(controller),
+  /// All five tab bodies: each mounts on its first visit and stays
+  /// mounted (query, results, and scroll survive a switch), while the
+  /// fade only covers the incoming body — no cross-fade of two
+  /// transparency layers, and no re-inflate mid-animation. Only the
+  /// search slot retains layout while hidden (T-TS-10): it is the one
+  /// whose show-layout costs frames; the plain lists relayout cheaply.
+  Widget _tabBodies(LibrarySession controller) {
+    return TabBodyStack(
+      currentIndex: _tab.index,
+      retainLayout: <int>{ShellTab.search.index},
+      children: [
+        for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
+      ],
+    );
+  }
+
+  /// The body for [tab], or a placeholder until its first visit (lazy so
+  /// opening a library does not inflate all five tabs up front).
+  Widget _tabBodyFor(ShellTab tab, LibrarySession controller) {
+    if (!_visitedTabs.contains(tab)) return const SizedBox.shrink();
+    return switch (tab) {
+      // Always scrim-wrapped (never toggled): see [_withFabScrim].
+      ShellTab.files => _withFabScrim(_treePane(controller)),
       ShellTab.todo => TodoTab(
         controller: _todoController,
         reminders: widget.reminders,
       ),
-      ShellTab.search =>
-        _showTags
-            ? TagsScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onBack: () => setState(() => _showTags = false),
-              )
-            : SearchScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onOpenTags: () => setState(() => _showTags = true),
-              ),
+      ShellTab.search => _searchSlot(controller),
       ShellTab.quickNote => QuickNoteTab(
         controller: controller,
         onOpen: _openQuickNote,
       ),
       ShellTab.settings => SettingsTab(controller: controller),
     };
+  }
+
+  /// The search tab: Search and Tags side by side, Tags mounting once.
+  /// The flip stays instant (as before — same tab, no transition); the
+  /// outer fade already covered entering the tab. Search retains layout
+  /// while Tags shows (T-TS-10): flipping back is then paint-only,
+  /// matching the tab-level switch into Search.
+  Widget _searchSlot(LibrarySession controller) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Visibility(
+          visible: !_showTags,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          child: TickerMode(
+            enabled: !_showTags,
+            child: SearchScreen(
+              controller: controller,
+              onOpenNote: _openSearchNote,
+              onOpenTags: () => setState(() {
+                _showTags = true;
+                _tagsVisited = true;
+              }),
+            ),
+          ),
+        ),
+        if (_tagsVisited)
+          Offstage(
+            offstage: !_showTags,
+            child: TickerMode(
+              enabled: _showTags,
+              child: TagsScreen(
+                controller: controller,
+                onOpenNote: _openSearchNote,
+                onBack: () => setState(() => _showTags = false),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   /// The tree pane: the action bar and the note tree — the whole body on
@@ -1333,7 +1667,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
 /// Right-hand pane: the note editor, or a prompt until a note is chosen.
 final class _DetailPane extends StatelessWidget {
-  const _DetailPane({
+  const new({
     required this.root,
     required this.selectedPath,
     required this.selectedIsDir,
@@ -1448,7 +1782,7 @@ Future<String?> _showMoveDialog(
 }
 
 final class _MovePicker extends StatefulWidget {
-  const _MovePicker({required this.name, required this.folders});
+  const new({required this.name, required this.folders});
 
   final String name;
   final List<Note> folders;

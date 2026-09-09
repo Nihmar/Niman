@@ -15,7 +15,7 @@ import 'package:copist/src/core/language.dart';
 /// documentation.
 // ignore_for_file: public_member_api_docs
 final class AppStrings {
-  const AppStrings._();
+  const new _();
 
   /// The English or the Italian text, per [AppLanguages].
   static String _t(String en, String it) => AppLanguages.isItalian ? it : en;
@@ -43,15 +43,30 @@ final class AppStrings {
     'Mostra la tastiera appena si apre una nota (off = al primo tocco)',
   );
 
+  // Settings: the section headings the list is grouped under.
+  static String get settingsSectionAppearance => _t('Appearance', 'Aspetto');
+  static String get settingsSectionEditor => _t('Editor', 'Editor');
+  static String get settingsSectionLibrary => _t('Library', 'Libreria');
+  static String get settingsSectionReminders => _t('Reminders', 'Promemoria');
+  static String get settingsSectionDiagnostics =>
+      _t('Diagnostics', 'Diagnostica');
+
+  /// The indent width as a row's value, e.g. "4 spaces".
+  static String indentWidthValue(int spaces) =>
+      _t('$spaces spaces', '$spaces spazi');
+
+  /// The editor's share of a split, as a row's value, e.g. "50%".
+  static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
+
   // Settings: preview mode.
   static String get previewModeTitle =>
       _t('Preview mode', 'Modalità anteprima');
   static String get previewModeSubtitle => _t(
-    'How the preview sits next to the editor (auto = by width)',
-    'Come sta l’anteprima accanto all’editor (auto = secondo la larghezza)',
+    'Whether the preview shares the screen with the editor, or replaces '
+        'it',
+    'Se l’anteprima divide lo schermo con l’editor o lo sostituisce',
   );
-  static String get previewModeAuto => _t('Auto', 'Auto');
-  static String get previewModeSplit => _t('Side by side', 'Affiancata');
+  static String get previewModeAuto => _t('Side by side', 'Affiancata');
   static String get previewModeSwitch => _t('Full screen', 'A tutto schermo');
   static String get splitRatioTitle => _t('Split width', 'Larghezza divisione');
   static String get splitRatioSubtitle => _t(
@@ -76,10 +91,8 @@ final class AppStrings {
 
   // Settings: language (T-L10N-04).
   static String get languageTitle => _t('Language', 'Lingua');
-  static String get languageSubtitle => _t(
-    'The language of the app’s own text',
-    'La lingua dei testi dell’app',
-  );
+  static String get languageSubtitle =>
+      _t('The language of the app’s own text', 'La lingua dei testi dell’app');
   static String get languageSystem => _t('System', 'Sistema');
   // Language names stay in their own language: someone who landed in the
   // wrong one has to be able to find their way back.
@@ -89,8 +102,7 @@ final class AppStrings {
   // List note kind (T-TK-02).
   static String get listAddHint => _t('Add an item', 'Aggiungi un elemento');
   static String get listAddTooltip => _t('Add an item', 'Aggiungi un elemento');
-  static String get listEmpty =>
-      _t('No items yet', 'Nessun elemento per ora');
+  static String get listEmpty => _t('No items yet', 'Nessun elemento per ora');
   static String get listDragHandleLabel =>
       _t('Reorder item', 'Riordina l’elemento');
 
@@ -102,8 +114,7 @@ final class AppStrings {
 
   // Editor status bar.
   static String get outlineTooltip => _t('Outline', 'Struttura');
-  static String get outlineNoHeadings =>
-      _t('No headings', 'Nessun titolo');
+  static String get outlineNoHeadings => _t('No headings', 'Nessun titolo');
   static String get outlineNoTitle => _t('(no title)', '(senza titolo)');
 
   // Editor toolbar: one name per button, used as its tooltip in the
@@ -129,10 +140,6 @@ final class AppStrings {
   // Toolbar settings (T-TB-05).
   static String get toolbarSettingsTitle =>
       _t('Editor toolbar', 'Barra dell’editor');
-  static String get toolbarSettingsSubtitle => _t(
-    'Order the buttons and hide the ones you do not use',
-    'Ordina i pulsanti e nascondi quelli che non usi',
-  );
   static String get toolbarSettingsHint => _t(
     'Drag to reorder; the eye shows or hides a button.',
     'Trascina per riordinare; l’occhio mostra o nasconde un pulsante.',
@@ -146,6 +153,10 @@ final class AppStrings {
   static String get showPreviewTooltip =>
       _t('Show preview', 'Mostra anteprima');
   static String get showEditorTooltip => _t('Show editor', 'Mostra editor');
+  static String get enterFullScreenTooltip =>
+      _t('Full screen', 'Schermo intero');
+  static String get exitFullScreenTooltip =>
+      _t('Exit full screen', 'Esci da schermo intero');
 
   // Raw-HTML table fallback.
   static String get htmlTableFallback =>
@@ -185,8 +196,7 @@ final class AppStrings {
 
   // Editor find & replace (the classic in-note bar, re_editor's find
   // controller + CopistFindPanel).
-  static String get findInNoteTooltip =>
-      _t('Find in note', 'Trova nella nota');
+  static String get findInNoteTooltip => _t('Find in note', 'Trova nella nota');
   static String get editorFindHint => _t('Find', 'Trova');
   static String get editorReplaceHint => _t('Replace', 'Sostituisci');
   static String get editorFindCaseTooltip =>
@@ -225,7 +235,6 @@ final class AppStrings {
       _t('Several notes match', 'Più note corrispondono');
   static String get openLinkFailed =>
       _t('Could not open link', 'Impossibile aprire il link');
-  static String get chooseNote => _t('Choose a note', 'Scegli una nota');
 
   // Task lists (T-TD-04).
   static String get todoOpen => _t('Open', 'Da fare');
@@ -252,8 +261,7 @@ final class AppStrings {
   // The todo.txt format help (T-TD-08).
   static String get todoHelpTitle =>
       _t('The todo.txt format', 'Il formato todo.txt');
-  static String get todoHelpTooltip =>
-      _t('Format help', 'Guida al formato');
+  static String get todoHelpTooltip => _t('Format help', 'Guida al formato');
   static String get todoHelpIntro => _t(
     'Your tasks are one plain text file, one task per line. Copist '
         'writes the syntax for you, but nothing is hidden: you can edit '
@@ -299,10 +307,8 @@ final class AppStrings {
     'Data di completamento, poi data di creazione. Con una sola data è '
         'quella di creazione, a meno che la riga inizi con x.',
   );
-  static String get todoHelpTokensTitle => _t(
-    'Projects, contexts and tags',
-    'Progetti, contesti e tag',
-  );
+  static String get todoHelpTokensTitle =>
+      _t('Projects, contexts and tags', 'Progetti, contesti e tag');
   static String get todoHelpTokensBody => _t(
     'Anywhere in the description, a word with one of these prefixes '
         'becomes a chip you can filter by. Nothing is predefined: a token '
@@ -355,10 +361,8 @@ final class AppStrings {
         'todo.txt sopravvivono al giro. Copist non li interpreta, rec: '
         'compreso: un’attività ricorrente non viene ancora ripetuta.',
   );
-  static String get todoHelpEditTitle => _t(
-    'Editing outside Copist',
-    'Modifiche fuori da Copist',
-  );
+  static String get todoHelpEditTitle =>
+      _t('Editing outside Copist', 'Modifiche fuori da Copist');
   static String get todoHelpEditBody => _t(
     'A task you have not touched is written back byte for byte, odd '
         'spacing included. Edit a line and Copist rewrites that one line in '
@@ -374,7 +378,6 @@ final class AppStrings {
   static String get todoSave => _t('Save', 'Salva');
   static String get todoEditAction => _t('Edit', 'Modifica');
   static String get todoDeleteAction => _t('Delete', 'Elimina');
-  static String get todoHasReminder => _t('Has reminder', 'Con promemoria');
 
   // Task filters (T-TD-05).
   static String get todoDueOverdue => _t('Overdue', 'Scadute');
@@ -445,6 +448,7 @@ final class AppStrings {
   static String get actionOk => _t('OK', 'OK');
   static String get actionCancel => _t('Cancel', 'Annulla');
   static String get actionCreate => _t('Create', 'Crea');
+  static String get actionSave => _t('Save', 'Salva');
   static String get actionChoose => _t('Choose', 'Scegli');
   static String get actionDelete => _t('Delete', 'Elimina');
   static String get actionRename => _t('Rename', 'Rinomina');
@@ -478,18 +482,15 @@ final class AppStrings {
   static String get movedToTrash =>
       _t('Moved to trash', 'Spostato nel cestino');
   static String get deletedMessage => _t('Deleted', 'Eliminato');
-  static String deleteToTrashConfirm(String name) => _t(
-    '$name will be moved to .trash/',
-    '$name verrà spostato in .trash/',
-  );
+  static String deleteToTrashConfirm(String name) =>
+      _t('$name will be moved to .trash/', '$name verrà spostato in .trash/');
   static String deleteForeverConfirm(String name) => _t(
     '$name will be permanently deleted',
     '$name verrà eliminato definitivamente',
   );
   static String get chooseDestination =>
       _t('Choose destination', 'Scegli la destinazione');
-  static String get libraryRoot =>
-      _t('Library root', 'Radice della libreria');
+  static String get libraryRoot => _t('Library root', 'Radice della libreria');
   static String moveTitle(String name) => _t('Move $name', 'Sposta $name');
   static String headingLevelLabel(int level) =>
       _t('Heading $level', 'Titolo $level');
@@ -511,8 +512,7 @@ final class AppStrings {
       _t('Choose quick note', 'Scegli la nota rapida');
 
   // Folder picker (T-TK-07).
-  static String get folderPickerNewFolder =>
-      _t('New folder', 'Nuova cartella');
+  static String get folderPickerNewFolder => _t('New folder', 'Nuova cartella');
   static String get folderPickerEmpty =>
       _t('No folders yet', 'Nessuna cartella');
   static String get listFolderTitle =>
@@ -557,6 +557,42 @@ final class AppStrings {
     'Quella cartella non è supportata. Scegline una nella memoria del '
         'dispositivo.',
   );
+
+  /// The first index's counter, e.g. "412 of 10000 notes".
+  static String indexingCount(int done, int total) =>
+      _t('$done of $total notes', '$done di $total note');
+
+  // The known-library list on the home screen (T-ML-05, T-ML-07).
+  static String get knownLibrariesTitle =>
+      _t('Your libraries', 'Le tue librerie');
+  static String get libraryUnreachable =>
+      _t('Not reachable', 'Non raggiungibile');
+  static String get libraryOpenedToday => _t('Opened today', 'Aperta oggi');
+  static String get libraryOpenedYesterday =>
+      _t('Opened yesterday', 'Aperta ieri');
+  static String libraryOpenedDaysAgo(int days) =>
+      _t('Opened $days days ago', 'Aperta $days giorni fa');
+  static String libraryOpenedOn(DateTime when) {
+    final d = when.day.toString().padLeft(2, '0');
+    final m = when.month.toString().padLeft(2, '0');
+    return _t('Opened on ${when.year}-$m-$d', 'Aperta il $d/$m/${when.year}');
+  }
+
+  static String get libraryOpenNow => _t('Open now', 'Aperta ora');
+  static String get switchLibraryTitle =>
+      _t('Switch library', 'Cambia libreria');
+  static String get libraryForget => _t('Forget', 'Dimentica');
+  static String libraryForgetTitle(String name) =>
+      _t('Forget "$name"?', 'Dimenticare «$name»?');
+  static String get libraryForgetExplained => _t(
+    'It goes off this list. The folder, the notes and the library '
+        'settings inside it are left alone, and opening it again brings '
+        'it back.',
+    'Sparisce da questo elenco. La cartella, le note e le impostazioni '
+        'della libreria restano dove sono, e riaprendola torna '
+        'nell’elenco.',
+  );
+
   static String get storageAccessAction =>
       _t('Grant file access', 'Concedi l’accesso ai file');
   static String get storageAccessNeeded => _t(
@@ -597,10 +633,8 @@ final class AppStrings {
     'Save the recorded events to a file you choose',
     'Salva gli eventi registrati in un file a tua scelta',
   );
-  static String get exportLogEmpty => _t(
-    'The debug log buffer is empty',
-    'Il buffer del log di debug è vuoto',
-  );
+  static String get exportLogEmpty =>
+      _t('The debug log buffer is empty', 'Il buffer del log di debug è vuoto');
   static String get quickNoteUnset => _t('Not set yet', 'Non impostata');
   static String exportLogDone(Object target) =>
       _t('Debug log exported to $target', 'Log di debug esportato in $target');
@@ -616,10 +650,8 @@ final class AppStrings {
     'Replaced $occurrences occurrence(s) of "$term" in $notes note(s)',
     'Sostituite $occurrences occorrenze di "$term" in $notes note',
   );
-  static String replaceSkipped(int skipped) => _t(
-    ' ($skipped open note(s) skipped)',
-    ' ($skipped note aperte saltate)',
-  );
+  static String replaceSkipped(int skipped) =>
+      _t(' ($skipped open note(s) skipped)', ' ($skipped note aperte saltate)');
   static String replacePreviewEmpty(String term, String? only) => _t(
     'No exact whole-word match of "$term" '
         '${only == null ? 'was found' : 'found in $only'}',
@@ -630,11 +662,31 @@ final class AppStrings {
   /// The short month names used by the task rows, January first.
   static List<String> get monthNames => AppLanguages.isItalian
       ? const [
-          'gen', 'feb', 'mar', 'apr', 'mag', 'giu',
-          'lug', 'ago', 'set', 'ott', 'nov', 'dic',
+          'gen',
+          'feb',
+          'mar',
+          'apr',
+          'mag',
+          'giu',
+          'lug',
+          'ago',
+          'set',
+          'ott',
+          'nov',
+          'dic',
         ]
       : const [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
         ];
 }

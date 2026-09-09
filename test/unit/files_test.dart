@@ -21,10 +21,7 @@ void main() {
 
   group('sanitizeName', () {
     test('strips path separators and illegal characters', () {
-      expect(
-        sanitizeName(r'a/b\c:d*e?f"g<h>i|j', fallback: 'X'),
-        'abcdefghij',
-      );
+      expect(sanitizeName(r'a/b\c:d*e?f"g<h>i|j', fallback: 'X'), 'abcdefghij');
     });
 
     test('collapses whitespace runs and trims', () {

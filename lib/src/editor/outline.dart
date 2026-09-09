@@ -13,11 +13,7 @@ import 'package:copist/src/editor/highlighting.dart';
 /// One heading in the outline.
 final class OutlineEntry {
   /// Creates an outline entry for the heading on logical line [line].
-  const OutlineEntry({
-    required this.line,
-    required this.level,
-    required this.text,
-  });
+  const new({required this.line, required this.level, required this.text});
 
   /// The logical line the heading is on.
   final int line;

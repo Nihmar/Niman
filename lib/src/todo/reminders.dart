@@ -106,7 +106,7 @@ final class LocalReminderService implements ReminderService {
   /// wall clock guarding against scheduling into the past. All three are
   /// injected in tests, which is what lets the logic below run without a
   /// device.
-  LocalReminderService({
+  new({
     ReminderBackend? backend,
     this.settings = const PlatformReminderSettings(),
     DateTime Function()? clock,
@@ -125,8 +125,9 @@ final class LocalReminderService implements ReminderService {
   /// time it lands here.
   final DateTime Function() _clock;
 
-  final ValueNotifier<ReminderHealth> _health =
-      ValueNotifier<ReminderHealth>(ReminderHealth.ok);
+  final ValueNotifier<ReminderHealth> _health = ValueNotifier<ReminderHealth>(
+    ReminderHealth.ok,
+  );
 
   static const AppLogger _log = AppLogger(name: 'todo');
 
@@ -213,8 +214,7 @@ final class LocalReminderService implements ReminderService {
     // came back through onResume instead of a fresh reconcile. Nothing is
     // asked while nothing is wanted.
     final granted = wanted.isEmpty || await _backend.notificationsAllowed();
-    final exact =
-        granted && wanted.isNotEmpty && await _backend.exactAllowed();
+    final exact = granted && wanted.isNotEmpty && await _backend.exactAllowed();
     final batteryExempt = await settings.isBatteryExempt();
     _health.value = _healthOf(
       granted: granted,
@@ -262,6 +262,11 @@ final class LocalReminderService implements ReminderService {
   ///
   /// Only runs when something is actually overdue, so a healthy set costs
   /// nothing.
+  ///
+  /// This depends on [reminderGrace]: before it existed the wanted set
+  /// could not contain a past reminder by construction, so this logged
+  /// nothing on the very run that caught the bug. The evidence was the
+  /// `cancelled 1 stale` line instead.
   Future<void> _logOverdue(
     Map<int, TodoReminder> wanted, {
     required bool exact,
@@ -324,6 +329,11 @@ final class LocalReminderService implements ReminderService {
   /// cancel. Copist posts no notifications other than reminders, so every
   /// pending id outside [wanted] is stale -- that reservation of the id
   /// space is what makes the sweep safe.
+  ///
+  /// "Stale" is the caller's word: [wantedReminders] holds a reminder for
+  /// [reminderGrace] past its own moment, because an alarm the OS has
+  /// deferred is still pending and cancelling it here is what silences a
+  /// reminder outright rather than merely delaying it.
   Future<void> _cancelStale(Map<int, TodoReminder> wanted) async {
     final List<int> pending;
     try {
@@ -362,8 +372,13 @@ final class LocalReminderService implements ReminderService {
     var scheduled = 0;
     for (final reminder in wanted.values) {
       if (!reminder.when.isAfter(now)) {
-        // The set can be stale: it is computed before the grant round
-        // trip, which may open a system screen and take minutes.
+        // Two ways to get here: the set is stale, because it is computed
+        // before the grant round trip and that can open a system screen
+        // and take minutes; or the reminder is inside `reminderGrace`,
+        // kept in the set so the sweep does not cancel an alarm the OS
+        // still owes. Either way there is nothing to arm — an instant
+        // already past cannot be scheduled — and the pending alarm, if
+        // there is one, is left to fire.
         _log.info(
           'todo reminders: skipped ${reminder.id}, '
           '${reminder.when.toIso8601String()} already passed',
@@ -411,7 +426,7 @@ final class LocalReminderService implements ReminderService {
 
   @override
   Future<bool> openHealthSettings() async {
-    return switch (_health.value) {
+    return await switch (_health.value) {
       ReminderHealth.notificationsBlocked =>
         settings.openNotificationSettings(),
       ReminderHealth.batteryRestricted => settings.openBatterySettings(),
@@ -446,7 +461,7 @@ final class LocalReminderService implements ReminderService {
 /// the due badges carry the state (documented limitation, T-TD-07).
 final class NoopReminderService implements ReminderService {
   /// Creates the no-op service.
-  const NoopReminderService();
+  const new();
 
   @override
   Future<void> reconcile(Map<int, TodoReminder> wanted) async {}

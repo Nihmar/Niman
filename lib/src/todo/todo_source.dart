@@ -54,9 +54,7 @@ abstract interface class TodoSource {
 /// The shell reads this provider for the controller's factory so widget
 /// tests can override it with an in-memory fake (the real store's
 /// `Isolate.run` reads never complete in the fake-async test zone).
-final todoSourceFactoryProvider = Provider<TodoSource Function(String)>((
-  ref,
-) {
+final todoSourceFactoryProvider = Provider<TodoSource Function(String)>((ref) {
   return _defaultTodoSource;
 });
 

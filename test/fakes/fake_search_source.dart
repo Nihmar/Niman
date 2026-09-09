@@ -8,7 +8,7 @@ import 'package:copist/src/search/search_repo.dart';
 /// rendering, mode toggle and open-on-click.
 final class FakeSearchSource implements SearchSource {
   /// Creates a fake source over [hits].
-  FakeSearchSource({List<SearchHit>? hits}) : hits = hits ?? [];
+  new({List<SearchHit>? hits}) : hits = hits ?? [];
 
   /// The hits every word query returns (writable, so tests can reshuffle).
   List<SearchHit> hits;

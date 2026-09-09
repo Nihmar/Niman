@@ -159,10 +159,7 @@ void main() {
       await reminded.add('call rem:2026-09-08T10:30');
       await waitFor(() => reminders.reconciled.length == 2);
       final wanted = reminders.reconciled.last;
-      expect(
-        wanted.keys.single,
-        todoReminderId('call rem:2026-09-08T10:30'),
-      );
+      expect(wanted.keys.single, todoReminderId('call rem:2026-09-08T10:30'));
       expect(wanted.values.single.when, DateTime(2026, 9, 8, 10, 30));
     });
 
@@ -200,10 +197,7 @@ void main() {
       await reminded.add('kept');
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(reminded.error, isNull);
-      expect(
-        reminded.snapshot!.todo.single.task.description,
-        'kept',
-      );
+      expect(reminded.snapshot!.todo.single.task.description, 'kept');
     });
 
     test('a resume before anything loaded schedules, never cancels', () async {

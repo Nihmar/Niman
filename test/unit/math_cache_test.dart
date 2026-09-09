@@ -7,10 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
 
-BoxNode _realRender(String tex, {required bool displayMode}) => renderToBox(
-      tex,
-      options: KatexOptions(displayMode: displayMode),
-    );
+BoxNode _realRender(String tex, {required bool displayMode}) =>
+    renderToBox(tex, options: KatexOptions(displayMode: displayMode));
 
 void main() {
   test('renders once and reuses unchanged spans (the edit-reuse AC)', () async {
@@ -35,9 +33,8 @@ void main() {
 
   test('errors are remembered but never cached', () async {
     final cache = MathCache(
-      renderer: (tex, {required displayMode}) => throw const FormatException(
-        'bad',
-      ),
+      renderer: (tex, {required displayMode}) =>
+          throw const FormatException('bad'),
     );
     expect(await cache.ensure(r'\frac{a}', displayMode: false), isNull);
     expect(cache.isError(r'\frac{a}', displayMode: false), isTrue);
@@ -48,10 +45,7 @@ void main() {
   });
 
   test('is bounded: oldest entry evicted first (LRU)', () async {
-    final cache = MathCache(
-      capacity: 2,
-      renderer: _realRender,
-    );
+    final cache = MathCache(capacity: 2, renderer: _realRender);
     await cache.ensure('a', displayMode: false);
     await cache.ensure('b', displayMode: false);
     // Touch 'a' so 'b' is the least recent.

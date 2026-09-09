@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:drift/native.dart';
@@ -13,7 +14,7 @@ import 'package:path/path.dart' as p;
 void main() {
   late Directory root;
   late Directory dbDir;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late Indexer indexer;
   late NoteOps ops;
   late NoteDao dao;
@@ -21,13 +22,16 @@ void main() {
   setUp(() async {
     root = await Directory.current.createTemp('copist_ops_');
     dbDir = await Directory.current.createTemp('copist_ops_db_');
-    db = CopistDatabase(
-      NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))),
-    );
+    db = IndexDatabase(NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))));
     addTearDown(db.close);
     indexer = Indexer(db);
     dao = indexer.dao;
-    ops = NoteOps(root: root.path, db: db, indexer: indexer);
+    ops = NoteOps(
+      root: root.path,
+      db: db,
+      indexer: indexer,
+      config: LibraryConfigRepo(root.path),
+    );
   });
 
   tearDown(() async {
@@ -119,27 +123,26 @@ void main() {
       expect(await dao.find('Docs/X_1.md'), isNotNull);
     });
 
-    test('moving a folder into itself or its own subtree is rejected',
-        () async {
-      await ops.createFolder(parentPath: '', name: 'Docs');
-      await ops.createFolder(parentPath: 'Docs', name: 'Inner');
+    test(
+      'moving a folder into itself or its own subtree is rejected',
+      () async {
+        await ops.createFolder(parentPath: '', name: 'Docs');
+        await ops.createFolder(parentPath: 'Docs', name: 'Inner');
 
-      await expectLater(
-        () => ops.move('Docs', 'Docs'),
-        throwsA(isA<ArgumentError>()),
-      );
-      await expectLater(
-        () => ops.move('Docs', 'Docs/Inner'),
-        throwsA(isA<ArgumentError>()),
-      );
-      // The move was never attempted: nothing moved, nothing renamed.
-      expect(await dao.find('Docs'), isNotNull);
-      expect(await dao.find('Docs/Inner'), isNotNull);
-      expect(
-        Directory(p.join(root.path, 'Docs/Inner')).existsSync(),
-        isTrue,
-      );
-    });
+        await expectLater(
+          () => ops.move('Docs', 'Docs'),
+          throwsA(isA<ArgumentError>()),
+        );
+        await expectLater(
+          () => ops.move('Docs', 'Docs/Inner'),
+          throwsA(isA<ArgumentError>()),
+        );
+        // The move was never attempted: nothing moved, nothing renamed.
+        expect(await dao.find('Docs'), isNotNull);
+        expect(await dao.find('Docs/Inner'), isNotNull);
+        expect(Directory(p.join(root.path, 'Docs/Inner')).existsSync(), isTrue);
+      },
+    );
   });
 
   group('delete (trash on by default)', () {
@@ -147,10 +150,7 @@ void main() {
       await ops.createNote(parentPath: '', name: 'Gone');
       await ops.delete('Gone.md');
       expect(File(p.join(root.path, 'Gone.md')).existsSync(), isFalse);
-      expect(
-        File(p.join(root.path, '.trash/Gone.md')).existsSync(),
-        isTrue,
-      );
+      expect(File(p.join(root.path, '.trash/Gone.md')).existsSync(), isTrue);
       final items = await ops.trashItems();
       expect(items, hasLength(1));
       expect(items.first.name, 'Gone.md');
@@ -161,10 +161,7 @@ void main() {
       await ops.createFolder(parentPath: '', name: 'Docs');
       await ops.createNote(parentPath: 'Docs', name: 'One');
       await ops.delete('Docs');
-      expect(
-        Directory(p.join(root.path, '.trash/Docs')).existsSync(),
-        isTrue,
-      );
+      expect(Directory(p.join(root.path, '.trash/Docs')).existsSync(), isTrue);
       expect(
         File(p.join(root.path, '.trash/Docs/One.md')).existsSync(),
         isTrue,
@@ -211,8 +208,9 @@ void main() {
       await ops.createNote(parentPath: 'Docs', name: 'One');
       await ops.delete('Docs/One.md'); // → .trash/One.md
       await ops.delete('Docs'); // its original parent → .trash/Docs
-      final item = (await ops.trashItems())
-          .firstWhere((i) => i.name == 'One.md');
+      final item = (await ops.trashItems()).firstWhere(
+        (i) => i.name == 'One.md',
+      );
       final restored = await ops.restoreTrash(item.name);
       expect(restored.path, 'One.md');
       expect(await dao.find('One.md'), isNotNull);
@@ -264,10 +262,7 @@ void main() {
       final item = (await ops.trashItems()).single;
       await ops.deleteTrashPermanently(item.name);
       expect(await ops.trashItems(), isEmpty);
-      expect(
-        File(p.join(root.path, '.trash/Gone.md')).existsSync(),
-        isFalse,
-      );
+      expect(File(p.join(root.path, '.trash/Gone.md')).existsSync(), isFalse);
     });
 
     test('emptyTrash removes every item', () async {
@@ -277,34 +272,30 @@ void main() {
       await ops.delete('B.md');
       await ops.emptyTrash();
       expect(await ops.trashItems(), isEmpty);
-      expect(
-        File(p.join(root.path, '.trash/A.md')).existsSync(),
-        isFalse,
-      );
-      expect(
-        File(p.join(root.path, '.trash/B.md')).existsSync(),
-        isFalse,
-      );
+      expect(File(p.join(root.path, '.trash/A.md')).existsSync(), isFalse);
+      expect(File(p.join(root.path, '.trash/B.md')).existsSync(), isFalse);
     });
 
-    test('a corrupt manifest entry is skipped, the rest still listed',
-        () async {
-      await ops.createNote(parentPath: '', name: 'A');
-      await ops.createNote(parentPath: '', name: 'B');
-      await ops.delete('A.md');
-      await ops.delete('B.md');
-      final manifestFile = File(
-        p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
-      );
-      final raw =
-          jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
-      raw['A.md'] = <String, dynamic>{'originalPath': 'A.md'};
-      manifestFile.writeAsStringSync(jsonEncode(raw));
+    test(
+      'a corrupt manifest entry is skipped, the rest still listed',
+      () async {
+        await ops.createNote(parentPath: '', name: 'A');
+        await ops.createNote(parentPath: '', name: 'B');
+        await ops.delete('A.md');
+        await ops.delete('B.md');
+        final manifestFile = File(
+          p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
+        );
+        final raw =
+            jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+        raw['A.md'] = <String, dynamic>{'originalPath': 'A.md'};
+        manifestFile.writeAsStringSync(jsonEncode(raw));
 
-      final items = await ops.trashItems();
+        final items = await ops.trashItems();
 
-      expect(items.map((i) => i.name).toList(), ['B.md']);
-    });
+        expect(items.map((i) => i.name).toList(), ['B.md']);
+      },
+    );
 
     test('a non-JSON manifest file yields an empty listing', () async {
       await ops.createNote(parentPath: '', name: 'A');
@@ -315,8 +306,7 @@ void main() {
       expect(await ops.trashItems(), isEmpty);
     });
 
-    test('writing the manifest prunes items that left the trash',
-        () async {
+    test('writing the manifest prunes items that left the trash', () async {
       await ops.createNote(parentPath: '', name: 'A');
       await ops.createNote(parentPath: '', name: 'B');
       await ops.delete('A.md');
@@ -355,9 +345,8 @@ void main() {
       );
       expect(
         jsonDecode(
-          File(
-            p.join(root.path, '.trash/${NoteOps.manifestFileName}'),
-          ).readAsStringSync(),
+          File(p.join(root.path, '.trash/${NoteOps.manifestFileName}'))
+              .readAsStringSync(),
         ),
         isEmpty,
       );
@@ -373,25 +362,35 @@ void main() {
       expect(Directory(p.join(root.path, '.trash')).existsSync(), isFalse);
     });
 
-    test('the toggle persists on the database', () async {
+    test('the toggle persists in the library folder', () async {
       await ops.setTrashEnabled(enabled: false);
-      final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
+      final fresh = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
       expect(await fresh.trashEnabled, isFalse);
-      // The repo agrees too.
-      final repo = LibrarySettingsRepo(db);
-      expect(await repo.isTrashEnabled(root.path), isFalse);
+      // It is the library's own settings file that holds it, not a row
+      // in the app database (T-ML-02).
+      final config = await LibraryConfigStore(root.path).read();
+      expect(config.trashEnabled, isFalse);
     });
   });
 
   group('quick note', () {
-    test('defaults to null, the built-in Quick note.md at the root',
-        () async {
+    test('defaults to null, the built-in Quick note.md at the root', () async {
       expect(await ops.quickNotePath, isNull);
     });
 
     test('the chosen path persists across ops instances', () async {
       await ops.setQuickNotePath(path: 'Inbox/Scratch.md');
-      final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
+      final fresh = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
       expect(await fresh.quickNotePath, 'Inbox/Scratch.md');
     });
 

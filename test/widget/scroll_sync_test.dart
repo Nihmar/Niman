@@ -17,8 +17,9 @@ String _longFixture() {
 }
 
 void main() {
-  testWidgets('scrolling the editor moves the preview, and back (both ways)',
-      (tester) async {
+  testWidgets('scrolling the editor moves the preview, and back (both ways)', (
+    tester,
+  ) async {
     final text = _longFixture();
     final editorController = CodeLineEditingController.fromText(text);
     final focus = FocusNode();

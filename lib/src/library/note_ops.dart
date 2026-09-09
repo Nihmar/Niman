@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:path/path.dart' as p;
@@ -13,7 +14,7 @@ import 'package:path/path.dart' as p;
 /// One item in `.trash/`, mapped back to its library-relative origin.
 final class TrashItem {
   /// Creates a trash listing entry.
-  const TrashItem({
+  const new({
     required this.name,
     required this.originalPath,
     required this.deletedAt,
@@ -37,12 +38,16 @@ final class TrashItem {
 /// can be restored to their original location.
 final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
-  NoteOps({
+  ///
+  /// [config] is the session's own reader of `.copist/settings.json`, not
+  /// a second one: the session resolves the overridable settings through
+  /// the same cache these four go through (T-ML-10).
+  new({
     required this.root,
-    required CopistDatabase db,
+    required IndexDatabase db,
     required this.indexer,
-  })  : _dao = NoteDao(db),
-        _settings = LibrarySettingsRepo(db);
+    required this.config,
+  }) : _dao = NoteDao(db);
 
   /// Absolute path of the library root.
   final String root;
@@ -50,8 +55,11 @@ final class NoteOps implements NoteOperations {
   /// The shared indexer; every op funnels its disk change through it.
   final Indexer indexer;
 
+  /// The library's `.copist/settings.json`, shared with the session so
+  /// both read one cached copy.
+  final LibraryConfigRepo config;
+
   final NoteDao _dao;
-  final LibrarySettingsRepo _settings;
 
   /// The name of the trash manifest inside `.trash/`.
   static const manifestFileName = '.copist-trash.json';
@@ -80,30 +88,34 @@ final class NoteOps implements NoteOperations {
 
   /// The current trash toggle for this library.
   @override
-  Future<bool> get trashEnabled => _settings.isTrashEnabled(root);
+  Future<bool> get trashEnabled async => (await config.config).trashEnabled;
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   @override
   Future<void> setTrashEnabled({required bool enabled}) =>
-      _settings.setTrashEnabled(root, enabled: enabled);
+      config.update((c) => c.copyWith(trashEnabled: enabled));
 
   /// The list-note folder (library-relative).
   @override
-  Future<String> get listNoteFolder => _settings.listNoteFolder(root);
+  Future<String> get listNoteFolder async =>
+      (await config.config).listNoteFolder;
 
-  /// Sets the list-note folder.
+  /// Sets the list-note folder (sanitized; an empty result falls back to
+  /// the default).
   @override
   Future<void> setListNoteFolder({required String folder}) =>
-      _settings.setListNoteFolder(root, folder: folder);
+      config.update((c) => c.copyWith(listNoteFolder: cleanListFolder(folder)));
 
   /// The user-chosen quick note, or null for the default.
   @override
-  Future<String?> get quickNotePath => _settings.quickNotePath(root);
+  Future<String?> get quickNotePath async =>
+      (await config.config).quickNotePath;
 
   /// Sets (or clears) the user-chosen quick note.
   @override
-  Future<void> setQuickNotePath({required String? path}) =>
-      _settings.setQuickNotePath(root, path: path);
+  Future<void> setQuickNotePath({required String? path}) => config.update(
+    (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
+  );
 
   /// Creates a `<name>.md` note in [parentPath] with [content] as its
   /// initial content, uniquifying the name. Returns the indexed row.
@@ -120,7 +132,7 @@ final class NoteOps implements NoteOperations {
       final file = File(_abs(resolvePath(parentPath, unique)));
       await writeFileAtomically(file, utf8.encode(content));
       await indexer.applyEvents(root, [file.path]);
-      return _mustFind(resolvePath(parentPath, unique));
+      return await _mustFind(resolvePath(parentPath, unique));
     });
   }
 
@@ -137,7 +149,7 @@ final class NoteOps implements NoteOperations {
       final newDir = Directory(_abs(resolvePath(parentPath, unique)));
       await newDir.create(recursive: true);
       await indexer.applyEvents(root, [newDir.path]);
-      return _mustFind(resolvePath(parentPath, unique));
+      return await _mustFind(resolvePath(parentPath, unique));
     });
   }
 
@@ -157,11 +169,7 @@ final class NoteOps implements NoteOperations {
       String target;
       if (row.isDir) {
         final clean = sanitizeName(base, fallback: defaultFolderName);
-        target = await uniqueFolderName(
-          parentDir,
-          clean,
-          exclude: _abs(path),
-        );
+        target = await uniqueFolderName(parentDir, clean, exclude: _abs(path));
       } else {
         final clean = sanitizeName(base, fallback: defaultNoteName);
         target = await uniqueFileName(
@@ -180,7 +188,7 @@ final class NoteOps implements NoteOperations {
         await File(oldAbs).rename(_abs(newRel));
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -216,7 +224,7 @@ final class NoteOps implements NoteOperations {
         await File(oldAbs).rename(_abs(newRel));
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -227,7 +235,7 @@ final class NoteOps implements NoteOperations {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final oldAbs = _abs(path);
-      final trash = await _settings.isTrashEnabled(root);
+      final trash = await trashEnabled;
       String? trashAbs;
       if (trash) {
         final trashDir = Directory(_abs('.trash'));
@@ -317,7 +325,7 @@ final class NoteOps implements NoteOperations {
       manifest.remove(trashName);
       await _writeManifest(manifest);
       await indexer.applyEvents(root, [trashAbs, _abs(newRel)]);
-      return _mustFind(newRel);
+      return await _mustFind(newRel);
     });
   }
 
@@ -416,8 +424,7 @@ final class NoteOps implements NoteOperations {
         if (_existsInTrash(entry.key)) entry.key: entry.value,
     };
     final payload = jsonEncode({
-      for (final entry in kept.entries)
-        entry.key: entry.value.toJson(),
+      for (final entry in kept.entries) entry.key: entry.value.toJson(),
     });
     await writeFileAtomically(
       File(_abs('.trash/$manifestFileName')),
@@ -442,10 +449,7 @@ final class NoteOps implements NoteOperations {
 /// One manifest entry: where a trash item came from.
 final class _ManifestEntry {
   /// Creates a manifest entry.
-  const _ManifestEntry({
-    required this.originalPath,
-    required this.deletedAt,
-  });
+  const new({required this.originalPath, required this.deletedAt});
 
   /// Library-relative path before the delete.
   final String originalPath;

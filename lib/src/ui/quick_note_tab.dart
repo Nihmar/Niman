@@ -13,11 +13,7 @@ import 'package:flutter/material.dart';
 /// not shown anymore.
 final class QuickNoteTab extends StatefulWidget {
   /// Creates the quick note tab.
-  const QuickNoteTab({
-    required this.controller,
-    required this.onOpen,
-    super.key,
-  });
+  const new({required this.controller, required this.onOpen, super.key});
 
   /// The session providing the ops.
   final LibrarySession controller;
@@ -81,8 +77,8 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
               AppStrings.quickNoteEmpty,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(

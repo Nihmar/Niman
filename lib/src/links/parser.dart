@@ -14,7 +14,7 @@ import 'package:copist/src/editor/highlighting.dart';
 /// offsets into the source text (`[`, `(`… or `[[`…`]]`).
 sealed class ParsedLink {
   /// Creates a parsed link covering [start]..[end] of the source text.
-  const ParsedLink({required this.start, required this.end});
+  const new({required this.start, required this.end});
 
   /// Offset of the first character of the link (`[` or `[[`).
   final int start;
@@ -26,11 +26,7 @@ sealed class ParsedLink {
 /// A wikilink `[[…]]`.
 final class WikiLink extends ParsedLink {
   /// Creates a wikilink with its parsed [ref].
-  const WikiLink({
-    required super.start,
-    required super.end,
-    required this.ref,
-  });
+  const new({required super.start, required super.end, required this.ref});
 
   /// The link's parsed inside.
   final WikiRef ref;
@@ -39,7 +35,7 @@ final class WikiLink extends ParsedLink {
 /// A standard Markdown link `[text](href)`.
 final class MarkdownLink extends ParsedLink {
   /// Creates a Markdown link with its [text] and [href].
-  const MarkdownLink({
+  const new({
     required super.start,
     required super.end,
     required this.text,
@@ -60,7 +56,7 @@ final class MarkdownLink extends ParsedLink {
 /// `target#heading|alias`, `#heading`, `#heading|alias`, `|alias`.
 final class WikiRef {
   /// Creates a wiki ref: [target] and optional [heading] / [alias].
-  const WikiRef({required this.target, this.heading, this.alias});
+  const new({required this.target, this.heading, this.alias});
 
   /// The note reference before any `#`/`|` (trimmed). Empty for `[[#heading]]`
   /// and `[[|alias]]` — "the current note".
@@ -100,9 +96,7 @@ List<ParsedLink> linksInDocument(HighlightDocument doc) {
         final precededByBang =
             token.start > 0 && src.codeUnitAt(token.start - 1) == 0x21;
         if (precededByBang) continue;
-        final ref = parseWikiRef(
-          src.substring(token.start + 2, token.end - 2),
-        );
+        final ref = parseWikiRef(src.substring(token.start + 2, token.end - 2));
         if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
           continue;
         }

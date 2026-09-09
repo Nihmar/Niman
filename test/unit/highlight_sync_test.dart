@@ -5,10 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:re_editor/re_editor.dart';
 
-const TextStyle _base = TextStyle(
-  fontFamily: 'monospace',
-  fontSize: 13,
-);
+const TextStyle _base = TextStyle(fontFamily: 'monospace', fontSize: 13);
 
 Color? _colorOf(TextSpan span, String want) => _styleOf(span, want)?.color;
 
@@ -22,15 +19,19 @@ TextStyle? _styleOf(TextSpan span, String want) {
   return null;
 }
 
-TextSpan _spanFor(EditorHighlightSync sync, int index, String text,
-        {bool dark = false, Color accent = const Color(0xFF445E91)}) =>
-    sync.spanFor(
-      index: index,
-      text: text,
-      base: _base,
-      dark: dark,
-      accent: accent,
-    );
+TextSpan _spanFor(
+  EditorHighlightSync sync,
+  int index,
+  String text, {
+  bool dark = false,
+  Color accent = const Color(0xFF445E91),
+}) => sync.spanFor(
+  index: index,
+  text: text,
+  base: _base,
+  dark: dark,
+  accent: accent,
+);
 
 void main() {
   test('the first buffer load gets styled tokens per line', () {
@@ -64,8 +65,11 @@ void main() {
     sync.onBufferChanged(controller.codeLines);
     final first = _spanFor(sync, 1, 'two');
     final second = _spanFor(sync, 1, 'two');
-    expect(identical(first, second), isTrue,
-        reason: 'the paragraph cache keys on the span instance');
+    expect(
+      identical(first, second),
+      isTrue,
+      reason: 'the paragraph cache keys on the span instance',
+    );
     // An unchanged line keeps its span across an edit elsewhere…
     final unchanged = _spanFor(sync, 0, 'one');
     controller.text = 'one\ntwo!\nthree';
@@ -117,8 +121,13 @@ void main() {
         ..text = '[[La stella Pyrale|Pyrale]]';
       sync.onBufferChanged(controller.codeLines);
       // The token covers the whole [[...]] (brackets included).
-      final span = _spanFor(sync, 0, '[[La stella Pyrale|Pyrale]]',
-          dark: dark, accent: accent);
+      final span = _spanFor(
+        sync,
+        0,
+        '[[La stella Pyrale|Pyrale]]',
+        dark: dark,
+        accent: accent,
+      );
       final token = _styleOf(span, '[[La stella Pyrale|Pyrale]]');
       expect(token?.color, accent);
       expect(token?.decoration, TextDecoration.underline);

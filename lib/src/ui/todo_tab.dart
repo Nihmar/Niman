@@ -29,12 +29,7 @@ final class TodoTab extends StatefulWidget {
   ///
   /// [clock] fixes the wall-clock day for due badges and the edit
   /// dialog (defaults to now; widget tests inject a fixed time).
-  const TodoTab({
-    required this.controller,
-    this.reminders,
-    this.clock,
-    super.key,
-  });
+  const new({required this.controller, this.reminders, this.clock, super.key});
 
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
@@ -85,10 +80,7 @@ final class _TodoTabState extends State<TodoTab> {
               child: SegmentedButton<bool>(
                 key: const Key('todo-view-switch'),
                 segments: [
-                  ButtonSegment(
-                    value: false,
-                    label: Text(AppStrings.todoOpen),
-                  ),
+                  ButtonSegment(value: false, label: Text(AppStrings.todoOpen)),
                   ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
                 ],
                 selected: {_showDone},
@@ -101,9 +93,7 @@ final class _TodoTabState extends State<TodoTab> {
                 child: Text(
                   key: const Key('todo-error'),
                   controller.error!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             Expanded(child: _body(snapshot)),
@@ -121,11 +111,7 @@ final class _TodoTabState extends State<TodoTab> {
     if (snapshot != null) {
       final entries = done ? snapshot.done : snapshot.todo;
       final available = <String>{
-        for (final chip in tokenCountsFor(
-          entries,
-          TodoDueRange.all,
-          _today,
-        ))
+        for (final chip in tokenCountsFor(entries, TodoDueRange.all, _today))
           chip.token,
       };
       filter = filter.pruneTokens(available);
@@ -172,9 +158,7 @@ final class _TodoTabState extends State<TodoTab> {
                     final entry = visible[index];
                     final view = _showDone ? 'done' : 'open';
                     return TodoRow(
-                      key: Key(
-                        'todo-row-$view-${entry.lineIndex}',
-                      ),
+                      key: Key('todo-row-$view-${entry.lineIndex}'),
                       entry: entry,
                       today: _today,
                       onToggle: (checked) => _toggle(entry, checked),
@@ -191,24 +175,26 @@ final class _TodoTabState extends State<TodoTab> {
   /// Opens the token + sort sheet (T-TDM-03) over the visible file.
   void _openFilterSheet(List<TodoEntry> fileEntries) {
     final counts = tokenCountsFor(fileEntries, _filter.dueRange, _today);
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => TodoFilterSheet(
-        filter: _filter,
-        counts: counts,
-        onToggleToken: (token) {
-          final tokens = {..._filter.tokens};
-          if (!tokens.remove(token)) {
-            tokens.add(token);
-          }
-          _log.debug('todo filter tokens: $tokens');
-          setState(() => _filter = _filter.copyWith(tokens: tokens));
-        },
-        onSort: (sort) {
-          setState(() => _filter = _filter.copyWith(sort: sort));
-        },
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (context) => TodoFilterSheet(
+          filter: _filter,
+          counts: counts,
+          onToggleToken: (token) {
+            final tokens = {..._filter.tokens};
+            if (!tokens.remove(token)) {
+              tokens.add(token);
+            }
+            _log.debug('todo filter tokens: $tokens');
+            setState(() => _filter = _filter.copyWith(tokens: tokens));
+          },
+          onSort: (sort) {
+            setState(() => _filter = _filter.copyWith(sort: sort));
+          },
+        ),
       ),
-    ));
+    );
   }
 
   /// The empty state: the file's own when it holds nothing, the filtered
@@ -253,9 +239,7 @@ final class _TodoTabState extends State<TodoTab> {
   /// files.
   Set<String> _knownTokens() {
     final snapshot = widget.controller.snapshot;
-    return snapshot == null
-        ? const <String>{}
-        : snapshotTokens(snapshot);
+    return snapshot == null ? const <String>{} : snapshotTokens(snapshot);
   }
 
   /// Long-press bottom sheet (the app's menu pattern): edit or delete.

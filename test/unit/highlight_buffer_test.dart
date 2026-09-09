@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 List<String> _lines(String text) =>
     text.isEmpty ? <String>[''] : text.split('\n');
 
-HighlightDocument _doc(String text) =>
-    HighlightDocument.fromText(text);
+HighlightDocument _doc(String text) => HighlightDocument.fromText(text);
 
 /// The token kinds of line [i], for assertions.
 List<TokenKind> _kinds(HighlightDocument doc, int i) {
@@ -26,8 +25,7 @@ void main() {
   });
 
   test('append at the end converges immediately', () {
-    final doc = _doc('# Hello\nbody')
-      ..replaceLines(2, 0, _lines('tail'));
+    final doc = _doc('# Hello\nbody')..replaceLines(2, 0, _lines('tail'));
     expect(doc.lineCount, 3);
     expect(doc.lineAt(2).text, 'tail');
     expect(doc.lineAt(0).tokens.first.kind, TokenKind.headingMarker);

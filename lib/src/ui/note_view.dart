@@ -4,9 +4,10 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:copist/src/core/files.dart';
+import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/find_panel.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/highlighting.dart';
@@ -55,7 +56,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// drive the draggable divider and its persistence.
 final class NoteView extends StatefulWidget {
   /// Opens the note at [path].
-  const NoteView({
+  const new({
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
@@ -268,6 +269,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       }
       unawaited(_load());
     }
+    // The preview has no editable: a note opening in it, or the switch
+    // flipping to it, dismisses the keyboard instead of leaving it up.
+    final wasPreviewOnly = !oldWidget.splitPreview && oldWidget.showPreview;
+    if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
+      _dismissKeyboardForPreview();
+    }
   }
 
   @override
@@ -373,6 +380,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _loading = false;
         _ready = true;
       });
+      // Opened straight into the preview: the IME has no target here.
+      _dismissKeyboardForPreview();
       widget.onNoteKindChanged?.call(_noteKind);
       // Word count + outline on open: debounced for edits only; the
       // production load already has them from its isolate (the seam path
@@ -385,6 +394,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
       );
+      // The read time above is what the disk/isolate cost; this is what the
+      // user waited for — load plus the frame that paints the loaded note.
+      logNextFrame('editor', 'note open first frame (${text.length} chars)');
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
@@ -437,6 +449,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final text = _controller.text;
     if (text == _previewText) return;
     setState(() => _previewText = text);
+  }
+
+  /// Whether only the preview is on screen (the editor hidden): the IME
+  /// has no editable target, so it must go.
+  bool get _previewOnly => !widget.splitPreview && widget.showPreview;
+
+  /// Dismisses the keyboard when the preview is the only pane: a note
+  /// opening in preview, or the switch flipping to it, must not leave
+  /// the IME up over a pane with nothing editable.
+  void _dismissKeyboardForPreview() {
+    if (_previewOnly) FocusManager.instance.primaryFocus?.unfocus();
   }
 
   Widget _buildEditor() => Listener(
@@ -557,10 +580,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final snippet = '![$label]($relative)';
     _controller.replaceSelection(snippet);
     _scroll.makeCenterIfInvisible(
-      CodeLinePosition(
-        index: _controller.selection.extentIndex,
-        offset: 0,
-      ),
+      CodeLinePosition(index: _controller.selection.extentIndex, offset: 0),
     );
     _focus.requestFocus();
     _refreshStats();
@@ -629,13 +649,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// so the jump is visible in every layout.
   void _jumpToHeading(int line) {
     const AppLogger(name: 'links').debug('jump to source line $line');
-    _controller.selection = CodeLineSelection.collapsed(
-      index: line,
-      offset: 0,
-    );
-    _scroll.makeCenterIfInvisible(
-      CodeLinePosition(index: line, offset: 0),
-    );
+    _controller.selection = CodeLineSelection.collapsed(index: line, offset: 0);
+    _scroll.makeCenterIfInvisible(CodeLinePosition(index: line, offset: 0));
     _syncPreviewToLine(line);
   }
 
@@ -673,10 +688,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         );
         return;
       }
-      final offset = map.previewOffsetForLine(
-        line,
-        maxExtent: maxExtent,
-      );
+      final offset = map.previewOffsetForLine(line, maxExtent: maxExtent);
       if (offset == null) {
         log.debug('anchor jump: no blocks laid out — skipped');
         return;
@@ -766,9 +778,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           'part "$aliasTarget" as the target',
         );
         final swapped = await source.resolveWiki(aliasTarget.trim());
-        log.debug(
-          'wikilink alias "$aliasTarget" -> ${_describe(swapped)}',
-        );
+        log.debug('wikilink alias "$aliasTarget" -> ${_describe(swapped)}');
         if (swapped is ResolvedNote || swapped is AmbiguousNote) {
           resolved = swapped;
           anchor = aliasHeading;
@@ -893,10 +903,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       final entries = _outline;
       final shown = entries.length <= 40
           ? entries
-          : [
-              ...entries.take(20),
-              ...entries.skip(entries.length - 20),
-            ];
+          : [...entries.take(20), ...entries.skip(entries.length - 20)];
       const AppLogger(name: 'links').debug(
         'heading "$heading" (slug "$slug") not found among '
         '${entries.length} outline entr(ies): '
@@ -910,9 +917,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   void _linkSnack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _onFocusChanged() {
@@ -942,9 +948,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final joinClock = Stopwatch()..start();
     final text = _controller.text;
     final joinMs = joinClock.elapsedMilliseconds;
-    _log.info(
-      'save start: $target (${text.length} chars, join $joinMs ms)',
-    );
+    _log.info('save start: $target (${text.length} chars, join $joinMs ms)');
     try {
       await _write(target, text);
       if (target == widget.path) _lastSavedRevision = revision;
@@ -1004,7 +1008,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // is on screen) and hides in full-screen preview mode.
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
-    final showToolbar = (split || !widget.showPreview) &&
+    final showToolbar =
+        (split || !widget.showPreview) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the
@@ -1052,50 +1057,54 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               : Center(child: Text(error)),
         ),
         if (!kindBody) ...[
-        // Fade + size the outline panel in and out.
-        AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.bottomCenter,
-          child: AnimatedSwitcher(
+          // Fade + size the outline panel in and out.
+          AnimatedSize(
             duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation) =>
-                FadeTransition(opacity: animation, child: child),
-            child: _showOutline && _outline.isNotEmpty
-                ? KeyedSubtree(
-                    key: const ValueKey('outline-open'),
-                    child: OutlinePanel(
-                      entries: _outline,
-                      onJump: _jumpToHeading,
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.bottomCenter,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: _showOutline && _outline.isNotEmpty
+                  ? KeyedSubtree(
+                      key: const ValueKey('outline-open'),
+                      child: OutlinePanel(
+                        entries: _outline,
+                        onJump: _jumpToHeading,
+                      ),
+                    )
+                  : const SizedBox(
+                      key: ValueKey('outline-closed'),
+                      width: double.infinity,
                     ),
-                  )
-                : const SizedBox(
-                    key: ValueKey('outline-closed'),
-                    width: double.infinity,
+            ),
+          ),
+          SafeArea(
+            // The bottom chrome only: top stays false so the status-bar
+            // inset is never inserted between the preview and this row
+            // (issue #3: that gap read as empty space above the toolbar).
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _statusRow(context),
+                // The toolbar fades + sizes in and out (hidden in preview
+                // mode). It is only mounted once loaded, so it appears
+                // immediately on load and animates only when preview mode
+                // toggles.
+                if (!_loading)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: showToolbar
+                        ? _toolbar(context)
+                        : const SizedBox(width: double.infinity),
                   ),
+              ],
+            ),
           ),
-        ),
-        SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _statusRow(context),
-              // The toolbar fades + sizes in and out (hidden in preview
-              // mode). It is only mounted once loaded, so it appears
-              // immediately on load and animates only when preview mode
-              // toggles.
-              if (!_loading)
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  alignment: Alignment.topCenter,
-                  child: showToolbar
-                      ? _toolbar(context)
-                      : const SizedBox(width: double.infinity),
-                ),
-            ],
-          ),
-        ),
         ],
       ],
     );
@@ -1116,10 +1125,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               icon: const Icon(Icons.toc),
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 34,
-                minHeight: 26,
-              ),
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: () => setState(() => _showOutline = !_showOutline),
             ),
           // Find & replace lives in the editor pane (hidden in
@@ -1131,10 +1137,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               icon: const Icon(Icons.search),
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 34,
-                minHeight: 26,
-              ),
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: _findController.findMode,
             ),
           if (!_loading)
@@ -1183,8 +1186,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     return {
       ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
       ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
-      ToolbarItem.strikethrough: () =>
-          _wrapSelection(left: '~~', right: '~~'),
+      ToolbarItem.strikethrough: () => _wrapSelection(left: '~~', right: '~~'),
       ToolbarItem.superscript: () =>
           _wrapSelection(left: '<sup>', right: '</sup>'),
       ToolbarItem.underline: () => _wrapSelection(left: '<u>', right: '</u>'),
@@ -1349,7 +1351,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 /// The kind GUIs' window onto the note (T-TK-02): the buffer text, and
 /// byte-stable edits that persist through the regular save path.
 final class _NoteKindHost implements NoteKindHost {
-  _NoteKindHost(this._state);
+  new(this._state);
 
   final _NoteViewState _state;
 
@@ -1374,9 +1376,8 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
             onPressed: () => Navigator.of(context).pop(level),
             child: Text(
               AppStrings.headingLevelLabel(level),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 26.0 - level * 2,
-              ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontSize: 26.0 - level * 2),
             ),
           ),
       ],

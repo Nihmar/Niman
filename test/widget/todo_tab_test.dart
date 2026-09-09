@@ -35,7 +35,9 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: TodoTab(controller: controller!, clock: clock)),
+        home: Scaffold(
+          body: TodoTab(controller: controller!, clock: clock),
+        ),
       ),
     );
     await tester.pump();
@@ -145,10 +147,7 @@ void main() {
   });
 
   testWidgets('unchecking restores the row to Open', (tester) async {
-    await pumpTab(
-      tester,
-      done: ['x (A) 2026-09-07 2026-01-02 file taxes'],
-    );
+    await pumpTab(tester, done: ['x (A) 2026-09-07 2026-01-02 file taxes']);
     await tester.tap(find.text('Done'));
     await tester.pump();
     expect(find.text('file taxes'), findsOneWidget);
@@ -233,10 +232,7 @@ void main() {
   testWidgets('the sheet token chips show counts and AND together', (
     tester,
   ) async {
-    await pumpTab(
-      tester,
-      todo: ['a +p +q', 'b +p', 'c'],
-    );
+    await pumpTab(tester, todo: ['a +p +q', 'b +p', 'c']);
     expect(find.byKey(const Key('todo-filter-button')), findsOneWidget);
     await openSheet(tester);
     expect(find.text('+p (2)'), findsOneWidget);
@@ -255,10 +251,7 @@ void main() {
   testWidgets('the sheet shows the live selection (no close and reopen)', (
     tester,
   ) async {
-    await pumpTab(
-      tester,
-      todo: ['a +p +q', 'b +p', 'c'],
-    );
+    await pumpTab(tester, todo: ['a +p +q', 'b +p', 'c']);
     await openSheet(tester);
     // The token chip reflects the tap while the sheet is open...
     final tokenChip = find.byKey(const Key('todo-token-+p'));
@@ -277,10 +270,7 @@ void main() {
   testWidgets('a combo that matches nothing shows the filtered empty', (
     tester,
   ) async {
-    await pumpTab(
-      tester,
-      todo: ['a +p due:2026-09-01', 'b +q due:2026-10-01'],
-    );
+    await pumpTab(tester, todo: ['a +p due:2026-09-01', 'b +q due:2026-10-01']);
     await openSheet(tester);
     await tester.tap(find.byKey(const Key('todo-token-+q')));
     await tester.pump();
@@ -314,10 +304,7 @@ void main() {
   });
 
   testWidgets('due and reminder keep their own dates apart', (tester) async {
-    await pumpTab(
-      tester,
-      todo: ['both due:2026-09-01 rem:2026-10-02T08:30'],
-    );
+    await pumpTab(tester, todo: ['both due:2026-09-01 rem:2026-10-02T08:30']);
     // The due label is state-colored and prefixed...
     expect(find.text('Overdue · 1 Sep'), findsOneWidget);
     // ...the reminder carries its own date, never the due date's.
@@ -374,10 +361,7 @@ void main() {
     await pumpTab(tester, todo: ['buy milk +groceries']);
     await tester.tap(find.text('buy milk'));
     await settle(tester);
-    await tester.enterText(
-      find.byKey(const Key('todo-dialog-field')),
-      '+g',
-    );
+    await tester.enterText(find.byKey(const Key('todo-dialog-field')), '+g');
     await tester.pump();
     await tester.tap(find.byKey(const Key('todo-complete-+groceries')));
     await tester.pump();
@@ -442,10 +426,7 @@ void main() {
     await pumpTab(tester, todo: ['buy milk +groceries @home']);
     await tester.tap(find.text('buy milk'));
     await settle(tester);
-    expect(
-      find.byKey(const Key('todo-token-chip-+groceries')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('todo-token-chip-+groceries')), findsOneWidget);
     expect(find.byKey(const Key('todo-token-chip-@home')), findsOneWidget);
     await tester.tap(
       find.descendant(
