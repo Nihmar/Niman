@@ -73,6 +73,56 @@ void main() {
     await controller.dispose();
   });
 
+  // Issue #4: opening the quick note faded the note in over the window
+  // background (a black frame in dark mode). The tab shell stays painted
+  // under the fade and hides only once the note has covered it.
+  testWidgets('the quick note fades over the tabs, hiding them after', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [librarySessionProvider.overrideWithValue(controller)],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    await controller.createNote(parentPath: '', name: 'Scratch');
+    await settle(tester);
+    await controller.ops!.setQuickNotePath(path: 'Scratch.md');
+
+    Offstage tabShellOffstage() => tester.widget<Offstage>(
+      find.byKey(const ValueKey('tab-shell-offstage')),
+    );
+
+    // On the Files tab, nothing open.
+    expect(noteRow('Scratch.md'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Quick note'),
+      ),
+    );
+    await tester.pump(); // the tile's async open lands.
+    await tester.pump(); // first fade frame, clock held: fade just started.
+    expect(find.byType(NoteView), findsOneWidget);
+    // Mid-fade the shell still paints underneath (no window-background
+    // frame between the tab and the note).
+    expect(tabShellOffstage().offstage, isFalse);
+    expect(find.byKey(const Key('quick-note-choose')), findsOneWidget);
+
+    // Past the fade the shell hides again (layout/paint/tickers skipped
+    // under the opaque note).
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(NoteView), findsOneWidget);
+    expect(tabShellOffstage().offstage, isTrue);
+    expect(find.byKey(const Key('quick-note-choose')), findsNothing);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
   // 2026-09-08 user request: a fullscreen action beside the preview eye,
   // giving the note's text the whole phone screen.
   group('the preview fullscreen', () {

@@ -252,6 +252,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       _visitedTabs.add(tab);
       _treeVisible = true;
       _fabExpanded = false;
+      // Leaving any open note: the tabs show at once (issue #4).
+      _noteClosed();
     });
     // Time-to-visible of the switch itself: the 'tap tab' line above is the
     // input, this is when the first new frame actually painted (with the
@@ -383,6 +385,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
       '(current tab ${_tab.name})',
     );
+    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = path;
       _selectedIsDir = false;
@@ -390,6 +393,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
       _resetNoteKind();
+      _noteOpened();
     });
   }
 
@@ -405,12 +409,55 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// action lives in the shared app bar, so the shell owns the state.
   bool _previewVisible = false;
 
-  void _togglePreview() => setState(() {
-    _previewVisible = !_previewVisible;
-    // Fullscreen belongs to the preview: switching back to the editor
-    // must not leave a chromeless editor with no way out.
-    if (!_previewVisible) _previewFullScreen = false;
-  });
+  void _togglePreview() {
+    // The preview has no editable: flipping to it dismisses the keyboard
+    // instead of leaving the IME up over a read-only pane.
+    if (!_previewVisible) FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _previewVisible = !_previewVisible;
+      // Fullscreen belongs to the preview: switching back to the editor
+      // must not leave a chromeless editor with no way out.
+      if (!_previewVisible) _previewFullScreen = false;
+    });
+  }
+
+  /// Whether a note opened right now would show only the preview (the
+  /// editor hidden): the IME has no target and must go before the
+  /// transition, or its resize lands mid-fade.
+  bool _opensPreviewOnly() {
+    if (!_previewVisible) return false;
+    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
+    return !_effectiveSplit(narrow: narrow);
+  }
+
+  /// Records a note open: the tabs stay painted under the fading note
+  /// (issue #4, see [_noteHidingTabs]) and hide once it has covered them.
+  /// A no-op when they are already hidden (opening another note while one
+  /// is open swaps the content opaquely — no fade, nothing to cover).
+  void _noteOpened() {
+    if (_noteHidingTabs) return;
+    _noteHidingTabs = false;
+    _noteHideTimer?.cancel();
+    final token = ++_noteHideRevision;
+    _noteHideTimer = Timer(
+      _fullNoteFade + const Duration(milliseconds: 40),
+      () {
+        _noteHideTimer = null;
+        if (!mounted || token != _noteHideRevision) return;
+        if (_selected == null || _selectedIsDir || _treeVisible) return;
+        setState(() => _noteHidingTabs = true);
+      },
+    );
+  }
+
+  /// Records a note close: the tabs show at once so the fading note
+  /// cross-fades over them instead of over the window background.
+  void _noteClosed() {
+    _noteHideTimer?.cancel();
+    _noteHideTimer = null;
+    _noteHideRevision++;
+    _noteHidingTabs = false;
+  }
 
   /// Whether the preview has taken over the phone screen (2026-09-08
   /// user request): app bar and tab bar hidden, the note's own text left.
@@ -418,6 +465,22 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Phone-only. On the wide layout the note already shares the window
   /// with the tree, and "fullscreen" there would mean something else.
   bool _previewFullScreen = false;
+
+  /// The full-note open fade (matches the AnimatedSwitcher below).
+  static const _fullNoteFade = Duration(milliseconds: 220);
+
+  /// Whether the tab shell stays hidden under the open note. It flips on
+  /// only once the open fade has covered it (issue #4): hiding the shell
+  /// in the same frame as the open exposes the window background through
+  /// the fading note — a black frame in dark mode. Tickers stop at once;
+  /// layout and paint follow the fade.
+  bool _noteHidingTabs = false;
+
+  /// The pending tab-hide after a note open (canceled on close).
+  Timer? _noteHideTimer;
+
+  /// Guards the pending hide against a rapid close/reopen.
+  int _noteHideRevision = 0;
 
   /// The app-bar fullscreen action, next to the editor/preview eye.
   Widget _previewFullScreenAction() {
@@ -557,6 +620,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _noteHideTimer?.cancel();
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     _todoController.dispose();
@@ -688,6 +752,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   void _select(Note note) {
+    // A note opening in preview-only has no editable for the IME.
+    final previewOnly = !note.isDir && _opensPreviewOnly();
+    if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = note.path;
       _selectedIsDir = note.isDir;
@@ -695,7 +762,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = null;
       _resetNoteKind();
-      if (note.isDir) _expanded.add(note.path);
+      if (note.isDir) {
+        _noteClosed();
+        _expanded.add(note.path);
+      } else {
+        _noteOpened();
+      }
     });
   }
 
@@ -703,12 +775,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note takes the screen, back returns to the search tab; wide — the
   /// detail pane shows it alongside the tree.
   void _openSearchNote(String path) {
+    if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
       _resetNoteKind();
+      _noteOpened();
     });
     logNextFrame('shell', 'search result open first frame');
   }
@@ -740,6 +814,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = false;
         _treeVisible = false;
         _resetNoteKind();
+        _noteOpened();
       });
       logNextFrame('shell', 'quick note open first frame');
     });
@@ -797,8 +872,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   Future<void> _guard(Future<void> Function() action) async {
+    // Pure reentrancy flag (no UI reads it): no setState around it, so a
+    // guarded action rebuilds once for its own state instead of three
+    // times around the transition it animates (issue #4).
     if (_busy) return;
-    setState(() => _busy = true);
+    _busy = true;
     try {
       await action();
     } on Object catch (error) {
@@ -808,9 +886,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       }
       return;
     } finally {
-      if (mounted) {
-        setState(() => _busy = false);
-      }
+      _busy = false;
     }
   }
 
@@ -828,11 +904,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         parentPath: parent ?? _createParent,
         name: name,
       );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _noteOpened();
       });
     });
   }
@@ -928,7 +1007,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (confirmed != true) return;
     await _guard(() async {
       await ops.delete(sel);
-      setState(() => _selected = null);
+      setState(() {
+        _selected = null;
+        // Deleting the open note closes it: the tabs show at once.
+        _noteClosed();
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1086,7 +1169,8 @@ final class _LibraryShellState extends State<_LibraryShell>
               // hiding waits out the open fade (issue #4): the note fades
               // in over the tabs instead of over the window background.
               Offstage(
-                offstage: fullNote,
+                key: const ValueKey('tab-shell-offstage'),
+                offstage: fullNote && _noteHidingTabs,
                 child: TickerMode(
                   enabled: !fullNote,
                   child: KeyedSubtree(
@@ -1105,7 +1189,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                 ),
               ),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
+                duration: _fullNoteFade,
                 switchInCurve: Curves.easeOutCubic,
                 transitionBuilder: (child, animation) =>
                     FadeTransition(opacity: animation, child: child),
@@ -1285,12 +1369,15 @@ final class _LibraryShellState extends State<_LibraryShell>
         name: name,
         content: listNoteContent(),
       );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
       setState(() {
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
         _resetNoteKind();
+        _noteOpened();
       });
     });
   }
@@ -1394,6 +1481,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _visitedTabs.add(_noteFromTab);
       _treeVisible = true;
       _resetNoteKind();
+      _noteClosed();
     });
     logNextFrame('shell', 'note close first frame');
   }

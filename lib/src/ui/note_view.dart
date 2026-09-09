@@ -269,6 +269,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       }
       unawaited(_load());
     }
+    // The preview has no editable: a note opening in it, or the switch
+    // flipping to it, dismisses the keyboard instead of leaving it up.
+    final wasPreviewOnly = !oldWidget.splitPreview && oldWidget.showPreview;
+    if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
+      _dismissKeyboardForPreview();
+    }
   }
 
   @override
@@ -374,6 +380,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _loading = false;
         _ready = true;
       });
+      // Opened straight into the preview: the IME has no target here.
+      _dismissKeyboardForPreview();
       widget.onNoteKindChanged?.call(_noteKind);
       // Word count + outline on open: debounced for edits only; the
       // production load already has them from its isolate (the seam path
@@ -441,6 +449,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final text = _controller.text;
     if (text == _previewText) return;
     setState(() => _previewText = text);
+  }
+
+  /// Whether only the preview is on screen (the editor hidden): the IME
+  /// has no editable target, so it must go.
+  bool get _previewOnly => !widget.splitPreview && widget.showPreview;
+
+  /// Dismisses the keyboard when the preview is the only pane: a note
+  /// opening in preview, or the switch flipping to it, must not leave
+  /// the IME up over a pane with nothing editable.
+  void _dismissKeyboardForPreview() {
+    if (_previewOnly) FocusManager.instance.primaryFocus?.unfocus();
   }
 
   Widget _buildEditor() => Listener(
