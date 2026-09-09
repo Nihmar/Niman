@@ -99,13 +99,21 @@ void main() {
       }
     });
 
-    test('month names are translated and complete', () {
+    test('month and weekday names are translated and complete', () {
       AppLanguages.choice = AppLanguage.english;
-      expect(AppStrings.monthNames.length, 12);
-      expect(AppStrings.monthNames[8], 'Sep');
+      expect(AppStrings.monthNamesShort.length, 12);
+      expect(AppStrings.monthNamesShort[8], 'Sep');
+      expect(AppStrings.monthNames[8], 'September');
+      expect(AppStrings.weekdayNames.length, 7);
+      expect(AppStrings.weekdayNames.first, 'Monday');
+      expect(AppStrings.weekdayNamesShort.first, 'Mon');
       AppLanguages.choice = AppLanguage.italian;
-      expect(AppStrings.monthNames.length, 12);
-      expect(AppStrings.monthNames[8], 'set');
+      expect(AppStrings.monthNamesShort.length, 12);
+      expect(AppStrings.monthNamesShort[8], 'set');
+      expect(AppStrings.monthNames[8], 'settembre');
+      expect(AppStrings.weekdayNames.length, 7);
+      expect(AppStrings.weekdayNames.first, 'lunedì');
+      expect(AppStrings.weekdayNamesShort.first, 'lun');
     });
   });
 }

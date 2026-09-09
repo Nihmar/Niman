@@ -248,7 +248,7 @@ final class _TokenChip extends StatelessWidget {
 /// differs from [today]'s — the row's display formatting (the parser's
 /// `formatTodoDate` stays the machine form).
 String _shortDate(DateTime date, DateTime today) {
-  final base = '${date.day} ${AppStrings.monthNames[date.month - 1]}';
+  final base = '${date.day} ${AppStrings.monthNamesShort[date.month - 1]}';
   return date.year == today.year ? base : '$base ${date.year}';
 }
 

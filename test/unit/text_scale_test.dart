@@ -54,7 +54,7 @@ void main() {
     });
 
     test('a hand-typed nonsense size is read into range', () {
-      final back = LibraryConfig.fromJsonMap(<String, Object?>{
+      final back = LibraryConfig.fromJsonMap(const <String, Object?>{
         'uiTextScale': 40,
         'noteTextScale': 'huge',
       });
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('clamping still bounds the result', () {
-      const composed = ComposedTextScaler(TextScaler.linear(1), 4);
+      const composed = ComposedTextScaler(TextScaler.noScaling, 4);
       expect(composed.clamp(maxScaleFactor: 2).scale(10), 20);
       expect(composed.clamp().scale(10), 40);
     });

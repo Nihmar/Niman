@@ -20,6 +20,100 @@ final class AppStrings {
   /// The English or the Italian text, per [AppLanguages].
   static String _t(String en, String it) => AppLanguages.isItalian ? it : en;
 
+  /// The English or the Italian list, per [AppLanguages].
+  static List<String> _tl(List<String> en, List<String> it) =>
+      AppLanguages.isItalian ? it : en;
+
+  // Dates written out (template placeholders, T-TPL-01). Indexed from
+  // zero: month 1 is [0]. Italian month and weekday names are lowercase
+  // in running text, which is where a template puts them.
+  static List<String> get monthNames => _tl(
+    const [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    const [
+      'gennaio',
+      'febbraio',
+      'marzo',
+      'aprile',
+      'maggio',
+      'giugno',
+      'luglio',
+      'agosto',
+      'settembre',
+      'ottobre',
+      'novembre',
+      'dicembre',
+    ],
+  );
+  static List<String> get monthNamesShort => _tl(
+    const [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    const [
+      'gen',
+      'feb',
+      'mar',
+      'apr',
+      'mag',
+      'giu',
+      'lug',
+      'ago',
+      'set',
+      'ott',
+      'nov',
+      'dic',
+    ],
+  );
+
+  /// Monday first, as `DateTime.weekday` counts: weekday 1 is [0].
+  static List<String> get weekdayNames => _tl(
+    const [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ],
+    const [
+      'lunedì',
+      'martedì',
+      'mercoledì',
+      'giovedì',
+      'venerdì',
+      'sabato',
+      'domenica',
+    ],
+  );
+  static List<String> get weekdayNamesShort => _tl(
+    const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    const ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'],
+  );
+
   // Settings: editor toggles.
   static String get trashTitle => _t('Trash', 'Cestino');
   static String get trashSubtitle => _t(
@@ -511,10 +605,8 @@ final class AppStrings {
       _t('New from template', 'Nuova da modello');
   static String get newFromTemplateHere =>
       _t('New from template here', 'Nuova da modello qui');
-  static String frontmatterInvalid(String reason) => _t(
-    'Frontmatter not read: $reason',
-    'Frontmatter non letto: $reason',
-  );
+  static String frontmatterInvalid(String reason) =>
+      _t('Frontmatter not read: $reason', 'Frontmatter non letto: $reason');
   static String get templatePickerTitle =>
       _t('Choose a template', 'Scegli un modello');
   static String templatePickerEmpty(String folder) => _t(
@@ -703,34 +795,8 @@ final class AppStrings {
         '${only == null ? 'trovata' : 'trovata in $only'}',
   );
 
-  /// The short month names used by the task rows, January first.
-  static List<String> get monthNames => AppLanguages.isItalian
-      ? const [
-          'gen',
-          'feb',
-          'mar',
-          'apr',
-          'mag',
-          'giu',
-          'lug',
-          'ago',
-          'set',
-          'ott',
-          'nov',
-          'dic',
-        ]
-      : const [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
+  // The task rows' month names moved to the top of this file, where the
+  // written-out dates live: they are the same twelve words the template
+  // `MMM` token needs (T-TPL-01), and one list is better than two that
+  // must be kept in step.
 }

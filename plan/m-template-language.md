@@ -80,7 +80,7 @@ alternatives.
 The first four are the slice as ordered; T-TPL-05 and T-TPL-07 are held
 back by choice 4 and land after.
 
-- [ ] **T-TPL-01** The value layer: filters and a real date vocabulary.
+- [x] **T-TPL-01** The value layer: filters and a real date vocabulary.
   `{{name:argument|filter|filter}}`, filters applied left to right.
   Filters: `upper`, `lower`, `slug` (the link slug, so a template can
   build a wikilink to a note it names), `title` (title case), `trim`,

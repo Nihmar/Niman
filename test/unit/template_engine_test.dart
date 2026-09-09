@@ -1,6 +1,7 @@
 // T-M4-06 AC: one test per placeholder, and the date formats — rendered
 // against a fixed local clock so the assertions do not depend on when the
 // suite runs or where.
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/templates/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -91,6 +92,114 @@ void main() {
 
     test('an empty format renders nothing', () {
       expect(formatDateTime(clock, ''), '');
+    });
+  });
+
+  // T-TPL-01: the filter pipe, and the date vocabulary a person writing
+  // a lecture or a journal note actually asks for.
+  group('filters', () {
+    test('the text ones, alone and chained', () {
+      expect(render('{{title|upper}}'), 'MY NOTE');
+      expect(render('{{title|lower}}'), 'my note');
+      expect(render('{{title|slug}}'), 'my-note');
+      expect(render('{{title|slug|upper}}'), 'MY-NOTE');
+      expect(render('{{title|title}}', title: 'my note'), 'My Note');
+      expect(render('{{title|trim}}', title: '  spaced  '), 'spaced');
+      expect(render('{{title|pad:10}}'), '000My Note');
+    });
+
+    test('title case leaves a word the user capitalised alone', () {
+      expect(
+        render('{{title|title}}', title: 'the iPhone note'),
+        'The iPhone Note',
+      );
+      expect(render('{{title|title}}', title: 'a USB cable'), 'A USB Cable');
+    });
+
+    test('default fills in for an empty value', () {
+      expect(render('{{title|default:Untitled}}', title: ''), 'Untitled');
+      expect(render('{{title|default:Untitled}}'), 'My Note');
+    });
+
+    test('an unknown filter leaves the whole placeholder standing', () {
+      expect(render('{{title|nope}}'), '{{title|nope}}');
+      expect(render('{{title|upper|nope}}'), '{{title|upper|nope}}');
+      expect(render('{{title|pad:wide}}'), '{{title|pad:wide}}');
+    });
+
+    test('a pipe inside a quoted date format is not a filter', () {
+      expect(render("{{time:HH'|'mm}}"), '07|05');
+    });
+
+    test('uuid takes filters too', () {
+      expect(render('{{uuid|upper}}'), 'FIXED-UUID');
+    });
+  });
+
+  group('date shifts', () {
+    test('days and weeks', () {
+      expect(render('{{date|+7d}}'), '2026-03-16');
+      expect(render('{{date|-1w}}'), '2026-03-02');
+      expect(render('{{date:YYYY-MM-DD|+1w|+1d}}'), '2026-03-17');
+    });
+
+    test('months and years, with the day clamped into the month', () {
+      expect(render('{{date|+1m}}'), '2026-04-09');
+      expect(render('{{date|+1y}}'), '2027-03-09');
+      // 31 January plus a month is the end of February, not March.
+      expect(
+        applyTemplate('{{date|+1m}}', title: 'x', now: DateTime(2026, 1, 31)),
+        '2026-02-28',
+      );
+      // And across the year boundary.
+      expect(
+        applyTemplate('{{date|+2m}}', title: 'x', now: DateTime(2026, 11, 30)),
+        '2027-01-30',
+      );
+    });
+
+    test('startof and endof snap to the week, month and year', () {
+      // The fixed clock is a Monday, so the week already starts there.
+      expect(render('{{date|startof:week}}'), '2026-03-09');
+      expect(render('{{date|endof:week}}'), '2026-03-15');
+      expect(render('{{date|startof:month}}'), '2026-03-01');
+      expect(render('{{date|endof:month}}'), '2026-03-31');
+      expect(render('{{date|startof:year}}'), '2026-01-01');
+      expect(render('{{date|endof:year}}'), '2026-12-31');
+    });
+
+    test('a shift then a text filter, in that order', () {
+      expect(render('{{date:MMMM|+1m|upper}}'), 'APRIL');
+      // The other way round there is no date left to move.
+      expect(render('{{date:MMMM|upper|+1m}}'), '{{date:MMMM|upper|+1m}}');
+    });
+  });
+
+  group('the written-out date tokens', () {
+    setUp(AppLanguages.reset);
+    tearDown(AppLanguages.reset);
+
+    test('month and weekday names, in the app language', () {
+      expect(formatDateTime(clock, 'dddd D MMMM YYYY'), 'Monday 9 March 2026');
+      expect(formatDateTime(clock, 'ddd DD MMM'), 'Mon 09 Mar');
+      AppLanguages.choice = AppLanguage.italian;
+      expect(formatDateTime(clock, 'dddd D MMMM YYYY'), 'lunedì 9 marzo 2026');
+      expect(formatDateTime(clock, 'ddd DD MMM'), 'lun 09 mar');
+    });
+
+    test('MMMM never reads as two MM', () {
+      expect(formatDateTime(clock, 'MMMM MMM MM M'), 'March Mar 03 3');
+    });
+
+    test('the ISO week and the quarter', () {
+      expect(formatDateTime(clock, 'WW'), '11');
+      expect(formatDateTime(clock, 'W'), '11');
+      expect(formatDateTime(clock, 'Q'), '1');
+      // 1 January 2026 is a Thursday, so it belongs to week 1...
+      expect(formatDateTime(DateTime(2026), 'W'), '1');
+      // ...and 31 December 2024 to week 1 of 2025, not week 53 of 2024.
+      expect(formatDateTime(DateTime(2024, 12, 31), 'W'), '1');
+      expect(formatDateTime(DateTime(2026, 12, 31), 'W'), '53');
     });
   });
 
