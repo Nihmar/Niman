@@ -107,8 +107,9 @@ void main() {
       );
       await tester.pump();
       await tester.pump();
-      // The divider sits at `fraction` of the split's width (4 px handle):
-      // grab it there and drag right (the editor takes a bigger share).
+      // The divider sits at `fraction` of the split's width (1 px visual
+      // in a wider grab box): grab it there and drag right (the editor
+      // takes a bigger share).
       final rect = tester.getRect(find.byType(EditorPreviewSplit));
       final dividerX = rect.left + rect.width * 0.55 + 2;
       final gesture = await tester.startGesture(

@@ -52,35 +52,6 @@ void main() {
     expect(find.byType(SegmentedButton<PreviewLayoutMode>), findsNothing);
   });
 
-  testWidgets('the layout choice has no two entries that do the same', (
-    tester,
-  ) async {
-    // T-CL-07: a third mode forced the split at any width, which stopped
-    // meaning anything once a narrow screen refused to split.
-    await pump(tester);
-    await tester.tap(find.byKey(const Key('preview-mode-setting')));
-    await tester.pumpAndSettle();
-    final dialog = find.byType(SimpleDialog);
-    expect(
-      find.descendant(
-        of: dialog,
-        matching: find.text(AppStrings.previewModeAuto),
-      ),
-      findsOne,
-    );
-    expect(
-      find.descendant(
-        of: dialog,
-        matching: find.text(AppStrings.previewModeSwitch),
-      ),
-      findsOne,
-    );
-    expect(
-      find.descendant(of: dialog, matching: find.byType(ListTile)),
-      findsExactly(2),
-    );
-  });
-
   testWidgets('a choice row reads its current value', (tester) async {
     await pump(tester);
     final row = find.byKey(const Key('indent-width'));
@@ -162,7 +133,15 @@ void main() {
   ) async {
     await pump(tester);
     expect(find.text(AppStrings.trashSubtitle), findsOne);
-    expect(find.text(AppStrings.keyboardOnOpenSubtitle), findsOne);
+  });
+
+  testWidgets('the keyboard row shows on phones only, hidden on desktop', (
+    tester,
+  ) async {
+    // The test host is a desktop platform, so the row — gated on
+    // Android/iOS — is never offered here (user, 2026-09-09).
+    await pump(tester);
+    expect(find.text(AppStrings.keyboardOnOpenSubtitle), findsNothing);
   });
 
   group('the split-ratio row appears only where the panes can split', () {
@@ -182,8 +161,6 @@ void main() {
 
     final row = find.byKey(const Key('split-ratio-setting'));
 
-    final modeRow = find.byKey(const Key('preview-mode-setting'));
-
     testWidgets('hidden on a phone, where auto never splits', (tester) async {
       await pumpAt(tester, 400);
       expect(row, findsNothing);
@@ -194,23 +171,14 @@ void main() {
       expect(row, findsOne);
     });
 
-    testWidgets('the layout row goes with it on a phone', (tester) async {
-      // Below 600 dp the panes cannot share the screen, so the mode
-      // decides nothing (user, 2026-09-09).
-      await pumpAt(tester, 400);
-      expect(modeRow, findsNothing);
-      await pumpAt(tester, 900);
-      expect(modeRow, findsOne);
-    });
-
-    testWidgets('neither row is offered on a phone, whatever the mode', (
+    testWidgets('no layout row is offered on a phone, whatever the mode', (
       tester,
     ) async {
       // Below 600 dp the layout is settled: one pane, and no control
-      // that could say otherwise.
+      // that could say otherwise. The split/switch choice lives in the
+      // editor's app bar now (user, 2026-09-09), not here.
       await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
       await pumpAt(tester, 400);
-      expect(modeRow, findsNothing);
       expect(row, findsNothing);
     });
 
@@ -219,7 +187,6 @@ void main() {
     ) async {
       await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
       await pumpAt(tester, 900);
-      expect(modeRow, findsOne);
       expect(row, findsNothing);
     });
 

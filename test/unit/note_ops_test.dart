@@ -218,9 +218,8 @@ void main() {
 
     test('unpinning is allowed on any file, so a stray block can go', () async {
       // A pin written before that rule existed has to be removable.
-      File(
-        p.join(root.path, 'todo.txt'),
-      ).writeAsStringSync('---\npinned: true\n---\n\ntask\n');
+      File(p.join(root.path, 'todo.txt'))
+          .writeAsStringSync('---\npinned: true\n---\n\ntask\n');
       await indexer.fullScan(root.path);
 
       await ops.setPinned('todo.txt', pinned: false);
@@ -230,10 +229,7 @@ void main() {
 
     test('a folder cannot be pinned', () async {
       await ops.createFolder(parentPath: '', name: 'Folder');
-      expect(
-        () => ops.setPinned('Folder', pinned: true),
-        throwsArgumentError,
-      );
+      expect(() => ops.setPinned('Folder', pinned: true), throwsArgumentError);
     });
   });
 

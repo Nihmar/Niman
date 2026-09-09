@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:copist/src/core/language.dart';
@@ -18,31 +19,9 @@ import 'package:flutter/material.dart';
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
 /// Global theme/layout settings arrive with the M6 token system.
-final class SettingsScreen extends StatelessWidget {
-  /// Creates the settings screen.
-  const new({required this.controller, super.key});
-
-  /// The session of the library whose settings this screen edits.
-  final LibrarySession controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(AppStrings.settingsTitle)),
-      body: SettingsBody(
-        controller: controller,
-        onClosed: () {
-          // The pushed screen returns to the shell (which then re-renders
-          // into the open-library screen since the session is closed).
-          if (context.mounted) Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
-}
-
-/// The settings content: the same list is shown pushed (wide app-bar
-/// button) and embedded as the bottom-nav Settings tab (T-UI-02).
+///
+/// The settings content, embedded as the Settings tab (bottom bar on
+/// narrow, rail on wide).
 final class SettingsBody extends StatefulWidget {
   /// Creates the settings body.
   const new({required this.controller, this.onClosed, super.key});
@@ -247,15 +226,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
     }
   }
 
-  Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
-    final controller = widget.controller;
-    await controller.setPreviewMode(mode);
-    controller.notify();
-    if (mounted) {
-      setState(() => _previewMode = mode);
-    }
-  }
-
   Future<void> _setSplitRatio(double ratio) async {
     final controller = widget.controller;
     await controller.setSplitRatio(ratio);
@@ -369,26 +339,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
         '.${three(dt.millisecond)}';
   }
 
-  /// Asks for the preview mode.
-  Future<void> _choosePreviewMode() async {
-    final mode = await showSettingsChoice<PreviewLayoutMode>(
-      context,
-      dialogKey: const Key('preview-mode-dialog'),
-      title: AppStrings.previewModeTitle,
-      subtitle: AppStrings.previewModeSubtitle,
-      current: _previewMode,
-      options: [
-        SettingsOption(PreviewLayoutMode.auto, AppStrings.previewModeAuto),
-        SettingsOption(
-          PreviewLayoutMode.fullScreen,
-          AppStrings.previewModeSwitch,
-        ),
-      ],
-    );
-    if (mode != null) await _setPreviewMode(mode);
-  }
-
-  /// Asks for the editor's share of a side-by-side split.
   Future<void> _chooseSplitRatio() async {
     final ratio = await showSettingsSlider(
       context,
@@ -495,21 +445,9 @@ final class _SettingsBodyState extends State<SettingsBody> {
           },
           onTap: () => unawaited(_chooseLanguage()),
         ),
-        // Both rows are about a layout a narrow screen cannot have
-        // (T-CL-05): the mode decides nothing below 600 dp, and the
-        // ratio moves a number nothing reads. Their stored values are
-        // untouched while they are hidden, so plugging in a monitor
-        // brings back the layout the user chose.
-        if (!narrow)
-          SettingsValueRow(
-            key: const Key('preview-mode-setting'),
-            title: AppStrings.previewModeTitle,
-            value: switch (_previewMode) {
-              PreviewLayoutMode.auto => AppStrings.previewModeAuto,
-              PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
-            },
-            onTap: () => unawaited(_choosePreviewMode()),
-          ),
+        // The split ratio stays here; the split/switch choice itself
+        // lives in the editor's app bar (user, 2026-09-09): a layout a
+        // narrow screen cannot have is not a global setting.
         if (_splitLoaded && previewSplits(_previewMode, narrow: narrow))
           SettingsValueRow(
             key: const Key('split-ratio-setting'),
@@ -541,12 +479,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: _lineNumbers ?? true,
           onChanged: _toggleLineNumbers,
         ),
-        SwitchListTile(
-          title: Text(AppStrings.keyboardOnOpenTitle),
-          subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
-          value: _autofocusEditor ?? false,
-          onChanged: _toggleAutofocusEditor,
-        ),
+        // Phones and tablets only: there is no on-screen keyboard to
+        // show on desktop, so the row would toggle a no-op (user,
+        // 2026-09-09).
+        if (Platform.isAndroid || Platform.isIOS)
+          SwitchListTile(
+            title: Text(AppStrings.keyboardOnOpenTitle),
+            subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
+            value: _autofocusEditor ?? false,
+            onChanged: _toggleAutofocusEditor,
+          ),
         SettingsValueRow(
           key: const Key('link-type'),
           title: AppStrings.linkTypeTitle,

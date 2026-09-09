@@ -80,6 +80,7 @@ final class NoteView extends StatefulWidget {
     this.initialAnchor,
     this.kindMode = true,
     this.onNoteKindChanged,
+    this.toolbarTop = false,
     super.key,
   });
 
@@ -161,6 +162,10 @@ final class NoteView extends StatefulWidget {
   /// Reports the loaded note's kind (the frontmatter `type` value, null =
   /// plain note); the shell shows the kind toggle for known kinds.
   final void Function(String? type)? onNoteKindChanged;
+
+  /// Whether the formatting toolbar sits above the editor (desktop)
+  /// instead of below it (phone, where it extends the keyboard).
+  final bool toolbarTop;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -1037,6 +1042,21 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final kindBody = widget.kindMode && kindGui != null;
     return Column(
       children: [
+        // Desktop: the toolbar is editor chrome, above the editor, with a
+        // divider setting it off the text. Phone: it extends the keyboard,
+        // below (see the bottom slot).
+        if (widget.toolbarTop && !kindBody && !_loading)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.bottomCenter,
+            child: showToolbar
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_toolbar(context), const Divider(height: 1)],
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
         Expanded(
           child: error == null
               ? (!_ready || _loading
@@ -1090,8 +1110,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                 // The toolbar fades + sizes in and out (hidden in preview
                 // mode). It is only mounted once loaded, so it appears
                 // immediately on load and animates only when preview mode
-                // toggles.
-                if (!_loading)
+                // toggles. Phone only: on desktop it lives above the
+                // editor (the top slot).
+                if (!widget.toolbarTop && !_loading)
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOutCubic,
@@ -1412,9 +1433,8 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
           // more about the choice than the number does.
           title: Text(
             AppStrings.headingLevelLabel(level),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontSize: 26.0 - level * 2),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontSize: 26.0 - level * 2),
           ),
         ),
     ],

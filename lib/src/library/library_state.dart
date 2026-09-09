@@ -609,6 +609,16 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
   }
 
+  /// The tree pane's width in logical pixels.
+  @override
+  Future<double> get treeWidth async => (await _library).treeWidth;
+
+  /// Sets (and persists) the tree pane's width.
+  @override
+  Future<void> setTreeWidth(double width) async {
+    await _editLibrary((c) => c.copyWith(treeWidth: width));
+  }
+
   /// Whether the tree's pinned section is rolled up.
   @override
   Future<bool> get pinnedCollapsed async => (await _library).pinnedCollapsed;

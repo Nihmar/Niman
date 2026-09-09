@@ -1,6 +1,7 @@
 // T-UI-02 AC: the phone/narrow layout shows the 5-tab bottom NavigationBar;
 // switching tabs preserves the library state (expanded folders, selected
-// note); the wide layout stays unchanged (no tab bar).
+// note); the wide layout shows the same 5 tabs in a fixed left
+// NavigationRail (T-PP-14, covered in shell_rail_test.dart).
 // T-UI-10 AC: the Quick note tab opens `Quick note.md` at the library root,
 // creating it when missing; the Search tab is disabled until M3 (R3).
 import 'package:copist/src/app.dart';

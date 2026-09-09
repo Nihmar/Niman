@@ -1,4 +1,5 @@
 import 'package:copist/src/core/language.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -218,6 +219,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
+
+  /// The tree pane's width in logical pixels (default
+  /// [defaultTreeWidth]).
+  Future<double> get treeWidth;
+
+  /// Sets (and persists) the tree pane's width.
+  Future<void> setTreeWidth(double width);
 
   /// Whether the tree's pinned section is rolled up (default false).
   ///

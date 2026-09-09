@@ -56,6 +56,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
   String _templateFolder = defaultTemplateFolder;
+
+  /// Search hits returned for every word query (empty = no results).
+  ///
+  /// Settable so shell-level tests can drive search → open flows.
+  List<SearchHit> searchHits = [];
   AppLanguage _language = AppLanguage.system;
 
   @override
@@ -228,6 +233,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<double> get treeWidth async => _config.treeWidth;
+
+  @override
+  Future<void> setTreeWidth(double width) async {
+    _config = _config.copyWith(treeWidth: width);
+  }
+
+  @override
   Future<bool> get pinnedCollapsed async => _config.pinnedCollapsed;
 
   @override
@@ -318,7 +331,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<SearchSource?> get searchSource async => FakeSearchSource();
+  Future<SearchSource?> get searchSource async =>
+      FakeSearchSource(hits: searchHits);
 
   @override
   Future<ReplaceSource?> get replaceSource async => FakeReplaceSource();
@@ -807,8 +821,7 @@ final class _FakeFieldSource implements FieldSource {
     for (final (note, fm) in _session._liveFrontmatter()) {
       final values = fm?.fields[name];
       if (values == null) continue;
-      if (wanted.isEmpty ||
-          values.any((v) => v.toLowerCase() == wanted)) {
+      if (wanted.isEmpty || values.any((v) => v.toLowerCase() == wanted)) {
         out.add(note);
       }
     }

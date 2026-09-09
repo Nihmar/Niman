@@ -49,6 +49,9 @@ Finder dialogField() => find.descendant(
   matching: find.byType(TextField),
 );
 
+/// The tree pane itself: the width assertions measure its rect.
+Finder noteTree() => find.byType(NoteTree);
+
 /// The tree row (not the detail pane) showing [name].
 ///
 /// With [offstage] true it also finds the tree under a pushed screen

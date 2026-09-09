@@ -207,8 +207,13 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
-    // Switch the trash toggle off in settings.
-    await tester.tap(find.byKey(const Key('open-settings')));
+    // Switch the trash toggle off in settings (the rail tab, inline).
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('shell-rail')),
+        matching: find.text('Settings'),
+      ),
+    );
     await settle(tester);
     // The settings list is grouped and lazy, and the trash toggle sits
     // under Library, so it may be below the fold.
@@ -219,7 +224,12 @@ void main() {
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('shell-rail')),
+        matching: find.text('Files'),
+      ),
+    );
     await settle(tester);
 
     // Recreate the note, then delete it with the toggle off: hard delete.

@@ -55,6 +55,26 @@ int normalizeIndentWidth(Object? raw) {
   return width;
 }
 
+/// The tree pane's width in a fresh library (logical pixels).
+const double defaultTreeWidth = 340;
+
+/// The narrowest the tree pane drags to.
+const double minTreeWidth = 200;
+
+/// The widest the tree pane drags to.
+const double maxTreeWidth = 600;
+
+/// Reads a `treeWidth` out of the settings file, clamped into range —
+/// the same bargain as `indentWidth`: a hand-typed number stays near
+/// what was meant, anything else reads back as the default.
+double normalizeTreeWidth(Object? raw) {
+  if (raw is! num) return defaultTreeWidth;
+  final width = raw.toDouble();
+  if (width < minTreeWidth) return minTreeWidth;
+  if (width > maxTreeWidth) return maxTreeWidth;
+  return width;
+}
+
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
@@ -113,6 +133,7 @@ final class LibraryConfig {
     this.linkType = LinkType.wikilink,
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
+    this.treeWidth = defaultTreeWidth,
     this.extra = const {},
   });
 
@@ -164,6 +185,7 @@ final class LibraryConfig {
         final String layout => layout,
         _ => '',
       },
+      treeWidth: normalizeTreeWidth(json['treeWidth']),
       extra: extra,
     );
   }
@@ -221,6 +243,10 @@ final class LibraryConfig {
   /// The arranged editor toolbar; empty means the shipped one.
   final String editorToolbar;
 
+  /// The tree pane's width in logical pixels (default
+  /// [defaultTreeWidth]), dragged on wide screens.
+  final double treeWidth;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -240,6 +266,7 @@ final class LibraryConfig {
     LinkType? linkType,
     int? indentWidth,
     String? editorToolbar,
+    double? treeWidth,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -257,6 +284,7 @@ final class LibraryConfig {
       linkType: linkType ?? this.linkType,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
+      treeWidth: treeWidth ?? this.treeWidth,
       extra: extra,
     );
   }
@@ -275,6 +303,7 @@ final class LibraryConfig {
     'linkType',
     'indentWidth',
     'editorToolbar',
+    'treeWidth',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -301,6 +330,7 @@ final class LibraryConfig {
       'linkType': linkType.name,
       'indentWidth': indentWidth,
       'editorToolbar': editorToolbar,
+      'treeWidth': treeWidth,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -368,6 +398,7 @@ final class LibraryConfig {
         linkType == other.linkType &&
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&
+        treeWidth == other.treeWidth &&
         _deepEquals(extra, other.extra);
   }
 

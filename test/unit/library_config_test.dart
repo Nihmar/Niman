@@ -200,6 +200,7 @@ void main() {
         'linkType',
         'indentWidth',
         'editorToolbar',
+        'treeWidth',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }
@@ -285,6 +286,13 @@ void main() {
       expect(normalizeIndentWidth(40), maxIndentWidth);
       expect(normalizeIndentWidth(4), 4);
       expect(normalizeIndentWidth('four'), defaultIndentWidth);
+    });
+
+    test('an out-of-range treeWidth is clamped into range', () {
+      expect(normalizeTreeWidth(50), minTreeWidth);
+      expect(normalizeTreeWidth(5000), maxTreeWidth);
+      expect(normalizeTreeWidth(400), 400);
+      expect(normalizeTreeWidth('wide'), defaultTreeWidth);
     });
 
     test('an unreadable enum falls back to its default', () {
