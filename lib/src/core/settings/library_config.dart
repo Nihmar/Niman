@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
-    show LinkType, TreeSort, defaultListFolder;
+    show LinkType, TreeSort, defaultListFolder, defaultTemplateFolder;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -58,16 +58,26 @@ int normalizeIndentWidth(Object? raw) {
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
-/// Sanitizes a list-folder path: trims, drops leading/trailing slashes
-/// and empty/`.`/`..` segments; an empty result is [defaultListFolder].
-String cleanListFolder(String folder) {
+/// Sanitizes a library-relative folder path: trims, drops leading and
+/// trailing slashes and empty/`.`/`..` segments; an empty result is
+/// [fallback].
+String cleanFolderPath(String folder, String fallback) {
   final parts = folder
       .trim()
       .split('/')
       .where((s) => s.isNotEmpty && s != '.' && s != '..')
       .toList();
-  return parts.isEmpty ? defaultListFolder : parts.join('/');
+  return parts.isEmpty ? fallback : parts.join('/');
 }
+
+/// Sanitizes a list-folder path; an empty result is [defaultListFolder].
+String cleanListFolder(String folder) =>
+    cleanFolderPath(folder, defaultListFolder);
+
+/// Sanitizes a template-folder path; an empty result is
+/// [defaultTemplateFolder].
+String cleanTemplateFolder(String folder) =>
+    cleanFolderPath(folder, defaultTemplateFolder);
 
 /// The per-library settings, stored in the library folder itself as
 /// `<library>/.copist/settings.json` (T-ML-01, T-ML-10).
@@ -94,6 +104,7 @@ final class LibraryConfig {
     required this.historyVersions,
     required this.quickNotePath,
     required this.listNoteFolder,
+    this.templateFolder = defaultTemplateFolder,
     this.lineNumbers = true,
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
@@ -121,6 +132,7 @@ final class LibraryConfig {
     final versions = json['historyVersions'];
     final quick = json['quickNotePath'];
     final folder = json['listNoteFolder'];
+    final templates = json['templateFolder'];
     return LibraryConfig(
       trashEnabled: switch (trash) {
         final bool enabled => enabled,
@@ -131,6 +143,9 @@ final class LibraryConfig {
       listNoteFolder: folder is String
           ? cleanListFolder(folder)
           : defaultListFolder,
+      templateFolder: templates is String
+          ? cleanTemplateFolder(templates)
+          : defaultTemplateFolder,
       lineNumbers: _boolOr(json['lineNumbers'], true),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
@@ -152,7 +167,8 @@ final class LibraryConfig {
   }
 
   /// The settings of a fresh library: trash enabled, 10 history versions,
-  /// the default quick note at the root, list notes in `Lists`.
+  /// the default quick note at the root, list notes in `Lists`, templates
+  /// in `Templates`.
   static const LibraryConfig defaults = LibraryConfig(
     trashEnabled: true,
     historyVersions: defaultHistoryVersions,
@@ -174,6 +190,9 @@ final class LibraryConfig {
 
   /// The folder (library-relative) holding the list notes.
   final String listNoteFolder;
+
+  /// The folder (library-relative) holding the note templates.
+  final String templateFolder;
 
   /// Whether the editor shows the row-number column (default true).
   final bool lineNumbers;
@@ -207,6 +226,7 @@ final class LibraryConfig {
     String? quickNotePath,
     bool clearQuickNotePath = false,
     String? listNoteFolder,
+    String? templateFolder,
     bool? lineNumbers,
     bool? editorAutofocus,
     bool? reminderShowTokens,
@@ -222,6 +242,7 @@ final class LibraryConfig {
           ? null
           : quickNotePath ?? this.quickNotePath,
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
+      templateFolder: templateFolder ?? this.templateFolder,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
@@ -238,6 +259,7 @@ final class LibraryConfig {
     'historyVersions',
     'quickNotePath',
     'listNoteFolder',
+    'templateFolder',
     'lineNumbers',
     'editorAutofocus',
     'reminderShowTokens',
@@ -262,6 +284,7 @@ final class LibraryConfig {
       'trashEnabled': trashEnabled,
       'historyVersions': historyVersions,
       'listNoteFolder': listNoteFolder,
+      'templateFolder': templateFolder,
       'lineNumbers': lineNumbers,
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
@@ -327,6 +350,7 @@ final class LibraryConfig {
         historyVersions == other.historyVersions &&
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
+        templateFolder == other.templateFolder &&
         lineNumbers == other.lineNumbers &&
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&

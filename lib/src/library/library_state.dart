@@ -21,6 +21,7 @@ import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
+import 'package:copist/src/templates/repo.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -280,6 +281,14 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return null;
     return FieldRepo(db);
+  }
+
+  @override
+  Future<TemplateSource?> get templateSource async {
+    final indexer = _indexer;
+    final ops = this.ops;
+    if (indexer == null || ops == null) return null;
+    return TemplateRepo(indexer.dao, ops);
   }
 
   @override

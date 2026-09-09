@@ -57,6 +57,10 @@ const double defaultSplitRatio = 0.55;
 /// The default folder (library-relative) of the list notes (T-TK-06).
 const String defaultListFolder = 'Lists';
 
+/// The default folder (library-relative) holding the note templates
+/// (T-M4-05).
+const String defaultTemplateFolder = 'Templates';
+
 /// The lower bound of the allowed split range.
 const double minSplitRatio = 0.2;
 

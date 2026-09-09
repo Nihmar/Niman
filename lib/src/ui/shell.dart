@@ -12,6 +12,7 @@ import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/templates/engine.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
@@ -28,6 +29,7 @@ import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
+import 'package:copist/src/ui/template_picker.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
@@ -878,6 +880,52 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
   }
 
+  /// Creates a note from a template in [parent] (default: the FAB
+  /// target), T-M4-07.
+  ///
+  /// Template first, then name: which template you want is the decision,
+  /// and the name often follows from it. The template's text — frontmatter
+  /// included — becomes the note's, with its placeholders substituted
+  /// against the name just chosen.
+  Future<void> _createFromTemplate({String? parent}) async {
+    final source = await widget.controller.templateSource;
+    if (source == null || !mounted) return;
+    final templates = await source.templates();
+    final folder = await source.folder;
+    if (!mounted) return;
+    final chosen = await showTemplatePicker(
+      context,
+      templates: templates,
+      folder: folder,
+    );
+    if (chosen == null || !mounted) return;
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newFromTemplateTitle,
+      initial: chosen.name.split('/').last,
+    );
+    if (name == null) return;
+    await _guard(() async {
+      final ops = widget.controller.ops!;
+      final template = await ops.readNote(chosen.path);
+      final row = await ops.createNote(
+        parentPath: parent ?? _createParent,
+        name: name,
+        content: applyTemplate(template, title: name),
+      );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+      setState(() {
+        _selected = row.path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+        _pendingAnchor = null;
+        _resetNoteKind();
+        _noteOpened();
+      });
+    });
+  }
+
   /// Creates a folder in [parent] (default: the FAB target).
   Future<void> _createFolder({String? parent}) async {
     final name = await showNameDialog(
@@ -1011,67 +1059,80 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (!mounted) return;
     final action = await showModalBottomSheet<String>(
       context: context,
+      // The menu has outgrown the default sheet, which caps itself at
+      // nine sixteenths of the screen and silently clips the rest — on a
+      // short screen that hid Delete. Scroll-controlled it takes the
+      // height it needs, and scrolls when the screen is shorter still.
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              key: const Key('menu-new-note'),
-              leading: const Icon(Icons.note_add),
-              title: Text(AppStrings.newNoteHere),
-              onTap: () => Navigator.pop(context, 'note'),
-            ),
-            if (note.isDir)
+        child: SingleChildScrollView(
+          child: Wrap(
+            children: [
               ListTile(
-                key: const Key('menu-new-folder'),
-                leading: const Icon(Icons.create_new_folder),
-                title: Text(AppStrings.newFolderHere),
-                onTap: () => Navigator.pop(context, 'folder'),
+                key: const Key('menu-new-note'),
+                leading: const Icon(Icons.note_add),
+                title: Text(AppStrings.newNoteHere),
+                onTap: () => Navigator.pop(context, 'note'),
               ),
-            if (!note.isDir)
               ListTile(
-                key: const Key('menu-quick-note'),
-                leading: Icon(
-                  isQuickNote
-                      ? Icons.sticky_note_2
-                      : Icons.sticky_note_2_outlined,
-                ),
-                title: Text(
-                  isQuickNote
-                      ? AppStrings.currentQuickNote
-                      : AppStrings.setAsQuickNote,
-                ),
-                onTap: () => Navigator.pop(context, 'quicknote'),
+                key: const Key('menu-new-from-template'),
+                leading: const Icon(Icons.file_copy_outlined),
+                title: Text(AppStrings.newFromTemplateHere),
+                onTap: () => Navigator.pop(context, 'template'),
               ),
-            if (!note.isDir)
+              if (note.isDir)
+                ListTile(
+                  key: const Key('menu-new-folder'),
+                  leading: const Icon(Icons.create_new_folder),
+                  title: Text(AppStrings.newFolderHere),
+                  onTap: () => Navigator.pop(context, 'folder'),
+                ),
+              if (!note.isDir)
+                ListTile(
+                  key: const Key('menu-quick-note'),
+                  leading: Icon(
+                    isQuickNote
+                        ? Icons.sticky_note_2
+                        : Icons.sticky_note_2_outlined,
+                  ),
+                  title: Text(
+                    isQuickNote
+                        ? AppStrings.currentQuickNote
+                        : AppStrings.setAsQuickNote,
+                  ),
+                  onTap: () => Navigator.pop(context, 'quicknote'),
+                ),
+              if (!note.isDir)
+                ListTile(
+                  key: const Key('menu-pin'),
+                  leading: Icon(
+                    note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                  ),
+                  title: Text(
+                    note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
+                  ),
+                  onTap: () => Navigator.pop(context, 'pin'),
+                ),
               ListTile(
-                key: const Key('menu-pin'),
-                leading: Icon(
-                  note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
-                ),
-                title: Text(
-                  note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
-                ),
-                onTap: () => Navigator.pop(context, 'pin'),
+                key: const Key('menu-rename'),
+                leading: const Icon(Icons.edit),
+                title: Text(AppStrings.actionRename),
+                onTap: () => Navigator.pop(context, 'rename'),
               ),
-            ListTile(
-              key: const Key('menu-rename'),
-              leading: const Icon(Icons.edit),
-              title: Text(AppStrings.actionRename),
-              onTap: () => Navigator.pop(context, 'rename'),
-            ),
-            ListTile(
-              key: const Key('menu-move'),
-              leading: const Icon(Icons.drive_folder_upload),
-              title: Text(AppStrings.actionMove),
-              onTap: () => Navigator.pop(context, 'move'),
-            ),
-            ListTile(
-              key: const Key('menu-delete'),
-              leading: const Icon(Icons.delete_outline),
-              title: Text(AppStrings.actionDelete),
-              onTap: () => Navigator.pop(context, 'delete'),
-            ),
-          ],
+              ListTile(
+                key: const Key('menu-move'),
+                leading: const Icon(Icons.drive_folder_upload),
+                title: Text(AppStrings.actionMove),
+                onTap: () => Navigator.pop(context, 'move'),
+              ),
+              ListTile(
+                key: const Key('menu-delete'),
+                leading: const Icon(Icons.delete_outline),
+                title: Text(AppStrings.actionDelete),
+                onTap: () => Navigator.pop(context, 'delete'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1079,6 +1140,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     switch (action) {
       case 'note':
         await _createNote(parent: here);
+      case 'template':
+        await _createFromTemplate(parent: here);
       case 'folder':
         await _createFolder(parent: here);
       case 'quicknote':
@@ -1326,6 +1389,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       onNewListNote: () {
         _closeFab();
         unawaited(_createListNote());
+      },
+      onNewFromTemplate: () {
+        _closeFab();
+        unawaited(_createFromTemplate());
       },
       onNewFolder: () {
         _closeFab();

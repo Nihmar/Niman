@@ -483,6 +483,18 @@ final class AppStrings {
   static String get currentQuickNote =>
       _t('Current quick note', 'Nota rapida attuale');
   static String get pinnedSection => _t('Pinned', 'Fissate');
+  static String get templateFolderTitle =>
+      _t('Template folder', 'Cartella dei modelli');
+  static String get newFromTemplateTitle =>
+      _t('New from template', 'Nuova da modello');
+  static String get newFromTemplateHere =>
+      _t('New from template here', 'Nuova da modello qui');
+  static String get templatePickerTitle =>
+      _t('Choose a template', 'Scegli un modello');
+  static String templatePickerEmpty(String folder) => _t(
+    'No templates yet. Put a note in $folder/ and it becomes one.',
+    'Nessun modello. Metti una nota in $folder/ e diventa un modello.',
+  );
   static String get actionPin => _t('Pin', 'Fissa in alto');
   static String get actionUnpin => _t('Unpin', 'Non fissare più');
   static String get movedToTrash =>

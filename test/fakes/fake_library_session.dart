@@ -17,6 +17,7 @@ import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
+import 'package:copist/src/templates/repo.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -54,6 +55,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashEnabled = true;
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
+  String _templateFolder = defaultTemplateFolder;
   AppLanguage _language = AppLanguage.system;
 
   @override
@@ -376,6 +378,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setListNoteFolder({required String folder}) async {
     _listNoteFolder = folder;
   }
+
+  @override
+  Future<String> readNote(String path) async => _requireRow(path).content;
+
+  @override
+  Future<String> get templateFolder async => _templateFolder;
+
+  @override
+  Future<void> setTemplateFolder({required String folder}) async {
+    _templateFolder = folder;
+  }
+
+  /// Templates come from the fake's own rows, so a test that creates a
+  /// note under the folder has a template.
+  @override
+  Future<TemplateSource?> get templateSource async => _FakeTemplateSource(this);
 
   @override
   Future<Note> createNote({
@@ -791,6 +809,32 @@ final class _FakeFieldSource implements FieldSource {
     return [
       for (final key in keys) FieldKeyCount(key: key, count: counts[key]!),
     ];
+  }
+}
+
+/// The fake's template source: the live notes under the configured
+/// folder, named the way the real repo names them.
+final class _FakeTemplateSource implements TemplateSource {
+  new(this._session);
+
+  final FakeLibrarySession _session;
+
+  @override
+  Future<String> get folder => _session.templateFolder;
+
+  @override
+  Future<List<TemplateEntry>> templates() async {
+    final root = await folder;
+    final out = <TemplateEntry>[];
+    for (final note in _session._liveNotes()) {
+      if (note.isDir || !note.name.toLowerCase().endsWith('.md')) continue;
+      if (!note.path.startsWith('$root/')) continue;
+      var name = note.path.substring(root.length + 1);
+      name = name.substring(0, name.length - 3);
+      out.add(TemplateEntry(path: note.path, name: name));
+    }
+    return out
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 }
 

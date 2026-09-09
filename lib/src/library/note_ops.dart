@@ -107,6 +107,18 @@ final class NoteOps implements NoteOperations {
   Future<void> setListNoteFolder({required String folder}) =>
       config.update((c) => c.copyWith(listNoteFolder: cleanListFolder(folder)));
 
+  /// The folder holding the note templates (default `Templates`).
+  @override
+  Future<String> get templateFolder async =>
+      (await config.config).templateFolder;
+
+  /// Sets the template folder (sanitized; an empty result falls back to
+  /// the default).
+  @override
+  Future<void> setTemplateFolder({required String folder}) => config.update(
+    (c) => c.copyWith(templateFolder: cleanTemplateFolder(folder)),
+  );
+
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath async =>
@@ -227,6 +239,18 @@ final class NoteOps implements NoteOperations {
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
+  }
+
+  /// The text of the note at [path], decoded leniently (a note with a
+  /// broken byte is still a note) and without its BOM.
+  @override
+  Future<String> readNote(String path) async {
+    await _mustFind(path);
+    final bytes = await File(_abs(path)).readAsBytes();
+    final text = utf8.decode(bytes, allowMalformed: true);
+    return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
+        ? text.substring(1)
+        : text;
   }
 
   /// Pins or unpins the note at [path] by editing its frontmatter.
