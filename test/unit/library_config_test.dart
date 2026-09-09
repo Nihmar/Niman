@@ -4,6 +4,7 @@ import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
     show defaultListFolder;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   late Directory tempDir;
@@ -24,7 +25,9 @@ void main() {
     test('writes to <library>/.copist/settings.json', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
-      expect(store.file.path, '${lib.path}/.copist/settings.json');
+      // Joined, not spelled with '/': the store builds the path with
+      // `package:path`, which uses '\' on Windows.
+      expect(store.file.path, p.join(lib.path, '.copist', 'settings.json'));
       expect(store.file.existsSync(), isFalse);
       await store.write(LibraryConfig.defaults);
       expect(store.file.existsSync(), isTrue);
@@ -107,18 +110,15 @@ void main() {
     });
 
     test('an unreadable file gives the defaults', () async {
+      // A directory where the file should be. `read()` opens the path
+      // without checking first, so this throws on the read the way a
+      // permission error would, and it does so on every platform —
+      // unlike `chmod`, which does not exist on Windows and made this
+      // test throw a ProcessException instead of skipping.
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
-      await store.file.create(recursive: true);
-      store.file.writeAsStringSync('{"trashEnabled": false}');
-      // `dart:io` has no chmod; use the shell one where available.
-      final hide = await Process.run('chmod', ['000', store.file.path]);
-      if (hide.exitCode != 0) return; // no shell chmod: nothing to verify.
-      try {
-        expect(await store.read(), LibraryConfig.defaults);
-      } finally {
-        await Process.run('chmod', ['644', store.file.path]);
-      }
+      await Directory(store.file.path).create(recursive: true);
+      expect(await store.read(), LibraryConfig.defaults);
     });
 
     test('an unknown key survives a write', () async {
