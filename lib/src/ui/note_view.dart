@@ -27,6 +27,7 @@ import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
+import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -210,7 +211,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   int _wordCount = 0;
   List<OutlineEntry> _outline = const <OutlineEntry>[];
   String? _lastStatsText;
-  bool _showOutline = false;
 
   /// Why the note's frontmatter block does not parse, or null when it
   /// does (or when there is no block). Refreshed on the stats debounce.
@@ -654,6 +654,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
   }
 
+  /// Opens the outline sheet and jumps to whatever was picked.
+  Future<void> _openOutline() async {
+    final line = await showOutlineSheet(context, entries: _outline);
+    if (line == null || !mounted) return;
+    _jumpToHeading(line);
+  }
+
   /// The outline jump: caret to the heading line, then bring it into view.
   ///
   /// When the preview is visible (phone switch mode) the editor caret is
@@ -1069,29 +1076,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               : Center(child: Text(error)),
         ),
         if (!kindBody) ...[
-          // Fade + size the outline panel in and out.
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.bottomCenter,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) =>
-                  FadeTransition(opacity: animation, child: child),
-              child: _showOutline && _outline.isNotEmpty
-                  ? KeyedSubtree(
-                      key: const ValueKey('outline-open'),
-                      child: OutlinePanel(
-                        entries: _outline,
-                        onJump: _jumpToHeading,
-                      ),
-                    )
-                  : const SizedBox(
-                      key: ValueKey('outline-closed'),
-                      width: double.infinity,
-                    ),
-            ),
-          ),
           SafeArea(
             // The bottom chrome only: top stays false so the status-bar
             // inset is never inserted between the preview and this row
@@ -1176,7 +1160,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: () => setState(() => _showOutline = !_showOutline),
+              onPressed: () => unawaited(_openOutline()),
             ),
           // Find & replace lives in the editor pane (hidden in
           // preview-only mode).
@@ -1415,22 +1399,24 @@ final class _NoteKindHost implements NoteKindHost {
 /// Shows the heading-level picker (H1..H6); resolves to the chosen level
 /// (1..6) or null (dismissed).
 Future<int?> showHeadingLevelDialog(BuildContext context) {
-  return showDialog<int>(
-    context: context,
-    builder: (context) => SimpleDialog(
-      title: Text(AppStrings.headingDialogTitle),
-      children: [
-        for (var level = 1; level <= 6; level++)
-          SimpleDialogOption(
-            key: ValueKey<int>(level),
-            onPressed: () => Navigator.of(context).pop(level),
-            child: Text(
-              AppStrings.headingLevelLabel(level),
-              style: Theme.of(context).textTheme.titleLarge
-                  ?.copyWith(fontSize: 26.0 - level * 2),
-            ),
+  return showActionSheet<int>(
+    context,
+    sheetKey: const Key('heading-level-sheet'),
+    title: AppStrings.headingDialogTitle,
+    items: (context) => [
+      for (var level = 1; level <= 6; level++)
+        ListTile(
+          key: ValueKey<int>(level),
+          onTap: () => Navigator.of(context).pop(level),
+          // The label is set in the size the heading will be, which says
+          // more about the choice than the number does.
+          title: Text(
+            AppStrings.headingLevelLabel(level),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontSize: 26.0 - level * 2),
           ),
-      ],
-    ),
+        ),
+    ],
   );
 }

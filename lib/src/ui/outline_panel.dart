@@ -1,93 +1,91 @@
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
-/// The heading outline panel (T-M2-07): a compact column listing the
-/// document's headings, indented by level; tapping an entry jumps the editor
-/// to that heading line. A folded heading is shown with a filled chevron.
-final class OutlinePanel extends StatelessWidget {
-  /// Creates the panel.
+/// The heading outline (T-M2-07): the note's headings, indented by level;
+/// picking one jumps the editor to that heading's line.
+///
+/// It opens as the app's action sheet rather than the panel it used to be
+/// (user, 2026-09-09): jumping is a choice from a list, the same shape as
+/// the tree's long-press menu, and as a sheet it can be as tall as the
+/// note is deep without taking the room away from the editor underneath.
+///
+/// Resolves to the chosen heading's line, or null when dismissed.
+Future<int?> showOutlineSheet(
+  BuildContext context, {
+  required List<OutlineEntry> entries,
+  Set<int> foldedLines = const <int>{},
+}) {
+  return showActionSheet<int>(
+    context,
+    sheetKey: const Key('outline-sheet'),
+    title: AppStrings.outlineTooltip,
+    items: (context) => [
+      if (entries.isEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+          child: Text(
+            AppStrings.outlineNoHeadings,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      for (final entry in entries)
+        _OutlineRow(
+          entry: entry,
+          folded: foldedLines.contains(entry.line),
+          onTap: () => Navigator.of(context).pop(entry.line),
+        ),
+    ],
+  );
+}
+
+/// One heading row: indented by its level, named by its text, with a
+/// filled chevron when the heading is folded in the editor.
+final class _OutlineRow extends StatelessWidget {
   const new({
-    required this.entries,
-    required this.onJump,
-    this.foldedLines = const <int>{},
-    this.maxHeight = 240,
-    super.key,
+    required this.entry,
+    required this.folded,
+    required this.onTap,
   });
 
-  /// The document's headings (line order).
-  final List<OutlineEntry> entries;
-
-  /// Called with the heading's line when an entry is tapped.
-  final ValueChanged<int> onJump;
-
-  /// The heading lines currently folded (marker state).
-  final Set<int> foldedLines;
-
-  /// The panel's vertical bound.
-  final double maxHeight;
+  final OutlineEntry entry;
+  final bool folded;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-      ),
-      child: entries.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                AppStrings.outlineNoHeadings,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            )
-          : ListView.builder(
-              shrinkWrap: true,
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                final folded = foldedLines.contains(entry.line);
-                return InkWell(
-                  onTap: () => onJump(entry.line),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 8 + (entry.level - 1) * 12.0),
-                        Icon(
-                          folded
-                              ? Icons.keyboard_arrow_down
-                              : Icons.keyboard_arrow_right,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            entry.text.isEmpty
-                                ? AppStrings.outlineNoTitle
-                                : entry.text,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  fontWeight: entry.level == 1
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            SizedBox(width: 8 + (entry.level - 1) * 14.0),
+            Icon(
+              folded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                entry.text.isEmpty ? AppStrings.outlineNoTitle : entry.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: entry.level == 1
+                      ? FontWeight.w600
+                      : FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -17,6 +17,7 @@ import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_source.dart';
+import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
@@ -1070,88 +1071,75 @@ final class _LibraryShellState extends State<_LibraryShell>
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      // The menu has outgrown the default sheet, which caps itself at
-      // nine sixteenths of the screen and silently clips the rest — on a
-      // short screen that hid Delete. Scroll-controlled it takes the
-      // height it needs, and scrolls when the screen is shorter still.
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: Wrap(
-            children: [
-              ListTile(
-                key: const Key('menu-new-note'),
-                leading: const Icon(Icons.note_add),
-                title: Text(AppStrings.newNoteHere),
-                onTap: () => Navigator.pop(context, 'note'),
-              ),
-              ListTile(
-                key: const Key('menu-new-from-template'),
-                leading: const Icon(Icons.file_copy_outlined),
-                title: Text(AppStrings.newFromTemplateHere),
-                onTap: () => Navigator.pop(context, 'template'),
-              ),
-              if (note.isDir)
-                ListTile(
-                  key: const Key('menu-new-folder'),
-                  leading: const Icon(Icons.create_new_folder),
-                  title: Text(AppStrings.newFolderHere),
-                  onTap: () => Navigator.pop(context, 'folder'),
-                ),
-              if (!note.isDir)
-                ListTile(
-                  key: const Key('menu-quick-note'),
-                  leading: Icon(
-                    isQuickNote
-                        ? Icons.sticky_note_2
-                        : Icons.sticky_note_2_outlined,
-                  ),
-                  title: Text(
-                    isQuickNote
-                        ? AppStrings.currentQuickNote
-                        : AppStrings.setAsQuickNote,
-                  ),
-                  onTap: () => Navigator.pop(context, 'quicknote'),
-                ),
-              // Markdown only: the pin is a frontmatter key, and a
-              // `todo.txt` has no frontmatter to put it in. An already
-              // pinned row keeps the entry whatever it is, so a pin
-              // written before this rule can still be taken back off.
-              if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
-                ListTile(
-                  key: const Key('menu-pin'),
-                  leading: Icon(
-                    note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  ),
-                  title: Text(
-                    note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
-                  ),
-                  onTap: () => Navigator.pop(context, 'pin'),
-                ),
-              ListTile(
-                key: const Key('menu-rename'),
-                leading: const Icon(Icons.edit),
-                title: Text(AppStrings.actionRename),
-                onTap: () => Navigator.pop(context, 'rename'),
-              ),
-              ListTile(
-                key: const Key('menu-move'),
-                leading: const Icon(Icons.drive_folder_upload),
-                title: Text(AppStrings.actionMove),
-                onTap: () => Navigator.pop(context, 'move'),
-              ),
-              ListTile(
-                key: const Key('menu-delete'),
-                leading: const Icon(Icons.delete_outline),
-                title: Text(AppStrings.actionDelete),
-                onTap: () => Navigator.pop(context, 'delete'),
-              ),
-            ],
-          ),
+    final action = await showActionSheet<String>(
+      context,
+      items: (context) => [
+        ListTile(
+          key: const Key('menu-new-note'),
+          leading: const Icon(Icons.note_add),
+          title: Text(AppStrings.newNoteHere),
+          onTap: () => Navigator.pop(context, 'note'),
         ),
-      ),
+        ListTile(
+          key: const Key('menu-new-from-template'),
+          leading: const Icon(Icons.file_copy_outlined),
+          title: Text(AppStrings.newFromTemplateHere),
+          onTap: () => Navigator.pop(context, 'template'),
+        ),
+        if (note.isDir)
+          ListTile(
+            key: const Key('menu-new-folder'),
+            leading: const Icon(Icons.create_new_folder),
+            title: Text(AppStrings.newFolderHere),
+            onTap: () => Navigator.pop(context, 'folder'),
+          ),
+        if (!note.isDir)
+          ListTile(
+            key: const Key('menu-quick-note'),
+            leading: Icon(
+              isQuickNote ? Icons.sticky_note_2 : Icons.sticky_note_2_outlined,
+            ),
+            title: Text(
+              isQuickNote
+                  ? AppStrings.currentQuickNote
+                  : AppStrings.setAsQuickNote,
+            ),
+            onTap: () => Navigator.pop(context, 'quicknote'),
+          ),
+        // Markdown only: the pin is a frontmatter key, and a
+        // `todo.txt` has no frontmatter to put it in. An already
+        // pinned row keeps the entry whatever it is, so a pin
+        // written before this rule can still be taken back off.
+        if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
+          ListTile(
+            key: const Key('menu-pin'),
+            leading: Icon(
+              note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+            ),
+            title: Text(
+              note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
+            ),
+            onTap: () => Navigator.pop(context, 'pin'),
+          ),
+        ListTile(
+          key: const Key('menu-rename'),
+          leading: const Icon(Icons.edit),
+          title: Text(AppStrings.actionRename),
+          onTap: () => Navigator.pop(context, 'rename'),
+        ),
+        ListTile(
+          key: const Key('menu-move'),
+          leading: const Icon(Icons.drive_folder_upload),
+          title: Text(AppStrings.actionMove),
+          onTap: () => Navigator.pop(context, 'move'),
+        ),
+        ListTile(
+          key: const Key('menu-delete'),
+          leading: const Icon(Icons.delete_outline),
+          title: Text(AppStrings.actionDelete),
+          onTap: () => Navigator.pop(context, 'delete'),
+        ),
+      ],
     );
     if (action == null) return;
     switch (action) {
@@ -1704,9 +1692,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an
       // open quick note leaves this body painted under the opening note.
-      ShellTab.quickNote => _showQuickNoteChooser
-          ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
-          : const SizedBox.shrink(),
+      ShellTab.quickNote =>
+        _showQuickNoteChooser
+            ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+            : const SizedBox.shrink(),
       ShellTab.settings => SettingsTab(controller: controller),
     };
   }
