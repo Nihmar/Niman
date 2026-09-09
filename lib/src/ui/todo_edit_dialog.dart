@@ -337,30 +337,15 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
             ),
             const SizedBox(height: 8),
             Row(
+              key: const Key('todo-dialog-priority'),
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.flag_outlined, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButton<String?>(
-                    key: const Key('todo-dialog-priority'),
-                    value: _priority,
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<String?>(
-                        child: Text(AppStrings.todoNoPriority),
-                      ),
-                      for (var code = 65; code <= 90; code++)
-                        DropdownMenuItem<String?>(
-                          value: String.fromCharCode(code),
-                          child: Text('(${String.fromCharCode(code)})'),
-                        ),
-                    ],
-                    onChanged: (priority) {
-                      _log.debug('todo dialog priority: $priority');
-                      setState(() => _priority = priority);
-                    },
-                  ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Icon(Icons.flag_outlined, size: 20),
                 ),
+                const SizedBox(width: 8),
+                Expanded(child: _priorityChips()),
               ],
             ),
             Row(
@@ -486,6 +471,87 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
           ),
       ],
     );
+  }
+
+  /// The priorities offered inline. todo.txt allows A to Z; the ones
+  /// past the first few are a convention nobody uses, and offering all
+  /// twenty-six was what made this a menu the height of the screen.
+  static const List<String> _commonPriorities = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+  /// The priority row: one chip per choice, wrapping instead of opening a
+  /// menu over the whole app.
+  ///
+  /// A priority the task already carries is always among the chips, even
+  /// outside [_commonPriorities] — a `(M)` typed elsewhere must be
+  /// visible here, and must survive a save that did not touch it. The
+  /// rest of the alphabet is behind the last chip.
+  Widget _priorityChips() {
+    final current = _priority;
+    final letters = <String>[
+      ..._commonPriorities,
+      if (current != null && !_commonPriorities.contains(current)) current,
+    ];
+    return Wrap(
+      spacing: 6,
+      children: [
+        ChoiceChip(
+          key: const Key('todo-priority-none'),
+          label: Text(AppStrings.todoNoPriorityShort),
+          selected: current == null,
+          visualDensity: VisualDensity.compact,
+          onSelected: (_) => _setPriority(null),
+        ),
+        for (final letter in letters)
+          ChoiceChip(
+            key: Key('todo-priority-$letter'),
+            label: Text(letter),
+            selected: current == letter,
+            visualDensity: VisualDensity.compact,
+            onSelected: (_) => _setPriority(letter),
+          ),
+        ActionChip(
+          key: const Key('todo-priority-more'),
+          label: Text(AppStrings.todoMorePriorities),
+          visualDensity: VisualDensity.compact,
+          onPressed: _pickOtherPriority,
+        ),
+      ],
+    );
+  }
+
+  void _setPriority(String? priority) {
+    _log.debug('todo dialog priority: $priority');
+    setState(() => _priority = priority);
+  }
+
+  /// The rest of the alphabet, as a grid small enough to read at once.
+  Future<void> _pickOtherPriority() async {
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        key: const Key('todo-priority-grid'),
+        title: Text(AppStrings.todoPriorityTitle),
+        contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        children: [
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (var code = 65; code <= 90; code++)
+                ActionChip(
+                  key: Key('todo-priority-pick-${String.fromCharCode(code)}'),
+                  label: Text(String.fromCharCode(code)),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () =>
+                      Navigator.pop(context, String.fromCharCode(code)),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+    if (picked == null || !mounted) return;
+    _setPriority(picked);
   }
 
   /// Truncates [date] to day precision.

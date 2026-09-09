@@ -399,6 +399,9 @@ final class AppStrings {
 
   // Task dialog pickers (T-TD-06).
   static String get todoNoPriority => _t('No priority', 'Nessuna priorità');
+  static String get todoNoPriorityShort => _t('None', 'Nessuna');
+  static String get todoMorePriorities => _t('More…', 'Altre…');
+  static String get todoPriorityTitle => _t('Priority', 'Priorità');
   static String get todoNoDueDate => _t('No due date', 'Nessuna scadenza');
   static String get todoNoReminder => _t('No reminder', 'Nessun promemoria');
   static String get todoAddProject => _t('+ Project', '+ Progetto');
