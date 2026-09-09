@@ -1,7 +1,7 @@
 # Multiple libraries — a library is a folder that describes itself
 
-**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-05 and
-T-ML-07 done 2026-09-09) · **Depends on:** M1
+**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-08
+done 2026-09-09, T-ML-09 and T-ML-10 open) · **Depends on:** M1
 (library core), M3 (index) · **Blocks:** nothing, but it changes where
 settings live, so it wants to land before M5 sync writes anything of its
 own · **Spec:** user request: several libraries like Obsidian's vaults —
@@ -21,9 +21,10 @@ tap rather than a folder picker.
 
 ## Current state
 
-- **One library at a time.** `LibraryController.open` throws if a library
-  is already open; `app_settings.library_path` holds the last one, and
-  `resume()` reopens it at start.
+- **One library at a time**, by decision 5. `LibraryController.open`
+  throws if a library is already open, and `switchTo` is the close and
+  the open as one step; `app_settings.library_path` holds the last one,
+  and `resume()` reopens it at start.
 - ~~**The index is one global file.**~~ Done in T-ML-03: one index file
   per library under `indexes/`, and `copist.db` is the app's settings
   database.
@@ -110,10 +111,15 @@ tap rather than a folder picker.
   and on a first run the screen is exactly what it was. Open and create
   are filled buttons while they are the whole screen and plain ones once
   a list sits above them.
-- [ ] **T-ML-06** Switching from the settings (point 2). A "Library" row
+- [x] **T-ML-06** Switching from the settings (point 2). A "Library" row
   in the settings opens the same list; picking another closes the current
   one and opens it, landing on its tree. *AC: widget test — switching
   swaps the tree, the todo list and the per-library settings together.*
+  Done: a "Switch library" row above "Close library", opening the same
+  list the home screen shows, with the open library marked and not
+  offered for forgetting. `LibrarySession.switchTo` is the close and the
+  open as one operation, and it takes the non-blocking path since the
+  target has its own index.
 - [x] **T-ML-07** Forgetting a library (point 3). A per-row action on the
   list, confirmed, that removes the registry entry and its index file and
   leaves the folder untouched. *AC: widget test — the row goes, the
@@ -122,12 +128,22 @@ tap rather than a folder picker.
   not a swipe — a swipe on a list of three rows fires by accident. The
   confirmation says what forgetting does not touch, because the word
   invites the reading that it deletes the notes.
-- [ ] **T-ML-08** What travels with a switch. Reminders are reconciled
+- [x] **T-ML-08** What travels with a switch. Reminders are reconciled
   against the newly open library's todo file, the quick note follows the
   new library's setting, and the open note is closed. *AC: widget test —
   switching from a library with a reminder to one without cancels the
   alarm rather than leaving it pointing at a task that is no longer
-  there.*
+  there.* Done, and it needed no new mechanism: the shell belongs to the
+  open library, so a switch tears it down and builds another, and the
+  todo controller, the quick note and the selection are rebuilt with it.
+  The reminder cancellation is the existing full-replace reconciliation
+  doing its job on the new library's file.
+  - **The launcher shortcuts act on the library that is open** (user,
+    2026-09-09), which is the last one used. Nothing was needed: a
+    shortcut runs from inside the shell, the shell exists only while a
+    library is open, and a cold start opens the resumed library — which
+    `app_settings.library_path` has always held. A switch moves the
+    shortcuts with it because it moves the shell.
 - [ ] **T-ML-10** Any setting can be overridden per library (user
   request, 2026-09-09). The four settings T-ML-02 moved have no app-wide
   meaning, but most of the others do and are still a single global value:

@@ -579,6 +579,9 @@ final class AppStrings {
     return _t('Opened on ${when.year}-$m-$d', 'Aperta il $d/$m/${when.year}');
   }
 
+  static String get libraryOpenNow => _t('Open now', 'Aperta ora');
+  static String get switchLibraryTitle =>
+      _t('Switch library', 'Cambia libreria');
   static String get libraryForget => _t('Forget', 'Dimentica');
   static String libraryForgetTitle(String name) =>
       _t('Forget "$name"?', 'Dimenticare «$name»?');

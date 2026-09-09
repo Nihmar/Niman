@@ -105,6 +105,13 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _bump();
   }
 
+  @override
+  Future<void> switchTo(String libraryPath) async {
+    if (libraryPath == _root) return;
+    if (_phase != LibraryPhase.none) await close();
+    await open(libraryPath, create: false, blockingScan: false);
+  }
+
   /// The known-library list, newest first (T-ML-04).
   final List<KnownLibrary> _known = <KnownLibrary>[];
 

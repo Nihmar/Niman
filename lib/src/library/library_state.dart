@@ -375,6 +375,23 @@ final class LibraryController implements LibrarySession {
     _bump();
   }
 
+  /// Closes the open library and opens the one at [libraryPath].
+  ///
+  /// Non-blocking, unlike a plain open from the picker: the target has
+  /// its own index from the last time it was open (T-ML-03), so its tree
+  /// is there at once and a reconciliation scan follows. A failure to
+  /// open leaves no library open, with [lastError] set — which lands the
+  /// app on the home screen, where the failure can be read and another
+  /// library picked.
+  @override
+  Future<void> switchTo(String libraryPath) async {
+    final target = p.normalize(libraryPath.trim());
+    if (target == _root) return;
+    _log.info('switch library: $_root -> $target');
+    if (_phase != LibraryPhase.none) await close();
+    await open(target, create: false, blockingScan: false);
+  }
+
   /// The libraries the app knows about, most recently opened first.
   @override
   Future<List<KnownLibrary>> knownLibraries() async {

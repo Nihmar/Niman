@@ -119,6 +119,16 @@ abstract interface class LibrarySession {
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();
 
+  /// Closes the open library and opens the one at [libraryPath]
+  /// (T-ML-06).
+  ///
+  /// One library is open at a time, so a switch is a close and an open —
+  /// but it is one operation for the caller, and it takes the fast path:
+  /// the target keeps its own index (T-ML-03), so it comes up from that
+  /// and reconciles in the background rather than waiting on a scan.
+  /// Switching to the library already open does nothing.
+  Future<void> switchTo(String libraryPath);
+
   /// The libraries the app knows about, most recently opened first
   /// (T-ML-04); what the home screen lists.
   Future<List<KnownLibrary>> knownLibraries();

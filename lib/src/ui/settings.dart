@@ -10,6 +10,7 @@ import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/switch_library_screen.dart';
 import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -425,6 +426,27 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (language != null) await _setLanguage(language);
   }
 
+  /// Opens the known-library list and switches to whatever is picked
+  /// (T-ML-06).
+  ///
+  /// The switch tears down the shell this screen is part of, so the
+  /// settings screen leaves with it: `onClosed` is the same exit "Close
+  /// library" takes, and the tab case falls back to popping the pushed
+  /// route.
+  Future<void> _switchLibrary() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SwitchLibraryScreen(
+          controller: widget.controller,
+          onSwitched: () {
+            Navigator.of(context).pop();
+            widget.onClosed?.call();
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
@@ -547,6 +569,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
           leading: const Icon(Icons.refresh),
           title: Text(AppStrings.reindexTitle),
           onTap: _rescan,
+        ),
+        // Above "Close library" on purpose: switching is the common move
+        // and closing is the way out of every library at once.
+        SettingsValueRow(
+          key: const Key('switch-library-setting'),
+          title: AppStrings.switchLibraryTitle,
+          onTap: _switchLibrary,
         ),
         ListTile(
           key: const Key('close-library-setting'),

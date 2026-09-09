@@ -1,6 +1,29 @@
+import 'dart:io';
+
 import 'package:copist/src/db/app_database.dart';
+import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+
+/// What the known-library list needs to draw itself: the entries, and
+/// which of their folders are not there right now.
+typedef KnownLibraries = ({List<KnownLibrary> entries, Set<String> missing});
+
+/// Reads the known libraries and checks which folders still exist.
+///
+/// The check is a stat per row, not a walk: the list is a handful of
+/// entries, and the alternative is a row that opens onto an empty tree
+/// because its drive is unplugged.
+Future<KnownLibraries> loadKnownLibraries(LibrarySession session) async {
+  final entries = await session.knownLibraries();
+  final missing = <String>{};
+  for (final entry in entries) {
+    // Sync on purpose: `exists()` spawns an isolate per call, which costs
+    // more than the stat it avoids for a list this short.
+    if (!Directory(entry.path).existsSync()) missing.add(entry.path);
+  }
+  return (entries: entries, missing: missing);
+}
 
 /// The libraries the app knows about, on the home screen (T-ML-05).
 ///
@@ -19,6 +42,7 @@ final class KnownLibraryList extends StatelessWidget {
     required this.onOpen,
     required this.onForget,
     this.enabled = true,
+    this.currentPath,
     super.key,
   });
 
@@ -38,6 +62,11 @@ final class KnownLibraryList extends StatelessWidget {
 
   /// False while an open or a picker is in flight.
   final bool enabled;
+
+  /// The library open right now, marked as such and not offered for
+  /// forgetting — an app cannot stop listing the library it is showing.
+  /// Null on the home screen, where nothing is open.
+  final String? currentPath;
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +89,11 @@ final class KnownLibraryList extends StatelessWidget {
             entry: entry,
             reachable: !unreachable.contains(entry.path),
             enabled: enabled,
+            isCurrent: entry.path == currentPath,
             onOpen: () => onOpen(entry.path),
-            onForget: () => _confirmForget(context, entry),
+            onForget: entry.path == currentPath
+                ? null
+                : () => _confirmForget(context, entry),
           ),
       ],
     );
@@ -98,6 +130,7 @@ final class _KnownLibraryTile extends StatelessWidget {
     required this.entry,
     required this.reachable,
     required this.enabled,
+    required this.isCurrent,
     required this.onOpen,
     required this.onForget,
   });
@@ -105,8 +138,11 @@ final class _KnownLibraryTile extends StatelessWidget {
   final KnownLibrary entry;
   final bool reachable;
   final bool enabled;
+  final bool isCurrent;
   final VoidCallback onOpen;
-  final Future<void> Function() onForget;
+
+  /// Null for the open library, which cannot be forgotten.
+  final Future<void> Function()? onForget;
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +150,12 @@ final class _KnownLibraryTile extends StatelessWidget {
     return ListTile(
       key: Key('known-library-${entry.path}'),
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-      leading: Icon(
-        reachable ? Icons.folder_outlined : Icons.folder_off_outlined,
-        color: reachable ? null : theme.colorScheme.error,
-      ),
+      selected: isCurrent,
+      leading: Icon(switch ((isCurrent, reachable)) {
+        (true, _) => Icons.folder_open,
+        (false, true) => Icons.folder_outlined,
+        (false, false) => Icons.folder_off_outlined,
+      }, color: reachable ? null : theme.colorScheme.error),
       title: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +167,11 @@ final class _KnownLibraryTile extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
           Text(
-            reachable
-                ? _lastOpened(entry.lastOpened)
-                : AppStrings.libraryUnreachable,
+            switch ((isCurrent, reachable)) {
+              (true, _) => AppStrings.libraryOpenNow,
+              (false, true) => _lastOpened(entry.lastOpened),
+              (false, false) => AppStrings.libraryUnreachable,
+            },
             style: theme.textTheme.bodySmall?.copyWith(
               color: reachable ? null : theme.colorScheme.error,
             ),
@@ -141,7 +181,7 @@ final class _KnownLibraryTile extends StatelessWidget {
       // An unreachable folder still opens on a tap: the drive may be back
       // by now, and the open path already reports what went wrong.
       onTap: enabled ? onOpen : null,
-      onLongPress: enabled ? onForget.call : null,
+      onLongPress: enabled ? onForget?.call : null,
     );
   }
 

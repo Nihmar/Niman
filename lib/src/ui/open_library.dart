@@ -68,22 +68,12 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   }
 
   /// Reads the known-library list and checks which folders are there.
-  ///
-  /// The reachability check is a stat per row, not a walk: this list is a
-  /// handful of entries, and the alternative is a row that opens onto an
-  /// empty tree because its drive is unplugged.
   Future<void> _loadKnown() async {
-    final entries = await widget.controller.knownLibraries();
-    final missing = <String>{};
-    for (final entry in entries) {
-      // Sync on purpose: `exists()` spawns an isolate per call, which
-      // costs more than the stat it avoids for a list this short.
-      if (!Directory(entry.path).existsSync()) missing.add(entry.path);
-    }
+    final loaded = await loadKnownLibraries(widget.controller);
     if (!mounted) return;
     setState(() {
-      _known = entries;
-      _unreachable = missing;
+      _known = loaded.entries;
+      _unreachable = loaded.missing;
     });
   }
 
