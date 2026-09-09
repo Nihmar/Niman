@@ -5,7 +5,7 @@ import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/links/resolver.dart';
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart' show Value, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -838,6 +838,49 @@ void main() {
       expect(await fieldsOf('note1.md'), isEmpty);
       // The rest of the library indexed normally.
       expect(await dao.allRows(), hasLength(5));
+    });
+
+    test('a file that is not a note never gets frontmatter', () async {
+      // A `todo.txt` with a YAML block at the top is still a todo.txt.
+      // rescanFiles read whatever it was handed, so pinning one indexed
+      // it as a note and put it in the tree's pinned block (user,
+      // 2026-09-09).
+      final todo = File(p.join(root.path, 'todo.txt'))
+        ..writeAsStringSync('---\npinned: true\n---\ntask\n');
+      await indexer.fullScan(root.path);
+      await indexer.rescanFiles(root.path, [todo.path]);
+
+      final row = (await dao.find('todo.txt'))!;
+      expect(row.pinned, isFalse);
+      expect(row.title, isNull);
+      expect(await fieldsOf('todo.txt'), isEmpty);
+    });
+
+    test('frontmatter recorded against a non-note is cleared', () async {
+      // The repair for an index written before that was fixed.
+      File(p.join(root.path, 'todo.txt')).writeAsStringSync('task\n');
+      await indexer.fullScan(root.path);
+      final row = (await dao.find('todo.txt'))!;
+      await (db.update(db.notes)..where((t) => t.id.equals(row.id))).write(
+        const NotesCompanion(title: Value('Todo'), pinned: Value(true)),
+      );
+      await db
+          .into(db.frontmatterFields)
+          .insert(
+            FrontmatterFieldsCompanion.insert(
+              noteId: row.id,
+              key: 'pinned',
+              value: 'true',
+            ),
+          );
+
+      // A scan that changes nothing still has to run the repair.
+      await indexer.fullScan(root.path);
+
+      final fixed = (await dao.find('todo.txt'))!;
+      expect(fixed.pinned, isFalse);
+      expect(fixed.title, isNull);
+      expect(await fieldsOf('todo.txt'), isEmpty);
     });
 
     test('a deleted note takes its field rows with it', () async {

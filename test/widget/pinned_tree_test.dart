@@ -141,6 +141,21 @@ void main() {
     expect(controller.contentOf('plain.md'), 'body\n');
   });
 
+  testWidgets('a file that is not a note offers no pin action', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    await controller.seedFile('todo.txt', content: 'task\n');
+    await settle(tester);
+
+    await tester.longPress(noteRow('todo.txt'));
+    await settle(tester);
+
+    expect(find.byKey(const Key('menu-pin')), findsNothing);
+  });
+
   testWidgets('a folder row offers no pin action', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();

@@ -178,6 +178,22 @@ Frontmatter parseFrontmatterBlock(String source) {
   );
 }
 
+/// How many leading entries of [lines] the frontmatter block occupies —
+/// fences included — or 0 when there is no block.
+///
+/// The line-list form of [frontmatterBlock], for callers that already
+/// hold a file split into lines. Same rule, in one place: a `todo.txt`
+/// and a note have to agree on what frontmatter is.
+int frontmatterLineCount(List<String> lines) {
+  if (lines.isEmpty || lines.first.trim() != '---') return 0;
+  for (var i = 1; i < lines.length; i++) {
+    final trimmed = lines[i].trim();
+    if (trimmed == '---' || trimmed == '...') return i + 1;
+  }
+  // Never closed: a horizontal rule and some text, not frontmatter.
+  return 0;
+}
+
 /// Why the leading frontmatter block of [text] does not parse, or null
 /// when it parses (or when there is no block).
 ///

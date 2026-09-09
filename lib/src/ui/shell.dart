@@ -1115,7 +1115,11 @@ final class _LibraryShellState extends State<_LibraryShell>
                   ),
                   onTap: () => Navigator.pop(context, 'quicknote'),
                 ),
-              if (!note.isDir)
+              // Markdown only: the pin is a frontmatter key, and a
+              // `todo.txt` has no frontmatter to put it in. An already
+              // pinned row keeps the entry whatever it is, so a pin
+              // written before this rule can still be taken back off.
+              if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
                 ListTile(
                   key: const Key('menu-pin'),
                   leading: Icon(

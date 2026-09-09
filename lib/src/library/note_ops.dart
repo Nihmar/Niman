@@ -266,8 +266,14 @@ final class NoteOps implements NoteOperations {
   Future<Note> setPinned(String path, {required bool pinned}) {
     return _synchronized(() async {
       final row = await _mustFind(path);
-      if (row.isDir) {
-        throw ArgumentError('Only notes can be pinned; "$path" is a folder');
+      // The pin lives in the note's frontmatter, so only a note can carry
+      // one. Pinning a `todo.txt` wrote a YAML block into a file that has
+      // no such thing, and every todo.txt reader — this app's included —
+      // then read the three lines as tasks. Unpinning stays allowed
+      // whatever the file is, so a block already written can be taken
+      // back out.
+      if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
+        throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
       }
       final file = File(_abs(path));
       final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);

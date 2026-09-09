@@ -202,6 +202,32 @@ void main() {
       );
     });
 
+    test('only Markdown notes can be pinned', () async {
+      // The pin is a frontmatter key. Pinning a `todo.txt` wrote a YAML
+      // block into a file that has no such thing, and the Todo tab then
+      // read its three lines as tasks (user, 2026-09-09).
+      File(p.join(root.path, 'todo.txt')).writeAsStringSync('task\n');
+      await indexer.fullScan(root.path);
+
+      await expectLater(
+        () => ops.setPinned('todo.txt', pinned: true),
+        throwsArgumentError,
+      );
+      expect(File(p.join(root.path, 'todo.txt')).readAsStringSync(), 'task\n');
+    });
+
+    test('unpinning is allowed on any file, so a stray block can go', () async {
+      // A pin written before that rule existed has to be removable.
+      File(
+        p.join(root.path, 'todo.txt'),
+      ).writeAsStringSync('---\npinned: true\n---\n\ntask\n');
+      await indexer.fullScan(root.path);
+
+      await ops.setPinned('todo.txt', pinned: false);
+
+      expect(File(p.join(root.path, 'todo.txt')).readAsStringSync(), 'task\n');
+    });
+
     test('a folder cannot be pinned', () async {
       await ops.createFolder(parentPath: '', name: 'Folder');
       expect(

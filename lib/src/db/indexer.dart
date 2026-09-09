@@ -574,7 +574,13 @@ final class Indexer {
       if (live.isEmpty) return;
 
       // Forced content read: the (size, mtime) shortcut must not apply.
-      final contents = await _readRelContents(root, live.keys.toList());
+      // Notes only, as on every other content path — this one took the
+      // caller's word for it, and a `todo.txt` handed to it by the pin
+      // flow was read and indexed as if it were a note.
+      final contents = await _readRelContents(root, <String>[
+        for (final rel in live.keys)
+          if (_isNote(p.basename(rel))) rel,
+      ]);
       var wrote = false;
       final changed = <NoteContent>[];
       for (final entry in live.entries) {
@@ -771,11 +777,21 @@ final class Indexer {
           "AND lower(substr(name, -3)) = '.md') AS notes, "
           '(SELECT count(*) FROM notes_fts) AS fts, '
           '(SELECT count(*) FROM notes WHERE is_dir = 0) AS files, '
-          "(SELECT count(*) FROM note_stems WHERE source = 'file') AS stems",
+          "(SELECT count(*) FROM note_stems WHERE source = 'file') AS stems, "
+          '(SELECT count(*) FROM notes WHERE is_dir = 0 '
+          "AND lower(substr(name, -3)) <> '.md' "
+          'AND (title IS NOT NULL OR date IS NOT NULL '
+          'OR pinned <> 0)) AS stray',
         )
         .getSingle();
+    // `stray` counts frontmatter recorded against a file that is not a
+    // note — impossible now, but an index written before that was fixed
+    // can hold some. Counting it here is what gets the repair pass run on
+    // a library where nothing else changed: the no-write exit is skipped
+    // until the rows are clean.
     return rows.read<int>('notes') == rows.read<int>('fts') &&
-        rows.read<int>('files') == rows.read<int>('stems');
+        rows.read<int>('files') == rows.read<int>('stems') &&
+        rows.read<int>('stray') == 0;
   }
 
   /// Writes the missing file stems (every file without one) — the one-time
@@ -805,6 +821,30 @@ final class Indexer {
       });
       if (end < rows.length) await Future<void>.delayed(Duration.zero);
     }
+  }
+
+  /// Clears frontmatter the index should never have recorded: the known
+  /// fields on a row that is not a Markdown note, and its field rows.
+  ///
+  /// A one-time repair, like the missing file stems above. `rescanFiles`
+  /// used to read whatever it was handed, so pinning a `todo.txt` — which
+  /// wrote a YAML block into it — came back as `pinned` on that row and
+  /// put the file in the tree's pinned block. The write path is fixed;
+  /// this takes back what it already recorded.
+  Future<void> _clearNonNoteFrontmatter() async {
+    const nonNote = "is_dir = 0 AND lower(substr(name, -3)) <> '.md'";
+    final fixed = await _db.customUpdate(
+      'UPDATE notes SET title = NULL, date = NULL, pinned = 0 '
+      'WHERE $nonNote AND (title IS NOT NULL OR date IS NOT NULL '
+      'OR pinned <> 0)',
+      updates: {_db.notes},
+    );
+    if (fixed == 0) return;
+    _log.info('contents: cleared frontmatter on $fixed non-note row(s)');
+    await _db.customStatement(
+      'DELETE FROM frontmatter_fields WHERE note_id IN '
+      '(SELECT id FROM notes WHERE $nonNote)',
+    );
   }
 
   /// The paths of md notes that have no `notes_fts` row.
@@ -1363,9 +1403,13 @@ final class Indexer {
     Map<String, NoteContent> contents, {
     required Set<String> paired,
   }) async {
+    // Notes only. FTS, tags, links and frontmatter fields are all derived
+    // from Markdown, and the completeness check counts `.md` rows, so a
+    // non-note that reached here would be indexed and then permanently
+    // look like a missing row to the repair pass.
     final items = <(Note, NoteContent)>[
       for (final c in contents.values)
-        if (!paired.contains(c.rel))
+        if (!paired.contains(c.rel) && _isNote(p.basename(c.rel)))
           if (await _dao.find(c.rel) case final Note row) (row, c),
     ];
 
@@ -1376,6 +1420,7 @@ final class Indexer {
     // never ran — content rows were complete, nothing else was rewritten
     // (T-M3-09 device report: `![[…]]` images stayed placeholders).
     await _repairMissingFileStems();
+    await _clearNonNoteFrontmatter();
     if (items.isEmpty) return;
 
     // Link targets resolve once per pass — one stems lookup per distinct

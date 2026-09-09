@@ -358,6 +358,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _bump();
   }
 
+  /// Test-only: puts a file at [path] verbatim, extension and all.
+  ///
+  /// [createNote] always makes a `.md`, as the real ops do, but a library
+  /// holds files nobody created through the app — attachments, a
+  /// `todo.txt` — and the tree lists them. This is how a test gets one.
+  Future<Note> seedFile(String path, {String content = ''}) async {
+    if (_phase != LibraryPhase.ready) {
+      throw StateError('Open the fake before seeding files');
+    }
+    _addRow(path, isDir: false).content = content;
+    _bump();
+    return _noteAt(path);
+  }
+
   // -- NoteOperations --------------------------------------------------
 
   @override
@@ -486,8 +500,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<Note> setPinned(String path, {required bool pinned}) async {
     final row = _requireRow(path);
-    if (row.isDir) {
-      throw ArgumentError('Only notes can be pinned, and "$path" is a folder');
+    if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
+      throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
     }
     row.content = pinned
         ? setFrontmatterKey(row.content, 'pinned', 'true')
