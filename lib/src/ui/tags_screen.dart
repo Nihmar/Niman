@@ -90,12 +90,8 @@ final class _TagsScreenState extends State<TagsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final started = DateTime.now();
     final tag = _selectedTag;
-    final child = tag == null ? _tagList() : _noteList(tag);
-    const AppLogger(name: 'tags.ui')
-        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
-    return child;
+    return tag == null ? _tagList() : _noteList(tag);
   }
 
   Widget _tagList() {

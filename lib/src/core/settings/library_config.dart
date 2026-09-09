@@ -110,6 +110,14 @@ final class LibraryConfig {
 
   /// The JSON object to write: the known keys (a null quick note is
   /// omitted) followed by the preserved unknown keys.
+  ///
+  /// A known key found in [extra] is dropped rather than written. It
+  /// cannot get there through [LibraryConfig.fromJsonMap], which filters
+  /// the known ones
+  /// out, but a config built by hand could carry one, and an `addAll`
+  /// would then let it overwrite the typed field it duplicates. The typed
+  /// field is the authority; this makes that true by construction instead
+  /// of by the caller's care.
   Map<String, Object?> toJsonMap() {
     final json = <String, Object?>{
       'trashEnabled': trashEnabled,
@@ -119,7 +127,10 @@ final class LibraryConfig {
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
     }
-    json.addAll(extra);
+    for (final entry in extra.entries) {
+      if (_knownKeys.contains(entry.key)) continue;
+      json[entry.key] = entry.value;
+    }
     return json;
   }
 
@@ -173,14 +184,12 @@ final class LibraryConfig {
         _deepEquals(extra, other.extra);
   }
 
+  /// Hashed over [toJsonMap], which is the same filtered view `==`
+  /// compares. The spread this replaced had the shadowing problem too: a
+  /// known key in [extra] displaced the typed field it duplicates, so two
+  /// configs that compare equal could hash differently.
   @override
-  int get hashCode => _stableHash(<String, Object?>{
-    'trashEnabled': trashEnabled,
-    'historyVersions': historyVersions,
-    'quickNotePath': quickNotePath,
-    'listNoteFolder': listNoteFolder,
-    ...extra,
-  });
+  int get hashCode => _stableHash(toJsonMap());
 }
 
 /// The reader/writer for one library's `.copist/settings.json`.

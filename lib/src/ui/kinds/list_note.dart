@@ -62,7 +62,7 @@ final class _DropTarget {
 }
 
 class _ListNoteViewState extends State<ListNoteView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
   final ScrollController _scroll = ScrollController();
@@ -85,10 +85,43 @@ class _ListNoteViewState extends State<ListNoteView>
     reverseCurve: Curves.easeInCubic,
   );
 
+  /// Whether the software keyboard was up at the last metrics change.
+  ///
+  /// Dismissals are edge-triggered (open, then closed) so a stray
+  /// zero-inset frame around gaining focus can never end an edit.
+  bool _keyboardOpen = false;
+
   @override
   void initState() {
     super.initState();
     _items = parseListItems(widget.text);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Ends an in-place edit when the software keyboard is dismissed
+  /// (issue #5).
+  ///
+  /// On Android the back gesture closes the IME but leaves the field
+  /// focused, so the row's focus-loss commit never runs and the add row
+  /// stays hidden until the note is reopened. Closing the edit here takes
+  /// the same path as any other finish: the row sees `isEditing` go false
+  /// and commits.
+  ///
+  /// One observer for the whole list, not one per row. Every row used to
+  /// register its own, so a hundred-item list registered a hundred
+  /// observers and each keyboard or rotation event walked all of them —
+  /// and only one row is ever editing, which this state already knows.
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final open = WidgetsBinding.instance.platformDispatcher.views.any(
+      (view) => view.viewInsets.bottom / view.devicePixelRatio > 0,
+    );
+    final dismissed = _keyboardOpen && !open;
+    _keyboardOpen = open;
+    if (dismissed && _editingIndex != null && mounted) {
+      setState(() => _setEditing(null));
+    }
   }
 
   /// Opens ([index]) or closes (null) the in-place edit, animating the
@@ -122,6 +155,7 @@ class _ListNoteViewState extends State<ListNoteView>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _newItem.dispose();
     _scroll.dispose();
     _addRowShown.dispose();

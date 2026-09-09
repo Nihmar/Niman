@@ -76,7 +76,12 @@ tap rather than a folder picker.
   are copied into the file the first time their library is opened, so a
   user loses nothing. *AC: a library opened with old rows and no file
   ends up with a file holding the same values; the table is gone from
-  the schema afterwards.*
+  the schema afterwards.* **Clamp `historyVersions` when this lands.**
+  `LibraryConfig` takes whatever number the file holds, so a hand-edited
+  `-5` or `100000` passes straight through. Harmless while nothing reads
+  it; this is the task that starts reading it, and the file is
+  user-editable by design, so the range belongs here rather than in a
+  later bug. *AC: a negative or absurd value reads back as the default.*
 - [ ] **T-ML-03** One index per library. `copist.db` becomes
   `<support>/indexes/<hash of the library path>.db`, so switching does
   not re-index and the previous library's rows are not clobbered. The

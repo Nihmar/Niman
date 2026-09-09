@@ -143,8 +143,7 @@ final class _NoteTreeState extends State<NoteTree> {
 
   @override
   Widget build(BuildContext context) {
-    final started = DateTime.now();
-    final child = StreamBuilder<int>(
+    return StreamBuilder<int>(
       stream: widget.controller.events,
       initialData: widget.controller.revision,
       builder: (context, snapshot) {
@@ -177,9 +176,6 @@ final class _NoteTreeState extends State<NoteTree> {
         );
       },
     );
-    const AppLogger(name: 'tree.ui')
-        .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
-    return child;
   }
 }
 
