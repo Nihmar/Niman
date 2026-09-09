@@ -1,7 +1,15 @@
 # M6 — Scale & polish
 
-**Status:** Planned · **Depends on:** M5 · **Spec:** *Requirements* (export,
-import, themes, security, layout), *Performance strategy*, *Milestones → M6*
+**Status:** In progress · **Depends on:** M4 · **Spec:** *Requirements*
+(export, import, themes, security, layout), *Performance strategy*,
+*Milestones → M6*
+
+M5 (sync) is **not** a prerequisite, whatever the M0→M7 chain says: nothing
+here reads or writes the sync queue, and scale, tabs, export, themes and
+onboarding all sit on the M4 library. The one place the two meet is
+encryption × sync, and it meets in one direction only — an encrypted
+library must have its key before its first upload — which is a constraint
+on M5, not a dependency of M6 (user, 2026-09-09).
 
 ## Purpose
 
@@ -11,8 +19,9 @@ with the first-launch onboarding, and overall polish.
 
 ## Current state
 
-M5 syncs a local-only, unencrypted library with a single open note and system
-theming.
+M4 leaves a local-only, unencrypted library with a single open note, one
+seeded Material theme that follows the system brightness, and every text
+size fixed in code. Sync (M5) has not been built.
 
 ## Tasks
 
@@ -39,6 +48,16 @@ theming.
 - [ ] **T-M6-05** Themes: brightness (day/night/system) × palette (system |
   Catppuccin — night → Mocha, day → Latte); token-based role map (design.md).
   *AC: all four combinations render; adding a palette = adding a mapping.*
+- [ ] **T-M6-12** Text size: two sliders in the settings, one for the
+  interface and one for the note text, each stored app-wide and applied
+  live. The interface slider multiplies the OS text scale for every
+  screen — tree, tabs, todo rows, dialogs, settings. The note slider sets
+  the source editor's font size in points and scales the preview of the
+  same note by the same factor, so switching between the two panes does
+  not change how big the note reads. Neither slider moves the other.
+  *AC: both sliders survive a restart; the editor ignores the interface
+  slider and the tree ignores the note slider; the preview and the editor
+  agree; the smallest and largest steps still lay out on a phone.*
 - [ ] **T-M6-06** Encryption: first-launch choice of plain vs encrypted
   library; AES-256-GCM per file; key in `flutter_secure_storage`; transparent
   encrypt-on-write / decrypt-on-read in the note pipeline; export yields plain
@@ -68,12 +87,23 @@ See [design.md](design.md). M6 slice:
 
 - **Modules:** `ui/tabs.dart`, `ui/onboarding.dart`, `ui/theme/` (token maps),
   `core/crypto.dart`, `export/` (note, html, bundle), `import/` (obsidian,
-  notion), `core/settings/` (theme settings).
+  notion), `core/settings/` (theme and text-size settings).
 - **Crypto:** AES-256-GCM via a pure-Dart implementation (`pointycastle` —
   new dep, the "zero-deps" constraint applies to the WebDAV client, not
   crypto). Per-file: 12-byte random nonce + ciphertext; magic-byte header
   marking encrypted files; key from `flutter_secure_storage`. Editor holds
   plaintext in memory only; `.md`/HTML exports always decrypt.
+- **Text size:** two doubles on the single `app_settings` row, both
+  defaulting to 1.0 and clamped to a usable band. The interface one is
+  applied once, at the app root, by composing it with the OS scaler
+  (`MediaQuery.textScalerOf`) so the accessibility setting still counts;
+  everything under it inherits. The note one never travels as a scaler:
+  the source editor takes an explicit `CodeEditorStyle.fontSize` (re_editor
+  paints its own text and ignores `textScaler` entirely), and the preview
+  subtree gets its own `MediaQuery` carrying the note scaler instead of
+  the interface one. That split is what keeps the two sliders independent
+  — without it the preview would follow the interface slider and disagree
+  with the editor beside it.
 - **HTML export:** markdown → HTML (shared preview pipeline) + KaTeX output
   inlined; standalone file.
 - **Notion import:** zip walk → `.md` files mapped into the library tree;
@@ -89,6 +119,8 @@ See [design.md](design.md). M6 slice:
 - Multi-tab works; export/import round-trips verified for `.md`, HTML, zip,
   Obsidian, and Notion.
 - Encryption round-trips; onboarding complete; all theme combinations render.
+- Both text-size sliders persist, apply live, and stay out of each other's
+  way.
 - Unit + widget + perf tests green.
 
 ## Risks / open questions

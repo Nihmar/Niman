@@ -16,13 +16,14 @@ which is the **source of truth for requirements**; this folder plans the work.
 | [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | **Done** |
 | [m3-links-search.md](m3-links-search.md) | M3 — Links & search | **Done** |
 | [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | **Done** |
-| [m5-sync.md](m5-sync.md) | M5 — Sync | **Next** |
-| [m6-scale-polish.md](m6-scale-polish.md) | M6 — Scale & polish | Planned |
+| [m5-sync.md](m5-sync.md) | M5 — Sync | Planned |
+| [m6-scale-polish.md](m6-scale-polish.md) | M6 — Scale & polish | **In progress** |
 | [m7-packaging-release.md](m7-packaging-release.md) | M7 — Packaging & release | Planned |
 | [ui-mockups.md](ui-mockups.md) | UI — mockup parity (bottom nav, toolbars) | **Done** |
 
-Everything before M4 is done and verified on the user's device
-(2026-09-08). M4 is built and green; it has not been tried on device yet.
+Everything through M4 is done and verified on the user's device: M4 was
+tried on 2026-09-09 and the three defects it turned up (the quick-note
+flash, the todo priority picker, pinning a `.txt`) are fixed.
 
 ### Slices outside the M0→M7 chain
 
@@ -40,9 +41,10 @@ header rather than on the next one in the chain.
 | [m-app-shortcuts.md](m-app-shortcuts.md) | Launcher quick actions (Android) | **Done** |
 | [m-toolbar-customization.md](m-toolbar-customization.md) | Editor toolbar — user order + hiding | **Done** |
 | [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | **Done** |
-| [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Planned |
-| [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | Planned |
-| [m-multi-library.md](m-multi-library.md) | Several libraries, each describing itself | Planned |
+| [m-multi-library.md](m-multi-library.md) | Several libraries, each describing itself | **Done** |
+| [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Fix in, device check open |
+| [m-tab-switch-jank.md](m-tab-switch-jank.md) | What the tab switch cost, and what paid for it | Fix in, device check open |
+| [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | T-CL-03 and T-CL-04 open |
 
 ## Conventions
 
@@ -59,11 +61,15 @@ header rather than on the next one in the chain.
 ## Dependencies
 
 ```
-M0 → M1 → M1.5 → M2 → M3 → M4 → M5 → M6 → M7
+M0 → M1 → M1.5 → M2 → M3 → M4 → M5 → M7
+                              ↘ M6 ↗
 ```
 
-Strictly sequential: each milestone builds on the previous one's modules
-(`lib/src/…`) and tests. Stretch goals are not on the critical path.
+Each milestone builds on the previous one's modules (`lib/src/…`) and
+tests. The one place the chain forks is M5/M6: sync and scale-and-polish
+both sit on M4 and touch nothing of each other's, so M6 is being built
+first (user, 2026-09-09). M7 still waits for both. Stretch goals are not
+on the critical path.
 
 [ui-mockups.md](ui-mockups.md) is a cross-cutting UI pass, not part of the
 M0→M7 chain: it needs M2a's editor surface but can run any time after, and
