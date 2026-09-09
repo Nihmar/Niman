@@ -42,6 +42,7 @@ header rather than on the next one in the chain.
 | [m-toolbar-customization.md](m-toolbar-customization.md) | Editor toolbar — user order + hiding | **Done** |
 | [m-localization.md](m-localization.md) | Italian + English, chosen in the settings | **Done** |
 | [m-multi-library.md](m-multi-library.md) | Several libraries, each describing itself | **Done** |
+| [m-template-language.md](m-template-language.md) | Templates — a language worth writing in | Planned |
 | [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Fix in, device check open |
 | [m-tab-switch-jank.md](m-tab-switch-jank.md) | What the tab switch cost, and what paid for it | Fix in, device check open |
 | [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | T-CL-03 and T-CL-04 open |
