@@ -429,6 +429,30 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
+  /// The phone full-screen note body (one builder for both the chromed
+  /// and the immersive variants: only the Scaffold around it changes).
+  Widget _fullNoteView(LibrarySession controller, String selectedPath) {
+    return NoteView(
+      path: p.join(controller.root ?? '', selectedPath),
+      showLineNumbers: _lineNumbers,
+      autofocusEditor: _autofocusEditor,
+      linkType: _linkType,
+      indentWidth: _indentWidth,
+      toolbarLayout: _toolbarLayout,
+      splitPreview: _effectiveSplit(narrow: true),
+      showPreview: _previewVisible,
+      splitFraction: _splitRatio,
+      onSplitFractionChanged: _onSplitFractionChanged,
+      onSplitDragEnd: _onSplitDragEnd,
+      libraryRoot: controller.root,
+      linkSource: _linkSource,
+      onOpenNote: _openNoteFromLink,
+      initialAnchor: _pendingAnchor,
+      kindMode: !_kindRawMode,
+      onNoteKindChanged: _onNoteKindChanged,
+    );
+  }
+
   /// The way back out of [_previewFullScreen], floating over the preview.
   ///
   /// The chrome that would normally carry this action is exactly what is
@@ -693,6 +717,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// A stale setting (the note was moved, renamed, or deleted) is cleared
   /// so the tab returns to its empty state.
   Future<void> _openQuickNote(String path) async {
+    // Closes the keyboard before the transition (issue #4): opening the
+    // overlay over a live IME rips focus mid-fade while adjustResize
+    // reshapes the window, which flashes on device. Tab switches already
+    // do this in _selectShellTab.
+    FocusManager.instance.primaryFocus?.unfocus();
     await _guard(() async {
       final ops = widget.controller.ops;
       if (ops == null) return;
@@ -1044,86 +1073,93 @@ final class _LibraryShellState extends State<_LibraryShell>
           }
           _closeFullScreenNote();
         },
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // The tab shell never unmounts: hidden it skips layout, paint,
-            // and tickers, and the fullscreen note above is opaque.
-            Offstage(
-              offstage: fullNote,
-              child: TickerMode(
-                enabled: !fullNote,
-                child: KeyedSubtree(
-                  key: const ValueKey('tab-shell'),
-                  child: _tabShell(
-                    controller: controller,
-                    title: _tabTitle,
-                    actions: _tab == ShellTab.files
-                        ? _filesAppBarActions(controller)
-                        : _tab == ShellTab.todo
-                        ? [_todoHelpAction()]
-                        : const [],
-                    floatingActionButton: _tabFab(),
+        child: ColoredBox(
+          // Opaque surface behind every phone transition (issue #4): the
+          // full-note fade starts from transparent, and without this the
+          // first frames expose the black Android window instead.
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // The tab shell never unmounts: hidden it skips layout, paint,
+              // and tickers, and the fullscreen note above is opaque. The
+              // hiding waits out the open fade (issue #4): the note fades
+              // in over the tabs instead of over the window background.
+              Offstage(
+                offstage: fullNote,
+                child: TickerMode(
+                  enabled: !fullNote,
+                  child: KeyedSubtree(
+                    key: const ValueKey('tab-shell'),
+                    child: _tabShell(
+                      controller: controller,
+                      title: _tabTitle,
+                      actions: _tab == ShellTab.files
+                          ? _filesAppBarActions(controller)
+                          : _tab == ShellTab.todo
+                          ? [_todoHelpAction()]
+                          : const [],
+                      floatingActionButton: _tabFab(),
+                    ),
                   ),
                 ),
               ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              transitionBuilder: (child, animation) =>
-                  FadeTransition(opacity: animation, child: child),
-              child: fullNote
-                  ? KeyedSubtree(
-                      key: const ValueKey('full-note'),
-                      child: Scaffold(
-                        appBar: immersive
-                            ? null
-                            : AppBar(
-                                leading: BackButton(
-                                  onPressed: _closeFullScreenNote,
-                                ),
-                                title: Text(p.basename(selectedPath)),
-                                actions: [
-                                  ..._kindActions,
-                                  if (!_effectiveSplit(narrow: true) &&
-                                      _previewToggleVisible) ...[
-                                    _previewToggleAction(),
-                                    if (_previewVisible)
-                                      _previewFullScreenAction(),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                child: fullNote
+                    ? KeyedSubtree(
+                        key: const ValueKey('full-note'),
+                        child: Scaffold(
+                          appBar: immersive
+                              ? null
+                              : AppBar(
+                                  leading: BackButton(
+                                    onPressed: _closeFullScreenNote,
+                                  ),
+                                  title: Text(p.basename(selectedPath)),
+                                  actions: [
+                                    ..._kindActions,
+                                    if (!_effectiveSplit(narrow: true) &&
+                                        _previewToggleVisible) ...[
+                                      _previewToggleAction(),
+                                      if (_previewVisible)
+                                        _previewFullScreenAction(),
+                                    ],
                                   ],
-                                ],
+                                ),
+                          body: Stack(
+                            children: [
+                              // Stable subtree across the immersive toggle:
+                              // only the top inset flips, so entering or
+                              // leaving fullscreen never reparents (and
+                              // disposes) the open note's state, focus and
+                              // scroll. The all-false SafeArea is a layout
+                              // no-op.
+                              Positioned.fill(
+                                child: SafeArea(
+                                  top: immersive,
+                                  bottom: false,
+                                  left: false,
+                                  right: false,
+                                  child: _fullNoteView(
+                                    controller,
+                                    selectedPath,
+                                  ),
+                                ),
                               ),
-                        body: Stack(
-                          children: [
-                            NoteView(
-                              path: p.join(controller.root ?? '', selectedPath),
-                              showLineNumbers: _lineNumbers,
-                              autofocusEditor: _autofocusEditor,
-                              linkType: _linkType,
-                              indentWidth: _indentWidth,
-                              toolbarLayout: _toolbarLayout,
-                              splitPreview: _effectiveSplit(narrow: true),
-                              showPreview: _previewVisible,
-                              splitFraction: _splitRatio,
-                              onSplitFractionChanged: _onSplitFractionChanged,
-                              onSplitDragEnd: _onSplitDragEnd,
-                              libraryRoot: controller.root,
-                              linkSource: _linkSource,
-                              onOpenNote: _openNoteFromLink,
-                              initialAnchor: _pendingAnchor,
-                              kindMode: !_kindRawMode,
-                              onNoteKindChanged: _onNoteKindChanged,
-                            ),
-                            if (immersive) _exitFullScreenButton(),
-                          ],
+                              if (immersive) _exitFullScreenButton(),
+                            ],
+                          ),
+                          bottomNavigationBar: immersive ? null : _shellTabs(),
                         ),
-                        bottomNavigationBar: immersive ? null : _shellTabs(),
-                      ),
-                    )
-                  : null,
-            ),
-          ],
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       );
     }

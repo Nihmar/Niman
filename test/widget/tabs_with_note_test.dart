@@ -143,5 +143,81 @@ void main() {
       await controller.close();
       await controller.dispose();
     });
+
+    // Issues #2/#3: the fullscreen background may reach the status bar,
+    // but the content must start below it, with no system gap above the
+    // bottom toolbar.
+    testWidgets('immersive content starts below the status bar', (
+      tester,
+    ) async {
+      tester.view.padding = const FakeViewPadding(top: 47);
+      tester.view.viewPadding = const FakeViewPadding(top: 47);
+      addTearDown(tester.view.reset);
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+
+      // The opaque transition surface still reaches the screen edge...
+      final background = find.byWidgetPredicate(
+        (widget) => widget is ColoredBox && widget.child is Stack,
+      );
+      expect(
+        tester.widget<ColoredBox>(background).color,
+        Theme.of(tester.element(find.byType(NoteView))).scaffoldBackgroundColor,
+      );
+      expect(tester.getTopLeft(background).dy, 0);
+      // ...while the note content starts below the status bar.
+      expect(
+        tester.getTopLeft(find.byType(NoteView)).dy,
+        moreOrLessEquals(47, epsilon: 0.5),
+      );
+
+      await controller.close();
+      await controller.dispose();
+    });
+
+    testWidgets('no system gap sits between preview and status row', (
+      tester,
+    ) async {
+      tester.view.padding = const FakeViewPadding(top: 47, bottom: 20);
+      tester.view.viewPadding = const FakeViewPadding(top: 47, bottom: 20);
+      addTearDown(tester.view.reset);
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+
+      // The bottom chrome keeps only its bottom inset: with top enabled
+      // the 47 px status-bar inset would leak in between the preview and
+      // the status row (issue #3).
+      final chrome = find.descendant(
+        of: find.byType(NoteView),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is SafeArea && widget.bottom,
+        ),
+      );
+      expect(chrome, findsOneWidget);
+      expect(tester.widget<SafeArea>(chrome).top, isFalse);
+
+      await controller.close();
+      await controller.dispose();
+    });
+
+    testWidgets('toggling fullscreen keeps the open note state', (
+      tester,
+    ) async {
+      // Flipping only insets: entering or leaving fullscreen must not
+      // reparent (and dispose) the NoteView, losing focus and scroll.
+      await pumpPreviewing(tester);
+      await tester.tap(find.byKey(const Key('preview-fullscreen')));
+      await settle(tester);
+      final state = tester.state(find.byType(NoteView));
+      await tester.tap(find.byKey(const Key('preview-fullscreen-exit')));
+      await settle(tester);
+      expect(find.byType(NoteView), findsOneWidget);
+      expect(tester.state(find.byType(NoteView)), same(state));
+
+      await controller.close();
+      await controller.dispose();
+    });
   });
 }

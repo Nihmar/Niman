@@ -1062,6 +1062,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ),
           ),
           SafeArea(
+            // The bottom chrome only: top stays false so the status-bar
+            // inset is never inserted between the preview and this row
+            // (issue #3: that gap read as empty space above the toolbar).
+            top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
