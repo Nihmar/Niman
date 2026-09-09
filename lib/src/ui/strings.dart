@@ -479,6 +479,9 @@ final class AppStrings {
       _t('Set as quick note', 'Imposta come nota rapida');
   static String get currentQuickNote =>
       _t('Current quick note', 'Nota rapida attuale');
+  static String get pinnedSection => _t('Pinned', 'Fissate');
+  static String get actionPin => _t('Pin', 'Fissa in alto');
+  static String get actionUnpin => _t('Unpin', 'Non fissare più');
   static String get movedToTrash =>
       _t('Moved to trash', 'Spostato nel cestino');
   static String get deletedMessage => _t('Deleted', 'Eliminato');

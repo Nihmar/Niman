@@ -42,6 +42,14 @@ abstract interface class NoteOperations {
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 
+  /// Pins or unpins the note at [path] (T-M4-04).
+  ///
+  /// Pinning is a frontmatter edit — `pinned: true` goes into the note's
+  /// own block, and unpinning takes the key back out — so the pin travels
+  /// with the file and is visible to whoever opens it elsewhere. Returns
+  /// the re-indexed row.
+  Future<Note> setPinned(String path, {required bool pinned});
+
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
 

@@ -7,6 +7,7 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/edit.dart';
 import 'package:copist/src/frontmatter/fields.dart';
 import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -451,6 +452,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _repath(path, newRel);
     _bump();
     return _noteAt(newRel);
+  }
+
+  /// Pins by editing the row's content, exactly as the real ops edit the
+  /// file — so a widget test that pins sees the same frontmatter a person
+  /// would find in the note afterwards.
+  @override
+  Future<Note> setPinned(String path, {required bool pinned}) async {
+    final row = _requireRow(path);
+    if (row.isDir) {
+      throw ArgumentError('Only notes can be pinned, and "$path" is a folder');
+    }
+    row.content = pinned
+        ? setFrontmatterKey(row.content, 'pinned', 'true')
+        : removeFrontmatterKey(row.content, 'pinned');
+    _bump();
+    return _toNote(row);
   }
 
   @override

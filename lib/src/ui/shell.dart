@@ -1042,6 +1042,17 @@ final class _LibraryShellState extends State<_LibraryShell>
                 ),
                 onTap: () => Navigator.pop(context, 'quicknote'),
               ),
+            if (!note.isDir)
+              ListTile(
+                key: const Key('menu-pin'),
+                leading: Icon(
+                  note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                ),
+                title: Text(
+                  note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
+                ),
+                onTap: () => Navigator.pop(context, 'pin'),
+              ),
             ListTile(
               key: const Key('menu-rename'),
               leading: const Icon(Icons.edit),
@@ -1074,6 +1085,13 @@ final class _LibraryShellState extends State<_LibraryShell>
         await _guard(() async {
           await widget.controller.ops!.setQuickNotePath(path: note.path);
           widget.controller.notify();
+        });
+      case 'pin':
+        await _guard(() async {
+          await widget.controller.ops!.setPinned(
+            note.path,
+            pinned: !note.pinned,
+          );
         });
       case 'rename':
         await _rename(note.path);

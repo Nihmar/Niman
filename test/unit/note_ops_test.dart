@@ -145,6 +145,72 @@ void main() {
     );
   });
 
+  group('pin (T-M4-04)', () {
+    test('pinning writes the key into the note and the index', () async {
+      await ops.createNote(parentPath: '', name: 'Note', content: 'body\n');
+
+      final row = await ops.setPinned('Note.md', pinned: true);
+
+      expect(row.pinned, isTrue);
+      expect(
+        File(p.join(root.path, 'Note.md')).readAsStringSync(),
+        '---\npinned: true\n---\n\nbody\n',
+      );
+      expect((await dao.find('Note.md'))!.pinned, isTrue);
+    });
+
+    test('pinning keeps the rest of an existing block', () async {
+      await ops.createNote(
+        parentPath: '',
+        name: 'Note',
+        content: '---\ntitle: Real\ntags: [a]\n---\nbody\n',
+      );
+
+      await ops.setPinned('Note.md', pinned: true);
+
+      expect(
+        File(p.join(root.path, 'Note.md')).readAsStringSync(),
+        '---\ntitle: Real\ntags: [a]\npinned: true\n---\nbody\n',
+      );
+    });
+
+    test('unpinning takes the key back out, block and all', () async {
+      await ops.createNote(parentPath: '', name: 'Note', content: 'body\n');
+      await ops.setPinned('Note.md', pinned: true);
+
+      final row = await ops.setPinned('Note.md', pinned: false);
+
+      expect(row.pinned, isFalse);
+      expect(File(p.join(root.path, 'Note.md')).readAsStringSync(), 'body\n');
+      expect((await dao.find('Note.md'))!.pinned, isFalse);
+    });
+
+    test('pinning an already pinned note rewrites nothing', () async {
+      await ops.createNote(
+        parentPath: '',
+        name: 'Note',
+        content: '---\npinned: true\n---\nbody\n',
+      );
+      final before = File(p.join(root.path, 'Note.md')).lastModifiedSync();
+
+      await ops.setPinned('Note.md', pinned: true);
+
+      expect(
+        File(p.join(root.path, 'Note.md')).lastModifiedSync(),
+        before,
+        reason: 'the file was already in the wanted state',
+      );
+    });
+
+    test('a folder cannot be pinned', () async {
+      await ops.createFolder(parentPath: '', name: 'Folder');
+      expect(
+        () => ops.setPinned('Folder', pinned: true),
+        throwsArgumentError,
+      );
+    });
+  });
+
   group('delete (trash on by default)', () {
     test('moves the note into .trash with a manifest entry', () async {
       await ops.createNote(parentPath: '', name: 'Gone');

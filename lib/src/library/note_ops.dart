@@ -8,6 +8,7 @@ import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/edit.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
@@ -225,6 +226,34 @@ final class NoteOps implements NoteOperations {
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
+    });
+  }
+
+  /// Pins or unpins the note at [path] by editing its frontmatter.
+  ///
+  /// Unpinning removes the key rather than writing `pinned: false`: the
+  /// file goes back to what it looked like before, instead of collecting
+  /// a line that says nothing.
+  ///
+  /// Re-indexed through [Indexer.rescanFiles], not `applyEvents`: the
+  /// rewrite can leave the size unchanged within the same second, which
+  /// the (size, mtime) shortcut would read as "nothing happened".
+  @override
+  Future<Note> setPinned(String path, {required bool pinned}) {
+    return _synchronized(() async {
+      final row = await _mustFind(path);
+      if (row.isDir) {
+        throw ArgumentError('Only notes can be pinned; "$path" is a folder');
+      }
+      final file = File(_abs(path));
+      final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);
+      final updated = pinned
+          ? setFrontmatterKey(text, 'pinned', 'true')
+          : removeFrontmatterKey(text, 'pinned');
+      if (updated == text) return row;
+      await writeFileAtomically(file, utf8.encode(updated));
+      await indexer.rescanFiles(root, [file.path]);
+      return await _mustFind(path);
     });
   }
 
