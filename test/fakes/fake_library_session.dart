@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -102,6 +103,33 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _root = null;
     _phase = LibraryPhase.none;
     _bump();
+  }
+
+  /// The known-library list, newest first (T-ML-04).
+  final List<KnownLibrary> _known = <KnownLibrary>[];
+
+  @override
+  Future<List<KnownLibrary>> knownLibraries() async => List.of(_known);
+
+  @override
+  Future<void> forgetLibrary(String libraryPath) async {
+    _known.removeWhere((entry) => entry.path == libraryPath);
+    _bump();
+  }
+
+  /// Test-only seeding of the known list, so the home screen has rows
+  /// without a real registry behind it.
+  void seedKnownLibrary(String path, {String? name, DateTime? lastOpened}) {
+    _known
+      ..removeWhere((entry) => entry.path == path)
+      ..insert(
+        0,
+        KnownLibrary(
+          path: path,
+          name: name ?? p.basename(path),
+          lastOpened: lastOpened ?? DateTime.now(),
+        ),
+      );
   }
 
   @override

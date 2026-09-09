@@ -563,6 +563,34 @@ final class AppStrings {
     'Quella cartella non è supportata. Scegline una nella memoria del '
         'dispositivo.',
   );
+  // The known-library list on the home screen (T-ML-05, T-ML-07).
+  static String get knownLibrariesTitle =>
+      _t('Your libraries', 'Le tue librerie');
+  static String get libraryUnreachable =>
+      _t('Not reachable', 'Non raggiungibile');
+  static String get libraryOpenedToday => _t('Opened today', 'Aperta oggi');
+  static String get libraryOpenedYesterday =>
+      _t('Opened yesterday', 'Aperta ieri');
+  static String libraryOpenedDaysAgo(int days) =>
+      _t('Opened $days days ago', 'Aperta $days giorni fa');
+  static String libraryOpenedOn(DateTime when) {
+    final d = when.day.toString().padLeft(2, '0');
+    final m = when.month.toString().padLeft(2, '0');
+    return _t('Opened on ${when.year}-$m-$d', 'Aperta il $d/$m/${when.year}');
+  }
+
+  static String get libraryForget => _t('Forget', 'Dimentica');
+  static String libraryForgetTitle(String name) =>
+      _t('Forget "$name"?', 'Dimenticare «$name»?');
+  static String get libraryForgetExplained => _t(
+    'It goes off this list. The folder, the notes and the library '
+        'settings inside it are left alone, and opening it again brings '
+        'it back.',
+    'Sparisce da questo elenco. La cartella, le note e le impostazioni '
+        'della libreria restano dove sono, e riaprendola torna '
+        'nell’elenco.',
+  );
+
   static String get storageAccessAction =>
       _t('Grant file access', 'Concedi l’accesso ai file');
   static String get storageAccessNeeded => _t(

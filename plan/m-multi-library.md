@@ -1,7 +1,7 @@
 # Multiple libraries — a library is a folder that describes itself
 
-**Status:** In progress (2026-09-08, user request; T-ML-01 and T-ML-02
-done 2026-09-09) · **Depends on:** M1
+**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-05 and
+T-ML-07 done 2026-09-09) · **Depends on:** M1
 (library core), M3 (index) · **Blocks:** nothing, but it changes where
 settings live, so it wants to land before M5 sync writes anything of its
 own · **Spec:** user request: several libraries like Obsidian's vaults —
@@ -24,10 +24,9 @@ tap rather than a folder picker.
 - **One library at a time.** `LibraryController.open` throws if a library
   is already open; `app_settings.library_path` holds the last one, and
   `resume()` reopens it at start.
-- **The index is one global file.** `copist.db` in the app support
-  directory holds a `notes` table whose paths are library-relative with
-  no library id, so it describes whichever library was opened last.
-  Opening another one re-indexes over the top of it.
+- ~~**The index is one global file.**~~ Done in T-ML-03: one index file
+  per library under `indexes/`, and `copist.db` is the app's settings
+  database.
 - ~~**Per-library settings are database rows.**~~ Done in T-ML-02: the
   four of them live in `<library>/.copist/settings.json` and travel with
   the folder. The `library_settings` table is gone.
@@ -100,21 +99,29 @@ tap rather than a folder picker.
   and `LibraryRegistry` over it. Opening a library touches it, which is
   the only registration step there is; a name the user chose survives
   later opens.
-- [ ] **T-ML-05** The home screen (point 1). The library list as the
+- [x] **T-ML-05** The home screen (point 1). The library list as the
   app's start screen when nothing resumes: each row is name, path and
   when it was last opened; tapping one opens it. Plus "Open a folder" and
   "Create a library", which are today's two actions. *AC: widget tests —
   the list shows known libraries, a tap opens, an unreachable path is
-  shown as such rather than opening onto an empty tree.*
+  shown as such rather than opening onto an empty tree.* Done, on the
+  screen that was already there rather than a new one: the branding
+  header stays, the list takes the place of the one-line introduction,
+  and on a first run the screen is exactly what it was. Open and create
+  are filled buttons while they are the whole screen and plain ones once
+  a list sits above them.
 - [ ] **T-ML-06** Switching from the settings (point 2). A "Library" row
   in the settings opens the same list; picking another closes the current
   one and opens it, landing on its tree. *AC: widget test — switching
   swaps the tree, the todo list and the per-library settings together.*
-- [ ] **T-ML-07** Forgetting a library (point 3). A per-row action on the
+- [x] **T-ML-07** Forgetting a library (point 3). A per-row action on the
   list, confirmed, that removes the registry entry and its index file and
   leaves the folder untouched. *AC: widget test — the row goes, the
   folder and its `.copist/settings.json` are still there, and opening the
-  folder again lists it again with its settings.*
+  folder again lists it again with its settings.* Done: a long press,
+  not a swipe — a swipe on a list of three rows fires by accident. The
+  confirmation says what forgetting does not touch, because the word
+  invites the reading that it deletes the notes.
 - [ ] **T-ML-08** What travels with a switch. Reminders are reconciled
   against the newly open library's todo file, the quick note follows the
   new library's setting, and the open note is closed. *AC: widget test —

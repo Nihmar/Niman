@@ -57,6 +57,7 @@ final class LibraryController implements LibrarySession {
   new(
     this.appDbFactory, {
     required this.indexDbFactory,
+    this.indexFileOf,
     Future<IndexDatabase> Function(String libraryPath)? searchDbFactory,
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
@@ -85,6 +86,12 @@ final class LibraryController implements LibrarySession {
 
   /// Builds the index database of the library at the given absolute path.
   final Future<IndexDatabase> Function(String libraryPath) indexDbFactory;
+
+  /// Locates a library's index file, so forgetting one can delete it.
+  ///
+  /// Null leaves the file behind, which costs disk space and nothing
+  /// else — the index is derived data.
+  final Future<File> Function(String libraryPath)? indexFileOf;
 
   /// The search connection; defaults to [indexDbFactory] (tests), the app
   /// injects the background-isolate connection.
@@ -366,6 +373,40 @@ final class LibraryController implements LibrarySession {
       // Settings unavailable; nothing else to clear.
     }
     _bump();
+  }
+
+  /// The libraries the app knows about, most recently opened first.
+  @override
+  Future<List<KnownLibrary>> knownLibraries() async {
+    return await LibraryRegistry(await appDatabase).all();
+  }
+
+  /// Drops [libraryPath] from the known list; the folder is untouched.
+  @override
+  Future<void> forgetLibrary(String libraryPath) async {
+    _log.info('forget library: $libraryPath');
+    await LibraryRegistry(await appDatabase).forget(libraryPath);
+    // The index is derived data and the entry that named it is gone, so
+    // the file would sit there forever with nothing pointing at it.
+    await _deleteIndexOf(libraryPath);
+    _bump();
+  }
+
+  /// Deletes the index file of a forgotten library, if it can be found.
+  ///
+  /// Best effort: a failure here costs disk space, not correctness, and
+  /// must not turn "forget this library" into an error.
+  Future<void> _deleteIndexOf(String libraryPath) async {
+    try {
+      final locate = indexFileOf;
+      if (locate == null) return;
+      final file = await locate(libraryPath);
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    } on Object catch (error) {
+      _log.warning('forget: index file not removed ($error)');
+    }
   }
 
   /// Triggers a full rescan immediately (explicit re-index).
@@ -699,6 +740,7 @@ final librarySessionProvider = Provider<LibrarySession>((ref) {
   final controller = LibraryController(
     defaultAppDatabase,
     indexDbFactory: defaultIndexDatabase,
+    indexFileOf: libraryIndexFile,
     searchDbFactory: defaultSearchDatabase,
   );
   ref.onDispose(controller.dispose);

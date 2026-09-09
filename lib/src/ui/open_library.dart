@@ -4,16 +4,25 @@ import 'dart:io';
 import 'package:copist/src/core/library_root.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/storage_access.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/ui/known_library_list.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
-/// The open/create screen.
+/// The home screen: the libraries the app knows about, and the two ways
+/// to reach one it does not (T-ML-05).
 ///
-/// Both flows go through the native directory picker (Storage Access
+/// It is where the app starts when nothing resumes. On a first run the
+/// list is empty and what is left is the screen this used to be —
+/// branding, one line of explanation, open and create — so the welcome
+/// is unchanged and the list takes the place of the explanation only
+/// once there is something to list.
+///
+/// Both open flows go through the native directory picker (Storage Access
 /// Framework on Android, xdg-desktop-portal on Linux) — no manual path
 /// entry, so a library root can only ever be a real, readable folder.
 /// The picker only *chooses* the folder: on Android the library is read
@@ -44,10 +53,44 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
   /// A picker/open failure that the session does not know about.
   String? _pickerError;
 
+  /// The known libraries, most recently opened first; empty until the
+  /// first load lands, which is also a first run's final state.
+  List<KnownLibrary> _known = const [];
+
+  /// Of those, the ones whose folder is not there right now.
+  Set<String> _unreachable = const {};
+
   @override
   void initState() {
     super.initState();
     unawaited(_refreshAccess());
+    unawaited(_loadKnown());
+  }
+
+  /// Reads the known-library list and checks which folders are there.
+  ///
+  /// The reachability check is a stat per row, not a walk: this list is a
+  /// handful of entries, and the alternative is a row that opens onto an
+  /// empty tree because its drive is unplugged.
+  Future<void> _loadKnown() async {
+    final entries = await widget.controller.knownLibraries();
+    final missing = <String>{};
+    for (final entry in entries) {
+      // Sync on purpose: `exists()` spawns an isolate per call, which
+      // costs more than the stat it avoids for a list this short.
+      if (!Directory(entry.path).existsSync()) missing.add(entry.path);
+    }
+    if (!mounted) return;
+    setState(() {
+      _known = entries;
+      _unreachable = missing;
+    });
+  }
+
+  /// Forgets [libraryPath] and refreshes the list.
+  Future<void> _forget(String libraryPath) async {
+    await widget.controller.forgetLibrary(libraryPath);
+    await _loadKnown();
   }
 
   /// Re-reads the shared-storage permission state into [_needsAccess].
@@ -100,42 +143,32 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                   style: theme.textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  AppStrings.openLibraryIntro,
-                  style: theme.textTheme.bodyMedium,
-                ),
+                // The one line of explanation gives way to the list: on a
+                // phone the two together push the libraries below the
+                // fold, and someone with a list of them does not need it.
+                if (_known.isEmpty)
+                  Text(
+                    AppStrings.openLibraryIntro,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 const SizedBox(height: 24),
+                if (!_needsAccess && _known.isNotEmpty) ...[
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: KnownLibraryList(
+                      entries: _known,
+                      unreachable: _unreachable,
+                      enabled: !active,
+                      onOpen: (path) => unawaited(_openKnown(path)),
+                      onForget: (path) => unawaited(_forget(path)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 if (_needsAccess)
                   _AccessPrompt(onGrant: active ? null : _grantAccess)
-                else if (narrow)
-                  Column(
-                    children: [
-                      FilledButton(
-                        onPressed: active ? null : _openExisting,
-                        child: Text(AppStrings.openLibraryExisting),
-                      ),
-                      const SizedBox(height: 8),
-                      FilledButton.tonal(
-                        onPressed: active ? null : _createNew,
-                        child: Text(AppStrings.openLibraryCreate),
-                      ),
-                    ],
-                  )
                 else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FilledButton(
-                        onPressed: active ? null : _openExisting,
-                        child: Text(AppStrings.openLibraryExisting),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.tonal(
-                        onPressed: active ? null : _createNew,
-                        child: Text(AppStrings.openLibraryCreate),
-                      ),
-                    ],
-                  ),
+                  _actions(active: active, narrow: narrow),
                 if (active)
                   const Padding(
                     padding: EdgeInsets.only(top: 16),
@@ -155,6 +188,54 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
         ),
       ),
     );
+  }
+
+  /// Open and create, side by side where there is room.
+  ///
+  /// They carry the screen on a first run, so they are filled buttons
+  /// there. Once a list is above them the list is what the screen is
+  /// about, and two filled buttons under it would compete with it for
+  /// the eye, so they step back to plain ones.
+  Widget _actions({required bool active, required bool narrow}) {
+    final prominent = _known.isEmpty;
+    final open = prominent
+        ? FilledButton(
+            key: const Key('open-existing-library'),
+            onPressed: active ? null : _openExisting,
+            child: Text(AppStrings.openLibraryExisting),
+          )
+        : TextButton(
+            key: const Key('open-existing-library'),
+            onPressed: active ? null : _openExisting,
+            child: Text(AppStrings.openLibraryExisting),
+          );
+    final create = prominent
+        ? FilledButton.tonal(
+            key: const Key('create-library'),
+            onPressed: active ? null : _createNew,
+            child: Text(AppStrings.openLibraryCreate),
+          )
+        : TextButton(
+            key: const Key('create-library'),
+            onPressed: active ? null : _createNew,
+            child: Text(AppStrings.openLibraryCreate),
+          );
+    // Stacked on a phone only while they are the whole screen; as a pair
+    // of plain buttons they fit on one line at any width.
+    if (narrow && prominent) {
+      return Column(children: [open, const SizedBox(height: 8), create]);
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [open, const SizedBox(width: 8), create],
+    );
+  }
+
+  /// Opens a library the user picked off the known list.
+  Future<void> _openKnown(String path) async {
+    _pickerError = null;
+    await widget.controller.open(path, create: false);
+    // The controller's event stream drives the rebuild (phase/lastError).
   }
 
   Future<void> _openExisting() async {

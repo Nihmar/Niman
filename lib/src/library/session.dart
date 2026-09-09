@@ -1,5 +1,6 @@
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -117,6 +118,17 @@ abstract interface class LibrarySession {
 
   /// Closes the current library (stops watching; keeps the index).
   Future<void> close();
+
+  /// The libraries the app knows about, most recently opened first
+  /// (T-ML-04); what the home screen lists.
+  Future<List<KnownLibrary>> knownLibraries();
+
+  /// Drops [libraryPath] from that list.
+  ///
+  /// Forgetting is a list operation: the folder, its notes and its
+  /// `.copist/settings.json` are untouched, so opening it again lists it
+  /// again with its settings.
+  Future<void> forgetLibrary(String libraryPath);
 
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
