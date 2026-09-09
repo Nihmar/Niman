@@ -112,6 +112,11 @@ final class NoteDao {
         args,
       );
       await _db.customStatement(
+        'DELETE FROM frontmatter_fields WHERE note_id IN '
+        '(SELECT id FROM notes WHERE $where)',
+        args,
+      );
+      await _db.customStatement(
         'DELETE FROM note_links WHERE from_note IN '
         '(SELECT id FROM notes WHERE $where)',
         args,

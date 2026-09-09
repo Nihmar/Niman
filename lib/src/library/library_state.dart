@@ -12,6 +12,7 @@ import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/fields.dart';
 import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/library_registry.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -272,6 +273,13 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return null;
     return TagRepo(db);
+  }
+
+  @override
+  Future<FieldSource?> get fieldSource async {
+    final db = _indexDb;
+    if (db == null) return null;
+    return FieldRepo(db);
   }
 
   @override

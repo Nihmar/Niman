@@ -235,15 +235,44 @@ final class _RowTile extends StatelessWidget {
               ),
             Expanded(
               child: Text(
-                note.name,
+                displayNameOf(note),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium,
               ),
             ),
+            if (note.date case final DateTime date)
+              Padding(
+                padding: const EdgeInsets.only(left: 8, right: 12),
+                child: Text(
+                  isoDate(date),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+/// What a note is called on screen: its frontmatter `title:` when it has
+/// one, else its filename (T-M4-02).
+///
+/// The title is the note's own name for itself, so it wins wherever the
+/// note is listed. The filename still decides the file on disk and still
+/// resolves `[[links]]` — this changes what is shown, not what anything
+/// points at.
+String displayNameOf(Note note) {
+  final title = note.title;
+  return (title == null || title.isEmpty) ? note.name : title;
+}
+
+/// A frontmatter date as `YYYY-MM-DD` — the form it is written in.
+String isoDate(DateTime date) {
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  return '${date.year}-$month-$day';
 }

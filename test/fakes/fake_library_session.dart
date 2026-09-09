@@ -7,6 +7,8 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/fields.dart';
+import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
@@ -313,6 +315,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<TagSource?> get tagSource async => FakeTagSource();
 
+  /// Answered from the fake's own rows rather than a canned fake: the
+  /// content is right there, so pinned notes and `key = value` filters
+  /// behave the way they will against a real index.
+  @override
+  Future<FieldSource?> get fieldSource async => _FakeFieldSource(this);
+
   @override
   Future<LinkSource?> get linkSource async => FakeLinkSource();
 
@@ -527,7 +535,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     }
   }
 
+  /// The row as an indexed note, with the frontmatter fields the real
+  /// indexer would have derived from its content (T-M4-02) — so a widget
+  /// test can pin a note by writing `pinned: true` into it, exactly as a
+  /// person would.
   Note _toNote(_Row row) {
+    final fm = row.isDir ? null : parseFrontmatter(row.content);
     return Note(
       id: row.id,
       path: row.path,
@@ -536,10 +549,29 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       isDir: row.isDir,
       size: 0,
       modified: DateTime.fromMillisecondsSinceEpoch(0),
+      title: fm?.fields['title']?.first,
+      date: fm?.date,
+      pinned: fm?.pinned ?? false,
     );
   }
 
   Note _noteAt(String path) => _toNote(_requireRow(path));
+
+  /// Every live (untrashed) note row as an indexed note; folders included.
+  Iterable<Note> _liveNotes() sync* {
+    for (final row in _rows) {
+      if (!row.trashed) yield _toNote(row);
+    }
+  }
+
+  /// Every live note paired with its parsed frontmatter (null for folders
+  /// and for notes without a block).
+  Iterable<(Note, Frontmatter?)> _liveFrontmatter() sync* {
+    for (final row in _rows) {
+      if (row.trashed || row.isDir) continue;
+      yield (_toNote(row), parseFrontmatter(row.content));
+    }
+  }
 
   _Row? _findRow(String path) {
     for (final row in _rows) {
@@ -691,6 +723,57 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       if (row.id == id) return row;
     }
     return null;
+  }
+}
+
+/// The fake's frontmatter-field source: parses each live note's content
+/// on demand, which is cheap at the handful of notes a widget test has.
+final class _FakeFieldSource implements FieldSource {
+  new(this._session);
+
+  final FakeLibrarySession _session;
+
+  @override
+  Future<List<Note>> pinnedNotes() async {
+    final notes = [
+      for (final note in _session._liveNotes())
+        if (note.pinned) note,
+    ]..sort((a, b) => a.path.compareTo(b.path));
+    return notes;
+  }
+
+  @override
+  Future<List<Note>> notesWithField(String key, String value) async {
+    final wanted = value.trim().toLowerCase();
+    final name = key.trim().toLowerCase();
+    final out = <Note>[];
+    for (final (note, fm) in _session._liveFrontmatter()) {
+      final values = fm?.fields[name];
+      if (values == null) continue;
+      if (wanted.isEmpty ||
+          values.any((v) => v.toLowerCase() == wanted)) {
+        out.add(note);
+      }
+    }
+    return out..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  @override
+  Future<List<FieldKeyCount>> fieldKeys() async {
+    final counts = <String, int>{};
+    for (final (_, fm) in _session._liveFrontmatter()) {
+      for (final key in fm?.fields.keys ?? const <String>[]) {
+        counts[key] = (counts[key] ?? 0) + 1;
+      }
+    }
+    final keys = counts.keys.toList()
+      ..sort((a, b) {
+        final byCount = counts[b]!.compareTo(counts[a]!);
+        return byCount != 0 ? byCount : a.compareTo(b);
+      });
+    return [
+      for (final key in keys) FieldKeyCount(key: key, count: counts[key]!),
+    ];
   }
 }
 

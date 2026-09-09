@@ -752,6 +752,106 @@ void main() {
       expect(title.read<String>('title'), 'note1');
     });
   });
+
+  group('frontmatter fields (T-M4-02)', () {
+    /// The `frontmatter_fields` rows of [path] as `key=value` strings.
+    Future<List<String>> fieldsOf(String path) async {
+      final row = (await dao.find(path))!;
+      final rows =
+          await (db.select(db.frontmatterFields)
+                ..where((f) => f.noteId.equals(row.id)))
+              .get();
+      return [for (final f in rows) '${f.key}=${f.value}']..sort();
+    }
+
+    test('every key is indexed, known and invented alike', () async {
+      File(p.join(root.path, 'note1.md')).writeAsStringSync(
+        '---\ntitle: Real Title\ntags: [a]\ndate: 2026-03-01\n'
+        'pinned: true\nstatus: draft\nprojects: [alpha, beta]\n---\nbody',
+      );
+      await indexer.fullScan(root.path);
+
+      expect(await fieldsOf('note1.md'), [
+        'date=2026-03-01',
+        'pinned=true',
+        'projects=alpha',
+        'projects=beta',
+        'status=draft',
+        'tags=a',
+        'title=Real Title',
+      ]);
+    });
+
+    test('the known fields land on the note row itself', () async {
+      File(p.join(root.path, 'note1.md')).writeAsStringSync(
+        '---\ntitle: Real Title\ndate: 2026-03-01\npinned: true\n---\nbody',
+      );
+      await indexer.fullScan(root.path);
+
+      final row = (await dao.find('note1.md'))!;
+      expect(row.title, 'Real Title');
+      expect(row.date, DateTime(2026, 3));
+      expect(row.pinned, isTrue);
+
+      // A note without a block keeps them empty — the filename is its
+      // display name.
+      final plain = (await dao.find('note2.md'))!;
+      expect(plain.title, isNull);
+      expect(plain.date, isNull);
+      expect(plain.pinned, isFalse);
+    });
+
+    test('a changed key updates the index in one pass', () async {
+      final file = File(p.join(root.path, 'note1.md'))
+        ..writeAsStringSync('---\nstatus: draft\npinned: true\n---\nbody');
+      await indexer.fullScan(root.path);
+      expect(await fieldsOf('note1.md'), ['pinned=true', 'status=draft']);
+
+      file.writeAsStringSync('---\nstatus: done\n---\nbody');
+      await indexer.applyEvents(root.path, [file.path]);
+
+      expect(await fieldsOf('note1.md'), ['status=done']);
+      final row = (await dao.find('note1.md'))!;
+      expect(row.pinned, isFalse, reason: 'the key is gone from the block');
+    });
+
+    test('removing the block clears the fields and the row columns', () async {
+      final file = File(p.join(root.path, 'note1.md'))
+        ..writeAsStringSync('---\ntitle: T\ndate: 2026-03-01\n---\nbody');
+      await indexer.fullScan(root.path);
+      expect(await fieldsOf('note1.md'), isNotEmpty);
+
+      file.writeAsStringSync('just body now');
+      await indexer.applyEvents(root.path, [file.path]);
+
+      expect(await fieldsOf('note1.md'), isEmpty);
+      final row = (await dao.find('note1.md'))!;
+      expect(row.title, isNull);
+      expect(row.date, isNull);
+    });
+
+    test('a malformed block indexes no fields, and stops nothing', () async {
+      File(p.join(root.path, 'note1.md'))
+          .writeAsStringSync('---\ntitle: [unclosed\n---\nbody');
+      await indexer.fullScan(root.path);
+
+      expect(await fieldsOf('note1.md'), isEmpty);
+      // The rest of the library indexed normally.
+      expect(await dao.allRows(), hasLength(5));
+    });
+
+    test('a deleted note takes its field rows with it', () async {
+      File(p.join(root.path, 'note1.md'))
+          .writeAsStringSync('---\nstatus: draft\n---\nbody');
+      await indexer.fullScan(root.path);
+      expect(await db.select(db.frontmatterFields).get(), isNotEmpty);
+
+      File(p.join(root.path, 'note1.md')).deleteSync();
+      await indexer.applyEvents(root.path, [p.join(root.path, 'note1.md')]);
+
+      expect(await db.select(db.frontmatterFields).get(), isEmpty);
+    });
+  });
 }
 
 /// The index state a rebuild reproduces: per-note content rows.

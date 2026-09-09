@@ -90,6 +90,37 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  @override
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
+    'pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -100,6 +131,9 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
     size,
     modified,
     sha256,
+    title,
+    date,
+    pinned,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -170,6 +204,24 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         sha256.isAcceptableOrUnknown(data['sha256']!, _sha256Meta),
       );
     }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    }
+    if (data.containsKey('pinned')) {
+      context.handle(
+        _pinnedMeta,
+        pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta),
+      );
+    }
     return context;
   }
 
@@ -211,6 +263,18 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
         DriftSqlType.string,
         data['${effectivePrefix}sha256'],
       ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      ),
+      pinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pinned'],
+      )!,
     );
   }
 
@@ -244,6 +308,20 @@ class Note extends DataClass implements Insertable<Note> {
 
   /// Content sha256, hex; files only (directories are null).
   final String? sha256;
+
+  /// The frontmatter `title:`, or null when the note has none — then the
+  /// filename is the display name.
+  ///
+  /// It lives on the row rather than only in [FrontmatterFields] because
+  /// the tree reads it for every visible row on every paint, and a join
+  /// per paint is a cost the tree does not have to pay (T-M4-02).
+  final String? title;
+
+  /// The frontmatter `date:` when it reads as a date, else null.
+  final DateTime? date;
+
+  /// Whether the frontmatter says `pinned: true`.
+  final bool pinned;
   const Note({
     required this.id,
     required this.path,
@@ -253,6 +331,9 @@ class Note extends DataClass implements Insertable<Note> {
     required this.size,
     required this.modified,
     this.sha256,
+    this.title,
+    this.date,
+    required this.pinned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -267,6 +348,13 @@ class Note extends DataClass implements Insertable<Note> {
     if (!nullToAbsent || sha256 != null) {
       map['sha256'] = Variable<String>(sha256);
     }
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || date != null) {
+      map['date'] = Variable<DateTime>(date);
+    }
+    map['pinned'] = Variable<bool>(pinned);
     return map;
   }
 
@@ -282,6 +370,11 @@ class Note extends DataClass implements Insertable<Note> {
       sha256: sha256 == null && nullToAbsent
           ? const Value.absent()
           : Value(sha256),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      date: date == null && nullToAbsent ? const Value.absent() : Value(date),
+      pinned: Value(pinned),
     );
   }
 
@@ -299,6 +392,9 @@ class Note extends DataClass implements Insertable<Note> {
       size: serializer.fromJson<int>(json['size']),
       modified: serializer.fromJson<DateTime>(json['modified']),
       sha256: serializer.fromJson<String?>(json['sha256']),
+      title: serializer.fromJson<String?>(json['title']),
+      date: serializer.fromJson<DateTime?>(json['date']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
     );
   }
   @override
@@ -313,6 +409,9 @@ class Note extends DataClass implements Insertable<Note> {
       'size': serializer.toJson<int>(size),
       'modified': serializer.toJson<DateTime>(modified),
       'sha256': serializer.toJson<String?>(sha256),
+      'title': serializer.toJson<String?>(title),
+      'date': serializer.toJson<DateTime?>(date),
+      'pinned': serializer.toJson<bool>(pinned),
     };
   }
 
@@ -325,6 +424,9 @@ class Note extends DataClass implements Insertable<Note> {
     int? size,
     DateTime? modified,
     Value<String?> sha256 = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<DateTime?> date = const Value.absent(),
+    bool? pinned,
   }) => Note(
     id: id ?? this.id,
     path: path ?? this.path,
@@ -334,6 +436,9 @@ class Note extends DataClass implements Insertable<Note> {
     size: size ?? this.size,
     modified: modified ?? this.modified,
     sha256: sha256.present ? sha256.value : this.sha256,
+    title: title.present ? title.value : this.title,
+    date: date.present ? date.value : this.date,
+    pinned: pinned ?? this.pinned,
   );
   Note copyWithCompanion(NotesCompanion data) {
     return Note(
@@ -345,6 +450,9 @@ class Note extends DataClass implements Insertable<Note> {
       size: data.size.present ? data.size.value : this.size,
       modified: data.modified.present ? data.modified.value : this.modified,
       sha256: data.sha256.present ? data.sha256.value : this.sha256,
+      title: data.title.present ? data.title.value : this.title,
+      date: data.date.present ? data.date.value : this.date,
+      pinned: data.pinned.present ? data.pinned.value : this.pinned,
     );
   }
 
@@ -358,14 +466,28 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
-          ..write('sha256: $sha256')
+          ..write('sha256: $sha256, ')
+          ..write('title: $title, ')
+          ..write('date: $date, ')
+          ..write('pinned: $pinned')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, path, parent, name, isDir, size, modified, sha256);
+  int get hashCode => Object.hash(
+    id,
+    path,
+    parent,
+    name,
+    isDir,
+    size,
+    modified,
+    sha256,
+    title,
+    date,
+    pinned,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -377,7 +499,10 @@ class Note extends DataClass implements Insertable<Note> {
           other.isDir == this.isDir &&
           other.size == this.size &&
           other.modified == this.modified &&
-          other.sha256 == this.sha256);
+          other.sha256 == this.sha256 &&
+          other.title == this.title &&
+          other.date == this.date &&
+          other.pinned == this.pinned);
 }
 
 class NotesCompanion extends UpdateCompanion<Note> {
@@ -389,6 +514,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<int> size;
   final Value<DateTime> modified;
   final Value<String?> sha256;
+  final Value<String?> title;
+  final Value<DateTime?> date;
+  final Value<bool> pinned;
   const NotesCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
@@ -398,6 +526,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.size = const Value.absent(),
     this.modified = const Value.absent(),
     this.sha256 = const Value.absent(),
+    this.title = const Value.absent(),
+    this.date = const Value.absent(),
+    this.pinned = const Value.absent(),
   });
   NotesCompanion.insert({
     this.id = const Value.absent(),
@@ -408,6 +539,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     required int size,
     required DateTime modified,
     this.sha256 = const Value.absent(),
+    this.title = const Value.absent(),
+    this.date = const Value.absent(),
+    this.pinned = const Value.absent(),
   }) : path = Value(path),
        parent = Value(parent),
        name = Value(name),
@@ -423,6 +557,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<int>? size,
     Expression<DateTime>? modified,
     Expression<String>? sha256,
+    Expression<String>? title,
+    Expression<DateTime>? date,
+    Expression<bool>? pinned,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -433,6 +570,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (size != null) 'size': size,
       if (modified != null) 'modified': modified,
       if (sha256 != null) 'sha256': sha256,
+      if (title != null) 'title': title,
+      if (date != null) 'date': date,
+      if (pinned != null) 'pinned': pinned,
     });
   }
 
@@ -445,6 +585,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Value<int>? size,
     Value<DateTime>? modified,
     Value<String?>? sha256,
+    Value<String?>? title,
+    Value<DateTime?>? date,
+    Value<bool>? pinned,
   }) {
     return NotesCompanion(
       id: id ?? this.id,
@@ -455,6 +598,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
       size: size ?? this.size,
       modified: modified ?? this.modified,
       sha256: sha256 ?? this.sha256,
+      title: title ?? this.title,
+      date: date ?? this.date,
+      pinned: pinned ?? this.pinned,
     );
   }
 
@@ -485,6 +631,15 @@ class NotesCompanion extends UpdateCompanion<Note> {
     if (sha256.present) {
       map['sha256'] = Variable<String>(sha256.value);
     }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
+    }
     return map;
   }
 
@@ -498,7 +653,10 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('isDir: $isDir, ')
           ..write('size: $size, ')
           ..write('modified: $modified, ')
-          ..write('sha256: $sha256')
+          ..write('sha256: $sha256, ')
+          ..write('title: $title, ')
+          ..write('date: $date, ')
+          ..write('pinned: $pinned')
           ..write(')'))
         .toString();
   }
@@ -1462,6 +1620,272 @@ class NoteLinksCompanion extends UpdateCompanion<NoteLink> {
   }
 }
 
+class $FrontmatterFieldsTable extends FrontmatterFields
+    with TableInfo<$FrontmatterFieldsTable, FrontmatterField> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FrontmatterFieldsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _noteIdMeta = const VerificationMeta('noteId');
+  @override
+  late final GeneratedColumn<int> noteId = GeneratedColumn<int>(
+    'note_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [noteId, key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'frontmatter_fields';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FrontmatterField> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('note_id')) {
+      context.handle(
+        _noteIdMeta,
+        noteId.isAcceptableOrUnknown(data['note_id']!, _noteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteIdMeta);
+    }
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {noteId, key, value};
+  @override
+  FrontmatterField map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FrontmatterField(
+      noteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}note_id'],
+      )!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $FrontmatterFieldsTable createAlias(String alias) {
+    return $FrontmatterFieldsTable(attachedDatabase, alias);
+  }
+}
+
+class FrontmatterField extends DataClass
+    implements Insertable<FrontmatterField> {
+  /// The id of the note the field belongs to.
+  final int noteId;
+
+  /// The key, lowercased; dotted for a nested map's leaf.
+  final String key;
+
+  /// One of the key's values, as text.
+  final String value;
+  const FrontmatterField({
+    required this.noteId,
+    required this.key,
+    required this.value,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['note_id'] = Variable<int>(noteId);
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  FrontmatterFieldsCompanion toCompanion(bool nullToAbsent) {
+    return FrontmatterFieldsCompanion(
+      noteId: Value(noteId),
+      key: Value(key),
+      value: Value(value),
+    );
+  }
+
+  factory FrontmatterField.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FrontmatterField(
+      noteId: serializer.fromJson<int>(json['noteId']),
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'noteId': serializer.toJson<int>(noteId),
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  FrontmatterField copyWith({int? noteId, String? key, String? value}) =>
+      FrontmatterField(
+        noteId: noteId ?? this.noteId,
+        key: key ?? this.key,
+        value: value ?? this.value,
+      );
+  FrontmatterField copyWithCompanion(FrontmatterFieldsCompanion data) {
+    return FrontmatterField(
+      noteId: data.noteId.present ? data.noteId.value : this.noteId,
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FrontmatterField(')
+          ..write('noteId: $noteId, ')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(noteId, key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FrontmatterField &&
+          other.noteId == this.noteId &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class FrontmatterFieldsCompanion extends UpdateCompanion<FrontmatterField> {
+  final Value<int> noteId;
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const FrontmatterFieldsCompanion({
+    this.noteId = const Value.absent(),
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FrontmatterFieldsCompanion.insert({
+    required int noteId,
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : noteId = Value(noteId),
+       key = Value(key),
+       value = Value(value);
+  static Insertable<FrontmatterField> custom({
+    Expression<int>? noteId,
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (noteId != null) 'note_id': noteId,
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FrontmatterFieldsCompanion copyWith({
+    Value<int>? noteId,
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return FrontmatterFieldsCompanion(
+      noteId: noteId ?? this.noteId,
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (noteId.present) {
+      map['note_id'] = Variable<int>(noteId.value);
+    }
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FrontmatterFieldsCompanion(')
+          ..write('noteId: $noteId, ')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$IndexDatabase extends GeneratedDatabase {
   _$IndexDatabase(QueryExecutor e) : super(e);
   $IndexDatabaseManager get managers => $IndexDatabaseManager(this);
@@ -1470,6 +1894,8 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $TagsTable tags = $TagsTable(this);
   late final $NoteTagsTable noteTags = $NoteTagsTable(this);
   late final $NoteLinksTable noteLinks = $NoteLinksTable(this);
+  late final $FrontmatterFieldsTable frontmatterFields =
+      $FrontmatterFieldsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1480,6 +1906,7 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     tags,
     noteTags,
     noteLinks,
+    frontmatterFields,
   ];
 }
 
@@ -1492,6 +1919,9 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   required int size,
   required DateTime modified,
   Value<String?> sha256,
+  Value<String?> title,
+  Value<DateTime?> date,
+  Value<bool> pinned,
 });
 typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<int> id,
@@ -1502,6 +1932,9 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<int> size,
   Value<DateTime> modified,
   Value<String?> sha256,
+  Value<String?> title,
+  Value<DateTime?> date,
+  Value<bool> pinned,
 });
 
 class $$NotesTableFilterComposer
@@ -1550,6 +1983,21 @@ class $$NotesTableFilterComposer
 
   ColumnFilters<String> get sha256 => $composableBuilder(
     column: $table.sha256,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1602,6 +2050,21 @@ class $$NotesTableOrderingComposer
     column: $table.sha256,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$NotesTableAnnotationComposer
@@ -1636,6 +2099,15 @@ class $$NotesTableAnnotationComposer
 
   GeneratedColumn<String> get sha256 =>
       $composableBuilder(column: $table.sha256, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<bool> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => column);
 }
 
 class $$NotesTableTableManager
@@ -1674,6 +2146,9 @@ class $$NotesTableTableManager
                 Value<int> size = const Value.absent(),
                 Value<DateTime> modified = const Value.absent(),
                 Value<String?> sha256 = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<DateTime?> date = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
               }) => NotesCompanion(
                 id: id,
                 path: path,
@@ -1683,6 +2158,9 @@ class $$NotesTableTableManager
                 size: size,
                 modified: modified,
                 sha256: sha256,
+                title: title,
+                date: date,
+                pinned: pinned,
               ),
           createCompanionCallback:
               ({
@@ -1694,6 +2172,9 @@ class $$NotesTableTableManager
                 required int size,
                 required DateTime modified,
                 Value<String?> sha256 = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<DateTime?> date = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
               }) => NotesCompanion.insert(
                 id: id,
                 path: path,
@@ -1703,6 +2184,9 @@ class $$NotesTableTableManager
                 size: size,
                 modified: modified,
                 sha256: sha256,
+                title: title,
+                date: date,
+                pinned: pinned,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2348,6 +2832,190 @@ typedef $$NoteLinksTableProcessedTableManager =
       NoteLink,
       PrefetchHooks Function()
     >;
+typedef $$FrontmatterFieldsTableCreateCompanionBuilder =
+    FrontmatterFieldsCompanion Function({
+      required int noteId,
+      required String key,
+      required String value,
+      Value<int> rowid,
+    });
+typedef $$FrontmatterFieldsTableUpdateCompanionBuilder =
+    FrontmatterFieldsCompanion Function({
+      Value<int> noteId,
+      Value<String> key,
+      Value<String> value,
+      Value<int> rowid,
+    });
+
+class $$FrontmatterFieldsTableFilterComposer
+    extends Composer<_$IndexDatabase, $FrontmatterFieldsTable> {
+  $$FrontmatterFieldsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FrontmatterFieldsTableOrderingComposer
+    extends Composer<_$IndexDatabase, $FrontmatterFieldsTable> {
+  $$FrontmatterFieldsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get noteId => $composableBuilder(
+    column: $table.noteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FrontmatterFieldsTableAnnotationComposer
+    extends Composer<_$IndexDatabase, $FrontmatterFieldsTable> {
+  $$FrontmatterFieldsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get noteId =>
+      $composableBuilder(column: $table.noteId, builder: (column) => column);
+
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$FrontmatterFieldsTableTableManager
+    extends
+        RootTableManager<
+          _$IndexDatabase,
+          $FrontmatterFieldsTable,
+          FrontmatterField,
+          $$FrontmatterFieldsTableFilterComposer,
+          $$FrontmatterFieldsTableOrderingComposer,
+          $$FrontmatterFieldsTableAnnotationComposer,
+          $$FrontmatterFieldsTableCreateCompanionBuilder,
+          $$FrontmatterFieldsTableUpdateCompanionBuilder,
+          (
+            FrontmatterField,
+            BaseReferences<
+              _$IndexDatabase,
+              $FrontmatterFieldsTable,
+              FrontmatterField
+            >,
+          ),
+          FrontmatterField,
+          PrefetchHooks Function()
+        > {
+  $$FrontmatterFieldsTableTableManager(
+    _$IndexDatabase db,
+    $FrontmatterFieldsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FrontmatterFieldsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FrontmatterFieldsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FrontmatterFieldsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> noteId = const Value.absent(),
+                Value<String> key = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FrontmatterFieldsCompanion(
+                noteId: noteId,
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int noteId,
+                required String key,
+                required String value,
+                Value<int> rowid = const Value.absent(),
+              }) => FrontmatterFieldsCompanion.insert(
+                noteId: noteId,
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FrontmatterFieldsTable, FrontmatterField>(table),
+                  BaseReferences<
+                    _$IndexDatabase,
+                    $FrontmatterFieldsTable,
+                    FrontmatterField
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FrontmatterFieldsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$IndexDatabase,
+      $FrontmatterFieldsTable,
+      FrontmatterField,
+      $$FrontmatterFieldsTableFilterComposer,
+      $$FrontmatterFieldsTableOrderingComposer,
+      $$FrontmatterFieldsTableAnnotationComposer,
+      $$FrontmatterFieldsTableCreateCompanionBuilder,
+      $$FrontmatterFieldsTableUpdateCompanionBuilder,
+      (
+        FrontmatterField,
+        BaseReferences<
+          _$IndexDatabase,
+          $FrontmatterFieldsTable,
+          FrontmatterField
+        >,
+      ),
+      FrontmatterField,
+      PrefetchHooks Function()
+    >;
 
 class $IndexDatabaseManager {
   final _$IndexDatabase _db;
@@ -2361,4 +3029,6 @@ class $IndexDatabaseManager {
       $$NoteTagsTableTableManager(_db, _db.noteTags);
   $$NoteLinksTableTableManager get noteLinks =>
       $$NoteLinksTableTableManager(_db, _db.noteLinks);
+  $$FrontmatterFieldsTableTableManager get frontmatterFields =>
+      $$FrontmatterFieldsTableTableManager(_db, _db.frontmatterFields);
 }

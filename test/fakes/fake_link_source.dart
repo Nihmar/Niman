@@ -25,6 +25,7 @@ final class FakeLinkSource implements LinkSource {
     isDir: false,
     size: 0,
     modified: DateTime.fromMillisecondsSinceEpoch(0),
+    pinned: false,
   );
 
   @override

@@ -181,6 +181,10 @@ final class NoteContent {
     required this.inlineTags,
     required this.aliases,
     required this.links,
+    this.fields = const {},
+    this.date,
+    this.pinned = false,
+    this.frontmatterError,
   });
 
   /// Library-relative note path.
@@ -207,6 +211,22 @@ final class NoteContent {
 
   /// The note's links, in document order.
   final List<ParsedLink> links;
+
+  /// Every frontmatter key mapped to its values as text — what the
+  /// `frontmatter_fields` rows are written from (T-M4-02).
+  final Map<String, List<String>> fields;
+
+  /// The frontmatter `date:`, or null.
+  final DateTime? date;
+
+  /// Whether the frontmatter says `pinned: true`.
+  final bool pinned;
+
+  /// Why the frontmatter block did not parse, or null when it did.
+  ///
+  /// Carried so the scan can say which note is broken; the index keeps no
+  /// fields for it, because it has none to keep.
+  final String? frontmatterError;
 }
 
 /// Reads and parses the notes at [rels] (library-relative, under [root]) —
@@ -273,6 +293,10 @@ NoteContent _extractContent(String rel, String sha, String text) {
     inlineTags: inlineTagsOf(doc),
     aliases: fm?.aliases ?? const [],
     links: linksInDocument(doc),
+    fields: fm?.fields ?? const {},
+    date: fm?.date,
+    pinned: fm?.pinned ?? false,
+    frontmatterError: fm?.error,
   );
 }
 
@@ -1414,7 +1438,45 @@ final class Indexer {
     await _replaceStems(row.id, row.name);
     await _writeAliasStems(row.id, c);
     await _writeTags(row.id, c);
+    await _writeFields(row.id, c);
     await _writeLinks(row.id, c, resolved);
+  }
+
+  /// Writes the known frontmatter fields onto the note row itself and the
+  /// whole block into `frontmatter_fields` (T-M4-02).
+  ///
+  /// The three known ones are on the row because the tree renders them per
+  /// visible row; the table holds every key, including those three, and is
+  /// what a `key = value` filter reads. A note whose block was removed —
+  /// or never parsed — writes them back as null/false, so a title that is
+  /// gone stops overriding the filename.
+  Future<void> _writeFields(int noteId, NoteContent c) async {
+    await (_db.update(_db.notes)..where((t) => t.id.equals(noteId))).write(
+      NotesCompanion(
+        title: Value(c.fields['title']?.first),
+        date: Value(c.date),
+        pinned: Value(c.pinned),
+      ),
+    );
+    await (_db.delete(
+      _db.frontmatterFields,
+    )..where((f) => f.noteId.equals(noteId))).go();
+    if (c.fields.isEmpty) return;
+    await _db.batch((batch) {
+      for (final entry in c.fields.entries) {
+        for (final value in entry.value) {
+          batch.insert(
+            _db.frontmatterFields,
+            FrontmatterFieldsCompanion.insert(
+              noteId: noteId,
+              key: entry.key,
+              value: value,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      }
+    });
   }
 
   /// Rewrites the `note_stems` alias rows (source `alias`) of note
