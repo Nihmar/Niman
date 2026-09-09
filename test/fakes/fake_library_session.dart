@@ -5,6 +5,7 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
@@ -64,6 +65,13 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   int get revision => _revision;
 
+  /// The fake indexes nothing, so there is never a scan to report on.
+  /// Tests that need the indexing line set this and pump.
+  IndexProgress? indexing;
+
+  @override
+  IndexProgress? get indexProgress => indexing;
+
   @override
   Stream<int> get events => _events.stream;
 
@@ -93,10 +101,17 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _phase = LibraryPhase.opening;
     _lastError = null;
     _bump();
+    // Held while a test wants to look at the opening screen: the progress
+    // bar and the line naming the note being indexed only exist there.
+    final gate = openGate;
+    if (gate != null) await gate.future;
     _root = path;
     _phase = LibraryPhase.ready;
     _bump();
   }
+
+  /// Set to pause [open] in its opening phase; complete it to finish.
+  Completer<void>? openGate;
 
   @override
   Future<void> close() async {

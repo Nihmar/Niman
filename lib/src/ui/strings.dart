@@ -563,6 +563,11 @@ final class AppStrings {
     'Quella cartella non è supportata. Scegline una nella memoria del '
         'dispositivo.',
   );
+
+  /// The first index's counter, e.g. "412 of 10000 notes".
+  static String indexingCount(int done, int total) =>
+      _t('$done of $total notes', '$done di $total note');
+
   // The known-library list on the home screen (T-ML-05, T-ML-07).
   static String get knownLibrariesTitle =>
       _t('Your libraries', 'Le tue librerie');

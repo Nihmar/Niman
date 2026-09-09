@@ -36,8 +36,14 @@ try {
 
 # A failure line ends in "[E]" and names the file and the test. Keep both,
 # since the same test name can exist in two files.
+#
+# The reporter prefixes each line with a running "+N -M: " counter, and
+# omits the file path when the run covers a single file. Strip the counter
+# either way; a line left without a path is matched by its tail below.
 $failed = Select-String -Path $log -Pattern '\[E\]$' |
-    ForEach-Object { ($_.Line -replace '^.*?Copist[/\\]', '').Trim() } |
+    ForEach-Object {
+        ($_.Line -replace '^.*?Copist[/\\]', '' -replace '^\s*\+\d+(\s+-\d+)?:\s*', '').Trim()
+    } |
     Sort-Object -Unique
 
 $summary = (Get-Content $log | Where-Object { $_ -match '^\s*\+\d+' } | Select-Object -Last 1)
@@ -68,7 +74,12 @@ if (Test-Path $baselineFile) {
         ForEach-Object { $_.TrimStart('~') }
 }
 
-$new = @($failed | Where-Object { $known -notcontains $_ })
+# A single-file run reports the test without its path, so a baseline entry
+# matches when it ends with the reported line.
+$new = @($failed | Where-Object {
+    $line = $_
+    -not ($known | Where-Object { $_ -eq $line -or $_.EndsWith(": $line") })
+})
 # Only meaningful on a full run: a subset never exercises the rest.
 $fixed = @()
 if (-not $Paths) {

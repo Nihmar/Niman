@@ -2,6 +2,7 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/links/resolver.dart';
@@ -90,6 +91,10 @@ abstract interface class LibrarySession {
 
   /// Bumped after every index change.
   int get revision;
+
+  /// The note the first index is reading, or null when no scan is
+  /// running. Reported only for the blocking scan of an opening library.
+  IndexProgress? get indexProgress;
 
   /// Fires with the new [revision] after every index change.
   Stream<int> get events;

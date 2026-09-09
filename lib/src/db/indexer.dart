@@ -13,6 +13,7 @@ import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// A note file or folder observed on disk during a scan.
@@ -215,12 +216,20 @@ final class NoteContent {
 /// Top-level for [Isolate.run]; batched by the caller (a few hundred per
 /// call). A note that cannot be read (deleted or replaced mid-scan) is left
 /// out; the next scan picks it up.
+///
+/// [progress] receives each library-relative path as it comes up, so a
+/// first index can name what it is reading. A `SendPort` is sendable, so
+/// the isolate closure can carry one.
 Future<List<NoteContent>> readNoteContents(
   String root,
-  List<String> rels,
-) async {
+  List<String> rels, {
+  SendPort? progress,
+}) async {
   final out = <NoteContent>[];
   for (final rel in rels) {
+    // Posted before the read, so what the screen names is the note being
+    // worked on rather than the one just finished.
+    progress?.send(rel);
     try {
       final bytes = await File(p.join(root, rel)).readAsBytes();
       var text = utf8.decode(bytes, allowMalformed: true);
@@ -235,6 +244,20 @@ Future<List<NoteContent>> readNoteContents(
     }
   }
   return out;
+}
+
+/// Runs one [readNoteContents] batch on a background isolate.
+///
+/// Top-level so the [Isolate.run] closure captures only these three
+/// sendable values. Inlined in the caller it captured that method's
+/// context, which holds the async body's future — unsendable, and the
+/// open failed with it.
+Future<List<NoteContent>> _readBatchOnIsolate(
+  String root,
+  List<String> batch,
+  SendPort? progress,
+) {
+  return Isolate.run(() => readNoteContents(root, batch, progress: progress));
 }
 
 /// Parses [text] into a [NoteContent] (pure: frontmatter, tags, links).
@@ -257,6 +280,26 @@ NoteContent _extractContent(String rel, String sha, String text) {
 String _titleFromName(String rel) {
   final name = p.basename(rel);
   return name.endsWith('.md') ? name.substring(0, name.length - 3) : name;
+}
+
+/// How far a scan has got, and on which note.
+///
+/// It exists for the first index of a library, which is the one long
+/// enough to watch: the alternative is a progress bar with nothing behind
+/// it while the app reads a few thousand files.
+@immutable
+final class IndexProgress {
+  /// Creates a progress report.
+  const new({required this.file, required this.done, required this.of});
+
+  /// The library-relative path being read.
+  final String file;
+
+  /// Notes reached so far, including this one.
+  final int done;
+
+  /// Notes this pass will read in total.
+  final int of;
 }
 
 /// Builds and maintains the notes index so it mirrors the library on disk.
@@ -283,6 +326,13 @@ final class Indexer {
 
   /// Callback invoked after each successful index mutation.
   void Function()? onChanged;
+
+  /// Called with each note a content pass reads, while it is set.
+  ///
+  /// Every content read reports, not only a full scan. The session sets
+  /// it around a first index and clears it after, because it costs a
+  /// message per note and is worth paying only when someone is looking.
+  void Function(IndexProgress)? onProgress;
 
   Future<void> _chain = Future<void>.value();
 
@@ -756,6 +806,10 @@ final class Indexer {
   }
 
   /// Reads [rels] in batches of [_contentBatch] on the index isolate.
+  ///
+  /// While [onProgress] is set, the read isolate reports each note as it
+  /// reaches it. The port is opened only then: a scan nobody is watching
+  /// should not pay for a message per note.
   Future<Map<String, NoteContent>> _readRelContents(
     String root,
     List<String> rels,
@@ -763,16 +817,39 @@ final class Indexer {
     if (rels.isEmpty) return const {};
     final contents = <String, NoteContent>{};
     _log.debug('contents: reading ${rels.length} note(s)');
-    for (var i = 0; i < rels.length; i += _contentBatch) {
-      final end = i + _contentBatch < rels.length
-          ? i + _contentBatch
-          : rels.length;
-      final read = await Isolate.run(
-        () => readNoteContents(root, rels.sublist(i, end)),
-      );
-      for (final c in read) {
-        contents[c.rel] = c;
+    final report = onProgress;
+    ReceivePort? port;
+    if (report != null) {
+      var done = 0;
+      port = ReceivePort()
+        ..listen((message) {
+          done++;
+          report(
+            IndexProgress(
+              file: message! as String,
+              done: done,
+              of: rels.length,
+            ),
+          );
+        });
+    }
+    final send = port?.sendPort;
+    try {
+      for (var i = 0; i < rels.length; i += _contentBatch) {
+        final end = i + _contentBatch < rels.length
+            ? i + _contentBatch
+            : rels.length;
+        final read = await _readBatchOnIsolate(
+          root,
+          rels.sublist(i, end),
+          send,
+        );
+        for (final c in read) {
+          contents[c.rel] = c;
+        }
       }
+    } finally {
+      port?.close();
     }
     return contents;
   }

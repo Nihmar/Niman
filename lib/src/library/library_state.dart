@@ -128,6 +128,31 @@ final class LibraryController implements LibrarySession {
   /// [_teardown] so a stale scan can never hit a different library.
   Timer? _reconcileTimer;
 
+  /// How far the first index has got, or null when no scan is running.
+  @override
+  IndexProgress? get indexProgress => _indexProgress;
+
+  IndexProgress? _indexProgress;
+  DateTime? _progressShown;
+
+  /// Records a scan's progress, and lets the UI see it at a readable rate.
+  ///
+  /// The reports arrive one per note, which on a large library is far
+  /// faster than a frame; rebuilding on each would spend the scan drawing
+  /// instead of reading. Twenty a second already reads as a blur, which
+  /// is the point of showing them.
+  void _onIndexProgress(IndexProgress progress) {
+    _indexProgress = progress;
+    final now = DateTime.now();
+    final last = _progressShown;
+    if (last != null && now.difference(last) < _progressInterval) return;
+    _progressShown = now;
+    _bump();
+  }
+
+  /// How often a running scan redraws the name it is showing.
+  static const _progressInterval = Duration(milliseconds: 50);
+
   /// Current phase.
   @override
   LibraryPhase get phase => _phase;
@@ -322,7 +347,15 @@ final class LibraryController implements LibrarySession {
       final indexer = Indexer(indexDb)..onChanged = _bump;
       final ops = NoteOps(root: abs, db: indexDb, indexer: indexer);
       if (blockingScan) {
-        await indexer.fullScan(abs);
+        // Only here: the first index is the scan long enough to be worth
+        // watching, and reporting costs a message per note.
+        indexer.onProgress = _onIndexProgress;
+        try {
+          await indexer.fullScan(abs);
+        } finally {
+          indexer.onProgress = null;
+          _indexProgress = null;
+        }
       }
       final watcher = FileWatcher(abs, debounce: watcherDebounce);
       watcher.events.listen(_onWatchBatch);

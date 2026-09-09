@@ -411,6 +411,42 @@ void main() {
     });
   });
 
+  group('scan progress', () {
+    test('a first index names every note it reads', () async {
+      final seen = <IndexProgress>[];
+      indexer.onProgress = seen.add;
+      await indexer.fullScan(root.path);
+
+      // Three notes on disk; the hidden ones are never walked, so they
+      // are never read either.
+      expect(seen.map((p) => p.file), hasLength(3));
+      expect(seen.map((p) => p.file), containsAll(<String>['note1.md']));
+      expect(seen.map((p) => p.done), [1, 2, 3]);
+      expect(seen.every((p) => p.of == 3), isTrue);
+    });
+
+    test('any content read reports while a callback is set', () async {
+      // The indexer reports whenever someone is listening; it is the
+      // session that only listens around a first index, so a rescan once
+      // a minute pays nothing.
+      await indexer.fullScan(root.path);
+      final seen = <IndexProgress>[];
+      indexer.onProgress = seen.add;
+      final added = p.join(root.path, 'note3.md');
+      File(added).writeAsStringSync('new');
+      await indexer.applyEvents(root.path, [added]);
+      expect(seen.map((p) => p.file), ['note3.md']);
+    });
+
+    test('a scan with nothing to read reports nothing', () async {
+      await indexer.fullScan(root.path);
+      final seen = <IndexProgress>[];
+      indexer.onProgress = seen.add;
+      await indexer.fullScan(root.path);
+      expect(seen, isEmpty);
+    });
+  });
+
   group('content pipeline (T-M3-03)', () {
     test('a full scan indexes FTS, tags, links and alias stems', () async {
       File(p.join(root.path, 'other.md'))

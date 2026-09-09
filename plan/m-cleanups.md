@@ -60,6 +60,16 @@ list stays honest about what remains. Nothing here is a feature.
   when the mode is forced to `split`; the stored ratio survives being
   hidden.*
 
+- [x] **T-CL-06** The first index names what it is reading (user,
+  2026-09-09). A large library's first open was a progress bar over
+  nothing for a long time, which reads as a hang. The content pass now
+  reports each note as it reaches it, over a `SendPort` handed to the
+  read isolate, and the open screen shows the count and the note's path
+  under the bar. The session listens only around the blocking first scan,
+  since the report costs a message per note; the redraw is throttled to
+  twenty a second, which is already a blur. *Done: unit tests on the
+  reporting, widget tests on the line.*
+
 ## Not worth doing (recorded so it is not re-found)
 
 - The list drag's hit testing walks every row per pointer move
