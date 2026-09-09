@@ -55,6 +55,37 @@ int normalizeIndentWidth(Object? raw) {
   return width;
 }
 
+/// The text size of a fresh library: the sizes the app shipped with.
+const double defaultTextScale = 1;
+
+/// The smallest accepted text scale.
+const double minTextScale = 0.8;
+
+/// The largest accepted text scale.
+const double maxTextScale = 1.8;
+
+/// The source editor's font size at [defaultTextScale], in logical
+/// pixels.
+///
+/// It is re_editor's own default, restated here because the note scale
+/// multiplies it: leaving the package to supply the size would make 100%
+/// mean whatever the next version of it decides.
+const double baseNoteFontSize = 13;
+
+/// Reads a text scale out of the settings file, into range.
+///
+/// Clamped rather than defaulted, for the reason [normalizeIndentWidth]
+/// is: someone who typed 3 wants the text as large as it goes, not back
+/// at the size they were trying to leave.
+double normalizeTextScale(Object? raw) {
+  if (raw is! num) return defaultTextScale;
+  final scale = raw.toDouble();
+  if (!scale.isFinite) return defaultTextScale;
+  if (scale < minTextScale) return minTextScale;
+  if (scale > maxTextScale) return maxTextScale;
+  return scale;
+}
+
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
@@ -113,6 +144,8 @@ final class LibraryConfig {
     this.linkType = LinkType.wikilink,
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
+    this.uiTextScale = defaultTextScale,
+    this.noteTextScale = defaultTextScale,
     this.extra = const {},
   });
 
@@ -164,6 +197,8 @@ final class LibraryConfig {
         final String layout => layout,
         _ => '',
       },
+      uiTextScale: normalizeTextScale(json['uiTextScale']),
+      noteTextScale: normalizeTextScale(json['noteTextScale']),
       extra: extra,
     );
   }
@@ -221,6 +256,18 @@ final class LibraryConfig {
   /// The arranged editor toolbar; empty means the shipped one.
   final String editorToolbar;
 
+  /// How much larger than shipped the interface text is (default 1.0).
+  ///
+  /// Per library rather than per install (user, 2026-09-09): the size a
+  /// library wants to be read at is a property of what is in it, and the
+  /// tablet-vs-phone argument that keeps the preview layout app-wide does
+  /// not apply — a library read on both wants the same text on both.
+  final double uiTextScale;
+
+  /// How much larger than shipped the note text is, in the editor and in
+  /// the preview alike (default 1.0).
+  final double noteTextScale;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -240,6 +287,8 @@ final class LibraryConfig {
     LinkType? linkType,
     int? indentWidth,
     String? editorToolbar,
+    double? uiTextScale,
+    double? noteTextScale,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -257,6 +306,8 @@ final class LibraryConfig {
       linkType: linkType ?? this.linkType,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
+      uiTextScale: uiTextScale ?? this.uiTextScale,
+      noteTextScale: noteTextScale ?? this.noteTextScale,
       extra: extra,
     );
   }
@@ -275,6 +326,8 @@ final class LibraryConfig {
     'linkType',
     'indentWidth',
     'editorToolbar',
+    'uiTextScale',
+    'noteTextScale',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -301,6 +354,8 @@ final class LibraryConfig {
       'linkType': linkType.name,
       'indentWidth': indentWidth,
       'editorToolbar': editorToolbar,
+      'uiTextScale': uiTextScale,
+      'noteTextScale': noteTextScale,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -368,6 +423,8 @@ final class LibraryConfig {
         linkType == other.linkType &&
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&
+        uiTextScale == other.uiTextScale &&
+        noteTextScale == other.noteTextScale &&
         _deepEquals(extra, other.extra);
   }
 

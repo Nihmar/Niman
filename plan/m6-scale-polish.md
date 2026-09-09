@@ -48,16 +48,17 @@ size fixed in code. Sync (M5) has not been built.
 - [ ] **T-M6-05** Themes: brightness (day/night/system) × palette (system |
   Catppuccin — night → Mocha, day → Latte); token-based role map (design.md).
   *AC: all four combinations render; adding a palette = adding a mapping.*
-- [ ] **T-M6-12** Text size: two sliders in the settings, one for the
-  interface and one for the note text, each stored app-wide and applied
-  live. The interface slider multiplies the OS text scale for every
-  screen — tree, tabs, todo rows, dialogs, settings. The note slider sets
-  the source editor's font size in points and scales the preview of the
-  same note by the same factor, so switching between the two panes does
-  not change how big the note reads. Neither slider moves the other.
-  *AC: both sliders survive a restart; the editor ignores the interface
-  slider and the tree ignores the note slider; the preview and the editor
-  agree; the smallest and largest steps still lay out on a phone.*
+- [x] **T-M6-12** Text size: two sliders in the settings, one for the
+  interface and one for the note text, both stored **in the library**
+  (user, 2026-09-09) and applied live. The interface slider multiplies
+  the OS text scale for every screen — tree, tabs, todo rows, dialogs,
+  settings. The note slider sets the source editor's font size and scales
+  the preview of the same note by the same factor, so switching between
+  the two panes does not change how big the note reads. Neither slider
+  moves the other. *AC: both sliders survive a restart; the editor
+  ignores the interface slider and the tree ignores the note slider; the
+  preview and the editor agree; the smallest and largest steps still lay
+  out on a phone.*
 - [ ] **T-M6-06** Encryption: first-launch choice of plain vs encrypted
   library; AES-256-GCM per file; key in `flutter_secure_storage`; transparent
   encrypt-on-write / decrypt-on-read in the note pipeline; export yields plain
@@ -93,17 +94,24 @@ See [design.md](design.md). M6 slice:
   crypto). Per-file: 12-byte random nonce + ciphertext; magic-byte header
   marking encrypted files; key from `flutter_secure_storage`. Editor holds
   plaintext in memory only; `.md`/HTML exports always decrypt.
-- **Text size:** two doubles on the single `app_settings` row, both
-  defaulting to 1.0 and clamped to a usable band. The interface one is
-  applied once, at the app root, by composing it with the OS scaler
-  (`MediaQuery.textScalerOf`) so the accessibility setting still counts;
-  everything under it inherits. The note one never travels as a scaler:
-  the source editor takes an explicit `CodeEditorStyle.fontSize` (re_editor
-  paints its own text and ignores `textScaler` entirely), and the preview
-  subtree gets its own `MediaQuery` carrying the note scaler instead of
-  the interface one. That split is what keeps the two sliders independent
-  — without it the preview would follow the interface slider and disagree
-  with the editor beside it.
+- **Text size:** two doubles in `.copist/settings.json`, both defaulting
+  to 1.0 and clamped to 0.8 .. 1.8 on read, since the file is
+  hand-editable. Opening a library publishes them on `AppTextScales`, a
+  small global of the kind `core/language.dart` already is, and closing
+  one puts them back: the app root sits above every provider and the
+  editor builds its style outside any Material ancestor, so neither can
+  be reached by an inherited widget. The interface one is applied once,
+  at the app root, by composing it with the OS scaler
+  (`ComposedTextScaler`, since `TextScaler` can only be clamped, not
+  multiplied) so the accessibility setting still counts; everything under
+  it inherits. The note one never travels as a scaler: the source editor
+  takes an explicit `CodeEditorStyle.fontSize` (re_editor paints its own
+  text and ignores `textScaler` entirely), and the preview replaces the
+  inherited scaler with one built from *under* the interface slider —
+  composing on top of what it inherits would multiply the two together.
+  That is what keeps the sliders independent; without it the preview
+  would follow the interface slider and disagree with the editor beside
+  it.
 - **HTML export:** markdown → HTML (shared preview pipeline) + KaTeX output
   inlined; standalone file.
 - **Notion import:** zip walk → `.md` files mapped into the library tree;

@@ -58,6 +58,23 @@ final class AppStrings {
   /// The editor's share of a split, as a row's value, e.g. "50%".
   static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
 
+  // Settings: text size (T-M6-12).
+  static String get uiTextScaleTitle =>
+      _t('Interface text size', 'Dimensione del testo dell’interfaccia');
+  static String get uiTextScaleSubtitle => _t(
+    'The tree, the tabs and the dialogs; on top of the system setting',
+    'L’albero, le schede e i dialoghi; oltre all’impostazione di sistema',
+  );
+  static String get noteTextScaleTitle =>
+      _t('Note text size', 'Dimensione del testo delle note');
+  static String get noteTextScaleSubtitle => _t(
+    'The editor and the preview, which always agree',
+    'L’editor e l’anteprima, che restano d’accordo',
+  );
+
+  /// A text size as a row's value, e.g. "120%".
+  static String textScaleValue(double scale) => '${(scale * 100).round()}%';
+
   // Settings: preview mode.
   static String get previewModeTitle =>
       _t('Preview mode', 'Modalità anteprima');

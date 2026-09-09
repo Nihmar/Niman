@@ -8,6 +8,7 @@ import 'package:copist/src/core/settings/legacy_library_settings.dart';
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/text_scale.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -401,6 +402,13 @@ final class LibraryController implements LibrarySession {
       _indexer = indexer;
       _ops = ops;
       _root = abs;
+      // The library's own text sizes, on screen with it (T-M6-12) and
+      // before the ready bump, so nothing paints at the wrong size first.
+      final settings = await config.config;
+      AppTextScales.apply(
+        ui: settings.uiTextScale,
+        note: settings.noteTextScale,
+      );
       _phase = LibraryPhase.ready;
       currentRootPath = abs;
       await AppSettingsRepo(appDb).setLastLibraryPath(abs);
@@ -654,6 +662,32 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(editorToolbar: layout));
   }
 
+  /// The interface text size.
+  @override
+  Future<double> get uiTextScale async => (await _library).uiTextScale;
+
+  /// Sets (and persists) the interface text size, and puts it on screen.
+  @override
+  Future<void> setUiTextScale(double scale) async {
+    final clamped = normalizeTextScale(scale);
+    _log.info('interface text scale set to $clamped');
+    await _editLibrary((c) => c.copyWith(uiTextScale: clamped));
+    AppTextScales.ui = clamped;
+  }
+
+  /// The note text size.
+  @override
+  Future<double> get noteTextScale async => (await _library).noteTextScale;
+
+  /// Sets (and persists) the note text size, and puts it on screen.
+  @override
+  Future<void> setNoteTextScale(double scale) async {
+    final clamped = normalizeTextScale(scale);
+    _log.info('note text scale set to $clamped');
+    await _editLibrary((c) => c.copyWith(noteTextScale: clamped));
+    AppTextScales.note = clamped;
+  }
+
   /// The UI language.
   @override
   Future<AppLanguage> get language async {
@@ -711,6 +745,9 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops = null;
     _configRepo = null;
+    // The text sizes belonged to the library that just went away; the
+    // home screen is nobody's library and reads at the shipped sizes.
+    AppTextScales.reset();
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.
     final searchDb = _searchDb;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/editor/markdown_chunks.dart';
 import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
@@ -35,6 +36,7 @@ final class NoteEditor extends StatelessWidget {
     required this.focusNode,
     this.showLineNumbers = true,
     this.autofocus = false,
+    this.fontSize = baseNoteFontSize,
     this.scrollController,
     this.findController,
     this.findBuilder,
@@ -53,6 +55,14 @@ final class NoteEditor extends StatelessWidget {
 
   /// Whether the editor focuses (shows the keyboard) on open.
   final bool autofocus;
+
+  /// The source text's size in logical pixels (the note text-size
+  /// setting, T-M6-12).
+  ///
+  /// It is a size and not a scale because the editor never sees one:
+  /// re_editor paints its own text and reads no `textScaler`, which is
+  /// also why the interface slider leaves this widget alone.
+  final double fontSize;
 
   /// The editor's scroll controllers (vertical is the sync side).
   final CodeScrollController? scrollController;
@@ -83,9 +93,14 @@ final class NoteEditor extends StatelessWidget {
       // multi-second on novel-length notes); the controller's spanBuilder
       // (wired by `NoteView`) styles each line from the incremental
       // tokenizer instead.
-      style: const CodeEditorStyle(
+      style: CodeEditorStyle(
+        fontSize: fontSize,
         fontFamily: 'monospace',
-        fontFamilyFallback: ['Consolas', 'DejaVu Sans Mono', 'Roboto Mono'],
+        fontFamilyFallback: const [
+          'Consolas',
+          'DejaVu Sans Mono',
+          'Roboto Mono',
+        ],
       ),
       // The row-number column + fold markers (settings + T-M2-07): heading
       // chunks come from MarkdownChunkAnalyzer (the header folds), not the

@@ -4,6 +4,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/text_scale.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -111,6 +112,9 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     final gate = openGate;
     if (gate != null) await gate.future;
     _root = path;
+    // As the real session does: the library's text sizes go on screen
+    // with it (T-M6-12).
+    AppTextScales.apply(ui: _config.uiTextScale, note: _config.noteTextScale);
     _phase = LibraryPhase.ready;
     _bump();
   }
@@ -122,6 +126,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> close() async {
     _root = null;
     _phase = LibraryPhase.none;
+    AppTextScales.reset();
     _bump();
   }
 
@@ -257,6 +262,26 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setEditorToolbar(String layout) async {
     _config = _config.copyWith(editorToolbar: layout);
+  }
+
+  @override
+  Future<double> get uiTextScale async => _config.uiTextScale;
+
+  @override
+  Future<void> setUiTextScale(double scale) async {
+    final clamped = normalizeTextScale(scale);
+    _config = _config.copyWith(uiTextScale: clamped);
+    AppTextScales.ui = clamped;
+  }
+
+  @override
+  Future<double> get noteTextScale async => _config.noteTextScale;
+
+  @override
+  Future<void> setNoteTextScale(double scale) async {
+    final clamped = normalizeTextScale(scale);
+    _config = _config.copyWith(noteTextScale: clamped);
+    AppTextScales.note = clamped;
   }
 
   @override
@@ -807,8 +832,7 @@ final class _FakeFieldSource implements FieldSource {
     for (final (note, fm) in _session._liveFrontmatter()) {
       final values = fm?.fields[name];
       if (values == null) continue;
-      if (wanted.isEmpty ||
-          values.any((v) => v.toLowerCase() == wanted)) {
+      if (wanted.isEmpty || values.any((v) => v.toLowerCase() == wanted)) {
         out.add(note);
       }
     }

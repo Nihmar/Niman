@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
@@ -74,6 +75,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
   String? _listFolder;
   String? _templateFolder;
   AppLanguage _language = AppLanguage.system;
+  double _uiTextScale = defaultTextScale;
+  double _noteTextScale = defaultTextScale;
+
+  /// Steps of 5% between [minTextScale] and [maxTextScale]: fine enough
+  /// to land on a size that fits, coarse enough to be hit on a phone.
+  static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
+      .round();
 
   @override
   void initState() {
@@ -98,6 +106,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
     final language = await controller.language;
+    final uiTextScale = await controller.uiTextScale;
+    final noteTextScale = await controller.noteTextScale;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -114,6 +124,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _listFolder = listFolder;
         _templateFolder = templateFolder;
         _language = language;
+        _uiTextScale = uiTextScale;
+        _noteTextScale = noteTextScale;
       });
     }
   }
@@ -403,6 +415,44 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (ratio != null) await _setSplitRatio(ratio);
   }
 
+  /// Asks how large the interface text should be.
+  Future<void> _chooseUiTextScale() async {
+    final scale = await showSettingsSlider(
+      context,
+      dialogKey: const Key('ui-text-scale-dialog'),
+      sliderKey: const Key('ui-text-scale-slider'),
+      title: AppStrings.uiTextScaleTitle,
+      subtitle: AppStrings.uiTextScaleSubtitle,
+      current: _uiTextScale,
+      min: minTextScale,
+      max: maxTextScale,
+      divisions: _textScaleSteps,
+      format: AppStrings.textScaleValue,
+    );
+    if (scale == null) return;
+    await widget.controller.setUiTextScale(scale);
+    if (mounted) setState(() => _uiTextScale = scale);
+  }
+
+  /// Asks how large the note text should be, in both panes.
+  Future<void> _chooseNoteTextScale() async {
+    final scale = await showSettingsSlider(
+      context,
+      dialogKey: const Key('note-text-scale-dialog'),
+      sliderKey: const Key('note-text-scale-slider'),
+      title: AppStrings.noteTextScaleTitle,
+      subtitle: AppStrings.noteTextScaleSubtitle,
+      current: _noteTextScale,
+      min: minTextScale,
+      max: maxTextScale,
+      divisions: _textScaleSteps,
+      format: AppStrings.textScaleValue,
+    );
+    if (scale == null) return;
+    await widget.controller.setNoteTextScale(scale);
+    if (mounted) setState(() => _noteTextScale = scale);
+  }
+
   /// Asks for the link format the editor's link button inserts.
   Future<void> _chooseLinkType() async {
     final type = await showSettingsChoice<LinkType>(
@@ -495,6 +545,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
           },
           onTap: () => unawaited(_chooseLanguage()),
         ),
+        SettingsValueRow(
+          key: const Key('ui-text-scale-setting'),
+          title: AppStrings.uiTextScaleTitle,
+          value: AppStrings.textScaleValue(_uiTextScale),
+          onTap: () => unawaited(_chooseUiTextScale()),
+        ),
         // Both rows are about a layout a narrow screen cannot have
         // (T-CL-05): the mode decides nothing below 600 dp, and the
         // ratio moves a number nothing reads. Their stored values are
@@ -555,6 +611,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
             LinkType.markdown => AppStrings.linkTypeMarkdown,
           },
           onTap: () => unawaited(_chooseLinkType()),
+        ),
+        SettingsValueRow(
+          key: const Key('note-text-scale-setting'),
+          title: AppStrings.noteTextScaleTitle,
+          value: AppStrings.textScaleValue(_noteTextScale),
+          onTap: () => unawaited(_chooseNoteTextScale()),
         ),
         SettingsValueRow(
           key: const Key('indent-width'),

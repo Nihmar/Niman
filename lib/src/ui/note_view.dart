@@ -7,6 +7,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/text_scale.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/find_panel.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
@@ -486,6 +487,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       focusNode: _focus,
       showLineNumbers: widget.showLineNumbers,
       autofocus: widget.autofocusEditor,
+      // Read from the global rather than passed down the shell: the app
+      // root rebuilds everything when the setting changes, so this is
+      // read fresh on the very frame the slider moves (T-M6-12).
+      fontSize: AppTextScales.noteFontSize,
       scrollController: _scroll,
       findController: _findController,
       findBuilder: (context, controller, readOnly) =>
@@ -494,15 +499,25 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     ),
   );
 
-  Widget _buildPreview() => MarkdownPreview(
-    data: _previewText,
-    controller: _previewScroll,
-    scrollMap: _previewMap,
-    mathCache: _mathCache,
-    imageDirectory: widget.libraryRoot,
-    onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
-    onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
-    embedResolver: _resolveEmbed,
+  /// The preview, at the *note* text size rather than the interface one
+  /// (T-M6-12).
+  ///
+  /// The app root put the interface scale on every MediaQuery below it;
+  /// here it is replaced, so the same note reads the same size whichever
+  /// pane shows it.
+  Widget _buildPreview(BuildContext context) => MediaQuery(
+    data: MediaQuery.of(context)
+        .copyWith(textScaler: noteTextScalerOf(context)),
+    child: MarkdownPreview(
+      data: _previewText,
+      controller: _previewScroll,
+      scrollMap: _previewMap,
+      mathCache: _mathCache,
+      imageDirectory: widget.libraryRoot,
+      onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
+      onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
+      embedResolver: _resolveEmbed,
+    ),
   );
 
   /// Schedules the caret-link check for the end of a frame; the caret the
@@ -1046,7 +1061,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                     : split
                     ? EditorPreviewSplit(
                         editor: _buildEditor(),
-                        preview: _buildPreview(),
+                        preview: _buildPreview(context),
                         editorScroll: _scroll.verticalScroller,
                         previewScroll: _previewScroll,
                         map: _previewMap,
@@ -1066,7 +1081,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                         child: widget.showPreview
                             ? KeyedSubtree(
                                 key: const ValueKey('pane-preview'),
-                                child: _buildPreview(),
+                                child: _buildPreview(context),
                               )
                             : KeyedSubtree(
                                 key: const ValueKey('pane-editor'),
@@ -1412,9 +1427,8 @@ Future<int?> showHeadingLevelDialog(BuildContext context) {
           // more about the choice than the number does.
           title: Text(
             AppStrings.headingLevelLabel(level),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontSize: 26.0 - level * 2),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontSize: 26.0 - level * 2),
           ),
         ),
     ],

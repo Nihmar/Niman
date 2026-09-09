@@ -174,9 +174,10 @@ Future<T?> showSettingsChoice<T>(
 
 /// Asks for a value on a continuous scale, returning it or null.
 ///
-/// The one setting that is not a choice among a handful (the split
-/// width), given the same row treatment so it does not become the single
-/// inline control left on the screen.
+/// The settings that are not a choice among a handful — the split width
+/// and the two text sizes — given the same row treatment so they do not
+/// become the only inline controls left on the screen. [divisions] snaps
+/// the slider to steps; null leaves it continuous.
 Future<double?> showSettingsSlider(
   BuildContext context, {
   required String title,
@@ -186,6 +187,8 @@ Future<double?> showSettingsSlider(
   required String Function(double value) format,
   String? subtitle,
   Key? dialogKey,
+  Key sliderKey = const Key('split-ratio'),
+  int? divisions,
 }) {
   var value = current;
   return showDialog<double>(
@@ -208,10 +211,11 @@ Future<double?> showSettingsSlider(
             const SizedBox(height: 8),
             Text(format(value), style: Theme.of(context).textTheme.titleMedium),
             Slider(
-              key: const Key('split-ratio'),
+              key: sliderKey,
               min: min,
               max: max,
               value: value,
+              divisions: divisions,
               onChanged: (v) => setInner(() => value = v),
             ),
           ],

@@ -248,6 +248,22 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the editor-toolbar layout.
   Future<void> setEditorToolbar(String layout);
 
+  /// The interface text size, as a multiplier of the shipped one
+  /// (default 1.0). Applied by the app root, which also multiplies the
+  /// platform's own scale.
+  Future<double> get uiTextScale;
+
+  /// Sets (and persists) the interface text size.
+  Future<void> setUiTextScale(double scale);
+
+  /// The note text size, as a multiplier of the shipped one (default
+  /// 1.0). It reaches the source editor as a font size and the preview as
+  /// a text scale, and the two have to agree.
+  Future<double> get noteTextScale;
+
+  /// Sets (and persists) the note text size.
+  Future<void> setNoteTextScale(double scale);
+
   /// The UI language ([AppLanguage.system] by default).
   Future<AppLanguage> get language;
 
