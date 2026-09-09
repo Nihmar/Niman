@@ -1,7 +1,7 @@
 # Multiple libraries — a library is a folder that describes itself
 
-**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-08
-done 2026-09-09, T-ML-09 and T-ML-10 open) · **Depends on:** M1
+**Status:** In progress (2026-09-08, user request; T-ML-01 to T-ML-09
+done 2026-09-09, T-ML-10 open) · **Depends on:** M1
 (library core), M3 (index) · **Blocks:** nothing, but it changes where
 settings live, so it wants to land before M5 sync writes anything of its
 own · **Spec:** user request: several libraries like Obsidian's vaults —
@@ -173,10 +173,14 @@ tap rather than a folder picker.
     value in A and the app value in B; changing the app value moves B and
     not A; clearing an override makes A follow the app again; unit tests
     on the resolver, a widget test on the row.*
-- [ ] **T-ML-09** Strings + docs. Everything in `strings.dart`, in both
+- [x] **T-ML-09** Strings + docs. Everything in `strings.dart`, in both
   languages; `README.md` gains the `.copist/` folder and the multi-library
   behaviour. *AC: analyze clean; no user-facing literal outside the
-  strings file.*
+  strings file.* Done: the README has a Libraries section, and the two
+  databases are named where it describes the index. The sweep also
+  removed three strings nothing had called since the redesigns that
+  orphaned them (`toolbarSettingsSubtitle`, `chooseNote`,
+  `todoHasReminder`); git has them if a later screen wants them back.
 
 ## Technical design
 

@@ -36,6 +36,24 @@ disk are always the source of truth.
   + folding. LaTeX autocomplete is backlog.
 - **Mermaid diagrams:** stretch goal (bundled offline webview renderer).
 
+### Libraries
+
+- A **library** is a folder of Markdown notes, and it describes itself: its
+  own settings live inside it as `<library>/.copist/settings.json`, plain
+  JSON you can read and fix in any editor. Copy the folder to another
+  machine and its trash toggle, history depth, quick note and list folder
+  travel with it.
+- Copist remembers the libraries you have opened and starts on a list of
+  them: name, path, and when each was last opened. Tapping one opens it;
+  a long press forgets it, which removes it from the list and touches
+  nothing inside the folder.
+- **One library open at a time.** Switching from the settings closes the
+  current one and opens the next, landing on its tree.
+- Each library keeps its own index, in Copist's private storage rather
+  than in the folder, so switching does not re-scan and a sync never
+  carries a database. Deleting an index file rebuilds it on the next
+  open.
+
 ### Organization
 
 - **Trash:** `.trash/`, user-toggleable (off = hard delete).
@@ -152,8 +170,10 @@ system actually has, as opposed to what Copist asked for.
   scroll sync via line mapping.
 - **WebDAV client:** `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match,
   Basic auth, http + https (zero dependencies).
-- **Index:** `drift` (SQLite + FTS5); files located via `path_provider`;
-  credentials via `flutter_secure_storage`.
+- **Index:** `drift` (SQLite + FTS5), one database file per library under
+  `indexes/`, alongside a small app database holding the settings that
+  belong to the installation rather than to a library; files located via
+  `path_provider`; credentials via `flutter_secure_storage`.
 - **Testing:** `flutter_test`, `integration_test`, and a mock WebDAV server
   (Dart `HttpServer`).
 - **No CI:** analyze, test and release builds are run locally.

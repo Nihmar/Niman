@@ -140,10 +140,6 @@ final class AppStrings {
   // Toolbar settings (T-TB-05).
   static String get toolbarSettingsTitle =>
       _t('Editor toolbar', 'Barra dell’editor');
-  static String get toolbarSettingsSubtitle => _t(
-    'Order the buttons and hide the ones you do not use',
-    'Ordina i pulsanti e nascondi quelli che non usi',
-  );
   static String get toolbarSettingsHint => _t(
     'Drag to reorder; the eye shows or hides a button.',
     'Trascina per riordinare; l’occhio mostra o nasconde un pulsante.',
@@ -239,7 +235,6 @@ final class AppStrings {
       _t('Several notes match', 'Più note corrispondono');
   static String get openLinkFailed =>
       _t('Could not open link', 'Impossibile aprire il link');
-  static String get chooseNote => _t('Choose a note', 'Scegli una nota');
 
   // Task lists (T-TD-04).
   static String get todoOpen => _t('Open', 'Da fare');
@@ -383,7 +378,6 @@ final class AppStrings {
   static String get todoSave => _t('Save', 'Salva');
   static String get todoEditAction => _t('Edit', 'Modifica');
   static String get todoDeleteAction => _t('Delete', 'Elimina');
-  static String get todoHasReminder => _t('Has reminder', 'Con promemoria');
 
   // Task filters (T-TD-05).
   static String get todoDueOverdue => _t('Overdue', 'Scadute');
