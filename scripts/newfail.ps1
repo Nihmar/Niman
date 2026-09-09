@@ -27,10 +27,17 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $log = Join-Path $logDir 'copist-newfail.log'
 
 Push-Location $root
+# Test names carry non-ASCII (an arrow in one of them). Without this the
+# console's code page decodes the child's UTF-8 output lossily, the name
+# no longer matches its baseline entry, and a known failure is reported
+# as new.
+$previousEncoding = [Console]::OutputEncoding
 try {
+    [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
     $args = @('test', '--reporter', 'failures-only') + $Paths
     & flutter @args 2>&1 | Out-File $log -Encoding utf8
 } finally {
+    [Console]::OutputEncoding = $previousEncoding
     Pop-Location
 }
 

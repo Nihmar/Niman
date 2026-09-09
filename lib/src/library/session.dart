@@ -1,4 +1,5 @@
 import 'package:copist/src/core/language.dart';
+import 'package:copist/src/core/settings/library_setting.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -155,6 +156,18 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the debug log recording toggle.
   Future<void> setDebugLogsEnabled({required bool enabled});
+
+  /// The settings this library answers for itself rather than following
+  /// the app (T-ML-10).
+  Future<Set<LibrarySetting>> overriddenSettings();
+
+  /// Starts answering [setting] in this library, seeded with the app's
+  /// current value so nothing changes at the moment of the switch.
+  Future<void> overrideHere(LibrarySetting setting);
+
+  /// Stops answering [setting] here; the library follows the app again,
+  /// and the value it had while overriding is dropped.
+  Future<void> followApp(LibrarySetting setting);
 
   /// Whether the note editor shows the row-number column (default true).
   Future<bool> get lineNumbersEnabled;

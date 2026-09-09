@@ -5,7 +5,10 @@ import 'dart:io';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/legacy_library_settings.dart';
+import 'package:copist/src/core/settings/library_config_repo.dart';
+import 'package:copist/src/core/settings/library_setting.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/settings/settings_resolver.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -119,6 +122,10 @@ final class LibraryController implements LibrarySession {
   /// The open library's index; null while no library is open, and a
   /// different file for each library (T-ML-03).
   IndexDatabase? _indexDb;
+
+  /// The open library's `.copist/settings.json`; null while none is open,
+  /// and then every setting reads and writes app-wide.
+  LibraryConfigRepo? _configRepo;
   Indexer? _indexer;
   NoteOps? _ops;
   FileWatcher? _watcher;
@@ -345,7 +352,16 @@ final class LibraryController implements LibrarySession {
       final indexDb = await indexDbFactory(abs);
       _indexDb = indexDb;
       final indexer = Indexer(indexDb)..onChanged = _bump;
-      final ops = NoteOps(root: abs, db: indexDb, indexer: indexer);
+      // One reader of `.copist/settings.json` per session: the four
+      // per-library settings and the overrides (T-ML-10) share its cache.
+      final config = LibraryConfigRepo(abs);
+      _configRepo = config;
+      final ops = NoteOps(
+        root: abs,
+        db: indexDb,
+        indexer: indexer,
+        config: config,
+      );
       if (blockingScan) {
         // Only here: the first index is the scan long enough to be worth
         // watching, and reporting costs a message per note.
@@ -488,122 +504,133 @@ final class LibraryController implements LibrarySession {
     AppLog.enabled = enabled;
   }
 
+  /// Reads and writes the settings a library may answer for itself
+  /// (T-ML-10): the open library's file while it overrides one, the app
+  /// database otherwise.
+  Future<SettingsResolver> get _settings async =>
+      SettingsResolver(AppSettingsRepo(await appDatabase), _configRepo);
+
+  /// The settings this library answers for itself.
+  @override
+  Future<Set<LibrarySetting>> overriddenSettings() async =>
+      await (await _settings).overridden();
+
+  /// Starts answering [setting] in this library, at the app's value.
+  @override
+  Future<void> overrideHere(LibrarySetting setting) async {
+    _log.info('override ${setting.name} in $_root');
+    await (await _settings).overrideHere(setting);
+    _bump();
+  }
+
+  /// Stops answering [setting] here; the library follows the app again.
+  @override
+  Future<void> followApp(LibrarySetting setting) async {
+    _log.info('follow app for ${setting.name} in $_root');
+    await (await _settings).followApp(setting);
+    _bump();
+  }
+
   /// Whether the note editor shows the row-number column.
   @override
-  Future<bool> get lineNumbersEnabled async {
-    return await AppSettingsRepo(await appDatabase).lineNumbersEnabled();
-  }
+  Future<bool> get lineNumbersEnabled async =>
+      await (await _settings).lineNumbers();
 
   /// Sets (and persists) the editor line-numbers toggle.
   @override
   Future<void> setLineNumbersEnabled({required bool enabled}) async {
     _log.info('editor line numbers set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setLineNumbersEnabled(enabled: enabled);
+    await (await _settings).setLineNumbers(enabled: enabled);
   }
 
   /// Whether the note editor focuses (shows the keyboard) on note open.
   @override
-  Future<bool> get editorAutofocusEnabled async {
-    return await AppSettingsRepo(await appDatabase).editorAutofocusEnabled();
-  }
+  Future<bool> get editorAutofocusEnabled async =>
+      await (await _settings).editorAutofocus();
 
   /// Sets (and persists) the keyboard-on-open toggle.
   @override
   Future<void> setEditorAutofocusEnabled({required bool enabled}) async {
     _log.info('editor keyboard-on-open set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setEditorAutofocusEnabled(enabled: enabled);
+    await (await _settings).setEditorAutofocus(enabled: enabled);
   }
 
   /// Whether reminder text keeps the +project/@context/#tag markers.
   @override
-  Future<bool> get reminderShowTokens async {
-    return await AppSettingsRepo(await appDatabase).reminderShowTokens();
-  }
+  Future<bool> get reminderShowTokens async =>
+      await (await _settings).reminderShowTokens();
 
   /// Sets (and persists) the reminder-markers toggle.
   @override
   Future<void> setReminderShowTokens({required bool enabled}) async {
     _log.info('reminder markers set to $enabled');
-    await AppSettingsRepo(await appDatabase)
-        .setReminderShowTokens(enabled: enabled);
+    await (await _settings).setReminderShowTokens(enabled: enabled);
   }
 
   /// The preview layout mode.
   @override
-  Future<PreviewLayoutMode> get previewMode async {
-    return await AppSettingsRepo(await appDatabase).previewMode();
-  }
+  Future<PreviewLayoutMode> get previewMode async =>
+      await (await _settings).previewMode();
 
   /// Sets (and persists) the preview layout mode.
   @override
   Future<void> setPreviewMode(PreviewLayoutMode mode) async {
     _log.info('preview mode set to ${mode.name}');
-    await AppSettingsRepo(await appDatabase).setPreviewMode(mode);
+    await (await _settings).setPreviewMode(mode);
   }
 
   /// The editor|preview split ratio.
   @override
-  Future<double> get splitRatio async {
-    return await AppSettingsRepo(await appDatabase).splitRatio();
-  }
+  Future<double> get splitRatio async => await (await _settings).splitRatio();
 
   /// Sets (and persists) the split ratio.
   @override
   Future<void> setSplitRatio(double ratio) async {
-    await AppSettingsRepo(await appDatabase).setSplitRatio(ratio);
+    await (await _settings).setSplitRatio(ratio);
   }
 
   /// The library tree sort order.
   @override
-  Future<TreeSort> get treeSort async {
-    return await AppSettingsRepo(await appDatabase).treeSort();
-  }
+  Future<TreeSort> get treeSort async => await (await _settings).treeSort();
 
   /// Sets (and persists) the library tree sort order.
   @override
   Future<void> setTreeSort(TreeSort sort) async {
-    await AppSettingsRepo(await appDatabase).setTreeSort(sort);
+    await (await _settings).setTreeSort(sort);
   }
 
   /// The link format the editor's link button inserts.
   @override
-  Future<LinkType> get linkType async {
-    return await AppSettingsRepo(await appDatabase).linkType();
-  }
+  Future<LinkType> get linkType async => await (await _settings).linkType();
 
   /// Sets (and persists) the link format.
   @override
   Future<void> setLinkType(LinkType type) async {
     _log.info('link type set to ${type.name}');
-    await AppSettingsRepo(await appDatabase).setLinkType(type);
+    await (await _settings).setLinkType(type);
   }
 
   /// The editor's indent/outdent width in spaces.
   @override
-  Future<int> get indentWidth async {
-    return await AppSettingsRepo(await appDatabase).indentWidth();
-  }
+  Future<int> get indentWidth async => await (await _settings).indentWidth();
 
   /// Sets (and persists) the indent/outdent width.
   @override
   Future<void> setIndentWidth(int width) async {
     _log.info('indent width set to $width');
-    await AppSettingsRepo(await appDatabase).setIndentWidth(width);
+    await (await _settings).setIndentWidth(width);
   }
 
   /// The stored editor-toolbar layout (empty = the shipped toolbar).
   @override
-  Future<String> get editorToolbar async {
-    return await AppSettingsRepo(await appDatabase).editorToolbar();
-  }
+  Future<String> get editorToolbar async =>
+      await (await _settings).editorToolbar();
 
   /// Sets (and persists) the editor-toolbar layout.
   @override
   Future<void> setEditorToolbar(String layout) async {
     _log.info('editor toolbar set to "$layout"');
-    await AppSettingsRepo(await appDatabase).setEditorToolbar(layout);
+    await (await _settings).setEditorToolbar(layout);
   }
 
   /// The UI language.
@@ -662,6 +689,7 @@ final class LibraryController implements LibrarySession {
     await watcher?.stop();
     _indexer = null;
     _ops = null;
+    _configRepo = null;
     // Nulled before the awaits: a caller that races us must not find a
     // half-closed database.
     final searchDb = _searchDb;

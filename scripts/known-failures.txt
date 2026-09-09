@@ -4,7 +4,11 @@
 # suite is green on Linux.
 #
 # '~' marks a flake: tolerated whether or not it fails on a given run,
-# and kept across `newfail.ps1 -Update`.
+# and kept across `newfail.ps1 -Update`. Several of them are the same
+# Windows fault under full-suite load: a rename or a delete on a file
+# another process still holds ("Accesso negato", errno 5/32). They pass
+# in isolation, and the error is never an assertion — check a suspect one
+# on its own before believing it.
 ~test/unit/file_watcher_test.dart: coalesces rapid events into a single batch [E]
 ~test/unit/fixture_10k_test.dart: word search on the fixture is instant; bm25 ranks the title hit first [E]
 test/unit/fixture_10k_test.dart: a 10k-note library indexes (walk + content pass) in well under a minute, with FTS/tags/stems populated [E]
@@ -24,4 +28,7 @@ test/unit/note_ops_test.dart: restore falls back to the root when the original p
 test/unit/note_ops_test.dart: restore restores a dotted folder name whole [E]
 test/unit/note_ops_test.dart: restore restores a folder with its contents reindexed [E]
 test/unit/search_replace_test.dart: ReplaceRunner the index reflects a replace right away (no watcher needed) [E]
+~test/unit/search_replace_test.dart: ReplaceRunner case-sensitive run touches only the exact case [E]
+~test/unit/note_ops_test.dart: trash management deleteTrashPermanently removes the manifest item and disk [E]
+~test/unit/settings_resolver_test.dart: every overridable setting round trips booleans [E]
 test/widget/library_flow_test.dart: open, create, rename, and move work end to end [E]

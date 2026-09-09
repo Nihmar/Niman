@@ -38,9 +38,16 @@ final class TrashItem {
 /// can be restored to their original location.
 final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
-  new({required this.root, required IndexDatabase db, required this.indexer})
-    : _dao = NoteDao(db),
-      _config = LibraryConfigRepo(root);
+  ///
+  /// [config] is the session's own reader of `.copist/settings.json`, not
+  /// a second one: the session resolves the overridable settings through
+  /// the same cache these four go through (T-ML-10).
+  new({
+    required this.root,
+    required IndexDatabase db,
+    required this.indexer,
+    required this.config,
+  }) : _dao = NoteDao(db);
 
   /// Absolute path of the library root.
   final String root;
@@ -48,8 +55,11 @@ final class NoteOps implements NoteOperations {
   /// The shared indexer; every op funnels its disk change through it.
   final Indexer indexer;
 
+  /// The library's `.copist/settings.json`, shared with the session so
+  /// both read one cached copy.
+  final LibraryConfigRepo config;
+
   final NoteDao _dao;
-  final LibraryConfigRepo _config;
 
   /// The name of the trash manifest inside `.trash/`.
   static const manifestFileName = '.copist-trash.json';
@@ -78,33 +88,32 @@ final class NoteOps implements NoteOperations {
 
   /// The current trash toggle for this library.
   @override
-  Future<bool> get trashEnabled async => (await _config.config).trashEnabled;
+  Future<bool> get trashEnabled async => (await config.config).trashEnabled;
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   @override
   Future<void> setTrashEnabled({required bool enabled}) =>
-      _config.update((c) => c.copyWith(trashEnabled: enabled));
+      config.update((c) => c.copyWith(trashEnabled: enabled));
 
   /// The list-note folder (library-relative).
   @override
   Future<String> get listNoteFolder async =>
-      (await _config.config).listNoteFolder;
+      (await config.config).listNoteFolder;
 
   /// Sets the list-note folder (sanitized; an empty result falls back to
   /// the default).
   @override
-  Future<void> setListNoteFolder({required String folder}) => _config.update(
-    (c) => c.copyWith(listNoteFolder: cleanListFolder(folder)),
-  );
+  Future<void> setListNoteFolder({required String folder}) =>
+      config.update((c) => c.copyWith(listNoteFolder: cleanListFolder(folder)));
 
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath async =>
-      (await _config.config).quickNotePath;
+      (await config.config).quickNotePath;
 
   /// Sets (or clears) the user-chosen quick note.
   @override
-  Future<void> setQuickNotePath({required String? path}) => _config.update(
+  Future<void> setQuickNotePath({required String? path}) => config.update(
     (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
   );
 

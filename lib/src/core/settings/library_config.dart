@@ -61,6 +61,7 @@ final class LibraryConfig {
     required this.historyVersions,
     required this.quickNotePath,
     required this.listNoteFolder,
+    this.overrides = const {},
     this.extra = const {},
   });
 
@@ -91,6 +92,12 @@ final class LibraryConfig {
       listNoteFolder: folder is String
           ? cleanListFolder(folder)
           : defaultListFolder,
+      overrides: switch (json['overrides']) {
+        final Map<Object?, Object?> map => {
+          for (final entry in map.entries) entry.key.toString(): entry.value,
+        },
+        _ => const {},
+      },
       extra: extra,
     );
   }
@@ -119,6 +126,15 @@ final class LibraryConfig {
   /// The folder (library-relative) holding the list notes.
   final String listNoteFolder;
 
+  /// The app-wide settings this library answers for itself (T-ML-10),
+  /// keyed by the `LibrarySetting` name; an absent key means "follow the
+  /// app".
+  ///
+  /// Kept verbatim rather than parsed into fields: a key this build does
+  /// not know is a newer build's override, and dropping it on write
+  /// would break the same bargain [extra] keeps for the rest of the file.
+  final Map<String, Object?> overrides;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -129,6 +145,7 @@ final class LibraryConfig {
     String? quickNotePath,
     bool clearQuickNotePath = false,
     String? listNoteFolder,
+    Map<String, Object?>? overrides,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -137,6 +154,7 @@ final class LibraryConfig {
           ? null
           : quickNotePath ?? this.quickNotePath,
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
+      overrides: overrides ?? this.overrides,
       extra: extra,
     );
   }
@@ -146,6 +164,7 @@ final class LibraryConfig {
     'historyVersions',
     'quickNotePath',
     'listNoteFolder',
+    'overrides',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -166,6 +185,12 @@ final class LibraryConfig {
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
+    }
+    // Omitted when empty: a library that overrides nothing — which is
+    // every library until someone asks for one — keeps a file of four
+    // lines.
+    if (overrides.isNotEmpty) {
+      json['overrides'] = overrides;
     }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
@@ -221,6 +246,7 @@ final class LibraryConfig {
         historyVersions == other.historyVersions &&
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
+        _deepEquals(overrides, other.overrides) &&
         _deepEquals(extra, other.extra);
   }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -25,7 +26,12 @@ void main() {
     addTearDown(db.close);
     indexer = Indexer(db);
     dao = indexer.dao;
-    ops = NoteOps(root: root.path, db: db, indexer: indexer);
+    ops = NoteOps(
+      root: root.path,
+      db: db,
+      indexer: indexer,
+      config: LibraryConfigRepo(root.path),
+    );
   });
 
   tearDown(() async {
@@ -358,7 +364,12 @@ void main() {
 
     test('the toggle persists in the library folder', () async {
       await ops.setTrashEnabled(enabled: false);
-      final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
+      final fresh = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
       expect(await fresh.trashEnabled, isFalse);
       // It is the library's own settings file that holds it, not a row
       // in the app database (T-ML-02).
@@ -374,7 +385,12 @@ void main() {
 
     test('the chosen path persists across ops instances', () async {
       await ops.setQuickNotePath(path: 'Inbox/Scratch.md');
-      final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
+      final fresh = NoteOps(
+        root: root.path,
+        db: db,
+        indexer: indexer,
+        config: LibraryConfigRepo(root.path),
+      );
       expect(await fresh.quickNotePath, 'Inbox/Scratch.md');
     });
 
