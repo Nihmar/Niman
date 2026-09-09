@@ -32,6 +32,7 @@ final class FakeTagSource implements TagSource {
             isDir: false,
             size: 0,
             modified: DateTime.fromMillisecondsSinceEpoch(0),
+            pinned: false,
           ),
         ),
       );

@@ -31,6 +31,45 @@ class Notes extends Table {
 
   /// Content sha256, hex; files only (directories are null).
   TextColumn get sha256 => text().nullable()();
+
+  /// The frontmatter `title:`, or null when the note has none — then the
+  /// filename is the display name.
+  ///
+  /// It lives on the row rather than only in [FrontmatterFields] because
+  /// the tree reads it for every visible row on every paint, and a join
+  /// per paint is a cost the tree does not have to pay (T-M4-02).
+  TextColumn get title => text().nullable()();
+
+  /// The frontmatter `date:` when it reads as a date, else null.
+  DateTimeColumn get date => dateTime().nullable()();
+
+  /// Whether the frontmatter says `pinned: true`.
+  BoolColumn get pinned => boolean().withDefault(const Constant(false))();
+}
+
+/// Every frontmatter key of every note: `title`, `tags`, `date`, `pinned`
+/// and `aliases` alongside whatever else the note declares.
+///
+/// One row per (note, key, value) — not per (note, key): a key whose value
+/// is a list is one field with several values, and filtering by
+/// `projects = alpha` has to match a note that lists alpha among others.
+/// Nested maps arrive flattened onto dotted keys (`author.name`), so the
+/// table stays two columns wide whatever the block's shape.
+///
+/// The known keys are also materialized on [Notes]; this table is what
+/// makes *any* key filterable (T-M4-03).
+class FrontmatterFields extends Table {
+  /// The id of the note the field belongs to.
+  IntColumn get noteId => integer()();
+
+  /// The key, lowercased; dotted for a nested map's leaf.
+  TextColumn get key => text()();
+
+  /// One of the key's values, as text.
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {noteId, key, value};
 }
 
 /// The link-resolution index: one row per note *stem* (filename without
@@ -109,13 +148,17 @@ class NoteLinks extends Table {
 /// the first one's rows. The file is created at the current schema and
 /// never migrated: a shape change means deleting it and rescanning,
 /// which costs a walk and loses nothing.
-@DriftDatabase(tables: [Notes, NoteStems, Tags, NoteTags, NoteLinks])
+@DriftDatabase(
+  tables: [Notes, NoteStems, Tags, NoteTags, NoteLinks, FrontmatterFields],
+)
 class IndexDatabase extends _$IndexDatabase {
   /// Creates the index on top of [e].
   new(super.e);
 
+  /// v1: M3's tree, stems, tags and links. v2: the frontmatter fields
+  /// table and the three known-field columns on `notes` (T-M4-02).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -124,9 +167,33 @@ class IndexDatabase extends _$IndexDatabase {
       'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
       "fts5(title, body, tokenize = 'unicode61 remove_diacritics 2')";
 
+  /// The tables an upgrade drops, dependents before the rows they key on.
+  static const List<String> _allTables = [
+    'notes_fts',
+    'frontmatter_fields',
+    'note_links',
+    'note_tags',
+    'tags',
+    'note_stems',
+    'notes',
+  ];
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
+      await m.createAll();
+      await m.database.customStatement(_createFts);
+    },
+    // Every row here is derived from the notes on disk, so an upgrade is a
+    // wipe and a rescan: the file is emptied and recreated at the new
+    // shape, and the next full scan — which runs on open anyway — fills
+    // it. That costs a walk and loses nothing, and it saves the app a
+    // migration chain for a cache. The library's own files are not
+    // touched; only this index file is.
+    onUpgrade: (m, from, to) async {
+      for (final table in _allTables) {
+        await m.database.customStatement('DROP TABLE IF EXISTS $table');
+      }
       await m.createAll();
       await m.database.customStatement(_createFts);
     },

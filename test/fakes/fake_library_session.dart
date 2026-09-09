@@ -7,6 +7,9 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/edit.dart';
+import 'package:copist/src/frontmatter/fields.dart';
+import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
@@ -14,6 +17,7 @@ import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
+import 'package:copist/src/templates/repo.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -51,6 +55,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   bool _trashEnabled = true;
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
+  String _templateFolder = defaultTemplateFolder;
   AppLanguage _language = AppLanguage.system;
 
   @override
@@ -223,6 +228,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get pinnedCollapsed async => _config.pinnedCollapsed;
+
+  @override
+  Future<void> setPinnedCollapsed({required bool collapsed}) async {
+    _config = _config.copyWith(pinnedCollapsed: collapsed);
+  }
+
+  @override
   Future<LinkType> get linkType async => _config.linkType;
 
   @override
@@ -313,6 +326,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<TagSource?> get tagSource async => FakeTagSource();
 
+  /// Answered from the fake's own rows rather than a canned fake: the
+  /// content is right there, so pinned notes and `key = value` filters
+  /// behave the way they will against a real index.
+  @override
+  Future<FieldSource?> get fieldSource async => _FakeFieldSource(this);
+
   @override
   Future<LinkSource?> get linkSource async => FakeLinkSource();
 
@@ -337,6 +356,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       _addRow('note_$i.md', isDir: false);
     }
     _bump();
+  }
+
+  /// Test-only: puts a file at [path] verbatim, extension and all.
+  ///
+  /// [createNote] always makes a `.md`, as the real ops do, but a library
+  /// holds files nobody created through the app — attachments, a
+  /// `todo.txt` — and the tree lists them. This is how a test gets one.
+  Future<Note> seedFile(String path, {String content = ''}) async {
+    if (_phase != LibraryPhase.ready) {
+      throw StateError('Open the fake before seeding files');
+    }
+    _addRow(path, isDir: false).content = content;
+    _bump();
+    return _noteAt(path);
   }
 
   // -- NoteOperations --------------------------------------------------
@@ -367,6 +400,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setListNoteFolder({required String folder}) async {
     _listNoteFolder = folder;
   }
+
+  @override
+  Future<String> readNote(String path) async => _requireRow(path).content;
+
+  @override
+  Future<String> get templateFolder async => _templateFolder;
+
+  @override
+  Future<void> setTemplateFolder({required String folder}) async {
+    _templateFolder = folder;
+  }
+
+  /// Templates come from the fake's own rows, so a test that creates a
+  /// note under the folder has a template.
+  @override
+  Future<TemplateSource?> get templateSource async => _FakeTemplateSource(this);
 
   @override
   Future<Note> createNote({
@@ -443,6 +492,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _repath(path, newRel);
     _bump();
     return _noteAt(newRel);
+  }
+
+  /// Pins by editing the row's content, exactly as the real ops edit the
+  /// file — so a widget test that pins sees the same frontmatter a person
+  /// would find in the note afterwards.
+  @override
+  Future<Note> setPinned(String path, {required bool pinned}) async {
+    final row = _requireRow(path);
+    if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
+      throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
+    }
+    row.content = pinned
+        ? setFrontmatterKey(row.content, 'pinned', 'true')
+        : removeFrontmatterKey(row.content, 'pinned');
+    _bump();
+    return _toNote(row);
   }
 
   @override
@@ -527,7 +592,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     }
   }
 
+  /// The row as an indexed note, with the frontmatter fields the real
+  /// indexer would have derived from its content (T-M4-02) — so a widget
+  /// test can pin a note by writing `pinned: true` into it, exactly as a
+  /// person would.
   Note _toNote(_Row row) {
+    final fm = row.isDir ? null : parseFrontmatter(row.content);
     return Note(
       id: row.id,
       path: row.path,
@@ -536,10 +606,29 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       isDir: row.isDir,
       size: 0,
       modified: DateTime.fromMillisecondsSinceEpoch(0),
+      title: fm?.fields['title']?.first,
+      date: fm?.date,
+      pinned: fm?.pinned ?? false,
     );
   }
 
   Note _noteAt(String path) => _toNote(_requireRow(path));
+
+  /// Every live (untrashed) note row as an indexed note; folders included.
+  Iterable<Note> _liveNotes() sync* {
+    for (final row in _rows) {
+      if (!row.trashed) yield _toNote(row);
+    }
+  }
+
+  /// Every live note paired with its parsed frontmatter (null for folders
+  /// and for notes without a block).
+  Iterable<(Note, Frontmatter?)> _liveFrontmatter() sync* {
+    for (final row in _rows) {
+      if (row.trashed || row.isDir) continue;
+      yield (_toNote(row), parseFrontmatter(row.content));
+    }
+  }
 
   _Row? _findRow(String path) {
     for (final row in _rows) {
@@ -691,6 +780,83 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       if (row.id == id) return row;
     }
     return null;
+  }
+}
+
+/// The fake's frontmatter-field source: parses each live note's content
+/// on demand, which is cheap at the handful of notes a widget test has.
+final class _FakeFieldSource implements FieldSource {
+  new(this._session);
+
+  final FakeLibrarySession _session;
+
+  @override
+  Future<List<Note>> pinnedNotes() async {
+    final notes = [
+      for (final note in _session._liveNotes())
+        if (note.pinned) note,
+    ]..sort((a, b) => a.path.compareTo(b.path));
+    return notes;
+  }
+
+  @override
+  Future<List<Note>> notesWithField(String key, String value) async {
+    final wanted = value.trim().toLowerCase();
+    final name = key.trim().toLowerCase();
+    final out = <Note>[];
+    for (final (note, fm) in _session._liveFrontmatter()) {
+      final values = fm?.fields[name];
+      if (values == null) continue;
+      if (wanted.isEmpty ||
+          values.any((v) => v.toLowerCase() == wanted)) {
+        out.add(note);
+      }
+    }
+    return out..sort((a, b) => a.path.compareTo(b.path));
+  }
+
+  @override
+  Future<List<FieldKeyCount>> fieldKeys() async {
+    final counts = <String, int>{};
+    for (final (_, fm) in _session._liveFrontmatter()) {
+      for (final key in fm?.fields.keys ?? const <String>[]) {
+        counts[key] = (counts[key] ?? 0) + 1;
+      }
+    }
+    final keys = counts.keys.toList()
+      ..sort((a, b) {
+        final byCount = counts[b]!.compareTo(counts[a]!);
+        return byCount != 0 ? byCount : a.compareTo(b);
+      });
+    return [
+      for (final key in keys) FieldKeyCount(key: key, count: counts[key]!),
+    ];
+  }
+}
+
+/// The fake's template source: the live notes under the configured
+/// folder, named the way the real repo names them.
+final class _FakeTemplateSource implements TemplateSource {
+  new(this._session);
+
+  final FakeLibrarySession _session;
+
+  @override
+  Future<String> get folder => _session.templateFolder;
+
+  @override
+  Future<List<TemplateEntry>> templates() async {
+    final root = await folder;
+    final out = <TemplateEntry>[];
+    for (final note in _session._liveNotes()) {
+      if (note.isDir || !note.name.toLowerCase().endsWith('.md')) continue;
+      if (!note.path.startsWith('$root/')) continue;
+      var name = note.path.substring(root.length + 1);
+      name = name.substring(0, name.length - 3);
+      out.add(TemplateEntry(path: note.path, name: name));
+    }
+    return out
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 }
 

@@ -3,12 +3,14 @@ import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/fields.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
+import 'package:copist/src/templates/repo.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -38,8 +40,23 @@ abstract interface class NoteOperations {
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
 
+  /// The text of the note at [path].
+  ///
+  /// The editor reads notes through its own seam; this is for the flows
+  /// that need a note's content without opening it — creating one from a
+  /// template, so far. Throws when the note is not there.
+  Future<String> readNote(String path);
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
+
+  /// Pins or unpins the note at [path] (T-M4-04).
+  ///
+  /// Pinning is a frontmatter edit — `pinned: true` goes into the note's
+  /// own block, and unpinning takes the key back out — so the pin travels
+  /// with the file and is visible to whoever opens it elsewhere. Returns
+  /// the re-indexed row.
+  Future<Note> setPinned(String path, {required bool pinned});
 
   /// Whether deletes move notes into `.trash/` (default true).
   Future<bool> get trashEnabled;
@@ -54,6 +71,13 @@ abstract interface class NoteOperations {
 
   /// Sets the list-note folder.
   Future<void> setListNoteFolder({required String folder});
+
+  /// The folder (library-relative) that holds the note templates
+  /// (default `Templates`, T-M4-05).
+  Future<String> get templateFolder;
+
+  /// Sets the template folder.
+  Future<void> setTemplateFolder({required String folder});
 
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
@@ -195,6 +219,15 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
 
+  /// Whether the tree's pinned section is rolled up (default false).
+  ///
+  /// Per library, like the sort order: which notes are worth pinning — and
+  /// how many — is a property of the library, not of the app.
+  Future<bool> get pinnedCollapsed;
+
+  /// Sets (and persists) the pinned section's rolled-up state.
+  Future<void> setPinnedCollapsed({required bool collapsed});
+
   /// The link format the editor's link button inserts
   /// (default [LinkType.wikilink]).
   Future<LinkType> get linkType;
@@ -251,6 +284,14 @@ abstract interface class LibrarySession {
 
   /// The tag data source (tag list with counts, tag→notes).
   Future<TagSource?> get tagSource;
+
+  /// The frontmatter-field data source (pinned notes, `key = value`
+  /// filtering, the keys in use); null while no library is ready.
+  Future<FieldSource?> get fieldSource;
+
+  /// The template data source (the configured folder and what is in it);
+  /// null while no library is ready.
+  Future<TemplateSource?> get templateSource;
 
   /// The link-resolution source (wiki targets + markdown hrefs against
   /// the open index).

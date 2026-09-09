@@ -330,13 +330,55 @@ void main() {
     await pumpTab(tester, todo: ['(B) bee']);
     await tester.tap(find.text('bee'));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('todo-dialog-priority')));
-    await settle(tester);
-    await tester.tap(find.text('(A)').last);
+    await tester.tap(find.byKey(const Key('todo-priority-A')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('todo-dialog-save')));
     await settle(tester);
     expect(source.todoLines, ['(A) bee']);
+  });
+
+  testWidgets('the priority chips clear a priority', (tester) async {
+    await pumpTab(tester, todo: ['(B) bee']);
+    await tester.tap(find.text('bee'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-priority-none')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['bee']);
+  });
+
+  testWidgets('a rare priority keeps its own chip and survives a save', (
+    tester,
+  ) async {
+    // (M) is not one of the chips offered, but the task has it: it has to
+    // be visible and it has to come back out of a save that ignored it.
+    await pumpTab(tester, todo: ['(M) odd']);
+    await tester.tap(find.text('odd'));
+    await settle(tester);
+
+    expect(find.byKey(const Key('todo-priority-M')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+    expect(source.todoLines, ['(M) odd']);
+  });
+
+  testWidgets('the rest of the alphabet is behind one more chip', (
+    tester,
+  ) async {
+    await pumpTab(tester, todo: ['plain']);
+    await tester.tap(find.text('plain'));
+    await settle(tester);
+    expect(find.byKey(const Key('todo-priority-Z')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('todo-priority-more')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-priority-pick-Z')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('todo-dialog-save')));
+    await settle(tester);
+
+    expect(source.todoLines, ['(Z) plain']);
   });
 
   testWidgets('reminder picker writes rem: on save', (tester) async {

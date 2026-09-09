@@ -8,6 +8,7 @@ import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/edit.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
@@ -105,6 +106,18 @@ final class NoteOps implements NoteOperations {
   @override
   Future<void> setListNoteFolder({required String folder}) =>
       config.update((c) => c.copyWith(listNoteFolder: cleanListFolder(folder)));
+
+  /// The folder holding the note templates (default `Templates`).
+  @override
+  Future<String> get templateFolder async =>
+      (await config.config).templateFolder;
+
+  /// Sets the template folder (sanitized; an empty result falls back to
+  /// the default).
+  @override
+  Future<void> setTemplateFolder({required String folder}) => config.update(
+    (c) => c.copyWith(templateFolder: cleanTemplateFolder(folder)),
+  );
 
   /// The user-chosen quick note, or null for the default.
   @override
@@ -225,6 +238,52 @@ final class NoteOps implements NoteOperations {
       }
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
+    });
+  }
+
+  /// The text of the note at [path], decoded leniently (a note with a
+  /// broken byte is still a note) and without its BOM.
+  @override
+  Future<String> readNote(String path) async {
+    await _mustFind(path);
+    final bytes = await File(_abs(path)).readAsBytes();
+    final text = utf8.decode(bytes, allowMalformed: true);
+    return text.isNotEmpty && text.codeUnitAt(0) == 0xFEFF
+        ? text.substring(1)
+        : text;
+  }
+
+  /// Pins or unpins the note at [path] by editing its frontmatter.
+  ///
+  /// Unpinning removes the key rather than writing `pinned: false`: the
+  /// file goes back to what it looked like before, instead of collecting
+  /// a line that says nothing.
+  ///
+  /// Re-indexed through [Indexer.rescanFiles], not `applyEvents`: the
+  /// rewrite can leave the size unchanged within the same second, which
+  /// the (size, mtime) shortcut would read as "nothing happened".
+  @override
+  Future<Note> setPinned(String path, {required bool pinned}) {
+    return _synchronized(() async {
+      final row = await _mustFind(path);
+      // The pin lives in the note's frontmatter, so only a note can carry
+      // one. Pinning a `todo.txt` wrote a YAML block into a file that has
+      // no such thing, and every todo.txt reader — this app's included —
+      // then read the three lines as tasks. Unpinning stays allowed
+      // whatever the file is, so a block already written can be taken
+      // back out.
+      if (row.isDir || (pinned && !isMarkdownNote(row.name))) {
+        throw ArgumentError('Only Markdown notes can be pinned, not "$path"');
+      }
+      final file = File(_abs(path));
+      final text = utf8.decode(await file.readAsBytes(), allowMalformed: true);
+      final updated = pinned
+          ? setFrontmatterKey(text, 'pinned', 'true')
+          : removeFrontmatterKey(text, 'pinned');
+      if (updated == text) return row;
+      await writeFileAtomically(file, utf8.encode(updated));
+      await indexer.rescanFiles(root, [file.path]);
+      return await _mustFind(path);
     });
   }
 

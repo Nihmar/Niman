@@ -12,10 +12,12 @@ import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/templates/engine.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_source.dart';
+import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
@@ -28,6 +30,7 @@ import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
+import 'package:copist/src/ui/template_picker.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
@@ -476,6 +479,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// layout and paint follow the fade.
   bool _noteHidingTabs = false;
 
+  /// Whether the Quick note tab body is the choose/create screen.
+  ///
+  /// It is only ever wanted when no quick note is set. With one set, the
+  /// tab is a way of opening that note, and the tab shell stays painted
+  /// under the opening note for the length of the fade — long enough for
+  /// the chooser to flash behind a note the user had already chosen.
+  bool _showQuickNoteChooser = false;
+
   /// The pending tab-hide after a note open (canceled on close).
   Timer? _noteHideTimer;
 
@@ -763,14 +774,18 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (ops == null) return;
       final note = await ops.find(path);
       if (note == null || note.isDir) {
+        // The note it pointed at is gone: forget it and ask again, rather
+        // than leaving the tap with nothing to show for itself.
         await ops.setQuickNotePath(path: null);
         widget.controller.notify();
+        if (mounted) _openQuickNoteChooser();
         return;
       }
       if (!mounted) return;
       setState(() {
         _tab = ShellTab.quickNote;
         _visitedTabs.add(ShellTab.quickNote);
+        _showQuickNoteChooser = false;
         _noteFromTab = ShellTab.files;
         _selected = note.path;
         _selectedIsDir = false;
@@ -803,6 +818,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// nowhere on a tablet with no quick note set yet.
   void _openQuickNoteChooser() {
     if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
+      setState(() => _showQuickNoteChooser = true);
       _selectShellTab(ShellTab.quickNote);
       return;
     }
@@ -873,6 +889,52 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _noteOpened();
+      });
+    });
+  }
+
+  /// Creates a note from a template in [parent] (default: the FAB
+  /// target), T-M4-07.
+  ///
+  /// Template first, then name: which template you want is the decision,
+  /// and the name often follows from it. The template's text — frontmatter
+  /// included — becomes the note's, with its placeholders substituted
+  /// against the name just chosen.
+  Future<void> _createFromTemplate({String? parent}) async {
+    final source = await widget.controller.templateSource;
+    if (source == null || !mounted) return;
+    final templates = await source.templates();
+    final folder = await source.folder;
+    if (!mounted) return;
+    final chosen = await showTemplatePicker(
+      context,
+      templates: templates,
+      folder: folder,
+    );
+    if (chosen == null || !mounted) return;
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newFromTemplateTitle,
+      initial: chosen.name.split('/').last,
+    );
+    if (name == null) return;
+    await _guard(() async {
+      final ops = widget.controller.ops!;
+      final template = await ops.readNote(chosen.path);
+      final row = await ops.createNote(
+        parentPath: parent ?? _createParent,
+        name: name,
+        content: applyTemplate(template, title: name),
+      );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+      setState(() {
+        _selected = row.path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+        _pendingAnchor = null;
+        _resetNoteKind();
         _noteOpened();
       });
     });
@@ -1009,71 +1071,95 @@ final class _LibraryShellState extends State<_LibraryShell>
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              key: const Key('menu-new-note'),
-              leading: const Icon(Icons.note_add),
-              title: Text(AppStrings.newNoteHere),
-              onTap: () => Navigator.pop(context, 'note'),
-            ),
-            if (note.isDir)
-              ListTile(
-                key: const Key('menu-new-folder'),
-                leading: const Icon(Icons.create_new_folder),
-                title: Text(AppStrings.newFolderHere),
-                onTap: () => Navigator.pop(context, 'folder'),
-              ),
-            if (!note.isDir)
-              ListTile(
-                key: const Key('menu-quick-note'),
-                leading: Icon(
-                  isQuickNote
-                      ? Icons.sticky_note_2
-                      : Icons.sticky_note_2_outlined,
-                ),
-                title: Text(
-                  isQuickNote
-                      ? AppStrings.currentQuickNote
-                      : AppStrings.setAsQuickNote,
-                ),
-                onTap: () => Navigator.pop(context, 'quicknote'),
-              ),
-            ListTile(
-              key: const Key('menu-rename'),
-              leading: const Icon(Icons.edit),
-              title: Text(AppStrings.actionRename),
-              onTap: () => Navigator.pop(context, 'rename'),
-            ),
-            ListTile(
-              key: const Key('menu-move'),
-              leading: const Icon(Icons.drive_folder_upload),
-              title: Text(AppStrings.actionMove),
-              onTap: () => Navigator.pop(context, 'move'),
-            ),
-            ListTile(
-              key: const Key('menu-delete'),
-              leading: const Icon(Icons.delete_outline),
-              title: Text(AppStrings.actionDelete),
-              onTap: () => Navigator.pop(context, 'delete'),
-            ),
-          ],
+    final action = await showActionSheet<String>(
+      context,
+      items: (context) => [
+        ListTile(
+          key: const Key('menu-new-note'),
+          leading: const Icon(Icons.note_add),
+          title: Text(AppStrings.newNoteHere),
+          onTap: () => Navigator.pop(context, 'note'),
         ),
-      ),
+        ListTile(
+          key: const Key('menu-new-from-template'),
+          leading: const Icon(Icons.file_copy_outlined),
+          title: Text(AppStrings.newFromTemplateHere),
+          onTap: () => Navigator.pop(context, 'template'),
+        ),
+        if (note.isDir)
+          ListTile(
+            key: const Key('menu-new-folder'),
+            leading: const Icon(Icons.create_new_folder),
+            title: Text(AppStrings.newFolderHere),
+            onTap: () => Navigator.pop(context, 'folder'),
+          ),
+        if (!note.isDir)
+          ListTile(
+            key: const Key('menu-quick-note'),
+            leading: Icon(
+              isQuickNote ? Icons.sticky_note_2 : Icons.sticky_note_2_outlined,
+            ),
+            title: Text(
+              isQuickNote
+                  ? AppStrings.currentQuickNote
+                  : AppStrings.setAsQuickNote,
+            ),
+            onTap: () => Navigator.pop(context, 'quicknote'),
+          ),
+        // Markdown only: the pin is a frontmatter key, and a
+        // `todo.txt` has no frontmatter to put it in. An already
+        // pinned row keeps the entry whatever it is, so a pin
+        // written before this rule can still be taken back off.
+        if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
+          ListTile(
+            key: const Key('menu-pin'),
+            leading: Icon(
+              note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+            ),
+            title: Text(
+              note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
+            ),
+            onTap: () => Navigator.pop(context, 'pin'),
+          ),
+        ListTile(
+          key: const Key('menu-rename'),
+          leading: const Icon(Icons.edit),
+          title: Text(AppStrings.actionRename),
+          onTap: () => Navigator.pop(context, 'rename'),
+        ),
+        ListTile(
+          key: const Key('menu-move'),
+          leading: const Icon(Icons.drive_folder_upload),
+          title: Text(AppStrings.actionMove),
+          onTap: () => Navigator.pop(context, 'move'),
+        ),
+        ListTile(
+          key: const Key('menu-delete'),
+          leading: const Icon(Icons.delete_outline),
+          title: Text(AppStrings.actionDelete),
+          onTap: () => Navigator.pop(context, 'delete'),
+        ),
+      ],
     );
     if (action == null) return;
     switch (action) {
       case 'note':
         await _createNote(parent: here);
+      case 'template':
+        await _createFromTemplate(parent: here);
       case 'folder':
         await _createFolder(parent: here);
       case 'quicknote':
         await _guard(() async {
           await widget.controller.ops!.setQuickNotePath(path: note.path);
           widget.controller.notify();
+        });
+      case 'pin':
+        await _guard(() async {
+          await widget.controller.ops!.setPinned(
+            note.path,
+            pinned: !note.pinned,
+          );
         });
       case 'rename':
         await _rename(note.path);
@@ -1308,6 +1394,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       onNewListNote: () {
         _closeFab();
         unawaited(_createListNote());
+      },
+      onNewFromTemplate: () {
+        _closeFab();
+        unawaited(_createFromTemplate());
       },
       onNewFolder: () {
         _closeFab();
@@ -1600,10 +1690,12 @@ final class _LibraryShellState extends State<_LibraryShell>
         reminders: widget.reminders,
       ),
       ShellTab.search => _searchSlot(controller),
-      ShellTab.quickNote => QuickNoteTab(
-        controller: controller,
-        onOpen: _openQuickNote,
-      ),
+      // Empty unless the shell actually sent the user here to choose: an
+      // open quick note leaves this body painted under the opening note.
+      ShellTab.quickNote =>
+        _showQuickNoteChooser
+            ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
+            : const SizedBox.shrink(),
       ShellTab.settings => SettingsTab(controller: controller),
     };
   }

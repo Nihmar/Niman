@@ -38,6 +38,48 @@ void main() {
     });
   });
 
+  group('fieldQuery (T-M4-03)', () {
+    test('key = value, with or without the spaces', () {
+      expect(fieldQuery('status = draft'), (key: 'status', value: 'draft'));
+      expect(fieldQuery('status=draft'), (key: 'status', value: 'draft'));
+      expect(fieldQuery('  Status  =  Draft  '), (
+        key: 'status',
+        value: 'Draft',
+      ));
+    });
+
+    test('an empty value asks for every note declaring the key', () {
+      expect(fieldQuery('status ='), (key: 'status', value: ''));
+    });
+
+    test('a quoted value keeps its spaces', () {
+      expect(fieldQuery('author = "Ada Lovelace"'), (
+        key: 'author',
+        value: 'Ada Lovelace',
+      ));
+      expect(fieldQuery("author = 'Ada Lovelace'"), (
+        key: 'author',
+        value: 'Ada Lovelace',
+      ));
+    });
+
+    test('a dotted key (a nested field) parses', () {
+      expect(fieldQuery('author.name = Ada'), (
+        key: 'author.name',
+        value: 'Ada',
+      ));
+    });
+
+    test('anything that is not a key stays a text search', () {
+      expect(fieldQuery('plain text'), isNull);
+      expect(fieldQuery('= draft'), isNull); // no key
+      expect(fieldQuery('x = y = z'), isNull); // two of them
+      expect(fieldQuery('some words = draft'), isNull); // key has a space
+      expect(fieldQuery('a+b = c'), isNull); // not key characters
+      expect(fieldQuery(''), isNull);
+    });
+  });
+
   group('tagQuery', () {
     test('a single #tag is a tag query, normalized', () {
       expect(tagQuery('#Work'), 'work');

@@ -166,8 +166,11 @@ final class AppStrings {
   static String get searchHint => _t('Search notes', 'Cerca nelle note');
   static String get searchModeWords => _t('Words', 'Parole');
   static String get searchModeContains => _t('Contains', 'Contiene');
-  static String get searchEmptyHint =>
-      _t('Type to search the library', 'Scrivi per cercare nella libreria');
+  static String get searchEmptyHint => _t(
+    'Type to search the library, or key = value to filter by frontmatter',
+    'Scrivi per cercare nella libreria, oppure chiave = valore per '
+        'filtrare per frontmatter',
+  );
   static String get searchTooShortHint =>
       _t('Type at least 2 characters', 'Scrivi almeno 2 caratteri');
   static String get searchNoMatches =>
@@ -396,6 +399,9 @@ final class AppStrings {
 
   // Task dialog pickers (T-TD-06).
   static String get todoNoPriority => _t('No priority', 'Nessuna priorità');
+  static String get todoNoPriorityShort => _t('None', 'Nessuna');
+  static String get todoMorePriorities => _t('More…', 'Altre…');
+  static String get todoPriorityTitle => _t('Priority', 'Priorità');
   static String get todoNoDueDate => _t('No due date', 'Nessuna scadenza');
   static String get todoNoReminder => _t('No reminder', 'Nessun promemoria');
   static String get todoAddProject => _t('+ Project', '+ Progetto');
@@ -479,6 +485,27 @@ final class AppStrings {
       _t('Set as quick note', 'Imposta come nota rapida');
   static String get currentQuickNote =>
       _t('Current quick note', 'Nota rapida attuale');
+  static String get pinnedSection => _t('Pinned', 'Fissate');
+  static String pinnedSectionCount(int count) =>
+      '${_t('Pinned', 'Fissate')} · $count';
+  static String get templateFolderTitle =>
+      _t('Template folder', 'Cartella dei modelli');
+  static String get newFromTemplateTitle =>
+      _t('New from template', 'Nuova da modello');
+  static String get newFromTemplateHere =>
+      _t('New from template here', 'Nuova da modello qui');
+  static String frontmatterInvalid(String reason) => _t(
+    'Frontmatter not read: $reason',
+    'Frontmatter non letto: $reason',
+  );
+  static String get templatePickerTitle =>
+      _t('Choose a template', 'Scegli un modello');
+  static String templatePickerEmpty(String folder) => _t(
+    'No templates yet. Put a note in $folder/ and it becomes one.',
+    'Nessun modello. Metti una nota in $folder/ e diventa un modello.',
+  );
+  static String get actionPin => _t('Pin', 'Fissa in alto');
+  static String get actionUnpin => _t('Unpin', 'Non fissare più');
   static String get movedToTrash =>
       _t('Moved to trash', 'Spostato nel cestino');
   static String get deletedMessage => _t('Deleted', 'Eliminato');

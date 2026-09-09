@@ -15,13 +15,14 @@ which is the **source of truth for requirements**; this folder plans the work.
 | [m1_5-correctness.md](m1_5-correctness.md) | M1.5 — Correctness pass | **Done** |
 | [m2-editor-preview.md](m2-editor-preview.md) | M2 — Editor + preview | **Done** |
 | [m3-links-search.md](m3-links-search.md) | M3 — Links & search | **Done** |
-| [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | **Next** |
-| [m5-sync.md](m5-sync.md) | M5 — Sync | Planned |
+| [m4-frontmatter-templates.md](m4-frontmatter-templates.md) | M4 — Frontmatter & templates | **Done** |
+| [m5-sync.md](m5-sync.md) | M5 — Sync | **Next** |
 | [m6-scale-polish.md](m6-scale-polish.md) | M6 — Scale & polish | Planned |
 | [m7-packaging-release.md](m7-packaging-release.md) | M7 — Packaging & release | Planned |
 | [ui-mockups.md](ui-mockups.md) | UI — mockup parity (bottom nav, toolbars) | **Done** |
 
-Everything before M4 is done and verified on the user's device (2026-09-08).
+Everything before M4 is done and verified on the user's device
+(2026-09-08). M4 is built and green; it has not been tried on device yet.
 
 ### Slices outside the M0→M7 chain
 

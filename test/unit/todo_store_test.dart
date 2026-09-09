@@ -60,6 +60,65 @@ void main() {
     });
   });
 
+  group('a leading frontmatter block', () {
+    // Pinning todo.txt wrote a YAML block into it, and its three lines
+    // showed in the Todo tab as three tasks (user, 2026-09-09).
+    test('is not made of tasks', () async {
+      writeRaw('todo.txt', '---\npinned: true\n---\n\nreal task\n');
+      final snapshot = await store.load();
+
+      expect(snapshot.todo.map((e) => e.task.description), ['', 'real task']);
+    });
+
+    test('leaves the line indices pointing at the real lines', () async {
+      writeRaw('todo.txt', '---\npinned: true\n---\nfirst\nsecond\n');
+      final snapshot = await store.load();
+
+      expect(snapshot.todo.map((e) => e.lineIndex), [3, 4]);
+      // And an edit addressed by that index rewrites the right line,
+      // leaving the block where it was.
+      await store.updateTodoAt(3, 'edited');
+      expect(readRaw('todo.txt'), '---\npinned: true\n---\nedited\nsecond\n');
+    });
+
+    test('a ... fence closes it too', () async {
+      writeRaw('todo.txt', '---\ntitle: mine\n...\ntask\n');
+      final snapshot = await store.load();
+      expect(snapshot.todo.map((e) => e.task.description), ['task']);
+    });
+
+    test('an unclosed --- is a task, not a block', () async {
+      writeRaw('todo.txt', '---\nnever closed\n');
+      final snapshot = await store.load();
+      expect(snapshot.todo, hasLength(2));
+    });
+
+    test('a --- further down is a task', () async {
+      writeRaw('todo.txt', 'first\n---\nsecond\n');
+      final snapshot = await store.load();
+      expect(snapshot.todo.map((e) => e.task.description), [
+        'first',
+        '---',
+        'second',
+      ]);
+    });
+
+    test('done.txt gets the same treatment', () async {
+      writeRaw('done.txt', '---\npinned: true\n---\nx 2026-09-06 old\n');
+      final snapshot = await store.load();
+      expect(snapshot.done, hasLength(1));
+      expect(snapshot.done.single.lineIndex, 3);
+    });
+
+    test('archiving completed lines steps over it', () async {
+      writeRaw('todo.txt', '---\npinned: true\n---\nx 2026-09-06 done\nopen\n');
+      await store.migrateCompleted();
+
+      expect(readRaw('todo.txt'), '---\npinned: true\n---\nopen\n');
+      expect(readRaw('done.txt'), 'x 2026-09-06 done');
+    });
+  });
+
   group('add', () {
     test('first add creates both files', () async {
       await store.add('Buy milk +errands');

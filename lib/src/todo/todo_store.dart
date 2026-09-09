@@ -22,6 +22,7 @@ import 'dart:typed_data';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/todo/parser.dart';
 import 'package:copist/src/todo/todo_files.dart';
 import 'package:copist/src/todo/todo_source.dart';
@@ -172,14 +173,18 @@ final class TodoStore implements TodoSource {
       op: 'migrate',
       allowCreate: true,
       apply: (todo, done) {
+        // The frontmatter block stays where it is: it is not a task, so
+        // it is not something the archive can move.
+        final start = frontmatterLineCount(todo);
         final archived = <String>[];
-        todo.removeWhere((line) {
-          if (!parseTodoLine(line).completed) {
-            return false;
+        var line = start;
+        while (line < todo.length) {
+          if (parseTodoLine(todo[line]).completed) {
+            archived.add(todo.removeAt(line));
+          } else {
+            line++;
           }
-          archived.add(line);
-          return true;
-        });
+        }
         done.addAll(archived);
       },
     );
@@ -424,9 +429,16 @@ List<TodoEntry> _parseLines(Uint8List? bytes) {
 }
 
 /// Parses content [lines] into snapshot entries with line indices.
+///
+/// A leading frontmatter block is not made of tasks: its fences and keys
+/// were showing up in the list as three tasks called `---`, `title: …`
+/// and `---`. The lines are skipped, not removed — [TodoEntry.lineIndex]
+/// addresses the real file line, and every edit, delete and archive
+/// writes through it, so the block has to keep its place in the file.
 List<TodoEntry> _parseEntries(List<String> lines) {
+  final start = frontmatterLineCount(lines);
   return <TodoEntry>[
-    for (var i = 0; i < lines.length; i++)
+    for (var i = start; i < lines.length; i++)
       TodoEntry(lineIndex: i, task: parseTodoLine(lines[i])),
   ];
 }

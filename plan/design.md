@@ -60,7 +60,8 @@ lib/
       tag_repo.dart         # tag list + tag→note queries
     frontmatter/
       parser.dart           # general YAML frontmatter parse/validate
-      fields.dart           # known fields (title, tags, date, pinned, aliases)
+      fields.dart           # queries over frontmatter_fields (pinned, key = value)
+      edit.dart             # set/remove one key in place, without reflowing the block
     templates/
       repo.dart             # template folder management (default Templates/)
       engine.dart           # {{title}}, {{date:YYYY-MM-DD}}, {{time}}, {{now}}, {{uuid}}
@@ -130,12 +131,12 @@ cheap at 1M scale.
 
 ```
 frontmatter_fields
-  id          int PK
   note_id     int           -- notes.id
-  key         text
+  key         text          -- lowercased; dotted for a nested map's leaf
   value       text
-  UNIQUE (note_id, key)     -- known: title, tags, date, pinned, aliases;
-                             -- any other key is stored too (indexed/filterable)
+  PRIMARY KEY (note_id, key, value)
+                            -- known: title, tags, date, pinned, aliases;
+                            -- any other key is stored too (indexed/filterable)
 
 tags            name UNIQUE   -- normalized (lowercase, no leading #)
 note_tags       tag, note_id, is_frontmatter(bool)
@@ -149,9 +150,21 @@ UI reads from it. Tag search queries `tags`/`note_tags`, not FTS.
 `note_stems` is M3's link-resolution index: a `COLLATE NOCASE` row per note
 filename (stem, lowercase) and — from M4 on — per alias. `note_links` holds
 **resolved** link edges from index-time extraction (dead links are skipped;
-references/backlinks UI is future work). M3 reads a minimal frontmatter
+references/backlinks UI is future work). M3 read a minimal frontmatter
 block (key:value; title, tags, aliases) without `frontmatter_fields`; M4's
-full YAML parser + fields table supersede it.
+full YAML parser + fields table superseded it.
+
+The value is part of the key because a key whose value is a list is one
+field with several values, and filtering by one of them (`projects =
+alpha`) has to match a note that lists it among others.
+
+`notes` also carries `title`, `date` and `pinned` as columns. They are the
+three known fields the tree renders per visible row, and a join per paint
+is a cost the tree does not have to pay; `frontmatter_fields` still holds
+them, so a `key = value` filter treats them like any other key.
+
+The index file is a cache with no migration chain: a schema bump drops
+every table and the next scan refills them (M4 took it from 1 to 2).
 
 ### Search (FTS5)
 
@@ -173,9 +186,8 @@ lookup; tags are answered from `tags`/`note_tags`, not from FTS.
   [m1_5-correctness.md](m1_5-correctness.md) comes first — today every
   scan reassigns them and every FTS row would point at the wrong note.
 - **Title is its own column** so ranking can weight it above the body
-  (`bm25(notes_fts, 10.0, 1.0)`). M3 reads the frontmatter title with the
-  minimal frontmatter reader (filename fallback); M4's fields table takes
-  it over.
+  (`bm25(notes_fts, 10.0, 1.0)`). The title is the frontmatter `title:`
+  with the filename as fallback.
 - **The table keeps its own copy of the text** (a standalone FTS5 table,
   not `content='notes'` and not contentless). That copy is what makes
   `snippet()` free of disk reads, and it is what substring search scans.

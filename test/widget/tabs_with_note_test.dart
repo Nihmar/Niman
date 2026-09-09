@@ -108,9 +108,11 @@ void main() {
     await tester.pump(); // first fade frame, clock held: fade just started.
     expect(find.byType(NoteView), findsOneWidget);
     // Mid-fade the shell still paints underneath (no window-background
-    // frame between the tab and the note).
+    // frame between the tab and the note) — but what it paints is the
+    // Quick note tab with an empty body, not the choose/create screen the
+    // user already answered (user, 2026-09-09).
     expect(tabShellOffstage().offstage, isFalse);
-    expect(find.byKey(const Key('quick-note-choose')), findsOneWidget);
+    expect(find.byKey(const Key('quick-note-choose')), findsNothing);
 
     // Past the fade the shell hides again (layout/paint/tickers skipped
     // under the opaque note).

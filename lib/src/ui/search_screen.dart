@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/frontmatter/fields.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/search/query.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/tree.dart' show displayNameOf;
 import 'package:flutter/material.dart';
 
 /// The Search tab/screen (T-M3-05/T-M3-08 toggle, T-M3-10 replace).
@@ -31,6 +33,7 @@ final class SearchScreen extends StatefulWidget {
     this.onOpenTags,
     this.source,
     this.replaceSource,
+    this.fieldSource,
     super.key,
   });
 
@@ -52,6 +55,10 @@ final class SearchScreen extends StatefulWidget {
   /// null the screen resolves it from [controller].
   final ReplaceSource? replaceSource;
 
+  /// Optional frontmatter-field source override (widget tests inject a
+  /// fake); when null the screen resolves it from [controller].
+  final FieldSource? fieldSource;
+
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -72,6 +79,7 @@ final class _SearchScreenState extends State<SearchScreen> {
   List<ReplaceMatchNote> _replacePreview = const [];
 
   SearchSource? _source;
+  FieldSource? _fields;
   Timer? _debounceTimer;
   Timer? _replaceRefresh;
   bool _contains = false;
@@ -136,6 +144,24 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     logNextFrame('search.ui', 'source applied first frame');
     if (_query.text.trim().isNotEmpty) unawaited(_runSearch());
+  }
+
+  /// The frontmatter-field source, resolved on first use.
+  ///
+  /// Unlike the search source it needs no warming: it runs on the UI
+  /// connection, and a `key = value` filter is an indexed lookup, not a
+  /// MATCH over every body in the library.
+  Future<FieldSource?> _acquireFields() async {
+    final own = widget.fieldSource;
+    if (own != null) return own;
+    final cached = _fields;
+    if (cached != null) return cached;
+    try {
+      return _fields = await widget.controller.fieldSource;
+    } on Object catch (e) {
+      const AppLogger(name: 'search.ui').warning('field source failed: $e');
+      return null;
+    }
   }
 
   Future<SearchSource?> _acquireSource() async {
@@ -218,10 +244,20 @@ final class _SearchScreenState extends State<SearchScreen> {
     }
     final id = source.begin();
     final contains = _contains;
-    const AppLogger(name: 'search.ui')
-        .debug('issue id $id (${contains ? 'contains' : 'words'}) "$text"');
+    final field = _fieldFilter(text);
+    final mode = field != null
+        ? 'field'
+        : contains
+        ? 'contains'
+        : 'words';
+    const AppLogger(name: 'search.ui').debug('issue id $id ($mode) "$text"');
     final clock = Stopwatch()..start();
-    final results = contains
+    // The field filter borrows the search source's invocation id: the two
+    // are driven by the same box, so a text query typed over a filter (or
+    // the other way round) still supersedes what came before it.
+    final results = field != null
+        ? await _runFieldFilter(field)
+        : contains
         ? await source.searchContains(text, id: id)
         : await source.search(buildFtsQuery(text), id: id);
     if (!source.isCurrent(id)) return; // a newer query superseded this one
@@ -239,6 +275,37 @@ final class _SearchScreenState extends State<SearchScreen> {
       _shown = _pageSize < results.length ? _pageSize : results.length;
     });
     logNextFrame('search.ui', 'results first frame (id $id)');
+  }
+
+  /// The `key = value` filter [text] asks for, or null when it is a text
+  /// search.
+  ///
+  /// Only in Words mode: Contains is a literal scan of the note bodies,
+  /// and someone who typed `x = y` there meant to find that string.
+  ({String key, String value})? _fieldFilter(String text) =>
+      _contains ? null : fieldQuery(text);
+
+  /// Whether the box currently holds a `key = value` filter.
+  bool get _inFieldMode => _fieldFilter(_query.text.trim()) != null;
+
+  /// Runs a `key = value` filter and shapes its notes like search hits, so
+  /// the results list stays one list. There is no snippet: the match is
+  /// the field, not a place in the text.
+  Future<List<SearchHit>> _runFieldFilter(
+    ({String key, String value}) f,
+  ) async {
+    final fields = await _acquireFields();
+    if (fields == null) return const [];
+    final notes = await fields.notesWithField(f.key, f.value);
+    return [
+      for (final note in notes)
+        SearchHit(
+          noteId: note.id,
+          path: note.path,
+          title: displayNameOf(note),
+          snippet: '',
+        ),
+    ];
   }
 
   void _loadMore() {
@@ -264,7 +331,11 @@ final class _SearchScreenState extends State<SearchScreen> {
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: AppStrings.searchHint,
-                  prefixIcon: const Icon(Icons.search),
+                  // The icon says which of the two the box is doing, so a
+                  // filter that matched is visible before the results are.
+                  prefixIcon: Icon(
+                    _inFieldMode ? Icons.filter_alt_outlined : Icons.search,
+                  ),
                   suffixIcon: _query.text.isEmpty
                       ? null
                       : IconButton(
@@ -300,7 +371,9 @@ final class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const Spacer(),
-                  if (!_contains && _hits.isNotEmpty)
+                  // Replace rewrites the query term inside the notes; a
+                  // filter has no term, so it has nothing to offer.
+                  if (!_contains && !_inFieldMode && _hits.isNotEmpty)
                     IconButton(
                       key: const Key('search-replace'),
                       tooltip: AppStrings.replaceTooltip,
@@ -757,6 +830,9 @@ final class _SearchScreenState extends State<SearchScreen> {
   /// two characters too, whatever came before it.
   bool _canSearch(String text) {
     if (text.length < 2) return false;
+    // A `key = value` filter is an indexed lookup, so the prefix-expansion
+    // problem the floor exists for does not apply: `x = 1` runs.
+    if (_fieldFilter(text) != null) return true;
     if (_contains) return true;
     final last = text.split(RegExp(r'\s+')).last;
     return last.length >= 2;

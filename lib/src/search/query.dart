@@ -35,6 +35,30 @@ String? buildFtsQuery(String userText) {
   return out.join(' ');
 }
 
+/// The `key = value` filter [userText] asks for, or null when it asks for
+/// a text search (T-M4-03).
+///
+/// `status = draft`, `status=draft` and `status =` (every note that
+/// declares the key) all parse; the value may be quoted to keep its
+/// spaces, `author = "Ada Lovelace"`. The key has to look like a key —
+/// letters, digits, `_`, `-` and the `.` of a nested one — so a note
+/// about `x = y + 1` is still a text search, and so is anything with a
+/// second `=` in it.
+({String key, String value})? fieldQuery(String userText) {
+  final text = userText.trim();
+  final eq = text.indexOf('=');
+  if (eq < 0 || text.indexOf('=', eq + 1) >= 0) return null;
+  final key = text.substring(0, eq).trim();
+  if (key.isEmpty || !RegExp(r'^[A-Za-z0-9_.-]+$').hasMatch(key)) return null;
+  var value = text.substring(eq + 1).trim();
+  if (value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'")))) {
+    value = value.substring(1, value.length - 1);
+  }
+  return (key: key.toLowerCase(), value: value);
+}
+
 /// The normalized tag when [userText] is exactly one `#tag` token — the
 /// tag-search mode — or null (word search). `#work` → `work`;
 /// `#work extra` → null (mixed input stays a word search).

@@ -18,6 +18,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onToggle,
     required this.onNewNote,
     required this.onNewListNote,
+    required this.onNewFromTemplate,
     required this.onNewFolder,
     super.key,
   });
@@ -38,6 +39,9 @@ final class NewItemFab extends StatelessWidget {
   /// Creates a new list note in the configured list folder.
   final VoidCallback onNewListNote;
 
+  /// Creates a note from a template, in the FAB target folder.
+  final VoidCallback onNewFromTemplate;
+
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
 
@@ -53,6 +57,14 @@ final class NewItemFab extends StatelessWidget {
           tooltip: AppStrings.newNoteTitle,
           open: expanded,
           onTap: onNewNote,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('new-from-template-action'),
+          icon: Icons.file_copy_outlined,
+          tooltip: AppStrings.newFromTemplateTitle,
+          open: expanded,
+          onTap: onNewFromTemplate,
         ),
         const SizedBox(height: 12),
         _MiniFab(

@@ -12,6 +12,7 @@ import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
+import 'package:copist/src/frontmatter/fields.dart';
 import 'package:copist/src/library/file_watcher.dart';
 import 'package:copist/src/library/library_registry.dart';
 import 'package:copist/src/library/note_ops.dart';
@@ -20,6 +21,7 @@ import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
+import 'package:copist/src/templates/repo.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -272,6 +274,21 @@ final class LibraryController implements LibrarySession {
     final db = _indexDb;
     if (db == null) return null;
     return TagRepo(db);
+  }
+
+  @override
+  Future<FieldSource?> get fieldSource async {
+    final db = _indexDb;
+    if (db == null) return null;
+    return FieldRepo(db);
+  }
+
+  @override
+  Future<TemplateSource?> get templateSource async {
+    final indexer = _indexer;
+    final ops = this.ops;
+    if (indexer == null || ops == null) return null;
+    return TemplateRepo(indexer.dao, ops);
   }
 
   @override
@@ -590,6 +607,16 @@ final class LibraryController implements LibrarySession {
   @override
   Future<void> setTreeSort(TreeSort sort) async {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
+  }
+
+  /// Whether the tree's pinned section is rolled up.
+  @override
+  Future<bool> get pinnedCollapsed async => (await _library).pinnedCollapsed;
+
+  /// Sets (and persists) the pinned section's rolled-up state.
+  @override
+  Future<void> setPinnedCollapsed({required bool collapsed}) async {
+    await _editLibrary((c) => c.copyWith(pinnedCollapsed: collapsed));
   }
 
   /// The link format the editor's link button inserts.

@@ -197,6 +197,15 @@ String stripSegments(String path, int count) {
   return parts.sublist(count).join('/');
 }
 
+/// Whether [name] (a file name or a library-relative path) is a Markdown
+/// note.
+///
+/// The library holds other files too — attachments, and a `todo.txt` — and
+/// they are indexed, listed and linkable. What they are not is notes: they
+/// have no frontmatter, so anything that works by writing frontmatter has
+/// to ask this first.
+bool isMarkdownNote(String name) => name.toLowerCase().endsWith('.md');
+
 /// Whether [path] is strictly inside [parent], at any depth (empty parent
 /// = the library root).
 bool isUnder(String parent, String path) {

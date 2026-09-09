@@ -47,7 +47,7 @@ void main() {
   testWidgets('no query: hint, no results', (tester) async {
     await tester.pumpWidget(buildApp(source));
     await tester.pump();
-    expect(find.text('Type to search the library'), findsOne);
+    expect(find.textContaining('Type to search the library'), findsOne);
   });
 
   testWidgets('query debounces: one search per pause, results appear', (
@@ -162,7 +162,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('search-clear')));
     await tester.pump();
-    expect(find.text('Type to search the library'), findsOne);
+    expect(find.textContaining('Type to search the library'), findsOne);
   });
 
   testWidgets('paging: 50 hits per page, Show more reveals the rest', (

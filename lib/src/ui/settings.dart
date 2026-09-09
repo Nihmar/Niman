@@ -72,6 +72,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   int _indentWidth = 2;
   String? _quickNotePath;
   String? _listFolder;
+  String? _templateFolder;
   AppLanguage _language = AppLanguage.system;
 
   @override
@@ -95,6 +96,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final indentWidth = await controller.indentWidth;
     final quickNotePath = await ops.quickNotePath;
     final listFolder = await ops.listNoteFolder;
+    final templateFolder = await ops.templateFolder;
     final language = await controller.language;
     if (mounted) {
       setState(() {
@@ -110,6 +112,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _indentWidth = indentWidth;
         _quickNotePath = quickNotePath;
         _listFolder = listFolder;
+        _templateFolder = templateFolder;
         _language = language;
       });
     }
@@ -146,6 +149,30 @@ final class _SettingsBodyState extends State<SettingsBody> {
     widget.controller.notify();
     if (mounted) {
       setState(() => _listFolder = saved);
+    }
+  }
+
+  /// Opens the template-folder picker (T-M4-05): where the note
+  /// templates live, chosen from the library's folders rather than
+  /// typed.
+  Future<void> _pickTemplateFolder() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final folders = await widget.controller.folders();
+    if (!mounted) return;
+    final folder = await showFolderPicker(
+      context,
+      title: AppStrings.templateFolderTitle,
+      folders: folders,
+      ops: ops,
+      current: _templateFolder ?? defaultTemplateFolder,
+    );
+    if (folder == null) return;
+    await ops.setTemplateFolder(folder: folder);
+    final saved = await ops.templateFolder;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _templateFolder = saved);
     }
   }
 
@@ -555,6 +582,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
           title: AppStrings.listFolderTitle,
           value: _listFolder ?? defaultListFolder,
           onTap: _pickListFolder,
+        ),
+        SettingsValueRow(
+          key: const Key('template-folder-setting'),
+          title: AppStrings.templateFolderTitle,
+          value: _templateFolder ?? defaultTemplateFolder,
+          onTap: _pickTemplateFolder,
         ),
         SwitchListTile(
           key: const Key('trash-setting'),
