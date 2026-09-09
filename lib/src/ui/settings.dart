@@ -456,7 +456,15 @@ final class _SettingsBodyState extends State<SettingsBody> {
           },
           onTap: () => unawaited(_choosePreviewMode()),
         ),
-        if (_splitLoaded)
+        // Only where the two panes actually share a screen (T-CL-05):
+        // on a phone in the switch layout this slider moves a number
+        // nothing reads. The stored ratio is untouched while it is
+        // hidden, so plugging in a monitor brings back the chosen split.
+        if (_splitLoaded &&
+            previewSplits(
+              _previewMode,
+              narrow: MediaQuery.sizeOf(context).width < splitBreakpoint,
+            ))
           SettingsValueRow(
             key: const Key('split-ratio-setting'),
             title: AppStrings.splitRatioTitle,

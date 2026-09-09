@@ -118,4 +118,55 @@ void main() {
     expect(find.text(AppStrings.trashSubtitle), findsOne);
     expect(find.text(AppStrings.keyboardOnOpenSubtitle), findsOne);
   });
+
+  group('the split-ratio row appears only where the panes can split', () {
+    /// Pumps the settings body at [width], the way a phone or a tablet
+    /// would show it.
+    Future<void> pumpAt(WidgetTester tester, double width) async {
+      tester.view.physicalSize = Size(width, 2800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: SettingsBody(controller: controller)),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final row = find.byKey(const Key('split-ratio-setting'));
+
+    testWidgets('hidden on a phone, where auto never splits', (tester) async {
+      await pumpAt(tester, 400);
+      expect(row, findsNothing);
+    });
+
+    testWidgets('shown on a tablet, where auto does split', (tester) async {
+      await pumpAt(tester, 900);
+      expect(row, findsOne);
+    });
+
+    testWidgets('shown on a phone when the split is forced', (tester) async {
+      await controller.setPreviewMode(PreviewLayoutMode.split);
+      await pumpAt(tester, 400);
+      expect(row, findsOne);
+    });
+
+    testWidgets('hidden on a tablet when the switch layout is forced', (
+      tester,
+    ) async {
+      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
+      await pumpAt(tester, 900);
+      expect(row, findsNothing);
+    });
+
+    testWidgets('the stored ratio survives being hidden', (tester) async {
+      // Hiding the control must not reset the value: plugging in a
+      // monitor brings back the split the user chose.
+      await controller.setSplitRatio(0.7);
+      await pumpAt(tester, 400);
+      expect(row, findsNothing);
+      expect(await controller.splitRatio, 0.7);
+    });
+  });
 }

@@ -33,6 +33,23 @@ enum LinkType {
   markdown,
 }
 
+/// Below this width the shell is single-pane (spec: phones are
+/// full-screen tree or editor, the split lands at 600 dp and up).
+const double splitBreakpoint = 600;
+
+/// Whether the editor and the preview actually sit side by side.
+///
+/// The forced modes win; `auto` follows the width. It lives here rather
+/// than in the shell because the settings screen asks the same question:
+/// the split-ratio row means nothing when the panes never share a screen
+/// (T-CL-05).
+bool previewSplits(PreviewLayoutMode mode, {required bool narrow}) =>
+    switch (mode) {
+      PreviewLayoutMode.split => true,
+      PreviewLayoutMode.fullScreen => false,
+      PreviewLayoutMode.auto => !narrow,
+    };
+
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
 

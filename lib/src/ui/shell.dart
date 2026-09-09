@@ -205,7 +205,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// as a screen instead. Reminder taps land here, so a tablet no longer
   /// opens the app on the file tree with no hint of why.
   void _openTodo() {
-    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
       _selectShellTab(ShellTab.todo);
       return;
     }
@@ -300,7 +300,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
 
-  /// Phone (< [_phoneBreakpoint]) mode: which pane is visible.
+  /// Phone (< [splitBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
 
@@ -426,8 +426,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// transition, or its resize lands mid-fade.
   bool _opensPreviewOnly() {
     if (!_previewVisible) return false;
-    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
-    return !_effectiveSplit(narrow: narrow);
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    return !previewSplits(_previewMode, narrow: narrow);
   }
 
   /// Records a note open: the tabs stay painted under the fading note
@@ -502,7 +502,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       linkType: _linkType,
       indentWidth: _indentWidth,
       toolbarLayout: _toolbarLayout,
-      splitPreview: _effectiveSplit(narrow: true),
+      splitPreview: previewSplits(_previewMode, narrow: true),
       showPreview: _previewVisible,
       splitFraction: _splitRatio,
       onSplitFractionChanged: _onSplitFractionChanged,
@@ -556,10 +556,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       onPressed: _togglePreview,
     );
   }
-
-  /// Below this width the shell is single-pane (spec: phones are
-  /// full-screen tree or editor, the split lands at 600 px and up).
-  static const double _phoneBreakpoint = 600;
 
   @override
   void initState() {
@@ -711,14 +707,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// Resolves the effective preview layout for a width: forced modes win,
-  /// `auto` follows the width (split ≥ 600 dp, switch on phones).
-  bool _effectiveSplit({required bool narrow}) {
-    if (_previewMode == PreviewLayoutMode.split) return true;
-    if (_previewMode == PreviewLayoutMode.fullScreen) return false;
-    return !narrow;
-  }
-
   /// Parent path for new note/folder creation.
   String get _createParent {
     if (_selected == null) return '';
@@ -814,7 +802,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// screen — otherwise the launcher's Quick note action would land
   /// nowhere on a tablet with no quick note set yet.
   void _openQuickNoteChooser() {
-    if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
       _selectShellTab(ShellTab.quickNote);
       return;
     }
@@ -1100,7 +1088,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final selectedPath = _selected;
-    final narrow = MediaQuery.sizeOf(context).width < _phoneBreakpoint;
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
 
     if (narrow) {
       // Phone: the selected note opens full-screen (from any tab) over the
@@ -1117,7 +1105,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           _previewFullScreen &&
           _previewVisible &&
           _previewToggleVisible &&
-          !_effectiveSplit(narrow: true);
+          !previewSplits(_previewMode, narrow: true);
       return PopScope(
         canPop: !fullNote,
         onPopInvokedWithResult: (didPop, _) {
@@ -1180,7 +1168,10 @@ final class _LibraryShellState extends State<_LibraryShell>
                                   title: Text(p.basename(selectedPath)),
                                   actions: [
                                     ..._kindActions,
-                                    if (!_effectiveSplit(narrow: true) &&
+                                    if (!previewSplits(
+                                          _previewMode,
+                                          narrow: true,
+                                        ) &&
                                         _previewToggleVisible) ...[
                                       _previewToggleAction(),
                                       if (_previewVisible)
@@ -1230,7 +1221,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           if (_selected != null &&
               !_selectedIsDir &&
               _previewToggleVisible &&
-              !_effectiveSplit(narrow: false))
+              !previewSplits(_previewMode, narrow: false))
             _previewToggleAction(),
           IconButton(
             key: const Key('open-trash'),
@@ -1562,7 +1553,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             linkType: _linkType,
             indentWidth: _indentWidth,
             toolbarLayout: _toolbarLayout,
-            splitPreview: _effectiveSplit(narrow: false),
+            splitPreview: previewSplits(_previewMode, narrow: false),
             showPreview: _previewVisible,
             splitFraction: _splitRatio,
             onSplitFractionChanged: _onSplitFractionChanged,
