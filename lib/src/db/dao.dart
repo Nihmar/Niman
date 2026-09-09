@@ -1,12 +1,12 @@
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart';
 
 /// Query helpers over the materialized notes tree.
 final class NoteDao {
-  /// Creates the DAO backed by the given [CopistDatabase].
+  /// Creates the DAO backed by the given [IndexDatabase].
   new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   /// Rows directly under the library root (parent id 0), directories first.
   Future<List<Note>> topLevel() {

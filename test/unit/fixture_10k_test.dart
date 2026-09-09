@@ -3,7 +3,7 @@
 // incremental path on it.
 import 'dart:io';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/search/query.dart';
 import 'package:copist/src/search/search_repo.dart';
@@ -18,7 +18,7 @@ const int noteCount = 10000;
 
 void main() {
   late Directory root;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late Indexer indexer;
   late SearchRepo search;
   late TagRepo tags;
@@ -43,7 +43,7 @@ void main() {
         );
       }
     }
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);
     search = SearchRepo(db);

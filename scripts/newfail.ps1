@@ -56,8 +56,8 @@ if (Test-Path $baselineFile) {
 if ($Update) {
     $steady = @($failed | Where-Object { "~$_" -notin $kept })
     ($kept + $steady) | Set-Content $baselineFile -Encoding utf8
-    Write-Host "baseline updated: $($steady.Count) steady + " +
-        "$(($kept | Where-Object { $_.StartsWith('~') }).Count) flaky"
+    $flakyCount = ($kept | Where-Object { $_.StartsWith('~') }).Count
+    Write-Host "baseline updated: $($steady.Count) steady + $flakyCount flaky"
     exit 0
 }
 

@@ -6,7 +6,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:path/path.dart' as p;
@@ -38,7 +38,7 @@ final class TrashItem {
 /// can be restored to their original location.
 final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
-  new({required this.root, required CopistDatabase db, required this.indexer})
+  new({required this.root, required IndexDatabase db, required this.indexer})
     : _dao = NoteDao(db),
       _config = LibraryConfigRepo(root);
 

@@ -2,38 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
-part 'database.g.dart';
-
-/// One note file or folder in the library.
-///
-/// [path] is library-relative, slash-separated. Directory rows are
-/// materialized (not derived on the fly) so tree queries stay cheap at
-/// scale. [parent] is the parent row id; 0 means the library root.
-class Notes extends Table {
-  /// Primary key.
-  IntColumn get id => integer().autoIncrement()();
-
-  /// Library-relative slash-separated path; unique.
-  TextColumn get path => text().unique()();
-
-  /// Parent row id; 0 = library root.
-  IntColumn get parent => integer()();
-
-  /// Display name (file or folder name).
-  TextColumn get name => text()();
-
-  /// Whether this row is a directory.
-  BoolColumn get isDir => boolean()();
-
-  /// Byte size; 0 for directories.
-  IntColumn get size => integer()();
-
-  /// Last modification time as seen on disk.
-  DateTimeColumn get modified => dateTime()();
-
-  /// Content sha256, hex; files only (directories are null).
-  TextColumn get sha256 => text().nullable()();
-}
+part 'app_database.g.dart';
 
 /// Global app settings; a single row (id 1).
 class AppSettings extends Table {
@@ -117,110 +86,48 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-/// The link-resolution index: one row per note *stem* (filename without
-/// `.md`, lowercased) and — from M4 on — per frontmatter alias, both
-/// `COLLATE NOCASE` so `[[note]]` and `[[Note]]` share a candidate set.
+/// The app's own database: settings that belong to the installation, not
+/// to any one library.
 ///
-/// Rows are maintained by the indexer on insert/rename/delete; the table is
-/// rebuildable from disk by a full rescan.
-class NoteStems extends Table {
-  /// The normalized (lowercased) stem or alias text.
-  TextColumn get stem => text().customConstraint('COLLATE NOCASE')();
-
-  /// The id of the note row the stem points at.
-  IntColumn get noteId => integer()();
-
-  /// Where the stem came from: `file` (the filename stem) or `alias`
-  /// (a frontmatter alias).
-  TextColumn get source => text()();
-
-  @override
-  Set<Column> get primaryKey => {stem, noteId, source};
-}
-
-/// A tag, normalized (lowercased, no leading `#`); the tag name is the key.
-class Tags extends Table {
-  /// The normalized tag name.
-  TextColumn get name => text()();
-
-  @override
-  Set<Column> get primaryKey => {name};
-}
-
-/// Which note carries which tag, and from where: frontmatter `tags:` or an
-/// inline `#tag`. One row per (tag, note, source) — a tag in both sources
-/// has two rows, so the counts and the source survive.
-class NoteTags extends Table {
-  /// The normalized tag name (see [Tags]).
-  TextColumn get tag => text()();
-
-  /// The ids of the note row.
-  IntColumn get noteId => integer()();
-
-  /// Whether the tag came from frontmatter (true) or inline `#tag` (false).
-  BoolColumn get isFrontmatter => boolean()();
-
-  @override
-  Set<Column> get primaryKey => {tag, noteId, isFrontmatter};
-}
-
-/// A resolved link edge between two notes; dead links are skipped, so every
-/// row points at an existing note. References/backlinks UI is future work
-/// (M3 stores the edges; it has no reader for them yet).
-class NoteLinks extends Table {
-  /// The id of the note containing the link.
-  IntColumn get fromNote => integer()();
-
-  /// The id of the linked note.
-  IntColumn get toNote => integer()();
-
-  /// The link form: `wiki` (`[[…]]`) or `md` (`[t](p)`).
-  TextColumn get kind => text()();
-
-  @override
-  Set<Column> get primaryKey => {fromNote, toNote, kind};
-}
-
-/// The Copist database.
-///
-/// Every table is rebuildable from disk: deleting the database file and
-/// rescanning the library reproduces it exactly.
-@DriftDatabase(
-  tables: [Notes, AppSettings, NoteStems, Tags, NoteTags, NoteLinks],
-)
-class CopistDatabase extends _$CopistDatabase {
+/// It is the file `copist.db` in the application-support directory, and
+/// up to schema v14 it held the note index too. T-ML-03 moved the index
+/// out, one database per library, and left this one with the settings —
+/// which is why the migration chain below starts long before this class
+/// existed. It carries the only rows in the app that are NOT rebuildable
+/// from disk, so it is the one database worth backing up.
+@DriftDatabase(tables: [AppSettings])
+class AppDatabase extends _$AppDatabase {
   /// Creates the database on top of [e].
   new(super.e);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
-  /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
-  /// `notes.id`, one row per note, `title` weighted above `body` by the
-  /// search ranking). `IF NOT EXISTS` keeps re-open and both migration
-  /// paths idempotent.
-  static const String _createFts =
-      'CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING '
-      "fts5(title, body, tokenize = 'unicode61 remove_diacritics 2')";
+  /// The index tables that lived here through v14, dropped by v15.
+  static const _indexTables = [
+    'notes_fts',
+    'note_links',
+    'note_tags',
+    'note_stems',
+    'tags',
+    'notes',
+  ];
 
-  /// Fresh databases get all tables; v1 databases gain the
+  /// Fresh databases get `app_settings` alone; v1 databases gain the
   /// `debug_logs_enabled` column, pre-v3 databases `line_numbers`,
   /// pre-v4 databases `editor_autofocus`, pre-v5 databases
   /// `preview_mode` + `split_ratio`, pre-v6 databases the
   /// `quick_note_path` library setting, pre-v7 databases `tree_sort`,
-  /// pre-v8 databases the M3 tables (`note_stems`, `tags`, `note_tags`,
-  /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
-  /// `reminder_show_tokens`, pre-v10 databases `link_type` +
-  /// `indent_width`, and pre-v11 databases the `list_note_folder`
-  /// library setting, pre-v12 databases `editor_toolbar`, pre-v13
-  /// databases `language`, and pre-v14 databases lose `library_settings`
-  /// (T-ML-02) after its rows are parked in `legacy_library_settings`.
+  /// pre-v9 databases `reminder_show_tokens`, pre-v10 databases
+  /// `link_type` + `indent_width`, pre-v11 databases the
+  /// `list_note_folder` library setting, pre-v12 databases
+  /// `editor_toolbar`, pre-v13 databases `language`, pre-v14 databases
+  /// lose `library_settings` (T-ML-02) after its rows are parked in
+  /// `legacy_library_settings`, and pre-v15 databases lose the index
+  /// tables (T-ML-03), which each library now keeps in its own file.
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async {
-      await m.createAll();
-      await m.database.customStatement(_createFts);
-    },
+    onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
       if (from == 1) {
         await m.database.customStatement(
@@ -261,13 +168,9 @@ class CopistDatabase extends _$CopistDatabase {
           "TEXT NOT NULL DEFAULT 'nameAsc'",
         );
       }
-      if (from < 8) {
-        await m.createTable(noteStems);
-        await m.createTable(tags);
-        await m.createTable(noteTags);
-        await m.createTable(noteLinks);
-        await m.database.customStatement(_createFts);
-      }
+      // v8 created the M3 index tables here. v15 drops them from this
+      // database, so an old enough upgrade skips straight to that: the
+      // library's own index file is built by the scan on its first open.
       if (from < 9) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN reminder_show_tokens '
@@ -311,6 +214,12 @@ class CopistDatabase extends _$CopistDatabase {
         await m.database.customStatement(
           'DROP TABLE IF EXISTS library_settings',
         );
+      }
+      if (from < 15) {
+        for (final table in _indexTables) {
+          await m.database.customStatement('DROP TABLE IF EXISTS $table');
+        }
+        await m.database.customStatement('VACUUM');
       }
     },
   );

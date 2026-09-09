@@ -6,7 +6,7 @@ import 'dart:isolate';
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/links/parser.dart';
@@ -265,10 +265,10 @@ String _titleFromName(String rel) {
 /// app-originated operations and disk-originated events converge identically
 /// (T-M1-07).
 final class Indexer {
-  /// Creates the indexer over the given [CopistDatabase].
+  /// Creates the indexer over the given [IndexDatabase].
   new(this._db) : _dao = NoteDao(_db), _log = const AppLogger(name: 'indexer');
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   final NoteDao _dao;
 

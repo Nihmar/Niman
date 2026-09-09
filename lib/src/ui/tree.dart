@@ -1,5 +1,5 @@
 import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/file_icon.dart';
 import 'package:copist/src/ui/strings.dart';

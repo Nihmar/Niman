@@ -7,7 +7,7 @@
 /// picker.
 library;
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 
 /// The normalized stem of a note file name: lowercased, with the `.md`
 /// extension (case-insensitive) stripped. `My Note.md` → `my note`.
@@ -91,10 +91,10 @@ abstract interface class LinkSource {
 /// Resolves wiki targets (`[[…]]` target part) and markdown hrefs against
 /// the note index. Not a DAO and not stateful: callers create one per use.
 final class LinkResolver implements LinkSource {
-  /// Creates a resolver over the drift [CopistDatabase].
+  /// Creates a resolver over the drift [IndexDatabase].
   new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   @override
   Future<ResolveResult> resolveWiki(String target) {

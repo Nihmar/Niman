@@ -1,7 +1,7 @@
 // T-M3-10: the exact whole-word replace runner over a real index + disk.
 import 'dart:io';
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/search/replace.dart';
 import 'package:drift/drift.dart' show Variable;
@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 
 void main() {
   late Directory root;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late ReplaceRunner replace;
 
   File file(String rel) => File(p.join(root.path, rel));
@@ -20,7 +20,7 @@ void main() {
 
   setUp(() async {
     root = await Directory.current.createTemp('copist_replace_');
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     // The corpus: word-boundary traps and a multi-word phrase.
     await file('a.md')

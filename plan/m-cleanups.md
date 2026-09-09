@@ -47,6 +47,19 @@ list stays honest about what remains. Nothing here is a feature.
   with each piece. *AC: no behaviour change; each extracted piece keeps
   its tests.*
 
+- [ ] **T-CL-05** The split-ratio row is shown where it cannot apply
+  (user, 2026-09-09). The editor|preview split only exists when the two
+  panes are side by side: at `auto` that needs a window at least 600 dp
+  wide, and on a phone in the switch layout the slider moves a number
+  nothing reads. Show the row only when the current preview mode and
+  width can actually split, so the settings screen stops offering a
+  control with no effect. Keep the stored value untouched while it is
+  hidden — plugging in a monitor should bring back the ratio the user
+  chose, not a default. *AC: widget tests — the row is absent on a phone
+  width at `auto` and present at a tablet width; present at any width
+  when the mode is forced to `split`; the stored ratio survives being
+  hidden.*
+
 ## Not worth doing (recorded so it is not re-found)
 
 - The list drag's hit testing walks every row per pointer move

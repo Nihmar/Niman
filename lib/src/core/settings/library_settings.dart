@@ -1,5 +1,5 @@
 import 'package:copist/src/core/language.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 
 /// The preview layout mode (settings, T-M2-08): follow the width (`auto`)
@@ -47,10 +47,10 @@ const double maxSplitRatio = 0.8;
 
 /// Global app settings, a single row (id 1).
 final class AppSettingsRepo {
-  /// Creates the repo over the given [CopistDatabase].
+  /// Creates the repo over the given [AppDatabase].
   new(this._db);
 
-  final CopistDatabase _db;
+  final AppDatabase _db;
 
   /// The last opened library root, or null.
   Future<String?> lastLibraryPath() async {

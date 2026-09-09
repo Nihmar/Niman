@@ -1,6 +1,6 @@
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/links/resolver.dart';

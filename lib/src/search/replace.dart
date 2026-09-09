@@ -20,7 +20,7 @@ import 'dart:math' as math;
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:path/path.dart' as p;
 
@@ -119,7 +119,7 @@ final class ReplaceRunner implements ReplaceSource {
   /// this run rewrote, right after the batch that rewrote them.
   new(this._db, this._root, {this.onNotesReindexed});
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
   final String _root;
 
   /// Called with the rewritten notes' absolute paths, per write batch, so

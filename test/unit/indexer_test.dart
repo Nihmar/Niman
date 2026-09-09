@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart' show Variable;
@@ -12,13 +12,13 @@ import 'package:path/path.dart' as p;
 
 void main() {
   late Directory root;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late Indexer indexer;
   late NoteDao dao;
 
   setUp(() async {
     root = await Directory.current.createTemp('copist_index_');
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);
     dao = indexer.dao;
@@ -95,7 +95,7 @@ void main() {
     await indexer.fullScan(root.path);
     final first = await dao.allRows();
 
-    final db2 = CopistDatabase(NativeDatabase.memory());
+    final db2 = IndexDatabase(NativeDatabase.memory());
     addTearDown(db2.close);
     await Indexer(db2).fullScan(root.path);
     final second = await NoteDao(db2).allRows();
@@ -488,7 +488,7 @@ void main() {
         await indexer.fullScan(root.path);
         final before = await _indexState(db, dao);
 
-        final db2 = CopistDatabase(NativeDatabase.memory());
+        final db2 = IndexDatabase(NativeDatabase.memory());
         addTearDown(db2.close);
         final indexer2 = Indexer(db2);
         await indexer2.fullScan(root.path);
@@ -720,7 +720,7 @@ void main() {
 
 /// The index state a rebuild reproduces: per-note content rows.
 Future<Map<String, List<String>>> _indexState(
-  CopistDatabase db,
+  IndexDatabase db,
   NoteDao dao,
 ) async {
   final notes = await dao.allRows();

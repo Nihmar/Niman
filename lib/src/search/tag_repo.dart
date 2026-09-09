@@ -5,7 +5,7 @@
 /// so the same note folder grouping applies everywhere.
 library;
 
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 
 /// A tag with its note count.
@@ -35,10 +35,10 @@ abstract interface class TagSource {
 
 /// The tag side of the search data (T-M3-04/T-M3-06).
 final class TagRepo implements TagSource {
-  /// Creates the repo over [CopistDatabase].
+  /// Creates the repo over [IndexDatabase].
   new(this._db);
 
-  final CopistDatabase _db;
+  final IndexDatabase _db;
 
   @override
   Future<List<TagCount>> tagCounts() async {

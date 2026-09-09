@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 
 /// Delivers the settings the dropped `library_settings` table held to the
@@ -23,7 +23,7 @@ final class LegacyLibrarySettings {
   /// Creates the migrator over the app database.
   new(this._db);
 
-  final CopistDatabase _db;
+  final AppDatabase _db;
 
   final AppLogger _log = const AppLogger(name: 'settings');
 

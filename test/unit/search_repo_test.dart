@@ -1,7 +1,7 @@
 // T-M3-04 AC: word search ranks (bm25, title over body) with snippets;
 // #tag search answers from tags/note_tags, never FTS; superseded queries
 // are dropped by invocation id; MATCH vs LIKE behaviors.
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/search/query.dart';
 import 'package:copist/src/search/search_repo.dart';
 import 'package:copist/src/search/tag_repo.dart';
@@ -10,7 +10,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late CopistDatabase db;
+  late IndexDatabase db;
   late SearchRepo search;
   late TagRepo tags;
 
@@ -33,7 +33,7 @@ void main() {
   }
 
   setUp(() async {
-    db = CopistDatabase(NativeDatabase.memory());
+    db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     search = SearchRepo(db);
     tags = TagRepo(db);

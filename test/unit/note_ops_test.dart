@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:drift/native.dart';
@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 void main() {
   late Directory root;
   late Directory dbDir;
-  late CopistDatabase db;
+  late IndexDatabase db;
   late Indexer indexer;
   late NoteOps ops;
   late NoteDao dao;
@@ -21,9 +21,7 @@ void main() {
   setUp(() async {
     root = await Directory.current.createTemp('copist_ops_');
     dbDir = await Directory.current.createTemp('copist_ops_db_');
-    db = CopistDatabase(
-      NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))),
-    );
+    db = IndexDatabase(NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))));
     addTearDown(db.close);
     indexer = Indexer(db);
     dao = indexer.dao;

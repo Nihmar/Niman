@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/settings/legacy_library_settings.dart';
 import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,14 +12,12 @@ import 'package:path/path.dart' as p;
 void main() {
   late Directory tempDir;
   late Directory lib;
-  late CopistDatabase db;
+  late AppDatabase db;
 
   setUp(() async {
     tempDir = await Directory.current.createTemp('copist_legacy_');
     lib = await tempDir.createTemp('lib_');
-    db = CopistDatabase(
-      NativeDatabase(File(p.join(tempDir.path, 'test.sqlite'))),
-    );
+    db = AppDatabase(NativeDatabase(File(p.join(tempDir.path, 'test.sqlite'))));
     addTearDown(db.close);
   });
 

@@ -1,4 +1,4 @@
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/links/resolver.dart';
 
 /// In-memory [LinkSource] for widget tests: resolves wiki targets and md

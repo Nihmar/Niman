@@ -84,12 +84,14 @@ tap rather than a folder picker.
   later bug. *AC: a negative or absurd value reads back as the default.*
   Done: `LibraryConfigRepo` is what `NoteOps` reads now, schema v14 drops
   the table, and `LegacyLibrarySettings` delivers its rows (see below).
-- [ ] **T-ML-03** One index per library. `copist.db` becomes
+- [x] **T-ML-03** One index per library. `copist.db` becomes
   `<support>/indexes/<hash of the library path>.db`, so switching does
   not re-index and the previous library's rows are not clobbered. The
   index stays rebuildable: deleting the file rebuilds it on the next
   open. *AC: open A, open B, reopen A — A is not re-scanned and its tree
-  is intact.*
+  is intact.* Done: the note index left the app database, which forced
+  the split described below; the settings stayed in `copist.db` and the
+  index tables were dropped from it at schema v15.
 - [ ] **T-ML-04** The known-library registry. An app-side list (path,
   name, last opened) with add/touch/forget, kept in `app_settings` or its
   own table. *AC: unit tests — opening adds or touches an entry, forget
@@ -115,6 +117,35 @@ tap rather than a folder picker.
   switching from a library with a reminder to one without cancels the
   alarm rather than leaving it pointing at a task that is no longer
   there.*
+- [ ] **T-ML-10** Any setting can be overridden per library (user
+  request, 2026-09-09). The four settings T-ML-02 moved have no app-wide
+  meaning, but most of the others do and are still a single global value:
+  a creative-writing library wants a toolbar without code blocks and
+  headings, the programming-notes library next to it wants exactly those.
+  Chosen model: **an app default with a per-library override**, the
+  user/workspace split VS Code and Obsidian use. Every setting keeps its
+  app-wide value; a library may override some in its own
+  `settings.json`, and a key that is absent means "follow the app". A
+  user with one library sees no change; a user with five does not
+  reconfigure the toolbar five times.
+  - *Overridable:* `editorToolbar`, `lineNumbers`, `editorAutofocus`,
+    `indentWidth`, `linkType`, `treeSort`, `reminderShowTokens`,
+    `previewMode`, `splitRatio`.
+  - *App-wide only:* `language` (it is about the reader, not the
+    library), `debugLogsEnabled` (diagnostics), and the resume pointer.
+  - *Neither:* the four T-ML-02 settings stay plain per-library values —
+    there is no sensible app-wide "history versions".
+  - The reader is one resolver consulted by the session getters:
+    library override first, app value second. `LibraryConfig` grows a
+    nullable field per overridable setting; absent stays absent through a
+    write, so a library that overrides nothing keeps a small file.
+  - The settings screen needs a way to say "in this library" on a row,
+    and to show which rows are overridden. Design it with the mockups
+    the settings redesign used, not in passing.
+  - *AC: a setting overridden in library A and left alone in B reads A's
+    value in A and the app value in B; changing the app value moves B and
+    not A; clearing an override makes A follow the app again; unit tests
+    on the resolver, a widget test on the row.*
 - [ ] **T-ML-09** Strings + docs. Everything in `strings.dart`, in both
   languages; `README.md` gains the `.copist/` folder and the multi-library
   behaviour. *AC: analyze clean; no user-facing literal outside the
@@ -161,6 +192,21 @@ tap rather than a folder picker.
 - **The path hash.** The per-library index file is named by a digest of
   the absolute path, so two libraries never share one and a moved library
   simply rebuilds. The registry keeps the mapping readable.
+- **Two databases, not one (T-ML-03).** Moving the index per library
+  split the old `copist.db` in two, because the settings cannot follow it:
+  `app_settings` holds the resume pointer, and that has to be readable
+  before the app knows which library to open. So `AppDatabase` keeps
+  `copist.db` and its whole migration chain, while `IndexDatabase` holds
+  the note tables in `indexes/<digest>.db` at schema 1, with no migration
+  chain at all — a shape change there means deleting the file and
+  rescanning, which costs a walk and loses nothing. The v15 migration
+  drops the index tables from `copist.db` and vacuums.
+- **The index's lifetime is the library's.** `LibraryController` opens
+  the index file in `open` and closes it in the teardown, search
+  connection included — otherwise a session that visited four libraries
+  would hold four connections and four search worker isolates. That is
+  also why the tree reads answer empty rather than throwing when nothing
+  is open: the UI asks before the first library exists.
 - **Where the current library lives.** `app_settings.library_path` stays
   as "the one to resume"; the registry is the list, not the pointer.
 - **Migration order.** T-ML-01 and T-ML-02 first: they are what makes a

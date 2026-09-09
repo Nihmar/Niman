@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/app_database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -27,12 +28,16 @@ void main() {
     await tmp.delete(recursive: true);
   });
 
-  /// A factory over one shared on-disk database, so a "fresh" controller
-  /// (simulating an app restart) sees the same index and settings.
-  Future<CopistDatabase> Function() sharedDb() {
-    return () async =>
-        CopistDatabase(NativeDatabase(File(p.join(tmp.path, 'copist.db'))));
-  }
+  /// The app settings file, shared across controllers so a "fresh" one
+  /// (simulating an app restart) sees the same settings.
+  Future<AppDatabase> appDb() async =>
+      AppDatabase(NativeDatabase(File(p.join(tmp.path, 'copist.db'))));
+
+  /// One index file per library, named after its folder — the same rule
+  /// the app applies with a digest (T-ML-03), spelled readably here.
+  Future<IndexDatabase> indexDb(String libraryPath) async => IndexDatabase(
+    NativeDatabase(File(p.join(tmp.path, '${p.basename(libraryPath)}.db'))),
+  );
 
   /// A controller with a long periodic rescan and the given
   /// reconciliation delay.
@@ -40,7 +45,8 @@ void main() {
     Duration reconcileDelay = const Duration(seconds: 1),
   }) {
     return LibraryController(
-      sharedDb(),
+      appDb,
+      indexDbFactory: indexDb,
       rescanInterval: const Duration(hours: 1),
       resumeReconcileDelay: reconcileDelay,
     );
@@ -105,9 +111,7 @@ void main() {
     await first.dispose();
 
     // ...and its process died, leaving the persisted last-library path.
-    final settingsDb = CopistDatabase(
-      NativeDatabase(File(p.join(tmp.path, 'copist.db'))),
-    );
+    final settingsDb = await appDb();
     await AppSettingsRepo(settingsDb).setLastLibraryPath(root.path);
     await settingsDb.close();
 
@@ -124,6 +128,46 @@ void main() {
     await expectConverged(() async => (await names(second)).contains('b.md'));
     await second.close();
     await second.dispose();
+  });
+
+  test('each library keeps its own index across a switch', () async {
+    // T-ML-03: with one shared index, opening the second library scanned
+    // over the first one's rows and coming back re-scanned from scratch.
+    final other = Directory(p.join(tmp.path, 'other'))..createSync();
+    File(p.join(other.path, 'z.md')).writeAsStringSync('z');
+
+    final first = makeController();
+    await first.open(root.path, create: false);
+    expect(await names(first), ['a.md']);
+    await first.close();
+    await first.dispose();
+
+    final second = makeController();
+    await second.open(other.path, create: false);
+    expect(await names(second), ['z.md']);
+    await second.close();
+    await second.dispose();
+
+    // Back to the first library, without waiting for a scan: what comes
+    // up is its own index, not the one the second library left behind.
+    final third = makeController();
+    await third.open(root.path, create: false, blockingScan: false);
+    expect(await names(third), ['a.md']);
+    await third.close();
+    await third.dispose();
+  });
+
+  test('a closed session reads no tree at all', () async {
+    // The index belongs to the open library, so there is nothing to read
+    // before the first open — and the tree UI asks anyway.
+    final controller = makeController();
+    expect(await controller.children(0), isEmpty);
+    expect(await controller.tree(const []), isEmpty);
+    expect(await controller.folders(), isEmpty);
+    expect(await controller.searchSource, isNull);
+    expect(await controller.tagSource, isNull);
+    expect(await controller.linkSource, isNull);
+    await controller.dispose();
   });
 
   test('a disk-originated change moves the revision', () async {

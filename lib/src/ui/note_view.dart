@@ -7,7 +7,7 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/database.dart';
+import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/find_panel.dart';
 import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/highlighting.dart';
