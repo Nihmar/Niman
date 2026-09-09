@@ -62,11 +62,11 @@ final class AppStrings {
   static String get previewModeTitle =>
       _t('Preview mode', 'Modalità anteprima');
   static String get previewModeSubtitle => _t(
-    'How the preview sits next to the editor (auto = by width)',
-    'Come sta l’anteprima accanto all’editor (auto = secondo la larghezza)',
+    'Whether the preview shares the screen with the editor, or replaces '
+        'it',
+    'Se l’anteprima divide lo schermo con l’editor o lo sostituisce',
   );
-  static String get previewModeAuto => _t('Auto', 'Auto');
-  static String get previewModeSplit => _t('Side by side', 'Affiancata');
+  static String get previewModeAuto => _t('Side by side', 'Affiancata');
   static String get previewModeSwitch => _t('Full screen', 'A tutto schermo');
   static String get splitRatioTitle => _t('Split width', 'Larghezza divisione');
   static String get splitRatioSubtitle => _t(

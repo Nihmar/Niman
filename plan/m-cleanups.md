@@ -73,13 +73,15 @@ list stays honest about what remains. Nothing here is a feature.
   twenty a second, which is already a blur. *Done: unit tests on the
   reporting, widget tests on the line.*
 
-- [ ] **T-CL-07** "Side by side" and "Auto" are the same choice. Since
+- [x] **T-CL-07** "Side by side" and "Auto" were the same choice. Since
   T-CL-05 made a narrow screen never split, the forced `split` mode
-  differs from `auto` nowhere: above 600 dp both split, below it neither
-  does. The settings dialog offers three options where there are two.
-  Either drop the mode and map a stored `split` to `auto`, or find a
-  width where the distinction earns its place. *AC: the choice a user is
-  offered has no two entries that do the same thing.*
+  differed from `auto` nowhere: above 600 dp both split, below it neither
+  does. *AC: the choice a user is offered has no two entries that do the
+  same thing.* Done: the mode is gone and a stored `split` reads back as
+  `auto`, which is what it now means. With two values left, "Auto" was
+  the wrong name for one of them — above the breakpoint it is the side by
+  side layout and the other is the full-screen one, so the labels say
+  that.
 
 ## Not worth doing (recorded so it is not re-found)
 

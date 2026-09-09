@@ -217,6 +217,21 @@ void main() {
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
   });
 
+  testWidgets('each tab names itself in the app bar', (tester) async {
+    // The Files tab said "Copist", which named the app on a screen that
+    // is about the tree (user, 2026-09-09).
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    expect(find.widgetWithText(AppBar, AppStrings.tabFiles), findsOne);
+    expect(find.widgetWithText(AppBar, AppStrings.appTitle), findsNothing);
+
+    await tester.tap(find.byKey(const Key('tab-settings')));
+    await settle(tester);
+    expect(find.widgetWithText(AppBar, AppStrings.tabSettings), findsOne);
+  });
+
   testWidgets('quick note: choosing in Settings is honored by the tab', (
     tester,
   ) async {

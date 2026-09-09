@@ -52,6 +52,35 @@ void main() {
     expect(find.byType(SegmentedButton<PreviewLayoutMode>), findsNothing);
   });
 
+  testWidgets('the layout choice has no two entries that do the same', (
+    tester,
+  ) async {
+    // T-CL-07: a third mode forced the split at any width, which stopped
+    // meaning anything once a narrow screen refused to split.
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('preview-mode-setting')));
+    await tester.pumpAndSettle();
+    final dialog = find.byType(SimpleDialog);
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.text(AppStrings.previewModeAuto),
+      ),
+      findsOne,
+    );
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.text(AppStrings.previewModeSwitch),
+      ),
+      findsOne,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.byType(ListTile)),
+      findsExactly(2),
+    );
+  });
+
   testWidgets('a choice row reads its current value', (tester) async {
     await pump(tester);
     final row = find.byKey(const Key('indent-width'));
@@ -174,14 +203,23 @@ void main() {
       expect(modeRow, findsOne);
     });
 
-    testWidgets('a forced split does not bring either row back', (
+    testWidgets('neither row is offered on a phone, whatever the mode', (
       tester,
     ) async {
-      // Otherwise a phone that once forced the split would be stuck with
-      // a two-pane layout and a hidden control to undo it.
-      await controller.setPreviewMode(PreviewLayoutMode.split);
+      // Below 600 dp the layout is settled: one pane, and no control
+      // that could say otherwise.
+      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
       await pumpAt(tester, 400);
       expect(modeRow, findsNothing);
+      expect(row, findsNothing);
+    });
+
+    testWidgets('the full-screen mode hides the ratio on a tablet too', (
+      tester,
+    ) async {
+      await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
+      await pumpAt(tester, 900);
+      expect(modeRow, findsOne);
       expect(row, findsNothing);
     });
 

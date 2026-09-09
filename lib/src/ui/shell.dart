@@ -1451,8 +1451,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     logNextFrame('shell', 'note close first frame');
   }
 
+  /// The app bar's title on each tab: the tab's own name, matching the
+  /// label under the icon that got you there. The Files tab used to say
+  /// "Copist", which named the app on a screen that is about the tree.
   String get _tabTitle => switch (_tab) {
-    ShellTab.files => AppStrings.appTitle,
+    ShellTab.files => AppStrings.tabFiles,
     ShellTab.todo => AppStrings.todoTitle,
     ShellTab.search => AppStrings.tabSearch,
     ShellTab.quickNote => AppStrings.quickNoteTitle,

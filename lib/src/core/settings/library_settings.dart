@@ -2,16 +2,18 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 
-/// The preview layout mode (settings, T-M2-08): follow the width (`auto`)
-/// or force one of the two modes.
+/// The preview layout mode (settings, T-M2-08): follow the width, or
+/// keep one pane at any width.
+///
+/// A third value used to force the split at any width. Once a narrow
+/// screen stopped honouring it (T-CL-05) it did the same as [auto]
+/// everywhere, so T-CL-07 dropped it; a stored `split` reads back as
+/// [auto], which is what it now means.
 enum PreviewLayoutMode {
-  /// Auto: split at >= 600 dp, full-screen switch on phones.
+  /// Side by side at >= 600 dp, one pane below it.
   auto,
 
-  /// Forced side-by-side (desktop style) at any width.
-  split,
-
-  /// Forced single pane with the top switch.
+  /// One pane with the top switch, at any width.
   fullScreen,
 }
 
@@ -47,7 +49,7 @@ const double splitBreakpoint = 600;
 /// asks the same question: neither the layout row nor the split-ratio row
 /// means anything where the panes cannot share a screen (T-CL-05).
 bool previewSplits(PreviewLayoutMode mode, {required bool narrow}) =>
-    !narrow && mode != PreviewLayoutMode.fullScreen;
+    !narrow && mode == PreviewLayoutMode.auto;
 
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
@@ -101,8 +103,8 @@ final class AppSettingsRepo {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isEmpty) return PreviewLayoutMode.auto;
     return switch (rows.first.previewMode) {
-      'split' => PreviewLayoutMode.split,
-      'switch' => PreviewLayoutMode.fullScreen,
+      'switch' || 'fullScreen' => PreviewLayoutMode.fullScreen,
+      // 'split' included: it is what auto already does (T-CL-07).
       _ => PreviewLayoutMode.auto,
     };
   }

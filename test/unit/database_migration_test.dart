@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -688,6 +689,16 @@ void main() {
       expect(entry['indentWidth'], 6);
       await db.close();
     });
+  });
+
+  test('a stored "split" layout reads back as side by side', () async {
+    // T-CL-07 dropped the third mode; what it did is what auto does.
+    final db = AppDatabase(NativeDatabase(dbFile));
+    await db.customStatement(
+      "INSERT INTO app_settings (id, preview_mode) VALUES (1, 'split')",
+    );
+    expect(await AppSettingsRepo(db).previewMode(), PreviewLayoutMode.auto);
+    await db.close();
   });
 
   test('a fresh database holds the settings and the registry alone', () async {

@@ -352,7 +352,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
       current: _previewMode,
       options: [
         SettingsOption(PreviewLayoutMode.auto, AppStrings.previewModeAuto),
-        SettingsOption(PreviewLayoutMode.split, AppStrings.previewModeSplit),
         SettingsOption(
           PreviewLayoutMode.fullScreen,
           AppStrings.previewModeSwitch,
@@ -480,7 +479,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
             title: AppStrings.previewModeTitle,
             value: switch (_previewMode) {
               PreviewLayoutMode.auto => AppStrings.previewModeAuto,
-              PreviewLayoutMode.split => AppStrings.previewModeSplit,
               PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
             },
             onTap: () => unawaited(_choosePreviewMode()),
