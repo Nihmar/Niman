@@ -166,8 +166,11 @@ final class AppStrings {
   static String get searchHint => _t('Search notes', 'Cerca nelle note');
   static String get searchModeWords => _t('Words', 'Parole');
   static String get searchModeContains => _t('Contains', 'Contiene');
-  static String get searchEmptyHint =>
-      _t('Type to search the library', 'Scrivi per cercare nella libreria');
+  static String get searchEmptyHint => _t(
+    'Type to search the library, or key = value to filter by frontmatter',
+    'Scrivi per cercare nella libreria, oppure chiave = valore per '
+        'filtrare per frontmatter',
+  );
   static String get searchTooShortHint =>
       _t('Type at least 2 characters', 'Scrivi almeno 2 caratteri');
   static String get searchNoMatches =>
