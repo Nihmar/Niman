@@ -11,6 +11,7 @@ import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
 import 'package:copist/src/library/file_watcher.dart';
+import 'package:copist/src/library/library_registry.dart';
 import 'package:copist/src/library/note_ops.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
@@ -331,6 +332,10 @@ final class LibraryController implements LibrarySession {
       _phase = LibraryPhase.ready;
       currentRootPath = abs;
       await AppSettingsRepo(appDb).setLastLibraryPath(abs);
+      // The list the home screen shows (T-ML-04). Opening is what puts a
+      // folder on it, so a library the app has never seen needs no
+      // registration step of its own.
+      await LibraryRegistry(appDb).touch(abs);
       _bump();
       if (!blockingScan) {
         _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));

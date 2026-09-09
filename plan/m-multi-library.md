@@ -92,10 +92,14 @@ tap rather than a folder picker.
   is intact.* Done: the note index left the app database, which forced
   the split described below; the settings stayed in `copist.db` and the
   index tables were dropped from it at schema v15.
-- [ ] **T-ML-04** The known-library registry. An app-side list (path,
+- [x] **T-ML-04** The known-library registry. An app-side list (path,
   name, last opened) with add/touch/forget, kept in `app_settings` or its
   own table. *AC: unit tests — opening adds or touches an entry, forget
-  removes only the entry.*
+  removes only the entry.* Done: the `known_libraries` table at schema
+  v16, seeded on upgrade with the library the app was already resuming,
+  and `LibraryRegistry` over it. Opening a library touches it, which is
+  the only registration step there is; a name the user chose survives
+  later opens.
 - [ ] **T-ML-05** The home screen (point 1). The library list as the
   app's start screen when nothing resumes: each row is name, path and
   when it was last opened; tapping one opens it. Plus "Open a folder" and

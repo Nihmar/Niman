@@ -47,7 +47,7 @@ list stays honest about what remains. Nothing here is a feature.
   with each piece. *AC: no behaviour change; each extracted piece keeps
   its tests.*
 
-- [ ] **T-CL-05** The split-ratio row is shown where it cannot apply
+- [x] **T-CL-05** The split-ratio row is shown where it cannot apply
   (user, 2026-09-09). The editor|preview split only exists when the two
   panes are side by side: at `auto` that needs a window at least 600 dp
   wide, and on a phone in the switch layout the slider moves a number

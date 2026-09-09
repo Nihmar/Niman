@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:path/path.dart' as p;
 
 part 'app_database.g.dart';
 
@@ -86,6 +87,27 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// A library the app knows about: one row per entry on the home screen
+/// (T-ML-04).
+///
+/// App-side on purpose. Forgetting a library removes its row and touches
+/// nothing inside the folder, and a folder is a library whether or not
+/// this table has ever heard of it — the registry is the list, not the
+/// definition.
+class KnownLibraries extends Table {
+  /// Absolute, normalized path of the library root; the primary key.
+  TextColumn get path => text()();
+
+  /// Display name; the folder's own name unless the user renames it.
+  TextColumn get name => text()();
+
+  /// When the library was last opened.
+  DateTimeColumn get lastOpened => dateTime().named('last_opened')();
+
+  @override
+  Set<Column> get primaryKey => {path};
+}
+
 /// The app's own database: settings that belong to the installation, not
 /// to any one library.
 ///
@@ -95,13 +117,13 @@ class AppSettings extends Table {
 /// which is why the migration chain below starts long before this class
 /// existed. It carries the only rows in the app that are NOT rebuildable
 /// from disk, so it is the one database worth backing up.
-@DriftDatabase(tables: [AppSettings])
+@DriftDatabase(tables: [AppSettings, KnownLibraries])
 class AppDatabase extends _$AppDatabase {
   /// Creates the database on top of [e].
   new(super.e);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -123,8 +145,10 @@ class AppDatabase extends _$AppDatabase {
   /// `list_note_folder` library setting, pre-v12 databases
   /// `editor_toolbar`, pre-v13 databases `language`, pre-v14 databases
   /// lose `library_settings` (T-ML-02) after its rows are parked in
-  /// `legacy_library_settings`, and pre-v15 databases lose the index
-  /// tables (T-ML-03), which each library now keeps in its own file.
+  /// `legacy_library_settings`, pre-v15 databases lose the index
+  /// tables (T-ML-03), which each library now keeps in its own file, and
+  /// pre-v16 databases gain `known_libraries` (T-ML-04), seeded with the
+  /// library they were about to resume.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -221,8 +245,32 @@ class AppDatabase extends _$AppDatabase {
         }
         await m.database.customStatement('VACUUM');
       }
+      if (from < 16) {
+        await m.createTable(knownLibraries);
+        await _seedRegistry();
+      }
     },
   );
+
+  /// Puts the library the app was already resuming into the new registry,
+  /// so an upgrade lands on a home screen that lists it rather than an
+  /// empty one (T-ML-04).
+  Future<void> _seedRegistry() async {
+    final rows = await customSelect(
+      'SELECT library_path FROM app_settings WHERE library_path IS NOT NULL',
+    ).get();
+    for (final row in rows) {
+      final path = row.read<String>('library_path');
+      await into(knownLibraries).insert(
+        KnownLibrariesCompanion.insert(
+          path: path,
+          name: p.basename(path),
+          lastOpened: DateTime.now(),
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
+    }
+  }
 
   /// Copies whatever `library_settings` holds into
   /// `app_settings.legacy_library_settings`, so dropping the table does

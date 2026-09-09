@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/library/library_registry.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -155,6 +156,33 @@ void main() {
     expect(await names(third), ['a.md']);
     await third.close();
     await third.dispose();
+  });
+
+  test('opening a library puts it on the known list', () async {
+    // T-ML-04: opening is the only registration step there is.
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    await controller.close();
+    await controller.dispose();
+
+    final db = await appDb();
+    final entry = (await LibraryRegistry(db).all()).single;
+    expect(entry.path, root.path);
+    expect(entry.name, 'library');
+    await db.close();
+  });
+
+  test('closing a library leaves it on the known list', () async {
+    // Closing is not forgetting: the list survives so the home screen can
+    // offer it again.
+    final controller = makeController();
+    await controller.open(root.path, create: false);
+    await controller.close();
+    await controller.dispose();
+
+    final db = await appDb();
+    expect(await LibraryRegistry(db).all(), hasLength(1));
+    await db.close();
   });
 
   test('a closed session reads no tree at all', () async {

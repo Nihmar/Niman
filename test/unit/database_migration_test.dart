@@ -71,6 +71,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 16) await db.customStatement('DROP TABLE known_libraries');
   if (version < 15) {
     for (final statement in _createIndexTables) {
       await db.customStatement(statement);
@@ -558,7 +559,43 @@ void main() {
     });
   });
 
-  test('a fresh database holds the settings alone', () async {
+  group('v15 → v16: the known-library registry appears', () {
+    test('the library being resumed is seeded into it', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 15);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+
+      // An upgrade must not land on an empty home screen while a library
+      // is open (T-ML-04).
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final entry = (await db.select(db.knownLibraries).get()).single;
+      expect(entry.path, '/lib/Work');
+      expect(entry.name, 'Work');
+      await db.close();
+    });
+
+    test('an install with no library resumes with an empty list', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 15);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path) VALUES (1, NULL)',
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(await db.select(db.knownLibraries).get(), isEmpty);
+      await db.close();
+    });
+  });
+
+  test('a fresh database holds the settings and the registry alone', () async {
     final db = AppDatabase(NativeDatabase(dbFile));
     final tables = await db
         .customSelect(
@@ -566,8 +603,12 @@ void main() {
           "AND name NOT LIKE 'sqlite_%'",
         )
         .get();
-    expect(tables.map((r) => r.read<String>('name')), ['app_settings']);
+    expect(
+      tables.map((r) => r.read<String>('name')),
+      unorderedEquals(['app_settings', 'known_libraries']),
+    );
     expect(await db.select(db.appSettings).get(), isEmpty);
+    expect(await db.select(db.knownLibraries).get(), isEmpty);
     await db.close();
   });
 }

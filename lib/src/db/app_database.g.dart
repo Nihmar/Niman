@@ -881,15 +881,288 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   }
 }
 
+class $KnownLibrariesTable extends KnownLibraries
+    with TableInfo<$KnownLibrariesTable, KnownLibrary> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $KnownLibrariesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastOpenedMeta = const VerificationMeta(
+    'lastOpened',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastOpened = GeneratedColumn<DateTime>(
+    'last_opened',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [path, name, lastOpened];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'known_libraries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<KnownLibrary> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('last_opened')) {
+      context.handle(
+        _lastOpenedMeta,
+        lastOpened.isAcceptableOrUnknown(data['last_opened']!, _lastOpenedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastOpenedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {path};
+  @override
+  KnownLibrary map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return KnownLibrary(
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      lastOpened: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_opened'],
+      )!,
+    );
+  }
+
+  @override
+  $KnownLibrariesTable createAlias(String alias) {
+    return $KnownLibrariesTable(attachedDatabase, alias);
+  }
+}
+
+class KnownLibrary extends DataClass implements Insertable<KnownLibrary> {
+  /// Absolute, normalized path of the library root; the primary key.
+  final String path;
+
+  /// Display name; the folder's own name unless the user renames it.
+  final String name;
+
+  /// When the library was last opened.
+  final DateTime lastOpened;
+  const KnownLibrary({
+    required this.path,
+    required this.name,
+    required this.lastOpened,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['path'] = Variable<String>(path);
+    map['name'] = Variable<String>(name);
+    map['last_opened'] = Variable<DateTime>(lastOpened);
+    return map;
+  }
+
+  KnownLibrariesCompanion toCompanion(bool nullToAbsent) {
+    return KnownLibrariesCompanion(
+      path: Value(path),
+      name: Value(name),
+      lastOpened: Value(lastOpened),
+    );
+  }
+
+  factory KnownLibrary.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return KnownLibrary(
+      path: serializer.fromJson<String>(json['path']),
+      name: serializer.fromJson<String>(json['name']),
+      lastOpened: serializer.fromJson<DateTime>(json['lastOpened']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'path': serializer.toJson<String>(path),
+      'name': serializer.toJson<String>(name),
+      'lastOpened': serializer.toJson<DateTime>(lastOpened),
+    };
+  }
+
+  KnownLibrary copyWith({String? path, String? name, DateTime? lastOpened}) =>
+      KnownLibrary(
+        path: path ?? this.path,
+        name: name ?? this.name,
+        lastOpened: lastOpened ?? this.lastOpened,
+      );
+  KnownLibrary copyWithCompanion(KnownLibrariesCompanion data) {
+    return KnownLibrary(
+      path: data.path.present ? data.path.value : this.path,
+      name: data.name.present ? data.name.value : this.name,
+      lastOpened: data.lastOpened.present
+          ? data.lastOpened.value
+          : this.lastOpened,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KnownLibrary(')
+          ..write('path: $path, ')
+          ..write('name: $name, ')
+          ..write('lastOpened: $lastOpened')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(path, name, lastOpened);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is KnownLibrary &&
+          other.path == this.path &&
+          other.name == this.name &&
+          other.lastOpened == this.lastOpened);
+}
+
+class KnownLibrariesCompanion extends UpdateCompanion<KnownLibrary> {
+  final Value<String> path;
+  final Value<String> name;
+  final Value<DateTime> lastOpened;
+  final Value<int> rowid;
+  const KnownLibrariesCompanion({
+    this.path = const Value.absent(),
+    this.name = const Value.absent(),
+    this.lastOpened = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  KnownLibrariesCompanion.insert({
+    required String path,
+    required String name,
+    required DateTime lastOpened,
+    this.rowid = const Value.absent(),
+  }) : path = Value(path),
+       name = Value(name),
+       lastOpened = Value(lastOpened);
+  static Insertable<KnownLibrary> custom({
+    Expression<String>? path,
+    Expression<String>? name,
+    Expression<DateTime>? lastOpened,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (path != null) 'path': path,
+      if (name != null) 'name': name,
+      if (lastOpened != null) 'last_opened': lastOpened,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  KnownLibrariesCompanion copyWith({
+    Value<String>? path,
+    Value<String>? name,
+    Value<DateTime>? lastOpened,
+    Value<int>? rowid,
+  }) {
+    return KnownLibrariesCompanion(
+      path: path ?? this.path,
+      name: name ?? this.name,
+      lastOpened: lastOpened ?? this.lastOpened,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (lastOpened.present) {
+      map['last_opened'] = Variable<DateTime>(lastOpened.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KnownLibrariesCompanion(')
+          ..write('path: $path, ')
+          ..write('name: $name, ')
+          ..write('lastOpened: $lastOpened, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $KnownLibrariesTable knownLibraries = $KnownLibrariesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [appSettings];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    appSettings,
+    knownLibraries,
+  ];
 }
 
 typedef $$AppSettingsTableCreateCompanionBuilder =
@@ -1286,10 +1559,187 @@ typedef $$AppSettingsTableProcessedTableManager =
       AppSetting,
       PrefetchHooks Function()
     >;
+typedef $$KnownLibrariesTableCreateCompanionBuilder =
+    KnownLibrariesCompanion Function({
+      required String path,
+      required String name,
+      required DateTime lastOpened,
+      Value<int> rowid,
+    });
+typedef $$KnownLibrariesTableUpdateCompanionBuilder =
+    KnownLibrariesCompanion Function({
+      Value<String> path,
+      Value<String> name,
+      Value<DateTime> lastOpened,
+      Value<int> rowid,
+    });
+
+class $$KnownLibrariesTableFilterComposer
+    extends Composer<_$AppDatabase, $KnownLibrariesTable> {
+  $$KnownLibrariesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$KnownLibrariesTableOrderingComposer
+    extends Composer<_$AppDatabase, $KnownLibrariesTable> {
+  $$KnownLibrariesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$KnownLibrariesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $KnownLibrariesTable> {
+  $$KnownLibrariesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastOpened => $composableBuilder(
+    column: $table.lastOpened,
+    builder: (column) => column,
+  );
+}
+
+class $$KnownLibrariesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $KnownLibrariesTable,
+          KnownLibrary,
+          $$KnownLibrariesTableFilterComposer,
+          $$KnownLibrariesTableOrderingComposer,
+          $$KnownLibrariesTableAnnotationComposer,
+          $$KnownLibrariesTableCreateCompanionBuilder,
+          $$KnownLibrariesTableUpdateCompanionBuilder,
+          (
+            KnownLibrary,
+            BaseReferences<_$AppDatabase, $KnownLibrariesTable, KnownLibrary>,
+          ),
+          KnownLibrary,
+          PrefetchHooks Function()
+        > {
+  $$KnownLibrariesTableTableManager(
+    _$AppDatabase db,
+    $KnownLibrariesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$KnownLibrariesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$KnownLibrariesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$KnownLibrariesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> path = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> lastOpened = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => KnownLibrariesCompanion(
+                path: path,
+                name: name,
+                lastOpened: lastOpened,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String path,
+                required String name,
+                required DateTime lastOpened,
+                Value<int> rowid = const Value.absent(),
+              }) => KnownLibrariesCompanion.insert(
+                path: path,
+                name: name,
+                lastOpened: lastOpened,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$KnownLibrariesTable, KnownLibrary>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $KnownLibrariesTable,
+                    KnownLibrary
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$KnownLibrariesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $KnownLibrariesTable,
+      KnownLibrary,
+      $$KnownLibrariesTableFilterComposer,
+      $$KnownLibrariesTableOrderingComposer,
+      $$KnownLibrariesTableAnnotationComposer,
+      $$KnownLibrariesTableCreateCompanionBuilder,
+      $$KnownLibrariesTableUpdateCompanionBuilder,
+      (
+        KnownLibrary,
+        BaseReferences<_$AppDatabase, $KnownLibrariesTable, KnownLibrary>,
+      ),
+      KnownLibrary,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$KnownLibrariesTableTableManager get knownLibraries =>
+      $$KnownLibrariesTableTableManager(_db, _db.knownLibraries);
 }
