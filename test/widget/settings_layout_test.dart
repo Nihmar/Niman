@@ -111,6 +111,23 @@ void main() {
     expect(await controller.splitRatio, greaterThan(defaultSplitRatio));
   });
 
+  testWidgets('the toolbar row sits under Editor, not Appearance', (
+    tester,
+  ) async {
+    // It decides what the editor can do, not how the app looks (user,
+    // 2026-09-09).
+    await pump(tester);
+    final editor = tester.getTopLeft(
+      find.text(AppStrings.settingsSectionEditor),
+    );
+    final library = tester.getTopLeft(
+      find.text(AppStrings.settingsSectionLibrary),
+    );
+    final toolbar = tester.getTopLeft(find.byKey(const Key('toolbar-setting')));
+    expect(toolbar.dy, greaterThan(editor.dy));
+    expect(toolbar.dy, lessThan(library.dy));
+  });
+
   testWidgets('switches keep their explanation, having no dialog', (
     tester,
   ) async {

@@ -492,6 +492,10 @@ final class _SettingsBodyState extends State<SettingsBody> {
             value: AppStrings.splitRatioValue(_splitRatio),
             onTap: () => unawaited(_chooseSplitRatio()),
           ),
+
+        SettingsSection(AppStrings.settingsSectionEditor),
+        // The toolbar is an editor setting, not an appearance one: it
+        // decides what the editor can do, not how the app looks.
         SettingsValueRow(
           key: const Key('toolbar-setting'),
           title: AppStrings.toolbarSettingsTitle,
@@ -503,8 +507,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
             ),
           ),
         ),
-
-        SettingsSection(AppStrings.settingsSectionEditor),
         // Switches keep their subtitle: a switch has no dialog to move
         // the explanation into, and "off = on first tap" is exactly what
         // someone reads the row for.
