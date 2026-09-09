@@ -62,15 +62,38 @@ class ListItemRow extends StatefulWidget {
   State<ListItemRow> createState() => _ListItemRowState();
 }
 
-class _ListItemRowState extends State<ListItemRow> {
+class _ListItemRowState extends State<ListItemRow> with WidgetsBindingObserver {
   final FocusNode _focus = FocusNode();
   final TextEditingController _text = TextEditingController();
   bool _committed = false;
+
+  /// Whether the software keyboard was visible at the last metrics
+  /// update; dismissals are edge-triggered (open → closed) so a stray
+  /// zero-inset frame around focus gain can never end the edit.
+  bool _keyboardOpen = false;
 
   @override
   void initState() {
     super.initState();
     _focus.addListener(_onFocusChanged);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// The software keyboard was dismissed while this row is being edited
+  /// (issue #5): on Android the back gesture closes the IME but leaves
+  /// the field focused, so the focus-loss commit below never runs and
+  /// the add row stays hidden until the note is reopened. Ending the
+  /// edit here commits through the same path as any other finish.
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    final open = views.any(
+      (view) => view.viewInsets.bottom / view.devicePixelRatio > 0,
+    );
+    final dismissed = _keyboardOpen && !open;
+    _keyboardOpen = open;
+    if (dismissed && widget.isEditing && _focus.hasFocus) _focus.unfocus();
   }
 
   @override
@@ -109,6 +132,7 @@ class _ListItemRowState extends State<ListItemRow> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _focus.removeListener(_onFocusChanged);
     _focus.dispose();
     _text.dispose();

@@ -296,6 +296,57 @@ void main() {
     expect(addRow().height, shown);
   });
 
+  testWidgets(
+    'dismissing the keyboard ends the edit and restores the add row',
+    (tester) async {
+      // Issue #5: on Android the back gesture closes the IME but leaves
+      // the row field focused, which used to hide the add row until the
+      // note was reopened.
+      addTearDown(tester.view.reset);
+      var text = '---\ntype: list\n---\n- [ ] one\n';
+      Widget app() => _app(
+        ListNoteView(
+          text: text,
+          onChanged: (t) {
+            text = t;
+          },
+        ),
+      );
+      await tester.pumpWidget(app());
+      Size addRow() => tester.getSize(find.byKey(const Key('list-add-row')));
+      final shown = addRow().height;
+
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+      expect(addRow().height, 0);
+      await tester.enterText(_rowEditField(), 'one edited');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 400);
+      await tester.pump();
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pumpAndSettle();
+
+      // The edit committed and the add row is back...
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+      expect(find.text('one edited'), findsOneWidget);
+      expect(_rowEditField(), findsNothing);
+      expect(addRow().height, shown);
+
+      // ...so the next item is added without reopening the note.
+      final addField = find
+          .descendant(
+            of: find.byType(ListNoteView),
+            matching: find.byType(TextField),
+          )
+          .last;
+      await tester.enterText(addField, 'two');
+      await tester.tap(find.byKey(const Key('list-add-button')));
+      await tester.pump();
+      await tester.pumpWidget(app());
+      expect(find.text('two'), findsOneWidget);
+    },
+  );
+
   testWidgets('a note without task items shows the empty state', (
     tester,
   ) async {
