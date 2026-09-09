@@ -1,6 +1,7 @@
 # Multiple libraries — a library is a folder that describes itself
 
-**Status:** Planned (2026-09-08, user request) · **Depends on:** M1
+**Status:** In progress (2026-09-08, user request; T-ML-01 and T-ML-02
+done 2026-09-09) · **Depends on:** M1
 (library core), M3 (index) · **Blocks:** nothing, but it changes where
 settings live, so it wants to land before M5 sync writes anything of its
 own · **Spec:** user request: several libraries like Obsidian's vaults —
@@ -27,10 +28,9 @@ tap rather than a folder picker.
   directory holds a `notes` table whose paths are library-relative with
   no library id, so it describes whichever library was opened last.
   Opening another one re-indexes over the top of it.
-- **Per-library settings are database rows.** `library_settings` is keyed
-  by absolute path and holds `trash_enabled`, `history_versions`,
-  `quick_note_path` and `list_note_folder`. Copy the folder to another
-  machine and those are gone.
+- ~~**Per-library settings are database rows.**~~ Done in T-ML-02: the
+  four of them live in `<library>/.copist/settings.json` and travel with
+  the folder. The `library_settings` table is gone.
 - **App-wide settings are separate already** (`app_settings`: language,
   editor toolbar, line numbers, preview mode, indent width, …), and stay
   where they are.
@@ -64,12 +64,12 @@ tap rather than a folder picker.
 
 ## Tasks
 
-- [ ] **T-ML-01** Settings as a file. A `LibraryConfig` value object and
+- [x] **T-ML-01** Settings as a file. A `LibraryConfig` value object and
   a reader/writer for `<library>/.copist/settings.json` (atomic write,
   unknown keys preserved, a missing or unreadable file giving the
   defaults). *AC: unit tests — round trip, defaults on a missing file, an
   unknown key survives a write, a malformed file does not throw.*
-- [ ] **T-ML-02** Move the four per-library settings onto it.
+- [x] **T-ML-02** Move the four per-library settings onto it.
   `trash_enabled`, `history_versions`, `quick_note_path` and
   `list_note_folder` are read from and written to the file; the
   `library_settings` table becomes dead weight and goes. Existing rows
@@ -82,6 +82,8 @@ tap rather than a folder picker.
   it; this is the task that starts reading it, and the file is
   user-editable by design, so the range belongs here rather than in a
   later bug. *AC: a negative or absurd value reads back as the default.*
+  Done: `LibraryConfigRepo` is what `NoteOps` reads now, schema v14 drops
+  the table, and `LegacyLibrarySettings` delivers its rows (see below).
 - [ ] **T-ML-03** One index per library. `copist.db` becomes
   `<support>/indexes/<hash of the library path>.db`, so switching does
   not re-index and the previous library's rows are not clobbered. The
@@ -133,6 +135,25 @@ tap rather than a folder picker.
     "listNoteFolder": "Lists"
   }
   ```
+- **The two-step migration out of the table (T-ML-02).** The rows cannot
+  be written to their libraries where they are found. The schema
+  migration runs on the first query after an upgrade — app startup, which
+  on Android is before the storage permission, and a library on a
+  disconnected drive is not writable at all. So v14 parks the rows in
+  `app_settings.legacy_library_settings` (a JSON object keyed by library
+  path) and drops the table; `LegacyLibrarySettings.seed` drains one
+  entry per library open, when the folder is known to be reachable. A
+  library that already has a settings file keeps it and the entry is
+  discarded; a failed write leaves the entry parked for the next open.
+  The column empties itself and can be dropped once no install can still
+  be carrying one.
+- **The settings are read once per session.** `LibraryConfigRepo` caches
+  the parsed config for the life of the open library: the trash toggle is
+  consulted on every delete and the list folder on UI paths, and a row
+  read was cheap where a parse of a file is not. The cost is that editing
+  `settings.json` by hand while the app runs takes effect on the next
+  open — the watcher ignores `.copist/` by design, so there is nothing to
+  notice it.
 - **Why not the index too.** The index is derived data: it must be
   deletable without loss, and it must not sync. A database inside the
   library folder would do both wrong. `.copist/` is for what the user
@@ -158,8 +179,10 @@ tap rather than a folder picker.
 
 ## Risks / open questions
 
-- **`.copist/` and the file watcher.** The watcher must ignore it, or
-  writing a setting looks like a library change and triggers a rescan.
+- ~~**`.copist/` and the file watcher.**~~ Settled: the indexer already
+  skips every dot entry, on the walk and on a watch event, the same way
+  it skips `.trash/` and `.history/`. Writing a setting is invisible to
+  it.
 - **`.copist/` and sync (M5).** It should sync — the settings are the
   user's — but the conflict rules for a JSON file are not the ones for a
   note. Settle it when M5 lands, not here.

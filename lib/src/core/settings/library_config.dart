@@ -7,6 +7,43 @@ import 'package:copist/src/core/settings/library_settings.dart'
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
+/// The number of kept `.history/` versions of a fresh library.
+const int defaultHistoryVersions = 10;
+
+/// The smallest accepted `historyVersions` (0 = keep no history).
+const int minHistoryVersions = 0;
+
+/// The largest accepted `historyVersions`.
+const int maxHistoryVersions = 100;
+
+/// Reads a `historyVersions` value out of the settings file (T-ML-02).
+///
+/// The file is user-editable by design, so the number in it is an input,
+/// not a fact: a hand-typed `-5` or `100000` would otherwise reach the
+/// history code as-is. Anything outside [minHistoryVersions] ..
+/// [maxHistoryVersions] reads back as [defaultHistoryVersions], the same
+/// answer a missing key gives — a nonsense value is no more informative
+/// than no value.
+int normalizeHistoryVersions(Object? raw) {
+  if (raw is! num) return defaultHistoryVersions;
+  final count = raw.toInt();
+  if (count < minHistoryVersions || count > maxHistoryVersions) {
+    return defaultHistoryVersions;
+  }
+  return count;
+}
+
+/// Sanitizes a list-folder path: trims, drops leading/trailing slashes
+/// and empty/`.`/`..` segments; an empty result is [defaultListFolder].
+String cleanListFolder(String folder) {
+  final parts = folder
+      .trim()
+      .split('/')
+      .where((s) => s.isNotEmpty && s != '.' && s != '..')
+      .toList();
+  return parts.isEmpty ? defaultListFolder : parts.join('/');
+}
+
 /// The per-library settings, stored in the library folder itself as
 /// `<library>/.copist/settings.json` (T-ML-01).
 ///
@@ -29,8 +66,10 @@ final class LibraryConfig {
 
   /// Parses the raw `settings.json` object into a config.
   ///
-  /// Wrong-type known keys fall back to their defaults; every other key
-  /// goes into [LibraryConfig.extra].
+  /// Wrong-type known keys fall back to their defaults, an out-of-range
+  /// `historyVersions` with them, and `listNoteFolder` is sanitized the
+  /// way the setter sanitizes it; every other key goes into
+  /// [LibraryConfig.extra].
   factory fromJsonMap(Map<String, Object?> json) {
     final extra = <String, Object?>{};
     for (final entry in json.entries) {
@@ -47,12 +86,11 @@ final class LibraryConfig {
         final bool enabled => enabled,
         _ => true,
       },
-      historyVersions: switch (versions) {
-        final num count => count.toInt(),
-        _ => 10,
-      },
+      historyVersions: normalizeHistoryVersions(versions),
       quickNotePath: quick is String ? quick : null,
-      listNoteFolder: folder is String ? folder : defaultListFolder,
+      listNoteFolder: folder is String
+          ? cleanListFolder(folder)
+          : defaultListFolder,
       extra: extra,
     );
   }
@@ -61,7 +99,7 @@ final class LibraryConfig {
   /// the default quick note at the root, list notes in `Lists`.
   static const LibraryConfig defaults = LibraryConfig(
     trashEnabled: true,
-    historyVersions: 10,
+    historyVersions: defaultHistoryVersions,
     quickNotePath: null,
     listNoteFolder: defaultListFolder,
   );
@@ -69,7 +107,9 @@ final class LibraryConfig {
   /// Whether deletes move notes into `.trash/` (default true).
   final bool trashEnabled;
 
-  /// The number of kept `.history/` versions (default 10).
+  /// The number of kept `.history/` versions (default 10), in
+  /// [minHistoryVersions] .. [maxHistoryVersions] when it came from the
+  /// file.
   final int historyVersions;
 
   /// The user-chosen quick note (library-relative path), or null when the

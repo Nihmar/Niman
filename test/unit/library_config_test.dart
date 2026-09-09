@@ -179,6 +179,50 @@ void main() {
       expect(LibraryConfig.defaults.listNoteFolder, defaultListFolder);
     });
 
+    test('an out-of-range historyVersions reads back as the default', () {
+      // The file is hand-editable, so the number in it is an input.
+      for (final absurd in [-5, -1, maxHistoryVersions + 1, 100000]) {
+        expect(
+          LibraryConfig.fromJsonMap({'historyVersions': absurd})
+              .historyVersions,
+          defaultHistoryVersions,
+          reason: '$absurd should not reach the history code',
+        );
+      }
+    });
+
+    test('the ends of the range are kept', () {
+      for (final count in [minHistoryVersions, 7, maxHistoryVersions]) {
+        expect(
+          LibraryConfig.fromJsonMap({'historyVersions': count}).historyVersions,
+          count,
+        );
+      }
+    });
+
+    test('a fractional historyVersions truncates, then is ranged', () {
+      expect(
+        LibraryConfig.fromJsonMap(const {'historyVersions': 4.9})
+            .historyVersions,
+        4,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const {'historyVersions': -0.5})
+            .historyVersions,
+        0,
+      );
+    });
+
+    test('a hand-written listNoteFolder is sanitized on read', () {
+      String folderOf(String raw) =>
+          LibraryConfig.fromJsonMap({'listNoteFolder': raw}).listNoteFolder;
+      expect(folderOf('/Lists/'), 'Lists');
+      expect(folderOf('  Notes/Lists  '), 'Notes/Lists');
+      expect(folderOf('../../etc'), 'etc');
+      expect(folderOf('//'), defaultListFolder);
+      expect(folderOf('  '), defaultListFolder);
+    });
+
     test('value equality', () {
       expect(
         const LibraryConfig(

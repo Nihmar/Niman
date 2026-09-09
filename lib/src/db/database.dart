@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 part 'database.g.dart';
@@ -31,32 +33,6 @@ class Notes extends Table {
 
   /// Content sha256, hex; files only (directories are null).
   TextColumn get sha256 => text().nullable()();
-}
-
-/// Per-library local settings, keyed by the absolute library path.
-///
-/// Never stored inside the library folder itself.
-class LibrarySettings extends Table {
-  /// Absolute, normalized path of the library root; the primary key.
-  TextColumn get path => text()();
-
-  /// Whether deletes move notes into `.trash/` (true) or hard-delete them.
-  BoolColumn get trashEnabled => boolean()();
-
-  /// Number of `.history/` versions to keep (M5); default 10.
-  IntColumn get historyVersions => integer()();
-
-  /// Library-relative path of the user-chosen quick note; null = the
-  /// default `Quick note.md` at the library root.
-  TextColumn get quickNotePath => text().named('quick_note_path').nullable()();
-
-  /// Library-relative folder of the list notes (T-TK-06); default
-  /// `Lists`.
-  TextColumn get listNoteFolder =>
-      text().named('list_note_folder').withDefault(const Constant('Lists'))();
-
-  @override
-  Set<Column> get primaryKey => {path};
 }
 
 /// Global app settings; a single row (id 1).
@@ -123,6 +99,19 @@ class AppSettings extends Table {
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   TextColumn get language => text().withDefault(const Constant('system'))();
+
+  /// The settings the dropped `library_settings` table held, waiting to
+  /// reach the libraries they belong to (T-ML-02).
+  ///
+  /// A JSON object keyed by absolute library path; empty (`''`) once
+  /// every one of them has been opened at least once, and on any install
+  /// that never had the table. It exists because the two events cannot be
+  /// made to coincide: the table is dropped when the database migrates,
+  /// which on Android happens at startup, while the library folder is
+  /// only writable later, after the storage permission — and a library on
+  /// a disconnected drive may not be writable for weeks.
+  TextColumn get legacyLibrarySettings =>
+      text().named('legacy_library_settings').withDefault(const Constant(''))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -197,22 +186,14 @@ class NoteLinks extends Table {
 /// Every table is rebuildable from disk: deleting the database file and
 /// rescanning the library reproduces it exactly.
 @DriftDatabase(
-  tables: [
-    Notes,
-    LibrarySettings,
-    AppSettings,
-    NoteStems,
-    Tags,
-    NoteTags,
-    NoteLinks,
-  ],
+  tables: [Notes, AppSettings, NoteStems, Tags, NoteTags, NoteLinks],
 )
 class CopistDatabase extends _$CopistDatabase {
   /// Creates the database on top of [e].
   new(super.e);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the
@@ -231,8 +212,9 @@ class CopistDatabase extends _$CopistDatabase {
   /// `note_links`) plus the `notes_fts` FTS5 index, pre-v9 databases
   /// `reminder_show_tokens`, pre-v10 databases `link_type` +
   /// `indent_width`, and pre-v11 databases the `list_note_folder`
-  /// library setting, pre-v12 databases `editor_toolbar`, and pre-v13
-  /// databases `language`.
+  /// library setting, pre-v12 databases `editor_toolbar`, pre-v13
+  /// databases `language`, and pre-v14 databases lose `library_settings`
+  /// (T-ML-02) after its rows are parked in `legacy_library_settings`.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -320,6 +302,52 @@ class CopistDatabase extends _$CopistDatabase {
           "TEXT NOT NULL DEFAULT 'system'",
         );
       }
+      if (from < 14) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN legacy_library_settings '
+          "TEXT NOT NULL DEFAULT ''",
+        );
+        await _parkLibrarySettings(m.database);
+        await m.database.customStatement(
+          'DROP TABLE IF EXISTS library_settings',
+        );
+      }
     },
   );
+
+  /// Copies whatever `library_settings` holds into
+  /// `app_settings.legacy_library_settings`, so dropping the table does
+  /// not throw the settings away.
+  ///
+  /// They cannot be written to their libraries here: this runs on the
+  /// first query after an upgrade, which is app startup, before the
+  /// storage permission on Android and with no guarantee the folders are
+  /// even reachable. `LegacyLibrarySettings` drains the parked values as
+  /// each library is opened.
+  static Future<void> _parkLibrarySettings(DatabaseConnectionUser db) async {
+    final table = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name = 'library_settings'",
+        )
+        .get();
+    if (table.isEmpty) return;
+    final rows = await db.customSelect('SELECT * FROM library_settings').get();
+    if (rows.isEmpty) return;
+    final parked = <String, Object?>{
+      for (final row in rows)
+        row.read<String>('path'): <String, Object?>{
+          'trashEnabled': row.read<int>('trash_enabled') != 0,
+          'historyVersions': row.read<int>('history_versions'),
+          'quickNotePath': ?row.readNullable<String>('quick_note_path'),
+          'listNoteFolder': row.read<String>('list_note_folder'),
+        },
+    };
+    await db.customStatement(
+      'INSERT INTO app_settings (id, legacy_library_settings) '
+      'VALUES (1, ?1) ON CONFLICT(id) DO UPDATE SET '
+      'legacy_library_settings = ?1',
+      [jsonEncode(parked)],
+    );
+  }
 }

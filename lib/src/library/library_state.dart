@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/legacy_library_settings.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
@@ -268,6 +269,10 @@ final class LibraryController implements LibrarySession {
       }
       final db = await dbFactory();
       AppLog.enabled = await AppSettingsRepo(db).debugLogsEnabled();
+      // Before anything reads the settings: a library upgraded from the
+      // `library_settings` table gets its `.copist/settings.json` here,
+      // now that the folder is known to be reachable (T-ML-02).
+      await LegacyLibrarySettings(db).seed(abs);
       final indexer = Indexer(db)..onChanged = _bump;
       final ops = NoteOps(root: abs, db: db, indexer: indexer);
       if (blockingScan) {

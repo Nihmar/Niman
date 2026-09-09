@@ -1,0 +1,147 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:copist/src/core/settings/legacy_library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/db/database.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+
+void main() {
+  late Directory tempDir;
+  late Directory lib;
+  late CopistDatabase db;
+
+  setUp(() async {
+    tempDir = await Directory.current.createTemp('copist_legacy_');
+    lib = await tempDir.createTemp('lib_');
+    db = CopistDatabase(
+      NativeDatabase(File(p.join(tempDir.path, 'test.sqlite'))),
+    );
+    addTearDown(db.close);
+  });
+
+  tearDown(() async {
+    await tempDir.delete(recursive: true);
+  });
+
+  /// Puts [parked] in `app_settings.legacy_library_settings`, the way the
+  /// v14 migration does.
+  Future<void> park(Map<String, Object?> parked) async {
+    await db
+        .into(db.appSettings)
+        .insert(
+          AppSettingsCompanion.insert(
+            id: const Value(1),
+            legacyLibrarySettings: Value(jsonEncode(parked)),
+          ),
+        );
+  }
+
+  Future<String> parkedNow() async {
+    final rows = await db.select(db.appSettings).get();
+    return rows.isEmpty ? '' : rows.first.legacyLibrarySettings;
+  }
+
+  test('a parked library gets its settings file on open', () async {
+    await park({
+      lib.path: {
+        'trashEnabled': false,
+        'historyVersions': 3,
+        'quickNotePath': 'Inbox/Scratch.md',
+        'listNoteFolder': 'Checklists',
+      },
+    });
+
+    await LegacyLibrarySettings(db).seed(lib.path);
+
+    final config = await LibraryConfigStore(lib.path).read();
+    expect(config.trashEnabled, isFalse);
+    expect(config.historyVersions, 3);
+    expect(config.quickNotePath, 'Inbox/Scratch.md');
+    expect(config.listNoteFolder, 'Checklists');
+    // Delivered, so no longer parked.
+    expect(await parkedNow(), '');
+  });
+
+  test('only the opened library is drained', () async {
+    await park({
+      lib.path: {'trashEnabled': false, 'historyVersions': 3},
+      '/elsewhere': {'trashEnabled': true, 'historyVersions': 7},
+    });
+
+    await LegacyLibrarySettings(db).seed(lib.path);
+
+    final left = jsonDecode(await parkedNow()) as Map<String, Object?>;
+    expect(left.keys, ['/elsewhere']);
+  });
+
+  test('nothing parked, nothing written', () async {
+    await park({'/elsewhere': <String, Object?>{}});
+    await LegacyLibrarySettings(db).seed(lib.path);
+    expect(LibraryConfigStore(lib.path).file.existsSync(), isFalse);
+  });
+
+  test('an empty payload is not an error', () async {
+    await LegacyLibrarySettings(db).seed(lib.path);
+    expect(LibraryConfigStore(lib.path).file.existsSync(), isFalse);
+  });
+
+  test('an existing settings file wins and the entry is dropped', () async {
+    final store = LibraryConfigStore(lib.path);
+    await store.write(LibraryConfig.defaults.copyWith(historyVersions: 42));
+    await park({
+      lib.path: {'trashEnabled': false, 'historyVersions': 3},
+    });
+
+    await LegacyLibrarySettings(db).seed(lib.path);
+
+    // The file is the newer of the two; the old row does not overwrite it.
+    expect((await store.read()).historyVersions, 42);
+    expect(await parkedNow(), '');
+  });
+
+  test(
+    'an unwritable library keeps its entry parked for the next open',
+    () async {
+      // A directory where the settings file belongs: the write throws, and
+      // losing the settings because a drive was busy would be worse than
+      // trying again later.
+      final store = LibraryConfigStore(lib.path);
+      await Directory(store.file.path).create(recursive: true);
+      await park({
+        lib.path: {'trashEnabled': false, 'historyVersions': 3},
+      });
+
+      await LegacyLibrarySettings(db).seed(lib.path);
+
+      final left = jsonDecode(await parkedNow()) as Map<String, Object?>;
+      expect(left.keys, [lib.path]);
+    },
+  );
+
+  test('a malformed payload is ignored rather than thrown', () async {
+    await db
+        .into(db.appSettings)
+        .insert(
+          AppSettingsCompanion.insert(
+            id: const Value(1),
+            legacyLibrarySettings: const Value('[1, 2, 3]'),
+          ),
+        );
+    await LegacyLibrarySettings(db).seed(lib.path);
+    expect(LibraryConfigStore(lib.path).file.existsSync(), isFalse);
+  });
+
+  test('the written file is the real settings file, hand-editable', () async {
+    await park({
+      lib.path: {'trashEnabled': false, 'historyVersions': 3},
+    });
+    await LegacyLibrarySettings(db).seed(lib.path);
+    final file = File(p.join(lib.path, '.copist', 'settings.json'));
+    expect(file.existsSync(), isTrue);
+    expect(file.readAsStringSync(), contains('"trashEnabled": false'));
+  });
+}

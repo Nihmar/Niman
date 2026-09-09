@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -358,13 +358,14 @@ void main() {
       expect(Directory(p.join(root.path, '.trash')).existsSync(), isFalse);
     });
 
-    test('the toggle persists on the database', () async {
+    test('the toggle persists in the library folder', () async {
       await ops.setTrashEnabled(enabled: false);
       final fresh = NoteOps(root: root.path, db: db, indexer: indexer);
       expect(await fresh.trashEnabled, isFalse);
-      // The repo agrees too.
-      final repo = LibrarySettingsRepo(db);
-      expect(await repo.isTrashEnabled(root.path), isFalse);
+      // It is the library's own settings file that holds it, not a row
+      // in the app database (T-ML-02).
+      final config = await LibraryConfigStore(root.path).read();
+      expect(config.trashEnabled, isFalse);
     });
   });
 

@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/settings/library_config.dart';
+import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -39,7 +40,7 @@ final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
   new({required this.root, required CopistDatabase db, required this.indexer})
     : _dao = NoteDao(db),
-      _settings = LibrarySettingsRepo(db);
+      _config = LibraryConfigRepo(root);
 
   /// Absolute path of the library root.
   final String root;
@@ -48,7 +49,7 @@ final class NoteOps implements NoteOperations {
   final Indexer indexer;
 
   final NoteDao _dao;
-  final LibrarySettingsRepo _settings;
+  final LibraryConfigRepo _config;
 
   /// The name of the trash manifest inside `.trash/`.
   static const manifestFileName = '.copist-trash.json';
@@ -77,30 +78,35 @@ final class NoteOps implements NoteOperations {
 
   /// The current trash toggle for this library.
   @override
-  Future<bool> get trashEnabled => _settings.isTrashEnabled(root);
+  Future<bool> get trashEnabled async => (await _config.config).trashEnabled;
 
   /// Sets the trash toggle: `true` = deletes move into `.trash/`.
   @override
   Future<void> setTrashEnabled({required bool enabled}) =>
-      _settings.setTrashEnabled(root, enabled: enabled);
+      _config.update((c) => c.copyWith(trashEnabled: enabled));
 
   /// The list-note folder (library-relative).
   @override
-  Future<String> get listNoteFolder => _settings.listNoteFolder(root);
+  Future<String> get listNoteFolder async =>
+      (await _config.config).listNoteFolder;
 
-  /// Sets the list-note folder.
+  /// Sets the list-note folder (sanitized; an empty result falls back to
+  /// the default).
   @override
-  Future<void> setListNoteFolder({required String folder}) =>
-      _settings.setListNoteFolder(root, folder: folder);
+  Future<void> setListNoteFolder({required String folder}) => _config.update(
+    (c) => c.copyWith(listNoteFolder: cleanListFolder(folder)),
+  );
 
   /// The user-chosen quick note, or null for the default.
   @override
-  Future<String?> get quickNotePath => _settings.quickNotePath(root);
+  Future<String?> get quickNotePath async =>
+      (await _config.config).quickNotePath;
 
   /// Sets (or clears) the user-chosen quick note.
   @override
-  Future<void> setQuickNotePath({required String? path}) =>
-      _settings.setQuickNotePath(root, path: path);
+  Future<void> setQuickNotePath({required String? path}) => _config.update(
+    (c) => c.copyWith(quickNotePath: path, clearQuickNotePath: path == null),
+  );
 
   /// Creates a `<name>.md` note in [parentPath] with [content] as its
   /// initial content, uniquifying the name. Returns the indexed row.
@@ -220,7 +226,7 @@ final class NoteOps implements NoteOperations {
     return _synchronized(() async {
       final row = await _mustFind(path);
       final oldAbs = _abs(path);
-      final trash = await _settings.isTrashEnabled(root);
+      final trash = await trashEnabled;
       String? trashAbs;
       if (trash) {
         final trashDir = Directory(_abs('.trash'));

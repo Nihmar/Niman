@@ -504,412 +504,6 @@ class NotesCompanion extends UpdateCompanion<Note> {
   }
 }
 
-class $LibrarySettingsTable extends LibrarySettings
-    with TableInfo<$LibrarySettingsTable, LibrarySetting> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $LibrarySettingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _pathMeta = const VerificationMeta('path');
-  @override
-  late final GeneratedColumn<String> path = GeneratedColumn<String>(
-    'path',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _trashEnabledMeta = const VerificationMeta(
-    'trashEnabled',
-  );
-  @override
-  late final GeneratedColumn<bool> trashEnabled = GeneratedColumn<bool>(
-    'trash_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("trash_enabled" IN (0, 1))',
-    ),
-  );
-  static const VerificationMeta _historyVersionsMeta = const VerificationMeta(
-    'historyVersions',
-  );
-  @override
-  late final GeneratedColumn<int> historyVersions = GeneratedColumn<int>(
-    'history_versions',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _quickNotePathMeta = const VerificationMeta(
-    'quickNotePath',
-  );
-  @override
-  late final GeneratedColumn<String> quickNotePath = GeneratedColumn<String>(
-    'quick_note_path',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _listNoteFolderMeta = const VerificationMeta(
-    'listNoteFolder',
-  );
-  @override
-  late final GeneratedColumn<String> listNoteFolder = GeneratedColumn<String>(
-    'list_note_folder',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('Lists'),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    path,
-    trashEnabled,
-    historyVersions,
-    quickNotePath,
-    listNoteFolder,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'library_settings';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<LibrarySetting> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('path')) {
-      context.handle(
-        _pathMeta,
-        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_pathMeta);
-    }
-    if (data.containsKey('trash_enabled')) {
-      context.handle(
-        _trashEnabledMeta,
-        trashEnabled.isAcceptableOrUnknown(
-          data['trash_enabled']!,
-          _trashEnabledMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_trashEnabledMeta);
-    }
-    if (data.containsKey('history_versions')) {
-      context.handle(
-        _historyVersionsMeta,
-        historyVersions.isAcceptableOrUnknown(
-          data['history_versions']!,
-          _historyVersionsMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_historyVersionsMeta);
-    }
-    if (data.containsKey('quick_note_path')) {
-      context.handle(
-        _quickNotePathMeta,
-        quickNotePath.isAcceptableOrUnknown(
-          data['quick_note_path']!,
-          _quickNotePathMeta,
-        ),
-      );
-    }
-    if (data.containsKey('list_note_folder')) {
-      context.handle(
-        _listNoteFolderMeta,
-        listNoteFolder.isAcceptableOrUnknown(
-          data['list_note_folder']!,
-          _listNoteFolderMeta,
-        ),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {path};
-  @override
-  LibrarySetting map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LibrarySetting(
-      path: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}path'],
-      )!,
-      trashEnabled: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}trash_enabled'],
-      )!,
-      historyVersions: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}history_versions'],
-      )!,
-      quickNotePath: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}quick_note_path'],
-      ),
-      listNoteFolder: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}list_note_folder'],
-      )!,
-    );
-  }
-
-  @override
-  $LibrarySettingsTable createAlias(String alias) {
-    return $LibrarySettingsTable(attachedDatabase, alias);
-  }
-}
-
-class LibrarySetting extends DataClass implements Insertable<LibrarySetting> {
-  /// Absolute, normalized path of the library root; the primary key.
-  final String path;
-
-  /// Whether deletes move notes into `.trash/` (true) or hard-delete them.
-  final bool trashEnabled;
-
-  /// Number of `.history/` versions to keep (M5); default 10.
-  final int historyVersions;
-
-  /// Library-relative path of the user-chosen quick note; null = the
-  /// default `Quick note.md` at the library root.
-  final String? quickNotePath;
-
-  /// Library-relative folder of the list notes (T-TK-06); default
-  /// `Lists`.
-  final String listNoteFolder;
-  const LibrarySetting({
-    required this.path,
-    required this.trashEnabled,
-    required this.historyVersions,
-    this.quickNotePath,
-    required this.listNoteFolder,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['path'] = Variable<String>(path);
-    map['trash_enabled'] = Variable<bool>(trashEnabled);
-    map['history_versions'] = Variable<int>(historyVersions);
-    if (!nullToAbsent || quickNotePath != null) {
-      map['quick_note_path'] = Variable<String>(quickNotePath);
-    }
-    map['list_note_folder'] = Variable<String>(listNoteFolder);
-    return map;
-  }
-
-  LibrarySettingsCompanion toCompanion(bool nullToAbsent) {
-    return LibrarySettingsCompanion(
-      path: Value(path),
-      trashEnabled: Value(trashEnabled),
-      historyVersions: Value(historyVersions),
-      quickNotePath: quickNotePath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(quickNotePath),
-      listNoteFolder: Value(listNoteFolder),
-    );
-  }
-
-  factory LibrarySetting.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LibrarySetting(
-      path: serializer.fromJson<String>(json['path']),
-      trashEnabled: serializer.fromJson<bool>(json['trashEnabled']),
-      historyVersions: serializer.fromJson<int>(json['historyVersions']),
-      quickNotePath: serializer.fromJson<String?>(json['quickNotePath']),
-      listNoteFolder: serializer.fromJson<String>(json['listNoteFolder']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'path': serializer.toJson<String>(path),
-      'trashEnabled': serializer.toJson<bool>(trashEnabled),
-      'historyVersions': serializer.toJson<int>(historyVersions),
-      'quickNotePath': serializer.toJson<String?>(quickNotePath),
-      'listNoteFolder': serializer.toJson<String>(listNoteFolder),
-    };
-  }
-
-  LibrarySetting copyWith({
-    String? path,
-    bool? trashEnabled,
-    int? historyVersions,
-    Value<String?> quickNotePath = const Value.absent(),
-    String? listNoteFolder,
-  }) => LibrarySetting(
-    path: path ?? this.path,
-    trashEnabled: trashEnabled ?? this.trashEnabled,
-    historyVersions: historyVersions ?? this.historyVersions,
-    quickNotePath: quickNotePath.present
-        ? quickNotePath.value
-        : this.quickNotePath,
-    listNoteFolder: listNoteFolder ?? this.listNoteFolder,
-  );
-  LibrarySetting copyWithCompanion(LibrarySettingsCompanion data) {
-    return LibrarySetting(
-      path: data.path.present ? data.path.value : this.path,
-      trashEnabled: data.trashEnabled.present
-          ? data.trashEnabled.value
-          : this.trashEnabled,
-      historyVersions: data.historyVersions.present
-          ? data.historyVersions.value
-          : this.historyVersions,
-      quickNotePath: data.quickNotePath.present
-          ? data.quickNotePath.value
-          : this.quickNotePath,
-      listNoteFolder: data.listNoteFolder.present
-          ? data.listNoteFolder.value
-          : this.listNoteFolder,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LibrarySetting(')
-          ..write('path: $path, ')
-          ..write('trashEnabled: $trashEnabled, ')
-          ..write('historyVersions: $historyVersions, ')
-          ..write('quickNotePath: $quickNotePath, ')
-          ..write('listNoteFolder: $listNoteFolder')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    path,
-    trashEnabled,
-    historyVersions,
-    quickNotePath,
-    listNoteFolder,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is LibrarySetting &&
-          other.path == this.path &&
-          other.trashEnabled == this.trashEnabled &&
-          other.historyVersions == this.historyVersions &&
-          other.quickNotePath == this.quickNotePath &&
-          other.listNoteFolder == this.listNoteFolder);
-}
-
-class LibrarySettingsCompanion extends UpdateCompanion<LibrarySetting> {
-  final Value<String> path;
-  final Value<bool> trashEnabled;
-  final Value<int> historyVersions;
-  final Value<String?> quickNotePath;
-  final Value<String> listNoteFolder;
-  final Value<int> rowid;
-  const LibrarySettingsCompanion({
-    this.path = const Value.absent(),
-    this.trashEnabled = const Value.absent(),
-    this.historyVersions = const Value.absent(),
-    this.quickNotePath = const Value.absent(),
-    this.listNoteFolder = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  LibrarySettingsCompanion.insert({
-    required String path,
-    required bool trashEnabled,
-    required int historyVersions,
-    this.quickNotePath = const Value.absent(),
-    this.listNoteFolder = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : path = Value(path),
-       trashEnabled = Value(trashEnabled),
-       historyVersions = Value(historyVersions);
-  static Insertable<LibrarySetting> custom({
-    Expression<String>? path,
-    Expression<bool>? trashEnabled,
-    Expression<int>? historyVersions,
-    Expression<String>? quickNotePath,
-    Expression<String>? listNoteFolder,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (path != null) 'path': path,
-      if (trashEnabled != null) 'trash_enabled': trashEnabled,
-      if (historyVersions != null) 'history_versions': historyVersions,
-      if (quickNotePath != null) 'quick_note_path': quickNotePath,
-      if (listNoteFolder != null) 'list_note_folder': listNoteFolder,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  LibrarySettingsCompanion copyWith({
-    Value<String>? path,
-    Value<bool>? trashEnabled,
-    Value<int>? historyVersions,
-    Value<String?>? quickNotePath,
-    Value<String>? listNoteFolder,
-    Value<int>? rowid,
-  }) {
-    return LibrarySettingsCompanion(
-      path: path ?? this.path,
-      trashEnabled: trashEnabled ?? this.trashEnabled,
-      historyVersions: historyVersions ?? this.historyVersions,
-      quickNotePath: quickNotePath ?? this.quickNotePath,
-      listNoteFolder: listNoteFolder ?? this.listNoteFolder,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (path.present) {
-      map['path'] = Variable<String>(path.value);
-    }
-    if (trashEnabled.present) {
-      map['trash_enabled'] = Variable<bool>(trashEnabled.value);
-    }
-    if (historyVersions.present) {
-      map['history_versions'] = Variable<int>(historyVersions.value);
-    }
-    if (quickNotePath.present) {
-      map['quick_note_path'] = Variable<String>(quickNotePath.value);
-    }
-    if (listNoteFolder.present) {
-      map['list_note_folder'] = Variable<String>(listNoteFolder.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LibrarySettingsCompanion(')
-          ..write('path: $path, ')
-          ..write('trashEnabled: $trashEnabled, ')
-          ..write('historyVersions: $historyVersions, ')
-          ..write('quickNotePath: $quickNotePath, ')
-          ..write('listNoteFolder: $listNoteFolder, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $AppSettingsTable extends AppSettings
     with TableInfo<$AppSettingsTable, AppSetting> {
   @override
@@ -1079,6 +673,18 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('system'),
   );
+  static const VerificationMeta _legacyLibrarySettingsMeta =
+      const VerificationMeta('legacyLibrarySettings');
+  @override
+  late final GeneratedColumn<String> legacyLibrarySettings =
+      GeneratedColumn<String>(
+        'legacy_library_settings',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1094,6 +700,7 @@ class $AppSettingsTable extends AppSettings
     indentWidth,
     editorToolbar,
     language,
+    legacyLibrarySettings,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1206,6 +813,15 @@ class $AppSettingsTable extends AppSettings
         language.isAcceptableOrUnknown(data['language']!, _languageMeta),
       );
     }
+    if (data.containsKey('legacy_library_settings')) {
+      context.handle(
+        _legacyLibrarySettingsMeta,
+        legacyLibrarySettings.isAcceptableOrUnknown(
+          data['legacy_library_settings']!,
+          _legacyLibrarySettingsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1266,6 +882,10 @@ class $AppSettingsTable extends AppSettings
       language: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}language'],
+      )!,
+      legacyLibrarySettings: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}legacy_library_settings'],
       )!,
     );
   }
@@ -1328,6 +948,18 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// The UI language: `system` (follow the OS, the default), `en` or
   /// `it`.
   final String language;
+
+  /// The settings the dropped `library_settings` table held, waiting to
+  /// reach the libraries they belong to (T-ML-02).
+  ///
+  /// A JSON object keyed by absolute library path; empty (`''`) once
+  /// every one of them has been opened at least once, and on any install
+  /// that never had the table. It exists because the two events cannot be
+  /// made to coincide: the table is dropped when the database migrates,
+  /// which on Android happens at startup, while the library folder is
+  /// only writable later, after the storage permission — and a library on
+  /// a disconnected drive may not be writable for weeks.
+  final String legacyLibrarySettings;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -1342,6 +974,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.indentWidth,
     required this.editorToolbar,
     required this.language,
+    required this.legacyLibrarySettings,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1361,6 +994,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['indent_width'] = Variable<int>(indentWidth);
     map['editor_toolbar'] = Variable<String>(editorToolbar);
     map['language'] = Variable<String>(language);
+    map['legacy_library_settings'] = Variable<String>(legacyLibrarySettings);
     return map;
   }
 
@@ -1381,6 +1015,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       indentWidth: Value(indentWidth),
       editorToolbar: Value(editorToolbar),
       language: Value(language),
+      legacyLibrarySettings: Value(legacyLibrarySettings),
     );
   }
 
@@ -1403,6 +1038,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       indentWidth: serializer.fromJson<int>(json['indentWidth']),
       editorToolbar: serializer.fromJson<String>(json['editorToolbar']),
       language: serializer.fromJson<String>(json['language']),
+      legacyLibrarySettings: serializer.fromJson<String>(
+        json['legacyLibrarySettings'],
+      ),
     );
   }
   @override
@@ -1422,6 +1060,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'indentWidth': serializer.toJson<int>(indentWidth),
       'editorToolbar': serializer.toJson<String>(editorToolbar),
       'language': serializer.toJson<String>(language),
+      'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
     };
   }
 
@@ -1439,6 +1078,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? indentWidth,
     String? editorToolbar,
     String? language,
+    String? legacyLibrarySettings,
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -1453,6 +1093,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     indentWidth: indentWidth ?? this.indentWidth,
     editorToolbar: editorToolbar ?? this.editorToolbar,
     language: language ?? this.language,
+    legacyLibrarySettings: legacyLibrarySettings ?? this.legacyLibrarySettings,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -1487,6 +1128,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? data.editorToolbar.value
           : this.editorToolbar,
       language: data.language.present ? data.language.value : this.language,
+      legacyLibrarySettings: data.legacyLibrarySettings.present
+          ? data.legacyLibrarySettings.value
+          : this.legacyLibrarySettings,
     );
   }
 
@@ -1505,7 +1149,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('linkType: $linkType, ')
           ..write('indentWidth: $indentWidth, ')
           ..write('editorToolbar: $editorToolbar, ')
-          ..write('language: $language')
+          ..write('language: $language, ')
+          ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
         .toString();
   }
@@ -1525,6 +1170,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     indentWidth,
     editorToolbar,
     language,
+    legacyLibrarySettings,
   );
   @override
   bool operator ==(Object other) =>
@@ -1542,7 +1188,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.linkType == this.linkType &&
           other.indentWidth == this.indentWidth &&
           other.editorToolbar == this.editorToolbar &&
-          other.language == this.language);
+          other.language == this.language &&
+          other.legacyLibrarySettings == this.legacyLibrarySettings);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -1559,6 +1206,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> indentWidth;
   final Value<String> editorToolbar;
   final Value<String> language;
+  final Value<String> legacyLibrarySettings;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -1573,6 +1221,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.indentWidth = const Value.absent(),
     this.editorToolbar = const Value.absent(),
     this.language = const Value.absent(),
+    this.legacyLibrarySettings = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1588,6 +1237,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.indentWidth = const Value.absent(),
     this.editorToolbar = const Value.absent(),
     this.language = const Value.absent(),
+    this.legacyLibrarySettings = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -1603,6 +1253,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<int>? indentWidth,
     Expression<String>? editorToolbar,
     Expression<String>? language,
+    Expression<String>? legacyLibrarySettings,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1619,6 +1270,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (indentWidth != null) 'indent_width': indentWidth,
       if (editorToolbar != null) 'editor_toolbar': editorToolbar,
       if (language != null) 'language': language,
+      if (legacyLibrarySettings != null)
+        'legacy_library_settings': legacyLibrarySettings,
     });
   }
 
@@ -1636,6 +1289,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? indentWidth,
     Value<String>? editorToolbar,
     Value<String>? language,
+    Value<String>? legacyLibrarySettings,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -1651,6 +1305,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
       language: language ?? this.language,
+      legacyLibrarySettings:
+          legacyLibrarySettings ?? this.legacyLibrarySettings,
     );
   }
 
@@ -1696,6 +1352,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (language.present) {
       map['language'] = Variable<String>(language.value);
     }
+    if (legacyLibrarySettings.present) {
+      map['legacy_library_settings'] = Variable<String>(
+        legacyLibrarySettings.value,
+      );
+    }
     return map;
   }
 
@@ -1714,7 +1375,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('linkType: $linkType, ')
           ..write('indentWidth: $indentWidth, ')
           ..write('editorToolbar: $editorToolbar, ')
-          ..write('language: $language')
+          ..write('language: $language, ')
+          ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
         .toString();
   }
@@ -2682,9 +2344,6 @@ abstract class _$CopistDatabase extends GeneratedDatabase {
   _$CopistDatabase(QueryExecutor e) : super(e);
   $CopistDatabaseManager get managers => $CopistDatabaseManager(this);
   late final $NotesTable notes = $NotesTable(this);
-  late final $LibrarySettingsTable librarySettings = $LibrarySettingsTable(
-    this,
-  );
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $NoteStemsTable noteStems = $NoteStemsTable(this);
   late final $TagsTable tags = $TagsTable(this);
@@ -2696,7 +2355,6 @@ abstract class _$CopistDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     notes,
-    librarySettings,
     appSettings,
     noteStems,
     tags,
@@ -2957,229 +2615,6 @@ typedef $$NotesTableProcessedTableManager =
       Note,
       PrefetchHooks Function()
     >;
-typedef $$LibrarySettingsTableCreateCompanionBuilder =
-    LibrarySettingsCompanion Function({
-      required String path,
-      required bool trashEnabled,
-      required int historyVersions,
-      Value<String?> quickNotePath,
-      Value<String> listNoteFolder,
-      Value<int> rowid,
-    });
-typedef $$LibrarySettingsTableUpdateCompanionBuilder =
-    LibrarySettingsCompanion Function({
-      Value<String> path,
-      Value<bool> trashEnabled,
-      Value<int> historyVersions,
-      Value<String?> quickNotePath,
-      Value<String> listNoteFolder,
-      Value<int> rowid,
-    });
-
-class $$LibrarySettingsTableFilterComposer
-    extends Composer<_$CopistDatabase, $LibrarySettingsTable> {
-  $$LibrarySettingsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get path => $composableBuilder(
-    column: $table.path,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get trashEnabled => $composableBuilder(
-    column: $table.trashEnabled,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get historyVersions => $composableBuilder(
-    column: $table.historyVersions,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get quickNotePath => $composableBuilder(
-    column: $table.quickNotePath,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get listNoteFolder => $composableBuilder(
-    column: $table.listNoteFolder,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$LibrarySettingsTableOrderingComposer
-    extends Composer<_$CopistDatabase, $LibrarySettingsTable> {
-  $$LibrarySettingsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get path => $composableBuilder(
-    column: $table.path,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get trashEnabled => $composableBuilder(
-    column: $table.trashEnabled,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get historyVersions => $composableBuilder(
-    column: $table.historyVersions,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get quickNotePath => $composableBuilder(
-    column: $table.quickNotePath,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get listNoteFolder => $composableBuilder(
-    column: $table.listNoteFolder,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$LibrarySettingsTableAnnotationComposer
-    extends Composer<_$CopistDatabase, $LibrarySettingsTable> {
-  $$LibrarySettingsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get path =>
-      $composableBuilder(column: $table.path, builder: (column) => column);
-
-  GeneratedColumn<bool> get trashEnabled => $composableBuilder(
-    column: $table.trashEnabled,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get historyVersions => $composableBuilder(
-    column: $table.historyVersions,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get quickNotePath => $composableBuilder(
-    column: $table.quickNotePath,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get listNoteFolder => $composableBuilder(
-    column: $table.listNoteFolder,
-    builder: (column) => column,
-  );
-}
-
-class $$LibrarySettingsTableTableManager
-    extends
-        RootTableManager<
-          _$CopistDatabase,
-          $LibrarySettingsTable,
-          LibrarySetting,
-          $$LibrarySettingsTableFilterComposer,
-          $$LibrarySettingsTableOrderingComposer,
-          $$LibrarySettingsTableAnnotationComposer,
-          $$LibrarySettingsTableCreateCompanionBuilder,
-          $$LibrarySettingsTableUpdateCompanionBuilder,
-          (
-            LibrarySetting,
-            BaseReferences<
-              _$CopistDatabase,
-              $LibrarySettingsTable,
-              LibrarySetting
-            >,
-          ),
-          LibrarySetting,
-          PrefetchHooks Function()
-        > {
-  $$LibrarySettingsTableTableManager(
-    _$CopistDatabase db,
-    $LibrarySettingsTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$LibrarySettingsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$LibrarySettingsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$LibrarySettingsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> path = const Value.absent(),
-                Value<bool> trashEnabled = const Value.absent(),
-                Value<int> historyVersions = const Value.absent(),
-                Value<String?> quickNotePath = const Value.absent(),
-                Value<String> listNoteFolder = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => LibrarySettingsCompanion(
-                path: path,
-                trashEnabled: trashEnabled,
-                historyVersions: historyVersions,
-                quickNotePath: quickNotePath,
-                listNoteFolder: listNoteFolder,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String path,
-                required bool trashEnabled,
-                required int historyVersions,
-                Value<String?> quickNotePath = const Value.absent(),
-                Value<String> listNoteFolder = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => LibrarySettingsCompanion.insert(
-                path: path,
-                trashEnabled: trashEnabled,
-                historyVersions: historyVersions,
-                quickNotePath: quickNotePath,
-                listNoteFolder: listNoteFolder,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$LibrarySettingsTable, LibrarySetting>(table),
-                  BaseReferences<
-                    _$CopistDatabase,
-                    $LibrarySettingsTable,
-                    LibrarySetting
-                  >(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$LibrarySettingsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$CopistDatabase,
-      $LibrarySettingsTable,
-      LibrarySetting,
-      $$LibrarySettingsTableFilterComposer,
-      $$LibrarySettingsTableOrderingComposer,
-      $$LibrarySettingsTableAnnotationComposer,
-      $$LibrarySettingsTableCreateCompanionBuilder,
-      $$LibrarySettingsTableUpdateCompanionBuilder,
-      (
-        LibrarySetting,
-        BaseReferences<_$CopistDatabase, $LibrarySettingsTable, LibrarySetting>,
-      ),
-      LibrarySetting,
-      PrefetchHooks Function()
-    >;
 typedef $$AppSettingsTableCreateCompanionBuilder =
     AppSettingsCompanion Function({
       Value<int> id,
@@ -3195,6 +2630,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> indentWidth,
       Value<String> editorToolbar,
       Value<String> language,
+      Value<String> legacyLibrarySettings,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -3211,6 +2647,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int> indentWidth,
       Value<String> editorToolbar,
       Value<String> language,
+      Value<String> legacyLibrarySettings,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -3284,6 +2721,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get language => $composableBuilder(
     column: $table.language,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get legacyLibrarySettings => $composableBuilder(
+    column: $table.legacyLibrarySettings,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3361,6 +2803,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.language,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get legacyLibrarySettings => $composableBuilder(
+    column: $table.legacyLibrarySettings,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -3428,6 +2875,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get language =>
       $composableBuilder(column: $table.language, builder: (column) => column);
+
+  GeneratedColumn<String> get legacyLibrarySettings => $composableBuilder(
+    column: $table.legacyLibrarySettings,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -3474,6 +2926,7 @@ class $$AppSettingsTableTableManager
                 Value<int> indentWidth = const Value.absent(),
                 Value<String> editorToolbar = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -3488,6 +2941,7 @@ class $$AppSettingsTableTableManager
                 indentWidth: indentWidth,
                 editorToolbar: editorToolbar,
                 language: language,
+                legacyLibrarySettings: legacyLibrarySettings,
               ),
           createCompanionCallback:
               ({
@@ -3504,6 +2958,7 @@ class $$AppSettingsTableTableManager
                 Value<int> indentWidth = const Value.absent(),
                 Value<String> editorToolbar = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -3518,6 +2973,7 @@ class $$AppSettingsTableTableManager
                 indentWidth: indentWidth,
                 editorToolbar: editorToolbar,
                 language: language,
+                legacyLibrarySettings: legacyLibrarySettings,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4172,8 +3628,6 @@ class $CopistDatabaseManager {
   $CopistDatabaseManager(this._db);
   $$NotesTableTableManager get notes =>
       $$NotesTableTableManager(_db, _db.notes);
-  $$LibrarySettingsTableTableManager get librarySettings =>
-      $$LibrarySettingsTableTableManager(_db, _db.librarySettings);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$NoteStemsTableTableManager get noteStems =>
