@@ -220,6 +220,24 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _bump();
   }
 
+  @override
+  Future<EditorKind> get editorKind async => _config.editorKind;
+
+  @override
+  Future<void> setEditorKind(EditorKind kind) async {
+    _config = _config.copyWith(editorKind: kind);
+    _bump();
+  }
+
+  @override
+  Future<bool> get previewEnabled async => _config.previewEnabled;
+
+  @override
+  Future<void> setPreviewEnabled({required bool enabled}) async {
+    _config = _config.copyWith(previewEnabled: enabled);
+    _bump();
+  }
+
   // The preview layout is app-wide: it follows the screen, not the
   // library.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;

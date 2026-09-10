@@ -605,6 +605,28 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(spellDictionaries: names));
   }
 
+  /// Which editor the library writes in (default source).
+  @override
+  Future<EditorKind> get editorKind async => (await _library).editorKind;
+
+  /// Sets (and persists) the editor kind.
+  @override
+  Future<void> setEditorKind(EditorKind kind) async {
+    _log.info('editor kind set to ${kind.name}');
+    await _editLibrary((c) => c.copyWith(editorKind: kind));
+  }
+
+  /// Whether the preview exists at all (default true).
+  @override
+  Future<bool> get previewEnabled async => (await _library).previewEnabled;
+
+  /// Sets (and persists) the preview switch.
+  @override
+  Future<void> setPreviewEnabled({required bool enabled}) async {
+    _log.info('preview enabled set to $enabled');
+    await _editLibrary((c) => c.copyWith(previewEnabled: enabled));
+  }
+
   /// The preview layout mode.
   ///
   /// App-wide, with the split ratio: both follow the screen rather than

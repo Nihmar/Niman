@@ -227,6 +227,18 @@ abstract interface class LibrarySession {
   /// restores the locale default.
   Future<void> setSpellDictionaries(List<String> names);
 
+  /// Which editor the library writes in (default source).
+  Future<EditorKind> get editorKind;
+
+  /// Sets (and persists) the editor kind.
+  Future<void> setEditorKind(EditorKind kind);
+
+  /// Whether the preview exists at all (default true).
+  Future<bool> get previewEnabled;
+
+  /// Sets (and persists) the preview switch.
+  Future<void> setPreviewEnabled({required bool enabled});
+
   /// The preview layout mode (default `auto`: split on wide screens,
   /// full-screen switch on phones).
   Future<PreviewLayoutMode> get previewMode;
