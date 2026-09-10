@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
+import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
+import 'package:copist/src/editor/wysiwyg/wysiwyg_find_panel.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 /// The WYSIWYG writing surface: a Quill editor over the note's Markdown.
 ///
 /// It deliberately has no toolbar of its own: the app's EditorToolbar is the
 /// editor chrome on both surfaces, in the same slot, and its Quill commands
-/// are `QuillEditorCommands`.
+/// are QuillEditorCommands.
 final class WysiwygEditor extends StatefulWidget {
   /// Creates the surface over the note's Markdown.
   const new({
@@ -46,11 +49,15 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   final ScrollController _scroll = ScrollController();
   late quill.QuillController _controller;
   late DecodedNote _decoded;
+  late WysiwygFindController _find;
   StreamSubscription<quill.DocChange>? _changes;
   Timer? _debounce;
 
   /// The controller the toolbar commands act on (T-WYS-06).
   quill.QuillController get controller => _controller;
+
+  /// Opens the find bar (the status-row button and Ctrl/Cmd+F, T-WYS-08).
+  void openFind({bool replace = false}) => _find.open(replace: replace);
 
   @override
   void initState() {
@@ -65,6 +72,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
       selection: const TextSelection.collapsed(offset: 0),
     );
     _changes = _controller.changes.listen((_) => _onDocumentChanged());
+    _find = WysiwygFindController(_controller);
   }
 
   void _onDocumentChanged() {
@@ -85,6 +93,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
       return;
     }
     unawaited(_changes?.cancel());
+    _find.dispose();
     _controller.dispose();
     _open(widget.data);
   }
@@ -93,6 +102,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   void dispose() {
     _debounce?.cancel();
     unawaited(_changes?.cancel());
+    _find.dispose();
     _controller.dispose();
     _focus.dispose();
     _scroll.dispose();
@@ -109,14 +119,35 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         ),
       );
     }
-    return quill.QuillEditor(
-      controller: _controller,
-      focusNode: _focus,
-      scrollController: _scroll,
-      config: quill.QuillEditorConfig(
-        autoFocus: widget.autoFocus,
-        padding: const EdgeInsets.all(16),
-        embedBuilders: const [OpaqueEmbedBuilder()],
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () =>
+            _find.open(),
+        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): () =>
+            _find.open(),
+        const SingleActivator(LogicalKeyboardKey.keyH, control: true): () =>
+            _find.open(replace: true),
+        const SingleActivator(LogicalKeyboardKey.escape): _find.close,
+      },
+      child: Column(
+        children: [
+          AnimatedBuilder(
+            animation: _find,
+            builder: (context, _) => WysiwygFindPanel(controller: _find),
+          ),
+          Expanded(
+            child: quill.QuillEditor(
+              controller: _controller,
+              focusNode: _focus,
+              scrollController: _scroll,
+              config: quill.QuillEditorConfig(
+                autoFocus: widget.autoFocus,
+                padding: const EdgeInsets.all(16),
+                embedBuilders: const [OpaqueEmbedBuilder()],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
