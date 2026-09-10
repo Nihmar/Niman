@@ -1,3 +1,4 @@
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/editor_commands.dart';
 import 'package:copist/src/editor/toolbar_item.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +18,8 @@ final class QuillEditorCommands implements EditorCommands {
     required this.onHeading,
   });
 
+  static const AppLogger _log = AppLogger(name: 'wysiwyg');
+
   /// The document the toolbar formats.
   final quill.QuillController controller;
 
@@ -31,6 +34,7 @@ final class QuillEditorCommands implements EditorCommands {
 
   @override
   void apply(ToolbarItem item) {
+    final before = _styleKeys();
     switch (item) {
       case ToolbarItem.bold:
         _toggle(quill.Attribute.bold);
@@ -61,7 +65,11 @@ final class QuillEditorCommands implements EditorCommands {
       case ToolbarItem.indent:
         _indent(1);
     }
+    _log.debug('toolbar ${item.name}: [$before] -> [${_styleKeys()}]');
   }
+
+  String _styleKeys() =>
+      controller.getSelectionStyle().attributes.keys.join(',');
 
   /// Applies a header level (the heading dialog's answer).
   void applyHeader(int level) {
