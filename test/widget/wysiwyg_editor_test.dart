@@ -112,6 +112,83 @@ void main() {
     expect(key.currentState!.plainTextLines.first, 'hello world');
   });
 
+  testWidgets('Enter after a heading does not continue the heading', (
+    tester,
+  ) async {
+    final key = GlobalKey<WysiwygEditorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(
+            key: key,
+            data: '# Heading\n\nA paragraph.\n',
+            onChanged: (value) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final controller = key.currentState!.controller;
+    // The caret at the end of the heading, Enter, then a word: two
+    // separate events, not one cascade.
+    // ignore: cascade_invocations
+    controller.replaceText(
+      7,
+      0,
+      '\n',
+      const TextSelection.collapsed(offset: 8),
+    );
+    await tester.pump();
+    controller.replaceText(
+      8,
+      0,
+      'plain',
+      const TextSelection.collapsed(offset: 13),
+    );
+    await tester.pump();
+    expect(controller.getSelectionStyle().attributes['header'], isNull);
+    final headings = controller.document.toDelta().toJson().where(
+      (op) =>
+          op['insert'] == '\n' &&
+          (op['attributes'] as Map<Object?, Object?>?)?['header'] != null,
+    );
+    expect(headings, hasLength(1), reason: 'only the original heading line');
+  });
+
+  testWidgets('Enter in a list continues the list', (tester) async {
+    final key = GlobalKey<WysiwygEditorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(
+            key: key,
+            data: '- one\n- two\n',
+            onChanged: (value) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final controller = key.currentState!.controller;
+    // Enter, then the next item: two separate events, not one cascade.
+    // ignore: cascade_invocations
+    controller.replaceText(
+      3,
+      0,
+      '\n',
+      const TextSelection.collapsed(offset: 4),
+    );
+    await tester.pump();
+    controller.replaceText(
+      4,
+      0,
+      'three',
+      const TextSelection.collapsed(offset: 9),
+    );
+    await tester.pump();
+    expect(controller.getSelectionStyle().attributes['list']?.value, 'bullet');
+  });
+
   testWidgets('a novel-length note offers the source editor', (tester) async {
     // Quill builds the whole document; above the guard the surface refuses
     // rather than stalls (T-WYS-07).
