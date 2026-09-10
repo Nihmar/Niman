@@ -1,6 +1,6 @@
 # Platform parity — Android ↔ Linux/Windows
 
-**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11, T-PP-06b and T-PP-22 landed — `window_manager` owns the window and its close veto, `nativeapi` the tray, and the desktop chrome is app-bar-free) · **Depends on:** M4 (everything compared exists) ·
+**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11, T-PP-06b and T-PP-22 landed — `window_manager` owns the window and its close veto, `nativeapi` the tray, and the desktop chrome is app-bar-free; T-PP-01, T-PP-02, T-PP-03, T-PP-05, T-PP-06, T-PP-06a, T-PP-09 and T-PP-10 landed — the platform-service probes, the desktop reminder timer, the CLI + desktop-entry + tray quick actions, the spellcheck decision, and the app accelerators with their in-app reference) · **Depends on:** M4 (everything compared exists) ·
 **Spec:** *Requirements → Platforms* (Android + Linux + Windows now)
 
 ## Purpose
@@ -293,7 +293,10 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   frameless window on Linux — drag, double-click maximize, the three
   window buttons, Close with a dirty note (must ask), Ctrl+B, and the
   tree toggle leaving the rail up; plus the view controls now reading in
-  the note's status row rather than the editor header.
+  the note's status row rather than the editor header. The accelerators
+  (T-PP-10) are widget-tested on routed key events but not driven in a real
+  window, and the desktop reminder popup (T-PP-03) still needs a `rem:` a
+  minute out watched on this session.
 
 ### P3 — Share-in / open-with (both sides)
 
