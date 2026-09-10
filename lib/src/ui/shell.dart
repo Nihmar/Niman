@@ -1402,50 +1402,74 @@ final class _LibraryShellState extends State<_LibraryShell>
     // The desktop has no window app bar (T-PP-22): the rail names the
     // app, the tree carries its own controls at the base, and an open
     // note carries its controls in the detail pane's header.
-    return Scaffold(
-      body: _wideContent(controller),
-      floatingActionButton: _wideFab(),
-    );
-  }
-
-  /// The wide layout's one floating action: the Todo tab's add button.
-  /// Note/folder creation lives in the tree footer (T-PP-22), not on a
-  /// FAB, so the other tabs have no floating action at all.
-  Widget? _wideFab() {
-    return switch (_tab) {
-      ShellTab.todo => _todoAddFab(),
-      ShellTab.files ||
-      ShellTab.search ||
-      ShellTab.quickNote ||
-      ShellTab.settings => null,
-    };
+    return Scaffold(body: _wideContent(controller));
   }
 
   /// The wide-layout content: the tree + detail split for Files (and for
   /// an open quick note, which lives in the detail pane — its tab body is
   /// empty by design), the tab body itself otherwise.
+  ///
+  /// Bodies are kept mounted exactly like the narrow stack
+  /// ([TabBodyStack]): the tree/detail pair shares ONE slot across Files
+  /// and the open quick note, so a tab switch never re-runs the tree's
+  /// per-level queries or re-inflates the open editor. The 2026-09-10
+  /// desktop log showed the cost of the old swap-in/swap-out: 6-9 ms tree
+  /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
   Widget _wideContent(LibrarySession controller) {
+    final filesVisible =
+        _tab == ShellTab.files ||
+        (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
     return Row(
       children: [
         _shellRail(),
         const VerticalDivider(width: 1),
         Expanded(
-          child: switch (_tab) {
-            ShellTab.files => _wideBody(controller),
-            // The open quick note lives in the detail pane (its tab body
-            // is empty by design); the not-yet-chosen one shows the
-            // choose/create screen inline, rail included.
-            ShellTab.quickNote =>
-              _showQuickNoteChooser
-                  ? _tabBodyFor(_tab, controller)
-                  : _wideBody(controller),
-            ShellTab.todo ||
-            ShellTab.search ||
-            ShellTab.settings => _tabBodyFor(_tab, controller),
-          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _wideSlot(visible: filesVisible, child: _wideBody(controller)),
+              // One slot per remaining tab, in tab order so a slot's
+              // identity never moves. Unvisited tabs build the empty
+              // placeholder `_tabBodyFor` returns.
+              for (final tab in ShellTab.values)
+                if (tab != ShellTab.files && tab != ShellTab.quickNote)
+                  _wideSlot(
+                    visible: _tab == tab,
+                    retainLayout: tab == ShellTab.search,
+                    child: _tabBodyFor(tab, controller),
+                  ),
+              // The quick-note chooser: empty while its note is open in
+              // the slot above, the choose/create screen otherwise.
+              _wideSlot(
+                visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
+                child: _tabBodyFor(ShellTab.quickNote, controller),
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
+  /// tickers (see [TabBodyStack]); [retainLayout] keeps an expensive one
+  /// laid out, so showing it is paint-only.
+  Widget _wideSlot({
+    required bool visible,
+    required Widget child,
+    bool retainLayout = false,
+  }) {
+    final slot = TickerMode(enabled: visible, child: child);
+    if (retainLayout) {
+      return Visibility(
+        visible: visible,
+        maintainState: true,
+        maintainAnimation: true,
+        maintainSize: true,
+        child: slot,
+      );
+    }
+    return Offstage(offstage: !visible, child: slot);
   }
 
   /// The fixed left rail (T-PP-14): the wide layout's always-visible twin
@@ -1880,6 +1904,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.todo => TodoTab(
         controller: _todoController,
         reminders: widget.reminders,
+        onAddTask: _addTodo,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an
@@ -1953,6 +1978,13 @@ final class _LibraryShellState extends State<_LibraryShell>
             tooltip: AppStrings.actionNew,
             onSelected: _onNewItem,
             position: PopupMenuPosition.over,
+            // A desktop menu should appear, not perform (T-PP-22): the
+            // default 300 ms scale reads as skipped frames on this
+            // compositor, and 120 ms is a menu that is simply there.
+            popUpAnimationStyle: const AnimationStyle(
+              duration: Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+            ),
             itemBuilder: (context) => [
               _newItemMenuItem(
                 _NewItem.note,

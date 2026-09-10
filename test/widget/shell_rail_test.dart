@@ -264,9 +264,10 @@ void main() {
     await tester.tap(find.byKey(const Key('search-hit-alpha.md')));
     await settle(tester);
 
-    // The rail is back on Files: the tree is showing and the note is open
-    // in the detail pane next to it.
-    expect(find.byType(SearchScreen), findsNothing);
+    // The rail is back on Files: the search pane is kept alive but no
+    // longer on screen (the wide bodies stay mounted, T-PP-22), the tree
+    // is showing and the note is open in the detail pane next to it.
+    expect(find.byType(SearchScreen).hitTestable(), findsNothing);
     expect(noteRow('alpha.md'), findsOne);
     expect(
       tester

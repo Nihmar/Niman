@@ -168,6 +168,15 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   the wide bar. The phone keeps its app bar and FAB untouched. *AC: wide
   shows no AppBar and no note FAB, the footer creates and opens the trash,
   the header names the open note and its folder; narrow is unchanged.*
+  Follow-up from the same review (2026-09-10): the wide layout keeps its
+  tab bodies mounted like the narrow stack — the old swap-in/swap-out
+  re-ran the tree's per-level queries and re-inflated Search/Settings
+  (28-62 ms build frames in the desktop log, vsync waits aside); the
+  + New menu opens in 120 ms; the Todo format help opens as a dialog so
+  the rail stays; on the desktop the Todo panel folds Open/Done in as its
+  leading control and gains Add task plus help (the FAB is gone there);
+  the A-Z priority fallback is a compact fixed-width dialog instead of a
+  full-window grid.
 
 ### P3 — Share-in / open-with (both sides)
 

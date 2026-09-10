@@ -11,6 +11,7 @@
 library;
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/todo/parser.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
@@ -525,33 +526,68 @@ final class _TodoTaskDialogState extends State<_TodoTaskDialog> {
   }
 
   /// The rest of the alphabet, as a grid small enough to read at once.
+  ///
+  /// Desktop gets a compact, fixed-width dialog: a `SimpleDialog` there
+  /// stretches to the window and laid all twenty-six chips on one line
+  /// (user, 2026-09-10). The phone keeps the sheet-like dialog.
   Future<void> _pickOtherPriority() async {
-    final picked = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        key: const Key('todo-priority-grid'),
-        title: Text(AppStrings.todoPriorityTitle),
-        contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        children: [
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (var code = 65; code <= 90; code++)
-                ActionChip(
-                  key: Key('todo-priority-pick-${String.fromCharCode(code)}'),
-                  label: Text(String.fromCharCode(code)),
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () =>
-                      Navigator.pop(context, String.fromCharCode(code)),
+    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
+    final picked = wide
+        ? await showDialog<String>(
+            context: context,
+            builder: (context) => AlertDialog(
+              key: const Key('todo-priority-grid'),
+              title: Text(AppStrings.todoPriorityTitle),
+              content: SizedBox(
+                width: 320,
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (var code = 65; code <= 90; code++)
+                      _priorityLetterChip(code),
+                  ],
                 ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppStrings.actionCancel),
+                ),
+              ],
+            ),
+          )
+        : await showDialog<String>(
+            context: context,
+            builder: (context) => SimpleDialog(
+              key: const Key('todo-priority-grid'),
+              title: Text(AppStrings.todoPriorityTitle),
+              contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              children: [
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (var code = 65; code <= 90; code++)
+                      _priorityLetterChip(code),
+                  ],
+                ),
+              ],
+            ),
+          );
     if (picked == null || !mounted) return;
     _setPriority(picked);
+  }
+
+  /// One A-Z chip of [_pickOtherPriority]'s grid.
+  Widget _priorityLetterChip(int code) {
+    final letter = String.fromCharCode(code);
+    return ActionChip(
+      key: Key('todo-priority-pick-$letter'),
+      label: Text(letter),
+      visualDensity: VisualDensity.compact,
+      onPressed: () => Navigator.pop(context, letter),
+    );
   }
 
   /// Truncates [date] to day precision.

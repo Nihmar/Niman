@@ -22,33 +22,46 @@ final class TodoHelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppStrings.todoHelpTitle)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          _Paragraph(AppStrings.todoHelpIntro),
-          const _Example('buy milk +groceries @errands due:2026-09-09'),
-          _Section(AppStrings.todoHelpFilesTitle),
-          _Paragraph(AppStrings.todoHelpFilesBody),
-          _Section(AppStrings.todoHelpLineTitle),
-          _Paragraph(AppStrings.todoHelpLineBody),
-          const _Example('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
-          _Row(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
-          _Row(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
-          _Row(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
-          _Section(AppStrings.todoHelpTokensTitle),
-          _Paragraph(AppStrings.todoHelpTokensBody),
-          _Row(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
-          _Row(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
-          _Row(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
-          _Section(AppStrings.todoHelpTagsTitle),
-          _Paragraph(AppStrings.todoHelpTagsBody),
-          _Row(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
-          _Row(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
-          _Row(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
-          _Section(AppStrings.todoHelpEditTitle),
-          _Paragraph(AppStrings.todoHelpEditBody),
-        ],
-      ),
+      body: const TodoHelpBody(),
+    );
+  }
+}
+
+/// The reference's content alone, without the screen chrome: the desktop
+/// opens it in a dialog over the tab, so the rail and the list stay on
+/// screen (T-PP-22).
+final class TodoHelpBody extends StatelessWidget {
+  /// Creates the reference body.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      children: [
+        _Paragraph(AppStrings.todoHelpIntro),
+        const _Example('buy milk +groceries @errands due:2026-09-09'),
+        _Section(AppStrings.todoHelpFilesTitle),
+        _Paragraph(AppStrings.todoHelpFilesBody),
+        _Section(AppStrings.todoHelpLineTitle),
+        _Paragraph(AppStrings.todoHelpLineBody),
+        const _Example('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
+        _Row(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
+        _Row(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
+        _Row(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
+        _Section(AppStrings.todoHelpTokensTitle),
+        _Paragraph(AppStrings.todoHelpTokensBody),
+        _Row(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
+        _Row(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
+        _Row(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
+        _Section(AppStrings.todoHelpTagsTitle),
+        _Paragraph(AppStrings.todoHelpTagsBody),
+        _Row(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
+        _Row(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
+        _Row(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
+        _Section(AppStrings.todoHelpEditTitle),
+        _Paragraph(AppStrings.todoHelpEditBody),
+      ],
     );
   }
 }

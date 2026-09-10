@@ -3,11 +3,14 @@
 // pane header; the phone keeps its app bar and FAB.
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
+import 'package:copist/src/todo/todo_source.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_todo_source.dart';
 import '../fakes/shell_harness.dart';
 
 void main() {
@@ -21,10 +24,18 @@ void main() {
 
   Widget buildApp() {
     return ProviderScope(
-      overrides: [librarySessionProvider.overrideWithValue(controller)],
+      overrides: [
+        librarySessionProvider.overrideWithValue(controller),
+        todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+      ],
       child: const CopistApp(),
     );
   }
+
+  Finder railDest(String label) => find.descendant(
+    of: find.byKey(const Key('shell-rail')),
+    matching: find.text(label),
+  );
 
   Future<void> pumpShell(WidgetTester tester, Size size) async {
     setSurfaceSize(tester, size);
@@ -94,18 +105,42 @@ void main() {
     expect(find.byKey(const Key('layout-mode')), findsOne);
   });
 
-  testWidgets('wide: the todo format help stays one tap from the list', (
+  testWidgets('wide: the todo panel holds switch, add and help; no FAB', (
     tester,
   ) async {
     await pumpShell(tester, const Size(1200, 900));
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('shell-rail')),
-        matching: find.text('Todo'),
+    await tester.tap(railDest('Todo'));
+    await settle(tester);
+
+    // Open/Done leads the filter panel (same row), with Add task and the
+    // format help trailing it; the phone's add FAB is gone on desktop.
+    expect(find.byKey(const Key('todo-view-switch')), findsOne);
+    expect(find.byKey(const Key('todo-filter-button')), findsOne);
+    expect(find.byKey(const Key('todo-add-button')), findsOne);
+    expect(find.byKey(const Key('todo-help')), findsOne);
+    expect(find.byKey(const Key('todo-add')), findsNothing);
+    expect(
+      tester.getCenter(find.byKey(const Key('todo-view-switch'))).dy,
+      moreOrLessEquals(
+        tester.getCenter(find.byKey(const Key('todo-filter-button'))).dy,
+        epsilon: 1,
       ),
     );
+
+    await tester.tap(find.byKey(const Key('todo-add-button')));
     await settle(tester);
-    expect(find.byKey(const Key('todo-help')), findsOne);
+    expect(find.byKey(const Key('todo-dialog-field')), findsOne);
+    await tester.tap(find.text(AppStrings.todoCancel));
+    await settle(tester);
+
+    // The help opens over the tab: the rail stays on screen.
+    await tester.tap(find.byKey(const Key('todo-help')));
+    await settle(tester);
+    expect(find.byKey(const Key('todo-help-dialog')), findsOne);
+    expect(find.byKey(const Key('shell-rail')), findsOne);
+    await tester.tap(find.byKey(const Key('todo-help-close')));
+    await settle(tester);
+    expect(find.byKey(const Key('todo-help-dialog')), findsNothing);
   });
 
   testWidgets('narrow: the app bar and the FAB stay, no tree footer', (

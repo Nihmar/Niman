@@ -11,6 +11,7 @@ library;
 import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
@@ -30,7 +31,16 @@ final class TodoTab extends StatefulWidget {
   ///
   /// [clock] fixes the wall-clock day for due badges and the edit
   /// dialog (defaults to now; widget tests inject a fixed time).
-  const new({required this.controller, this.reminders, this.clock, super.key});
+  ///
+  /// [onAddTask] is the shell's add flow: the desktop panel's Add button
+  /// uses it (the phone's FAB owns creation there).
+  const new({
+    required this.controller,
+    this.reminders,
+    this.clock,
+    this.onAddTask,
+    super.key,
+  });
 
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
@@ -40,6 +50,9 @@ final class TodoTab extends StatefulWidget {
 
   /// The wall-clock source for "today".
   final DateTime Function()? clock;
+
+  /// Creates a task; the desktop filter panel shows the button.
+  final VoidCallback? onAddTask;
 
   @override
   State<TodoTab> createState() => _TodoTabState();
@@ -67,6 +80,7 @@ final class _TodoTabState extends State<TodoTab> {
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, _) {
@@ -76,39 +90,15 @@ final class _TodoTabState extends State<TodoTab> {
         return Column(
           children: [
             if (reminders != null) ReminderHealthBanner(service: reminders),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  SegmentedButton<bool>(
-                    key: const Key('todo-view-switch'),
-                    segments: [
-                      ButtonSegment(
-                        value: false,
-                        label: Text(AppStrings.todoOpen),
-                      ),
-                      ButtonSegment(
-                        value: true,
-                        label: Text(AppStrings.todoDone),
-                      ),
-                    ],
-                    selected: {_showDone},
-                    onSelectionChanged: (selected) =>
-                        _selectView(selected.single),
-                  ),
-                  const Spacer(),
-                  // The format reference stays one tap from the list on
-                  // every layout (T-TD-08): the wide layout has no app bar
-                  // to hold it any more.
-                  IconButton(
-                    key: const Key('todo-help'),
-                    tooltip: AppStrings.todoHelpTooltip,
-                    icon: const Icon(Icons.help_outline),
-                    onPressed: _openHelp,
-                  ),
-                ],
+            // The phone keeps the switch on its own row; the desktop folds
+            // it — and the help — into the filter panel below (T-PP-22).
+            if (!wide)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [_viewSwitch(), const Spacer(), _helpButton()],
+                ),
               ),
-            ),
             if (controller.error != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -118,10 +108,35 @@ final class _TodoTabState extends State<TodoTab> {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
-            Expanded(child: _body(snapshot)),
+            Expanded(child: _body(snapshot, wide: wide)),
           ],
         );
       },
+    );
+  }
+
+  /// The Open/Done switch: its own row on the phone, the leading control
+  /// of the desktop filter panel.
+  Widget _viewSwitch() {
+    return SegmentedButton<bool>(
+      key: const Key('todo-view-switch'),
+      segments: [
+        ButtonSegment(value: false, label: Text(AppStrings.todoOpen)),
+        ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
+      ],
+      selected: {_showDone},
+      onSelectionChanged: (selected) => _selectView(selected.single),
+    );
+  }
+
+  /// The format reference stays one tap from the list on every layout
+  /// (T-TD-08): the wide layout has no app bar to hold it any more.
+  Widget _helpButton() {
+    return IconButton(
+      key: const Key('todo-help'),
+      tooltip: AppStrings.todoHelpTooltip,
+      icon: const Icon(Icons.help_outline),
+      onPressed: _openHelp,
     );
   }
 
@@ -129,11 +144,50 @@ final class _TodoTabState extends State<TodoTab> {
   ///
   /// The dialog writes the syntax, so a user can go a long way without
   /// seeing it — until they open todo.txt in another editor, or wonder
-  /// what the chips are.
-  void _openHelp() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
+  /// what the chips are. On the desktop it opens as a dialog over the
+  /// tab: a pushed screen would hide the rail and the list (T-PP-22).
+  Future<void> _openHelp() async {
+    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        key: const Key('todo-help-dialog'),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620, maxHeight: 640),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 8, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        AppStrings.todoHelpTitle,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('todo-help-close'),
+                      tooltip: MaterialLocalizations.of(context)
+                          .closeButtonTooltip,
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Flexible(child: TodoHelpBody()),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -157,8 +211,10 @@ final class _TodoTabState extends State<TodoTab> {
     });
   }
 
-  /// The list (or loading/empty state) for the visible file.
-  Widget _body(TodoSnapshot? snapshot) {
+  /// The list (or loading/empty state) for the visible file on [wide],
+  /// where the filter panel leads with the view switch and trails with
+  /// Add task and help (T-PP-22).
+  Widget _body(TodoSnapshot? snapshot, {required bool wide}) {
     if (snapshot == null) {
       return const Center(
         key: Key('todo-loading'),
@@ -176,6 +232,22 @@ final class _TodoTabState extends State<TodoTab> {
           filter: _filter,
           showDone: _showDone,
           count: fileEntries.length,
+          leading: wide ? _viewSwitch() : null,
+          trailing: wide
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.onAddTask != null)
+                      TextButton.icon(
+                        key: const Key('todo-add-button'),
+                        onPressed: widget.onAddTask,
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(AppStrings.todoAddTooltip),
+                      ),
+                    _helpButton(),
+                  ],
+                )
+              : null,
           onDueRange: (range) {
             _log.debug('todo filter due: ${range.name}');
             setState(() => _filter = _filter.copyWith(dueRange: range));
