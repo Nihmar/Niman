@@ -1,6 +1,6 @@
 # Platform parity — Android ↔ Linux/Windows
 
-**Status:** Planned · **Depends on:** M4 (everything compared exists) ·
+**Status:** Planned (T-PP-16 spike done on 3 packages, see Spike notes) · **Depends on:** M4 (everything compared exists) ·
 **Spec:** *Requirements → Platforms* (Android + Linux + Windows now)
 
 ## Purpose
@@ -171,25 +171,21 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   identical shortcuts do identical things on all three OSes.*
 - [ ] **T-PP-11** Dirty-check on window close (desktop) / task removal
   (Android): the note pipeline already knows "saved" (`ui/note_view.dart`
-  status row) — hook it to window-close events (see T-PP-16 for the
-  package choice) instead of growing a second source of truth. *AC:
-  closing with unsaved edits asks, on desktop; no behaviour change on
-  Android.*
-- [ ] **T-PP-16** Evaluate `nativeapi` (leanflutter.dev, v0.2.3, MIT —
-  Flutter bindings over FFI for window/tray/menu/dialog APIs on all five
-  platforms) for the desktop window chrome: custom titlebar
-  (`titleBarStyle = hidden` + a Flutter-drawn bar), tray icon with the
-  four quick actions in its context menu, native menus, and the
-  close-request events T-PP-11 needs. Spike on a Wayland session first:
-  the package is pre-1.0/WIP (API churn is the risk), it adds a native
-  FFI dependency where desktop currently has none, and a hidden titlebar
-  must coexist with the runner's GNOME header-bar logic
-  (`linux/runner/my_application.cc`) rather than fight it. If the spike
-  passes, `nativeapi` replaces the `window_close` candidate in T-PP-11
-  and the tray menu becomes the third quick-action surface next to
-  `.desktop` Actions and KRunner. *AC: spike note records Wayland
-  behaviour (hidden bar, drag-to-move, window controls) + API-stability
-  judgement, and T-PP-11 names the chosen package.*
+  status row) — hook it to `window_manager`'s `WindowListener.onWindowClose`
+  + `setPreventClose(true)` while dirty (package chosen in T-PP-16, spike
+  notes) instead of growing a second source of truth. *AC: closing with
+  unsaved edits asks, on desktop; no behaviour change on Android.*
+- [x] **T-PP-16** Evaluate the desktop window-chrome packages — `nativeapi`
+  v0.2.3, `window_manager` v0.5.2 (both leanflutter), `bitsdojo_window`
+  v0.1.6 — on a real Plasma / Wayland session; see *Spike notes* below.
+  Outcome: **`window_manager` owns the window** (only one with a
+  runtime-verified close-request event + real Linux drag), **`nativeapi`
+  stays for the tray only** (the piece the other two lack), **bitsdojo
+  rejected** (stale, no close event, no tray). Custom titlebar unblocked
+  on Linux behind `window_manager`. Windows-host pass owed for both adopted
+  packages. *AC: spike note records Wayland behaviour (hidden bar,
+  drag-to-move, window controls, close event, tray) + API-stability
+  judgement, and T-PP-11 names the chosen package (`window_manager`).*
 
 ### P6 — Verification hooks (no new code without a device)
 
@@ -200,6 +196,143 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 - [ ] **T-PP-13** Secure-storage first-run on all three (fresh profile, no
   keychain/dbus): credentials save/load, clean degradation. *AC: covered
   by hand, recorded here.*
+
+## Spike notes — desktop window packages (T-PP-16, 2026-09-09/10)
+
+Ran locally: one scratch Flutter app (`/tmp/copist/nativeapi-spike`,
+not committed), `flutter build linux`, executed on this machine's real
+Plasma 6.6.5 / Wayland session, switched between the three candidates and
+exercised the same surface each time: frameless/hidden titlebar,
+drag-to-move, tray, and the close-request path. Findings verified against
+the package sources in `~/.pub-cache/hosted/pub.dev/`.
+
+### `window_manager` v0.5.2 (same leanflutter team as nativeapi)
+
+Method-channel plugin (federated; C++ on Linux, no getCurrent heuristic —
+the plugin connects directly to the Flutter view's `GtkWindow`). 42
+published versions; latest 0.5.2 = 2026-07-04, changelog active through
+#550. Ships Flutter widgets for the chrome: `DragToMoveArea`,
+`DragToResizeArea`, `VirtualWindowFrame`, `WindowCaption`.
+
+- **Close-request event works, verified at runtime**: `WindowListener
+  .onWindowClose` + `setPreventClose(true)` — the Linux `delete_event`
+  handler emits `close` and returns the prevent flag. Self-test passed:
+  with `setPreventClose(true)`, `close()` fired the event and the window
+  stayed alive. This is exactly the T-PP-11 dirty-check surface.
+- **Real Linux drag**: `startDragging` → `gtk_window_begin_move_drag`
+  (resize via `begin_resize_drag`) — not a stub. Frameless via
+  `setAsFrameless`/`titleBarStyle` applied cleanly, no `Gdk-CRITICAL`
+  (the window is resolved by the plugin, not by device-position probing).
+- **No tray** in the current line (`TrayManager` existed in the 0.1.x era
+  and was dropped; absent from lib/ entirely).
+- Adds a small extra dep: `screen_retriever`.
+
+### `bitsdojo_window` v0.1.6
+
+Federated (linux/windows/macos sub-packages), C++/GTK on Linux.
+Latest 0.1.6 = 2023-12-23 — ~2.5 years stale as of this spike.
+Description literally says "Windows and macOS"; Linux is a second-class
+federated package. Global `appWindow` + `doWhenWindowReady(callback)`
+callback style (no listener object).
+
+- Builds and ran on the Plasma/Wayland session (frameless via
+  `gtk_window_set_decorated(FALSE)` + RGBA visual, `titleBarHeight=32`);
+  `startDragging` is real (`gtk_window_begin_move_drag`), ships
+  `WindowBorder`/`WindowCaption`/`WindowButton`/`MoveWindow` widgets.
+- **No close-request event**: `close()` is programmatic-only; there is no
+  `onWindowClose`/`preventClose` in the platform interface, and the Linux
+  impl never surfaces `delete_event` to Dart. T-PP-11 cannot ride it.
+- **No tray.**
+
+### `nativeapi` v0.2.3 (previous notes, condensed)
+
+**Pros**
+- The tray works on Wayland/KDE: the `TrayIcon` registers a StatusNotifier
+  item (confirmed via `gdbus` on `org.kde.StatusNotifierWatcher`) with a
+  context menu of `MenuItem`s + click callbacks — the third quick-action
+  surface next to `.desktop` Actions / KRunner, no app-side native code.
+- Build is ordinary: an FFI plugin; `cnativeapi` compiles a vendored
+  `libnativeapi` C++ fork (~140 files) via CMake inside `flutter build`, no
+  script or manual step. (Windows side is not cross-buildable from Linux —
+  needs a Windows-host pass.)
+- Clean Dart API (typed event listeners per object), MIT, actively developed
+  (0.2.x over the last month).
+- `titleBarStyle = hidden` + hidden control buttons apply without crashing
+  on Wayland: the Linux impl walks the GTK tree, finds the runner's
+  `GtkHeaderBar` and hides it (falls back to
+  `gtk_window_set_decorated(false)`) — it composes with
+  `linux/runner/my_application.cc` instead of fighting it.
+- `MessageDialog` exists for the confirm-on-close dialog (T-PP-11) if/when a
+  close event exists.
+
+**Cons / blockers**
+- **No close-request event in v0.2.3.** Window events are only
+  `focused/blurred/minimized/maximized/restored/moved/resized`
+  (`cnativeapi/.../capi/window_c.h`), so the dirty-check-on-close (T-PP-11)
+  cannot ride this package today; the upstream `setWillCloseHook` PR is
+  still closed-without-merge. The window hooks stop at will-show/will-hide.
+- **`startDragging()` is a no-op on Linux** ("stub implementation",
+  `platform/linux/window_linux.cpp`), along with ~10 property setters
+  (`isResizable`, `isMovable`, `isClosable`, `hasShadow`, …). A
+  Flutter-drawn titlebar with `titleBarStyle = hidden` would therefore make
+  the window **unmovable on Linux**. Windows/macOS do implement dragging
+  (`WM_NCLBUTTONDOWN/HTCAPTION`, `performWindowDragWithEvent:`).
+- **`getCurrent()` race / Wayland fragility:** returns `null` right after
+  startup (window not realized yet) and logged a `Gdk-CRITICAL`
+  (`gdk_device_get_window_at_position_double … != GDK_SOURCE_KEYBOARD`) on
+  every attempt — the same failure as open upstream issue #6 (KDE Plasma +
+  Wayland). Succeeded on a ~500 ms retry here; the fallback is
+  "first visible toplevel", a heuristic that will mis-target once the app
+  has more than one window (dialogs, a second library).
+- **New Linux build dependency:** the plugin's CMake requires GTK3, X11 and
+  `ayatana-appindicator3` dev packages, so the Linux tar.gz/AppImage build
+  host gains a native dep (and the C++ lands in the bundle — build time +
+  binary size). The plugin is declared for all five platforms, so the
+  Android APK build compiles it too.
+- **Tray reach on Linux is SNI-dependent:** Plasma shows it; GNOME needs the
+  AppIndicator extension (ecosystem limit, same as any SNI app).
+- **Churn:** pre-1.0 with a "Work in Progress" banner; 0.2.0 was a full Dart
+  API regeneration + event rework; the README already lags the current API
+  (`Image.fromAsset` in the docs vs `fromFile`/`fromBase64` shipped in 0.2.3).
+  Pin exact versions and treat the API as moving.
+
+**Judgement (three-way)**
+- **`window_manager` wins the window job.** It is the only candidate with a
+  *released, runtime-verified* close-request event (`onWindowClose` +
+  `setPreventClose`, self-test passed: programmatic close vetoed, window
+  stayed alive) and a *real* Linux drag (`gtk_window_begin_move_drag`).
+  Frameless applies cleanly with no `Gdk-CRITICAL` (the plugin owns the
+  window handle, unlike `nativeapi getCurrent()`'s device-position probe).
+  Adopt it behind the same "one seam, fakes in tests" pattern as
+  `ShortcutService` — `WindowManager.instance` + a `WindowListener` in the
+  `ui/` layer, faked in tests. Windows/macOS behaviour is unverified here
+  (Windows-host pass owed, same as nativeapi).
+- **`nativeapi` stays for the tray only** — the third quick-action surface —
+  which is the piece `window_manager` dropped (no `TrayManager` in 0.5.x)
+  and `bitsdojo_window` never had. Same author family as `window_manager`
+  (leanflutter). **Coexistence verified in the spike** (both in one app,
+  one Linux build): the tray registered with KDE SNI while
+  `window_manager` owned the window — frameless applied and the close-veto
+  self-test passed with nativeapi loaded. Two seams to keep: import
+  `nativeapi` with `hide WindowManager` (both export one), and don't call
+  `nativeapi`'s `WindowManager.getCurrent()` once `window_manager` owns the
+  window (that `Gdk-CRITICAL`/null race is a `nativeapi` failure mode we no
+  longer need). Version-pin both (nativeapi is pre-1.0 with a moving API).
+- **Custom titlebar: now unblocked on Linux** via `window_manager`
+  (`titleBarStyle hidden` + `DragToMoveArea` + the shipped `VirtualWindowFrame`/
+  `WindowCaption` widgets). Scope it to P1/P2 like the other chrome; do
+  not adopt the hidden bar until the drag region is exercised on a real
+  Wayland session.
+- **`bitsdojo_window`: rejected.** Stale (0.1.6 = 2023-12-23), its own
+  description scopes it to Windows/macOS with Linux a second-class
+  federated package, no close-request event (T-PP-11 can't ride it), no
+  tray. The only useful confirmation: a real GTK-based frameless/drag
+  implementation exists and ran on this session — useful prior for the
+  others, not a dependency.
+- **T-PP-11 is named: `window_manager`.** The mechanism is
+  `WindowListener.onWindowClose` + `setPreventClose(true)` while a note is
+  dirty (the `ui/note_view.dart` "saved" status row already knows), show
+  the confirm-on-close, then `setPreventClose(false)` + `close()` on yes.
 
 ## Technical design
 
@@ -248,6 +381,16 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 - **Linux notification daemons vary** (GNOME/KDE/Wayland compositors) —
   libnotify presence and closed-app behaviour need the real sessions, not
   CI.
+- **`nativeapi` adds a native build chain to desktop** (verified in the
+  spike): a C++ FFI plugin — GTK3/X11/`ayatana-appindicator3` dev packages
+  and ~140 C++ files compiled into the Linux/Windows builds, plus the same
+  on the Android APK build. The Linux build host needs the new dev
+  packages; treat it as build-infrastructure, not just a dependency.
+  Version-pin it (pre-1.0, moving API). `window_manager` adds a smaller
+  second native plugin (C++/GTK on Linux, `screen_retriever` dep); pin it
+  too. The two coexist (spike-verified: one build, one process — tray
+  registered with KDE SNI + close veto working simultaneously); the
+  combined surface is still owed a Windows-host pass.
 - **Single-instance on desktop** is new native surface (one small plugin);
   keep it behind the same "one seam, fakes in tests" pattern as
   `ShortcutService`/`ReminderBackend`.
