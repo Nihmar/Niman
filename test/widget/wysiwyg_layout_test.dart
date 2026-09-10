@@ -84,10 +84,16 @@ void main() {
     expect(find.byType(MarkdownPreview), findsNothing);
   });
 
-  testWidgets('find hides in WYSIWYG while the outline stays', (tester) async {
+  testWidgets('find opens over the WYSIWYG surface', (tester) async {
     await _open(tester, _view(showWysiwyg: true));
-    expect(find.byKey(const Key('editor-find-open')), findsNothing);
-    expect(find.byKey(const Key('outline-toggle')), findsOneWidget);
+    expect(find.byKey(const Key('editor-find-open')), findsOneWidget);
+    expect(find.byKey(const Key('wysiwyg-find-input')), findsNothing);
+    await tester.tap(find.byKey(const Key('editor-find-open')));
+    await tester.pump();
+    expect(find.byKey(const Key('wysiwyg-find-input')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('wysiwyg-find-close')));
+    await tester.pump();
+    expect(find.byKey(const Key('wysiwyg-find-input')), findsNothing);
   });
 
   testWidgets('the toolbar formats the WYSIWYG document', (tester) async {
