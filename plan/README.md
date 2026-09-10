@@ -47,6 +47,7 @@ header rather than on the next one in the chain.
 | [m-reminder-latency.md](m-reminder-latency.md) | Todo reminders arriving minutes late | Fix in, device check open |
 | [m-tab-switch-jank.md](m-tab-switch-jank.md) | What the tab switch cost, and what paid for it | Fix in, device check open |
 | [m-cleanups.md](m-cleanups.md) | Quick wins from a review pass | T-CL-03 and T-CL-04 open |
+| [m-wysiwyg-editor.md](m-wysiwyg-editor.md) | WYSIWYG editor between source and preview | Planned |
 
 ## Conventions
 
