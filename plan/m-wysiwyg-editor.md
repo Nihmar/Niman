@@ -10,6 +10,14 @@ feature. Every phase has: goal, exact files, exact steps, code to write, a
 command to run, and an acceptance check. Do the phases in order. Do not skip a
 check because it looks obvious.
 
+## Mockups (the visual target)
+
+`mockup/wysiwyg/index.html` is a self-contained HTML page with the final look
+for every mode: Android Settings (the two new rows), the Android editor in
+source / WYSIWYG / preview-off, the desktop split / WYSIWYG / preview-off, and
+the mode matrix. Open it in a browser; the segmented controls switch modes and
+the top-bar button switches the theme. `mockup/wysiwyg/README.md` explains it.
+
 ## How to use this plan (read before touching anything)
 
 1. **One phase per session.** Finish a phase, run its checks, commit, then
