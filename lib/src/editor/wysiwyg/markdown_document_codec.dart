@@ -92,10 +92,24 @@ final class MarkdownDocumentCodec {
     // to the group, not to a line. One fence per line, or code text let out
     // of it, is the bug the device report hit (2026-09-11).
     var inCode = false;
+    var codeLang = '';
+    var codeLines = <String>[];
+    // An empty fence carries nothing: the code button on an empty line made
+    // pairs of stray markers in the note, and the device report asked for
+    // them gone (2026-09-11).
     void closeCode() {
       if (!inCode) return;
-      buffer.write('~~~$_nl');
       inCode = false;
+      final lines = codeLines;
+      codeLines = <String>[];
+      if (lines.every((line) => line.isEmpty)) return;
+      buffer.write('~~~$codeLang$_nl');
+      for (final line in lines) {
+        buffer
+          ..write(line)
+          ..write(_nl);
+      }
+      buffer.write('~~~$_nl');
     }
 
     void flush(Map<String, dynamic> attrs) {
@@ -104,12 +118,10 @@ final class MarkdownDocumentCodec {
       if (attrs['code-block'] == true) {
         if (!inCode) {
           final lang = attrs['copist-lang'];
-          buffer.write('~~~${lang is String ? lang : ''}$_nl');
+          codeLang = lang is String ? lang : '';
           inCode = true;
         }
-        buffer
-          ..write(text)
-          ..write(_nl);
+        codeLines.add(text);
         return;
       }
       closeCode();
