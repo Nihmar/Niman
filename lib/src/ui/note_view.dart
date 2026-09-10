@@ -630,6 +630,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           data: _currentText,
           onChanged: _onWysiwygChanged,
           autoFocus: widget.autofocusEditor,
+          spellCheck: widget.spellCheck,
         )
       : _buildEditor();
 
@@ -1185,6 +1186,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   List<SpellIssue> _scanSpelling() {
     final spell = widget.spellCheck;
     if (spell == null) return const <SpellIssue>[];
+    if (widget.showWysiwyg) {
+      final state = _wysiwygKey.currentState;
+      if (state == null) return const <SpellIssue>[];
+      return spell.scan(<SpellLine>[
+        for (final line in state.plainTextLines)
+          (text: line, skip: const <TextRange>[]),
+      ]);
+    }
     final lines = _controller.codeLines;
     return spell.scan(<SpellLine>[
       for (var i = 0; i < lines.length; i++)
@@ -1194,6 +1203,15 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   /// Replaces one issue's word in the controller (the panel's fix).
   void _applySpelling(SpellIssue issue, String replacement) {
+    if (widget.showWysiwyg) {
+      _wysiwygKey.currentState?.replaceDocumentRange(
+        issue.line,
+        issue.start,
+        issue.end,
+        replacement,
+      );
+      return;
+    }
     _controller.replaceSelection(
       replacement,
       CodeLineSelection(
@@ -1441,7 +1459,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                   : _findController.findMode,
             ),
           if (!_loading &&
-              !widget.showWysiwyg &&
               widget.spellCheck != null &&
               widget.spellCheck!.available)
             IconButton(
