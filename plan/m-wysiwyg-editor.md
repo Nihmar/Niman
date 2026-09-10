@@ -37,6 +37,10 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
   caret (a pressed button toggles off, like a word processor), and the
   surface never re-decodes from the parent's stale echo: that reset the
   buffer and put typed text back at the start of the note (device report).
+- **Phase 11** — the blank lines between blocks are kept (the parser drops
+  them from the AST, so the view ate them and the next edit wrote them away —
+  device report), and Quill's near-white code-block style follows the app
+  theme instead of showing as a white box in the dark.
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
