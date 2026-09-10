@@ -1,0 +1,29 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Copist
+GenericName=Markdown Notes
+Comment=Markdown notes
+Exec=copist %U
+Icon=dev.copist.copist
+Terminal=false
+Categories=Office;TextEditor;Utility;
+Keywords=notes;markdown;note;todo;task;list;quick;copist;
+StartupWMClass=dev.copist.copist
+Actions=quick-note;new-todo;new-note;new-list;
+
+[Desktop Action quick-note]
+Name=Quick note
+Exec=copist --quick-note
+
+[Desktop Action new-todo]
+Name=New todo
+Exec=copist --new-todo
+
+[Desktop Action new-note]
+Name=New note
+Exec=copist --new-note
+
+[Desktop Action new-list]
+Name=New list
+Exec=copist --new-list

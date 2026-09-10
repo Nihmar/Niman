@@ -95,11 +95,24 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `<file>` is parsed into `LaunchArgs.openPath` and logged, not opened:
   that is the P3 single-instance slice. `test/unit/launch_args_test.dart`
   plus the CLI cold-start widget test in `test/widget/shortcuts_shell_test.dart`.
-- [ ] **T-PP-06** Desktop surface: Linux `.desktop` `Actions=` (four
+- [x] **T-PP-06** Desktop surface: Linux `.desktop` `Actions=` (four
   entries calling the CLI flags) shipped in the tar.gz/AppImage/pkg;
   Windows jumplist tasks (or documented deferral with reason). *AC:
   right-clicking the desktop icon offers the same four entries, or the
   Risks section says why not yet.*
+  Landed (Linux): `linux/dev.copist.copist.desktop` carries the four
+  `Actions=` (quick-note / new-todo / new-note / new-list, each `Exec`
+  calling the T-PP-05 flag) and `Keywords=` covering the same actions for
+  KRunner; `linux/CMakeLists.txt` installs it into the release bundle, so
+  `./scripts/copist.sh linux` ships it. `test/unit/desktop_entry_test.dart`
+  feeds every `Exec` back through `parseLaunchArgs`, so the entry cannot
+  drift from the CLI. Owed: M7 packaging (T-M7-03) installs the file into
+  `~/.local/share/applications` with an absolute `Exec` and an icon; the
+  right-click hand check rides on that.
+  Windows jumplist deferred: it needs a stable AppUserModelID and an
+  `.lnk`/jump-list writer that Flutter's Windows runner does not provide
+  — native shim is M7+ work, and the CLI floor (T-PP-05) already covers
+  the four actions there.
 - [ ] **T-PP-06a** KRunner discoverability (KDE): spike what KRunner
   actually lists — the main `.desktop` entry (via `Name`/`GenericName`/
   `Keywords=`) is found, but individual `Actions=` are task-manager/dock
