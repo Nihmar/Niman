@@ -345,6 +345,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   double _splitRatio = defaultSplitRatio;
 
+  /// Which editor the library writes in and whether the preview exists
+  /// (T-WYS-05); both are per library and refresh with the editor settings.
+  EditorKind _editorKind = EditorKind.source;
+  bool _previewEnabled = true;
+
   /// The editor's link format and indent width (settings).
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
@@ -410,7 +415,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
   /// in raw-edit mode.
-  bool get _previewToggleVisible => _noteKind == null || _kindRawMode;
+  bool get _previewToggleVisible =>
+      _previewEnabled && (_noteKind == null || _kindRawMode);
 
   /// The kind toggle actions (T-TK-05): a kinded note offers the raw
   /// editor (pencil); in raw mode the kind GUI is offered back. Empty
@@ -498,7 +504,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   bool _opensPreviewOnly() {
     if (!_previewVisible) return false;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
-    return !previewSplits(_previewMode, narrow: narrow);
+    return !previewSplits(
+      _previewMode,
+      narrow: narrow,
+      editor: _editorKind,
+      previewEnabled: _previewEnabled,
+    );
   }
 
   /// Records a note open: the tabs stay painted under the fading note
@@ -581,8 +592,14 @@ final class _LibraryShellState extends State<_LibraryShell>
       linkType: _linkType,
       indentWidth: _indentWidth,
       toolbarLayout: _toolbarLayout,
-      splitPreview: previewSplits(_previewMode, narrow: true),
-      showPreview: _previewVisible,
+      splitPreview: previewSplits(
+        _previewMode,
+        narrow: true,
+        editor: _editorKind,
+        previewEnabled: _previewEnabled,
+      ),
+      showPreview: _previewEnabled && _previewVisible,
+      showWysiwyg: _editorKind == EditorKind.wysiwyg,
       splitFraction: _splitRatio,
       onSplitFractionChanged: _onSplitFractionChanged,
       onSplitDragEnd: _onSplitDragEnd,
@@ -804,12 +821,16 @@ final class _LibraryShellState extends State<_LibraryShell>
     // revised); it notifies the open editor itself, so no setState is
     // needed here.
     final spellDictionaries = await controller.spellDictionaries;
+    final editorKind = await controller.editorKind;
+    final previewEnabled = await controller.previewEnabled;
     if (mounted) widget.spellCheck.setDictionaries(spellDictionaries);
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
             previewMode != _previewMode ||
             splitRatio != _splitRatio ||
+            editorKind != _editorKind ||
+            previewEnabled != _previewEnabled ||
             linkType != _linkType ||
             indentWidth != _indentWidth ||
             treeSort != _treeSort ||
@@ -820,6 +841,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         _autofocusEditor = autofocus;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
+        _editorKind = editorKind;
+        _previewEnabled = previewEnabled;
         _linkType = linkType;
         _indentWidth = indentWidth;
         _treeSort = treeSort;
@@ -1603,7 +1626,12 @@ final class _LibraryShellState extends State<_LibraryShell>
           _previewFullScreen &&
           _previewVisible &&
           _previewToggleVisible &&
-          !previewSplits(_previewMode, narrow: true);
+          !previewSplits(
+            _previewMode,
+            narrow: true,
+            editor: _editorKind,
+            previewEnabled: _previewEnabled,
+          );
       // The same accelerators on the phone layout, but without the
       // focus claim: a field keeps the software keyboard (T-PP-10).
       return CallbackShortcuts(
@@ -1671,6 +1699,8 @@ final class _LibraryShellState extends State<_LibraryShell>
                                       if (!previewSplits(
                                             _previewMode,
                                             narrow: true,
+                                            editor: _editorKind,
+                                            previewEnabled: _previewEnabled,
                                           ) &&
                                           _previewToggleVisible) ...[
                                         _previewToggleAction(),
@@ -2207,8 +2237,14 @@ final class _LibraryShellState extends State<_LibraryShell>
                   linkType: _linkType,
                   indentWidth: _indentWidth,
                   toolbarLayout: _toolbarLayout,
-                  splitPreview: previewSplits(_previewMode, narrow: false),
-                  showPreview: _previewVisible,
+                  splitPreview: previewSplits(
+                    _previewMode,
+                    narrow: false,
+                    editor: _editorKind,
+                    previewEnabled: _previewEnabled,
+                  ),
+                  showPreview: _previewEnabled && _previewVisible,
+                  showWysiwyg: _editorKind == EditorKind.wysiwyg,
                   splitFraction: _splitRatio,
                   onSplitFractionChanged: _onSplitFractionChanged,
                   onSplitDragEnd: _onSplitDragEnd,
@@ -2224,8 +2260,14 @@ final class _LibraryShellState extends State<_LibraryShell>
                     // desktop (T-PP-22): the header above is about the file,
                     // the footer about how it is shown.
                     if (_previewToggleVisible) ...[
-                      _layoutModeAction(compact: true),
-                      if (!previewSplits(_previewMode, narrow: false))
+                      if (_editorKind == EditorKind.source)
+                        _layoutModeAction(compact: true),
+                      if (!previewSplits(
+                        _previewMode,
+                        narrow: false,
+                        editor: _editorKind,
+                        previewEnabled: _previewEnabled,
+                      ))
                         _previewToggleAction(compact: true),
                     ],
                   ],
@@ -2550,6 +2592,7 @@ final class _DetailPane extends StatelessWidget {
     required this.toolbarLayout,
     required this.splitPreview,
     required this.showPreview,
+    required this.showWysiwyg,
     required this.splitFraction,
     required this.onSplitFractionChanged,
     required this.onSplitDragEnd,
@@ -2586,6 +2629,9 @@ final class _DetailPane extends StatelessWidget {
 
   /// Editor/preview switch state (T-UI-06): the shared app bar owns it.
   final bool showPreview;
+
+  /// Whether the WYSIWYG surface replaces the source editor (T-WYS-05).
+  final bool showWysiwyg;
 
   /// Link navigation (T-M3-07).
   final LinkSource? linkSource;
@@ -2642,6 +2688,7 @@ final class _DetailPane extends StatelessWidget {
                 toolbarTop: true,
                 splitPreview: splitPreview,
                 showPreview: showPreview,
+                showWysiwyg: showWysiwyg,
                 splitFraction: splitFraction,
                 onSplitFractionChanged: onSplitFractionChanged,
                 onSplitDragEnd: onSplitDragEnd,
