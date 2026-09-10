@@ -282,6 +282,29 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         parent.style.attributes.containsKey(quill.Attribute.codeBlock.key);
   }
 
+  /// Quill's default code-block style is a near-white box with dark blue
+  /// text: in the app's dark theme it read as a white rectangle (device
+  /// report, 2026-09-11). The app's own surface and text replace it; every
+  /// other style stays Quill's.
+  static quill.DefaultStyles _customStyles(ThemeData theme) =>
+      quill.DefaultStyles(
+        code: quill.DefaultTextBlockStyle(
+          TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontFamily: 'monospace',
+            fontSize: 13,
+            height: 1.15,
+          ),
+          const quill.HorizontalSpacing(14, 0),
+          const quill.VerticalSpacing(6, 6),
+          quill.VerticalSpacing.zero,
+          BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     if (widget.data.length > _maxWysiwygBytes) {
@@ -318,6 +341,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
                 padding: const EdgeInsets.all(16),
                 embedBuilders: const [OpaqueEmbedBuilder()],
                 textSpanBuilder: _spellSpan,
+                customStyles: _customStyles(Theme.of(context)),
               ),
             ),
           ),
