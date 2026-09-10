@@ -80,7 +80,8 @@ A [[wikilink]] and an ![[embed.png]].
   });
 
   test('an edit keeps every opaque block byte for byte', () {
-    const note = r'''# Heading
+    const note = r'''
+# Heading
 
 A paragraph.
 
