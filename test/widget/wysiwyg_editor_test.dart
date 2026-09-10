@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A checker whose only misspelling is 'wrold'.
 final class _FakeChecker implements SpellChecker {
-  const _FakeChecker();
+  const new();
 
   @override
   bool get available => true;

@@ -14,7 +14,7 @@ Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 /// A checker whose only misspelling is 'wrold', with one suggestion.
 final class _SpellFixChecker implements SpellChecker {
-  const _SpellFixChecker();
+  const new();
 
   @override
   bool get available => true;
