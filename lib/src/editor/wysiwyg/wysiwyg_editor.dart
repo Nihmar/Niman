@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -35,6 +36,11 @@ final class WysiwygEditor extends StatefulWidget {
 /// The surface's state; the owner holds it by key to reach [controller].
 final class WysiwygEditorState extends State<WysiwygEditor> {
   static const MarkdownDocumentCodec _codec = MarkdownDocumentCodec();
+
+  /// Above this size Quill builds a document the note does not pay for; the
+  /// source editor is offered instead (T-WYS-07). Quill has no windowing,
+  /// unlike the preview.
+  static const int _maxWysiwygBytes = 200 * 1024;
 
   final FocusNode _focus = FocusNode();
   final ScrollController _scroll = ScrollController();
@@ -95,6 +101,14 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.data.length > _maxWysiwygBytes) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(AppStrings.wysiwygTooLarge, textAlign: TextAlign.center),
+        ),
+      );
+    }
     return quill.QuillEditor(
       controller: _controller,
       focusNode: _focus,

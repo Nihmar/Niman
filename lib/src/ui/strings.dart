@@ -150,6 +150,12 @@ final class AppStrings {
     'Show the rendered note beside the source editor',
     'Mostra la nota renderizzata accanto all’editor sorgente',
   );
+  static String get wysiwygTooLarge => _t(
+    'This note is too large for the WYSIWYG editor. Open it in the Markdown '
+        'source.',
+    'Questa nota è troppo grande per l’editor WYSIWYG. Aprila nel sorgente '
+        'Markdown.',
+  );
 
   // Settings: the section headings the list is grouped under.
   static String get settingsSectionAppearance => _t('Appearance', 'Aspetto');
