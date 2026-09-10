@@ -73,10 +73,32 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       _resumeStarted = true;
       unawaited(_resume());
     }
-    unawaited(_publishQuickActions());
-    unawaited(_applyLanguage());
+    unawaited(_startLanguageAndActions());
     unawaited(_applyTheme());
   }
+
+  @override
+  void dispose() {
+    AppLanguages.revision.removeListener(_republishQuickActions);
+    super.dispose();
+  }
+
+  /// The stored language, and only then the quick actions.
+  ///
+  /// Their labels are strings like any other, so they answer in whatever
+  /// language is set when they are published — and publishing before the
+  /// stored choice had landed handed the launcher the *system* language
+  /// instead of the app's, on every launch (device report, 2026-09-10).
+  Future<void> _startLanguageAndActions() async {
+    await _applyLanguage();
+    if (!mounted) return;
+    await _publishQuickActions();
+    // And again whenever the language changes under them: the settings
+    // switch, or the OS locale moving while the app runs.
+    AppLanguages.revision.addListener(_republishQuickActions);
+  }
+
+  void _republishQuickActions() => unawaited(_publishQuickActions());
 
   /// Applies the stored theme (T-M6-05).
   ///
@@ -104,7 +126,9 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// carry the same ids, so both run the same flows.
   ///
   /// Here rather than in the shell: they belong to the app, not to an
-  /// open library, so they are there on the very first launch too.
+  /// open library, so they are there on the very first launch too. Called
+  /// again on every language change, so both surfaces speak the app's
+  /// language and not the system's.
   Future<void> _publishQuickActions() async {
     final labels = {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,

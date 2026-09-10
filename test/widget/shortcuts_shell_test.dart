@@ -2,6 +2,7 @@
 // control uses, on a warm start (the tap stream) and on a cold one (the
 // launch action the shell consumes when it mounts).
 import 'package:copist/src/app.dart';
+import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -19,10 +20,13 @@ void main() {
   late FakeFilePicker filePicker;
 
   setUp(() {
+    AppLanguages.reset();
     controller = FakeLibrarySession();
     shortcuts = FakeShortcutService();
     filePicker = useFakeFilePicker();
   });
+
+  tearDown(AppLanguages.reset);
 
   Widget buildApp() {
     return ProviderScope(
@@ -44,7 +48,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(buildApp());
-    await tester.pump();
+    await settle(tester);
 
     expect(shortcuts.published, {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
@@ -57,6 +61,34 @@ void main() {
       ShortcutAction.values,
       reason: 'the launcher ranks by publish order',
     );
+    await close();
+  });
+
+  // 2026-09-10 device report: the launcher's shortcuts kept answering in
+  // the system's language. Their labels are strings like any other, and
+  // they were published before the stored language had been read — so
+  // the launcher was handed whatever the app spoke before the choice
+  // landed, on every launch.
+  testWidgets('the labels are in the language the app is set to', (
+    tester,
+  ) async {
+    await controller.setLanguage(AppLanguage.italian);
+    await tester.pumpWidget(buildApp());
+    await settle(tester);
+
+    expect(shortcuts.published![ShortcutAction.quickNote], 'Nota rapida');
+    expect(AppStrings.shortcutQuickNote, 'Nota rapida');
+    await close();
+  });
+
+  testWidgets('changing the language republishes them', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await settle(tester);
+    expect(shortcuts.published![ShortcutAction.quickNote], 'Quick note');
+
+    AppLanguages.choice = AppLanguage.italian;
+    await settle(tester);
+    expect(shortcuts.published![ShortcutAction.quickNote], 'Nota rapida');
     await close();
   });
 

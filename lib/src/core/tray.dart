@@ -12,6 +12,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/shortcuts.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nativeapi/nativeapi.dart'
     show
@@ -32,6 +33,9 @@ import 'package:nativeapi/nativeapi.dart'
 abstract interface class TrayService {
   /// Creates the tray icon offering [labels], in order. A host without a
   /// tray (no SNI watcher, no plugin) degrades to nothing.
+  ///
+  /// Called again with different labels — the language changed under the
+  /// menu — it relabels what is already there.
   Future<void> init(Map<ShortcutAction, String> labels);
 
   /// Menu taps, carrying the same ids the launcher publishes — the shell
@@ -91,9 +95,17 @@ final class PlatformTrayService implements TrayService {
   @override
   Stream<void> get activated => _activated.stream;
 
+  /// The labels the menu currently carries, so a repeat call with the same
+  /// ones costs nothing.
+  Map<ShortcutAction, String> _labels = const {};
+
   @override
   Future<void> init(Map<ShortcutAction, String> labels) async {
-    if (_tray != null) return; // already up
+    final existing = _tray;
+    if (existing != null) {
+      if (!mapEquals(_labels, labels)) _relabel(existing, labels);
+      return;
+    }
     try {
       final tray = TrayIcon.create();
       if (tray == null) {
@@ -108,39 +120,83 @@ final class PlatformTrayService implements TrayService {
         _icon = icon;
         tray.icon = icon;
       }
-      final menu = Menu.create();
-      if (menu == null) {
+      final built = _buildMenu(labels);
+      if (built == null) {
         tray.dispose();
         _log.warning('tray menu unavailable (native side declined)');
         return;
       }
-      for (final entry in labels.entries) {
-        final item = MenuItem.createWithLabelAndType(
-          entry.value,
-          MenuItemType.normal,
-        );
-        if (item == null) continue;
-        item.addListener((event) {
-          if (event is! MenuItemClickedEvent || event.itemId != item.id) return;
-          _log.debug('tray action: ${entry.key.id}');
-          _actions.add(entry.key);
-        });
-        menu.addItem(item);
-        _items.add(item);
-      }
       tray
-        ..setContextMenu(menu)
+        ..setContextMenu(built.menu)
         ..addListener((event) {
           if (event is TrayIconClickedEvent) _activated.add(null);
         });
       _tray = tray;
-      _menu = menu;
+      _menu = built.menu;
+      _items.addAll(built.items);
+      _labels = Map<ShortcutAction, String>.of(labels);
       _log.info('tray ready (${labels.length} actions)');
     } on Object catch (error) {
       // A session without SNI (or a build without the native library) is a
       // missing convenience, not a reason to fail the launch.
       _log.warning('tray init failed ($error)');
     }
+  }
+
+  /// Hangs a fresh menu on the icon and lets the old one go.
+  ///
+  /// A menu item's label is fixed when it is created, so a language change
+  /// means new items. The new menu is hung first and the old one released
+  /// after, never the other way round: the native side must never be
+  /// pointed at something already freed.
+  void _relabel(TrayIcon tray, Map<ShortcutAction, String> labels) {
+    try {
+      final built = _buildMenu(labels);
+      if (built == null) {
+        _log.warning('tray relabel declined by the native side');
+        return;
+      }
+      final old = _menu;
+      final oldItems = List<MenuItem>.of(_items);
+      tray.setContextMenu(built.menu);
+      _menu = built.menu;
+      _items
+        ..clear()
+        ..addAll(built.items);
+      _labels = Map<ShortcutAction, String>.of(labels);
+      old?.dispose();
+      for (final item in oldItems) {
+        item.dispose();
+      }
+      _log.info('tray relabelled (${labels.length} actions)');
+    } on Object catch (error) {
+      _log.warning('tray relabel failed ($error)');
+    }
+  }
+
+  /// Builds a menu carrying [labels] and the items in it, or null when the
+  /// native side declines.
+  ({Menu menu, List<MenuItem> items})? _buildMenu(
+    Map<ShortcutAction, String> labels,
+  ) {
+    final menu = Menu.create();
+    if (menu == null) return null;
+    final items = <MenuItem>[];
+    for (final entry in labels.entries) {
+      final item = MenuItem.createWithLabelAndType(
+        entry.value,
+        MenuItemType.normal,
+      );
+      if (item == null) continue;
+      item.addListener((event) {
+        if (event is! MenuItemClickedEvent || event.itemId != item.id) return;
+        _log.debug('tray action: ${entry.key.id}');
+        _actions.add(entry.key);
+      });
+      menu.addItem(item);
+      items.add(item);
+    }
+    return (menu: menu, items: items);
   }
 
   @override
