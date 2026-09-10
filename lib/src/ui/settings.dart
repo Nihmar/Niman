@@ -77,6 +77,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
   static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
       .round();
   List<String> _spellDictionaries = const <String>[];
+  EditorKind _editorKind = EditorKind.source;
+  bool _previewEnabled = true;
 
   @override
   void initState() {
@@ -106,6 +108,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final uiTextScale = await controller.uiTextScale;
     final noteTextScale = await controller.noteTextScale;
     final spellDictionaries = await controller.spellDictionaries;
+    final editorKind = await controller.editorKind;
+    final previewEnabled = await controller.previewEnabled;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -127,6 +131,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _uiTextScale = uiTextScale;
         _noteTextScale = noteTextScale;
         _spellDictionaries = spellDictionaries;
+        _editorKind = editorKind;
+        _previewEnabled = previewEnabled;
       });
     }
   }
@@ -476,6 +482,30 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (width != null) await _setIndentWidth(width);
   }
 
+  /// Asks which editor the library writes in (T-WYS-03).
+  Future<void> _chooseEditorKind() async {
+    final kind = await showSettingsChoice<EditorKind>(
+      context,
+      dialogKey: const Key('editor-kind-dialog'),
+      title: AppStrings.settingsEditorKindTitle,
+      subtitle: AppStrings.settingsEditorKindSubtitle,
+      current: _editorKind,
+      options: [
+        SettingsOption(EditorKind.source, AppStrings.editorKindSource),
+        SettingsOption(EditorKind.wysiwyg, AppStrings.editorKindWysiwyg),
+      ],
+    );
+    if (kind == null) return;
+    await widget.controller.setEditorKind(kind);
+    if (mounted) setState(() => _editorKind = kind);
+  }
+
+  /// Persists the preview switch (T-WYS-03).
+  Future<void> _togglePreviewEnabled(bool value) async {
+    await widget.controller.setPreviewEnabled(enabled: value);
+    if (mounted) setState(() => _previewEnabled = value);
+  }
+
   /// Asks which hunspell dictionaries the editor should use (T-PP-09,
   /// revised): every one found on the machine, any number of them at once.
   /// Choosing none means the locale default.
@@ -675,7 +705,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
         // The split ratio stays here; the split/switch choice itself
         // lives in the editor's app bar (user, 2026-09-09): a layout a
         // narrow screen cannot have is not a global setting.
-        if (_splitLoaded && previewSplits(_previewMode, narrow: narrow))
+        if (_splitLoaded &&
+            previewSplits(
+              _previewMode,
+              narrow: narrow,
+              editor: _editorKind,
+              previewEnabled: _previewEnabled,
+            ))
           SettingsValueRow(
             key: const Key('split-ratio-setting'),
             title: AppStrings.splitRatioTitle,
@@ -696,6 +732,22 @@ final class _SettingsBodyState extends State<SettingsBody> {
                   ToolbarSettingsScreen(controller: widget.controller),
             ),
           ),
+        ),
+        SettingsValueRow(
+          key: const Key('editor-kind-setting'),
+          title: AppStrings.settingsEditorKindTitle,
+          subtitle: AppStrings.settingsEditorKindSubtitle,
+          value: _editorKind == EditorKind.wysiwyg
+              ? AppStrings.editorKindWysiwyg
+              : AppStrings.editorKindSource,
+          onTap: () => unawaited(_chooseEditorKind()),
+        ),
+        SwitchListTile(
+          key: const Key('preview-enabled-setting'),
+          title: Text(AppStrings.settingsPreviewEnabledTitle),
+          subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
+          value: _previewEnabled,
+          onChanged: _togglePreviewEnabled,
         ),
         // Switches keep their subtitle: a switch has no dialog to move
         // the explanation into, and "off = on first tap" is exactly what
