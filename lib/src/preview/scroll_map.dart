@@ -44,7 +44,18 @@ final class ScrollMap {
   bool get built => blockStartLines.isNotEmpty || lineCount == 0;
 
   /// Rebuilds from [source] (frontmatter stripped, as the preview parses).
+  ///
+  /// The previous parse's measured heights are carried over for the blocks
+  /// that still start on the same source line: without that, every
+  /// debounced edit (one parse per typing pause) wiped the whole map, and
+  /// the preview re-measured every block on screen — each first layout
+  /// after a keystroke paid a full re-learn (T-PP-22).
   void rebuild(String source) {
+    final previous = <int, double>{
+      for (var i = 0; i < blockStartLines.length; i++)
+        if (i < blockHeights.length && blockHeights[i] > 0)
+          blockStartLines[i]: blockHeights[i],
+    };
     blockStartLines.clear();
     blockHeights.clear();
     _extents.clear();
@@ -55,6 +66,10 @@ final class ScrollMap {
     final lines = const LineSplitter().convert(source);
     lineCount = lines.length;
     blockStartLines.addAll(BlockLocator().locate(lines));
+    for (var i = 0; i < blockStartLines.length; i++) {
+      final height = previous[blockStartLines[i]];
+      if (height != null) measure(i, height);
+    }
   }
 
   /// Records a measured height for block [index] (from the preview layout).

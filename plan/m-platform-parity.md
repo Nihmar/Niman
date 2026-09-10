@@ -190,8 +190,17 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   1.5 s worst frame before, 0.70 s / 75 ms after; real-engine
   profile-mode run (`flutter drive ... -d linux --profile`, harness
   removed after use): p90 build 19 ms, p90 raster 2.2 ms, worst frame
-  140 ms over 121 frames. Remaining headroom: the first full layout pass
-  after a parse still pays the per-block cost.
+  140 ms over 121 frames. Second round, same note: the map now carries
+  its measured heights across re-parses (a typing pause used to wipe
+  them, so the preview re-measured every block on screen), and profiling
+  with the settle timers actually running puts a scroll at ~20 ms
+  gesture frames and ~11 ms settle frames. The math cache keeps its 512
+  entries: a corrected A/B (the first harness reused `MarkdownPreview`'s
+  state across runs and never fired the settle timer, both fixed) shows
+  512 hitting 515 of 1164 spans over a pass, with 4096 within noise.
+  Two measurement traps worth remembering: `pumpWidget` reuses a same-
+  shaped tree's state, and a deferred render never resumes in fake async
+  unless a pump advances the settle timer.
   Second pass on the same review: the view controls move from the editor
   header into the note's status row (the header is about the file); Linux
   runs frameless with the app's own title bar (`ui/title_bar.dart`:

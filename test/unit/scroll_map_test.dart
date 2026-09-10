@@ -159,6 +159,40 @@ void main() {
       expect(map.previewOffsetForLine(6, maxExtent: 1000), 90);
     });
 
+    test('a re-parse keeps the heights of blocks that did not move', () {
+      // Every typing pause re-parses and rebuilds the map: without carrying
+      // the measurements over, the preview re-measured every block on
+      // screen (T-PP-22).
+      final map = ScrollMap()
+        ..rebuild('a\n\nb')
+        ..measure(0, 40)
+        ..measure(1, 20);
+      expect(map.isReady, isTrue);
+
+      map.rebuild('a\n\nb');
+      expect(map.isReady, isTrue, reason: 'no re-learn for identical starts');
+      expect(map.blockHeights.take(2), [40, 20]);
+    });
+
+    test('a block whose start line moved is measured again', () {
+      // The measurements come first, then the re-parse: a paragraph
+      // inserted above b and c shifts their start lines, so only the
+      // block that still starts on line 0 carries its height.
+      final map = ScrollMap()
+        ..rebuild('a\n\nb\n\nc')
+        ..measure(0, 10)
+        ..measure(1, 20)
+        ..measure(2, 30)
+        ..rebuild('a\n\nextra\n\nb\n\nc');
+      expect(map.blockStartLines, [0, 2, 4, 6]);
+      expect(map.blockHeights.first, 10);
+      // The starts 0, 2 and 4 still exist, so their heights carry over —
+      // including the one now holding the inserted paragraph, which the
+      // next layout corrects. Only the block at line 6 is unmeasured.
+      expect(map.blockHeights.where((height) => height > 0).length, 3);
+      expect(map.isReady, isFalse);
+    });
+
     test('a re-measure replaces the old height in the average', () {
       // Not 120: the block's second measurement is the one that counts.
       final map = ScrollMap()
