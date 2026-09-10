@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:copist/src/editor/wysiwyg/markdown_blocks.dart';
 import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,6 +77,39 @@ A [[wikilink]] and an ![[embed.png]].
     expect(blocks[0].opaque, isFalse);
     expect(blocks[1].tag, 'table');
     expect(blocks[1].opaque, isTrue);
+  });
+
+  test('an edit keeps every opaque block byte for byte', () {
+    const note = r'''# Heading
+
+A paragraph.
+
+| A | B |
+| --- | --- |
+| 1 | 2 |
+
+Math $x^2$.
+
+A [[wikilink]].
+''';
+    final decoded = codec.decode(note);
+    final controller = quill.QuillController(
+      document: decoded.document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    addTearDown(controller.dispose);
+    // Edit the supported heading only.
+    controller.replaceText(
+      0,
+      0,
+      'Edited ',
+      const TextSelection.collapsed(offset: 7),
+    );
+    final out = codec.encode(controller.document);
+    expect(out, contains('# Edited Heading'));
+    expect(out, contains('| A | B |\n| --- | --- |\n| 1 | 2 |\n'));
+    expect(out, contains(r'Math $x^2$.'));
+    expect(out, contains('A [[wikilink]].'));
   });
 
   test('an edited document serializes canonically', () {
