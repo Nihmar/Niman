@@ -30,6 +30,9 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
   row and Ctrl/Cmd+F) and the spell underlines via Quill's
   `textSpanBuilder`, with the review panel scanning and fixing the Quill
   document.
+- **Phase 9** — the `wysiwyg` logger (open/change/emit/toolbar lines in the
+  debug log), and a heading is not continued on Enter while lists and quotes
+  still are (device report: typing after a heading came out bold).
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
