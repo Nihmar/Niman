@@ -310,12 +310,21 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 
 ### P4 — Spellcheck scope (desktop side)
 
-- [ ] **T-PP-09** Decide and implement the Linux (/Windows) spellcheck:
+- [x] **T-PP-09** Decide and implement the Linux (/Windows) spellcheck:
   candidates are Flutter's `SpellCheckConfiguration` where the platform
   supplies one vs a bundled hunspell dictionary (stretch goal 4). Android
   keeps IME behaviour unchanged. *AC: the spec line "spellcheck (where
   available)" names each platform's actual provider, or the backlog entry
   is promoted into tasks here.*
+  Decision: Flutter supplies no spell-check service on Linux or Windows —
+  `SpellCheckConfiguration` is a platform service the engine implements only
+  for Android/iOS/macOS (`flutter#120611`, `#122433`, both still open) — and
+  the editor package exposes no hook to feed one. So "where available" now
+  names the provider: Android/iOS use the system/IME proofreader (Copist
+  changes nothing), Linux/Windows show none, and a bundled hunspell engine
+  stays the backlog stretch entry (`plan/README.md` row 4). Spec and README
+  updated accordingly. No code lands: this is the decision the AC asks for;
+  a hunspell slice would need dictionary licensing and size settled first.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 

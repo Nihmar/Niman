@@ -43,7 +43,7 @@
     
 *   **Markdown extras:** tables, task lists, footnotes, strikethrough, code blocks with syntax highlighting.
     
-*   **Editor conveniences:** spellcheck (where available), word count, heading outline + folding, and the formatting toolbar (bold, italic, strikethrough, superscript, underline, link, code, image, list, quote — mockup-confirmed, evenly spaced). LaTeX autocomplete = backlog.
+*   **Editor conveniences:** spellcheck (Android/iOS: the system/IME proofreader; Linux/Windows: no engine-provided service, backlog — `plan/m-platform-parity.md` T-PP-09), word count, heading outline + folding, and the formatting toolbar (bold, italic, strikethrough, superscript, underline, link, code, image, list, quote — mockup-confirmed, evenly spaced). LaTeX autocomplete = backlog.
     
 *   **Mermaid:** stretch goal (bundled offline webview renderer).
     
