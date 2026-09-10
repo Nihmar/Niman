@@ -74,20 +74,18 @@ void main() {
   test('heading and link apply their dialog answers', () {
     final controller = _controller();
     addTearDown(controller.dispose);
-    final commands = _commands(controller);
-    commands.applyHeader(2);
+    _commands(controller).applyHeader(2);
     expect(_has(controller, 'header', 2), isTrue);
-    commands.applyLink('https://example.com');
+    _commands(controller).applyLink('https://example.com');
     expect(_has(controller, 'link', 'https://example.com'), isTrue);
   });
 
   test('indent and outdent move the line level', () {
     final controller = _controller();
     addTearDown(controller.dispose);
-    final commands = _commands(controller);
-    commands.apply(ToolbarItem.indent);
+    _commands(controller).apply(ToolbarItem.indent);
     expect(_has(controller, 'indent', 1), isTrue);
-    commands.apply(ToolbarItem.outdent);
+    _commands(controller).apply(ToolbarItem.outdent);
     expect(_has(controller, 'indent', 0), isTrue);
   });
 }
