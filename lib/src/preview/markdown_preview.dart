@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/editor/wysiwyg/markdown_parse.dart';
 import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/preview/aspect_image.dart';
 import 'package:copist/src/preview/html_table.dart';
@@ -245,22 +245,8 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     );
   }
 
-  static List<md.Node> _parseSyncSource(String source) {
-    final document = md.Document(
-      blockSyntaxes: <md.BlockSyntax>[
-        const MathBlockSyntax(),
-        ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-      ],
-      inlineSyntaxes: [EmbedInlineSyntax(), WikilinkInlineSyntax()],
-      extensionSet: md.ExtensionSet.gitHubFlavored,
-      encodeHtml: false,
-    );
-    return splitHtmlTables(
-      splitInlineMath(
-        document.parseLines(const LineSplitter().convert(source)),
-      ),
-    );
-  }
+  static List<md.Node> _parseSyncSource(String source) =>
+      parseMarkdownDocument(source);
 
   void _applyParse(
     int revision,
