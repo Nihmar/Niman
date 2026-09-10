@@ -41,6 +41,8 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
   them from the AST, so the view ate them and the next edit wrote them away —
   device report), and Quill's near-white code-block style follows the app
   theme instead of showing as a white box in the dark.
+- **Phase 12** — a switch between the source editor and WYSIWYG in the note's
+  status row, next to the word count (the setting stays per library).
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
