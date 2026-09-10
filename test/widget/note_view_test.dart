@@ -246,5 +246,29 @@ void main() {
       await tester.pump();
       expect(fieldFocus.hasFocus, isFalse);
     });
+
+    testWidgets('the status icons breathe on desktop', (tester) async {
+      // The test host is a desktop platform: each status icon stands off
+      // its neighbours and the word count stands off the icons (user,
+      // 2026-09-11). The phone keeps the row tight.
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/a.md', readNote: (_) async => 'hello')),
+      );
+      await tester.pump();
+      await tester.pump();
+      final outline = find.byKey(const Key('outline-toggle'));
+      final findButton = find.byKey(const Key('editor-find-open'));
+      expect(outline, findsOneWidget);
+      expect(findButton, findsOneWidget);
+      expect(tester.getRect(outline).width, 40);
+      final between =
+          tester.getTopLeft(findButton).dx - tester.getTopRight(outline).dx;
+      expect(between, 6);
+      final words = find.text('1 words');
+      expect(words, findsOneWidget);
+      final afterFind =
+          tester.getTopLeft(words).dx - tester.getTopRight(findButton).dx;
+      expect(afterFind, 9);
+    });
   });
 }

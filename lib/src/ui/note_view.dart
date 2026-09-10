@@ -1446,69 +1446,89 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// unsaved right.
   Widget _statusRow(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelSmall;
+    // Desktop breathing room (user, 2026-09-11): the phone keeps the row
+    // tight; on desktop each icon stands off its neighbours and the word
+    // count stands off the icons.
+    final desktop = !(Platform.isAndroid || Platform.isIOS);
+    final iconPadding = EdgeInsets.symmetric(horizontal: desktop ? 3 : 0);
     return Padding(
       key: const Key('status-row'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Row(
         children: [
           if (!_loading)
-            IconButton(
-              key: const Key('outline-toggle'),
-              tooltip: AppStrings.outlineTooltip,
-              icon: const Icon(Icons.toc),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: () => unawaited(_openOutline()),
+            Padding(
+              padding: iconPadding,
+              child: IconButton(
+                key: const Key('outline-toggle'),
+                tooltip: AppStrings.outlineTooltip,
+                icon: const Icon(Icons.toc),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                onPressed: () => unawaited(_openOutline()),
+              ),
             ),
           // Find & replace lives in the editor pane (hidden in
           // preview-only mode).
           if (!_loading && (widget.splitPreview || !widget.showPreview))
-            IconButton(
-              key: const Key('editor-find-open'),
-              tooltip: AppStrings.findInNoteTooltip,
-              icon: const Icon(Icons.search),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: widget.showWysiwyg
-                  ? () => _wysiwygKey.currentState?.openFind()
-                  : _findController.findMode,
+            Padding(
+              padding: iconPadding,
+              child: IconButton(
+                key: const Key('editor-find-open'),
+                tooltip: AppStrings.findInNoteTooltip,
+                icon: const Icon(Icons.search),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                onPressed: widget.showWysiwyg
+                    ? () => _wysiwygKey.currentState?.openFind()
+                    : _findController.findMode,
+              ),
             ),
           if (!_loading &&
               widget.spellCheck != null &&
               widget.spellCheck!.available)
-            IconButton(
-              key: const Key('spell-check-open'),
-              tooltip: AppStrings.spellCheckTooltip,
-              icon: const Icon(Icons.spellcheck),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: () => unawaited(_openSpellCheck()),
+            Padding(
+              padding: iconPadding,
+              child: IconButton(
+                key: const Key('spell-check-open'),
+                tooltip: AppStrings.spellCheckTooltip,
+                icon: const Icon(Icons.spellcheck),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                onPressed: () => unawaited(_openSpellCheck()),
+              ),
             ),
           // The quick way between the two editors (T-WYS-12): the setting
           // stays per library, the button just flips it.
           if (!_loading && widget.onEditorKindChanged != null)
-            IconButton(
-              key: const Key('editor-kind-toggle'),
-              tooltip: widget.showWysiwyg
-                  ? AppStrings.switchToSourceTooltip
-                  : AppStrings.switchToWysiwygTooltip,
-              icon: Icon(
-                widget.showWysiwyg ? Icons.code : Icons.edit_note,
-                size: 18,
+            Padding(
+              padding: iconPadding,
+              child: IconButton(
+                key: const Key('editor-kind-toggle'),
+                tooltip: widget.showWysiwyg
+                    ? AppStrings.switchToSourceTooltip
+                    : AppStrings.switchToWysiwygTooltip,
+                icon: Icon(
+                  widget.showWysiwyg ? Icons.code : Icons.edit_note,
+                  size: 18,
+                ),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                onPressed: _toggleEditorKind,
               ),
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: _toggleEditorKind,
             ),
           if (!_loading)
-            Text(
-              '$_wordCount words',
-              style: labelStyle?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+            Padding(
+              padding: EdgeInsets.only(left: desktop ? 6 : 0),
+              child: Text(
+                '$_wordCount words',
+                style: labelStyle?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           const Spacer(),
