@@ -77,6 +77,48 @@ A [[wikilink]] and an ![[embed.png]].
     expect(codec.encode(decoded.document, decoded: decoded), '\n');
   });
 
+  test('a code block keeps its lines inside the fence', () {
+    const note = '~~~dart\nvoid main() {}\nprint(1);\n~~~\n';
+    final decoded = codec.decode(note);
+    final ops = decoded.document.toDelta().toJson();
+    // Every code line carries the attribute on its newline: without it the
+    // code sat outside the block and the next edit moved it out of the
+    // fence (device report, 2026-09-11).
+    expect(
+      (ops[1]['attributes'] as Map<Object?, Object?>?)?['code-block'],
+      isTrue,
+    );
+    expect(
+      (ops[3]['attributes'] as Map<Object?, Object?>?)?['code-block'],
+      isTrue,
+    );
+    final controller = quill.QuillController(
+      document: decoded.document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    addTearDown(controller.dispose);
+    controller.replaceText(
+      0,
+      0,
+      '// ',
+      const TextSelection.collapsed(offset: 3),
+    );
+    expect(
+      codec.encode(controller.document),
+      '~~~dart\n// void main() {}\nprint(1);\n~~~\n',
+    );
+  });
+
+  test('an empty code block still has its line', () {
+    final decoded = codec.decode('~~~\n~~~\n');
+    expect(codec.encode(decoded.document, decoded: decoded), '~~~\n~~~\n');
+    final ops = decoded.document.toDelta().toJson();
+    expect(
+      (ops.first['attributes'] as Map<Object?, Object?>?)?['code-block'],
+      isTrue,
+    );
+  });
+
   test('the blank lines between blocks survive', () {
     final decoded = codec.decode('a\n\n\nb\n');
     expect(decoded.document.toPlainText(), 'a\n\n\nb\n');
