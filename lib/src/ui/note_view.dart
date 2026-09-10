@@ -132,7 +132,9 @@ final class NoteView extends StatefulWidget {
   /// Reports a WYSIWYG edit as Markdown (the owner saves it).
   final ValueChanged<String>? onWysiwygChanged;
 
-  /// Switches the library's editor kind (the status row's toggle, T-WYS-12).
+  /// Switches the library's editor kind (the status row's toggle,
+  /// T-WYS-12); null hides the toggle, which is what a library with a
+  /// single enabled editor passes.
   final ValueChanged<EditorKind>? onEditorKindChanged;
 
   /// The editor's share of the split (0..1).

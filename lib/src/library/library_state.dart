@@ -616,6 +616,22 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(editorKind: kind));
   }
 
+  /// Which editors the library offers (default both).
+  @override
+  Future<Set<EditorKind>> get enabledEditors async =>
+      (await _library).enabledEditors;
+
+  /// Sets (and persists) the enabled editors; an empty set is ignored.
+  @override
+  Future<void> setEnabledEditors(Set<EditorKind> editors) async {
+    if (editors.isEmpty) {
+      _log.info('enabled editors: empty set ignored');
+      return;
+    }
+    _log.info('enabled editors set to ${editors.map((e) => e.name).join(',')}');
+    await _editLibrary((c) => c.copyWith(enabledEditors: {...editors}));
+  }
+
   /// Whether the preview exists at all (default true).
   @override
   Future<bool> get previewEnabled async => (await _library).previewEnabled;

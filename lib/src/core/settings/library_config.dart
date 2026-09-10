@@ -114,6 +114,23 @@ double normalizeTreeWidth(Object? raw) {
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
+/// Reads an `enabledEditors` list out of the settings file.
+///
+/// Unknown names are dropped; an empty or missing list reads back as both
+/// editors — the file must never resolve to no editor, and files written
+/// before the switch existed offered both.
+Set<EditorKind> _enabledEditorsFrom(Object? raw) {
+  final kinds = <EditorKind>{};
+  if (raw is List) {
+    for (final name in raw) {
+      for (final kind in EditorKind.values) {
+        if (name == kind.name) kinds.add(kind);
+      }
+    }
+  }
+  return kinds.isEmpty ? const {EditorKind.source, EditorKind.wysiwyg} : kinds;
+}
+
 /// Reads a `spellDictionaries` list out of the settings file.
 ///
 /// Accepts the legacy single `spellDictionary` string as well, so an
@@ -197,6 +214,7 @@ final class LibraryConfig {
     this.treeWidth = defaultTreeWidth,
     this.spellDictionaries = const <String>[],
     this.editorKind = EditorKind.source,
+    this.enabledEditors = const {EditorKind.source, EditorKind.wysiwyg},
     this.previewEnabled = true,
     this.extra = const {},
   });
@@ -260,6 +278,11 @@ final class LibraryConfig {
         'wysiwyg' => EditorKind.wysiwyg,
         _ => EditorKind.source,
       },
+      // Absent on files written before the switch existed: both editors
+      // were offered then (the status row always switched), so both stay
+      // on. An empty or all-unknown list reads back the same way — the
+      // file must never resolve to no editor.
+      enabledEditors: _enabledEditorsFrom(json['enabledEditors']),
       previewEnabled: _boolOr(json['previewEnabled'], true),
       extra: extra,
     );
@@ -343,6 +366,11 @@ final class LibraryConfig {
   /// Which editor this library writes in (default source).
   final EditorKind editorKind;
 
+  /// Which editors the library offers (default both): the settings screen
+  /// enables source, WYSIWYG, or both, never none; the note's status row
+  /// switches between them only when both are enabled.
+  final Set<EditorKind> enabledEditors;
+
   /// Whether the preview exists at all (default true).
   final bool previewEnabled;
 
@@ -370,6 +398,7 @@ final class LibraryConfig {
     double? treeWidth,
     List<String>? spellDictionaries,
     EditorKind? editorKind,
+    Set<EditorKind>? enabledEditors,
     bool? previewEnabled,
   }) {
     return LibraryConfig(
@@ -393,6 +422,7 @@ final class LibraryConfig {
       treeWidth: treeWidth ?? this.treeWidth,
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       editorKind: editorKind ?? this.editorKind,
+      enabledEditors: enabledEditors ?? this.enabledEditors,
       previewEnabled: previewEnabled ?? this.previewEnabled,
       extra: extra,
     );
@@ -418,6 +448,7 @@ final class LibraryConfig {
     'spellDictionary', // Legacy single-dictionary key (read, never written).
     'spellDictionaries',
     'editorKind',
+    'enabledEditors',
     'previewEnabled',
   };
 
@@ -449,6 +480,12 @@ final class LibraryConfig {
       'noteTextScale': noteTextScale,
       'treeWidth': treeWidth,
       'editorKind': editorKind.name,
+      // Canonical order, so the file does not churn when the set is
+      // rebuilt insertion-ordered differently.
+      'enabledEditors': [
+        for (final kind in EditorKind.values)
+          if (enabledEditors.contains(kind)) kind.name,
+      ],
       'previewEnabled': previewEnabled,
     };
     if (quickNotePath != null) {
@@ -525,6 +562,8 @@ final class LibraryConfig {
         treeWidth == other.treeWidth &&
         _deepEquals(spellDictionaries, other.spellDictionaries) &&
         editorKind == other.editorKind &&
+        enabledEditors.length == other.enabledEditors.length &&
+        enabledEditors.containsAll(other.enabledEditors) &&
         previewEnabled == other.previewEnabled &&
         _deepEquals(extra, other.extra);
   }

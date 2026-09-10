@@ -48,6 +48,7 @@ import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:copist/src/ui/window_controller.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -350,6 +351,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   EditorKind _editorKind = EditorKind.source;
   bool _previewEnabled = true;
 
+  /// Which editors the library offers (settings, T-WYS-03): both, or one
+  /// alone. The note's status row switches editors only when both are on.
+  Set<EditorKind> _editorsEnabled = {EditorKind.source, EditorKind.wysiwyg};
+
   /// The editor's link format and indent width (settings).
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
@@ -600,7 +605,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
       showPreview: _previewEnabled && _previewVisible,
       showWysiwyg: _editorKind == EditorKind.wysiwyg,
-      onEditorKindChanged: _setEditorKind,
+      // A single enabled editor has nowhere to switch to: the note hides
+      // its switch instead of offering a dead toggle.
+      onEditorKindChanged: _editorsEnabled.length > 1 ? _setEditorKind : null,
       splitFraction: _splitRatio,
       onSplitFractionChanged: _onSplitFractionChanged,
       onSplitDragEnd: _onSplitDragEnd,
@@ -699,8 +706,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (mounted) setState(() => _previewMode = mode);
   }
 
-  /// Flips the library's editor kind from the note's status row (T-WYS-12):
-  /// persisted like the settings screen does, then the shell re-reads it.
+  /// Switches the library's current editor from the note's status row
+  /// (T-WYS-12): persisted, then the shell re-reads it. Only offered when
+  /// the library enables both editors.
   Future<void> _setEditorKind(EditorKind kind) async {
     if (kind == _editorKind) return;
     final controller = widget.controller;
@@ -833,14 +841,29 @@ final class _LibraryShellState extends State<_LibraryShell>
     // needed here.
     final spellDictionaries = await controller.spellDictionaries;
     final editorKind = await controller.editorKind;
+    final editorsEnabled = await controller.enabledEditors;
     final previewEnabled = await controller.previewEnabled;
+    // A hand-edited file resolves an empty set to both editors, the way
+    // the store reads it; the session never persists one.
+    final effectiveEnabled = editorsEnabled.isEmpty
+        ? const {EditorKind.source, EditorKind.wysiwyg}
+        : editorsEnabled;
+    // The current editor may have been switched off in the settings: fall
+    // back to an enabled one rather than stranding the note on a surface
+    // the library no longer offers.
+    final effectiveKind = effectiveEnabled.contains(editorKind)
+        ? editorKind
+        : effectiveEnabled.contains(EditorKind.source)
+        ? EditorKind.source
+        : EditorKind.wysiwyg;
     if (mounted) widget.spellCheck.setDictionaries(spellDictionaries);
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
             previewMode != _previewMode ||
             splitRatio != _splitRatio ||
-            editorKind != _editorKind ||
+            effectiveKind != _editorKind ||
+            !setEquals(effectiveEnabled, _editorsEnabled) ||
             previewEnabled != _previewEnabled ||
             linkType != _linkType ||
             indentWidth != _indentWidth ||
@@ -852,7 +875,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         _autofocusEditor = autofocus;
         _previewMode = previewMode;
         _splitRatio = splitRatio;
-        _editorKind = editorKind;
+        _editorKind = effectiveKind;
+        _editorsEnabled = {...effectiveEnabled};
         _previewEnabled = previewEnabled;
         _linkType = linkType;
         _indentWidth = indentWidth;
@@ -2256,7 +2280,12 @@ final class _LibraryShellState extends State<_LibraryShell>
                   ),
                   showPreview: _previewEnabled && _previewVisible,
                   showWysiwyg: _editorKind == EditorKind.wysiwyg,
-                  onEditorKindChanged: _setEditorKind,
+                  // A single enabled editor has nowhere to switch to:
+                  // the note hides its switch instead of offering a
+                  // dead toggle.
+                  onEditorKindChanged: _editorsEnabled.length > 1
+                      ? _setEditorKind
+                      : null,
                   splitFraction: _splitRatio,
                   onSplitFractionChanged: _onSplitFractionChanged,
                   onSplitDragEnd: _onSplitDragEnd,
@@ -2646,8 +2675,9 @@ final class _DetailPane extends StatelessWidget {
   /// Whether the WYSIWYG surface replaces the source editor (T-WYS-05).
   final bool showWysiwyg;
 
-  /// The status row's editor switch (T-WYS-12).
-  final ValueChanged<EditorKind> onEditorKindChanged;
+  /// The status row's editor switch (T-WYS-12); null hides it, which is
+  /// what a library with a single enabled editor passes.
+  final ValueChanged<EditorKind>? onEditorKindChanged;
 
   /// Link navigation (T-M3-07).
   final LinkSource? linkSource;

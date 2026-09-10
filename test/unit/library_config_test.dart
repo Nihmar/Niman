@@ -95,6 +95,42 @@ void main() {
       expect(read.previewEnabled, isFalse);
     });
 
+    test('round trips a single enabled editor', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: 'Lists',
+        enabledEditors: {EditorKind.wysiwyg},
+      );
+      await store.write(config);
+      expect(await store.read(), config);
+    });
+
+    test('a file without enabledEditors offers both', () async {
+      // Files written before the switch existed always offered both (the
+      // status row switched), so the key's absence keeps both on — with
+      // the stored current editor untouched.
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.create(recursive: true);
+      store.file.writeAsStringSync('{"editorKind": "wysiwyg"}');
+      final read = await store.read();
+      expect(read.editorKind, EditorKind.wysiwyg);
+      expect(read.enabledEditors, {EditorKind.source, EditorKind.wysiwyg});
+    });
+
+    test('an empty or unknown enabledEditors list offers both', () async {
+      Set<EditorKind> enabledOf(Object? raw) =>
+          LibraryConfig.fromJsonMap({'enabledEditors': raw}).enabledEditors;
+      expect(enabledOf([]), {EditorKind.source, EditorKind.wysiwyg});
+      expect(enabledOf(['byVibes']), {EditorKind.source, EditorKind.wysiwyg});
+      expect(enabledOf(['wysiwyg', 'wysiwyg']), {EditorKind.wysiwyg});
+      expect(enabledOf('wysiwyg'), {EditorKind.source, EditorKind.wysiwyg});
+    });
+
     test('a config without a quick note round trips as default', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
@@ -249,6 +285,7 @@ void main() {
         'linkType',
         'indentWidth',
         'editorToolbar',
+        'enabledEditors',
         'treeWidth',
       ]) {
         expect(content, contains('"$key"'), reason: key);

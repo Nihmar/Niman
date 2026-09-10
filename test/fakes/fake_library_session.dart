@@ -230,6 +230,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<Set<EditorKind>> get enabledEditors async => _config.enabledEditors;
+
+  @override
+  Future<void> setEnabledEditors(Set<EditorKind> editors) async {
+    if (editors.isEmpty) return;
+    _config = _config.copyWith(enabledEditors: {...editors});
+    _bump();
+  }
+
+  @override
   Future<bool> get previewEnabled async => _config.previewEnabled;
 
   @override

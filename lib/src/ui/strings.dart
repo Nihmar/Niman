@@ -136,12 +136,6 @@ final class AppStrings {
     'Show the keyboard as soon as a note opens (off = on first tap)',
     'Mostra la tastiera appena si apre una nota (off = al primo tocco)',
   );
-  static String get settingsEditorKindTitle =>
-      _t('Editor type', 'Tipo di editor');
-  static String get settingsEditorKindSubtitle => _t(
-    'Write in the Markdown source or in a WYSIWYG surface',
-    'Scrivi nel sorgente Markdown o in una superficie WYSIWYG',
-  );
   static String get editorKindSource =>
       _t('Markdown source', 'Sorgente Markdown');
   static String get editorKindWysiwyg => _t('WYSIWYG', 'WYSIWYG');

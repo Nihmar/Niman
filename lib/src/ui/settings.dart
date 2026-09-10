@@ -78,6 +78,10 @@ final class _SettingsBodyState extends State<SettingsBody> {
       .round();
   List<String> _spellDictionaries = const <String>[];
   EditorKind _editorKind = EditorKind.source;
+  Set<EditorKind> _enabledEditors = const {
+    EditorKind.source,
+    EditorKind.wysiwyg,
+  };
   bool _previewEnabled = true;
 
   @override
@@ -109,6 +113,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final noteTextScale = await controller.noteTextScale;
     final spellDictionaries = await controller.spellDictionaries;
     final editorKind = await controller.editorKind;
+    final enabledEditors = await controller.enabledEditors;
     final previewEnabled = await controller.previewEnabled;
     if (mounted) {
       setState(() {
@@ -132,6 +137,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _noteTextScale = noteTextScale;
         _spellDictionaries = spellDictionaries;
         _editorKind = editorKind;
+        _enabledEditors = {...enabledEditors};
         _previewEnabled = previewEnabled;
       });
     }
@@ -482,25 +488,25 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (width != null) await _setIndentWidth(width);
   }
 
-  /// Asks which editor the library writes in (T-WYS-03).
-  Future<void> _chooseEditorKind() async {
-    final kind = await showSettingsChoice<EditorKind>(
-      context,
-      dialogKey: const Key('editor-kind-dialog'),
-      title: AppStrings.settingsEditorKindTitle,
-      subtitle: AppStrings.settingsEditorKindSubtitle,
-      current: _editorKind,
-      options: [
-        SettingsOption(EditorKind.source, AppStrings.editorKindSource),
-        SettingsOption(EditorKind.wysiwyg, AppStrings.editorKindWysiwyg),
-      ],
-    );
-    if (kind == null) return;
-    await widget.controller.setEditorKind(kind);
+  /// Enables or disables one of the library's editors (T-WYS-03).
+  ///
+  /// The last enabled editor cannot be switched off: the callback arrives
+  /// null for it, so its switch reads as disabled rather than opening a
+  /// dead end with no editor at all.
+  Future<void> _toggleEditorEnabled(EditorKind kind, bool enabled) async {
+    final next = {..._enabledEditors};
+    if (enabled) {
+      next.add(kind);
+    } else {
+      if (next.length < 2) return;
+      next.remove(kind);
+    }
+    await widget.controller.setEnabledEditors(next);
     // Notify so the shell refreshes its cached value — the open note swaps
-    // surfaces without reopening it.
+    // surfaces, and the status row gains or loses its switch, without
+    // reopening it.
     widget.controller.notify();
-    if (mounted) setState(() => _editorKind = kind);
+    if (mounted) setState(() => _enabledEditors = next);
   }
 
   /// Persists the preview switch (T-WYS-03).
@@ -737,14 +743,30 @@ final class _SettingsBodyState extends State<SettingsBody> {
             ),
           ),
         ),
-        SettingsValueRow(
-          key: const Key('editor-kind-setting'),
-          title: AppStrings.settingsEditorKindTitle,
-          subtitle: AppStrings.settingsEditorKindSubtitle,
-          value: _editorKind == EditorKind.wysiwyg
-              ? AppStrings.editorKindWysiwyg
-              : AppStrings.editorKindSource,
-          onTap: () => unawaited(_chooseEditorKind()),
+        // Which editors the library offers: both, or one alone. The
+        // last one on cannot be switched off (its switch disables
+        // itself), so the choice never resolves to no editor.
+        SwitchListTile(
+          key: const Key('editor-source-setting'),
+          title: Text(AppStrings.editorKindSource),
+          value: _enabledEditors.contains(EditorKind.source),
+          onChanged:
+              _enabledEditors.length < 2 &&
+                  _enabledEditors.contains(EditorKind.source)
+              ? null
+              : (value) =>
+                    unawaited(_toggleEditorEnabled(EditorKind.source, value)),
+        ),
+        SwitchListTile(
+          key: const Key('editor-wysiwyg-setting'),
+          title: Text(AppStrings.editorKindWysiwyg),
+          value: _enabledEditors.contains(EditorKind.wysiwyg),
+          onChanged:
+              _enabledEditors.length < 2 &&
+                  _enabledEditors.contains(EditorKind.wysiwyg)
+              ? null
+              : (value) =>
+                    unawaited(_toggleEditorEnabled(EditorKind.wysiwyg, value)),
         ),
         SwitchListTile(
           key: const Key('preview-enabled-setting'),

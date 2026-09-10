@@ -233,6 +233,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the editor kind.
   Future<void> setEditorKind(EditorKind kind);
 
+  /// Which editors the library offers (default both).
+  Future<Set<EditorKind>> get enabledEditors;
+
+  /// Sets (and persists) the enabled editors; an empty set is ignored —
+  /// the library must never resolve to no editor.
+  Future<void> setEnabledEditors(Set<EditorKind> editors);
+
   /// Whether the preview exists at all (default true).
   Future<bool> get previewEnabled;
 

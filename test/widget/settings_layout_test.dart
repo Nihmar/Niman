@@ -146,6 +146,37 @@ void main() {
     expect(find.text(AppStrings.keyboardOnOpenSubtitle), findsNothing);
   });
 
+  group('the editor switches', () {
+    final source = find.byKey(const Key('editor-source-setting'));
+    final wysiwyg = find.byKey(const Key('editor-wysiwyg-setting'));
+
+    testWidgets('both editors are on by default', (tester) async {
+      await pump(tester);
+      expect(tester.widget<SwitchListTile>(source).value, isTrue);
+      expect(tester.widget<SwitchListTile>(wysiwyg).value, isTrue);
+    });
+
+    testWidgets('one editor switches off, never the last', (tester) async {
+      await pump(tester);
+      await tester.tap(wysiwyg);
+      await tester.pumpAndSettle();
+      expect(await controller.enabledEditors, {EditorKind.source});
+      // The last one on disables its own switch rather than offering a
+      // library with no editor.
+      expect(tester.widget<SwitchListTile>(source).onChanged, isNull);
+      await tester.tap(source);
+      await tester.pumpAndSettle();
+      expect(await controller.enabledEditors, {EditorKind.source});
+      // Back on: both again.
+      await tester.tap(wysiwyg);
+      await tester.pumpAndSettle();
+      expect(await controller.enabledEditors, {
+        EditorKind.source,
+        EditorKind.wysiwyg,
+      });
+    });
+  });
+
   testWidgets('the shortcuts row opens the reference where a keyboard exists', (
     tester,
   ) async {
@@ -154,10 +185,7 @@ void main() {
     await pump(tester);
     final row = find.byKey(const Key('keyboard-shortcuts-setting'));
     expect(row, findsOneWidget);
-    final tile = find.descendant(
-      of: row,
-      matching: find.byType(ListTile),
-    );
+    final tile = find.descendant(of: row, matching: find.byType(ListTile));
     expect(tester.widget<ListTile>(tile).enabled, isTrue);
     await tester.tap(row);
     await tester.pumpAndSettle();

@@ -181,6 +181,24 @@ void main() {
     expect(chosen, EditorKind.wysiwyg);
   });
 
+  testWidgets('the editor switch hides with a single enabled editor', (
+    tester,
+  ) async {
+    // No `onEditorKindChanged` is what the shell passes when the library
+    // enables a single editor: nowhere to switch to, no toggle.
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        showWysiwyg: true,
+        readNote: (_) async => '# Head\n\nbody text',
+      ),
+    );
+    expect(find.byKey(const Key('editor-kind-toggle')), findsNothing);
+  });
+
   testWidgets('from WYSIWYG the toggle offers the source editor', (
     tester,
   ) async {
