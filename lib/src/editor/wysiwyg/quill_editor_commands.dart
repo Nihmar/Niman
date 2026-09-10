@@ -82,13 +82,58 @@ final class QuillEditorCommands implements EditorCommands {
   }
 
   void _toggle(quill.Attribute<Object?> attribute) {
-    final active = controller.getSelectionStyle().attributes.containsKey(
-      attribute.key,
-    );
+    final active = _isOn(_attributesOf(controller), attribute);
     controller.formatSelection(
       active ? quill.Attribute.clone(attribute, null) : attribute,
     );
   }
+
+  /// The styles at the caret, merged with the ones kept for the next typed
+  /// character: a toggle tapped on an empty selection has to look active
+  /// before anything is typed (T-WYS-06).
+  static Map<String, quill.Attribute<dynamic>> _attributesOf(
+    quill.QuillController controller,
+  ) => <String, quill.Attribute<dynamic>>{
+    ...controller.getSelectionStyle().attributes,
+    ...controller.toggledStyle.attributes,
+  };
+
+  /// Whether [item] is already on at the caret, for the toolbar's pressed
+  /// state.
+  static bool isActive(quill.QuillController controller, ToolbarItem item) {
+    final attributes = _attributesOf(controller);
+    return switch (item) {
+      ToolbarItem.bold => _isOn(attributes, quill.Attribute.bold),
+      ToolbarItem.italic => _isOn(attributes, quill.Attribute.italic),
+      ToolbarItem.underline => _isOn(attributes, quill.Attribute.underline),
+      ToolbarItem.strikethrough => _isOn(
+        attributes,
+        quill.Attribute.strikeThrough,
+      ),
+      ToolbarItem.superscript =>
+        attributes[quill.Attribute.script.key]?.value ==
+            quill.Attribute.superscript.value,
+      ToolbarItem.link => _isOn(attributes, quill.Attribute.link),
+      ToolbarItem.code =>
+        _isOn(attributes, quill.Attribute.codeBlock) ||
+            _isOn(attributes, quill.Attribute.inlineCode),
+      ToolbarItem.image => false,
+      ToolbarItem.heading => _isOn(attributes, quill.Attribute.header),
+      ToolbarItem.list =>
+        attributes[quill.Attribute.list.key]?.value == 'bullet',
+      ToolbarItem.orderedList =>
+        attributes[quill.Attribute.list.key]?.value == 'ordered',
+      ToolbarItem.quote => _isOn(attributes, quill.Attribute.blockQuote),
+      ToolbarItem.outdent || ToolbarItem.indent => false,
+    };
+  }
+
+  /// An attribute is "on" only when it carries a value: a removed one stays
+  /// in the style map with a null value.
+  static bool _isOn(
+    Map<String, quill.Attribute<dynamic>> attributes,
+    quill.Attribute<dynamic> attribute,
+  ) => attributes[attribute.key]?.value != null;
 
   void _indent(int delta) {
     final current = controller

@@ -8,6 +8,7 @@ final class EditorToolbarButton {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.active = false,
   });
 
   /// The button's widget key (tests identify buttons by it).
@@ -21,6 +22,11 @@ final class EditorToolbarButton {
 
   /// The button's action.
   final VoidCallback onPressed;
+
+  /// Whether the format is on at the caret: the button stays pressed until
+  /// it is toggled off, the way a word processor's toolbar behaves
+  /// (T-WYS-06). The source editor leaves it false.
+  final bool active;
 }
 
 /// The toolbar's height: icon 20 px with 6 px padding above and below.
@@ -58,12 +64,26 @@ final class EditorToolbar extends StatelessWidget {
                   key: button.key,
                   onTap: button.onPressed,
                   canRequestFocus: false,
-                  child: Padding(
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 6,
                     ),
-                    child: Icon(button.icon, size: 20),
+                    decoration: button.active
+                        ? BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          )
+                        : null,
+                    child: Icon(
+                      button.icon,
+                      size: 20,
+                      color: button.active
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : null,
+                    ),
                   ),
                 ),
               ),
