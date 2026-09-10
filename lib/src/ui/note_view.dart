@@ -18,6 +18,8 @@ import 'package:copist/src/editor/outline.dart';
 import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/editor/toolbar_item.dart';
 import 'package:copist/src/editor/toolbar_layout.dart';
+import 'package:copist/src/editor/wysiwyg/quill_editor_commands.dart';
+import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:copist/src/frontmatter/note_kind.dart';
 import 'package:copist/src/frontmatter/parser.dart';
 import 'package:copist/src/library/image_import.dart';
@@ -73,6 +75,8 @@ final class NoteView extends StatefulWidget {
     this.toolbarLayout = ToolbarLayout.defaults,
     this.splitPreview = false,
     this.showPreview = false,
+    this.showWysiwyg = false,
+    this.onWysiwygChanged,
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
@@ -119,6 +123,13 @@ final class NoteView extends StatefulWidget {
   /// Preview visibility (T-UI-06): the shared app bar owns the switch
   /// and passes the state down; NoteView just follows it.
   final bool showPreview;
+
+  /// Whether this note opens in the WYSIWYG surface instead of the source
+  /// editor (T-WYS-05).
+  final bool showWysiwyg;
+
+  /// Reports a WYSIWYG edit as Markdown (the owner saves it).
+  final ValueChanged<String>? onWysiwygChanged;
 
   /// The editor's share of the split (0..1).
   final double splitFraction;
@@ -250,6 +261,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// cache, and the switch-mode visibility.
   Timer? _previewTimer;
   String _previewText = '';
+
+  /// The serialized Markdown of the WYSIWYG surface; null while the source
+  /// editor owns the buffer (T-WYS-05).
+  String? _wysiwygText;
+
+  /// The note's current text, whichever surface holds it.
+  String get _currentText =>
+      widget.showWysiwyg ? _wysiwygText ?? '' : _controller.text;
+
+  /// The WYSIWYG surface's state (the toolbar's Quill commands need it).
+  final GlobalKey<WysiwygEditorState> _wysiwygKey =
+      GlobalKey<WysiwygEditorState>();
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
@@ -333,6 +356,16 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final wasPreviewOnly = !oldWidget.splitPreview && oldWidget.showPreview;
     if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
       _dismissKeyboardForPreview();
+    }
+    // Hand the buffer over when the editor kind changes (T-WYS-05): the
+    // WYSIWYG surface opens with what the source editor holds, and the
+    // source editor takes back what WYSIWYG serialized.
+    if (oldWidget.showWysiwyg != widget.showWysiwyg) {
+      if (widget.showWysiwyg) {
+        _wysiwygText = _controller.text;
+      } else if (_wysiwygText != null && _wysiwygText != _controller.text) {
+        _controller.text = _wysiwygText!;
+      }
     }
   }
 
@@ -437,6 +470,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _applyStats(text, stats.$1, stats.$2);
       }
       _controller.text = text;
+      _wysiwygText = text;
       // The spell cache is keyed by line index + text; a different note can
       // reuse the same indices, so forget the previous file's answers.
       widget.spellCheck?.reset();
@@ -519,9 +553,28 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   void _refreshPreview() {
     if (!mounted || _loading) return;
-    final text = _controller.text;
+    final text = _currentText;
     if (text == _previewText) return;
     setState(() => _previewText = text);
+  }
+
+  /// A WYSIWYG edit, reported as Markdown: the serialized Markdown becomes
+  /// the buffer, and the usual save/preview cadence follows (T-WYS-05).
+  void _onWysiwygChanged(String markdown) {
+    if (!mounted) return;
+    _wysiwygText = markdown;
+    _revision++;
+    _unsaved?.noteChanged();
+    _saveTimer?.cancel();
+    final debounce = _saving
+        ? const Duration(seconds: 1)
+        : const Duration(milliseconds: 500);
+    _saveTimer = Timer(debounce, _save);
+    _statsTimer?.cancel();
+    _statsTimer = Timer(const Duration(milliseconds: 350), _refreshStats);
+    _previewTimer?.cancel();
+    _previewTimer = Timer(const Duration(milliseconds: 500), _refreshPreview);
+    widget.onWysiwygChanged?.call(markdown);
   }
 
   /// Whether only the preview is on screen (the editor hidden): the IME
@@ -684,7 +737,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   void _refreshStats() {
     if (!mounted || _loading) return;
-    final text = _controller.text;
+    final text = _currentText;
     if (text == _lastStatsText) return;
     _lastStatsText = text;
     final revision = ++_statsRevision;
@@ -1059,7 +1112,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final text = _controller.text;
+    final text = _currentText;
     final joinMs = joinClock.elapsedMilliseconds;
     _log.info('save start: $target (${text.length} chars, join $joinMs ms)');
     try {
@@ -1188,6 +1241,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// note is saved immediately.
   void _applyKindEdit(String newText) {
     _controller.text = newText;
+    _wysiwygText = newText;
     setState(() {});
     unawaited(_save());
   }
@@ -1231,6 +1285,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                     ? const Center(child: CircularProgressIndicator())
                     : kindBody
                     ? kindGui.buildBody(context, _kindHost)
+                    : widget.showWysiwyg
+                    ? WysiwygEditor(
+                        key: _wysiwygKey,
+                        data: _currentText,
+                        onChanged: _onWysiwygChanged,
+                        autoFocus: widget.autofocusEditor,
+                      )
                     : split
                     ? EditorPreviewSplit(
                         editor: _buildEditor(),
@@ -1355,7 +1416,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ),
           // Find & replace lives in the editor pane (hidden in
           // preview-only mode).
-          if (!_loading && (widget.splitPreview || !widget.showPreview))
+          if (!_loading &&
+              !widget.showWysiwyg &&
+              (widget.splitPreview || !widget.showPreview))
             IconButton(
               key: const Key('editor-find-open'),
               tooltip: AppStrings.findInNoteTooltip,
@@ -1366,6 +1429,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               onPressed: _findController.findMode,
             ),
           if (!_loading &&
+              !widget.showWysiwyg &&
               widget.spellCheck != null &&
               widget.spellCheck!.available)
             IconButton(
@@ -1405,25 +1469,27 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// region and tapping it keeps the editor focused.
   Widget _toolbar(BuildContext context) {
     final actions = _toolbarActions();
-    return CodeEditorTapRegion(
-      child: EditorToolbar(
-        buttons: [
-          for (final item in widget.toolbarLayout.visible)
-            EditorToolbarButton(
-              key: item.widgetKey,
-              icon: item.icon,
-              tooltip: item.label,
-              onPressed: actions[item]!,
-            ),
-        ],
-      ),
+    final toolbar = EditorToolbar(
+      buttons: [
+        for (final item in widget.toolbarLayout.visible)
+          EditorToolbarButton(
+            key: item.widgetKey,
+            icon: item.icon,
+            tooltip: item.label,
+            onPressed: actions[item]!,
+          ),
+      ],
     );
+    // The re_editor tap region keeps the keyboard up for the source editor;
+    // the WYSIWYG surface has its own focus handling.
+    return widget.showWysiwyg ? toolbar : CodeEditorTapRegion(child: toolbar);
   }
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
   /// controller they act on.
   Map<ToolbarItem, VoidCallback> _toolbarActions() {
+    if (widget.showWysiwyg) return _quillToolbarActions();
     return {
       ToolbarItem.bold: () => _wrapSelection(left: '**', right: '**'),
       ToolbarItem.italic: () => _wrapSelection(left: '*', right: '*'),
@@ -1442,6 +1508,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       ToolbarItem.indent: () => _indentLines(outdent: false),
     };
   }
+
+  /// The toolbar's commands against the WYSIWYG document (T-WYS-06): the
+  /// same buttons, the Quill formats behind them.
+  Map<ToolbarItem, VoidCallback> _quillToolbarActions() => {
+    for (final item in ToolbarItem.values) item: () => _applyQuillItem(item),
+  };
 
   /// Applies a pure markdown command's result: the whole text is set
   /// (undoable) and the selection lands where the command put it — inside
@@ -1565,6 +1637,76 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
   }
 
+  /// Applies a toolbar item to the WYSIWYG document (T-WYS-06).
+  void _applyQuillItem(ToolbarItem item) {
+    final state = _wysiwygKey.currentState;
+    if (state == null) return;
+    _quillCommands(state).apply(item);
+  }
+
+  /// The Quill commands over the open surface's controller.
+  QuillEditorCommands _quillCommands(WysiwygEditorState state) =>
+      QuillEditorCommands(
+        controller: state.controller,
+        onLink: _insertQuillLink,
+        onImage: _insertQuillImage,
+        onHeading: _showQuillHeadingDialog,
+      );
+
+  /// The heading picker, applied to the Quill selection.
+  Future<void> _showQuillHeadingDialog() async {
+    final state = _wysiwygKey.currentState;
+    if (state == null) return;
+    final level = await showHeadingLevelDialog(context);
+    if (level == null) return;
+    _quillCommands(state).applyHeader(level);
+  }
+
+  /// The link button in WYSIWYG: the same syntax the source editor inserts,
+  /// as text (the codec writes it back unchanged, T-WYS-06).
+  void _insertQuillLink() {
+    final state = _wysiwygKey.currentState;
+    if (state == null) return;
+    final controller = state.controller;
+    final selection = controller.selection;
+    final selected = controller.document.getPlainText(
+      selection.start,
+      selection.end - selection.start,
+    );
+    final markdown = widget.linkType == LinkType.markdown;
+    final snippet = markdown ? '[$selected](...)' : '[[$selected]]';
+    controller.replaceText(
+      selection.start,
+      selection.end - selection.start,
+      snippet,
+      TextSelection.collapsed(offset: selection.start + snippet.length),
+    );
+  }
+
+  /// The image button in WYSIWYG: the source editor's picker/import flow,
+  /// with the resulting snippet inserted as text (T-WYS-06).
+  Future<void> _insertQuillImage() async {
+    final state = _wysiwygKey.currentState;
+    final root = widget.libraryRoot;
+    if (state == null || root == null) return;
+    final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
+    if (source == null || !mounted) return;
+    final relative =
+        await (widget.importImage?.call(root, source) ??
+            importImageToLibrary(libraryRoot: root, sourcePath: source));
+    if (!mounted) return;
+    final label = p.basenameWithoutExtension(source);
+    final snippet = '![$label]($relative)';
+    final controller = state.controller;
+    final index = controller.selection.start;
+    controller.replaceText(
+      index,
+      0,
+      snippet,
+      TextSelection.collapsed(offset: index + snippet.length),
+    );
+  }
+
   /// Converts re_editor's line+offset selection to whole-text offsets
   /// (called once per toolbar tap, so the O(n) scan is fine).
   TextSelection _textSelection(CodeLineSelection selection) {
@@ -1618,7 +1760,7 @@ final class _NoteKindHost implements NoteKindHost {
   final _NoteViewState _state;
 
   @override
-  String get text => _state._controller.text;
+  String get text => _state._currentText;
 
   @override
   void applyEdit(String newText) => _state._applyKindEdit(newText);
