@@ -154,7 +154,7 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `.lnk`/jump-list writer that Flutter's Windows runner does not provide
   — native shim is M7+ work, and the CLI floor (T-PP-05) already covers
   the four actions there.
-- [ ] **T-PP-06a** KRunner discoverability (KDE): spike what KRunner
+- [x] **T-PP-06a** KRunner discoverability (KDE): spike what KRunner
   actually lists — the main `.desktop` entry (via `Name`/`GenericName`/
   `Keywords=`) is found, but individual `Actions=` are task-manager/dock
   surface and are not separate KRunner results. Candidates for one-hit
@@ -163,6 +163,19 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `copist --new-note` runs from KRunner's command line (documented).
   *AC: the spike records which one KDE shows, and the chosen one ships;
   at minimum the main entry carries keywords covering all four actions.*
+  Spike result (recorded; the minimum already shipped with T-PP-06):
+  KRunner matches the main `.desktop` entry through
+  `Name`/`GenericName`/`Keywords=`; the four `Actions=`, by KDE's design,
+  are task-manager/dock surface and are not separate KRunner results (the
+  long-standing KDE tracker entry for Firefox profiles, bug 455436, is the
+  same behaviour). Chosen: CLI-on-PATH + keywords — `copist --new-note`
+  (the four T-PP-05 flags) runs from KRunner's command line, and
+  `Keywords=` now names all four actions
+  (`notes;markdown;note;todo;task;list;quick;new;reminder;copist`). The
+  four extra `.desktop` files were rejected (menu clutter) and the
+  `org.kde.krunner1` DBus plugin too (heavy for four one-shot commands).
+  Owed: the hand check that typing the keywords in KRunner on this session
+  finds the entry; putting `copist` on PATH is M7 packaging.
 - [x] **T-PP-06b** Tray quick actions (`nativeapi`, which the T-PP-16
   verdict reserves for this surface only): a StatusNotifier tray icon whose
   context menu offers the same four actions, each running the existing

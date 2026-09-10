@@ -8,7 +8,7 @@ Exec=copist %U
 Icon=dev.copist.copist
 Terminal=false
 Categories=Office;TextEditor;Utility;
-Keywords=notes;markdown;note;todo;task;list;quick;copist;
+Keywords=notes;markdown;note;todo;task;list;quick;new;reminder;copist;
 StartupWMClass=dev.copist.copist
 Actions=quick-note;new-todo;new-note;new-list;
 
