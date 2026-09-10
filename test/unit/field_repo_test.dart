@@ -44,10 +44,7 @@ void main() {
       Directory(p.join(root.path, 'folder')).createSync();
       await indexer.fullScan(root.path);
 
-      expect((await repo.pinnedNotes()).map((n) => n.path), [
-        'a.md',
-        'b.md',
-      ]);
+      expect((await repo.pinnedNotes()).map((n) => n.path), ['a.md', 'b.md']);
     });
 
     test('unpinning a note drops it from the list', () async {

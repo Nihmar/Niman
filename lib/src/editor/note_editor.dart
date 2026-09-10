@@ -129,6 +129,17 @@ final class NoteEditor extends StatelessWidget {
       findController: findController,
       findBuilder: findBuilder,
       shortcutsActivatorsBuilder: shortcutsActivators,
+      // PageUp/PageDown: bound by Copist's activators, moved here because
+      // the package's controller methods are `// TODO` stubs.
+      shortcutOverrideActions: {
+        CodeShortcutCursorMovePageIntent:
+            CallbackAction<CodeShortcutCursorMovePageIntent>(
+              onInvoke: (intent) {
+                _moveByPage(forward: intent.forward);
+                return null;
+              },
+            ),
+      },
       toolbarController: MobileSelectionToolbarController(
         builder:
             ({
@@ -180,4 +191,56 @@ final class NoteEditor extends StatelessWidget {
       ),
     );
   }
+
+  /// Moves a page: the caret first, the scroll following it.
+  ///
+  /// re_editor 0.10.0 declares the page intents but implements
+  /// `moveCursorToPageUp/Down` as empty stubs, so the move lives here.
+  /// Lines per page come from the document's own pixels-per-line average
+  /// ([ScrollPosition.maxScrollExtent] over the line count): no theme
+  /// internals, and word-wrapped lines are averaged in rather than
+  /// missed.
+  void _moveByPage({required bool forward}) {
+    final lines = controller.codeLines.length;
+    if (lines < 2) return;
+    final scroller = scrollController?.verticalScroller;
+    final position = scroller != null && scroller.hasClients
+        ? scroller.position
+        : null;
+    final perPage = pageLineStep(
+      lineCount: lines,
+      extent: position?.maxScrollExtent ?? 0,
+      viewport: position?.viewportDimension ?? 0,
+    );
+    if (perPage == 0) return;
+    final current = controller.selection.extentIndex.clamp(0, lines - 1);
+    final target = (current + (forward ? perPage : -perPage)).clamp(
+      0,
+      lines - 1,
+    );
+    if (target == current) return;
+    controller.selection = CodeLineSelection.collapsed(
+      index: target,
+      offset: 0,
+    );
+    scrollController?.makeVisible(CodeLinePosition(index: target, offset: 0));
+  }
+}
+
+/// The lines a PageUp/PageDown covers on a document of [lineCount] lines
+/// with scroll [extent] and [viewport] pixels.
+///
+/// The viewport's share of the document's own pixels-per-line average
+/// (content height over line count), not a theme line height: word-wrapped
+/// lines are then counted in instead of missed. Clamped to at least one
+/// line and at most the document.
+int pageLineStep({
+  required int lineCount,
+  required double extent,
+  required double viewport,
+}) {
+  if (lineCount < 2) return 0;
+  final content = extent + viewport;
+  if (content <= 0 || viewport <= 0) return lineCount - 1;
+  return (viewport * lineCount / content).floor().clamp(1, lineCount - 1);
 }

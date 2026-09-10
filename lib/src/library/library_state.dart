@@ -70,8 +70,12 @@ final class LibraryController implements LibrarySession {
     this.watcherDebounce = FileWatcher.defaultDebounce,
   }) : _searchDbFactory = searchDbFactory ?? indexDbFactory;
 
-  /// Full-rescan fallback cadence (~60 s); doubles as the M5 poll cadence.
-  static const defaultRescanInterval = Duration(seconds: 60);
+  /// Full-rescan fallback cadence: the watcher covers live changes, so the
+  /// full walk is the safety net (a missed event, a network mount). One
+  /// walk a minute cost 27-46 ms on a 901-entry library and scales with it
+  /// (T-PP-22); five minutes keeps the net without the constant cost. It
+  /// doubles as the M5 poll cadence.
+  static const defaultRescanInterval = Duration(minutes: 5);
 
   /// The root path of the currently open library, for crash reports (the
   /// crash file is written next to the debug logs the user already exports
@@ -412,6 +416,11 @@ final class LibraryController implements LibrarySession {
       );
       _phase = LibraryPhase.ready;
       currentRootPath = abs;
+      // Warm the tree's first query while the caller still shows its
+      // opening state: the first flatten otherwise paid drift's statement
+      // preparation and SQLite's page cache right as the shell built
+      // (78-118 ms in the log, T-PP-22).
+      unawaited(_warmUpTree(indexer.dao));
       await AppSettingsRepo(appDb).setLastLibraryPath(abs);
       // The list the home screen shows (T-ML-04). Opening is what puts a
       // folder on it, so a library the app has never seen needs no
@@ -581,6 +590,20 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
   }
 
+  /// The spell-check dictionary name, or null for the locale default.
+  @override
+  Future<String?> get spellDictionary async => (await _library).spellDictionary;
+
+  /// Sets (and persists) the spell-check dictionary.
+  @override
+  Future<void> setSpellDictionary(String? name) async {
+    _log.info('spell-check dictionary set to ${name ?? 'system'}');
+    await _editLibrary(
+      (c) =>
+          c.copyWith(spellDictionary: name, clearSpellDictionary: name == null),
+    );
+  }
+
   /// The preview layout mode.
   ///
   /// App-wide, with the split ratio: both follow the screen rather than
@@ -616,6 +639,16 @@ final class LibraryController implements LibrarySession {
   @override
   Future<void> setTreeSort(TreeSort sort) async {
     await _editLibrary((c) => c.copyWith(treeSort: sort));
+  }
+
+  /// The tree pane's width in logical pixels.
+  @override
+  Future<double> get treeWidth async => (await _library).treeWidth;
+
+  /// Sets (and persists) the tree pane's width.
+  @override
+  Future<void> setTreeWidth(double width) async {
+    await _editLibrary((c) => c.copyWith(treeWidth: width));
   }
 
   /// Whether the tree's pinned section is rolled up.
@@ -804,6 +837,15 @@ final class LibraryController implements LibrarySession {
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');
+    }
+  }
+
+  /// Prepares the tree's first query off the critical path.
+  Future<void> _warmUpTree(NoteDao dao) async {
+    try {
+      await dao.tree(const <String>[]);
+    } on Object catch (error) {
+      _log.debug('tree warm-up failed ($error)');
     }
   }
 

@@ -77,7 +77,9 @@ final class EditorHighlightSync {
   /// The styled span for buffer line [index] (the [CodeLineSpanBuilder]
   /// implementation): [text] is the line's text, [base] the editor's base
   /// style, [syntax] the palette's Markdown colors (T-M6-05) and [dark]
-  /// the weight bold text is drawn at.
+  /// the weight bold text is drawn at. [spellRanges] are the misspelled
+  /// stretches of this line, drawn in [spellStyle] over whatever the
+  /// syntax gave them (T-PP-09).
   ///
   /// Changing palette drops every cached span, which is a full repaint of
   /// what is on screen and nothing more: the tokens are untouched.
@@ -87,6 +89,8 @@ final class EditorHighlightSync {
     required TextStyle base,
     required SyntaxColors syntax,
     required bool dark,
+    List<TextRange> spellRanges = const <TextRange>[],
+    TextStyle? spellStyle,
   }) {
     if (dark != _dark || syntax != _syntax) {
       _dark = dark;
@@ -98,10 +102,14 @@ final class EditorHighlightSync {
     final styled = index < _doc.lineCount
         ? _doc.lineAt(index)
         : StyledLine(text, const <Token>[]);
-    final span = _buildSpan(styled, base);
+    final span = _buildSpan(styled, base, spellRanges, spellStyle);
     _spans[index] = span;
     return span;
   }
+
+  /// Drops the per-line span cache: spelling results changed, so the next
+  /// layout must rebuild each visible line's span.
+  void clearSpans() => _spans.clear();
 
   /// The document's heading outline (T-M2-07), from the incremental
   /// document's tokens — materializes the whole document, so call it from a
@@ -202,7 +210,12 @@ final class EditorHighlightSync {
   /// between token boundaries gets the covering token's style; the unmarked
   /// region after a heading marker gets the heading style; the rest is
   /// plain (the base style shows).
-  TextSpan _buildSpan(StyledLine styled, TextStyle base) {
+  TextSpan _buildSpan(
+    StyledLine styled,
+    TextStyle base,
+    List<TextRange> spellRanges,
+    TextStyle? spellStyle,
+  ) {
     final textLength = styled.text.length;
     if (textLength == 0) {
       return TextSpan(text: '', style: base);
@@ -225,6 +238,10 @@ final class EditorHighlightSync {
     if (headingStart >= 0 && headingStart < textLength) {
       bounds.add(headingStart);
     }
+    for (final range in spellRanges) {
+      if (range.start > 0 && range.start < textLength) bounds.add(range.start);
+      if (range.end > 0 && range.end < textLength) bounds.add(range.end);
+    }
     final sorted = bounds.toList()..sort();
     final children = <TextSpan>[];
     for (var i = 0; i + 1 < sorted.length; i++) {
@@ -234,7 +251,13 @@ final class EditorHighlightSync {
       children.add(
         TextSpan(
           text: styled.text.substring(start, end),
-          style: _styleAt(styled.tokens, start, headingStart),
+          style: _styleAt(
+            styled.tokens,
+            start,
+            headingStart,
+            spellRanges,
+            spellStyle,
+          ),
         ),
       );
     }
@@ -245,14 +268,35 @@ final class EditorHighlightSync {
   /// override, the heading style for the unmarked heading text, null (base)
   /// otherwise. [headingStart] is the first unmarked heading position (-1 =
   /// no heading).
-  TextStyle? _styleAt(List<Token> tokens, int pos, int headingStart) {
+  TextStyle? _styleAt(
+    List<Token> tokens,
+    int pos,
+    int headingStart,
+    List<TextRange> spellRanges,
+    TextStyle? spellStyle,
+  ) {
+    TextStyle? style;
     for (final token in tokens) {
       if (token.start > pos) break;
       if (pos < token.end) {
-        return markdownTokenStyle(token.kind, _syntax, dark: _dark);
+        style = markdownTokenStyle(token.kind, _syntax, dark: _dark);
+        break;
       }
     }
-    if (headingStart >= 0 && pos >= headingStart) return markdownHeadingStyle;
-    return null;
+    if (style == null && headingStart >= 0 && pos >= headingStart) {
+      style = markdownHeadingStyle;
+    }
+    if (spellStyle != null && _inSpell(pos, spellRanges)) {
+      style = style == null ? spellStyle : style.merge(spellStyle);
+    }
+    return style;
+  }
+
+  /// Whether [pos] falls in a misspelled range.
+  static bool _inSpell(int pos, List<TextRange> ranges) {
+    for (final range in ranges) {
+      if (pos >= range.start && pos < range.end) return true;
+    }
+    return false;
   }
 }

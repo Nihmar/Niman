@@ -86,6 +86,26 @@ double normalizeTextScale(Object? raw) {
   return scale;
 }
 
+/// The tree pane's width in a fresh library (logical pixels).
+const double defaultTreeWidth = 340;
+
+/// The narrowest the tree pane drags to.
+const double minTreeWidth = 200;
+
+/// The widest the tree pane drags to.
+const double maxTreeWidth = 600;
+
+/// Reads a `treeWidth` out of the settings file, clamped into range —
+/// the same bargain as `indentWidth`: a hand-typed number stays near
+/// what was meant, anything else reads back as the default.
+double normalizeTreeWidth(Object? raw) {
+  if (raw is! num) return defaultTreeWidth;
+  final width = raw.toDouble();
+  if (width < minTreeWidth) return minTreeWidth;
+  if (width > maxTreeWidth) return maxTreeWidth;
+  return width;
+}
+
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
@@ -146,6 +166,8 @@ final class LibraryConfig {
     this.editorToolbar = '',
     this.uiTextScale = defaultTextScale,
     this.noteTextScale = defaultTextScale,
+    this.treeWidth = defaultTreeWidth,
+    this.spellDictionary,
     this.extra = const {},
   });
 
@@ -199,6 +221,11 @@ final class LibraryConfig {
       },
       uiTextScale: normalizeTextScale(json['uiTextScale']),
       noteTextScale: normalizeTextScale(json['noteTextScale']),
+      treeWidth: normalizeTreeWidth(json['treeWidth']),
+      spellDictionary: switch (json['spellDictionary']) {
+        final String name when name.trim().isNotEmpty => name.trim(),
+        _ => null,
+      },
       extra: extra,
     );
   }
@@ -267,6 +294,14 @@ final class LibraryConfig {
   /// How much larger than shipped the note text is, in the editor and in
   /// the preview alike (default 1.0).
   final double noteTextScale;
+  /// The tree pane's width in logical pixels (default
+  /// [defaultTreeWidth]), dragged on wide screens.
+  final double treeWidth;
+
+  /// The hunspell dictionary the spell checker uses (a `<name>` found on
+  /// the machine), or null for the locale's default. Only meaningful in a
+  /// library whose notes share a language.
+  final String? spellDictionary;
 
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
@@ -289,6 +324,9 @@ final class LibraryConfig {
     String? editorToolbar,
     double? uiTextScale,
     double? noteTextScale,
+    double? treeWidth,
+    String? spellDictionary,
+    bool clearSpellDictionary = false,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -308,6 +346,10 @@ final class LibraryConfig {
       editorToolbar: editorToolbar ?? this.editorToolbar,
       uiTextScale: uiTextScale ?? this.uiTextScale,
       noteTextScale: noteTextScale ?? this.noteTextScale,
+      treeWidth: treeWidth ?? this.treeWidth,
+      spellDictionary: clearSpellDictionary
+          ? null
+          : spellDictionary ?? this.spellDictionary,
       extra: extra,
     );
   }
@@ -328,6 +370,8 @@ final class LibraryConfig {
     'editorToolbar',
     'uiTextScale',
     'noteTextScale',
+    'treeWidth',
+    'spellDictionary',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -356,9 +400,13 @@ final class LibraryConfig {
       'editorToolbar': editorToolbar,
       'uiTextScale': uiTextScale,
       'noteTextScale': noteTextScale,
+      'treeWidth': treeWidth,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
+    }
+    if (spellDictionary != null) {
+      json['spellDictionary'] = spellDictionary;
     }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
@@ -425,6 +473,8 @@ final class LibraryConfig {
         editorToolbar == other.editorToolbar &&
         uiTextScale == other.uiTextScale &&
         noteTextScale == other.noteTextScale &&
+        treeWidth == other.treeWidth &&
+        spellDictionary == other.spellDictionary &&
         _deepEquals(extra, other.extra);
   }
 

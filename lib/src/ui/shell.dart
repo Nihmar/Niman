@@ -4,15 +4,19 @@ import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/frame_log.dart';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
 import 'package:copist/src/core/theme.dart';
+import 'package:copist/src/core/tray.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/spell_check_provider.dart';
 import 'package:copist/src/templates/directives.dart';
 import 'package:copist/src/templates/engine.dart';
 import 'package:copist/src/templates/includes.dart';
@@ -22,6 +26,7 @@ import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/action_sheet.dart';
+import 'package:copist/src/ui/app_shortcuts.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
@@ -30,18 +35,19 @@ import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/quick_note_tab.dart';
 import 'package:copist/src/ui/search_screen.dart';
-import 'package:copist/src/ui/settings.dart';
 import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/template_form.dart';
 import 'package:copist/src/ui/template_picker.dart';
+import 'package:copist/src/ui/title_bar.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
-import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
+import 'package:copist/src/ui/unsaved_notes.dart';
+import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,7 +73,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       _resumeStarted = true;
       unawaited(_resume());
     }
-    unawaited(_publishShortcuts());
+    unawaited(_publishQuickActions());
     unawaited(_applyLanguage());
     unawaited(_applyTheme());
   }
@@ -93,17 +99,21 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     AppLanguages.choice = await ref.read(librarySessionProvider).language;
   }
 
-  /// Publishes the launcher quick actions (T-SC-02).
+  /// Publishes the quick actions on every surface that takes a label map:
+  /// the Android launcher (T-SC-02) and the desktop tray (T-PP-06b). Both
+  /// carry the same ids, so both run the same flows.
   ///
   /// Here rather than in the shell: they belong to the app, not to an
   /// open library, so they are there on the very first launch too.
-  Future<void> _publishShortcuts() {
-    return ref.read(shortcutServiceProvider).publish({
+  Future<void> _publishQuickActions() async {
+    final labels = {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
-    });
+    };
+    await ref.read(shortcutServiceProvider).publish(labels);
+    await ref.read(trayServiceProvider).init(labels);
   }
 
   /// Resumes the last library, unless Android is withholding the
@@ -128,8 +138,12 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
         LibraryPhase.ready => _LibraryShell(
           controller: controller,
           reminders: ref.read(reminderServiceProvider),
+          spellCheck: ref.read(spellCheckProvider),
           shortcuts: ref.read(shortcutServiceProvider),
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
+          unsavedTracker: ref.watch(unsavedTrackerProvider),
+          tray: ref.read(trayServiceProvider),
+          window: ref.read(windowControllerProvider),
         ),
         _ => OpenLibraryScreen(controller: controller),
       },
@@ -143,14 +157,21 @@ final class _LibraryShell extends StatefulWidget {
   const new({
     required this.controller,
     required this.reminders,
+    required this.spellCheck,
     required this.shortcuts,
     required this.todoSourceFactory,
+    required this.unsavedTracker,
+    required this.tray,
+    required this.window,
   });
 
   final LibrarySession controller;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
+
+  /// The editor's spelling state (T-PP-09), passed to every [NoteView].
+  final EditorSpellCheck spellCheck;
 
   /// The launcher quick actions (T-SC-03: each one lands on the flow its
   /// in-app control uses).
@@ -160,11 +181,23 @@ final class _LibraryShell extends StatefulWidget {
   /// fake in widget tests).
   final TodoSource Function(String root) todoSourceFactory;
 
+  /// The open notes' unsaved edits, which the window's close guard reads
+  /// (T-PP-11); passed down to every [NoteView].
+  final UnsavedTracker unsavedTracker;
+
+  /// The desktop tray's quick actions (T-PP-06b): the same four flows the
+  /// launcher publishes, on a third surface.
+  final TrayService tray;
+
+  /// The platform window; a tray activation brings it back to the front.
+  final WindowController window;
+
   @override
   State<_LibraryShell> createState() => _LibraryShellState();
 }
 
-/// The bottom-navigation tabs (phone/narrow layout only).
+/// The app tabs: the bottom navigation bar on the narrow layout, the
+/// fixed left rail on the wide layout (T-PP-14).
 enum ShellTab {
   /// The note tree plus the note-open stack (T-UI-02).
   files,
@@ -180,6 +213,21 @@ enum ShellTab {
 
   /// The library settings (the pushed SettingsScreen on wide screens).
   settings,
+}
+
+/// The desktop tree footer's create menu entries (T-PP-22).
+enum _NewItem {
+  /// A plain Markdown note.
+  note,
+
+  /// A list note (frontmatter type: list) in the list folder.
+  listNote,
+
+  /// A note copied from a template.
+  template,
+
+  /// A folder.
+  folder,
 }
 
 final class _LibraryShellState extends State<_LibraryShell>
@@ -206,57 +254,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
-  /// The app-bar action opening the todo.txt format reference.
-  ///
-  /// The dialog writes the syntax, so a user can go a long way without
-  /// seeing it — until they open todo.txt in another editor, or wonder
-  /// what the chips are. The reference is one tap from the list.
-  Widget _todoHelpAction() {
-    return IconButton(
-      key: const Key('todo-help'),
-      tooltip: AppStrings.todoHelpTooltip,
-      icon: const Icon(Icons.help_outline),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
-      ),
-    );
-  }
-
   /// Shows the todo list, wherever this layout keeps it.
   ///
-  /// The bottom-nav tab only exists on a phone; the wide layout pushes it
-  /// as a screen instead. Reminder taps land here, so a tablet no longer
-  /// opens the app on the file tree with no hint of why.
+  /// The narrow bottom bar and the wide rail both own a Todo tab, so this
+  /// only selects it. Reminder taps land here, so a tap opens the app on
+  /// the list with no hint missing of why.
   void _openTodo() {
-    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
-      _selectShellTab(ShellTab.todo);
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(AppStrings.todoTitle),
-            actions: [_todoHelpAction()],
-          ),
-          // 2026-09-07 user feedback: the add action is a FAB, not an
-          // app-bar `+` (the bar `+` read as something else).
-          floatingActionButton: FloatingActionButton(
-            key: const Key('todo-add-wide'),
-            heroTag: 'todo-add-wide',
-            tooltip: AppStrings.todoAddTooltip,
-            onPressed: _addTodo,
-            child: const Icon(Icons.add),
-          ),
-          body: TodoTab(
-            controller: _todoController,
-            reminders: widget.reminders,
-          ),
-        ),
-      ),
-    );
+    _selectShellTab(ShellTab.todo);
   }
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
@@ -271,6 +275,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     // A kept-alive search field would otherwise hold focus (and the
     // keyboard) on the next tab: disposing used to drop it for free.
     FocusManager.instance.primaryFocus?.unfocus();
+    // Put it back on the shell so the next accelerator still reaches the
+    // bindings (T-PP-10).
+    _shellFocus.requestFocus();
     setState(() {
       _tab = tab;
       _visitedTabs.add(tab);
@@ -321,8 +328,21 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The editor toolbar the user arranged (settings, T-TB-04).
   ToolbarLayout _toolbarLayout = ToolbarLayout.defaults;
 
+  /// Whether the wide layout's tree pane shows (the title bar's toggle;
+  /// the rail always stays, T-PP-22).
+  bool _sidebarVisible = true;
+
+  /// Carries focus for the app accelerators (T-PP-10) when nothing else
+  /// wants it, so a keyboard-only tab switch is followed by a working next
+  /// one: [FocusManager] would otherwise leave nothing focused.
+  final FocusNode _shellFocus = FocusNode(debugLabel: 'app shortcuts');
+
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
+
+  /// The tree pane's width (wide layout), dragged and persisted per
+  /// library (T-PP-21).
+  double _treeWidth = defaultTreeWidth;
 
   /// Phone (< [splitBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
@@ -342,6 +362,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
   StreamSubscription<ShortcutAction>? _shortcutTaps;
+  StreamSubscription<ShortcutAction>? _trayTaps;
+  StreamSubscription<void>? _trayActivations;
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -545,6 +567,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       initialAnchor: _pendingAnchor,
       kindMode: !_kindRawMode,
       onNoteKindChanged: _onNoteKindChanged,
+      unsavedTracker: widget.unsavedTracker,
+      spellCheck: widget.spellCheck,
     );
   }
 
@@ -578,15 +602,58 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The app-bar eye action: flips the editor/preview pane (phone
   /// full-screen note and the wide switch override).
-  Widget _previewToggleAction() {
+  Widget _previewToggleAction({bool compact = false}) {
     return IconButton(
       key: const Key('editor-preview-toggle'),
       tooltip: _previewVisible
           ? AppStrings.showEditorTooltip
           : AppStrings.showPreviewTooltip,
       icon: Icon(_previewVisible ? Icons.edit : Icons.visibility),
+      iconSize: compact ? 18 : null,
+      visualDensity: compact ? VisualDensity.compact : null,
+      padding: compact ? EdgeInsets.zero : null,
+      constraints: compact
+          ? const BoxConstraints(minWidth: 34, minHeight: 26)
+          : null,
       onPressed: _togglePreview,
     );
+  }
+
+  /// The split/switch picker (user, 2026-09-09): how the preview shares
+  /// the window is an editor control, not a settings-screen row. Wide
+  /// only — below 600 dp the panes cannot share the screen, so there is
+  /// nothing to choose.
+  Widget _layoutModeAction({bool compact = false}) {
+    return PopupMenuButton<PreviewLayoutMode>(
+      key: const Key('layout-mode'),
+      tooltip: AppStrings.previewModeTitle,
+      icon: Icon(Icons.splitscreen, size: compact ? 18 : null),
+      padding: compact ? EdgeInsets.zero : const EdgeInsets.all(8),
+      onSelected: (mode) => unawaited(_setPreviewMode(mode)),
+      itemBuilder: (context) => [
+        CheckedPopupMenuItem(
+          value: PreviewLayoutMode.auto,
+          checked: _previewMode == PreviewLayoutMode.auto,
+          child: Text(AppStrings.previewModeAuto),
+        ),
+        CheckedPopupMenuItem(
+          value: PreviewLayoutMode.fullScreen,
+          checked: _previewMode == PreviewLayoutMode.fullScreen,
+          child: Text(AppStrings.previewModeSwitch),
+        ),
+      ],
+    );
+  }
+
+  /// Persists the split/switch choice the layout menu made: the stored
+  /// value is shared with the settings ratio row, and the session event
+  /// refreshes every NoteView through [_refreshEditorSettings].
+  Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
+    if (mode == _previewMode) return;
+    final controller = widget.controller;
+    await controller.setPreviewMode(mode);
+    controller.notify();
+    if (mounted) setState(() => _previewMode = mode);
   }
 
   @override
@@ -613,6 +680,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
+    _trayTaps = widget.tray.actions.listen(
+      (action) => unawaited(_runShortcut(action)),
+    );
+    _trayActivations = widget.tray.activated.listen(
+      (_) => unawaited(widget.window.show()),
+    );
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
@@ -625,7 +698,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     _noteHideTimer?.cancel();
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
+    unawaited(_trayTaps?.cancel());
+    unawaited(_trayActivations?.cancel());
     _todoController.dispose();
+    _shellFocus.dispose();
     super.dispose();
   }
 
@@ -697,7 +773,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     final linkType = await controller.linkType;
     final indentWidth = await controller.indentWidth;
     final treeSort = await controller.treeSort;
+    final treeWidth = await controller.treeWidth;
     final toolbar = await controller.editorToolbar;
+    // The spell checker follows the library's dictionary (T-PP-09); it
+    // notifies the open editor itself, so no setState is needed here.
+    final spellDictionary = await controller.spellDictionary;
+    if (mounted) widget.spellCheck.setDictionary(spellDictionary);
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
@@ -706,6 +787,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             linkType != _linkType ||
             indentWidth != _indentWidth ||
             treeSort != _treeSort ||
+            treeWidth != _treeWidth ||
             toolbar != _toolbarLayout.encode())) {
       setState(() {
         _lineNumbers = lineNumbers;
@@ -715,6 +797,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _linkType = linkType;
         _indentWidth = indentWidth;
         _treeSort = treeSort;
+        _treeWidth = treeWidth;
         _toolbarLayout = ToolbarLayout.parse(toolbar);
       });
     }
@@ -767,14 +850,20 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Opens a search result at [path] (library-relative): phone — the
   /// note takes the screen, back returns to the search tab; wide — the
-  /// detail pane shows it alongside the tree.
+  /// rail flips to Files and the detail pane shows it alongside the tree
+  /// (the search body would otherwise hide the selection).
   void _openSearchNote(String path) {
     if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+    final wide = MediaQuery.sizeOf(context).width >= splitBreakpoint;
     setState(() {
       _selected = path;
       _selectedIsDir = false;
       _treeVisible = false;
       _noteFromTab = _tab;
+      if (wide) {
+        _tab = ShellTab.files;
+        _visitedTabs.add(ShellTab.files);
+      }
       _resetNoteKind();
       _noteOpened();
     });
@@ -829,35 +918,30 @@ final class _LibraryShellState extends State<_LibraryShell>
       _openQuickNoteChooser();
       return;
     }
+    // Already open: just land on the tab. Reopening would unfocus the
+    // editor, reset the kind view and restart the hide timer for identical
+    // content — on wide, where both tabs share the detail pane, that reads
+    // as a close/reopen flash.
+    if (_selected == path && !_selectedIsDir && !_showQuickNoteChooser) {
+      if (_tab != ShellTab.quickNote) {
+        setState(() {
+          _tab = ShellTab.quickNote;
+          _visitedTabs.add(ShellTab.quickNote);
+        });
+      }
+      return;
+    }
     await _openQuickNote(path);
   }
 
   /// Shows the choose/create screen, wherever this layout keeps it.
   ///
-  /// The bottom-nav tab is phone-only, so a wide layout pushes it as a
-  /// screen — otherwise the launcher's Quick note action would land
-  /// nowhere on a tablet with no quick note set yet.
+  /// Every layout shows it inline in the Quick note tab body (the rail on
+  /// wide, the bottom bar on narrow), so the tab chrome always persists —
+  /// opening it over the shell used to hide the rail on wide.
   void _openQuickNoteChooser() {
-    if (MediaQuery.sizeOf(context).width < splitBreakpoint) {
-      setState(() => _showQuickNoteChooser = true);
-      _selectShellTab(ShellTab.quickNote);
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: Text(AppStrings.quickNoteTitle)),
-          body: QuickNoteTab(
-            controller: widget.controller,
-            onOpen: (path) {
-              Navigator.pop(context);
-              unawaited(_openQuickNote(path));
-            },
-          ),
-        ),
-      ),
-    );
+    setState(() => _showQuickNoteChooser = true);
+    _selectShellTab(ShellTab.quickNote);
   }
 
   void _toggle(String path) {
@@ -1314,73 +1398,125 @@ final class _LibraryShellState extends State<_LibraryShell>
     final action = await showActionSheet<String>(
       context,
       items: (context) => [
-        ListTile(
-          key: const Key('menu-new-note'),
-          leading: const Icon(Icons.note_add),
-          title: Text(AppStrings.newNoteHere),
-          onTap: () => Navigator.pop(context, 'note'),
-        ),
-        ListTile(
-          key: const Key('menu-new-from-template'),
-          leading: const Icon(Icons.file_copy_outlined),
-          title: Text(AppStrings.newFromTemplateHere),
-          onTap: () => Navigator.pop(context, 'template'),
-        ),
-        if (note.isDir)
+        for (final entry in _rowMenuEntries(note, isQuickNote))
           ListTile(
-            key: const Key('menu-new-folder'),
-            leading: const Icon(Icons.create_new_folder),
-            title: Text(AppStrings.newFolderHere),
-            onTap: () => Navigator.pop(context, 'folder'),
+            key: entry.key,
+            leading: Icon(entry.icon),
+            title: Text(entry.label),
+            onTap: () => Navigator.pop(context, entry.value),
           ),
-        if (!note.isDir)
-          ListTile(
-            key: const Key('menu-quick-note'),
-            leading: Icon(
-              isQuickNote ? Icons.sticky_note_2 : Icons.sticky_note_2_outlined,
-            ),
-            title: Text(
-              isQuickNote
-                  ? AppStrings.currentQuickNote
-                  : AppStrings.setAsQuickNote,
-            ),
-            onTap: () => Navigator.pop(context, 'quicknote'),
-          ),
-        // Markdown only: the pin is a frontmatter key, and a
-        // `todo.txt` has no frontmatter to put it in. An already
-        // pinned row keeps the entry whatever it is, so a pin
-        // written before this rule can still be taken back off.
-        if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
-          ListTile(
-            key: const Key('menu-pin'),
-            leading: Icon(
-              note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
-            ),
-            title: Text(
-              note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
-            ),
-            onTap: () => Navigator.pop(context, 'pin'),
-          ),
-        ListTile(
-          key: const Key('menu-rename'),
-          leading: const Icon(Icons.edit),
-          title: Text(AppStrings.actionRename),
-          onTap: () => Navigator.pop(context, 'rename'),
-        ),
-        ListTile(
-          key: const Key('menu-move'),
-          leading: const Icon(Icons.drive_folder_upload),
-          title: Text(AppStrings.actionMove),
-          onTap: () => Navigator.pop(context, 'move'),
-        ),
-        ListTile(
-          key: const Key('menu-delete'),
-          leading: const Icon(Icons.delete_outline),
-          title: Text(AppStrings.actionDelete),
-          onTap: () => Navigator.pop(context, 'delete'),
-        ),
       ],
     );
+    await _runRowAction(action, note, here);
+  }
+
+  /// Right-click context menu on a tree row (T-PP-20): the same actions
+  /// as [_showRowMenu], in a menu at the cursor instead of the phone's
+  /// bottom sheet.
+  Future<void> _showRowMenuAt(Note note, Offset position) async {
+    final here = note.isDir ? note.path : parentOf(note.path);
+    final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
+    if (!mounted) return;
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final action = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        for (final entry in _rowMenuEntries(note, isQuickNote))
+          PopupMenuItem(
+            key: entry.key,
+            value: entry.value,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(entry.icon, size: 20),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(entry.label, overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+    await _runRowAction(action, note, here);
+  }
+
+  /// One tree-row menu entry, shared by the sheet and the cursor menu so
+  /// the two presentations cannot drift apart.
+  List<({Key key, IconData icon, String label, String value})> _rowMenuEntries(
+    Note note,
+    bool isQuickNote,
+  ) {
+    return [
+      (
+        key: const Key('menu-new-note'),
+        icon: Icons.note_add,
+        label: AppStrings.newNoteHere,
+        value: 'note',
+      ),
+      (
+        key: const Key('menu-new-from-template'),
+        icon: Icons.file_copy_outlined,
+        label: AppStrings.newFromTemplateHere,
+        value: 'template',
+      ),
+      if (note.isDir)
+        (
+          key: const Key('menu-new-folder'),
+          icon: Icons.create_new_folder,
+          label: AppStrings.newFolderHere,
+          value: 'folder',
+        ),
+      if (!note.isDir)
+        (
+          key: const Key('menu-quick-note'),
+          icon: isQuickNote
+              ? Icons.sticky_note_2
+              : Icons.sticky_note_2_outlined,
+          label: isQuickNote
+              ? AppStrings.currentQuickNote
+              : AppStrings.setAsQuickNote,
+          value: 'quicknote',
+        ),
+      // Markdown only: the pin is a frontmatter key, and a
+      // `todo.txt` has no frontmatter to put it in. An already
+      // pinned row keeps the entry whatever it is, so a pin
+      // written before this rule can still be taken back off.
+      if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
+        (
+          key: const Key('menu-pin'),
+          icon: note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+          label: note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
+          value: 'pin',
+        ),
+      (
+        key: const Key('menu-rename'),
+        icon: Icons.edit,
+        label: AppStrings.actionRename,
+        value: 'rename',
+      ),
+      (
+        key: const Key('menu-move'),
+        icon: Icons.drive_folder_upload,
+        label: AppStrings.actionMove,
+        value: 'move',
+      ),
+      (
+        key: const Key('menu-delete'),
+        icon: Icons.delete_outline,
+        label: AppStrings.actionDelete,
+        value: 'delete',
+      ),
+    ];
+  }
+
+  /// Runs the tree-row menu action both presentations return.
+  Future<void> _runRowAction(String? action, Note note, String here) async {
     if (action == null) return;
     switch (action) {
       case 'note':
@@ -1432,156 +1568,251 @@ final class _LibraryShellState extends State<_LibraryShell>
           _previewVisible &&
           _previewToggleVisible &&
           !previewSplits(_previewMode, narrow: true);
-      return PopScope(
-        canPop: !fullNote,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          // Back leaves fullscreen before it leaves the note: one gesture,
-          // one layer of chrome, the way every other fullscreen behaves.
-          if (immersive) {
-            setState(() => _previewFullScreen = false);
-            return;
-          }
-          _closeFullScreenNote();
-        },
-        child: ColoredBox(
-          // Opaque surface behind every phone transition (issue #4): the
-          // full-note fade starts from transparent, and without this the
-          // first frames expose the black Android window instead.
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // The tab shell never unmounts: hidden it skips layout, paint,
-              // and tickers, and the fullscreen note above is opaque. The
-              // hiding waits out the open fade (issue #4): the note fades
-              // in over the tabs instead of over the window background.
-              Offstage(
-                key: const ValueKey('tab-shell-offstage'),
-                offstage: fullNote && _noteHidingTabs,
-                child: TickerMode(
-                  enabled: !fullNote,
-                  child: KeyedSubtree(
-                    key: const ValueKey('tab-shell'),
-                    child: _tabShell(
-                      controller: controller,
-                      title: _tabTitle,
-                      actions: _tab == ShellTab.files
-                          ? _filesAppBarActions(controller)
-                          : _tab == ShellTab.todo
-                          ? [_todoHelpAction()]
-                          : const [],
-                      floatingActionButton: _tabFab(),
+      // The same accelerators on the phone layout, but without the
+      // focus claim: a field keeps the software keyboard (T-PP-10).
+      return CallbackShortcuts(
+        bindings: _appShortcutBindings(),
+        child: PopScope(
+          canPop: !fullNote,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            // Back leaves fullscreen before it leaves the note: one gesture,
+            // one layer of chrome, the way every other fullscreen behaves.
+            if (immersive) {
+              setState(() => _previewFullScreen = false);
+              return;
+            }
+            _closeFullScreenNote();
+          },
+          child: ColoredBox(
+            // Opaque surface behind every phone transition (issue #4): the
+            // full-note fade starts from transparent, and without this the
+            // first frames expose the black Android window instead.
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // The tab shell never unmounts: hidden it skips layout, paint,
+                // and tickers, and the fullscreen note above is opaque. The
+                // hiding waits out the open fade (issue #4): the note fades
+                // in over the tabs instead of over the window background.
+                Offstage(
+                  key: const ValueKey('tab-shell-offstage'),
+                  offstage: fullNote && _noteHidingTabs,
+                  child: TickerMode(
+                    enabled: !fullNote,
+                    child: KeyedSubtree(
+                      key: const ValueKey('tab-shell'),
+                      child: _tabShell(
+                        controller: controller,
+                        title: _tabTitle,
+                        actions: _tab == ShellTab.files
+                            ? _filesAppBarActions(controller)
+                            : const [],
+                        floatingActionButton: _tabFab(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              AnimatedSwitcher(
-                duration: _fullNoteFade,
-                switchInCurve: Curves.easeOutCubic,
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: fullNote
-                    ? KeyedSubtree(
-                        key: const ValueKey('full-note'),
-                        child: Scaffold(
-                          appBar: immersive
-                              ? null
-                              : AppBar(
-                                  leading: BackButton(
-                                    onPressed: _closeFullScreenNote,
-                                  ),
-                                  title: Text(p.basename(selectedPath)),
-                                  actions: [
-                                    ..._kindActions,
-                                    if (!previewSplits(
-                                          _previewMode,
-                                          narrow: true,
-                                        ) &&
-                                        _previewToggleVisible) ...[
-                                      _previewToggleAction(),
-                                      if (_previewVisible)
-                                        _previewFullScreenAction(),
+                AnimatedSwitcher(
+                  duration: _fullNoteFade,
+                  switchInCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: fullNote
+                      ? KeyedSubtree(
+                          key: const ValueKey('full-note'),
+                          child: Scaffold(
+                            appBar: immersive
+                                ? null
+                                : AppBar(
+                                    leading: BackButton(
+                                      onPressed: _closeFullScreenNote,
+                                    ),
+                                    title: Text(p.basename(selectedPath)),
+                                    actions: [
+                                      ..._kindActions,
+                                      if (!previewSplits(
+                                            _previewMode,
+                                            narrow: true,
+                                          ) &&
+                                          _previewToggleVisible) ...[
+                                        _previewToggleAction(),
+                                        if (_previewVisible)
+                                          _previewFullScreenAction(),
+                                      ],
                                     ],
-                                  ],
-                                ),
-                          body: Stack(
-                            children: [
-                              // Stable subtree across the immersive toggle:
-                              // only the top inset flips, so entering or
-                              // leaving fullscreen never reparents (and
-                              // disposes) the open note's state, focus and
-                              // scroll. The all-false SafeArea is a layout
-                              // no-op.
-                              Positioned.fill(
-                                child: SafeArea(
-                                  top: immersive,
-                                  bottom: false,
-                                  left: false,
-                                  right: false,
-                                  child: _fullNoteView(
-                                    controller,
-                                    selectedPath,
+                                  ),
+                            body: Stack(
+                              children: [
+                                // Stable subtree across the immersive toggle:
+                                // only the top inset flips, so entering or
+                                // leaving fullscreen never reparents (and
+                                // disposes) the open note's state, focus and
+                                // scroll. The all-false SafeArea is a layout
+                                // no-op.
+                                Positioned.fill(
+                                  child: SafeArea(
+                                    top: immersive,
+                                    bottom: false,
+                                    left: false,
+                                    right: false,
+                                    child: _fullNoteView(
+                                      controller,
+                                      selectedPath,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (immersive) _exitFullScreenButton(),
-                            ],
+                                if (immersive) _exitFullScreenButton(),
+                              ],
+                            ),
+                            bottomNavigationBar: immersive
+                                ? null
+                                : _shellTabs(),
                           ),
-                          bottomNavigationBar: immersive ? null : _shellTabs(),
-                        ),
-                      )
-                    : null,
-              ),
-            ],
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
+    // The desktop has no window app bar (T-PP-22): the rail names the
+    // app, the tree carries its own controls at the base, and an open
+    // note carries its controls in the detail pane's header. On Linux the
+    // window is frameless and the app draws its own title bar instead.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.appTitle),
-        actions: [
-          if (_selected != null && !_selectedIsDir) ..._kindActions,
-          if (_selected != null &&
-              !_selectedIsDir &&
-              _previewToggleVisible &&
-              !previewSplits(_previewMode, narrow: false))
-            _previewToggleAction(),
-          IconButton(
-            key: const Key('open-trash'),
-            tooltip: AppStrings.trashTitle,
-            icon: const Icon(Icons.delete),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => TrashScreen(controller: controller),
-              ),
-            ),
+      body: CallbackShortcuts(
+        bindings: _appShortcutBindings(),
+        // The shell has to be an ancestor of the primary focus for key
+        // events to bubble to the bindings; a fresh window focuses nothing
+        // (T-PP-10), so the body claims it until the tree or the editor
+        // takes over.
+        child: Focus(
+          focusNode: _shellFocus,
+          autofocus: true,
+          child: Column(
+            children: [
+              if (widget.window.customTitleBar)
+                AppTitleBar(
+                  title: _windowTitle,
+                  sidebarVisible: _sidebarVisible,
+                  onToggleSidebar: _toggleSidebar,
+                  window: widget.window,
+                ),
+              Expanded(child: _wideContent(controller)),
+            ],
           ),
-          IconButton(
-            key: const Key('open-todo'),
-            tooltip: AppStrings.todoTitle,
-            icon: const Icon(Icons.checklist),
-            onPressed: _openTodo,
-          ),
-          _sortToggle(),
-          IconButton(
-            key: const Key('open-settings'),
-            tooltip: AppStrings.tabSettings,
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => SettingsScreen(controller: controller),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
-      body: _withFabScrim(_wideBody(controller)),
-      floatingActionButton: _newItemFab(),
+    );
+  }
+
+  /// The wide-layout content: the tree + detail split for Files (and for
+  /// an open quick note, which lives in the detail pane — its tab body is
+  /// empty by design), the tab body itself otherwise.
+  ///
+  /// Bodies are kept mounted exactly like the narrow stack
+  /// ([TabBodyStack]): the tree/detail pair shares ONE slot across Files
+  /// and the open quick note, so a tab switch never re-runs the tree's
+  /// per-level queries or re-inflates the open editor. The 2026-09-10
+  /// desktop log showed the cost of the old swap-in/swap-out: 6-9 ms tree
+  /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
+  Widget _wideContent(LibrarySession controller) {
+    final filesVisible =
+        _tab == ShellTab.files ||
+        (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
+    return Row(
+      children: [
+        _shellRail(),
+        const VerticalDivider(width: 1),
+        Expanded(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _wideSlot(visible: filesVisible, child: _wideBody(controller)),
+              // One slot per remaining tab, in tab order so a slot's
+              // identity never moves. Unvisited tabs build the empty
+              // placeholder `_tabBodyFor` returns.
+              for (final tab in ShellTab.values)
+                if (tab != ShellTab.files && tab != ShellTab.quickNote)
+                  _wideSlot(
+                    visible: _tab == tab,
+                    retainLayout: tab == ShellTab.search,
+                    child: _tabBodyFor(tab, controller),
+                  ),
+              // The quick-note chooser: empty while its note is open in
+              // the slot above, the choose/create screen otherwise.
+              _wideSlot(
+                visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
+                child: _tabBodyFor(ShellTab.quickNote, controller),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
+  /// tickers (see [TabBodyStack]); [retainLayout] keeps an expensive one
+  /// laid out, so showing it is paint-only.
+  Widget _wideSlot({
+    required bool visible,
+    required Widget child,
+    bool retainLayout = false,
+  }) {
+    final slot = TickerMode(enabled: visible, child: child);
+    if (retainLayout) {
+      return Visibility(
+        visible: visible,
+        maintainState: true,
+        maintainAnimation: true,
+        maintainSize: true,
+        child: slot,
+      );
+    }
+    return Offstage(offstage: !visible, child: slot);
+  }
+
+  /// The fixed left rail (T-PP-14): the wide layout's always-visible twin
+  /// of the narrow bottom bar — same tabs, same order, same routing, so a
+  /// tab switch does the same thing on both layouts.
+  Widget _shellRail() {
+    return NavigationRail(
+      key: const Key('shell-rail'),
+      selectedIndex: _tab.index,
+      onDestinationSelected: _onDestinationSelected,
+      labelType: NavigationRailLabelType.all,
+      destinations: [
+        NavigationRailDestination(
+          icon: const Icon(Icons.folder_outlined),
+          selectedIcon: const Icon(Icons.folder),
+          label: Text(AppStrings.tabFiles),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.check_box_outlined),
+          selectedIcon: const Icon(Icons.check_box),
+          label: Text(AppStrings.todoTitle),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.search),
+          label: Text(AppStrings.tabSearch),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.edit_outlined),
+          selectedIcon: const Icon(Icons.edit),
+          label: Text(AppStrings.quickNoteTitle),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          label: Text(AppStrings.tabSettings),
+        ),
+      ],
     );
   }
 
@@ -1870,36 +2101,135 @@ final class _LibraryShellState extends State<_LibraryShell>
     _selectShellTab(tab);
   }
 
+  /// The title bar's text: the app, and the open note when there is one.
+  String get _windowTitle {
+    final path = _selected;
+    if (path == null || _selectedIsDir) return AppStrings.appTitle;
+    return '${AppStrings.appTitle} — ${p.basename(path)}';
+  }
+
+  /// Shows/hides the wide tree pane; the rail stays (T-PP-22).
+  void _toggleSidebar() {
+    setState(() => _sidebarVisible = !_sidebarVisible);
+  }
+
+  /// The app accelerators (T-PP-10), built from the shared registry so the
+  /// installed keys and the in-app reference cannot drift.
+  Map<ShortcutActivator, VoidCallback> _appShortcutBindings() {
+    return appShortcutBindings({
+      AppCommand.newNote: () => unawaited(_createNote()),
+      AppCommand.newListNote: () => unawaited(_createListNote()),
+      AppCommand.newTodo: () {
+        _openTodo();
+        unawaited(_addTodo());
+      },
+      AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
+      AppCommand.toggleSidebar: _toggleSidebar,
+      AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
+      AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
+      AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
+      AppCommand.tabQuickNote: () =>
+          _onDestinationSelected(ShellTab.quickNote.index),
+      AppCommand.tabSettings: () =>
+          _onDestinationSelected(ShellTab.settings.index),
+    });
+  }
+
   /// The wide-layout body: the tree pane and the split detail pane.
+  ///
+  /// The tree keeps its own controls at the base (T-PP-22), and an open
+  /// note gets a header inside the detail pane carrying its name and the
+  /// note controls the window app bar used to hold. Hiding the tree (the
+  /// title bar's toggle) gives its width to the detail pane.
   Widget _wideBody(LibrarySession controller) {
+    final noteOpen = _selected != null && !_selectedIsDir;
     return Row(
       children: [
-        SizedBox(width: 340, child: _treePane(controller)),
-        const VerticalDivider(width: 1),
+        if (_sidebarVisible) ...[
+          SizedBox(
+            width: _treeWidth,
+            child: Column(
+              children: [
+                Expanded(child: _treePane(controller)),
+                _treeFooter(controller),
+              ],
+            ),
+          ),
+          _treeDivider(),
+        ],
         Expanded(
-          child: _DetailPane(
-            root: controller.root,
-            selectedPath: _selected,
-            selectedIsDir: _selectedIsDir,
-            showLineNumbers: _lineNumbers,
-            autofocusEditor: _autofocusEditor,
-            linkType: _linkType,
-            indentWidth: _indentWidth,
-            toolbarLayout: _toolbarLayout,
-            splitPreview: previewSplits(_previewMode, narrow: false),
-            showPreview: _previewVisible,
-            splitFraction: _splitRatio,
-            onSplitFractionChanged: _onSplitFractionChanged,
-            onSplitDragEnd: _onSplitDragEnd,
-            linkSource: _linkSource,
-            onOpenNote: _openNoteFromLink,
-            initialAnchor: _pendingAnchor,
-            kindMode: !_kindRawMode,
-            onNoteKindChanged: _onNoteKindChanged,
+          child: Column(
+            children: [
+              if (noteOpen) _editorHeader(),
+              Expanded(
+                child: _DetailPane(
+                  root: controller.root,
+                  selectedPath: _selected,
+                  selectedIsDir: _selectedIsDir,
+                  showLineNumbers: _lineNumbers,
+                  autofocusEditor: _autofocusEditor,
+                  linkType: _linkType,
+                  indentWidth: _indentWidth,
+                  toolbarLayout: _toolbarLayout,
+                  splitPreview: previewSplits(_previewMode, narrow: false),
+                  showPreview: _previewVisible,
+                  splitFraction: _splitRatio,
+                  onSplitFractionChanged: _onSplitFractionChanged,
+                  onSplitDragEnd: _onSplitDragEnd,
+                  linkSource: _linkSource,
+                  onOpenNote: _openNoteFromLink,
+                  initialAnchor: _pendingAnchor,
+                  kindMode: !_kindRawMode,
+                  onNoteKindChanged: _onNoteKindChanged,
+                  unsavedTracker: widget.unsavedTracker,
+                  spellCheck: widget.spellCheck,
+                  statusActions: [
+                    // The view controls live in the note's status row on the
+                    // desktop (T-PP-22): the header above is about the file,
+                    // the footer about how it is shown.
+                    if (_previewToggleVisible) ...[
+                      _layoutModeAction(compact: true),
+                      if (!previewSplits(_previewMode, narrow: false))
+                        _previewToggleAction(compact: true),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  /// The draggable tree/detail divider (T-PP-21): a 1 px visual with a
+  /// wider grab box and the resize cursor, mirroring the editor split.
+  /// Moves apply live; the lift persists the width to the library.
+  Widget _treeDivider() {
+    return GestureDetector(
+      key: const Key('tree-divider'),
+      behavior: HitTestBehavior.translucent,
+      onHorizontalDragUpdate: (details) => setState(() {
+        _treeWidth = (_treeWidth + details.delta.dx).clamp(
+          minTreeWidth,
+          maxTreeWidth,
+        );
+      }),
+      onHorizontalDragEnd: (_) => unawaited(_persistTreeWidth()),
+      child: const MouseRegion(
+        cursor: SystemMouseCursors.resizeColumn,
+        child: SizedBox(
+          width: 13,
+          child: Center(child: VerticalDivider(width: 1)),
+        ),
+      ),
+    );
+  }
+
+  /// Persists the dragged tree width to the library settings.
+  Future<void> _persistTreeWidth() async {
+    await widget.controller.setTreeWidth(_treeWidth);
+    widget.controller.notify();
   }
 
   /// All five tab bodies: each mounts on its first visit and stays
@@ -1928,6 +2258,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.todo => TodoTab(
         controller: _todoController,
         reminders: widget.reminders,
+        onAddTask: _addTodo,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an
@@ -1936,7 +2267,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         _showQuickNoteChooser
             ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
             : const SizedBox.shrink(),
-      ShellTab.settings => SettingsTab(controller: controller),
+      ShellTab.settings => SettingsTab(
+        controller: controller,
+        spellCheck: widget.spellCheck,
+      ),
     };
   }
 
@@ -1982,6 +2316,174 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
+  /// The desktop tree's controls at the base of its column (T-PP-22):
+  /// creation, the trash and the sort order — the app-bar actions the wide
+  /// layout used to carry, where the tree is the thing they act on.
+  Widget _treeFooter(LibrarySession controller) {
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('tree-footer'),
+      height: 44,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          PopupMenuButton<_NewItem>(
+            key: const Key('new-item-menu'),
+            tooltip: AppStrings.actionNew,
+            onSelected: _onNewItem,
+            position: PopupMenuPosition.over,
+            // A desktop menu should appear, not perform (T-PP-22): the
+            // default 300 ms scale reads as skipped frames on this
+            // compositor, and 120 ms is a menu that is simply there.
+            popUpAnimationStyle: const AnimationStyle(
+              duration: Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+            ),
+            itemBuilder: (context) => [
+              _newItemMenuItem(
+                _NewItem.note,
+                Icons.note_add_outlined,
+                AppStrings.newNoteTitle,
+                key: const Key('new-note-action'),
+              ),
+              _newItemMenuItem(
+                _NewItem.listNote,
+                Icons.checklist_outlined,
+                AppStrings.newListNoteTitle,
+                key: const Key('new-list-note-action'),
+              ),
+              _newItemMenuItem(
+                _NewItem.template,
+                Icons.file_copy_outlined,
+                AppStrings.newFromTemplateTitle,
+                key: const Key('new-from-template-action'),
+              ),
+              const PopupMenuDivider(),
+              _newItemMenuItem(
+                _NewItem.folder,
+                Icons.create_new_folder_outlined,
+                AppStrings.newFolderTitle,
+                key: const Key('new-folder-action'),
+              ),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add, size: 18),
+                  const SizedBox(width: 4),
+                  Text(AppStrings.actionNew, style: theme.textTheme.labelLarge),
+                  const Icon(Icons.arrow_drop_down, size: 18),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            key: const Key('open-trash'),
+            tooltip: AppStrings.trashTitle,
+            icon: const Icon(Icons.delete),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => TrashScreen(controller: controller),
+              ),
+            ),
+          ),
+          _sortToggle(),
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
+
+  /// One entry of the tree footer's create menu.
+  PopupMenuItem<_NewItem> _newItemMenuItem(
+    _NewItem item,
+    IconData icon,
+    String label, {
+    Key? key,
+  }) {
+    return PopupMenuItem<_NewItem>(
+      key: key,
+      value: item,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 12),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+
+  /// Runs the create flow behind a tree-footer menu entry.
+  void _onNewItem(_NewItem item) {
+    switch (item) {
+      case _NewItem.note:
+        unawaited(_createNote());
+      case _NewItem.listNote:
+        unawaited(_createListNote());
+      case _NewItem.template:
+        unawaited(_createFromTemplate());
+      case _NewItem.folder:
+        unawaited(_createFolder());
+    }
+  }
+
+  /// The open note's header inside the detail pane (T-PP-22): the file
+  /// name and its folder, then the note controls that used to sit in the
+  /// wide app bar. Only mounted while a note is open.
+  Widget _editorHeader() {
+    final path = _selected!;
+    final folder = p.dirname(path);
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('editor-header'),
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.description_outlined,
+            size: 17,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              p.basename(path),
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall,
+            ),
+          ),
+          if (folder.isNotEmpty && folder != '.') ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                folder,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ),
+          ],
+          const Spacer(),
+          ..._kindActions,
+        ],
+      ),
+    );
+  }
+
   /// The tree pane: the action bar and the note tree — the whole body on
   /// phones, the left column on wide screens.
   Widget _treePane(LibrarySession controller) {
@@ -1993,6 +2495,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       onToggle: _toggle,
       onSelect: _select,
       onLongPress: _showRowMenu,
+      onSecondaryTapDown: (note, details) =>
+          _showRowMenuAt(note, details.globalPosition),
     );
   }
 }
@@ -2018,6 +2522,9 @@ final class _DetailPane extends StatelessWidget {
     required this.initialAnchor,
     required this.kindMode,
     required this.onNoteKindChanged,
+    required this.unsavedTracker,
+    required this.statusActions,
+    required this.spellCheck,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -2053,6 +2560,16 @@ final class _DetailPane extends StatelessWidget {
   final bool kindMode;
   final void Function(String? type) onNoteKindChanged;
 
+  /// The open notes' unsaved edits (T-PP-11): the detail editor reports
+  /// its dirty state here for the window's close guard.
+  final UnsavedTracker unsavedTracker;
+
+  /// The view controls forwarded into the note's status row (T-PP-22).
+  final List<Widget> statusActions;
+
+  /// The editor's spelling state (T-PP-09).
+  final EditorSpellCheck spellCheck;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -2083,6 +2600,10 @@ final class _DetailPane extends StatelessWidget {
                 linkType: linkType,
                 indentWidth: indentWidth,
                 toolbarLayout: toolbarLayout,
+                // Wide only: the formatting toolbar sits above the editor
+                // (desktop chrome); the phone keeps it under the editor,
+                // extending the keyboard.
+                toolbarTop: true,
                 splitPreview: splitPreview,
                 showPreview: showPreview,
                 splitFraction: splitFraction,
@@ -2094,6 +2615,9 @@ final class _DetailPane extends StatelessWidget {
                 initialAnchor: initialAnchor,
                 kindMode: kindMode,
                 onNoteKindChanged: onNoteKindChanged,
+                unsavedTracker: unsavedTracker,
+                statusActions: statusActions,
+                spellCheck: spellCheck,
               ),
             ),
     );

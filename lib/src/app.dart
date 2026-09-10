@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/text_scale.dart';
 import 'package:copist/src/core/theme.dart';
+import 'package:copist/src/ui/close_guard.dart';
 import 'package:copist/src/ui/shell.dart';
 import 'package:copist/src/ui/theme/device_colors.dart';
 import 'package:copist/src/ui/theme/palettes.dart';
+import 'package:copist/src/ui/unsaved_notes.dart';
+import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Root widget of the Copist application.
 ///
@@ -91,7 +95,16 @@ class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: const LibraryHome(),
+        // The close guard sits directly under the MaterialApp, not above
+        // it: the ask is a dialog, so it needs the Navigator and the
+        // ScaffoldMessenger the app provides.
+        home: Consumer(
+          builder: (context, ref, _) => CloseGuard(
+            tracker: ref.watch(unsavedTrackerProvider),
+            window: ref.watch(windowControllerProvider),
+            child: const LibraryHome(),
+          ),
+        ),
       ),
     );
   }

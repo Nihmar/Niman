@@ -72,12 +72,17 @@ void main() {
     expect(lastWanted(), <int>[todoReminderId(line)]);
   });
 
-  testWidgets('the wide layout opens the todo list from the app bar', (
+  testWidgets('the wide layout opens the todo list from the rail', (
     tester,
   ) async {
     await pumpShell(tester, const Size(1200, 900));
-    expect(find.byKey(const Key('open-todo')), findsOne);
-    await tester.tap(find.byKey(const Key('open-todo')));
+    expect(find.byKey(const Key('shell-rail')), findsOne);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('shell-rail')),
+        matching: find.text('Todo'),
+      ),
+    );
     await settle(tester);
     expect(find.byKey(const Key('todo-view-switch')), findsOne);
   });

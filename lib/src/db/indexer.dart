@@ -341,10 +341,6 @@ final class Indexer {
 
   final AppLogger _log;
 
-  /// How many entry paths are listed in a single debug log line before the
-  /// rest is summarized, keeping huge libraries from flooding the buffer.
-  static const _logEntryCap = 200;
-
   /// The DAO over the same database, exposed for read-side callers.
   NoteDao get dao => _dao;
 
@@ -383,13 +379,17 @@ final class Indexer {
       };
       final entries = await _walk(root, root);
       final files = entries.where((e) => !e.isDir).length;
-      _log.info(
-        'fullScan $root: found ${entries.length} entr(ies) '
-        '($files file, ${entries.length - files} dir)',
-      );
-      _log.debug('fullScan entries: ${_entryList(entries)}');
+      _log
+        ..info(
+          'fullScan $root: found ${entries.length} entr(ies) '
+          '($files file, ${entries.length - files} dir)',
+        )
+        // The paths themselves are not logged: on a large library the line
+        // was ~8 KB of the 512 KB ring on every fallback scan, and it
+        // evicted the useful history (T-PP-22).
+        ..debug('fullScan entries: ${entries.length} path(s)');
       // Checked before the digests: a rescan that changes nothing — the
-      // common case, once a minute — then costs the walk and no reads.
+      // common case — then costs the walk and no reads.
       // The content index can still be incomplete (a v7-era database
       // predates the M3 tables): in that case the no-write exit is skipped
       // and the content pass rebuilds FTS/tags/links for every note.
@@ -1028,15 +1028,6 @@ final class Indexer {
     final scan = await Isolate.run(() => scanTree(root, start));
     scan.logs.forEach(_log.debug);
     return scan.entries;
-  }
-
-  /// The [entries] rel paths as a single debug log line, capped at
-  /// [_logEntryCap] paths.
-  String _entryList(List<DiskEntry> entries) {
-    if (entries.isEmpty) return '(none)';
-    final shown = entries.take(_logEntryCap).map((e) => e.rel).join(', ');
-    final extra = entries.length - _logEntryCap;
-    return extra > 0 ? '$shown, … (+$extra more)' : shown;
   }
 
   /// Applies the difference between the desired tree [entries] (a walk of

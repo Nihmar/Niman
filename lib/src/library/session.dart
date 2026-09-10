@@ -1,4 +1,5 @@
 import 'package:copist/src/core/language.dart';
+import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
@@ -218,6 +219,14 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the reminder-markers toggle.
   Future<void> setReminderShowTokens({required bool enabled});
 
+  /// The hunspell dictionary the spell checker uses (`<name>` found on the
+  /// machine), or null for the locale default.
+  Future<String?> get spellDictionary;
+
+  /// Sets (and persists) the spell-check dictionary; null restores the
+  /// locale default.
+  Future<void> setSpellDictionary(String? name);
+
   /// The preview layout mode (default `auto`: split on wide screens,
   /// full-screen switch on phones).
   Future<PreviewLayoutMode> get previewMode;
@@ -236,6 +245,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the library tree sort order.
   Future<void> setTreeSort(TreeSort sort);
+
+  /// The tree pane's width in logical pixels (default
+  /// [defaultTreeWidth]).
+  Future<double> get treeWidth;
+
+  /// Sets (and persists) the tree pane's width.
+  Future<void> setTreeWidth(double width);
 
   /// Whether the tree's pinned section is rolled up (default false).
   ///

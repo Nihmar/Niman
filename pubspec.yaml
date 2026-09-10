@@ -17,7 +17,12 @@ dependencies:
   crypto: ^3.0.7
   drift: ^2.34.3
 
+  # The device's own colors, for the Material You palette (T-M6-05).
   dynamic_color: ^2.1.0
+
+  # Dart FFI: the hunspell desktop spell-check engine (T-PP-09).
+  ffi: ^2.1.1
+
   file_picker: ^12.2.0
   flutter:
     sdk: flutter
@@ -56,6 +61,16 @@ dependencies:
   markdown: ^7.3.1
   # Filesystem location for the library root.
   meta: ^1.19.0
+
+  # The desktop tray (T-PP-06b) — the one surface window_manager dropped
+  # (no TrayManager in 0.5.x), same leanflutter family. Used for the tray
+  # only: its `WindowManager` is hidden at the import and `getCurrent()`
+  # is never called, since window_manager owns the window. Exact pin:
+  # pre-1.0 with a moving API. Its vendored C++ compiles into every
+  # platform build, the Android APK included (accepted in the T-PP-16
+  # verdict; see the Risks section of plan/m-platform-parity.md).
+  nativeapi: 0.2.3
+
   path: ^1.9.1
   path_provider: ^2.1.6
 
@@ -82,6 +97,13 @@ dependencies:
   sqlite3: ^3.5.2
   timezone: ^0.11.1
   url_launcher: ^6.3.2
+
+  # The desktop window is owned by this package (T-PP-16 spike winner):
+  # the only candidate with a runtime-verified close-request event, which
+  # the dirty-check on close (T-PP-11) rides, plus a real Linux drag.
+  # Exact pin: leanflutter's pre-1.0 line with a moving API (the spike
+  # notes in plan/m-platform-parity.md record the three-way evaluation).
+  window_manager: 0.5.2
 
   # The frontmatter block is real YAML (M4): the hand-rolled key:value
   # reader could not do nested maps, block lists or quoting rules, and a

@@ -49,10 +49,9 @@ void main() {
     await settle(tester);
   }
 
-  /// Picks `Bug` from the FAB and names the note [name].
+  /// Picks `Bug` from the create menu and names the note [name].
   Future<void> useTemplate(WidgetTester tester, String name) async {
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-from-template-action')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('template-Templates/Bug.md')));
@@ -97,8 +96,7 @@ void main() {
       '_repro': 'Seen on {{choice:Platform:Android,Windows}}',
     });
 
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-from-template-action')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('template-Templates/Bug.md')));

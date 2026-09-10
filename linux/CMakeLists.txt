@@ -121,6 +121,16 @@ install(CODE "
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
+# The desktop entry (T-PP-06): the four quick actions mirror the launcher
+# shortcuts and the tray menu, each calling a CLI flag. It ships next to the
+# executable so M7 packaging can install it into
+# ~/.local/share/applications, rewriting Exec to the absolute install path
+# (the spec wants one once installed; the bare `copist` works from a
+# checkout on PATH).
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/dev.copist.copist.desktop"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+
 # Install the AOT library on non-Debug builds only.
 if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
   install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"

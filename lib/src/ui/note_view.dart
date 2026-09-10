@@ -28,11 +28,15 @@ import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/spell_check_sheet.dart';
+import 'package:copist/src/spellcheck/spell_issue.dart';
 import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/theme/tokens.dart';
+import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +86,10 @@ final class NoteView extends StatefulWidget {
     this.initialAnchor,
     this.kindMode = true,
     this.onNoteKindChanged,
+    this.toolbarTop = false,
+    this.unsavedTracker,
+    this.statusActions = const <Widget>[],
+    this.spellCheck,
     super.key,
   });
 
@@ -164,6 +172,25 @@ final class NoteView extends StatefulWidget {
   /// plain note); the shell shows the kind toggle for known kinds.
   final void Function(String? type)? onNoteKindChanged;
 
+  /// Whether the formatting toolbar sits above the editor (desktop)
+  /// instead of below it (phone, where it extends the keyboard).
+  final bool toolbarTop;
+
+  /// The app-level registry of notes with unsaved edits (T-PP-11), which
+  /// the window's close guard reads; null when the owner does not track
+  /// (most widget tests). The adapter below reports this note's live
+  /// revision pair, so the tracker never holds a copy of the text.
+  final UnsavedTracker? unsavedTracker;
+
+  /// Extra controls at the right of the status row (T-PP-22): the desktop
+  /// puts the layout/preview actions here, next to the note's own status;
+  /// the phone keeps them in its note app bar (empty by default).
+  final List<Widget> statusActions;
+
+  /// The editor's spelling state (T-PP-09): underlines misspelled prose.
+  /// Null (most widget tests, and a platform without hunspell) draws none.
+  final EditorSpellCheck? spellCheck;
+
   @override
   State<NoteView> createState() => _NoteViewState();
 }
@@ -231,6 +258,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   int _revision = 0;
   int _lastSavedRevision = 0;
 
+  /// The save in flight, if any: a coalesced [_save] hands it back, so a
+  /// caller that must know the disk moved ([_saveForClose]) awaits the
+  /// real write instead of the pending flag.
+  Future<void>? _activeSave;
+
+  /// The app-level unsaved registry this editor reports into (T-PP-11),
+  /// or null when the owner does not track.
+  late final UnsavedTracker? _unsaved;
+
+  /// The [UnsavedNote] view handed to [_unsaved]; it reads this state's
+  /// revision pair live, so it cannot hold stale text.
+  late final _UnsavedNoteAdapter _unsavedNote = _UnsavedNoteAdapter(this);
+
   /// The loaded note's kind (the frontmatter `type` value, null = plain
   /// note); null again while a load is in flight.
   String? _noteKind;
@@ -252,6 +292,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         : widget.controller!;
     _findController = CodeFindController(_controller);
     _kindHost = _NoteKindHost(this);
+    _unsaved = widget.unsavedTracker;
+    _unsaved?.register(_unsavedNote);
+    widget.spellCheck?.addListener(_onSpellCheckChanged);
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -273,6 +316,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       if (!_saving && _revision != _lastSavedRevision) {
         unawaited(_save(path: oldWidget.path));
       }
+      // The tracker now sees the incoming path (the adapter reads it
+      // live) — re-read the dirty set so the guard does not act on the
+      // outgoing note.
+      _unsaved?.noteChanged();
       unawaited(_load());
     }
     // The preview has no editable: a note opening in it, or the switch
@@ -291,6 +338,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
+    _unsaved?.unregister(_unsavedNote);
+    widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _findController.dispose();
     _focus.dispose();
     _scroll.verticalScroller.dispose();
@@ -381,8 +430,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _applyStats(text, stats.$1, stats.$2);
       }
       _controller.text = text;
+      // The spell cache is keyed by line index + text; a different note can
+      // reuse the same indices, so forget the previous file's answers.
+      widget.spellCheck?.reset();
       _lastLines = _controller.codeLines;
       _lastSavedRevision = _revision;
+      _unsaved?.noteChanged();
       setState(() {
         _loading = false;
         _ready = true;
@@ -394,7 +447,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // production load already has them from its isolate (the seam path
       // uses the regular refresh).
       if (stats == null) _refreshStats();
-      _refreshPreview();
+      // The editor gets this frame: the preview's parse and first layout
+      // start right after the text is on screen, so a large note shows it
+      // before the preview works (T-PP-22).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refreshPreview();
+      });
       final anchor = widget.initialAnchor;
       if (anchor != null) _jumpToAnchor(anchor);
       _log.info(
@@ -434,6 +492,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
     _lastLines = value.codeLines;
     _revision++;
+    _unsaved?.noteChanged();
     // No setState: the status line follows the save state only. The debounce
     // lengthens while a save is in flight (typing fast: one trailing save,
     // not a queue).
@@ -966,17 +1025,28 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) unawaited(_save());
   }
 
-  Future<void> _save({String? path}) async {
+  /// Saves the buffer at most once: a request that finds a save in flight
+  /// coalesces into one trailing save (the text is re-read from the buffer
+  /// at that point, so nothing is lost) and returns the write already
+  /// running, so an awaiting caller still learns when the disk moved.
+  Future<void> _save({String? path}) {
     final revision = _revision;
-    if (revision == _lastSavedRevision) return; // nothing new on disk
+    if (revision == _lastSavedRevision) {
+      return Future<void>.value(); // nothing new on disk
+    }
     if (path == null && _saving) {
-      // A save is in flight: coalesce into one trailing save (the text is
-      // re-read from the buffer at that point, so nothing is lost).
       _savePending = true;
-      return;
+      return _activeSave ?? Future<void>.value();
     }
     _saving = true;
-    final target = path ?? widget.path;
+    final future = _performSave(revision, path ?? widget.path);
+    _activeSave = future;
+    return future;
+  }
+
+  /// The actual write for [_save]; a write error reaches every caller
+  /// awaiting the returned future.
+  Future<void> _performSave(int revision, String target) async {
     final clock = Stopwatch()..start();
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
@@ -986,7 +1056,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _log.info('save start: $target (${text.length} chars, join $joinMs ms)');
     try {
       await _write(target, text);
-      if (target == widget.path) _lastSavedRevision = revision;
+      if (target == widget.path) {
+        _lastSavedRevision = revision;
+        _unsaved?.noteChanged();
+      }
       _log.info(
         'note saved: $target (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -1000,8 +1073,68 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
   }
 
+  /// The close guard's save (T-PP-11): writes until the disk holds the
+  /// latest revision — waiting out a save that was already in flight — and
+  /// completes with the write's error when one fails. The caller keeps the
+  /// window open on a failure: the edits are still only in the buffer.
+  Future<void> _saveForClose() async {
+    while (_revision != _lastSavedRevision) {
+      await _save();
+    }
+  }
+
+  /// Spelling results changed (the note loaded, or a settings toggle):
+  /// cached line spans must be rebuilt with the new ranges.
+  void _onSpellCheckChanged() {
+    if (!mounted) return;
+    _highlight.clearSpans();
+    setState(() {});
+  }
+
+  /// Opens the spelling review panel (T-PP-09).
+  Future<void> _openSpellCheck() async {
+    final spell = widget.spellCheck;
+    if (spell == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SpellCheckSheet(
+        scan: _scanSpelling,
+        apply: _applySpelling,
+        available: spell.available,
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  /// The whole note's issues, in reading order (the panel's pass).
+  List<SpellIssue> _scanSpelling() {
+    final spell = widget.spellCheck;
+    if (spell == null) return const <SpellIssue>[];
+    final lines = _controller.codeLines;
+    return spell.scan(<SpellLine>[
+      for (var i = 0; i < lines.length; i++)
+        (text: lines[i].text, skip: spellSkipRanges(_highlight.tokensOf(i))),
+    ]);
+  }
+
+  /// Replaces one issue's word in the controller (the panel's fix).
+  void _applySpelling(SpellIssue issue, String replacement) {
+    _controller.replaceSelection(
+      replacement,
+      CodeLineSelection(
+        baseIndex: issue.line,
+        baseOffset: issue.start,
+        extentIndex: issue.line,
+        extentOffset: issue.end,
+      ),
+    );
+    _highlight.clearSpans();
+  }
+
   /// The [CodeLineSpanBuilder] over [_highlight]: styles each line the
-  /// editor lays out, dark/light per the app brightness.
+  /// editor lays out, dark/light per the app brightness, and underlines the
+  /// misspelled prose (T-PP-09) once the spell checker knows the line.
   TextSpan _buildHighlightSpan({
     required BuildContext context,
     required int index,
@@ -1009,12 +1142,28 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     required TextSpan textSpan,
     required TextStyle style,
   }) {
+    final spell = widget.spellCheck;
+    final spellRanges = spell == null
+        ? const <TextRange>[]
+        : spell.rangesFor(
+            index,
+            codeLine.text,
+            skip: spellSkipRanges(_highlight.tokensOf(index)),
+          );
     return _highlight.spanFor(
       index: index,
       text: codeLine.text,
       base: style,
       syntax: SyntaxColors.of(context),
       dark: Theme.of(context).brightness == Brightness.dark,
+      spellRanges: spellRanges,
+      spellStyle: spellRanges.isEmpty
+          ? null
+          : TextStyle(
+              decoration: TextDecoration.underline,
+              decorationStyle: TextDecorationStyle.wavy,
+              decorationColor: Theme.of(context).colorScheme.error,
+            ),
     );
   }
 
@@ -1053,6 +1202,21 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final kindBody = widget.kindMode && kindGui != null;
     return Column(
       children: [
+        // Desktop: the toolbar is editor chrome, above the editor, with a
+        // divider setting it off the text. Phone: it extends the keyboard,
+        // below (see the bottom slot).
+        if (widget.toolbarTop && !kindBody && !_loading)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.bottomCenter,
+            child: showToolbar
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_toolbar(context), const Divider(height: 1)],
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
         Expanded(
           child: error == null
               ? (!_ready || _loading
@@ -1106,8 +1270,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                 // The toolbar fades + sizes in and out (hidden in preview
                 // mode). It is only mounted once loaded, so it appears
                 // immediately on load and animates only when preview mode
-                // toggles.
-                if (!_loading)
+                // toggles. Phone only: on desktop it lives above the
+                // editor (the top slot).
+                if (!widget.toolbarTop && !_loading)
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOutCubic,
@@ -1165,6 +1330,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   Widget _statusRow(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelSmall;
     return Padding(
+      key: const Key('status-row'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Row(
         children: [
@@ -1190,6 +1356,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: _findController.findMode,
             ),
+          if (!_loading &&
+              widget.spellCheck != null &&
+              widget.spellCheck!.available)
+            IconButton(
+              key: const Key('spell-check-open'),
+              tooltip: AppStrings.spellCheckTooltip,
+              icon: const Icon(Icons.spellcheck),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+              onPressed: () => unawaited(_openSpellCheck()),
+            ),
           if (!_loading)
             Text(
               '$_wordCount words',
@@ -1199,6 +1377,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ),
           const Spacer(),
           Text(_status, style: labelStyle),
+          for (final action in widget.statusActions) ...[
+            const SizedBox(width: 6),
+            action,
+          ],
         ],
       ),
     );
@@ -1396,6 +1578,27 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
     return index + offset;
   }
+}
+
+/// The [UnsavedNote] view over [_NoteViewState]'s revision pair
+/// (T-PP-11): no text copy, so the dirty bit cannot drift from the buffer.
+final class _UnsavedNoteAdapter implements UnsavedNote {
+  const new(this._state);
+
+  final _NoteViewState _state;
+
+  @override
+  String get path => _state.widget.path;
+
+  @override
+  // While a load is in flight the buffer holds the outgoing note and the
+  // incoming one has nothing to save yet: not dirty, so a close landing on
+  // the swap cannot write stale text under the new path.
+  bool get unsaved =>
+      !_state._loading && _state._revision != _state._lastSavedRevision;
+
+  @override
+  Future<void> save() => _state._saveForClose();
 }
 
 /// The kind GUIs' window onto the note (T-TK-02): the buffer text, and

@@ -1,6 +1,6 @@
-// T-TK-06/07: the FAB's "New list note" mini — creates a `type: list`
-// note in the configured folder (default `Lists/`, re-targetable via the
-// library setting) and opens it.
+// T-TK-06/07: the create menu's "New list note" action — creates a
+// `type: list` note in the configured folder (default `Lists/`,
+// re-targetable via the library setting) and opens it.
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:flutter/material.dart';
@@ -26,15 +26,14 @@ void main() {
     );
   }
 
-  testWidgets('the FAB expands into note, folder and list-note actions', (
+  testWidgets('the create menu offers note, folder and list-note actions', (
     tester,
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
 
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     expect(find.byKey(const Key('new-note-action')), findsOneWidget);
     expect(find.byKey(const Key('new-folder-action')), findsOneWidget);
     expect(find.byKey(const Key('new-list-note-action')), findsOneWidget);
@@ -50,8 +49,7 @@ void main() {
     await tester.pump();
     await openLibrary(tester, filePicker);
 
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-list-note-action')));
     await settle(tester);
     expect(find.byType(AlertDialog), findsOneWidget);
@@ -83,8 +81,7 @@ void main() {
 
     await controller.ops!.setListNoteFolder(folder: 'Checklists');
 
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-list-note-action')));
     await settle(tester);
     await tester.enterText(dialogField(), 'Second');

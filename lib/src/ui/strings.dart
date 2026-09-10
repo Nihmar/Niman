@@ -142,8 +142,38 @@ final class AppStrings {
   static String get settingsSectionEditor => _t('Editor', 'Editor');
   static String get settingsSectionLibrary => _t('Library', 'Libreria');
   static String get settingsSectionReminders => _t('Reminders', 'Promemoria');
+  static String get settingsSectionShortcuts => _t('Keyboard', 'Tastiera');
+  static String get keyboardShortcutsTitle =>
+      _t('Keyboard shortcuts', 'Scorciatoie da tastiera');
   static String get settingsSectionDiagnostics =>
       _t('Diagnostics', 'Diagnostica');
+  static String get settingsSpellCheckTitle =>
+      _t('Check spelling', 'Controlla ortografia');
+  static String get settingsSpellCheckSubtitle => _t(
+    'Underline misspelled words while writing.',
+    'Sottolinea le parole errate mentre scrivi.',
+  );
+  static String get spellCheckDictionaryTitle => _t('Dictionary', 'Dizionario');
+  static String get spellCheckDictionarySystem =>
+      _t('System default', 'Predefinito di sistema');
+  static String get spellCheckDictionaryChoiceTitle =>
+      _t('Choose dictionary', 'Scegli dizionario');
+
+  // Spelling review (T-PP-09).
+  static String get spellCheckTooltip =>
+      _t('Check spelling', 'Controlla ortografia');
+  static String get spellCheckTitle => _t('Spelling', 'Ortografia');
+  static String get spellCheckEmpty =>
+      _t('No spelling mistakes.', 'Nessun errore di ortografia.');
+  static String get spellCheckUnavailable => _t(
+    'hunspell is not installed on this system.',
+    'hunspell non è installato su questo sistema.',
+  );
+  static String get spellCheckNoSuggestions =>
+      _t('No suggestions', 'Nessun suggerimento');
+  static String spellCheckCount(int count) =>
+      _t('$count to review', '$count da rivedere');
+  static String spellCheckLine(int line) => _t('line $line', 'riga $line');
 
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) =>
@@ -250,6 +280,16 @@ final class AppStrings {
   static String get shortcutNewTodo => _t('New todo', 'Nuova attività');
   static String get shortcutNewNote => _t('New note', 'Nuova nota');
   static String get shortcutNewList => _t('New list', 'Nuova lista');
+  static String get shortcutToggleSidebar =>
+      _t('Show or hide the file tree', 'Mostra o nascondi l’albero dei file');
+  static String get shortcutEditorSection => _t('In the editor', 'Nell’editor');
+  static String get shortcutFind => _t('Find', 'Trova');
+  static String get shortcutReplace =>
+      _t('Find and replace', 'Trova e sostituisci');
+  static String get shortcutSavingNote => _t(
+    'Edits are saved automatically, so there is no save shortcut.',
+    'Le modifiche si salvano da sole: non c’è una scorciatoia per salvare.',
+  );
 
   // Editor status bar.
   static String get outlineTooltip => _t('Outline', 'Struttura');
@@ -501,6 +541,12 @@ final class AppStrings {
     'Quando inviare una notifica, nella tua ora locale. Arriva anche a '
         'schermo spento e con l’app chiusa.',
   );
+  static String get todoHelpRemDesktop => _t(
+    'On desktop Copist must be running when the time comes: the reminder is '
+        'shown while the app is open, and nothing fires when it is closed.',
+    'Su desktop Copist deve essere aperto al momento giusto: il promemoria '
+        'compare mentre l’app è aperta, e nulla scatta a app chiusa.',
+  );
   static String get todoHelpOther => 'anything:else';
   static String get todoHelpOtherBody => _t(
     'Kept exactly as written, so tags from other todo.txt apps survive '
@@ -600,17 +646,58 @@ final class AppStrings {
   static String get actionOk => _t('OK', 'OK');
   static String get actionCancel => _t('Cancel', 'Annulla');
   static String get actionCreate => _t('Create', 'Crea');
+
+  /// The desktop tree footer's create menu (T-PP-22).
+  static String get actionNew => _t('New', 'Nuovo');
   static String get actionSave => _t('Save', 'Salva');
   static String get actionClear => _t('Clear', 'Svuota');
   static String get actionChoose => _t('Choose', 'Scegli');
   static String get actionDelete => _t('Delete', 'Elimina');
   static String get actionRename => _t('Rename', 'Rinomina');
   static String get actionMove => _t('Move', 'Sposta');
+
+  /// The close-with-unsaved-edits ask (T-PP-11).
+  static String get saveAndClose => _t('Save and close', 'Salva e chiudi');
+  static String get closeUnsavedTitle =>
+      _t('Unsaved changes', 'Modifiche non salvate');
+
+  /// The close ask's body, for the unsaved notes' names.
+  static String closeUnsavedBody(List<String> names) {
+    if (names.length == 1) {
+      return _t(
+        "'${names.first}' has edits that are not saved yet. "
+            'Save them before closing?',
+        "'${names.first}' ha modifiche non ancora salvate. "
+            'Salvarle prima di chiudere?',
+      );
+    }
+    return _t(
+      '${names.length} notes have edits that are not saved yet. '
+          'Save them before closing?',
+      '${names.length} note hanno modifiche non ancora salvate. '
+          'Salvarle prima di chiudere?',
+    );
+  }
+
+  /// The save-before-close failed, so the window stays open.
+  static String get closeSaveFailed =>
+      _t('Could not save; still open.', 'Salvataggio fallito: ancora aperta.');
   static String get actionRestore => _t('Restore', 'Ripristina');
   static String get actionEmpty => _t('Empty', 'Svuota');
 
   // The shell: app bar, tabs and tree actions.
   static const String appTitle = 'Copist';
+
+  // The window's own title bar (T-PP-22).
+  static String get hideSidebarTooltip =>
+      _t('Hide sidebar (Ctrl+B)', 'Nascondi il pannello (Ctrl+B)');
+  static String get showSidebarTooltip =>
+      _t('Show sidebar (Ctrl+B)', 'Mostra il pannello (Ctrl+B)');
+  static String get windowMinimizeTooltip => _t('Minimize', 'Riduci a icona');
+  static String get windowMaximizeTooltip => _t('Maximize', 'Ingrandisci');
+  static String get windowRestoreTooltip => _t('Restore', 'Ripristina');
+  static String get windowCloseTooltip => _t('Close', 'Chiudi');
+
   static String get tabFiles => _t('Files', 'File');
   static String get tabSearch => _t('Search', 'Cerca');
   static String get tabSettings => _t('Settings', 'Impostazioni');

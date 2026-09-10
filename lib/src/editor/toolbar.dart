@@ -23,6 +23,13 @@ final class EditorToolbarButton {
   final VoidCallback onPressed;
 }
 
+/// The toolbar's height: icon 20 px with 6 px padding above and below.
+///
+/// Shared with the pinned section's heading, whose row matches it so the
+/// two top bars line up across panes (user, 2026-09-09). Pinned here
+/// (rather than derived) so a padding tweak cannot silently misalign them.
+const double editorToolbarHeight = 32;
+
 /// The editor formatting toolbar (T-UI-08): a horizontally scrollable row
 /// of buttons at the bottom (no scrollbar). The buttons are non-focusable
 /// so tapping one never takes focus from the editor (the keyboard stays
@@ -37,28 +44,31 @@ final class EditorToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final button in buttons)
-            Tooltip(
-              message: button.tooltip,
-              child: InkWell(
-                key: button.key,
-                onTap: button.onPressed,
-                canRequestFocus: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+    return SizedBox(
+      height: editorToolbarHeight,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final button in buttons)
+              Tooltip(
+                message: button.tooltip,
+                child: InkWell(
+                  key: button.key,
+                  onTap: button.onPressed,
+                  canRequestFocus: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    child: Icon(button.icon, size: 20),
                   ),
-                  child: Icon(button.icon, size: 20),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

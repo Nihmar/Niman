@@ -89,9 +89,12 @@ void main() {
     previewScroll.jumpTo(previewTarget);
     await tester.pump();
     await tester.pump();
+    // The mapping anchors the source line at the *top* of the viewport
+    // (T-PP-22), so the editor lands half a viewport of lines before the
+    // raw 70% fraction would — hence the wider tolerance here.
     expect(
       editorPos.pixels,
-      closeTo(editorPos.maxScrollExtent * 0.7, editorPos.maxScrollExtent / 60),
+      closeTo(editorPos.maxScrollExtent * 0.7, editorPos.maxScrollExtent / 30),
     );
 
     editorController.dispose();

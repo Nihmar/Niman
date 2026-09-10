@@ -2,6 +2,7 @@
 // its date, and lists the pinned notes above the folder tree — pinned and
 // unpinned from the row's own menu.
 import 'package:copist/src/app.dart';
+import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
@@ -33,10 +34,7 @@ void main() {
   }
 
   /// Opens a library holding the given notes (path → content).
-  Future<void> openWith(
-    WidgetTester tester,
-    Map<String, String> notes,
-  ) async {
+  Future<void> openWith(WidgetTester tester, Map<String, String> notes) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
@@ -93,6 +91,16 @@ void main() {
     expect(noteRow('pinned.md'), findsNWidgets(2));
   });
 
+  testWidgets('the pinned heading matches the editor toolbar height', (
+    tester,
+  ) async {
+    // One constant drives both top bars so the rows below start together
+    // (user, 2026-09-09); the toolbar end is pinned in toolbar_layout_test.
+    await openWith(tester, {'pinned': '---\npinned: true\n---\nbody'});
+
+    expect(tester.getRect(pinnedHeading()).height, editorToolbarHeight);
+  });
+
   testWidgets('the pinned block shows a note from any folder', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -141,9 +149,7 @@ void main() {
     expect(controller.contentOf('plain.md'), 'body\n');
   });
 
-  testWidgets('a file that is not a note offers no pin action', (
-    tester,
-  ) async {
+  testWidgets('a file that is not a note offers no pin action', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);

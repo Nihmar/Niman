@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/db/index_database.dart';
+import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/file_icon.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -39,6 +40,7 @@ final class NoteTree extends StatefulWidget {
     required this.onToggle,
     required this.onSelect,
     this.onLongPress,
+    this.onSecondaryTapDown,
     this.nameDesc = false,
     super.key,
   });
@@ -63,6 +65,11 @@ final class NoteTree extends StatefulWidget {
 
   /// Called with the row's note on long-press (context menu, T-UI-05).
   final void Function(Note note)? onLongPress;
+
+  /// Called with the row's note on right-click (context menu at the
+  /// cursor, T-PP-20): the desktop twin of [onLongPress], which stays
+  /// for touchscreens.
+  final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -206,6 +213,7 @@ final class _NoteTreeState extends State<NoteTree> {
                   onSelect: widget.onSelect,
                   onToggle: widget.onToggle,
                   onLongPress: widget.onLongPress,
+                  onSecondaryTapDown: widget.onSecondaryTapDown,
                 );
               },
             );
@@ -220,7 +228,13 @@ final class _NoteTreeState extends State<NoteTree> {
   Widget _pinnedItem(List<Note> pinned, int index) {
     if (index == 0) return _pinnedHeading(pinned.length);
     if (index == (_collapsed ? 1 : pinned.length + 1)) {
-      return const Divider(height: 9);
+      // The hairline sits directly under the heading — aligned with the
+      // editor toolbar's divider across the pane boundary — with the
+      // breathing room kept below it, so the block keeps its metrics.
+      return const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [Divider(height: 1), SizedBox(height: 8)],
+      );
     }
     final note = pinned[index - 1];
     return _RowTile(
@@ -234,6 +248,7 @@ final class _NoteTreeState extends State<NoteTree> {
       onSelect: widget.onSelect,
       onToggle: widget.onToggle,
       onLongPress: widget.onLongPress,
+      onSecondaryTapDown: widget.onSecondaryTapDown,
       icon: Icons.push_pin_outlined,
     );
   }
@@ -244,26 +259,33 @@ final class _NoteTreeState extends State<NoteTree> {
   /// The count is what makes rolling it up bearable — closed, the heading
   /// still says how much is behind it, so the section is a thing you put
   /// away rather than a thing you lose.
+  ///
+  /// The row is exactly [editorToolbarHeight] tall, matching the editor
+  /// toolbar across the pane boundary so the rows below start together
+  /// (user, 2026-09-09).
   Widget _pinnedHeading(int count) {
     final theme = Theme.of(context);
     final style = theme.textTheme.labelMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
-    return InkWell(
-      key: const Key('pinned-heading'),
-      onTap: () => _togglePinned(collapsed: !_collapsed),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 16, 4),
-        child: Row(
-          children: [
-            Icon(
-              _collapsed ? Icons.chevron_right : Icons.expand_more,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Text(AppStrings.pinnedSectionCount(count), style: style),
-          ],
+    return SizedBox(
+      height: editorToolbarHeight,
+      child: InkWell(
+        key: const Key('pinned-heading'),
+        onTap: () => _togglePinned(collapsed: !_collapsed),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12, right: 16),
+          child: Row(
+            children: [
+              Icon(
+                _collapsed ? Icons.chevron_right : Icons.expand_more,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Text(AppStrings.pinnedSectionCount(count), style: style),
+            ],
+          ),
         ),
       ),
     );
@@ -296,6 +318,7 @@ final class _RowTile extends StatelessWidget {
     required this.onSelect,
     required this.onToggle,
     this.onLongPress,
+    this.onSecondaryTapDown,
     this.icon,
     super.key,
   });
@@ -307,6 +330,7 @@ final class _RowTile extends StatelessWidget {
   final void Function(Note note) onSelect;
   final ValueChanged<String> onToggle;
   final void Function(Note note)? onLongPress;
+  final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
 
   /// Replaces the file-type icon; the pinned block uses it to say why the
   /// row is there.
@@ -318,6 +342,9 @@ final class _RowTile extends StatelessWidget {
     return InkWell(
       onTap: () => onSelect(note),
       onLongPress: onLongPress == null ? null : () => onLongPress!(note),
+      onSecondaryTapDown: onSecondaryTapDown == null
+          ? null
+          : (details) => onSecondaryTapDown!(note, details),
       child: Container(
         height: 40,
         color: selected ? theme.highlightColor.withValues(alpha: 0.4) : null,

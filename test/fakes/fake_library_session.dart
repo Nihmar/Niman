@@ -58,6 +58,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
   String _templateFolder = defaultTemplateFolder;
+
+  /// Search hits returned for every word query (empty = no results).
+  ///
+  /// Settable so shell-level tests can drive search → open flows.
+  List<SearchHit> searchHits = [];
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
   AppPalette _themePalette = AppPalette.system;
@@ -206,6 +211,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _config = _config.copyWith(reminderShowTokens: enabled);
   }
 
+  @override
+  Future<String?> get spellDictionary async => _config.spellDictionary;
+
+  @override
+  Future<void> setSpellDictionary(String? name) async {
+    _config = _config.copyWith(
+      spellDictionary: name,
+      clearSpellDictionary: name == null,
+    );
+    _bump();
+  }
+
   // The preview layout is app-wide: it follows the screen, not the
   // library.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
@@ -233,6 +250,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTreeSort(TreeSort sort) async {
     _config = _config.copyWith(treeSort: sort);
+  }
+
+  @override
+  Future<double> get treeWidth async => _config.treeWidth;
+
+  @override
+  Future<void> setTreeWidth(double width) async {
+    _config = _config.copyWith(treeWidth: width);
   }
 
   @override
@@ -362,7 +387,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<SearchSource?> get searchSource async => FakeSearchSource();
+  Future<SearchSource?> get searchSource async =>
+      FakeSearchSource(hits: searchHits);
 
   @override
   Future<ReplaceSource?> get replaceSource async => FakeReplaceSource();

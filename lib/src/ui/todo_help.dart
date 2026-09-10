@@ -10,6 +10,8 @@
 /// out precisely because it is kept but not acted on.
 library;
 
+import 'dart:io';
+
 import 'package:copist/src/ui/help_layout.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
@@ -23,35 +25,50 @@ final class TodoHelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppStrings.todoHelpTitle)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          HelpParagraph(AppStrings.todoHelpIntro),
-          const HelpExample('buy milk +groceries @errands due:2026-09-09'),
-          HelpSection(AppStrings.todoHelpFilesTitle),
-          HelpParagraph(AppStrings.todoHelpFilesBody),
-          HelpSection(AppStrings.todoHelpLineTitle),
-          HelpParagraph(AppStrings.todoHelpLineBody),
-          const HelpExample(
-            'x 2026-09-08 2026-09-01 (A) call the plumber @home',
-          ),
-          HelpRow(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
-          HelpRow(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
-          HelpRow(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
-          HelpSection(AppStrings.todoHelpTokensTitle),
-          HelpParagraph(AppStrings.todoHelpTokensBody),
-          HelpRow(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
-          HelpRow(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
-          HelpRow(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
-          HelpSection(AppStrings.todoHelpTagsTitle),
-          HelpParagraph(AppStrings.todoHelpTagsBody),
-          HelpRow(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
-          HelpRow(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
-          HelpRow(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
-          HelpSection(AppStrings.todoHelpEditTitle),
-          HelpParagraph(AppStrings.todoHelpEditBody),
-        ],
-      ),
+      body: const TodoHelpBody(),
+    );
+  }
+}
+
+/// The reference's content alone, without the screen chrome: the desktop
+/// opens it in a dialog over the tab, so the rail and the list stay on
+/// screen (T-PP-22).
+final class TodoHelpBody extends StatelessWidget {
+  /// Creates the reference body.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      children: [
+        HelpParagraph(AppStrings.todoHelpIntro),
+        const HelpExample('buy milk +groceries @errands due:2026-09-09'),
+        HelpSection(AppStrings.todoHelpFilesTitle),
+        HelpParagraph(AppStrings.todoHelpFilesBody),
+        HelpSection(AppStrings.todoHelpLineTitle),
+        HelpParagraph(AppStrings.todoHelpLineBody),
+        const HelpExample('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
+        HelpRow(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
+        HelpRow(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
+        HelpRow(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
+        HelpSection(AppStrings.todoHelpTokensTitle),
+        HelpParagraph(AppStrings.todoHelpTokensBody),
+        HelpRow(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
+        HelpRow(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
+        HelpRow(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
+        HelpSection(AppStrings.todoHelpTagsTitle),
+        HelpParagraph(AppStrings.todoHelpTagsBody),
+        HelpRow(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
+        HelpRow(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
+        // Android fires with the app closed; the desktops cannot, so say so
+        // where the syntax is explained rather than letting it be found out.
+        if (Platform.isLinux || Platform.isWindows)
+          HelpParagraph(AppStrings.todoHelpRemDesktop),
+        HelpRow(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
+        HelpSection(AppStrings.todoHelpEditTitle),
+        HelpParagraph(AppStrings.todoHelpEditBody),
+      ],
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:copist/src/core/language.dart';
@@ -8,7 +9,10 @@ import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:copist/src/ui/folder_picker.dart';
+import 'package:copist/src/ui/keyboard_shortcuts.dart';
 import 'package:copist/src/ui/note_picker.dart';
 import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -21,37 +25,23 @@ import 'package:flutter/material.dart';
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
 /// Global theme/layout settings arrive with the M6 token system.
-final class SettingsScreen extends StatelessWidget {
-  /// Creates the settings screen.
-  const new({required this.controller, super.key});
-
-  /// The session of the library whose settings this screen edits.
-  final LibrarySession controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(AppStrings.settingsTitle)),
-      body: SettingsBody(
-        controller: controller,
-        onClosed: () {
-          // The pushed screen returns to the shell (which then re-renders
-          // into the open-library screen since the session is closed).
-          if (context.mounted) Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
-}
-
-/// The settings content: the same list is shown pushed (wide app-bar
-/// button) and embedded as the bottom-nav Settings tab (T-UI-02).
+///
+/// The settings content, embedded as the Settings tab (bottom bar on
+/// narrow, rail on wide).
 final class SettingsBody extends StatefulWidget {
   /// Creates the settings body.
-  const new({required this.controller, this.onClosed, super.key});
+  const new({
+    required this.controller,
+    this.onClosed,
+    this.spellCheck,
+    super.key,
+  });
 
   /// The session of the library whose settings this body edits.
   final LibrarySession controller;
+
+  /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
+  final EditorSpellCheck? spellCheck;
 
   /// Called after "Close library" closes the session; the pushed screen
   /// pops its own route, the shell tab returns to the Files tab. When null
@@ -86,6 +76,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   /// to land on a size that fits, coarse enough to be hit on a phone.
   static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
       .round();
+  String? _spellDictionary;
 
   @override
   void initState() {
@@ -114,6 +105,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final themePalette = await controller.themePalette;
     final uiTextScale = await controller.uiTextScale;
     final noteTextScale = await controller.noteTextScale;
+    final spellDictionary = await controller.spellDictionary;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -134,6 +126,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _themePalette = themePalette;
         _uiTextScale = uiTextScale;
         _noteTextScale = noteTextScale;
+        _spellDictionary = spellDictionary;
       });
     }
   }
@@ -286,15 +279,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
     }
   }
 
-  Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
-    final controller = widget.controller;
-    await controller.setPreviewMode(mode);
-    controller.notify();
-    if (mounted) {
-      setState(() => _previewMode = mode);
-    }
-  }
-
   Future<void> _setSplitRatio(double ratio) async {
     final controller = widget.controller;
     await controller.setSplitRatio(ratio);
@@ -408,26 +392,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
         '.${three(dt.millisecond)}';
   }
 
-  /// Asks for the preview mode.
-  Future<void> _choosePreviewMode() async {
-    final mode = await showSettingsChoice<PreviewLayoutMode>(
-      context,
-      dialogKey: const Key('preview-mode-dialog'),
-      title: AppStrings.previewModeTitle,
-      subtitle: AppStrings.previewModeSubtitle,
-      current: _previewMode,
-      options: [
-        SettingsOption(PreviewLayoutMode.auto, AppStrings.previewModeAuto),
-        SettingsOption(
-          PreviewLayoutMode.fullScreen,
-          AppStrings.previewModeSwitch,
-        ),
-      ],
-    );
-    if (mode != null) await _setPreviewMode(mode);
-  }
-
-  /// Asks for the editor's share of a side-by-side split.
   Future<void> _chooseSplitRatio() async {
     final ratio = await showSettingsSlider(
       context,
@@ -510,6 +474,36 @@ final class _SettingsBodyState extends State<SettingsBody> {
       ],
     );
     if (width != null) await _setIndentWidth(width);
+  }
+
+  /// Asks which hunspell dictionary the editor should use (T-PP-09): every
+  /// one found on the machine plus the locale default.
+  Future<void> _chooseSpellDictionary(EditorSpellCheck spell) async {
+    final names = discoverDictionaries().keys.toList()..sort();
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
+        children: [
+          SimpleDialogOption(
+            key: const Key('spell-dictionary-system'),
+            onPressed: () => Navigator.pop(context, ''),
+            child: Text(AppStrings.spellCheckDictionarySystem),
+          ),
+          for (final name in names)
+            SimpleDialogOption(
+              key: Key('spell-dictionary-$name'),
+              onPressed: () => Navigator.pop(context, name),
+              child: Text(name),
+            ),
+        ],
+      ),
+    );
+    if (choice == null) return;
+    final name = choice.isEmpty ? null : choice;
+    await widget.controller.setSpellDictionary(name);
+    spell.setDictionary(name);
+    if (mounted) setState(() => _spellDictionary = name);
   }
 
   /// Asks for the app's language.
@@ -598,6 +592,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final spell = widget.spellCheck;
     // Grouped, and every setting one row of the same height (2026-09-08
     // user feedback). Switches stay switches; everything with more than
     // two choices reads its value on the right and opens a dialog, which
@@ -638,21 +633,9 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: AppStrings.textScaleValue(_uiTextScale),
           onTap: () => unawaited(_chooseUiTextScale()),
         ),
-        // Both rows are about a layout a narrow screen cannot have
-        // (T-CL-05): the mode decides nothing below 600 dp, and the
-        // ratio moves a number nothing reads. Their stored values are
-        // untouched while they are hidden, so plugging in a monitor
-        // brings back the layout the user chose.
-        if (!narrow)
-          SettingsValueRow(
-            key: const Key('preview-mode-setting'),
-            title: AppStrings.previewModeTitle,
-            value: switch (_previewMode) {
-              PreviewLayoutMode.auto => AppStrings.previewModeAuto,
-              PreviewLayoutMode.fullScreen => AppStrings.previewModeSwitch,
-            },
-            onTap: () => unawaited(_choosePreviewMode()),
-          ),
+        // The split ratio stays here; the split/switch choice itself
+        // lives in the editor's app bar (user, 2026-09-09): a layout a
+        // narrow screen cannot have is not a global setting.
         if (_splitLoaded && previewSplits(_previewMode, narrow: narrow))
           SettingsValueRow(
             key: const Key('split-ratio-setting'),
@@ -684,12 +667,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: _lineNumbers ?? true,
           onChanged: _toggleLineNumbers,
         ),
-        SwitchListTile(
-          title: Text(AppStrings.keyboardOnOpenTitle),
-          subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
-          value: _autofocusEditor ?? false,
-          onChanged: _toggleAutofocusEditor,
-        ),
+        // Phones and tablets only: there is no on-screen keyboard to
+        // show on desktop, so the row would toggle a no-op (user,
+        // 2026-09-09).
+        if (Platform.isAndroid || Platform.isIOS)
+          SwitchListTile(
+            title: Text(AppStrings.keyboardOnOpenTitle),
+            subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
+            value: _autofocusEditor ?? false,
+            onChanged: _toggleAutofocusEditor,
+          ),
         SettingsValueRow(
           key: const Key('link-type'),
           title: AppStrings.linkTypeTitle,
@@ -711,6 +698,35 @@ final class _SettingsBodyState extends State<SettingsBody> {
           value: AppStrings.indentWidthValue(_indentWidth),
           onTap: () => unawaited(_chooseIndentWidth()),
         ),
+
+        SettingsSection(AppStrings.settingsSectionShortcuts),
+        SettingsValueRow(
+          key: const Key('keyboard-shortcuts-setting'),
+          title: AppStrings.keyboardShortcutsTitle,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const KeyboardShortcutsScreen(),
+            ),
+          ),
+        ),
+
+        if (spell != null && spell.available) ...[
+          SwitchListTile(
+            key: const Key('spell-check-setting'),
+            title: Text(AppStrings.settingsSpellCheckTitle),
+            subtitle: Text(AppStrings.settingsSpellCheckSubtitle),
+            value: spell.enabled,
+            onChanged: (value) =>
+                setState(() => spell.setEnabled(enabled: value)),
+          ),
+          SettingsValueRow(
+            key: const Key('spell-dictionary-setting'),
+            title: AppStrings.spellCheckDictionaryTitle,
+            value: _spellDictionary ?? AppStrings.spellCheckDictionarySystem,
+            onTap: () => unawaited(_chooseSpellDictionary(spell)),
+          ),
+        ],
 
         SettingsSection(AppStrings.settingsSectionLibrary),
         // The one row with nothing to change: a fact about the open

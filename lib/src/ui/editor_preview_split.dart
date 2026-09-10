@@ -23,7 +23,7 @@ final class EditorPreviewSplit extends StatefulWidget {
     this.onDragEnd,
     this.minFraction = 0.2,
     this.maxFraction = 0.8,
-    this.dividerWidth = 4,
+    this.dividerWidth = 1,
     super.key,
   });
 
@@ -117,7 +117,7 @@ final class _EditorPreviewSplitState extends State<EditorPreviewSplit> {
             child: MouseRegion(
               cursor: SystemMouseCursors.resizeColumn,
               child: SizedBox(
-                // The visual divider stays 4 px; the hit box is wider so
+                // The visual divider stays 1 px; the hit box is wider so
                 // fingers (and pointers) can actually grab it.
                 width: widget.dividerWidth + 12,
                 child: Center(

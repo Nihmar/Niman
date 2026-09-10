@@ -60,10 +60,9 @@ void main() {
     await settle(tester);
   }
 
-  /// Opens the FAB's template picker and takes the one template.
+  /// Opens the create menu's template picker and takes the one template.
   Future<void> chooseTemplate(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-from-template-action')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('template-Templates/Spinoff.md')));

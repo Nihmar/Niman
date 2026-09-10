@@ -757,10 +757,9 @@ void main() {
     /// The `frontmatter_fields` rows of [path] as `key=value` strings.
     Future<List<String>> fieldsOf(String path) async {
       final row = (await dao.find(path))!;
-      final rows =
-          await (db.select(db.frontmatterFields)
-                ..where((f) => f.noteId.equals(row.id)))
-              .get();
+      final rows = await (db.select(
+        db.frontmatterFields,
+      )..where((f) => f.noteId.equals(row.id))).get();
       return [for (final f in rows) '${f.key}=${f.value}']..sort();
     }
 

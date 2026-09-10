@@ -17,7 +17,12 @@ const String _doc = 'hello world';
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 /// Pumps a NoteView whose toolbar is [layout].
-Future<void> _pumpEditor(WidgetTester tester, ToolbarLayout layout) async {
+Future<void> _pumpEditor(
+  WidgetTester tester,
+  ToolbarLayout layout, {
+  bool toolbarTop = false,
+  bool showPreview = false,
+}) async {
   final controller = CodeLineEditingController.fromText(_doc);
   addTearDown(controller.dispose);
   await tester.pumpWidget(
@@ -27,6 +32,8 @@ Future<void> _pumpEditor(WidgetTester tester, ToolbarLayout layout) async {
         showLineNumbers: true,
         autofocusEditor: false,
         toolbarLayout: layout,
+        toolbarTop: toolbarTop,
+        showPreview: showPreview,
         controller: controller,
         readNote: (_) async => _doc,
         writeNote: (path, content) async {},
@@ -49,6 +56,45 @@ void main() {
     expect(_renderedKeys(tester), [
       for (final item in ToolbarItem.values) item.widgetKey,
     ]);
+  });
+
+  testWidgets('default: the toolbar sits below the editor (phone)', (
+    tester,
+  ) async {
+    await _pumpEditor(tester, ToolbarLayout.defaults);
+    final bar = tester.getCenter(find.byKey(ToolbarItem.bold.widgetKey)).dy;
+    final editor = tester.getCenter(find.byType(CodeEditor)).dy;
+    expect(bar, greaterThan(editor));
+  });
+
+  testWidgets('toolbarTop: the toolbar sits above the editor (desktop)', (
+    tester,
+  ) async {
+    await _pumpEditor(tester, ToolbarLayout.defaults, toolbarTop: true);
+    expect(find.byType(EditorToolbar), findsOneWidget);
+    expect(
+      tester.getRect(find.byType(EditorToolbar)).height,
+      editorToolbarHeight,
+    );
+    final bar = tester.getCenter(find.byKey(ToolbarItem.bold.widgetKey)).dy;
+    final editor = tester.getCenter(find.byType(CodeEditor)).dy;
+    expect(bar, lessThan(editor));
+    // A divider sets the bar off the text.
+    expect(find.byType(Divider), findsOneWidget);
+  });
+
+  testWidgets('fullscreen preview hides the toolbar, top or bottom', (
+    tester,
+  ) async {
+    await _pumpEditor(tester, ToolbarLayout.defaults, showPreview: true);
+    expect(find.byType(EditorToolbar), findsNothing);
+    await _pumpEditor(
+      tester,
+      ToolbarLayout.defaults,
+      toolbarTop: true,
+      showPreview: true,
+    );
+    expect(find.byType(EditorToolbar), findsNothing);
   });
 
   testWidgets('a stored order is the render order', (tester) async {

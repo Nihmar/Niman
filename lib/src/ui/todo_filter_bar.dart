@@ -20,6 +20,8 @@ final class TodoFilterBar extends StatelessWidget {
     required this.count,
     required this.onDueRange,
     required this.onOpenFilter,
+    this.leading,
+    this.trailing,
     super.key,
   });
 
@@ -37,6 +39,13 @@ final class TodoFilterBar extends StatelessWidget {
 
   /// Opens the token + sort sheet.
   final VoidCallback onOpenFilter;
+
+  /// Optional control before the due-range pill: the desktop folds its
+  /// Open/Done switch in here (T-PP-22).
+  final Widget? leading;
+
+  /// Optional controls after the count: the desktop's Add task and help.
+  final Widget? trailing;
 
   static const AppLogger _log = AppLogger(name: 'todo');
 
@@ -56,6 +65,7 @@ final class TodoFilterBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
+          if (leading case final lead?) ...[lead, const SizedBox(width: 12)],
           _DueRangeMenu(range: filter.dueRange, onDueRange: onDueRange),
           const SizedBox(width: 8),
           OutlinedButton.icon(
@@ -76,6 +86,7 @@ final class TodoFilterBar extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
+          if (trailing case final tail?) ...[const SizedBox(width: 8), tail],
         ],
       ),
     );

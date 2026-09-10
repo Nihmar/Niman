@@ -136,6 +136,29 @@ void main() {
     await close();
   });
 
+  testWidgets('a CLI flag runs the same flow as its launcher twin', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          librarySessionProvider.overrideWithValue(controller),
+          shortcutServiceProvider.overrideWith(
+            (ref) => CliShortcutService(ShortcutAction.newTodo),
+          ),
+        ],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    await settle(tester);
+
+    expect(find.text(AppStrings.todoAddTitle), findsOneWidget);
+    expect(find.byKey(const Key('todo-dialog-field')), findsOneWidget);
+    await close();
+  });
+
   testWidgets('a cold start runs the action once the shell mounts', (
     tester,
   ) async {

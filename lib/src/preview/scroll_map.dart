@@ -11,12 +11,25 @@ import 'dart:math' as math;
 /// layout, and the map answers the two sync queries: source line → preview
 /// offset (editor scrolls → preview follows) and preview offset → source
 /// line (preview scrolls → editor follows).
+///
+/// The mapping walks the block heights, not a line fraction (T-PP-22): an
+/// image or a display-math block is hundreds of pixels tall for a handful
+/// of source lines, so the fraction put the preview behind the editor
+/// next to them. Blocks the windowed preview has not laid out yet are
+/// estimated from the measured blocks' own pixels-per-line average, and
+/// those same heights are handed to the layout as the blocks' extents
+/// ([extentFor]), so the pane's pixels and the map cannot disagree.
 final class ScrollMap {
   /// Per top-level block: the source line it starts on.
   final List<int> blockStartLines = <int>[];
 
   /// Per top-level block: measured pixel height (0 until laid out).
   final List<double> blockHeights = <double>[];
+
+  /// Running sums over the measured blocks, so the average used for the
+  /// unmeasured ones costs nothing per scroll frame.
+  double _measuredPixels = 0;
+  int _measuredLines = 0;
 
   /// Total source lines (frontmatter excluded, like the preview parse).
   int lineCount = 0;
@@ -31,14 +44,32 @@ final class ScrollMap {
   bool get built => blockStartLines.isNotEmpty || lineCount == 0;
 
   /// Rebuilds from [source] (frontmatter stripped, as the preview parses).
+  ///
+  /// The previous parse's measured heights are carried over for the blocks
+  /// that still start on the same source line: without that, every
+  /// debounced edit (one parse per typing pause) wiped the whole map, and
+  /// the preview re-measured every block on screen — each first layout
+  /// after a keystroke paid a full re-learn (T-PP-22).
   void rebuild(String source) {
+    final previous = <int, double>{
+      for (var i = 0; i < blockStartLines.length; i++)
+        if (i < blockHeights.length && blockHeights[i] > 0)
+          blockStartLines[i]: blockHeights[i],
+    };
     blockStartLines.clear();
     blockHeights.clear();
+    _extents.clear();
+    _measuredPixels = 0;
+    _measuredLines = 0;
     lineCount = 0;
     if (source.isEmpty) return;
     final lines = const LineSplitter().convert(source);
     lineCount = lines.length;
     blockStartLines.addAll(BlockLocator().locate(lines));
+    for (var i = 0; i < blockStartLines.length; i++) {
+      final height = previous[blockStartLines[i]];
+      if (height != null) measure(i, height);
+    }
   }
 
   /// Records a measured height for block [index] (from the preview layout).
@@ -47,8 +78,73 @@ final class ScrollMap {
     while (blockHeights.length <= index) {
       blockHeights.add(0);
     }
+    final previous = blockHeights[index];
+    if (previous > 0) {
+      _measuredPixels -= previous;
+      _measuredLines -= _spanOf(index);
+    }
     blockHeights[index] = height;
+    if (height > 0) {
+      _measuredPixels += height;
+      _measuredLines += _spanOf(index);
+      _freeze(index, height);
+    }
   }
+
+  /// Freezes block [index]'s extent for the layout (see [_extents]).
+  void _freeze(int index, double extent) {
+    while (_extents.length <= index) {
+      _extents.add(0);
+    }
+    _extents[index] = extent;
+  }
+
+  /// The source lines block [index] spans (at least one).
+  int _spanOf(int index) {
+    final start = blockStartLines[index];
+    final end = index + 1 < blockStartLines.length
+        ? blockStartLines[index + 1]
+        : lineCount;
+    return math.max(1, end - start);
+  }
+
+  /// Pixels per source line assumed until a block has been measured (the
+  /// preview's body text at 1.5 line height).
+  static const double defaultPixelsPerLine = 22;
+
+  /// Per-block extent handed to the layout and used by the mapping.
+  ///
+  /// A block's extent is frozen the first time it is asked for — the
+  /// measured height once the preview has laid it out, the line-span
+  /// estimate before — and then only replaced by that block's own
+  /// measurement. Letting the shared average re-estimate blocks that were
+  /// already placed is what makes SliverVariedExtentList assert: their
+  /// offsets move under the scroll position.
+  final List<double> _extents = <double>[];
+
+  /// Block [index]'s height: its frozen extent (seeded here on first use),
+  /// the block's measurement winning as soon as it lands.
+  double _heightOf(int index) {
+    while (_extents.length <= index) {
+      _extents.add(0);
+    }
+    final frozen = _extents[index];
+    if (frozen > 0) return frozen;
+    final measured = index < blockHeights.length ? blockHeights[index] : 0.0;
+    final perLine = _measuredLines == 0
+        ? defaultPixelsPerLine
+        : _measuredPixels / _measuredLines;
+    final extent = measured > 0 ? measured : _spanOf(index) * perLine;
+    _extents[index] = extent;
+    return extent;
+  }
+
+  /// The extent to give block [index] in the preview's layout
+  /// (`SliverVariedExtentList`): the same height the mapping walks, so the
+  /// pane's pixels and the map can never disagree. With an extent per
+  /// block, a jump lays out only the blocks it lands on instead of every
+  /// block in between (the scroll cost on math-heavy notes, T-PP-22).
+  double extentFor(int index) => _heightOf(index);
 
   /// The block index containing source [line].
   int blockForLine(int line) {
@@ -66,25 +162,48 @@ final class ScrollMap {
   }
 
   /// The preview offset that shows [line], or null when nothing is laid out
-  /// yet. Proportional (line fraction × content height): the mapping table
-  /// pins the block structure, but the scroll position itself is a fraction
-  /// — which is what lines up with the editor's own (wrap-dependent)
-  /// extent.
+  /// yet. It walks the blocks above [line]'s, adding their measured (or
+  /// estimated) heights and the line's fraction inside its own block.
   double? previewOffsetForLine(int line, {required double maxExtent}) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    final fraction = (line / math.max(1, lineCount - 1)).clamp(0.0, 1.0);
-    return maxExtent * fraction;
+    final index = blockForLine(line);
+    var content = 0.0;
+    for (var i = 0; i < index; i++) {
+      content += _heightOf(i);
+    }
+    final span = _spanOf(index);
+    final within = span <= 1
+        ? 0.0
+        : ((line - blockStartLines[index]) / span).clamp(0.0, 1.0);
+    content += _heightOf(index) * within;
+    // The preview's layout uses exactly these extents, so the offset needs
+    // no rescaling to the pane's current extent.
+    return content.clamp(0.0, maxExtent);
   }
 
-  /// The source line shown at preview [offset], or null when unknown.
+  /// The source line shown at preview [offset], or null when unknown. The
+  /// mirror of [previewOffsetForLine]: blocks are walked, not fractions.
   int? lineForPreviewOffset(double offset, {required double maxExtent}) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    final fraction = (offset / maxExtent).clamp(0.0, 1.0);
-    return ((lineCount - 1) * fraction).round();
+    final content = offset;
+    var acc = 0.0;
+    for (var i = 0; i < blockStartLines.length; i++) {
+      final height = _heightOf(i);
+      if (acc + height > content) {
+        final within = height <= 0
+            ? 0.0
+            : ((content - acc) / height).clamp(0.0, 1.0);
+        final span = _spanOf(i);
+        final line = blockStartLines[i] + (within * span).floor();
+        return line.clamp(blockStartLines[i], blockStartLines[i] + span - 1);
+      }
+      acc += height;
+    }
+    return lineCount - 1;
   }
 }
 
