@@ -91,12 +91,30 @@ final class QuillEditorCommands implements EditorCommands {
   /// The styles at the caret, merged with the ones kept for the next typed
   /// character: a toggle tapped on an empty selection has to look active
   /// before anything is typed (T-WYS-06).
+  ///
+  /// Inline attributes come from the selection style; block attributes come
+  /// from the line the caret sits on. The selection style inherits the
+  /// previous line's block style when the caret is at the start of an empty
+  /// line, which is how the code button stayed lit — and the toggle direction
+  /// flipped — after a double Enter left the fence (2026-09-13, code-block
+  /// follow-up). Reading the line directly keeps the button in step with the
+  /// document.
   static Map<String, quill.Attribute<dynamic>> _attributesOf(
     quill.QuillController controller,
-  ) => <String, quill.Attribute<dynamic>>{
-    ...controller.getSelectionStyle().attributes,
-    ...controller.toggledStyle.attributes,
-  };
+  ) {
+    final line = controller.document.queryChild(controller.selection.end).node;
+    final attributes = <String, quill.Attribute<dynamic>>{};
+    for (final entry in controller.getSelectionStyle().attributes.entries) {
+      if (entry.value.scope == quill.AttributeScope.inline) {
+        attributes[entry.key] = entry.value;
+      }
+    }
+    if (line is quill.Line) {
+      attributes.addAll(line.style.attributes);
+    }
+    attributes.addAll(controller.toggledStyle.attributes);
+    return attributes;
+  }
 
   /// Whether [item] is already on at the caret, for the toolbar's pressed
   /// state.

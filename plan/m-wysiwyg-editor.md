@@ -47,7 +47,11 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
   insert with no attribute put the code outside the fence, and the next write
   moved it out of the note (device report). Each fence line now carries the
   block attribute, consecutive lines group into one fence, blank lines inside
-  stay, and an empty fence is no longer written back.
+  stay, and an empty fence is no longer written back. Enter continues the
+  fence and a second Enter on the empty line closes it — the same way a list
+  or a quote behaves — and the code button tracks the caret (it used to stay
+  lit after the exit, because the selection style borrowed the previous line's
+  block attribute).
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
