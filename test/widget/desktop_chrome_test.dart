@@ -102,7 +102,24 @@ void main() {
       findsOne,
     );
     expect(find.descendant(of: header, matching: find.text('Notes')), findsOne);
-    expect(find.byKey(const Key('layout-mode')), findsOne);
+    // The view controls sit in the note's status row, not in the header
+    // (T-PP-22, user 2026-09-10).
+    final statusRow = find.byKey(const Key('status-row'));
+    expect(statusRow, findsOne);
+    expect(
+      find.descendant(
+        of: statusRow,
+        matching: find.byKey(const Key('layout-mode')),
+      ),
+      findsOne,
+    );
+    expect(
+      find.descendant(
+        of: header,
+        matching: find.byKey(const Key('layout-mode')),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('wide: the todo panel holds switch, add and help; no FAB', (

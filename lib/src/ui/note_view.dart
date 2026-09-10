@@ -83,6 +83,7 @@ final class NoteView extends StatefulWidget {
     this.onNoteKindChanged,
     this.toolbarTop = false,
     this.unsavedTracker,
+    this.statusActions = const <Widget>[],
     super.key,
   });
 
@@ -174,6 +175,11 @@ final class NoteView extends StatefulWidget {
   /// (most widget tests). The adapter below reports this note's live
   /// revision pair, so the tracker never holds a copy of the text.
   final UnsavedTracker? unsavedTracker;
+
+  /// Extra controls at the right of the status row (T-PP-22): the desktop
+  /// puts the layout/preview actions here, next to the note's own status;
+  /// the phone keeps them in its note app bar (empty by default).
+  final List<Widget> statusActions;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -1224,6 +1230,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   Widget _statusRow(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelSmall;
     return Padding(
+      key: const Key('status-row'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Row(
         children: [
@@ -1258,6 +1265,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ),
           const Spacer(),
           Text(_status, style: labelStyle),
+          for (final action in widget.statusActions) ...[
+            const SizedBox(width: 6),
+            action,
+          ],
         ],
       ),
     );

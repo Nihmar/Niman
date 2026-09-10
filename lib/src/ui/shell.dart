@@ -559,13 +559,19 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The app-bar eye action: flips the editor/preview pane (phone
   /// full-screen note and the wide switch override).
-  Widget _previewToggleAction() {
+  Widget _previewToggleAction({bool compact = false}) {
     return IconButton(
       key: const Key('editor-preview-toggle'),
       tooltip: _previewVisible
           ? AppStrings.showEditorTooltip
           : AppStrings.showPreviewTooltip,
       icon: Icon(_previewVisible ? Icons.edit : Icons.visibility),
+      iconSize: compact ? 18 : null,
+      visualDensity: compact ? VisualDensity.compact : null,
+      padding: compact ? EdgeInsets.zero : null,
+      constraints: compact
+          ? const BoxConstraints(minWidth: 34, minHeight: 26)
+          : null,
       onPressed: _togglePreview,
     );
   }
@@ -574,11 +580,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the window is an editor control, not a settings-screen row. Wide
   /// only — below 600 dp the panes cannot share the screen, so there is
   /// nothing to choose.
-  Widget _layoutModeAction() {
+  Widget _layoutModeAction({bool compact = false}) {
     return PopupMenuButton<PreviewLayoutMode>(
       key: const Key('layout-mode'),
       tooltip: AppStrings.previewModeTitle,
-      icon: const Icon(Icons.splitscreen),
+      icon: Icon(Icons.splitscreen, size: compact ? 18 : null),
+      padding: compact ? EdgeInsets.zero : const EdgeInsets.all(8),
       onSelected: (mode) => unawaited(_setPreviewMode(mode)),
       itemBuilder: (context) => [
         CheckedPopupMenuItem(
@@ -1839,6 +1846,16 @@ final class _LibraryShellState extends State<_LibraryShell>
                   kindMode: !_kindRawMode,
                   onNoteKindChanged: _onNoteKindChanged,
                   unsavedTracker: widget.unsavedTracker,
+                  statusActions: [
+                    // The view controls live in the note's status row on the
+                    // desktop (T-PP-22): the header above is about the file,
+                    // the footer about how it is shown.
+                    if (_previewToggleVisible) ...[
+                      _layoutModeAction(compact: true),
+                      if (!previewSplits(_previewMode, narrow: false))
+                        _previewToggleAction(compact: true),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -2122,11 +2139,6 @@ final class _LibraryShellState extends State<_LibraryShell>
           ],
           const Spacer(),
           ..._kindActions,
-          if (_previewToggleVisible) ...[
-            _layoutModeAction(),
-            if (!previewSplits(_previewMode, narrow: false))
-              _previewToggleAction(),
-          ],
         ],
       ),
     );
@@ -2171,6 +2183,7 @@ final class _DetailPane extends StatelessWidget {
     required this.kindMode,
     required this.onNoteKindChanged,
     required this.unsavedTracker,
+    required this.statusActions,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -2209,6 +2222,9 @@ final class _DetailPane extends StatelessWidget {
   /// The open notes' unsaved edits (T-PP-11): the detail editor reports
   /// its dirty state here for the window's close guard.
   final UnsavedTracker unsavedTracker;
+
+  /// The view controls forwarded into the note's status row (T-PP-22).
+  final List<Widget> statusActions;
 
   @override
   Widget build(BuildContext context) {
@@ -2256,6 +2272,7 @@ final class _DetailPane extends StatelessWidget {
                 kindMode: kindMode,
                 onNoteKindChanged: onNoteKindChanged,
                 unsavedTracker: unsavedTracker,
+                statusActions: statusActions,
               ),
             ),
     );
