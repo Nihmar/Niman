@@ -13,6 +13,7 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/templates/directives.dart';
+import 'package:copist/src/templates/engine.dart';
 import 'package:copist/src/templates/prompts.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
@@ -39,6 +40,7 @@ import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -941,10 +943,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       answers = await showTemplateForm(context, fields: fields);
       if (answers == null) return;
     }
+    // Where the note is being made from (T-TPL-04). The clipboard is
+    // read once, here, rather than per occurrence — two `{{clipboard}}`
+    // in one template must not be able to disagree — and only for a
+    // template that asks for it, so using any other template never
+    // reaches into what the user copied.
+    final surroundings = TemplateContext(
+      parent: _parentNoteName(),
+      clipboard: templateUses(template, 'clipboard')
+          ? await _clipboardText()
+          : '',
+    );
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
     // is known, so a folder may be built from it.
-    final declared = readTemplateDirectives(template, answers: answers);
+    final declared = readTemplateDirectives(
+      template,
+      answers: answers,
+      context: surroundings,
+    );
     final String name;
     if (declared.namesItself) {
       name = declared.filename!;
@@ -963,9 +980,17 @@ final class _LibraryShellState extends State<_LibraryShell>
         template,
         title: name,
         answers: answers,
+        context: surroundings,
       );
-      final content = renderTemplate(template, title: name, answers: answers);
       final target = directives.folder ?? parent ?? _createParent;
+      // The body is rendered after the folder is settled, which is the
+      // only reason `{{folder}}` can answer at all.
+      final content = renderTemplate(
+        template,
+        title: name,
+        answers: answers,
+        context: surroundings.withFolder(target),
+      );
       if (directives.folder case final wanted? when wanted.isNotEmpty) {
         await ops.ensureFolder(wanted);
       }
@@ -994,6 +1019,34 @@ final class _LibraryShellState extends State<_LibraryShell>
         _noteOpened();
       });
     });
+  }
+
+  /// The name of the note the creation is starting from, without the
+  /// `.md`, or empty when it is starting from the tree (T-TPL-04).
+  ///
+  /// What `{{parent}}` answers, and what makes `[[{{parent}}]]` in a
+  /// template a link back to the page the new note was spun out of.
+  String _parentNoteName() {
+    final selected = _selected;
+    if (selected == null || _selectedIsDir) return '';
+    final name = selected.split('/').last;
+    return isMarkdownNote(name) ? name.substring(0, name.length - 3) : name;
+  }
+
+  /// The clipboard's text, or empty — including when the platform
+  /// refuses it, which some Linux sessions do with no clipboard owner,
+  /// and when it simply never answers: a note being created must not be
+  /// held up by a clipboard that is somebody else's problem.
+  Future<String> _clipboardText() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain)
+          .timeout(const Duration(seconds: 2), onTimeout: () => null);
+      return data?.text ?? '';
+    } on Object catch (error) {
+      const AppLogger(name: 'shell')
+          .debug('clipboard unreadable for a template: $error');
+      return '';
+    }
   }
 
   /// Creates a folder in [parent] (default: the FAB target).

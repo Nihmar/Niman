@@ -111,13 +111,20 @@ back by choice 4 and land after.
   `{{ask:Label:hint}}` seeds the field. *AC: a template with three fields
   asks three questions once each; cancelling creates nothing; an answer
   reaches both the body and the filename.*
-- [ ] **T-TPL-04** Context values: `{{parent}}` (a wikilink to the note
-  the creation was started from — the backlink that makes a template
-  worth using in worldbuilding), `{{folder}}` (the folder the note landed
-  in), `{{clipboard}}`, `{{selection}}` (the editor selection, when the
+- [x] **T-TPL-04** Context values: `{{parent}}` (the note the creation
+  was started from — the backlink that makes a template worth using in
+  worldbuilding), `{{folder}}` (the folder the note landed in),
+  `{{clipboard}}`, `{{selection}}` (the editor selection, when the
   creation came from "new note from selection"; empty otherwise).
   *AC: creating from inside a note links back to it; an empty clipboard
   yields an empty string, not the literal placeholder.*
+  **Built differently:** `{{parent}}` gives the note's *name*, not a
+  ready-made wikilink. A placeholder that wrapped itself in `[[…]]` could
+  not be used in a sentence, in a frontmatter value, or with a filter, and
+  it would have to guess between the two link formats the settings offer.
+  A template writes `[[{{parent}}]]`, which is also what it looks like in
+  the note. The four resolve to the empty string when there is nothing to
+  say and stand only when the caller supplied no context at all.
 - [ ] **T-TPL-06** `{{include:path}}` — another template's text, pasted
   before substitution, so a library can keep one header and one footer.
   Depth-limited to 5, cycles refused with the cycle named in the created

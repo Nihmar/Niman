@@ -19,6 +19,71 @@ import 'dart:math';
 
 import 'package:copist/src/links/slug.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:meta/meta.dart';
+
+/// Where the note is being made from (T-TPL-04): the four values a
+/// template can ask about its surroundings rather than about a date or
+/// the user.
+///
+/// A context that is supplied answers all four, empty string included —
+/// an empty clipboard is an answer, not a missing one. A caller that
+/// supplies none leaves the four placeholders standing, which is what
+/// every other unknown does here.
+@immutable
+final class TemplateContext {
+  /// Creates a context; anything not given is empty.
+  const new({
+    this.parent = '',
+    this.folder = '',
+    this.clipboard = '',
+    this.selection = '',
+  });
+
+  /// Every value empty, but present: the four placeholders resolve, to
+  /// nothing.
+  static const TemplateContext empty = TemplateContext();
+
+  /// The name of the note the creation was started from, without the
+  /// `.md`; empty when it was started from the tree.
+  ///
+  /// The name, not a link: a placeholder that quietly wrapped itself in
+  /// `[[…]]` could not be used in a sentence, in a frontmatter value or
+  /// with a filter. A template that wants the backlink writes
+  /// `[[{{parent}}]]`, which is also what it looks like in the note.
+  final String parent;
+
+  /// The library-relative folder the note lands in; empty at the root.
+  ///
+  /// Known only once the directives have been read, so it is empty while
+  /// they are being read — `folder: {{folder}}` is a circle, and answers
+  /// with nothing.
+  final String folder;
+
+  /// What is on the clipboard, empty when it holds no text.
+  final String clipboard;
+
+  /// The editor selection the creation came from; empty until there is a
+  /// command that starts a note from one.
+  final String selection;
+
+  /// This context with [folder] filled in.
+  TemplateContext withFolder(String folder) => TemplateContext(
+    parent: parent,
+    folder: folder,
+    clipboard: clipboard,
+    selection: selection,
+  );
+
+  /// The value of the placeholder called [name], or null when [name] is
+  /// not one of the four.
+  String? valueFor(String name) => switch (name) {
+    'parent' => parent,
+    'folder' => folder,
+    'clipboard' => clipboard,
+    'selection' => selection,
+    _ => null,
+  };
+}
 
 /// The `{{date}}` format used when none is given.
 const String defaultDateFormat = 'YYYY-MM-DD';
@@ -46,6 +111,7 @@ String applyTemplate(
   DateTime? now,
   String Function()? uuid,
   Map<String, String>? answers,
+  TemplateContext? context,
 }) {
   final clock = now ?? DateTime.now();
   final newUuid = uuid ?? newUuidV4;
@@ -65,6 +131,11 @@ String applyTemplate(
       'now' => _dateValue(clock, argument, defaultNowFormat, filters) ?? whole,
       'ask' || 'choice' => switch (answers?[fieldLabel(argument)]) {
         final answer? => _applyTextFilters(answer, filters) ?? whole,
+        null => whole,
+      },
+      'parent' || 'folder' || 'clipboard' || 'selection' => switch (context
+          ?.valueFor(name)) {
+        final value? => _applyTextFilters(value, filters) ?? whole,
         null => whole,
       },
       // Not ours: left exactly as written.
@@ -93,6 +164,20 @@ final RegExp templatePlaceholder = RegExp(r'\{\{([^{}]*)\}\}');
     argument: colon < 0 ? null : head.substring(colon + 1).trim(),
     filters: parts.skip(1).toList(),
   );
+}
+
+/// Whether [source] holds a `{{name}}` placeholder, whatever argument or
+/// filters it carries.
+///
+/// So a caller can skip work a template never asked for: reading the
+/// clipboard is a platform round trip, and a template with no
+/// `{{clipboard}}` in it should not cost one — nor should it reach into
+/// the user's clipboard at all.
+bool templateUses(String source, String name) {
+  for (final match in templatePlaceholder.allMatches(source)) {
+    if (parsePlaceholder(match.group(1)!).name == name) return true;
+  }
+  return false;
 }
 
 /// The label of an `{{ask:…}}` or `{{choice:…}}` argument: everything up
