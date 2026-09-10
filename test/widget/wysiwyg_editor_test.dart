@@ -76,6 +76,46 @@ void main() {
     expect(reported, contains('Edited'));
   });
 
+  testWidgets('a stale parent echo does not reset the document', (
+    tester,
+  ) async {
+    // The parent stores what the surface emits; while the writer keeps
+    // typing its copy lags behind. Rebuilding with that copy must not
+    // re-decode the note (device report: text jumped back to the start).
+    var data = 'hello\n';
+    final key = GlobalKey<WysiwygEditorState>();
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          rebuild = setState;
+          return MaterialApp(
+            home: Scaffold(
+              body: WysiwygEditor(
+                key: key,
+                data: data,
+                onChanged: (value) => data = value,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pump();
+    final controller = key.currentState!.controller;
+    // The two edits are separate typing events, not one cascade.
+    // ignore: cascade_invocations
+    controller.replaceText(5, 0, 'X', const TextSelection.collapsed(offset: 6));
+    // The debounce fires: the parent now holds 'helloX\n'.
+    await tester.pump(const Duration(milliseconds: 600));
+    controller.replaceText(6, 0, 'Y', const TextSelection.collapsed(offset: 7));
+    await tester.pump();
+    // The parent rebuilds with its stale copy.
+    rebuild(() {});
+    await tester.pump();
+    expect(controller.document.toPlainText(), contains('helloXY'));
+  });
+
   testWidgets('underlines the misspelled words', (tester) async {
     final spell = EditorSpellCheck(createChecker: (_) => const _FakeChecker());
     addTearDown(spell.dispose);

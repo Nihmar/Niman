@@ -1,6 +1,7 @@
 // T-WYS-05: the WYSIWYG surface replaces the source editor, never sits
 // beside the preview, and hides the source-only controls.
 import 'package:copist/src/editor/note_editor.dart';
+import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
@@ -141,6 +142,23 @@ void main() {
       find.textContaining('hello world', findRichText: true),
       findsWidgets,
     );
+  });
+
+  testWidgets('a toolbar button stays pressed while its format is on', (
+    tester,
+  ) async {
+    await _open(tester, _view(showWysiwyg: true));
+    EditorToolbarButton button() => tester
+        .widget<EditorToolbar>(find.byType(EditorToolbar))
+        .buttons
+        .firstWhere((item) => item.key == const Key('toolbar-bold'));
+    expect(button().active, isFalse);
+    await tester.tap(find.byKey(const Key('toolbar-bold')));
+    await tester.pump();
+    expect(button().active, isTrue);
+    await tester.tap(find.byKey(const Key('toolbar-bold')));
+    await tester.pump();
+    expect(button().active, isFalse);
   });
 
   testWidgets('the toolbar formats the WYSIWYG document', (tester) async {

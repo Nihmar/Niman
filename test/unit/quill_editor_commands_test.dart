@@ -80,6 +80,20 @@ void main() {
     expect(_has(controller, 'link', 'https://example.com'), isTrue);
   });
 
+  test('isActive follows the toggle', () {
+    final controller = _controller();
+    addTearDown(controller.dispose);
+    expect(QuillEditorCommands.isActive(controller, ToolbarItem.bold), isFalse);
+    _commands(controller).apply(ToolbarItem.bold);
+    expect(QuillEditorCommands.isActive(controller, ToolbarItem.bold), isTrue);
+    _commands(controller).apply(ToolbarItem.bold);
+    expect(QuillEditorCommands.isActive(controller, ToolbarItem.bold), isFalse);
+    _commands(controller).apply(ToolbarItem.list);
+    expect(QuillEditorCommands.isActive(controller, ToolbarItem.list), isTrue);
+    _commands(controller).apply(ToolbarItem.list);
+    expect(QuillEditorCommands.isActive(controller, ToolbarItem.list), isFalse);
+  });
+
   test('indent and outdent move the line level', () {
     final controller = _controller();
     addTearDown(controller.dispose);
