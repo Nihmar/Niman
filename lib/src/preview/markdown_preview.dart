@@ -320,16 +320,26 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     // a 934 KB note, paid on every typing pause (the debounced parse). The
     // first window's worth goes out now, then a chunk per turn of the event
     // loop, so frames and input interleave with the build (T-PP-22).
+    // The package spaces the blocks it puts inside one parent, and every
+    // block here is built alone — so the gap between two blocks is this
+    // pane's to add. Until the blocks were measured properly it came out
+    // of the estimates they were stretched to, which is why removing that
+    // stretch left the document with none at all.
+    final spacing = styleSheet.blockSpacing ?? 8.0;
+
     void buildBlocks(int limit) {
       while (built < limit && built < nodes.length) {
         final block = builder.build([nodes[built]]);
-        final content = block.length == 1
-            ? block.single
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: block,
-              );
+        final content = Padding(
+          padding: EdgeInsets.only(bottom: spacing),
+          child: block.length == 1
+              ? block.single
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: block,
+                ),
+        );
         if (map == null) {
           children.add(content);
         } else {
@@ -367,6 +377,15 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       _children = children;
     });
     map?.rebuild(source);
+    // The map pairs its blocks with these children by position, so a
+    // parser the locator does not agree with puts the two panes out of
+    // step for the rest of the document. Say so rather than drift.
+    if (map != null && map.blockStartLines.length != nodes.length) {
+      const AppLogger(name: 'preview').warning(
+        'scroll map: ${nodes.length} blocks built against '
+        '${map.blockStartLines.length} located',
+      );
+    }
     if (built < nodes.length) {
       void step() {
         if (!mounted || revision != _parseRevision) return;
@@ -404,10 +423,17 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   Widget build(BuildContext context) {
     final children = _children ?? const <Widget>[];
     final map = widget.scrollMap;
-    final delegate = SliverChildBuilderDelegate(
-      (context, index) => children[index],
-      childCount: children.length,
-    );
+    map?.contentInset = widget.padding.top;
+    final delegate = map == null
+        ? SliverChildBuilderDelegate(
+            (context, index) => children[index],
+            childCount: children.length,
+          )
+        : _MappedChildDelegate(
+            (context, index) => children[index],
+            childCount: children.length,
+            map: map,
+          );
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         _onScrollNotification(notification);
@@ -438,6 +464,27 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       ),
     );
   }
+}
+
+/// The preview's children, with the document's real height attached.
+///
+/// A lazy list otherwise guesses its scrollable extent from the children it
+/// has laid out: on a long note that guess is a small fraction of the
+/// truth, and every jump beyond it is clamped — which is what pulled the
+/// preview away from the editor (device report, 2026-09-10). The map holds
+/// an extent for every block, so it can say.
+final class _MappedChildDelegate extends SliverChildBuilderDelegate {
+  new(super.builder, {required this.map, super.childCount});
+
+  final ScrollMap map;
+
+  @override
+  double? estimateMaxScrollOffset(
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) => map.totalExtent();
 }
 
 /// Reports its child's height after layout (the scroll map's per-block

@@ -76,6 +76,12 @@ final class _EditorPreviewScrollSyncState
   /// Whether a post-frame pass over the editor's new lines is booked.
   bool _linesPending = false;
 
+  /// The line the editor asked the preview to show, until it shows it.
+  int? _previewLine;
+
+  /// Attempts spent on [_previewLine].
+  int _previewTries = 0;
+
   /// Tries allowed before a wanted line is given up on.
   static const int _maxSeekTries = 4;
 
@@ -149,14 +155,41 @@ final class _EditorPreviewScrollSyncState
     if (lines == null) return;
     final line = lines.topLine();
     if (line == null) return;
+    _previewLine = line;
+    _previewTries = 0;
+    _seekPreview();
+  }
+
+  /// Puts [_previewLine]'s block at the top of the preview.
+  ///
+  /// Once, and then again: the blocks that come into view are measured
+  /// during the frame the jump lays out, and their real heights move
+  /// everything below them, so the first landing is a block or so out. A
+  /// second aim lands on the block itself, and the third finds nothing
+  /// left to correct.
+  void _seekPreview() {
+    final line = _previewLine;
+    if (line == null) return;
     final preview = widget.previewScroll.position;
-    if (!preview.hasContentDimensions) return;
+    if (!preview.hasContentDimensions) {
+      _previewLine = null;
+      return;
+    }
     final target = widget.map.previewOffsetForLine(
       line,
       maxExtent: preview.maxScrollExtent,
     );
-    if (target == null) return;
-    _jump(preview, target);
+    if (target == null) {
+      _previewLine = null;
+      return;
+    }
+    if (!_jump(preview, target) || ++_previewTries >= _maxSeekTries) {
+      _previewLine = null;
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _seekPreview();
+    });
   }
 
   void _onEditorScroll() {
@@ -181,6 +214,8 @@ final class _EditorPreviewScrollSyncState
 
   void _onPreviewScroll() {
     if (_applying) return;
+    // The reader took over this pane; stop aiming it.
+    _previewLine = null;
     final editor = widget.editorScroll.position;
     final preview = widget.previewScroll.position;
     if (!editor.hasContentDimensions || !preview.hasContentDimensions) return;

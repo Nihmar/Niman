@@ -2,6 +2,7 @@
 // ScrollMap answers the line↔offset queries.
 import 'dart:convert';
 
+import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +10,8 @@ import 'package:markdown/markdown.dart' as md;
 
 List<String> _lines(String text) => const LineSplitter().convert(text);
 
+/// The preview's own node list: one entry per block it will lay out, and
+/// the entry the scroll map's block of the same index has to describe.
 List<md.Node> _astBlocks(String source) {
   final document = md.Document(
     blockSyntaxes: [
@@ -18,7 +21,9 @@ List<md.Node> _astBlocks(String source) {
     extensionSet: md.ExtensionSet.gitHubFlavored,
     encodeHtml: false,
   );
-  return document.parseLines(_lines(stripFrontmatter(source)));
+  return splitHtmlTables(
+    splitInlineMath(document.parseLines(_lines(stripFrontmatter(source)))),
+  );
 }
 
 const String _coverage = r'''
@@ -80,6 +85,28 @@ void main() {
       );
       final ast = _astBlocks('before\n\n\$\$\nx\n\$\$\nafter');
       expect(starts.length, ast.length);
+    });
+
+    // 2026-09-10 device report: on a 10 000-line note the preview sat a
+    // screenful below the editor. The pairing is by position — block i of
+    // the map describes child i of the preview — and these two shapes put
+    // it out of step for the whole rest of the document.
+    test('a raw HTML table is one block', () {
+      const source = 'before\n\n'
+          '<table><tr><td>1</td><td>2</td></tr></table>\n\n'
+          'after';
+      final starts = BlockLocator().locate(_lines(source));
+      expect(starts.length, _astBlocks(source).length);
+    });
+
+    test('footnote definitions in a row are one block', () {
+      const source = 'text with a note[^1] and another[^2]\n\n'
+          '[^1]: the first note\n\n'
+          '[^2]: the second note\n';
+      final starts = BlockLocator().locate(_lines(source));
+      // The parser gathers every definition into one section at the end.
+      expect(starts.length, _astBlocks(source).length);
+      expect(starts.length, 2);
     });
 
     test('inline math never creates a block', () {

@@ -73,12 +73,22 @@ List<md.Node> _splitText(String text) {
   final pieces = <md.Node>[];
   var pos = 0;
   for (final m in _tableRe.allMatches(text)) {
-    if (m.start > pos) pieces.add(md.Text(text.substring(pos, m.start)));
+    _addText(pieces, text.substring(pos, m.start));
     pieces.add(_parseTable(m.group(1)!));
     pos = m.end;
   }
-  if (pos < text.length) pieces.add(md.Text(text.substring(pos)));
+  _addText(pieces, text.substring(pos));
   return pieces;
+}
+
+/// Adds [text] as a node unless it is blank.
+///
+/// The newline that follows a `<table>` block would otherwise become a node
+/// of its own — an empty one, drawing nothing, but still a block between
+/// the preview and the scroll map, which pairs them by position (T-M2-06).
+void _addText(List<md.Node> pieces, String text) {
+  if (text.trim().isEmpty) return;
+  pieces.add(md.Text(text));
 }
 
 md.Node _parseTable(String inner) {

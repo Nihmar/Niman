@@ -60,6 +60,7 @@ final class ScrollMap {
     blockHeights.clear();
     _extents.clear();
     _pending.clear();
+    _extentSum = 0;
     _measuredPixels = 0;
     _measuredLines = 0;
     lineCount = 0;
@@ -123,11 +124,40 @@ final class ScrollMap {
     while (_extents.length <= index) {
       _extents.add(0);
     }
+    _extentSum += extent - _extents[index];
     _extents[index] = extent;
   }
 
-  /// The source lines block [index] spans (at least one).
+  /// The sum of every extent handed out so far (see [totalExtent]).
+  double _extentSum = 0;
+
+  /// The whole document's height in the preview's own pixels.
+  ///
+  /// The preview hands this to the sliver as the scrollable extent. Left to
+  /// itself a lazy list extrapolates from the handful of children it has
+  /// laid out, which put the end of a 10 000-line note some 30 000 px away
+  /// when its blocks add up to twelve times that: every jump past the
+  /// guess was clamped, and the two panes came apart (device report,
+  /// 2026-09-10). Walking the blocks costs one pass and settles their
+  /// extents, which the mapping wants settled anyway.
+  double totalExtent() {
+    final count = math.max(blockStartLines.length, _extents.length);
+    for (var i = 0; i < count; i++) {
+      _heightOf(i);
+    }
+    return _extentSum;
+  }
+
+  /// Pixels between the top of the scrollable and the first block (the
+  /// preview's own padding), so an offset here is a scroll position.
+  double contentInset = 0;
+
+  /// The source lines block [index] spans (at least one), and one for a
+  /// block the locator never found — the preview may hold a child the
+  /// locator and the parser disagreed about, and an extent is still owed
+  /// for it.
   int _spanOf(int index) {
+    if (index < 0 || index >= blockStartLines.length) return 1;
     final start = blockStartLines[index];
     final end = index + 1 < blockStartLines.length
         ? blockStartLines[index + 1]
@@ -163,6 +193,7 @@ final class ScrollMap {
         : _measuredPixels / _measuredLines;
     final extent = measured > 0 ? measured : _spanOf(index) * perLine;
     _extents[index] = extent;
+    _extentSum += extent;
     return extent;
   }
 
@@ -206,8 +237,9 @@ final class ScrollMap {
         : ((line - blockStartLines[index]) / span).clamp(0.0, 1.0);
     content += _heightOf(index) * within;
     // The preview's layout uses exactly these extents, so the offset needs
-    // no rescaling to the pane's current extent.
-    return content.clamp(0.0, maxExtent);
+    // no rescaling to the pane's current extent — only the pane's own
+    // padding, which sits above the first block.
+    return (content + contentInset).clamp(0.0, maxExtent);
   }
 
   /// The source line shown at preview [offset], or null when unknown. The
@@ -216,7 +248,7 @@ final class ScrollMap {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    final content = offset;
+    final content = offset - contentInset;
     var acc = 0.0;
     for (var i = 0; i < blockStartLines.length; i++) {
       final height = _heightOf(i);
@@ -250,6 +282,7 @@ final class BlockLocator {
     r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?)*\|\s*$',
   );
   final RegExp _header = RegExp(r'^\s{0,3}(#{1,6})(?:\s|$)');
+  final RegExp _footnoteDef = RegExp(r'^\s{0,3}\[\^[^\]\s]+\]:');
 
   /// The located blocks' start lines, in parse order.
   List<int> locate(List<String> lines) {
@@ -274,6 +307,14 @@ final class BlockLocator {
       if (_header.hasMatch(lines[i])) {
         starts.add(i);
         i++;
+        continue;
+      }
+      // Every footnote definition in a row is one block: the parser
+      // gathers them all into the single section it appends at the end of
+      // the document, and the preview draws that section as one block.
+      if (_footnoteDef.hasMatch(lines[i])) {
+        starts.add(i);
+        i = _footnoteEnd(lines, i) + 1;
         continue;
       }
       final setextLine =
@@ -325,11 +366,34 @@ final class BlockLocator {
       _isMathOpen(lines[i]) ||
       _fenceOpen(lines[i]) != null ||
       _header.hasMatch(lines[i]) ||
+      _footnoteDef.hasMatch(lines[i]) ||
       (i + 1 < lines.length && _setext.hasMatch(lines[i + 1].trim())) ||
       _isHr(lines[i], prev: lines[i - 1]) ||
       _quote.hasMatch(lines[i]) ||
       _listMarker.hasMatch(lines[i]) ||
       _tableStart(lines, i);
+
+  /// The last line of the run of footnote definitions opening at [i]:
+  /// their indented continuations, and the definitions after them.
+  int _footnoteEnd(List<String> lines, int i) {
+    var end = i;
+    var j = i + 1;
+    while (j < lines.length) {
+      final line = lines[j];
+      if (line.trim().isEmpty) {
+        j++;
+        continue;
+      }
+      final continues =
+          _footnoteDef.hasMatch(line) ||
+          line.startsWith('    ') ||
+          line.startsWith('\t');
+      if (!continues) break;
+      end = j;
+      j++;
+    }
+    return end;
+  }
 
   bool _isMathOpen(String line) => line.trim().startsWith(r'$$');
 
