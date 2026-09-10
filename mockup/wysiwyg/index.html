@@ -118,14 +118,6 @@
     border:solid var(--on-accent);border-width:0 2px 2px 0;transform:rotate(45deg)}
 
   /* ---- wysiwyg ---- */
-  .qtoolbar{display:flex;align-items:center;gap:2px;padding:6px 8px;flex:none;flex-wrap:wrap;
-    background:var(--surface);border-bottom:1px solid var(--outline)}
-  .qtoolbar .tb{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-    border-radius:7px;font-size:13px;font-weight:600;color:var(--text)}
-  .qtoolbar .tb.g{font-family:var(--mono)}
-  .qtoolbar .tb.on{background:var(--accent-soft);color:var(--accent)}
-  .qtoolbar .sep{width:1px;height:20px;background:var(--outline);margin:0 5px}
-  .qtoolbar .grow{flex:1}
   .wysiwyg{padding:18px 16px;font-size:14px;line-height:1.7}
   .wysiwyg h1{font-size:22px;margin:.1em 0 .5em}
   .wysiwyg h2{font-size:17px;margin:1em 0 .3em}
@@ -334,8 +326,8 @@
 <h2>Android — Editor <span class="tag">phone</span></h2>
 <p class="note">
   On a phone the source editor and the preview are already one pane behind the
-  eye. <b>WYSIWYG</b> replaces the source pane and its Markdown toolbar with a
-  Quill editor: the eye still flips to the read-only preview, and it is never
+  eye. <b>WYSIWYG</b> replaces the source pane with a Quill editor
+  (the Markdown toolbar stays where it is): the eye still flips to the read-only preview, and it is never
   split. <b>Preview off</b> removes the eye entirely; the editor keeps its own
   toolbar.
 </p>
@@ -377,25 +369,6 @@ La massa &egrave; <span class="math">$$M = 3.2 \times 10^{24}\ \mathrm{kg}$$</sp
 &#96;&#96;&#96;</div>
         </div>
         <div class="surface surface-col only-wysiwyg">
-          <div class="qtoolbar">
-            <div class="tb" style="font-weight:800">B</div>
-            <div class="tb" style="font-style:italic">I</div>
-            <div class="tb" style="text-decoration:underline">U</div>
-            <div class="tb" style="text-decoration:line-through">S</div>
-            <div class="sep"></div>
-            <div class="tb">H1</div>
-            <div class="tb">&#8226;</div>
-            <div class="tb">1.</div>
-            <div class="tb">&#9745;</div>
-            <div class="tb">&#8220;</div>
-            <div class="tb g">&lt;/&gt;</div>
-            <div class="sep"></div>
-            <div class="tb">&#128279;</div>
-            <div class="tb">&#128247;</div>
-            <div class="grow"></div>
-            <div class="tb">&#8630;</div>
-            <div class="tb">&#8631;</div>
-          </div>
           <div class="wysiwyg">
             <h1>Enciclopedia di Celestia</h1>
             <h2>Introduzione</h2>
@@ -419,7 +392,7 @@ La massa &egrave; <span class="math">$$M = 3.2 \times 10^{24}\ \mathrm{kg}$$</sp
         </div>
       </div>
       <div class="statusrow"><span>5523 words</span><span>saved</span></div>
-      <div class="toolbar only-source only-off">
+      <div class="toolbar">
         <div class="tb" style="font-weight:800">B</div>
         <div class="tb" style="font-style:italic">I</div>
         <div class="tb" style="text-decoration:line-through">S</div>
@@ -435,9 +408,7 @@ La massa &egrave; <span class="math">$$M = 3.2 \times 10^{24}\ \mathrm{kg}$$</sp
     </div>
   </div>
   <div class="stack" style="max-width:360px">
-    <div class="callout"><b>What changes here.</b> The Markdown toolbar is gone
-      in WYSIWYG (the Quill bar takes its place), the source toolbar comes back
-      with Preview off, and the split divider never appears on a phone. Table,
+    <div class="callout"><b>What changes here.</b> The same Markdown toolbar stays in every mode, at the bottom of the screen; in WYSIWYG it drives the rendered document instead of the text buffer, so there is no second toolbar to learn. The split divider never appears on a phone. Table,
       math and footnote blocks are the shaded boxes: read-only, written back
       byte for byte.</div>
   </div>
@@ -471,6 +442,19 @@ La massa &egrave; <span class="math">$$M = 3.2 \times 10^{24}\ \mathrm{kg}$$</sp
       </div>
       <div style="flex:1;min-width:0;display:flex;flex-direction:column">
         <div class="detail-head"><span>&#9636;</span><span>Enciclopedia di Celestia.md</span><span class="folder">Celestia</span><span class="grow"></span><span style="color:var(--muted)">&#9998;</span></div>
+        <div class="toolbar">
+          <div class="tb" style="font-weight:800">B</div>
+          <div class="tb" style="font-style:italic">I</div>
+          <div class="tb" style="text-decoration:line-through">S</div>
+          <div class="tb" style="text-decoration:underline">T</div>
+          <div class="tb">x&#178;</div>
+          <div class="tb">&#128279;</div>
+          <div class="tb">&lt;/&gt;</div>
+          <div class="tb">&#128247;</div>
+          <div class="tb">&#8226;</div>
+          <div class="tb">&#8220;</div>
+          <div class="tb">&#9881;</div>
+        </div>
         <div class="detail detail-row">
           <div class="only-split">
             <div class="surface surface-col" style="flex:11;position:relative">
@@ -508,25 +492,6 @@ La massa &egrave; <span class="math">$$M = 3.2 \times 10^{24}$$</span></div>
             </div>
           </div>
           <div class="surface surface-col only-wysiwyg">
-            <div class="qtoolbar">
-              <div class="tb" style="font-weight:800">B</div>
-              <div class="tb" style="font-style:italic">I</div>
-              <div class="tb" style="text-decoration:underline">U</div>
-              <div class="tb" style="text-decoration:line-through">S</div>
-              <div class="sep"></div>
-              <div class="tb">H1</div>
-              <div class="tb">&#8226;</div>
-              <div class="tb">1.</div>
-              <div class="tb">&#9745;</div>
-              <div class="tb">&#8220;</div>
-              <div class="tb g">&lt;/&gt;</div>
-              <div class="sep"></div>
-              <div class="tb">&#128279;</div>
-              <div class="tb">&#128247;</div>
-              <div class="grow"></div>
-              <div class="tb">&#8630;</div>
-              <div class="tb">&#8631;</div>
-            </div>
             <div class="wysiwyg">
               <h1>Enciclopedia di Celestia</h1>
               <h2>Introduzione</h2>
@@ -567,7 +532,7 @@ Celestia &egrave; il terzo pianeta che orbita attorno a <span class="wl">[[La st
   <div class="h">Split</div><div class="y">yes (wide) / eye (phone)</div><div class="n">never</div><div class="n">n/a</div>
   <div class="h">Layout menu</div><div class="y">shown</div><div class="n">hidden</div><div class="n">hidden</div>
   <div class="h">Eye</div><div class="y">shown</div><div class="y">shown</div><div class="n">hidden</div>
-  <div class="h">Markdown toolbar</div><div class="y">shown</div><div class="n">Quill toolbar instead</div><div class="y">shown</div>
+  <div class="h">Markdown toolbar</div><div class="y">shown</div><div class="y">same toolbar, drives Quill</div><div class="y">shown</div>
   <div class="h">Split ratio row</div><div class="y">shown when it splits</div><div class="n">hidden</div><div class="n">hidden</div>
 </div>
 </main>

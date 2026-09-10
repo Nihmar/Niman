@@ -1067,33 +1067,17 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        quill.QuillSimpleToolbar(
-          controller: _controller,
-          config: const quill.QuillSimpleToolbarConfig(
-            multiRowsDisplay: false,
-            showFontFamily: false,
-            showFontSize: false,
-            showColorButton: false,
-            showBackgroundColorButton: false,
-            showAlignmentButtons: false,
-            showSearchButton: true,
-          ),
-        ),
-        const Divider(height: 1),
-        Expanded(
-          child: quill.QuillEditor(
-            controller: _controller,
-            focusNode: _focus,
-            scrollController: _scroll,
-            config: const quill.QuillEditorConfig(
-              padding: EdgeInsets.all(16),
-              embedBuilders: [OpaqueEmbedBuilder()],
-            ),
-          ),
-        ),
-      ],
+    // No toolbar here on purpose: the app's own EditorToolbar is the editor
+    // chrome on both surfaces, in the same slot (top on desktop, bottom on a
+    // phone). See Step 3.1b.
+    return quill.QuillEditor(
+      controller: _controller,
+      focusNode: _focus,
+      scrollController: _scroll,
+      config: const quill.QuillEditorConfig(
+        padding: EdgeInsets.all(16),
+        embedBuilders: [OpaqueEmbedBuilder()],
+      ),
     );
   }
 }
@@ -1102,6 +1086,52 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
 Note: `QuillEditorConfig` is `const`, so `autoFocus: widget.autoFocus`
 cannot go in the const instance. If the analyzer rejects it, build the config
 without `const` and pass `autoFocus: widget.autoFocus`.
+
+### Step 3.1b — the app toolbar drives both editors
+
+The WYSIWYG widget deliberately has **no toolbar of its own**. The app's
+existing toolbar (`lib/src/editor/toolbar.dart`) is the editor chrome on both
+surfaces and in both positions: above the editor on desktop (`toolbarTop`),
+below it on a phone. This is the design the mockups show
+(`mockup/wysiwyg/index.html`).
+
+Make the same toolbar act on the active editor:
+
+1. Add `lib/src/editor/editor_commands.dart` with a small interface and two
+   implementations:
+
+   ~~~dart
+   /// The formatting toolbar's commands against the active editor.
+   abstract interface class EditorCommands {
+     void apply(ToolbarItem item);
+   }
+   ~~~
+
+   `SourceEditorCommands` wraps the existing `md_editing.dart` functions
+   and the `CodeLineEditingController`; `QuillEditorCommands` wraps the
+   `QuillController` exposed by `WysiwygEditorState`.
+2. Expose the controller from `WysiwygEditorState` (a getter
+   `QuillController get controller`) so `NoteView` can build the Quill
+   commands with a `GlobalKey<WysiwygEditorState>`.
+3. In `NoteView`, keep building the toolbar in the same slot and pass the
+   commands for the active editor. Do **not** hide it when `showWysiwyg`.
+4. Map each `ToolbarItem` to a Quill format (confirm the names against the
+   package in `~/.pub-cache/.../flutter_quill-11.5.1/lib/src/document/attribute.dart`):
+
+   | ToolbarItem | Quill |
+   | --- | --- |
+   | bold / italic / underline / strikethrough | `quill.Attribute.bold` / `.italic` / `.underline` / `.strikeThrough` |
+   | superscript | `quill.Attribute.superscript` |
+   | link | `quill.LinkAttribute(href)` after the URL dialog |
+   | code | `quill.Attribute.inlineCode`; a fenced block uses `quill.Attribute.codeBlock` |
+   | image | the app's library-relative image flow, inserted as an image embed |
+   | heading | `quill.HeaderAttribute(level: n)` |
+   | list / orderedList | `quill.ListAttribute('bullet')` / `quill.ListAttribute('ordered')` |
+   | quote | `quill.Attribute.blockQuote` |
+   | outdent / indent | `quill.IndentAttribute(level: n)` |
+
+   Every item already in the user's `ToolbarLayout` gets a mapping; there is
+   no second catalogue.
 
 ### Step 3.2 — the widget test: `test/widget/wysiwyg_editor_test.dart`
 
@@ -1206,10 +1236,11 @@ Read the whole class first. Then:
            : AnimatedSwitcher(...)
    ~~~
    Add the import `package:copist/src/editor/wysiwyg/wysiwyg_editor.dart`.
-7. The formatting toolbar keeps its place above the editor and should be
-   hidden when `showWysiwyg` is true (the Quill toolbar is part of the
-   widget): change `showToolbar` to start with
-   `!widget.showWysiwyg && (split || !widget.showPreview) && ...`.
+7. The formatting toolbar is the **same** chrome on both editors and keeps
+   its slot (top on desktop via `toolbarTop`, bottom on a phone). Do **not**
+   hide it for WYSIWYG: leave
+   `showToolbar = (split || !widget.showPreview) && toolbarLayout.visible.isNotEmpty`
+   and pass the commands for the active editor (Step 3.1b).
 
 ### Step 4.2 — `lib/src/ui/shell.dart`
 
@@ -1267,7 +1298,8 @@ Run the app on Linux:
 ./scripts/copist.sh linux
 ~~~
 Open Settings, switch Editor to WYSIWYG, close Settings, open a note. Verify:
-the Quill toolbar shows; the preview never sits beside it; turning Preview off
+the app toolbar shows at the bottom (phone) / top (desktop), the same as
+source; the preview never sits beside it; turning Preview off
 removes the eye; switching back to source restores the split.
 
 ~~~bash
@@ -1289,7 +1321,7 @@ Implement and test each row. The rule is a single source of truth:
 | `EditorPreviewSplit` | as today | never built | never built |
 | scroll sync/map | as today | not built | not built |
 | split-ratio settings row | shown when it splits | hidden | hidden |
-| formatting toolbar | as today | hidden (Quill toolbar instead) | as today |
+| formatting toolbar | as today | same app toolbar, drives Quill; same slot | as today |
 | find & replace (custom) | as today | not shown (Quill `showSearchButton`) | as today |
 | spell underlines | as today | none | as today (source) |
 | line numbers, folding, indent helpers | as today | not shown | as today |

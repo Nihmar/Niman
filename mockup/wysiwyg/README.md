@@ -17,7 +17,7 @@ inline CSS and a few lines of JavaScript.
 | Section | Screen |
 | --- | --- |
 | Android — Settings | the two new rows under **Editor**: **Editor** (source / WYSIWYG, with the picker dialog) and **Preview** (switch). The split-ratio row greys out where the panes cannot split. |
-| Android — Editor | three modes via the segmented control: **Source + preview**, **WYSIWYG**, **Preview off**. Shows the toolbar swap, the eye appearing/disappearing, and the opaque "kept verbatim" blocks (table, math, footnote). |
+| Android — Editor | three modes via the segmented control: **Source + preview**, **WYSIWYG**, **Preview off**. The **same app toolbar** stays at the bottom in every mode and drives the active editor (Quill in WYSIWYG); shows the eye appearing/disappearing and the opaque "kept verbatim" blocks (table, math, footnote). |
 | Desktop — Editor | the same three ideas at wide width: **split** source + preview, full-width **WYSIWYG**, and **Preview off**. The layout menu disappears in WYSIWYG; the eye disappears when the preview is off. |
 | Mode matrix | the setting -> screen table in one grid. |
 
