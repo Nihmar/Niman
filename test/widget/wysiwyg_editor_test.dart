@@ -42,6 +42,19 @@ void main() {
     expect(find.byType(quill.QuillEditor), findsOneWidget);
   });
 
+  testWidgets('an empty note renders an empty editor', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(data: '', onChanged: (value) {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(quill.QuillEditor), findsOneWidget);
+  });
+
   testWidgets('reports an edit as Markdown after the pause', (tester) async {
     String? reported;
     final key = GlobalKey<WysiwygEditorState>();

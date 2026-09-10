@@ -64,6 +64,19 @@ A [[wikilink]] and an ![[embed.png]].
     expect(codec.encode(decoded.document, decoded: decoded), note);
   });
 
+  test('an empty note decodes to one empty line and stays empty', () {
+    // Quill refuses an empty document; without the guard this threw and the
+    // release build showed the grey ErrorWidget (device report, 2026-09-11).
+    final decoded = codec.decode('');
+    expect(decoded.document.toPlainText(), '\n');
+    expect(codec.encode(decoded.document, decoded: decoded), '');
+  });
+
+  test('a blank note decodes without throwing', () {
+    final decoded = codec.decode('\n');
+    expect(codec.encode(decoded.document, decoded: decoded), '\n');
+  });
+
   test('the splitter marks unrepresentable blocks opaque', () {
     final blocks = splitMarkdownBlocks(
       '# H\n'
