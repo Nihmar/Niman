@@ -57,7 +57,12 @@ final class TemplateDirectives {
     this.filename,
     this.append = false,
     this.open = TemplateOpen.editor,
+    this.error,
   });
+
+  /// A template whose frontmatter does not parse: it declares nothing,
+  /// and says why.
+  factory malformed(String reason) => TemplateDirectives(error: reason);
 
   /// A template that says nothing: the note is created where the user
   /// was, under the name they typed, and opens in the editor.
@@ -78,6 +83,16 @@ final class TemplateDirectives {
   /// What happens once the note exists.
   final TemplateOpen open;
 
+  /// Why the template's frontmatter could not be read, when it could
+  /// not.
+  ///
+  /// A malformed block used to make the directives simply vanish, which
+  /// put the note somewhere the author had not asked for with nothing
+  /// said about it — the questions still appeared, because those are
+  /// found by scanning the text rather than by parsing the YAML, so the
+  /// template looked like it was working (user, 2026-09-10).
+  final String? error;
+
   /// Whether the template named the note itself, so there is nothing to
   /// ask the user.
   bool get namesItself => filename != null && filename!.isNotEmpty;
@@ -97,7 +112,10 @@ TemplateDirectives readTemplateDirectives(
   TemplateContext? context,
 }) {
   final parsed = parseFrontmatter(source);
-  if (parsed == null || parsed.error != null) return TemplateDirectives.none;
+  if (parsed == null) return TemplateDirectives.none;
+  if (parsed.error case final reason?) {
+    return TemplateDirectives.malformed(reason);
+  }
   String? value(String key) {
     final raw = parsed.first('$directivesKey.$key');
     if (raw == null) return null;

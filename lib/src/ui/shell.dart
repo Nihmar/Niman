@@ -990,7 +990,9 @@ final class _LibraryShellState extends State<_LibraryShell>
         answers: answers,
         context: surroundings,
       );
-      final target = directives.folder ?? parent ?? _createParent;
+      final target =
+          directives.folder ??
+          _awayFromTemplates(parent ?? _createParent, folder);
       // The body is rendered after the folder is settled, which is the
       // only reason `{{folder}}` can answer at all.
       final content = renderTemplate(
@@ -1010,6 +1012,19 @@ final class _LibraryShellState extends State<_LibraryShell>
               content: content,
             );
       if (!mounted) return;
+      // A template whose frontmatter does not parse declares nothing, and
+      // used to do it in silence: its questions still appeared, so it
+      // looked like it was working while the folder and the name it asked
+      // for did nothing (user, 2026-09-10).
+      if (directives.error case final reason?) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppStrings.templateFrontmatterInvalid(chosen.name, reason),
+            ),
+          ),
+        );
+      }
       if (directives.open == TemplateOpen.none) {
         // The template filed something away; the user was in the middle
         // of something else and stays there.
@@ -1027,6 +1042,21 @@ final class _LibraryShellState extends State<_LibraryShell>
         _noteOpened();
       });
     });
+  }
+
+  /// Where a template-made note goes when the template did not say, kept
+  /// out of [templateFolder].
+  ///
+  /// Writing a template is exactly when someone tries one out, so the FAB
+  /// is often pressed with the template itself open — and the note it
+  /// makes must not land among the templates, where it would then be
+  /// offered as one. The library root is the honest fallback: the
+  /// template said nothing about where to file this, and neither did the
+  /// place the user happened to be standing (user, 2026-09-10).
+  String _awayFromTemplates(String target, String templateFolder) {
+    if (templateFolder.isEmpty) return target;
+    if (target == templateFolder || isUnder(templateFolder, target)) return '';
+    return target;
   }
 
   /// Finds the template an `{{include:…}}` names (T-TPL-06).

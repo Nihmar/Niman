@@ -129,6 +129,48 @@ void main() {
     expect(find.byType(NoteTree), findsOneWidget);
   });
 
+  // 2026-09-10 device report: a template that named a folder put its note
+  // in the template folder instead. Trying a template out is done with the
+  // template open, so the FAB's target was `Templates` — and a note filed
+  // among the templates is then offered as one.
+  testWidgets('a template that says nothing does not file into Templates', (
+    tester,
+  ) async {
+    await openWith(tester, '# {{title}}\n');
+    // Standing on the template itself, which is where you stand while
+    // writing one.
+    await tester.tap(noteRow('Templates'));
+    await settle(tester);
+    await tester.tap(noteRow('Filed.md'));
+    await settle(tester);
+
+    await useTemplate(tester);
+    await tester.enterText(dialogField(), 'Tried');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(await controller.ops!.find('Templates/Tried.md'), isNull);
+    expect(controller.contentOf('Tried.md'), '# Tried\n');
+  });
+
+  testWidgets('a template whose frontmatter is broken says so', (tester) async {
+    await openWith(
+      tester,
+      '---\ncopist:\n  folder: [unclosed\n---\n\n# {{title}}\n',
+    );
+
+    await useTemplate(tester);
+    await tester.enterText(dialogField(), 'Anyway');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    // The note is still made — the template is the thing at fault, and
+    // refusing to create anything would lose what was typed.
+    expect(await controller.ops!.find('Anyway.md'), isNotNull);
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.textContaining('Filed'), findsWidgets);
+  });
+
   testWidgets('a template with no directives still asks for a name', (
     tester,
   ) async {

@@ -79,8 +79,21 @@ copist:
       expect(read('---\ncopist:\n  filename: ""\n---\n').namesItself, isFalse);
     });
 
-    test('malformed frontmatter declares nothing rather than throwing', () {
-      expect(read('---\ncopist: [unclosed\n---\n'), TemplateDirectives.none);
+    test('malformed frontmatter declares nothing, and says why', () {
+      // Silence here is what put a note in the wrong folder with nothing
+      // said about it: the questions are found by scanning the text, so a
+      // template with broken YAML still looked like it was working
+      // (user, 2026-09-10).
+      final directives = read('---\ncopist: [unclosed\n---\n');
+      expect(directives.folder, isNull);
+      expect(directives.filename, isNull);
+      expect(directives.namesItself, isFalse);
+      expect(directives.error, isNotNull);
+      expect(directives.error, isNotEmpty);
+    });
+
+    test('a template with no frontmatter at all is not an error', () {
+      expect(read('# Just a body\n').error, isNull);
     });
   });
 

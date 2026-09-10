@@ -806,6 +806,13 @@ final class AppStrings {
   );
   static String frontmatterInvalid(String reason) =>
       _t('Frontmatter not read: $reason', 'Frontmatter non letto: $reason');
+  static String templateFrontmatterInvalid(String template, String reason) =>
+      _t(
+        'The frontmatter of “$template” was not read, so its folder and '
+            'file name did nothing: $reason',
+        'Il frontmatter di “$template” non è stato letto, quindi la sua '
+            'cartella e il nome del file non hanno fatto nulla: $reason',
+      );
   static String get templatePickerTitle =>
       _t('Choose a template', 'Scegli un modello');
   static String templatePickerEmpty(String folder) => _t(
