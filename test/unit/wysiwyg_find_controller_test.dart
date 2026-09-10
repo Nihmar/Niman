@@ -57,8 +57,9 @@ void main() {
     addTearDown(find.dispose);
     find.findInput.text = 'one';
     find.replaceInput.text = '1';
-    find.search();
-    find.replaceMatch();
+    find
+      ..search()
+      ..replaceMatch();
     expect(controller.document.toPlainText().trim(), '1 two one');
     find.replaceAllMatches();
     expect(controller.document.toPlainText().trim(), '1 two 1');
