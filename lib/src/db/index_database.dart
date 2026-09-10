@@ -7,6 +7,15 @@ part 'index_database.g.dart';
 /// [path] is library-relative, slash-separated. Directory rows are
 /// materialized (not derived on the fly) so tree queries stay cheap at
 /// scale. [parent] is the parent row id; 0 means the library root.
+///
+/// Materialized rows are only half of cheap, though: without an index on
+/// [parent] every "what is in this folder" is a scan of the whole table,
+/// which is a millisecond at a thousand notes and a tenth of a second at
+/// a million — per expanded folder, on the frame that opens it (T-M6-01).
+/// The folder index covers the picker's "every directory, by path", which
+/// otherwise reads a million rows to find a thousand.
+@TableIndex(name: 'notes_parent', columns: {#parent})
+@TableIndex(name: 'notes_dir_path', columns: {#isDir, #path})
 class Notes extends Table {
   /// Primary key.
   IntColumn get id => integer().autoIncrement()();
@@ -57,7 +66,10 @@ class Notes extends Table {
 /// table stays two columns wide whatever the block's shape.
 ///
 /// The known keys are also materialized on [Notes]; this table is what
-/// makes *any* key filterable (T-M4-03).
+/// makes *any* key filterable (T-M4-03). The primary key answers "the
+/// fields of this note"; the index answers the other direction, "the
+/// notes whose `status` is `draft`", which is what filtering asks.
+@TableIndex(name: 'fields_key_value', columns: {#key, #value})
 class FrontmatterFields extends Table {
   /// The id of the note the field belongs to.
   IntColumn get noteId => integer()();
@@ -77,7 +89,10 @@ class FrontmatterFields extends Table {
 /// `COLLATE NOCASE` so `[[note]]` and `[[Note]]` share a candidate set.
 ///
 /// Rows are maintained by the indexer on insert/rename/delete; the table is
-/// rebuildable from disk by a full rescan.
+/// rebuildable from disk by a full rescan. The primary key resolves a
+/// link; the index is for the maintenance, which deletes a note's rows by
+/// its id — once per re-indexed note, so a scan there is a scan per note.
+@TableIndex(name: 'stems_note', columns: {#noteId})
 class NoteStems extends Table {
   /// The normalized (lowercased) stem or alias text.
   TextColumn get stem => text().customConstraint('COLLATE NOCASE')();
@@ -105,6 +120,7 @@ class Tags extends Table {
 /// Which note carries which tag, and from where: frontmatter `tags:` or an
 /// inline `#tag`. One row per (tag, note, source) — a tag in both sources
 /// has two rows, so the counts and the source survive.
+@TableIndex(name: 'note_tags_note', columns: {#noteId})
 class NoteTags extends Table {
   /// The normalized tag name (see [Tags]).
   TextColumn get tag => text()();
@@ -122,6 +138,11 @@ class NoteTags extends Table {
 /// A resolved link edge between two notes; dead links are skipped, so every
 /// row points at an existing note. References/backlinks UI is future work
 /// (M3 stores the edges; it has no reader for them yet).
+///
+/// The primary key reads a note's outgoing links; the index reads them the
+/// way the backlinks panel will, which is the direction the key cannot
+/// answer.
+@TableIndex(name: 'links_to', columns: {#toNote})
 class NoteLinks extends Table {
   /// The id of the note containing the link.
   IntColumn get fromNote => integer()();
@@ -156,9 +177,10 @@ class IndexDatabase extends _$IndexDatabase {
   new(super.e);
 
   /// v1: M3's tree, stems, tags and links. v2: the frontmatter fields
-  /// table and the three known-field columns on `notes` (T-M4-02).
+  /// table and the three known-field columns on `notes` (T-M4-02). v3:
+  /// the six indexes the million-note pass showed missing (T-M6-01).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// The FTS5 index (design.md: no drift class — raw SQL, `rowid` =
   /// `notes.id`, one row per note, `title` weighted above `body` by the

@@ -68,7 +68,12 @@ void main() {
     final clock = Stopwatch()..start();
     await indexer.fullScan(root.path);
     final elapsed = clock.elapsedMilliseconds;
-    expect(elapsed, lessThan(60000), reason: 'fullScan took $elapsed ms');
+    // Twenty-odd seconds on this machine with nothing else running, and
+    // the bound is twice a minute rather than one: `flutter test` runs
+    // files in parallel, and the scale test next door is writing its own
+    // hundred thousand rows while this one walks. The assertion is here
+    // to catch a scan that reads every body again, not to time a laptop.
+    expect(elapsed, lessThan(120000), reason: 'fullScan took $elapsed ms');
 
     final fts = await db
         .customSelect('SELECT count(*) c FROM notes_fts')
@@ -97,9 +102,11 @@ void main() {
     final clock = Stopwatch()..start();
     final counts = await tags.tagCounts();
     expect(counts.single.name, 'fixture');
+    // The count is the whole truth; the list of notes is a page of it
+    // (T-M6-01), so a tag on the entire library opens in bounded time.
     expect(counts.single.count, noteCount);
     final notes = await tags.notesWithTag('fixture');
-    expect(notes, hasLength(noteCount));
+    expect(notes, hasLength(tagNotesLimit));
     expect(clock.elapsedMilliseconds, lessThan(5000));
   });
 

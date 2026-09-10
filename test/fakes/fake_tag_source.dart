@@ -59,8 +59,12 @@ final class FakeTagSource implements TagSource {
   }
 
   @override
-  Future<List<Note>> notesWithTag(String tag) async {
+  Future<List<Note>> notesWithTag(
+    String tag, {
+    int limit = tagNotesLimit,
+  }) async {
     final paths = List<String>.of(tags[tag] ?? const [])..sort();
-    return _rowsFor(paths);
+    final rows = _rowsFor(paths);
+    return rows.length <= limit ? rows : rows.sublist(0, limit);
   }
 }

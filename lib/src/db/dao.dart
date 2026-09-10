@@ -68,9 +68,14 @@ final class NoteDao {
   }
 
   /// All directory rows, path-ordered (for move-target pickers).
+  ///
+  /// `is_dir = 1` rather than the bare column: SQLite matches an index on
+  /// an equality, not on a truthiness test, and the difference at a
+  /// million notes is a scan of every row against a walk of the folders
+  /// (T-M6-01).
   Future<List<Note>> folders() {
     return (_db.select(_db.notes)
-          ..where((t) => t.isDir)
+          ..where((t) => t.isDir.equals(true))
           ..orderBy([(t) => OrderingTerm.asc(t.path)]))
         .get();
   }
@@ -88,11 +93,10 @@ final class NoteDao {
   /// the still-present notes rows — so a subtree of any size costs a
   /// constant number of statements, never an argument-list per note.
   Future<int> deleteSubtree(String path) {
-    // Both statements bind the same two arguments; SQLite string literals
-    // do not process escapes, so `'\'` is a single backslash for the
-    // ESCAPE clause.
-    const where = r"path = ? OR path LIKE ? ESCAPE '\'";
-    final args = [path, '${sqlLikeEscape(path)}/%'];
+    // Every statement binds the same three arguments.
+    const where = 'path = ? OR (path >= ? AND path < ?)';
+    final range = subtreePathRange(path);
+    final args = [path, range.from, range.to];
     return _db.transaction(() async {
       // Dependents first (they select the ids from notes), then the notes
       // rows themselves.
@@ -126,13 +130,11 @@ final class NoteDao {
         '(SELECT id FROM notes WHERE $where)',
         args,
       );
-      final t = _db.notes;
-      return await (_db.delete(t)..where(
-            (x) =>
-                x.path.equals(path) |
-                x.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
-          ))
-          .go();
+      return await _db.customUpdate(
+        'DELETE FROM notes WHERE $where',
+        variables: [for (final arg in args) Variable<String>(arg)],
+        updates: {_db.notes},
+      );
     });
   }
 
@@ -140,18 +142,34 @@ final class NoteDao {
   /// or every row when [path] is empty.
   Future<List<Note>> subtreeRows(String path) async {
     if (path.isEmpty) return await allRows();
+    final range = subtreePathRange(path);
     return await (_db.select(_db.notes)..where(
           (t) =>
               t.path.equals(path) |
-              t.path.like('${sqlLikeEscape(path)}/%', escapeChar: r'\'),
+              (t.path.isBiggerOrEqualValue(range.from) &
+                  t.path.isSmallerThanValue(range.to)),
         ))
         .get();
   }
 }
 
+/// The half-open path range holding everything under [path].
+///
+/// A subtree used to be found with `LIKE 'path/%'`, which reads every row
+/// in the table: SQLite's LIKE is case-insensitive by default, and an
+/// index built on the default collation cannot answer it. A range on the
+/// same prefix is an index seek instead — a second saved per deleted
+/// folder at a million notes (T-M6-01).
+///
+/// `to` is the prefix with its trailing `/` replaced by the next
+/// character in the alphabet, `0`, which is the first string that sorts
+/// after every descendant.
+({String from, String to}) subtreePathRange(String path) =>
+    (from: '$path/', to: '${path}0');
+
 /// Escapes SQL `LIKE` wildcards in [s] so it can be used safely with an
-/// `ESCAPE '\'` clause. Public: the contains-search pattern (T-M3-08) and
-/// the subtree predicates share it.
+/// `ESCAPE '\'` clause. Public: the contains search (T-M3-08) builds its
+/// pattern with it.
 String sqlLikeEscape(String s) {
   return s
       .replaceAll(r'\', r'\\')

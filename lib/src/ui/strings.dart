@@ -368,6 +368,13 @@ final class AppStrings {
   static String get tagsNotesEmpty =>
       _t('No notes with this tag', 'Nessuna nota con questo tag');
 
+  /// The last row of a tag's note list when the tag has more notes than
+  /// the list shows (T-M6-01).
+  static String tagsNotesCapped(int limit) => _t(
+    'Only the first $limit are listed — search the tag to narrow it down',
+    'Sono elencate solo le prime $limit — cerca il tag per restringere',
+  );
+
   // Link navigation (T-M3-07).
   static String get unresolvedLinkTitle =>
       _t('Link not found', 'Link non trovato');

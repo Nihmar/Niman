@@ -26,16 +26,29 @@ neither has sync (M5).
 
 ## Tasks
 
-- [ ] **T-M6-01** 1M-note performance pass: startup with cached index (no
+- [x] **T-M6-01** 1M-note performance pass: startup with cached index (no
   blocking scan), incremental indexing verified, lazy tree, FTS5 search at
   scale. Fixture generator (synthetic 1M-note library) + timing assertions in the
   test suite. *AC: startup < target, search instant, memory bounded.*
+  Two fixtures, because the gate has two halves: `tool/make_fixture.dart`
+  writes a real million-note library (about half an hour, run once and
+  kept) for opening on a device, and `test/perf/index_scale_test.dart`
+  builds the *index* of one directly — no files — because startup reads
+  the index and never the disk. It runs at 50 000 notes in every suite
+  run and at the full million with `COPIST_SCALE=1000000`.
 - [ ] **T-M6-11** First-index experience at scale: opening a library for
   the first time still runs a blocking scan behind a spinner, which is
   fine for a thousand notes and minutes long for a million. Index in the
   background with visible progress and a browsable partial tree, and let
   the user work while it fills. *AC: a 1M-note library is usable before
-  its first scan finishes.*
+  its first scan finishes.* **It also owns the memory**, which the
+  million-note pass measured and did not fix: `fullScan` reads every
+  index row into a map and the walk into a list, which at a million notes
+  is nine seconds and about a gigabyte — an out-of-memory kill on a
+  phone, and it runs on the periodic rescan too, not only on the first
+  index. The fix is the same restructuring this task needs anyway:
+  reconcile a directory at a time instead of the whole library at once.
+  `test/perf/index_scale_test.dart` keeps the number on the record.
 - [ ] **T-M6-02** Multi-tab: multiple notes open at once — tab bar, close,
   switch; per-tab editor state. *AC: edit two tabs independently; state
   survives tab switch.*
@@ -138,12 +151,26 @@ See [design.md](design.md). M6 slice:
   frontmatter stripped/normalized; page links best-effort to wikilinks.
 - **Perf gate:** fixture generator writes 1M small notes + novel-length files;
   the suite asserts startup, first-paint and search timings (soft
-  thresholds, tracked over time).
+  thresholds, tracked over time). What the first pass found (2026-09-10,
+  a million rows): the tree was materialized but unindexed, so every
+  "what is in this folder" read the whole table — six indexes now cover
+  the parent, the folder list, a note's tags and stems, the backlink
+  direction and frontmatter filtering. Two more queries were unbounded
+  rather than slow: a subtree was found with `LIKE 'folder/%'`, which no
+  index can answer, and is now a range on the path; and opening a tag
+  returned every note carrying it, half a library at the gate, and is
+  now a page of 500 under a count that still tells the truth. Measured
+  after, at a million notes: open to ready 60 ms, first tree read 18 ms,
+  a folder's children 16 ms, every folder 8 ms, a rare word 5 ms, a tag
+  211 ms, a folder deleted 35 ms. The ceiling left standing is a word
+  that appears in every note — 1.2 s, because bm25 has to rank a million
+  matches before it can take the top fifty.
 
 ## Exit criteria
 
 - 1M-note fixture: startup (cached index), tree scroll, and search meet the
-  timing gate; memory bounded.
+  timing gate; memory bounded — the reads are (T-M6-01), the
+  reconciliation is not until T-M6-11 rewrites it.
 - Multi-tab works; export/import round-trips verified for `.md`, HTML, zip,
   Obsidian, and Notion.
 - Encryption round-trips; onboarding complete; all theme combinations render.
@@ -161,4 +188,6 @@ See [design.md](design.md). M6 slice:
   before the first sync.
 - AppImage/AppImage-free tar.gz builds for M6 testing on Linux desktop
   (Wayland required) — build tooling finalized in M7.
-- 1M fixture generation time — generate it once and keep the artifact.
+- ~~1M fixture generation time — generate it once and keep the
+  artifact.~~ Settled: `tool/make_fixture.dart` writes it (about half an
+  hour), and the index-level gate needs no files at all.

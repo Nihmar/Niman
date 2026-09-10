@@ -324,8 +324,11 @@ auto / force split / force switch.
 | `integration_test/`| On-device E2E: open library → edit → sync → conflict round trip |
 | Local              | `flutter analyze --fatal-infos` + `flutter test` before every commit; there is no CI, by choice |
 
-1M-note validation: a fixture generator (M6) creates a synthetic library and
-drives startup, indexing, and search timing assertions.
+`test/perf/` holds the scale gate: it builds a synthetic *index* (no note
+files) and times what startup, the tree, search and tags cost on it —
+50 000 notes on every run, a million with `COPIST_SCALE=1000000`. The
+library made of real files is `tool/make_fixture.dart`, generated once
+and opened on a device; walking one is `test/unit/fixture_10k_test.dart`.
 
 ## Performance strategy
 

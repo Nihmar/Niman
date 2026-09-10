@@ -22,6 +22,14 @@ final class TagCount {
   final int count;
 }
 
+/// How many notes a tag lists at once.
+///
+/// A tag on half a library is a list nobody scrolls and half a library's
+/// rows in memory — five seconds and hundreds of megabytes at the
+/// million-note gate (T-M6-01). The tag list already shows the real
+/// count beside the name; this bounds what opening one costs.
+const int tagNotesLimit = 500;
+
 /// The tag data source the UI talks to (T-M3-06): tag list with counts
 /// and tag→notes. [TagRepo] is the production implementation over drift;
 /// widget tests inject a fake.
@@ -29,8 +37,9 @@ abstract interface class TagSource {
   /// Every tag with counts, most used first (ties alphabetical).
   Future<List<TagCount>> tagCounts();
 
-  /// The notes carrying [tag] (normalized — no `#`), in path order.
-  Future<List<Note>> notesWithTag(String tag);
+  /// The first [limit] notes carrying [tag] (normalized — no `#`), in
+  /// path order.
+  Future<List<Note>> notesWithTag(String tag, {int limit});
 }
 
 /// The tag side of the search data (T-M3-04/T-M3-06).
@@ -55,7 +64,7 @@ final class TagRepo implements TagSource {
   }
 
   @override
-  Future<List<Note>> notesWithTag(String tag) {
+  Future<List<Note>> notesWithTag(String tag, {int limit = tagNotesLimit}) {
     return (_db.select(_db.notes)
           ..where(
             (n) => n.id.isInQuery(
@@ -64,7 +73,8 @@ final class TagRepo implements TagSource {
                 ..where(_db.noteTags.tag.equals(tag)),
             ),
           )
-          ..orderBy([(n) => OrderingTerm.asc(n.path)]))
+          ..orderBy([(n) => OrderingTerm.asc(n.path)])
+          ..limit(limit))
         .get();
   }
 }

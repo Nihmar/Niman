@@ -1896,6 +1896,30 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
   late final $NoteLinksTable noteLinks = $NoteLinksTable(this);
   late final $FrontmatterFieldsTable frontmatterFields =
       $FrontmatterFieldsTable(this);
+  late final Index notesParent = Index(
+    'notes_parent',
+    'CREATE INDEX notes_parent ON notes (parent)',
+  );
+  late final Index notesDirPath = Index(
+    'notes_dir_path',
+    'CREATE INDEX notes_dir_path ON notes (is_dir, path)',
+  );
+  late final Index stemsNote = Index(
+    'stems_note',
+    'CREATE INDEX stems_note ON note_stems (note_id)',
+  );
+  late final Index noteTagsNote = Index(
+    'note_tags_note',
+    'CREATE INDEX note_tags_note ON note_tags (note_id)',
+  );
+  late final Index linksTo = Index(
+    'links_to',
+    'CREATE INDEX links_to ON note_links (to_note)',
+  );
+  late final Index fieldsKeyValue = Index(
+    'fields_key_value',
+    'CREATE INDEX fields_key_value ON frontmatter_fields ("key", value)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1907,6 +1931,12 @@ abstract class _$IndexDatabase extends GeneratedDatabase {
     noteTags,
     noteLinks,
     frontmatterFields,
+    notesParent,
+    notesDirPath,
+    stemsNote,
+    noteTagsNote,
+    linksTo,
+    fieldsKeyValue,
   ];
 }
 

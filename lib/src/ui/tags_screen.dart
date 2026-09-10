@@ -199,10 +199,26 @@ final class _TagsScreenState extends State<TagsScreen> {
         ),
       );
     }
+    // The last row says so when the tag has more notes than the list
+    // carries: a count of 12 000 next to a list of 500 is otherwise a
+    // list that looks wrong (T-M6-01).
+    final capped = notes.length >= tagNotesLimit;
     return ListView.builder(
       key: const Key('tag-notes'),
-      itemCount: notes.length,
+      itemCount: notes.length + (capped ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index >= notes.length) {
+          return ListTile(
+            key: const Key('tag-notes-capped'),
+            leading: const Icon(Icons.more_horiz),
+            title: Text(
+              AppStrings.tagsNotesCapped(tagNotesLimit),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
         final note = notes[index];
         return ListTile(
           key: Key('tag-note-${note.path}'),
