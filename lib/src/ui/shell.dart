@@ -14,6 +14,7 @@ import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/templates/directives.dart';
 import 'package:copist/src/templates/engine.dart';
+import 'package:copist/src/templates/includes.dart';
 import 'package:copist/src/templates/prompts.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
@@ -925,7 +926,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     final ops = widget.controller.ops!;
     final String template;
     try {
-      template = await ops.readNote(chosen.path);
+      // Includes first (T-TPL-06): the pasted text is then read like the
+      // rest of the file, so its placeholders are substituted and its
+      // own questions join the same form.
+      template = await expandTemplateIncludes(
+        await ops.readNote(chosen.path),
+        sourcePath: chosen.path,
+        resolve: (written) => _resolveInclude(ops, folder, written),
+      );
     } on Object catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -1019,6 +1027,32 @@ final class _LibraryShellState extends State<_LibraryShell>
         _noteOpened();
       });
     });
+  }
+
+  /// Finds the template an `{{include:…}}` names (T-TPL-06).
+  ///
+  /// Tried inside the template folder first, then from the library root,
+  /// with the `.md` added when it was left off — a partial lives beside
+  /// the templates that use it, and `{{include:_header}}` is what a
+  /// person writes.
+  Future<({String path, String text})?> _resolveInclude(
+    NoteOperations ops,
+    String templateFolder,
+    String written,
+  ) async {
+    final name = isMarkdownNote(written) ? written : '$written.md';
+    final cleaned = name.split('/').where((s) => s.isNotEmpty && s != '..');
+    if (cleaned.isEmpty) return null;
+    final relative = cleaned.join('/');
+    for (final candidate in <String>{
+      resolvePath(templateFolder, relative),
+      relative,
+    }) {
+      final row = await ops.find(candidate);
+      if (row == null || row.isDir) continue;
+      return (path: candidate, text: await ops.readNote(candidate));
+    }
+    return null;
   }
 
   /// The name of the note the creation is starting from, without the

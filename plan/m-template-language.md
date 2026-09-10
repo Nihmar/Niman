@@ -125,11 +125,16 @@ back by choice 4 and land after.
   A template writes `[[{{parent}}]]`, which is also what it looks like in
   the note. The four resolve to the empty string when there is nothing to
   say and stand only when the caller supplied no context at all.
-- [ ] **T-TPL-06** `{{include:path}}` — another template's text, pasted
+- [x] **T-TPL-06** `{{include:path}}` — another template's text, pasted
   before substitution, so a library can keep one header and one footer.
   Depth-limited to 5, cycles refused with the cycle named in the created
   note rather than a hang. *AC: a two-level include; a self-include
   produces a visible error, not a stack overflow.*
+  A path is tried inside the template folder first and from the library
+  root second, with the `.md` added when it was left off, so
+  `{{include:_repro}}` is what a person writes. Because the paste happens
+  before anything else runs, a partial's own `{{ask:…}}` fields join the
+  same form as the template that included it.
 - [ ] **T-TPL-08** A reference the user can reach: a "Template
   placeholders" help sheet in the settings, next to the template folder
   row, listing every placeholder and filter with an example — the same

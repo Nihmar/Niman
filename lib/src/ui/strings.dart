@@ -607,6 +607,17 @@ final class AppStrings {
       _t('New from template here', 'Nuova da modello qui');
   static String get templateFormTitle =>
       _t('Fill in the template', 'Compila il modello');
+
+  // What an {{include:…}} that could not be pasted leaves behind, beside
+  // the placeholder it could not replace (T-TPL-06).
+  static String includeMissing(String path) =>
+      _t('⚠ no template “$path”', '⚠ nessun modello “$path”');
+  static String includeCycle(String path) =>
+      _t('⚠ “$path” includes itself', '⚠ “$path” include sé stesso');
+  static String includeTooDeep(String path) => _t(
+    '⚠ “$path” is nested too deep',
+    '⚠ “$path” è annidato troppo in profondità',
+  );
   static String frontmatterInvalid(String reason) =>
       _t('Frontmatter not read: $reason', 'Frontmatter non letto: $reason');
   static String get templatePickerTitle =>
