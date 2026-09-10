@@ -1464,5 +1464,39 @@ Run and paste the outcome (do not paste raw logs):
 - Whether the opaque embed should eventually become editable per construct
   (math, tables) instead of a read-only box.
 
+## Markdown fidelity limits (measured 2026-09-11)
+
+Probed against the real codec (`MarkdownDocumentCodec` + flutter_quill
+11.5.1): decode each snippet, count opaque embeds, re-encode, compare
+bytes. flutter_quill itself understands no Markdown — everything below is
+the codec's mapping, not the package's.
+
+Round-trips byte-identical: paragraphs, `#`–`######`, `**bold**`,
+`*italic*`, `~~strike~~`, inline code, `[t](href)` links, `-`/`1.` lists,
+`>` quotes, `~~~` fences with language, `- [ ]`/`- [x]` tasks.
+
+Flattened or normalized on save: nested lists lose their indent; ordered
+lists are renumbered from `1.`; `<https://…>` autolinks are rewritten as
+`[https://…](https://…)`; setext headings are rewritten ATX. An `hr` and a
+footnote definition may gain a blank line around them.
+
+Opaque (preserved byte-identical, shown as a read-only monospace box,
+neither rendered nor editable): tables, math, frontmatter, raw HTML
+blocks, `---`, `![[…]]` embeds, `[[…]]` wikilinks, `![](…)` images (the
+whole paragraph containing one), nested quotes, hard breaks (trailing
+double space), reference-link definitions, footnotes.
+
+Inline HTML (`<u>`, `<sup>`, …) decodes as literal text: the WYSIWYG shows
+the tags as characters, with no formatting applied.
+
+Data loss: superscript/subscript applied from the WYSIWYG toolbar is kept
+as Quill's `script` attribute, which the encoder ignores — the text stays,
+the format is silently dropped on save. Fix when touched: map `script` to
+`<sup>…</sup>`/`<sub>…</sub>` in `_renderInline`, the way `underline`
+already maps to `<u>…</u>`.
+
+Scale: above 200 KB the surface refuses and offers the source editor
+(T-WYS-07); Quill builds the whole document with no windowing.
+
 
 
