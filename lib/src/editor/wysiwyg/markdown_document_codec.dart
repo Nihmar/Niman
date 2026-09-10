@@ -56,6 +56,11 @@ final class MarkdownDocumentCodec {
       } else {
         ops.addAll(_blockOps(block));
       }
+      // The parser drops the blank lines between blocks from the AST, but
+      // the block's slice carries them: without this the WYSIWYG view ate
+      // them, and the next edit wrote the note without them (device report,
+      // 2026-09-11).
+      ops.addAll(_trailingBlankLines(block.source));
     }
     // Quill refuses an empty document ("Document Delta cannot be empty"), and
     // an empty note is a note: give it the one empty line every document
@@ -114,6 +119,19 @@ final class MarkdownDocumentCodec {
       buffer.write(_renderLine(runs, const <String, dynamic>{}));
     }
     return buffer.toString();
+  }
+
+  /// The empty lines a block's source carries after its content: the first
+  /// newline ends the block's own line, every further one is a blank line.
+  static List<Map<String, dynamic>> _trailingBlankLines(String source) {
+    var newlines = 0;
+    for (var i = source.length - 1; i >= 0 && source[i] == _nl; i--) {
+      newlines++;
+    }
+    final blanks = newlines == 0 ? 0 : newlines - 1;
+    return <Map<String, dynamic>>[
+      for (var i = 0; i < blanks; i++) <String, dynamic>{'insert': _nl},
+    ];
   }
 
   List<Map<String, dynamic>> _blockOps(MarkdownBlock block) {
