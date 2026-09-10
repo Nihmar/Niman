@@ -57,6 +57,10 @@ final class MarkdownDocumentCodec {
         ops.addAll(_blockOps(block));
       }
     }
+    // Quill refuses an empty document ("Document Delta cannot be empty"), and
+    // an empty note is a note: give it the one empty line every document
+    // needs. The no-edit guard still writes the original bytes back.
+    if (ops.isEmpty) ops.add(<String, dynamic>{'insert': _nl});
     final document = quill.Document.fromJson(ops);
     return DecodedNote(
       source: source,
