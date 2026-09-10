@@ -28,6 +28,8 @@ import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/spell_check_sheet.dart';
+import 'package:copist/src/spellcheck/spell_issue.dart';
 import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
@@ -1073,6 +1075,47 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     setState(() {});
   }
 
+  /// Opens the spelling review panel (T-PP-09).
+  Future<void> _openSpellCheck() async {
+    final spell = widget.spellCheck;
+    if (spell == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SpellCheckSheet(
+        scan: _scanSpelling,
+        apply: _applySpelling,
+        available: spell.available,
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  /// The whole note's issues, in reading order (the panel's pass).
+  List<SpellIssue> _scanSpelling() {
+    final spell = widget.spellCheck;
+    if (spell == null) return const <SpellIssue>[];
+    final lines = _controller.codeLines;
+    return spell.scan(<SpellLine>[
+      for (var i = 0; i < lines.length; i++)
+        (text: lines[i].text, skip: spellSkipRanges(_highlight.tokensOf(i))),
+    ]);
+  }
+
+  /// Replaces one issue's word in the controller (the panel's fix).
+  void _applySpelling(SpellIssue issue, String replacement) {
+    _controller.replaceSelection(
+      replacement,
+      CodeLineSelection(
+        baseIndex: issue.line,
+        baseOffset: issue.start,
+        extentIndex: issue.line,
+        extentOffset: issue.end,
+      ),
+    );
+    _highlight.clearSpans();
+  }
+
   /// The [CodeLineSpanBuilder] over [_highlight]: styles each line the
   /// editor lays out, dark/light per the app brightness, and underlines the
   /// misspelled prose (T-PP-09) once the spell checker knows the line.
@@ -1296,6 +1339,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: _findController.findMode,
+            ),
+          if (!_loading &&
+              widget.spellCheck != null &&
+              widget.spellCheck!.available)
+            IconButton(
+              key: const Key('spell-check-open'),
+              tooltip: AppStrings.spellCheckTooltip,
+              icon: const Icon(Icons.spellcheck),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+              onPressed: () => unawaited(_openSpellCheck()),
             ),
           if (!_loading)
             Text(

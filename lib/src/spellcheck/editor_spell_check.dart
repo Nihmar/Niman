@@ -12,6 +12,7 @@ import 'dart:ui' show TextRange;
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:copist/src/spellcheck/spell_checker.dart';
+import 'package:copist/src/spellcheck/spell_issue.dart';
 import 'package:flutter/foundation.dart';
 
 /// Ranges in [tokens] the checker must not look at.
@@ -40,6 +41,10 @@ const Set<TokenKind> _skipKinds = <TokenKind>{
   TokenKind.taskBox,
   TokenKind.tag,
 };
+
+/// One line handed to [EditorSpellCheck.scan]: its text and the ranges the
+/// checker must ignore.
+typedef SpellLine = ({String text, List<TextRange> skip});
 
 /// One checked line: the text it was checked for and the ranges found.
 final class _CheckedLine {
@@ -108,6 +113,45 @@ final class EditorSpellCheck extends ChangeNotifier {
     _lines[index] = _CheckedLine(line, ranges);
     return ranges;
   }
+
+  /// Every misspelling in [lines], in reading order, with suggestions.
+  ///
+  /// The panel's whole-note pass, unlike the per-visible-line [rangesFor];
+  /// capped so a mostly-code note cannot build an unbounded list, and
+  /// sharing the same word-verdict cache.
+  List<SpellIssue> scan(List<SpellLine> lines) {
+    if (!_enabled) return const <SpellIssue>[];
+    final checker = _checker ??= _createChecker();
+    if (!checker.available) return const <SpellIssue>[];
+    final issues = <SpellIssue>[];
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      for (final match in _word.allMatches(line.text)) {
+        final start = match.start;
+        final end = match.end;
+        if (_covered(start, end, line.skip)) continue;
+        final word = match.group(0)!;
+        if (!_checkable(word)) continue;
+        final correct = _words[word] ??= checker.isCorrect(word);
+        if (correct) continue;
+        issues.add(
+          SpellIssue(
+            line: i,
+            start: start,
+            end: end,
+            word: word,
+            lineText: line.text,
+            suggestions: checker.suggest(word),
+          ),
+        );
+        if (issues.length >= maxIssues) return issues;
+      }
+    }
+    return issues;
+  }
+
+  /// The most issues the panel lists.
+  static const int maxIssues = 200;
 
   List<TextRange> _checkLine(
     SpellChecker checker,

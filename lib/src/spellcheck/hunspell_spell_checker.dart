@@ -128,6 +128,7 @@ final class HunspellSpellChecker implements SpellChecker {
           >('Hunspell_create');
       final handle = create(aff, dic);
       if (handle == nullptr) return null;
+      const AppLogger(name: 'spellcheck').info('hunspell ready: ${dict.dic}');
       return HunspellSpellChecker._(
         handle: handle,
         spell: lib

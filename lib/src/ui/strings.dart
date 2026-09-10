@@ -53,6 +53,28 @@ final class AppStrings {
       _t('Keyboard shortcuts', 'Scorciatoie da tastiera');
   static String get settingsSectionDiagnostics =>
       _t('Diagnostics', 'Diagnostica');
+  static String get settingsSpellCheckTitle =>
+      _t('Check spelling', 'Controlla ortografia');
+  static String get settingsSpellCheckSubtitle => _t(
+    'Underline misspelled words while writing.',
+    'Sottolinea le parole errate mentre scrivi.',
+  );
+
+  // Spelling review (T-PP-09).
+  static String get spellCheckTooltip =>
+      _t('Check spelling', 'Controlla ortografia');
+  static String get spellCheckTitle => _t('Spelling', 'Ortografia');
+  static String get spellCheckEmpty =>
+      _t('No spelling mistakes.', 'Nessun errore di ortografia.');
+  static String get spellCheckUnavailable => _t(
+    'hunspell is not installed on this system.',
+    'hunspell non è installato su questo sistema.',
+  );
+  static String get spellCheckNoSuggestions =>
+      _t('No suggestions', 'Nessun suggerimento');
+  static String spellCheckCount(int count) =>
+      _t('$count to review', '$count da rivedere');
+  static String spellCheckLine(int line) => _t('line $line', 'riga $line');
 
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) =>

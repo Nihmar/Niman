@@ -7,6 +7,7 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/keyboard_shortcuts.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
@@ -25,10 +26,18 @@ import 'package:flutter/material.dart';
 /// narrow, rail on wide).
 final class SettingsBody extends StatefulWidget {
   /// Creates the settings body.
-  const new({required this.controller, this.onClosed, super.key});
+  const new({
+    required this.controller,
+    this.onClosed,
+    this.spellCheck,
+    super.key,
+  });
 
   /// The session of the library whose settings this body edits.
   final LibrarySession controller;
+
+  /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
+  final EditorSpellCheck? spellCheck;
 
   /// Called after "Close library" closes the session; the pushed screen
   /// pops its own route, the shell tab returns to the Files tab. When null
@@ -428,6 +437,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final spell = widget.spellCheck;
     // Grouped, and every setting one row of the same height (2026-09-08
     // user feedback). Switches stay switches; everything with more than
     // two choices reads its value on the right and opens a dialog, which
@@ -517,6 +527,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
             ),
           ),
         ),
+
+        if (spell != null && spell.available)
+          SwitchListTile(
+            key: const Key('spell-check-setting'),
+            title: Text(AppStrings.settingsSpellCheckTitle),
+            subtitle: Text(AppStrings.settingsSpellCheckSubtitle),
+            value: spell.enabled,
+            onChanged: (value) =>
+                setState(() => spell.setEnabled(enabled: value)),
+          ),
 
         SettingsSection(AppStrings.settingsSectionLibrary),
         // The one row with nothing to change: a fact about the open

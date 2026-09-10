@@ -3,6 +3,7 @@
 // state is exercised with a fake so the logic runs everywhere.
 import 'dart:io';
 
+import 'package:copist/src/editor/highlight_sync.dart';
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
@@ -10,6 +11,7 @@ import 'package:copist/src/spellcheck/spell_checker.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:re_editor/re_editor.dart';
 
 /// Whether the host actually has hunspell + a dictionary; decided once so a
 /// bare machine simply skips the live test.
@@ -91,6 +93,28 @@ void main() {
       expect(check.available, isFalse);
     });
 
+    test('scan lists the note issues with suggestions', () {
+      final check = EditorSpellCheck(
+        createChecker: () => _FakeChecker(
+          {'wrold'},
+          suggestions: const {
+            'wrold': ['world', 'would'],
+          },
+        ),
+      );
+      final issues = check.scan([
+        (text: 'hello wrold', skip: const <TextRange>[]),
+      ]);
+      expect(issues, hasLength(1));
+      final issue = issues.single;
+      expect(issue.word, 'wrold');
+      expect(issue.line, 0);
+      expect(issue.start, 6);
+      expect(issue.end, 11);
+      expect(issue.lineText, 'hello wrold');
+      expect(issue.suggestions, ['world', 'would']);
+    });
+
     test('reset forgets the cached lines', () {
       final check = EditorSpellCheck(
         createChecker: () => _FakeChecker({'wrold'}),
@@ -116,6 +140,43 @@ void main() {
     expect(checker.suggest('helo'), contains('hello'));
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
 
+  test('the real engine underlines a real typo in a real span', () {
+    final check = EditorSpellCheck();
+    addTearDown(check.dispose);
+    const line = 'hello wrold';
+    final ranges = check.rangesFor(0, line, skip: const <TextRange>[]);
+    expect(ranges, isNotEmpty);
+
+    final sync = EditorHighlightSync();
+    final controller = CodeLineEditingController()..text = line;
+    addTearDown(controller.dispose);
+    sync.onBufferChanged(controller.codeLines);
+    const spell = TextStyle(
+      decoration: TextDecoration.underline,
+      decorationStyle: TextDecorationStyle.wavy,
+      decorationColor: Color(0xFFB00020),
+    );
+    final span = sync.spanFor(
+      index: 0,
+      text: line,
+      base: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+      dark: false,
+      accent: const Color(0xFF445E91),
+      spellRanges: ranges,
+      spellStyle: spell,
+    );
+
+    // Walk to the misspelled run and check the wavy style landed.
+    final walk = <TextSpan>[span];
+    TextStyle? found;
+    while (walk.isNotEmpty) {
+      final node = walk.removeLast();
+      if (node.text == 'wrold') found = node.style;
+      walk.addAll(node.children?.whereType<TextSpan>() ?? const []);
+    }
+    expect(found?.decorationStyle, TextDecorationStyle.wavy);
+  }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
+
   test('the no-op reports unavailable and accepts every word', () {
     const checker = NoopSpellChecker();
     expect(checker.available, isFalse);
@@ -126,9 +187,10 @@ void main() {
 
 /// A checker whose misspellings are the words in [wrong].
 final class _FakeChecker implements SpellChecker {
-  new(this.wrong);
+  new(this.wrong, {this.suggestions = const <String, List<String>>{}});
 
   final Set<String> wrong;
+  final Map<String, List<String>> suggestions;
 
   @override
   bool get available => true;
@@ -137,7 +199,7 @@ final class _FakeChecker implements SpellChecker {
   bool isCorrect(String word) => !wrong.contains(word);
 
   @override
-  List<String> suggest(String word) => const <String>[];
+  List<String> suggest(String word) => suggestions[word] ?? const <String>[];
 
   @override
   void dispose() {}

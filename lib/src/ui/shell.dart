@@ -2023,7 +2023,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         _showQuickNoteChooser
             ? QuickNoteTab(controller: controller, onOpen: _openQuickNote)
             : const SizedBox.shrink(),
-      ShellTab.settings => SettingsTab(controller: controller),
+      ShellTab.settings => SettingsTab(
+        controller: controller,
+        spellCheck: widget.spellCheck,
+      ),
     };
   }
 
