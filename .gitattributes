@@ -1,0 +1,7 @@
+# The Markdown fixtures are content under test, not source: a parser is
+# run over their exact bytes and the timings are compared across hosts.
+# Git's checkout translation would hand a Windows working tree CRLF
+# copies, and the preview benchmark then failed on a heading whose line
+# ended in a carriage return. `-text` means: store and check out these
+# files byte for byte, on every platform.
+test/fixtures/** -text

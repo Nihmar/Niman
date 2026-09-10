@@ -1,6 +1,15 @@
 // T-M3-09: 10k-note fixture — index build and search latencies with
 // generous machine-speed assertions (signal, not a benchmark), plus the
 // incremental path on it.
+//
+// The harness needs longer than its 30-second default here, and not
+// because the code is slow: writing 10 000 files and walking them is
+// minutes of filesystem work on a Windows host with a virus scanner in
+// the path, and it happens before the first assertion runs. A test that
+// allows a scan 60 seconds cannot be given 30 to finish in.
+@Timeout(Duration(minutes: 5))
+library;
+
 import 'dart:io';
 
 import 'package:copist/src/db/index_database.dart';

@@ -47,5 +47,7 @@ String? resolveLibraryRoot(String? picked) {
   final volumeRoot = volumeId == 'primary'
       ? '/storage/emulated/0'
       : '/storage/$volumeId';
-  return docPath.isEmpty ? volumeRoot : p.join(volumeRoot, docPath);
+  // Posix join, not the host's: this builds an Android path, and on a
+  // Windows desktop `p.join` would splice it together with a backslash.
+  return docPath.isEmpty ? volumeRoot : p.posix.join(volumeRoot, docPath);
 }

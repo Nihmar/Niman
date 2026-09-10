@@ -6,6 +6,7 @@ import 'package:copist/src/ui/trash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -48,7 +49,10 @@ void main() {
 
     // The shell is up with an empty tree.
     expect(find.text('No notes yet'), findsOne);
-    expect(controller.root, '/fake/library');
+    // Joined the way the app joins it: the create flow and the shell both
+    // use `p.join`, which spells the separator the host spells it, so a
+    // hard-coded '/' would be asserting about Linux from Windows.
+    expect(controller.root, p.join('/fake', 'library'));
 
     // Create a note via the FAB (T-UI-05).
     await tester.tap(find.byKey(const Key('new-note-fab')));
@@ -66,7 +70,7 @@ void main() {
     // library-relative one).
     expect(
       tester.widget<NoteView>(find.byType(NoteView)).path,
-      '/fake/library/First note.md',
+      p.join('/fake', 'library', 'First note.md'),
     );
 
     // Seed a root folder (no row to long-press yet), then use its context

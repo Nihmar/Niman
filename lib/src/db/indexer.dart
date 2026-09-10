@@ -668,6 +668,13 @@ final class Indexer {
 
   /// Library-relative path of [abs], or `null` when the path is outside the
   /// library, is the library root itself, or is hidden.
+  ///
+  /// Slash-separated, through the same [relPath] the scan walk uses. A
+  /// bare `p.relative` gives the platform separator, which on Windows had
+  /// this function answering `Docs\One.md` for a note the walk had
+  /// indexed as `Docs/One.md`: the same note under two paths, one row per
+  /// spelling, and every lookup by the path the rest of the app builds
+  /// missing the row the incremental pass had just written.
   String? _safeRel(String abs, String root) {
     final rootN = p.normalize(root);
     final absN = p.normalize(abs);
@@ -675,7 +682,7 @@ final class Indexer {
         !absN.startsWith('$rootN${p.separator}')) {
       return null;
     }
-    final rel = p.relative(absN, from: rootN);
+    final rel = relPath(absN, rootN);
     if (rel.isEmpty || _isHidden(rel)) return null;
     return rel;
   }
