@@ -1,5 +1,6 @@
 // T-WYS-05: the WYSIWYG surface replaces the source editor, never sits
 // beside the preview, and hides the source-only controls.
+import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/editor/note_editor.dart';
 import 'package:copist/src/editor/toolbar.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
@@ -159,6 +160,42 @@ void main() {
     await tester.tap(find.byKey(const Key('toolbar-bold')));
     await tester.pump();
     expect(button().active, isFalse);
+  });
+
+  testWidgets('the status row switches the editor kind', (tester) async {
+    EditorKind? chosen;
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        onEditorKindChanged: (kind) => chosen = kind,
+        readNote: (_) async => '# Head\n\nbody text',
+      ),
+    );
+    expect(find.byKey(const Key('editor-kind-toggle')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('editor-kind-toggle')));
+    expect(chosen, EditorKind.wysiwyg);
+  });
+
+  testWidgets('from WYSIWYG the toggle offers the source editor', (
+    tester,
+  ) async {
+    EditorKind? chosen;
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        showWysiwyg: true,
+        onEditorKindChanged: (kind) => chosen = kind,
+        readNote: (_) async => '# Head\n\nbody text',
+      ),
+    );
+    await tester.tap(find.byKey(const Key('editor-kind-toggle')));
+    expect(chosen, EditorKind.source);
   });
 
   testWidgets('the toolbar formats the WYSIWYG document', (tester) async {
