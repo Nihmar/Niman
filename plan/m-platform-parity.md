@@ -184,6 +184,11 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   seam, so Close still meets the unsaved-edits guard), Ctrl+B toggles the
   tree and the rail always stays. Windows gets the same bar after its
   pass.
+  **To test by hand (owed, user had no way to try them yet):** the
+  frameless window on Linux — drag, double-click maximize, the three
+  window buttons, Close with a dirty note (must ask), Ctrl+B, and the
+  tree toggle leaving the rail up; plus the view controls now reading in
+  the note's status row rather than the editor header.
 
 ### P3 — Share-in / open-with (both sides)
 
