@@ -432,7 +432,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // production load already has them from its isolate (the seam path
       // uses the regular refresh).
       if (stats == null) _refreshStats();
-      _refreshPreview();
+      // The editor gets this frame: the preview's parse and first layout
+      // start right after the text is on screen, so a large note shows it
+      // before the preview works (T-PP-22).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refreshPreview();
+      });
       final anchor = widget.initialAnchor;
       if (anchor != null) _jumpToAnchor(anchor);
       _log.info(

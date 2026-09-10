@@ -139,6 +139,12 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   /// parse, T-M2-05).
   static const int _syncParseLimit = 64 * 1024;
 
+  /// Blocks built in the parse's first frame, and per later turn of the
+  /// event loop (T-PP-22). The first chunk is a few tall windows' worth, so
+  /// ordinary notes build in one go and only novel-length ones stream.
+  static const int _firstChunk = 600;
+  static const int _chunkSize = 480;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -275,38 +281,58 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     // (the locator tests assert the two counts match).
     final map = widget.scrollMap;
     final children = <Widget>[];
-    for (final node in nodes) {
-      final block = builder.build([node]);
-      final content = block.length == 1
-          ? block.single
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: block,
-            );
-      if (map == null) {
-        children.add(content);
-        continue;
+    var built = 0;
+    // The whole document's widgets used to be built in one frame: ~55 ms on
+    // a 934 KB note, paid on every typing pause (the debounced parse). The
+    // first window's worth goes out now, then a chunk per turn of the event
+    // loop, so frames and input interleave with the build (T-PP-22).
+    void buildBlocks(int limit) {
+      while (built < limit && built < nodes.length) {
+        final block = builder.build([nodes[built]]);
+        final content = block.length == 1
+            ? block.single
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: block,
+              );
+        if (map == null) {
+          children.add(content);
+        } else {
+          final index = children.length;
+          // The sliver forces each child's extent (the map's estimate), so
+          // the measure sits inside an unbounded box: it reports the block's
+          // natural height, which the map then uses as the real extent.
+          children.add(
+            OverflowBox(
+              alignment: Alignment.topCenter,
+              maxHeight: double.infinity,
+              child: _BlockMeasure(
+                onHeight: (height) => map.measure(index, height),
+                child: content,
+              ),
+            ),
+          );
+        }
+        built++;
       }
-      final index = children.length;
-      // The sliver forces each child's extent (the map's estimate), so the
-      // measure sits inside an unbounded box: it reports the block's
-      // natural height, which the map then uses as the real extent.
-      children.add(
-        OverflowBox(
-          alignment: Alignment.topCenter,
-          maxHeight: double.infinity,
-          child: _BlockMeasure(
-            onHeight: (height) => map.measure(index, height),
-            child: content,
-          ),
-        ),
-      );
     }
+
+    buildBlocks(_firstChunk);
     setState(() {
       _children = children;
     });
     map?.rebuild(source);
+    if (built < nodes.length) {
+      void step() {
+        if (!mounted || revision != _parseRevision) return;
+        buildBlocks(built + _chunkSize);
+        setState(() {});
+        if (built < nodes.length) Timer.run(step);
+      }
+
+      Timer.run(step);
+    }
     // AST → widget-tree construction is the preview's other O(doc) cost;
     // the parse logs above separate it from the Markdown parse itself.
     const AppLogger(name: 'preview').debug(
