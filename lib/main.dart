@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:copist/src/app.dart';
 import 'package:copist/src/core/crash_reporter.dart';
+import 'package:copist/src/core/launch_args.dart';
 import 'package:copist/src/core/log_file.dart';
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,12 +13,30 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 /// Entrypoint of the Copist application.
-void main() {
+void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
   unawaited(_attachLogFile());
   _reportSlowFrames();
-  runApp(const ProviderScope(child: CopistApp()));
+  // Desktop only by construction: Android launches with no arguments, so
+  // the platform service stays in charge there.
+  final launch = parseLaunchArgs(args);
+  final openPath = launch.openPath;
+  if (openPath != null) {
+    const AppLogger(name: 'launch')
+        .info('file argument not opened yet (P3): $openPath');
+  }
+  runApp(
+    ProviderScope(
+      overrides: [
+        if (launch.action case final action?)
+          shortcutServiceProvider.overrideWith(
+            (ref) => CliShortcutService(action),
+          ),
+      ],
+      child: const CopistApp(),
+    ),
+  );
 }
 
 /// Points the log buffer at a file in the app's private support directory.

@@ -77,6 +77,36 @@ ShortcutService createShortcutService({bool? isAndroid}) {
   return const NoopShortcutService();
 }
 
+/// A launch action that came from the command line rather than the
+/// platform.
+///
+/// Hands the action to the shell exactly once through the same
+/// [ShortcutService.consumeLaunchAction] contract the Android launcher
+/// uses, so the CLI and the launcher share one route (`_runShortcut`)
+/// and cannot drift (T-PP-05).
+final class CliShortcutService implements ShortcutService {
+  /// Creates the service for the flag the CLI parsed.
+  new(this._action);
+
+  ShortcutAction? _action;
+
+  @override
+  Future<void> publish(Map<ShortcutAction, String> labels) async {}
+
+  @override
+  Stream<ShortcutAction> get actions => const Stream<ShortcutAction>.empty();
+
+  @override
+  Future<ShortcutAction?> consumeLaunchAction() async {
+    final action = _action;
+    _action = null;
+    return action;
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
 /// The single shortcut service for the app session.
 final shortcutServiceProvider = Provider<ShortcutService>((ref) {
   final service = createShortcutService();

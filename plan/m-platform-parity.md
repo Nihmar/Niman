@@ -82,11 +82,19 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 
 ### P2 — Quick-action equivalents + CLI (desktop side of shortcuts)
 
-- [ ] **T-PP-05** CLI args as the shared floor: `--quick-note`,
+- [x] **T-PP-05** CLI args as the shared floor: `--quick-note`,
   `--new-note`, `--new-todo`, `--new-list`, plus `<file>` (feeds P3).
   Route through the same `_runShortcut` paths the Android shortcuts use
   (`ui/shell.dart:648`), so the flows cannot drift. *AC: each flag lands
   on the same screen as its launcher twin.*
+  Landed: `core/launch_args.dart` parses the four flags to the same
+  `ShortcutAction`s; `main` overrides `shortcutServiceProvider` with
+  `CliShortcutService(action)` (one-shot, like the platform's), so the
+  shell's existing `consumeLaunchAction` -> `_runShortcut` route is the
+  only path. Unknown flags are ignored (a desktop session adds its own).
+  `<file>` is parsed into `LaunchArgs.openPath` and logged, not opened:
+  that is the P3 single-instance slice. `test/unit/launch_args_test.dart`
+  plus the CLI cold-start widget test in `test/widget/shortcuts_shell_test.dart`.
 - [ ] **T-PP-06** Desktop surface: Linux `.desktop` `Actions=` (four
   entries calling the CLI flags) shipped in the tar.gz/AppImage/pkg;
   Windows jumplist tasks (or documented deferral with reason). *AC:
