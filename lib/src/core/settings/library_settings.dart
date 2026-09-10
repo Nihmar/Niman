@@ -18,6 +18,15 @@ enum PreviewLayoutMode {
   fullScreen,
 }
 
+/// Which editor a library writes in (T-WYS-03, default source).
+enum EditorKind {
+  /// The Markdown source editor (re_editor).
+  source,
+
+  /// The WYSIWYG surface (flutter_quill).
+  wysiwyg,
+}
+
 /// The library tree sort order (T-UI-03).
 enum TreeSort {
   /// Name ascending (default).
@@ -49,8 +58,16 @@ const double splitBreakpoint = 600;
 /// It lives here rather than in the shell because the settings screen
 /// asks the same question: neither the layout row nor the split-ratio row
 /// means anything where the panes cannot share a screen (T-CL-05).
-bool previewSplits(PreviewLayoutMode mode, {required bool narrow}) =>
-    !narrow && mode == PreviewLayoutMode.auto;
+bool previewSplits(
+  PreviewLayoutMode mode, {
+  required bool narrow,
+  EditorKind editor = EditorKind.source,
+  bool previewEnabled = true,
+}) =>
+    previewEnabled &&
+    editor == EditorKind.source &&
+    !narrow &&
+    mode == PreviewLayoutMode.auto;
 
 /// The default editor share of the split.
 const double defaultSplitRatio = 0.55;
