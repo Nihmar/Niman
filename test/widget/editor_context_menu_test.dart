@@ -47,6 +47,13 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
 
+    // A click anywhere else takes it down: re_editor never asks the
+    // toolbar to hide on the desktop, so the menu carries its own barrier
+    // (2026-09-10 device report).
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pump();
+    expect(find.text('Paste'), findsNothing);
+
     // Back inside the body: the harness checks for a leaked foundation
     // override before the tearDowns run.
     debugDefaultTargetPlatformOverride = null;

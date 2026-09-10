@@ -14,6 +14,12 @@ Widget _app(Widget child) => MaterialApp(
   home: Scaffold(body: SizedBox(height: 600, child: child)),
 );
 
+/// One box of each state.
+const String _tasks = '''
+- [ ] pending
+- [x] done
+''';
+
 const String _extras = r'''
 # Heading
 
@@ -148,6 +154,58 @@ void main() {
               '(${example['section']}) crashed: '
               '${markdown.length > 60 ? markdown.substring(0, 60) : markdown}',
         );
+      }
+    });
+
+    // 2026-09-10 device report: the task boxes were invisible in the
+    // dark. They were rendered and laid out — painted in
+    // `ThemeData.primaryColor`, which a dark theme sets to the surface
+    // color, so every box was the color of the page behind it.
+    testWidgets('the task boxes are visible against the page', (tester) async {
+      for (final brightness in Brightness.values) {
+        // A clean tree between the two: the preview builds its widgets
+        // once per parse, so reusing the element would keep the styles of
+        // the theme before it.
+        await tester.pumpWidget(const SizedBox());
+        final theme = ThemeData(
+          brightness: brightness,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFFCBA6F7),
+            brightness: brightness,
+          ),
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Scaffold(
+              body: SizedBox(
+                height: 400,
+                // Keyed per brightness: the preview keeps the widgets it
+                // built for the last parse, so an unkeyed swap would show
+                // the previous theme's boxes.
+                child: MarkdownPreview(key: ValueKey(brightness), data: _tasks),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final pending = tester.widget<Icon>(
+          find.byIcon(Icons.check_box_outline_blank),
+        );
+        final done = tester.widget<Icon>(find.byIcon(Icons.check_box));
+        for (final box in [pending, done]) {
+          expect(
+            box.color,
+            theme.colorScheme.primary,
+            reason: 'the box is not the accent in $brightness',
+          );
+          expect(
+            box.color,
+            isNot(theme.colorScheme.surface),
+            reason: 'the box is the color of the page in $brightness',
+          );
+        }
       }
     });
   });

@@ -240,7 +240,19 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   void _applyParse(int revision, String source, List<md.Node> nodes) {
     final clock = Stopwatch()..start();
     if (!mounted || revision != _parseRevision) return;
-    final styleSheet = MarkdownStyleSheet.fromTheme(Theme.of(context))
+    final theme = Theme.of(context);
+    // The task-list boxes take the accent, not `ThemeData.primaryColor`
+    // (2026-09-10 device report: they were invisible in the dark). That
+    // field is a Material 1 leftover, and a dark `ThemeData` sets it to
+    // the *surface* color — so the package's default painted every
+    // checkbox in the color of the page behind it. The boxes were there
+    // and laid out; they simply could not be seen.
+    final styleSheet = MarkdownStyleSheet.fromTheme(theme)
+        .copyWith(
+          checkbox: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        )
         .merge(widget.styleSheet);
     final builder = MarkdownBuilder(
       delegate: this,

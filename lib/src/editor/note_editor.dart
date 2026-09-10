@@ -263,12 +263,16 @@ int pageLineStep({
 }
 
 /// The desktop selection toolbar: [builder]'s menu in an overlay entry,
-/// anchored where the click was.
+/// anchored where the click was, over a barrier that closes it.
 ///
 /// The package ships only a mobile implementation, and that one positions
-/// itself against a `renderRect` the desktop path never provides. Nothing
-/// here needs it: the menu is placed from the anchors and dismissed by
-/// the editor's next tap, which is what a desktop context menu does.
+/// itself against a `renderRect` the desktop path never provides. It also
+/// leaves the closing to the editor, which on the desktop never asks:
+/// re_editor calls `hideToolbar` from its mobile gestures only, so a menu
+/// opened by a right-click stayed up through every click after it
+/// (2026-09-10 device report). The barrier is the menu's own: one click
+/// anywhere else takes it down, and that click does nothing else, which
+/// is how a context menu behaves everywhere.
 final class _DesktopSelectionToolbar implements SelectionToolbarController {
   new({required this.builder});
 
@@ -296,19 +300,35 @@ final class _DesktopSelectionToolbar implements SelectionToolbarController {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return;
     final entry = OverlayEntry(
-      builder: (_) => builder(
-        context: context,
-        anchors: anchors,
-        controller: controller,
-        onDismiss: () => hide(context),
-        onRefresh: () => show(
-          context: context,
-          controller: controller,
-          anchors: anchors,
-          layerLink: layerLink,
-          visibility: visibility,
-          renderRect: renderRect,
-        ),
+      builder: (_) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              key: const Key('editor-menu-barrier'),
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (_) => hide(context),
+            ),
+          ),
+          // Full-screen constraints on purpose: the toolbar places itself
+          // from the anchors inside the box it is given, and a loose one
+          // would leave it in the corner.
+          Positioned.fill(
+            child: builder(
+              context: context,
+              anchors: anchors,
+              controller: controller,
+              onDismiss: () => hide(context),
+              onRefresh: () => show(
+                context: context,
+                controller: controller,
+                anchors: anchors,
+                layerLink: layerLink,
+                visibility: visibility,
+                renderRect: renderRect,
+              ),
+            ),
+          ),
+        ],
       ),
     );
     overlay.insert(entry);
