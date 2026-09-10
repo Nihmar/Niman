@@ -69,8 +69,11 @@ abstract interface class ShortcutService {
 
 /// Creates the platform service: launcher shortcuts on Android, a no-op
 /// elsewhere (no desktop has the equivalent menu).
-ShortcutService createShortcutService() {
-  if (Platform.isAndroid) return PlatformShortcutService();
+///
+/// [isAndroid] overrides the host platform so a plain test can cover the
+/// branch that does not run here (T-PP-01).
+ShortcutService createShortcutService({bool? isAndroid}) {
+  if (isAndroid ?? Platform.isAndroid) return PlatformShortcutService();
   return const NoopShortcutService();
 }
 

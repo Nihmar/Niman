@@ -74,8 +74,11 @@ abstract interface class ReminderService {
 
 /// Creates the platform service: scheduled OS notifications on
 /// Android, a no-op elsewhere.
-ReminderService createReminderService() {
-  if (Platform.isAndroid) {
+///
+/// [isAndroid] overrides the host platform so a plain test can cover the
+/// branch that does not run here (T-PP-01).
+ReminderService createReminderService({bool? isAndroid}) {
+  if (isAndroid ?? Platform.isAndroid) {
     return LocalReminderService();
   }
   return const NoopReminderService();

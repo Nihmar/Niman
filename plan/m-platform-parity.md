@@ -44,7 +44,7 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 
 ### P0 — Lock the inventory
 
-- [ ] **T-PP-01** Turn the table above into widget/unit probes where cheap:
+- [x] **T-PP-01** Turn the table above into widget/unit probes where cheap:
   a test that `createReminderService`/`createShortcutService` return the
   Noop off Android already exists in shape — assert the documented
   limitations stay documented (strings + banner) until each phase lands.
@@ -54,6 +54,12 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   wide rail): size the surface explicitly (`setSurfaceSize`) and assert
   the layout under test, instead of forcing one layout's expectations
   onto the other.
+  Done: the four factories (`createShortcutService`, `createReminderService`,
+  `createTrayService`, `createWindowController`) take an optional platform
+  override (`isAndroid`/`isDesktop`), so a plain unit test covers *both*
+  branches on any host; the default still reads `Platform.*`. Every Noop is
+  asserted inert (streams done, no-op calls, `health` stays `ok`,
+  `customTitleBar` false). `test/unit/platform_services_test.dart`.
 
 ### P1 — Desktop reminders (the big one)
 

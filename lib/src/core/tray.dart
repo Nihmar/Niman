@@ -47,8 +47,13 @@ abstract interface class TrayService {
 
 /// Creates the platform service: a real tray on the desktops, a no-op
 /// elsewhere (Android has no tray; its quick actions are the launcher's).
-TrayService createTrayService() {
-  if (Platform.isLinux || Platform.isWindows) return PlatformTrayService();
+///
+/// [isDesktop] overrides the host platform so a plain test can cover the
+/// branch that does not run here (T-PP-01).
+TrayService createTrayService({bool? isDesktop}) {
+  if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
+    return PlatformTrayService();
+  }
   return const NoopTrayService();
 }
 
