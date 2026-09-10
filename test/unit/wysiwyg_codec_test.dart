@@ -77,6 +77,23 @@ A [[wikilink]] and an ![[embed.png]].
     expect(codec.encode(decoded.document, decoded: decoded), '\n');
   });
 
+  test('the blank lines between blocks survive', () {
+    final decoded = codec.decode('a\n\n\nb\n');
+    expect(decoded.document.toPlainText(), 'a\n\n\nb\n');
+    expect(codec.encode(decoded.document, decoded: decoded), 'a\n\n\nb\n');
+  });
+
+  test('an edit keeps the blank lines', () {
+    final decoded = codec.decode('a\n\n\nb\n');
+    final controller = quill.QuillController(
+      document: decoded.document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    addTearDown(controller.dispose);
+    controller.replaceText(0, 0, 'X', const TextSelection.collapsed(offset: 1));
+    expect(codec.encode(controller.document), 'Xa\n\n\nb\n');
+  });
+
   test('the splitter marks unrepresentable blocks opaque', () {
     final blocks = splitMarkdownBlocks(
       '# H\n'

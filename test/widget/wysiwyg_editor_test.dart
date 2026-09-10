@@ -76,6 +76,29 @@ void main() {
     expect(reported, contains('Edited'));
   });
 
+  testWidgets('the code block follows the theme', (tester) async {
+    // Quill's default is a near-white box: in the dark theme it read as a
+    // white rectangle (device report, 2026-09-11).
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: WysiwygEditor(data: '~~~\ncode\n~~~\n', onChanged: (value) {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    final editor = tester.widget<quill.QuillEditor>(
+      find.byType(quill.QuillEditor),
+    );
+    final decoration = editor.config.customStyles?.code?.decoration;
+    final expected = Theme.of(tester.element(find.byType(quill.QuillEditor)))
+        .colorScheme
+        .surfaceContainerHighest;
+    expect(decoration?.color, expected);
+    expect(decoration?.color, isNot(Colors.grey.shade50));
+  });
+
   testWidgets('a stale parent echo does not reset the document', (
     tester,
   ) async {
