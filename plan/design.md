@@ -42,6 +42,14 @@ lib/
       indexer.dart          # disk scan → index build + incremental apply
     editor/
       note_editor.dart      # NoteEditor: re_editor CodeEditor wrapper (M2a)
+      editor_commands.dart  # T-WYS-06: what the toolbar commands act on
+      wysiwyg/              # T-WYS: the WYSIWYG surface (flutter_quill)
+        markdown_parse.dart        # the preview's parser, shared
+        markdown_blocks.dart       # note → top-level blocks (opaque-aware)
+        markdown_document_codec.dart  # Markdown ↔ Quill Delta, byte-stable
+        opaque_embed.dart          # preserved blocks, read-only in Quill
+        quill_editor_commands.dart # the toolbar mapped onto Quill
+        wysiwyg_editor.dart        # the Quill editing surface
       highlighting.dart     # MD + math-span tokenizer → styled display
       highlight_sync.dart   # incremental tokenizer sync → per-line spans
       md_editing.dart       # T-UI-08: pure markdown commands (wrap/prefix)
@@ -80,8 +88,9 @@ lib/
       shell.dart            # app shell: sidebar | editor | preview; the
                             #   phone bottom nav (Files/Todo/Search/Quick
                             #   note/Settings) and the shared app bar
-      note_view.dart        # note screen: editor/preview switch, status
-                            #   row (words, saved), toolbar (T-UI-06..08)
+      note_view.dart        # note screen: source/WYSIWYG editor, preview
+                            #   switch, status row (words, saved), toolbar
+                            #   (T-UI-06..08, T-WYS-05)
       tree.dart             # note tree UI
       tabs.dart             # multi-tab (M6)
       theme/                # brightness × palette tokens

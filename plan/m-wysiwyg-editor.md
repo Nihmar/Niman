@@ -1,6 +1,6 @@
 # WYSIWYG editor — execution plan (small-model friendly)
 
-**Status:** Planned (feasibility spike done; phases not started) · **Depends on:** M2 (editor + preview), M6
+**Status:** In progress (implementation landed; device pass open) · **Depends on:** M2 (editor + preview), M6
 (theming, text size) · **Branch:** `feat/wysiwyg-editor` · **Spec:**
 *Requirements* (editor), [design.md](design.md)
 
@@ -9,6 +9,28 @@ that even a small local model can follow it top to bottom and land a working
 feature. Every phase has: goal, exact files, exact steps, code to write, a
 command to run, and an acceptance check. Do the phases in order. Do not skip a
 check because it looks obvious.
+
+## Progress
+
+Landed on `feat/wysiwyg-editor` (one commit per step):
+
+- **Phase 0** — `flutter_quill ^11.5.1`.
+- **Phase 1** — the shared parser, the block splitter, the opaque embed and
+  `MarkdownDocumentCodec`, with the byte-stability test over
+  `test/spec.json` and the app extras.
+- **Phase 2** — `EditorKind` + `previewEnabled` in `LibraryConfig` (per
+  library), the session plumbing and the Settings rows.
+- **Phase 3** — `WysiwygEditor` and `QuillEditorCommands`, with unit and
+  widget tests.
+- **Phase 4/5** — `note_view.dart` and `shell.dart` pick the surface; the
+  WYSIWYG editor never splits; the eye switches it to the preview; find and
+  the spell button hide while it is up.
+- **Phase 7** — the 200 KB guard and these docs.
+
+Still open: the **device pass** on Linux and Android (a real note with
+frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
+diff and the switch). Find & replace and the spell underlines remain v1 cuts
+inside the WYSIWYG surface, as the control inventory says.
 
 ## Mockups (the visual target)
 
