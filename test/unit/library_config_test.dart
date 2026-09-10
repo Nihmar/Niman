@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
-    show LinkType, TreeSort, defaultListFolder;
+    show EditorKind, LinkType, TreeSort, defaultListFolder;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
@@ -69,6 +69,30 @@ void main() {
       await store.file.parent.create(recursive: true);
       await store.file.writeAsString('{"spellDictionary": "it_IT"}');
       expect((await store.read()).spellDictionaries, ['it_IT']);
+    });
+
+    test('an older file reads back as the shipped editor defaults', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      expect((await store.read()).editorKind, EditorKind.source);
+      expect((await store.read()).previewEnabled, isTrue);
+    });
+
+    test('round trips the editor kind and the preview switch', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: 'Lists',
+        editorKind: EditorKind.wysiwyg,
+        previewEnabled: false,
+      );
+      await store.write(config);
+      final read = await store.read();
+      expect(read.editorKind, EditorKind.wysiwyg);
+      expect(read.previewEnabled, isFalse);
     });
 
     test('a config without a quick note round trips as default', () async {
