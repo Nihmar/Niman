@@ -48,6 +48,9 @@ final class AppStrings {
   static String get settingsSectionEditor => _t('Editor', 'Editor');
   static String get settingsSectionLibrary => _t('Library', 'Libreria');
   static String get settingsSectionReminders => _t('Reminders', 'Promemoria');
+  static String get settingsSectionShortcuts => _t('Keyboard', 'Tastiera');
+  static String get keyboardShortcutsTitle =>
+      _t('Keyboard shortcuts', 'Scorciatoie da tastiera');
   static String get settingsSectionDiagnostics =>
       _t('Diagnostics', 'Diagnostica');
 
@@ -111,6 +114,16 @@ final class AppStrings {
   static String get shortcutNewTodo => _t('New todo', 'Nuova attività');
   static String get shortcutNewNote => _t('New note', 'Nuova nota');
   static String get shortcutNewList => _t('New list', 'Nuova lista');
+  static String get shortcutToggleSidebar =>
+      _t('Show or hide the file tree', 'Mostra o nascondi l’albero dei file');
+  static String get shortcutEditorSection => _t('In the editor', 'Nell’editor');
+  static String get shortcutFind => _t('Find', 'Trova');
+  static String get shortcutReplace =>
+      _t('Find and replace', 'Trova e sostituisci');
+  static String get shortcutSavingNote => _t(
+    'Edits are saved automatically, so there is no save shortcut.',
+    'Le modifiche si salvano da sole: non c’è una scorciatoia per salvare.',
+  );
 
   // Editor status bar.
   static String get outlineTooltip => _t('Outline', 'Struttura');

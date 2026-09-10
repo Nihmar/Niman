@@ -8,6 +8,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
+import 'package:copist/src/ui/keyboard_shortcuts.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
@@ -503,6 +504,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
           title: AppStrings.indentWidthTitle,
           value: AppStrings.indentWidthValue(_indentWidth),
           onTap: () => unawaited(_chooseIndentWidth()),
+        ),
+
+        SettingsSection(AppStrings.settingsSectionShortcuts),
+        SettingsValueRow(
+          key: const Key('keyboard-shortcuts-setting'),
+          title: AppStrings.keyboardShortcutsTitle,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const KeyboardShortcutsScreen(),
+            ),
+          ),
         ),
 
         SettingsSection(AppStrings.settingsSectionLibrary),

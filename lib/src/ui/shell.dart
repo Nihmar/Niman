@@ -20,6 +20,7 @@ import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/action_sheet.dart';
+import 'package:copist/src/ui/app_shortcuts.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
@@ -40,7 +41,6 @@ import 'package:copist/src/ui/tree.dart';
 import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -247,6 +247,9 @@ final class _LibraryShellState extends State<_LibraryShell>
     // A kept-alive search field would otherwise hold focus (and the
     // keyboard) on the next tab: disposing used to drop it for free.
     FocusManager.instance.primaryFocus?.unfocus();
+    // Put it back on the shell so the next accelerator still reaches the
+    // bindings (T-PP-10).
+    _shellFocus.requestFocus();
     setState(() {
       _tab = tab;
       _visitedTabs.add(tab);
@@ -300,6 +303,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Whether the wide layout's tree pane shows (the title bar's toggle;
   /// the rail always stays, T-PP-22).
   bool _sidebarVisible = true;
+
+  /// Carries focus for the app accelerators (T-PP-10) when nothing else
+  /// wants it, so a keyboard-only tab switch is followed by a working next
+  /// one: [FocusManager] would otherwise leave nothing focused.
+  final FocusNode _shellFocus = FocusNode(debugLabel: 'app shortcuts');
 
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
@@ -664,6 +672,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
     _todoController.dispose();
+    _shellFocus.dispose();
     super.dispose();
   }
 
@@ -1307,106 +1316,113 @@ final class _LibraryShellState extends State<_LibraryShell>
           _previewVisible &&
           _previewToggleVisible &&
           !previewSplits(_previewMode, narrow: true);
-      return PopScope(
-        canPop: !fullNote,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          // Back leaves fullscreen before it leaves the note: one gesture,
-          // one layer of chrome, the way every other fullscreen behaves.
-          if (immersive) {
-            setState(() => _previewFullScreen = false);
-            return;
-          }
-          _closeFullScreenNote();
-        },
-        child: ColoredBox(
-          // Opaque surface behind every phone transition (issue #4): the
-          // full-note fade starts from transparent, and without this the
-          // first frames expose the black Android window instead.
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // The tab shell never unmounts: hidden it skips layout, paint,
-              // and tickers, and the fullscreen note above is opaque. The
-              // hiding waits out the open fade (issue #4): the note fades
-              // in over the tabs instead of over the window background.
-              Offstage(
-                key: const ValueKey('tab-shell-offstage'),
-                offstage: fullNote && _noteHidingTabs,
-                child: TickerMode(
-                  enabled: !fullNote,
-                  child: KeyedSubtree(
-                    key: const ValueKey('tab-shell'),
-                    child: _tabShell(
-                      controller: controller,
-                      title: _tabTitle,
-                      actions: _tab == ShellTab.files
-                          ? _filesAppBarActions(controller)
-                          : const [],
-                      floatingActionButton: _tabFab(),
+      // The same accelerators on the phone layout, but without the
+      // focus claim: a field keeps the software keyboard (T-PP-10).
+      return CallbackShortcuts(
+        bindings: _appShortcutBindings(),
+        child: PopScope(
+          canPop: !fullNote,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            // Back leaves fullscreen before it leaves the note: one gesture,
+            // one layer of chrome, the way every other fullscreen behaves.
+            if (immersive) {
+              setState(() => _previewFullScreen = false);
+              return;
+            }
+            _closeFullScreenNote();
+          },
+          child: ColoredBox(
+            // Opaque surface behind every phone transition (issue #4): the
+            // full-note fade starts from transparent, and without this the
+            // first frames expose the black Android window instead.
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // The tab shell never unmounts: hidden it skips layout, paint,
+                // and tickers, and the fullscreen note above is opaque. The
+                // hiding waits out the open fade (issue #4): the note fades
+                // in over the tabs instead of over the window background.
+                Offstage(
+                  key: const ValueKey('tab-shell-offstage'),
+                  offstage: fullNote && _noteHidingTabs,
+                  child: TickerMode(
+                    enabled: !fullNote,
+                    child: KeyedSubtree(
+                      key: const ValueKey('tab-shell'),
+                      child: _tabShell(
+                        controller: controller,
+                        title: _tabTitle,
+                        actions: _tab == ShellTab.files
+                            ? _filesAppBarActions(controller)
+                            : const [],
+                        floatingActionButton: _tabFab(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              AnimatedSwitcher(
-                duration: _fullNoteFade,
-                switchInCurve: Curves.easeOutCubic,
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: fullNote
-                    ? KeyedSubtree(
-                        key: const ValueKey('full-note'),
-                        child: Scaffold(
-                          appBar: immersive
-                              ? null
-                              : AppBar(
-                                  leading: BackButton(
-                                    onPressed: _closeFullScreenNote,
-                                  ),
-                                  title: Text(p.basename(selectedPath)),
-                                  actions: [
-                                    ..._kindActions,
-                                    if (!previewSplits(
-                                          _previewMode,
-                                          narrow: true,
-                                        ) &&
-                                        _previewToggleVisible) ...[
-                                      _previewToggleAction(),
-                                      if (_previewVisible)
-                                        _previewFullScreenAction(),
+                AnimatedSwitcher(
+                  duration: _fullNoteFade,
+                  switchInCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: fullNote
+                      ? KeyedSubtree(
+                          key: const ValueKey('full-note'),
+                          child: Scaffold(
+                            appBar: immersive
+                                ? null
+                                : AppBar(
+                                    leading: BackButton(
+                                      onPressed: _closeFullScreenNote,
+                                    ),
+                                    title: Text(p.basename(selectedPath)),
+                                    actions: [
+                                      ..._kindActions,
+                                      if (!previewSplits(
+                                            _previewMode,
+                                            narrow: true,
+                                          ) &&
+                                          _previewToggleVisible) ...[
+                                        _previewToggleAction(),
+                                        if (_previewVisible)
+                                          _previewFullScreenAction(),
+                                      ],
                                     ],
-                                  ],
-                                ),
-                          body: Stack(
-                            children: [
-                              // Stable subtree across the immersive toggle:
-                              // only the top inset flips, so entering or
-                              // leaving fullscreen never reparents (and
-                              // disposes) the open note's state, focus and
-                              // scroll. The all-false SafeArea is a layout
-                              // no-op.
-                              Positioned.fill(
-                                child: SafeArea(
-                                  top: immersive,
-                                  bottom: false,
-                                  left: false,
-                                  right: false,
-                                  child: _fullNoteView(
-                                    controller,
-                                    selectedPath,
+                                  ),
+                            body: Stack(
+                              children: [
+                                // Stable subtree across the immersive toggle:
+                                // only the top inset flips, so entering or
+                                // leaving fullscreen never reparents (and
+                                // disposes) the open note's state, focus and
+                                // scroll. The all-false SafeArea is a layout
+                                // no-op.
+                                Positioned.fill(
+                                  child: SafeArea(
+                                    top: immersive,
+                                    bottom: false,
+                                    left: false,
+                                    right: false,
+                                    child: _fullNoteView(
+                                      controller,
+                                      selectedPath,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (immersive) _exitFullScreenButton(),
-                            ],
+                                if (immersive) _exitFullScreenButton(),
+                              ],
+                            ),
+                            bottomNavigationBar: immersive
+                                ? null
+                                : _shellTabs(),
                           ),
-                          bottomNavigationBar: immersive ? null : _shellTabs(),
-                        ),
-                      )
-                    : null,
-              ),
-            ],
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -1418,21 +1434,26 @@ final class _LibraryShellState extends State<_LibraryShell>
     // window is frameless and the app draws its own title bar instead.
     return Scaffold(
       body: CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.keyB, control: true):
-              _toggleSidebar,
-        },
-        child: Column(
-          children: [
-            if (widget.window.customTitleBar)
-              AppTitleBar(
-                title: _windowTitle,
-                sidebarVisible: _sidebarVisible,
-                onToggleSidebar: _toggleSidebar,
-                window: widget.window,
-              ),
-            Expanded(child: _wideContent(controller)),
-          ],
+        bindings: _appShortcutBindings(),
+        // The shell has to be an ancestor of the primary focus for key
+        // events to bubble to the bindings; a fresh window focuses nothing
+        // (T-PP-10), so the body claims it until the tree or the editor
+        // takes over.
+        child: Focus(
+          focusNode: _shellFocus,
+          autofocus: true,
+          child: Column(
+            children: [
+              if (widget.window.customTitleBar)
+                AppTitleBar(
+                  title: _windowTitle,
+                  sidebarVisible: _sidebarVisible,
+                  onToggleSidebar: _toggleSidebar,
+                  window: widget.window,
+                ),
+              Expanded(child: _wideContent(controller)),
+            ],
+          ),
         ),
       ),
     );
@@ -1838,6 +1859,28 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Shows/hides the wide tree pane; the rail stays (T-PP-22).
   void _toggleSidebar() {
     setState(() => _sidebarVisible = !_sidebarVisible);
+  }
+
+  /// The app accelerators (T-PP-10), built from the shared registry so the
+  /// installed keys and the in-app reference cannot drift.
+  Map<ShortcutActivator, VoidCallback> _appShortcutBindings() {
+    return appShortcutBindings({
+      AppCommand.newNote: () => unawaited(_createNote()),
+      AppCommand.newListNote: () => unawaited(_createListNote()),
+      AppCommand.newTodo: () {
+        _openTodo();
+        unawaited(_addTodo());
+      },
+      AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
+      AppCommand.toggleSidebar: _toggleSidebar,
+      AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
+      AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
+      AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
+      AppCommand.tabQuickNote: () =>
+          _onDestinationSelected(ShellTab.quickNote.index),
+      AppCommand.tabSettings: () =>
+          _onDestinationSelected(ShellTab.settings.index),
+    });
   }
 
   /// The wide-layout body: the tree pane and the split detail pane.

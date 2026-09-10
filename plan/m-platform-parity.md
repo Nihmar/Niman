@@ -319,12 +319,26 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 
-- [ ] **T-PP-10** App-level accelerators (new note/todo, find, save,
+- [x] **T-PP-10** App-level accelerators (new note/todo, find, save,
   tab switch — the set the editor activators started in `find_panel.dart`)
   that do not fight the editor's own bindings; Esc closes dialogs before
   windows; system-back on Android keeps its current behaviour. *AC: the
   list of accelerators is documented in-app (settings or help) and
   identical shortcuts do identical things on all three OSes.*
+  Landed: `ui/app_shortcuts.dart` is the registry (`AppCommand`,
+  `copistAppShortcuts`, `appShortcutBindings`, `describeActivator`); the
+  shell installs it over both layouts with `CallbackShortcuts` (the wide
+  layout also claims focus with a `FocusNode`, so a keyboard-only tab
+  switch is followed by a working next one). `ui/keyboard_shortcuts.dart`
+  renders the reference from the same registry (Settings → Keyboard),
+  plus the editor's own Ctrl+F/Ctrl+H and the note that edits autosave.
+  Keys: Ctrl+N / Ctrl+Shift+N / Ctrl+T / Ctrl+Q for new note, new list,
+  new todo and quick note; Ctrl+B for the tree; Ctrl+1..5 for the rail
+  tabs. The editor keeps its bindings — the shell binds only what it
+  owns — and system-back on Android is untouched. Tests:
+  `test/unit/app_shortcuts_test.dart`,
+  `test/widget/keyboard_shortcuts_test.dart`,
+  `test/widget/app_shortcuts_shell_test.dart`.
 - [x] **T-PP-11** Dirty-check on window close (desktop) / task removal
   (Android): the note pipeline already knows "saved" (`ui/note_view.dart`
   status row) — hook it to `window_manager`'s `WindowListener.onWindowClose`
