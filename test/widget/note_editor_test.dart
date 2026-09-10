@@ -120,5 +120,26 @@ void main() {
       controller.dispose();
       focus.dispose();
     });
+
+    // The mobile toolbar controller is the right one *on mobile*: on the
+    // desktop it crashes, which `editor_context_menu_test.dart` covers
+    // where it can control the platform (re_editor decides its overlay
+    // once per isolate, so that test has a file to itself).
+    testWidgets('the phone gets the package selection toolbar', (
+      tester,
+    ) async {
+      final controller = CodeLineEditingController.fromText('hi');
+      final focus = FocusNode();
+      await tester.pumpWidget(
+        _app(NoteEditor(controller: controller, focusNode: focus)),
+      );
+
+      final editor = tester.widget<CodeEditor>(find.byType(CodeEditor));
+      expect(editor.toolbarController, isA<MobileSelectionToolbarController>());
+
+      await _unmount(tester);
+      controller.dispose();
+      focus.dispose();
+    });
   });
 }

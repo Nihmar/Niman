@@ -57,6 +57,17 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# cnativeapi 0.2.3 (the tray's vendored C++) reads the executable's
+# version resource — GetFileVersionInfoSizeW, GetFileVersionInfoW,
+# VerQueryValueW — and its own CMake links user32, shell32, dwmapi,
+# gdiplus and crypt32 but not version.lib, so the Windows link fails with
+# three unresolved externals. Added here rather than patched in the pub
+# cache, which no checkout of this repository would carry. Guarded by the
+# target test so it disappears with the dependency.
+if(TARGET cnativeapi)
+  target_link_libraries(cnativeapi PRIVATE version)
+endif()
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can

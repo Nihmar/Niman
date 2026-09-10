@@ -1,5 +1,6 @@
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals three
 /// mini FABs above it — New note, New list note and New folder — instead
@@ -10,10 +11,10 @@ import 'package:flutter/material.dart';
 final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   ///
-  /// [anchorKey] marks the main FAB's icon so [FabScrim]'s circular
+  /// [onAnchor] reports where the main FAB is, so [FabScrim]'s circular
   /// reveal can be centered on it.
   const new({
-    required this.anchorKey,
+    required this.onAnchor,
     required this.expanded,
     required this.onToggle,
     required this.onNewNote,
@@ -23,9 +24,17 @@ final class NewItemFab extends StatelessWidget {
     super.key,
   });
 
-  /// Marks the main FAB (see [FabScrim]); lives in the shell so the
-  /// scrim layer can find the icon's position.
-  final GlobalKey anchorKey;
+  /// Called with the main FAB's center in global coordinates, whenever
+  /// it is painted (see [FabScrim]).
+  ///
+  /// A reported position rather than a `GlobalKey` on the button
+  /// (2026-09-10 device report): `Scaffold` cross-fades the outgoing FAB
+  /// when the tab changes, and a tab change that also opens a note
+  /// freezes that animation with the shell offstage — so the old button
+  /// was still mounted when the new one arrived, two widgets held one
+  /// global key, and Flutter truncated the tree at the duplicate. What
+  /// the user saw was an empty screen.
+  final ValueChanged<Offset> onAnchor;
 
   /// Whether the mini FABs are revealed (the shell owns this state).
   final bool expanded;
@@ -83,8 +92,8 @@ final class NewItemFab extends StatelessWidget {
           onTap: onNewFolder,
         ),
         const SizedBox(height: 12),
-        KeyedSubtree(
-          key: anchorKey,
+        _ReportAnchor(
+          onAnchor: onAnchor,
           child: FloatingActionButton(
             key: const Key('new-note-fab'),
             tooltip: expanded ? 'Close' : 'New',
@@ -146,20 +155,21 @@ final class _MiniFab extends StatelessWidget {
 }
 
 /// The tap-to-dismiss layer of the expanded FAB menu: a circle that
-/// grows out of the main FAB icon (see [NewItemFab.anchorKey]) until it
+/// grows out of the main FAB icon (see [NewItemFab.onAnchor]) until it
 /// covers the body, dims it, and closes the menu on any tap. Always
 /// mounted; paints nothing and ignores taps while collapsed.
 final class FabScrim extends StatelessWidget {
   /// Creates the FAB-menu scrim; [onClose] collapses the menu.
   const new({
-    required this.anchorKey,
+    required this.anchor,
     required this.expanded,
     required this.onClose,
     super.key,
   });
 
-  /// The main FAB's key (see [NewItemFab.anchorKey]).
-  final GlobalKey anchorKey;
+  /// The main FAB's center in global coordinates, or null before it has
+  /// been painted (see [NewItemFab.onAnchor]).
+  final Offset? anchor;
 
   /// Whether the FAB menu is expanded (drives the reveal).
   final bool expanded;
@@ -179,11 +189,7 @@ final class FabScrim extends StatelessWidget {
           builder: (context, constraints) {
             final size = Size(constraints.maxWidth, constraints.maxHeight);
             // Collapsed paints nothing (progress lands on 0), so the
-            // anchor is not resolved: while hidden for a tab switch the
-            // FAB may be mid-unmount, and its element stays reachable but
-            // inactive for that window, which makes `findRenderObject`
-            // assert. The menu only opens on Files, where the FAB is
-            // mounted whenever `expanded` is true.
+            // anchor is not worth resolving.
             final center = expanded
                 ? _fabCenter(context, size)
                 : _fallbackCenter(size);
@@ -209,25 +215,51 @@ final class FabScrim extends StatelessWidget {
 
   /// The main FAB icon's center, in the scrim's local coordinates.
   ///
-  /// Resolved from [anchorKey] so it stays exact for any FAB location or
-  /// size.
-  ///
-  /// Only called while expanded, when the Files FAB is mounted: the
-  /// [BuildContext.mounted] check still covers the single frame where the
-  /// FAB is torn down, falling back to the default geometry until the
-  /// next frame (which has no scrim).
+  /// Taken from what the FAB last reported, so it stays exact for any FAB
+  /// location or size; the default geometry stands in until the button
+  /// has been painted once.
   Offset _fabCenter(BuildContext context, Size size) {
-    final anchor = anchorKey.currentContext;
-    final fabBox = anchor != null && anchor.mounted
-        ? anchor.findRenderObject() as RenderBox?
-        : null;
-    if (fabBox == null || !fabBox.hasSize) {
-      return _fallbackCenter(size);
-    }
-    final scrimBox = context.findRenderObject()! as RenderBox;
-    return scrimBox.globalToLocal(
-      fabBox.localToGlobal(fabBox.size.center(Offset.zero)),
-    );
+    final reported = anchor;
+    if (reported == null) return _fallbackCenter(size);
+    final scrimBox = context.findRenderObject() as RenderBox?;
+    if (scrimBox == null || !scrimBox.hasSize) return _fallbackCenter(size);
+    return scrimBox.globalToLocal(reported);
+  }
+}
+
+/// Reports its child's center, in global coordinates, on every paint.
+///
+/// Painting is the moment the position is both known and settled, and the
+/// report is a plain field write on the other end — never a `setState`,
+/// which a paint may not cause. The scrim reads that field the next time
+/// it is built, which is when the menu opens.
+final class _ReportAnchor extends SingleChildRenderObjectWidget {
+  const new({required this.onAnchor, required Widget super.child});
+
+  final ValueChanged<Offset> onAnchor;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderReportAnchor(onAnchor);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderReportAnchor renderObject,
+  ) {
+    renderObject.onAnchor = onAnchor;
+  }
+}
+
+final class _RenderReportAnchor extends RenderProxyBox {
+  new(this.onAnchor);
+
+  ValueChanged<Offset> onAnchor;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    onAnchor(localToGlobal(size.center(Offset.zero)));
   }
 }
 

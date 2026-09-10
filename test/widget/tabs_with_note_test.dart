@@ -125,6 +125,52 @@ void main() {
     await controller.dispose();
   });
 
+  // 2026-09-10 device report: opening the quick note, going back and
+  // tapping the tile again showed an empty screen. The tile's "already
+  // open, just land on the tab" shortcut only looked at what was
+  // selected, and a closed note stays selected — so it landed on a tab
+  // whose body is empty by design, with no note over it.
+  testWidgets('the quick note reopens after it has been closed', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [librarySessionProvider.overrideWithValue(controller)],
+        child: const CopistApp(),
+      ),
+    );
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+    await controller.createNote(parentPath: '', name: 'Scratch');
+    await settle(tester);
+    await controller.ops!.setQuickNotePath(path: 'Scratch.md');
+
+    Future<void> tapQuickNoteTile() async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Quick note'),
+        ),
+      );
+      await settle(tester);
+    }
+
+    await tapQuickNoteTile();
+    expect(find.byType(NoteView), findsOneWidget);
+
+    // Back to the tree, the way the phone's back arrow goes.
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.byType(NoteView), findsNothing);
+
+    await tapQuickNoteTile();
+    expect(find.byType(NoteView), findsOneWidget);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
   // 2026-09-08 user request: a fullscreen action beside the preview eye,
   // giving the note's text the whole phone screen.
   group('the preview fullscreen', () {

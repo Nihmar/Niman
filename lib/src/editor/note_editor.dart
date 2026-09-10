@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/editor/markdown_chunks.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -140,55 +141,71 @@ final class NoteEditor extends StatelessWidget {
               },
             ),
       },
-      toolbarController: MobileSelectionToolbarController(
-        builder:
-            ({
-              required context,
-              required anchors,
-              required controller,
-              required onDismiss,
-              required onRefresh,
-            }) {
-              final items = <ContextMenuButtonItem>[
-                // Cut/copy of a collapsed caret would eat the whole line, so
-                // they are offered for a real selection only.
-                if (!controller.selection.isCollapsed)
-                  ContextMenuButtonItem(
-                    type: ContextMenuButtonType.cut,
-                    onPressed: () {
-                      controller.cut();
-                      onDismiss();
-                    },
-                  ),
-                if (!controller.selection.isCollapsed)
-                  ContextMenuButtonItem(
-                    type: ContextMenuButtonType.copy,
-                    onPressed: () {
-                      unawaited(controller.copy());
-                      onDismiss();
-                    },
-                  ),
-                ContextMenuButtonItem(
-                  type: ContextMenuButtonType.paste,
-                  onPressed: () {
-                    controller.paste();
-                    onDismiss();
-                  },
-                ),
-                ContextMenuButtonItem(
-                  type: ContextMenuButtonType.selectAll,
-                  onPressed: () {
-                    controller.selectAll();
-                    onDismiss();
-                  },
-                ),
-              ];
-              return AdaptiveTextSelectionToolbar.buttonItems(
-                anchors: anchors,
-                buttonItems: items,
-              );
-            },
+      toolbarController: _toolbarController(),
+    );
+  }
+
+  /// The selection toolbar, of the kind the platform actually has.
+  ///
+  /// re_editor picks its overlay controller by platform, and the desktop
+  /// one shows the toolbar with no `renderRect` — which the package's
+  /// mobile toolbar controller dereferences with `!`, so a right-click on
+  /// Windows or Linux took the app down (2026-09-10 crash report). The
+  /// desktop gets a controller of our own instead: the same menu, placed
+  /// at the click and dismissed by the next one.
+  SelectionToolbarController _toolbarController() {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      return MobileSelectionToolbarController(builder: _selectionMenu);
+    }
+    return _DesktopSelectionToolbar(builder: _selectionMenu);
+  }
+
+  /// Cut/copy/paste/select all for the current selection.
+  Widget _selectionMenu({
+    required BuildContext context,
+    required TextSelectionToolbarAnchors anchors,
+    required CodeLineEditingController controller,
+    required VoidCallback onDismiss,
+    required VoidCallback onRefresh,
+  }) {
+    final items = <ContextMenuButtonItem>[
+      // Cut/copy of a collapsed caret would eat the whole line, so they
+      // are offered for a real selection only.
+      if (!controller.selection.isCollapsed)
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.cut,
+          onPressed: () {
+            controller.cut();
+            onDismiss();
+          },
+        ),
+      if (!controller.selection.isCollapsed)
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.copy,
+          onPressed: () {
+            unawaited(controller.copy());
+            onDismiss();
+          },
+        ),
+      ContextMenuButtonItem(
+        type: ContextMenuButtonType.paste,
+        onPressed: () {
+          controller.paste();
+          onDismiss();
+        },
       ),
+      ContextMenuButtonItem(
+        type: ContextMenuButtonType.selectAll,
+        onPressed: () {
+          controller.selectAll();
+          onDismiss();
+        },
+      ),
+    ];
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: anchors,
+      buttonItems: items,
     );
   }
 
@@ -243,4 +260,58 @@ int pageLineStep({
   final content = extent + viewport;
   if (content <= 0 || viewport <= 0) return lineCount - 1;
   return (viewport * lineCount / content).floor().clamp(1, lineCount - 1);
+}
+
+/// The desktop selection toolbar: [builder]'s menu in an overlay entry,
+/// anchored where the click was.
+///
+/// The package ships only a mobile implementation, and that one positions
+/// itself against a `renderRect` the desktop path never provides. Nothing
+/// here needs it: the menu is placed from the anchors and dismissed by
+/// the editor's next tap, which is what a desktop context menu does.
+final class _DesktopSelectionToolbar implements SelectionToolbarController {
+  new({required this.builder});
+
+  /// Builds the menu itself; shared with the mobile controller.
+  final ToolbarMenuBuilder builder;
+
+  OverlayEntry? _entry;
+
+  @override
+  void hide(BuildContext context) {
+    _entry?.remove();
+    _entry = null;
+  }
+
+  @override
+  void show({
+    required BuildContext context,
+    required CodeLineEditingController controller,
+    required TextSelectionToolbarAnchors anchors,
+    required LayerLink layerLink,
+    required ValueNotifier<bool> visibility,
+    Rect? renderRect,
+  }) {
+    hide(context);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null) return;
+    final entry = OverlayEntry(
+      builder: (_) => builder(
+        context: context,
+        anchors: anchors,
+        controller: controller,
+        onDismiss: () => hide(context),
+        onRefresh: () => show(
+          context: context,
+          controller: controller,
+          anchors: anchors,
+          layerLink: layerLink,
+          visibility: visibility,
+          renderRect: renderRect,
+        ),
+      ),
+    );
+    overlay.insert(entry);
+    _entry = entry;
+  }
 }

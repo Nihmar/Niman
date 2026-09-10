@@ -447,9 +447,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the shell owns it so the body can be scrimmed while it is open.
   bool _fabExpanded = false;
 
-  /// Marks the main FAB so [FabScrim]'s reveal circle is centered on its
-  /// icon (the shell owns it: the FAB slot and the scrim are siblings).
-  final GlobalKey _fabAnchorKey = GlobalKey();
+  /// Where the main FAB is, so [FabScrim]'s reveal circle is centered on
+  /// its icon (the shell owns it: the FAB slot and the scrim are
+  /// siblings). Written from the FAB's paint, read when the scrim builds.
+  Offset? _fabAnchor;
 
   /// Editor/preview switch for the non-split layouts (T-UI-06): the eye
   /// action lives in the shared app bar, so the shell owns the state.
@@ -918,11 +919,21 @@ final class _LibraryShellState extends State<_LibraryShell>
       _openQuickNoteChooser();
       return;
     }
-    // Already open: just land on the tab. Reopening would unfocus the
-    // editor, reset the kind view and restart the hide timer for identical
-    // content — on wide, where both tabs share the detail pane, that reads
-    // as a close/reopen flash.
-    if (_selected == path && !_selectedIsDir && !_showQuickNoteChooser) {
+    // Already on screen: just land on the tab. Reopening would unfocus
+    // the editor, reset the kind view and restart the hide timer for
+    // identical content — on wide, where both tabs share the detail pane,
+    // that reads as a close/reopen flash.
+    //
+    // On screen, not merely selected (2026-09-10 device report): closing
+    // the note leaves it selected, and on a phone the tab it lands on has
+    // an empty body by design — so the shortcut showed nothing at all.
+    // The tree being up is what says the note is closed.
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    final onScreen = !narrow || !_treeVisible;
+    if (onScreen &&
+        _selected == path &&
+        !_selectedIsDir &&
+        !_showQuickNoteChooser) {
       if (_tab != ShellTab.quickNote) {
         setState(() {
           _tab = ShellTab.quickNote;
@@ -1855,7 +1866,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// selected folder, root if none (T-UI-05).
   Widget _newItemFab() {
     return NewItemFab(
-      anchorKey: _fabAnchorKey,
+      onAnchor: (center) => _fabAnchor = center,
       expanded: _fabExpanded,
       onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
       onNewNote: () {
@@ -1955,7 +1966,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       children: [
         child,
         FabScrim(
-          anchorKey: _fabAnchorKey,
+          anchor: _fabAnchor,
           expanded: _fabExpanded,
           onClose: _closeFab,
         ),
