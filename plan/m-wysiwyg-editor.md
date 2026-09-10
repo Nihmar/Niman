@@ -43,6 +43,11 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
   theme instead of showing as a white box in the dark.
 - **Phase 12** — a switch between the source editor and WYSIWYG in the note's
   status row, next to the word count (the setting stays per library).
+- **Phase 13** — the code block actually holds its lines: one multi-line
+  insert with no attribute put the code outside the fence, and the next write
+  moved it out of the note (device report). Each fence line now carries the
+  block attribute, consecutive lines group into one fence, blank lines inside
+  stay, and an empty fence is no longer written back.
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
