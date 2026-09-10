@@ -149,6 +149,58 @@ final class NoteOps implements NoteOperations {
     });
   }
 
+  /// The folder at [path], created with its parents if missing.
+  ///
+  /// No uniquifying: the caller named a folder, not a wish for one.
+  @override
+  Future<Note> ensureFolder(String path) {
+    return _synchronized(() async {
+      final clean = cleanFolderPath(path, '');
+      if (clean.isEmpty) {
+        // The root is not a row, and "make sure the root exists" is not
+        // a thing a caller can mean.
+        throw ArgumentError('ensureFolder was given no folder: "$path"');
+      }
+      final dir = Directory(_abs(clean));
+      if (!dir.existsSync()) {
+        await dir.create(recursive: true);
+        // Every folder on the way is new too, so the index hears about
+        // the whole chain rather than only its last link.
+        final segments = clean.split('/');
+        final made = <String>[
+          for (var i = 1; i <= segments.length; i++)
+            _abs(segments.take(i).join('/')),
+        ];
+        await indexer.applyEvents(root, made);
+      }
+      return await _mustFind(clean);
+    });
+  }
+
+  /// Adds [content] to the end of the note at [path], creating it when it
+  /// is not there.
+  @override
+  Future<Note> appendToNote(String path, String content) {
+    return _synchronized(() async {
+      final file = File(_abs(path));
+      final existing = file.existsSync() ? await file.readAsString() : '';
+      final joined = existing.isEmpty
+          ? content
+          : '${_endingInABlankLine(existing)}$content';
+      await writeFileAtomically(file, utf8.encode(joined));
+      await indexer.applyEvents(root, [file.path]);
+      return await _mustFind(path);
+    });
+  }
+
+  /// [text] with exactly one blank line at its end, so what follows
+  /// starts a paragraph of its own.
+  static String _endingInABlankLine(String text) {
+    final eol = text.contains('\r\n') ? '\r\n' : '\n';
+    final trimmed = text.replaceFirst(RegExp(r'\s+$'), '');
+    return '$trimmed$eol$eol';
+  }
+
   /// Creates a folder in [parentPath], uniquifying the name.
   @override
   Future<Note> createFolder({

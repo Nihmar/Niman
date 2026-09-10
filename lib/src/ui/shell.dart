@@ -12,7 +12,7 @@ import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
-import 'package:copist/src/templates/engine.dart';
+import 'package:copist/src/templates/directives.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
@@ -901,6 +901,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// and the name often follows from it. The template's text — frontmatter
   /// included — becomes the note's, with its placeholders substituted
   /// against the name just chosen.
+  ///
+  /// A template that names its own notes (`copist: filename:`, T-TPL-02)
+  /// is not asked about: it already answered. The rest of its directives
+  /// decide the folder, whether a second use adds to the file instead of
+  /// making a new one, and what happens once the note exists.
   Future<void> _createFromTemplate({String? parent}) async {
     final source = await widget.controller.templateSource;
     if (source == null || !mounted) return;
@@ -913,23 +918,59 @@ final class _LibraryShellState extends State<_LibraryShell>
       folder: folder,
     );
     if (chosen == null || !mounted) return;
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.newFromTemplateTitle,
-      initial: chosen.name.split('/').last,
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final ops = widget.controller.ops!;
-      final template = await ops.readNote(chosen.path);
-      final row = await ops.createNote(
-        parentPath: parent ?? _createParent,
-        name: name,
-        content: applyTemplate(template, title: name),
-      );
+    final ops = widget.controller.ops!;
+    final String template;
+    try {
+      template = await ops.readNote(chosen.path);
+    } on Object catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$error')));
+      }
+      return;
+    }
+    // Read once with no title, only to find out whether the template
+    // names the note itself; the real read happens below, once the name
+    // is known, so a folder may be built from it.
+    final declared = readTemplateDirectives(template);
+    final String name;
+    if (declared.namesItself) {
+      name = declared.filename!;
+    } else {
       if (!mounted) return;
+      final asked = await showNameDialog(
+        context,
+        title: AppStrings.newFromTemplateTitle,
+        initial: chosen.name.split('/').last,
+      );
+      if (asked == null) return;
+      name = asked;
+    }
+    await _guard(() async {
+      final directives = readTemplateDirectives(template, title: name);
+      final content = renderTemplate(template, title: name);
+      final target = directives.folder ?? parent ?? _createParent;
+      if (directives.folder case final wanted? when wanted.isNotEmpty) {
+        await ops.ensureFolder(wanted);
+      }
+      final row = directives.append
+          ? await ops.appendToNote(resolvePath(target, '$name.md'), content)
+          : await ops.createNote(
+              parentPath: target,
+              name: name,
+              content: content,
+            );
+      if (!mounted) return;
+      if (directives.open == TemplateOpen.none) {
+        // The template filed something away; the user was in the middle
+        // of something else and stays there.
+        widget.controller.notify();
+        return;
+      }
       if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
       setState(() {
+        if (directives.open == TemplateOpen.preview) _previewVisible = true;
         _selected = row.path;
         _selectedIsDir = false;
         _treeVisible = false;

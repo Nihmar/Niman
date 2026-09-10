@@ -472,6 +472,35 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<Note> ensureFolder(String path) async {
+    final clean = cleanFolderPath(path, '');
+    if (clean.isEmpty) {
+      throw ArgumentError('ensureFolder was given no folder: "$path"');
+    }
+    final segments = clean.split('/');
+    for (var i = 1; i <= segments.length; i++) {
+      final rel = segments.take(i).join('/');
+      if (_findRow(rel) != null) continue;
+      _addRow(rel, isDir: true);
+    }
+    _bump();
+    return _noteAt(clean);
+  }
+
+  @override
+  Future<Note> appendToNote(String path, String content) async {
+    final existing = _findRow(path);
+    if (existing == null) {
+      _addRow(path, isDir: false).content = content;
+    } else {
+      final before = existing.content.replaceFirst(RegExp(r'\s+$'), '');
+      existing.content = before.isEmpty ? content : '$before\n\n$content';
+    }
+    _bump();
+    return _noteAt(path);
+  }
+
+  @override
   Future<Note> rename(String path, String newName) async {
     final row = _requireRow(path);
     final parent = parentOf(path);

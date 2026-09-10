@@ -71,6 +71,72 @@ void main() {
     });
   });
 
+  // T-TPL-02: what a template's `folder:` and `append:` directives need
+  // from the ops layer.
+  group('ensureFolder', () {
+    test('creates the whole chain, and indexes every folder in it', () async {
+      final row = await ops.ensureFolder('Journal/2026/03');
+      expect(row.path, 'Journal/2026/03');
+      expect(
+        Directory(p.join(root.path, 'Journal/2026/03')).existsSync(),
+        true,
+      );
+      expect(await dao.find('Journal'), isNotNull);
+      expect(await dao.find('Journal/2026'), isNotNull);
+      expect(await dao.find('Journal/2026/03'), isNotNull);
+    });
+
+    test('an existing folder is returned, never uniquified', () async {
+      final first = await ops.ensureFolder('Journal');
+      final second = await ops.ensureFolder('Journal');
+      expect(second.path, first.path);
+      expect(await dao.find('Journal_1'), isNull);
+    });
+
+    test('a path out of a settings file is sanitized', () async {
+      final row = await ops.ensureFolder('/../World//Places/');
+      expect(row.path, 'World/Places');
+    });
+
+    test('the root is not a folder anyone can ask for', () async {
+      await expectLater(ops.ensureFolder(''), throwsArgumentError);
+    });
+  });
+
+  group('appendToNote', () {
+    test('a missing note is created with the content', () async {
+      final row = await ops.appendToNote('Log.md', '- one\n');
+      expect(row.path, 'Log.md');
+      expect(File(p.join(root.path, 'Log.md')).readAsStringSync(), '- one\n');
+    });
+
+    test('a second append goes under the first, one blank line down', () async {
+      await ops.appendToNote('Log.md', '- one\n');
+      await ops.appendToNote('Log.md', '- two\n');
+      expect(
+        File(p.join(root.path, 'Log.md')).readAsStringSync(),
+        '- one\n\n- two\n',
+      );
+    });
+
+    test('trailing blank lines do not pile up', () async {
+      await ops.appendToNote('Log.md', '- one\n\n\n\n');
+      await ops.appendToNote('Log.md', '- two\n');
+      expect(
+        File(p.join(root.path, 'Log.md')).readAsStringSync(),
+        '- one\n\n- two\n',
+      );
+    });
+
+    test('a CRLF note keeps its line endings at the join', () async {
+      final file = File(p.join(root.path, 'Log.md'));
+      await file.writeAsString('- one\r\n');
+      await indexer.fullScan(root.path);
+      await ops.appendToNote('Log.md', '- two\n');
+      expect(file.readAsStringSync(), '- one\r\n\r\n- two\n');
+    });
+  });
+
   group('rename', () {
     test('renames a note', () async {
       await ops.createNote(parentPath: '', name: 'Old');
@@ -218,9 +284,8 @@ void main() {
 
     test('unpinning is allowed on any file, so a stray block can go', () async {
       // A pin written before that rule existed has to be removable.
-      File(
-        p.join(root.path, 'todo.txt'),
-      ).writeAsStringSync('---\npinned: true\n---\n\ntask\n');
+      File(p.join(root.path, 'todo.txt'))
+          .writeAsStringSync('---\npinned: true\n---\n\ntask\n');
       await indexer.fullScan(root.path);
 
       await ops.setPinned('todo.txt', pinned: false);
@@ -230,10 +295,7 @@ void main() {
 
     test('a folder cannot be pinned', () async {
       await ops.createFolder(parentPath: '', name: 'Folder');
-      expect(
-        () => ops.setPinned('Folder', pinned: true),
-        throwsArgumentError,
-      );
+      expect(() => ops.setPinned('Folder', pinned: true), throwsArgumentError);
     });
   });
 

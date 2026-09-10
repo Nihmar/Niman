@@ -31,6 +31,23 @@ abstract interface class NoteOperations {
   /// Creates a folder in [parentPath].
   Future<Note> createFolder({required String parentPath, required String name});
 
+  /// The folder at library-relative [path], created — with every folder
+  /// above it — if it is not there (T-TPL-02).
+  ///
+  /// Unlike [createFolder] this one does *not* uniquify: a template that
+  /// files its notes in `Journal/2026` means that folder, and a second
+  /// note must not land in `Journal/2026 2`. An existing folder is
+  /// returned untouched.
+  Future<Note> ensureFolder(String path);
+
+  /// Adds [content] to the end of the note at library-relative [path],
+  /// creating it when it is not there (T-TPL-02).
+  ///
+  /// A blank line is inserted between what was there and what is added,
+  /// unless the file already ends in one, so appended entries do not run
+  /// into the last paragraph of the previous one.
+  Future<Note> appendToNote(String path, String content);
+
   /// Renames the note or folder at [path] to [newName].
   Future<Note> rename(String path, String newName);
 
