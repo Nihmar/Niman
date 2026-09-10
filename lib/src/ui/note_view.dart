@@ -620,6 +620,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     ),
   );
 
+  /// The editor pane: the WYSIWYG surface or the source editor (T-WYS-05).
+  ///
+  /// The switch mode handles the eye for both: the WYSIWYG surface and the
+  /// source editor are one pane, never two.
+  Widget _editorPane() => widget.showWysiwyg
+      ? WysiwygEditor(
+          key: _wysiwygKey,
+          data: _currentText,
+          onChanged: _onWysiwygChanged,
+          autoFocus: widget.autofocusEditor,
+        )
+      : _buildEditor();
+
   /// The preview, at the *note* text size rather than the interface one
   /// (T-M6-12).
   ///
@@ -1249,7 +1262,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final error = _error;
-    final split = widget.splitPreview;
+    // The WYSIWYG surface is never split: it already is a rendering, and the
+    // shell's previewSplits agrees — this is the belt to its braces.
+    final split = widget.splitPreview && !widget.showWysiwyg;
     // The toolbar formats the editor: it stays in split mode (the editor
     // is on screen) and hides in full-screen preview mode.
     // Hiding every button hides the toolbar itself; the editor keeps its
@@ -1285,16 +1300,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                     ? const Center(child: CircularProgressIndicator())
                     : kindBody
                     ? kindGui.buildBody(context, _kindHost)
-                    : widget.showWysiwyg
-                    ? WysiwygEditor(
-                        key: _wysiwygKey,
-                        data: _currentText,
-                        onChanged: _onWysiwygChanged,
-                        autoFocus: widget.autofocusEditor,
-                      )
                     : split
                     ? EditorPreviewSplit(
-                        editor: _buildEditor(),
+                        editor: _editorPane(),
                         preview: _buildPreview(context),
                         editorScroll: _scroll.verticalScroller,
                         previewScroll: _previewScroll,
@@ -1319,8 +1327,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                                 child: _buildPreview(context),
                               )
                             : KeyedSubtree(
-                                key: const ValueKey('pane-editor'),
-                                child: _buildEditor(),
+                                key: ValueKey(
+                                  widget.showWysiwyg
+                                      ? 'pane-wysiwyg'
+                                      : 'pane-editor',
+                                ),
+                                child: _editorPane(),
                               ),
                       ))
               : Center(child: Text(error)),
