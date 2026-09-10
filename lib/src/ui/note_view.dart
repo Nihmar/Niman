@@ -1428,9 +1428,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             ),
           // Find & replace lives in the editor pane (hidden in
           // preview-only mode).
-          if (!_loading &&
-              !widget.showWysiwyg &&
-              (widget.splitPreview || !widget.showPreview))
+          if (!_loading && (widget.splitPreview || !widget.showPreview))
             IconButton(
               key: const Key('editor-find-open'),
               tooltip: AppStrings.findInNoteTooltip,
@@ -1438,7 +1436,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-              onPressed: _findController.findMode,
+              onPressed: widget.showWysiwyg
+                  ? () => _wysiwygKey.currentState?.openFind()
+                  : _findController.findMode,
             ),
           if (!_loading &&
               !widget.showWysiwyg &&
