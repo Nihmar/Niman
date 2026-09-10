@@ -12,6 +12,7 @@ import 'package:copist/src/ui/quick_note_picker.dart';
 import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/switch_library_screen.dart';
+import 'package:copist/src/ui/template_help.dart';
 import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -650,6 +651,18 @@ final class _SettingsBodyState extends State<SettingsBody> {
           title: AppStrings.templateFolderTitle,
           value: _templateFolder ?? defaultTemplateFolder,
           onTap: _pickTemplateFolder,
+        ),
+        // Next to the folder, because that is where someone setting
+        // templates up is already standing (T-TPL-08).
+        SettingsValueRow(
+          key: const Key('template-help-setting'),
+          title: AppStrings.templateHelpTitle,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const TemplateHelpScreen(),
+            ),
+          ),
         ),
         SwitchListTile(
           key: const Key('trash-setting'),

@@ -608,6 +608,192 @@ final class AppStrings {
   static String get templateFormTitle =>
       _t('Fill in the template', 'Compila il modello');
 
+  // The template placeholder reference (T-TPL-08).
+  static String get templateHelpTitle =>
+      _t('Template placeholders', 'Segnaposto dei modelli');
+  static String get templateHelpIntro => _t(
+    'A template is an ordinary note with holes in it. Creating a note '
+        'from one copies its text and fills the holes in.',
+    'Un modello è una nota come le altre, con dei buchi dentro. Creare '
+        'una nota da un modello ne copia il testo e riempie i buchi.',
+  );
+  static String get templateHelpUnknown => _t(
+    'A placeholder Copist does not know is left exactly as written, so a '
+        'typo shows up in the note instead of quietly eating a line.',
+    'Un segnaposto che Copist non conosce resta scritto com’è, così un '
+        'errore di battitura si vede nella nota invece di mangiarsi una '
+        'riga in silenzio.',
+  );
+
+  static String get templateHelpValuesTitle => _t('Values', 'Valori');
+  static String get templateHelpTitleBody => _t(
+    'The name the note is being created under.',
+    'Il nome con cui la nota sta per essere creata.',
+  );
+  static String get templateHelpDateBody => _t(
+    'Today, and the time now. Both take a format: {{date:DD/MM/YYYY}}.',
+    'Oggi, e l’ora adesso. Entrambi accettano un formato: '
+        '{{date:DD/MM/YYYY}}.',
+  );
+  static String get templateHelpNowBody =>
+      _t('The date and the time together.', 'La data e l’ora insieme.');
+  static String get templateHelpUuidBody => _t(
+    'A fresh identifier, a different one at every occurrence.',
+    'Un identificatore nuovo, diverso a ogni occorrenza.',
+  );
+
+  static String get templateHelpDatesTitle =>
+      _t('Writing a date', 'Scrivere una data');
+  static String get templateHelpDatesBody => _t(
+    'These stand for parts of the date inside a format. Anything else is '
+        'literal, and text in single quotes is literal too. Month and '
+        'weekday names follow the app language.',
+    'Questi stanno per le parti della data dentro un formato. Tutto il '
+        'resto è letterale, e anche il testo fra apici singoli lo è. I '
+        'nomi di mese e di giorno seguono la lingua dell’app.',
+  );
+  static String get templateHelpYear =>
+      _t('the year: 2026, 26', 'l’anno: 2026, 26');
+  static String get templateHelpMonth =>
+      _t('the month: 03, 3, March, Mar', 'il mese: 03, 3, marzo, mar');
+  static String get templateHelpDay =>
+      _t('the day: 09, 9, Monday, Mon', 'il giorno: 09, 9, lunedì, lun');
+  static String get templateHelpTime =>
+      _t('hours, minutes, seconds', 'ore, minuti, secondi');
+  static String get templateHelpWeek => _t(
+    'the ISO week and the quarter: 11, 11, 1',
+    'la settimana ISO e il trimestre: 11, 11, 1',
+  );
+
+  static String get templateHelpFiltersTitle => _t('Filters', 'Filtri');
+  static String get templateHelpFiltersBody => _t(
+    'A value can be followed by filters, applied left to right.',
+    'Un valore può essere seguito da filtri, applicati da sinistra a '
+        'destra.',
+  );
+  static String get templateHelpCaseBody => _t(
+    'Upper case, lower case, and the first letter of each word — a word '
+        'you capitalised yourself is left alone.',
+    'Maiuscolo, minuscolo, e l’iniziale di ogni parola — una parola che '
+        'hai scritto tu con la maiuscola resta com’è.',
+  );
+  static String get templateHelpSlugBody => _t(
+    'The link form of the text, for building a wikilink.',
+    'La forma da link del testo, per costruire un wikilink.',
+  );
+  static String get templateHelpPadBody => _t(
+    'Trim the ends; pad with zeros to a width; use a fallback when the '
+        'value is empty.',
+    'Toglie gli spazi ai lati; riempie di zeri fino a una larghezza; usa '
+        'un ripiego quando il valore è vuoto.',
+  );
+  static String get templateHelpShiftBody => _t(
+    'Move a date by days, weeks, months or years — next week’s lecture, '
+        'last month’s file.',
+    'Sposta una data di giorni, settimane, mesi o anni — la lezione della '
+        'settimana prossima, il file del mese scorso.',
+  );
+  static String get templateHelpSnapBody => _t(
+    'Snap a date to the start or the end of its week, month or year.',
+    'Porta una data all’inizio o alla fine della sua settimana, del mese '
+        'o dell’anno.',
+  );
+
+  static String get templateHelpAskTitle =>
+      _t('Asking you something', 'Chiedere qualcosa');
+  static String get templateHelpAskBody => _t(
+    'A form appears before the note is created, one box per question. '
+        'The same label twice is one question, and its answer fills every '
+        'occurrence — the folder and the file name included.',
+    'Prima che la nota venga creata compare un modulo, una casella per '
+        'domanda. La stessa etichetta due volte è una domanda sola, e la '
+        'risposta riempie ogni occorrenza — cartella e nome del file '
+        'compresi.',
+  );
+  static String get templateHelpAskFieldBody => _t(
+    'A box to type in; the text after the second colon is what it starts '
+        'with.',
+    'Una casella in cui scrivere; il testo dopo i secondi due punti è '
+        'quello con cui parte.',
+  );
+  static String get templateHelpChoiceBody => _t(
+    'A pick from a list, separated by commas.',
+    'Una scelta da una lista, separata da virgole.',
+  );
+
+  static String get templateHelpWhereTitle =>
+      _t('Where the note goes', 'Dove va la nota');
+  static String get templateHelpWhereBody => _t(
+    'These are not text: they are instructions, and they live in a '
+        'copist: block in the template’s own frontmatter. The block is '
+        'obeyed and then removed, so it never appears in the note. Their '
+        'values may hold placeholders.',
+    'Questi non sono testo: sono istruzioni, e stanno in un blocco '
+        'copist: nel frontmatter del modello stesso. Il blocco viene '
+        'eseguito e poi rimosso, quindi non compare mai nella nota. I '
+        'loro valori possono contenere segnaposto.',
+  );
+  static String get templateHelpFolderBody => _t(
+    'The folder the note is created in, made if it is not there. Without '
+        'it the note lands where you were.',
+    'La cartella in cui la nota viene creata, creata se non esiste. Senza '
+        'di essa la nota finisce dove eri tu.',
+  );
+  static String get templateHelpFilenameBody => _t(
+    'What the note is called. A template that says this is not asked for '
+        'a name.',
+    'Come si chiama la nota. A un modello che lo dichiara non viene '
+        'chiesto il nome.',
+  );
+  static String get templateHelpAppendBody => _t(
+    'Add to the note if it is already there, instead of making a second '
+        'one. This is what turns a month of meetings into one file.',
+    'Aggiunge alla nota se esiste già, invece di crearne una seconda. È '
+        'quello che trasforma un mese di riunioni in un solo file.',
+  );
+  static String get templateHelpOpenBody => _t(
+    'What happens once the note exists: the editor (the default), the '
+        'preview, or nothing — the note is filed and you stay where you '
+        'were.',
+    'Cosa succede quando la nota esiste: l’editor (il valore predefinito), '
+        'l’anteprima, o niente — la nota viene archiviata e tu resti dove '
+        'eri.',
+  );
+
+  static String get templateHelpAroundTitle =>
+      _t('Where it came from', 'Da dove arriva');
+  static String get templateHelpParentBody => _t(
+    'The name of the note you started from; write [[{{parent}}]] for a '
+        'link back to it. Empty when you started from the tree.',
+    'Il nome della nota da cui sei partito; scrivi [[{{parent}}]] per un '
+        'link che ci riporta. Vuoto se sei partito dall’albero.',
+  );
+  static String get templateHelpFolderValueBody => _t(
+    'The folder the note ended up in.',
+    'La cartella in cui la nota è finita.',
+  );
+  static String get templateHelpClipboardBody => _t(
+    'What is on the clipboard, and the editor selection when the note was '
+        'started from one.',
+    'Cosa c’è negli appunti, e la selezione dell’editor se la nota è '
+        'partita da una.',
+  );
+
+  static String get templateHelpIncludeTitle =>
+      _t('Reusing a piece', 'Riusare un pezzo');
+  static String get templateHelpIncludeBody => _t(
+    'Pastes another template in, so ten templates can share one checklist. '
+        'It is looked for in the template folder first, and the .md may be '
+        'left off. Its own questions join the same form.',
+    'Incolla un altro modello, così dieci modelli possono condividere una '
+        'sola checklist. Viene cercato prima nella cartella dei modelli, e '
+        'il .md si può omettere. Le sue domande finiscono nello stesso '
+        'modulo.',
+  );
+
+  static String get templateHelpExampleTitle =>
+      _t('All together', 'Tutto insieme');
+
   // What an {{include:…}} that could not be pasted leaves behind, beside
   // the placeholder it could not replace (T-TPL-06).
   static String includeMissing(String path) =>

@@ -1,7 +1,9 @@
 # Templates — a language worth writing in
 
-**Status:** Planned; the four design choices below were made by the user
-on 2026-09-09 · **Depends on:** M4
+**Status:** Done for the round the user chose (T-TPL-01 to T-TPL-04,
+T-TPL-06, T-TPL-08, T-TPL-09, landed 2026-09-10); the counter and the
+caret marker are held back by choice. The four design choices below were
+made by the user on 2026-09-09 · **Depends on:** M4
 (`templates/engine.dart`, `templates/repo.dart`, the frontmatter parser) ·
 **Spec:** user request: *"definiamo bene un meta linguaggio per i template
 che sia espressivo e potente"*.
@@ -135,13 +137,15 @@ back by choice 4 and land after.
   `{{include:_repro}}` is what a person writes. Because the paste happens
   before anything else runs, a partial's own `{{ask:…}}` fields join the
   same form as the template that included it.
-- [ ] **T-TPL-08** A reference the user can reach: a "Template
+- [x] **T-TPL-08** A reference the user can reach: a "Template
   placeholders" help sheet in the settings, next to the template folder
   row, listing every placeholder and filter with an example — the same
-  shape as the todo.txt help (T-TD-09).
-- [ ] **T-TPL-09** Tests: unit for every placeholder, filter, token and
-  directive; widget for the prompt form and the folder/filename
-  directives. *AC: green.*
+  shape as the todo.txt help (T-TD-09). The four widgets that shape was
+  made of moved into `ui/help_layout.dart`, so the two screens are now
+  the same by construction rather than by having been copied.
+- [x] **T-TPL-09** Tests: unit for every placeholder, filter, token and
+  directive; widget for the prompt form, the folder/filename directives,
+  the includes and the reference page. *AC: green.*
 
 ### Held back (choice 4)
 
@@ -155,13 +159,11 @@ back by choice 4 and land after.
   `{{cursor:2}}` if the editor can be made to walk them; one stop
   otherwise. *AC: the caret is at the marker, and the marker is not in
   the file.*
-- [ ] **T-TPL-08** A reference the user can reach: a "Template
-  placeholders" help sheet in the settings, next to the template folder
-  row, listing every placeholder and filter with an example — the same
-  shape as the todo.txt help (T-TD-09).
-- [ ] **T-TPL-09** Tests: unit for every placeholder, filter, token and
-  directive; widget for the prompt form, the folder/filename directives
-  and the caret. *AC: green.*
+
+Both, when they land, want a line each on the reference page (T-TPL-08)
+and their own tests; the page is the list of what this build actually
+substitutes, so a placeholder that is not on it is one nobody can find
+out about.
 
 ## What the layers buy, by the way the app is used
 

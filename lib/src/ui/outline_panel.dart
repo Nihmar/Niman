@@ -45,11 +45,7 @@ Future<int?> showOutlineSheet(
 /// One heading row: indented by its level, named by its text, with a
 /// filled chevron when the heading is folded in the editor.
 final class _OutlineRow extends StatelessWidget {
-  const new({
-    required this.entry,
-    required this.folded,
-    required this.onTap,
-  });
+  const new({required this.entry, required this.folded, required this.onTap});
 
   final OutlineEntry entry;
   final bool folded;

@@ -10,6 +10,7 @@
 /// out precisely because it is kept but not acted on.
 library;
 
+import 'package:copist/src/ui/help_layout.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
@@ -25,119 +26,30 @@ final class TodoHelpScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          _Paragraph(AppStrings.todoHelpIntro),
-          const _Example('buy milk +groceries @errands due:2026-09-09'),
-          _Section(AppStrings.todoHelpFilesTitle),
-          _Paragraph(AppStrings.todoHelpFilesBody),
-          _Section(AppStrings.todoHelpLineTitle),
-          _Paragraph(AppStrings.todoHelpLineBody),
-          const _Example('x 2026-09-08 2026-09-01 (A) call the plumber @home'),
-          _Row(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
-          _Row(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
-          _Row(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
-          _Section(AppStrings.todoHelpTokensTitle),
-          _Paragraph(AppStrings.todoHelpTokensBody),
-          _Row(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
-          _Row(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
-          _Row(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
-          _Section(AppStrings.todoHelpTagsTitle),
-          _Paragraph(AppStrings.todoHelpTagsBody),
-          _Row(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
-          _Row(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
-          _Row(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
-          _Section(AppStrings.todoHelpEditTitle),
-          _Paragraph(AppStrings.todoHelpEditBody),
-        ],
-      ),
-    );
-  }
-}
-
-/// A section heading.
-final class _Section extends StatelessWidget {
-  const new(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 8),
-      child: Text(text, style: Theme.of(context).textTheme.titleMedium),
-    );
-  }
-}
-
-/// A block of prose.
-final class _Paragraph extends StatelessWidget {
-  const new(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
-    );
-  }
-}
-
-/// A monospaced sample line, scrollable so a long one never clips.
-final class _Example extends StatelessWidget {
-  const new(this.line);
-
-  final String line;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Text(
-          line,
-          style: TextStyle(fontFamily: 'monospace', color: scheme.onSurface),
-        ),
-      ),
-    );
-  }
-}
-
-/// One piece of syntax and what it means.
-final class _Row extends StatelessWidget {
-  const new(this.syntax, this.meaning);
-
-  final String syntax;
-  final String meaning;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            syntax,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontFamily: 'monospace',
-              fontWeight: FontWeight.bold,
-            ),
+          HelpParagraph(AppStrings.todoHelpIntro),
+          const HelpExample('buy milk +groceries @errands due:2026-09-09'),
+          HelpSection(AppStrings.todoHelpFilesTitle),
+          HelpParagraph(AppStrings.todoHelpFilesBody),
+          HelpSection(AppStrings.todoHelpLineTitle),
+          HelpParagraph(AppStrings.todoHelpLineBody),
+          const HelpExample(
+            'x 2026-09-08 2026-09-01 (A) call the plumber @home',
           ),
-          Text(
-            meaning,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          HelpRow(AppStrings.todoHelpDone, AppStrings.todoHelpDoneBody),
+          HelpRow(AppStrings.todoHelpPriority, AppStrings.todoHelpPriorityBody),
+          HelpRow(AppStrings.todoHelpDates, AppStrings.todoHelpDatesBody),
+          HelpSection(AppStrings.todoHelpTokensTitle),
+          HelpParagraph(AppStrings.todoHelpTokensBody),
+          HelpRow(AppStrings.todoHelpProject, AppStrings.todoHelpProjectBody),
+          HelpRow(AppStrings.todoHelpContext, AppStrings.todoHelpContextBody),
+          HelpRow(AppStrings.todoHelpHashtag, AppStrings.todoHelpHashtagBody),
+          HelpSection(AppStrings.todoHelpTagsTitle),
+          HelpParagraph(AppStrings.todoHelpTagsBody),
+          HelpRow(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
+          HelpRow(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
+          HelpRow(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
+          HelpSection(AppStrings.todoHelpEditTitle),
+          HelpParagraph(AppStrings.todoHelpEditBody),
         ],
       ),
     );
