@@ -4,7 +4,9 @@ import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_find_panel.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -20,6 +22,7 @@ final class WysiwygEditor extends StatefulWidget {
     required this.data,
     required this.onChanged,
     this.autoFocus = false,
+    this.spellCheck,
     super.key,
   });
 
@@ -31,6 +34,10 @@ final class WysiwygEditor extends StatefulWidget {
 
   /// Whether to focus the editor when it opens.
   final bool autoFocus;
+
+  /// The editor's spelling state (T-WYS-08): underlines misspelled prose.
+  /// Null (tests, or a platform without hunspell) draws none.
+  final EditorSpellCheck? spellCheck;
 
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
@@ -56,8 +63,30 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// The controller the toolbar commands act on (T-WYS-06).
   quill.QuillController get controller => _controller;
 
+  /// The document's lines, for the spell review panel (T-WYS-08).
+  List<String> get plainTextLines =>
+      _controller.document.toPlainText().split(String.fromCharCode(10));
+
   /// Opens the find bar (the status-row button and Ctrl/Cmd+F, T-WYS-08).
   void openFind({bool replace = false}) => _find.open(replace: replace);
+
+  /// Replaces [start]..[end] of document line [line], the spell panel's fix
+  /// (T-WYS-08).
+  void replaceDocumentRange(int line, int start, int end, String replacement) {
+    final lines = plainTextLines;
+    if (line < 0 || line >= lines.length) return;
+    var offset = 0;
+    for (var i = 0; i < line; i++) {
+      offset += lines[i].length + 1;
+    }
+    final index = offset + start;
+    _controller.replaceText(
+      index,
+      end - start,
+      replacement,
+      TextSelection.collapsed(offset: index + replacement.length),
+    );
+  }
 
   @override
   void initState() {
@@ -109,6 +138,66 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     super.dispose();
   }
 
+  /// Quill's text-span hook: the misspelled words get the wavy underline,
+  /// everything else is the package's default span (T-WYS-08).
+  InlineSpan _spellSpan(
+    BuildContext context,
+    quill.Node node,
+    int nodeOffset,
+    String text,
+    TextStyle? style,
+    GestureRecognizer? recognizer,
+  ) {
+    final fallback = quill.defaultSpanBuilder(
+      context,
+      node,
+      nodeOffset,
+      text,
+      style,
+      recognizer,
+    );
+    final spell = widget.spellCheck;
+    if (spell == null || text.isEmpty || _isCode(node)) return fallback;
+    final ranges = spell.rangesFor(
+      text.hashCode & 0x7fffffff,
+      text,
+      skip: const <TextRange>[],
+    );
+    if (ranges.isEmpty) return fallback;
+    final children = <TextSpan>[];
+    var cursor = 0;
+    for (final range in ranges) {
+      if (range.start > cursor) {
+        children.add(TextSpan(text: text.substring(cursor, range.start)));
+      }
+      children.add(
+        TextSpan(
+          text: text.substring(range.start, range.end),
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+            decorationStyle: TextDecorationStyle.wavy,
+            decorationColor: Theme.of(context).colorScheme.error,
+          ),
+        ),
+      );
+      cursor = range.end;
+    }
+    if (cursor < text.length) {
+      children.add(TextSpan(text: text.substring(cursor)));
+    }
+    return TextSpan(style: style, recognizer: recognizer, children: children);
+  }
+
+  /// Code is not prose: neither inline code nor a code block is checked.
+  static bool _isCode(quill.Node node) {
+    if (node.style.attributes.containsKey(quill.Attribute.inlineCode.key)) {
+      return true;
+    }
+    final parent = node.parent;
+    return parent != null &&
+        parent.style.attributes.containsKey(quill.Attribute.codeBlock.key);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.data.length > _maxWysiwygBytes) {
@@ -144,6 +233,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
                 autoFocus: widget.autoFocus,
                 padding: const EdgeInsets.all(16),
                 embedBuilders: const [OpaqueEmbedBuilder()],
+                textSpanBuilder: _spellSpan,
               ),
             ),
           ),
