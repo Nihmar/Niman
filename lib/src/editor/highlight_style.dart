@@ -1,123 +1,79 @@
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:flutter/widgets.dart';
-
 /// Display styles for the source editor's highlighting (M2a E7-influence,
 /// now over re_editor's per-line `spanBuilder`).
 ///
-/// [styleFor] maps a [TokenKind] to a [TextStyle] *override* for the line
-/// span; [TokenKind.plain] maps to null (the base editor style shows). The
-/// overrides change only color / weight / decoration / font-style — never
-/// font size or line height — so a line keeps the editor's constant
-/// metrics. [light] and [dark] are fixed palettes; the app brightness picks
-/// one.
-enum HighlightPalette {
-  /// The light-theme palette.
-  light,
+/// [markdownTokenStyle] maps a [TokenKind] to a [TextStyle] *override* for
+/// the line span; [TokenKind.plain] maps to null (the base editor style
+/// shows). The overrides change only color / weight / decoration /
+/// font-style — never font size or line height — so a line keeps the
+/// editor's constant metrics.
+///
+/// The colors come from the palette (T-M6-05), not from here: what this
+/// file decides is which role a token takes and how it is drawn. That is
+/// what makes a palette a list of colors and nothing else.
+library;
 
-  /// The dark-theme palette.
-  dark;
+import 'package:copist/src/editor/highlighting.dart';
+import 'package:copist/src/ui/theme/tokens.dart';
+import 'package:flutter/widgets.dart';
 
-  /// The style of the *heading text* — the region after a `#…` marker,
-  /// which the tokenizer leaves unmarked: bold, at the base row size.
-  TextStyle? get headingStyle => const TextStyle(fontWeight: FontWeight.bold);
+/// The style of the *heading text* — the region after a `#…` marker,
+/// which the tokenizer leaves unmarked: bold, at the base row size.
+const TextStyle markdownHeadingStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+);
 
-  /// The [TextStyle] override for [kind] in this palette (null = base).
-  ///
-  /// Wikilinks (T-UI-09) track the theme: [accent] is the current
-  /// ColorScheme's primary, underlined per mockup, in both palettes.
-  TextStyle? styleFor(TokenKind kind, {required Color accent}) {
-    if (kind == TokenKind.wikilink) {
-      return TextStyle(color: accent, decoration: TextDecoration.underline);
-    }
-    return (this == HighlightPalette.dark ? _darkStyles : _lightStyles)[kind];
-  }
-
-  // Light: the M2a row-painter colors, kept as-is.
-  static const Map<TokenKind, TextStyle?> _lightStyles = {
-    TokenKind.plain: null,
-    TokenKind.headingMarker: TextStyle(color: _dim),
-    TokenKind.bold: TextStyle(fontWeight: FontWeight.bold),
-    TokenKind.italic: TextStyle(fontStyle: FontStyle.italic),
-    TokenKind.strike: TextStyle(decoration: TextDecoration.lineThrough),
-    TokenKind.codeInline: TextStyle(color: _code),
-    TokenKind.codeFence: TextStyle(color: _codeMuted),
-    TokenKind.codeLanguage: TextStyle(
-      color: _codeMuted,
+/// The [TextStyle] override for [kind] in [syntax] (null = base style).
+///
+/// [dark] decides the weight of bold text and nothing else: a heavy face
+/// blooms on a dark ground, so night stops one step short of it.
+TextStyle? markdownTokenStyle(
+  TokenKind kind,
+  SyntaxColors syntax, {
+  required bool dark,
+}) {
+  return switch (kind) {
+    TokenKind.plain => null,
+    TokenKind.headingMarker => TextStyle(color: syntax.dim),
+    TokenKind.bold => TextStyle(
+      fontWeight: dark ? FontWeight.w600 : FontWeight.bold,
+    ),
+    TokenKind.italic => const TextStyle(fontStyle: FontStyle.italic),
+    TokenKind.strike => const TextStyle(
+      decoration: TextDecoration.lineThrough,
+    ),
+    TokenKind.codeInline => TextStyle(color: syntax.code),
+    TokenKind.codeFence => TextStyle(color: syntax.codeMuted),
+    TokenKind.codeLanguage => TextStyle(
+      color: syntax.codeMuted,
       fontStyle: FontStyle.italic,
     ),
-    TokenKind.link: TextStyle(
-      color: _link,
+    TokenKind.link => TextStyle(
+      color: syntax.link,
       decoration: TextDecoration.underline,
     ),
-    TokenKind.image: TextStyle(color: _image),
-    TokenKind.listMarker: TextStyle(color: _dim),
-    TokenKind.taskBox: TextStyle(color: _task),
-    TokenKind.blockquote: TextStyle(color: _quote, fontStyle: FontStyle.italic),
-    TokenKind.horizontalRule: TextStyle(color: _dim),
-    TokenKind.mathInline: TextStyle(color: _math),
-    TokenKind.mathBlock: TextStyle(color: _math, fontStyle: FontStyle.italic),
-    TokenKind.tag: TextStyle(color: _tag),
-    TokenKind.frontmatter: TextStyle(color: _dim, fontStyle: FontStyle.italic),
-  };
-
-  // Dark: same structure, brighter hues on dark backgrounds. The two math
-  // colors match the atom-one themes' `formula` scope (what the previous
-  // codeTheme mode painted).
-  static const Map<TokenKind, TextStyle?> _darkStyles = {
-    TokenKind.plain: null,
-    TokenKind.headingMarker: TextStyle(color: _dimDark),
-    TokenKind.bold: TextStyle(fontWeight: FontWeight.w600),
-    TokenKind.italic: TextStyle(fontStyle: FontStyle.italic),
-    TokenKind.strike: TextStyle(decoration: TextDecoration.lineThrough),
-    TokenKind.codeInline: TextStyle(color: _codeDark),
-    TokenKind.codeFence: TextStyle(color: _codeMutedDark),
-    TokenKind.codeLanguage: TextStyle(
-      color: _codeMutedDark,
-      fontStyle: FontStyle.italic,
-    ),
-    TokenKind.link: TextStyle(
-      color: _linkDark,
+    // Wikilinks (T-UI-09) take the palette's accent, underlined per
+    // mockup: they are the app's own kind of link.
+    TokenKind.wikilink => TextStyle(
+      color: syntax.wikilink,
       decoration: TextDecoration.underline,
     ),
-    TokenKind.image: TextStyle(color: _imageDark),
-    TokenKind.listMarker: TextStyle(color: _dimDark),
-    TokenKind.taskBox: TextStyle(color: _taskDark),
-    TokenKind.blockquote: TextStyle(
-      color: _quoteDark,
+    TokenKind.image => TextStyle(color: syntax.image),
+    TokenKind.listMarker => TextStyle(color: syntax.dim),
+    TokenKind.taskBox => TextStyle(color: syntax.task),
+    TokenKind.blockquote => TextStyle(
+      color: syntax.quote,
       fontStyle: FontStyle.italic,
     ),
-    TokenKind.horizontalRule: TextStyle(color: _dimDark),
-    TokenKind.mathInline: TextStyle(color: _mathDark),
-    TokenKind.mathBlock: TextStyle(
-      color: _mathDark,
+    TokenKind.horizontalRule => TextStyle(color: syntax.dim),
+    TokenKind.mathInline => TextStyle(color: syntax.math),
+    TokenKind.mathBlock => TextStyle(
+      color: syntax.math,
       fontStyle: FontStyle.italic,
     ),
-    TokenKind.tag: TextStyle(color: _tagDark),
-    TokenKind.frontmatter: TextStyle(
-      color: _dimDark,
+    TokenKind.tag => TextStyle(color: syntax.tag),
+    TokenKind.frontmatter => TextStyle(
+      color: syntax.dim,
       fontStyle: FontStyle.italic,
     ),
   };
-
-  // Light colors.
-  static const Color _dim = Color(0xFF7A7A7A);
-  static const Color _code = Color(0xFF0E7C7B);
-  static const Color _codeMuted = Color(0xFF5C6B73);
-  static const Color _link = Color(0xFF1A5FB4);
-  static const Color _image = Color(0xFF7B1FA2);
-  static const Color _task = Color(0xFF2E7D32);
-  static const Color _quote = Color(0xFF6B7280);
-  static const Color _math = Color(0xFFAD1457);
-  static const Color _tag = Color(0xFF00838F);
-
-  // Dark colors.
-  static const Color _dimDark = Color(0xFF9E9E9E);
-  static const Color _codeDark = Color(0xFF56B6C2);
-  static const Color _codeMutedDark = Color(0xFF7A828E);
-  static const Color _linkDark = Color(0xFF61AFEF);
-  static const Color _imageDark = Color(0xFFD19A66);
-  static const Color _taskDark = Color(0xFF98C379);
-  static const Color _quoteDark = Color(0xFF80868E);
-  static const Color _mathDark = Color(0xFFC678DD);
-  static const Color _tagDark = Color(0xFF4EC9B0);
 }

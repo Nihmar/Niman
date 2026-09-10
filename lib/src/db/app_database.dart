@@ -35,6 +35,19 @@ class AppSettings extends Table {
   /// `it`.
   TextColumn get language => text().withDefault(const Constant('system'))();
 
+  /// How bright the app is: `system` (follow the device, the default),
+  /// `day` or `night` (T-M6-05).
+  ///
+  /// App-wide, like the language and unlike the two text sizes: the
+  /// screen is the screen whichever library is open on it.
+  TextColumn get themeBrightness =>
+      text().named('theme_brightness').withDefault(const Constant('system'))();
+
+  /// The palette: `system` (the device's own colors), `catppuccin`,
+  /// `solarized` or `gruvbox`.
+  TextColumn get themePalette =>
+      text().named('theme_palette').withDefault(const Constant('system'))();
+
   /// The settings waiting to reach the libraries they belong to: the
   /// dropped `library_settings` rows (T-ML-02) and the editor settings
   /// that used to be one value for every library (T-ML-10).
@@ -89,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -116,7 +129,10 @@ class AppDatabase extends _$AppDatabase {
   /// pre-v16 databases gain `known_libraries` (T-ML-04), seeded with the
   /// library they were about to resume, and pre-v17 databases lose the
   /// seven editor settings that were one value for every library
-  /// (T-ML-10), after parking them for each known library to collect.
+  /// (T-ML-10), after parking them for each known library to collect, and
+  /// pre-v18 databases gain the theme: `theme_brightness` and
+  /// `theme_palette` (T-M6-05), both starting at `system`, which is what
+  /// the app looked like before the setting existed.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -225,6 +241,14 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 18) {
+        for (final column in ['theme_brightness', 'theme_palette']) {
+          await m.database.customStatement(
+            'ALTER TABLE app_settings ADD COLUMN $column '
+            "TEXT NOT NULL DEFAULT 'system'",
+          );
+        }
+      }
     },
   );
 
@@ -275,10 +299,19 @@ class AppDatabase extends _$AppDatabase {
 
   /// Whatever an earlier migration already parked, so v17 adds to it
   /// rather than replacing it.
+  ///
+  /// One column by name, not the table through its generated mapper: the
+  /// row this reads is mid-migration and does not have the columns a
+  /// later schema will add, and mapping it would fail on the one that is
+  /// not there yet.
   Future<Map<String, Map<String, Object?>>> _parkedNow() async {
-    final rows = await select(appSettings).get();
-    if (rows.isEmpty || rows.first.legacyLibrarySettings.isEmpty) return {};
-    final decoded = jsonDecode(rows.first.legacyLibrarySettings);
+    final rows = await customSelect(
+      'SELECT legacy_library_settings FROM app_settings',
+    ).get();
+    if (rows.isEmpty) return {};
+    final parked = rows.first.read<String>('legacy_library_settings');
+    if (parked.isEmpty) return {};
+    final decoded = jsonDecode(parked);
     if (decoded is! Map) return {};
     return {
       for (final entry in decoded.entries)

@@ -1,5 +1,6 @@
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -286,6 +287,18 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the UI language.
   Future<void> setLanguage(AppLanguage language);
+
+  /// How bright the app is ([AppBrightness.system] by default).
+  Future<AppBrightness> get themeBrightness;
+
+  /// Sets (and persists) the brightness choice.
+  Future<void> setThemeBrightness(AppBrightness brightness);
+
+  /// The palette the app wears ([AppPalette.system] by default).
+  Future<AppPalette> get themePalette;
+
+  /// Sets (and persists) the palette.
+  Future<void> setThemePalette(AppPalette palette);
 
   /// Notifies listeners that state changed without an index mutation.
   void notify();

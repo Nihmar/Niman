@@ -19,9 +19,10 @@ with the first-launch onboarding, and overall polish.
 
 ## Current state
 
-M4 leaves a local-only, unencrypted library with a single open note, one
-seeded Material theme that follows the system brightness, and every text
-size fixed in code. Sync (M5) has not been built.
+M4 leaves a local-only, unencrypted library with a single open note. The
+two text sizes (T-M6-12) and the theme (T-M6-05) have since landed; the
+scale gate, tabs, import/export, encryption and onboarding have not, and
+neither has sync (M5).
 
 ## Tasks
 
@@ -45,9 +46,16 @@ size fixed in code. Sync (M5) has not been built.
   already supported); Notion export zip → import (map Notion markdown to
   `.md` notes, strip Notion-specific metadata). *AC: both sources produce a
   browsable, linked library.*
-- [ ] **T-M6-05** Themes: brightness (day/night/system) × palette (system |
-  Catppuccin — night → Mocha, day → Latte); token-based role map (design.md).
-  *AC: all four combinations render; adding a palette = adding a mapping.*
+- [x] **T-M6-05** Themes: brightness (day/night/system) × palette. Four
+  palettes rather than the two the spec names (user, 2026-09-10): the
+  device's own colors — Material You, the wallpaper palette on Android 12
+  and up and the accent color on Windows, macOS and GTK, falling back to
+  the shipped seed — plus Catppuccin (Latte/Mocha), Solarized and Gruvbox.
+  Token-based role map (design.md), and the Markdown colors ride with it
+  as a theme extension so the editor and the preview are repainted by the
+  same choice. Stored app-wide, not per library (user, 2026-09-10).
+  *AC: every brightness × palette combination renders and is readable;
+  adding a palette = adding a mapping.*
 - [x] **T-M6-12** Text size: two sliders in the settings, one for the
   interface and one for the note text, both stored **in the library**
   (user, 2026-09-09) and applied live. The interface slider multiplies
@@ -89,6 +97,18 @@ See [design.md](design.md). M6 slice:
 - **Modules:** `ui/tabs.dart`, `ui/onboarding.dart`, `ui/theme/` (token maps),
   `core/crypto.dart`, `export/` (note, html, bundle), `import/` (obsidian,
   notion), `core/settings/` (theme and text-size settings).
+- **Themes:** `core/theme.dart` holds the two choices and the global the
+  app root listens to; `ui/theme/tokens.dart` names the color roles —
+  four surfaces, the text on them, one accent, plus the ten Markdown
+  roles as a `ThemeExtension` — and turns them into a `ColorScheme`;
+  `ui/theme/palettes.dart` is the registry, and each palette is a file of
+  named colors beside it. Two things follow. A palette never touches a
+  widget: the editor asks the theme for its Markdown colors the way
+  everything else asks for its accent, which is also what makes a palette
+  change one repaint rather than a special case per pane. And the
+  `system` palette is the only one that is not a mapping — it seeds from
+  what the OS answers (`ui/theme/device_colors.dart`, read once at
+  startup) and from the shipped seed where the OS answers nothing.
 - **Crypto:** AES-256-GCM via a pure-Dart implementation (`pointycastle` —
   new dep, the "zero-deps" constraint applies to the WebDAV client, not
   crypto). Per-file: 12-byte random nonce + ciphertext; magic-byte header

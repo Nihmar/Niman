@@ -80,6 +80,30 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('system'),
   );
+  static const VerificationMeta _themeBrightnessMeta = const VerificationMeta(
+    'themeBrightness',
+  );
+  @override
+  late final GeneratedColumn<String> themeBrightness = GeneratedColumn<String>(
+    'theme_brightness',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('system'),
+  );
+  static const VerificationMeta _themePaletteMeta = const VerificationMeta(
+    'themePalette',
+  );
+  @override
+  late final GeneratedColumn<String> themePalette = GeneratedColumn<String>(
+    'theme_palette',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('system'),
+  );
   static const VerificationMeta _legacyLibrarySettingsMeta =
       const VerificationMeta('legacyLibrarySettings');
   @override
@@ -100,6 +124,8 @@ class $AppSettingsTable extends AppSettings
     previewMode,
     splitRatio,
     language,
+    themeBrightness,
+    themePalette,
     legacyLibrarySettings,
   ];
   @override
@@ -156,6 +182,24 @@ class $AppSettingsTable extends AppSettings
         language.isAcceptableOrUnknown(data['language']!, _languageMeta),
       );
     }
+    if (data.containsKey('theme_brightness')) {
+      context.handle(
+        _themeBrightnessMeta,
+        themeBrightness.isAcceptableOrUnknown(
+          data['theme_brightness']!,
+          _themeBrightnessMeta,
+        ),
+      );
+    }
+    if (data.containsKey('theme_palette')) {
+      context.handle(
+        _themePaletteMeta,
+        themePalette.isAcceptableOrUnknown(
+          data['theme_palette']!,
+          _themePaletteMeta,
+        ),
+      );
+    }
     if (data.containsKey('legacy_library_settings')) {
       context.handle(
         _legacyLibrarySettingsMeta,
@@ -198,6 +242,14 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}language'],
       )!,
+      themeBrightness: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}theme_brightness'],
+      )!,
+      themePalette: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}theme_palette'],
+      )!,
       legacyLibrarySettings: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}legacy_library_settings'],
@@ -237,6 +289,17 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// `it`.
   final String language;
 
+  /// How bright the app is: `system` (follow the device, the default),
+  /// `day` or `night` (T-M6-05).
+  ///
+  /// App-wide, like the language and unlike the two text sizes: the
+  /// screen is the screen whichever library is open on it.
+  final String themeBrightness;
+
+  /// The palette: `system` (the device's own colors), `catppuccin`,
+  /// `solarized` or `gruvbox`.
+  final String themePalette;
+
   /// The settings waiting to reach the libraries they belong to: the
   /// dropped `library_settings` rows (T-ML-02) and the editor settings
   /// that used to be one value for every library (T-ML-10).
@@ -256,6 +319,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.previewMode,
     required this.splitRatio,
     required this.language,
+    required this.themeBrightness,
+    required this.themePalette,
     required this.legacyLibrarySettings,
   });
   @override
@@ -269,6 +334,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
     map['language'] = Variable<String>(language);
+    map['theme_brightness'] = Variable<String>(themeBrightness);
+    map['theme_palette'] = Variable<String>(themePalette);
     map['legacy_library_settings'] = Variable<String>(legacyLibrarySettings);
     return map;
   }
@@ -283,6 +350,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
       language: Value(language),
+      themeBrightness: Value(themeBrightness),
+      themePalette: Value(themePalette),
       legacyLibrarySettings: Value(legacyLibrarySettings),
     );
   }
@@ -299,6 +368,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
       language: serializer.fromJson<String>(json['language']),
+      themeBrightness: serializer.fromJson<String>(json['themeBrightness']),
+      themePalette: serializer.fromJson<String>(json['themePalette']),
       legacyLibrarySettings: serializer.fromJson<String>(
         json['legacyLibrarySettings'],
       ),
@@ -314,6 +385,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
       'language': serializer.toJson<String>(language),
+      'themeBrightness': serializer.toJson<String>(themeBrightness),
+      'themePalette': serializer.toJson<String>(themePalette),
       'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
     };
   }
@@ -325,6 +398,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? previewMode,
     double? splitRatio,
     String? language,
+    String? themeBrightness,
+    String? themePalette,
     String? legacyLibrarySettings,
   }) => AppSetting(
     id: id ?? this.id,
@@ -333,6 +408,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
     language: language ?? this.language,
+    themeBrightness: themeBrightness ?? this.themeBrightness,
+    themePalette: themePalette ?? this.themePalette,
     legacyLibrarySettings: legacyLibrarySettings ?? this.legacyLibrarySettings,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
@@ -351,6 +428,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? data.splitRatio.value
           : this.splitRatio,
       language: data.language.present ? data.language.value : this.language,
+      themeBrightness: data.themeBrightness.present
+          ? data.themeBrightness.value
+          : this.themeBrightness,
+      themePalette: data.themePalette.present
+          ? data.themePalette.value
+          : this.themePalette,
       legacyLibrarySettings: data.legacyLibrarySettings.present
           ? data.legacyLibrarySettings.value
           : this.legacyLibrarySettings,
@@ -366,6 +449,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
+          ..write('themeBrightness: $themeBrightness, ')
+          ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
         .toString();
@@ -379,6 +464,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     previewMode,
     splitRatio,
     language,
+    themeBrightness,
+    themePalette,
     legacyLibrarySettings,
   );
   @override
@@ -391,6 +478,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
           other.language == this.language &&
+          other.themeBrightness == this.themeBrightness &&
+          other.themePalette == this.themePalette &&
           other.legacyLibrarySettings == this.legacyLibrarySettings);
 }
 
@@ -401,6 +490,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> previewMode;
   final Value<double> splitRatio;
   final Value<String> language;
+  final Value<String> themeBrightness;
+  final Value<String> themePalette;
   final Value<String> legacyLibrarySettings;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
@@ -409,6 +500,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
+    this.themeBrightness = const Value.absent(),
+    this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
   });
   AppSettingsCompanion.insert({
@@ -418,6 +511,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
+    this.themeBrightness = const Value.absent(),
+    this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
@@ -427,6 +522,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
     Expression<String>? language,
+    Expression<String>? themeBrightness,
+    Expression<String>? themePalette,
     Expression<String>? legacyLibrarySettings,
   }) {
     return RawValuesInsertable({
@@ -436,6 +533,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
       if (language != null) 'language': language,
+      if (themeBrightness != null) 'theme_brightness': themeBrightness,
+      if (themePalette != null) 'theme_palette': themePalette,
       if (legacyLibrarySettings != null)
         'legacy_library_settings': legacyLibrarySettings,
     });
@@ -448,6 +547,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? previewMode,
     Value<double>? splitRatio,
     Value<String>? language,
+    Value<String>? themeBrightness,
+    Value<String>? themePalette,
     Value<String>? legacyLibrarySettings,
   }) {
     return AppSettingsCompanion(
@@ -457,6 +558,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
       language: language ?? this.language,
+      themeBrightness: themeBrightness ?? this.themeBrightness,
+      themePalette: themePalette ?? this.themePalette,
       legacyLibrarySettings:
           legacyLibrarySettings ?? this.legacyLibrarySettings,
     );
@@ -483,6 +586,12 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (language.present) {
       map['language'] = Variable<String>(language.value);
     }
+    if (themeBrightness.present) {
+      map['theme_brightness'] = Variable<String>(themeBrightness.value);
+    }
+    if (themePalette.present) {
+      map['theme_palette'] = Variable<String>(themePalette.value);
+    }
     if (legacyLibrarySettings.present) {
       map['legacy_library_settings'] = Variable<String>(
         legacyLibrarySettings.value,
@@ -500,6 +609,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
+          ..write('themeBrightness: $themeBrightness, ')
+          ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings')
           ..write(')'))
         .toString();
@@ -798,6 +909,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> language,
+      Value<String> themeBrightness,
+      Value<String> themePalette,
       Value<String> legacyLibrarySettings,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
@@ -808,6 +921,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> language,
+      Value<String> themeBrightness,
+      Value<String> themePalette,
       Value<String> legacyLibrarySettings,
     });
 
@@ -847,6 +962,16 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get language => $composableBuilder(
     column: $table.language,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get themeBrightness => $composableBuilder(
+    column: $table.themeBrightness,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get themePalette => $composableBuilder(
+    column: $table.themePalette,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -895,6 +1020,16 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get themeBrightness => $composableBuilder(
+    column: $table.themeBrightness,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get themePalette => $composableBuilder(
+    column: $table.themePalette,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get legacyLibrarySettings => $composableBuilder(
     column: $table.legacyLibrarySettings,
     builder: (column) => ColumnOrderings(column),
@@ -935,6 +1070,16 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get language =>
       $composableBuilder(column: $table.language, builder: (column) => column);
+
+  GeneratedColumn<String> get themeBrightness => $composableBuilder(
+    column: $table.themeBrightness,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get themePalette => $composableBuilder(
+    column: $table.themePalette,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get legacyLibrarySettings => $composableBuilder(
     column: $table.legacyLibrarySettings,
@@ -979,6 +1124,8 @@ class $$AppSettingsTableTableManager
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> themeBrightness = const Value.absent(),
+                Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
@@ -987,6 +1134,8 @@ class $$AppSettingsTableTableManager
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 language: language,
+                themeBrightness: themeBrightness,
+                themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
               ),
           createCompanionCallback:
@@ -997,6 +1146,8 @@ class $$AppSettingsTableTableManager
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> themeBrightness = const Value.absent(),
+                Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
@@ -1005,6 +1156,8 @@ class $$AppSettingsTableTableManager
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 language: language,
+                themeBrightness: themeBrightness,
+                themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
               ),
           withReferenceMapper: (p0) => p0

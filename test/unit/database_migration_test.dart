@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,6 +85,10 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 18) {
+    await drop('app_settings', 'theme_brightness');
+    await drop('app_settings', 'theme_palette');
+  }
   if (version < 17) {
     // The seven settings v17 hands to the libraries were columns here.
     for (final column in _editorSettingColumns) {
@@ -687,6 +692,51 @@ void main() {
       expect(entry['trashEnabled'], false);
       expect(entry['historyVersions'], 3);
       expect(entry['indentWidth'], 6);
+      await db.close();
+    });
+  });
+
+  group('v17 → v18: the theme appears', () {
+    test('an existing install keeps the look it had', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 17);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, language) '
+          "VALUES (1, '/old/root', 'it')",
+        );
+        await db.close();
+      }
+
+      // The device's brightness and the device's colors: what the app
+      // wore before there was anything to choose (T-M6-05).
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      expect(await repo.themeBrightness(), AppBrightness.system);
+      expect(await repo.themePalette(), AppPalette.system);
+      expect((await db.select(db.appSettings).get()).single.language, 'it');
+      await db.close();
+    });
+
+    test('a chosen theme survives the round trip', () async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      await repo.setThemeBrightness(AppBrightness.night);
+      await repo.setThemePalette(AppPalette.gruvbox);
+
+      expect(await repo.themeBrightness(), AppBrightness.night);
+      expect(await repo.themePalette(), AppPalette.gruvbox);
+      await db.close();
+    });
+
+    test('a palette this build never heard of reads as the default', () async {
+      // A settings row written by a later build, or edited by hand.
+      final db = AppDatabase(NativeDatabase(dbFile));
+      await db.customStatement(
+        'INSERT INTO app_settings (id, theme_palette) '
+        "VALUES (1, 'dracula')",
+      );
+      expect(await AppSettingsRepo(db).themePalette(), AppPalette.system);
       await db.close();
     });
   });

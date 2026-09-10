@@ -5,6 +5,7 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/text_scale.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/db/indexer.dart';
@@ -58,6 +59,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String _listNoteFolder = 'Lists';
   String _templateFolder = defaultTemplateFolder;
   AppLanguage _language = AppLanguage.system;
+  AppBrightness _themeBrightness = AppBrightness.system;
+  AppPalette _themePalette = AppPalette.system;
 
   @override
   LibraryPhase get phase => _phase;
@@ -290,6 +293,22 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setLanguage(AppLanguage language) async {
     _language = language;
+  }
+
+  @override
+  Future<AppBrightness> get themeBrightness async => _themeBrightness;
+
+  @override
+  Future<void> setThemeBrightness(AppBrightness brightness) async {
+    _themeBrightness = brightness;
+  }
+
+  @override
+  Future<AppPalette> get themePalette async => _themePalette;
+
+  @override
+  Future<void> setThemePalette(AppPalette palette) async {
+    _themePalette = palette;
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:copist/src/editor/highlight_style.dart';
 import 'package:copist/src/editor/highlighting.dart';
 import 'package:copist/src/editor/outline.dart';
+import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -36,6 +37,7 @@ final class EditorHighlightSync {
   final Map<int, TextSpan> _spans = <int, TextSpan>{};
 
   bool _dark = false;
+  SyntaxColors _syntax = SyntaxColors.fallbackLight;
 
   /// Syncs the document with the buffer after a text change (call with the
   /// controller's current [CodeLines]; selection-only values reuse the same
@@ -74,17 +76,21 @@ final class EditorHighlightSync {
 
   /// The styled span for buffer line [index] (the [CodeLineSpanBuilder]
   /// implementation): [text] is the line's text, [base] the editor's base
-  /// style, [dark] the palette selection, [accent] the theme's primary
-  /// (wikilinks, T-UI-09).
+  /// style, [syntax] the palette's Markdown colors (T-M6-05) and [dark]
+  /// the weight bold text is drawn at.
+  ///
+  /// Changing palette drops every cached span, which is a full repaint of
+  /// what is on screen and nothing more: the tokens are untouched.
   TextSpan spanFor({
     required int index,
     required String text,
     required TextStyle base,
+    required SyntaxColors syntax,
     required bool dark,
-    required Color accent,
   }) {
-    if (dark != _dark) {
+    if (dark != _dark || syntax != _syntax) {
       _dark = dark;
+      _syntax = syntax;
       _spans.clear();
     }
     final cached = _spans[index];
@@ -92,7 +98,7 @@ final class EditorHighlightSync {
     final styled = index < _doc.lineCount
         ? _doc.lineAt(index)
         : StyledLine(text, const <Token>[]);
-    final span = _buildSpan(styled, base, accent);
+    final span = _buildSpan(styled, base);
     _spans[index] = span;
     return span;
   }
@@ -196,7 +202,7 @@ final class EditorHighlightSync {
   /// between token boundaries gets the covering token's style; the unmarked
   /// region after a heading marker gets the heading style; the rest is
   /// plain (the base style shows).
-  TextSpan _buildSpan(StyledLine styled, TextStyle base, Color accent) {
+  TextSpan _buildSpan(StyledLine styled, TextStyle base) {
     final textLength = styled.text.length;
     if (textLength == 0) {
       return TextSpan(text: '', style: base);
@@ -228,7 +234,7 @@ final class EditorHighlightSync {
       children.add(
         TextSpan(
           text: styled.text.substring(start, end),
-          style: _styleAt(styled.tokens, start, headingStart, accent),
+          style: _styleAt(styled.tokens, start, headingStart),
         ),
       );
     }
@@ -239,22 +245,14 @@ final class EditorHighlightSync {
   /// override, the heading style for the unmarked heading text, null (base)
   /// otherwise. [headingStart] is the first unmarked heading position (-1 =
   /// no heading).
-  TextStyle? _styleAt(
-    List<Token> tokens,
-    int pos,
-    int headingStart,
-    Color accent,
-  ) {
+  TextStyle? _styleAt(List<Token> tokens, int pos, int headingStart) {
     for (final token in tokens) {
       if (token.start > pos) break;
       if (pos < token.end) {
-        return _palette.styleFor(token.kind, accent: accent);
+        return markdownTokenStyle(token.kind, _syntax, dark: _dark);
       }
     }
-    if (headingStart >= 0 && pos >= headingStart) return _palette.headingStyle;
+    if (headingStart >= 0 && pos >= headingStart) return markdownHeadingStyle;
     return null;
   }
-
-  HighlightPalette get _palette =>
-      _dark ? HighlightPalette.dark : HighlightPalette.light;
 }

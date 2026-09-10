@@ -304,7 +304,9 @@ default 10) are kept as `.history/<path>.v<n>` with a monotonically increasing
 ## Theming
 
 - **Brightness:** day | night | system.
-- **Palette:** system | Catppuccin (night → Mocha, day → Latte).
+- **Palette:** system (Material You — the device's wallpaper palette or
+  accent color, the shipped seed where there is neither) | Catppuccin
+  (night → Mocha, day → Latte) | Solarized | Gruvbox.
 - **Token-based:** color roles (background, surface, text, muted, accent, …)
   mapped per palette; adding a palette = adding a mapping.
 

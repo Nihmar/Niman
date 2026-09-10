@@ -32,6 +32,7 @@ import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1012,8 +1013,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       index: index,
       text: codeLine.text,
       base: style,
+      syntax: SyntaxColors.of(context),
       dark: Theme.of(context).brightness == Brightness.dark,
-      accent: Theme.of(context).colorScheme.primary,
     );
   }
 

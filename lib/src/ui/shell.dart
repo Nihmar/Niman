@@ -7,6 +7,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -68,6 +69,20 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     }
     unawaited(_publishShortcuts());
     unawaited(_applyLanguage());
+    unawaited(_applyTheme());
+  }
+
+  /// Applies the stored theme (T-M6-05).
+  ///
+  /// Read once at start, like the language: the app wears the device's
+  /// colors until the choice lands, which is what it wears anyway unless
+  /// the user picked a palette.
+  Future<void> _applyTheme() async {
+    final session = ref.read(librarySessionProvider);
+    AppThemes.apply(
+      brightness: await session.themeBrightness,
+      palette: await session.themePalette,
+    );
   }
 
   /// Applies the stored UI language (T-L10N-03).

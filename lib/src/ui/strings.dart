@@ -152,6 +152,34 @@ final class AppStrings {
   /// The editor's share of a split, as a row's value, e.g. "50%".
   static String splitRatioValue(double ratio) => '${(ratio * 100).round()}%';
 
+  // Settings: theme (T-M6-05).
+  static String get themeBrightnessTitle => _t('Brightness', 'Luminosità');
+  static String get themeBrightnessSubtitle => _t(
+    'Light, dark, or whatever the device is set to',
+    'Chiara, scura o quella impostata sul dispositivo',
+  );
+  static String get themeBrightnessSystem => _t('System', 'Sistema');
+  static String get themeBrightnessDay => _t('Light', 'Chiara');
+  static String get themeBrightnessNight => _t('Dark', 'Scura');
+  static String get themePaletteTitle => _t('Palette', 'Palette');
+  static String get themePaletteSubtitle => _t(
+    'The colors of the interface and of the note',
+    'I colori dell’interfaccia e della nota',
+  );
+
+  /// The device-colors palette. Named for what it does rather than for
+  /// Material You: on a device that offers nothing it is the colors the
+  /// app ships with, and calling that "Material You" would be a promise
+  /// the device did not keep.
+  static String get themePaletteSystem => _t('System', 'Sistema');
+
+  // The named palettes keep their names: they are what their authors
+  // published, and someone looking for Catppuccin is looking for the
+  // word.
+  static String get themePaletteCatppuccin => 'Catppuccin';
+  static String get themePaletteSolarized => 'Solarized';
+  static String get themePaletteGruvbox => 'Gruvbox';
+
   // Settings: text size (T-M6-12).
   static String get uiTextScaleTitle =>
       _t('Interface text size', 'Dimensione del testo dell’interfaccia');

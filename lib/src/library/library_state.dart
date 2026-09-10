@@ -9,6 +9,7 @@ import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/text_scale.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:copist/src/db/dao.dart';
 import 'package:copist/src/db/index_database.dart';
@@ -699,6 +700,30 @@ final class LibraryController implements LibrarySession {
   Future<void> setLanguage(AppLanguage language) async {
     _log.info('language set to ${language.id}');
     await AppSettingsRepo(await appDatabase).setLanguage(language);
+  }
+
+  /// How bright the app is (T-M6-05).
+  @override
+  Future<AppBrightness> get themeBrightness async =>
+      await AppSettingsRepo(await appDatabase).themeBrightness();
+
+  /// Sets (and persists) the brightness choice.
+  @override
+  Future<void> setThemeBrightness(AppBrightness brightness) async {
+    _log.info('theme brightness set to ${brightness.id}');
+    await AppSettingsRepo(await appDatabase).setThemeBrightness(brightness);
+  }
+
+  /// The palette the app wears.
+  @override
+  Future<AppPalette> get themePalette async =>
+      await AppSettingsRepo(await appDatabase).themePalette();
+
+  /// Sets (and persists) the palette.
+  @override
+  Future<void> setThemePalette(AppPalette palette) async {
+    _log.info('palette set to ${palette.id}');
+    await AppSettingsRepo(await appDatabase).setThemePalette(palette);
   }
 
   /// Notifies listeners that state changed without an index mutation

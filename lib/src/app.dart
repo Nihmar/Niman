@@ -1,16 +1,21 @@
+import 'dart:async';
+
 import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/text_scale.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/ui/shell.dart';
+import 'package:copist/src/ui/theme/device_colors.dart';
+import 'package:copist/src/ui/theme/palettes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 /// Root widget of the Copist application.
 ///
-/// Owns the [MaterialApp], the system-brightness Material theme, the app
-/// language and the interface text size: it keeps [AppLanguages.system] in
-/// step with the OS and rebuilds everything below when the resolved
-/// language or either text scale changes, so a settings change reaches
-/// every open screen at once.
+/// Owns the [MaterialApp], the theme, the app language and the interface
+/// text size: it keeps [AppLanguages.system] in step with the OS and
+/// rebuilds everything below when the resolved language, either text
+/// scale or the theme changes, so a settings change reaches every open
+/// screen at once.
 class CopistApp extends StatefulWidget {
   /// Creates the application root.
   const new({super.key});
@@ -25,6 +30,9 @@ class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _readSystemLanguage();
+    // Material You: what the OS answers arrives a frame or two in, and
+    // the app wears its own seed until then (T-M6-05).
+    unawaited(readDeviceColors());
   }
 
   @override
@@ -52,11 +60,13 @@ class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
       listenable: Listenable.merge([
         AppLanguages.revision,
         AppTextScales.revision,
+        AppThemes.revision,
       ]),
       builder: (context, _) => MaterialApp(
         title: 'Copist',
-        theme: buildAppTheme(Brightness.light),
-        darkTheme: buildAppTheme(Brightness.dark),
+        theme: buildAppTheme(AppThemes.palette, Brightness.light),
+        darkTheme: buildAppTheme(AppThemes.palette, Brightness.dark),
+        themeMode: AppThemes.mode,
         // The interface slider, applied once for the whole app (T-M6-12).
         // It multiplies the platform scaler rather than replacing it, so
         // the OS accessibility setting still counts; the note text does
@@ -85,17 +95,4 @@ class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
       ),
     );
   }
-}
-
-/// Builds the system-brightness Material theme used until the full
-/// brightness x palette token system lands in M6.
-///
-/// The seed color doubles as the placeholder branding accent and is
-/// expected to be replaced by the M6 token system.
-ThemeData buildAppTheme(Brightness brightness) {
-  final colorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF45475A),
-    brightness: brightness,
-  );
-  return ThemeData(brightness: brightness, colorScheme: colorScheme);
 }

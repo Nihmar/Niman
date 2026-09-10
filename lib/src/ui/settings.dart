@@ -6,6 +6,7 @@ import 'package:copist/src/core/language.dart';
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/note_picker.dart';
@@ -76,6 +77,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
   String? _listFolder;
   String? _templateFolder;
   AppLanguage _language = AppLanguage.system;
+  AppBrightness _themeBrightness = AppBrightness.system;
+  AppPalette _themePalette = AppPalette.system;
   double _uiTextScale = defaultTextScale;
   double _noteTextScale = defaultTextScale;
 
@@ -107,6 +110,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
     final language = await controller.language;
+    final themeBrightness = await controller.themeBrightness;
+    final themePalette = await controller.themePalette;
     final uiTextScale = await controller.uiTextScale;
     final noteTextScale = await controller.noteTextScale;
     if (mounted) {
@@ -125,6 +130,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _listFolder = listFolder;
         _templateFolder = templateFolder;
         _language = language;
+        _themeBrightness = themeBrightness;
+        _themePalette = themePalette;
         _uiTextScale = uiTextScale;
         _noteTextScale = noteTextScale;
       });
@@ -138,6 +145,25 @@ final class _SettingsBodyState extends State<SettingsBody> {
     AppLanguages.choice = language;
     if (mounted) {
       setState(() => _language = language);
+    }
+  }
+
+  /// Persists the brightness and applies it immediately (T-M6-05): the
+  /// app root listens to [AppThemes] and rebuilds every screen.
+  Future<void> _setThemeBrightness(AppBrightness brightness) async {
+    await widget.controller.setThemeBrightness(brightness);
+    AppThemes.brightness = brightness;
+    if (mounted) {
+      setState(() => _themeBrightness = brightness);
+    }
+  }
+
+  /// Persists the palette and applies it immediately.
+  Future<void> _setThemePalette(AppPalette palette) async {
+    await widget.controller.setThemePalette(palette);
+    AppThemes.palette = palette;
+    if (mounted) {
+      setState(() => _themePalette = palette);
     }
   }
 
@@ -503,6 +529,50 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (language != null) await _setLanguage(language);
   }
 
+  /// Asks how bright the app should be.
+  Future<void> _chooseThemeBrightness() async {
+    final brightness = await showSettingsChoice<AppBrightness>(
+      context,
+      dialogKey: const Key('theme-brightness-dialog'),
+      title: AppStrings.themeBrightnessTitle,
+      subtitle: AppStrings.themeBrightnessSubtitle,
+      current: _themeBrightness,
+      options: [
+        SettingsOption(
+          AppBrightness.system,
+          AppStrings.themeBrightnessSystem,
+        ),
+        SettingsOption(AppBrightness.day, AppStrings.themeBrightnessDay),
+        SettingsOption(AppBrightness.night, AppStrings.themeBrightnessNight),
+      ],
+    );
+    if (brightness != null) await _setThemeBrightness(brightness);
+  }
+
+  /// Asks which palette the app wears.
+  Future<void> _chooseThemePalette() async {
+    final palette = await showSettingsChoice<AppPalette>(
+      context,
+      dialogKey: const Key('theme-palette-dialog'),
+      title: AppStrings.themePaletteTitle,
+      subtitle: AppStrings.themePaletteSubtitle,
+      current: _themePalette,
+      options: [
+        for (final palette in AppPalette.values)
+          SettingsOption(palette, _paletteName(palette)),
+      ],
+    );
+    if (palette != null) await _setThemePalette(palette);
+  }
+
+  /// What a palette reads as, in the dialog and on the row.
+  static String _paletteName(AppPalette palette) => switch (palette) {
+    AppPalette.system => AppStrings.themePaletteSystem,
+    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
+    AppPalette.solarized => AppStrings.themePaletteSolarized,
+    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
+  };
+
   /// Opens the known-library list and switches to whatever is picked
   /// (T-ML-06).
   ///
@@ -545,6 +615,22 @@ final class _SettingsBodyState extends State<SettingsBody> {
             AppLanguage.italian => AppStrings.languageItalian,
           },
           onTap: () => unawaited(_chooseLanguage()),
+        ),
+        SettingsValueRow(
+          key: const Key('theme-brightness-setting'),
+          title: AppStrings.themeBrightnessTitle,
+          value: switch (_themeBrightness) {
+            AppBrightness.system => AppStrings.themeBrightnessSystem,
+            AppBrightness.day => AppStrings.themeBrightnessDay,
+            AppBrightness.night => AppStrings.themeBrightnessNight,
+          },
+          onTap: () => unawaited(_chooseThemeBrightness()),
+        ),
+        SettingsValueRow(
+          key: const Key('theme-palette-setting'),
+          title: AppStrings.themePaletteTitle,
+          value: _paletteName(_themePalette),
+          onTap: () => unawaited(_chooseThemePalette()),
         ),
         SettingsValueRow(
           key: const Key('ui-text-scale-setting'),

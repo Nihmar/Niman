@@ -1,4 +1,5 @@
 import 'package:copist/src/core/language.dart';
+import 'package:copist/src/core/theme.dart';
 import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 
@@ -153,6 +154,38 @@ final class AppSettingsRepo {
     await _ensureRow();
     await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
       AppSettingsCompanion(language: Value(language.id)),
+    );
+  }
+
+  /// The stored brightness choice (T-M6-05).
+  Future<AppBrightness> themeBrightness() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty
+        ? AppBrightness.system
+        : AppBrightness.fromId(rows.first.themeBrightness);
+  }
+
+  /// Persists the brightness choice.
+  Future<void> setThemeBrightness(AppBrightness brightness) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(themeBrightness: Value(brightness.id)),
+    );
+  }
+
+  /// The stored palette (T-M6-05).
+  Future<AppPalette> themePalette() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty
+        ? AppPalette.system
+        : AppPalette.fromId(rows.first.themePalette);
+  }
+
+  /// Persists the palette.
+  Future<void> setThemePalette(AppPalette palette) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(themePalette: Value(palette.id)),
     );
   }
 
