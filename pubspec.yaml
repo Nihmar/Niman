@@ -82,6 +82,13 @@ dependencies:
   timezone: ^0.11.1
   url_launcher: ^6.3.2
 
+  # The desktop window is owned by this package (T-PP-16 spike winner):
+  # the only candidate with a runtime-verified close-request event, which
+  # the dirty-check on close (T-PP-11) rides, plus a real Linux drag.
+  # Exact pin: leanflutter's pre-1.0 line with a moving API (the spike
+  # notes in plan/m-platform-parity.md record the three-way evaluation).
+  window_manager: 0.5.2
+
   # The frontmatter block is real YAML (M4): the hand-rolled key:value
   # reader could not do nested maps, block lists or quoting rules, and a
   # note that opens fine in another editor must not read as garbage here.

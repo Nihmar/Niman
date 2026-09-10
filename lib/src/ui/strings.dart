@@ -459,6 +459,33 @@ final class AppStrings {
   static String get actionDelete => _t('Delete', 'Elimina');
   static String get actionRename => _t('Rename', 'Rinomina');
   static String get actionMove => _t('Move', 'Sposta');
+
+  /// The close-with-unsaved-edits ask (T-PP-11).
+  static String get saveAndClose => _t('Save and close', 'Salva e chiudi');
+  static String get closeUnsavedTitle =>
+      _t('Unsaved changes', 'Modifiche non salvate');
+
+  /// The close ask's body, for the unsaved notes' names.
+  static String closeUnsavedBody(List<String> names) {
+    if (names.length == 1) {
+      return _t(
+        "'${names.first}' has edits that are not saved yet. "
+            'Save them before closing?',
+        "'${names.first}' ha modifiche non ancora salvate. "
+            'Salvarle prima di chiudere?',
+      );
+    }
+    return _t(
+      '${names.length} notes have edits that are not saved yet. '
+          'Save them before closing?',
+      '${names.length} note hanno modifiche non ancora salvate. '
+          'Salvarle prima di chiudere?',
+    );
+  }
+
+  /// The save-before-close failed, so the window stays open.
+  static String get closeSaveFailed =>
+      _t('Could not save; still open.', 'Salvataggio fallito: ancora aperta.');
   static String get actionRestore => _t('Restore', 'Ripristina');
   static String get actionEmpty => _t('Empty', 'Svuota');
 

@@ -36,6 +36,7 @@ import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
+import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -109,6 +110,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
           reminders: ref.read(reminderServiceProvider),
           shortcuts: ref.read(shortcutServiceProvider),
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
+          unsavedTracker: ref.watch(unsavedTrackerProvider),
         ),
         _ => OpenLibraryScreen(controller: controller),
       },
@@ -124,6 +126,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.reminders,
     required this.shortcuts,
     required this.todoSourceFactory,
+    required this.unsavedTracker,
   });
 
   final LibrarySession controller;
@@ -138,6 +141,10 @@ final class _LibraryShell extends StatefulWidget {
   /// Builds the todo file source per library root (overridden with a
   /// fake in widget tests).
   final TodoSource Function(String root) todoSourceFactory;
+
+  /// The open notes' unsaved edits, which the window's close guard reads
+  /// (T-PP-11); passed down to every [NoteView].
+  final UnsavedTracker unsavedTracker;
 
   @override
   State<_LibraryShell> createState() => _LibraryShellState();
@@ -502,6 +509,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       initialAnchor: _pendingAnchor,
       kindMode: !_kindRawMode,
       onNoteKindChanged: _onNoteKindChanged,
+      unsavedTracker: widget.unsavedTracker,
     );
   }
 
@@ -1798,6 +1806,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             initialAnchor: _pendingAnchor,
             kindMode: !_kindRawMode,
             onNoteKindChanged: _onNoteKindChanged,
+            unsavedTracker: widget.unsavedTracker,
           ),
         ),
       ],
@@ -1952,6 +1961,7 @@ final class _DetailPane extends StatelessWidget {
     required this.initialAnchor,
     required this.kindMode,
     required this.onNoteKindChanged,
+    required this.unsavedTracker,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -1986,6 +1996,10 @@ final class _DetailPane extends StatelessWidget {
   /// Note kind mode (T-TK-02).
   final bool kindMode;
   final void Function(String? type) onNoteKindChanged;
+
+  /// The open notes' unsaved edits (T-PP-11): the detail editor reports
+  /// its dirty state here for the window's close guard.
+  final UnsavedTracker unsavedTracker;
 
   @override
   Widget build(BuildContext context) {
@@ -2032,6 +2046,7 @@ final class _DetailPane extends StatelessWidget {
                 initialAnchor: initialAnchor,
                 kindMode: kindMode,
                 onNoteKindChanged: onNoteKindChanged,
+                unsavedTracker: unsavedTracker,
               ),
             ),
     );

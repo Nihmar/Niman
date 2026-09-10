@@ -1,6 +1,6 @@
 # Platform parity — Android ↔ Linux/Windows
 
-**Status:** Planned (T-PP-16 spike done on 3 packages, see Spike notes) · **Depends on:** M4 (everything compared exists) ·
+**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11 landed — `window_manager` owns the close veto) · **Depends on:** M4 (everything compared exists) ·
 **Spec:** *Requirements → Platforms* (Android + Linux + Windows now)
 
 ## Purpose
@@ -95,6 +95,16 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `copist --new-note` runs from KRunner's command line (documented).
   *AC: the spike records which one KDE shows, and the chosen one ships;
   at minimum the main entry carries keywords covering all four actions.*
+- [ ] **T-PP-06b** Tray quick actions (`nativeapi`, which the T-PP-16
+  verdict reserves for this surface only): a StatusNotifier tray icon whose
+  context menu offers the same four actions, each running the existing
+  `_runShortcut` flow in-process. Two seams from the spike: import
+  `nativeapi` with `hide WindowManager` (both export one) and never call its
+  `WindowManager.getCurrent()` — `window_manager` owns the window. Route it
+  through a `createTrayService()` seam (Noop off Linux/Windows) like
+  `ShortcutService`, version-pinned. *AC: the four actions are on the tray
+  menu and land on the same screens as their launcher/CLI twins; the GNOME
+  AppIndicator caveat and the Windows-host pass are recorded here.*
 
 ### P2b — Desktop tab chrome (nav rail)
 
@@ -169,12 +179,20 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   windows; system-back on Android keeps its current behaviour. *AC: the
   list of accelerators is documented in-app (settings or help) and
   identical shortcuts do identical things on all three OSes.*
-- [ ] **T-PP-11** Dirty-check on window close (desktop) / task removal
+- [x] **T-PP-11** Dirty-check on window close (desktop) / task removal
   (Android): the note pipeline already knows "saved" (`ui/note_view.dart`
   status row) — hook it to `window_manager`'s `WindowListener.onWindowClose`
   + `setPreventClose(true)` while dirty (package chosen in T-PP-16, spike
   notes) instead of growing a second source of truth. *AC: closing with
   unsaved edits asks, on desktop; no behaviour change on Android.*
+  Landed: `ui/window_controller.dart` (the pinned `window_manager` seam, a
+  Noop off desktop), `ui/unsaved_notes.dart` (the tracker over each
+  NoteView's live revision pair — no second source of truth), and
+  `ui/close_guard.dart` (veto + Save and close / Cancel ask), wired under
+  the MaterialApp in `app.dart`. Save and close writes the notes first; a
+  failed write keeps the window open. A platform that refuses to connect
+  degrades to tracking only. Linux build + launch smoke only so far: the
+  close-veto ask owes a hand check on this session.
 - [x] **T-PP-16** Evaluate the desktop window-chrome packages — `nativeapi`
   v0.2.3, `window_manager` v0.5.2 (both leanflutter), `bitsdojo_window`
   v0.1.6 — on a real Plasma / Wayland session; see *Spike notes* below.
