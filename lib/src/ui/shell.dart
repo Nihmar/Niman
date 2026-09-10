@@ -33,7 +33,6 @@ import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/template_picker.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
-import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
@@ -186,6 +185,21 @@ enum ShellTab {
   settings,
 }
 
+/// The desktop tree footer's create menu entries (T-PP-22).
+enum _NewItem {
+  /// A plain Markdown note.
+  note,
+
+  /// A list note (frontmatter type: list) in the list folder.
+  listNote,
+
+  /// A note copied from a template.
+  template,
+
+  /// A folder.
+  folder,
+}
+
 final class _LibraryShellState extends State<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
@@ -209,23 +223,6 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
-
-  /// The app-bar action opening the todo.txt format reference.
-  ///
-  /// The dialog writes the syntax, so a user can go a long way without
-  /// seeing it — until they open todo.txt in another editor, or wonder
-  /// what the chips are. The reference is one tap from the list.
-  Widget _todoHelpAction() {
-    return IconButton(
-      key: const Key('todo-help'),
-      tooltip: AppStrings.todoHelpTooltip,
-      icon: const Icon(Icons.help_outline),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
-      ),
-    );
-  }
 
   /// Shows the todo list, wherever this layout keeps it.
   ///
@@ -1333,8 +1330,6 @@ final class _LibraryShellState extends State<_LibraryShell>
                       title: _tabTitle,
                       actions: _tab == ShellTab.files
                           ? _filesAppBarActions(controller)
-                          : _tab == ShellTab.todo
-                          ? [_todoHelpAction()]
                           : const [],
                       floatingActionButton: _tabFab(),
                     ),
@@ -1404,56 +1399,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       );
     }
 
+    // The desktop has no window app bar (T-PP-22): the rail names the
+    // app, the tree carries its own controls at the base, and an open
+    // note carries its controls in the detail pane's header.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.appTitle),
-        actions: [
-          if (_selected != null && !_selectedIsDir) ..._kindActions,
-          if (_selected != null && !_selectedIsDir && _previewToggleVisible)
-            _layoutModeAction(),
-          if (_selected != null &&
-              !_selectedIsDir &&
-              _previewToggleVisible &&
-              !previewSplits(_previewMode, narrow: false))
-            _previewToggleAction(),
-          IconButton(
-            key: const Key('open-trash'),
-            tooltip: AppStrings.trashTitle,
-            icon: const Icon(Icons.delete),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => TrashScreen(controller: controller),
-              ),
-            ),
-          ),
-          // No Todo button here: the rail owns that tab (T-PP-14).
-          // Reminder taps still funnel through _openTodo, which selects
-          // the rail tab on wide.
-          _sortToggle(),
-          // No Settings button here: the rail owns that tab (T-PP-15).
-        ],
-      ),
-      // Always scrim-wrapped, never toggled per tab: swapping the Stack
-      // in and out reparents the content and remounts every state inside
-      // (the Files↔Quicknote flash). Collapsed the scrim paints nothing
-      // and never resolves the anchor, so tabs without the expandable
-      // FAB are unaffected.
-      body: _withFabScrim(_wideContent(controller)),
+      body: _wideContent(controller),
       floatingActionButton: _wideFab(),
     );
   }
 
-  /// The wide layout's FAB: the Todo tab gets its add button, every other
-  /// tab keeps the new-item FAB (creation stays one tap away while a note
-  /// is open in the detail pane).
-  Widget _wideFab() {
+  /// The wide layout's one floating action: the Todo tab's add button.
+  /// Note/folder creation lives in the tree footer (T-PP-22), not on a
+  /// FAB, so the other tabs have no floating action at all.
+  Widget? _wideFab() {
     return switch (_tab) {
       ShellTab.todo => _todoAddFab(),
       ShellTab.files ||
       ShellTab.search ||
       ShellTab.quickNote ||
-      ShellTab.settings => _newItemFab(),
+      ShellTab.settings => null,
     };
   }
 
@@ -1808,32 +1772,52 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   /// The wide-layout body: the tree pane and the split detail pane.
+  ///
+  /// The tree keeps its own controls at the base (T-PP-22), and an open
+  /// note gets a header inside the detail pane carrying its name and the
+  /// note controls the window app bar used to hold.
   Widget _wideBody(LibrarySession controller) {
+    final noteOpen = _selected != null && !_selectedIsDir;
     return Row(
       children: [
-        SizedBox(width: _treeWidth, child: _treePane(controller)),
+        SizedBox(
+          width: _treeWidth,
+          child: Column(
+            children: [
+              Expanded(child: _treePane(controller)),
+              _treeFooter(controller),
+            ],
+          ),
+        ),
         _treeDivider(),
         Expanded(
-          child: _DetailPane(
-            root: controller.root,
-            selectedPath: _selected,
-            selectedIsDir: _selectedIsDir,
-            showLineNumbers: _lineNumbers,
-            autofocusEditor: _autofocusEditor,
-            linkType: _linkType,
-            indentWidth: _indentWidth,
-            toolbarLayout: _toolbarLayout,
-            splitPreview: previewSplits(_previewMode, narrow: false),
-            showPreview: _previewVisible,
-            splitFraction: _splitRatio,
-            onSplitFractionChanged: _onSplitFractionChanged,
-            onSplitDragEnd: _onSplitDragEnd,
-            linkSource: _linkSource,
-            onOpenNote: _openNoteFromLink,
-            initialAnchor: _pendingAnchor,
-            kindMode: !_kindRawMode,
-            onNoteKindChanged: _onNoteKindChanged,
-            unsavedTracker: widget.unsavedTracker,
+          child: Column(
+            children: [
+              if (noteOpen) _editorHeader(),
+              Expanded(
+                child: _DetailPane(
+                  root: controller.root,
+                  selectedPath: _selected,
+                  selectedIsDir: _selectedIsDir,
+                  showLineNumbers: _lineNumbers,
+                  autofocusEditor: _autofocusEditor,
+                  linkType: _linkType,
+                  indentWidth: _indentWidth,
+                  toolbarLayout: _toolbarLayout,
+                  splitPreview: previewSplits(_previewMode, narrow: false),
+                  showPreview: _previewVisible,
+                  splitFraction: _splitRatio,
+                  onSplitFractionChanged: _onSplitFractionChanged,
+                  onSplitDragEnd: _onSplitDragEnd,
+                  linkSource: _linkSource,
+                  onOpenNote: _openNoteFromLink,
+                  initialAnchor: _pendingAnchor,
+                  kindMode: !_kindRawMode,
+                  onNoteKindChanged: _onNoteKindChanged,
+                  unsavedTracker: widget.unsavedTracker,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1947,6 +1931,172 @@ final class _LibraryShellState extends State<_LibraryShell>
             ),
           ),
       ],
+    );
+  }
+
+  /// The desktop tree's controls at the base of its column (T-PP-22):
+  /// creation, the trash and the sort order — the app-bar actions the wide
+  /// layout used to carry, where the tree is the thing they act on.
+  Widget _treeFooter(LibrarySession controller) {
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('tree-footer'),
+      height: 44,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          PopupMenuButton<_NewItem>(
+            key: const Key('new-item-menu'),
+            tooltip: AppStrings.actionNew,
+            onSelected: _onNewItem,
+            position: PopupMenuPosition.over,
+            itemBuilder: (context) => [
+              _newItemMenuItem(
+                _NewItem.note,
+                Icons.note_add_outlined,
+                AppStrings.newNoteTitle,
+                key: const Key('new-note-action'),
+              ),
+              _newItemMenuItem(
+                _NewItem.listNote,
+                Icons.checklist_outlined,
+                AppStrings.newListNoteTitle,
+                key: const Key('new-list-note-action'),
+              ),
+              _newItemMenuItem(
+                _NewItem.template,
+                Icons.file_copy_outlined,
+                AppStrings.newFromTemplateTitle,
+                key: const Key('new-from-template-action'),
+              ),
+              const PopupMenuDivider(),
+              _newItemMenuItem(
+                _NewItem.folder,
+                Icons.create_new_folder_outlined,
+                AppStrings.newFolderTitle,
+                key: const Key('new-folder-action'),
+              ),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add, size: 18),
+                  const SizedBox(width: 4),
+                  Text(AppStrings.actionNew, style: theme.textTheme.labelLarge),
+                  const Icon(Icons.arrow_drop_down, size: 18),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            key: const Key('open-trash'),
+            tooltip: AppStrings.trashTitle,
+            icon: const Icon(Icons.delete),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => TrashScreen(controller: controller),
+              ),
+            ),
+          ),
+          _sortToggle(),
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
+
+  /// One entry of the tree footer's create menu.
+  PopupMenuItem<_NewItem> _newItemMenuItem(
+    _NewItem item,
+    IconData icon,
+    String label, {
+    Key? key,
+  }) {
+    return PopupMenuItem<_NewItem>(
+      key: key,
+      value: item,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 12),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+
+  /// Runs the create flow behind a tree-footer menu entry.
+  void _onNewItem(_NewItem item) {
+    switch (item) {
+      case _NewItem.note:
+        unawaited(_createNote());
+      case _NewItem.listNote:
+        unawaited(_createListNote());
+      case _NewItem.template:
+        unawaited(_createFromTemplate());
+      case _NewItem.folder:
+        unawaited(_createFolder());
+    }
+  }
+
+  /// The open note's header inside the detail pane (T-PP-22): the file
+  /// name and its folder, then the note controls that used to sit in the
+  /// wide app bar. Only mounted while a note is open.
+  Widget _editorHeader() {
+    final path = _selected!;
+    final folder = p.dirname(path);
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('editor-header'),
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.description_outlined,
+            size: 17,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              p.basename(path),
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall,
+            ),
+          ),
+          if (folder.isNotEmpty && folder != '.') ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                folder,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ),
+          ],
+          const Spacer(),
+          ..._kindActions,
+          if (_previewToggleVisible) ...[
+            _layoutModeAction(),
+            if (!previewSplits(_previewMode, narrow: false))
+              _previewToggleAction(),
+          ],
+        ],
+      ),
     );
   }
 

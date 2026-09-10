@@ -1,6 +1,6 @@
 # Platform parity — Android ↔ Linux/Windows
 
-**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11 and T-PP-06b landed — `window_manager` owns the window and its close veto, `nativeapi` the tray) · **Depends on:** M4 (everything compared exists) ·
+**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11, T-PP-06b and T-PP-22 landed — `window_manager` owns the window and its close veto, `nativeapi` the tray, and the desktop chrome is app-bar-free) · **Depends on:** M4 (everything compared exists) ·
 **Spec:** *Requirements → Platforms* (Android + Linux + Windows now)
 
 ## Purpose
@@ -157,6 +157,17 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   the width to the library settings (clamped 200–600, default 340) and
   the next launch restores it. *AC: dragging changes the width live and
   a relaunch restores the last one; the phone layout is untouched.*
+- [x] **T-PP-22** Desktop chrome without the window app bar (user,
+  2026-09-10): the wide layout drops the `AppBar` — the rail already names
+  the app. The tree's controls move to a 44 px footer at the base of its
+  column: **+ New** (a menu: note / list note / from template / folder,
+  replacing the FAB with its mini-FABs and scrim), the trash and the sort
+  toggle. An open note gets a 44 px header inside the detail pane with its
+  file name and folder plus the note controls the bar held (kind, layout,
+  preview); the Todo format help moves to the tab's top row so it survives
+  the wide bar. The phone keeps its app bar and FAB untouched. *AC: wide
+  shows no AppBar and no note FAB, the footer creates and opens the trash,
+  the header names the open note and its folder; narrow is unchanged.*
 
 ### P3 — Share-in / open-with (both sides)
 

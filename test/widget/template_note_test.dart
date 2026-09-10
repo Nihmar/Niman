@@ -60,8 +60,7 @@ void main() {
 
   /// Opens the FAB menu and taps "New from template".
   Future<void> tapNewFromTemplate(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await settleFabMenu(tester);
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-from-template-action')));
     await settle(tester);
   }

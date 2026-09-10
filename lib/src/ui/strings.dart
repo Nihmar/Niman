@@ -454,6 +454,9 @@ final class AppStrings {
   static String get actionOk => _t('OK', 'OK');
   static String get actionCancel => _t('Cancel', 'Annulla');
   static String get actionCreate => _t('Create', 'Crea');
+
+  /// The desktop tree footer's create menu (T-PP-22).
+  static String get actionNew => _t('New', 'Nuovo');
   static String get actionSave => _t('Save', 'Salva');
   static String get actionChoose => _t('Choose', 'Scegli');
   static String get actionDelete => _t('Delete', 'Elimina');

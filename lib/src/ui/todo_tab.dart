@@ -1,11 +1,11 @@
 /// The Todo tab: Open/Done lists over `todo.txt` / `done.txt`
 /// (plan/todo-tab.md T-TD-04).
 ///
-/// The shell owns the [TodoController] (so the tab's app-bar add action
-/// shares it); the tab opens the controller on mount, renders the
-/// Open/Done switch over the same list shape, and routes row gestures:
-/// checkbox toggles check/uncheck, tap edits, long-press opens the
-/// bottom sheet (the app's menu pattern) with edit/delete.
+/// The shell owns the [TodoController] (its add action shares it); the
+/// tab opens the controller on mount, renders the Open/Done switch over
+/// the same list shape, and routes row gestures: checkbox toggles
+/// check/uncheck, tap edits, long-press opens the bottom sheet (the
+/// app's menu pattern) with edit/delete.
 library;
 
 import 'dart:async';
@@ -20,6 +20,7 @@ import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_filter_bar.dart';
 import 'package:copist/src/ui/todo_filter_sheet.dart';
+import 'package:copist/src/ui/todo_help.dart';
 import 'package:copist/src/ui/todo_row.dart';
 import 'package:flutter/material.dart';
 
@@ -77,14 +78,35 @@ final class _TodoTabState extends State<TodoTab> {
             if (reminders != null) ReminderHealthBanner(service: reminders),
             Padding(
               padding: const EdgeInsets.all(8),
-              child: SegmentedButton<bool>(
-                key: const Key('todo-view-switch'),
-                segments: [
-                  ButtonSegment(value: false, label: Text(AppStrings.todoOpen)),
-                  ButtonSegment(value: true, label: Text(AppStrings.todoDone)),
+              child: Row(
+                children: [
+                  SegmentedButton<bool>(
+                    key: const Key('todo-view-switch'),
+                    segments: [
+                      ButtonSegment(
+                        value: false,
+                        label: Text(AppStrings.todoOpen),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        label: Text(AppStrings.todoDone),
+                      ),
+                    ],
+                    selected: {_showDone},
+                    onSelectionChanged: (selected) =>
+                        _selectView(selected.single),
+                  ),
+                  const Spacer(),
+                  // The format reference stays one tap from the list on
+                  // every layout (T-TD-08): the wide layout has no app bar
+                  // to hold it any more.
+                  IconButton(
+                    key: const Key('todo-help'),
+                    tooltip: AppStrings.todoHelpTooltip,
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: _openHelp,
+                  ),
                 ],
-                selected: {_showDone},
-                onSelectionChanged: (selected) => _selectView(selected.single),
               ),
             ),
             if (controller.error != null)
@@ -100,6 +122,18 @@ final class _TodoTabState extends State<TodoTab> {
           ],
         );
       },
+    );
+  }
+
+  /// Opens the todo.txt format reference (T-TD-08).
+  ///
+  /// The dialog writes the syntax, so a user can go a long way without
+  /// seeing it — until they open todo.txt in another editor, or wonder
+  /// what the chips are.
+  void _openHelp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => const TodoHelpScreen()),
     );
   }
 

@@ -50,11 +50,8 @@ void main() {
     expect(find.text('No notes yet'), findsOne);
     expect(controller.root, '/fake/library');
 
-    // Create a note via the FAB (T-UI-05).
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await tester.pump();
-    // FAB menu expansion animation, then the New note mini FAB.
-    await tester.pump(const Duration(milliseconds: 200));
+    // Create a note via the create affordance (T-UI-05).
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'First note');
@@ -141,10 +138,7 @@ void main() {
     await settle(tester);
     expect(find.text('No notes yet'), findsOne);
 
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await tester.pump();
-    // FAB menu expansion animation, then the New note mini FAB.
-    await tester.pump(const Duration(milliseconds: 200));
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Sacrifice');
@@ -165,7 +159,7 @@ void main() {
     expect((await controller.ops!.trashItems()).length, 1);
 
     // Restore it from the trash screen.
-    await tester.tap(find.byKey(const Key('open-trash')));
+    await tapTreeFooterAction(tester, find.byKey(const Key('open-trash')));
     await settle(tester);
     expect(
       find.descendant(
@@ -193,7 +187,7 @@ void main() {
     await settle(tester);
     expect(noteRow('Sacrifice.md', offstage: true), findsNothing);
 
-    await tester.tap(find.byKey(const Key('open-trash')));
+    await tapTreeFooterAction(tester, find.byKey(const Key('open-trash')));
     await settle(tester);
     await tester.tap(find.byTooltip('Delete permanently'));
     await tester.pump();
@@ -233,10 +227,7 @@ void main() {
     await settle(tester);
 
     // Recreate the note, then delete it with the toggle off: hard delete.
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await tester.pump();
-    // FAB menu expansion animation, then the New note mini FAB.
-    await tester.pump(const Duration(milliseconds: 200));
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Sacrifice');
@@ -271,10 +262,7 @@ void main() {
     await settle(tester);
 
     // A note in the trash, so the empty action is offered.
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await tester.pump();
-    // FAB menu expansion animation, then the New note mini FAB.
-    await tester.pump(const Duration(milliseconds: 200));
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Victim');
@@ -289,7 +277,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('open-trash')));
+    await tapTreeFooterAction(tester, find.byKey(const Key('open-trash')));
     await settle(tester);
     await tester.tap(find.byTooltip('Empty trash'));
     await tester.pump();
@@ -458,10 +446,7 @@ void main() {
     expect(find.text('No notes yet'), findsOne);
 
     // Creating a note opens it full-screen.
-    await tester.tap(find.byKey(const Key('new-note-fab')));
-    await tester.pump();
-    // FAB menu expansion animation, then the New note mini FAB.
-    await tester.pump(const Duration(milliseconds: 200));
+    await openNewItemMenu(tester);
     await tester.tap(find.byKey(const Key('new-note-action')));
     await tester.pump();
     await tester.enterText(dialogField(), 'Phone');

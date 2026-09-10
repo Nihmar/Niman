@@ -77,6 +77,33 @@ Future<void> settleFabMenu(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 200));
 }
 
+/// Taps a control in the desktop tree footer (T-PP-22), dismissing any
+/// snackbar first: the footer sits in the strip a fixed snackbar covers.
+Future<void> tapTreeFooterAction(WidgetTester tester, Finder finder) async {
+  final messenger = find.byType(ScaffoldMessenger);
+  if (messenger.evaluate().isNotEmpty) {
+    tester.state<ScaffoldMessengerState>(messenger.first).clearSnackBars();
+  }
+  // Let any snackbar finish its exit before tapping the footer under it.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.tap(finder);
+}
+
+/// Opens the create affordance of whichever layout is up: the phone's
+/// expandable FAB menu, or the desktop tree footer's "+ New" menu
+/// (T-PP-22). The individual actions share their keys across layouts.
+Future<void> openNewItemMenu(WidgetTester tester) async {
+  final fab = find.byKey(const Key('new-note-fab'));
+  if (fab.evaluate().isNotEmpty) {
+    await tester.tap(fab);
+    await settleFabMenu(tester);
+    return;
+  }
+  await tester.tap(find.byKey(const Key('new-item-menu')));
+  await settle(tester);
+}
+
 /// Opens a library at `<parent>/<name>` through the "Create new" flow.
 Future<void> openLibrary(
   WidgetTester tester,

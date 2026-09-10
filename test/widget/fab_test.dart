@@ -57,6 +57,7 @@ void main() {
   testWidgets('the FAB expands into note and folder actions (T-UI-05)', (
     tester,
   ) async {
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
@@ -87,6 +88,10 @@ void main() {
     await tester.enterText(dialogField(), 'First note');
     await tester.tap(find.text('OK'));
     await settle(tester);
+    // The new note opens full-screen on the phone: back to the tree
+    // before reaching for the FAB again.
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
     expect(noteRow('First note.md'), findsOneWidget);
     expect(scrimInert(tester), isTrue);
 
@@ -108,6 +113,7 @@ void main() {
   testWidgets('tapping the FAB again closes the menu without a dialog', (
     tester,
   ) async {
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
@@ -132,6 +138,7 @@ void main() {
   testWidgets('tapping the scrim dismisses the menu without a dialog', (
     tester,
   ) async {
+    setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await openLibrary(tester, filePicker);
@@ -157,6 +164,8 @@ void main() {
     await settle(tester);
     await tester.enterText(dialogField(), 'Scrim note');
     await tester.tap(find.text('OK'));
+    await settle(tester);
+    await tester.tap(find.byType(BackButton));
     await settle(tester);
     expect(noteRow('Scrim note.md'), findsOneWidget);
 
