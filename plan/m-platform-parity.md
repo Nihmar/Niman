@@ -296,8 +296,11 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   the note's status row rather than the editor header. The accelerators
   (T-PP-10) are widget-tested on routed key events but not driven in a real
   window, the desktop reminder popup (T-PP-03) still needs a `rem:` a
-  minute out watched on this session, and the hunspell underline (T-PP-09)
-  is unit-tested (live engine included) but not watched in a real window.
+  minute out watched on this session, and the hunspell underline/panel
+  (T-PP-09) is unit-tested end to end (real engine -> real span) and the
+  release binary was launched here: the window renders the library with no
+  errors, but no note could be opened (this session has no input
+  automation), so the underline itself still owes one click.
 
 ### P3 — Share-in / open-with (both sides)
 
@@ -335,7 +338,9 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   frontmatter and tags; a missing library or dictionary degrades to a
   no-op (Android, an unprepared Windows box). Android keeps the IME
   behaviour unchanged; the spec and README keep naming the provider per
-  platform.
+  platform. The status row's check-spelling button opens a review panel
+  (issues + suggestions + click-to-replace, capped at 200); Settings has
+  a "Check spelling" switch — both shown only where the engine loaded.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 
