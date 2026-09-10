@@ -58,23 +58,28 @@ final class _CheckedLine {
 final class EditorSpellCheck extends ChangeNotifier {
   /// Creates the state over [createChecker] (the system engine by default).
   ///
-  /// [_dictionary] is the user's chosen dictionary name (null = the
-  /// machine's locale); [setDictionary] changes it later.
-  new({this._dictionary, SpellChecker Function()? createChecker})
-    : _override = createChecker;
+  /// [dictionaries] are the user's chosen dictionary names; an empty list
+  /// means the machine's locale. [setDictionaries] changes them later.
+  new({
+    List<String> dictionaries = const <String>[],
+    SpellChecker Function(String? dictionary)? createChecker,
+  }) : _dictionaries = _normalize(dictionaries),
+       _override = createChecker;
 
-  final SpellChecker Function()? _override;
-  String? _dictionary;
+  final SpellChecker Function(String? dictionary)? _override;
+  List<String> _dictionaries;
 
-  /// The active dictionary name (null = the machine's locale).
-  String? get dictionary => _dictionary;
+  /// The active dictionary names, in selection order (empty = the
+  /// machine's locale).
+  List<String> get dictionaries => List.unmodifiable(_dictionaries);
 
-  /// Changes the dictionary: the current engine is dropped, its word
-  /// verdicts and line ranges forgotten, and a new one builds on the next
+  /// Changes the dictionaries: the current engines are dropped, their word
+  /// verdicts and line ranges forgotten, and new ones build on the next
   /// request.
-  void setDictionary(String? dictionary) {
-    if (_dictionary == dictionary) return;
-    _dictionary = dictionary;
+  void setDictionaries(List<String> dictionaries) {
+    final normalized = _normalize(dictionaries);
+    if (listEquals(_dictionaries, normalized)) return;
+    _dictionaries = normalized;
     _checker?.dispose();
     _checker = null;
     _lines.clear();
@@ -82,8 +87,28 @@ final class EditorSpellCheck extends ChangeNotifier {
     notifyListeners();
   }
 
-  SpellChecker _newChecker() =>
-      _override?.call() ?? createSpellChecker(dictionary: _dictionary);
+  /// Drops empty names and duplicates while keeping the selection order.
+  static List<String> _normalize(List<String> dictionaries) {
+    final names = <String>[];
+    for (final dictionary in dictionaries) {
+      final name = dictionary.trim();
+      if (name.isEmpty || names.contains(name)) continue;
+      names.add(name);
+    }
+    return names;
+  }
+
+  /// One engine per selected dictionary; the locale's when none is chosen.
+  SpellChecker _newChecker() {
+    final override = _override;
+    final checkers = _dictionaries.isEmpty
+        ? <SpellChecker>[override?.call(null) ?? createSpellChecker()]
+        : <SpellChecker>[
+            for (final name in _dictionaries)
+              override?.call(name) ?? createSpellChecker(dictionary: name),
+          ];
+    return checkers.length == 1 ? checkers.single : MultiSpellChecker(checkers);
+  }
 
   /// Prose words: a letter run, apostrophes and inner hyphens allowed.
   static final RegExp _word = RegExp(r"[\p{L}][\p{L}'’-]*", unicode: true);

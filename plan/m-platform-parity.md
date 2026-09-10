@@ -341,11 +341,14 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   platform. The status row's check-spelling button opens a review panel
   (issues + suggestions + click-to-replace, capped at 200); Settings has
   a "Check spelling" switch and a "Dictionary" row — both shown only where
-  the engine loaded. The dictionary is per library (`spellDictionary` in
-  `.copist/settings.json`): the locale picks the default, and `it_IT` was
-  installed into `~/.local/share/hunspell` (the `hunspell-it` package needs
-  root, which this session did not have) so an Italian library can choose
-  it.
+  the engine loaded. The dictionaries are per library
+  (`spellDictionaries` in `.copist/settings.json`, migrating the older
+  single `spellDictionary` string): the row opens a checkbox list, any
+  number of them can be active at once, a word passes when any of them
+  knows it, and the locale picks the default when none is chosen. `it_IT`
+  was installed into `~/.local/share/hunspell` (the `hunspell-it` package
+  needs root, which this session did not have) so an Italian library can
+  choose it.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 

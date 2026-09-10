@@ -157,7 +157,19 @@ final class AppStrings {
   static String get spellCheckDictionarySystem =>
       _t('System default', 'Predefinito di sistema');
   static String get spellCheckDictionaryChoiceTitle =>
-      _t('Choose dictionary', 'Scegli dizionario');
+      _t('Choose dictionaries', 'Scegli dizionari');
+  static String get spellCheckDictionaryChoiceSubtitle => _t(
+    'Pick every language this library is written in. A word passes when '
+        'any chosen dictionary knows it; with none chosen, the system '
+        'locale decides.',
+    'Scegli ogni lingua in cui è scritta questa libreria. Una parola è '
+        'corretta se la conosce almeno un dizionario scelto; senza scelte '
+        'decide la lingua di sistema.',
+  );
+  static String get spellCheckNoDictionaries => _t(
+    'No dictionaries found on this system.',
+    'Nessun dizionario trovato su questo sistema.',
+  );
 
   // Spelling review (T-PP-09).
   static String get spellCheckTooltip =>

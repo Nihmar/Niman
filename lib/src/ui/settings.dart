@@ -76,7 +76,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   /// to land on a size that fits, coarse enough to be hit on a phone.
   static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
       .round();
-  String? _spellDictionary;
+  List<String> _spellDictionaries = const <String>[];
 
   @override
   void initState() {
@@ -105,7 +105,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final themePalette = await controller.themePalette;
     final uiTextScale = await controller.uiTextScale;
     final noteTextScale = await controller.noteTextScale;
-    final spellDictionary = await controller.spellDictionary;
+    final spellDictionaries = await controller.spellDictionaries;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -126,7 +126,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _themePalette = themePalette;
         _uiTextScale = uiTextScale;
         _noteTextScale = noteTextScale;
-        _spellDictionary = spellDictionary;
+        _spellDictionaries = spellDictionaries;
       });
     }
   }
@@ -476,34 +476,76 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (width != null) await _setIndentWidth(width);
   }
 
-  /// Asks which hunspell dictionary the editor should use (T-PP-09): every
-  /// one found on the machine plus the locale default.
-  Future<void> _chooseSpellDictionary(EditorSpellCheck spell) async {
+  /// Asks which hunspell dictionaries the editor should use (T-PP-09,
+  /// revised): every one found on the machine, any number of them at once.
+  /// Choosing none means the locale default.
+  Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
     final names = discoverDictionaries().keys.toList()..sort();
-    final choice = await showDialog<String>(
+    final selected = _spellDictionaries.toSet();
+    final choice = await showDialog<List<String>>(
       context: context,
-      builder: (context) => SimpleDialog(
+      builder: (context) => AlertDialog(
+        key: const Key('spell-dictionary-dialog'),
+        scrollable: true,
         title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
-        children: [
-          SimpleDialogOption(
-            key: const Key('spell-dictionary-system'),
-            onPressed: () => Navigator.pop(context, ''),
-            child: Text(AppStrings.spellCheckDictionarySystem),
-          ),
-          for (final name in names)
-            SimpleDialogOption(
-              key: Key('spell-dictionary-$name'),
-              onPressed: () => Navigator.pop(context, name),
-              child: Text(name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              AppStrings.spellCheckDictionaryChoiceSubtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
+            const SizedBox(height: 8),
+            if (names.isEmpty)
+              Text(AppStrings.spellCheckNoDictionaries)
+            else
+              StatefulBuilder(
+                builder: (context, setDialogState) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final name in names)
+                      CheckboxListTile(
+                        key: Key('spell-dictionary-$name'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(name),
+                        value: selected.contains(name),
+                        onChanged: (value) => setDialogState(() {
+                          if (value ?? false) {
+                            selected.add(name);
+                          } else {
+                            selected.remove(name);
+                          }
+                        }),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            key: const Key('spell-dictionary-cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppStrings.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('spell-dictionary-save'),
+            onPressed: () =>
+                Navigator.of(context)
+                    .pop(names.where(selected.contains).toList()),
+            child: Text(AppStrings.actionSave),
+          ),
         ],
       ),
     );
     if (choice == null) return;
-    final name = choice.isEmpty ? null : choice;
-    await widget.controller.setSpellDictionary(name);
-    spell.setDictionary(name);
-    if (mounted) setState(() => _spellDictionary = name);
+    await widget.controller.setSpellDictionaries(choice);
+    spell.setDictionaries(choice);
+    if (mounted) setState(() => _spellDictionaries = choice);
   }
 
   /// Asks for the app's language.
@@ -532,10 +574,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
       subtitle: AppStrings.themeBrightnessSubtitle,
       current: _themeBrightness,
       options: [
-        SettingsOption(
-          AppBrightness.system,
-          AppStrings.themeBrightnessSystem,
-        ),
+        SettingsOption(AppBrightness.system, AppStrings.themeBrightnessSystem),
         SettingsOption(AppBrightness.day, AppStrings.themeBrightnessDay),
         SettingsOption(AppBrightness.night, AppStrings.themeBrightnessNight),
       ],
@@ -723,8 +762,10 @@ final class _SettingsBodyState extends State<SettingsBody> {
           SettingsValueRow(
             key: const Key('spell-dictionary-setting'),
             title: AppStrings.spellCheckDictionaryTitle,
-            value: _spellDictionary ?? AppStrings.spellCheckDictionarySystem,
-            onTap: () => unawaited(_chooseSpellDictionary(spell)),
+            value: _spellDictionaries.isEmpty
+                ? AppStrings.spellCheckDictionarySystem
+                : _spellDictionaries.join(', '),
+            onTap: () => unawaited(_chooseSpellDictionaries(spell)),
           ),
         ],
 

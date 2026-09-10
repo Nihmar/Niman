@@ -109,6 +109,29 @@ double normalizeTreeWidth(Object? raw) {
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
+/// Reads a `spellDictionaries` list out of the settings file.
+///
+/// Accepts the legacy single `spellDictionary` string as well, so an
+/// older library opens with its one dictionary selected. Blank and
+/// duplicate names are dropped; the order is the selection order.
+List<String> _spellDictionariesFrom(Object? raw) {
+  final names = switch (raw) {
+    final List<Object?> list => [
+      for (final name in list)
+        if (name is String) name,
+    ],
+    final String name => [name],
+    _ => const <String>[],
+  };
+  final clean = <String>[];
+  for (final name in names) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty || clean.contains(trimmed)) continue;
+    clean.add(trimmed);
+  }
+  return clean;
+}
+
 /// Sanitizes a library-relative folder path: trims, drops leading and
 /// trailing slashes and empty/`.`/`..` segments; an empty result is
 /// [fallback].
@@ -167,7 +190,7 @@ final class LibraryConfig {
     this.uiTextScale = defaultTextScale,
     this.noteTextScale = defaultTextScale,
     this.treeWidth = defaultTreeWidth,
-    this.spellDictionary,
+    this.spellDictionaries = const <String>[],
     this.extra = const {},
   });
 
@@ -222,10 +245,10 @@ final class LibraryConfig {
       uiTextScale: normalizeTextScale(json['uiTextScale']),
       noteTextScale: normalizeTextScale(json['noteTextScale']),
       treeWidth: normalizeTreeWidth(json['treeWidth']),
-      spellDictionary: switch (json['spellDictionary']) {
-        final String name when name.trim().isNotEmpty => name.trim(),
-        _ => null,
-      },
+      // The legacy single-dictionary key migrates to the list.
+      spellDictionaries: _spellDictionariesFrom(
+        json['spellDictionaries'] ?? json['spellDictionary'],
+      ),
       extra: extra,
     );
   }
@@ -294,14 +317,16 @@ final class LibraryConfig {
   /// How much larger than shipped the note text is, in the editor and in
   /// the preview alike (default 1.0).
   final double noteTextScale;
+
   /// The tree pane's width in logical pixels (default
   /// [defaultTreeWidth]), dragged on wide screens.
   final double treeWidth;
 
-  /// The hunspell dictionary the spell checker uses (a `<name>` found on
-  /// the machine), or null for the locale's default. Only meaningful in a
-  /// library whose notes share a language.
-  final String? spellDictionary;
+  /// The hunspell dictionaries the spell checker uses (`<name>`s found
+  /// on the machine), in selection order. Empty means the locale's default.
+  /// Several are checked at once, a word passing when any of them knows it
+  /// (T-PP-09, revised).
+  final List<String> spellDictionaries;
 
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
@@ -325,8 +350,7 @@ final class LibraryConfig {
     double? uiTextScale,
     double? noteTextScale,
     double? treeWidth,
-    String? spellDictionary,
-    bool clearSpellDictionary = false,
+    List<String>? spellDictionaries,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -347,9 +371,7 @@ final class LibraryConfig {
       uiTextScale: uiTextScale ?? this.uiTextScale,
       noteTextScale: noteTextScale ?? this.noteTextScale,
       treeWidth: treeWidth ?? this.treeWidth,
-      spellDictionary: clearSpellDictionary
-          ? null
-          : spellDictionary ?? this.spellDictionary,
+      spellDictionaries: spellDictionaries ?? this.spellDictionaries,
       extra: extra,
     );
   }
@@ -371,7 +393,8 @@ final class LibraryConfig {
     'uiTextScale',
     'noteTextScale',
     'treeWidth',
-    'spellDictionary',
+    'spellDictionary', // Legacy single-dictionary key (read, never written).
+    'spellDictionaries',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -405,8 +428,8 @@ final class LibraryConfig {
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
     }
-    if (spellDictionary != null) {
-      json['spellDictionary'] = spellDictionary;
+    if (spellDictionaries.isNotEmpty) {
+      json['spellDictionaries'] = spellDictionaries;
     }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
@@ -474,7 +497,7 @@ final class LibraryConfig {
         uiTextScale == other.uiTextScale &&
         noteTextScale == other.noteTextScale &&
         treeWidth == other.treeWidth &&
-        spellDictionary == other.spellDictionary &&
+        _deepEquals(spellDictionaries, other.spellDictionaries) &&
         _deepEquals(extra, other.extra);
   }
 

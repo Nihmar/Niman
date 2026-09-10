@@ -46,7 +46,7 @@ void main() {
       expect(await store.read(), config);
     });
 
-    test('round trips the spell-check dictionary', () async {
+    test('round trips the spell-check dictionaries', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       const config = LibraryConfig(
@@ -54,13 +54,21 @@ void main() {
         historyVersions: 10,
         quickNotePath: null,
         listNoteFolder: 'Lists',
-        spellDictionary: 'it_IT',
+        spellDictionaries: ['it_IT', 'en_US'],
       );
       await store.write(config);
-      expect((await store.read()).spellDictionary, 'it_IT');
+      expect((await store.read()).spellDictionaries, ['it_IT', 'en_US']);
       // Clearing writes no key and reads back as the locale default.
-      await store.write(config.copyWith(clearSpellDictionary: true));
-      expect((await store.read()).spellDictionary, isNull);
+      await store.write(config.copyWith(spellDictionaries: const []));
+      expect((await store.read()).spellDictionaries, isEmpty);
+    });
+
+    test('migrates the legacy single-dictionary key', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      await store.file.parent.create(recursive: true);
+      await store.file.writeAsString('{"spellDictionary": "it_IT"}');
+      expect((await store.read()).spellDictionaries, ['it_IT']);
     });
 
     test('a config without a quick note round trips as default', () async {

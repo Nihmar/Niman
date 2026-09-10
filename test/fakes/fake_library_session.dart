@@ -212,14 +212,11 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
-  Future<String?> get spellDictionary async => _config.spellDictionary;
+  Future<List<String>> get spellDictionaries async => _config.spellDictionaries;
 
   @override
-  Future<void> setSpellDictionary(String? name) async {
-    _config = _config.copyWith(
-      spellDictionary: name,
-      clearSpellDictionary: name == null,
-    );
+  Future<void> setSpellDictionaries(List<String> names) async {
+    _config = _config.copyWith(spellDictionaries: names);
     _bump();
   }
 

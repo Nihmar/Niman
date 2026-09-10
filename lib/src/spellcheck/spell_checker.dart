@@ -39,3 +39,44 @@ final class NoopSpellChecker implements SpellChecker {
   @override
   void dispose() {}
 }
+
+/// A [SpellChecker] over several dictionaries at once.
+///
+/// Hunspell opens one dictionary per handle, so a note that mixes languages
+/// — or a library whose writer does — is checked against one engine per
+/// chosen language. A word is correct as soon as *any* of them knows it;
+/// the suggestions are every engine's, in selection order and deduplicated
+/// (T-PP-09, revised).
+final class MultiSpellChecker implements SpellChecker {
+  /// Creates a checker over the given engines, in priority order.
+  new(this._checkers);
+
+  final List<SpellChecker> _checkers;
+
+  @override
+  bool get available => _checkers.any((checker) => checker.available);
+
+  @override
+  bool isCorrect(String word) {
+    final usable = _checkers.where((checker) => checker.available);
+    if (usable.isEmpty) return true;
+    return usable.any((checker) => checker.isCorrect(word));
+  }
+
+  @override
+  List<String> suggest(String word) {
+    final suggestions = <String>{};
+    for (final checker in _checkers) {
+      if (!checker.available) continue;
+      suggestions.addAll(checker.suggest(word));
+    }
+    return suggestions.toList(growable: false);
+  }
+
+  @override
+  void dispose() {
+    for (final checker in _checkers) {
+      checker.dispose();
+    }
+  }
+}

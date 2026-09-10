@@ -219,13 +219,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the reminder-markers toggle.
   Future<void> setReminderShowTokens({required bool enabled});
 
-  /// The hunspell dictionary the spell checker uses (`<name>` found on the
-  /// machine), or null for the locale default.
-  Future<String?> get spellDictionary;
+  /// The hunspell dictionaries the spell checker uses (`<name>`s found
+  /// on the machine), in selection order; empty means the locale default.
+  Future<List<String>> get spellDictionaries;
 
-  /// Sets (and persists) the spell-check dictionary; null restores the
-  /// locale default.
-  Future<void> setSpellDictionary(String? name);
+  /// Sets (and persists) the spell-check dictionaries; an empty list
+  /// restores the locale default.
+  Future<void> setSpellDictionaries(List<String> names);
 
   /// The preview layout mode (default `auto`: split on wide screens,
   /// full-screen switch on phones).

@@ -67,21 +67,62 @@ void main() {
       expect(found['it_IT']!.dic, startsWith(first.path));
     });
 
-    test('setDictionary swaps the engine, clears and notifies once', () {
+    test('setDictionaries swaps the engines, clears and notifies once', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'wrold'}),
+        createChecker: (_) => _FakeChecker({'wrold'}),
       );
       var notified = 0;
       check.addListener(() => notified++);
 
       // Setup and read are separate assertions on purpose.
       // ignore: cascade_invocations
-      check.setDictionary('it_IT');
-      expect(check.dictionary, 'it_IT');
+      check.setDictionaries(['it_IT', 'en_US']);
+      expect(check.dictionaries, ['it_IT', 'en_US']);
       expect(notified, 1);
 
-      check.setDictionary('it_IT');
-      expect(notified, 1, reason: 'the same name is a no-op');
+      check.setDictionaries(['it_IT', 'en_US']);
+      expect(notified, 1, reason: 'the same names are a no-op');
+
+      // Blank and duplicate names are dropped, the order is kept.
+      check.setDictionaries(['en_US', ' ', 'en_US', 'it_IT']);
+      expect(check.dictionaries, ['en_US', 'it_IT']);
+      expect(notified, 2);
+    });
+  });
+
+  group('MultiSpellChecker', () {
+    test('accepts a word any engine knows and merges suggestions', () {
+      final multi = MultiSpellChecker([
+        _FakeChecker(
+          {'hello', 'x'},
+          suggestions: const {
+            'x': ['alpha'],
+          },
+        ),
+        _FakeChecker(
+          {'ciao', 'x'},
+          suggestions: const {
+            'x': ['beta', 'alpha'],
+          },
+        ),
+      ]);
+      expect(multi.available, isTrue);
+      // 'hello' is wrong to the first engine but right to the second.
+      expect(multi.isCorrect('hello'), isTrue);
+      expect(multi.isCorrect('ciao'), isTrue);
+      // Wrong to both engines.
+      expect(multi.isCorrect('x'), isFalse);
+      expect(multi.suggest('x'), ['alpha', 'beta']);
+    });
+
+    test('with no available engine accepts every word', () {
+      final multi = MultiSpellChecker([
+        const NoopSpellChecker(),
+        const NoopSpellChecker(),
+      ]);
+      expect(multi.available, isFalse);
+      expect(multi.isCorrect('anything'), isTrue);
+      expect(multi.suggest('anything'), isEmpty);
     });
   });
 
@@ -100,16 +141,32 @@ void main() {
   group('editor spell state', () {
     test('underlines only the misspelled words', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'wrold'}),
+        createChecker: (_) => _FakeChecker({'wrold'}),
       );
       expect(check.rangesFor(0, 'hello wrold', skip: const []), [
         const TextRange(start: 6, end: 11),
       ]);
     });
 
+    test('accepts a word any of the chosen dictionaries knows', () {
+      final check = EditorSpellCheck(
+        dictionaries: const ['it_IT', 'en_US'],
+        createChecker: (dictionary) => switch (dictionary) {
+          'it_IT' => _FakeChecker({'hello', 'hola'}),
+          _ => _FakeChecker({'ciao', 'hola'}),
+        },
+      );
+      // 'ciao' is wrong to en_US but right to it_IT; 'hello' the reverse.
+      expect(check.rangesFor(0, 'ciao hello', skip: const []), isEmpty);
+      // 'hola' is wrong to both, so it is underlined.
+      expect(check.rangesFor(1, 'hola', skip: const []), [
+        const TextRange(start: 0, end: 4),
+      ]);
+    });
+
     test('skipped code is not checked', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'wrold', 'code'}),
+        createChecker: (_) => _FakeChecker({'wrold', 'code'}),
       );
       final skip = spellSkipRanges([const Token(TokenKind.codeInline, 6, 12)]);
       expect(check.rangesFor(0, 'wrold `code`', skip: skip), [
@@ -119,14 +176,14 @@ void main() {
 
     test('camel-case identifiers are left alone', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'fooBar'}),
+        createChecker: (_) => _FakeChecker({'fooBar'}),
       );
       expect(check.rangesFor(0, 'fooBar', skip: const []), isEmpty);
     });
 
     test('a disabled checker underlines nothing', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'wrold'}),
+        createChecker: (_) => _FakeChecker({'wrold'}),
       );
       // Setup and read are separate assertions on purpose.
       // ignore: cascade_invocations
@@ -137,7 +194,7 @@ void main() {
 
     test('scan lists the note issues with suggestions', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker(
+        createChecker: (_) => _FakeChecker(
           {'wrold'},
           suggestions: const {
             'wrold': ['world', 'would'],
@@ -159,7 +216,7 @@ void main() {
 
     test('reset forgets the cached lines', () {
       final check = EditorSpellCheck(
-        createChecker: () => _FakeChecker({'wrold'}),
+        createChecker: (_) => _FakeChecker({'wrold'}),
       );
       const skip = <TextRange>[];
       check.rangesFor(0, 'wrold', skip: skip);

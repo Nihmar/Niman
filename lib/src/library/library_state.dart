@@ -590,18 +590,19 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
   }
 
-  /// The spell-check dictionary name, or null for the locale default.
+  /// The spell-check dictionary names, in selection order.
   @override
-  Future<String?> get spellDictionary async => (await _library).spellDictionary;
+  Future<List<String>> get spellDictionaries async =>
+      (await _library).spellDictionaries;
 
-  /// Sets (and persists) the spell-check dictionary.
+  /// Sets (and persists) the spell-check dictionaries.
   @override
-  Future<void> setSpellDictionary(String? name) async {
-    _log.info('spell-check dictionary set to ${name ?? 'system'}');
-    await _editLibrary(
-      (c) =>
-          c.copyWith(spellDictionary: name, clearSpellDictionary: name == null),
+  Future<void> setSpellDictionaries(List<String> names) async {
+    _log.info(
+      'spell-check dictionaries set to '
+      '${names.isEmpty ? 'system' : names.join(', ')}',
     );
+    await _editLibrary((c) => c.copyWith(spellDictionaries: names));
   }
 
   /// The preview layout mode.

@@ -800,10 +800,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     final treeSort = await controller.treeSort;
     final treeWidth = await controller.treeWidth;
     final toolbar = await controller.editorToolbar;
-    // The spell checker follows the library's dictionary (T-PP-09); it
-    // notifies the open editor itself, so no setState is needed here.
-    final spellDictionary = await controller.spellDictionary;
-    if (mounted) widget.spellCheck.setDictionary(spellDictionary);
+    // The spell checker follows the library's dictionaries (T-PP-09,
+    // revised); it notifies the open editor itself, so no setState is
+    // needed here.
+    final spellDictionaries = await controller.spellDictionaries;
+    if (mounted) widget.spellCheck.setDictionaries(spellDictionaries);
     if (mounted &&
         (lineNumbers != _lineNumbers ||
             autofocus != _autofocusEditor ||
