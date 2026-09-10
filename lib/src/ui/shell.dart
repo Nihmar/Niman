@@ -600,6 +600,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
       showPreview: _previewEnabled && _previewVisible,
       showWysiwyg: _editorKind == EditorKind.wysiwyg,
+      onEditorKindChanged: _setEditorKind,
       splitFraction: _splitRatio,
       onSplitFractionChanged: _onSplitFractionChanged,
       onSplitDragEnd: _onSplitDragEnd,
@@ -696,6 +697,16 @@ final class _LibraryShellState extends State<_LibraryShell>
     await controller.setPreviewMode(mode);
     controller.notify();
     if (mounted) setState(() => _previewMode = mode);
+  }
+
+  /// Flips the library's editor kind from the note's status row (T-WYS-12):
+  /// persisted like the settings screen does, then the shell re-reads it.
+  Future<void> _setEditorKind(EditorKind kind) async {
+    if (kind == _editorKind) return;
+    final controller = widget.controller;
+    await controller.setEditorKind(kind);
+    controller.notify();
+    if (mounted) setState(() => _editorKind = kind);
   }
 
   @override
@@ -2245,6 +2256,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   ),
                   showPreview: _previewEnabled && _previewVisible,
                   showWysiwyg: _editorKind == EditorKind.wysiwyg,
+                  onEditorKindChanged: _setEditorKind,
                   splitFraction: _splitRatio,
                   onSplitFractionChanged: _onSplitFractionChanged,
                   onSplitDragEnd: _onSplitDragEnd,
@@ -2593,6 +2605,7 @@ final class _DetailPane extends StatelessWidget {
     required this.splitPreview,
     required this.showPreview,
     required this.showWysiwyg,
+    required this.onEditorKindChanged,
     required this.splitFraction,
     required this.onSplitFractionChanged,
     required this.onSplitDragEnd,
@@ -2632,6 +2645,9 @@ final class _DetailPane extends StatelessWidget {
 
   /// Whether the WYSIWYG surface replaces the source editor (T-WYS-05).
   final bool showWysiwyg;
+
+  /// The status row's editor switch (T-WYS-12).
+  final ValueChanged<EditorKind> onEditorKindChanged;
 
   /// Link navigation (T-M3-07).
   final LinkSource? linkSource;
@@ -2689,6 +2705,7 @@ final class _DetailPane extends StatelessWidget {
                 splitPreview: splitPreview,
                 showPreview: showPreview,
                 showWysiwyg: showWysiwyg,
+                onEditorKindChanged: onEditorKindChanged,
                 splitFraction: splitFraction,
                 onSplitFractionChanged: onSplitFractionChanged,
                 onSplitDragEnd: onSplitDragEnd,

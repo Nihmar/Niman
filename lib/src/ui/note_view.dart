@@ -77,6 +77,7 @@ final class NoteView extends StatefulWidget {
     this.showPreview = false,
     this.showWysiwyg = false,
     this.onWysiwygChanged,
+    this.onEditorKindChanged,
     this.splitFraction = defaultSplitRatio,
     this.onSplitFractionChanged,
     this.onSplitDragEnd,
@@ -130,6 +131,9 @@ final class NoteView extends StatefulWidget {
 
   /// Reports a WYSIWYG edit as Markdown (the owner saves it).
   final ValueChanged<String>? onWysiwygChanged;
+
+  /// Switches the library's editor kind (the status row's toggle, T-WYS-12).
+  final ValueChanged<EditorKind>? onEditorKindChanged;
 
   /// The editor's share of the split (0..1).
   final double splitFraction;
@@ -561,6 +565,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final text = _currentText;
     if (text == _previewText) return;
     setState(() => _previewText = text);
+  }
+
+  /// Flips between the source editor and the WYSIWYG surface (T-WYS-12);
+  /// the owner persists it and refreshes the shell.
+  void _toggleEditorKind() {
+    final next = widget.showWysiwyg ? EditorKind.source : EditorKind.wysiwyg;
+    widget.onEditorKindChanged?.call(next);
   }
 
   /// A WYSIWYG edit, reported as Markdown: the serialized Markdown becomes
@@ -1475,6 +1486,23 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
               onPressed: () => unawaited(_openSpellCheck()),
+            ),
+          // The quick way between the two editors (T-WYS-12): the setting
+          // stays per library, the button just flips it.
+          if (!_loading && widget.onEditorKindChanged != null)
+            IconButton(
+              key: const Key('editor-kind-toggle'),
+              tooltip: widget.showWysiwyg
+                  ? AppStrings.switchToSourceTooltip
+                  : AppStrings.switchToWysiwygTooltip,
+              icon: Icon(
+                widget.showWysiwyg ? Icons.code : Icons.edit_note,
+                size: 18,
+              ),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+              onPressed: _toggleEditorKind,
             ),
           if (!_loading)
             Text(

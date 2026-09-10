@@ -150,6 +150,10 @@ final class AppStrings {
     'Show the rendered note beside the source editor',
     'Mostra la nota renderizzata accanto all’editor sorgente',
   );
+  static String get switchToWysiwygTooltip =>
+      _t('Switch to the WYSIWYG editor', 'Passa all’editor WYSIWYG');
+  static String get switchToSourceTooltip =>
+      _t('Switch to the Markdown source', 'Passa al sorgente Markdown');
   static String get wysiwygTooLarge => _t(
     'This note is too large for the WYSIWYG editor. Open it in the Markdown '
         'source.',
