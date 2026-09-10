@@ -340,7 +340,12 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   behaviour unchanged; the spec and README keep naming the provider per
   platform. The status row's check-spelling button opens a review panel
   (issues + suggestions + click-to-replace, capped at 200); Settings has
-  a "Check spelling" switch — both shown only where the engine loaded.
+  a "Check spelling" switch and a "Dictionary" row — both shown only where
+  the engine loaded. The dictionary is per library (`spellDictionary` in
+  `.copist/settings.json`): the locale picks the default, and `it_IT` was
+  installed into `~/.local/share/hunspell` (the `hunspell-it` package needs
+  root, which this session did not have) so an Italian library can choose
+  it.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 
