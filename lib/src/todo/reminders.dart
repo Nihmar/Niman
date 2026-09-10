@@ -19,10 +19,12 @@
 /// and with the app closed; the exact privilege comes from the
 /// auto-granted `USE_EXACT_ALARM` permission, with an inexact fallback
 /// if a device reports otherwise) through `flutter_local_notifications` +
-/// `timezone`; every other platform gets [NoopReminderService] — no OS
-/// notifications in v1, the due badges carry the state (documented
-/// limitation). Widget tests inject a fake; the plugin itself is only
-/// touched on-device.
+/// `timezone`. The desktops get an in-process timer over the same plugin
+/// (T-PP-03): a notification is shown while Copist runs, and a closed app
+/// fires late on the next run or not at all — no desktop equivalent of
+/// AlarmManager exists. Anything else (web) gets [NoopReminderService].
+/// Widget tests inject a fake; the plugin itself is only touched
+/// on-device.
 library;
 
 import 'dart:async';
@@ -30,6 +32,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/todo/reminder_backend.dart';
+import 'package:copist/src/todo/reminder_backend_desktop.dart';
 import 'package:copist/src/todo/reminder_backend_plugin.dart';
 import 'package:copist/src/todo/reminder_health.dart';
 import 'package:copist/src/todo/reminder_settings.dart';
@@ -72,14 +75,17 @@ abstract interface class ReminderService {
   Future<void> dispose();
 }
 
-/// Creates the platform service: scheduled OS notifications on
-/// Android, a no-op elsewhere.
+/// Creates the platform service: scheduled OS notifications on Android,
+/// an in-process timer on the desktops (T-PP-03), a no-op elsewhere.
 ///
-/// [isAndroid] overrides the host platform so a plain test can cover the
-/// branch that does not run here (T-PP-01).
-ReminderService createReminderService({bool? isAndroid}) {
+/// [isAndroid] and [isDesktop] override the host platform so a plain test
+/// can cover the branches that do not run here (T-PP-01).
+ReminderService createReminderService({bool? isAndroid, bool? isDesktop}) {
   if (isAndroid ?? Platform.isAndroid) {
     return LocalReminderService();
+  }
+  if (isDesktop ?? (Platform.isLinux || Platform.isWindows)) {
+    return LocalReminderService(backend: DesktopReminderBackend());
   }
   return const NoopReminderService();
 }
@@ -94,7 +100,10 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
   return service;
 });
 
-/// Android reminders: the scheduling policy over a [ReminderBackend].
+/// The reminder scheduling policy over a [ReminderBackend].
+///
+/// Shared by Android (OS alarms) and the desktops (in-process timers);
+/// everything above the backend is platform-agnostic.
 ///
 /// Holds no platform code of its own -- the full replace, the single
 /// flight, the grant gating and the health reporting are ordinary Dart,

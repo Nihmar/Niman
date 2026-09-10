@@ -41,14 +41,17 @@ void main() {
   });
 
   group('reminders', () {
-    test('are Android-only (desktop scheduling is the open P1)', () {
-      expect(
-        createReminderService(isAndroid: true),
-        isA<LocalReminderService>(),
-      );
-      final service = createReminderService(isAndroid: false);
-      expect(service, isA<NoopReminderService>());
-      addTearDown(service.dispose);
+    test('are Android and desktop; the Noop is for anything else', () {
+      final android = createReminderService(isAndroid: true, isDesktop: false);
+      final desktop = createReminderService(isAndroid: false, isDesktop: true);
+      final other = createReminderService(isAndroid: false, isDesktop: false);
+      addTearDown(android.dispose);
+      addTearDown(desktop.dispose);
+      addTearDown(other.dispose);
+
+      expect(android, isA<LocalReminderService>());
+      expect(desktop, isA<LocalReminderService>());
+      expect(other, isA<NoopReminderService>());
     });
 
     test('the no-op is inert and always healthy', () async {

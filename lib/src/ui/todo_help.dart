@@ -10,6 +10,8 @@
 /// out precisely because it is kept but not acted on.
 library;
 
+import 'dart:io';
+
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +60,10 @@ final class TodoHelpBody extends StatelessWidget {
         _Paragraph(AppStrings.todoHelpTagsBody),
         _Row(AppStrings.todoHelpDue, AppStrings.todoHelpDueBody),
         _Row(AppStrings.todoHelpRem, AppStrings.todoHelpRemBody),
+        // Android fires with the app closed; the desktops cannot, so say so
+        // where the syntax is explained rather than letting it be found out.
+        if (Platform.isLinux || Platform.isWindows)
+          _Paragraph(AppStrings.todoHelpRemDesktop),
         _Row(AppStrings.todoHelpOther, AppStrings.todoHelpOtherBody),
         _Section(AppStrings.todoHelpEditTitle),
         _Paragraph(AppStrings.todoHelpEditBody),

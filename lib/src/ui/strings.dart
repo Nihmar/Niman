@@ -355,6 +355,12 @@ final class AppStrings {
     'Quando inviare una notifica, nella tua ora locale. Arriva anche a '
         'schermo spento e con l’app chiusa.',
   );
+  static String get todoHelpRemDesktop => _t(
+    'On desktop Copist must be running when the time comes: the reminder is '
+        'shown while the app is open, and nothing fires when it is closed.',
+    'Su desktop Copist deve essere aperto al momento giusto: il promemoria '
+        'compare mentre l’app è aperta, e nulla scatta a app chiusa.',
+  );
   static String get todoHelpOther => 'anything:else';
   static String get todoHelpOtherBody => _t(
     'Kept exactly as written, so tags from other todo.txt apps survive '

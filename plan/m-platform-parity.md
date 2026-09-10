@@ -63,12 +63,38 @@ sides equally absent — they land shared), M7 branding/packaging execution.
 
 ### P1 — Desktop reminders (the big one)
 
-- [ ] **T-PP-02** Spike: `flutter_local_notifications` on Linux (libnotify)
+- [x] **T-PP-02** Spike: `flutter_local_notifications` on Linux (libnotify)
   and Windows (toasts) from this tree — schedule, reboot/restart survival,
   closed-app behaviour. The expected answer is "fires while running, not
   with the process dead" (no AlarmManager equivalent). *AC: a one-page
   note in this file records what each desktop OS actually guarantees.*
-- [ ] **T-PP-03** `DesktopReminderBackend` behind the existing
+  Spike result (from the tree's resolved packages, not a device run):
+  `flutter_local_notifications` 22.3.0 already pulls
+  `flutter_local_notifications_linux` 8.0.1 and
+  `flutter_local_notifications_windows` 3.1.1 (`pubspec.lock`), so both are
+  available with no pubspec change.
+  * Linux (libnotify/DBus, no native code): the backend implements only
+    `initialize`, `show`, `getCapabilities`, `getSystemIdMap`.
+    `zonedSchedule`, `cancel`, `cancelAll` and `periodicallyShow` fall
+    through to the platform interface and throw `UnimplementedError`.
+    There is no OS scheduler and no daemon: a notification can only be
+    shown while the process runs, and a reboot loses everything. A
+    reminder must be held by an in-process timer and shown at the moment
+    it is due; a missed one (app closed, machine asleep) fires late on the
+    next run or not at all, and the app has to say so in-app.
+  * Windows (C++/WinRT toasts): `zonedSchedule` is real —
+    `ScheduledToastNotification` handed to `ToastNotifier.AddToSchedule`,
+    so the OS owns the schedule and fires it with the app closed and
+    across a reboot. `periodicallyShow` throws `UnsupportedError` (no
+    repeating toasts). `cancel`/`getActiveNotifications` need MSIX package
+    identity; in an unpackaged zip they no-op/return empty, so a scheduled
+    toast cannot be reliably withdrawn before packaging.
+  Consequence for T-PP-03: one `DesktopReminderBackend` with an in-process
+  timer as the floor (Linux, and unpackaged Windows), delegating future
+  occurrences to `zonedSchedule` on Windows when packaged; health =
+  notifications allowed *and* app running, with the banner stating the
+  closed-app limit on Linux. No desktop equivalent of AlarmManager exists.
+- [x] **T-PP-03** `DesktopReminderBackend` behind the existing
   `ReminderBackend` interface (`todo/reminder_backend.dart`): same full-
   replace reconciliation, new backend; `createReminderService` picks it on
   Linux/Windows. Health becomes "notifications allowed + app running",
@@ -76,6 +102,21 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   so when there is no API). *AC: a `rem:` fires as a desktop notification
   with the app running; closed-app limits are stated in-app, not found
   out.*
+  Landed: `todo/reminder_backend_desktop.dart` arms a `Timer` per wanted
+  reminder (its pending map is what `pendingIds` reads back) and posts
+  through `todo/desktop_notifier.dart` (`PluginDesktopNotifier` over
+  `flutter_local_notifications`); `createReminderService(isAndroid:
+  false, isDesktop: true)` builds it and the shared `LocalReminderService`
+  reconcile runs unchanged. Health stays `ok` on desktop because
+  `PlatformReminderSettings.isBatteryExempt()` is true off Android and the
+  timer is exact; the "app running" caveat is stated in the Todo help
+  (`todoHelpRemDesktop`, shown on Linux/Windows) rather than a banner,
+  since a running app is the normal state.
+  Owed: a hand run on this Plasma session watching a `rem:` one minute out
+  produce a libnotify popup, and the Windows-host pass. Windows
+  `zonedSchedule` (an OS-held toast that survives a reboot) is deferred
+  with M7 MSIX packaging, which `cancel` needs. Tests:
+  `test/unit/desktop_reminder_backend_test.dart`.
 - [ ] **T-PP-04** Device-and-desktop verification: the T-RL-01 overdue line
   (`STILL PENDING` vs `fired`) must read sensibly on desktop backends too.
   *AC: one log each from Linux and Windows next to the Android one.*
