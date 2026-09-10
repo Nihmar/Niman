@@ -319,15 +319,22 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   keeps IME behaviour unchanged. *AC: the spec line "spellcheck (where
   available)" names each platform's actual provider, or the backlog entry
   is promoted into tasks here.*
-  Decision: Flutter supplies no spell-check service on Linux or Windows —
-  `SpellCheckConfiguration` is a platform service the engine implements only
-  for Android/iOS/macOS (`flutter#120611`, `#122433`, both still open) — and
-  the editor package exposes no hook to feed one. So "where available" now
-  names the provider: Android/iOS use the system/IME proofreader (Copist
-  changes nothing), Linux/Windows show none, and a bundled hunspell engine
-  stays the backlog stretch entry (`plan/README.md` row 4). Spec and README
-  updated accordingly. No code lands: this is the decision the AC asks for;
-  a hunspell slice would need dictionary licensing and size settled first.
+  Decision + landed (revised: the user asked to use the system hunspell):
+  Flutter still supplies no spell-check service on Linux or Windows
+  (`SpellCheckConfiguration` is a platform service the engine only
+  implements for Android/iOS/macOS; `flutter#120611`, `#122433`), so the
+  desktop binds the machine's own `libhunspell` through `dart:ffi`
+  (`spellcheck/hunspell_spell_checker.dart`) and reads a dictionary from
+  the usual system/per-user paths, locale-first. The editor already builds
+  its own line spans (`ui/note_view.dart`, `editor/highlight_sync.dart`),
+  so no fork is needed: the misspelled ranges become extra boundaries in
+  that span and are drawn with a wavy underline.
+  `spellcheck/editor_spell_check.dart` checks only the lines the editor
+  lays out, caches a verdict per word, and skips code, math, links,
+  frontmatter and tags; a missing library or dictionary degrades to a
+  no-op (Android, an unprepared Windows box). Android keeps the IME
+  behaviour unchanged; the spec and README keep naming the provider per
+  platform.
 
 ### P5 — Keyboard / window integration (felt mostly on desktop)
 

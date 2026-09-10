@@ -17,6 +17,9 @@ dependencies:
   crypto: ^3.0.7
   drift: ^2.34.3
 
+  # Dart FFI: the hunspell desktop spell-check engine (T-PP-09).
+  ffi: ^2.1.1
+
   file_picker: ^12.2.0
   flutter:
     sdk: flutter

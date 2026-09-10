@@ -82,6 +82,8 @@ final class EditorHighlightSync {
     required TextStyle base,
     required bool dark,
     required Color accent,
+    List<TextRange> spellRanges = const <TextRange>[],
+    TextStyle? spellStyle,
   }) {
     if (dark != _dark) {
       _dark = dark;
@@ -92,10 +94,14 @@ final class EditorHighlightSync {
     final styled = index < _doc.lineCount
         ? _doc.lineAt(index)
         : StyledLine(text, const <Token>[]);
-    final span = _buildSpan(styled, base, accent);
+    final span = _buildSpan(styled, base, accent, spellRanges, spellStyle);
     _spans[index] = span;
     return span;
   }
+
+  /// Drops the per-line span cache: spelling results changed, so the next
+  /// layout must rebuild each visible line's span.
+  void clearSpans() => _spans.clear();
 
   /// The document's heading outline (T-M2-07), from the incremental
   /// document's tokens — materializes the whole document, so call it from a
@@ -196,7 +202,13 @@ final class EditorHighlightSync {
   /// between token boundaries gets the covering token's style; the unmarked
   /// region after a heading marker gets the heading style; the rest is
   /// plain (the base style shows).
-  TextSpan _buildSpan(StyledLine styled, TextStyle base, Color accent) {
+  TextSpan _buildSpan(
+    StyledLine styled,
+    TextStyle base,
+    Color accent,
+    List<TextRange> spellRanges,
+    TextStyle? spellStyle,
+  ) {
     final textLength = styled.text.length;
     if (textLength == 0) {
       return TextSpan(text: '', style: base);
@@ -219,6 +231,10 @@ final class EditorHighlightSync {
     if (headingStart >= 0 && headingStart < textLength) {
       bounds.add(headingStart);
     }
+    for (final range in spellRanges) {
+      if (range.start > 0 && range.start < textLength) bounds.add(range.start);
+      if (range.end > 0 && range.end < textLength) bounds.add(range.end);
+    }
     final sorted = bounds.toList()..sort();
     final children = <TextSpan>[];
     for (var i = 0; i + 1 < sorted.length; i++) {
@@ -228,7 +244,14 @@ final class EditorHighlightSync {
       children.add(
         TextSpan(
           text: styled.text.substring(start, end),
-          style: _styleAt(styled.tokens, start, headingStart, accent),
+          style: _styleAt(
+            styled.tokens,
+            start,
+            headingStart,
+            accent,
+            spellRanges,
+            spellStyle,
+          ),
         ),
       );
     }
@@ -244,15 +267,32 @@ final class EditorHighlightSync {
     int pos,
     int headingStart,
     Color accent,
+    List<TextRange> spellRanges,
+    TextStyle? spellStyle,
   ) {
+    TextStyle? style;
     for (final token in tokens) {
       if (token.start > pos) break;
       if (pos < token.end) {
-        return _palette.styleFor(token.kind, accent: accent);
+        style = _palette.styleFor(token.kind, accent: accent);
+        break;
       }
     }
-    if (headingStart >= 0 && pos >= headingStart) return _palette.headingStyle;
-    return null;
+    if (style == null && headingStart >= 0 && pos >= headingStart) {
+      style = _palette.headingStyle;
+    }
+    if (spellStyle != null && _inSpell(pos, spellRanges)) {
+      style = style == null ? spellStyle : style.merge(spellStyle);
+    }
+    return style;
+  }
+
+  /// Whether [pos] falls in a misspelled range.
+  static bool _inSpell(int pos, List<TextRange> ranges) {
+    for (final range in ranges) {
+      if (pos >= range.start && pos < range.end) return true;
+    }
+    return false;
   }
 
   HighlightPalette get _palette =>

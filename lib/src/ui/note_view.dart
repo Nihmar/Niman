@@ -27,6 +27,7 @@ import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
 import 'package:copist/src/preview/scroll_map.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/outline_panel.dart';
@@ -84,6 +85,7 @@ final class NoteView extends StatefulWidget {
     this.toolbarTop = false,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
+    this.spellCheck,
     super.key,
   });
 
@@ -180,6 +182,10 @@ final class NoteView extends StatefulWidget {
   /// puts the layout/preview actions here, next to the note's own status;
   /// the phone keeps them in its note app bar (empty by default).
   final List<Widget> statusActions;
+
+  /// The editor's spelling state (T-PP-09): underlines misspelled prose.
+  /// Null (most widget tests, and a platform without hunspell) draws none.
+  final EditorSpellCheck? spellCheck;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -284,6 +290,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _kindHost = _NoteKindHost(this);
     _unsaved = widget.unsavedTracker;
     _unsaved?.register(_unsavedNote);
+    widget.spellCheck?.addListener(_onSpellCheckChanged);
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -328,6 +335,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _controller.removeListener(_onValueChanged);
     if (_revision != _lastSavedRevision) unawaited(_save());
     _unsaved?.unregister(_unsavedNote);
+    widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _findController.dispose();
     _focus.dispose();
     _scroll.verticalScroller.dispose();
@@ -418,6 +426,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         _applyStats(text, stats.$1, stats.$2);
       }
       _controller.text = text;
+      // The spell cache is keyed by line index + text; a different note can
+      // reuse the same indices, so forget the previous file's answers.
+      widget.spellCheck?.reset();
       _lastLines = _controller.codeLines;
       _lastSavedRevision = _revision;
       _unsaved?.noteChanged();
@@ -1054,8 +1065,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
   }
 
+  /// Spelling results changed (the note loaded, or a settings toggle):
+  /// cached line spans must be rebuilt with the new ranges.
+  void _onSpellCheckChanged() {
+    if (!mounted) return;
+    _highlight.clearSpans();
+    setState(() {});
+  }
+
   /// The [CodeLineSpanBuilder] over [_highlight]: styles each line the
-  /// editor lays out, dark/light per the app brightness.
+  /// editor lays out, dark/light per the app brightness, and underlines the
+  /// misspelled prose (T-PP-09) once the spell checker knows the line.
   TextSpan _buildHighlightSpan({
     required BuildContext context,
     required int index,
@@ -1063,12 +1083,28 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     required TextSpan textSpan,
     required TextStyle style,
   }) {
+    final spell = widget.spellCheck;
+    final spellRanges = spell == null
+        ? const <TextRange>[]
+        : spell.rangesFor(
+            index,
+            codeLine.text,
+            skip: spellSkipRanges(_highlight.tokensOf(index)),
+          );
     return _highlight.spanFor(
       index: index,
       text: codeLine.text,
       base: style,
       dark: Theme.of(context).brightness == Brightness.dark,
       accent: Theme.of(context).colorScheme.primary,
+      spellRanges: spellRanges,
+      spellStyle: spellRanges.isEmpty
+          ? null
+          : TextStyle(
+              decoration: TextDecoration.underline,
+              decorationStyle: TextDecorationStyle.wavy,
+              decorationColor: Theme.of(context).colorScheme.error,
+            ),
     );
   }
 

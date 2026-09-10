@@ -14,6 +14,8 @@ import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
+import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/spell_check_provider.dart';
 import 'package:copist/src/templates/engine.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
@@ -115,6 +117,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
         LibraryPhase.ready => _LibraryShell(
           controller: controller,
           reminders: ref.read(reminderServiceProvider),
+          spellCheck: ref.read(spellCheckProvider),
           shortcuts: ref.read(shortcutServiceProvider),
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
           unsavedTracker: ref.watch(unsavedTrackerProvider),
@@ -133,6 +136,7 @@ final class _LibraryShell extends StatefulWidget {
   const new({
     required this.controller,
     required this.reminders,
+    required this.spellCheck,
     required this.shortcuts,
     required this.todoSourceFactory,
     required this.unsavedTracker,
@@ -144,6 +148,9 @@ final class _LibraryShell extends StatefulWidget {
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
+
+  /// The editor's spelling state (T-PP-09), passed to every [NoteView].
+  final EditorSpellCheck spellCheck;
 
   /// The launcher quick actions (T-SC-03: each one lands on the flow its
   /// in-app control uses).
@@ -540,6 +547,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       kindMode: !_kindRawMode,
       onNoteKindChanged: _onNoteKindChanged,
       unsavedTracker: widget.unsavedTracker,
+      spellCheck: widget.spellCheck,
     );
   }
 
@@ -1930,6 +1938,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   kindMode: !_kindRawMode,
                   onNoteKindChanged: _onNoteKindChanged,
                   unsavedTracker: widget.unsavedTracker,
+                  spellCheck: widget.spellCheck,
                   statusActions: [
                     // The view controls live in the note's status row on the
                     // desktop (T-PP-22): the header above is about the file,
@@ -2268,6 +2277,7 @@ final class _DetailPane extends StatelessWidget {
     required this.onNoteKindChanged,
     required this.unsavedTracker,
     required this.statusActions,
+    required this.spellCheck,
   });
 
   /// Absolute library root; null until the session is ready.
@@ -2309,6 +2319,9 @@ final class _DetailPane extends StatelessWidget {
 
   /// The view controls forwarded into the note's status row (T-PP-22).
   final List<Widget> statusActions;
+
+  /// The editor's spelling state (T-PP-09).
+  final EditorSpellCheck spellCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -2357,6 +2370,7 @@ final class _DetailPane extends StatelessWidget {
                 onNoteKindChanged: onNoteKindChanged,
                 unsavedTracker: unsavedTracker,
                 statusActions: statusActions,
+                spellCheck: spellCheck,
               ),
             ),
     );

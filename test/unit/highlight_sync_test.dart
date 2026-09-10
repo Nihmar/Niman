@@ -135,6 +135,33 @@ void main() {
     }
   });
 
+  test('a misspelled range is drawn with a wavy underline (T-PP-09)', () {
+    final sync = EditorHighlightSync();
+    final controller = CodeLineEditingController()..text = 'hello wrold';
+    sync.onBufferChanged(controller.codeLines);
+    const spell = TextStyle(
+      decoration: TextDecoration.underline,
+      decorationStyle: TextDecorationStyle.wavy,
+      decorationColor: Color(0xFFB00020),
+    );
+    final span = sync.spanFor(
+      index: 0,
+      text: 'hello wrold',
+      base: _base,
+      dark: false,
+      accent: const Color(0xFF445E91),
+      spellRanges: const [TextRange(start: 6, end: 11)],
+      spellStyle: spell,
+    );
+    final misspelled = _styleOf(span, 'wrold');
+    expect(misspelled?.decoration, TextDecoration.underline);
+    expect(misspelled?.decorationStyle, TextDecorationStyle.wavy);
+    expect(misspelled?.decorationColor, const Color(0xFFB00020));
+    // The correctly spelled half keeps the base look.
+    expect(_styleOf(span, 'hello ')?.decoration, isNull);
+    controller.dispose();
+  });
+
   test('frontmatter lines are styled as the block', () {
     final sync = EditorHighlightSync();
     final controller = CodeLineEditingController()
