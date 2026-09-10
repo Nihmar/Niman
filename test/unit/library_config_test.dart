@@ -46,6 +46,23 @@ void main() {
       expect(await store.read(), config);
     });
 
+    test('round trips the spell-check dictionary', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: 'Lists',
+        spellDictionary: 'it_IT',
+      );
+      await store.write(config);
+      expect((await store.read()).spellDictionary, 'it_IT');
+      // Clearing writes no key and reads back as the locale default.
+      await store.write(config.copyWith(clearSpellDictionary: true));
+      expect((await store.read()).spellDictionary, isNull);
+    });
+
     test('a config without a quick note round trips as default', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);

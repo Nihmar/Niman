@@ -59,6 +59,11 @@ final class AppStrings {
     'Underline misspelled words while writing.',
     'Sottolinea le parole errate mentre scrivi.',
   );
+  static String get spellCheckDictionaryTitle => _t('Dictionary', 'Dizionario');
+  static String get spellCheckDictionarySystem =>
+      _t('System default', 'Predefinito di sistema');
+  static String get spellCheckDictionaryChoiceTitle =>
+      _t('Choose dictionary', 'Scegli dizionario');
 
   // Spelling review (T-PP-09).
   static String get spellCheckTooltip =>

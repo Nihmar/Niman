@@ -134,6 +134,7 @@ final class LibraryConfig {
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
     this.treeWidth = defaultTreeWidth,
+    this.spellDictionary,
     this.extra = const {},
   });
 
@@ -186,6 +187,10 @@ final class LibraryConfig {
         _ => '',
       },
       treeWidth: normalizeTreeWidth(json['treeWidth']),
+      spellDictionary: switch (json['spellDictionary']) {
+        final String name when name.trim().isNotEmpty => name.trim(),
+        _ => null,
+      },
       extra: extra,
     );
   }
@@ -247,6 +252,11 @@ final class LibraryConfig {
   /// [defaultTreeWidth]), dragged on wide screens.
   final double treeWidth;
 
+  /// The hunspell dictionary the spell checker uses (a `<name>` found on
+  /// the machine), or null for the locale's default. Only meaningful in a
+  /// library whose notes share a language.
+  final String? spellDictionary;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -267,6 +277,8 @@ final class LibraryConfig {
     int? indentWidth,
     String? editorToolbar,
     double? treeWidth,
+    String? spellDictionary,
+    bool clearSpellDictionary = false,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -285,6 +297,9 @@ final class LibraryConfig {
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
       treeWidth: treeWidth ?? this.treeWidth,
+      spellDictionary: clearSpellDictionary
+          ? null
+          : spellDictionary ?? this.spellDictionary,
       extra: extra,
     );
   }
@@ -304,6 +319,7 @@ final class LibraryConfig {
     'indentWidth',
     'editorToolbar',
     'treeWidth',
+    'spellDictionary',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -334,6 +350,9 @@ final class LibraryConfig {
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
+    }
+    if (spellDictionary != null) {
+      json['spellDictionary'] = spellDictionary;
     }
     for (final entry in extra.entries) {
       if (_knownKeys.contains(entry.key)) continue;
@@ -399,6 +418,7 @@ final class LibraryConfig {
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&
         treeWidth == other.treeWidth &&
+        spellDictionary == other.spellDictionary &&
         _deepEquals(extra, other.extra);
   }
 

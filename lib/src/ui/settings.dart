@@ -8,6 +8,7 @@ import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
+import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:copist/src/ui/folder_picker.dart';
 import 'package:copist/src/ui/keyboard_shortcuts.dart';
 import 'package:copist/src/ui/quick_note_picker.dart';
@@ -63,6 +64,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   String? _listFolder;
   String? _templateFolder;
   AppLanguage _language = AppLanguage.system;
+  String? _spellDictionary;
 
   @override
   void initState() {
@@ -87,6 +89,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
     final language = await controller.language;
+    final spellDictionary = await controller.spellDictionary;
     if (mounted) {
       setState(() {
         _trash = enabled;
@@ -103,6 +106,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _listFolder = listFolder;
         _templateFolder = templateFolder;
         _language = language;
+        _spellDictionary = spellDictionary;
       });
     }
   }
@@ -395,6 +399,36 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (width != null) await _setIndentWidth(width);
   }
 
+  /// Asks which hunspell dictionary the editor should use (T-PP-09): every
+  /// one found on the machine plus the locale default.
+  Future<void> _chooseSpellDictionary(EditorSpellCheck spell) async {
+    final names = discoverDictionaries().keys.toList()..sort();
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
+        children: [
+          SimpleDialogOption(
+            key: const Key('spell-dictionary-system'),
+            onPressed: () => Navigator.pop(context, ''),
+            child: Text(AppStrings.spellCheckDictionarySystem),
+          ),
+          for (final name in names)
+            SimpleDialogOption(
+              key: Key('spell-dictionary-$name'),
+              onPressed: () => Navigator.pop(context, name),
+              child: Text(name),
+            ),
+        ],
+      ),
+    );
+    if (choice == null) return;
+    final name = choice.isEmpty ? null : choice;
+    await widget.controller.setSpellDictionary(name);
+    spell.setDictionary(name);
+    if (mounted) setState(() => _spellDictionary = name);
+  }
+
   /// Asks for the app's language.
   Future<void> _chooseLanguage() async {
     final language = await showSettingsChoice<AppLanguage>(
@@ -528,7 +562,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
           ),
         ),
 
-        if (spell != null && spell.available)
+        if (spell != null && spell.available) ...[
           SwitchListTile(
             key: const Key('spell-check-setting'),
             title: Text(AppStrings.settingsSpellCheckTitle),
@@ -537,6 +571,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
             onChanged: (value) =>
                 setState(() => spell.setEnabled(enabled: value)),
           ),
+          SettingsValueRow(
+            key: const Key('spell-dictionary-setting'),
+            title: AppStrings.spellCheckDictionaryTitle,
+            value: _spellDictionary ?? AppStrings.spellCheckDictionarySystem,
+            onTap: () => unawaited(_chooseSpellDictionary(spell)),
+          ),
+        ],
 
         SettingsSection(AppStrings.settingsSectionLibrary),
         // The one row with nothing to change: a fact about the open

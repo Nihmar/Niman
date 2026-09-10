@@ -57,10 +57,33 @@ final class _CheckedLine {
 /// The document-level spelling state the editor's span builder consults.
 final class EditorSpellCheck extends ChangeNotifier {
   /// Creates the state over [createChecker] (the system engine by default).
-  new({SpellChecker Function()? createChecker})
-    : _createChecker = createChecker ?? createSpellChecker;
+  ///
+  /// [_dictionary] is the user's chosen dictionary name (null = the
+  /// machine's locale); [setDictionary] changes it later.
+  new({this._dictionary, SpellChecker Function()? createChecker})
+    : _override = createChecker;
 
-  final SpellChecker Function() _createChecker;
+  final SpellChecker Function()? _override;
+  String? _dictionary;
+
+  /// The active dictionary name (null = the machine's locale).
+  String? get dictionary => _dictionary;
+
+  /// Changes the dictionary: the current engine is dropped, its word
+  /// verdicts and line ranges forgotten, and a new one builds on the next
+  /// request.
+  void setDictionary(String? dictionary) {
+    if (_dictionary == dictionary) return;
+    _dictionary = dictionary;
+    _checker?.dispose();
+    _checker = null;
+    _lines.clear();
+    _words.clear();
+    notifyListeners();
+  }
+
+  SpellChecker _newChecker() =>
+      _override?.call() ?? createSpellChecker(dictionary: _dictionary);
 
   /// Prose words: a letter run, apostrophes and inner hyphens allowed.
   static final RegExp _word = RegExp(r"[\p{L}][\p{L}'’-]*", unicode: true);
@@ -76,7 +99,7 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// Whether an engine and dictionary loaded (false = nothing to underline).
   bool get available {
     if (!_enabled) return false;
-    return (_checker ??= _createChecker()).available;
+    return (_checker ??= _newChecker()).available;
   }
 
   /// Turns underlining on/off (a settings toggle).
@@ -107,7 +130,7 @@ final class EditorSpellCheck extends ChangeNotifier {
     if (!_enabled) return const <TextRange>[];
     final cached = _lines[index];
     if (cached != null && cached.text == line) return cached.ranges;
-    final checker = _checker ??= _createChecker();
+    final checker = _checker ??= _newChecker();
     if (!checker.available) return const <TextRange>[];
     final ranges = _checkLine(checker, line, skip);
     _lines[index] = _CheckedLine(line, ranges);
@@ -121,7 +144,7 @@ final class EditorSpellCheck extends ChangeNotifier {
   /// sharing the same word-verdict cache.
   List<SpellIssue> scan(List<SpellLine> lines) {
     if (!_enabled) return const <SpellIssue>[];
-    final checker = _checker ??= _createChecker();
+    final checker = _checker ??= _newChecker();
     if (!checker.available) return const <SpellIssue>[];
     final issues = <SpellIssue>[];
     for (var i = 0; i < lines.length; i++) {

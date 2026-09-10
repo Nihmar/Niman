@@ -581,6 +581,20 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(reminderShowTokens: enabled));
   }
 
+  /// The spell-check dictionary name, or null for the locale default.
+  @override
+  Future<String?> get spellDictionary async => (await _library).spellDictionary;
+
+  /// Sets (and persists) the spell-check dictionary.
+  @override
+  Future<void> setSpellDictionary(String? name) async {
+    _log.info('spell-check dictionary set to ${name ?? 'system'}');
+    await _editLibrary(
+      (c) =>
+          c.copyWith(spellDictionary: name, clearSpellDictionary: name == null),
+    );
+  }
+
   /// The preview layout mode.
   ///
   /// App-wide, with the split ratio: both follow the screen rather than

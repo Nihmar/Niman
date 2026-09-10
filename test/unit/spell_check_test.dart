@@ -13,6 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
+/// Whether the machine has the Italian dictionary (installed separately).
+final bool _hasItalian = discoverDictionaries().containsKey('it_IT');
+
 /// Whether the host actually has hunspell + a dictionary; decided once so a
 /// bare machine simply skips the live test.
 final bool _hasHunspell = () {
@@ -40,6 +43,44 @@ void main() {
         discoverDictionary(locale: 'en_GB', dirs: ['/nonexistent']),
         isNull,
       );
+    });
+  });
+
+  group('dictionary choice', () {
+    test('lists every pair and keeps directory priority', () {
+      final first = Directory.systemTemp.createTempSync('copist-spell-a');
+      final second = Directory.systemTemp.createTempSync('copist-spell-b');
+      addTearDown(() {
+        first.deleteSync(recursive: true);
+        second.deleteSync(recursive: true);
+      });
+      for (final dir in [first, second]) {
+        for (final name in ['en_US', 'it_IT']) {
+          File(p.join(dir.path, '$name.aff')).writeAsStringSync('SET UTF-8');
+          File(p.join(dir.path, '$name.dic')).writeAsStringSync('1\nword');
+        }
+      }
+
+      final found = discoverDictionaries(dirs: [first.path, second.path]);
+      expect(found.keys, containsAll(['en_US', 'it_IT']));
+      expect(found['it_IT']!.dic, startsWith(first.path));
+    });
+
+    test('setDictionary swaps the engine, clears and notifies once', () {
+      final check = EditorSpellCheck(
+        createChecker: () => _FakeChecker({'wrold'}),
+      );
+      var notified = 0;
+      check.addListener(() => notified++);
+
+      // Setup and read are separate assertions on purpose.
+      // ignore: cascade_invocations
+      check.setDictionary('it_IT');
+      expect(check.dictionary, 'it_IT');
+      expect(notified, 1);
+
+      check.setDictionary('it_IT');
+      expect(notified, 1, reason: 'the same name is a no-op');
     });
   });
 
@@ -176,6 +217,13 @@ void main() {
     }
     expect(found?.decorationStyle, TextDecorationStyle.wavy);
   }, skip: _hasHunspell ? null : 'hunspell or a dictionary is not installed');
+
+  test('the Italian dictionary checks Italian', () {
+    final checker = HunspellSpellChecker.open(dictionary: 'it_IT');
+    addTearDown(checker!.dispose);
+    expect(checker.isCorrect('ciao'), isTrue);
+    expect(checker.isCorrect('qwertyuiop'), isFalse);
+  }, skip: _hasItalian ? null : 'it_IT is not installed');
 
   test('the no-op reports unavailable and accepts every word', () {
     const checker = NoopSpellChecker();

@@ -46,17 +46,42 @@ List<String> defaultDictionaryDirs() {
   ];
 }
 
-/// Finds the first usable dictionary pair for [locale] in [dirs].
+/// Every `<name>.aff`/`.dic` pair found in [dirs], keyed by dictionary name.
+///
+/// The first directory wins per name, so a per-user dictionary overrides a
+/// system one with the same tag. Callers that only need one should use
+/// [discoverDictionary].
+Map<String, ({String aff, String dic})> discoverDictionaries({
+  List<String>? dirs,
+}) {
+  final found = <String, ({String aff, String dic})>{};
+  for (final dir in dirs ?? defaultDictionaryDirs()) {
+    final directory = Directory(dir);
+    if (!directory.existsSync()) continue;
+    for (final entity in directory.listSync()) {
+      if (entity is! File || !entity.path.endsWith('.aff')) continue;
+      final name = p.basenameWithoutExtension(entity.path);
+      if (found.containsKey(name)) continue;
+      final dic = File(
+        '${entity.path.substring(0, entity.path.length - 4)}.dic',
+      );
+      if (dic.existsSync()) found[name] = (aff: entity.path, dic: dic.path);
+    }
+  }
+  return found;
+}
+
+/// The first usable dictionary pair for [locale] in [dirs].
 ///
 /// Candidate names are the locale tag (`en_GB`), its hyphenated form, its
 /// language alone (`en`), then the two defaults. When no candidate matches,
-/// the first pair in any directory wins, so an unusual locale still gets a
-/// dictionary rather than nothing.
+/// the first pair found wins, so an unusual locale still gets a dictionary
+/// rather than nothing.
 ({String aff, String dic})? discoverDictionary({
   String? locale,
   List<String>? dirs,
 }) {
-  final search = dirs ?? defaultDictionaryDirs();
+  final found = discoverDictionaries(dirs: dirs);
   final candidates = <String>[];
   final tag = _normalizeLocale(locale ?? Platform.localeName);
   if (tag != null) {
@@ -67,25 +92,10 @@ List<String> defaultDictionaryDirs() {
   }
   candidates.addAll(const <String>['en_US', 'en_GB']);
   for (final name in candidates) {
-    for (final dir in search) {
-      final aff = File(p.join(dir, '$name.aff'));
-      if (!aff.existsSync()) continue;
-      final dic = File(p.join(dir, '$name.dic'));
-      if (dic.existsSync()) return (aff: aff.path, dic: dic.path);
-    }
+    final pair = found[name];
+    if (pair != null) return pair;
   }
-  for (final dir in search) {
-    final directory = Directory(dir);
-    if (!directory.existsSync()) continue;
-    for (final entity in directory.listSync()) {
-      if (entity is! File || !entity.path.endsWith('.aff')) continue;
-      final dic = File(
-        '${entity.path.substring(0, entity.path.length - 4)}.dic',
-      );
-      if (dic.existsSync()) return (aff: entity.path, dic: dic.path);
-    }
-  }
-  return null;
+  return found.isEmpty ? null : found.values.first;
 }
 
 /// The `xx_YY` tag of a locale like `en_GB.UTF-8`, or null for `C`.
@@ -107,16 +117,21 @@ final class HunspellSpellChecker implements SpellChecker {
 
   /// Opens the library and a dictionary, or null when either is missing.
   ///
-  /// [library], [locale] and [dirs] are test seams; the defaults are the
-  /// system ones.
+  /// [dictionary] picks a named `<name>.aff`/`.dic` pair (the user's
+  /// choice); when null or gone, the locale's dictionary is used. The
+  /// other arguments are test seams; the defaults are the system ones.
   static HunspellSpellChecker? open({
     DynamicLibrary? library,
     String? locale,
     List<String>? dirs,
+    String? dictionary,
   }) {
     final lib = library ?? _openLibrary();
     if (lib == null) return null;
-    final dict = discoverDictionary(locale: locale, dirs: dirs);
+    final dict = dictionary == null
+        ? discoverDictionary(locale: locale, dirs: dirs)
+        : discoverDictionaries(dirs: dirs)[dictionary] ??
+              discoverDictionary(locale: locale, dirs: dirs);
     if (dict == null) return null;
     final aff = dict.aff.toNativeUtf8();
     final dic = dict.dic.toNativeUtf8();
@@ -243,5 +258,8 @@ final class HunspellSpellChecker implements SpellChecker {
 }
 
 /// The best checker this machine can offer.
-SpellChecker createSpellChecker() =>
-    HunspellSpellChecker.open() ?? const NoopSpellChecker();
+///
+/// [dictionary] names the user's chosen dictionary (null = the locale's).
+SpellChecker createSpellChecker({String? dictionary}) =>
+    HunspellSpellChecker.open(dictionary: dictionary) ??
+    const NoopSpellChecker();

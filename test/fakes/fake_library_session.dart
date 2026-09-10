@@ -203,6 +203,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _config = _config.copyWith(reminderShowTokens: enabled);
   }
 
+  @override
+  Future<String?> get spellDictionary async => _config.spellDictionary;
+
+  @override
+  Future<void> setSpellDictionary(String? name) async {
+    _config = _config.copyWith(
+      spellDictionary: name,
+      clearSpellDictionary: name == null,
+    );
+    _bump();
+  }
+
   // The preview layout is app-wide: it follows the screen, not the
   // library.
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
