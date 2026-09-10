@@ -12,13 +12,13 @@ import 'dart:math' as math;
 /// offset (editor scrolls → preview follows) and preview offset → source
 /// line (preview scrolls → editor follows).
 ///
-/// The mapping walks the measured block heights, not a line fraction
-/// (T-PP-22): an image or a display-math block is hundreds of pixels tall
-/// for a handful of source lines, so the fraction put the preview behind
-/// the editor next to them. Blocks the windowed preview has not laid out
-/// yet are estimated from the measured blocks' own pixels-per-line
-/// average, and before anything is measured the line fraction is still
-/// the best estimate there is.
+/// The mapping walks the block heights, not a line fraction (T-PP-22): an
+/// image or a display-math block is hundreds of pixels tall for a handful
+/// of source lines, so the fraction put the preview behind the editor
+/// next to them. Blocks the windowed preview has not laid out yet are
+/// estimated from the measured blocks' own pixels-per-line average, and
+/// those same heights are handed to the layout as the blocks' extents
+/// ([extentFor]), so the pane's pixels and the map cannot disagree.
 final class ScrollMap {
   /// Per top-level block: the source line it starts on.
   final List<int> blockStartLines = <int>[];
@@ -47,6 +47,7 @@ final class ScrollMap {
   void rebuild(String source) {
     blockStartLines.clear();
     blockHeights.clear();
+    _extents.clear();
     _measuredPixels = 0;
     _measuredLines = 0;
     lineCount = 0;
@@ -71,7 +72,16 @@ final class ScrollMap {
     if (height > 0) {
       _measuredPixels += height;
       _measuredLines += _spanOf(index);
+      _freeze(index, height);
     }
+  }
+
+  /// Freezes block [index]'s extent for the layout (see [_extents]).
+  void _freeze(int index, double extent) {
+    while (_extents.length <= index) {
+      _extents.add(0);
+    }
+    _extents[index] = extent;
   }
 
   /// The source lines block [index] spans (at least one).
@@ -83,25 +93,43 @@ final class ScrollMap {
     return math.max(1, end - start);
   }
 
-  /// The document's estimated content height in preview pixels (measured
-  /// blocks plus the estimate for the rest).
-  double _totalEstimated() {
-    var total = 0.0;
-    for (var i = 0; i < blockStartLines.length; i++) {
-      total += _heightOf(i);
+  /// Pixels per source line assumed until a block has been measured (the
+  /// preview's body text at 1.5 line height).
+  static const double defaultPixelsPerLine = 22;
+
+  /// Per-block extent handed to the layout and used by the mapping.
+  ///
+  /// A block's extent is frozen the first time it is asked for — the
+  /// measured height once the preview has laid it out, the line-span
+  /// estimate before — and then only replaced by that block's own
+  /// measurement. Letting the shared average re-estimate blocks that were
+  /// already placed is what makes SliverVariedExtentList assert: their
+  /// offsets move under the scroll position.
+  final List<double> _extents = <double>[];
+
+  /// Block [index]'s height: its frozen extent (seeded here on first use),
+  /// the block's measurement winning as soon as it lands.
+  double _heightOf(int index) {
+    while (_extents.length <= index) {
+      _extents.add(0);
     }
-    return total;
+    final frozen = _extents[index];
+    if (frozen > 0) return frozen;
+    final measured = index < blockHeights.length ? blockHeights[index] : 0.0;
+    final perLine = _measuredLines == 0
+        ? defaultPixelsPerLine
+        : _measuredPixels / _measuredLines;
+    final extent = measured > 0 ? measured : _spanOf(index) * perLine;
+    _extents[index] = extent;
+    return extent;
   }
 
-  /// Block [index]'s height: measured once the preview has laid it out,
-  /// else its line span at the measured pixels-per-line average (zero
-  /// before anything has been measured at all).
-  double _heightOf(int index) {
-    final measured = index < blockHeights.length ? blockHeights[index] : 0.0;
-    if (measured > 0) return measured;
-    if (_measuredLines == 0) return 0;
-    return _spanOf(index) * (_measuredPixels / _measuredLines);
-  }
+  /// The extent to give block [index] in the preview's layout
+  /// (`SliverVariedExtentList`): the same height the mapping walks, so the
+  /// pane's pixels and the map can never disagree. With an extent per
+  /// block, a jump lays out only the blocks it lands on instead of every
+  /// block in between (the scroll cost on math-heavy notes, T-PP-22).
+  double extentFor(int index) => _heightOf(index);
 
   /// The block index containing source [line].
   int blockForLine(int line) {
@@ -120,18 +148,11 @@ final class ScrollMap {
 
   /// The preview offset that shows [line], or null when nothing is laid out
   /// yet. It walks the blocks above [line]'s, adding their measured (or
-  /// estimated) heights and the line's fraction inside its own block; before
-  /// any block is measured it falls back to the source line fraction.
+  /// estimated) heights and the line's fraction inside its own block.
   double? previewOffsetForLine(int line, {required double maxExtent}) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    if (_measuredLines == 0) {
-      final fraction = (line / math.max(1, lineCount - 1)).clamp(0.0, 1.0);
-      return maxExtent * fraction;
-    }
-    final total = _totalEstimated();
-    if (total <= 0) return null;
     final index = blockForLine(line);
     var content = 0.0;
     for (var i = 0; i < index; i++) {
@@ -142,11 +163,9 @@ final class ScrollMap {
         ? 0.0
         : ((line - blockStartLines[index]) / span).clamp(0.0, 1.0);
     content += _heightOf(index) * within;
-    // The scrollable extent is the content minus its viewport: scaling by
-    // extent/total keeps the two panes' fractions equal (70% of the editor
-    // is 70% of the preview) while the block walk keeps the positions
-    // right where an image or a math block makes the density uneven.
-    return (content * maxExtent / total).clamp(0.0, maxExtent);
+    // The preview's layout uses exactly these extents, so the offset needs
+    // no rescaling to the pane's current extent.
+    return content.clamp(0.0, maxExtent);
   }
 
   /// The source line shown at preview [offset], or null when unknown. The
@@ -155,13 +174,7 @@ final class ScrollMap {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    if (_measuredLines == 0) {
-      final fraction = (offset / maxExtent).clamp(0.0, 1.0);
-      return ((lineCount - 1) * fraction).round();
-    }
-    final total = _totalEstimated();
-    if (total <= 0) return null;
-    final content = offset * total / maxExtent;
+    final content = offset;
     var acc = 0.0;
     for (var i = 0; i < blockStartLines.length; i++) {
       final height = _heightOf(i);

@@ -289,10 +289,17 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
         continue;
       }
       final index = children.length;
+      // The sliver forces each child's extent (the map's estimate), so the
+      // measure sits inside an unbounded box: it reports the block's
+      // natural height, which the map then uses as the real extent.
       children.add(
-        _BlockMeasure(
-          onHeight: (height) => map.measure(index, height),
-          child: content,
+        OverflowBox(
+          alignment: Alignment.topCenter,
+          maxHeight: double.infinity,
+          child: _BlockMeasure(
+            onHeight: (height) => map.measure(index, height),
+            child: content,
+          ),
         ),
       );
     }
@@ -326,6 +333,11 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   @override
   Widget build(BuildContext context) {
     final children = _children ?? const <Widget>[];
+    final map = widget.scrollMap;
+    final delegate = SliverChildBuilderDelegate(
+      (context, index) => children[index],
+      childCount: children.length,
+    );
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         _onScrollNotification(notification);
@@ -338,12 +350,18 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           slivers: <Widget>[
             SliverPadding(
               padding: widget.padding,
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => children[index],
-                  childCount: children.length,
-                ),
-              ),
+              // With a scroll map every block has a known (or estimated)
+              // extent, so a jump lays out only the blocks it lands on
+              // instead of walking every block in between — the difference
+              // between a smooth jump and a 5 ms-per-block stall on a
+              // math-heavy note (T-PP-22).
+              sliver: map == null
+                  ? SliverList(delegate: delegate)
+                  : SliverVariedExtentList(
+                      delegate: delegate,
+                      itemExtentBuilder: (index, dimensions) =>
+                          map.extentFor(index),
+                    ),
             ),
           ],
         ),

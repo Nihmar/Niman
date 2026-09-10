@@ -100,13 +100,13 @@ void main() {
       expect(offset, greaterThan(0));
     });
 
-    test('offset → line round-trips approximately', () {
+    test('offset → line walks the block heights', () {
       final map = ScrollMap()
         ..rebuild(List.generate(40, (i) => 'line $i').join('\n\n'));
-      // 79 lines (40 paragraphs, 39 separators); half of the content = the
-      // middle line, blank separators count as lines.
-      final line = map.lineForPreviewOffset(500, maxExtent: 1000);
-      expect(line, 39);
+      // No block measured yet: each spans 2 lines at the 22 px default, so
+      // 500 px is block 11's middle — around line 22, not the 39 a pure
+      // line fraction of the extent would say.
+      expect(map.lineForPreviewOffset(500, maxExtent: 1000), 22);
     });
 
     test('ready only once every block is measured', () {
@@ -138,12 +138,9 @@ void main() {
         ..measure(1, 1000)
         ..measure(2, 100);
 
-      // Content: 100 + 1000 before the last block = 1100 of 1200 px, i.e.
-      // 1833 of a 2000 px extent. A pure line fraction would say 1600.
-      expect(
-        map.previewOffsetForLine(4, maxExtent: 2000),
-        closeTo(2000 * 1100 / 1200, 0.001),
-      );
+      // Content: 100 + 1000 before the last block = 1100 px. A pure line
+      // fraction of the extent would say 1600.
+      expect(map.previewOffsetForLine(4, maxExtent: 2000), 1100);
       // Inside the tall block, half its height is its second line.
       expect(
         map.lineForPreviewOffset(600, maxExtent: 2000),
@@ -154,29 +151,21 @@ void main() {
     test('unmeasured blocks are estimated from the measured average', () {
       // Four blocks, spans 2/2/2/1 lines: the two measured ones give
       // (40 + 20) / 4 = 15 px per source line, so the third block (2 lines)
-      // estimates at 30 px and the fourth at 15: line 6 starts 90 px into
-      // 105 px of content — 857 of a 1000 px extent.
+      // estimates at 30 px and the fourth at 15: line 6 starts 90 px in.
       final map = ScrollMap()
         ..rebuild('a\n\nb\n\nc\n\nd')
         ..measure(0, 40)
         ..measure(1, 20);
-      expect(
-        map.previewOffsetForLine(6, maxExtent: 1000),
-        closeTo(1000 * 90 / 105, 0.001),
-      );
+      expect(map.previewOffsetForLine(6, maxExtent: 1000), 90);
     });
 
     test('a re-measure replaces the old height in the average', () {
       // Not 120: the block's second measurement is the one that counts.
-      // Content 20 + 10 (one line at the 10 px average) = 30 px.
       final map = ScrollMap()
         ..rebuild('a\n\nb')
         ..measure(0, 100)
         ..measure(0, 20);
-      expect(
-        map.previewOffsetForLine(2, maxExtent: 1000),
-        closeTo(1000 * 20 / 30, 0.001),
-      );
+      expect(map.previewOffsetForLine(2, maxExtent: 1000), 20);
     });
   });
 }

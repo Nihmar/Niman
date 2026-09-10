@@ -177,6 +177,21 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   leading control and gains Add task plus help (the FAB is gone there);
   the A-Z priority fallback is a compact fixed-width dialog instead of a
   full-window grid.
+  Preview performance (same review, T-PP-22): on the 934 KB geometry
+  note (10.3k lines, 3551 blocks, ~841 display-math, ~26k inline formulas)
+  the side-by-side scroll stalled on the preview: images changed block
+  heights after the map measured them, the map itself was a pure line
+  fraction, and every mounted formula rebuilt on every other formula's
+  render. Landed: aspect-reserving images, a block-height scroll map fed
+  to a `SliverVariedExtentList` (a jump lays out only the blocks it lands
+  on, extents frozen per block so the varied list never asserts),
+  per-widget math rebuilds, and typesetting deferred during a scroll.
+  Measured with a two-pass 120-step scroll: widget probe 16.3 s total /
+  1.5 s worst frame before, 0.70 s / 75 ms after; real-engine
+  profile-mode run (`flutter drive ... -d linux --profile`, harness
+  removed after use): p90 build 19 ms, p90 raster 2.2 ms, worst frame
+  140 ms over 121 frames. Remaining headroom: the first full layout pass
+  after a parse still pays the per-block cost.
   Second pass on the same review: the view controls move from the editor
   header into the note's status row (the header is about the file); Linux
   runs frameless with the app's own title bar (`ui/title_bar.dart`:
