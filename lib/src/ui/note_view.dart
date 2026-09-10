@@ -1716,10 +1716,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   }
 
   /// Applies a toolbar item to the WYSIWYG document (T-WYS-06).
+  ///
+  /// The focus returns to the surface, on the caret the command acted on:
+  /// on the desktop a toolbar tap moves focus out of the editor, and
+  /// without this the writer would have to click back in before typing —
+  /// losing the just-toggled format (e.g. bold on an empty caret). The
+  /// dialog/picker items refocus when their flow closes instead.
   void _applyQuillItem(ToolbarItem item) {
     final state = _wysiwygKey.currentState;
     if (state == null) return;
     _quillCommands(state).apply(item);
+    if (item == ToolbarItem.image || item == ToolbarItem.heading) return;
+    state.requestEditorFocus();
   }
 
   /// The Quill commands over the open surface's controller.
@@ -1736,8 +1744,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final state = _wysiwygKey.currentState;
     if (state == null) return;
     final level = await showHeadingLevelDialog(context);
-    if (level == null) return;
-    _quillCommands(state).applyHeader(level);
+    if (!mounted) return;
+    if (level != null) _quillCommands(state).applyHeader(level);
+    state.requestEditorFocus();
   }
 
   /// The link button in WYSIWYG: the same syntax the source editor inserts,
@@ -1759,6 +1768,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       snippet,
       TextSelection.collapsed(offset: selection.start + snippet.length),
     );
+    state.requestEditorFocus();
   }
 
   /// The image button in WYSIWYG: the source editor's picker/import flow,
@@ -1768,7 +1778,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final root = widget.libraryRoot;
     if (state == null || root == null) return;
     final source = await (widget.pickImagePath?.call() ?? _pickImageFile());
-    if (source == null || !mounted) return;
+    if (!mounted) return;
+    if (source == null) {
+      state.requestEditorFocus();
+      return;
+    }
     final relative =
         await (widget.importImage?.call(root, source) ??
             importImageToLibrary(libraryRoot: root, sourcePath: source));
@@ -1783,6 +1797,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       snippet,
       TextSelection.collapsed(offset: index + snippet.length),
     );
+    state.requestEditorFocus();
   }
 
   /// Converts re_editor's line+offset selection to whole-text offsets

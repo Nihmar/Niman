@@ -84,6 +84,16 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   List<String> get plainTextLines =>
       _controller.document.toPlainText().split(String.fromCharCode(10));
 
+  /// Returns focus to the surface, keeping the caret where it was.
+  ///
+  /// The formatting toolbar lives outside the editor: on the desktop a tap
+  /// on it moves focus out of the Quill editor, so every toolbar command
+  /// calls this after applying its format — the caret stays put, the format
+  /// stays active, and typing continues without a second click.
+  void requestEditorFocus() {
+    if (_focus.canRequestFocus) _focus.requestFocus();
+  }
+
   /// Opens the find bar (the status-row button and Ctrl/Cmd+F, T-WYS-08).
   void openFind({bool replace = false}) => _find.open(replace: replace);
 
