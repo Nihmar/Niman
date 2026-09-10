@@ -88,11 +88,40 @@ final class MarkdownDocumentCodec {
     final buffer = StringBuffer();
     var runs = <({String text, Map<String, dynamic> attrs})>[];
     var pendingOpaque = false;
+    // A fence is a run of consecutive code-block lines: the markers belong
+    // to the group, not to a line. One fence per line, or code text let out
+    // of it, is the bug the device report hit (2026-09-11).
+    var inCode = false;
+    void closeCode() {
+      if (!inCode) return;
+      buffer.write('~~~$_nl');
+      inCode = false;
+    }
+
+    void flush(Map<String, dynamic> attrs) {
+      final text = runs.map((run) => _renderInline(run.text, run.attrs)).join();
+      runs = <({String text, Map<String, dynamic> attrs})>[];
+      if (attrs['code-block'] == true) {
+        if (!inCode) {
+          final lang = attrs['copist-lang'];
+          buffer.write('~~~${lang is String ? lang : ''}$_nl');
+          inCode = true;
+        }
+        buffer
+          ..write(text)
+          ..write(_nl);
+        return;
+      }
+      closeCode();
+      buffer.write(_renderLine(text, attrs));
+    }
+
     for (final op in json) {
       final insert = op['insert'];
       final attrs = (op['attributes'] as Map<String, dynamic>?) ?? const {};
       if (insert is Map<String, dynamic> &&
           insert.containsKey(opaqueEmbedKey)) {
+        closeCode();
         final value = insert[opaqueEmbedKey];
         final source = value is Map ? value['source'] : null;
         if (source is String) {
@@ -109,15 +138,13 @@ final class MarkdownDocumentCodec {
           if (pendingOpaque) {
             pendingOpaque = false;
           } else {
-            buffer.write(_renderLine(runs, attrs));
+            flush(attrs);
           }
-          runs = <({String text, Map<String, dynamic> attrs})>[];
         }
       }
     }
-    if (runs.isNotEmpty) {
-      buffer.write(_renderLine(runs, const <String, dynamic>{}));
-    }
+    if (runs.isNotEmpty) flush(const <String, dynamic>{});
+    closeCode();
     return buffer.toString();
   }
 
@@ -167,15 +194,24 @@ final class MarkdownDocumentCodec {
     final lang = code is md.Element
         ? (code.attributes['class'] ?? '').replaceFirst('language-', '')
         : '';
+    // Every line inside the fence carries the code-block attribute: Quill's
+    // block format lives on the line's newline, and one multi-line insert
+    // with no attribute put the code outside the block (device report,
+    // 2026-09-11).
+    final lines = pre.textContent.split(_nl);
+    if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
+    if (lines.isEmpty) lines.add('');
     return <Map<String, dynamic>>[
-      <String, dynamic>{'insert': pre.textContent},
-      <String, dynamic>{
-        'insert': _nl,
-        'attributes': <String, dynamic>{
-          'code-block': true,
-          if (lang.isNotEmpty) 'copist-lang': lang,
+      for (final line in lines) ...<Map<String, dynamic>>[
+        <String, dynamic>{'insert': line},
+        <String, dynamic>{
+          'insert': _nl,
+          'attributes': <String, dynamic>{
+            'code-block': true,
+            if (lang.isNotEmpty) 'copist-lang': lang,
+          },
         },
-      },
+      ],
     ];
   }
 
@@ -249,16 +285,7 @@ final class MarkdownDocumentCodec {
     return ops;
   }
 
-  String _renderLine(
-    List<({String text, Map<String, dynamic> attrs})> runs,
-    Map<String, dynamic> attrs,
-  ) {
-    final text = runs.map((run) => _renderInline(run.text, run.attrs)).join();
-    if (attrs['code-block'] == true) {
-      final lang = attrs['copist-lang'];
-      final body = text.endsWith(_nl) ? text : '$text$_nl';
-      return '~~~${lang is String ? lang : ''}$_nl$body~~~$_nl';
-    }
+  String _renderLine(String text, Map<String, dynamic> attrs) {
     var prefix = '';
     final header = attrs['header'];
     if (header is int) prefix = '${'#' * header} ';
