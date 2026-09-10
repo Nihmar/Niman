@@ -24,6 +24,7 @@ import 'package:copist/src/ui/action_sheet.dart';
 import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:copist/src/ui/name_dialog.dart';
 import 'package:copist/src/ui/new_item_fab.dart';
+import 'package:copist/src/ui/note_picker.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:copist/src/ui/open_library.dart';
 import 'package:copist/src/ui/quick_note_tab.dart';
@@ -944,12 +945,32 @@ final class _LibraryShellState extends State<_LibraryShell>
     // The template's own questions first (T-TPL-03): an answer can name
     // the file and pick the folder, so it has to exist before either is
     // decided.
-    Map<String, String>? answers;
-    final fields = templateFields(template);
+    //
+    // The backlink joins them as a field of its own when the template
+    // wants one (user, 2026-09-10): the note it points at is a choice,
+    // and the app guessing it from wherever the user happened to be is
+    // what got it wrong. The note on screen is only the suggestion.
+    final wantsBacklink = templateUses(template, 'parent');
+    final fields = <TemplateField>[
+      if (wantsBacklink)
+        TemplateField(
+          label: parentFieldLabel,
+          title: AppStrings.templateFormBacklink,
+          kind: TemplateFieldKind.note,
+          hint: _parentNoteName(templateFolder: folder),
+        ),
+      ...templateFields(template),
+    ];
+    var answers = <String, String>{};
     if (fields.isNotEmpty) {
       if (!mounted) return;
-      answers = await showTemplateForm(context, fields: fields);
-      if (answers == null) return;
+      final given = await showTemplateForm(
+        context,
+        fields: fields,
+        pickNote: _pickBacklinkNote,
+      );
+      if (given == null) return;
+      answers = given;
     }
     // Where the note is being made from (T-TPL-04). The clipboard is
     // read once, here, rather than per occurrence — two `{{clipboard}}`
@@ -957,7 +978,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     // template that asks for it, so using any other template never
     // reaches into what the user copied.
     final surroundings = TemplateContext(
-      parent: _parentNoteName(templateFolder: folder),
+      parent: answers.remove(parentFieldLabel) ?? '',
       clipboard: templateUses(template, 'clipboard')
           ? await _clipboardText()
           : '',
@@ -1042,6 +1063,22 @@ final class _LibraryShellState extends State<_LibraryShell>
         _noteOpened();
       });
     });
+  }
+
+  /// Asks which note a template's `[[{{parent}}]]` should point at, and
+  /// answers with the name the link is written under.
+  ///
+  /// The name, not the path: a wikilink resolves by name, so that is what
+  /// goes in the note.
+  Future<String?> _pickBacklinkNote() async {
+    final path = await showNotePicker(
+      context,
+      controller: widget.controller,
+      title: AppStrings.templateFormPickNote,
+    );
+    if (path == null) return null;
+    final name = path.split('/').last;
+    return isMarkdownNote(name) ? name.substring(0, name.length - 3) : name;
   }
 
   /// Where a template-made note goes when the template did not say, kept

@@ -2,6 +2,7 @@
 // empty clipboard leaves an empty string rather than the placeholder.
 import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,20 +60,38 @@ void main() {
     await settle(tester);
   }
 
-  /// Picks the one template from the FAB and names the note [name].
-  Future<void> useTemplate(WidgetTester tester, String name) async {
+  /// Opens the FAB's template picker and takes the one template.
+  Future<void> chooseTemplate(WidgetTester tester) async {
     await tester.tap(find.byKey(const Key('new-note-fab')));
     await settleFabMenu(tester);
     await tester.tap(find.byKey(const Key('new-from-template-action')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('template-Templates/Spinoff.md')));
     await settle(tester);
+  }
+
+  /// The backlink field's current value, as the form shows it.
+  String backlinkShown(WidgetTester tester) {
+    final tile = tester.widget<ListTile>(
+      find.byKey(const Key('template-field-parent')),
+    );
+    return (tile.subtitle! as Text).data!;
+  }
+
+  /// Takes the template, accepts the form as it stands, and names the
+  /// note [name].
+  Future<void> useTemplate(WidgetTester tester, String name) async {
+    await chooseTemplate(tester);
+    if (find.byKey(const Key('template-form')).evaluate().isNotEmpty) {
+      await tester.tap(find.byKey(const Key('template-form-ok')));
+      await settle(tester);
+    }
     await tester.enterText(dialogField(), name);
     await tester.tap(find.text('OK'));
     await settle(tester);
   }
 
-  testWidgets('a note made from inside another links back to it', (
+  testWidgets('the note on screen is offered as the backlink, not imposed', (
     tester,
   ) async {
     useClipboard(null);
@@ -82,7 +101,15 @@ void main() {
     await tester.tap(noteRow('Kingdoms.md'));
     await settle(tester);
 
-    await useTemplate(tester, 'Elyria');
+    await chooseTemplate(tester);
+    // A field of its own, filled in with the suggestion, which the user
+    // can take, change or clear (user, 2026-09-10).
+    expect(backlinkShown(tester), 'Kingdoms');
+    await tester.tap(find.byKey(const Key('template-form-ok')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Elyria');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
 
     expect(
       controller.contentOf('Elyria.md'),
@@ -141,6 +168,71 @@ void main() {
     await useTemplate(tester, 'Tried');
 
     expect(controller.contentOf('Tried.md'), 'From []\n');
+  });
+
+  testWidgets('the backlink can be picked from the library', (tester) async {
+    useClipboard(null);
+    await openWith(tester, 'From [[{{parent}}]]\n');
+    await controller.createNote(parentPath: '', name: 'Kingdoms');
+    await controller.createNote(parentPath: '', name: 'Guilds');
+    await settle(tester);
+    // Standing on one note, but the new one belongs under the other.
+    await tester.tap(noteRow('Kingdoms.md'));
+    await settle(tester);
+
+    await chooseTemplate(tester);
+    expect(backlinkShown(tester), 'Kingdoms');
+    await tester.tap(find.byKey(const Key('template-field-parent')));
+    await settle(tester);
+    expect(find.byKey(const Key('note-picker')), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('note-picker')),
+        matching: find.text('Guilds.md'),
+      ),
+    );
+    await settle(tester);
+    expect(backlinkShown(tester), 'Guilds');
+
+    await tester.tap(find.byKey(const Key('template-form-ok')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Elyria');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(controller.contentOf('Elyria.md'), 'From [[Guilds]]\n');
+  });
+
+  testWidgets('the suggested backlink can be cleared away', (tester) async {
+    useClipboard(null);
+    await openWith(tester, 'From [{{parent}}]\n');
+    await controller.createNote(parentPath: '', name: 'Kingdoms');
+    await settle(tester);
+    await tester.tap(noteRow('Kingdoms.md'));
+    await settle(tester);
+
+    await chooseTemplate(tester);
+    await tester.tap(find.byKey(const Key('template-field-clear-parent')));
+    await settle(tester);
+    expect(backlinkShown(tester), AppStrings.templateFormNoNote);
+    await tester.tap(find.byKey(const Key('template-form-ok')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Loose');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    expect(controller.contentOf('Loose.md'), 'From []\n');
+  });
+
+  testWidgets('a template that wants no backlink is not asked about one', (
+    tester,
+  ) async {
+    useClipboard(null);
+    await openWith(tester, '# {{title}}\n');
+
+    await chooseTemplate(tester);
+
+    expect(find.byKey(const Key('template-form')), findsNothing);
   });
 
   testWidgets('the clipboard lands in the note', (tester) async {

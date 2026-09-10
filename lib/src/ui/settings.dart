@@ -8,7 +8,7 @@ import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/folder_picker.dart';
-import 'package:copist/src/ui/quick_note_picker.dart';
+import 'package:copist/src/ui/note_picker.dart';
 import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/switch_library_screen.dart';

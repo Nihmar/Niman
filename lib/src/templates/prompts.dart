@@ -22,7 +22,17 @@ enum TemplateFieldKind {
 
   /// Picked from a list the template wrote.
   choice,
+
+  /// Picked from the library's notes.
+  note,
 }
+
+/// The label of the field that answers `{{parent}}` (T-TPL-04).
+///
+/// Not a question the template wrote — the template only mentions
+/// `{{parent}}` — so the shell adds it, and it is reserved: a
+/// `{{ask:parent}}` would be answering the same thing twice.
+const String parentFieldLabel = 'parent';
 
 /// One question a template asks.
 @immutable
@@ -33,10 +43,18 @@ final class TemplateField {
     required this.kind,
     this.hint = '',
     this.choices = const [],
+    this.title,
   });
 
   /// What the field is called; also the key its answer is stored under.
   final String label;
+
+  /// What the form calls it, when that is not [label].
+  ///
+  /// A template's own questions are shown under the label their author
+  /// wrote. The one field the shell adds — the backlink — has a reserved
+  /// label and a phrase of its own.
+  final String? title;
 
   /// Whether it is typed or picked.
   final TemplateFieldKind kind;
@@ -50,9 +68,12 @@ final class TemplateField {
   /// What the form offers before the user touches anything: the hint for
   /// a text field, the first option for a choice.
   String get initial => switch (kind) {
-    TemplateFieldKind.text => hint,
+    TemplateFieldKind.text || TemplateFieldKind.note => hint,
     TemplateFieldKind.choice => choices.isEmpty ? '' : choices.first,
   };
+
+  /// The heading the form shows over the field.
+  String get heading => title ?? label;
 
   @override
   bool operator ==(Object other) =>
@@ -60,11 +81,13 @@ final class TemplateField {
       other.label == label &&
       other.kind == kind &&
       other.hint == hint &&
+      other.title == title &&
       other.choices.length == choices.length &&
       other.choices.indexed.every((e) => choices[e.$1] == e.$2);
 
   @override
-  int get hashCode => Object.hash(label, kind, hint, Object.hashAll(choices));
+  int get hashCode =>
+      Object.hash(label, kind, hint, title, Object.hashAll(choices));
 }
 
 /// Every field [source] asks for, in the order it first mentions them.

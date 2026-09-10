@@ -566,6 +566,7 @@ final class AppStrings {
   static String get actionCancel => _t('Cancel', 'Annulla');
   static String get actionCreate => _t('Create', 'Crea');
   static String get actionSave => _t('Save', 'Salva');
+  static String get actionClear => _t('Clear', 'Svuota');
   static String get actionChoose => _t('Choose', 'Scegli');
   static String get actionDelete => _t('Delete', 'Elimina');
   static String get actionRename => _t('Rename', 'Rinomina');
@@ -607,6 +608,10 @@ final class AppStrings {
       _t('New from template here', 'Nuova da modello qui');
   static String get templateFormTitle =>
       _t('Fill in the template', 'Compila il modello');
+  static String get templateFormBacklink => _t('Linked from', 'Collegata da');
+  static String get templateFormNoNote => _t('No note', 'Nessuna nota');
+  static String get templateFormPickNote =>
+      _t('Choose the note', 'Scegli la nota');
 
   // The template placeholder reference (T-TPL-08).
   static String get templateHelpTitle =>
@@ -702,11 +707,13 @@ final class AppStrings {
   static String get templateHelpAskTitle =>
       _t('Asking you something', 'Chiedere qualcosa');
   static String get templateHelpAskBody => _t(
-    'A form appears before the note is created, one box per question. '
+    'A form appears before the note is created, one box per question — '
+        'and one for the backlink, when the template wants one. '
         'The same label twice is one question, and its answer fills every '
         'occurrence — the folder and the file name included.',
     'Prima che la nota venga creata compare un modulo, una casella per '
-        'domanda. La stessa etichetta due volte è una domanda sola, e la '
+        'domanda, più una per il collegamento se il modello lo vuole. '
+        'La stessa etichetta due volte è una domanda sola, e la '
         'risposta riempie ogni occorrenza — cartella e nome del file '
         'compresi.',
   );
@@ -763,10 +770,10 @@ final class AppStrings {
   static String get templateHelpAroundTitle =>
       _t('Where it came from', 'Da dove arriva');
   static String get templateHelpParentBody => _t(
-    'The name of the note you started from; write [[{{parent}}]] for a '
-        'link back to it. Empty when you started from the tree.',
-    'Il nome della nota da cui sei partito; scrivi [[{{parent}}]] per un '
-        'link che ci riporta. Vuoto se sei partito dall’albero.',
+    'A note you pick in the form, which suggests the one on screen; write '
+        '[[{{parent}}]] for a link back to it.',
+    'Una nota che scegli nel modulo, che ti propone quella sullo schermo; '
+        'scrivi [[{{parent}}]] per un link che ci riporta.',
   );
   static String get templateHelpFolderValueBody => _t(
     'The folder the note ended up in.',

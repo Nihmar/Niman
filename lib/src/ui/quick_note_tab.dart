@@ -1,6 +1,6 @@
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/ui/name_dialog.dart';
-import 'package:copist/src/ui/quick_note_picker.dart';
+import 'package:copist/src/ui/note_picker.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 

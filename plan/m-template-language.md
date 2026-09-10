@@ -120,13 +120,20 @@ back by choice 4 and land after.
   creation came from "new note from selection"; empty otherwise).
   *AC: creating from inside a note links back to it; an empty clipboard
   yields an empty string, not the literal placeholder.*
-  **Built differently:** `{{parent}}` gives the note's *name*, not a
-  ready-made wikilink. A placeholder that wrapped itself in `[[…]]` could
+  **Built differently, twice.** First, `{{parent}}` gives the note's
+  *name*, not a ready-made wikilink. A placeholder that wrapped itself in `[[…]]` could
   not be used in a sentence, in a frontmatter value, or with a filter, and
   it would have to guess between the two link formats the settings offer.
   A template writes `[[{{parent}}]]`, which is also what it looks like in
   the note. The four resolve to the empty string when there is nothing to
   say and stand only when the caller supplied no context at all.
+  Second, and after the device round: `{{parent}}` is **picked in the
+  form**, not deduced. Deducing it was wrong twice over — a selection
+  outlives the note it points at, so the file list handed out a backlink
+  to whatever had been open before; and creating from a template opens
+  what it made, so a run of characters chained one to the next. The form
+  suggests the note on screen and the user takes it, changes it from the
+  library tree, or clears it (user, 2026-09-10).
 - [x] **T-TPL-06** `{{include:path}}` — another template's text, pasted
   before substitution, so a library can keep one header and one footer.
   Depth-limited to 5, cycles refused with the cycle named in the created
