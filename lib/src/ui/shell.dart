@@ -13,6 +13,7 @@ import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/library/session.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/templates/directives.dart';
+import 'package:copist/src/templates/prompts.dart';
 import 'package:copist/src/todo/reminders.dart';
 import 'package:copist/src/todo/todo_controller.dart';
 import 'package:copist/src/todo/todo_filter.dart';
@@ -30,6 +31,7 @@ import 'package:copist/src/ui/settings_tab.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
+import 'package:copist/src/ui/template_form.dart';
 import 'package:copist/src/ui/template_picker.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_help.dart';
@@ -924,16 +926,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       template = await ops.readNote(chosen.path);
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$error')));
       }
       return;
+    }
+    // The template's own questions first (T-TPL-03): an answer can name
+    // the file and pick the folder, so it has to exist before either is
+    // decided.
+    Map<String, String>? answers;
+    final fields = templateFields(template);
+    if (fields.isNotEmpty) {
+      if (!mounted) return;
+      answers = await showTemplateForm(context, fields: fields);
+      if (answers == null) return;
     }
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
     // is known, so a folder may be built from it.
-    final declared = readTemplateDirectives(template);
+    final declared = readTemplateDirectives(template, answers: answers);
     final String name;
     if (declared.namesItself) {
       name = declared.filename!;
@@ -948,8 +959,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       name = asked;
     }
     await _guard(() async {
-      final directives = readTemplateDirectives(template, title: name);
-      final content = renderTemplate(template, title: name);
+      final directives = readTemplateDirectives(
+        template,
+        title: name,
+        answers: answers,
+      );
+      final content = renderTemplate(template, title: name, answers: answers);
       final target = directives.folder ?? parent ?? _createParent;
       if (directives.folder case final wanted? when wanted.isNotEmpty) {
         await ops.ensureFolder(wanted);

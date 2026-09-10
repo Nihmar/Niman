@@ -1,8 +1,9 @@
 /// The template placeholder engine (T-M4-06, widened by T-TPL-01).
 ///
 /// Substitution, not a template language: `{{title}}`, `{{date}}`,
-/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}` and `{{uuid}}` are replaced,
-/// each may be followed by filters — `{{title|slug}}`,
+/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}`, `{{uuid}}` and the two the
+/// user answers — `{{ask:Label}}` and `{{choice:Label:a,b,c}}` — are
+/// replaced, each may be followed by filters — `{{title|slug}}`,
 /// `{{date:YYYY-MM-DD|+7d}}` — and everything else in the file is copied
 /// through byte for byte. There are no conditionals, no loops and no
 /// expressions, because a template here is a note that happens to have
@@ -35,24 +36,25 @@ const String defaultNowFormat = 'YYYY-MM-DD HH:mm';
 /// defaults to [DateTime.now], and tests pass a fixed one). [uuid]
 /// generates `{{uuid}}` values, one per occurrence; the default is a
 /// version 4 UUID from the platform's secure random.
+/// [answers] fills `{{ask:…}}` and `{{choice:…}}` (T-TPL-03), keyed by
+/// the field's label. A null map, or a label the map does not carry,
+/// leaves the placeholder standing — the same thing every other unknown
+/// does, and what a caller that never collected the answers should show.
 String applyTemplate(
   String source, {
   required String title,
   DateTime? now,
   String Function()? uuid,
+  Map<String, String>? answers,
 }) {
   final clock = now ?? DateTime.now();
   final newUuid = uuid ?? newUuidV4;
-  return source.replaceAllMapped(_placeholder, (match) {
+  return source.replaceAllMapped(templatePlaceholder, (match) {
     final whole = match.group(0)!;
-    final parts = splitPipes(match.group(1)!);
-    final head = parts.first;
-    final colon = head.indexOf(':');
-    final name = (colon < 0 ? head : head.substring(0, colon))
-        .trim()
-        .toLowerCase();
-    final argument = colon < 0 ? null : head.substring(colon + 1).trim();
-    final filters = parts.skip(1).toList();
+    final parsed = parsePlaceholder(match.group(1)!);
+    final name = parsed.name;
+    final argument = parsed.argument;
+    final filters = parsed.filters;
     return switch (name) {
       'title' => _applyTextFilters(title, filters) ?? whole,
       'uuid' => _applyTextFilters(newUuid(), filters) ?? whole,
@@ -61,6 +63,10 @@ String applyTemplate(
       'time' =>
         _dateValue(clock, argument, defaultTimeFormat, filters) ?? whole,
       'now' => _dateValue(clock, argument, defaultNowFormat, filters) ?? whole,
+      'ask' || 'choice' => switch (answers?[fieldLabel(argument)]) {
+        final answer? => _applyTextFilters(answer, filters) ?? whole,
+        null => whole,
+      },
       // Not ours: left exactly as written.
       _ => whole,
     };
@@ -69,7 +75,34 @@ String applyTemplate(
 
 /// `{{…}}`; the body runs to the closing braces, so a format may hold
 /// colons, pipes and spaces.
-final RegExp _placeholder = RegExp(r'\{\{([^{}]*)\}\}');
+final RegExp templatePlaceholder = RegExp(r'\{\{([^{}]*)\}\}');
+
+/// A placeholder body split into the three things it can hold.
+///
+/// `date:YYYY-MM|+7d` is name `date`, argument `YYYY-MM`, one filter.
+/// The name is lower-cased and the argument trimmed; the filters are
+/// left as written, for [_applyTextFilters] to read.
+({String name, String? argument, List<String> filters}) parsePlaceholder(
+  String body,
+) {
+  final parts = splitPipes(body);
+  final head = parts.first;
+  final colon = head.indexOf(':');
+  return (
+    name: (colon < 0 ? head : head.substring(0, colon)).trim().toLowerCase(),
+    argument: colon < 0 ? null : head.substring(colon + 1).trim(),
+    filters: parts.skip(1).toList(),
+  );
+}
+
+/// The label of an `{{ask:…}}` or `{{choice:…}}` argument: everything up
+/// to the first colon, which is where a hint or a list of options
+/// starts.
+String fieldLabel(String? argument) {
+  if (argument == null) return '';
+  final colon = argument.indexOf(':');
+  return (colon < 0 ? argument : argument.substring(0, colon)).trim();
+}
 
 /// [body] split on the `|` that separate a value from its filters.
 ///

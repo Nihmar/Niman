@@ -93,13 +93,19 @@ TemplateDirectives readTemplateDirectives(
   String source, {
   String title = '',
   DateTime? now,
+  Map<String, String>? answers,
 }) {
   final parsed = parseFrontmatter(source);
   if (parsed == null || parsed.error != null) return TemplateDirectives.none;
   String? value(String key) {
     final raw = parsed.first('$directivesKey.$key');
     if (raw == null) return null;
-    final rendered = applyTemplate(raw, title: title, now: now).trim();
+    final rendered = applyTemplate(
+      raw,
+      title: title,
+      now: now,
+      answers: answers,
+    ).trim();
     return rendered.isEmpty ? null : rendered;
   }
 
@@ -132,8 +138,9 @@ String renderTemplate(
   required String title,
   DateTime? now,
   String Function()? uuid,
+  Map<String, String>? answers,
 }) => removeFrontmatterKey(
-  applyTemplate(source, title: title, now: now, uuid: uuid),
+  applyTemplate(source, title: title, now: now, uuid: uuid, answers: answers),
   directivesKey,
 );
 

@@ -90,7 +90,7 @@ back by choice 4 and land after.
   `+1y`, and `startof:week` / `endof:month`. *AC: `{{date:dddd|upper}}`
   on a fixed clock; an offset crossing a month and a year boundary; an
   unknown filter leaves the placeholder standing, whole.*
-- [ ] **T-TPL-02** The directive layer: a `copist:` mapping in the
+- [x] **T-TPL-02** The directive layer: a `copist:` mapping in the
   template's own frontmatter, consumed on creation and never written to
   the new note. Keys: `folder` (where the note goes, library-relative,
   created if missing), `filename` (what it is called, placeholders and
@@ -103,7 +103,7 @@ back by choice 4 and land after.
   `append` template lands in the same file; the `copist:` key never
   appears in a created note, while the template's other frontmatter
   does.*
-- [ ] **T-TPL-03** The prompt layer: `{{ask:Label}}` and
+- [x] **T-TPL-03** The prompt layer: `{{ask:Label}}` and
   `{{choice:Label:one,two,three}}`. Every distinct label is asked once,
   in one form shown before the note is created, in the order the template
   mentions them; the answer fills every occurrence, directives included —

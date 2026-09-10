@@ -67,9 +67,7 @@ final class TemplateRepo implements TemplateSource {
           TemplateEntry(path: row.path, name: _nameUnder(root, row.path)),
     ];
     return entries
-      ..sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
   static bool _isNote(String name) => name.toLowerCase().endsWith('.md');
