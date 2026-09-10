@@ -273,6 +273,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// The WYSIWYG surface's state (the toolbar's Quill commands need it).
   final GlobalKey<WysiwygEditorState> _wysiwygKey =
       GlobalKey<WysiwygEditorState>();
+
+  /// The formats on at the WYSIWYG caret: the toolbar's pressed state.
+  final ValueNotifier<Set<ToolbarItem>> _wysiwygActive =
+      ValueNotifier<Set<ToolbarItem>>(const <ToolbarItem>{});
   late final ScrollController _previewScroll = ScrollController();
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
@@ -380,6 +384,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _findController.dispose();
+    _wysiwygActive.dispose();
     _focus.dispose();
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
@@ -631,6 +636,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           onChanged: _onWysiwygChanged,
           autoFocus: widget.autofocusEditor,
           spellCheck: widget.spellCheck,
+          activeItems: _wysiwygActive,
         )
       : _buildEditor();
 
@@ -1498,21 +1504,36 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// region and tapping it keeps the editor focused.
   Widget _toolbar(BuildContext context) {
     final actions = _toolbarActions();
-    final toolbar = EditorToolbar(
-      buttons: [
-        for (final item in widget.toolbarLayout.visible)
-          EditorToolbarButton(
-            key: item.widgetKey,
-            icon: item.icon,
-            tooltip: item.label,
-            onPressed: actions[item]!,
-          ),
-      ],
-    );
     // The re_editor tap region keeps the keyboard up for the source editor;
-    // the WYSIWYG surface has its own focus handling.
-    return widget.showWysiwyg ? toolbar : CodeEditorTapRegion(child: toolbar);
+    // the WYSIWYG surface has its own focus handling, and publishes which
+    // formats are on at the caret so a pressed button stays pressed until
+    // it is toggled off (T-WYS-06).
+    if (!widget.showWysiwyg) {
+      return CodeEditorTapRegion(
+        child: _toolbarBar(actions, const <ToolbarItem>{}),
+      );
+    }
+    return ValueListenableBuilder<Set<ToolbarItem>>(
+      valueListenable: _wysiwygActive,
+      builder: (context, active, _) => _toolbarBar(actions, active),
+    );
   }
+
+  Widget _toolbarBar(
+    Map<ToolbarItem, VoidCallback> actions,
+    Set<ToolbarItem> active,
+  ) => EditorToolbar(
+    buttons: [
+      for (final item in widget.toolbarLayout.visible)
+        EditorToolbarButton(
+          key: item.widgetKey,
+          icon: item.icon,
+          tooltip: item.label,
+          active: active.contains(item),
+          onPressed: actions[item]!,
+        ),
+    ],
+  );
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the

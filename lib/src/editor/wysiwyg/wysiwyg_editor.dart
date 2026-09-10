@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:copist/src/editor/toolbar_item.dart';
 import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
+import 'package:copist/src/editor/wysiwyg/quill_editor_commands.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_find_panel.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +27,7 @@ final class WysiwygEditor extends StatefulWidget {
     required this.onChanged,
     this.autoFocus = false,
     this.spellCheck,
+    this.activeItems,
     super.key,
   });
 
@@ -39,6 +43,10 @@ final class WysiwygEditor extends StatefulWidget {
   /// The editor's spelling state (T-WYS-08): underlines misspelled prose.
   /// Null (tests, or a platform without hunspell) draws none.
   final EditorSpellCheck? spellCheck;
+
+  /// The formats on at the caret, for the formatting toolbar's pressed
+  /// state (T-WYS-06). Null in tests that do not show a toolbar.
+  final ValueNotifier<Set<ToolbarItem>>? activeItems;
 
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
@@ -61,6 +69,13 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   late WysiwygFindController _find;
   StreamSubscription<quill.DocChange>? _changes;
   Timer? _debounce;
+
+  /// The last Markdown this surface emitted. The parent echoes it back as
+  /// [WysiwygEditor.data] on its next rebuild, and that echo can be older
+  /// than the live document while the writer keeps typing: re-decoding from
+  /// it reset the buffer and put the caret back at the start (device
+  /// report, 2026-09-11).
+  String? _lastEmitted;
 
   /// The controller the toolbar commands act on (T-WYS-06).
   quill.QuillController get controller => _controller;
@@ -104,6 +119,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     );
     _changes = _controller.changes.listen(_onDocumentChanged);
     _controller.onSelectionChanged = _onSelectionChanged;
+    _controller.addListener(_publishActive);
     _find = WysiwygFindController(_controller);
     final embedded = _decoded.snapshot
         .where((op) => op['insert'] is Map)
@@ -142,9 +158,22 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _log.debug('new line after a heading: the header is not continued');
   }
 
+  /// Publishes the formats that are on at the caret to the toolbar.
+  void _publishActive() {
+    final notifier = widget.activeItems;
+    if (notifier == null) return;
+    final active = <ToolbarItem>{
+      for (final item in ToolbarItem.values)
+        if (QuillEditorCommands.isActive(_controller, item)) item,
+    };
+    if (setEquals(active, notifier.value)) return;
+    notifier.value = active;
+  }
+
   void _emit() {
     if (!mounted) return;
     final markdown = _codec.encode(_controller.document, decoded: _decoded);
+    _lastEmitted = markdown;
     _log.debug('emit: ${markdown.length} chars');
     widget.onChanged(markdown);
   }
@@ -153,12 +182,17 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   void didUpdateWidget(WysiwygEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data == widget.data) return;
+    // Our own emit coming back, possibly stale while the writer types on:
+    // never re-decode from it.
+    if (widget.data == _lastEmitted) return;
     if (widget.data == _codec.encode(_controller.document, decoded: _decoded)) {
       return;
     }
     unawaited(_changes?.cancel());
     _find.dispose();
-    _controller.dispose();
+    _controller
+      ..removeListener(_publishActive)
+      ..dispose();
     _open(widget.data);
   }
 
@@ -167,7 +201,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _debounce?.cancel();
     unawaited(_changes?.cancel());
     _find.dispose();
-    _controller.dispose();
+    _controller
+      ..removeListener(_publishActive)
+      ..dispose();
     _focus.dispose();
     _scroll.dispose();
     super.dispose();
