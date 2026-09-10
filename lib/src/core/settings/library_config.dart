@@ -3,7 +3,12 @@ import 'dart:io';
 
 import 'package:copist/src/core/files.dart';
 import 'package:copist/src/core/settings/library_settings.dart'
-    show LinkType, TreeSort, defaultListFolder, defaultTemplateFolder;
+    show
+        EditorKind,
+        LinkType,
+        TreeSort,
+        defaultListFolder,
+        defaultTemplateFolder;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -191,6 +196,8 @@ final class LibraryConfig {
     this.noteTextScale = defaultTextScale,
     this.treeWidth = defaultTreeWidth,
     this.spellDictionaries = const <String>[],
+    this.editorKind = EditorKind.source,
+    this.previewEnabled = true,
     this.extra = const {},
   });
 
@@ -249,6 +256,11 @@ final class LibraryConfig {
       spellDictionaries: _spellDictionariesFrom(
         json['spellDictionaries'] ?? json['spellDictionary'],
       ),
+      editorKind: switch (json['editorKind']) {
+        'wysiwyg' => EditorKind.wysiwyg,
+        _ => EditorKind.source,
+      },
+      previewEnabled: _boolOr(json['previewEnabled'], true),
       extra: extra,
     );
   }
@@ -328,6 +340,12 @@ final class LibraryConfig {
   /// (T-PP-09, revised).
   final List<String> spellDictionaries;
 
+  /// Which editor this library writes in (default source).
+  final EditorKind editorKind;
+
+  /// Whether the preview exists at all (default true).
+  final bool previewEnabled;
+
   /// Keys this build does not understand, preserved verbatim.
   final Map<String, Object?> extra;
 
@@ -351,6 +369,8 @@ final class LibraryConfig {
     double? noteTextScale,
     double? treeWidth,
     List<String>? spellDictionaries,
+    EditorKind? editorKind,
+    bool? previewEnabled,
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
@@ -372,6 +392,8 @@ final class LibraryConfig {
       noteTextScale: noteTextScale ?? this.noteTextScale,
       treeWidth: treeWidth ?? this.treeWidth,
       spellDictionaries: spellDictionaries ?? this.spellDictionaries,
+      editorKind: editorKind ?? this.editorKind,
+      previewEnabled: previewEnabled ?? this.previewEnabled,
       extra: extra,
     );
   }
@@ -395,6 +417,8 @@ final class LibraryConfig {
     'treeWidth',
     'spellDictionary', // Legacy single-dictionary key (read, never written).
     'spellDictionaries',
+    'editorKind',
+    'previewEnabled',
   };
 
   /// The JSON object to write: the known keys (a null quick note is
@@ -424,6 +448,8 @@ final class LibraryConfig {
       'uiTextScale': uiTextScale,
       'noteTextScale': noteTextScale,
       'treeWidth': treeWidth,
+      'editorKind': editorKind.name,
+      'previewEnabled': previewEnabled,
     };
     if (quickNotePath != null) {
       json['quickNotePath'] = quickNotePath;
@@ -498,6 +524,8 @@ final class LibraryConfig {
         noteTextScale == other.noteTextScale &&
         treeWidth == other.treeWidth &&
         _deepEquals(spellDictionaries, other.spellDictionaries) &&
+        editorKind == other.editorKind &&
+        previewEnabled == other.previewEnabled &&
         _deepEquals(extra, other.extra);
   }
 
