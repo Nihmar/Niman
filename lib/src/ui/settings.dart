@@ -497,12 +497,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
     );
     if (kind == null) return;
     await widget.controller.setEditorKind(kind);
+    // Notify so the shell refreshes its cached value — the open note swaps
+    // surfaces without reopening it.
+    widget.controller.notify();
     if (mounted) setState(() => _editorKind = kind);
   }
 
   /// Persists the preview switch (T-WYS-03).
   Future<void> _togglePreviewEnabled(bool value) async {
     await widget.controller.setPreviewEnabled(enabled: value);
+    widget.controller.notify();
     if (mounted) setState(() => _previewEnabled = value);
   }
 
