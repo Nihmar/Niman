@@ -112,7 +112,18 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   }
 
   void _open(String source) {
-    _decoded = _codec.decode(source);
+    // The decode is the one step that can fail on a hostile file. Falling
+    // back to an empty note keeps the state valid: when it threw instead,
+    // the half-built state cascaded 77 LateInitializationErrors behind one
+    // bad file (debug log, 2026-09-10).
+    DecodedNote decoded;
+    try {
+      decoded = _codec.decode(source);
+    } on Object catch (error) {
+      _log.error('decode failed, opening an empty note: $error');
+      decoded = _codec.decode('');
+    }
+    _decoded = decoded;
     _controller = quill.QuillController(
       document: _decoded.document,
       selection: const TextSelection.collapsed(offset: 0),
@@ -121,6 +132,8 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _controller.onSelectionChanged = _onSelectionChanged;
     _controller.addListener(_publishActive);
     _find = WysiwygFindController(_controller);
+    // A new note's data is not the previous note's echo.
+    _lastEmitted = null;
     final embedded = _decoded.snapshot
         .where((op) => op['insert'] is Map)
         .length;
