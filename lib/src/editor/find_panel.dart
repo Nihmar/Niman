@@ -203,8 +203,9 @@ final class CopistFindPanel extends StatelessWidget
   }
 }
 
-/// The editor's shortcuts, defaults plus the classic Ctrl+H for the
-/// replace bar (non-mac desktop — mac keeps Cmd+Alt+F).
+/// The editor's shortcuts: the package defaults, the page keys the package
+/// forgets to bind, and the classic Ctrl+H for the replace bar (non-mac
+/// desktop — mac keeps Cmd+Alt+F).
 final class CopistShortcutsActivatorsBuilder
     extends CodeShortcutsActivatorsBuilder {
   /// Creates the builder.
@@ -213,6 +214,17 @@ final class CopistShortcutsActivatorsBuilder
   @override
   List<ShortcutActivator>? build(CodeShortcutType type) {
     final defaults = const DefaultCodeShortcutsActivatorsBuilder().build(type);
+    // The package ships the page-move intents and their action wiring but
+    // binds no key to them, and the controller methods behind them are
+    // `// TODO` stubs (re_editor 0.10.0): Copist binds the keys here and
+    // implements the move in `NoteEditor.shortcutOverrideActions`.
+    if (type == CodeShortcutType.cursorMovePageUp ||
+        type == CodeShortcutType.cursorMovePageDown) {
+      final key = type == CodeShortcutType.cursorMovePageUp
+          ? LogicalKeyboardKey.pageUp
+          : LogicalKeyboardKey.pageDown;
+      return [...?defaults, SingleActivator(key)];
+    }
     if (!kIsMacOS && type == CodeShortcutType.replace) {
       return [
         ...?defaults,
