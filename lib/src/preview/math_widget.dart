@@ -7,6 +7,31 @@ import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:markdown/markdown.dart' as md;
 
+/// Defers math typesetting while the preview is scrolling (T-PP-22).
+///
+/// A scroll lays out dozens of blocks per frame, and a math-heavy note
+/// typesets a formula in each of them: on the 934 KB geometry note the
+/// preview spent 5-6 ms per block, most of a frame's budget, which is what
+/// made scrolling stutter. While [deferring] is on, a math view keeps its
+/// placeholder and re-requests its box when the flag flips back (settle),
+/// so the gesture stays cheap and the typesetting happens between
+/// gestures.
+final class MathDeferScope extends InheritedWidget {
+  /// Creates the scope; [deferring] is the preview's scroll state.
+  const new({required this.deferring, required super.child, super.key});
+
+  /// Whether math views below should hold their placeholders.
+  final bool deferring;
+
+  /// The nearest scope's flag, or null outside a preview.
+  static MathDeferScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<MathDeferScope>();
+
+  @override
+  bool updateShouldNotify(MathDeferScope oldWidget) =>
+      oldWidget.deferring != deferring;
+}
+
 /// Visual style for the preview's math (text size in px-per-em, color).
 final class MathStyle {
   /// Creates the style.
@@ -113,31 +138,47 @@ final class InlineMathView extends StatefulWidget {
 }
 
 class _InlineMathViewState extends State<InlineMathView> {
+  /// Bumped per request so a stale completion never rebuilds a recycled
+  /// view.
+  int _revision = 0;
+
+  /// Whether the preview is scrolling: the render waits for the settle.
+  bool _deferring = false;
+
   @override
-  void initState() {
-    super.initState();
-    widget.cache.addListener(_onCache);
-    unawaited(widget.cache.ensure(widget.tex, displayMode: false));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _deferring = MathDeferScope.of(context)?.deferring ?? false;
+    if (!_deferring) _request();
   }
 
   @override
   void didUpdateWidget(InlineMathView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.cache != widget.cache || oldWidget.tex != widget.tex) {
-      oldWidget.cache.removeListener(_onCache);
-      widget.cache.addListener(_onCache);
-      unawaited(widget.cache.ensure(widget.tex, displayMode: false));
+      _request();
     }
   }
 
-  @override
-  void dispose() {
-    widget.cache.removeListener(_onCache);
-    super.dispose();
-  }
-
-  void _onCache() {
-    if (mounted) setState(() {});
+  /// Renders this span through the cache and rebuilds only this view when
+  /// it lands. A listener on the shared cache would rebuild every mounted
+  /// formula on every other formula's render — the scroll-time storm on
+  /// math-heavy notes (T-PP-22); the cache's own dedupe still shares one
+  /// render between views of the same tex.
+  void _request() {
+    final revision = ++_revision;
+    if (widget.cache.boxFor(widget.tex, displayMode: false) != null) {
+      // Count the reuse (the edit-reuse AC's measurement) without a
+      // rebuild: the box is already in hand.
+      unawaited(widget.cache.ensure(widget.tex, displayMode: false));
+      return;
+    }
+    if (_deferring) return; // didChangeDependencies re-runs on settle
+    unawaited(
+      widget.cache.ensure(widget.tex, displayMode: false).then((_) {
+        if (mounted && revision == _revision) setState(() {});
+      }),
+    );
   }
 
   @override
@@ -210,31 +251,42 @@ final class BlockMathView extends StatefulWidget {
 }
 
 class _BlockMathViewState extends State<BlockMathView> {
+  /// Bumped per request so a stale completion never rebuilds a recycled
+  /// view.
+  int _revision = 0;
+
+  /// Whether the preview is scrolling: the render waits for the settle.
+  bool _deferring = false;
+
   @override
-  void initState() {
-    super.initState();
-    widget.cache.addListener(_onCache);
-    unawaited(widget.cache.ensure(widget.tex, displayMode: true));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _deferring = MathDeferScope.of(context)?.deferring ?? false;
+    if (!_deferring) _request();
   }
 
   @override
   void didUpdateWidget(BlockMathView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.cache != widget.cache || oldWidget.tex != widget.tex) {
-      oldWidget.cache.removeListener(_onCache);
-      widget.cache.addListener(_onCache);
-      unawaited(widget.cache.ensure(widget.tex, displayMode: true));
+      _request();
     }
   }
 
-  @override
-  void dispose() {
-    widget.cache.removeListener(_onCache);
-    super.dispose();
-  }
-
-  void _onCache() {
-    if (mounted) setState(() {});
+  /// See [_InlineMathViewState._request]: one render, one rebuild of the
+  /// view that asked for it.
+  void _request() {
+    final revision = ++_revision;
+    if (widget.cache.boxFor(widget.tex, displayMode: true) != null) {
+      unawaited(widget.cache.ensure(widget.tex, displayMode: true));
+      return;
+    }
+    if (_deferring) return; // didChangeDependencies re-runs on settle
+    unawaited(
+      widget.cache.ensure(widget.tex, displayMode: true).then((_) {
+        if (mounted && revision == _revision) setState(() {});
+      }),
+    );
   }
 
   @override

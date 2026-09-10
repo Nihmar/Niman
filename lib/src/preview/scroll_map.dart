@@ -11,12 +11,25 @@ import 'dart:math' as math;
 /// layout, and the map answers the two sync queries: source line → preview
 /// offset (editor scrolls → preview follows) and preview offset → source
 /// line (preview scrolls → editor follows).
+///
+/// The mapping walks the measured block heights, not a line fraction
+/// (T-PP-22): an image or a display-math block is hundreds of pixels tall
+/// for a handful of source lines, so the fraction put the preview behind
+/// the editor next to them. Blocks the windowed preview has not laid out
+/// yet are estimated from the measured blocks' own pixels-per-line
+/// average, and before anything is measured the line fraction is still
+/// the best estimate there is.
 final class ScrollMap {
   /// Per top-level block: the source line it starts on.
   final List<int> blockStartLines = <int>[];
 
   /// Per top-level block: measured pixel height (0 until laid out).
   final List<double> blockHeights = <double>[];
+
+  /// Running sums over the measured blocks, so the average used for the
+  /// unmeasured ones costs nothing per scroll frame.
+  double _measuredPixels = 0;
+  int _measuredLines = 0;
 
   /// Total source lines (frontmatter excluded, like the preview parse).
   int lineCount = 0;
@@ -34,6 +47,8 @@ final class ScrollMap {
   void rebuild(String source) {
     blockStartLines.clear();
     blockHeights.clear();
+    _measuredPixels = 0;
+    _measuredLines = 0;
     lineCount = 0;
     if (source.isEmpty) return;
     final lines = const LineSplitter().convert(source);
@@ -47,7 +62,45 @@ final class ScrollMap {
     while (blockHeights.length <= index) {
       blockHeights.add(0);
     }
+    final previous = blockHeights[index];
+    if (previous > 0) {
+      _measuredPixels -= previous;
+      _measuredLines -= _spanOf(index);
+    }
     blockHeights[index] = height;
+    if (height > 0) {
+      _measuredPixels += height;
+      _measuredLines += _spanOf(index);
+    }
+  }
+
+  /// The source lines block [index] spans (at least one).
+  int _spanOf(int index) {
+    final start = blockStartLines[index];
+    final end = index + 1 < blockStartLines.length
+        ? blockStartLines[index + 1]
+        : lineCount;
+    return math.max(1, end - start);
+  }
+
+  /// The document's estimated content height in preview pixels (measured
+  /// blocks plus the estimate for the rest).
+  double _totalEstimated() {
+    var total = 0.0;
+    for (var i = 0; i < blockStartLines.length; i++) {
+      total += _heightOf(i);
+    }
+    return total;
+  }
+
+  /// Block [index]'s height: measured once the preview has laid it out,
+  /// else its line span at the measured pixels-per-line average (zero
+  /// before anything has been measured at all).
+  double _heightOf(int index) {
+    final measured = index < blockHeights.length ? blockHeights[index] : 0.0;
+    if (measured > 0) return measured;
+    if (_measuredLines == 0) return 0;
+    return _spanOf(index) * (_measuredPixels / _measuredLines);
   }
 
   /// The block index containing source [line].
@@ -66,25 +119,63 @@ final class ScrollMap {
   }
 
   /// The preview offset that shows [line], or null when nothing is laid out
-  /// yet. Proportional (line fraction × content height): the mapping table
-  /// pins the block structure, but the scroll position itself is a fraction
-  /// — which is what lines up with the editor's own (wrap-dependent)
-  /// extent.
+  /// yet. It walks the blocks above [line]'s, adding their measured (or
+  /// estimated) heights and the line's fraction inside its own block; before
+  /// any block is measured it falls back to the source line fraction.
   double? previewOffsetForLine(int line, {required double maxExtent}) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    final fraction = (line / math.max(1, lineCount - 1)).clamp(0.0, 1.0);
-    return maxExtent * fraction;
+    if (_measuredLines == 0) {
+      final fraction = (line / math.max(1, lineCount - 1)).clamp(0.0, 1.0);
+      return maxExtent * fraction;
+    }
+    final total = _totalEstimated();
+    if (total <= 0) return null;
+    final index = blockForLine(line);
+    var content = 0.0;
+    for (var i = 0; i < index; i++) {
+      content += _heightOf(i);
+    }
+    final span = _spanOf(index);
+    final within = span <= 1
+        ? 0.0
+        : ((line - blockStartLines[index]) / span).clamp(0.0, 1.0);
+    content += _heightOf(index) * within;
+    // The scrollable extent is the content minus its viewport: scaling by
+    // extent/total keeps the two panes' fractions equal (70% of the editor
+    // is 70% of the preview) while the block walk keeps the positions
+    // right where an image or a math block makes the density uneven.
+    return (content * maxExtent / total).clamp(0.0, maxExtent);
   }
 
-  /// The source line shown at preview [offset], or null when unknown.
+  /// The source line shown at preview [offset], or null when unknown. The
+  /// mirror of [previewOffsetForLine]: blocks are walked, not fractions.
   int? lineForPreviewOffset(double offset, {required double maxExtent}) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
-    final fraction = (offset / maxExtent).clamp(0.0, 1.0);
-    return ((lineCount - 1) * fraction).round();
+    if (_measuredLines == 0) {
+      final fraction = (offset / maxExtent).clamp(0.0, 1.0);
+      return ((lineCount - 1) * fraction).round();
+    }
+    final total = _totalEstimated();
+    if (total <= 0) return null;
+    final content = offset * total / maxExtent;
+    var acc = 0.0;
+    for (var i = 0; i < blockStartLines.length; i++) {
+      final height = _heightOf(i);
+      if (acc + height > content) {
+        final within = height <= 0
+            ? 0.0
+            : ((content - acc) / height).clamp(0.0, 1.0);
+        final span = _spanOf(i);
+        final line = blockStartLines[i] + (within * span).floor();
+        return line.clamp(blockStartLines[i], blockStartLines[i] + span - 1);
+      }
+      acc += height;
+    }
+    return lineCount - 1;
   }
 }
 

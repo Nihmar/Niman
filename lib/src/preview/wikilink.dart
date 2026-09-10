@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:copist/src/links/parser.dart';
+import 'package:copist/src/preview/aspect_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -110,8 +111,8 @@ final class _EmbedViewState extends State<_EmbedView> {
     if (path == null || !EmbedBuilder._imageExt.hasMatch(widget.target)) {
       return _placeholder(context);
     }
-    return Image.file(
-      File(path),
+    return AspectImage(
+      provider: FileImage(File(path)),
       fit: BoxFit.fitWidth,
       errorBuilder: (context, error, stack) => _placeholder(context),
     );

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/links/parser.dart';
+import 'package:copist/src/preview/aspect_image.dart';
 import 'package:copist/src/preview/html_table.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/math_syntax.dart';
@@ -128,6 +129,10 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   /// Bumped per parse so a stale isolate result is dropped.
   int _parseRevision = 0;
 
+  /// Whether the preview is mid-scroll (see [MathDeferScope]).
+  bool _scrolling = false;
+  Timer? _settleTimer;
+
   /// Below this size the parse stays synchronous (the divide is a single
   /// frame's cost); above it the whole parse runs on a background isolate
   /// so a 931K note never janks the UI (the measured 418 ms whole-doc
@@ -152,9 +157,23 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 
   @override
   void dispose() {
+    _settleTimer?.cancel();
     _disposeRecognizers();
     if (widget.mathCache == null) _mathCache.dispose();
     super.dispose();
+  }
+
+  /// Tracks the scroll gesture: the math views below hold their
+  /// placeholders until a short settle after the last notification, so a
+  /// gesture never pays the typesetting (T-PP-22). Any notification counts
+  /// as activity — an interrupted fling that never reports an end must not
+  /// leave every formula as a placeholder forever.
+  void _onScrollNotification(ScrollNotification notification) {
+    _settleTimer?.cancel();
+    if (!_scrolling) setState(() => _scrolling = true);
+    _settleTimer = Timer(const Duration(milliseconds: 120), () {
+      if (mounted && _scrolling) setState(() => _scrolling = false);
+    });
   }
 
   void _disposeRecognizers() {
@@ -248,10 +267,39 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       paddingBuilders: const {},
       listItemCrossAxisAlignment: MarkdownListItemCrossAxisAlignment.baseline,
     );
+    // One sliver child per top-level node, not one per built widget: the
+    // package appends a block-spacing `SizedBox` after every block, so its
+    // flat list has more entries than the source has blocks and the scroll
+    // map's per-block measurements drifted by one every block (T-PP-22).
+    // Grouping a node's widgets keeps the map's block index = node index
+    // (the locator tests assert the two counts match).
+    final map = widget.scrollMap;
+    final children = <Widget>[];
+    for (final node in nodes) {
+      final block = builder.build([node]);
+      final content = block.length == 1
+          ? block.single
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: block,
+            );
+      if (map == null) {
+        children.add(content);
+        continue;
+      }
+      final index = children.length;
+      children.add(
+        _BlockMeasure(
+          onHeight: (height) => map.measure(index, height),
+          child: content,
+        ),
+      );
+    }
     setState(() {
-      _children = builder.build(nodes);
+      _children = children;
     });
-    widget.scrollMap?.rebuild(source);
+    map?.rebuild(source);
     // AST → widget-tree construction is the preview's other O(doc) cost;
     // the parse logs above separate it from the Markdown parse itself.
     const AppLogger(name: 'preview').debug(
@@ -278,25 +326,28 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   @override
   Widget build(BuildContext context) {
     final children = _children ?? const <Widget>[];
-    final map = widget.scrollMap;
-    return CustomScrollView(
-      controller: widget.controller,
-      slivers: <Widget>[
-        SliverPadding(
-          padding: widget.padding,
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => map == null
-                  ? children[index]
-                  : _BlockMeasure(
-                      onHeight: (height) => map.measure(index, height),
-                      child: children[index],
-                    ),
-              childCount: children.length,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _onScrollNotification(notification);
+        return false;
+      },
+      child: MathDeferScope(
+        deferring: _scrolling,
+        child: CustomScrollView(
+          controller: widget.controller,
+          slivers: <Widget>[
+            SliverPadding(
+              padding: widget.padding,
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => children[index],
+                  childCount: children.length,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -334,33 +385,36 @@ final class _BlockMeasureRender extends RenderProxyBox {
 }
 
 /// Resolves an image URI (T-M2-09). Relative links (`scheme` empty, e.g.
-/// `assets/pic.png`) load from [directory] — the library root — via
-/// `Image.file`; absolute http(s)/data/resource URIs keep the package's
-/// behavior. A missing/unreadable file renders as an empty box.
+/// `assets/pic.png`) load from [directory] — the library root; absolute
+/// http(s)/data/resource URIs keep the package's behavior. The result is
+/// an [AspectImage], so the block reserves the image's box instead of
+/// growing when the bytes land (T-PP-22); a missing/unreadable file
+/// renders as an empty box.
 Widget _imageFor(Uri uri, String? directory) {
+  final provider = _providerFor(uri, directory);
+  if (provider == null) return const SizedBox();
+  return AspectImage(provider: provider, errorBuilder: _imageError);
+}
+
+/// The [ImageProvider] for an image URI, or null for a data URI that is
+/// not an image.
+ImageProvider? _providerFor(Uri uri, String? directory) {
   final scheme = uri.scheme;
   if (scheme == 'http' || scheme == 'https') {
-    return Image.network(uri.toString(), errorBuilder: _imageError);
+    return NetworkImage(uri.toString());
   }
   if (scheme == 'data') {
     final mime = uri.data?.mimeType ?? '';
     if (mime.startsWith('image/')) {
-      return Image.memory(
-        uri.data!.contentAsBytes(),
-        errorBuilder: _imageError,
-      );
+      return MemoryImage(uri.data!.contentAsBytes());
     }
+    return null;
   }
-  if (scheme == 'resource') {
-    return Image.asset(uri.path, errorBuilder: _imageError);
-  }
+  if (scheme == 'resource') return AssetImage(uri.path);
   if (scheme.isEmpty && directory != null) {
-    return Image.file(
-      File(p.join(directory, uri.path)),
-      errorBuilder: _imageError,
-    );
+    return FileImage(File(p.join(directory, uri.path)));
   }
-  return Image.network(uri.toString(), errorBuilder: _imageError);
+  return NetworkImage(uri.toString());
 }
 
 Widget _imageError(BuildContext context, Object error, StackTrace? stackTrace) {
