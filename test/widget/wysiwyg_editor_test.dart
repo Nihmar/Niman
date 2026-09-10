@@ -1,5 +1,6 @@
 // T-WYS-04: the WYSIWYG surface opens a note, edits it and reports Markdown.
 import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
@@ -40,5 +41,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     expect(reported, isNotNull);
     expect(reported, contains('Edited'));
+  });
+
+  testWidgets('a novel-length note offers the source editor', (tester) async {
+    // Quill builds the whole document; above the guard the surface refuses
+    // rather than stalls (T-WYS-07).
+    final large = 'word ' * 50000;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(data: large, onChanged: (value) {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text(AppStrings.wysiwygTooLarge), findsOneWidget);
+    expect(find.byType(quill.QuillEditor), findsNothing);
   });
 }
