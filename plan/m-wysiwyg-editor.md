@@ -33,6 +33,10 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
 - **Phase 9** — the `wysiwyg` logger (open/change/emit/toolbar lines in the
   debug log), and a heading is not continued on Enter while lists and quotes
   still are (device report: typing after a heading came out bold).
+- **Phase 10** — the formatting toolbar shows the formats that are on at the
+  caret (a pressed button toggles off, like a word processor), and the
+  surface never re-decodes from the parent's stale echo: that reset the
+  buffer and put typed text back at the start of the note (device report).
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
