@@ -957,7 +957,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     // template that asks for it, so using any other template never
     // reaches into what the user copied.
     final surroundings = TemplateContext(
-      parent: _parentNoteName(),
+      parent: _parentNoteName(templateFolder: folder),
       clipboard: templateUses(template, 'clipboard')
           ? await _clipboardText()
           : '',
@@ -1090,9 +1090,24 @@ final class _LibraryShellState extends State<_LibraryShell>
   ///
   /// What `{{parent}}` answers, and what makes `[[{{parent}}]]` in a
   /// template a link back to the page the new note was spun out of.
-  String _parentNoteName() {
+  ///
+  /// A selection is not a place. Closing a note leaves it selected so the
+  /// tree can highlight it, and on a phone the tree and the note take
+  /// turns — so pressing the FAB on the file list is not "coming from"
+  /// whatever was open before it. Only a note actually on screen counts
+  /// (user, 2026-09-10).
+  ///
+  /// Never a template either: writing one is done with it open, and
+  /// pressing the FAB from there produced `[[Personaggio]]`, a link to the
+  /// template itself.
+  String _parentNoteName({String templateFolder = ''}) {
     final selected = _selected;
     if (selected == null || _selectedIsDir) return '';
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    if (narrow && _treeVisible) return '';
+    if (templateFolder.isNotEmpty && isUnder(templateFolder, selected)) {
+      return '';
+    }
     final name = selected.split('/').last;
     return isMarkdownNote(name) ? name.substring(0, name.length - 3) : name;
   }

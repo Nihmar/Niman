@@ -101,6 +101,48 @@ void main() {
     expect(controller.contentOf('Loose.md'), 'From []\n');
   });
 
+  // 2026-09-10 device report: on a phone, going back to the file list and
+  // pressing + linked the new note to whatever had been open before it.
+  // The note was closed; only the selection remained, so the tree could
+  // highlight it.
+  testWidgets('the file list is not a note, whatever is still selected', (
+    tester,
+  ) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    useClipboard(null);
+    await openWith(tester, 'From [{{parent}}]\n');
+    await controller.createNote(parentPath: '', name: 'Kingdoms');
+    await settle(tester);
+    // Open a note, then go back to the tree, which is what creating a
+    // note from a template leaves you doing next.
+    await tester.tap(noteRow('Kingdoms.md'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('tab-files')));
+    await settle(tester);
+
+    await useTemplate(tester, 'Loose');
+
+    expect(controller.contentOf('Loose.md'), 'From []\n');
+  });
+
+  // 2026-09-10 device report: writing a template is done with the
+  // template open, and the FAB from there produced a link to the
+  // template itself.
+  testWidgets('the template is never the note it was spun out of', (
+    tester,
+  ) async {
+    useClipboard(null);
+    await openWith(tester, 'From [{{parent}}]\n');
+    await tester.tap(noteRow('Templates'));
+    await settle(tester);
+    await tester.tap(noteRow('Spinoff.md'));
+    await settle(tester);
+
+    await useTemplate(tester, 'Tried');
+
+    expect(controller.contentOf('Tried.md'), 'From []\n');
+  });
+
   testWidgets('the clipboard lands in the note', (tester) async {
     useClipboard('Exception: everything is on fire');
     await openWith(tester, '# {{title}}\n\n```\n{{clipboard}}\n```\n');
