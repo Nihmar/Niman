@@ -44,6 +44,23 @@ use it. The verdict is:
 - A note opened and saved **without edits must be byte-identical** to the file.
 - The WYSIWYG surface and the preview are **never side by side**.
 
+## Options considered
+
+| Option | Markdown I/O | Fit | Verdict |
+| --- | --- | --- | --- |
+| `flutter_quill` 11.5.1 | none built in; Delta model + custom embeds | mature WYSIWYG on desktop/mobile; the Delta + embed API matches the codec | **chosen** |
+| `super_editor` + `super_editor_markdown` | Markdown-native document model, both directions | cleaner serialization, but heavier widget adoption for toolbar/find/spell | fallback if Quill fidelity proves too low |
+| `appflowy_editor` | own document model + Markdown plugin | large dependency tree, less control | rejected |
+| `fleather` 1.28 | Delta, no Markdown | clean core, but no path for the `.md` disk format | rejected |
+| Custom WYSIWYG on the `markdown` AST + `re_editor` | exact by construction | month-scale: caret, IME, embeds, tables all new | rejected |
+| `flutter_quill` + `markdown_quill` 4.3.0 | converter both directions | measured 35/652 normalized | rejected (see spike) |
+
+Package compatibility (checked against pub.dev and by a real `flutter pub add`):
+`flutter_quill` 11.5.1 requires `sdk ^3.12.0` and `flutter >=3.44.0`; this
+project is `sdk ^3.13.2` and Flutter 3.47.2, and the add resolved the package
+and its transitive dependencies (`quill_native_bridge` and friends) without
+conflicts.
+
 ## Spike results (already measured on this machine)
 
 Run: added `flutter_quill 11.5.1` + `markdown_quill 4.3.0`, then converted
