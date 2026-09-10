@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:copist/src/core/logging.dart';
 import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
@@ -46,6 +47,7 @@ final class WysiwygEditor extends StatefulWidget {
 /// The surface's state; the owner holds it by key to reach [controller].
 final class WysiwygEditorState extends State<WysiwygEditor> {
   static const MarkdownDocumentCodec _codec = MarkdownDocumentCodec();
+  static const AppLogger _log = AppLogger(name: 'wysiwyg');
 
   /// Above this size Quill builds a document the note does not pay for; the
   /// source editor is offered instead (T-WYS-07). Quill has no windowing,
@@ -100,18 +102,51 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
       document: _decoded.document,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    _changes = _controller.changes.listen((_) => _onDocumentChanged());
+    _changes = _controller.changes.listen(_onDocumentChanged);
+    _controller.onSelectionChanged = _onSelectionChanged;
     _find = WysiwygFindController(_controller);
+    final embedded = _decoded.snapshot
+        .where((op) => op['insert'] is Map)
+        .length;
+    _log.debug(
+      'open: ${source.length} chars, ${_decoded.snapshot.length} delta ops, '
+      '$embedded preserved blocks',
+    );
   }
 
-  void _onDocumentChanged() {
+  void _onDocumentChanged(quill.DocChange change) {
+    final lineStyle = _controller.getSelectionStyle().attributes.keys.join(',');
+    final kept = _controller.toggledStyle.attributes.keys.join(',');
+    _log.debug(
+      'change: caret ${_controller.selection.start}, line [$lineStyle], '
+      'kept [$kept]',
+    );
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), _emit);
   }
 
+  /// Quill keeps the line's block style when Enter is pressed, so a heading
+  /// would turn every following line into a heading — the next typed word
+  /// would come out bold, which is not what a Markdown note expects. Lists
+  /// and quotes still continue; the header does not (T-WYS-08).
+  ///
+  /// The hook is the selection callback, not the changes stream: the stream
+  /// is published while replaceText composes the document, before it sets
+  /// the kept style, so a listener there would read the previous style.
+  void _onSelectionChanged(TextSelection selection) {
+    final toggled = _controller.toggledStyle;
+    if (!toggled.attributes.containsKey(quill.Attribute.header.key)) return;
+    _controller.toggledStyle = toggled.removeAll(<quill.Attribute<dynamic>>{
+      quill.Attribute.header,
+    });
+    _log.debug('new line after a heading: the header is not continued');
+  }
+
   void _emit() {
     if (!mounted) return;
-    widget.onChanged(_codec.encode(_controller.document, decoded: _decoded));
+    final markdown = _codec.encode(_controller.document, decoded: _decoded);
+    _log.debug('emit: ${markdown.length} chars');
+    widget.onChanged(markdown);
   }
 
   @override
