@@ -119,6 +119,30 @@ A [[wikilink]] and an ![[embed.png]].
     );
   });
 
+  test('an empty code block is dropped on the next write', () {
+    // The code button on an empty line left pairs of stray markers in the
+    // note (device report, 2026-09-11).
+    final decoded = codec.decode('a\n\n~~~\n~~~\n');
+    final controller = quill.QuillController(
+      document: decoded.document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    addTearDown(controller.dispose);
+    controller.replaceText(0, 0, 'X', const TextSelection.collapsed(offset: 1));
+    expect(codec.encode(controller.document), 'Xa\n\n');
+  });
+
+  test('a code block with blank lines keeps them inside the fence', () {
+    final decoded = codec.decode('a\n\n~~~\n\ncode\n~~~\n');
+    final controller = quill.QuillController(
+      document: decoded.document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    addTearDown(controller.dispose);
+    controller.replaceText(0, 0, 'X', const TextSelection.collapsed(offset: 1));
+    expect(codec.encode(controller.document), 'Xa\n\n~~~\n\ncode\n~~~\n');
+  });
+
   test('the blank lines between blocks survive', () {
     final decoded = codec.decode('a\n\n\nb\n');
     expect(decoded.document.toPlainText(), 'a\n\n\nb\n');
