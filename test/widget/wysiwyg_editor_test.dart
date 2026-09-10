@@ -1,5 +1,6 @@
 // T-WYS-04/08: the WYSIWYG surface opens a note, edits it, reports
 // Markdown, underlines misspellings and applies a range replacement.
+import 'package:copist/src/editor/toolbar_item.dart';
 import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:copist/src/spellcheck/editor_spell_check.dart';
 import 'package:copist/src/spellcheck/spell_checker.dart';
@@ -282,6 +283,83 @@ void main() {
     );
     await tester.pump();
     expect(controller.getSelectionStyle().attributes['list']?.value, 'bullet');
+  });
+
+  testWidgets('Enter in a code block stays in it; an empty line leaves it', (
+    tester,
+  ) async {
+    // The code button must follow the caret: on inside the fence (including
+    // the empty line a first Enter creates), off the moment the second Enter
+    // closes the fence and the caret lands on a plain line (code-block
+    // follow-up, 2026-09-13).
+    final active = ValueNotifier<Set<ToolbarItem>>(<ToolbarItem>{});
+    final key = GlobalKey<WysiwygEditorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WysiwygEditor(
+            key: key,
+            data: '~~~\nhello\n~~~\nrest\n',
+            onChanged: (_) {},
+            activeItems: active,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final controller = key.currentState!.controller;
+
+    // The newlines can be merged into one op (\\n\\n), so count the
+    // characters, not the ops.
+    int codeLines() {
+      var count = 0;
+      for (final op in controller.document.toDelta().toJson()) {
+        if ((op['attributes'] as Map<Object?, Object?>?)?['code-block'] ==
+            null) {
+          continue;
+        }
+        final text = op['insert'] as String?;
+        if (text != null) {
+          count += text.length - text.replaceAll('\n', '').length;
+        }
+      }
+      return count;
+    }
+
+    void expectCode({required bool on, required String reason}) {
+      expect(active.value.contains(ToolbarItem.code), on, reason: reason);
+    }
+
+    // Caret at the end of the code line: the button is on.
+    controller.updateSelection(
+      const TextSelection.collapsed(offset: 5),
+      quill.ChangeSource.local,
+    );
+    await tester.pump();
+    expectCode(on: true, reason: 'inside the code block');
+    expect(codeLines(), 1, reason: 'only the hello line is code');
+
+    // Enter continues the fence: the new empty line is still code.
+    controller.replaceText(
+      5,
+      0,
+      '\n',
+      const TextSelection.collapsed(offset: 6),
+    );
+    await tester.pump();
+    expectCode(on: true, reason: 'the empty line is still inside the fence');
+    expect(codeLines(), 2, reason: 'hello line and the empty line');
+
+    // A second Enter on the empty line closes the fence; the button follows.
+    controller.replaceText(
+      controller.selection.start,
+      0,
+      '\n',
+      TextSelection.collapsed(offset: controller.selection.start + 1),
+    );
+    await tester.pump();
+    expectCode(on: false, reason: 'the caret is on a plain line now');
+    expect(codeLines(), 1, reason: 'only hello keeps the code attribute');
   });
 
   testWidgets('a novel-length note offers the source editor', (tester) async {
