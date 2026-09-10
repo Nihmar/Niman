@@ -1,3 +1,4 @@
+import 'package:copist/src/preview/editor_lines.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:copist/src/preview/scroll_sync.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ final class EditorPreviewSplit extends StatefulWidget {
     required this.editorScroll,
     required this.previewScroll,
     required this.map,
+    required this.lines,
     required this.fraction,
     required this.onFractionChanged,
     this.onDragEnd,
@@ -41,6 +43,9 @@ final class EditorPreviewSplit extends StatefulWidget {
 
   /// The scroll map the preview feeds.
   final ScrollMap map;
+
+  /// The editor's visible source lines (the sync's editor side).
+  final EditorLineView lines;
 
   /// The editor's share of the split (before clamping).
   final double fraction;
@@ -106,6 +111,7 @@ final class _EditorPreviewSplitState extends State<EditorPreviewSplit> {
       editorScroll: widget.editorScroll,
       previewScroll: widget.previewScroll,
       map: widget.map,
+      lines: widget.lines,
       child: Row(
         children: [
           Expanded(flex: (1000 * fraction).round(), child: widget.editor),

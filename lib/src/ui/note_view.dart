@@ -24,6 +24,7 @@ import 'package:copist/src/library/image_import.dart';
 import 'package:copist/src/links/parser.dart';
 import 'package:copist/src/links/resolver.dart';
 import 'package:copist/src/links/slug.dart';
+import 'package:copist/src/preview/editor_lines.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/math_cache.dart';
 import 'package:copist/src/preview/preview_work.dart';
@@ -253,6 +254,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   late final ScrollMap _previewMap = ScrollMap();
   late final MathCache _mathCache = MathCache();
 
+  /// The source lines the editor has on screen — the scroll sync's editor
+  /// side (T-M2-06). The editor fills it as the package builds its
+  /// indicator.
+  late final EditorLineView _editorLines = EditorLineView();
+
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
   int _revision = 0;
@@ -345,6 +351,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
     _previewScroll.dispose();
+    _editorLines.dispose();
     _mathCache.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
@@ -552,6 +559,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // read fresh on the very frame the slider moves (T-M6-12).
       fontSize: AppTextScales.noteFontSize,
       scrollController: _scroll,
+      onIndicator: _editorLines.attach,
       findController: _findController,
       findBuilder: (context, controller, readOnly) =>
           CopistFindPanel(controller: controller, readOnly: readOnly),
@@ -1230,6 +1238,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                         editorScroll: _scroll.verticalScroller,
                         previewScroll: _previewScroll,
                         map: _previewMap,
+                        lines: _editorLines,
                         fraction: widget.splitFraction,
                         onFractionChanged:
                             widget.onSplitFractionChanged ?? (_) {},

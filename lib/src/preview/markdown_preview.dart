@@ -182,6 +182,28 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     });
   }
 
+  /// Takes a block's measured height and asks for one more layout when it
+  /// disagrees with the extent the sliver just used. The map keeps the
+  /// change until the frame is over (`ScrollMap.applyMeasurements`), so no
+  /// block moves under the sliver mid-pass; the next pass then places every
+  /// block at its real height. It settles in one extra frame — a block
+  /// measured with the same width measures the same.
+  void _onBlockMeasured(int index, double height) {
+    final map = widget.scrollMap;
+    if (map == null) return;
+    map.measure(index, height);
+    if (_extentSyncScheduled) return;
+    _extentSyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _extentSyncScheduled = false;
+      if (!mounted) return;
+      if (widget.scrollMap?.applyMeasurements() ?? false) setState(() {});
+    });
+  }
+
+  /// Whether a post-frame extent sync is already booked.
+  bool _extentSyncScheduled = false;
+
   void _disposeRecognizers() {
     for (final recognizer in _recognizers) {
       recognizer.dispose();
@@ -315,12 +337,22 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           // The sliver forces each child's extent (the map's estimate), so
           // the measure sits inside an unbounded box: it reports the block's
           // natural height, which the map then uses as the real extent.
+          //
+          // Unbounded at *both* ends. The sliver's constraint is tight, and
+          // an OverflowBox inherits the minimum it does not override — so
+          // with only `maxHeight` relaxed every block was stretched to the
+          // estimate it was supposed to correct, reported that back as its
+          // height, and kept it forever: a short block (a heading, a quote,
+          // a display formula) sat in a box sized by its line count, and
+          // the map's own average drifted upward with it (device report,
+          // 2026-09-10).
           children.add(
             OverflowBox(
               alignment: Alignment.topCenter,
+              minHeight: 0,
               maxHeight: double.infinity,
               child: _BlockMeasure(
-                onHeight: (height) => map.measure(index, height),
+                onHeight: (height) => _onBlockMeasured(index, height),
                 child: content,
               ),
             ),

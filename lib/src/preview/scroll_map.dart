@@ -59,6 +59,7 @@ final class ScrollMap {
     blockStartLines.clear();
     blockHeights.clear();
     _extents.clear();
+    _pending.clear();
     _measuredPixels = 0;
     _measuredLines = 0;
     lineCount = 0;
@@ -70,9 +71,18 @@ final class ScrollMap {
       final height = previous[blockStartLines[i]];
       if (height != null) measure(i, height);
     }
+    // A rebuild runs between frames, so the carried-over heights are the
+    // extents straight away.
+    applyMeasurements();
   }
 
   /// Records a measured height for block [index] (from the preview layout).
+  ///
+  /// The height replaces the block's estimate, but not before the frame is
+  /// over: the measurement arrives *during* the sliver's layout, and an
+  /// extent that moves under a block the sliver has already placed is what
+  /// makes SliverVariedExtentList's offsets jump mid-pass. The preview
+  /// calls [applyMeasurements] between frames.
   void measure(int index, double height) {
     if (index < 0 || index >= blockStartLines.length) return;
     while (blockHeights.length <= index) {
@@ -87,8 +97,25 @@ final class ScrollMap {
     if (height > 0) {
       _measuredPixels += height;
       _measuredLines += _spanOf(index);
-      _freeze(index, height);
+      final frozen = index < _extents.length ? _extents[index] : 0.0;
+      if ((frozen - height).abs() > _extentEpsilon) _pending[index] = height;
     }
+  }
+
+  /// Measurements from the last layout that disagree with the extents the
+  /// layout used, waiting for the frame to end (see [measure]).
+  final Map<int, double> _pending = <int, double>{};
+
+  /// Height difference (px) worth a re-layout.
+  static const double _extentEpsilon = 0.5;
+
+  /// Adopts the measurements the last layout reported; true when any
+  /// extent moved, which is the preview's cue to lay out again.
+  bool applyMeasurements() {
+    if (_pending.isEmpty) return false;
+    _pending.forEach(_freeze);
+    _pending.clear();
+    return true;
   }
 
   /// Freezes block [index]'s extent for the layout (see [_extents]).

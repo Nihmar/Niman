@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:copist/src/preview/code_highlight.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
+import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,27 @@ Widget _app(Widget child) => MaterialApp(
 const String _tasks = '''
 - [ ] pending
 - [x] done
+''';
+
+/// Short blocks with long line spans: a heading and a display formula each
+/// followed by blank lines, so an estimate made from the line count is far
+/// bigger than what either draws.
+const String _sparse = r'''
+# Heading
+
+
+
+
+Prose between the two.
+
+$$
+x^2 + y^2 = z^2
+$$
+
+
+
+
+Tail.
 ''';
 
 const String _extras = r'''
@@ -153,6 +175,39 @@ void main() {
               'spec example ${example['example']} '
               '(${example['section']}) crashed: '
               '${markdown.length > 60 ? markdown.substring(0, 60) : markdown}',
+        );
+      }
+    });
+
+    // 2026-09-10 device report: "there is an enormous amount of padding
+    // around the math blocks" — and around headings, and quotes. The
+    // sliver forces every block into the extent the map estimated from its
+    // line count, and the measuring box relaxed only the *maximum* of that
+    // constraint: each block was stretched to its own estimate, reported
+    // the stretched height back as its measurement, and kept it.
+    testWidgets('a block is laid out at its own height, not its line count', (
+      tester,
+    ) async {
+      final map = ScrollMap();
+      await tester.pumpWidget(
+        _app(MarkdownPreview(data: _sparse, scrollMap: map)),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      // Four blocks: heading, prose, formula, tail.
+      expect(map.blockStartLines.length, 4);
+      // The heading spans six source lines (five of them blank) and the
+      // formula five: at the map's 22 px per line that is 132 and 110 px
+      // of estimate against about 30 px of ink.
+      expect(map.blockHeights[0], lessThan(60));
+      expect(map.blockHeights[2], lessThan(60));
+      for (var i = 0; i < map.blockHeights.length; i++) {
+        expect(
+          map.extentFor(i),
+          moreOrLessEquals(map.blockHeights[i], epsilon: 0.5),
+          reason: 'block $i is laid out at an extent it does not fill',
         );
       }
     });

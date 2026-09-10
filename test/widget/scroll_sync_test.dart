@@ -1,6 +1,7 @@
 // T-M2-06 M-06-3 (AC): scrolling either pane moves the other, verified on
 // a long fixture in both directions.
 import 'package:copist/src/editor/note_editor.dart';
+import 'package:copist/src/preview/editor_lines.dart';
 import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:copist/src/preview/scroll_sync.dart';
@@ -12,6 +13,20 @@ String _longFixture() {
   final buffer = StringBuffer();
   for (var i = 0; i < 300; i++) {
     buffer.write('Paragraph number $i with enough text to fill a line.\n\n');
+  }
+  return buffer.toString();
+}
+
+/// Paragraphs written as one long source line each, the way prose is
+/// actually written: every line wraps over several rows in the editor.
+String _wrappedFixture() {
+  final buffer = StringBuffer();
+  for (var i = 0; i < 120; i++) {
+    buffer
+      ..write('Paragraph number $i ')
+      ..write('with a great deal more text on the very same source line, ')
+      ..write('long enough that the editor has to wrap it over several ')
+      ..write('rows before the next one starts.\n\n');
   }
   return buffer.toString();
 }
@@ -102,5 +117,115 @@ void main() {
     editorScroll.verticalScroller.dispose();
     editorScroll.horizontalScroller.dispose();
     previewScroll.dispose();
+  });
+
+  // 2026-09-10 device report: on a note of wrapped prose the two panes did
+  // not line up. The editor's scroll extent counts every line below the
+  // viewport as one unwrapped row, so it grows as the wrapped ones scroll
+  // in: the same fraction of it means a later line the further down you
+  // are, and the preview ran ahead. The sync reads the editor's top line
+  // instead.
+  testWidgets('the preview follows the editor line, not its pixel fraction', (
+    tester,
+  ) async {
+    final text = _wrappedFixture();
+    final editorController = CodeLineEditingController.fromText(text);
+    final focus = FocusNode();
+    final editorScroll = CodeScrollController();
+    final previewScroll = ScrollController();
+    final map = ScrollMap();
+    final lines = EditorLineView();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: EditorPreviewScrollSync(
+            editorScroll: editorScroll.verticalScroller,
+            previewScroll: previewScroll,
+            map: map,
+            lines: lines,
+            child: Row(
+              children: [
+                Expanded(
+                  child: NoteEditor(
+                    controller: editorController,
+                    focusNode: focus,
+                    scrollController: editorScroll,
+                    showLineNumbers: false,
+                    onIndicator: lines.attach,
+                  ),
+                ),
+                const VerticalDivider(width: 1),
+                Expanded(
+                  child: MarkdownPreview(
+                    data: text,
+                    controller: previewScroll,
+                    scrollMap: map,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(lines.hasLines, isTrue);
+
+    // A third of the way down by pixels — far enough in that the wrapped
+    // rows above have made the editor's extent estimate stale.
+    editorScroll.verticalScroller.jumpTo(
+      editorScroll.verticalScroller.position.maxScrollExtent / 3,
+    );
+    for (var i = 0; i < 4; i++) {
+      await tester.pump();
+    }
+
+    final top = lines.topLine();
+    expect(top, isNotNull);
+    // Source line 2n is paragraph n (each is followed by a blank line).
+    final paragraph = find.textContaining(
+      'Paragraph number ${top! ~/ 2} ',
+      findRichText: true,
+    );
+    expect(
+      paragraph,
+      findsOneWidget,
+      reason: 'the editor is on paragraph ${top ~/ 2}; the preview is not',
+    );
+    // And it is at the top of the preview, not somewhere down the pane.
+    final previewTop = tester.getTopLeft(find.byType(CustomScrollView)).dy;
+    expect(
+      tester.getTopLeft(paragraph).dy - previewTop,
+      lessThan(80),
+      reason: 'the paragraph is on screen but not where the editor is',
+    );
+
+    // The other way: the editor only measures the lines it has laid out,
+    // so a line further down is reached by estimate and then corrected
+    // over the next few layouts.
+    final previewPos = previewScroll.position;
+    previewScroll.jumpTo(previewPos.maxScrollExtent * 0.6);
+    for (var i = 0; i < 10; i++) {
+      await tester.pump();
+    }
+    final shown = map.lineForPreviewOffset(
+      previewPos.pixels,
+      maxExtent: previewPos.maxScrollExtent,
+    );
+    expect(shown, isNotNull);
+    expect(
+      lines.topLine(),
+      closeTo(shown!, 2),
+      reason: 'the preview is on line $shown; the editor is not',
+    );
+
+    editorController.dispose();
+    focus.dispose();
+    editorScroll.verticalScroller.dispose();
+    editorScroll.horizontalScroller.dispose();
+    previewScroll.dispose();
+    lines.dispose();
   });
 }

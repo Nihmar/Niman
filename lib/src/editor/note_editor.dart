@@ -42,6 +42,7 @@ final class NoteEditor extends StatelessWidget {
     this.findController,
     this.findBuilder,
     this.shortcutsActivators,
+    this.onIndicator,
     super.key,
   });
 
@@ -77,6 +78,14 @@ final class NoteEditor extends StatelessWidget {
   /// Editor shortcut activators (defaults + Ctrl+H replace).
   final CodeShortcutsActivatorsBuilder? shortcutsActivators;
 
+  /// Receives the editor's indicator notifier — the source lines it has
+  /// laid out, republished on every layout — as soon as the package builds
+  /// it. The scroll sync reads the top visible line from it (T-M2-06):
+  /// the editor's `maxScrollExtent` counts every line below the viewport
+  /// as a single row, so it grows as wrapped lines scroll in and a
+  /// fraction of it cannot say which line is on screen.
+  final ValueChanged<CodeIndicatorValueNotifier>? onIndicator;
+
   @override
   Widget build(BuildContext context) {
     return CodeEditor(
@@ -106,23 +115,23 @@ final class NoteEditor extends StatelessWidget {
       // The row-number column + fold markers (settings + T-M2-07): heading
       // chunks come from MarkdownChunkAnalyzer (the header folds), not the
       // default brace folding.
-      indicatorBuilder: showLineNumbers
-          ? (context, editingController, chunkController, notifier) {
-              return Row(
-                children: [
-                  DefaultCodeLineNumber(
-                    controller: editingController,
-                    notifier: notifier,
-                  ),
-                  DefaultCodeChunkIndicator(
-                    width: 20,
-                    controller: chunkController,
-                    notifier: notifier,
-                  ),
-                ],
-              );
-            }
-          : null,
+      // Always built, even with the row numbers off: it is the only place
+      // the package hands out the notifier the scroll sync needs, and an
+      // empty indicator takes no room.
+      indicatorBuilder: (context, editing, chunkController, notifier) {
+        onIndicator?.call(notifier);
+        if (!showLineNumbers) return const SizedBox.shrink();
+        return Row(
+          children: [
+            DefaultCodeLineNumber(controller: editing, notifier: notifier),
+            DefaultCodeChunkIndicator(
+              width: 20,
+              controller: chunkController,
+              notifier: notifier,
+            ),
+          ],
+        );
+      },
       // Heading-section folds (the tokenizer's outline — fences/math/
       // frontmatter are never anchors), not `{}`/`[]`.
       chunkAnalyzer: const MarkdownChunkAnalyzer(),

@@ -74,11 +74,11 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(
-        tester.widget<CodeEditor>(find.byType(CodeEditor)).indicatorBuilder,
-        isNull,
-      );
+      // The indicator is still built — it is where the package hands out
+      // the notifier the scroll sync reads its visible lines from — but it
+      // draws nothing and takes no room.
       expect(find.byType(DefaultCodeLineNumber), findsNothing);
+      expect(find.byType(DefaultCodeChunkIndicator), findsNothing);
       await _unmount(tester);
       controller.dispose();
       focus.dispose();
