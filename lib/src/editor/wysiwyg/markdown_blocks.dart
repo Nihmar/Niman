@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:copist/src/editor/wysiwyg/markdown_parse.dart';
+import 'package:copist/src/preview/math_syntax.dart';
 import 'package:copist/src/preview/scroll_map.dart';
 import 'package:markdown/markdown.dart' as md;
 
@@ -48,12 +49,37 @@ const Set<String> _blockTags = <String>{
   'pre',
 };
 
+/// The line separator the codec works with (the app normalizes to LF).
+const String _newline = '\n';
+
 /// Splits [markdown] into top-level blocks.
 ///
 /// The parser is the preview's and the boundaries are the scroll map's
 /// [BlockLocator]. When the two disagree about the count, the whole note
 /// becomes one opaque block rather than risk a silent mis-slice.
 List<MarkdownBlock> splitMarkdownBlocks(String markdown) {
+  if (markdown.isEmpty) return const <MarkdownBlock>[];
+  // The frontmatter is metadata, not prose: the preview strips it, and the
+  // codec keeps the whole block verbatim so the WYSIWYG never renders YAML.
+  final skip = frontmatterLines(markdown);
+  if (skip > 0) {
+    final lines = const LineSplitter().convert(markdown);
+    final head = lines.take(skip).join(_newline);
+    final body = lines.skip(skip).join(_newline);
+    return <MarkdownBlock>[
+      MarkdownBlock(
+        source: head.endsWith(_newline) ? head : '$head$_newline',
+        tag: 'frontmatter',
+        opaque: true,
+      ),
+      ..._splitBody(body),
+    ];
+  }
+  return _splitBody(markdown);
+}
+
+/// Splits [markdown] (frontmatter already removed) into blocks.
+List<MarkdownBlock> _splitBody(String markdown) {
   if (markdown.isEmpty) return const <MarkdownBlock>[];
   final nodes = parseMarkdownDocument(markdown);
   final lines = const LineSplitter().convert(markdown);
