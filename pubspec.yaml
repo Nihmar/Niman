@@ -40,6 +40,11 @@ dependencies:
     sdk: flutter
 
   flutter_markdown_plus: ^1.0.12
+
+  # WYSIWYG editing surface (T-WYS). Delta document model; the Markdown codec
+  # is Copist's (markdown_quill was measured and rejected, see
+  # plan/m-wysiwyg-editor.md).
+  flutter_quill: ^11.5.1
   flutter_riverpod: ^3.4.3
 
   # OS secure storage for credentials and the encryption key (M5/M6).
