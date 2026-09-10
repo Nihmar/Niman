@@ -58,6 +58,10 @@ final class SettingsOption<T> {
 /// [value] is what the row reads on the right. A null [value] makes it a
 /// plain navigation row (a chevron and nothing else), which is what the
 /// rows that open a screen of their own want.
+///
+/// [enabled] greys the row out and drops its tap (a `ListTile` with no
+/// `onTap`): for rows whose destination makes no sense on the device —
+/// the keyboard reference on a phone with no physical keyboard.
 final class SettingsValueRow extends StatelessWidget {
   /// Creates a row for [title] currently reading [value].
   const new({
@@ -65,6 +69,7 @@ final class SettingsValueRow extends StatelessWidget {
     required this.onTap,
     this.value,
     this.subtitle,
+    this.enabled = true,
     super.key,
   });
 
@@ -78,6 +83,9 @@ final class SettingsValueRow extends StatelessWidget {
   /// self-explanatory (the library path, which is a path).
   final String? subtitle;
 
+  /// Whether the row can be tapped; false renders it disabled.
+  final bool enabled;
+
   /// Opens whatever changes the setting.
   final VoidCallback onTap;
 
@@ -86,6 +94,7 @@ final class SettingsValueRow extends StatelessWidget {
     final theme = Theme.of(context);
     final current = value;
     return ListTile(
+      enabled: enabled,
       title: Text(title),
       subtitle: subtitle == null ? null : Text(subtitle!),
       trailing: Row(
@@ -109,7 +118,7 @@ final class SettingsValueRow extends StatelessWidget {
           const Icon(Icons.chevron_right),
         ],
       ),
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
     );
   }
 }

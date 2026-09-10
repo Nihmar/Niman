@@ -795,9 +795,13 @@ final class _SettingsBodyState extends State<SettingsBody> {
         ),
 
         SettingsSection(AppStrings.settingsSectionShortcuts),
+        // Phones and tablets have no physical keyboard, so the reference
+        // behind this row describes keys that cannot be pressed: the row
+        // stays visible but reads as disabled rather than opening it.
         SettingsValueRow(
           key: const Key('keyboard-shortcuts-setting'),
           title: AppStrings.keyboardShortcutsTitle,
+          enabled: !(Platform.isAndroid || Platform.isIOS),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute<void>(

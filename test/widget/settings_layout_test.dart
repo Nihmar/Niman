@@ -2,7 +2,9 @@
 // now grouped under headings, and every setting with more than two
 // choices is a row showing its current value, changed in a dialog.
 import 'package:copist/src/core/settings/library_settings.dart';
+import 'package:copist/src/ui/keyboard_shortcuts.dart';
 import 'package:copist/src/ui/settings.dart';
+import 'package:copist/src/ui/settings_rows.dart';
 import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -142,6 +144,47 @@ void main() {
     // Android/iOS — is never offered here (user, 2026-09-09).
     await pump(tester);
     expect(find.text(AppStrings.keyboardOnOpenSubtitle), findsNothing);
+  });
+
+  testWidgets('the shortcuts row opens the reference where a keyboard exists', (
+    tester,
+  ) async {
+    // The test host is a desktop platform, so a physical keyboard is
+    // assumed and the row stays enabled.
+    await pump(tester);
+    final row = find.byKey(const Key('keyboard-shortcuts-setting'));
+    expect(row, findsOneWidget);
+    final tile = find.descendant(
+      of: row,
+      matching: find.byType(ListTile),
+    );
+    expect(tester.widget<ListTile>(tile).enabled, isTrue);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(find.byType(KeyboardShortcutsScreen), findsOneWidget);
+  });
+
+  testWidgets('a disabled row cannot be tapped', (tester) async {
+    // Phones and tablets have no physical keyboard: the shortcuts row
+    // reads as disabled and its tap goes nowhere.
+    var tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsValueRow(
+            title: 'Shortcuts',
+            enabled: false,
+            onTap: () => tapped = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final tile = find.byType(ListTile);
+    expect(tester.widget<ListTile>(tile).enabled, isFalse);
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    expect(tapped, isFalse);
   });
 
   group('the split-ratio row appears only where the panes can split', () {
