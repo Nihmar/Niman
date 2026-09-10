@@ -10,6 +10,8 @@ import 'package:copist/src/spellcheck/spell_checker.dart';
 import 'package:copist/src/ui/editor_preview_split.dart';
 import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -203,5 +205,109 @@ void main() {
     await tester.tap(find.byKey(const Key('toolbar-bold')));
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the caret past the last character takes no format', (
+    tester,
+  ) async {
+    // A note ending in a closed ~~..~~ run: parking the caret at the end
+    // lit the strikethrough button, as if tapped (device report). Every
+    // inline span the codec writes is paired, so past the last character
+    // the span is closed — the lamp stays off. Inside the run it still
+    // lights, so typing there still continues the format.
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        showWysiwyg: true,
+        readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
+      ),
+    );
+    bool strikeActive() => tester
+        .widget<EditorToolbar>(find.byType(EditorToolbar))
+        .buttons
+        .firstWhere((item) => item.key == const Key('toolbar-strike'))
+        .active;
+    final state = tester.state<WysiwygEditorState>(find.byType(WysiwygEditor));
+
+    state.controller.updateSelection(
+      TextSelection.collapsed(offset: state.controller.document.length - 1),
+      quill.ChangeSource.local,
+    );
+    await tester.pump();
+    expect(strikeActive(), isFalse);
+
+    // Inside the closed run (the "u" of "struck") the button still lights.
+    state.controller.updateSelection(
+      const TextSelection.collapsed(offset: 26),
+      quill.ChangeSource.local,
+    );
+    await tester.pump();
+    expect(strikeActive(), isTrue);
+  });
+
+  testWidgets('a tap-toggled format survives the typed characters', (
+    tester,
+  ) async {
+    // The end-of-note strip dropped the just-tapped toggle after a single
+    // character: the caret rode in on the document change, which the strip
+    // mistook for a tap (device report). Typing keeps the toggled format;
+    // a later pure tap at the end strips again.
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        showWysiwyg: true,
+        readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
+      ),
+    );
+    bool strikeActive() => tester
+        .widget<EditorToolbar>(find.byType(EditorToolbar))
+        .buttons
+        .firstWhere((item) => item.key == const Key('toolbar-strike'))
+        .active;
+    final state = tester.state<WysiwygEditorState>(find.byType(WysiwygEditor));
+    final controller = state.controller;
+
+    // Park at the end (the strip clears the inherited strike), then tap
+    // the toolbar button for real: the toggle is intentional now.
+    controller.updateSelection(
+      TextSelection.collapsed(offset: controller.document.length - 1),
+      quill.ChangeSource.local,
+    );
+    await tester.pump();
+    expect(strikeActive(), isFalse);
+    await tester.tap(find.byKey(const Key('toolbar-strike')));
+    await tester.pump();
+    expect(strikeActive(), isTrue);
+
+    // Two typed characters, each carrying the kept style with the caret
+    // riding in on the document change — the way real input arrives.
+    for (var i = 0; i < 2; i++) {
+      final at = controller.selection.end;
+      final kept = controller.toggledStyle.toJson() ?? const {};
+      controller.document.compose(
+        delta.Delta()..insert('x', kept),
+        quill.ChangeSource.local,
+      );
+      controller.updateSelection(
+        TextSelection.collapsed(offset: at + 1),
+        quill.ChangeSource.local,
+      );
+      await tester.pump();
+      expect(strikeActive(), isTrue, reason: 'typed character ${i + 1}');
+    }
+
+    // A later pure tap at the end strips again: the span is closed.
+    controller.updateSelection(
+      TextSelection.collapsed(offset: controller.document.length - 1),
+      quill.ChangeSource.local,
+    );
+    await tester.pump();
+    expect(strikeActive(), isFalse);
   });
 }

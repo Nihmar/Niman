@@ -80,6 +80,10 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// The controller the toolbar commands act on (T-WYS-06).
   quill.QuillController get controller => _controller;
 
+  /// The document length at the last selection callback: telling a tap
+  /// (same length) from typing (the caret rode in on a longer document).
+  int _selectionDocLength = 0;
+
   /// The document's lines, for the spell review panel (T-WYS-08).
   List<String> get plainTextLines =>
       _controller.document.toPlainText().split(String.fromCharCode(10));
@@ -141,6 +145,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _changes = _controller.changes.listen(_onDocumentChanged);
     _controller.onSelectionChanged = _onSelectionChanged;
     _controller.addListener(_publishActive);
+    _selectionDocLength = _controller.document.length;
     _find = WysiwygFindController(_controller);
     // A new note's data is not the previous note's echo.
     _lastEmitted = null;
@@ -174,11 +179,54 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// the kept style, so a listener there would read the previous style.
   void _onSelectionChanged(TextSelection selection) {
     final toggled = _controller.toggledStyle;
-    if (!toggled.attributes.containsKey(quill.Attribute.header.key)) return;
-    _controller.toggledStyle = toggled.removeAll(<quill.Attribute<dynamic>>{
-      quill.Attribute.header,
-    });
-    _log.debug('new line after a heading: the header is not continued');
+    if (toggled.attributes.containsKey(quill.Attribute.header.key)) {
+      _controller.toggledStyle = toggled.removeAll(<quill.Attribute<dynamic>>{
+        quill.Attribute.header,
+      });
+      _log.debug('new line after a heading: the header is not continued');
+    }
+    _stripEndOfDocumentLeak(selection);
+  }
+
+  /// A collapsed caret past the last character takes no inline format from
+  /// the run before it: every inline span the codec writes is paired
+  /// (`**..**`, `*..*`, `~~..~~`, `<u>..</u>`), so past the last character
+  /// the span is closed and inheriting its format only extends it by
+  /// accident — the lit strikethrough the device report hit on a note
+  /// ending in a closed `~~..~~` run. Recording removals in the kept style
+  /// keeps the lamp and the next typed character in step: both plain.
+  /// Mid-document Quill's preceding-style convention stays: it is what lets
+  /// a tap inside a run keep typing inside it.
+  ///
+  /// Only a pure caret move strips: when the caret rode in on a document
+  /// change (typing, paste) the format is being continued on purpose —
+  /// stripping it dropped the just-tapped toggle after one character
+  /// (device report). The length is read on every callback, not just in
+  /// the end zone, so a mid-document edit cannot mask a later tap at
+  /// the end.
+  void _stripEndOfDocumentLeak(TextSelection selection) {
+    final controller = _controller;
+    final length = controller.document.length;
+    final docChanged = length != _selectionDocLength;
+    _selectionDocLength = length;
+    if (!selection.isCollapsed) return;
+    if (selection.end < length - 1) return;
+    if (docChanged) return;
+    var kept = controller.toggledStyle;
+    var changed = false;
+    for (final attr in controller.getSelectionStyle().attributes.values) {
+      if (attr.scope != quill.AttributeScope.inline) continue;
+      if (attr.value == null) continue;
+      // `put`, not `merge`: merge drops null-valued attributes, while the
+      // removal must stay in the kept style — it is what the toolbar reads
+      // and what the next typed character obeys (the toggle-off path).
+      kept = kept.put(quill.Attribute.clone(attr, null));
+      changed = true;
+    }
+    if (changed) {
+      controller.toggledStyle = kept;
+      _log.debug('caret at end of note: the closed run is not continued');
+    }
   }
 
   /// Publishes the formats that are on at the caret to the toolbar.
