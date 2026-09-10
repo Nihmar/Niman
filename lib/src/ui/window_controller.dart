@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:copist/src/core/logging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart'
-    show WindowListener, WindowManager;
+    show TitleBarStyle, WindowListener, WindowManager;
 
 /// What the close guard (T-PP-11) needs from the platform window: keep
 /// the close from landing while the app still holds unsaved edits, learn
@@ -30,6 +31,22 @@ abstract interface class WindowController {
   /// Brings the window back to the front (the tray icon's activation).
   Future<void> show();
 
+  /// Whether this platform gets the app's own title bar instead of the
+  /// system one. Linux first (T-PP-22); Windows after its pass.
+  bool get customTitleBar;
+
+  /// Hands the title bar to Flutter: frameless window, system bar hidden.
+  Future<void> applyCustomTitleBar();
+
+  /// Minimizes the window (the title bar's button).
+  Future<void> minimize();
+
+  /// Maximizes or restores the window (the title bar's button).
+  Future<void> toggleMaximize();
+
+  /// Whether the window is maximized (the title bar's button icon).
+  ValueListenable<bool> get maximized;
+
   /// Releases the platform side.
   Future<void> dispose();
 }
@@ -50,11 +67,39 @@ final class WindowManagerController implements WindowController {
   @override
   void Function()? onCloseRequested;
 
+  final ValueNotifier<bool> _maximized = ValueNotifier<bool>(false);
+
+  @override
+  bool get customTitleBar => Platform.isLinux;
+
+  @override
+  ValueListenable<bool> get maximized => _maximized;
+
   @override
   Future<void> init() async {
     await _manager.ensureInitialized();
     _manager.addListener(_listener);
+    if (customTitleBar) await applyCustomTitleBar();
     _log.info('window controller ready');
+  }
+
+  @override
+  Future<void> applyCustomTitleBar() async {
+    await _manager.setAsFrameless();
+    await _manager.setTitleBarStyle(TitleBarStyle.hidden);
+    _log.info('custom title bar applied');
+  }
+
+  @override
+  Future<void> minimize() => _manager.minimize();
+
+  @override
+  Future<void> toggleMaximize() async {
+    if (await _manager.isMaximized()) {
+      await _manager.unmaximize();
+    } else {
+      await _manager.maximize();
+    }
   }
 
   @override
@@ -76,6 +121,7 @@ final class WindowManagerController implements WindowController {
   @override
   Future<void> dispose() async {
     _manager.removeListener(_listener);
+    _maximized.dispose();
     _log.info('window controller disposed');
   }
 }
@@ -91,6 +137,12 @@ final class _WindowCloseListener extends WindowListener {
 
   @override
   void onWindowClose() => _controller.onCloseRequested?.call();
+
+  @override
+  void onWindowMaximize() => _controller._maximized.value = true;
+
+  @override
+  void onWindowUnmaximize() => _controller._maximized.value = false;
 }
 
 /// The off-desktop controller: no platform close surface to guard
@@ -112,7 +164,24 @@ final class NoopWindowController implements WindowController {
   Future<void> show() async {}
 
   @override
-  Future<void> dispose() async {}
+  bool get customTitleBar => false;
+
+  @override
+  final ValueNotifier<bool> maximized = ValueNotifier<bool>(false);
+
+  @override
+  Future<void> applyCustomTitleBar() async {}
+
+  @override
+  Future<void> minimize() async {}
+
+  @override
+  Future<void> toggleMaximize() async {}
+
+  @override
+  Future<void> dispose() async {
+    maximized.dispose();
+  }
 }
 
 /// Creates the platform controller: `window_manager` on the desktops

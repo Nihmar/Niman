@@ -32,6 +32,7 @@ import 'package:copist/src/ui/strings.dart';
 import 'package:copist/src/ui/tab_body_stack.dart';
 import 'package:copist/src/ui/tags_screen.dart';
 import 'package:copist/src/ui/template_picker.dart';
+import 'package:copist/src/ui/title_bar.dart';
 import 'package:copist/src/ui/todo_edit_dialog.dart';
 import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
@@ -39,6 +40,7 @@ import 'package:copist/src/ui/tree.dart';
 import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -294,6 +296,10 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The editor toolbar the user arranged (settings, T-TB-04).
   ToolbarLayout _toolbarLayout = ToolbarLayout.defaults;
+
+  /// Whether the wide layout's tree pane shows (the title bar's toggle;
+  /// the rail always stays, T-PP-22).
+  bool _sidebarVisible = true;
 
   /// The library tree sort order (T-UI-03).
   TreeSort _treeSort = TreeSort.nameAsc;
@@ -1408,8 +1414,28 @@ final class _LibraryShellState extends State<_LibraryShell>
 
     // The desktop has no window app bar (T-PP-22): the rail names the
     // app, the tree carries its own controls at the base, and an open
-    // note carries its controls in the detail pane's header.
-    return Scaffold(body: _wideContent(controller));
+    // note carries its controls in the detail pane's header. On Linux the
+    // window is frameless and the app draws its own title bar instead.
+    return Scaffold(
+      body: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.keyB, control: true):
+              _toggleSidebar,
+        },
+        child: Column(
+          children: [
+            if (widget.window.customTitleBar)
+              AppTitleBar(
+                title: _windowTitle,
+                sidebarVisible: _sidebarVisible,
+                onToggleSidebar: _toggleSidebar,
+                window: widget.window,
+              ),
+            Expanded(child: _wideContent(controller)),
+          ],
+        ),
+      ),
+    );
   }
 
   /// The wide-layout content: the tree + detail split for Files (and for
@@ -1802,25 +1828,40 @@ final class _LibraryShellState extends State<_LibraryShell>
     _selectShellTab(tab);
   }
 
+  /// The title bar's text: the app, and the open note when there is one.
+  String get _windowTitle {
+    final path = _selected;
+    if (path == null || _selectedIsDir) return AppStrings.appTitle;
+    return '${AppStrings.appTitle} — ${p.basename(path)}';
+  }
+
+  /// Shows/hides the wide tree pane; the rail stays (T-PP-22).
+  void _toggleSidebar() {
+    setState(() => _sidebarVisible = !_sidebarVisible);
+  }
+
   /// The wide-layout body: the tree pane and the split detail pane.
   ///
   /// The tree keeps its own controls at the base (T-PP-22), and an open
   /// note gets a header inside the detail pane carrying its name and the
-  /// note controls the window app bar used to hold.
+  /// note controls the window app bar used to hold. Hiding the tree (the
+  /// title bar's toggle) gives its width to the detail pane.
   Widget _wideBody(LibrarySession controller) {
     final noteOpen = _selected != null && !_selectedIsDir;
     return Row(
       children: [
-        SizedBox(
-          width: _treeWidth,
-          child: Column(
-            children: [
-              Expanded(child: _treePane(controller)),
-              _treeFooter(controller),
-            ],
+        if (_sidebarVisible) ...[
+          SizedBox(
+            width: _treeWidth,
+            child: Column(
+              children: [
+                Expanded(child: _treePane(controller)),
+                _treeFooter(controller),
+              ],
+            ),
           ),
-        ),
-        _treeDivider(),
+          _treeDivider(),
+        ],
         Expanded(
           child: Column(
             children: [

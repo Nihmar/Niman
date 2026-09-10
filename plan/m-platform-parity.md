@@ -177,6 +177,13 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   leading control and gains Add task plus help (the FAB is gone there);
   the A-Z priority fallback is a compact fixed-width dialog instead of a
   full-window grid.
+  Second pass on the same review: the view controls move from the editor
+  header into the note's status row (the header is about the file); Linux
+  runs frameless with the app's own title bar (`ui/title_bar.dart`:
+  sidebar toggle, drag area, window buttons over the `WindowController`
+  seam, so Close still meets the unsaved-edits guard), Ctrl+B toggles the
+  tree and the rail always stays. Windows gets the same bar after its
+  pass.
 
 ### P3 — Share-in / open-with (both sides)
 

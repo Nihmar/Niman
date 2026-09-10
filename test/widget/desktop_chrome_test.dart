@@ -5,21 +5,26 @@ import 'package:copist/src/app.dart';
 import 'package:copist/src/library/library_state.dart';
 import 'package:copist/src/todo/todo_source.dart';
 import 'package:copist/src/ui/strings.dart';
+import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
+import '../fakes/fake_window_controller.dart';
 import '../fakes/shell_harness.dart';
 
 void main() {
   late FakeLibrarySession controller;
   late FakeFilePicker filePicker;
+  late FakeWindowController window;
 
   setUp(() {
     controller = FakeLibrarySession();
     filePicker = useFakeFilePicker();
+    // The desktop window: frameless with the app's own title bar.
+    window = FakeWindowController(customTitleBar: true);
   });
 
   Widget buildApp() {
@@ -27,6 +32,7 @@ void main() {
       overrides: [
         librarySessionProvider.overrideWithValue(controller),
         todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
+        windowControllerProvider.overrideWithValue(window),
       ],
       child: const CopistApp(),
     );
@@ -160,6 +166,25 @@ void main() {
     expect(find.byKey(const Key('todo-help-dialog')), findsNothing);
   });
 
+  testWidgets('wide: the title bar toggles the tree, the rail stays', (
+    tester,
+  ) async {
+    await pumpShell(tester, const Size(1200, 900));
+
+    expect(find.byKey(const Key('title-bar')), findsOne);
+    expect(find.byKey(const Key('tree-footer')), findsOne);
+
+    await tester.tap(find.byKey(const Key('toggle-sidebar')));
+    await settle(tester);
+    expect(find.byKey(const Key('tree-footer')), findsNothing);
+    expect(find.byKey(const Key('shell-rail')), findsOne);
+
+    await tester.tap(find.byKey(const Key('toggle-sidebar')));
+    await settle(tester);
+    expect(find.byKey(const Key('tree-footer')), findsOne);
+    expect(find.byKey(const Key('shell-rail')), findsOne);
+  });
+
   testWidgets('narrow: the app bar and the FAB stay, no tree footer', (
     tester,
   ) async {
@@ -169,5 +194,7 @@ void main() {
     expect(find.byKey(const Key('new-note-fab')), findsOne);
     expect(find.byKey(const Key('tree-footer')), findsNothing);
     expect(find.byKey(const Key('new-item-menu')), findsNothing);
+    // No window title bar on the phone: the system chrome owns that.
+    expect(find.byKey(const Key('title-bar')), findsNothing);
   });
 }

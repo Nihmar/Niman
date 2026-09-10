@@ -494,6 +494,17 @@ final class AppStrings {
 
   // The shell: app bar, tabs and tree actions.
   static const String appTitle = 'Copist';
+
+  // The window's own title bar (T-PP-22).
+  static String get hideSidebarTooltip =>
+      _t('Hide sidebar (Ctrl+B)', 'Nascondi il pannello (Ctrl+B)');
+  static String get showSidebarTooltip =>
+      _t('Show sidebar (Ctrl+B)', 'Mostra il pannello (Ctrl+B)');
+  static String get windowMinimizeTooltip => _t('Minimize', 'Riduci a icona');
+  static String get windowMaximizeTooltip => _t('Maximize', 'Ingrandisci');
+  static String get windowRestoreTooltip => _t('Restore', 'Ripristina');
+  static String get windowCloseTooltip => _t('Close', 'Chiudi');
+
   static String get tabFiles => _t('Files', 'File');
   static String get tabSearch => _t('Search', 'Cerca');
   static String get tabSettings => _t('Settings', 'Impostazioni');
