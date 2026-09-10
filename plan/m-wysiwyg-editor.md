@@ -23,14 +23,17 @@ Landed on `feat/wysiwyg-editor` (one commit per step):
 - **Phase 3** — `WysiwygEditor` and `QuillEditorCommands`, with unit and
   widget tests.
 - **Phase 4/5** — `note_view.dart` and `shell.dart` pick the surface; the
-  WYSIWYG editor never splits; the eye switches it to the preview; find and
-  the spell button hide while it is up.
+  WYSIWYG editor never splits; the eye switches it to the preview.
 - **Phase 7** — the 200 KB guard and these docs.
+- **Phase 8** (the former v1 cuts) — find & replace over the Quill document
+  (`wysiwyg_find_controller.dart` + `wysiwyg_find_panel.dart`, from the status
+  row and Ctrl/Cmd+F) and the spell underlines via Quill's
+  `textSpanBuilder`, with the review panel scanning and fixing the Quill
+  document.
 
 Still open: the **device pass** on Linux and Android (a real note with
 frontmatter, table, footnote, math and a wikilink; edit one line; confirm the
-diff and the switch). Find & replace and the spell underlines remain v1 cuts
-inside the WYSIWYG surface, as the control inventory says.
+diff and the switch).
 
 ## Mockups (the visual target)
 
@@ -1344,8 +1347,8 @@ Implement and test each row. The rule is a single source of truth:
 | scroll sync/map | as today | not built | not built |
 | split-ratio settings row | shown when it splits | hidden | hidden |
 | formatting toolbar | as today | same app toolbar, drives Quill; same slot | as today |
-| find & replace (custom) | as today | not shown (Quill `showSearchButton`) | as today |
-| spell underlines | as today | none | as today (source) |
+| find & replace (custom) | as today | WYSIWYG bar (`wysiwyg-find-*`), Ctrl/Cmd+F | as today |
+| spell underlines | as today | wavy, via `textSpanBuilder` | as today (source) |
 | line numbers, folding, indent helpers | as today | not shown | as today |
 | word count / outline | source text | serialized Markdown | active editor |
 | kind actions | as today | as today | as today |
@@ -1436,8 +1439,6 @@ Run and paste the outcome (do not paste raw logs):
 ## Open questions (decide with the spike numbers)
 
 - Exact large-note threshold (start at 200 KB, lower it if the device is slow).
-- Whether find & replace and spell underlines must return in the WYSIWYG
-  surface; each is a new task if so.
 - Whether the opaque embed should eventually become editable per construct
   (math, tables) instead of a read-only box.
 

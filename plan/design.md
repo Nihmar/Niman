@@ -49,7 +49,9 @@ lib/
         markdown_document_codec.dart  # Markdown ↔ Quill Delta, byte-stable
         opaque_embed.dart          # preserved blocks, read-only in Quill
         quill_editor_commands.dart # the toolbar mapped onto Quill
-        wysiwyg_editor.dart        # the Quill editing surface
+        wysiwyg_find_controller.dart # find/replace over the Quill document
+        wysiwyg_find_panel.dart      # its bar (status row, Ctrl/Cmd+F)
+        wysiwyg_editor.dart        # the Quill editing surface (spell spans)
       highlighting.dart     # MD + math-span tokenizer → styled display
       highlight_sync.dart   # incremental tokenizer sync → per-line spans
       md_editing.dart       # T-UI-08: pure markdown commands (wrap/prefix)
