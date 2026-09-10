@@ -8,6 +8,7 @@ import 'package:copist/src/core/settings/library_config.dart';
 import 'package:copist/src/core/settings/library_settings.dart';
 import 'package:copist/src/core/shortcuts.dart';
 import 'package:copist/src/core/storage_access.dart';
+import 'package:copist/src/core/tray.dart';
 import 'package:copist/src/db/index_database.dart';
 import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:copist/src/library/library_state.dart';
@@ -37,6 +38,7 @@ import 'package:copist/src/ui/todo_tab.dart';
 import 'package:copist/src/ui/trash.dart';
 import 'package:copist/src/ui/tree.dart';
 import 'package:copist/src/ui/unsaved_notes.dart';
+import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -61,7 +63,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       _resumeStarted = true;
       unawaited(_resume());
     }
-    unawaited(_publishShortcuts());
+    unawaited(_publishQuickActions());
     unawaited(_applyLanguage());
   }
 
@@ -73,17 +75,21 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     AppLanguages.choice = await ref.read(librarySessionProvider).language;
   }
 
-  /// Publishes the launcher quick actions (T-SC-02).
+  /// Publishes the quick actions on every surface that takes a label map:
+  /// the Android launcher (T-SC-02) and the desktop tray (T-PP-06b). Both
+  /// carry the same ids, so both run the same flows.
   ///
   /// Here rather than in the shell: they belong to the app, not to an
   /// open library, so they are there on the very first launch too.
-  Future<void> _publishShortcuts() {
-    return ref.read(shortcutServiceProvider).publish({
+  Future<void> _publishQuickActions() async {
+    final labels = {
       ShortcutAction.quickNote: AppStrings.shortcutQuickNote,
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
-    });
+    };
+    await ref.read(shortcutServiceProvider).publish(labels);
+    await ref.read(trayServiceProvider).init(labels);
   }
 
   /// Resumes the last library, unless Android is withholding the
@@ -111,6 +117,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
           shortcuts: ref.read(shortcutServiceProvider),
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
           unsavedTracker: ref.watch(unsavedTrackerProvider),
+          tray: ref.read(trayServiceProvider),
+          window: ref.read(windowControllerProvider),
         ),
         _ => OpenLibraryScreen(controller: controller),
       },
@@ -127,6 +135,8 @@ final class _LibraryShell extends StatefulWidget {
     required this.shortcuts,
     required this.todoSourceFactory,
     required this.unsavedTracker,
+    required this.tray,
+    required this.window,
   });
 
   final LibrarySession controller;
@@ -145,6 +155,13 @@ final class _LibraryShell extends StatefulWidget {
   /// The open notes' unsaved edits, which the window's close guard reads
   /// (T-PP-11); passed down to every [NoteView].
   final UnsavedTracker unsavedTracker;
+
+  /// The desktop tray's quick actions (T-PP-06b): the same four flows the
+  /// launcher publishes, on a third surface.
+  final TrayService tray;
+
+  /// The platform window; a tray activation brings it back to the front.
+  final WindowController window;
 
   @override
   State<_LibraryShell> createState() => _LibraryShellState();
@@ -306,6 +323,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Notification taps while running: a todo tap opens the Todo tab.
   StreamSubscription<String?>? _reminderTaps;
   StreamSubscription<ShortcutAction>? _shortcutTaps;
+  StreamSubscription<ShortcutAction>? _trayTaps;
+  StreamSubscription<void>? _trayActivations;
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -614,6 +633,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
+    _trayTaps = widget.tray.actions.listen(
+      (action) => unawaited(_runShortcut(action)),
+    );
+    _trayActivations = widget.tray.activated.listen(
+      (_) => unawaited(widget.window.show()),
+    );
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
     unawaited(_refreshEditorSettings());
@@ -626,6 +651,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     _noteHideTimer?.cancel();
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
+    unawaited(_trayTaps?.cancel());
+    unawaited(_trayActivations?.cancel());
     _todoController.dispose();
     super.dispose();
   }

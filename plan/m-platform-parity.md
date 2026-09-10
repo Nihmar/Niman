@@ -1,6 +1,6 @@
 # Platform parity — Android ↔ Linux/Windows
 
-**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11 landed — `window_manager` owns the close veto) · **Depends on:** M4 (everything compared exists) ·
+**Status:** In progress (T-PP-16 spike done on 3 packages; T-PP-11 and T-PP-06b landed — `window_manager` owns the window and its close veto, `nativeapi` the tray) · **Depends on:** M4 (everything compared exists) ·
 **Spec:** *Requirements → Platforms* (Android + Linux + Windows now)
 
 ## Purpose
@@ -95,7 +95,7 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `copist --new-note` runs from KRunner's command line (documented).
   *AC: the spike records which one KDE shows, and the chosen one ships;
   at minimum the main entry carries keywords covering all four actions.*
-- [ ] **T-PP-06b** Tray quick actions (`nativeapi`, which the T-PP-16
+- [x] **T-PP-06b** Tray quick actions (`nativeapi`, which the T-PP-16
   verdict reserves for this surface only): a StatusNotifier tray icon whose
   context menu offers the same four actions, each running the existing
   `_runShortcut` flow in-process. Two seams from the spike: import
@@ -105,6 +105,15 @@ sides equally absent — they land shared), M7 branding/packaging execution.
   `ShortcutService`, version-pinned. *AC: the four actions are on the tray
   menu and land on the same screens as their launcher/CLI twins; the GNOME
   AppIndicator caveat and the Windows-host pass are recorded here.*
+  Landed: `core/tray.dart` (the `nativeapi` StatusNotifier tray behind the
+  `TrayService` seam, the four actions on a `ShortcutAction` stream the
+  shell subscribes to beside the launcher's; icon click → `window.show()`),
+  `assets/branding/tray.png` (32 px downscale of the placeholder feather —
+  M7 closes the branding). Linux verified on this Plasma/Wayland session:
+  the SNI watcher lists our item with the `Copist` tooltip, the app log
+  reads `tray ready (4 actions)`. Owed: a hand click through all four menu
+  entries; the Windows-host pass; on GNOME the icon needs the AppIndicator
+  extension (ecosystem limit, as recorded in the spike).
 
 ### P2b — Desktop tab chrome (nav rail)
 

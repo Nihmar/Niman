@@ -8,6 +8,8 @@ import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../fakes/fake_window_controller.dart';
+
 /// A note with a settable dirty bit and a counted, controllable save.
 final class _FakeNote implements UnsavedNote {
   new(this.path, {this.unsaved = false});
@@ -30,37 +32,6 @@ final class _FakeNote implements UnsavedNote {
   }
 }
 
-/// The platform window, recorded instead of driven.
-final class _FakeWindow implements WindowController {
-  new({this.failInit = false});
-
-  final bool failInit;
-
-  /// Every prevent flag pushed to the platform, in order.
-  final List<bool> preventHistory = [];
-
-  int closeCalls = 0;
-
-  @override
-  void Function()? onCloseRequested;
-
-  @override
-  Future<void> init() async {
-    if (failInit) throw StateError('no window here');
-  }
-
-  @override
-  Future<void> setPreventClose({required bool prevent}) async {
-    preventHistory.add(prevent);
-  }
-
-  @override
-  Future<void> close() async => closeCalls++;
-
-  @override
-  Future<void> dispose() async {}
-}
-
 Widget _host(UnsavedTracker tracker, WindowController window) {
   return MaterialApp(
     home: CloseGuard(
@@ -76,7 +47,7 @@ void main() {
     tester,
   ) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     final note = _FakeNote('/lib/a.md', unsaved: true);
     tracker.register(note);
 
@@ -96,7 +67,7 @@ void main() {
 
   testWidgets('a clean close request lands without asking', (tester) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     tracker.register(_FakeNote('/lib/a.md'));
 
     await tester.pumpWidget(_host(tracker, window));
@@ -110,7 +81,7 @@ void main() {
 
   testWidgets('a dirty close request asks before closing', (tester) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     final note = _FakeNote('/lib/a.md', unsaved: true);
     tracker.register(note);
 
@@ -135,7 +106,7 @@ void main() {
     tester,
   ) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     final note = _FakeNote('/lib/a.md', unsaved: true);
     tracker.register(note);
 
@@ -154,7 +125,7 @@ void main() {
 
   testWidgets('a failed save keeps the window open', (tester) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     final note = _FakeNote('/lib/a.md', unsaved: true)
       ..failWith = StateError('disk full');
     tracker.register(note);
@@ -175,7 +146,7 @@ void main() {
     tester,
   ) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
     tracker.register(_FakeNote('/lib/a.md', unsaved: true));
 
     await tester.pumpWidget(_host(tracker, window));
@@ -195,7 +166,7 @@ void main() {
     tester,
   ) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow(failInit: true);
+    final window = FakeWindowController(failInit: true);
     tracker.register(_FakeNote('/lib/a.md', unsaved: true));
 
     await tester.pumpWidget(_host(tracker, window));
@@ -215,7 +186,7 @@ void main() {
     tester,
   ) async {
     final tracker = UnsavedTracker();
-    final window = _FakeWindow();
+    final window = FakeWindowController();
 
     await tester.pumpWidget(_host(tracker, window));
     await tester.pump();

@@ -27,6 +27,9 @@ abstract interface class WindowController {
   /// Closes the window for real. Only meaningful with prevent off.
   Future<void> close();
 
+  /// Brings the window back to the front (the tray icon's activation).
+  Future<void> show();
+
   /// Releases the platform side.
   Future<void> dispose();
 }
@@ -65,6 +68,12 @@ final class WindowManagerController implements WindowController {
   }
 
   @override
+  Future<void> show() async {
+    await _manager.show();
+    await _manager.focus();
+  }
+
+  @override
   Future<void> dispose() async {
     _manager.removeListener(_listener);
     _log.info('window controller disposed');
@@ -98,6 +107,9 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<void> close() async {}
+
+  @override
+  Future<void> show() async {}
 
   @override
   Future<void> dispose() async {}

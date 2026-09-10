@@ -55,6 +55,16 @@ dependencies:
   markdown: ^7.3.1
   # Filesystem location for the library root.
   meta: ^1.19.0
+
+  # The desktop tray (T-PP-06b) — the one surface window_manager dropped
+  # (no TrayManager in 0.5.x), same leanflutter family. Used for the tray
+  # only: its `WindowManager` is hidden at the import and `getCurrent()`
+  # is never called, since window_manager owns the window. Exact pin:
+  # pre-1.0 with a moving API. Its vendored C++ compiles into every
+  # platform build, the Android APK included (accepted in the T-PP-16
+  # verdict; see the Risks section of plan/m-platform-parity.md).
+  nativeapi: 0.2.3
+
   path: ^1.9.1
   path_provider: ^2.1.6
 
