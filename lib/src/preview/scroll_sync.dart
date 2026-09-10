@@ -82,6 +82,9 @@ final class _EditorPreviewScrollSyncState
   /// Attempts spent on [_previewLine].
   int _previewTries = 0;
 
+  /// How far down [_previewLine] the editor is (see `topOffset`).
+  double _previewInto = 0;
+
   /// Tries allowed before a wanted line is given up on.
   static const int _maxSeekTries = 4;
 
@@ -156,6 +159,7 @@ final class _EditorPreviewScrollSyncState
     final line = lines.topLine();
     if (line == null) return;
     _previewLine = line;
+    _previewInto = lines.topOffset();
     _previewTries = 0;
     _seekPreview();
   }
@@ -178,6 +182,7 @@ final class _EditorPreviewScrollSyncState
     final target = widget.map.previewOffsetForLine(
       line,
       maxExtent: preview.maxScrollExtent,
+      into: _previewInto,
     );
     if (target == null) {
       _previewLine = null;

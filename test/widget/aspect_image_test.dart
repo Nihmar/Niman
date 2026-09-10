@@ -56,4 +56,62 @@ void main() {
     // 200 wide, so the reserved box is 100 tall.
     expect(tester.getSize(find.byType(AspectImage)).height, 100);
   });
+
+  // 2026-09-10 device report: a portrait figure filled the whole preview
+  // pane, and the prose around it went off screen.
+  testWidgets('a tall image is capped, keeping its ratio', (tester) async {
+    final image = (await tester.runAsync(
+      () => createTestImage(width: 200, height: 1000),
+    ))!;
+    addTearDown(image.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: AspectImage(
+              provider: _TestImageProvider(image),
+              maxHeight: 300,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // At the pane's full width the box would be 2000 px tall. Capped, it
+    // takes the height and derives the width from the ratio.
+    final size = tester.getSize(find.byType(AspectRatio));
+    expect(size.height, 300);
+    expect(size.width, moreOrLessEquals(60, epsilon: 0.5));
+  });
+
+  testWidgets('a wide image is left alone by the cap', (tester) async {
+    final image = (await tester.runAsync(
+      () => createTestImage(width: 400, height: 100),
+    ))!;
+    addTearDown(image.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: AspectImage(
+              provider: _TestImageProvider(image),
+              maxHeight: 300,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final size = tester.getSize(find.byType(AspectRatio));
+    expect(size.width, 400);
+    expect(size.height, 100);
+  });
+
+  test('the cap follows the window, up to a limit', () {
+    expect(maxImageHeight, 480);
+  });
 }

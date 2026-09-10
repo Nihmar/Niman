@@ -1,5 +1,7 @@
 // T-M2-05 M-05-1: the math syntaxes — display blocks (top level, lists,
 // blockquotes), inline splitting with the shared rules, frontmatter strip.
+import 'dart:convert';
+
 import 'package:copist/src/preview/math_syntax.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -146,6 +148,24 @@ void main() {
 
     test('no frontmatter leaves the text untouched', () {
       expect(stripFrontmatter('# Head'), '# Head');
+    });
+
+    // The scroll map answers in the note's line numbers, and the editor
+    // beside it counts the frontmatter (device report, 2026-09-10).
+    test('the stripped lines are counted', () {
+      expect(frontmatterLines('---\ntitle: Note\n---\n# Body'), 3);
+      expect(frontmatterLines('---\ntitle: Note\n...\nbody'), 3);
+      expect(frontmatterLines('# Head'), 0);
+      expect(frontmatterLines(''), 0);
+      // Unterminated: every line is metadata.
+      expect(frontmatterLines('---\ntitle: Note'), 2);
+    });
+
+    test('the count and the strip agree', () {
+      const text = '---\nid: 1\ntitle: Note\n---\n\n# Body\n\ntext';
+      final lines = const LineSplitter().convert(text);
+      final kept = const LineSplitter().convert(stripFrontmatter(text));
+      expect(frontmatterLines(text) + kept.length, lines.length);
     });
   });
 }

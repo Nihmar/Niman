@@ -46,6 +46,23 @@ final class EditorLineView extends ChangeNotifier {
     return paragraphs.isEmpty ? null : paragraphs.last.index;
   }
 
+  /// How far the top line has scrolled past the top of the viewport, as a
+  /// fraction of its own height (0 when it starts exactly there).
+  ///
+  /// A line of prose wraps over several rows, and the reader looking at the
+  /// last of them is most of a paragraph further on than [topLine] alone
+  /// says.
+  double topOffset() {
+    for (final paragraph in paragraphs) {
+      if (paragraph.bottom > 0) {
+        final height = paragraph.height;
+        if (height <= 0) return 0;
+        return (-paragraph.top / height).clamp(0.0, 1.0);
+      }
+    }
+    return 0;
+  }
+
   /// How far [line]'s top sits from the top of the viewport (negative when
   /// it has scrolled past it), or null when the line is not laid out.
   double? offsetOf(int line) {

@@ -21,6 +21,7 @@ final class AspectImage extends StatefulWidget {
     required this.provider,
     this.fit = BoxFit.contain,
     this.errorBuilder,
+    this.maxHeight,
     super.key,
   });
 
@@ -33,6 +34,10 @@ final class AspectImage extends StatefulWidget {
 
   /// The failed-decode widget; an empty box when null.
   final ImageErrorWidgetBuilder? errorBuilder;
+
+  /// The tallest the image may be drawn; null asks the screen (see
+  /// [heightCapFor]).
+  final double? maxHeight;
 
   @override
   State<AspectImage> createState() => _AspectImageState();
@@ -116,6 +121,34 @@ final class _AspectImageState extends State<AspectImage> {
       // aspect replaces the box as soon as the first frame arrives.
       return SizedBox(height: 96, child: image);
     }
-    return AspectRatio(aspectRatio: ratio, child: image);
+    // A portrait figure at the pane's full width is a screen and a half of
+    // one picture, and the prose around it disappears (device report,
+    // 2026-09-10). Past the cap the box takes the height and derives the
+    // width from the ratio, so the figure only ever gets smaller, never
+    // stretched — and it stays on the left, where the text starts.
+    return Align(
+      alignment: Alignment.centerLeft,
+      // Only the width is the pane's; the height is the picture's, so the
+      // block around it is exactly as tall as what it draws.
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: widget.maxHeight ?? heightCapFor(context),
+        ),
+        child: AspectRatio(aspectRatio: ratio, child: image),
+      ),
+    );
   }
 }
+
+/// How tall an image may be drawn in [context]: half the window, and no
+/// more than [maxImageHeight] of it. Half a phone screen and half a
+/// desktop pane are both about one comfortable figure.
+double heightCapFor(BuildContext context) {
+  final height = MediaQuery.sizeOf(context).height;
+  final half = height > 0 ? height / 2 : maxImageHeight;
+  return half < maxImageHeight ? half : maxImageHeight;
+}
+
+/// The tallest an image is ever drawn, however big the window.
+const double maxImageHeight = 480;

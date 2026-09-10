@@ -133,13 +133,24 @@ bool _isCodeLike(String tag) => tag == 'pre' || tag == 'code';
 /// preview's source: frontmatter is metadata, not prose — math inside it
 /// must not parse, and heading rules don't apply.
 String stripFrontmatter(String text) {
+  final skip = frontmatterLines(text);
+  if (skip == 0) return text;
+  return const LineSplitter().convert(text).skip(skip).join('\n');
+}
+
+/// How many lines [stripFrontmatter] takes off the top.
+///
+/// The preview's line numbers start after them while the editor's start at
+/// the file's first line, so everything that crosses between the two — the
+/// scroll map above all — has to know the difference (device report,
+/// 2026-09-10: an eight-line frontmatter left the preview eight lines
+/// ahead of the editor, all the way down a 10 000-line note).
+int frontmatterLines(String text) {
   final lines = const LineSplitter().convert(text);
-  if (lines.isEmpty || lines.first.trim() != '---') return text;
+  if (lines.isEmpty || lines.first.trim() != '---') return 0;
   for (var i = 1; i < lines.length; i++) {
     final trimmed = lines[i].trim();
-    if (trimmed == '---' || trimmed == '...') {
-      return const LineSplitter().convert(text).skip(i + 1).join('\n');
-    }
+    if (trimmed == '---' || trimmed == '...') return i + 1;
   }
-  return ''; // Unterminated block: metadata only.
+  return lines.length; // Unterminated block: metadata only.
 }

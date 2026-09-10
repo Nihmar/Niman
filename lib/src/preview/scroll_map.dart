@@ -43,14 +43,26 @@ final class ScrollMap {
   /// Whether the map has been built for the current source.
   bool get built => blockStartLines.isNotEmpty || lineCount == 0;
 
+  /// Lines of the note above [rebuild]'s source — its frontmatter.
+  ///
+  /// Every line this class is asked about, and every line it answers with,
+  /// is a line of the *note*: the editor counts from the first line of the
+  /// file, and a map that counted from the first line of the prose put the
+  /// preview a whole frontmatter ahead of it (device report, 2026-09-10).
+  int lineOffset = 0;
+
   /// Rebuilds from [source] (frontmatter stripped, as the preview parses).
+  ///
+  /// [lineOffset] is the number of lines stripped off the top, so the map
+  /// keeps answering in the note's own line numbers.
   ///
   /// The previous parse's measured heights are carried over for the blocks
   /// that still start on the same source line: without that, every
   /// debounced edit (one parse per typing pause) wiped the whole map, and
   /// the preview re-measured every block on screen — each first layout
   /// after a keystroke paid a full re-learn (T-PP-22).
-  void rebuild(String source) {
+  void rebuild(String source, {int lineOffset = 0}) {
+    this.lineOffset = lineOffset;
     final previous = <int, double>{
       for (var i = 0; i < blockStartLines.length; i++)
         if (i < blockHeights.length && blockHeights[i] > 0)
@@ -66,8 +78,13 @@ final class ScrollMap {
     lineCount = 0;
     if (source.isEmpty) return;
     final lines = const LineSplitter().convert(source);
-    lineCount = lines.length;
-    blockStartLines.addAll(BlockLocator().locate(lines));
+    // Everything past here counts the note's lines, frontmatter included:
+    // one conversion, at the edge, so the two directions cannot apply it
+    // differently.
+    lineCount = lineOffset + lines.length;
+    blockStartLines.addAll(
+      BlockLocator().locate(lines).map((line) => line + lineOffset),
+    );
     for (var i = 0; i < blockStartLines.length; i++) {
       final height = previous[blockStartLines[i]];
       if (height != null) measure(i, height);
@@ -222,7 +239,15 @@ final class ScrollMap {
   /// The preview offset that shows [line], or null when nothing is laid out
   /// yet. It walks the blocks above [line]'s, adding their measured (or
   /// estimated) heights and the line's fraction inside its own block.
-  double? previewOffsetForLine(int line, {required double maxExtent}) {
+  ///
+  /// [into] is how far down that line the reader is (0 at its first row, 1
+  /// at its last): a line of prose wraps over several rows in the editor,
+  /// and without it the preview steps a whole paragraph at a time.
+  double? previewOffsetForLine(
+    int line, {
+    required double maxExtent,
+    double into = 0,
+  }) {
     if (blockStartLines.isEmpty || maxExtent <= 0 || lineCount == 0) {
       return null;
     }
@@ -232,9 +257,11 @@ final class ScrollMap {
       content += _heightOf(i);
     }
     final span = _spanOf(index);
-    final within = span <= 1
-        ? 0.0
-        : ((line - blockStartLines[index]) / span).clamp(0.0, 1.0);
+    final within =
+        ((line - blockStartLines[index] + into.clamp(0.0, 1.0)) / span).clamp(
+          0.0,
+          1.0,
+        );
     content += _heightOf(index) * within;
     // The preview's layout uses exactly these extents, so the offset needs
     // no rescaling to the pane's current extent — only the pane's own

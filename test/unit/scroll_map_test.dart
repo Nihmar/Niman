@@ -127,6 +127,26 @@ void main() {
       expect(offset, greaterThan(0));
     });
 
+    // A line of prose wraps over several rows in the editor: reading the
+    // last of them, the reader is most of a paragraph past where the line
+    // alone would put the preview.
+    test('the offset moves inside a block as the line scrolls past', () {
+      final map = ScrollMap()..rebuild('one\n\ntwo\n\nthree');
+      for (var i = 0; i < map.blockStartLines.length; i++) {
+        map
+          ..measure(i, 100)
+          ..applyMeasurements();
+      }
+      final top = map.previewOffsetForLine(2, maxExtent: 1000);
+      final half = map.previewOffsetForLine(2, maxExtent: 1000, into: 0.5);
+      final end = map.previewOffsetForLine(2, maxExtent: 1000, into: 1);
+      // Block 1 ("two") spans two lines — its own and the blank after it —
+      // so half of the line is a quarter of the block.
+      expect(top, 100);
+      expect(half, 125);
+      expect(end, 150);
+    });
+
     test('offset → line walks the block heights', () {
       final map = ScrollMap()
         ..rebuild(List.generate(40, (i) => 'line $i').join('\n\n'));

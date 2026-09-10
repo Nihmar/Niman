@@ -179,6 +179,42 @@ void main() {
       }
     });
 
+    // 2026-09-10 device report: on a note with eight lines of frontmatter
+    // the preview sat eight lines ahead of the editor, the whole way down.
+    // The frontmatter is not parsed and not drawn, but the editor beside
+    // the pane still numbers its lines, so the map has to count them.
+    testWidgets('the map answers in the note lines, frontmatter included', (
+      tester,
+    ) async {
+      const note =
+          '---\n'
+          'id: 1\n'
+          'title: Note\n'
+          '---\n'
+          '\n'
+          '# Heading\n'
+          '\n'
+          'A paragraph.\n';
+      final map = ScrollMap();
+      await tester.pumpWidget(
+        _app(MarkdownPreview(data: note, scrollMap: map)),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Two blocks, at the note's own line 5 and line 7.
+      expect(map.blockStartLines, [5, 7]);
+      expect(map.lineCount, 8);
+      expect(map.lineOffset, 4);
+      // The heading's line maps above the paragraph's.
+      final heading = map.previewOffsetForLine(5, maxExtent: 1000);
+      final paragraph = map.previewOffsetForLine(7, maxExtent: 1000);
+      expect(heading, isNotNull);
+      expect(paragraph! > heading!, isTrue);
+      // And back again.
+      expect(map.lineForPreviewOffset(paragraph, maxExtent: 1000), 7);
+    });
+
     // 2026-09-10 device report: "there is an enormous amount of padding
     // around the math blocks" — and around headings, and quotes. The
     // sliver forces every block into the extent the map estimated from its

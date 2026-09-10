@@ -213,11 +213,14 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 
   void _parse() {
     final revision = ++_parseRevision;
+    // The frontmatter is not parsed, but the map still counts its lines:
+    // the editor beside this pane numbers them (T-M2-06).
+    final offset = frontmatterLines(widget.data);
     final source = stripFrontmatter(widget.data);
     final clock = Stopwatch()..start();
 
     if (source.length <= _syncParseLimit) {
-      _applyParse(revision, source, _parseSyncSource(source));
+      _applyParse(revision, source, _parseSyncSource(source), offset);
       const AppLogger(name: 'preview').debug(
         'parse sync: ${source.length} chars in '
         '${clock.elapsedMilliseconds}ms',
@@ -237,7 +240,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           'parse async: ${source.length} chars in '
           '${clock.elapsedMilliseconds}ms',
         );
-        _applyParse(revision, source, result);
+        _applyParse(revision, source, result, offset);
       }),
     );
   }
@@ -259,7 +262,12 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     );
   }
 
-  void _applyParse(int revision, String source, List<md.Node> nodes) {
+  void _applyParse(
+    int revision,
+    String source,
+    List<md.Node> nodes,
+    int lineOffset,
+  ) {
     final clock = Stopwatch()..start();
     if (!mounted || revision != _parseRevision) return;
     final theme = Theme.of(context);
@@ -376,7 +384,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     setState(() {
       _children = children;
     });
-    map?.rebuild(source);
+    map?.rebuild(source, lineOffset: lineOffset);
     // The map pairs its blocks with these children by position, so a
     // parser the locator does not agree with puts the two panes out of
     // step for the rest of the document. Say so rather than drift.
