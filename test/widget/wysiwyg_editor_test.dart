@@ -126,17 +126,36 @@ void main() {
     );
     await tester.pump();
     final controller = key.currentState!.controller;
-    // The two edits are separate typing events, not one cascade.
-    // ignore: cascade_invocations
-    controller.replaceText(5, 0, 'X', const TextSelection.collapsed(offset: 6));
-    // The debounce fires: the parent now holds 'helloX\n'.
-    await tester.pump(const Duration(milliseconds: 600));
-    controller.replaceText(6, 0, 'Y', const TextSelection.collapsed(offset: 7));
-    await tester.pump();
-    // The parent rebuilds with its stale copy.
-    rebuild(() {});
-    await tester.pump();
-    expect(controller.document.toPlainText(), contains('helloXY'));
+    // Three type/emit/rebuild cycles: the real app rebuilds the surface on
+    // every save and preview pass, so one stale echo is not the worst case.
+    for (var cycle = 0; cycle < 3; cycle++) {
+      final at = controller.document.length - 1;
+      // The two edits are separate typing events, not one cascade.
+      controller.replaceText(
+        at,
+        0,
+        'X',
+        TextSelection.collapsed(offset: at + 1),
+      );
+      // The debounce fires: the parent now holds the text without the Y.
+      await tester.pump(const Duration(milliseconds: 600));
+      controller.replaceText(
+        at + 1,
+        0,
+        'Y',
+        TextSelection.collapsed(offset: at + 2),
+      );
+      await tester.pump();
+      // The parent rebuilds with its stale copy.
+      rebuild(() {});
+      await tester.pump();
+      expect(
+        controller.selection.start,
+        at + 2,
+        reason: 'the caret moved in cycle $cycle',
+      );
+    }
+    expect(controller.document.toPlainText(), contains('helloXYXYXY'));
   });
 
   testWidgets('underlines the misspelled words', (tester) async {
