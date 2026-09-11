@@ -19,16 +19,17 @@ void main() {
     expect(nodes, isNotEmpty);
   });
 
-  test('read returns content + stats from one isolate', () async {
+  test('read returns the content alone, without paying for the stats',
+      () async {
+    // The stats are deliberately not bundled here: computing them costs an
+    // order of magnitude more than the read, and the note can be shown
+    // without them (see PreviewWork's `read`).
     final dir = await Directory.systemTemp.createTemp('niman_pw_');
     final file = File('${dir.path}/note.md');
     await file.writeAsString('# Alpha\n\nwords here\n\n## Beta\n');
     final result = await PreviewWork.run('read', file.path);
-    expect(result, isA<(String, int, List<String>)>());
-    final loaded = result! as (String, int, List<String>);
-    expect(loaded.$1, contains('# Alpha'));
-    expect(loaded.$2, 6);
-    expect(loaded.$3, hasLength(2));
+    expect(result, isA<String>());
+    expect(result! as String, contains('# Alpha'));
     await dir.delete(recursive: true);
   });
 

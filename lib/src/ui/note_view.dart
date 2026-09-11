@@ -401,20 +401,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  /// Applies precomputed stats (from the load isolate) to the state.
-  /// Applies precomputed stats (from the load isolate) to the state.
-  void _applyStats(String text, int words, List<String> outlineRows) {
-    _lastStatsText = text;
-    setState(() {
-      _frontmatterError = frontmatterErrorIn(text);
-      _wordCount = words;
-      _outline = outlineRows
-          .map(_parseOutlineRow)
-          .whereType<OutlineEntry>()
-          .toList();
-    });
-  }
-
   Future<void> _write(String path, String content) async {
     final seam = widget.writeNote;
     if (seam != null) {
@@ -449,26 +435,24 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     });
     final clock = Stopwatch()..start();
     try {
-      String content;
-      (int, List<String>)? stats;
+      final String content;
       if (widget.readNote != null) {
-        // The test seam: content per the injected reader; stats are
-        // computed afterwards (the synchronous path for small notes).
+        // The test seam: content per the injected reader.
         content = await widget.readNote!(path);
-        stats = null;
       } else {
-        // Production: the top-level isolate entry reads the file AND
-        // computes the stats in one pass — word count + outline are ready
-        // the moment the load ends. No closures cross the boundary (an
-        // instance closure is rejected by the isolate: the message carried
+        // Production: the top-level isolate entry reads the file, and only
+        // that. It used to compute the stats in the same pass, which put
+        // the outline's full-document highlight in front of the note: a
+        // 931K note read in 44 ms and then spun for another ~1.16 s before
+        // showing text whose first frame paints in 0.4 ms (device log,
+        // 2026-09-11). The stats follow the note on screen instead, via
+        // _refreshStats below. No closures cross the boundary (an instance
+        // closure is rejected by the isolate: the message carried
         // _AsyncCompleter + the whole element graph and every note failed
         // to load).
         final loaded = await PreviewWork.run('read', path);
-        if (loaded is! (String, int, List<String>)) {
-          throw StateError('$loaded');
-        }
-        content = loaded.$1;
-        stats = (loaded.$2, loaded.$3);
+        if (loaded is! String) throw StateError('$loaded');
+        content = loaded;
       }
       if (!mounted || widget.path != path) return;
       // The buffer uses LF: normalize line endings on load.
@@ -477,9 +461,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // (kind GUI or plain editor); detection scans the leading block
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
-      if (stats != null) {
-        _applyStats(text, stats.$1, stats.$2);
-      }
       _controller.text = text;
       _wysiwygText = text;
       // The spell cache is keyed by line index + text; a different note can
@@ -495,10 +476,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // Opened straight into the preview: the IME has no target here.
       _dismissKeyboardForPreview();
       widget.onNoteKindChanged?.call(_noteKind);
-      // Word count + outline on open: debounced for edits only; the
-      // production load already has them from its isolate (the seam path
-      // uses the regular refresh).
-      if (stats == null) _refreshStats();
+      // Word count + outline: asked for only now, with the note already on
+      // screen, because computing them costs an order of magnitude more
+      // than reading the note (see PreviewWork's `read`). Small notes
+      // answer synchronously inside this call; big ones go to an isolate
+      // and land a moment later.
+      _refreshStats();
       // The editor gets this frame: the preview's parse and first layout
       // start right after the text is on screen, so a large note shows it
       // before the preview works (T-PP-22).

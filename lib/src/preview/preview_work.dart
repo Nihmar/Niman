@@ -13,8 +13,8 @@ import 'package:niman/src/preview/wikilink.dart';
 
 /// Off-isolate work for the preview (T-M2-04/05/08): the whole-document
 /// markdown parse and the note stats (word count + heading outline) run in
-/// a spawned isolate so a 931K note never blocks the UI (~420 ms parse +
-/// ~150 ms stats at that size).
+/// a spawned isolate so a 931K note never blocks the UI (~420 ms parse;
+/// the stats cost far more — see [statsFor]).
 ///
 /// Deliberately NOT `Isolate.run`: its wrapper closes over the calling
 /// zone, and a closure created inside a widget State carries the State's
@@ -28,9 +28,14 @@ import 'package:niman/src/preview/wikilink.dart';
 /// * parse: `run('parse', source)` → the AST (`List` of `md.Node`s);
 /// * stats: `run('stats', source)` → a record `(int words,
 ///   outline rows)` where rows are `List` of strings;
-/// * read: `run('read', path)` → `(String content, int words, rows)` — the
-///   note loads AND its stats in one isolate, so word count + outline are
-///   ready the moment the load ends;
+/// * read: `run('read', path)` → the note's text, and deliberately not its
+///   stats with it. Reading a 931K note costs 44 ms; computing its stats
+///   costs ~1.1 s, because the outline comes from the tokenizer and so
+///   pays a full-document highlight ([statsFor]). Nothing on screen needs
+///   either number to show the text, so carrying them here only bought a
+///   1.2 s spinner in front of a note whose first frame paints in 0.4 ms
+///   (device log, 2026-09-11). The editor asks for them separately once
+///   the note is up;
 /// * unknown task or a thrown error → a `'__error__|detail'` string.
 ///
 /// Outline rows encode `'line|level|text'`.
@@ -71,9 +76,7 @@ final class PreviewWork {
           final stats = statsFor(message.source);
           message.reply.send(stats);
         case 'read':
-          final text = File(message.source).readAsStringSync();
-          final stats = statsFor(text);
-          message.reply.send((text, stats.$1, stats.$2));
+          message.reply.send(File(message.source).readAsStringSync());
         default:
           message.reply.send('__error__|unknown task: ${message.task}');
       }
@@ -87,6 +90,15 @@ typedef _Work = ({SendPort reply, String task, String source});
 
 /// Word count + heading outline of [text] (the row encoding
 /// `'line|level|text'`).
+///
+/// Dominated by the highlight pass, not by the counting: the outline is
+/// derived from the tokenizer so that a `#` inside a code fence, a math
+/// block or the frontmatter is not mistaken for a heading (see
+/// `outlineOf`), which means the whole document is tokenized to find it.
+/// On a 931K math-dense note that is ~1.07 s of the ~1.16 s total, for 84
+/// headings; the word count is ~80 ms and the outline extraction 6 ms.
+/// Never on the open path, and never on the main isolate above
+/// `_syncWorkLimit`.
 (int, List<String>) statsFor(String text) {
   final styled = HighlightDocument.fromText(text).lines;
   return (
