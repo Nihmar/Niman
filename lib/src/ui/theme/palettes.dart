@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/ui/theme/catppuccin.dart';
 import 'package:niman/src/ui/theme/gruvbox.dart';
+import 'package:niman/src/ui/theme/niman.dart';
 import 'package:niman/src/ui/theme/solarized.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 
@@ -50,6 +51,11 @@ PaletteColors paletteColors(AppPalette palette, Brightness brightness) {
     AppPalette.gruvbox => _mapped(
       gruvboxTokens(brightness),
       gruvboxSyntax(brightness),
+      brightness,
+    ),
+    AppPalette.niman => _mapped(
+      nimanTokens(brightness),
+      nimanSyntax(brightness),
       brightness,
     ),
   };

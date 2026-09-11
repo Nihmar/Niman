@@ -65,7 +65,8 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   List<SearchHit> searchHits = [];
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
-  AppPalette _themePalette = AppPalette.system;
+  // A fresh install wears the app's own palette (T-M6-05).
+  AppPalette _themePalette = AppPalette.niman;
 
   @override
   LibraryPhase get phase => _phase;

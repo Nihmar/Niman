@@ -190,11 +190,11 @@ final class AppSettingsRepo {
     );
   }
 
-  /// The stored palette (T-M6-05).
+  /// The stored palette (T-M6-05); a fresh install wears [AppPalette.niman].
   Future<AppPalette> themePalette() async {
     final rows = await _db.select(_db.appSettings).get();
     return rows.isEmpty
-        ? AppPalette.system
+        ? AppPalette.niman
         : AppPalette.fromId(rows.first.themePalette);
   }
 

@@ -644,6 +644,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
     AppPalette.solarized => AppStrings.themePaletteSolarized,
     AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
+    AppPalette.niman => AppStrings.themePaletteNiman,
   };
 
   /// Opens the known-library list and switches to whatever is picked

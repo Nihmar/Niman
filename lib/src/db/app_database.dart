@@ -43,10 +43,11 @@ class AppSettings extends Table {
   TextColumn get themeBrightness =>
       text().named('theme_brightness').withDefault(const Constant('system'))();
 
-  /// The palette: `system` (the device's own colors), `catppuccin`,
+  /// The palette: `niman` (the app's own colors, and what a fresh install
+  /// wears), `system` (the device's own colors), `catppuccin`,
   /// `solarized` or `gruvbox`.
   TextColumn get themePalette =>
-      text().named('theme_palette').withDefault(const Constant('system'))();
+      text().named('theme_palette').withDefault(const Constant('niman'))();
 
   /// The settings waiting to reach the libraries they belong to: the
   /// dropped `library_settings` rows (T-ML-02) and the editor settings

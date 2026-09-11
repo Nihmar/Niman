@@ -71,13 +71,17 @@ void main() {
       Theme.of(tester.element(find.byType(NoteTree)));
 
   group('the settings rows', () {
-    testWidgets('both start on the device', (tester) async {
+    testWidgets('brightness starts on the device, palette on Niman', (
+      tester,
+    ) async {
       await pumpSettings(tester);
 
       expect(find.byKey(const Key('theme-brightness-setting')), findsOneWidget);
       expect(find.byKey(const Key('theme-palette-setting')), findsOneWidget);
-      // Two rows, both reading "System".
-      expect(find.text('System'), findsNWidgets(3));
+      // Brightness and language read "System"; a fresh install wears the
+      // app's own palette, so that row reads "Niman".
+      expect(find.text('System'), findsNWidgets(2));
+      expect(find.text('Niman'), findsOneWidget);
     });
 
     testWidgets('the palette is remembered and applied at once', (
@@ -110,7 +114,8 @@ void main() {
 
       expect(await controller.themeBrightness, AppBrightness.night);
       expect(AppThemes.mode, ThemeMode.dark);
-      expect(AppThemes.palette, AppPalette.system);
+      // The palette is untouched, so it stays on the install default.
+      expect(AppThemes.palette, AppPalette.niman);
     });
 
     testWidgets('every palette the app ships is offered', (tester) async {
@@ -162,6 +167,9 @@ void main() {
     });
 
     testWidgets('the device colors reach a running app', (tester) async {
+      // The device's colors are the `system` palette; the app now installs
+      // on its own, so this one has to be asked for.
+      await controller.setThemePalette(AppPalette.system);
       await pumpApp(tester);
       final before = themeOfTree(tester).colorScheme.primary;
 
@@ -198,9 +206,9 @@ void main() {
       );
     });
 
-    testWidgets('with no palette chosen the app wears the shipped seed', (
-      tester,
-    ) async {
+    testWidgets('the system palette wears the shipped seed with no device '
+        'colors', (tester) async {
+      await controller.setThemePalette(AppPalette.system);
       await pumpApp(tester);
 
       expect(

@@ -239,6 +239,7 @@ final class AppStrings {
   static String get themePaletteCatppuccin => 'Catppuccin';
   static String get themePaletteSolarized => 'Solarized';
   static String get themePaletteGruvbox => 'Gruvbox';
+  static String get themePaletteNiman => 'Niman';
 
   // Settings: text size (T-M6-12).
   static String get uiTextScaleTitle =>

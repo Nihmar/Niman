@@ -102,7 +102,7 @@ class $AppSettingsTable extends AppSettings
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('system'),
+    defaultValue: const Constant('niman'),
   );
   static const VerificationMeta _legacyLibrarySettingsMeta =
       const VerificationMeta('legacyLibrarySettings');

@@ -53,7 +53,10 @@ enum AppPalette {
   solarized('solarized'),
 
   /// Gruvbox — the medium light and dark variants.
-  gruvbox('gruvbox');
+  gruvbox('gruvbox'),
+
+  /// Niman — the app's own colors, taken from the logo.
+  niman('niman');
 
   new(this.id);
 
@@ -78,7 +81,7 @@ final class AppThemes {
   static final ValueNotifier<int> revision = ValueNotifier<int>(0);
 
   static AppBrightness _brightness = AppBrightness.system;
-  static AppPalette _palette = AppPalette.system;
+  static AppPalette _palette = AppPalette.niman;
 
   /// Day, night, or whatever the device says.
   static AppBrightness get brightness => _brightness;
@@ -141,6 +144,6 @@ final class AppThemes {
   /// colors included.
   static void reset() {
     setDeviceColors();
-    apply(brightness: AppBrightness.system, palette: AppPalette.system);
+    apply(brightness: AppBrightness.system, palette: AppPalette.niman);
   }
 }
