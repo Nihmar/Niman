@@ -530,6 +530,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       // must not leave a chromeless editor with no way out.
       if (!_previewVisible) _previewFullScreen = false;
     });
+    // Device trace (preview toggle needs two presses on huge notes) —
+    // temporary: remove once the trace is in.
+    const AppLogger(name: 'preview')
+        .info('toggle → ${_previewVisible ? 'preview' : 'editor'}');
   }
 
   /// Whether a note opened right now would show only the preview (the

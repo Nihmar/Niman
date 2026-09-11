@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/preview/block_parse.dart';
@@ -22,8 +21,9 @@ import 'package:niman/src/preview/block_parse.dart';
 ///
 /// Results (task → returned message):
 ///
-/// * parse: `run('parse', source)` → the top-level blocks (`List` of
-///   `md.Node`s) with inlines left raw ([parseBlocks]);
+/// * parse: `run('parse', source)` → the block phase ([parseBlockPhase]):
+///   the top-level blocks with inlines left raw, plus the link reference
+///   definitions the inline phase resolves against;
 /// * stats: `run('stats', source)` → a record `(int words,
 ///   outline rows)` where rows are `List` of strings;
 /// * read: `run('read', path)` → the note's text, and deliberately not its
@@ -102,7 +102,8 @@ typedef _Work = ({SendPort reply, String task, String source});
 }
 
 /// The preview's block phase for [source] (the isolate task): the
-/// top-level blocks with inlines left raw. The inline phase runs per block
-/// on the render side (block_parse.dart) — measured on the 931K note the
-/// old whole-document parse split 14 ms of blocks and 378 ms of inlines.
-List<md.Node> _parseSource(String source) => parseBlocks(source);
+/// top-level blocks with inlines left raw, with the link reference
+/// definitions alongside. The inline phase runs per block on the render
+/// side (block_parse.dart) — measured on the 931K note the old
+/// whole-document parse split 14 ms of blocks and 378 ms of inlines.
+BlockPhase _parseSource(String source) => parseBlockPhase(source);

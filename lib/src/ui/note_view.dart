@@ -345,6 +345,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Device trace (preview toggle needs two presses on huge notes) —
+    // temporary: remove once the trace is in.
+    if (oldWidget.showPreview != widget.showPreview) {
+      final scroll = _previewScroll.hasClients
+          ? '${_previewScroll.offset.toStringAsFixed(0)}/'
+                '${_previewScroll.position.maxScrollExtent.toStringAsFixed(0)}'
+          : 'detached';
+      const AppLogger(name: 'preview').info(
+        'flip showPreview=${widget.showPreview} '
+        'chars=${_previewText.length} scroll=$scroll',
+      );
+    }
     if (oldWidget.path != widget.path) {
       _saveTimer?.cancel();
       _savePending = false;
@@ -360,6 +372,16 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // outgoing note.
       _unsaved?.noteChanged();
       unawaited(_load());
+    }
+    // Coming back to the editor no longer remounts it (both panes stay
+    // mounted below), so the source editor's autofocus no longer fires on
+    // its own — request it like a fresh mount did. Split mode never
+    // remounted either, so focus stays untouched there.
+    final splitNow = widget.splitPreview && !widget.showWysiwyg;
+    if (!splitNow && oldWidget.showPreview && !widget.showPreview) {
+      if (widget.autofocusEditor && !widget.showWysiwyg) {
+        _focus.requestFocus();
+      }
     }
     // The preview has no editable: a note opening in it, or the switch
     // flipping to it, dismisses the keyboard instead of leaving it up.
@@ -1333,27 +1355,34 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                             widget.onSplitFractionChanged ?? (_) {},
                         onDragEnd: widget.onSplitDragEnd,
                       )
-                    : AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
-                        transitionBuilder: (child, animation) =>
-                            FadeTransition(opacity: animation, child: child),
-                        // The outgoing pane leaves immediately: an
-                        // editor and its twin must never coexist.
-                        layoutBuilder: (currentChild, previousChildren) =>
-                            currentChild ?? const SizedBox.shrink(),
-                        child: widget.showPreview
-                            ? KeyedSubtree(
-                                key: const ValueKey('pane-preview'),
-                                child: _buildPreview(context),
-                              )
-                            : KeyedSubtree(
-                                key: ValueKey(
-                                  widget.showWysiwyg
-                                      ? 'pane-wysiwyg'
-                                      : 'pane-editor',
-                                ),
-                                child: _editorPane(),
+                    // Both panes stay mounted and only one is on stage:
+                    // coming back to the preview finds its parse, scroll
+                    // offset, typeset math and images where they were
+                    // (device report, 2026-09-11: every return re-parsed
+                    // the note and restarted from the top). Offstage
+                    // children skip hit testing, painting and the default
+                    // finders; the panes never show together.
+                    : Stack(
+                        children: [
+                          Offstage(
+                            offstage: widget.showPreview,
+                            child: KeyedSubtree(
+                              key: ValueKey(
+                                widget.showWysiwyg
+                                    ? 'pane-wysiwyg'
+                                    : 'pane-editor',
                               ),
+                              child: _editorPane(),
+                            ),
+                          ),
+                          Offstage(
+                            offstage: !widget.showPreview,
+                            child: KeyedSubtree(
+                              key: const ValueKey('pane-preview'),
+                              child: _buildPreview(context),
+                            ),
+                          ),
+                        ],
                       ))
               : Center(child: Text(error)),
         ),

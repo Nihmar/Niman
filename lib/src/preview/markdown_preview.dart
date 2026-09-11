@@ -237,7 +237,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     final clock = Stopwatch()..start();
 
     if (source.length <= _syncParseLimit) {
-      _applyParse(revision, source, parseBlocks(source), offset);
+      _applyParse(revision, source, parseBlockPhase(source), offset);
       const AppLogger(name: 'preview').debug(
         'parse sync: ${_nodes?.length} blocks, ${source.length} chars in '
         '${clock.elapsedMilliseconds}ms',
@@ -248,14 +248,23 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     // plain data).
     unawaited(
       PreviewWork.run('parse', source).then((result) {
-        if (!mounted || revision != _parseRevision) return;
-        if (result is! List<md.Node>) {
+        if (!mounted || revision != _parseRevision) {
+          // Device trace (preview toggle needs two presses on huge notes)
+          // — temporary: remove once the trace is in.
+          const AppLogger(name: 'preview').info(
+            'parse async: stale rev $revision '
+            '(current $_parseRevision), dropped',
+          );
+          return;
+        }
+        if (result is! BlockPhase) {
           const AppLogger(name: 'preview')
               .error('async parse failed (${source.length} chars): $result');
           return;
         }
         const AppLogger(name: 'preview').debug(
-          'parse async: ${result.length} blocks, ${source.length} chars in '
+          'parse async: ${result.nodes.length} blocks, '
+          '${source.length} chars in '
           '${clock.elapsedMilliseconds}ms',
         );
         _applyParse(revision, source, result, offset);
@@ -266,7 +275,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   void _applyParse(
     int revision,
     String source,
-    List<md.Node> nodes,
+    BlockPhase phase,
     int lineOffset,
   ) {
     final clock = Stopwatch()..start();
@@ -322,7 +331,8 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     // keystroke no longer blocks on the whole document's inlines (378 ms on
     // the 931K note; block_parse.dart).
     final doc = makeDocument();
-    prepareInlines(doc, nodes);
+    prepareInlines(doc, phase);
+    final nodes = phase.nodes;
     setState(() {
       _nodes = nodes;
       _doc = doc;

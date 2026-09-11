@@ -33,6 +33,33 @@ md.Document makeDocument() => md.Document(
   encodeHtml: false,
 );
 
+/// The block phase result: the top-level blocks plus the link reference
+/// definitions the block phase consumed.
+///
+/// Reference definitions (`[label]: destination`) never become blocks — the
+/// block parser files them into the document's `linkReferences`, where the
+/// inline phase resolves them. The preview splits the two phases across time
+/// (per-block inlines) and threads (isolate parse), so the definitions
+/// travel here instead of dying with the block-phase document.
+typedef BlockPhase = ({
+  List<md.Node> nodes,
+  Map<String, md.LinkReference> linkReferences,
+});
+
+/// The block phase returning the reference definitions with the blocks
+/// ([prepareInlines] feeds both to the inline-phase document).
+BlockPhase parseBlockPhase(String source) {
+  final doc = makeDocument();
+  final nodes = md.BlockParser(
+    const LineSplitter().convert(source).map(md.Line.new).toList(),
+    doc,
+  ).parseLines();
+  return (
+    nodes: _gatherFootnotes(nodes),
+    linkReferences: Map.of(doc.linkReferences),
+  );
+}
+
 /// The top-level blocks of [source], with the inlines left raw
 /// ([md.UnparsedContent] leaves) and footnote definitions gathered into the
 /// trailing `section.footnotes` block the preview draws as one.
@@ -41,26 +68,25 @@ md.Document makeDocument() => md.Document(
 /// preview pays up front. It is not a full parse: [withInlines] runs the
 /// inline phase for a single block when that block builds, producing the
 /// same nodes the old whole-document parse produced for that block.
-List<md.Node> parseBlocks(String source) {
-  final doc = makeDocument();
-  final nodes = md.BlockParser(
-    const LineSplitter().convert(source).map(md.Line.new).toList(),
-    doc,
-  ).parseLines();
-  return _gatherFootnotes(nodes);
-}
+/// Reference definitions are dropped here (use [parseBlockPhase] when the
+/// inline phase needs them).
+List<md.Node> parseBlocks(String source) => parseBlockPhase(source).nodes;
 
 /// Seeds the inline-phase state [withInlines] needs from the whole
-/// document: the footnote state into [doc].
+/// document: the link reference definitions into [doc], and the footnote
+/// state.
 ///
 /// Inlines run per block — the visible blocks first, out of order — so the
 /// state a whole-document parse would have accumulated is fixed here
 /// instead: the block phase seeds `footnoteReferences` with 0 on each
 /// definition (and the references it meets count up from there), and the
 /// labels are numbered in document order. Both are read from the trailing
-/// `section.footnotes` that [parseBlocks] appended.
-void prepareInlines(md.Document doc, List<md.Node> nodes) {
-  for (final node in nodes) {
+/// `section.footnotes` that [parseBlocks] appended. The labels are seeded
+/// up front (rather than discovered in build order) so a footnote's number
+/// never depends on which block scrolled into view first.
+void prepareInlines(md.Document doc, BlockPhase phase) {
+  doc.linkReferences.addAll(phase.linkReferences);
+  for (final node in phase.nodes) {
     if (node is! md.Element || node.tag != 'section') continue;
     for (final child in node.children ?? const <md.Node>[]) {
       if (child is! md.Element || child.tag != 'ol') continue;
@@ -90,21 +116,7 @@ List<md.Node> withInlines(md.Document doc, md.Node block) {
   } else {
     top = [block];
   }
-  final parsed = splitHtmlTables(splitInlineMath(top));
-  // The math elements exist only after the split, so the punctuation glue
-  // runs on the result (and walks the subtree, for inlines in lists or
-  // blockquotes).
-  _glueSubtree(parsed);
-  return parsed;
-}
-
-/// [_glueMathPunctuation] over [nodes] and every Element subtree below.
-void _glueSubtree(List<md.Node> nodes) {
-  _glueMathPunctuation(nodes);
-  for (final node in nodes) {
-    final kids = node is md.Element ? node.children : null;
-    if (kids != null) _glueSubtree(kids);
-  }
+  return splitHtmlTables(splitInlineMath(top));
 }
 
 /// The inlines of [children], with every raw leaf replaced in place by its
@@ -125,59 +137,6 @@ void _inlined(md.Document doc, List<md.Node> children) {
   }
 }
 
-/// The key the trailing-punctuation glue stores on an inline `math`
-/// element (see [_glueMathPunctuation]).
-const mathTrailingAttribute = 'niman-trailing';
-
-/// The characters that glue to a preceding math element.
-const _gluePunctuation = <String>{
-  '.',
-  ',',
-  ';',
-  ':',
-  '!',
-  '?',
-  '%',
-  ')',
-  '"',
-  '\u2019',
-  '\u2014',
-};
-
-/// Keeps the punctuation that follows an inline math element with it.
-///
-/// The math renders as a widget (a forced line-break boundary), so the wrap
-/// that fills the line right after it would strand the punctuation (`.`,
-/// `,`, …) at the start of the next line, split from its formula. The
-/// leading punctuation (+ at most one space) moves into the element's
-/// [mathTrailingAttribute]; the math view renders it inside its own (atomic)
-/// span, where it can no longer wrap away from the math. The text after
-/// keeps the remainder.
-void _glueMathPunctuation(List<md.Node> children) {
-  for (var i = 0; i + 1 < children.length; i++) {
-    final math = children[i];
-    if (math is! md.Element ||
-        math.tag != 'math' ||
-        math.attributes[mathTrailingAttribute] != null) {
-      continue;
-    }
-    final next = children[i + 1];
-    if (next is! md.Text || next.text.isEmpty) continue;
-    final first = next.text[0];
-    if (!_gluePunctuation.contains(first)) continue;
-    var cut = 1;
-    if (next.text.length > 1 && next.text[1] == ' ') cut = 2;
-    final glued = next.text.substring(0, cut);
-    final rest = next.text.substring(cut);
-    math.attributes[mathTrailingAttribute] = glued;
-    if (rest.isEmpty) {
-      children.removeAt(i + 1);
-    } else {
-      children[i + 1] = md.Text(rest);
-    }
-  }
-}
-
 /// The block phase of the package's `_filterFootnotes`: footnote
 /// definitions leave the body, and the ones referenced gather at the end
 /// into a single `section.footnotes` (the preview draws it as one block,
@@ -185,7 +144,8 @@ void _glueMathPunctuation(List<md.Node> children) {
 /// references are dropped, matching the upstream behavior.
 ///
 /// Upstream computes the referencing state out of the inline phase, which
-/// does not run here; the raw-text scan over the blocks is its stand-in.
+/// does not run here; the raw-text scan over the nodes is its stand-in
+/// (code spans blanked — inlines never run inside them either).
 List<md.Node> _gatherFootnotes(List<md.Node> nodes) {
   final blocks = <md.Node>[];
   final defs = <String, md.Element>{};
@@ -200,7 +160,10 @@ List<md.Node> _gatherFootnotes(List<md.Node> nodes) {
     blocks.add(node);
   }
   if (defs.isEmpty) return blocks;
-  final counts = _footnoteRefCounts(blocks);
+  // Scanned over every node in document order — including the definition
+  // bodies, whose references the inline phase meets too (upstream inlines
+  // the definitions like any other block).
+  final counts = _footnoteRefCounts(nodes);
   // Resolve the referenced labels to their definitions, first-reference
   // order; references without a definition stay literal text.
   final defOf = <String, String>{};
@@ -239,9 +202,16 @@ Map<String, int> _footnoteRefCounts(List<md.Node> nodes) {
 
 final RegExp _refPattern = RegExp(r'\[\^([^\]\s]+)\]');
 
+/// Inline code spans, blanked before the reference scan: the inline parser
+/// consumes them whole, so a `` `[^a]` `` is literal text, never a
+/// reference — without this the scan invents a footnote section the full
+/// parse never has.
+final RegExp _codeSpanPattern = RegExp(r'(`+).+?\1', dotAll: true);
+
 void _scanForRefs(md.Node node, Map<String, int> counts) {
   if (node is md.UnparsedContent) {
-    for (final match in _refPattern.allMatches(node.textContent)) {
+    final text = node.textContent.replaceAll(_codeSpanPattern, '');
+    for (final match in _refPattern.allMatches(text)) {
       final key = match.group(1)!.trim().toLowerCase();
       if (key.isNotEmpty) counts[key] = (counts[key] ?? 0) + 1;
     }

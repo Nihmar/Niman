@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/block_parse.dart';
 import 'package:niman/src/preview/preview_work.dart';
 
 const String _note =
@@ -14,8 +15,9 @@ const String _note =
 void main() {
   test('parse returns the block-phase AST over an isolate', () async {
     final result = await PreviewWork.run('parse', _note);
-    expect(result, isA<List<md.Node>>());
-    final nodes = result! as List<md.Node>;
+    expect(result, isA<BlockPhase>());
+    final phase = result! as BlockPhase;
+    final nodes = phase.nodes;
     expect(nodes, isNotEmpty);
     // The inlines stay raw: the paragraph's text is an UnparsedContent
     // leaf (the inline phase is per-block, block_parse.withInlines).

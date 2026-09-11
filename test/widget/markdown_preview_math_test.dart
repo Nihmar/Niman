@@ -138,5 +138,106 @@ $$
       );
       cache.dispose();
     });
+
+    testWidgets('inline math stays inside the paragraph RichText', (
+      tester,
+    ) async {
+      // Device report, 2026-09-11: every formula stood alone on its line.
+      // The package builds a block as a Wrap of its inline children and
+      // only merges text widgets — a bare view becomes its own wrap child
+      // (an atomic wrap unit). The builder returns a Text instead, so the
+      // paragraph stays one RichText and the formula is a WidgetSpan in it.
+      final cache = _syncCache();
+      await tester.pumpWidget(
+        _narrow(
+          _preview(r'I segmenti orientati $AB$ e $CD$ si diranno.', cache),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      final paras = find
+          .byType(RichText)
+          .evaluate()
+          .map((e) => e.widget as RichText)
+          .where((rt) => rt.text.toPlainText().contains('segmenti'))
+          .toList();
+      expect(paras, hasLength(1));
+      expect(_widgetSpans(paras.single.text), 2);
+      cache.dispose();
+    });
+
+    testWidgets('inline math wraps like plain text', (tester) async {
+      // The same sentence with the formulae as words: the line count must
+      // match, or the math is stranding neighbours on their own lines.
+      final cache = _syncCache();
+      const math =
+          r'I segmenti orientati $AB$ e $CD$ si diranno equipollenti se '
+          'sono entrambi banali oppure se sono uguali.';
+      const plain =
+          'I segmenti orientati AB e CD si diranno equipollenti se '
+          'sono entrambi banali oppure se sono uguali.';
+      expect(
+        await _lineCount(tester, math, cache),
+        await _lineCount(tester, plain, cache),
+      );
+      cache.dispose();
+    });
   });
+}
+
+/// A 300 px preview: narrow enough that the sentence must wrap.
+Widget _narrow(Widget child) => MaterialApp(
+  home: Scaffold(body: SizedBox(width: 300, height: 800, child: child)),
+);
+
+/// How many [WidgetSpan]s [span] holds, at any depth.
+int _widgetSpans(InlineSpan span) {
+  var count = 0;
+  void visit(InlineSpan node) {
+    if (node is WidgetSpan) count++;
+    if (node is TextSpan) node.children?.forEach(visit);
+  }
+
+  visit(span);
+  return count;
+}
+
+/// Lines the paragraph built for [data] takes at 300 px, replaying its
+/// span (with the live math sizes) through a TextPainter.
+Future<int> _lineCount(
+  WidgetTester tester,
+  String data,
+  MathCache cache,
+) async {
+  await tester.pumpWidget(_narrow(_preview(data, cache)));
+  await tester.pump();
+  expect(tester.takeException(), isNull);
+  RichText? para;
+  for (final e in find.byType(RichText).evaluate()) {
+    final rt = e.widget as RichText;
+    if (rt.text.toPlainText().contains('segmenti')) para = rt;
+  }
+  expect(para, isNotNull);
+  final context = tester.element(find.byWidget(para!));
+  final painter = TextPainter(
+    text: para.text,
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  );
+  final holderSizes = [
+    for (final e in find.byType(InlineMathView).evaluate())
+      tester.getSize(find.byWidget(e.widget)),
+  ];
+  painter.setPlaceholderDimensions([
+    for (final size in holderSizes)
+      PlaceholderDimensions(
+        size: size,
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        baselineOffset: size.height,
+      ),
+  ]);
+  return (painter..layout(maxWidth: tester.getSize(find.byWidget(para)).width))
+      .computeLineMetrics()
+      .length;
 }

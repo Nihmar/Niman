@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -15,9 +16,11 @@ NoteView _view({
   CodeLineEditingController? controller,
   bool showLineNumbers = true,
   bool autofocusEditor = false,
+  bool showPreview = false,
 }) => NoteView(
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
+  showPreview: showPreview,
   path: path,
   readNote: readNote,
   writeNote: writeNote,
@@ -269,6 +272,42 @@ void main() {
       final afterFind =
           tester.getTopLeft(words).dx - tester.getTopRight(findButton).dx;
       expect(afterFind, 9);
+    });
+
+    testWidgets('the preview keeps its scroll offset across the switch', (
+      tester,
+    ) async {
+      // Device report, 2026-09-11: every return to the preview restarted
+      // from the top. Both panes stay mounted (Offstage) so the preview
+      // keeps its parse, map and scroll position.
+      final text = List.generate(
+        200,
+        (i) => 'Paragraph $i with enough words to wrap.',
+      ).join('\n\n');
+      Widget view({required bool preview}) => _app(
+        _view(
+          path: '/notes/a.md',
+          readNote: (_) async => text,
+          showPreview: preview,
+        ),
+      );
+      await tester.pumpWidget(view(preview: true));
+      await tester.pump();
+      await tester.pump();
+      final scrollable = find.descendant(
+        of: find.byType(MarkdownPreview),
+        matching: find.byType(Scrollable),
+      );
+      expect(scrollable, findsOneWidget);
+      tester.state<ScrollableState>(scrollable).position.jumpTo(2000);
+      await tester.pump();
+      final offset = tester.state<ScrollableState>(scrollable).position.pixels;
+      expect(offset, greaterThan(0));
+      await tester.pumpWidget(view(preview: false));
+      await tester.pump();
+      await tester.pumpWidget(view(preview: true));
+      await tester.pump();
+      expect(tester.state<ScrollableState>(scrollable).position.pixels, offset);
     });
   });
 }

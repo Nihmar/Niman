@@ -55,58 +55,31 @@ void main() {
     expect(text, isA<md.UnparsedContent>());
   });
 
-  test('trailing punctuation glues to the math element, '
-      'so it can\'t wrap away from the formula', () {
-    const source = r'aaaa $x^2$. bbbb cccc';
-    final blocks = parseBlocks(source);
+  test('math followed by punctuation matches the whole-document parse', () {
+    // No preview-only transform may touch the nodes: the inline phase must
+    // produce exactly what the codec's full parse produces.
+    const source = r'Visto che $x$ vale, e $y$. Infine $z$.';
+    final phase = parseBlockPhase(source);
+    final full = parseMarkdownDocument(source);
+    expect(phase.nodes.length, full.length);
     final doc = makeDocument();
-    final parsed = withInlines(doc, blocks.first);
-    final p = parsed.first as md.Element;
-    final kids = p.children!;
-    // [Text('aaaa '), math(trailing '. '), Text('bbbb cccc')].
-    expect(kids, hasLength(3));
-    final math = kids[1] as md.Element;
-    expect(math.tag, 'math');
-    expect(math.attributes[mathTrailingAttribute], '. ');
-    expect((kids[2] as md.Text).text, 'bbbb cccc');
-  });
-
-  test('a lone punctuation at the end of the line glues without a crash', () {
-    // The text after the math is a single character (the punctuation, no
-    // trailing space): the glue must not read past it (RangeError).
-    const source = r'aaaa $x^2$.';
-    final blocks = parseBlocks(source);
-    final doc = makeDocument();
-    final parsed = withInlines(doc, blocks.first);
-    final p = parsed.first as md.Element;
-    final kids = p.children!;
-    final math = kids[kids.length - 1] as md.Element;
-    expect(math.tag, 'math');
-    expect(math.attributes[mathTrailingAttribute], '.');
-    expect(kids, hasLength(2));
-  });
-
-  test('a comma right after the math glues too (no space to move)', () {
-    const source = r'aaaa $x^2$,bbbb cccc';
-    final blocks = parseBlocks(source);
-    final doc = makeDocument();
-    final parsed = withInlines(doc, blocks.first);
-    final p = parsed.first as md.Element;
-    final kids = p.children!;
-    // The comma moves into the math as well — with no space in between,
-    // the line layout can't split it from the formula anyway, but keeping
-    // it inside the atomic span is the same contract.
-    final math = kids[kids.length - 2] as md.Element;
-    expect(math.attributes[mathTrailingAttribute], ',');
-    expect((kids.last as md.Text).text, 'bbbb cccc');
+    prepareInlines(doc, phase);
+    for (var i = 0; i < phase.nodes.length; i++) {
+      expect(
+        _describe(withInlines(doc, phase.nodes[i])),
+        _describe(full[i]),
+        reason: 'block $i',
+      );
+    }
   });
 
   test('withInlines matches the whole-document parse, block for block', () {
-    final blocks = parseBlocks(_note);
+    final phase = parseBlockPhase(_note);
+    final blocks = phase.nodes;
     final full = parseMarkdownDocument(_note);
     expect(blocks.length, full.length);
     final doc = makeDocument();
-    prepareInlines(doc, blocks);
+    prepareInlines(doc, phase);
     for (var i = 0; i < blocks.length; i++) {
       expect(
         _describe(withInlines(doc, blocks[i])),
@@ -118,22 +91,78 @@ void main() {
       );
     }
   });
+
+  test('reference-style links resolve against the block-phase definitions', () {
+    const source =
+        '[hello][ref] and ![alt][img] and [shortcut]\n'
+        '\n'
+        '[ref]: https://example.com\n'
+        '[img]: pic.png\n'
+        '[shortcut]: https://shortcut.example\n';
+    final phase = parseBlockPhase(source);
+    final full = parseMarkdownDocument(source);
+    // The definitions never become blocks, but they travel with the phase.
+    expect(phase.linkReferences['ref']?.destination, 'https://example.com');
+    expect(phase.nodes.length, full.length);
+    final doc = makeDocument();
+    prepareInlines(doc, phase);
+    for (var i = 0; i < phase.nodes.length; i++) {
+      expect(
+        _describe(withInlines(doc, phase.nodes[i])),
+        _describe(full[i]),
+        reason: 'block $i',
+      );
+    }
+  });
+
+  test('a footnote reference inside a code span stays literal text', () {
+    const source = 'Use `[^a]` here.\n\n[^a]: real note\n';
+    final full = parseMarkdownDocument(source);
+    // The full parse drops the unreferenced definition: one block, no
+    // footnotes section.
+    expect(full, hasLength(1));
+    final phase = parseBlockPhase(source);
+    expect(phase.nodes, hasLength(1));
+    final doc = makeDocument();
+    prepareInlines(doc, phase);
+    expect(
+      _describe(withInlines(doc, phase.nodes.first)),
+      _describe(full.first),
+    );
+  });
+
+  test('a footnote referenced from another definition is kept', () {
+    const source = 'Text[^a].\n\n[^a]: see [^b]\n\n[^b]: the bee\n';
+    final full = parseMarkdownDocument(source);
+    final phase = parseBlockPhase(source);
+    expect(phase.nodes.length, full.length);
+    final doc = makeDocument();
+    prepareInlines(doc, phase);
+    for (var i = 0; i < phase.nodes.length; i++) {
+      expect(
+        _describe(withInlines(doc, phase.nodes[i])),
+        _describe(full[i]),
+        reason: 'block $i',
+      );
+    }
+  });
 }
 
 String _describe(dynamic node) {
   if (node is List) {
     return node.map(_describe).join('|');
   }
-  node = node as md.Node;
-  if (node is md.Text) return 'T:${node.text}';
-  if (node is md.UnparsedContent) return 'U:${node.textContent}';
-  if (node is md.Element) {
-    final attrs = node.attributes.isEmpty
-        ? ''
-        : '[${node.attributes.entries.map((kv) => '${kv.key}=${kv.value}').join(', ')}]';
-    final kids = node.children;
+  final item = node as md.Node;
+  if (item is md.Text) return 'T:${item.text}';
+  if (item is md.UnparsedContent) return 'U:${item.textContent}';
+  if (item is md.Element) {
+    final pairs = item.attributes.entries
+        .map((kv) => '${kv.key}=${kv.value}')
+        .join(', ');
+    final attrs = item.attributes.isEmpty ? '' : '[$pairs]';
+    final kids = item.children;
     final children = kids == null ? '' : '<${kids.map(_describe).join(' ')}>';
-    return '${node.tag}$attrs$children';
+    return '${item.tag}$attrs$children';
   }
-  return '?:${node.runtimeType}';
+  return '?:${item.runtimeType}';
 }
