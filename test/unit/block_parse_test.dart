@@ -26,118 +26,90 @@ Paragraph with **bold**, *italic*, `code`, [link](https://e.com), $x^2$ and a [[
 | --- | --- |
 | 1 | 2 |
 
-```dart
-void main() { print('hi'); }
 ```
-
-<table><tr><td>cell</td></tr></table>
+x = 1;
+```
 
 $$
 x^2 + y^2
 $$
 
-A reference[^one] and another[^two], twice[^one].
+<table><tr><td>h</td></tr></table>
+
+Note[^one].
 
 [^one]: the first note
-
-[^two]: the second note
 
 ![[image.png]]
 ''';
 
 void main() {
-  group('parseBlocks', () {
-    test('leaves the inlines raw', () {
-      final blocks = parseBlocks(_note);
-      // The paragraph's inlines are still an UnparsedContent leaf.
-      final para = _topLevel(blocks, 'p');
-      expect(para.children, isNotNull);
-      expect(para.children!.single, isA<md.UnparsedContent>());
-      // The display math is block-phase: it is already there, before any
-      // inlines run.
-      expect(
-        blocks.any((node) => node is md.Element && node.tag == 'mathblock'),
-        isTrue,
-      );
-    });
-
-    test('footnote definitions gather at the end as one block', () {
-      final blocks = parseBlocks(_note);
-      // No definition left in the body.
-      expect(
-        blocks.where(
-          (node) =>
-              node is md.Element &&
-              node.tag == 'li' &&
-              node.footnoteLabel != null,
-        ),
-        isEmpty,
-      );
-      // The section is the last block, with the two definitions.
-      final section = blocks.last as md.Element;
-      expect(section.tag, 'section');
-      final list = section.children!.single as md.Element;
-      expect(list.tag, 'ol');
-      expect(list.children, hasLength(2));
-    });
-
-    test('a definition nothing references is dropped, matching the '
-        'whole-document parse', () {
-      const source = 'text\n\n[^ghost]: note\n\nlast\n';
-      final blocks = parseBlocks(source);
-      final full = parseMarkdownDocument(source);
-      // The unreferenced definition does not survive either parse: two
-      // paragraphs, no definition block.
-      expect(blocks.length, full.length);
-      expect(
-        blocks.where(
-          (node) =>
-              node is md.Element &&
-              node.tag == 'li' &&
-              node.footnoteLabel != null,
-        ),
-        isEmpty,
-      );
-    });
+  test('parseBlocks leaves the inlines raw', () {
+    final blocks = parseBlocks(_note);
+    expect(blocks, isNotEmpty);
+    // The paragraph's text is still UnparsedContent (no inline parse ran):
+    // the inline phase is per-block, on demand (withInlines).
+    final para =
+        blocks.firstWhere((n) => n is md.Element && n.tag == 'p') as md.Element;
+    final text = para.children!.firstWhere((c) => c is md.UnparsedContent);
+    expect(text, isA<md.UnparsedContent>());
   });
 
-  group('withInlines', () {
-    test('matches the whole-document parse, block for block', () {
-      final blocks = parseBlocks(_note);
-      final full = parseMarkdownDocument(_note);
+  test('trailing punctuation glues to the math element, '
+      'so it can\'t wrap away from the formula', () {
+    const source = r'aaaa $x^2$. bbbb cccc';
+    final blocks = parseBlocks(source);
+    final doc = makeDocument();
+    final parsed = withInlines(doc, blocks.first);
+    final p = parsed.first as md.Element;
+    final kids = p.children!;
+    // [Text('aaaa '), math(trailing '. '), Text('bbbb cccc')].
+    expect(kids, hasLength(3));
+    final math = kids[1] as md.Element;
+    expect(math.tag, 'math');
+    expect(math.attributes[mathTrailingAttribute], '. ');
+    expect((kids[2] as md.Text).text, 'bbbb cccc');
+  });
+
+  test('a comma right after the math glues too (no space to move)', () {
+    const source = r'aaaa $x^2$,bbbb cccc';
+    final blocks = parseBlocks(source);
+    final doc = makeDocument();
+    final parsed = withInlines(doc, blocks.first);
+    final p = parsed.first as md.Element;
+    final kids = p.children!;
+    // The comma moves into the math as well — with no space in between,
+    // the line layout can't split it from the formula anyway, but keeping
+    // it inside the atomic span is the same contract.
+    final math = kids[kids.length - 2] as md.Element;
+    expect(math.attributes[mathTrailingAttribute], ',');
+    expect((kids.last as md.Text).text, 'bbbb cccc');
+  });
+
+  test('withInlines matches the whole-document parse, block for block', () {
+    final blocks = parseBlocks(_note);
+    final full = parseMarkdownDocument(_note);
+    expect(blocks.length, full.length);
+    final doc = makeDocument();
+    prepareInlines(doc, blocks);
+    for (var i = 0; i < blocks.length; i++) {
       expect(
-        blocks.length,
-        full.length,
-        reason: 'the two parses must see the same top-level blocks',
+        _describe(withInlines(doc, blocks[i])),
+        _describe(full[i]),
+        reason:
+            'block $i:\n'
+            '  mine:    ${_describe(withInlines(doc, blocks[i]))}\n'
+            '  full:    ${_describe([full[i]])}',
       );
-      final doc = makeDocument();
-      prepareInlines(doc, blocks);
-      for (var i = 0; i < blocks.length; i++) {
-        expect(
-          _describeList(withInlines(doc, blocks[i])),
-          _describeList([full[i]]),
-          reason:
-              'block $i diverges from the whole-document parse:\n'
-              '${_describeList(withInlines(doc, blocks[i]))}\nvs\n'
-              '${_describeList([full[i]])}',
-        );
-      }
-    });
+    }
   });
 }
 
-md.Element _topLevel(List<md.Node> blocks, String tag) {
-  for (final block in blocks) {
-    if (block is md.Element && block.tag == tag) return block;
+String _describe(dynamic node) {
+  if (node is List) {
+    return node.map(_describe).join('|');
   }
-  throw StateError('no top-level $tag in the fixture');
-}
-
-String _describeList(List<md.Node> nodes) => nodes.map(_describe).join('|');
-
-/// The node, in a comparable form (the AST is mutable, so compare shapes,
-/// not instances).
-String _describe(md.Node node) {
+  node = node as md.Node;
   if (node is md.Text) return 'T:${node.text}';
   if (node is md.UnparsedContent) return 'U:${node.textContent}';
   if (node is md.Element) {

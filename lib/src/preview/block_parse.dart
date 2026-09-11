@@ -90,7 +90,21 @@ List<md.Node> withInlines(md.Document doc, md.Node block) {
   } else {
     top = [block];
   }
-  return splitHtmlTables(splitInlineMath(top));
+  final parsed = splitHtmlTables(splitInlineMath(top));
+  // The math elements exist only after the split, so the punctuation glue
+  // runs on the result (and walks the subtree, for inlines in lists or
+  // blockquotes).
+  _glueSubtree(parsed);
+  return parsed;
+}
+
+/// [_glueMathPunctuation] over [nodes] and every Element subtree below.
+void _glueSubtree(List<md.Node> nodes) {
+  _glueMathPunctuation(nodes);
+  for (final node in nodes) {
+    final kids = node is md.Element ? node.children : null;
+    if (kids != null) _glueSubtree(kids);
+  }
 }
 
 /// The inlines of [children], with every raw leaf replaced in place by its
@@ -107,6 +121,59 @@ void _inlined(md.Document doc, List<md.Node> children) {
       i += inlines.length - 1;
     } else if (child is md.Element && child.children != null) {
       _inlined(doc, child.children!);
+    }
+  }
+}
+
+/// The key the trailing-punctuation glue stores on an inline `math`
+/// element (see [_glueMathPunctuation]).
+const mathTrailingAttribute = 'niman-trailing';
+
+/// The characters that glue to a preceding math element.
+const _gluePunctuation = <String>{
+  '.',
+  ',',
+  ';',
+  ':',
+  '!',
+  '?',
+  '%',
+  ')',
+  '"',
+  '\u2019',
+  '\u2014',
+};
+
+/// Keeps the punctuation that follows an inline math element with it.
+///
+/// The math renders as a widget (a forced line-break boundary), so the wrap
+/// that fills the line right after it would strand the punctuation (`.`,
+/// `,`, …) at the start of the next line, split from its formula. The
+/// leading punctuation (+ at most one space) moves into the element's
+/// [mathTrailingAttribute]; the math view renders it inside its own (atomic)
+/// span, where it can no longer wrap away from the math. The text after
+/// keeps the remainder.
+void _glueMathPunctuation(List<md.Node> children) {
+  for (var i = 0; i + 1 < children.length; i++) {
+    final math = children[i];
+    if (math is! md.Element ||
+        math.tag != 'math' ||
+        math.attributes[mathTrailingAttribute] != null) {
+      continue;
+    }
+    final next = children[i + 1];
+    if (next is! md.Text || next.text.isEmpty) continue;
+    final first = next.text[0];
+    if (!_gluePunctuation.contains(first)) continue;
+    var cut = 1;
+    if (next.text[1] == ' ') cut = 2;
+    final glued = next.text.substring(0, cut);
+    final rest = next.text.substring(cut);
+    math.attributes[mathTrailingAttribute] = glued;
+    if (rest.isEmpty) {
+      children.removeAt(i + 1);
+    } else {
+      children[i + 1] = md.Text(rest);
     }
   }
 }

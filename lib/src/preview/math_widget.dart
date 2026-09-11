@@ -5,6 +5,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/block_parse.dart';
 import 'package:niman/src/preview/math_cache.dart';
 
 /// Defers math typesetting while the preview is scrolling (T-PP-22).
@@ -65,7 +66,13 @@ final class MathInlineBuilder extends MarkdownElementBuilder {
     TextStyle? preferredStyle,
     TextStyle? parentStyle,
   ) {
-    return InlineMathView(cache: cache, tex: _latexOf(element), style: style);
+    return InlineMathView(
+      cache: cache,
+      tex: _latexOf(element),
+      style: style,
+      trailing: element.attributes[mathTrailingAttribute],
+      trailingStyle: parentStyle,
+    );
   }
 }
 
@@ -121,6 +128,8 @@ final class InlineMathView extends StatefulWidget {
     required this.cache,
     required this.tex,
     required this.style,
+    this.trailing,
+    this.trailingStyle,
     super.key,
   });
 
@@ -132,6 +141,15 @@ final class InlineMathView extends StatefulWidget {
 
   /// The math style (size/color).
   final MathStyle style;
+
+  /// The punctuation glued to this math ([mathTrailingAttribute]): rendered
+  /// inside this view so it can't wrap
+  /// away from the math (the view is one atomic run for the line layout).
+  final String? trailing;
+
+  /// The style for [trailing] (the paragraph's, from the builder's
+  /// `parentStyle`).
+  final TextStyle? trailingStyle;
 
   @override
   State<InlineMathView> createState() => _InlineMathViewState();
@@ -185,46 +203,52 @@ class _InlineMathViewState extends State<InlineMathView> {
   Widget build(BuildContext context) {
     final box = widget.cache.boxFor(widget.tex, displayMode: false);
     if (box != null) {
-      return Text.rich(
-        TextSpan(
-          children: <InlineSpan>[
-            WidgetSpan(
-              alignment: PlaceholderAlignment.baseline,
-              baseline: TextBaseline.alphabetic,
-              child: _InlineMathBox(box: box, style: widget.style),
-            ),
-          ],
+      return _rich(<InlineSpan>[
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: _InlineMathBox(box: box, style: widget.style),
         ),
-      );
+      ]);
     }
     if (widget.cache.isError(widget.tex, displayMode: false)) {
       return Text.rich(
         TextSpan(
           text: widget.tex,
           style: const TextStyle(color: Color(0xFFCC0000)),
+          children: _trailing(),
         ),
       );
     }
     // Pending render: a small placeholder box (design.md).
-    return Text.rich(
-      TextSpan(
-        children: <InlineSpan>[
-          WidgetSpan(
-            alignment: PlaceholderAlignment.baseline,
-            baseline: TextBaseline.alphabetic,
-            child: SizedBox(
-              width: widget.style.fontSize * 0.7,
-              height: widget.style.fontSize * 0.9,
-              child: const Center(
-                child: Text('…', style: TextStyle(color: Color(0xFF9E9E9E))),
-              ),
-            ),
+    return _rich(<InlineSpan>[
+      WidgetSpan(
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        child: SizedBox(
+          width: widget.style.fontSize * 0.7,
+          height: widget.style.fontSize * 0.9,
+          child: const Center(
+            child: Text('…', style: TextStyle(color: Color(0xFF9E9E9E))),
           ),
-        ],
+        ),
       ),
-      textDirection: TextDirection.ltr,
-    );
+    ]);
   }
+
+  /// The span with the glued punctuation appended to [children] (so the
+  /// layout treats math + punctuation as one atomic run).
+  Text _rich(List<InlineSpan> children) => Text.rich(
+    TextSpan(children: [...children, ..._trailing()]),
+    textDirection: TextDirection.ltr,
+  );
+
+  List<InlineSpan> _trailing() =>
+      (widget.trailing == null || widget.trailing!.isEmpty)
+      ? const <InlineSpan>[]
+      : <InlineSpan>[
+          TextSpan(text: widget.trailing, style: widget.trailingStyle),
+        ];
 }
 
 /// A centered display-math box, rendering from [cache].
