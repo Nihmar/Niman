@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/switch_library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -17,7 +17,7 @@ void main() {
 
   setUp(() async {
     session = FakeLibrarySession();
-    tmp = await Directory.current.createTemp('copist_switch_');
+    tmp = await Directory.current.createTemp('niman_switch_');
     work = _makeLibrary(tmp, 'Work');
     personal = _makeLibrary(tmp, 'Personal');
     session

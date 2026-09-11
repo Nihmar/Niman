@@ -2,10 +2,10 @@
 // errors never cached, inflight coalescing.
 import 'dart:async';
 
-import 'package:copist/src/preview/math_cache.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
+import 'package:niman/src/preview/math_cache.dart';
 
 BoxNode _realRender(String tex, {required bool displayMode}) =>
     renderToBox(tex, options: KatexOptions(displayMode: displayMode));

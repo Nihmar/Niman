@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart' show Value, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -17,7 +17,7 @@ void main() {
   late NoteDao dao;
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_index_');
+    root = await Directory.current.createTemp('niman_index_');
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);
@@ -87,7 +87,7 @@ void main() {
     await indexer.fullScan(root.path);
 
     final names = (await dao.allRows()).map((n) => n.path).toList();
-    expect(names.where((name) => name.contains('copist-tmp')), isEmpty);
+    expect(names.where((name) => name.contains('niman-tmp')), isEmpty);
     expect(names, isNot(contains('inflight.md')));
   });
 
@@ -263,7 +263,7 @@ void main() {
     'applyEvents ignores paths outside the library and dot components',
     () async {
       await indexer.fullScan(root.path);
-      final outside = await Directory.current.createTemp('copist_outside_');
+      final outside = await Directory.current.createTemp('niman_outside_');
       addTearDown(() => outside.delete(recursive: true));
       File(p.join(outside.path, 'x.md')).writeAsStringSync('x');
 

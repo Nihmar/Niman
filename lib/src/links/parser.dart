@@ -8,7 +8,7 @@
 /// are never links, everywhere.
 library;
 
-import 'package:copist/src/editor/highlighting.dart';
+import 'package:niman/src/editor/highlighting.dart';
 
 /// A parsed link occurrence in a document; [start]..[end] are absolute
 /// offsets into the source text (`[`, `(`… or `[[`…`]]`).

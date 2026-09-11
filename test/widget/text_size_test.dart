@@ -1,18 +1,18 @@
 // T-M6-12: two sliders, one for the interface and one for the note.
 // They are remembered per library, they reach the screen at once, and
 // neither one moves what the other one owns.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/text_scale.dart';
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -39,7 +39,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: SettingsBody(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: SettingsBody(controller: controller)),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -105,7 +107,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [librarySessionProvider.overrideWithValue(controller)],
-          child: const CopistApp(),
+          child: const NimanApp(),
         ),
       );
       await settle(tester);

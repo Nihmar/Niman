@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/settings/library_settings.dart'
+import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
     show
         EditorKind,
         LinkType,
         TreeSort,
         defaultListFolder,
         defaultTemplateFolder;
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// The number of kept `.history/` versions of a fresh library.
@@ -176,7 +176,7 @@ String cleanTemplateFolder(String folder) =>
     cleanFolderPath(folder, defaultTemplateFolder);
 
 /// The per-library settings, stored in the library folder itself as
-/// `<library>/.copist/settings.json` (T-ML-01, T-ML-10).
+/// `<library>/.niman/settings.json` (T-ML-01, T-ML-10).
 ///
 /// A library is a self-describing folder: these settings travel with it,
 /// survive a sync, and can be read and fixed in any editor — the same
@@ -576,7 +576,7 @@ final class LibraryConfig {
   int get hashCode => _stableHash(toJsonMap());
 }
 
-/// The reader/writer for one library's `.copist/settings.json`.
+/// The reader/writer for one library's `.niman/settings.json`.
 ///
 /// Reading a missing, unreadable or malformed file yields
 /// [LibraryConfig.defaults] rather than throwing: the settings file is
@@ -589,8 +589,8 @@ final class LibraryConfigStore {
 
   final String _libraryPath;
 
-  /// The settings file: `<library>/.copist/settings.json`.
-  File get file => File(p.join(_libraryPath, '.copist', 'settings.json'));
+  /// The settings file: `<library>/.niman/settings.json`.
+  File get file => File(p.join(_libraryPath, '.niman', 'settings.json'));
 
   /// Reads the library's settings; defaults when the file is missing,
   /// unreadable or malformed.
@@ -611,7 +611,7 @@ final class LibraryConfigStore {
     }
   }
 
-  /// Writes [config] atomically, creating the `.copist/` folder if needed.
+  /// Writes [config] atomically, creating the `.niman/` folder if needed.
   Future<void> write(LibraryConfig config) async {
     await file.parent.create(recursive: true);
     final text = const JsonEncoder.withIndent('  ').convert(config.toJsonMap());

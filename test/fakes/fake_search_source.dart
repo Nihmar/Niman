@@ -1,4 +1,4 @@
-import 'package:copist/src/search/search_repo.dart';
+import 'package:niman/src/search/search_repo.dart';
 
 /// In-memory [SearchSource] for widget tests.
 ///

@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/library_root.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/storage_access.dart';
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/known_library_list.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/library_root.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/storage_access.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/known_library_list.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 /// The home screen: the libraries the app knows about, and the two ways
@@ -116,7 +116,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
     final narrow = MediaQuery.sizeOf(context).width < 600;
     return Scaffold(
       // No app bar: it carried the app's name and nothing else, and the
-      // name is already under the feather a few pixels below. What it
+      // name is already under the mark a few pixels below. What it
       // cost was a bar's worth of the list.
       body: SafeArea(
         child: Center(
@@ -127,7 +127,7 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/branding/feather.png',
+                    'assets/branding/app_icon.png',
                     key: const Key('branding'),
                     width: 72,
                   ),

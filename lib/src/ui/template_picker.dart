@@ -1,6 +1,6 @@
-import 'package:copist/src/templates/repo.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Asks which template to create from; resolves to the chosen entry, or
 /// null when the dialog is dismissed (T-M4-07).

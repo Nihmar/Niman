@@ -1,16 +1,16 @@
 // T-M6-05: the brightness and the palette are chosen in the settings,
 // they reach every screen at once, and they are still there next time.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/theme/gruvbox.dart';
-import 'package:copist/src/ui/theme/palettes.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
-import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/theme/gruvbox.dart';
+import 'package:niman/src/ui/theme/palettes.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -36,7 +36,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: SettingsBody(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: SettingsBody(controller: controller)),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -58,7 +60,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await settle(tester);
@@ -135,10 +137,7 @@ void main() {
 
       final theme = themeOfTree(tester);
       expect(theme.brightness, Brightness.dark);
-      expect(
-        theme.colorScheme.primary,
-        gruvboxTokens(Brightness.dark).accent,
-      );
+      expect(theme.colorScheme.primary, gruvboxTokens(Brightness.dark).accent);
     });
 
     testWidgets('the Markdown colors travel with it', (tester) async {

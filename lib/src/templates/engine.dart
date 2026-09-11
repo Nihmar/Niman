@@ -17,9 +17,9 @@ library;
 
 import 'dart:math';
 
-import 'package:copist/src/links/slug.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/links/slug.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Where the note is being made from (T-TPL-04): the four values a
 /// template can ask about its surroundings rather than about a date or

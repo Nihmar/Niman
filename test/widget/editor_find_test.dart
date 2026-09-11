@@ -1,13 +1,13 @@
 // The classic in-editor find & replace bar (re_editor find machinery +
-// CopistFindPanel): opens from the status-row action, expands to the
+// NimanFindPanel): opens from the status-row action, expands to the
 // replace row, and closes back to a clean editor.
 //
 // Note: typing a pattern starts the package's isolate-backed search, which
 // does not run under the fake-async test zone — these tests exercise the
 // bar's structure and state toggles, not the match results.
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 

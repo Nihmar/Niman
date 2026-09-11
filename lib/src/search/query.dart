@@ -6,7 +6,7 @@
 /// token gets the `*` prefix-match suffix (the type-as-you-grow case).
 library;
 
-import 'package:copist/src/frontmatter/parser.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 
 /// Builds an FTS5 MATCH expression from [userText], or null when there is
 /// no query (empty or whitespace-only input).

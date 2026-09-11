@@ -1,10 +1,10 @@
 // T-M2-07 AC: fold/unfold a section (re_editor chunk path) and outline
 // jumps land on the heading line; word count is live.
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/editor/word_count.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/editor/word_count.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));

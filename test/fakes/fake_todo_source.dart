@@ -1,6 +1,6 @@
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/todo/todo_store.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 /// In-memory [TodoSource] for widget tests.
 ///

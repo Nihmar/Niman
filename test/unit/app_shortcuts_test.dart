@@ -1,19 +1,19 @@
 // T-PP-10: the accelerator registry is the single source for what runs and
 // what the in-app reference documents.
-import 'package:copist/src/ui/app_shortcuts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 
 void main() {
   test('every command has exactly one accelerator', () {
-    final commands = copistAppShortcuts.map((s) => s.command).toList();
+    final commands = nimanAppShortcuts.map((s) => s.command).toList();
     expect(commands.toSet().length, commands.length);
     expect(commands.toSet(), AppCommand.values.toSet());
   });
 
   test('no two commands share a key combination', () {
-    final keys = copistAppShortcuts
+    final keys = nimanAppShortcuts
         .map((s) => describeActivator(s.activation))
         .toList();
     expect(keys.toSet().length, keys.length);

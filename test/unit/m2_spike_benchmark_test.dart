@@ -10,10 +10,10 @@
 import 'dart:io';
 import 'dart:ui' show Canvas, Offset, PictureRecorder;
 
-import 'package:copist/src/editor/highlighting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlighting.dart';
 
 const String _fixturePath = 'test/fixtures/markdown/fixture-200kb.md';
 

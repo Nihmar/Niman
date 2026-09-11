@@ -4,11 +4,11 @@
 // interleaving, and a stale set scheduling into the past.
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/reminder_settings.dart';
-import 'package:copist/src/todo/reminders.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/reminder_settings.dart';
+import 'package:niman/src/todo/reminders.dart';
 
 import '../fakes/fake_reminder_backend.dart';
 

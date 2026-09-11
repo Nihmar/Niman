@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:copist/src/preview/math_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:katex/katex.dart';
 import 'package:katex_dart/katex_dart.dart' show BoxNode;
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/math_cache.dart';
 
 /// Defers math typesetting while the preview is scrolling (T-PP-22).
 ///

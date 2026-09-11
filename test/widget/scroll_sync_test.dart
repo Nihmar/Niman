@@ -1,12 +1,12 @@
 // T-M2-06 M-06-3 (AC): scrolling either pane moves the other, verified on
 // a long fixture in both directions.
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/preview/editor_lines.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/preview/scroll_map.dart';
-import 'package:copist/src/preview/scroll_sync.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/preview/editor_lines.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/scroll_map.dart';
+import 'package:niman/src/preview/scroll_sync.dart';
 import 'package:re_editor/re_editor.dart';
 
 String _longFixture() {

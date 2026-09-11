@@ -1,12 +1,12 @@
 // The bottom tab bar stays put: a note opened full-screen on a phone
 // keeps the tabs, and they still switch.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -83,7 +83,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -137,7 +137,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();

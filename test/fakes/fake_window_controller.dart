@@ -1,5 +1,5 @@
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 /// The platform window, recorded instead of driven.
 final class FakeWindowController implements WindowController {

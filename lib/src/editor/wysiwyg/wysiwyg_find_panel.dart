@@ -1,6 +1,6 @@
-import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The WYSIWYG find & replace bar (T-WYS-08).
 ///

@@ -1,13 +1,13 @@
 // T-SC-01/02/09: the shortcut ids, the publish payload and the incoming
 // tap, over a mocked host channel.
-import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/shortcuts.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('copist/shortcuts');
+  const channel = MethodChannel('niman/shortcuts');
   const codec = StandardMethodCodec();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -65,7 +65,7 @@ void main() {
     final seen = service.actions.take(1).toList();
 
     await messenger.handlePlatformMessage(
-      'copist/shortcuts',
+      'niman/shortcuts',
       codec.encodeMethodCall(const MethodCall('shortcut', 'new_note')),
       (_) {},
     );
@@ -80,7 +80,7 @@ void main() {
     final sub = service.actions.listen((_) => seen++);
 
     await messenger.handlePlatformMessage(
-      'copist/shortcuts',
+      'niman/shortcuts',
       codec.encodeMethodCall(const MethodCall('shortcut', 'new_planet')),
       (_) {},
     );

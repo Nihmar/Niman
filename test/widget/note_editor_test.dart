@@ -1,6 +1,6 @@
-import 'package:copist/src/editor/note_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
 import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteEditor editor) => MaterialApp(home: Scaffold(body: editor));
@@ -125,9 +125,7 @@ void main() {
     // desktop it crashes, which `editor_context_menu_test.dart` covers
     // where it can control the platform (re_editor decides its overlay
     // once per isolate, so that test has a file to itself).
-    testWidgets('the phone gets the package selection toolbar', (
-      tester,
-    ) async {
+    testWidgets('the phone gets the package selection toolbar', (tester) async {
       final controller = CodeLineEditingController.fromText('hi');
       final focus = FocusNode();
       await tester.pumpWidget(

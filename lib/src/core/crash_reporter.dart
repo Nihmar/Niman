@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/library/library_state.dart';
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/library_state.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -13,7 +13,7 @@ import 'package:path_provider/path_provider.dart';
 /// is in-memory and dies with the process. So an uncaught error is
 /// (1) recorded in the buffer (visible in the settings export when the app
 /// is still alive) and (2) persisted — buffer included — to a
-/// `copist-crash-<stamp>.txt` in the open library (falling back to the app
+/// `niman-crash-<stamp>.txt` in the open library (falling back to the app
 /// documents directory), where the user can send it back for analysis.
 final class CrashReporter {
   new _();
@@ -60,9 +60,9 @@ final class CrashReporter {
         '${now.hour.toString().padLeft(2, '0')}'
         '${now.minute.toString().padLeft(2, '0')}'
         '${now.second.toString().padLeft(2, '0')}';
-    final filename = 'copist-crash-$stamp.txt';
+    final filename = 'niman-crash-$stamp.txt';
     final report = StringBuffer()
-      ..writeln('# Copist crash report')
+      ..writeln('# Niman crash report')
       ..writeln('# captured: ${now.toIso8601String()}')
       ..writeln()
       ..writeln(errorAndTrace)

@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/files.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
   late Directory tempDir;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('copist_files_');
+    tempDir = await Directory.current.createTemp('niman_files_');
   });
 
   tearDown(() async {

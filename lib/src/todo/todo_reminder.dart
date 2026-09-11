@@ -6,10 +6,10 @@
 /// keeping the model apart is what lets both be tested without a device.
 library;
 
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/todo_store.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The notification payload routing taps to the Todo tab.
 const String todoReminderPayload = 'todo';
@@ -19,7 +19,7 @@ const String todoReminderPayload = 'todo';
 /// Stable for the life of the install: Android keys a channel by id and
 /// freezes its importance at creation, so a new id would strand the
 /// user's per-channel settings on the old one.
-const String todoReminderChannelId = 'copist_reminders';
+const String todoReminderChannelId = 'niman_reminders';
 
 /// The status-bar icon for reminders: a BARE drawable resource name.
 ///

@@ -67,12 +67,12 @@ jobs:
       - name: Stage artifact
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/copist-$VERSION-android.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/niman-$VERSION-android.apk"
 
       - uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: dist/copist-*-android.apk
+          path: dist/niman-*-android.apk
 
   linux:
     name: Linux tarball, AppImage, Arch pkg
@@ -108,24 +108,24 @@ jobs:
         run: |
           mkdir -p dist tarstage
           cp -a build/linux/x64/release/bundle tarstage/bundle
-          cp assets/branding/feather.png tarstage/dev.copist.copist.png
-          tar -czf "dist/copist-$VERSION-linux-x64.tar.gz" -C tarstage bundle dev.copist.copist.png
+          cp assets/branding/app_icon.png tarstage/dev.niman.niman.png
+          tar -czf "dist/niman-$VERSION-linux-x64.tar.gz" -C tarstage bundle dev.niman.niman.png
 
       - name: AppImage
         run: |
           bash packaging/appimage/make-appimage.sh \
             build/linux/x64/release/bundle \
-            assets/branding/feather.png \
+            assets/branding/app_icon.png \
             "$VERSION" \
-            "dist/copist-$VERSION-linux-x64.AppImage"
+            "dist/niman-$VERSION-linux-x64.AppImage"
 
       - name: Arch package
         run: |
           STAGE="$PWD/pkgstage"
           mkdir -p "$STAGE"
           cp packaging/linux/PKGBUILD "$STAGE/"
-          cp "dist/copist-$VERSION-linux-x64.tar.gz" \
-            "$STAGE/copist-$VERSION-linux-x64.tar.gz"
+          cp "dist/niman-$VERSION-linux-x64.tar.gz" \
+            "$STAGE/niman-$VERSION-linux-x64.tar.gz"
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" "$STAGE/PKGBUILD"
           # makepkg refuses root: build as an unprivileged user inside Arch.
           # The tarball is already next to the PKGBUILD, so its https source
@@ -137,15 +137,15 @@ jobs:
             chown -R builder:builder /pkg
             su builder -c "cd /pkg && makepkg --noconfirm"
           '
-          mv "$STAGE"/copist-*.pkg.tar.zst dist/
+          mv "$STAGE"/niman-*.pkg.tar.zst dist/
 
       - uses: actions/upload-artifact@v4
         with:
           name: linux
           path: |
-            dist/copist-*-linux-x64.tar.gz
-            dist/copist-*-linux-x64.AppImage
-            dist/copist-*.pkg.tar.zst
+            dist/niman-*-linux-x64.tar.gz
+            dist/niman-*-linux-x64.AppImage
+            dist/niman-*.pkg.tar.zst
 
   windows:
     name: Windows installer (Inno Setup)
@@ -182,21 +182,21 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' `
-            "packaging\windows\copist.iss" "/DAppVersion=$env:VERSION"
+            "packaging\windows\niman.iss" "/DAppVersion=$env:VERSION"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Portable zip
         shell: pwsh
         run: |
           Compress-Archive -Path 'build\windows\x64\runner\Release\*' `
-            -DestinationPath "dist\copist-$env:VERSION-windows-x64.zip"
+            -DestinationPath "dist\niman-$env:VERSION-windows-x64.zip"
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows
           path: |
-            dist/copist-*-windows-x64-setup.exe
-            dist/copist-*-windows-x64.zip
+            dist/niman-*-windows-x64-setup.exe
+            dist/niman-*-windows-x64.zip
 
   github-release:
     name: Publish GitHub Release

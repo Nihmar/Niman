@@ -1,57 +1,57 @@
 import 'dart:async';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/frame_log.dart';
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/core/storage_access.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/core/tray.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/editor/toolbar_layout.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/links/resolver.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/spell_check_provider.dart';
-import 'package:copist/src/templates/directives.dart';
-import 'package:copist/src/templates/engine.dart';
-import 'package:copist/src/templates/includes.dart';
-import 'package:copist/src/templates/prompts.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_controller.dart';
-import 'package:copist/src/todo/todo_filter.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/ui/action_sheet.dart';
-import 'package:copist/src/ui/app_shortcuts.dart';
-import 'package:copist/src/ui/kinds/list_note.dart';
-import 'package:copist/src/ui/name_dialog.dart';
-import 'package:copist/src/ui/new_item_fab.dart';
-import 'package:copist/src/ui/note_picker.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/open_library.dart';
-import 'package:copist/src/ui/quick_note_tab.dart';
-import 'package:copist/src/ui/search_screen.dart';
-import 'package:copist/src/ui/settings_tab.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/tab_body_stack.dart';
-import 'package:copist/src/ui/tags_screen.dart';
-import 'package:copist/src/ui/template_form.dart';
-import 'package:copist/src/ui/template_picker.dart';
-import 'package:copist/src/ui/title_bar.dart';
-import 'package:copist/src/ui/todo_edit_dialog.dart';
-import 'package:copist/src/ui/todo_tab.dart';
-import 'package:copist/src/ui/trash.dart';
-import 'package:copist/src/ui/tree.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/storage_access.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/core/tray.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_check_provider.dart';
+import 'package:niman/src/templates/directives.dart';
+import 'package:niman/src/templates/engine.dart';
+import 'package:niman/src/templates/includes.dart';
+import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/name_dialog.dart';
+import 'package:niman/src/ui/new_item_fab.dart';
+import 'package:niman/src/ui/note_picker.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/open_library.dart';
+import 'package:niman/src/ui/quick_note_tab.dart';
+import 'package:niman/src/ui/search_screen.dart';
+import 'package:niman/src/ui/settings_tab.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tab_body_stack.dart';
+import 'package:niman/src/ui/tags_screen.dart';
+import 'package:niman/src/ui/template_form.dart';
+import 'package:niman/src/ui/template_picker.dart';
+import 'package:niman/src/ui/title_bar.dart';
+import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_tab.dart';
+import 'package:niman/src/ui/trash.dart';
+import 'package:niman/src/ui/tree.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
 /// Root screen: the open/create screen until a library is ready, then the
@@ -1101,7 +1101,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// included — becomes the note's, with its placeholders substituted
   /// against the name just chosen.
   ///
-  /// A template that names its own notes (`copist: filename:`, T-TPL-02)
+  /// A template that names its own notes (`niman: filename:`, T-TPL-02)
   /// is not asked about: it already answered. The rest of its directives
   /// decide the folder, whether a second use adds to the file instead of
   /// making a new one, and what happens once the note exists.
@@ -2115,7 +2115,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The app bar's title on each tab: the tab's own name, matching the
   /// label under the icon that got you there. The Files tab used to say
-  /// "Copist", which named the app on a screen that is about the tree.
+  /// "Niman", which named the app on a screen that is about the tree.
   String get _tabTitle => switch (_tab) {
     ShellTab.files => AppStrings.tabFiles,
     ShellTab.todo => AppStrings.todoTitle,

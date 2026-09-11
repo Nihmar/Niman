@@ -12,7 +12,7 @@
          Android 13+ (asked when the first reminder is scheduled).
          Minute precision needs exact alarms fired via
          setExactAndAllowWhileIdle, which survives Doze (screen off) and
-         a closed app. Copist is a todo/reminder app (targetSdk >= 33),
+         a closed app. Niman is a todo/reminder app (targetSdk >= 33),
          so it requests USE_EXACT_ALARM: a normal permission auto-granted
          at install with no runtime prompt, unlike SCHEDULE_EXACT_ALARM
          which is denied by default on Android 14+ and needs a manual
@@ -27,7 +27,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:label="Copist"
+        android:label="Niman"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

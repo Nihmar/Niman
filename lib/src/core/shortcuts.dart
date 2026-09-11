@@ -10,9 +10,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
 
 /// A launcher quick action.
 ///
@@ -114,11 +114,11 @@ final shortcutServiceProvider = Provider<ShortcutService>((ref) {
   return service;
 });
 
-/// Android quick actions over the `copist/shortcuts` method channel.
+/// Android quick actions over the `niman/shortcuts` method channel.
 final class PlatformShortcutService implements ShortcutService {
   /// Creates the service; [channel] is injected in tests.
   new({MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel('copist/shortcuts') {
+    : _channel = channel ?? const MethodChannel('niman/shortcuts') {
     _channel.setMethodCallHandler(_onCall);
   }
 

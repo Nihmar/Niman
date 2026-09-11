@@ -17,12 +17,12 @@ library;
 
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 /// Owns the Todo tab's data: the current [snapshot] over the open
 /// library's `todo.txt` / `done.txt`, refreshed on session events.

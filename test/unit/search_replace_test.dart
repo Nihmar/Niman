@@ -1,12 +1,12 @@
 // T-M3-10: the exact whole-word replace runner over a real index + disk.
 import 'dart:io';
 
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/search/replace.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/search/replace.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -19,7 +19,7 @@ void main() {
   Future<String> read(String rel) => file(rel).readAsString();
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_replace_');
+    root = await Directory.current.createTemp('niman_replace_');
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     // The corpus: word-boundary traps and a multi-word phrase.

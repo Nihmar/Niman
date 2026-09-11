@@ -1,12 +1,12 @@
 // T-TPL-08 AC: every placeholder and filter this build substitutes is on
 // the reference page, reachable from the settings row next to the
 // template folder.
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/template_help.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/template_help.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -86,7 +86,7 @@ void main() {
     expect(find.textContaining('filename:'), findsWidgets);
     expect(find.textContaining('append:'), findsWidgets);
     expect(find.textContaining('open:'), findsWidgets);
-    expect(find.textContaining('copist:'), findsWidgets);
+    expect(find.textContaining('niman:'), findsWidgets);
   });
 
   testWidgets('it speaks the app language', (tester) async {
@@ -104,7 +104,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: SettingsBody(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: SettingsBody(controller: controller)),
+      ),
     );
     await tester.pumpAndSettle();
 

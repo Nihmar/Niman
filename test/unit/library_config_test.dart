@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart'
-    show EditorKind, LinkType, TreeSort, defaultListFolder;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart'
+    show EditorKind, LinkType, TreeSort, defaultListFolder;
 import 'package:path/path.dart' as p;
 
 void main() {
   late Directory tempDir;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('copist_library_config_');
+    tempDir = await Directory.current.createTemp('niman_library_config_');
   });
 
   tearDown(() async {
@@ -22,12 +22,12 @@ void main() {
   Future<Directory> makeLibrary() => tempDir.createTemp('lib_');
 
   group('LibraryConfigStore', () {
-    test('writes to <library>/.copist/settings.json', () async {
+    test('writes to <library>/.niman/settings.json', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);
       // Joined, not spelled with '/': the store builds the path with
       // `package:path`, which uses '\' on Windows.
-      expect(store.file.path, p.join(lib.path, '.copist', 'settings.json'));
+      expect(store.file.path, p.join(lib.path, '.niman', 'settings.json'));
       expect(store.file.existsSync(), isFalse);
       await store.write(LibraryConfig.defaults);
       expect(store.file.existsSync(), isTrue);

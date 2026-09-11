@@ -9,11 +9,11 @@
 ///
 /// A label is the identity of a field. The same label twice is one
 /// question, and its answer fills every occurrence — the body, the
-/// frontmatter and the `copist:` directives alike.
+/// frontmatter and the `niman:` directives alike.
 library;
 
-import 'package:copist/src/templates/engine.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/templates/engine.dart';
 
 /// How a field is answered.
 enum TemplateFieldKind {

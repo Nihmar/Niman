@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:copist/src/editor/wysiwyg/markdown_blocks.dart';
-import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/editor/wysiwyg/markdown_blocks.dart';
+import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
 
 /// A decoded note: the document the editor edits plus the exact bytes it
 /// came from and a snapshot used to detect "no edit".
@@ -118,7 +118,7 @@ final class MarkdownDocumentCodec {
       runs = <({String text, Map<String, dynamic> attrs})>[];
       if (attrs['code-block'] == true) {
         if (!inCode) {
-          final lang = attrs['copist-lang'];
+          final lang = attrs['niman-lang'];
           codeLang = lang is String ? lang : '';
           inCode = true;
         }
@@ -221,7 +221,7 @@ final class MarkdownDocumentCodec {
           'insert': _nl,
           'attributes': <String, dynamic>{
             'code-block': true,
-            if (lang.isNotEmpty) 'copist-lang': lang,
+            if (lang.isNotEmpty) 'niman-lang': lang,
           },
         },
       ],

@@ -1,13 +1,13 @@
 // T-M4-02/04: the tree shows a note under its frontmatter title, shows
 // its date, and lists the pinned notes above the folder tree — pinned and
 // unpinned from the row's own menu.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/editor/toolbar.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/editor/toolbar.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -29,7 +29,7 @@ void main() {
   Widget buildApp() {
     return ProviderScope(
       overrides: [librarySessionProvider.overrideWithValue(controller)],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

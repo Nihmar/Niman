@@ -3,11 +3,11 @@
 // note, and the Words/Contains toggle (which is T-M3-08's UI surface).
 import 'dart:async';
 
-import 'package:copist/src/search/replace.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/ui/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/search_screen.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_replace_source.dart';

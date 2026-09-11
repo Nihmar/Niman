@@ -90,7 +90,7 @@ class KnownLibraries extends Table {
 /// The app's own database: settings that belong to the installation, not
 /// to any one library.
 ///
-/// It is the file `copist.db` in the application-support directory, and
+/// It is the file `niman.db` in the application-support directory, and
 /// up to schema v14 it held the note index too. T-ML-03 moved the index
 /// out, one database per library, and left this one with the settings —
 /// which is why the migration chain below starts long before this class

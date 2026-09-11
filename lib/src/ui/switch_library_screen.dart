@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/known_library_list.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/known_library_list.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The known-library list, reached from the settings, for switching from
 /// the open library to another one (T-ML-06).

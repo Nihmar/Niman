@@ -10,8 +10,8 @@
 /// wait on the filesystem.
 library;
 
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/library/session.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/library/session.dart';
 
 /// One template: the note behind it and the name it is offered under.
 final class TemplateEntry {

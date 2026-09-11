@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/reminders.dart';
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/reminders.dart';
 
 /// In-memory [ReminderService] for controller and widget tests.
 ///

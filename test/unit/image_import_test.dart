@@ -2,14 +2,14 @@
 // preview resolves (relative link under the library root).
 import 'dart:io';
 
-import 'package:copist/src/library/image_import.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/library/image_import.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
   test('copies into <library>/assets/ with a content-addressed name', () async {
-    final dir = await Directory.systemTemp.createTemp('copist_img_');
+    final dir = await Directory.systemTemp.createTemp('niman_img_');
     final source = File(p.join(dir.path, 'photo.png'));
     final bytes = List<int>.generate(64, (i) => i * 7 % 256);
     await source.writeAsBytes(bytes);
@@ -38,7 +38,7 @@ void main() {
   });
 
   test('different content gets its own file', () async {
-    final dir = await Directory.systemTemp.createTemp('copist_img2_');
+    final dir = await Directory.systemTemp.createTemp('niman_img2_');
     final source = File(p.join(dir.path, 'a.png'));
     await source.writeAsBytes(const [1, 2, 3]);
     final other = File(p.join(dir.path, 'b.png'));

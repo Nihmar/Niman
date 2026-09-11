@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/core/tray.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/tray.dart';
 
 /// An in-memory [TrayService]: the test plays the tray.
 ///

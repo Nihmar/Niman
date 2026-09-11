@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:copist/src/core/shortcuts.dart';
+import 'package:niman/src/core/shortcuts.dart';
 
 /// An in-memory [ShortcutService]: the test plays the launcher.
 ///

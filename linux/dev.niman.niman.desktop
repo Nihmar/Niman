@@ -1,0 +1,29 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Niman
+GenericName=Markdown Notes
+Comment=Markdown notes
+Exec=niman %U
+Icon=dev.niman.niman
+Terminal=false
+Categories=Office;TextEditor;Utility;
+Keywords=notes;markdown;note;todo;task;list;quick;new;reminder;niman;
+StartupWMClass=dev.niman.niman
+Actions=quick-note;new-todo;new-note;new-list;
+
+[Desktop Action quick-note]
+Name=Quick note
+Exec=niman --quick-note
+
+[Desktop Action new-todo]
+Name=New todo
+Exec=niman --new-todo
+
+[Desktop Action new-note]
+Name=New note
+Exec=niman --new-note
+
+[Desktop Action new-list]
+Name=New list
+Exec=niman --new-list

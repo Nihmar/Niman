@@ -1,5 +1,5 @@
-name: copist
-description: "Copist — a multiplatform Markdown note-taking app."
+name: niman
+description: "Niman — a multiplatform Markdown note-taking app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none'
@@ -42,7 +42,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.12
 
   # WYSIWYG editing surface (T-WYS). Delta document model; the Markdown codec
-  # is Copist's (markdown_quill was measured and rejected, see
+  # is Niman's (markdown_quill was measured and rejected, see
   # plan/m-wysiwyg-editor.md).
   flutter_quill: ^11.5.1
   flutter_riverpod: ^3.4.3
@@ -81,7 +81,7 @@ dependencies:
 
   # Source editor widget (Reqable's large-text editor): caret, selection,
   # IME/composition, handles and scrolling come from the package instead of
-  # the former hand-built editor stack. Highlighting is Copist's incremental
+  # the former hand-built editor stack. Highlighting is Niman's incremental
   # tokenizer (editor/highlighting.dart) wired through the controller's
   # spanBuilder — NOT the package's whole-file codeTheme engine.
   re_editor: ^0.10.0

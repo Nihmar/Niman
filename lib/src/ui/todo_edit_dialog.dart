@@ -10,11 +10,11 @@
 /// new raw line, or null on cancel.
 library;
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Shows the add ([initial] null) or edit dialog.
 ///

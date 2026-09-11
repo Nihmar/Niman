@@ -1,18 +1,18 @@
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/frontmatter/fields.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/note_ops.dart';
-import 'package:copist/src/links/resolver.dart';
-import 'package:copist/src/search/replace.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/search/tag_repo.dart';
-import 'package:copist/src/templates/repo.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/templates/repo.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -184,7 +184,7 @@ abstract interface class LibrarySession {
   /// Drops [libraryPath] from that list.
   ///
   /// Forgetting is a list operation: the folder, its notes and its
-  /// `.copist/settings.json` are untouched, so opening it again lists it
+  /// `.niman/settings.json` are untouched, so opening it again lists it
   /// again with its settings.
   Future<void> forgetLibrary(String libraryPath);
 

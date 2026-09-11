@@ -3,9 +3,9 @@
 // unlike a closure over a widget State).
 import 'dart:io';
 
-import 'package:copist/src/preview/preview_work.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/preview_work.dart';
 
 const String _note =
     '# Alpha\n\ntext \$x^\$ in prose\n\n'
@@ -20,7 +20,7 @@ void main() {
   });
 
   test('read returns content + stats from one isolate', () async {
-    final dir = await Directory.systemTemp.createTemp('copist_pw_');
+    final dir = await Directory.systemTemp.createTemp('niman_pw_');
     final file = File('${dir.path}/note.md');
     await file.writeAsString('# Alpha\n\nwords here\n\n## Beta\n');
     final result = await PreviewWork.run('read', file.path);

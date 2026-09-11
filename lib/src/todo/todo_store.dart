@@ -20,13 +20,13 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/frontmatter/parser.dart';
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/todo_files.dart';
-import 'package:copist/src/todo/todo_source.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_files.dart';
+import 'package:niman/src/todo/todo_source.dart';
 import 'package:path/path.dart' as p;
 
 /// The open-tasks file at the library root.

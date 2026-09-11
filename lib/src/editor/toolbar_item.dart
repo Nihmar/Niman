@@ -1,5 +1,5 @@
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A button the editor's formatting toolbar can show (T-TB-01).
 ///

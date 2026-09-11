@@ -7,12 +7,12 @@
 // mapping and one line in [paletteColors]; no widget ever asks which one
 // is on.
 
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/ui/theme/catppuccin.dart';
-import 'package:copist/src/ui/theme/gruvbox.dart';
-import 'package:copist/src/ui/theme/solarized.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/ui/theme/catppuccin.dart';
+import 'package:niman/src/ui/theme/gruvbox.dart';
+import 'package:niman/src/ui/theme/solarized.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The seed the app has shipped since M0, and what the `system` palette
 /// falls back to where the OS has no colors to offer.
@@ -101,7 +101,5 @@ PaletteColors _mapped(
   PaletteTokens tokens,
   SyntaxColors syntax,
   Brightness brightness,
-) => PaletteColors(
-  scheme: schemeFromTokens(tokens, brightness),
-  syntax: syntax,
-);
+) =>
+    PaletteColors(scheme: schemeFromTokens(tokens, brightness), syntax: syntax);

@@ -1,7 +1,7 @@
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/db/app_database.dart';
 
 /// The preview layout mode (settings, T-M2-08): follow the width, or
 /// keep one pane at any width.

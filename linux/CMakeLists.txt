@@ -4,10 +4,10 @@ project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "copist")
+set(BINARY_NAME "niman")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "dev.copist.copist")
+set(APPLICATION_ID "dev.niman.niman")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -125,9 +125,9 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 # shortcuts and the tray menu, each calling a CLI flag. It ships next to the
 # executable so M7 packaging can install it into
 # ~/.local/share/applications, rewriting Exec to the absolute install path
-# (the spec wants one once installed; the bare `copist` works from a
+# (the spec wants one once installed; the bare `niman` works from a
 # checkout on PATH).
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/dev.copist.copist.desktop"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/dev.niman.niman.desktop"
   DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 

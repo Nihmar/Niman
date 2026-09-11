@@ -161,7 +161,7 @@ class NoteLinks extends Table {
 ///
 /// Every table here is derived: deleting the file and rescanning the
 /// library reproduces it exactly. That is why it lives in the app's
-/// private storage and not in `.copist/` — a cache must be deletable
+/// private storage and not in `.niman/` — a cache must be deletable
 /// without loss and must never sync (T-ML-03).
 ///
 /// One file per library, named by a digest of the library path (see

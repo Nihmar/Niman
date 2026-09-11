@@ -2,11 +2,11 @@
 // row to Done with today's date, unchecking restores it, Open/Done
 // switch, tap-to-edit and long-press delete, all against FakeTodoSource
 // (no disk I/O in the fake-async test zone).
-import 'package:copist/src/todo/todo_controller.dart';
-import 'package:copist/src/ui/todo_edit_dialog.dart';
-import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';

@@ -3,8 +3,8 @@
 // concurrent ops, all against a temp library root.
 import 'dart:io';
 
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/todo_store.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -22,7 +22,7 @@ void main() {
   }
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('copist_todo_');
+    root = await Directory.systemTemp.createTemp('niman_todo_');
     store = TodoStore(root: root.path);
   });
 

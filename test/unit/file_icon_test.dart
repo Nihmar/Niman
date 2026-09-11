@@ -1,8 +1,8 @@
 // The tree's per-file icon: a note looks like a document, an image like
 // an image.
-import 'package:copist/src/ui/file_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/file_icon.dart';
 
 void main() {
   group('fileIconFor', () {

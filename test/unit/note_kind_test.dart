@@ -1,7 +1,7 @@
 // T-TK-01/02: the reserved `type` key, kind detection and the registry.
-import 'package:copist/src/frontmatter/note_kind.dart';
-import 'package:copist/src/frontmatter/parser.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 
 void main() {
   group('frontmatterTypeOf', () {

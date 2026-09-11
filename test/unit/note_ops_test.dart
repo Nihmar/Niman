@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_config_repo.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/library/note_ops.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/note_ops.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -20,8 +20,8 @@ void main() {
   late NoteDao dao;
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_ops_');
-    dbDir = await Directory.current.createTemp('copist_ops_db_');
+    root = await Directory.current.createTemp('niman_ops_');
+    dbDir = await Directory.current.createTemp('niman_ops_db_');
     db = IndexDatabase(NativeDatabase(File(p.join(dbDir.path, 'test.sqlite'))));
     addTearDown(db.close);
     indexer = Indexer(db);
@@ -480,7 +480,7 @@ void main() {
       expect(raw.keys, {'B.md', 'C.md'});
     });
 
-    test('emptyTrash removes items Copist never put there', () async {
+    test('emptyTrash removes items Niman never put there', () async {
       await ops.createNote(parentPath: '', name: 'A');
       await ops.delete('A.md');
       // A user moved these into .trash/ by hand: none is in the manifest.

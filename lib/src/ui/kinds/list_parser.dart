@@ -1,4 +1,4 @@
-import 'package:copist/src/editor/highlighting.dart';
+import 'package:niman/src/editor/highlighting.dart';
 
 /// One task-list item parsed from a note's text.
 final class ListItem {

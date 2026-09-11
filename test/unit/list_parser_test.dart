@@ -1,8 +1,8 @@
 // T-TK-03/04: the list parser — task items, nesting, byte-stable edits.
-import 'package:copist/src/frontmatter/parser.dart';
-import 'package:copist/src/ui/kinds/list_note.dart';
-import 'package:copist/src/ui/kinds/list_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/kinds/list_parser.dart';
 
 void main() {
   group('parseListItems', () {

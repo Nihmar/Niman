@@ -1,9 +1,9 @@
 // T-TPL-04 AC: the four placeholders that describe where a note is being
 // made from. An empty clipboard is an answer, not a missing one; a caller
 // that supplies no context leaves them standing.
-import 'package:copist/src/templates/directives.dart';
-import 'package:copist/src/templates/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/templates/directives.dart';
+import 'package:niman/src/templates/engine.dart';
 
 void main() {
   final clock = DateTime(2026, 3, 9, 7, 5);
@@ -62,7 +62,7 @@ void main() {
 
   group('in a template', () {
     test('a directive can be built from the parent note', () {
-      const source = '---\ncopist:\n  folder: World/{{parent}}\n---\nbody\n';
+      const source = '---\nniman:\n  folder: World/{{parent}}\n---\nbody\n';
       final directives = readTemplateDirectives(
         source,
         now: clock,

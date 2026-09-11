@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:copist/src/core/log_file.dart';
+import 'package:niman/src/core/log_file.dart';
 
 /// Severity of a log event.
 enum LogSeverity {
@@ -26,7 +26,7 @@ enum LogSeverity {
 /// events are dropped entirely (no buffering, no console output).
 final class AppLogger {
   /// Creates a logger identified by [name].
-  const new({this.name = 'copist'});
+  const new({this.name = 'niman'});
 
   /// Component name attached to every event this logger emits.
   final String name;

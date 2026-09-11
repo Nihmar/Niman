@@ -1,13 +1,13 @@
 // T-TPL-02 AC: a template that files its own notes. The folder is made,
 // the name is not asked for, a second use adds to the file instead of
 // making a second one, and `open: none` leaves the user where they were.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -59,7 +59,7 @@ void main() {
   ) async {
     await openWith(
       tester,
-      '---\ncopist:\n  filename: "Fixed name"\n---\n\n# {{title}}\n',
+      '---\nniman:\n  filename: "Fixed name"\n---\n\n# {{title}}\n',
     );
 
     await useTemplate(tester);
@@ -75,7 +75,7 @@ void main() {
   ) async {
     await openWith(
       tester,
-      '---\ncopist:\n  folder: Journal/2026/03\n  filename: Monday\n---\nbody\n',
+      '---\nniman:\n  folder: Journal/2026/03\n  filename: Monday\n---\nbody\n',
     );
 
     await useTemplate(tester);
@@ -90,7 +90,7 @@ void main() {
   ) async {
     await openWith(
       tester,
-      '---\ncopist:\n  filename: Log\n  append: true\n---\n- an entry\n',
+      '---\nniman:\n  filename: Log\n  append: true\n---\n- an entry\n',
     );
 
     await useTemplate(tester);
@@ -103,7 +103,7 @@ void main() {
   testWidgets('without append a second use leaves the first file alone', (
     tester,
   ) async {
-    await openWith(tester, '---\ncopist:\n  filename: Log\n---\nbody\n');
+    await openWith(tester, '---\nniman:\n  filename: Log\n---\nbody\n');
 
     await useTemplate(tester);
     await useTemplate(tester);
@@ -118,7 +118,7 @@ void main() {
   ) async {
     await openWith(
       tester,
-      '---\ncopist:\n  filename: Filed away\n  open: none\n---\nbody\n',
+      '---\nniman:\n  filename: Filed away\n  open: none\n---\nbody\n',
     );
 
     await useTemplate(tester);
@@ -155,7 +155,7 @@ void main() {
   testWidgets('a template whose frontmatter is broken says so', (tester) async {
     await openWith(
       tester,
-      '---\ncopist:\n  folder: [unclosed\n---\n\n# {{title}}\n',
+      '---\nniman:\n  folder: [unclosed\n---\n\n# {{title}}\n',
     );
 
     await useTemplate(tester);

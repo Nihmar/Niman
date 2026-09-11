@@ -20,7 +20,7 @@
 /// auto-granted `USE_EXACT_ALARM` permission, with an inexact fallback
 /// if a device reports otherwise) through `flutter_local_notifications` +
 /// `timezone`. The desktops get an in-process timer over the same plugin
-/// (T-PP-03): a notification is shown while Copist runs, and a closed app
+/// (T-PP-03): a notification is shown while Niman runs, and a closed app
 /// fires late on the next run or not at all — no desktop equivalent of
 /// AlarmManager exists. Anything else (web) gets [NoopReminderService].
 /// Widget tests inject a fake; the plugin itself is only touched
@@ -30,19 +30,19 @@ library;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/todo/reminder_backend.dart';
-import 'package:copist/src/todo/reminder_backend_desktop.dart';
-import 'package:copist/src/todo/reminder_backend_plugin.dart';
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/reminder_settings.dart';
-import 'package:copist/src/todo/todo_reminder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/reminder_backend.dart';
+import 'package:niman/src/todo/reminder_backend_desktop.dart';
+import 'package:niman/src/todo/reminder_backend_plugin.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/reminder_settings.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 /// The reminder model travels with the service: callers that schedule
 /// also build the wanted set.
-export 'package:copist/src/todo/todo_reminder.dart';
+export 'package:niman/src/todo/todo_reminder.dart';
 
 /// What the todo UI needs from the OS notification layer.
 ///
@@ -167,7 +167,7 @@ final class LocalReminderService implements ReminderService {
   /// Logs the ids the OS reports as pending, tagged with [stage].
   ///
   /// The authoritative answer to "is this reminder actually armed?" --
-  /// everything else here is what Copist *asked* for.
+  /// everything else here is what Niman *asked* for.
   Future<void> _logPending(String stage) async {
     try {
       final ids = await _backend.pendingIds();
@@ -255,7 +255,7 @@ final class LocalReminderService implements ReminderService {
     }
     await _scheduleAll(wanted, exact: exact);
     // Read back what the OS actually holds: everything above is what
-    // Copist asked for, and the two can differ (a rejected alarm, an OEM
+    // Niman asked for, and the two can differ (a rejected alarm, an OEM
     // limit). This line is what makes an exported log conclusive.
     await _logPending('after reconcile');
   }
@@ -338,7 +338,7 @@ final class LocalReminderService implements ReminderService {
   ///
   /// Ids still wanted are left alone: rescheduling the same id replaces
   /// the pending alarm, so an edited time or body converges without a
-  /// cancel. Copist posts no notifications other than reminders, so every
+  /// cancel. Niman posts no notifications other than reminders, so every
   /// pending id outside [wanted] is stale -- that reservation of the id
   /// space is what makes the sweep safe.
   ///

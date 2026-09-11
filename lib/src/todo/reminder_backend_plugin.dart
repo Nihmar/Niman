@@ -14,12 +14,12 @@ library;
 
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/todo/reminder_backend.dart';
-import 'package:copist/src/todo/todo_reminder.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/reminder_backend.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 

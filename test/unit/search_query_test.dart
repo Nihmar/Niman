@@ -1,8 +1,8 @@
 // T-M3-04 AC: the user text is never a raw FTS expression — quotes,
 // hyphens, parentheses, wildcards and operators are literals; only the last
 // token gets the prefix suffix; empty input = no query.
-import 'package:copist/src/search/query.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/search/query.dart';
 
 void main() {
   group('buildFtsQuery', () {

@@ -1,8 +1,8 @@
 // HighlightDocument.replaceLines: line-granularity edits over the
 // incremental tokenizer, including the carried block state (fences, display
 // math, YAML frontmatter) across inserts/deletes/edits.
-import 'package:copist/src/editor/highlighting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlighting.dart';
 
 List<String> _lines(String text) =>
     text.isEmpty ? <String>[''] : text.split('\n');

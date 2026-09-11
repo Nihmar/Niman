@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:copist/src/preview/html_table.dart';
-import 'package:copist/src/preview/math_syntax.dart';
-import 'package:copist/src/preview/wikilink.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/html_table.dart';
+import 'package:niman/src/preview/math_syntax.dart';
+import 'package:niman/src/preview/wikilink.dart';
 
 /// Parses [source] exactly as the preview does.
 ///

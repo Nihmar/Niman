@@ -11,10 +11,10 @@
 // notifier for the language and the two text sizes, and a palette that
 // arrives a frame late is a palette that arrives.
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/theme.dart';
 
 const AppLogger _log = AppLogger(name: 'theme');
 

@@ -1,8 +1,8 @@
 // T-TPL-06 AC: a two-level include, and a self-include that produces a
 // visible error rather than a stack overflow.
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/templates/includes.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/templates/includes.dart';
 
 void main() {
   setUp(AppLanguages.reset);

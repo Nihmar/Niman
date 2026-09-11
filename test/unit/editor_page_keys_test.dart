@@ -1,17 +1,17 @@
 // The editor's page keys: re_editor 0.10.0 declares the page-move intents
 // and their actions but binds no key to them, and the controller methods
-// behind them are empty stubs — Copist binds the keys and moves the page
+// behind them are empty stubs — Niman binds the keys and moves the page
 // itself (user, 2026-09-10).
-import 'package:copist/src/editor/find_panel.dart';
-import 'package:copist/src/editor/note_editor.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/find_panel.dart';
+import 'package:niman/src/editor/note_editor.dart';
 import 'package:re_editor/re_editor.dart';
 
 void main() {
   test('the editor binds PageUp and PageDown to the page moves', () {
-    const builder = CopistShortcutsActivatorsBuilder();
+    const builder = NimanShortcutsActivatorsBuilder();
     // SingleActivator has no equality, so assert on the trigger keys.
     final down = builder.build(CodeShortcutType.cursorMovePageDown);
     expect(down, hasLength(1));

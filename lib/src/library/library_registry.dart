@@ -1,5 +1,5 @@
-import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/app_database.dart';
 import 'package:path/path.dart' as p;
 
 /// The libraries the app knows about (T-ML-04): what the home screen
@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 /// the first time it is opened and stays one whether or not it has a row
 /// here, so opening a folder the app has never seen is not an error — it
 /// is how an entry appears. Forgetting one removes the row and leaves
-/// everything inside the folder, `.copist/settings.json` included, so
+/// everything inside the folder, `.niman/settings.json` included, so
 /// opening it again lists it again with its settings intact.
 final class LibraryRegistry {
   /// Creates the registry over the app database.

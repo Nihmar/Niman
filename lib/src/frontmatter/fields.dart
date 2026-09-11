@@ -11,8 +11,8 @@
 /// index scan instead of a join.
 library;
 
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/index_database.dart';
 
 /// The frontmatter keys the app itself acts on.
 ///

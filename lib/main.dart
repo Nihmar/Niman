@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/crash_reporter.dart';
-import 'package:copist/src/core/launch_args.dart';
-import 'package:copist/src/core/log_file.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/crash_reporter.dart';
+import 'package:niman/src/core/launch_args.dart';
+import 'package:niman/src/core/log_file.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/shortcuts.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-/// Entrypoint of the Copist application.
+/// Entrypoint of the Niman application.
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
@@ -34,7 +34,7 @@ void main(List<String> args) {
             (ref) => CliShortcutService(action),
           ),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     ),
   );
 }
@@ -49,7 +49,7 @@ void main(List<String> args) {
 Future<void> _attachLogFile() async {
   try {
     final dir = await getApplicationSupportDirectory();
-    final path = p.join(dir.path, 'copist-log.txt');
+    final path = p.join(dir.path, 'niman-log.txt');
     AppLog.file = LogFile(path: path);
     const AppLogger(name: 'log').info('log file attached: $path');
   } on Object catch (error) {

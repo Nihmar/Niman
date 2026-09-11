@@ -1,8 +1,8 @@
 // T-UI-08 AC: wrap-selection, empty-selection (markers at the caret), and
 // list/quote prefixing per line.
-import 'package:copist/src/editor/md_editing.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/md_editing.dart';
 
 TextSelection _sel(int start, [int? end]) => end == null
     ? TextSelection.collapsed(offset: start)

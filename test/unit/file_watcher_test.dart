@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:copist/src/library/file_watcher.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/library/file_watcher.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
   late Directory root;
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_watch_');
+    root = await Directory.current.createTemp('niman_watch_');
   });
 
   tearDown(() async {

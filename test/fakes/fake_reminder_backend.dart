@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:copist/src/todo/reminder_backend.dart';
-import 'package:copist/src/todo/todo_reminder.dart';
+import 'package:niman/src/todo/reminder_backend.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 /// In-memory [ReminderBackend] standing in for the OS.
 ///

@@ -1,7 +1,7 @@
 // T-TDM-02 AC: tag accent colors are deterministic per name.
-import 'package:copist/src/ui/tag_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/tag_color.dart';
 
 void main() {
   test('stable per name and case-insensitive', () {

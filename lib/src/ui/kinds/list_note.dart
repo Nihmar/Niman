@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:copist/src/frontmatter/note_kind.dart';
-import 'package:copist/src/ui/kinds/list_item_row.dart';
-import 'package:copist/src/ui/kinds/list_parser.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/ui/kinds/list_item_row.dart';
+import 'package:niman/src/ui/kinds/list_parser.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The frontmatter a new list note is created with.
 String listNoteContent() => '---\ntype: list\n---\n';

@@ -12,15 +12,13 @@
 /// what makes a palette a list of colors and nothing else.
 library;
 
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The style of the *heading text* — the region after a `#…` marker,
 /// which the tokenizer leaves unmarked: bold, at the base row size.
-const TextStyle markdownHeadingStyle = TextStyle(
-  fontWeight: FontWeight.bold,
-);
+const TextStyle markdownHeadingStyle = TextStyle(fontWeight: FontWeight.bold);
 
 /// The [TextStyle] override for [kind] in [syntax] (null = base style).
 ///
@@ -38,9 +36,7 @@ TextStyle? markdownTokenStyle(
       fontWeight: dark ? FontWeight.w600 : FontWeight.bold,
     ),
     TokenKind.italic => const TextStyle(fontStyle: FontStyle.italic),
-    TokenKind.strike => const TextStyle(
-      decoration: TextDecoration.lineThrough,
-    ),
+    TokenKind.strike => const TextStyle(decoration: TextDecoration.lineThrough),
     TokenKind.codeInline => TextStyle(color: syntax.code),
     TokenKind.codeFence => TextStyle(color: syntax.codeMuted),
     TokenKind.codeLanguage => TextStyle(

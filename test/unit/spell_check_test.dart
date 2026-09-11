@@ -3,14 +3,14 @@
 // state is exercised with a fake so the logic runs everywhere.
 import 'dart:io';
 
-import 'package:copist/src/editor/highlight_sync.dart';
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
-import 'package:copist/src/spellcheck/spell_checker.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlight_sync.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
@@ -29,7 +29,7 @@ final bool _hasHunspell = () {
 void main() {
   group('dictionary discovery', () {
     test('prefers the locale, then falls back to any pair', () {
-      final dir = Directory.systemTemp.createTempSync('copist-spell');
+      final dir = Directory.systemTemp.createTempSync('niman-spell');
       addTearDown(() => dir.deleteSync(recursive: true));
       for (final name in ['en_US', 'it_IT']) {
         File(p.join(dir.path, '$name.aff')).writeAsStringSync('SET UTF-8');
@@ -49,8 +49,8 @@ void main() {
 
   group('dictionary choice', () {
     test('lists every pair and keeps directory priority', () {
-      final first = Directory.systemTemp.createTempSync('copist-spell-a');
-      final second = Directory.systemTemp.createTempSync('copist-spell-b');
+      final first = Directory.systemTemp.createTempSync('niman-spell-a');
+      final second = Directory.systemTemp.createTempSync('niman-spell-b');
       addTearDown(() {
         first.deleteSync(recursive: true);
         second.deleteSync(recursive: true);

@@ -2,7 +2,7 @@
 ///
 /// Scheduling one is silent about everything that can go wrong after it:
 /// the alarm is handed to the system and the app usually is not running
-/// when it comes due. Copist can see the three preconditions, so it says
+/// when it comes due. Niman can see the three preconditions, so it says
 /// so in the Todo tab rather than leaving the user to discover a missed
 /// reminder.
 library;

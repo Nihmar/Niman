@@ -1,13 +1,13 @@
 // T-WYS-04/08: the WYSIWYG surface opens a note, edits it, reports
 // Markdown, underlines misspellings and applies a range replacement.
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/spell_checker.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A checker whose only misspelling is 'wrold'.
 final class _FakeChecker implements SpellChecker {

@@ -1,10 +1,10 @@
 // T-M3-01 AC: heading slug — the shared implementation the parser, the
 // editor/outline and the preview all use for `#heading` anchors.
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/links/parser.dart';
-import 'package:copist/src/links/slug.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/slug.dart';
 
 void main() {
   group('headingSlug', () {

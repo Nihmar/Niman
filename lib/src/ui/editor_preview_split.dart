@@ -1,7 +1,7 @@
-import 'package:copist/src/preview/editor_lines.dart';
-import 'package:copist/src/preview/scroll_map.dart';
-import 'package:copist/src/preview/scroll_sync.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/editor_lines.dart';
+import 'package:niman/src/preview/scroll_map.dart';
+import 'package:niman/src/preview/scroll_sync.dart';
 
 /// The editor | preview split (T-M2-08): a draggable divider between the
 /// two panes, with the bidirectional scroll sync wrapped around both.

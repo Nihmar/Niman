@@ -9,7 +9,7 @@
 ///
 /// Every key is kept ([Frontmatter.fields]) — that is what makes arbitrary
 /// keys indexable and filterable (T-M4-02/03). The known ones — `title`,
-/// `tags`, `date`, `pinned`, `aliases`, plus Copist's own `type` — are
+/// `tags`, `date`, `pinned`, `aliases`, plus Niman's own `type` — are
 /// also read out into typed getters, because the app acts on them.
 ///
 /// Tolerant by construction: a block whose YAML does not parse yields a
@@ -18,8 +18,8 @@
 /// editor has something to show the person who typed it.
 library;
 
-import 'package:copist/src/editor/highlighting.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/editor/highlighting.dart';
 import 'package:yaml/yaml.dart';
 
 /// One note's parsed frontmatter block.

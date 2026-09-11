@@ -1,4 +1,4 @@
-import 'package:copist/src/search/replace.dart';
+import 'package:niman/src/search/replace.dart';
 
 /// In-memory [ReplaceSource] for widget tests: records every request and
 /// returns the configured preview/report.

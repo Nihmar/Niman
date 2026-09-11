@@ -5,8 +5,8 @@
 // mapping can be read against the style guide rather than against a color
 // picker. Mauve is the accent the project itself defaults to.
 
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// Catppuccin's chrome at [brightness].
 PaletteTokens catppuccinTokens(Brightness brightness) =>

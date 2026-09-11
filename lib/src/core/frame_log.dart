@@ -1,6 +1,6 @@
-import 'package:copist/src/core/logging.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show State;
+import 'package:niman/src/core/logging.dart';
 
 /// Logs one line when the next UI frame lands.
 ///

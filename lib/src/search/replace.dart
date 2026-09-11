@@ -18,10 +18,10 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show Variable;
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/index_database.dart';
 import 'package:path/path.dart' as p;
 
 /// One replace run's outcome.

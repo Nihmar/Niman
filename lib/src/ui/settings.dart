@@ -3,24 +3,24 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
-import 'package:copist/src/ui/folder_picker.dart';
-import 'package:copist/src/ui/keyboard_shortcuts.dart';
-import 'package:copist/src/ui/note_picker.dart';
-import 'package:copist/src/ui/settings_rows.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/switch_library_screen.dart';
-import 'package:copist/src/ui/template_help.dart';
-import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/ui/folder_picker.dart';
+import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/note_picker.dart';
+import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/switch_library_screen.dart';
+import 'package:niman/src/ui/template_help.dart';
+import 'package:niman/src/ui/toolbar_settings.dart';
 
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
@@ -365,7 +365,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         'phase: ${controller.phase.name}, '
         'lastError: ${controller.lastError ?? '-'}';
     final content = <String>[
-      '# Copist debug log',
+      '# Niman debug log',
       '# exported: ${now.toIso8601String()}',
       '# library: ${controller.root ?? '(none)'}',
       '# $phase',
@@ -376,7 +376,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     ].join('\n');
     try {
       final uri = await FilePicker.saveFile(
-        fileName: 'copist-debug-log-$stamp.txt',
+        fileName: 'niman-debug-log-$stamp.txt',
         bytes: Uint8List.fromList(utf8.encode(content)),
         mimeType: 'text/plain',
         dialogTitle: AppStrings.exportLogTitle,

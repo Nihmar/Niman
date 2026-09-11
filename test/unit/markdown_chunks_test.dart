@@ -1,7 +1,7 @@
 // T-M2-07: the heading chunk analyzer — fold ranges from the tokenizer's
 // outline; nothing inside fences/math/frontmatter becomes a fold anchor.
-import 'package:copist/src/editor/markdown_chunks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/markdown_chunks.dart';
 import 'package:re_editor/re_editor.dart';
 
 List<CodeChunk> _chunks(String text) {

@@ -1,8 +1,8 @@
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
 
 import '../fakes/fake_library_session.dart';
 
@@ -13,12 +13,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(session)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
 
-    expect(find.text('Copist'), findsWidgets);
+    expect(find.text('Niman'), findsWidgets);
     expect(find.byKey(const Key('branding')), findsOne);
     expect(find.text('Open existing'), findsOne);
     expect(find.text('Create new'), findsOne);

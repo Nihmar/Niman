@@ -1,9 +1,9 @@
 // T-TD-05 AC: filter combos narrow the list, counts rank by task
 // count, sort orders place nulls last with line-index determinism.
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/todo_filter.dart';
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 void main() {
   /// Fixed "today" for range tests.

@@ -6,17 +6,17 @@
 /// so the syntax has to be discoverable without leaving the app.
 ///
 /// Content follows the parser, not the wider todo.txt ecosystem: only
-/// what Copist actually reads is documented here, and `rec:` is called
+/// what Niman actually reads is documented here, and `rec:` is called
 /// out precisely because it is kept but not acted on.
 library;
 
 import 'dart:io';
 
-import 'package:copist/src/ui/help_layout.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/help_layout.dart';
+import 'package:niman/src/ui/strings.dart';
 
-/// A read-only reference for the todo.txt syntax Copist understands.
+/// A read-only reference for the todo.txt syntax Niman understands.
 final class TodoHelpScreen extends StatelessWidget {
   /// Creates the help screen.
   const new({super.key});

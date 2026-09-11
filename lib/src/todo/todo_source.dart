@@ -7,8 +7,8 @@
 /// never completes.
 library;
 
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 /// What the todo UI layer needs from `todo.txt` / `done.txt`.
 ///

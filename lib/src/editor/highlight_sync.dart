@@ -1,8 +1,8 @@
-import 'package:copist/src/editor/highlight_style.dart';
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/highlight_style.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:re_editor/re_editor.dart';
 
 /// The bridge between the re_editor buffer ([CodeLineEditingController]) and

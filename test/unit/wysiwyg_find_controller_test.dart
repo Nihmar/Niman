@@ -1,8 +1,8 @@
 // T-WYS-08: the WYSIWYG find controller searches, navigates and replaces.
-import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 
 quill.QuillController _controller(String text) {
   final document = quill.Document.fromJson(<Map<String, dynamic>>[

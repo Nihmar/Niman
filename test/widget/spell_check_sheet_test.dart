@@ -1,10 +1,10 @@
 // T-PP-09: the spelling review panel lists hunspell's findings and applies
 // a suggestion back through the editor's scan/apply closures.
-import 'package:copist/src/spellcheck/spell_check_sheet.dart';
-import 'package:copist/src/spellcheck/spell_issue.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/spellcheck/spell_check_sheet.dart';
+import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/ui/strings.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 

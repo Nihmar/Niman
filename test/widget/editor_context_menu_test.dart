@@ -7,11 +7,11 @@
 // is on a phone once per isolate (`final kIsAndroid = ...` in its
 // consts), so the platform override only counts for the first editor a
 // file mounts.
-import 'package:copist/src/editor/note_editor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
 import 'package:re_editor/re_editor.dart';
 
 void main() {

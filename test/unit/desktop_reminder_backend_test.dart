@@ -1,10 +1,10 @@
 // T-PP-03: the desktop backend keeps the reminder schedule in-process.
 // The plugin is faked so the timer, the pending map and the full-replace
 // semantics are exercised without a desktop session.
-import 'package:copist/src/todo/desktop_notifier.dart';
-import 'package:copist/src/todo/reminder_backend_desktop.dart';
-import 'package:copist/src/todo/todo_reminder.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/desktop_notifier.dart';
+import 'package:niman/src/todo/reminder_backend_desktop.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 void main() {
   late FakeDesktopNotifier notifier;

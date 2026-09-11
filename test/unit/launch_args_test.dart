@@ -1,9 +1,9 @@
 // T-PP-05: the CLI is the desktop floor for the four quick actions. Each
 // flag must map to the same ShortcutAction its launcher and tray twins
 // use, and the hand-off must stay one-shot like the platform's.
-import 'package:copist/src/core/launch_args.dart';
-import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/launch_args.dart';
+import 'package:niman/src/core/shortcuts.dart';
 
 void main() {
   test('each flag maps to its launcher action', () {

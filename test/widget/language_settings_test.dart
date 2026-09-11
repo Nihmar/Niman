@@ -1,10 +1,10 @@
 // T-L10N-03/04: the language setting changes the app's own text at
 // once, and is remembered.
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/ui/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/ui/settings.dart';
 
 import '../fakes/fake_library_session.dart';
 

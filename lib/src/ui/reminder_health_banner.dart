@@ -9,10 +9,10 @@ library;
 
 import 'dart:async';
 
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A banner over the todo list describing [ReminderService.health].
 ///

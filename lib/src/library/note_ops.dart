@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_config_repo.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/frontmatter/edit.dart';
-import 'package:copist/src/library/session.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
 /// One item in `.trash/`, mapped back to its library-relative origin.
@@ -40,7 +40,7 @@ final class TrashItem {
 final class NoteOps implements NoteOperations {
   /// Creates the ops for the library at [root].
   ///
-  /// [config] is the session's own reader of `.copist/settings.json`, not
+  /// [config] is the session's own reader of `.niman/settings.json`, not
   /// a second one: the session resolves the overridable settings through
   /// the same cache these four go through (T-ML-10).
   new({
@@ -56,14 +56,14 @@ final class NoteOps implements NoteOperations {
   /// The shared indexer; every op funnels its disk change through it.
   final Indexer indexer;
 
-  /// The library's `.copist/settings.json`, shared with the session so
+  /// The library's `.niman/settings.json`, shared with the session so
   /// both read one cached copy.
   final LibraryConfigRepo config;
 
   final NoteDao _dao;
 
   /// The name of the trash manifest inside `.trash/`.
-  static const manifestFileName = '.copist-trash.json';
+  static const manifestFileName = '.niman-trash.json';
 
   Future<void> _chain = Future<void>.value();
 
@@ -460,7 +460,7 @@ final class NoteOps implements NoteOperations {
 
   /// Permanently deletes every managed trash item.
   @override
-  /// Deletes every entry in `.trash/`, not just the items Copist put
+  /// Deletes every entry in `.trash/`, not just the items Niman put
   /// there: the trash screen promises to empty the folder, and that
   /// includes anything a user moved into it by hand. Ends with an empty
   /// manifest.

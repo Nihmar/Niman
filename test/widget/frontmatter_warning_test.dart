@@ -1,8 +1,8 @@
 // T-M4-01: a frontmatter block that does not parse is indexed as if it
 // were not there, so the editor says so while the note is open.
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));

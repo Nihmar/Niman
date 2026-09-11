@@ -1,17 +1,16 @@
 import 'dart:io';
-
 import 'dart:ui' show PlatformDispatcher;
 
-import 'package:copist/src/core/crash_reporter.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/library/library_state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/crash_reporter.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/library_state.dart';
 
 void main() {
   test(
     'an uncaught error is recorded and persisted to the library root',
     () async {
-      final dir = await Directory.current.createTemp('copist_crash_');
+      final dir = await Directory.current.createTemp('niman_crash_');
       final previous = LibraryController.currentRootPath;
       LibraryController.currentRootPath = dir.path;
       addTearDown(() => LibraryController.currentRootPath = previous);
@@ -36,7 +35,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 100));
       final files = dir.listSync().whereType<File>().toList();
       expect(files, hasLength(1));
-      expect(files.single.path, contains('copist-crash-'));
+      expect(files.single.path, contains('niman-crash-'));
       final report = files.single.readAsStringSync();
       expect(report, contains('Exception: boom'));
       expect(report, contains('at here'));

@@ -22,9 +22,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $baselineFile = Join-Path $PSScriptRoot 'known-failures.txt'
-$logDir = Join-Path $env:TEMP 'copist'
+$logDir = Join-Path $env:TEMP 'niman'
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
-$log = Join-Path $logDir 'copist-newfail.log'
+$log = Join-Path $logDir 'niman-newfail.log'
 
 Push-Location $root
 # Test names carry non-ASCII (an arrow in one of them). Without this the
@@ -49,7 +49,7 @@ try {
 # either way; a line left without a path is matched by its tail below.
 $failed = Select-String -Path $log -Pattern '\[E\]$' |
     ForEach-Object {
-        ($_.Line -replace '^.*?Copist[/\\]', '' -replace '^\s*\+\d+(\s+-\d+)?:\s*', '').Trim()
+        ($_.Line -replace '^.*?Niman[/\\]', '' -replace '^\s*\+\d+(\s+-\d+)?:\s*', '').Trim()
     } |
     Sort-Object -Unique
 

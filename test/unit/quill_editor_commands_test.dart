@@ -1,9 +1,9 @@
 // T-WYS-06: the app toolbar maps onto the Quill document.
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/wysiwyg/quill_editor_commands.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
 
 QuillEditorCommands _commands(quill.QuillController controller) =>
     QuillEditorCommands(

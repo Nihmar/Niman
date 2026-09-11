@@ -3,21 +3,21 @@
 // tab-less tree+detail shell; Todo/Search/Settings render inline and
 // opening a search result flips the rail back to Files with the note in
 // the detail pane. Sizes are explicit per test (wide = 1200x900).
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/quick_note_tab.dart';
-import 'package:copist/src/ui/search_screen.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/quick_note_tab.dart';
+import 'package:niman/src/ui/search_screen.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
@@ -38,7 +38,7 @@ void main() {
         librarySessionProvider.overrideWithValue(controller),
         todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

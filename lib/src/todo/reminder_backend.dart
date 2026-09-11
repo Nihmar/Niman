@@ -11,7 +11,7 @@
 /// puts it: on-device.
 library;
 
-import 'package:copist/src/todo/todo_reminder.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 /// The platform operations reminders need.
 abstract interface class ReminderBackend {

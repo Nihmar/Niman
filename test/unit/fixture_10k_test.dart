@@ -12,14 +12,14 @@ library;
 
 import 'dart:io';
 
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/search/query.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/search/query.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/tag_repo.dart';
 import 'package:path/path.dart' as p;
 
 /// The fixture note count.
@@ -33,7 +33,7 @@ void main() {
   late TagRepo tags;
 
   setUpAll(() async {
-    root = await Directory.current.createTemp('copist_10k_');
+    root = await Directory.current.createTemp('niman_10k_');
     // 100 folders (a–z × 4ish), each ~100 notes; deterministic content
     // with a title, a tag and a wikilink, so indexing, search and tags all
     // have real work.

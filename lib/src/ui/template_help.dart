@@ -7,12 +7,12 @@
 /// setting templates up is already standing.
 ///
 /// It documents what this build actually substitutes. A placeholder that
-/// is not on this page is one Copist leaves standing.
+/// is not on this page is one Niman leaves standing.
 library;
 
-import 'package:copist/src/ui/help_layout.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/help_layout.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A read-only reference for the template placeholders.
 final class TemplateHelpScreen extends StatelessWidget {
@@ -83,7 +83,7 @@ final class TemplateHelpScreen extends StatelessWidget {
           ),
           const HelpExample(
             '---\n'
-            'copist:\n'
+            'niman:\n'
             '  folder: Journal/{{date:YYYY}}\n'
             '  filename: "{{date:YYYY-MM-DD}}"\n'
             '  append: true\n'
@@ -104,7 +104,7 @@ final class TemplateHelpScreen extends StatelessWidget {
           HelpSection(AppStrings.templateHelpExampleTitle),
           const HelpExample(
             '---\n'
-            'copist:\n'
+            'niman:\n'
             '  folder: World/{{choice:Kind:Characters,Places}}\n'
             '  filename: "{{ask:Name}}"\n'
             'type: character\n'

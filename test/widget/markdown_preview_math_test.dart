@@ -2,13 +2,13 @@
 // blocks (top-level + in lists), placeholders, errors, cache reuse.
 import 'dart:async';
 
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/preview/math_cache.dart';
-import 'package:copist/src/preview/math_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katex_dart/katex_dart.dart'
     show BoxNode, KatexOptions, renderToBox;
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_widget.dart';
 
 Widget _app(Widget child) => MaterialApp(
   home: Scaffold(body: SizedBox(height: 600, child: child)),

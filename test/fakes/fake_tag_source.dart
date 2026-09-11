@@ -1,5 +1,5 @@
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/search/tag_repo.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/search/tag_repo.dart';
 
 /// In-memory [TagSource] for widget tests: a tag → note-path map.
 ///

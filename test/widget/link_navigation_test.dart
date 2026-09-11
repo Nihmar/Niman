@@ -1,11 +1,11 @@
 // T-M3-07 AC: preview wikilink tap, markdown link tap (in-app vs external),
 // editor desktop Ctrl+click, heading anchors, unresolved links → snackbar.
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 import '../fakes/fake_link_source.dart';

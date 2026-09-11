@@ -6,7 +6,7 @@
 /// * **Notifications.** Denied or turned off, the alarm still fires and
 ///   nothing is shown.
 /// * **Battery optimization.** Reminders are `AlarmManager` alarms: the
-///   system holds them and fires them with Copist's process dead, which
+///   system holds them and fires them with Niman's process dead, which
 ///   is the whole point. An app left optimized can still be put to sleep
 ///   by an OEM battery manager, and several ROMs (MIUI/HyperOS, EMUI,
 ///   ColorOS, Funtouch) drop its pending alarms outright when it is
@@ -29,7 +29,7 @@ import 'package:flutter/services.dart';
 /// An interface so widget tests inject a fake instead of a method channel
 /// that never answers under `testWidgets`.
 abstract interface class ReminderSettings {
-  /// Whether Copist is exempt from battery optimization right now.
+  /// Whether Niman is exempt from battery optimization right now.
   Future<bool> isBatteryExempt();
 
   /// Opens the system list where the exemption is granted.
@@ -37,7 +37,7 @@ abstract interface class ReminderSettings {
   /// Returns false when no activity handles it.
   Future<bool> openBatterySettings();
 
-  /// Opens Copist's page in the system notification settings.
+  /// Opens Niman's page in the system notification settings.
   ///
   /// Returns false when no activity handles it.
   Future<bool> openNotificationSettings();
@@ -48,7 +48,7 @@ final class PlatformReminderSettings implements ReminderSettings {
   /// Creates the platform gate.
   const new();
 
-  static const MethodChannel _channel = MethodChannel('copist/reminders');
+  static const MethodChannel _channel = MethodChannel('niman/reminders');
 
   @override
   Future<bool> isBatteryExempt() async {

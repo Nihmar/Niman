@@ -1,34 +1,34 @@
 import 'dart:async';
 
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/text_scale.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/ui/close_guard.dart';
-import 'package:copist/src/ui/shell.dart';
-import 'package:copist/src/ui/theme/device_colors.dart';
-import 'package:copist/src/ui/theme/palettes.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/ui/close_guard.dart';
+import 'package:niman/src/ui/shell.dart';
+import 'package:niman/src/ui/theme/device_colors.dart';
+import 'package:niman/src/ui/theme/palettes.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
-/// Root widget of the Copist application.
+/// Root widget of the Niman application.
 ///
 /// Owns the [MaterialApp], the theme, the app language and the interface
 /// text size: it keeps [AppLanguages.system] in step with the OS and
 /// rebuilds everything below when the resolved language, either text
 /// scale or the theme changes, so a settings change reaches every open
 /// screen at once.
-class CopistApp extends StatefulWidget {
+class NimanApp extends StatefulWidget {
   /// Creates the application root.
   const new({super.key});
 
   @override
-  State<CopistApp> createState() => _CopistAppState();
+  State<NimanApp> createState() => _NimanAppState();
 }
 
-class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
+class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -67,7 +67,7 @@ class _CopistAppState extends State<CopistApp> with WidgetsBindingObserver {
         AppThemes.revision,
       ]),
       builder: (context, _) => MaterialApp(
-        title: 'Copist',
+        title: 'Niman',
         theme: buildAppTheme(AppThemes.palette, Brightness.light),
         darkTheme: buildAppTheme(AppThemes.palette, Brightness.dark),
         themeMode: AppThemes.mode,

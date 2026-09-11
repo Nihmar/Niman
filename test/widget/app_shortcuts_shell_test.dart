@@ -1,13 +1,13 @@
 // T-PP-10: the shell installs the registry over the desktop layout, so a
 // registered accelerator reaches the same command its button does.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/shell.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_shortcut_service.dart';
@@ -30,7 +30,7 @@ void main() {
         librarySessionProvider.overrideWithValue(controller),
         shortcutServiceProvider.overrideWithValue(shortcuts),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

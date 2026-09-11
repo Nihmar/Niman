@@ -3,9 +3,9 @@
 // the content read, and the tab's own ops publish without a round trip.
 import 'dart:io';
 
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_controller.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -29,7 +29,7 @@ void main() {
   }
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('copist_todo_ctrl_');
+    root = await Directory.systemTemp.createTemp('niman_todo_ctrl_');
     session = FakeLibrarySession();
     await session.open(root.path, create: false);
     controller = TodoController(

@@ -1,13 +1,13 @@
 // T-M3-04 AC: word search ranks (bm25, title over body) with snippets;
 // #tag search answers from tags/note_tags, never FTS; superseded queries
 // are dropped by invocation id; MATCH vs LIKE behaviors.
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/search/query.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/search/query.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/tag_repo.dart';
 
 void main() {
   late IndexDatabase db;

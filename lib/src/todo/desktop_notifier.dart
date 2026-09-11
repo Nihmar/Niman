@@ -7,8 +7,8 @@
 /// here.
 library;
 
-import 'package:copist/src/todo/todo_reminder.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 /// Where a desktop reminder is posted.
 ///
@@ -28,10 +28,10 @@ abstract interface class DesktopNotifier {
 /// `appUserModelId`, and `guid` identifies the activation callback. MSIX
 /// packaging (M7) may revisit these; changing them strands toasts the OS
 /// already holds.
-const String desktopNotificationAppName = 'Copist';
+const String desktopNotificationAppName = 'Niman';
 
 /// The stable Windows Application User Model ID.
-const String desktopNotificationAppUserModelId = 'dev.copist.copist';
+const String desktopNotificationAppUserModelId = 'dev.niman.niman';
 
 /// The GUID Windows uses to route a toast activation back to this app.
 const String desktopNotificationGuid = 'd7f0f2c4-3b1e-4a8f-9c2d-6e5a1b0c9f3d';
@@ -48,7 +48,7 @@ final class PluginDesktopNotifier implements DesktopNotifier {
   Future<void> init({required void Function(String? payload) onTap}) async {
     await _plugin.initialize(
       settings: const InitializationSettings(
-        linux: LinuxInitializationSettings(defaultActionName: 'Open Copist'),
+        linux: LinuxInitializationSettings(defaultActionName: 'Open Niman'),
         windows: WindowsInitializationSettings(
           appName: desktopNotificationAppName,
           appUserModelId: desktopNotificationAppUserModelId,

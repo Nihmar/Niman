@@ -1,11 +1,11 @@
 // T-M6-05: brightness × palette. Every combination has to produce a
 // readable theme, the named palettes have to be mappings and nothing
 // else, and the device's own colors have to reach the `system` one.
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/ui/theme/palettes.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/ui/theme/palettes.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The WCAG contrast ratio between two opaque colors.
 double _contrast(Color a, Color b) {

@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/toolbar_layout.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The editor-toolbar settings (T-TB-05): the buttons as a reorderable
 /// list, each with an eye that shows or hides it.

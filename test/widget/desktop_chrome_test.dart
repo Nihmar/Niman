@@ -1,14 +1,14 @@
 // T-PP-22: the desktop chrome — no window app bar, the tree's controls
 // at the base of its column, and the open note's controls in the detail
 // pane header; the phone keeps its app bar and FAB.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
@@ -34,7 +34,7 @@ void main() {
         todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
         windowControllerProvider.overrideWithValue(window),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

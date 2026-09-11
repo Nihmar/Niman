@@ -1,9 +1,9 @@
 // T-TB-01/02: the toolbar catalogue and the layout the user's order and
 // hidden buttons are stored as.
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/toolbar_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
 
 void main() {
   group('ToolbarItem', () {

@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/db/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/db/app_database.dart';
 
 /// The `library_settings` table as it stood through v13, before T-ML-02
 /// dropped it. A rewound database has to bring it back itself: the
@@ -149,8 +149,8 @@ void main() {
   late File dbFile;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('copist_migrate_');
-    dbFile = File('${tempDir.path}/copist.db');
+    tempDir = await Directory.current.createTemp('niman_migrate_');
+    dbFile = File('${tempDir.path}/niman.db');
   });
 
   tearDown(() async {

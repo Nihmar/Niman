@@ -2,12 +2,12 @@
 // the `key = value` filter read — and the index file's upgrade rule.
 import 'dart:io';
 
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/frontmatter/fields.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/frontmatter/fields.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
   late FieldRepo repo;
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_fields_');
+    root = await Directory.current.createTemp('niman_fields_');
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);

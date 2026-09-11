@@ -1,11 +1,11 @@
 // T-TK-06/07: the create menu's "New list note" action — creates a
 // `type: list` note in the configured folder (default `Lists/`,
 // re-targetable via the library setting) and opens it.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -22,7 +22,7 @@ void main() {
   Widget buildApp() {
     return ProviderScope(
       overrides: [librarySessionProvider.overrideWithValue(controller)],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

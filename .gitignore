@@ -5,7 +5,7 @@
 *.pyc
 *.swp
 *.apk
-copist-*.tar.gz
+niman-*.tar.gz
 # Local release staging (CI uses a fresh dist/ on the runner; the scripts
 # below can also create it locally — never commit it).
 /dist/
@@ -24,7 +24,7 @@ reference/
 # The on-device test note (novel-length fixture); never commit.
 /Geometria 1.md
 # Debug logs exported from the Settings screen.
-copist-debug-log-*.txt
+niman-debug-log-*.txt
 .buildlog/
 .history
 screenshots/
@@ -143,10 +143,10 @@ app.*.symbols
 # root and clean them up on success, which on Windows they often cannot.
 # The 10k and watcher ones hold files, so without this they land in a
 # `git add -A` -- 185 of them did once.
-/copist_state_*/
-/copist_migrate_*/
-/copist_10k_*/
-/copist_watch_*/
+/niman_state_*/
+/niman_migrate_*/
+/niman_10k_*/
+/niman_watch_*/
 
 # Kotlin compiler session state, written during a Gradle build.
 **/android/.kotlin/

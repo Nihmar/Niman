@@ -1,4 +1,4 @@
-import 'package:copist/src/core/shortcuts.dart';
+import 'package:niman/src/core/shortcuts.dart';
 
 /// What the command line asked the app to do at start.
 ///

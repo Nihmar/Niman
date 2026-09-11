@@ -5,8 +5,8 @@
 // base3, and both take their text from the middle of the ramp. Blue is the
 // accent, as in the original's UI examples.
 
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// Solarized's chrome at [brightness].
 PaletteTokens solarizedTokens(Brightness brightness) =>

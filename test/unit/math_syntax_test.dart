@@ -2,9 +2,9 @@
 // blockquotes), inline splitting with the shared rules, frontmatter strip.
 import 'dart:convert';
 
-import 'package:copist/src/preview/math_syntax.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/math_syntax.dart';
 
 List<md.Node> _parse(String text) {
   final document = md.Document(

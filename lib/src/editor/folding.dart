@@ -9,7 +9,7 @@
 /// inside the range are hidden along with the content.
 library;
 
-import 'package:copist/src/editor/outline.dart';
+import 'package:niman/src/editor/outline.dart';
 
 /// The folded-section state over a document's heading outline.
 final class FoldState {

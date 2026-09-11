@@ -16,27 +16,27 @@
 // Default scale is a twentieth of the gate so the suite keeps running
 // this every time without holding the machine up — `flutter test` runs
 // files in parallel, and the ten-thousand-note scan next door is timing
-// itself on the same disk. `COPIST_SCALE=1000000` is the gate itself.
+// itself on the same disk. `NIMAN_SCALE=1000000` is the gate itself.
 @Timeout(Duration(minutes: 10))
 library;
 
 import 'dart:io';
 
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/search/query.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/search/tag_repo.dart';
 import 'package:drift/drift.dart' show Value, Variable, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/search/query.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/tag_repo.dart';
 import 'package:path/path.dart' as p;
 
-/// Notes in the synthetic library; `COPIST_SCALE=1000000` is the gate.
+/// Notes in the synthetic library; `NIMAN_SCALE=1000000` is the gate.
 final int scale =
-    int.tryParse(Platform.environment['COPIST_SCALE'] ?? '') ?? 50000;
+    int.tryParse(Platform.environment['NIMAN_SCALE'] ?? '') ?? 50000;
 
 /// Notes per folder; the folder count follows from the scale.
 const int perFolder = 1000;
@@ -164,7 +164,7 @@ void main() {
   }
 
   setUpAll(() async {
-    tmp = await Directory.current.createTemp('copist_scale_');
+    tmp = await Directory.current.createTemp('niman_scale_');
     root = Directory(p.join(tmp.path, 'library'))..createSync();
     // The library on disk is a stub: this measures the index, and the
     // walk is `fixture_10k_test.dart`'s job.
@@ -254,11 +254,7 @@ void main() {
     // The other end: a word in every note. bm25 has to rank every match,
     // so this is the ceiling rather than the common case.
     final common = await timed('word search, every note', () async {
-      await search.search(
-        buildFtsQuery('seed'),
-        id: search.begin(),
-        limit: 50,
-      );
+      await search.search(buildFtsQuery('seed'), id: search.begin(), limit: 50);
     });
 
     expect(rare, lessThan(1000), reason: 'rare word took $rare ms');

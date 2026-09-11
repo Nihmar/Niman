@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/editor/wysiwyg/markdown_parse.dart';
-import 'package:copist/src/links/parser.dart';
-import 'package:copist/src/preview/aspect_image.dart';
-import 'package:copist/src/preview/html_table.dart';
-import 'package:copist/src/preview/math_cache.dart';
-import 'package:copist/src/preview/math_syntax.dart';
-import 'package:copist/src/preview/math_widget.dart';
-import 'package:copist/src/preview/preview_work.dart';
-import 'package:copist/src/preview/scroll_map.dart';
-import 'package:copist/src/preview/wikilink.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/wysiwyg/markdown_parse.dart';
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/preview/aspect_image.dart';
+import 'package:niman/src/preview/html_table.dart';
+import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/math_syntax.dart';
+import 'package:niman/src/preview/math_widget.dart';
+import 'package:niman/src/preview/preview_work.dart';
+import 'package:niman/src/preview/scroll_map.dart';
+import 'package:niman/src/preview/wikilink.dart';
 import 'package:path/path.dart' as p;
 
 /// The windowed Markdown preview (M2 T-M2-04).

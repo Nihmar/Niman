@@ -1,19 +1,19 @@
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
-import 'package:copist/src/editor/wysiwyg/opaque_embed.dart';
-import 'package:copist/src/editor/wysiwyg/quill_editor_commands.dart';
-import 'package:copist/src/editor/wysiwyg/wysiwyg_find_controller.dart';
-import 'package:copist/src/editor/wysiwyg/wysiwyg_find_panel.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
+import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
+import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_find_panel.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The WYSIWYG writing surface: a Quill editor over the note's Markdown.
 ///

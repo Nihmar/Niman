@@ -4,11 +4,11 @@
 // the paths starting `folder/`, and a sibling whose name merely starts
 // with the folder's name is not one of them. `a`, `a.md`, `a0` and `ab`
 // all sort next to each other, and only one of them is inside `a`.
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
 
 void main() {
   late IndexDatabase db;
@@ -74,10 +74,7 @@ void main() {
   });
 
   test('the folder list is the directories, by path', () async {
-    expect(
-      (await dao.folders()).map((n) => n.path),
-      ['a', 'a0', 'ab'],
-    );
+    expect((await dao.folders()).map((n) => n.path), ['a', 'a0', 'ab']);
   });
 
   test('children and the top level read the materialized rows', () async {

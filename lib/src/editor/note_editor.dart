@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/editor/markdown_chunks.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/editor/markdown_chunks.dart';
 import 'package:re_editor/re_editor.dart';
 
 /// The note source editor: a thin wrapper over re_editor's [CodeEditor].
@@ -11,7 +11,7 @@ import 'package:re_editor/re_editor.dart';
 /// This replaces the custom line-based widget stack (hand-built caret,
 /// selection, IME bridge, gestures and virtualized view). Caret, selection,
 /// IME/composition, selection handles, scrolling and accessibility now come
-/// from the package; Copist keeps ownership of load/save and of the
+/// from the package; Niman keeps ownership of load/save and of the
 /// Markdown language knowledge (`highlighting.dart`, `folding.dart`,
 /// `outline.dart`).
 ///
@@ -72,7 +72,7 @@ final class NoteEditor extends StatelessWidget {
   /// The note's find state; when null the editor makes its own.
   final CodeFindController? findController;
 
-  /// The find bar builder (the owner supplies `CopistFindPanel`).
+  /// The find bar builder (the owner supplies `NimanFindPanel`).
   final CodeFindBuilder? findBuilder;
 
   /// Editor shortcut activators (defaults + Ctrl+H replace).
@@ -139,7 +139,7 @@ final class NoteEditor extends StatelessWidget {
       findController: findController,
       findBuilder: findBuilder,
       shortcutsActivatorsBuilder: shortcutsActivators,
-      // PageUp/PageDown: bound by Copist's activators, moved here because
+      // PageUp/PageDown: bound by Niman's activators, moved here because
       // the package's controller methods are `// TODO` stubs.
       shortcutOverrideActions: {
         CodeShortcutCursorMovePageIntent:

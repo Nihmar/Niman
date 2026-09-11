@@ -5,9 +5,9 @@
 // above it shifts it, and an edit that removes its heading line (or turns
 // that line into a non-heading) drops it.
 
-import 'package:copist/src/editor/folding.dart';
-import 'package:copist/src/editor/outline.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/folding.dart';
+import 'package:niman/src/editor/outline.dart';
 
 OutlineEntry _h(int line, [int level = 1]) =>
     OutlineEntry(line: line, level: level, text: 'h$line');

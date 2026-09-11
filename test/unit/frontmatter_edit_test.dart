@@ -1,7 +1,7 @@
 // T-M4-04/07: setting and clearing one frontmatter key without touching
 // anything else in the file.
-import 'package:copist/src/frontmatter/edit.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 
 void main() {
   group('setFrontmatterKey', () {

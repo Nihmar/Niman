@@ -1,10 +1,10 @@
 // The editor formatting toolbar (T-UI-08): every button applies its
 // markdown command through the controller's range-replacement op, and the
 // editor keeps focus (the keyboard stays open) after a tap.
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 const String _doc = '# Head\n\nhello world\nsecond line';

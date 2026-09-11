@@ -7,9 +7,9 @@
 /// ignored, so chips show the pool they narrow and combos stay sane.
 library;
 
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 /// The due-date filter: one range (or all / no date).
 enum TodoDueRange {

@@ -1,8 +1,8 @@
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/editor/editor_commands.dart';
-import 'package:copist/src/editor/toolbar_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/editor_commands.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 
 /// The formatting toolbar mapped onto a [quill.QuillController].
 ///

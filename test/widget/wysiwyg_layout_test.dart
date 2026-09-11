@@ -1,18 +1,18 @@
 // T-WYS-05: the WYSIWYG surface replaces the source editor, never sits
 // beside the preview, and hides the source-only controls.
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/editor/toolbar.dart';
-import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/spell_checker.dart';
-import 'package:copist/src/ui/editor_preview_split.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/editor/toolbar.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 

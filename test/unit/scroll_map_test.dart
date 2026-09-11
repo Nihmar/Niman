@@ -2,11 +2,11 @@
 // ScrollMap answers the line↔offset queries.
 import 'dart:convert';
 
-import 'package:copist/src/preview/html_table.dart';
-import 'package:copist/src/preview/math_syntax.dart';
-import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/preview/html_table.dart';
+import 'package:niman/src/preview/math_syntax.dart';
+import 'package:niman/src/preview/scroll_map.dart';
 
 List<String> _lines(String text) => const LineSplitter().convert(text);
 
@@ -92,7 +92,8 @@ void main() {
     // the map describes child i of the preview — and these two shapes put
     // it out of step for the whole rest of the document.
     test('a raw HTML table is one block', () {
-      const source = 'before\n\n'
+      const source =
+          'before\n\n'
           '<table><tr><td>1</td><td>2</td></tr></table>\n\n'
           'after';
       final starts = BlockLocator().locate(_lines(source));
@@ -100,7 +101,8 @@ void main() {
     });
 
     test('footnote definitions in a row are one block', () {
-      const source = 'text with a note[^1] and another[^2]\n\n'
+      const source =
+          'text with a note[^1] and another[^2]\n\n'
           '[^1]: the first note\n\n'
           '[^2]: the second note\n';
       final starts = BlockLocator().locate(_lines(source));

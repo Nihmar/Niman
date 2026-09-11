@@ -2,10 +2,10 @@
 // round trip through the settings file, land in range whatever the file
 // says, and reach the screen as two scalers that never multiply each
 // other.
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/text_scale.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/text_scale.dart';
 
 void main() {
   setUp(AppTextScales.reset);

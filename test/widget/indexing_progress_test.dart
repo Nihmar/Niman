@@ -3,13 +3,13 @@
 // says the app is working rather than stuck (user, 2026-09-09).
 import 'dart:async';
 
-import 'package:copist/src/app.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -35,7 +35,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(session)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();

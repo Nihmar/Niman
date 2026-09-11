@@ -1,4 +1,4 @@
-import 'package:copist/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 
 /// The formatting toolbar's commands against the active editor.
 ///

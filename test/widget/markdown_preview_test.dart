@@ -4,12 +4,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/preview/code_highlight.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/preview/code_highlight.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/scroll_map.dart';
 
 Widget _app(Widget child) => MaterialApp(
   home: Scaffold(body: SizedBox(height: 600, child: child)),

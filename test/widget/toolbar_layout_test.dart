@@ -1,13 +1,13 @@
 // T-TB-04/05: the editor renders the toolbar the user arranged, and the
 // settings screen is where they arrange it.
-import 'package:copist/src/editor/toolbar.dart';
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/toolbar_layout.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/toolbar_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/toolbar.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/toolbar_settings.dart';
 import 'package:re_editor/re_editor.dart';
 
 import '../fakes/fake_library_session.dart';

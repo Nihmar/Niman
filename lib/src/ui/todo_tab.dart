@@ -10,20 +10,20 @@ library;
 
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_controller.dart';
-import 'package:copist/src/todo/todo_filter.dart';
-import 'package:copist/src/todo/todo_store.dart';
-import 'package:copist/src/ui/reminder_health_banner.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/todo_edit_dialog.dart';
-import 'package:copist/src/ui/todo_filter_bar.dart';
-import 'package:copist/src/ui/todo_filter_sheet.dart';
-import 'package:copist/src/ui/todo_help.dart';
-import 'package:copist/src/ui/todo_row.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/ui/reminder_health_banner.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/todo_edit_dialog.dart';
+import 'package:niman/src/ui/todo_filter_bar.dart';
+import 'package:niman/src/ui/todo_filter_sheet.dart';
+import 'package:niman/src/ui/todo_help.dart';
+import 'package:niman/src/ui/todo_row.dart';
 
 /// The Todo tab body.
 final class TodoTab extends StatefulWidget {

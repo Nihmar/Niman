@@ -1,4 +1,4 @@
-/// The shape a reference screen in Copist has.
+/// The shape a reference screen in Niman has.
 ///
 /// Two of them exist — the todo.txt syntax (T-TD-08) and the template
 /// placeholders (T-TPL-08) — and they answer the same kind of question:

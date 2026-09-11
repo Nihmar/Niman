@@ -1,7 +1,7 @@
-import 'package:copist/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 
 /// The open library's settings, read once from
-/// `<library>/.copist/settings.json` and written back on every change
+/// `<library>/.niman/settings.json` and written back on every change
 /// (T-ML-02).
 ///
 /// The file replaced a database row, and a row was cheap to read: the

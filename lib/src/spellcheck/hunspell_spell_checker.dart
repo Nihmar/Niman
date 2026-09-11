@@ -10,9 +10,9 @@ library;
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/spellcheck/spell_checker.dart';
 import 'package:ffi/ffi.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:path/path.dart' as p;
 
 /// The shared libraries to try, in order (Linux, macOS, Windows).

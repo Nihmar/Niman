@@ -1,9 +1,9 @@
 // T-PP-22: the app's own window title bar — the sidebar toggle, the drag
 // area, and the window buttons over the seam (the close button goes
 // through it, so it meets the unsaved-edits guard like the system one).
-import 'package:copist/src/ui/title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/title_bar.dart';
 
 import '../fakes/fake_window_controller.dart';
 
@@ -15,7 +15,7 @@ Widget _host(
   return MaterialApp(
     home: Scaffold(
       body: AppTitleBar(
-        title: 'Copist — note.md',
+        title: 'Niman — note.md',
         sidebarVisible: sidebarVisible,
         onToggleSidebar: onToggle ?? () {},
         window: window,
@@ -30,7 +30,7 @@ void main() {
     final window = FakeWindowController();
     await tester.pumpWidget(_host(window, onToggle: () => toggles++));
 
-    expect(find.text('Copist — note.md'), findsOne);
+    expect(find.text('Niman — note.md'), findsOne);
     await tester.tap(find.byKey(const Key('toggle-sidebar')));
     expect(toggles, 1);
   });

@@ -1,10 +1,10 @@
 // T-TPL-03 AC: a template's questions are found in the order it asks
 // them, each label asked once, and the answers reach the body, the
 // frontmatter and the directives alike.
-import 'package:copist/src/templates/directives.dart';
-import 'package:copist/src/templates/engine.dart';
-import 'package:copist/src/templates/prompts.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/templates/directives.dart';
+import 'package:niman/src/templates/engine.dart';
+import 'package:niman/src/templates/prompts.dart';
 
 void main() {
   final clock = DateTime(2026, 3, 9, 7, 5);
@@ -41,7 +41,7 @@ void main() {
     test('the same label twice is one question, asked where it first is', () {
       const source = '''
 ---
-copist:
+niman:
   filename: "{{ask:Name}}"
 ---
 
@@ -107,7 +107,7 @@ Written by {{ask:Author}}, also {{ask:Name}}.
     test('a field can name the file and pick the folder', () {
       const source = '''
 ---
-copist:
+niman:
   folder: World/{{choice:Kind:Characters,Places}}
   filename: "{{ask:Name}}"
 ---
@@ -126,7 +126,7 @@ copist:
 
     test('the block still goes, and the answers stay in the note', () {
       const source =
-          '---\ncopist:\n  filename: "{{ask:Name}}"\ntype: character\n---\n\n'
+          '---\nniman:\n  filename: "{{ask:Name}}"\ntype: character\n---\n\n'
           '# {{ask:Name}}\n';
       expect(
         renderTemplate(

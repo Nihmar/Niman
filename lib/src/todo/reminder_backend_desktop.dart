@@ -16,10 +16,10 @@ library;
 
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/todo/desktop_notifier.dart';
-import 'package:copist/src/todo/reminder_backend.dart';
-import 'package:copist/src/todo/todo_reminder.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/desktop_notifier.dart';
+import 'package:niman/src/todo/reminder_backend.dart';
+import 'package:niman/src/todo/todo_reminder.dart';
 
 /// The desktop reminders: an in-process timer over a [DesktopNotifier].
 final class DesktopReminderBackend implements ReminderBackend {

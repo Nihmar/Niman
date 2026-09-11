@@ -4,9 +4,9 @@
 /// documented is one that actually runs.
 library;
 
-import 'package:copist/src/ui/app_shortcuts.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Lists the app accelerators and the editor's own keys.
 final class KeyboardShortcutsScreen extends StatelessWidget {
@@ -26,7 +26,7 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          for (final shortcut in copistAppShortcuts)
+          for (final shortcut in nimanAppShortcuts)
             ListTile(
               key: Key('shortcut-${shortcut.command.name}'),
               title: Text(appCommandLabel(shortcut.command)),

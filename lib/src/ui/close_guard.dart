@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
 
 /// Guards the window's close requests (T-PP-11).

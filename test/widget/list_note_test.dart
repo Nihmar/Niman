@@ -1,11 +1,11 @@
 // T-TK-04/09: the list-kind GUI — checkable rows, nesting, the add row,
 // in-place text editing and drag reordering/sub-lists.
-import 'package:copist/src/ui/kinds/list_drag_handle.dart';
-import 'package:copist/src/ui/kinds/list_item_row.dart';
-import 'package:copist/src/ui/kinds/list_note.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/kinds/list_drag_handle.dart';
+import 'package:niman/src/ui/kinds/list_item_row.dart';
+import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/strings.dart';
 
 Widget _app(ListNoteView view) => MaterialApp(home: Scaffold(body: view));
 

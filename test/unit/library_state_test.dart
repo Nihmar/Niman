@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/library/library_registry.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/session.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/library_registry.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
   late Directory root;
 
   setUp(() async {
-    tmp = await Directory.current.createTemp('copist_state_');
+    tmp = await Directory.current.createTemp('niman_state_');
     root = Directory(p.join(tmp.path, 'library'))..createSync();
     File(p.join(root.path, 'a.md')).writeAsStringSync('a');
   });
@@ -32,7 +32,7 @@ void main() {
   /// The app settings file, shared across controllers so a "fresh" one
   /// (simulating an app restart) sees the same settings.
   Future<AppDatabase> appDb() async =>
-      AppDatabase(NativeDatabase(File(p.join(tmp.path, 'copist.db'))));
+      AppDatabase(NativeDatabase(File(p.join(tmp.path, 'niman.db'))));
 
   /// One index file per library, named after its folder — the same rule
   /// the app applies with a digest (T-ML-03), spelled readably here.

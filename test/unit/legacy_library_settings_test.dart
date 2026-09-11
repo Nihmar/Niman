@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/settings/legacy_library_settings.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/legacy_library_settings.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/db/app_database.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
   late AppDatabase db;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('copist_legacy_');
+    tempDir = await Directory.current.createTemp('niman_legacy_');
     lib = await tempDir.createTemp('lib_');
     db = AppDatabase(NativeDatabase(File(p.join(tempDir.path, 'test.sqlite'))));
     addTearDown(db.close);
@@ -164,7 +164,7 @@ void main() {
       lib.path: {'trashEnabled': false, 'historyVersions': 3},
     });
     await LegacyLibrarySettings(db).seed(lib.path);
-    final file = File(p.join(lib.path, '.copist', 'settings.json'));
+    final file = File(p.join(lib.path, '.niman', 'settings.json'));
     expect(file.existsSync(), isTrue);
     expect(file.readAsStringSync(), contains('"trashEnabled": false'));
   });

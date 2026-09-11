@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/editor/word_count.dart';
-import 'package:copist/src/preview/html_table.dart';
-import 'package:copist/src/preview/math_syntax.dart';
-import 'package:copist/src/preview/wikilink.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/word_count.dart';
+import 'package:niman/src/preview/html_table.dart';
+import 'package:niman/src/preview/math_syntax.dart';
+import 'package:niman/src/preview/wikilink.dart';
 
 /// Off-isolate work for the preview (T-M2-04/05/08): the whole-document
 /// markdown parse and the note stats (word count + heading outline) run in

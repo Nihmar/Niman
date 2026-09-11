@@ -5,9 +5,9 @@
 // silently opening the app with no action.
 import 'dart:io';
 
-import 'package:copist/src/core/launch_args.dart';
-import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/launch_args.dart';
+import 'package:niman/src/core/shortcuts.dart';
 import 'package:path/path.dart' as p;
 
 const _expected = <String, ShortcutAction>{
@@ -21,8 +21,7 @@ void main() {
   late List<String> lines;
 
   setUpAll(() {
-    lines = File(p.join('linux', 'dev.copist.copist.desktop'))
-        .readAsLinesSync();
+    lines = File(p.join('linux', 'dev.niman.niman.desktop')).readAsLinesSync();
   });
 
   /// The value of the first `key=` line at or after [from], or null.

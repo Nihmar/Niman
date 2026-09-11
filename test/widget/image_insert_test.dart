@@ -9,10 +9,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
@@ -92,7 +92,7 @@ void main() {
     tester,
   ) async {
     await tester.runAsync(() async {
-      final dir = await Directory.systemTemp.createTemp('copist_pv_');
+      final dir = await Directory.systemTemp.createTemp('niman_pv_');
       try {
         final assets = Directory(p.join(dir.path, 'assets'))..createSync();
         await File(p.join(assets.path, 'pic.png')).writeAsBytes(_png);
@@ -126,7 +126,7 @@ void main() {
     tester,
   ) async {
     final dir = (await tester.runAsync(
-      () => Directory.systemTemp.createTemp('copist_ins_'),
+      () => Directory.systemTemp.createTemp('niman_ins_'),
     ))!;
     try {
       final source = File(p.join(dir.path, 'pic.png'));

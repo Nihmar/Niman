@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "dev.copist" "\0"
-            VALUE "FileDescription", "copist" "\0"
+            VALUE "CompanyName", "dev.niman" "\0"
+            VALUE "FileDescription", "niman" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "copist" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 dev.copist. All rights reserved." "\0"
-            VALUE "OriginalFilename", "copist.exe" "\0"
-            VALUE "ProductName", "copist" "\0"
+            VALUE "InternalName", "niman" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 dev.niman. All rights reserved." "\0"
+            VALUE "OriginalFilename", "niman.exe" "\0"
+            VALUE "ProductName", "niman" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

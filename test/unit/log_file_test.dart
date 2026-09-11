@@ -3,9 +3,9 @@
 // mirror, not the in-memory buffer.
 import 'dart:io';
 
-import 'package:copist/src/core/log_file.dart';
-import 'package:copist/src/core/logging.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/log_file.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -13,8 +13,8 @@ void main() {
   late LogFile log;
 
   setUp(() async {
-    dir = await Directory.systemTemp.createTemp('copist_log_');
-    log = LogFile(path: p.join(dir.path, 'copist-log.txt'));
+    dir = await Directory.systemTemp.createTemp('niman_log_');
+    log = LogFile(path: p.join(dir.path, 'niman-log.txt'));
   });
 
   tearDown(() async {

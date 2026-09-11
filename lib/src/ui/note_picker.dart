@@ -6,10 +6,10 @@
 /// tree, and a tap on a note is the answer.
 library;
 
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree.dart';
 
 /// Asks for a note, resolving to its library-relative path or null.
 Future<String?> showNotePicker(

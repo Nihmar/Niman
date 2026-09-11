@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/links/parser.dart';
-import 'package:copist/src/preview/aspect_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/preview/aspect_image.dart';
 
 /// The inline syntax for `![[…]]` embeds in the preview: the note's own
 /// link style for files inside the library. Images render inline; other

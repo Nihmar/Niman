@@ -1,6 +1,6 @@
 // T-PP-11: the app-level unsaved registry the window's close guard reads.
-import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// A note with a settable dirty bit and a counted, controllable save.
 final class _FakeNote implements UnsavedNote {

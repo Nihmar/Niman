@@ -1,12 +1,12 @@
 // T-M2-08 AC: all layout modes reachable — split (editor + preview side by
 // side), full-screen switch with the app-bar toggle (T-UI-06), divider drag
 // persistence, and the shell's auto/forced resolution from the fake session.
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/ui/editor_preview_split.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 

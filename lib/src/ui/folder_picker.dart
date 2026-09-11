@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/name_dialog.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/name_dialog.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Picks one of the library's folders; resolves to its library-relative
 /// path, or null when dismissed.

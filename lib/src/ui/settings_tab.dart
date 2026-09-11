@@ -1,7 +1,7 @@
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/ui/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/ui/settings.dart';
 
 /// The Settings bottom-nav tab: today's settings list without its own
 /// Scaffold — the shell provides the app bar.

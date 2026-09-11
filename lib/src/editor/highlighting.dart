@@ -17,8 +17,8 @@
 /// worst case (an edit before an unclosed fence) the rest of the file.
 library;
 
-import 'package:copist/src/editor/math_rule.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/editor/math_rule.dart';
 
 /// The kind of a styled run within a line.
 enum TokenKind {

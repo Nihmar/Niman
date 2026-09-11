@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/ui/note_view.dart' show NoteView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/ui/note_view.dart' show NoteView;
 
 /// A note whose buffer may hold edits the disk does not have yet
 /// (T-PP-11).

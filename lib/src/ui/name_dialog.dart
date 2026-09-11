@@ -1,5 +1,5 @@
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A name-entry dialog; resolves to the trimmed text or null.
 Future<String?> showNameDialog(

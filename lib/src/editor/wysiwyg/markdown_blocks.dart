@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:copist/src/editor/wysiwyg/markdown_parse.dart';
-import 'package:copist/src/preview/math_syntax.dart';
-import 'package:copist/src/preview/scroll_map.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/editor/wysiwyg/markdown_parse.dart';
+import 'package:niman/src/preview/math_syntax.dart';
+import 'package:niman/src/preview/scroll_map.dart';
 
 /// One top-level block of a note: the exact bytes it came from and whether
 /// the codec can represent it in the WYSIWYG document.

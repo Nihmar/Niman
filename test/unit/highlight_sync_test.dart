@@ -1,9 +1,9 @@
 // EditorHighlightSync: re_editor CodeLines buffer -> incremental
 // tokenizer -> per-line styled spans (the spanBuilder implementation).
-import 'package:copist/src/editor/highlight_sync.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlight_sync.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:re_editor/re_editor.dart';
 
 const TextStyle _base = TextStyle(fontFamily: 'monospace', fontSize: 13);
@@ -31,8 +31,7 @@ TextSpan _spanFor(
   text: text,
   base: _base,
   syntax:
-      syntax ??
-      (dark ? SyntaxColors.fallbackDark : SyntaxColors.fallbackLight),
+      syntax ?? (dark ? SyntaxColors.fallbackDark : SyntaxColors.fallbackLight),
   dark: dark,
 );
 
@@ -129,9 +128,8 @@ void main() {
         0,
         '[[La stella Pyrale|Pyrale]]',
         dark: dark,
-        syntax:
-            (dark ? SyntaxColors.fallbackDark : SyntaxColors.fallbackLight)
-                .copyWith(wikilink: accent),
+        syntax: (dark ? SyntaxColors.fallbackDark : SyntaxColors.fallbackLight)
+            .copyWith(wikilink: accent),
       );
       final token = _styleOf(span, '[[La stella Pyrale|Pyrale]]');
       expect(token?.color, accent);

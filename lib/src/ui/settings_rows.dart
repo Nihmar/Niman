@@ -15,8 +15,8 @@
 /// screen is opened.
 library;
 
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A settings section heading.
 final class SettingsSection extends StatelessWidget {

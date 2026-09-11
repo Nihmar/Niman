@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:path/path.dart' as p;
 
 /// A batch of filesystem changes delivered by a [FileWatcher].

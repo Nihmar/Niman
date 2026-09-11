@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/library/library_registry.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/library/library_registry.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -12,8 +12,8 @@ void main() {
   late LibraryRegistry registry;
 
   setUp(() async {
-    tempDir = await Directory.current.createTemp('copist_registry_');
-    db = AppDatabase(NativeDatabase(File(p.join(tempDir.path, 'copist.db'))));
+    tempDir = await Directory.current.createTemp('niman_registry_');
+    db = AppDatabase(NativeDatabase(File(p.join(tempDir.path, 'niman.db'))));
     addTearDown(db.close);
     registry = LibraryRegistry(db);
   });

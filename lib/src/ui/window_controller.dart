@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:window_manager/window_manager.dart'
     show TitleBarStyle, WindowListener, WindowManager;
 

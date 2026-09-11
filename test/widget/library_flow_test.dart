@@ -1,11 +1,11 @@
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/trash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/trash.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
@@ -25,7 +25,7 @@ void main() {
       overrides: [
         librarySessionProvider.overrideWithValue(session ?? controller),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 
@@ -288,7 +288,7 @@ void main() {
     expect(
       find.text(
         'This deletes everything in the trash folder permanently, '
-        'including items Copist did not put there.',
+        'including items Niman did not put there.',
       ),
       findsOne,
     );

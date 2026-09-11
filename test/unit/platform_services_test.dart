@@ -6,12 +6,12 @@
 // pins the platform while the default keeps reading `Platform.*`. That is
 // the contract, and this file is what fails if someone reintroduces a
 // factory whose branches can only be half-tested by hand.
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/core/tray.dart';
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/tray.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 void main() {
   // The platform services reach method channels (and `window_manager`'s

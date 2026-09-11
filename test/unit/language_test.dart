@@ -1,8 +1,8 @@
 // T-L10N-01: the active language, and the strings that follow it.
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/ui/strings.dart';
 
 void main() {
   setUp(AppLanguages.reset);

@@ -1,8 +1,8 @@
 // T-TD-01 AC: todo.txt parser — the reference line, edge cases (uppercase
 // `X`, no space after `x`, missing creation date, `due:` at line end,
 // unicode/emoji, trailing whitespace, CRLF) and byte-stable round-trips.
-import 'package:copist/src/todo/parser.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/parser.dart';
 
 void main() {
   group('reference line', () {

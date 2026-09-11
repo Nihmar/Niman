@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/editor/toolbar.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/file_icon.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/toolbar.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/file_icon.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// One row of the flattened tree (note/folder + its depth).
 final class _Row {

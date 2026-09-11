@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:copist/src/core/frame_log.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/search/tag_repo.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The Tags screen (T-M3-06): the tag list with counts, and per tag the
 /// notes carrying it (path order) that open on tap.

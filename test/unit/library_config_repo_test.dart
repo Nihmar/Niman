@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_config_repo.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
 
 void main() {
   late Directory lib;
@@ -10,7 +10,7 @@ void main() {
   late LibraryConfigRepo repo;
 
   setUp(() async {
-    lib = await Directory.current.createTemp('copist_config_repo_');
+    lib = await Directory.current.createTemp('niman_config_repo_');
     store = LibraryConfigStore(lib.path);
     repo = LibraryConfigRepo(lib.path);
   });

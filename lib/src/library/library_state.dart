@@ -2,31 +2,31 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/legacy_library_settings.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_config_repo.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/text_scale.dart';
-import 'package:copist/src/core/theme.dart';
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/frontmatter/fields.dart';
-import 'package:copist/src/library/file_watcher.dart';
-import 'package:copist/src/library/library_registry.dart';
-import 'package:copist/src/library/note_ops.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/links/resolver.dart';
-import 'package:copist/src/search/replace.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/search/tag_repo.dart';
-import 'package:copist/src/templates/repo.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/legacy_library_settings.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/library/file_watcher.dart';
+import 'package:niman/src/library/library_registry.dart';
+import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/templates/repo.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
@@ -130,7 +130,7 @@ final class LibraryController implements LibrarySession {
   /// different file for each library (T-ML-03).
   IndexDatabase? _indexDb;
 
-  /// The open library's `.copist/settings.json`; null while none is open,
+  /// The open library's `.niman/settings.json`; null while none is open,
   /// and then every setting reads and writes app-wide.
   LibraryConfigRepo? _configRepo;
   Indexer? _indexer;
@@ -365,7 +365,7 @@ final class LibraryController implements LibrarySession {
       final appDb = await appDatabase;
       AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
       // Before anything reads the settings: a library upgraded from the
-      // `library_settings` table gets its `.copist/settings.json` here,
+      // `library_settings` table gets its `.niman/settings.json` here,
       // now that the folder is known to be reachable (T-ML-02).
       await LegacyLibrarySettings(appDb).seed(abs);
       // This library's own index file (T-ML-03). Opening a second library
@@ -374,7 +374,7 @@ final class LibraryController implements LibrarySession {
       final indexDb = await indexDbFactory(abs);
       _indexDb = indexDb;
       final indexer = Indexer(indexDb)..onChanged = _bump;
-      // One reader of `.copist/settings.json` per session: the four
+      // One reader of `.niman/settings.json` per session: the four
       // per-library settings and the overrides (T-ML-10) share its cache.
       final config = LibraryConfigRepo(abs);
       _configRepo = config;
@@ -912,7 +912,7 @@ final class LibraryController implements LibrarySession {
 /// moved the index into [libraryIndexFile] and left the settings here.
 Future<File> defaultAppDbFile() async {
   final dir = await getApplicationSupportDirectory();
-  return File(p.join(dir.path, 'copist.db'));
+  return File(p.join(dir.path, 'niman.db'));
 }
 
 /// The index FILE for the library at [libraryPath].
@@ -924,7 +924,7 @@ Future<File> defaultAppDbFile() async {
 /// 64 bits, and the registry keeps the mapping readable (T-ML-04).
 ///
 /// It lives OUTSIDE the library folder: the index is a cache, the files
-/// on disk are the source of truth, and `.copist/` is for what the user
+/// on disk are the source of truth, and `.niman/` is for what the user
 /// would want to keep.
 Future<File> libraryIndexFile(String libraryPath) async {
   final dir = Directory(

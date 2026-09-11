@@ -3,17 +3,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/frontmatter/parser.dart';
-import 'package:copist/src/links/parser.dart';
-import 'package:copist/src/links/resolver.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
 /// A note file or folder observed on disk during a scan.

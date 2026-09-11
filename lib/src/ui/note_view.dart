@@ -3,47 +3,47 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/frame_log.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/core/text_scale.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/editor/find_panel.dart';
-import 'package:copist/src/editor/highlight_sync.dart';
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/md_editing.dart';
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/editor/toolbar.dart';
-import 'package:copist/src/editor/toolbar_item.dart';
-import 'package:copist/src/editor/toolbar_layout.dart';
-import 'package:copist/src/editor/wysiwyg/quill_editor_commands.dart';
-import 'package:copist/src/editor/wysiwyg/wysiwyg_editor.dart';
-import 'package:copist/src/frontmatter/note_kind.dart';
-import 'package:copist/src/frontmatter/parser.dart';
-import 'package:copist/src/library/image_import.dart';
-import 'package:copist/src/links/parser.dart';
-import 'package:copist/src/links/resolver.dart';
-import 'package:copist/src/links/slug.dart';
-import 'package:copist/src/preview/editor_lines.dart';
-import 'package:copist/src/preview/markdown_preview.dart';
-import 'package:copist/src/preview/math_cache.dart';
-import 'package:copist/src/preview/preview_work.dart';
-import 'package:copist/src/preview/scroll_map.dart';
-import 'package:copist/src/spellcheck/editor_spell_check.dart';
-import 'package:copist/src/spellcheck/spell_check_sheet.dart';
-import 'package:copist/src/spellcheck/spell_issue.dart';
-import 'package:copist/src/ui/action_sheet.dart';
-import 'package:copist/src/ui/editor_preview_split.dart';
-import 'package:copist/src/ui/outline_panel.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/theme/tokens.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/editor/find_panel.dart';
+import 'package:niman/src/editor/highlight_sync.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/editor/toolbar.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
+import 'package:niman/src/frontmatter/note_kind.dart';
+import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/library/image_import.dart';
+import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/links/resolver.dart';
+import 'package:niman/src/links/slug.dart';
+import 'package:niman/src/preview/editor_lines.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/preview/preview_work.dart';
+import 'package:niman/src/preview/scroll_map.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/spell_check_sheet.dart';
+import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/ui/outline_panel.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -234,7 +234,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   late final bool _ownsController;
 
   /// The in-editor find & replace state (the classic bar): re_editor's
-  /// find machinery over [_controller], driven by `CopistFindPanel`.
+  /// find machinery over [_controller], driven by `NimanFindPanel`.
   late final CodeFindController _findController;
 
   /// The `CodeLines` the last processed text edit produced. A controller
@@ -633,8 +633,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       onIndicator: _editorLines.attach,
       findController: _findController,
       findBuilder: (context, controller, readOnly) =>
-          CopistFindPanel(controller: controller, readOnly: readOnly),
-      shortcutsActivators: const CopistShortcutsActivatorsBuilder(),
+          NimanFindPanel(controller: controller, readOnly: readOnly),
+      shortcutsActivators: const NimanShortcutsActivatorsBuilder(),
     ),
   );
 

@@ -1,8 +1,8 @@
 // T-M4-01: the frontmatter block parsed as real YAML — every key kept,
 // the known fields read out, malformed blocks reported rather than thrown.
 // Inline tag extraction rides along on the editor tokenizer's rules.
-import 'package:copist/src/frontmatter/parser.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/frontmatter/parser.dart';
 
 void main() {
   group('block detection', () {

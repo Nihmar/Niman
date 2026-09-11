@@ -1,15 +1,15 @@
-# Copist
+# Niman
 
-<img src="assets/branding/feather.png" alt="Copist app icon" width="140" align="right">
+<img src="assets/branding/app_icon.png" alt="Niman app icon" width="140" align="right">
+
+**Niman Is More (than) A Notebook.**
 
 A multiplatform Markdown note-taking app where your notes are just files.
 One note = one `.md` file on disk, organized in folders however you like.
 The app's database is only a rebuildable index — your files are always the
 source of truth. No lock-in, no proprietary format.
 
-> **Naming & status:** *Copist* and its feather icon are placeholders — the
-> app will be renamed before release. The project is under active
-> development.
+> **Status:** the project is under active development.
 
 ## What you get today
 
@@ -30,7 +30,7 @@ source of truth. No lock-in, no proprietary format.
 ### Libraries
 
 - A **library** is just a folder. Its settings live inside it as
-  `.copist/settings.json` — copy the folder to another machine and
+  `.niman/settings.json` — copy the folder to another machine and
   everything travels with it.
 - Each library is independent: its own editor preferences, trash policy,
   template folder, tree sort order, and so on.
@@ -62,7 +62,7 @@ the layout per library.
 
 ### Task reminders (Android)
 
-Mark a task with `rem:` and Copist schedules an exact alarm — it fires even
+Mark a task with `rem:` and Niman schedules an exact alarm — it fires even
 with the screen off, the app in the background, or the process killed.
 The app warns about notification and battery-optimization permissions that
 could prevent delivery.
@@ -76,30 +76,30 @@ delivery and other background behavior.
 ## What's coming
 
 These are tracked as GitHub issues — see the
-[issue tracker](https://github.com/Nihmar/Copist/issues) for details.
+[issue tracker](https://github.com/Nihmar/Niman/issues) for details.
 
-- **WebDAV sync** ([#9](https://github.com/Nihmar/Copist/issues/9)) —
+- **WebDAV sync** ([#9](https://github.com/Nihmar/Niman/issues/9)) —
   whole-library sync to Nextcloud, ownCloud, or any WebDAV server. Includes
   offline queue, conflict detection, and a hunk-level merge UI.
-- **Multi-tab editing** ([#23](https://github.com/Nihmar/Copist/issues/23)) —
+- **Multi-tab editing** ([#23](https://github.com/Nihmar/Niman/issues/23)) —
   open several notes at once.
-- **Export** ([#24](https://github.com/Nihmar/Copist/issues/24)) —
+- **Export** ([#24](https://github.com/Nihmar/Niman/issues/24)) —
   note to `.md` or `.html` (with math rendered), folder/library to zip.
-- **Import** ([#25](https://github.com/Nihmar/Copist/issues/25)) —
+- **Import** ([#25](https://github.com/Nihmar/Niman/issues/25)) —
   Obsidian folders (wikilinks supported) and Notion export zips.
-- **Encryption** ([#26](https://github.com/Nihmar/Copist/issues/26)) —
+- **Encryption** ([#26](https://github.com/Nihmar/Niman/issues/26)) —
   optional per-file AES-256-GCM, chosen at library creation.
-- **Onboarding** ([#27](https://github.com/Nihmar/Copist/issues/27)) —
+- **Onboarding** ([#27](https://github.com/Nihmar/Niman/issues/27)) —
   a guided first-launch experience.
-- **Scale improvements** ([#22](https://github.com/Nihmar/Copist/issues/22)) —
+- **Scale improvements** ([#22](https://github.com/Nihmar/Niman/issues/22)) —
   background indexing and bounded memory for very large libraries.
-- **Platform parity** ([#39](https://github.com/Nihmar/Copist/issues/39)) —
+- **Platform parity** ([#39](https://github.com/Nihmar/Niman/issues/39)) —
   share-in on Android, file association on desktop, single-instance guard.
-- **Note history viewer** ([#55](https://github.com/Nihmar/Copist/issues/55)) —
+- **Note history viewer** ([#55](https://github.com/Nihmar/Niman/issues/55)) —
   browse and restore past versions of a note.
-- **Performance** ([#45](https://github.com/Nihmar/Copist/issues/45)) —
+- **Performance** ([#45](https://github.com/Nihmar/Niman/issues/45)) —
   tab-switch smoothness and editor performance on large notes.
-- **Packaging & release** ([#31](https://github.com/Nihmar/Copist/issues/31)) —
+- **Packaging & release** ([#31](https://github.com/Nihmar/Niman/issues/31)) —
   final branding, signed builds, and the first public release.
 
 **Stretch goals:** Mermaid diagrams, PDF export, LaTeX autocomplete.
@@ -140,9 +140,9 @@ GitHub Release page.
 ### Building locally
 
 ```
-./scripts/copist.sh apk          # Android
-./scripts/copist.sh linux        # Linux bundle
-scripts\copist.bat windows       # Windows (on a Windows host)
+./scripts/niman.sh apk          # Android
+./scripts/niman.sh linux        # Linux bundle
+scripts\niman.bat windows       # Windows (on a Windows host)
 ```
 
 See the CI workflow and `packaging/` for AppImage, Arch pkg, and Inno Setup
@@ -152,7 +152,7 @@ details.
 
 - **Framework:** Flutter + Dart with `very_good_analysis`.
 - **State:** Riverpod.
-- **Source editor:** `re_editor` with Copist's own incremental Markdown tokenizer.
+- **Source editor:** `re_editor` with Niman's own incremental Markdown tokenizer.
 - **WYSIWYG editor:** `flutter_quill` with a Markdown round-trip codec.
 - **Preview:** `flutter_markdown_plus` + `katex_dart` for math +
   `flutter_highlight` for code.
@@ -181,9 +181,9 @@ details.
   for Android that keeps notes as ordinary files. A reference both for what
   a notes app owes its user (no lock-in, no database between them and their
   text) and for its visual design.
-- Obsidian — a behavioral reference. Copist uses its own vocabulary (the
+- Obsidian — a behavioral reference. Niman uses its own vocabulary (the
   root folder is the **Library**) and none of its code.
 
 ## License
 
-Copist is open source under the MIT license.
+Niman is open source under the MIT license.

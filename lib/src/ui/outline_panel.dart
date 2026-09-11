@@ -1,7 +1,7 @@
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/ui/action_sheet.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/ui/action_sheet.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The heading outline (T-M2-07): the note's headings, indented by level;
 /// picking one jumps the editor to that heading's line.

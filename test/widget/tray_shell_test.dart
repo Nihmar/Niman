@@ -1,14 +1,14 @@
 // T-PP-06b: a tray quick action runs the same flow its launcher twin
 // runs, and an icon click brings the window back to the front.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/core/tray.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/tray.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_shortcut_service.dart';
@@ -39,7 +39,7 @@ void main() {
         trayServiceProvider.overrideWithValue(tray),
         windowControllerProvider.overrideWithValue(window),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 

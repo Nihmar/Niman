@@ -12,9 +12,9 @@
 
 import 'dart:async';
 
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/window_controller.dart';
 import 'package:window_manager/window_manager.dart' show DragToMoveArea;
 
 /// The window title bar drawn by the app.
@@ -28,7 +28,7 @@ final class AppTitleBar extends StatelessWidget {
     super.key,
   });
 
-  /// What the bar shows, e.g. `Copist — note.md`.
+  /// What the bar shows, e.g. `Niman — note.md`.
   final String title;
 
   /// Whether the tree pane is showing (drives the button and its tooltip).

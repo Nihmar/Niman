@@ -1,8 +1,8 @@
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/name_dialog.dart';
-import 'package:copist/src/ui/note_picker.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/name_dialog.dart';
+import 'package:niman/src/ui/note_picker.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The Quick note tab: the setup screen shown while no quick note is set.
 ///

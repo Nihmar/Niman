@@ -1,9 +1,9 @@
 // T-PP-06b: the tray service's platform split and its off-desktop shape.
 import 'dart:io';
 
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/core/tray.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/tray.dart';
 
 void main() {
   test('the no-op tray takes labels and never emits', () async {

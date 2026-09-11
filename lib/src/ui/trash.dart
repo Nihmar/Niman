@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:copist/src/library/note_ops.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Lists trash items and supports restoring / permanent deletion.
 final class TrashScreen extends StatefulWidget {

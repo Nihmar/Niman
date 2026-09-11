@@ -1,9 +1,9 @@
 // T-TK-07: the folder picker behind the list-folder setting — folders
 // are chosen from a dialog, never typed.
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/ui/folder_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/ui/folder_picker.dart';
 
 import '../fakes/fake_library_session.dart';
 

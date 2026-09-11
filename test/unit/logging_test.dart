@@ -1,5 +1,5 @@
-import 'package:copist/src/core/logging.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/logging.dart';
 
 void main() {
   late AppLogger logger;

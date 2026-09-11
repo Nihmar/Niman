@@ -1,14 +1,14 @@
 // T-SC-03..07: a launcher quick action lands on the flow its in-app
 // control uses, on a warm start (the tap stream) and on a cold one (the
 // launch action the shell consumes when it mounts).
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/core/shortcuts.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_shortcut_service.dart';
@@ -34,7 +34,7 @@ void main() {
         librarySessionProvider.overrideWithValue(controller),
         shortcutServiceProvider.overrideWithValue(shortcuts),
       ],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 
@@ -179,7 +179,7 @@ void main() {
             (ref) => CliShortcutService(ShortcutAction.newTodo),
           ),
         ],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();

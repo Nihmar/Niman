@@ -1,13 +1,13 @@
 // 2026-09-08 user feedback: the settings screen read as one wall. It is
 // now grouped under headings, and every setting with more than two
 // choices is a row showing its current value, changed in a dialog.
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/ui/keyboard_shortcuts.dart';
-import 'package:copist/src/ui/settings.dart';
-import 'package:copist/src/ui/settings_rows.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/ui/keyboard_shortcuts.dart';
+import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 

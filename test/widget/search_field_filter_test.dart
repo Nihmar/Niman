@@ -1,11 +1,11 @@
 // T-M4-03 AC: `key = value` in the search box filters by frontmatter,
 // for any key — the invented ones as much as the known ones.
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/frontmatter/fields.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/ui/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/search_screen.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_search_source.dart';

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:copist/src/templates/prompts.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/templates/prompts.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Asks a template's questions, all of them at once (T-TPL-03).
 ///

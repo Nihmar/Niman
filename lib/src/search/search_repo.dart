@@ -7,10 +7,10 @@
 /// around the first match.
 library;
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/db/dao.dart';
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show QueryRow, Variable;
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/db/dao.dart';
+import 'package:niman/src/db/index_database.dart';
 
 /// One ranked search hit.
 final class SearchHit {

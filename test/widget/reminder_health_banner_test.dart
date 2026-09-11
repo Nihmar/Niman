@@ -1,11 +1,11 @@
 // T-TD-07: a scheduled reminder is silent about everything that can stop
 // it reaching the user, so the Todo tab says so while it can still be
 // fixed.
-import 'package:copist/src/todo/reminder_health.dart';
-import 'package:copist/src/todo/todo_controller.dart';
-import 'package:copist/src/ui/todo_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/reminder_health.dart';
+import 'package:niman/src/todo/todo_controller.dart';
+import 'package:niman/src/ui/todo_tab.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';

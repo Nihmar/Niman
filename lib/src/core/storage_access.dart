@@ -1,7 +1,7 @@
 // Gate for the Android "All files access" permission
 // (`MANAGE_EXTERNAL_STORAGE`).
 //
-// Copist reads and writes the library with plain file I/O: the indexer
+// Niman reads and writes the library with plain file I/O: the indexer
 // walks it, the watcher watches it, notes are opened by path. On Android
 // an app without this permission gets a filtered FUSE view of
 // `/storage/emulated/0` — directories are listable, files it did not
@@ -18,12 +18,12 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
-/// Whether Copist may read every file on shared storage.
+/// Whether Niman may read every file on shared storage.
 final class StorageAccess {
   /// Creates the gate; use the static methods.
   const new _();
 
-  static const MethodChannel _channel = MethodChannel('copist/storage');
+  static const MethodChannel _channel = MethodChannel('niman/storage');
 
   /// Whether shared storage is fully readable right now.
   ///
@@ -36,7 +36,7 @@ final class StorageAccess {
 
   /// [hasAllFilesAccess], sending the user to grant it first when needed.
   ///
-  /// On Android without the permission, opens Copist's page in the system
+  /// On Android without the permission, opens Niman's page in the system
   /// "All files access" settings and completes once the user returns, with
   /// the grant state at that point. The permission is not a runtime
   /// permission: it can only be flipped there.

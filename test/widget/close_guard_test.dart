@@ -1,12 +1,12 @@
 // T-PP-11: the close guard over a fake window — it asks before closing
 // while a tracked note is dirty, stays out of the way when clean, and
 // degrades to tracking only when the platform is unavailable.
-import 'package:copist/src/ui/close_guard.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
-import 'package:copist/src/ui/window_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/close_guard.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_window_controller.dart';
 

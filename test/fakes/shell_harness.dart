@@ -2,10 +2,10 @@
 // directory-picker stub the open flow goes through, the pump helpers for
 // a shell full of streams and animations, and the finders for its
 // dialogs and tree rows.
-import 'package:copist/src/ui/tree.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/tree.dart';
 
 /// A [FilePickerPlatform] stub: [directory] is what `getDirectoryPath`
 /// returns (null = the user canceled).

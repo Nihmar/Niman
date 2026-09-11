@@ -3,13 +3,13 @@
 // TodoController only loaded when TodoTab mounted -- unreachable in the
 // wide layout -- so every resume handed the service an empty set and
 // cancelled everything.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_source.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';
@@ -44,7 +44,7 @@ void main() {
           reminderServiceProvider.overrideWithValue(reminders),
           todoSourceFactoryProvider.overrideWithValue((_) => todos),
         ],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();

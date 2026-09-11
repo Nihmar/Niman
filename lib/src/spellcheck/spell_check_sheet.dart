@@ -5,9 +5,9 @@
 /// the list re-scans. Built over two closures so it owns no editor state.
 library;
 
-import 'package:copist/src/spellcheck/spell_issue.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A bottom sheet over the open note listing its spelling issues.
 final class SpellCheckSheet extends StatefulWidget {

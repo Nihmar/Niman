@@ -1,11 +1,11 @@
 // T-TK-02/05: NoteView kind dispatch — a `type: list` note renders the
 // list GUI instead of the editor; kindMode false (the pencil) shows the
 // editor, and edits in either surface persist through the note.
-import 'package:copist/src/editor/note_editor.dart';
-import 'package:copist/src/ui/kinds/list_note.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/note_editor.dart';
+import 'package:niman/src/ui/kinds/list_note.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 NoteView _view({

@@ -1,6 +1,6 @@
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The expandable "+" FAB (T-UI-05): the main round button reveals three
 /// mini FABs above it — New note, New list note and New folder — instead

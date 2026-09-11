@@ -8,7 +8,7 @@
 /// the frontmatter is not a heading.
 library;
 
-import 'package:copist/src/editor/highlighting.dart';
+import 'package:niman/src/editor/highlighting.dart';
 
 /// One heading in the outline.
 final class OutlineEntry {

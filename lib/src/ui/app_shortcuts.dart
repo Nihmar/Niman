@@ -9,9 +9,9 @@
 /// shortcut to fight the editor for.
 library;
 
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// A command the shell can run from the keyboard.
 enum AppCommand {
@@ -62,7 +62,7 @@ final class AppShortcut {
 /// Every app accelerator, in the order the reference lists them.
 ///
 /// Tab order matches the rail (T-PP-14), so Ctrl+1..5 select the five tabs.
-final List<AppShortcut> copistAppShortcuts = List<AppShortcut>.unmodifiable(
+final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
   const <AppShortcut>[
     AppShortcut(
       AppCommand.newNote,
@@ -140,7 +140,7 @@ Map<ShortcutActivator, VoidCallback> appShortcutBindings(
   Map<AppCommand, VoidCallback> handlers,
 ) {
   final bindings = <ShortcutActivator, VoidCallback>{};
-  for (final shortcut in copistAppShortcuts) {
+  for (final shortcut in nimanAppShortcuts) {
     final handler = handlers[shortcut.command];
     if (handler != null) bindings[shortcut.activation] = handler;
   }

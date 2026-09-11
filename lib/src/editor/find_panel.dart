@@ -10,18 +10,18 @@
 /// theme. A zero preferred size keeps the editor untouched while closed.
 ///
 /// The editor's default shortcuts apply (Ctrl/Cmd+F find, Ctrl/Cmd+Alt+F
-/// replace, Esc close); [CopistShortcutsActivatorsBuilder] adds the
+/// replace, Esc close); [NimanShortcutsActivatorsBuilder] adds the
 /// classic Ctrl+H for replace on non-mac desktop.
 library;
 
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:re_editor/re_editor.dart';
 
 /// The find/replace bar (see the library docs). [CodeEditor] calls the
 /// builder with the note's find [controller] on every state change.
-final class CopistFindPanel extends StatelessWidget
+final class NimanFindPanel extends StatelessWidget
     implements PreferredSizeWidget {
   /// Creates the panel over [controller].
   const new({required this.controller, required this.readOnly, super.key});
@@ -206,7 +206,7 @@ final class CopistFindPanel extends StatelessWidget
 /// The editor's shortcuts: the package defaults, the page keys the package
 /// forgets to bind, and the classic Ctrl+H for the replace bar (non-mac
 /// desktop — mac keeps Cmd+Alt+F).
-final class CopistShortcutsActivatorsBuilder
+final class NimanShortcutsActivatorsBuilder
     extends CodeShortcutsActivatorsBuilder {
   /// Creates the builder.
   const new();
@@ -216,7 +216,7 @@ final class CopistShortcutsActivatorsBuilder
     final defaults = const DefaultCodeShortcutsActivatorsBuilder().build(type);
     // The package ships the page-move intents and their action wiring but
     // binds no key to them, and the controller methods behind them are
-    // `// TODO` stubs (re_editor 0.10.0): Copist binds the keys here and
+    // `// TODO` stubs (re_editor 0.10.0): Niman binds the keys here and
     // implements the move in `NoteEditor.shortcutOverrideActions`.
     if (type == CodeShortcutType.cursorMovePageUp ||
         type == CodeShortcutType.cursorMovePageDown) {

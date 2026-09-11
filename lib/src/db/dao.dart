@@ -1,5 +1,5 @@
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart';
+import 'package:niman/src/db/index_database.dart';
 
 /// Query helpers over the materialized notes tree.
 final class NoteDao {

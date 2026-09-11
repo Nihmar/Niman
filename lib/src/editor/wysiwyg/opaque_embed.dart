@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 /// The Delta key of a block the codec keeps verbatim.
-const String opaqueEmbedKey = 'copist-opaque';
+const String opaqueEmbedKey = 'niman-opaque';
 
 /// Renders an opaque block read-only, as its own source text.
 ///

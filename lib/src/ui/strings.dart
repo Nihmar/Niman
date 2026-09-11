@@ -2,7 +2,7 @@
 /// in both languages the app speaks.
 library;
 
-import 'package:copist/src/core/language.dart';
+import 'package:niman/src/core/language.dart';
 
 /// All user-visible app strings, English and Italian side by side.
 ///
@@ -407,7 +407,7 @@ final class AppStrings {
   );
 
   // Editor find & replace (the classic in-note bar, re_editor's find
-  // controller + CopistFindPanel).
+  // controller + NimanFindPanel).
   static String get findInNoteTooltip => _t('Find in note', 'Trova nella nota');
   static String get editorFindHint => _t('Find', 'Trova');
   static String get editorReplaceHint => _t('Replace', 'Sostituisci');
@@ -482,22 +482,22 @@ final class AppStrings {
       _t('The todo.txt format', 'Il formato todo.txt');
   static String get todoHelpTooltip => _t('Format help', 'Guida al formato');
   static String get todoHelpIntro => _t(
-    'Your tasks are one plain text file, one task per line. Copist '
+    'Your tasks are one plain text file, one task per line. Niman '
         'writes the syntax for you, but nothing is hidden: you can edit '
-        'the file in any editor and Copist will read it back.',
-    'Le tue attività sono un unico file di testo, una per riga. Copist '
+        'the file in any editor and Niman will read it back.',
+    'Le tue attività sono un unico file di testo, una per riga. Niman '
         'scrive la sintassi per te, ma non nasconde niente: puoi '
-        'modificare il file in qualsiasi editor e Copist lo rilegge.',
+        'modificare il file in qualsiasi editor e Niman lo rilegge.',
   );
   static String get todoHelpFilesTitle => _t('The two files', 'I due file');
   static String get todoHelpFilesBody => _t(
     'Open tasks live in todo.txt at the root of your library. '
         'Completing one moves its line to done.txt, so todo.txt stays '
-        'short. If a completed line ends up back in todo.txt, Copist '
+        'short. If a completed line ends up back in todo.txt, Niman '
         'archives it the next time it reads the files.',
     'Le attività da fare stanno in todo.txt alla radice della libreria. '
         'Completandone una, la riga passa in done.txt, così todo.txt '
-        'resta corto. Se una riga completata torna in todo.txt, Copist '
+        'resta corto. Se una riga completata torna in todo.txt, Niman '
         'la archivia alla lettura successiva.',
   );
   static String get todoHelpLineTitle =>
@@ -510,8 +510,8 @@ final class AppStrings {
   );
   static String get todoHelpDone => 'x';
   static String get todoHelpDoneBody => _t(
-    'Marks the task done. Copist adds it when you tick the checkbox.',
-    'Segna l’attività come fatta. Copist la aggiunge quando spunti la '
+    'Marks the task done. Niman adds it when you tick the checkbox.',
+    'Segna l’attività come fatta. Niman la aggiunge quando spunti la '
         'casella.',
   );
   static String get todoHelpPriority => _t('(A) to (Z)', 'da (A) a (Z)');
@@ -554,9 +554,9 @@ final class AppStrings {
   static String get todoHelpTagsTitle =>
       _t('Dates and reminders', 'Date e promemoria');
   static String get todoHelpTagsBody => _t(
-    'These are key:value tags. Copist writes them from the task dialog, '
+    'These are key:value tags. Niman writes them from the task dialog, '
         'and reads them wherever they appear on the line.',
-    'Sono tag chiave:valore. Copist li scrive dalla finestra '
+    'Sono tag chiave:valore. Niman li scrive dalla finestra '
         'dell’attività e li legge ovunque compaiano nella riga.',
   );
   static String get todoHelpDue => 'due:2026-09-09';
@@ -572,28 +572,28 @@ final class AppStrings {
         'schermo spento e con l’app chiusa.',
   );
   static String get todoHelpRemDesktop => _t(
-    'On desktop Copist must be running when the time comes: the reminder is '
+    'On desktop Niman must be running when the time comes: the reminder is '
         'shown while the app is open, and nothing fires when it is closed.',
-    'Su desktop Copist deve essere aperto al momento giusto: il promemoria '
+    'Su desktop Niman deve essere aperto al momento giusto: il promemoria '
         'compare mentre l’app è aperta, e nulla scatta a app chiusa.',
   );
   static String get todoHelpOther => 'anything:else';
   static String get todoHelpOtherBody => _t(
     'Kept exactly as written, so tags from other todo.txt apps survive '
-        'a round trip. Copist does not act on them, rec: included: a '
+        'a round trip. Niman does not act on them, rec: included: a '
         'recurring task is not repeated yet.',
     'Conservati esattamente come scritti, così i tag di altre app '
-        'todo.txt sopravvivono al giro. Copist non li interpreta, rec: '
+        'todo.txt sopravvivono al giro. Niman non li interpreta, rec: '
         'compreso: un’attività ricorrente non viene ancora ripetuta.',
   );
   static String get todoHelpEditTitle =>
-      _t('Editing outside Copist', 'Modifiche fuori da Copist');
+      _t('Editing outside Niman', 'Modifiche fuori da Niman');
   static String get todoHelpEditBody => _t(
     'A task you have not touched is written back byte for byte, odd '
-        'spacing included. Edit a line and Copist rewrites that one line in '
+        'spacing included. Edit a line and Niman rewrites that one line in '
         'its canonical form, leaving the rest of the file alone.',
     'Un’attività che non hai toccato viene riscritta byte per byte, '
-        'spaziature strane comprese. Se modifichi una riga, Copist '
+        'spaziature strane comprese. Se modifichi una riga, Niman '
         'riscrive solo quella in forma canonica e lascia stare il resto.',
   );
   static String get todoAddTitle => _t('Add task', 'Aggiungi attività');
@@ -645,9 +645,9 @@ final class AppStrings {
     'Le notifiche sono disattivate, quindi i promemoria non compaiono.',
   );
   static String get todoReminderBattery => _t(
-    'Battery optimization is on for Copist. The system may sleep the '
+    'Battery optimization is on for Niman. The system may sleep the '
         'app and drop pending reminders.',
-    'L’ottimizzazione della batteria è attiva per Copist. Il sistema può '
+    'L’ottimizzazione della batteria è attiva per Niman. Il sistema può '
         'sospendere l’app e perdere i promemoria in attesa.',
   );
   static String get todoReminderInexact => _t(
@@ -716,7 +716,7 @@ final class AppStrings {
   static String get actionEmpty => _t('Empty', 'Svuota');
 
   // The shell: app bar, tabs and tree actions.
-  static const String appTitle = 'Copist';
+  static const String appTitle = 'Niman';
 
   // The window's own title bar (T-PP-22).
   static String get hideSidebarTooltip =>
@@ -775,9 +775,9 @@ final class AppStrings {
         'una nota da un modello ne copia il testo e riempie i buchi.',
   );
   static String get templateHelpUnknown => _t(
-    'A placeholder Copist does not know is left exactly as written, so a '
+    'A placeholder Niman does not know is left exactly as written, so a '
         'typo shows up in the note instead of quietly eating a line.',
-    'Un segnaposto che Copist non conosce resta scritto com’è, così un '
+    'Un segnaposto che Niman non conosce resta scritto com’è, così un '
         'errore di battitura si vede nella nota invece di mangiarsi una '
         'riga in silenzio.',
   );
@@ -884,11 +884,11 @@ final class AppStrings {
       _t('Where the note goes', 'Dove va la nota');
   static String get templateHelpWhereBody => _t(
     'These are not text: they are instructions, and they live in a '
-        'copist: block in the template’s own frontmatter. The block is '
+        'niman: block in the template’s own frontmatter. The block is '
         'obeyed and then removed, so it never appears in the note. Their '
         'values may hold placeholders.',
     'Questi non sono testo: sono istruzioni, e stanno in un blocco '
-        'copist: nel frontmatter del modello stesso. Il blocco viene '
+        'niman: nel frontmatter del modello stesso. Il blocco viene '
         'eseguito e poi rimosso, quindi non compare mai nella nota. I '
         'loro valori possono contenere segnaposto.',
   );
@@ -1024,9 +1024,9 @@ final class AppStrings {
   static String get trashEmptyAction => _t('Empty trash', 'Svuota il cestino');
   static String get trashEmptyConfirm => _t(
     'This deletes everything in the trash folder permanently, '
-        'including items Copist did not put there.',
+        'including items Niman did not put there.',
     'Elimina definitivamente tutto ciò che è nel cestino, compreso '
-        'ciò che non ci ha messo Copist.',
+        'ciò che non ci ha messo Niman.',
   );
   static String trashDeleteConfirm(String name) => _t(
     '$name will be deleted permanently (no restore)',
@@ -1097,16 +1097,16 @@ final class AppStrings {
   static String get storageAccessAction =>
       _t('Grant file access', 'Concedi l’accesso ai file');
   static String get storageAccessNeeded => _t(
-    'Copist cannot read your notes without "All files access". Grant it '
+    'Niman cannot read your notes without "All files access". Grant it '
         'to open a library.',
-    'Senza l’accesso a tutti i file Copist non può leggere le tue '
+    'Senza l’accesso a tutti i file Niman non può leggere le tue '
         'note. Concedilo per aprire una libreria.',
   );
   static String get storageAccessExplained => _t(
-    'Copist reads your notes as ordinary files, so Android needs to '
+    'Niman reads your notes as ordinary files, so Android needs to '
         'allow it access to all files. Nothing is uploaded, and only the '
         'library folder you pick is read.',
-    'Copist legge le note come file normali, quindi Android deve '
+    'Niman legge le note come file normali, quindi Android deve '
         'concedergli l’accesso a tutti i file. Non viene caricato '
         'niente, e viene letta solo la cartella che scegli.',
   );

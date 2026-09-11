@@ -10,8 +10,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nativeapi/nativeapi.dart'
@@ -25,6 +23,8 @@ import 'package:nativeapi/nativeapi.dart'
         MenuItemType,
         TrayIcon,
         TrayIconClickedEvent;
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/shortcuts.dart';
 
 /// What the shell needs from the desktop tray.
 ///
@@ -71,7 +71,7 @@ final trayServiceProvider = Provider<TrayService>((ref) {
 /// The `nativeapi` StatusNotifier tray.
 final class PlatformTrayService implements TrayService {
   /// Creates the service; [iconAsset] is a test seam (and the M7 branding
-  /// hook: the placeholder feather is downscaled to `tray.png`).
+  /// hook: the Niman mark is downscaled to `tray.png`).
   new({this.iconAsset = 'assets/branding/tray.png'});
 
   static const AppLogger _log = AppLogger(name: 'tray');
@@ -113,7 +113,7 @@ final class PlatformTrayService implements TrayService {
         return;
       }
       tray
-        ..setTooltip('Copist')
+        ..setTooltip('Niman')
         ..setContextMenuTrigger(ContextMenuTrigger.rightClicked);
       final icon = ImageAsset.fromAsset(iconAsset);
       if (icon != null) {

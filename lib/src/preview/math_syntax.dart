@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:copist/src/editor/math_rule.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/editor/math_rule.dart';
 
 /// Display-math block syntax (`$$…$$`, single- or multi-line) for the
 /// preview's parser.

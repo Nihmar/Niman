@@ -1,6 +1,6 @@
-import 'package:copist/src/preview/editor_lines.dart';
-import 'package:copist/src/preview/scroll_map.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/preview/editor_lines.dart';
+import 'package:niman/src/preview/scroll_map.dart';
 
 /// Bidirectional editor ↔ preview scroll sync (M2 T-M2-06).
 ///

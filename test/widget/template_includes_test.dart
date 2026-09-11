@@ -1,11 +1,11 @@
 // T-TPL-06 in the shell: a partial living beside the templates that use
 // it, found by the name a person writes, and its own questions asked in
 // the same form.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -71,10 +71,7 @@ void main() {
 
     await useTemplate(tester, 'Crash');
 
-    expect(
-      controller.contentOf('Crash.md'),
-      '# Crash\n\n## Steps\n1. \n2. \n',
-    );
+    expect(controller.contentOf('Crash.md'), '# Crash\n\n## Steps\n1. \n2. \n');
   });
 
   testWidgets('the pasted text is substituted like the rest of the note', (

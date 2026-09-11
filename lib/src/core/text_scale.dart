@@ -8,8 +8,8 @@
 // library publishes them here and closing one puts them back to the
 // shipped sizes.
 
-import 'package:copist/src/core/settings/library_config.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 
 /// The active text sizes, as multipliers of the sizes the app ships with.
 final class AppTextScales {

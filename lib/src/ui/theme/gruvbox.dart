@@ -4,8 +4,8 @@
 // the dark ground, the faded ones on the light. Yellow carries the
 // interface, which is the color the theme is known by.
 
-import 'package:copist/src/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// Gruvbox's chrome at [brightness].
 PaletteTokens gruvboxTokens(Brightness brightness) =>

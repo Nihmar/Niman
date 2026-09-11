@@ -7,7 +7,7 @@
 /// picker.
 library;
 
-import 'package:copist/src/db/index_database.dart';
+import 'package:niman/src/db/index_database.dart';
 
 /// The normalized stem of a note file name: lowercased, with the `.md`
 /// extension (case-insensitive) stripped. `My Note.md` → `my note`.

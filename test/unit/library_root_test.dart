@@ -1,7 +1,7 @@
 // Unit tests for resolveLibraryRoot.
 
-import 'package:copist/src/core/library_root.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/library_root.dart';
 
 void main() {
   group('resolveLibraryRoot', () {

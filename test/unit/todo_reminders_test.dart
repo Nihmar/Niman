@@ -2,10 +2,10 @@
 // reminders only, and the no-op service is inert.
 import 'dart:io';
 
-import 'package:copist/src/todo/parser.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_store.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/todo/parser.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_store.dart';
 
 void main() {
   TodoSnapshot snapshotOf({

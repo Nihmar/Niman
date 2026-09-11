@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/db/app_database.dart';
 import 'package:drift/drift.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/db/app_database.dart';
 
 /// Delivers the settings the dropped `library_settings` table held to the
 /// libraries they describe (T-ML-02).
@@ -13,7 +13,7 @@ import 'package:drift/drift.dart';
 /// it runs at startup, before Android grants storage access, and a
 /// library may be on a drive that is not plugged in. This drains one
 /// entry per library open, when the folder is known to be reachable —
-/// after which the library's own `.copist/settings.json` is the only
+/// after which the library's own `.niman/settings.json` is the only
 /// source and the parked entry is gone.
 ///
 /// Two migrations use it now. T-ML-02 moved four settings out of a
@@ -33,7 +33,7 @@ final class LegacyLibrarySettings {
   final AppLogger _log = const AppLogger(name: 'settings');
 
   /// Writes the parked settings for [libraryPath] into its
-  /// `.copist/settings.json`, then forgets them.
+  /// `.niman/settings.json`, then forgets them.
   ///
   /// Keys the file already has are left alone: it is the newer of the
   /// two. Does nothing when there is nothing parked for that library, and

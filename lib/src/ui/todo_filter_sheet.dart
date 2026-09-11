@@ -11,10 +11,10 @@
 /// selections.
 library;
 
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/todo/todo_filter.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/todo/todo_filter.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// The bottom sheet: token chips with counts + the sort choice chips.
 final class TodoFilterSheet extends StatefulWidget {

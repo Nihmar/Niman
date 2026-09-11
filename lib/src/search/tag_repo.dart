@@ -5,8 +5,8 @@
 /// so the same note folder grouping applies everywhere.
 library;
 
-import 'package:copist/src/db/index_database.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:niman/src/db/index_database.dart';
 
 /// A tag with its note count.
 final class TagCount {

@@ -1,7 +1,7 @@
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:niman/src/ui/strings.dart';
 
 /// Raw-HTML table support (the preview's "HTML is not injected" gap):
 /// `<table>` blocks imported from archives/PDFs parse as plain text with

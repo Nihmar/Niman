@@ -1,6 +1,6 @@
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/outline.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
 
 void main() {
   test('detects headings with level, line and text', () {

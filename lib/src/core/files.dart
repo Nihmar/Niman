@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 /// Suffix added to the target name when writing a temporary file.
-const _tempMarker = '.copist-tmp';
+const _tempMarker = '.niman-tmp';
 
 /// Maximum length of a note or folder name.
 ///

@@ -3,14 +3,14 @@
 /// Placeholders produce text where they stand. Where the note goes, what
 /// it is called and how it opens are not text: they are instructions
 /// about the file, and writing them inline would leave a line in every
-/// note that then had to be deleted. So they live in a `copist:` mapping
+/// note that then had to be deleted. So they live in a `niman:` mapping
 /// in the template's own frontmatter, which is read, obeyed and removed —
 /// the created note keeps the rest of the frontmatter and never sees this
 /// key.
 ///
 /// ```yaml
 /// ---
-/// copist:
+/// niman:
 ///   folder: Journal/{{date:YYYY}}/{{date:MM}}
 ///   filename: "{{date:YYYY-MM-DD}}"
 ///   append: true
@@ -24,15 +24,15 @@
 /// time the path is a path.
 library;
 
-import 'package:copist/src/core/files.dart';
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/frontmatter/edit.dart';
-import 'package:copist/src/frontmatter/parser.dart';
-import 'package:copist/src/templates/engine.dart';
 import 'package:meta/meta.dart';
+import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/templates/engine.dart';
 
 /// The frontmatter key the directives live under.
-const String directivesKey = 'copist';
+const String directivesKey = 'niman';
 
 /// What happens to the note once it exists.
 enum TemplateOpen {
@@ -48,7 +48,7 @@ enum TemplateOpen {
   none,
 }
 
-/// The `copist:` block of a template, read and typed.
+/// The `niman:` block of a template, read and typed.
 @immutable
 final class TemplateDirectives {
   /// Creates a set of directives; every one is optional.
@@ -147,7 +147,7 @@ TemplateDirectives readTemplateDirectives(
   );
 }
 
-/// [source] as the created note: placeholders substituted, `copist:`
+/// [source] as the created note: placeholders substituted, `niman:`
 /// gone.
 ///
 /// The block is removed after substitution rather than before, so a

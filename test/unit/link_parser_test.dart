@@ -1,7 +1,7 @@
 // T-M3-01 AC: link parser — all wikilink forms + Markdown links, edge cases
 // (empty, unicode, unclosed), fence/frontmatter skipping, absolute offsets.
-import 'package:copist/src/links/parser.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/links/parser.dart';
 
 WikiRef _wikiRef(String text, {int index = 0}) =>
     (parseLinks(text)[index] as WikiLink).ref;

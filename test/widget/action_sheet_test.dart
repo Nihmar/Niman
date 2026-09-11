@@ -1,14 +1,14 @@
 // One pop-up menu shape for the whole app (user, 2026-09-09): the tree's
 // long-press menu, the outline and the heading-level picker all open as a
 // modal sheet from the bottom edge.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/editor/outline.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/outline_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/editor/outline.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/outline_panel.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -36,7 +36,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [librarySessionProvider.overrideWithValue(controller)],
-          child: const CopistApp(),
+          child: const NimanApp(),
         ),
       );
       await tester.pump();

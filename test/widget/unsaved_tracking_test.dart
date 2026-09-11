@@ -1,9 +1,9 @@
 // T-PP-11: NoteView reports its live revision pair into the app-level
 // tracker and saves on the close guard's request.
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/unsaved_notes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:re_editor/re_editor.dart';
 
 Widget _host({

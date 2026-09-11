@@ -3,11 +3,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/editor/wysiwyg/markdown_blocks.dart';
-import 'package:copist/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/editor/wysiwyg/markdown_blocks.dart';
+import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 
 void main() {
   const codec = MarkdownDocumentCodec();

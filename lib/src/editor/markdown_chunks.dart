@@ -1,5 +1,5 @@
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/editor/outline.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/outline.dart';
 import 'package:re_editor/re_editor.dart';
 
 /// Heading-based code chunks (T-M2-07): re_editor's fold model over the
@@ -10,7 +10,7 @@ import 'package:re_editor/re_editor.dart';
 /// re_editor draws its fold indicator for each chunk and handles the
 /// collapse/expand itself; taps land through [DefaultCodeChunkIndicator].
 ///
-/// The analysis runs in re_editor's isolate per buffer change using Copist's
+/// The analysis runs in re_editor's isolate per buffer change using Niman's
 /// tokenizer (the same one the highlight and the outline use), so a `#`
 /// inside a code fence, a math block or frontmatter is never a fold anchor.
 /// Above [lineLimit] the analyzer is a no-op: the whole-document tokenize

@@ -4,17 +4,17 @@
 // NavigationRail (T-PP-14, covered in shell_rail_test.dart).
 // T-UI-10 AC: the Quick note tab opens `Quick note.md` at the library root,
 // creating it when missing; the Search tab is disabled until M3 (R3).
-import 'package:copist/src/app.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/todo/reminders.dart';
-import 'package:copist/src/todo/todo_source.dart';
-import 'package:copist/src/ui/note_view.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/tree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/todo/reminders.dart';
+import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_reminder_service.dart';
@@ -33,7 +33,7 @@ void main() {
   Widget buildApp() {
     return ProviderScope(
       overrides: [librarySessionProvider.overrideWithValue(controller)],
-      child: const CopistApp(),
+      child: const NimanApp(),
     );
   }
 
@@ -277,7 +277,7 @@ void main() {
   });
 
   testWidgets('each tab names itself in the app bar', (tester) async {
-    // The Files tab said "Copist", which named the app on a screen that
+    // The Files tab said "Niman", which named the app on a screen that
     // is about the tree (user, 2026-09-09).
     setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
@@ -448,7 +448,7 @@ void main() {
           reminderServiceProvider.overrideWithValue(reminders),
           todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
         ],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -473,7 +473,7 @@ void main() {
           reminderServiceProvider.overrideWithValue(reminders),
           todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
         ],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -494,7 +494,7 @@ void main() {
           reminderServiceProvider.overrideWithValue(reminders),
           todoSourceFactoryProvider.overrideWithValue((_) => todos),
         ],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();

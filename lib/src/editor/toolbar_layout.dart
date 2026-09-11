@@ -1,4 +1,4 @@
-import 'package:copist/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 
 /// The user's editor toolbar: every button in their order, with the ones
 /// they hid marked (T-TB-02).

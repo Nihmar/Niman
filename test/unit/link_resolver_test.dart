@@ -1,11 +1,11 @@
 // T-M3-02 AC: the resolver resolves exact stem → shortest unique path prefix
 // → ambiguous candidate list, in O(log n) over the stems index; aliases go
 // through the same table (source `alias`).
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/links/resolver.dart';
 import 'package:drift/drift.dart' show InsertMode;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/links/resolver.dart';
 
 void main() {
   late IndexDatabase db;

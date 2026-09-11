@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:copist/src/ui/kinds/list_drag_handle.dart';
-import 'package:copist/src/ui/kinds/list_drop_indicator.dart';
-import 'package:copist/src/ui/kinds/list_parser.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/kinds/list_drag_handle.dart';
+import 'package:niman/src/ui/kinds/list_drop_indicator.dart';
+import 'package:niman/src/ui/kinds/list_parser.dart';
 
 /// One row of the list-kind GUI: the drag handle (dragging it moves the
 /// row, T-TK-09), the checkbox (tapping it flips the item) and the item

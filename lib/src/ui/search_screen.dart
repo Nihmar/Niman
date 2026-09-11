@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:copist/src/core/frame_log.dart';
-import 'package:copist/src/core/logging.dart';
-import 'package:copist/src/frontmatter/fields.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/search/query.dart';
-import 'package:copist/src/search/replace.dart';
-import 'package:copist/src/search/search_repo.dart';
-import 'package:copist/src/ui/strings.dart';
-import 'package:copist/src/ui/tree.dart' show displayNameOf;
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/frame_log.dart';
+import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/search/query.dart';
+import 'package:niman/src/search/replace.dart';
+import 'package:niman/src/search/search_repo.dart';
+import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tree.dart' show displayNameOf;
 
 /// The Search tab/screen (T-M3-05/T-M3-08 toggle, T-M3-10 replace).
 ///

@@ -14,8 +14,8 @@
 /// from being a stack overflow.
 library;
 
-import 'package:copist/src/templates/engine.dart';
-import 'package:copist/src/ui/strings.dart';
+import 'package:niman/src/templates/engine.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// How deep includes may nest before the chain is called a mistake.
 const int maxIncludeDepth = 5;

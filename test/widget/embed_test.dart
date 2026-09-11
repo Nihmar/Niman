@@ -4,9 +4,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:copist/src/preview/markdown_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/preview/markdown_preview.dart';
 
 /// The transparent 1x1 PNG the test image uses.
 const _onePxPng =
@@ -19,7 +19,7 @@ void main() {
   late File epub;
 
   setUpAll(() async {
-    temp = await Directory.current.createTemp('copist_embed_');
+    temp = await Directory.current.createTemp('niman_embed_');
     png = File('${temp.path}/img.png')
       ..writeAsBytesSync(base64Decode(_onePxPng));
     epub = File('${temp.path}/book.epub')..writeAsStringSync('not a zip');

@@ -2,15 +2,15 @@
 // changes where templates come from.
 import 'dart:io';
 
-import 'package:copist/src/core/settings/library_config.dart';
-import 'package:copist/src/core/settings/library_config_repo.dart';
-import 'package:copist/src/core/settings/library_settings.dart';
-import 'package:copist/src/db/index_database.dart';
-import 'package:copist/src/db/indexer.dart';
-import 'package:copist/src/library/note_ops.dart';
-import 'package:copist/src/templates/repo.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_config_repo.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/templates/repo.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
   late TemplateRepo repo;
 
   setUp(() async {
-    root = await Directory.current.createTemp('copist_templates_');
+    root = await Directory.current.createTemp('niman_templates_');
     db = IndexDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     indexer = Indexer(db);

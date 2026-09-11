@@ -1,9 +1,9 @@
 // T-M4-06 AC: one test per placeholder, and the date formats — rendered
 // against a fixed local clock so the assertions do not depend on when the
 // suite runs or where.
-import 'package:copist/src/core/language.dart';
-import 'package:copist/src/templates/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/language.dart';
+import 'package:niman/src/templates/engine.dart';
 
 void main() {
   // A local time with a two-digit day, a single-digit hour and a second,

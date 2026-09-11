@@ -3,10 +3,10 @@
 // used to drag the scroll map's target away from the editor.
 import 'dart:ui' as ui;
 
-import 'package:copist/src/preview/aspect_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/preview/aspect_image.dart';
 
 /// A provider handing out an already-decoded test image.
 final class _TestImageProvider extends ImageProvider<_TestImageProvider> {

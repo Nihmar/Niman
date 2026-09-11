@@ -1,12 +1,12 @@
 // T-TPL-03 AC: the template's questions are asked once, in one form,
 // before the note exists — so an answer can name the file. Backing out
 // creates nothing.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/note_view.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -113,7 +113,7 @@ void main() {
   ) async {
     await openWith(
       tester,
-      '---\ncopist:\n  folder: World\n  filename: "{{ask:Name}}"\n---\n\n'
+      '---\nniman:\n  folder: World\n  filename: "{{ask:Name}}"\n---\n\n'
       '# {{ask:Name}}\n',
     );
 

@@ -1,9 +1,9 @@
 // T-M3-06 AC: tag list with counts (frontmatter + inline sources), tap a
 // tag → its notes in path order → open; normalization is the indexer's job
 // (unit-covered), the screen shows the stored names.
-import 'package:copist/src/ui/tags_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/tags_screen.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_tag_source.dart';

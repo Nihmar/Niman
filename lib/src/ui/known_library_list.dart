@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:copist/src/db/app_database.dart';
-import 'package:copist/src/library/session.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// What the known-library list needs to draw itself: the entries, and
 /// which of their folders are not there right now.

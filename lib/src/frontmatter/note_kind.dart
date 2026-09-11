@@ -1,5 +1,5 @@
-import 'package:copist/src/ui/kinds/list_note.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/ui/kinds/list_note.dart';
 
 /// The note text as seen and edited by a kind GUI.
 abstract interface class NoteKindHost {

@@ -1,9 +1,9 @@
 // T-TD-08: the task dialog writes the todo.txt syntax, so the format is
 // easy to never see -- until the file is opened in another editor. The
 // reference is one tap from the list, on both layouts.
-import 'package:copist/src/ui/todo_help.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/todo_help.dart';
 
 void main() {
   Future<void> pumpHelp(WidgetTester tester) async {
@@ -24,7 +24,7 @@ void main() {
     expect(find.text('(A) to (Z)'), findsOne);
   });
 
-  testWidgets('documents every token and tag Copist reads', (tester) async {
+  testWidgets('documents every token and tag Niman reads', (tester) async {
     await pumpHelp(tester);
     for (final syntax in <String>[
       '+project',

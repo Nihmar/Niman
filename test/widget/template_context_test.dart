@@ -1,12 +1,12 @@
 // T-TPL-04 AC: creating from inside a note links back to it, and an
 // empty clipboard leaves an empty string rather than the placeholder.
-import 'package:copist/src/app.dart';
-import 'package:copist/src/library/library_state.dart';
-import 'package:copist/src/ui/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/app.dart';
+import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [librarySessionProvider.overrideWithValue(controller)],
-        child: const CopistApp(),
+        child: const NimanApp(),
       ),
     );
     await tester.pump();
@@ -263,7 +263,7 @@ void main() {
     useClipboard(null);
     await openWith(
       tester,
-      '---\ncopist:\n  folder: Journal/2026\n---\n\nFiled under {{folder}}\n',
+      '---\nniman:\n  folder: Journal/2026\n---\n\nFiled under {{folder}}\n',
     );
 
     await useTemplate(tester, 'Monday');

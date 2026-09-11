@@ -9,11 +9,11 @@ library;
 
 import 'dart:ui' show TextRange;
 
-import 'package:copist/src/editor/highlighting.dart';
-import 'package:copist/src/spellcheck/hunspell_spell_checker.dart';
-import 'package:copist/src/spellcheck/spell_checker.dart';
-import 'package:copist/src/spellcheck/spell_issue.dart';
 import 'package:flutter/foundation.dart';
+import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/spellcheck/spell_checker.dart';
+import 'package:niman/src/spellcheck/spell_issue.dart';
 
 /// Ranges in [tokens] the checker must not look at.
 ///
