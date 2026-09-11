@@ -133,7 +133,7 @@ jobs:
           # is reused instead of downloaded.
           docker run --rm -v "$STAGE:/pkg" -w /pkg archlinux:latest bash -c '
             set -e
-            # makepkg checks the PKGBUILD's runtime depends and errors if
+            # makepkg checks the PKGBUILD runtime depends and errors when
             # they are absent; install them (plus base-devel) up front.
             pacman -Sy --noconfirm --needed base-devel \
               gtk3 libsecret libayatana-appindicator >/dev/null
