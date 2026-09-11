@@ -263,7 +263,18 @@ final class _LibraryShellState extends State<_LibraryShell>
   bool _busy = false;
 
   /// The currently selected bottom tab (narrow layout).
-  ShellTab _tab = ShellTab.files;
+  ///
+  /// A [ValueNotifier] rather than a plain field so a plain tab switch can
+  /// refresh the chrome and the visible slot through a
+  /// [ValueListenableBuilder] *without* a shell-wide `setState`: the
+  /// kept-alive bodies do not depend on which tab is current, so rebuilding
+  /// all of them on every switch was 12-24 ms of wasted `build` (device log,
+  /// #46). Read and written through [_tab], so every existing call site is
+  /// unchanged; the full-`setState` paths still fire where the switch also
+  /// changes state the bodies do read.
+  final ValueNotifier<ShellTab> _tabListenable = ValueNotifier(ShellTab.files);
+  ShellTab get _tab => _tabListenable.value;
+  set _tab(ShellTab value) => _tabListenable.value = value;
 
   /// Every tab visited so far: bodies mount on first visit and stay
   /// mounted afterwards, so a switch only flips visibility instead of
@@ -303,14 +314,28 @@ final class _LibraryShellState extends State<_LibraryShell>
     // Put it back on the shell so the next accelerator still reaches the
     // bindings (T-PP-10).
     _shellFocus.requestFocus();
-    setState(() {
-      _tab = tab;
-      _visitedTabs.add(tab);
-      _treeVisible = true;
-      _fabExpanded = false;
-      // Leaving any open note: the tabs show at once (issue #4).
+    // #46 fast path: on the phone, a plain switch (no fullscreen note in the
+    // way, the FAB menu closed, the target already mounted) changes nothing
+    // the kept-alive bodies read, so it only moves the visible-tab notifier
+    // the chrome and the body stack listen to. The bodies keep their
+    // instances and Element.update skips their subtrees, instead of a
+    // shell-wide rebuild re-running every mounted body's build (12-24 ms of
+    // `build` per switch in the device log). A fullscreen note to close, a
+    // first mount, or the open FAB all still fall to the full setState.
+    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    if (narrow && _treeVisible && !_fabExpanded && _visitedTabs.contains(tab)) {
       _noteClosed();
-    });
+      _tab = tab;
+    } else {
+      setState(() {
+        _tab = tab;
+        _visitedTabs.add(tab);
+        _treeVisible = true;
+        _fabExpanded = false;
+        // Leaving any open note: the tabs show at once (issue #4).
+        _noteClosed();
+      });
+    }
     // Time-to-visible of the switch itself: the 'tap tab' line above is the
     // input, this is when the first new frame actually painted (with the
     // navigation-bar selection animation the user said lags on Search).
@@ -763,6 +788,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_trayActivations?.cancel());
     _todoController.dispose();
     _shellFocus.dispose();
+    _tabListenable.dispose();
     super.dispose();
   }
 
@@ -1704,11 +1730,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                       key: const ValueKey('tab-shell'),
                       child: _tabShell(
                         controller: controller,
-                        title: _tabTitle,
-                        actions: _tab == ShellTab.files
-                            ? _filesAppBarActions(controller)
-                            : const [],
-                        floatingActionButton: _tabFab(),
+                        bodies: _tabBodyChildren(controller),
                       ),
                     ),
                   ),
@@ -2125,23 +2147,43 @@ final class _LibraryShellState extends State<_LibraryShell>
   };
 
   /// The narrow shell: app bar for the tab + the bottom navigation bar.
+  ///
+  /// The `_tab`-dependent chrome (title, Files actions, FAB, nav-bar
+  /// selection, and the stack's visible index) rebuilds through a
+  /// [ValueListenableBuilder] on [_tabListenable], so a plain switch
+  /// refreshes it without a shell-wide `setState` (#46). [bodies] are built
+  /// once by the caller and reused by identity: the kept-alive bodies do not
+  /// depend on the current tab, so a switch keeps their instances and their
+  /// subtrees are skipped.
   Widget _tabShell({
     required LibrarySession controller,
-    required String title,
-    required List<Widget> actions,
-    Widget? floatingActionButton,
+    required List<Widget> bodies,
   }) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), actions: actions),
-      // Bodies stay mounted once visited (see TabBodyStack): the switch
-      // only flips visibility and fades the incoming body in, instead of
-      // rebuilding two transparency layers mid-animation. The stack itself
-      // stays the direct body child on every tab: wrapping it in anything
-      // conditional (like the FAB scrim was) reparents the whole subtree
-      // and remounts every body, defeating the keep-alive.
-      body: _tabBodies(controller),
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: _shellTabs(),
+    return ValueListenableBuilder<ShellTab>(
+      valueListenable: _tabListenable,
+      builder: (context, tab, _) => Scaffold(
+        appBar: AppBar(
+          title: Text(_tabTitle),
+          actions: tab == ShellTab.files
+              ? _filesAppBarActions(controller)
+              : const [],
+        ),
+        // Bodies stay mounted once visited (see TabBodyStack): the switch
+        // only flips visibility and fades the incoming body in, instead of
+        // rebuilding two transparency layers mid-animation. The stack itself
+        // stays the direct body child on every tab: wrapping it in anything
+        // conditional (like the FAB scrim was) reparents the whole subtree
+        // and remounts every body, defeating the keep-alive. Only its
+        // currentIndex changes here; [bodies] are the same instances across
+        // a switch, so no body re-inflates.
+        body: TabBodyStack(
+          currentIndex: tab.index,
+          retainLayout: <int>{ShellTab.search.index},
+          children: bodies,
+        ),
+        floatingActionButton: _tabFab(),
+        bottomNavigationBar: _shellTabs(),
+      ),
     );
   }
 
@@ -2351,21 +2393,19 @@ final class _LibraryShellState extends State<_LibraryShell>
     widget.controller.notify();
   }
 
-  /// All five tab bodies: each mounts on its first visit and stays
-  /// mounted (query, results, and scroll survive a switch), while the
-  /// fade only covers the incoming body — no cross-fade of two
-  /// transparency layers, and no re-inflate mid-animation. Only the
-  /// search slot retains layout while hidden (T-TS-10): it is the one
-  /// whose show-layout costs frames; the plain lists relayout cheaply.
-  Widget _tabBodies(LibrarySession controller) {
-    return TabBodyStack(
-      currentIndex: _tab.index,
-      retainLayout: <int>{ShellTab.search.index},
-      children: [
-        for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
-      ],
-    );
-  }
+  /// All five tab bodies, in tab order: each mounts on its first visit and
+  /// stays mounted (query, results, and scroll survive a switch), while the
+  /// fade only covers the incoming body — no cross-fade of two transparency
+  /// layers, and no re-inflate mid-animation.
+  ///
+  /// Built once per shell build and handed to [_tabShell] by identity, so a
+  /// plain tab switch reuses the instances instead of rebuilding every body
+  /// (#46). Only the search slot retains layout while hidden (T-TS-10): it
+  /// is the one whose show-layout costs frames; the plain lists relayout
+  /// cheaply.
+  List<Widget> _tabBodyChildren(LibrarySession controller) => [
+    for (final tab in ShellTab.values) _tabBodyFor(tab, controller),
+  ];
 
   /// The body for [tab], or a placeholder until its first visit (lazy so
   /// opening a library does not inflate all five tabs up front).
