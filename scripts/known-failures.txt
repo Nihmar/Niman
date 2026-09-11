@@ -19,13 +19,21 @@
 #     that allows a test 30.
 #
 # '~' marks a flake: tolerated whether or not it fails on a given run,
-# and kept across `newfail.ps1 -Update`. These are the same Windows fault
-# under full-suite load — a rename or a delete on a file another process
-# still holds ("Accesso negato", errno 5/32). They pass in isolation, and
-# the error is never an assertion — check a suspect one on its own before
-# believing it. They are kept listed because they still fail under load
-# on some runs, not because anything is known to be wrong with them.
-~test/unit/file_watcher_test.dart: coalesces rapid events into a single batch [E]
+# and kept across `newfail.ps1 -Update`. The ones left are the same
+# Windows fault under full-suite load — a rename or a delete on a file
+# another process still holds ("Accesso negato", errno 5/32). They pass
+# in isolation; check a suspect one on its own before believing it. They
+# are kept listed because they still fail under load on some runs, not
+# because anything is known to be wrong with them.
+#
+# Do not take that on faith for a '~' entry, though. This file used to
+# say the error is never an assertion, and the watcher's "coalesces rapid
+# events into a single batch" was the counter-example: it failed its own
+# expectation, because the batching window opens when the OS delivers the
+# first event and under load the last write of the burst landed after the
+# window had closed. It now feeds the watcher a stream the test owns, so
+# it no longer depends on when the OS delivers, and the entry is gone
+# rather than tolerated (2026-09-11).
 ~test/unit/fixture_10k_test.dart: word search on the fixture is instant; bm25 ranks the title hit first [E]
 ~test/unit/search_replace_test.dart: ReplaceRunner case-sensitive run touches only the exact case [E]
 ~test/unit/note_ops_test.dart: trash management deleteTrashPermanently removes the manifest item and disk [E]

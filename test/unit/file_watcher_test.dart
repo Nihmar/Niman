@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -53,29 +54,36 @@ void main() {
   });
 
   test('coalesces rapid events into a single batch', () async {
-    final batches = await runWith(
-      FileWatcher(root.path, debounce: const Duration(milliseconds: 100)),
-      (b) async {
-        for (var i = 0; i < 5; i++) {
-          File(p.join(root.path, 'f$i.md')).writeAsStringSync('x');
-          await Future<void>.delayed(const Duration(milliseconds: 20));
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-      },
+    // Driven from a stream this test owns, not from real filesystem
+    // notifications: those open the window when the OS delivers the
+    // first one, and under full-suite load the last change of the burst
+    // used to land after the window had closed, splitting the batch.
+    final changes = StreamController<WatchChange>();
+    final watcher = FileWatcher(
+      root.path,
+      debounce: const Duration(milliseconds: 20),
+      source: (_) => changes.stream,
     );
-    final wanted = List.of(
-      List.generate(5, (i) => p.join(root.path, 'f$i.md')),
-    );
-    final allPaths = batches.expand((b) => b.paths).toSet();
-    for (final path in wanted) {
-      expect(allPaths, contains(path));
-    }
-    // All five writes happened within one debounce window: at least one
-    // batch carries every path together.
-    expect(
-      batches.where((b) => wanted.every((path) => b.paths.contains(path))),
-      isNotEmpty,
-    );
+    final wanted = List.generate(5, (i) => p.join(root.path, 'f$i.md'));
+    final latePath = p.join(root.path, 'late.md');
+    final batches = await runWith(watcher, (b) async {
+      final first = watcher.events.first;
+      // Fed synchronously: a Timer cannot run before the microtasks
+      // carrying these to the watcher have drained, so all five are
+      // inside one window whatever else the machine is doing.
+      for (final path in wanted) {
+        changes.add(WatchChange(path));
+      }
+      await first;
+      // The window has closed; what arrives now belongs to the next.
+      final second = watcher.events.first;
+      changes.add(WatchChange(latePath));
+      await second;
+    });
+    await changes.close();
+    expect(batches, hasLength(2));
+    expect(batches.first.paths, unorderedEquals(wanted));
+    expect(batches.last.paths, <String>[latePath]);
   });
 
   test('rename batches carry the parent directory for resync', () async {
