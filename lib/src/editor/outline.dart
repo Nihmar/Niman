@@ -25,6 +25,27 @@ final class OutlineEntry {
   final String text;
 }
 
+/// The headings of [text], without tokenizing it.
+///
+/// Same answer as [outlineOf] over `HighlightDocument.fromText(text).lines`
+/// — `outline_test` pins them together — but it walks only the block state
+/// machine, skipping the inline scan. That scan is the whole cost on a
+/// maths-dense note: collecting 84 headings from a 931K one took ~1 s
+/// through the tokenizer and a few ms this way (device report,
+/// 2026-09-11).
+///
+/// For a caller that already holds a tokenized document, [outlineOf] is
+/// free — use that instead of re-walking the text.
+List<OutlineEntry> outlineOfText(String text) {
+  final out = <OutlineEntry>[];
+  HighlightDocument.forEachHeading(
+    text,
+    (line, level, heading) =>
+        out.add(OutlineEntry(line: line, level: level, text: heading)),
+  );
+  return out;
+}
+
 /// The headings of a tokenized document, one per heading line, in line order.
 ///
 /// [lines] is the tokenizer's styled lines (e.g. `HighlightDocument.lines`),

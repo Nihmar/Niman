@@ -108,24 +108,35 @@ void main() {
     late HighlightDocument doc;
     final highlight = _ms(() => doc = HighlightDocument.fromText(text));
     final words = _ms(() => countWords(text));
-    late List<OutlineEntry> entries;
-    final outline = _ms(() => entries = outlineOf(doc.lines));
+    late List<OutlineEntry> viaTokens;
+    final outline = _ms(() => viaTokens = outlineOf(doc.lines));
+    late List<OutlineEntry> viaScan;
+    final fast = _ms(() => viaScan = outlineOfText(text));
+    final stats = _ms(() => statsFor(text));
 
     print('${file.uri.pathSegments.last}: ${text.length} chars, '
         '${'\n'.allMatches(text).length + 1} lines, '
         '${r'$'.allMatches(text).length} dollars');
-    print('  read:       $read ms   <- all the open path pays now');
-    print('  highlight:  $highlight ms   <- statsFor, for the outline');
-    print('  countWords: $words ms');
-    print('  outlineOf:  $outline ms   (${entries.length} headings)');
-    print('  spinner before: ${read + highlight + words + outline} ms');
-    print('  spinner after:  $read ms');
+    print('  read:          $read ms   <- all the open path pays now');
+    print('  countWords:    $words ms');
+    print('  outlineOfText: $fast ms   (${viaScan.length} headings)');
+    print('  statsFor now:  $stats ms');
+    print('  -- what it replaced --');
+    print('  highlight:     $highlight ms');
+    print('  outlineOf:     $outline ms   (${viaTokens.length} headings)');
 
-    expect(entries, isNotEmpty);
+    expect(viaScan, isNotEmpty);
+    // The strongest equivalence check there is: a real 900K note, with its
+    // own maths blocks deciding which `#` lines are headings.
+    expect(
+      viaScan.map((e) => '${e.line}|${e.level}|${e.text}').toList(),
+      viaTokens.map((e) => '${e.line}|${e.level}|${e.text}').toList(),
+      reason: 'the fast outline disagrees with the tokenizer on a real note',
+    );
     expect(
       highlight,
-      greaterThan(read),
-      reason: 'the highlight is what used to be in front of the note',
+      greaterThan(fast),
+      reason: 'the scan is the point: it must beat tokenizing the document',
     );
   });
 }

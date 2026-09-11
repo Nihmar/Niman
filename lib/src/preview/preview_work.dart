@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:markdown/markdown.dart' as md;
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/preview/html_table.dart';
@@ -91,19 +90,15 @@ typedef _Work = ({SendPort reply, String task, String source});
 /// Word count + heading outline of [text] (the row encoding
 /// `'line|level|text'`).
 ///
-/// Dominated by the highlight pass, not by the counting: the outline is
-/// derived from the tokenizer so that a `#` inside a code fence, a math
-/// block or the frontmatter is not mistaken for a heading (see
-/// `outlineOf`), which means the whole document is tokenized to find it.
-/// On a 931K math-dense note that is ~1.07 s of the ~1.16 s total, for 84
-/// headings; the word count is ~80 ms and the outline extraction 6 ms.
-/// Never on the open path, and never on the main isolate above
-/// `_syncWorkLimit`.
+/// Both are O(n) passes over the text, and neither tokenizes it: the
+/// outline used to come from `HighlightDocument.fromText(text).lines`,
+/// which on a 931K maths-dense note spent ~1.07 s of a ~1.16 s total
+/// inline-scanning 10,406 lines to find 84 headings. [outlineOfText] walks
+/// the block state machine alone for the same answer.
 (int, List<String>) statsFor(String text) {
-  final styled = HighlightDocument.fromText(text).lines;
   return (
     countWords(text),
-    outlineOf(styled).map((e) => '${e.line}|${e.level}|${e.text}').toList(),
+    outlineOfText(text).map((e) => '${e.line}|${e.level}|${e.text}').toList(),
   );
 }
 

@@ -447,6 +447,62 @@ final class HighlightDocument {
 
   static bool _isSingleLineMath(String trimmed) => isSingleLineDisplay(trimmed);
 
+  /// The number of `#` opening a heading on [text], or 0: one to six of
+  /// them at offset zero, followed by whitespace or the end of the line.
+  ///
+  /// Block context is the caller's to rule out first. [_lineTokens] and
+  /// [_headingIn] share this, so the highlight and the outline cannot
+  /// disagree about what counts as a heading.
+  static int _headingHashes(String text) {
+    var hashes = 0;
+    while (hashes < text.length && text.codeUnitAt(hashes) == 0x23) {
+      hashes++;
+    }
+    if (hashes >= 1 &&
+        hashes <= 6 &&
+        (hashes == text.length || _isSpaceChar(text.codeUnitAt(hashes)))) {
+      return hashes;
+    }
+    return 0;
+  }
+
+  /// The heading level on [text] entered in [inState], or 0.
+  ///
+  /// Mirrors the order of [_lineTokens]'s early returns — fence content, a
+  /// fence line, math, frontmatter, a horizontal rule — because a line that
+  /// stops there never reaches the heading branch there either.
+  static int _headingIn(String text, _State inState, int lineIndex) {
+    if (inState.fence != null) return 0;
+    if (_fenceOpen(text) != null) return 0;
+    final trimmed = text.trim();
+    if (inState.inMath || trimmed.startsWith(r'$$')) return 0;
+    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) return 0;
+    if (_hr.hasMatch(text)) return 0;
+    return _headingHashes(text);
+  }
+
+  /// Calls [onHeading] for each heading line of [text], in line order, with
+  /// the line index, the level, and the heading's text (markers stripped).
+  ///
+  /// Walks the block state machine ([_stateAfter]) and nothing else: no
+  /// inline scanning, which is where a maths-heavy note spends its time.
+  /// Collecting the 84 headings of a 931K note by tokenizing it whole cost
+  /// ~1 s on device; this way it is a few ms. `outline_test` holds the two
+  /// to the same answer over the cases the block context decides.
+  static void forEachHeading(
+    String text,
+    void Function(int line, int level, String heading) onHeading,
+  ) {
+    final raw = text.isEmpty ? const <String>[''] : text.split('\n');
+    var state = _State.initial;
+    for (var i = 0; i < raw.length; i++) {
+      final line = raw[i];
+      final level = _headingIn(line, state, i);
+      if (level > 0) onHeading(i, level, line.substring(level).trim());
+      state = _stateAfter(line, state, i);
+    }
+  }
+
   static _Fence? _fenceOpen(String text) {
     final info = _fenceOpenInfo(text);
     return info == null ? null : _Fence(info.$1, info.$2);
@@ -501,13 +557,8 @@ final class HighlightDocument {
     }
 
     // Heading: `#`..`######` followed by whitespace or end of line.
-    var hashes = 0;
-    while (hashes < text.length && text.codeUnitAt(hashes) == 0x23) {
-      hashes++;
-    }
-    if (hashes >= 1 &&
-        hashes <= 6 &&
-        (hashes == text.length || _isSpaceChar(text.codeUnitAt(hashes)))) {
+    final hashes = _headingHashes(text);
+    if (hashes > 0) {
       tokens.add(Token(TokenKind.headingMarker, 0, hashes));
       _InlineScanner.scan(tokens, text, hashes);
       return tokens;
