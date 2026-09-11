@@ -1,327 +1,187 @@
-> **Copist is a Vibe-Coded application.** It was developed exclusively with locally
-> run AI models — development is done using **Qwen 3.8 27B** (a 27 billion parameter
-> model) running locally.
-
 # Copist
 
 <img src="assets/branding/feather.png" alt="Copist app icon" width="140" align="right">
 
-Copist is a multiplatform Markdown note-taking app. Notes are plain files: one note
-is one `.md` file on disk, organized in nested folders. The app's SQLite database is
-only a **rebuildable index** (search, tags, frontmatter, sync state) — the files on
-disk are always the source of truth.
+A multiplatform Markdown note-taking app where your notes are just files.
+One note = one `.md` file on disk, organized in folders however you like.
+The app's database is only a rebuildable index — your files are always the
+source of truth. No lock-in, no proprietary format.
 
-> **Naming & status:** *Copist* (feather icon) is a placeholder name; the app will
-> be renamed before release. The project is currently in development — see
-> [Milestones](#milestones). Obsidian is a behavioral reference only; the app uses
-> its own vocabulary (the root folder is the **Library** — no vaults, canvases, or
-> graph views).
+> **Naming & status:** *Copist* and its feather icon are placeholders — the
+> app will be renamed before release. The project is under active
+> development.
 
-## Features (planned)
+## What you get today
 
-### Notes & content
+### Writing
 
-- **Frontmatter:** general YAML. Known fields: `title`, `tags`, `date`, `pinned`,
-  `aliases`; any other key is indexed and filterable.
-- **Tags:** frontmatter `tags:` plus inline `#tags`; both searchable.
-- **Links:** `[[wiki]]`, `[[wiki|alias]]`, `[[wiki#heading]]` and standard Markdown
-  links; click to navigate. Resolved by unique filename with path fallback.
-- **Images:** on insert, the file is copied into the library and linked (no base64
-  by default).
-- **Math:** `$…$` inline and `$$…$$` display, with whatever coverage KaTeX supports;
-  math spans are highlighted in the source pane.
-- **Markdown extras:** tables, task lists, footnotes, strikethrough, code blocks
-  with syntax highlighting.
-- **Editor conveniences:** spellcheck (Android/iOS: the system/IME
-  proofreader; Linux/Windows: system hunspell via ffi — see
-  `ANALYSIS.md` § "Platform parity", T-PP-09), word count, heading outline
-  + folding. LaTeX autocomplete is backlog.
-- **Mermaid diagrams:** stretch goal (bundled offline webview renderer).
+- Full **Markdown** support: tables, task lists, footnotes, strikethrough,
+  fenced code blocks with syntax highlighting.
+- **Math** with `$…$` and `$$…$$` (KaTeX).
+- **Wikilinks** (`[[note]]`, `[[note|alias]]`, `[[note#heading]]`) and
+  standard Markdown links — click to navigate.
+- **Images** copied into the library on insert (no base64 blobs).
+- **Spellcheck** on every platform (system/IME on Android, hunspell on
+  desktop).
+- **WYSIWYG editor** alongside the source editor — switch per note or per
+  library (powered by `flutter_quill`).
+- Word count, heading outline, heading folding.
 
 ### Libraries
 
-- A **library** is a folder of Markdown notes, and it describes itself: its
-  own settings live inside it as `<library>/.copist/settings.json`, plain
-  JSON you can read and fix in any editor. Copy the folder to another
-  machine and they travel with it — the trash toggle, the history depth,
-  the quick note and the list folder, and everything about how you write
-  there: the editor toolbar, the line numbers, the indent width, the link
-  format, the tree order, the reminder markers. Each library is
-  configured on its own, starting from the defaults.
-- What stays with the app rather than the library is what does not depend
-  on it: the interface language, the debug-log switch, and the preview
-  layout, which follows the screen.
-- Copist remembers the libraries you have opened and starts on a list of
-  them: name, path, and when each was last opened. Tapping one opens it;
-  a long press forgets it, which removes it from the list and touches
-  nothing inside the folder.
-- **One library open at a time.** Switching from the settings closes the
-  current one and opens the next, landing on its tree.
-- Each library keeps its own index, in Copist's private storage rather
-  than in the folder, so switching does not re-scan and a sync never
-  carries a database. Deleting an index file rebuilds it on the next
-  open.
+- A **library** is just a folder. Its settings live inside it as
+  `.copist/settings.json` — copy the folder to another machine and
+  everything travels with it.
+- Each library is independent: its own editor preferences, trash policy,
+  template folder, tree sort order, and so on.
+- Open multiple libraries from a remembered list; switch anytime.
 
 ### Organization
 
-- **Trash:** `.trash/`, user-toggleable (off = hard delete).
-- **History:** last N versions per note in local `.history/` (not synced); also
-  serves as the merge base for conflicts.
-- **Templates:** configurable folder (default `Templates/`) with placeholders
-  `{{title}}`, `{{date:YYYY-MM-DD}}`, `{{time}}`, `{{now}}`, `{{uuid}}`; template
-  frontmatter is merged into the new note.
-- **Tabs:** multiple notes open at once.
+- **Trash:** soft delete to `.trash/`, or hard delete — your choice per
+  library.
+- **History:** local `.history/` keeps the last N versions of each note.
+- **Templates:** with placeholders like `{{title}}`, `{{date:YYYY-MM-DD}}`,
+  `{{time}}`, `{{uuid}}`; frontmatter from the template merges into the new
+  note.
+- **Frontmatter:** any YAML key is indexed and searchable. Known fields
+  include `title`, `tags`, `date`, `pinned`, `aliases`.
+- **Tags:** in frontmatter or inline `#tags` — both searchable.
 
-### Search & indexing
+### Search
 
-- Full-text search (title + body + tags) via SQLite FTS5 — instant at 1M notes.
-- The index is rebuildable at any time; files on disk are the source of truth.
+Full-text search across titles, body, and tags, powered by SQLite FTS5.
+Designed to stay fast at scale — the target is 1,000,000 notes.
 
-### Sync & conflicts
+### Themes
 
-- **WebDAV** sync to one destination at a time (Nextcloud, ownCloud, NAS, or any
-  generic WebDAV server), with Basic auth over `http://` and `https://`.
-- Whole-library sync; manual button plus automatic (on app focus, on change
-  debounced, ~60s poll).
-- **Conflicts:** 3-way merge UI, hunk-level (mine/theirs per hunk, or keep whole
-  file). Multi-device simultaneous editing is out of scope for v1.
+Brightness (day / night / system) combined with color palettes (system or
+Catppuccin). The layout adapts to screen size: sidebar + editor + preview on
+desktop, full-screen toggle on phones, split on tablets. You can override
+the layout per library.
 
-### Security
+### Task reminders (Android)
 
-- At first launch the user chooses a plain or **encrypted library**: AES-256-GCM
-  per file, key stored in OS secure storage; exporting yields plain `.md`.
-- Credentials stored via `flutter_secure_storage`. Transport uses TLS (Nextcloud
-  E2EE is a separate protocol).
+Mark a task with `rem:` and Copist schedules an exact alarm — it fires even
+with the screen off, the app in the background, or the process killed.
+The app warns about notification and battery-optimization permissions that
+could prevent delivery.
 
-### Import / export
+### Debug log
 
-- **Export:** note → `.md` / `.html` (with KaTeX); library or folder → `.md`
-  bundle (zip). PDF export is a stretch goal.
-- **Import:** Obsidian libraries (open the folder — wikilinks are already
-  supported) and Notion export zips.
+An exportable debug log (last 5 000 lines in memory, mirrored to disk)
+that survives crashes, swipes, and reboots. Useful for diagnosing reminder
+delivery and other background behavior.
 
-### Themes & layout
+## What's coming
 
-- Brightness (day / night / system) × palette (system | Catppuccin; night → Mocha,
-  day → Latte). Token-based so more palettes can be added.
-- Desktop: sidebar | editor | preview with a draggable split; Android phone:
-  full-screen Edit/Preview switch; tablet/wide: split. User override:
-  auto / force split / force switch.
+These are tracked as GitHub issues — see the
+[issue tracker](https://github.com/Nihmar/Copist/issues) for details.
+
+- **WebDAV sync** ([#9](https://github.com/Nihmar/Copist/issues/9)) —
+  whole-library sync to Nextcloud, ownCloud, or any WebDAV server. Includes
+  offline queue, conflict detection, and a hunk-level merge UI.
+- **Multi-tab editing** ([#23](https://github.com/Nihmar/Copist/issues/23)) —
+  open several notes at once.
+- **Export** ([#24](https://github.com/Nihmar/Copist/issues/24)) —
+  note to `.md` or `.html` (with math rendered), folder/library to zip.
+- **Import** ([#25](https://github.com/Nihmar/Copist/issues/25)) —
+  Obsidian folders (wikilinks supported) and Notion export zips.
+- **Encryption** ([#26](https://github.com/Nihmar/Copist/issues/26)) —
+  optional per-file AES-256-GCM, chosen at library creation.
+- **Onboarding** ([#27](https://github.com/Nihmar/Copist/issues/27)) —
+  a guided first-launch experience.
+- **Scale improvements** ([#22](https://github.com/Nihmar/Copist/issues/22)) —
+  background indexing and bounded memory for very large libraries.
+- **Platform parity** ([#39](https://github.com/Nihmar/Copist/issues/39)) —
+  share-in on Android, file association on desktop, single-instance guard.
+- **Note history viewer** ([#55](https://github.com/Nihmar/Copist/issues/55)) —
+  browse and restore past versions of a note.
+- **Performance** ([#45](https://github.com/Nihmar/Copist/issues/45)) —
+  tab-switch smoothness and editor performance on large notes.
+- **Packaging & release** ([#31](https://github.com/Nihmar/Copist/issues/31)) —
+  final branding, signed builds, and the first public release.
+
+**Stretch goals:** Mermaid diagrams, PDF export, LaTeX autocomplete.
 
 ## Platforms
 
-- **Now:** Android + Linux + Windows.
-- **Later:** macOS, iOS (code is kept portable).
-- **Android:** minSdk 35 (Android 15), tablet support, APK for now.
-- **Linux:** Wayland required; release as AppImage + Arch `.pkg.tar.zst`
-  (PKGBUILD, no AUR).
-- **Windows:** built on a Windows host (no cross-build from Linux); SQLite
-  comes bundled, since Windows has no system one.
-
-### Task reminders on Android
-
-A `rem:` reminder is an exact alarm held by the system, so it fires with
-the screen off, with the app in the background, and with the app's process
-dead. Two things can still stop it, and Copist warns about both from the
-Todo tab:
-
-- **Notifications off.** The alarm fires and nothing is shown.
-- **Battery optimization.** The banner links to the system list. Without
-  the exemption, some manufacturer builds (Xiaomi/MIUI and HyperOS,
-  Huawei/EMUI, Oppo/OnePlus/Realme ColorOS, Vivo) discard an app's pending
-  alarms when it is swiped away from recents, and may sleep it after a
-  while. Those ROMs often also need an "autostart" toggle that only the
-  user can set. See dontkillmyapp.com for the per-vendor steps.
-
-A *force stop* from Settings cancels an app's alarms on every Android
-version; they are rescheduled the next time Copist runs. Reminders survive
-a reboot.
-
-### The debug log
-
-Settings has a **Export debug log** action that writes the whole log to a
-file you choose. Recording can be turned off there too.
-
-The log is kept two ways: the last 5000 lines in memory, and an
-append-only mirror on disk under the app's private storage
-(`copist-log.txt`, one rotation, capped at 2 x 512 KB). The mirror is
-flushed when the app goes to the background, so it survives a swipe away,
-a crash, an OEM kill and a reboot. An export starts with the earlier runs
-from disk and ends with the current one, which matters for reminders:
-the interesting moment usually happens in a process that no longer exists.
-
-Each line is `<timestamp> <SEVERITY> [<component>] <message>`. For
-reminders, look for the `[todo]` lines:
-
-```text
-todo reminders: timezone Europe/Rome
-todo reminders: 2 pending at startup [208725283, 867842594]
-todo reminders: reconcile 2 wanted, notifications allowed, alarms exact, battery unrestricted
-todo reminders: armed 867842594 for 2026-09-08T10:30 (in 2h 14m) call plumber
-todo reminders reconciled: 2 scheduled (exact)
-todo reminders: 2 pending after reconcile [208725283, 867842594]
-```
-
-`pending at startup` is the one to read after a kill or a reboot: it is
-what the system still holds from the previous run, and the only evidence
-of whether the alarms survived. `pending after reconcile` is what the
-system actually has, as opposed to what Copist asked for.
+- **Android** (minSdk 35), **Linux** (Wayland), **Windows**.
+- macOS and iOS are not built yet, but the code is kept portable.
 
 ## Release
 
-Releases are built by CI **only from version tags** — branch pushes and
-pull requests build nothing.
+Releases are built by CI from version tags only.
 
 ### Cutting a release
 
-1. Bump `version:` in `pubspec.yaml` (e.g. `1.2.0+3`) and commit it.
-2. Tag the commit: `git tag v1.2.0`.
-3. Push the tag: `git push origin v1.2.0`.
+1. Bump `version:` in `pubspec.yaml` and commit.
+2. Tag: `git tag v1.2.0` (must match `vX.Y.Z`, no suffixes).
+3. Push: `git push origin v1.2.0`.
 
-The tag **must** match `vX.Y.Z` with no suffixes (no `-rc1`): the workflow
-rejects anything else, because Arch `pkgver` forbids `-`. To re-run a
-release, delete the tag locally and remotely (`git tag -d v1.2.0 &&
-git push origin :v1.2.0`), fix whatever broke, and tag again.
-
-Pushing the tag runs `.github/workflows/release.yml` (Flutter 3.47.2 on
-all three runners). When every job succeeds, the artifacts are published
-on the tag's GitHub Release page (`Generate release notes` changelog).
+The workflow builds all platforms and publishes artifacts on the tag's
+GitHub Release page.
 
 ### Artifacts
 
-| Runner | Files |
-|--------|-------|
-| `ubuntu-latest` | `copist-<v>-android.apk` |
-| `ubuntu-22.04` | `copist-<v>-linux-x64.tar.gz` (Flutter bundle + icon), `copist-<v>-linux-x64.AppImage`, `copist-bin-<v>-1-x86_64.pkg.tar.zst` |
-| `windows-latest` | `copist-<v>-windows-x64-setup.exe` (Inno Setup), `copist-<v>-windows-x64.zip` (portable) |
+| Platform | Files |
+|----------|-------|
+| Android | `.apk` |
+| Linux | `.tar.gz`, `.AppImage`, `.pkg.tar.zst` (Arch) |
+| Windows | Inno Setup installer (`.exe`), portable `.zip` |
 
-The Linux job builds on Ubuntu 22.04 on purpose: its older glibc lets the
-AppImage run on more distros. The Arch package (`packaging/linux/PKGBUILD`,
-no AUR) repacks the release tarball — `/opt/copist` + a `/usr/bin/copist`
-symlink + the desktop entry — and is built in CI inside an Arch container.
-The Windows installer (`packaging/windows/copist.iss`, Inno Setup 6,
-English + Italian) installs the `flutter build windows` output per user
-with a Start-menu and optional desktop icon.
+### Signing
 
-### Signing status
+- **Android:** debug-signed until release keys are set up. To sign release
+  builds, store your keystore and passwords as Actions secrets — the
+  workflow picks them up automatically.
+- **Linux / Windows:** unsigned, as planned for v1.
 
-- **Android:** the APK is **debug-signed** until release keys exist
-  (plan `T-M7-02`). To sign release builds, generate an upload key once
-  and store it in the repo settings as Actions secrets
-  (`Settings → Secrets and variables → Actions`):
-  `ANDROID_KEYSTORE_BASE64` (the `.jks`, base64-encoded),
-  `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`.
-  When those secrets exist the workflow writes the gitignored
-  `android/key.properties` and Gradle signs with it; when they do not,
-  the build falls back to the debug key. The keystore itself never enters
-  the repo (`*.jks` is gitignored).
-- **Linux / Windows:** AppImage, Arch pkg and the Inno installer are
-  unsigned, as planned for v1.
+### Building locally
 
-### Reproducing a build locally
+```
+./scripts/copist.sh apk          # Android
+./scripts/copist.sh linux        # Linux bundle
+scripts\copist.bat windows       # Windows (on a Windows host)
+```
 
-Same commands CI runs, from a clean checkout:
+See the CI workflow and `packaging/` for AppImage, Arch pkg, and Inno Setup
+details.
 
-- APK: `./scripts/copist.sh apk`
-- Linux bundle: `./scripts/copist.sh linux`, then the tarball /
-  AppImage / pkg with the commands from the `linux` job
-  (`packaging/appimage/make-appimage.sh <bundle> <icon> <version>
-  <output>`; `makepkg` in `packaging/linux` with the tarball next to
-  the PKGBUILD).
-- Windows (on a Windows host): `scripts\copist.bat windows`, then
-  `iscc packaging\windows\copist.iss /DAppVersion=<version>`.
+## Architecture
 
-## Architecture & stack
-
-- **Framework:** Flutter (stable channel), Dart with `very_good_analysis`.
+- **Framework:** Flutter + Dart with `very_good_analysis`.
 - **State:** Riverpod.
-- **Rendering:** `flutter_markdown_plus` for preview, `katex_dart` (pure-Dart
-  KaTeX) for math, `flutter_highlight` for code highlighting.
-- **Editor:** `re_editor` (Reqable's large-text editor) with Copist's own
-  incremental Markdown tokenizer plugged into its span builder; bidirectional
-  scroll sync via line mapping.
-- **WebDAV client:** `dart:io` HttpClient — PROPFIND/GET/PUT/MKCOL, ETag/If-Match,
-  Basic auth, http + https (zero dependencies).
-- **Index:** `drift` (SQLite + FTS5), one database file per library under
-  `indexes/`, alongside a small app database holding the settings that
-  belong to the installation rather than to a library; files located via
-  `path_provider`; credentials via `flutter_secure_storage`.
-- **Testing:** `flutter_test`, `integration_test`, and a mock WebDAV server
-  (Dart `HttpServer`).
-- **CI:** tag-only GitHub Actions release (see [Release](#release));
-  analyze, test and dev builds are still run locally.
-- **Packaging:** APK; Linux tar.gz + AppImage + Arch pkg (PKGBUILD);
-  Windows installer (Inno Setup) + portable zip.
+- **Source editor:** `re_editor` with Copist's own incremental Markdown tokenizer.
+- **WYSIWYG editor:** `flutter_quill` with a Markdown round-trip codec.
+- **Preview:** `flutter_markdown_plus` + `katex_dart` for math +
+  `flutter_highlight` for code.
+- **Index:** `drift` (SQLite + FTS5), one database per library.
+- **Credentials:** `flutter_secure_storage`.
+- **Testing:** `flutter_test` + `integration_test`.
+- **CI:** tag-triggered GitHub Actions.
 
-### Third-party packages
+### Key packages
 
-Copist is built on top of these external packages rather than against the raw
-Flutter SDK — they carry the core of the app, so they deserve explicit credit:
-
-| Package | Role in Copist |
-|---------|----------------|
-| [`re_editor`](https://pub.dev/packages/re_editor) | The source-editor widget (caret, selection, IME/composition, handles, scrolling). Highlighting is Copist's own tokenizer via `spanBuilder` |
-| [`flutter_markdown_plus`](https://pub.dev/packages/flutter_markdown_plus) + [`markdown`](https://pub.dev/packages/markdown) | Markdown preview: Copist's windowed preview builds on the package's AST → widget pipeline (GFM tables/task lists, footnotes); `markdown` is the AST parser |
-| [`katex`](https://pub.dev/packages/katex) / [`katex_dart`](https://pub.dev/packages/katex_dart) | Pure-Dart KaTeX for `$…$` / `$$…$$` math rendering |
-| [`flutter_highlight`](https://pub.dev/packages/flutter_highlight) + [`highlight`](https://pub.dev/packages/highlight) | Code-block syntax highlighting in the preview |
-| [`drift`](https://pub.dev/packages/drift) (+ `drift_dev`, `sqlite3_flutter_libs`) | The rebuildable SQLite index — notes tree, tags, stems, links, FTS5 search |
-| [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | App-wide state management |
-| [`file_picker`](https://pub.dev/packages/file_picker) | CHOOSING the library root folder / picking images to insert (never scans storage itself) |
-| [`path_provider`](https://pub.dev/packages/path_provider) | OS folders for app data (index, settings, caches) |
-| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | WebDAV credentials + the encryption key (M5/M6) |
-| [`crypto`](https://pub.dev/packages/crypto) | sha256 content digests (change detection, sync reconciliation) |
-
-Notable non-default choices: `flutter_smooth_markdown` (0.8.1) is pinned only as
-*the reference renderer the M2 cost-model benchmark tests against* — the app's
-preview is Copist's own windowed renderer over `flutter_markdown_plus`. `hash` and
-`path` come from the Dart team; `meta` is the Flutter SDK's annotation package.
-
-### Sync state machine
-
-> Watch (local file events) + Poll (remote PROPFIND) → **Reconcile** (content hash
-> vs ETag/size) → queue: upload / download / delete (tombstones) / conflict.
-> `PUT` with `If-Match`; on 412 → re-fetch + 3-way merge UI (base from
-> `.history`). Offline: persisted queue, retry with backoff. `.trash` / `.history`
-> stay local.
-
-### Performance strategy
-
-- Startup with a cached index (no blocking scan); incremental indexing via file
-  watcher; one-time full scan.
-- Preview: parse once per change, lazy block rendering, KaTeX output cached per
-  math string (LRU).
-- Search: FTS5.
-- Editor: a single text buffer per note (fine at MB scale).
-
-## Milestones
-
-| # | Milestone | Scope |
-|---|-----------|-------|
-| M0 | Scaffold | Project, lint, placeholder branding, app shell — **done** |
-| M1 | Library core | Open/create library, file watcher, tree UI, CRUD, rename/move, trash toggle — **done** |
-| M1.5 | Index integrity | Index diff with stable row ids, change notification, subtree parent fix — **next, blocks M2** |
-| M2 | Editor + preview | Highlighting, `flutter_markdown_plus` + `katex_dart`, bidirectional scroll sync, all Markdown extras, word count, heading outline + folding |
-| M3 | Links & search | Link resolution + click navigation, FTS5 search (word/tag/title), tag list |
-| M4 | Frontmatter & templates | YAML parse/edit, template placeholder engine |
-| M5 | Sync | WebDAV client, state machine, manual + automatic, delete propagation, conflict merge UI |
-| M6 | Scale & polish | 1M-note performance pass, multi-tab, import/export, themes (brightness × palette), secure storage, onboarding (library + encryption choice) |
-| M7 | Packaging & release | APK; Linux tar.gz + AppImage + Arch pkg; Windows zip; open-source repo (license, README) |
-
-**Stretch goals (in order):** Mermaid, PDF export, LaTeX autocomplete, Linux
-spellcheck, E2E.
-
-## Scale requirement
-
-Copist must work unbounded: **1,000,000 notes and novel-length files** are a hard
-requirement, driving the rebuildable-index, FTS5, and LRU-cache strategies above.
+| Package | Role |
+|---------|------|
+| [`re_editor`](https://pub.dev/packages/re_editor) | Source editor widget |
+| [`flutter_quill`](https://pub.dev/packages/flutter_quill) | WYSIWYG editor |
+| [`flutter_markdown_plus`](https://pub.dev/packages/flutter_markdown_plus) + [`markdown`](https://pub.dev/packages/markdown) | Markdown preview and AST |
+| [`katex`](https://pub.dev/packages/katex) / [`katex_dart`](https://pub.dev/packages/katex_dart) | Math rendering |
+| [`flutter_highlight`](https://pub.dev/packages/flutter_highlight) | Code syntax highlighting |
+| [`drift`](https://pub.dev/packages/drift) | SQLite index + FTS5 search |
+| [`flutter_riverpod`](https://pub.dev/packages/flutter_riverpod) | State management |
+| [`file_picker`](https://pub.dev/packages/file_picker) | Library/image picker |
+| [`flutter_secure_storage`](https://pub.dev/packages/flutter_secure_storage) | Credentials + encryption key |
 
 ## Acknowledgments
 
-- [Markor](https://github.com/gsantner/markor) — the offline Markdown editor for
-  Android that keeps notes as ordinary files and puts a todo.txt view next to
-  them. A reference for what a notes app owes its user: no lock-in, no database
-  standing between them and their text.
-- Obsidian — a behavioral reference only. Copist keeps its own vocabulary (the
+- [Markor](https://github.com/gsantner/markor) — the offline Markdown editor
+  for Android that keeps notes as ordinary files. A reference both for what
+  a notes app owes its user (no lock-in, no database between them and their
+  text) and for its visual design.
+- Obsidian — a behavioral reference. Copist uses its own vocabulary (the
   root folder is the **Library**) and none of its code.
 
 ## License
