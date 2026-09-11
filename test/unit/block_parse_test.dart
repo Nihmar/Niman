@@ -71,6 +71,21 @@ void main() {
     expect((kids[2] as md.Text).text, 'bbbb cccc');
   });
 
+  test('a lone punctuation at the end of the line glues without a crash', () {
+    // The text after the math is a single character (the punctuation, no
+    // trailing space): the glue must not read past it (RangeError).
+    const source = r'aaaa $x^2$.';
+    final blocks = parseBlocks(source);
+    final doc = makeDocument();
+    final parsed = withInlines(doc, blocks.first);
+    final p = parsed.first as md.Element;
+    final kids = p.children!;
+    final math = kids[kids.length - 1] as md.Element;
+    expect(math.tag, 'math');
+    expect(math.attributes[mathTrailingAttribute], '.');
+    expect(kids, hasLength(2));
+  });
+
   test('a comma right after the math glues too (no space to move)', () {
     const source = r'aaaa $x^2$,bbbb cccc';
     final blocks = parseBlocks(source);

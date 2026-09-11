@@ -166,7 +166,7 @@ void _glueMathPunctuation(List<md.Node> children) {
     final first = next.text[0];
     if (!_gluePunctuation.contains(first)) continue;
     var cut = 1;
-    if (next.text[1] == ' ') cut = 2;
+    if (next.text.length > 1 && next.text[1] == ' ') cut = 2;
     final glued = next.text.substring(0, cut);
     final rest = next.text.substring(cut);
     math.attributes[mathTrailingAttribute] = glued;
