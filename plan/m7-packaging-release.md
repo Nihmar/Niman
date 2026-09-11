@@ -44,6 +44,14 @@ placeholder (feather icon); no build/packaging pipeline; no release.
   certificate). There is no cross-build: the artifact has to be produced on
   a Windows host. *AC: a clean install runs on a machine that never had
   Flutter.*
+- [x] **T-M7-08** Tag-triggered release CI (landed early, 2026-09-11,
+  ahead of the rest of M7): `.github/workflows/release.yml` runs on `v*`
+  tags only and publishes the APK, the Linux tar.gz + AppImage + Arch pkg
+  (from `packaging/linux/PKGBUILD`, no AUR) and the Windows Inno Setup
+  installer + portable zip (`packaging/windows/copist.iss`) to the GitHub
+  Release page. The cut-a-release procedure is in README "Release".
+  *AC: pushing `vX.Y.Z` produces every artifact; `android/key.properties`
+  signing stays optional until T-M7-02.*
 
 ## Technical design
 

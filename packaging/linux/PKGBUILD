@@ -1,0 +1,40 @@
+# Maintainer: Copist contributors (https://github.com/Nihmar/Copist)
+# Arch package for Copist. This is a -bin package: it repacks the prebuilt
+# Flutter release tarball published on the GitHub Release page for the same
+# version (see README "Release"). There is no AUR upload; the file lives here
+# so CI and anyone with the tarball can run `makepkg`.
+#
+# From a checkout after a release: download
+#   copist-${pkgver}-linux-x64.tar.gz
+# next to this file and run `makepkg`. In CI the freshly built tarball is
+# placed here with the exact name below, so makepkg reuses it instead of
+# downloading.
+pkgname=copist-bin
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Copist — multiplatform Markdown note-taking app'
+arch=('x86_64')
+url='https://github.com/Nihmar/Copist'
+license=('MIT')
+depends=('gtk3' 'libsecret')
+provides=('copist')
+conflicts=('copist')
+source=("copist-${pkgver}-linux-x64.tar.gz::https://github.com/Nihmar/Copist/releases/download/v${pkgver}/copist-${pkgver}-linux-x64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  install -dm755 "$pkgdir/opt/copist" "$pkgdir/usr/bin" \
+    "$pkgdir/usr/share/applications" "$pkgdir/usr/share/pixmaps"
+  # The tarball holds the Flutter bundle plus dev.copist.copist.png at root.
+  cp -a "$srcdir/bundle/." "$pkgdir/opt/copist/"
+  ln -s /opt/copist/copist "$pkgdir/usr/bin/copist"
+  install -m644 "$srcdir/dev.copist.copist.png" \
+    "$pkgdir/usr/share/pixmaps/dev.copist.copist.png"
+  # The desktop entry ships inside the bundle; point it at the install path.
+  # The s/// keeps the quick-action flags (--quick-note, ...), fixing only
+  # the binary.
+  sed -e 's|^Exec=copist |Exec=/usr/bin/copist |' \
+    -e 's|^Icon=.*|Icon=dev.copist.copist|' \
+    "$srcdir/bundle/dev.copist.copist.desktop" \
+    > "$pkgdir/usr/share/applications/dev.copist.copist.desktop"
+}

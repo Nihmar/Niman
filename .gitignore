@@ -6,6 +6,17 @@
 *.swp
 *.apk
 copist-*.tar.gz
+# Local release staging (CI uses a fresh dist/ on the runner; the scripts
+# below can also create it locally — never commit it).
+/dist/
+/tarstage/
+/pkgstage/
+*.AppImage
+*.pkg.tar.zst
+*-setup.exe
+# makepkg working dirs next to packaging/linux/PKGBUILD.
+packaging/linux/src/
+packaging/linux/pkg/
 # Local reference files (real notes, copyrighted, and captured device
 # logs). Never commit this folder; the findings live in plan/.
 reference/

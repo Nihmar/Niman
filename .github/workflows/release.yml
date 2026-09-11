@@ -1,0 +1,214 @@
+name: release
+
+# Tag-only releases: pushing a tag vX.Y.Z builds every artifact and publishes
+# it on the tag's GitHub Release page. Branch pushes and pull requests build
+# nothing. How to cut a release is documented in README "Release".
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: '3.47.2'
+
+jobs:
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "error: tag must be vX.Y.Z (got $GITHUB_REF_NAME)" >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Release signing key (optional)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            cat > android/key.properties <<EOF
+          storeFile=$RUNNER_TEMP/release.jks
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          storePassword=$ANDROID_STORE_PASSWORD
+          EOF
+            echo "Signing with the release key."
+          else
+            echo "No signing secrets: APK is debug-signed (see plan T-M7-02)."
+          fi
+
+      - run: flutter pub get
+      - run: flutter build apk --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+
+      - name: Stage artifact
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/copist-$VERSION-android.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: dist/copist-*-android.apk
+
+  linux:
+    name: Linux tarball, AppImage, Arch pkg
+    runs-on: ubuntu-22.04 # older glibc so the AppImage runs on more distros
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake git ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "error: tag must be vX.Y.Z (got $GITHUB_REF_NAME)" >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - run: flutter pub get
+      - run: flutter build linux --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+
+      - name: Linux tarball (bundle + icon)
+        run: |
+          mkdir -p dist tarstage
+          cp -a build/linux/x64/release/bundle tarstage/bundle
+          cp assets/branding/feather.png tarstage/dev.copist.copist.png
+          tar -czf "dist/copist-$VERSION-linux-x64.tar.gz" -C tarstage bundle dev.copist.copist.png
+
+      - name: AppImage
+        run: |
+          bash packaging/appimage/make-appimage.sh \
+            build/linux/x64/release/bundle \
+            assets/branding/feather.png \
+            "$VERSION" \
+            "dist/copist-$VERSION-linux-x64.AppImage"
+
+      - name: Arch package
+        run: |
+          STAGE="$PWD/pkgstage"
+          mkdir -p "$STAGE"
+          cp packaging/linux/PKGBUILD "$STAGE/"
+          cp "dist/copist-$VERSION-linux-x64.tar.gz" \
+            "$STAGE/copist-$VERSION-linux-x64.tar.gz"
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" "$STAGE/PKGBUILD"
+          # makepkg refuses root: build as an unprivileged user inside Arch.
+          # The tarball is already next to the PKGBUILD, so its https source
+          # is reused instead of downloaded.
+          docker run --rm -v "$STAGE:/pkg" -w /pkg archlinux:latest bash -c '
+            set -e
+            pacman -Sy --noconfirm --needed base-devel >/dev/null
+            useradd -m builder
+            chown -R builder:builder /pkg
+            su builder -c "cd /pkg && makepkg --noconfirm"
+          '
+          mv "$STAGE"/copist-*.pkg.tar.zst dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            dist/copist-*-linux-x64.tar.gz
+            dist/copist-*-linux-x64.AppImage
+            dist/copist-*.pkg.tar.zst
+
+  windows:
+    name: Windows installer (Inno Setup)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Version from tag
+        shell: pwsh
+        run: |
+          $v = $env:GITHUB_REF_NAME.TrimStart('v')
+          if ($v -notmatch '^[0-9]+\.[0-9]+\.[0-9]+$') {
+            Write-Error "tag must be vX.Y.Z (got $env:GITHUB_REF_NAME)"
+            exit 1
+          }
+          "VERSION=$v" >> $env:GITHUB_ENV
+
+      - run: flutter pub get
+      - name: Build Windows bundle
+        shell: bash
+        run: flutter build windows --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' `
+            "packaging\windows\copist.iss" "/DAppVersion=$env:VERSION"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path 'build\windows\x64\runner\Release\*' `
+            -DestinationPath "dist\copist-$env:VERSION-windows-x64.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            dist/copist-*-windows-x64-setup.exe
+            dist/copist-*-windows-x64.zip
+
+  github-release:
+    name: Publish GitHub Release
+    needs: [android, linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

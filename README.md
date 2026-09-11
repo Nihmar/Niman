@@ -167,6 +167,70 @@ what the system still holds from the previous run, and the only evidence
 of whether the alarms survived. `pending after reconcile` is what the
 system actually has, as opposed to what Copist asked for.
 
+## Release
+
+Releases are built by CI **only from version tags** — branch pushes and
+pull requests build nothing.
+
+### Cutting a release
+
+1. Bump `version:` in `pubspec.yaml` (e.g. `1.2.0+3`) and commit it.
+2. Tag the commit: `git tag v1.2.0`.
+3. Push the tag: `git push origin v1.2.0`.
+
+The tag **must** match `vX.Y.Z` with no suffixes (no `-rc1`): the workflow
+rejects anything else, because Arch `pkgver` forbids `-`. To re-run a
+release, delete the tag locally and remotely (`git tag -d v1.2.0 &&
+git push origin :v1.2.0`), fix whatever broke, and tag again.
+
+Pushing the tag runs `.github/workflows/release.yml` (Flutter 3.47.2 on
+all three runners). When every job succeeds, the artifacts are published
+on the tag's GitHub Release page (`Generate release notes` changelog).
+
+### Artifacts
+
+| Runner | Files |
+|--------|-------|
+| `ubuntu-latest` | `copist-<v>-android.apk` |
+| `ubuntu-22.04` | `copist-<v>-linux-x64.tar.gz` (Flutter bundle + icon), `copist-<v>-linux-x64.AppImage`, `copist-bin-<v>-1-x86_64.pkg.tar.zst` |
+| `windows-latest` | `copist-<v>-windows-x64-setup.exe` (Inno Setup), `copist-<v>-windows-x64.zip` (portable) |
+
+The Linux job builds on Ubuntu 22.04 on purpose: its older glibc lets the
+AppImage run on more distros. The Arch package (`packaging/linux/PKGBUILD`,
+no AUR) repacks the release tarball — `/opt/copist` + a `/usr/bin/copist`
+symlink + the desktop entry — and is built in CI inside an Arch container.
+The Windows installer (`packaging/windows/copist.iss`, Inno Setup 6,
+English + Italian) installs the `flutter build windows` output per user
+with a Start-menu and optional desktop icon.
+
+### Signing status
+
+- **Android:** the APK is **debug-signed** until release keys exist
+  (plan `T-M7-02`). To sign release builds, generate an upload key once
+  and store it in the repo settings as Actions secrets
+  (`Settings → Secrets and variables → Actions`):
+  `ANDROID_KEYSTORE_BASE64` (the `.jks`, base64-encoded),
+  `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`.
+  When those secrets exist the workflow writes the gitignored
+  `android/key.properties` and Gradle signs with it; when they do not,
+  the build falls back to the debug key. The keystore itself never enters
+  the repo (`*.jks` is gitignored).
+- **Linux / Windows:** AppImage, Arch pkg and the Inno installer are
+  unsigned, as planned for v1.
+
+### Reproducing a build locally
+
+Same commands CI runs, from a clean checkout:
+
+- APK: `./scripts/copist.sh apk`
+- Linux bundle: `./scripts/copist.sh linux`, then the tarball /
+  AppImage / pkg with the commands from the `linux` job
+  (`packaging/appimage/make-appimage.sh <bundle> <icon> <version>
+  <output>`; `makepkg` in `packaging/linux` with the tarball next to
+  the PKGBUILD).
+- Windows (on a Windows host): `scripts\copist.bat windows`, then
+  `iscc packaging\windows\copist.iss /DAppVersion=<version>`.
+
 ## Architecture & stack
 
 - **Framework:** Flutter (stable channel), Dart with `very_good_analysis`.
@@ -184,8 +248,10 @@ system actually has, as opposed to what Copist asked for.
   `path_provider`; credentials via `flutter_secure_storage`.
 - **Testing:** `flutter_test`, `integration_test`, and a mock WebDAV server
   (Dart `HttpServer`).
-- **No CI:** analyze, test and release builds are run locally.
-- **Packaging:** APK/AAB; Linux tar.gz + AppImage + Arch pkg (PKGBUILD).
+- **CI:** tag-only GitHub Actions release (see [Release](#release));
+  analyze, test and dev builds are still run locally.
+- **Packaging:** APK; Linux tar.gz + AppImage + Arch pkg (PKGBUILD);
+  Windows installer (Inno Setup) + portable zip.
 
 ### Third-party packages
 
