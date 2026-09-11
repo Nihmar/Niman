@@ -1,4 +1,4 @@
-/// Filtering + sorting for the todo list (plan/todo-tab.md T-TD-05).
+/// Filtering + sorting for the todo list (T-TD-05).
 ///
 /// Pure logic, no widgets: the tab holds one [TodoFilter] (due range +
 /// AND-ed token selection + sort key), narrows the visible file with

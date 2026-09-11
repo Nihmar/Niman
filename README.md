@@ -33,8 +33,8 @@ disk are always the source of truth.
 - **Markdown extras:** tables, task lists, footnotes, strikethrough, code blocks
   with syntax highlighting.
 - **Editor conveniences:** spellcheck (Android/iOS: the system/IME
-  proofreader; Linux/Windows: no engine service, backlog — see
-  `plan/m-platform-parity.md` T-PP-09), word count, heading outline
+  proofreader; Linux/Windows: system hunspell via ffi — see
+  `ANALYSIS.md` § "Platform parity", T-PP-09), word count, heading outline
   + folding. LaTeX autocomplete is backlog.
 - **Mermaid diagrams:** stretch goal (bundled offline webview renderer).
 

@@ -1,4 +1,4 @@
-/// The OS surface a reminder service drives (plan/todo-tab.md T-TD-07).
+/// The OS surface a reminder service drives (T-TD-07).
 ///
 /// Narrow on purpose: everything that needs a device — method channels,
 /// the timezone database, AlarmManager — sits behind this, so the

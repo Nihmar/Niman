@@ -1,4 +1,4 @@
-/// The todo filter row (plan/todo-mockup.md T-TDM-03): a due-range
+/// The todo filter row (T-TDM-03): a due-range
 /// dropdown pill ("All dates"), a `Filter` pill opening the token/sort
 /// sheet, and the right-aligned "N open"/"N done" count.
 ///

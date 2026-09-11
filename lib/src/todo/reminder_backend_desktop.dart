@@ -2,7 +2,7 @@
 ///
 /// Linux has no OS scheduler: `flutter_local_notifications` there can only
 /// `show` while the process runs, and `zonedSchedule`/`cancel` throw (see
-/// the T-PP-02 spike in `plan/m-platform-parity.md`). So the schedule lives
+/// the T-PP-02 spike). So the schedule lives
 /// in-process: `schedule` arms a [Timer] for the due instant and posts the
 /// notification when it fires. The app has to be running, which is what the
 /// in-app help tells the user; a closed or slept-through app fires late on

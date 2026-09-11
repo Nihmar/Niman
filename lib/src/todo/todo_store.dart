@@ -1,4 +1,4 @@
-/// File store over `todo.txt` / `done.txt` (plan/todo-tab.md T-TD-02,
+/// File store over `todo.txt` / `done.txt` (T-TD-02,
 /// migration + change probing in T-TD-03).
 ///
 /// The two files at the library root are the source of truth; the store

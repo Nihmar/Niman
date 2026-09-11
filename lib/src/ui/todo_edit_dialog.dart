@@ -1,4 +1,4 @@
-/// Add/edit dialog over one todo.txt line (plan/todo-tab.md T-TD-06).
+/// Add/edit dialog over one todo.txt line (T-TD-06).
 ///
 /// The dialog edits the description text (with `+`/`@`/`#` completion
 /// from the known-token pool; the current tokens also show as removable

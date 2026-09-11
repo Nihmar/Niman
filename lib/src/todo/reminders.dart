@@ -1,4 +1,4 @@
-/// OS reminders for `rem:` tags (plan/todo-tab.md T-TD-07).
+/// OS reminders for `rem:` tags (T-TD-07).
 ///
 /// The controller derives the wanted set from the snapshot
 /// ([wantedReminders]: open tasks with a future `rem:`) and hands it to

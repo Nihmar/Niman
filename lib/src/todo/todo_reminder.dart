@@ -1,5 +1,5 @@
 /// The reminder model: what a `rem:` tag becomes before anything
-/// platform-specific touches it (plan/todo-tab.md T-TD-07).
+/// platform-specific touches it (T-TD-07).
 ///
 /// Pure and dependency-free on purpose. The scheduling half lives in
 /// `reminders.dart` and the plugin half in `reminder_backend_plugin.dart`;

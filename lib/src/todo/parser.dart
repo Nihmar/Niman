@@ -1,4 +1,4 @@
-/// Line model + text round-trip for todo.txt (plan/todo-tab.md T-TD-01).
+/// Line model + text round-trip for todo.txt (T-TD-01).
 ///
 /// The grammar authority is `reference/description.svg` (the todo.txt
 /// project's syntax diagram):

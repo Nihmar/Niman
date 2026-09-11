@@ -1,4 +1,4 @@
-/// Deterministic colors for tag names (plan/todo-mockup.md T-TDM-02).
+/// Deterministic colors for tag names (T-TDM-02).
 ///
 /// The todo row's token chips dot each `+project` / `@context` / `#tag`
 /// (the old left accent bar's color, repurposed on 2026-09-07), so the

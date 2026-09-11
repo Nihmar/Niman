@@ -459,7 +459,7 @@ final class AppStrings {
   static String get todoOpen => _t('Open', 'Da fare');
   static String get todoDone => _t('Done', 'Fatte');
 
-  // Filter row + sheet (plan/todo-mockup.md T-TDM-03).
+  // Filter row + sheet (T-TDM-03).
   static String get todoAllDates => _t('All dates', 'Tutte le date');
   static String get todoFilter => _t('Filter', 'Filtra');
   static String get todoNoTokens =>

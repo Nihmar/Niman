@@ -29,7 +29,8 @@ final class DecodedNote {
 ///
 /// Opening a note and saving it without edits returns the original bytes;
 /// an edit serializes the document canonically while every opaque block is
-/// emitted verbatim. See plan/m-wysiwyg-editor.md for the measured reasons.
+/// emitted verbatim. See ANALYSIS.md § "WYSIWYG editor" for
+/// the measured reasons.
 final class MarkdownDocumentCodec {
   /// Creates the codec.
   const new();

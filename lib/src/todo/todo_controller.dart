@@ -1,5 +1,5 @@
 /// Session-bound todo state: migration-on-open + revision-driven refresh
-/// (plan/todo-tab.md T-TD-03).
+/// (T-TD-03).
 ///
 /// The shell owns one controller and opens it when it mounts, not when
 /// the Todo tab does: reminders must reconcile at every library open, and

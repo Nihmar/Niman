@@ -1,5 +1,5 @@
 /// The Android [ReminderBackend]: `flutter_local_notifications` +
-/// `timezone` (plan/todo-tab.md T-TD-07).
+/// `timezone` (T-TD-07).
 ///
 /// Everything here needs a device: method channels, the timezone
 /// database, AlarmManager. Nothing above it does, which is the point of

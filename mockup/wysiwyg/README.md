@@ -1,7 +1,7 @@
 # WYSIWYG mockups (T-WYS)
 
-Static, self-contained HTML mockups for the WYSIWYG editor plan
-(`plan/m-wysiwyg-editor.md`, branch `feat/wysiwyg-editor`).
+Static, self-contained HTML mockups for the WYSIWYG editor
+(`ANALYSIS.md` § "WYSIWYG editor", branch `feat/wysiwyg-editor`).
 
 Open `index.html` in any browser:
 

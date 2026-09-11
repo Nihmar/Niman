@@ -1,5 +1,5 @@
 /// The token + sort sheet behind the filter row's `Filter` pill
-/// (plan/todo-mockup.md T-TDM-03): one `FilterChip` per token found in
+/// (T-TDM-03): one `FilterChip` per token found in
 /// the due-range-narrowed pool (counts, AND semantics) and the sort
 /// choice chips.
 ///

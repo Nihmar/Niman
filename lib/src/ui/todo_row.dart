@@ -1,4 +1,4 @@
-/// One todo row (plan/todo-mockup.md T-TDM-02): a checkbox, the
+/// One todo row (T-TDM-02): a checkbox, the
 /// task's display text, and a subtitle with the due/reminder line plus
 /// a chip per `+project` / `@context` / `#tag` token the task carries
 /// (2026-09-07 user feedback: the tokens were invisible in the row; the

@@ -1,5 +1,5 @@
 /// The Todo tab: Open/Done lists over `todo.txt` / `done.txt`
-/// (plan/todo-tab.md T-TD-04).
+/// (T-TD-04).
 ///
 /// The shell owns the [TodoController] (its add action shares it); the
 /// tab opens the controller on mount, renders the Open/Done switch over

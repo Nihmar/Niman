@@ -1,4 +1,4 @@
-/// The todo.txt format, explained in the app (plan/todo-tab.md T-TD-08).
+/// The todo.txt format, explained in the app (T-TD-08).
 ///
 /// The Todo tab writes a plain `todo.txt`, and every part of a task is a
 /// piece of syntax on that line. The dialog hides most of it, but the
