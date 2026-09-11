@@ -340,6 +340,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     // input, this is when the first new frame actually painted (with the
     // navigation-bar selection animation the user said lags on Search).
     logNextFrame('shell', 'tab ${tab.name} first frame');
+    // #48: the frames after that first one, attributed to this switch. The
+    // shared slow-frame log flushes in batches, so a switch could never be
+    // told apart from the one before it.
+    FrameProbe.watch('shell', 'tab ${tab.name} frames');
     // T-TS-09 marker: brackets the fade so a slow frame can be attributed
     // to the switch itself (before it) or to what settles after it. Only
     // the latest switch reports: a rapid double-tap's stale marker would
