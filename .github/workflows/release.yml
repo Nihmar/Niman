@@ -141,7 +141,9 @@ jobs:
             chown -R builder:builder /pkg
             su builder -c "cd /pkg && makepkg --noconfirm"
           '
-          mv "$STAGE"/niman-*.pkg.tar.zst dist/
+          # makepkg ran as the container's unprivileged user, so the
+          # outputs are owned by that uid; sudo to move them on the host.
+          sudo mv "$STAGE"/niman-*.pkg.tar.zst dist/
 
       - uses: actions/upload-artifact@v4
         with:

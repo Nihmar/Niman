@@ -19,6 +19,9 @@ license=('MIT')
 depends=('gtk3' 'libsecret' 'libayatana-appindicator')
 provides=('niman')
 conflicts=('niman')
+# Prebuilt release binaries carry no debug symbols: skip the (empty) debug
+# package split and its gdb-add-index noise.
+options=('!debug')
 source=("niman-${pkgver}-linux-x64.tar.gz::https://github.com/Nihmar/Niman/releases/download/v${pkgver}/niman-${pkgver}-linux-x64.tar.gz")
 sha256sums=('SKIP')
 
