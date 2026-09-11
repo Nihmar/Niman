@@ -18,28 +18,65 @@ final class WatchBatch {
   final List<String> resyncDirs;
 }
 
+/// One raw change, as [FileWatcher]'s coalescing sees it.
+///
+/// `dart:io` seals [FileSystemEvent] and its subclasses, so nothing
+/// outside the SDK can build one. The OS stream is mapped to this on the
+/// way in, which is what lets a test drive the coalescing from a stream
+/// it owns rather than from real filesystem notifications, whose arrival
+/// time is the machine's to decide.
+final class WatchChange {
+  /// A change to [path].
+  const new(this.path) : destination = null, isMove = false;
+
+  /// A rename away from [path], to [destination] when the OS reports one.
+  const new move(this.path, {this.destination}) : isMove = true;
+
+  /// The changed absolute path; for a move, the OLD path.
+  final String path;
+
+  /// Where a move landed, when the OS knows; null otherwise.
+  final String? destination;
+
+  /// Whether this is a move, whose parent directory needs a full resync.
+  final bool isMove;
+}
+
+/// Where a [FileWatcher] gets its raw changes: the OS watch on the root,
+/// or, in tests, a stream the test feeds itself.
+typedef WatchSource = Stream<WatchChange> Function(String root);
+
 /// Recursively watches [root] for changes, coalescing raw events into
-/// [WatchBatch]es after [debounce] of quiet.
+/// [WatchBatch]es: the first change opens a window of [debounce], and
+/// everything arriving while it is open ships as one batch.
+///
+/// The window is not extended by later changes, so a burst longer than
+/// [debounce] arrives as several batches instead of holding the index
+/// back until the burst ends.
 ///
 /// On Linux the recursive watch is inotify-backed; on Android the same
 /// mechanism applies. When the OS cannot deliver every event (FUSE, inotify
 /// limits), the periodic full rescan in the library controller is the
 /// safety net (see the M1 plan risks).
 final class FileWatcher {
-  /// Creates a watcher for [root] with the given [debounce] window.
-  new(this.root, {this.debounce = defaultDebounce});
+  /// Creates a watcher for [root] with the given [debounce] window;
+  /// [source] replaces the OS watch and is injected in tests.
+  new(this.root, {this.debounce = defaultDebounce, WatchSource? source})
+    : _source = source ?? _watchFileSystem;
 
-  /// The debounce window between the last event and the batch emission.
+  /// How long a batching window stays open, by default.
   static const defaultDebounce = Duration(milliseconds: 250);
 
-  final AppLogger _log = const AppLogger(name: 'watcher');
+  static const AppLogger _log = AppLogger(name: 'watcher');
 
   /// The watched root directory (absolute path).
   final String root;
 
-  /// How long after the last event before a batch is emitted.
+  /// How long the batching window stays open after the change that
+  /// opened it. Later changes do not extend it.
   final Duration debounce;
 
+  final WatchSource _source;
   final StreamController<WatchBatch> _controller =
       StreamController<WatchBatch>.broadcast();
   final Set<String> _paths = <String>{};
@@ -47,7 +84,7 @@ final class FileWatcher {
 
   /// Cancelled in [stop]; the lint cannot see the cross-method lifecycle.
   // ignore: cancel_subscriptions
-  StreamSubscription<FileSystemEvent>? _subscription;
+  StreamSubscription<WatchChange>? _subscription;
   Timer? _timer;
   bool _started = false;
   bool _closed = false;
@@ -55,22 +92,38 @@ final class FileWatcher {
   /// Batches of changed paths, coalesced by the debounce window.
   Stream<WatchBatch> get events => _controller.stream;
 
-  /// Begins watching. Each emitted [FileSystemEvent] is coalesced; move
-  /// events additionally resync their parent directory, since the destination
-  /// may be unknown to the OS event.
+  /// Begins watching. Each change is coalesced; move events additionally
+  /// resync their parent directory, since the destination may be unknown
+  /// to the OS event.
   Future<void> start() async {
     if (_started || _closed) {
       throw StateError('Watcher is already started or closed');
     }
     _started = true;
     _log.info('watcher start: "$root" (recursive)');
-    final stream = Directory(root).watch(recursive: true);
-    _listen(stream);
+    _listen(_source(root));
   }
 
-  void _listen(Stream<FileSystemEvent> stream) {
+  static Stream<WatchChange> _watchFileSystem(String root) =>
+      Directory(root).watch(recursive: true).map(_toChange);
+
+  static WatchChange _toChange(FileSystemEvent event) {
+    if (event is FileSystemMoveEvent) {
+      // The destination may be unknown to the OS; the parent is resynced
+      // either way, and the destination indexed when it is known.
+      _log.debug(
+        'watcher event: move "${event.path}" -> '
+        '${event.destination ?? 'unknown'}',
+      );
+      return WatchChange.move(event.path, destination: event.destination);
+    }
+    _log.debug('watcher event: ${_typeName(event)} "${event.path}"');
+    return WatchChange(event.path);
+  }
+
+  void _listen(Stream<WatchChange> stream) {
     _subscription = stream.listen(
-      _onEvent,
+      _onChange,
       onError: (Object error) {
         // Transient FS errors are recoverable via the periodic rescan, but
         // they are exactly what this log is meant to surface.
@@ -83,29 +136,20 @@ final class FileWatcher {
     );
   }
 
-  void _onEvent(FileSystemEvent event) {
+  void _onChange(WatchChange change) {
     if (_closed) return;
-    if (event is FileSystemMoveEvent) {
-      // The destination may be unknown to the OS; resync the parent either
-      // way, and index the destination when it is known.
-      _log.debug(
-        'watcher event: move "${event.path}" -> '
-        '${event.destination ?? 'unknown'}',
-      );
-      _resyncDirs.add(p.dirname(event.path));
-      _paths.add(event.path);
-      final destination = event.destination;
-      if (destination != null) {
-        _paths.add(destination);
-      }
-    } else {
-      _log.debug('watcher event: ${_typeName(event)} "${event.path}"');
-      _paths.add(event.path);
+    if (change.isMove) {
+      _resyncDirs.add(p.dirname(change.path));
+    }
+    _paths.add(change.path);
+    final destination = change.destination;
+    if (destination != null) {
+      _paths.add(destination);
     }
     _timer ??= Timer(debounce, _flush);
   }
 
-  String _typeName(FileSystemEvent event) {
+  static String _typeName(FileSystemEvent event) {
     return switch (event) {
       FileSystemCreateEvent() => 'create',
       FileSystemModifyEvent() => 'modify',
