@@ -7,9 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/editor/wysiwyg/markdown_parse.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/preview/aspect_image.dart';
+import 'package:niman/src/preview/block_parse.dart';
 import 'package:niman/src/preview/html_table.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/math_syntax.dart';
@@ -21,17 +21,16 @@ import 'package:path/path.dart' as p;
 
 /// The windowed Markdown preview (M2 T-M2-04).
 ///
-/// Parses the whole document once per change (using flutter_markdown_plus's
-/// MarkdownBuilder, which builds a widget per AST block) but lays out
-/// **only the blocks the viewport shows** via a [SliverList]. This is the
-/// design's windowing rule: the package's own `Markdown` view hands the
-/// whole document to an eager `Column`/`ListView` (measured ~2.1 s for a
-/// 200 KB buffer) — never do that.
+/// Parses the document's block phase once per change, and each block's
+/// inline content when the block first builds (block_parse.dart — the old
+/// whole-document parse split 14 ms of blocks and 378 ms of inlines on the
+/// 931K note), laying out **only the blocks the viewport shows** via a
+/// [SliverList]. This is the design's windowing rule: the package's own
+/// `Markdown` view hands the whole document to an eager `Column`/`ListView`
+/// (measured ~2.1 s for a 200 KB buffer) — never do that.
 ///
-/// The parsed block widgets are rebuilt on every data/style change (the
-/// caller debounces the source); widget construction is ~O(doc), layout is
-/// O(visible). Tables, task lists, footnotes, strikethrough and links come
-/// from the GFM extension set + the package's own builders; code blocks are
+/// Tables, task lists, footnotes, strikethrough and links come from the
+/// GFM extension set + the package's own builders; code blocks are
 /// highlighted by [syntaxHighlighter].
 final class MarkdownPreview extends StatefulWidget {
   /// Creates a preview over [data].
@@ -123,7 +122,30 @@ final class MarkdownPreview extends StatefulWidget {
 final class _MarkdownPreviewState extends State<MarkdownPreview>
     implements MarkdownBuilderDelegate {
   final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
-  List<Widget>? _children;
+
+  /// The parsed top-level blocks (null before the first parse completes) —
+  /// the block phase only (block_parse.dart): the 4 % of the old
+  /// whole-document parse cost, with each block's inline content still raw.
+  List<md.Node>? _nodes;
+
+  /// Per-block inline results ([withInlines]), filled when the block first
+  /// builds; fresh on every re-parse.
+  List<List<md.Node>?>? _inlines;
+
+  /// The per-pass parser state: one document covers every block inlined
+  /// this pass (footnote references must number as a whole-document parse
+  /// would — blocks build in the viewport's order, not the note's — see
+  /// [prepareInlines]).
+  late md.Document? _doc;
+
+  /// The [MarkdownBuilder] for this pass (style-dependent; built alongside
+  /// [_nodes]).
+  late MarkdownBuilder? _builder;
+
+  /// The spacing between two blocks this pass (the style sheet's; read
+  /// where the sheet is built in [_applyParse]).
+  double _spacing = 8;
+
   late final MathCache _mathCache = widget.mathCache ?? MathCache();
 
   /// Bumped per parse so a stale isolate result is dropped.
@@ -134,16 +156,11 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
   Timer? _settleTimer;
 
   /// Below this size the parse stays synchronous (the divide is a single
-  /// frame's cost); above it the whole parse runs on a background isolate
+  /// frame's cost); above it the block phase runs on a background isolate
   /// so a 931K note never janks the UI (the measured 418 ms whole-doc
-  /// parse, T-M2-05).
+  /// parse, T-M2-05 — its inline phase now runs per block as the blocks
+  /// build instead). Even the block phase alone is ~3 ms on the 931K note.
   static const int _syncParseLimit = 64 * 1024;
-
-  /// Blocks built in the parse's first frame, and per later turn of the
-  /// event loop (T-PP-22). The first chunk is a few tall windows' worth, so
-  /// ordinary notes build in one go and only novel-length ones stream.
-  static const int _firstChunk = 600;
-  static const int _chunkSize = 480;
 
   @override
   void didChangeDependencies() {
@@ -220,14 +237,15 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     final clock = Stopwatch()..start();
 
     if (source.length <= _syncParseLimit) {
-      _applyParse(revision, source, _parseSyncSource(source), offset);
+      _applyParse(revision, source, parseBlocks(source), offset);
       const AppLogger(name: 'preview').debug(
-        'parse sync: ${source.length} chars in '
+        'parse sync: ${_nodes?.length} blocks, ${source.length} chars in '
         '${clock.elapsedMilliseconds}ms',
       );
       return;
     }
-    // Large document: parse off the UI isolate (the AST is plain data).
+    // Large document: the block phase off the UI isolate (the nodes are
+    // plain data).
     unawaited(
       PreviewWork.run('parse', source).then((result) {
         if (!mounted || revision != _parseRevision) return;
@@ -237,16 +255,13 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           return;
         }
         const AppLogger(name: 'preview').debug(
-          'parse async: ${source.length} chars in '
+          'parse async: ${result.length} blocks, ${source.length} chars in '
           '${clock.elapsedMilliseconds}ms',
         );
         _applyParse(revision, source, result, offset);
       }),
     );
   }
-
-  static List<md.Node> _parseSyncSource(String source) =>
-      parseMarkdownDocument(source);
 
   void _applyParse(
     int revision,
@@ -270,7 +285,8 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           ),
         )
         .merge(widget.styleSheet);
-    final builder = MarkdownBuilder(
+    _spacing = styleSheet.blockSpacing ?? 8.0;
+    _builder = MarkdownBuilder(
       delegate: this,
       selectable: false,
       styleSheet: styleSheet,
@@ -301,97 +317,28 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       paddingBuilders: const {},
       listItemCrossAxisAlignment: MarkdownListItemCrossAxisAlignment.baseline,
     );
-    // One sliver child per top-level node, not one per built widget: the
-    // package appends a block-spacing `SizedBox` after every block, so its
-    // flat list has more entries than the source has blocks and the scroll
-    // map's per-block measurements drifted by one every block (T-PP-22).
-    // Grouping a node's widgets keeps the map's block index = node index
-    // (the locator tests assert the two counts match).
-    final map = widget.scrollMap;
-    final children = <Widget>[];
-    var built = 0;
-    // The whole document's widgets used to be built in one frame: ~55 ms on
-    // a 934 KB note, paid on every typing pause (the debounced parse). The
-    // first window's worth goes out now, then a chunk per turn of the event
-    // loop, so frames and input interleave with the build (T-PP-22).
-    // The package spaces the blocks it puts inside one parent, and every
-    // block here is built alone — so the gap between two blocks is this
-    // pane's to add. Until the blocks were measured properly it came out
-    // of the estimates they were stretched to, which is why removing that
-    // stretch left the document with none at all.
-    final spacing = styleSheet.blockSpacing ?? 8.0;
-
-    void buildBlocks(int limit) {
-      while (built < limit && built < nodes.length) {
-        final block = builder.build([nodes[built]]);
-        final content = Padding(
-          padding: EdgeInsets.only(bottom: spacing),
-          child: block.length == 1
-              ? block.single
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: block,
-                ),
-        );
-        if (map == null) {
-          children.add(content);
-        } else {
-          final index = children.length;
-          // The sliver forces each child's extent (the map's estimate), so
-          // the measure sits inside an unbounded box: it reports the block's
-          // natural height, which the map then uses as the real extent.
-          //
-          // Unbounded at *both* ends. The sliver's constraint is tight, and
-          // an OverflowBox inherits the minimum it does not override — so
-          // with only `maxHeight` relaxed every block was stretched to the
-          // estimate it was supposed to correct, reported that back as its
-          // height, and kept it forever: a short block (a heading, a quote,
-          // a display formula) sat in a box sized by its line count, and
-          // the map's own average drifted upward with it (device report,
-          // 2026-09-10).
-          children.add(
-            OverflowBox(
-              alignment: Alignment.topCenter,
-              minHeight: 0,
-              maxHeight: double.infinity,
-              child: _BlockMeasure(
-                onHeight: (height) => _onBlockMeasured(index, height),
-                child: content,
-              ),
-            ),
-          );
-        }
-        built++;
-      }
-    }
-
-    buildBlocks(_firstChunk);
+    // The inline phase is not paid here: each block pays for it when it
+    // builds ([_blockAt]) — ~0.1 ms a block, the visible blocks first, so a
+    // keystroke no longer blocks on the whole document's inlines (378 ms on
+    // the 931K note; block_parse.dart).
+    final doc = makeDocument();
+    prepareInlines(doc, nodes);
     setState(() {
-      _children = children;
+      _nodes = nodes;
+      _doc = doc;
+      _inlines = List<List<md.Node>?>.filled(nodes.length, null);
     });
+    final map = widget.scrollMap;
     map?.rebuild(source, lineOffset: lineOffset);
-    // The map pairs its blocks with these children by position, so a
-    // parser the locator does not agree with puts the two panes out of
-    // step for the rest of the document. Say so rather than drift.
+    // The map pairs its blocks with these nodes by position, so a parser
+    // the locator does not agree with puts the two panes out of step for
+    // the rest of the document. Say so rather than drift.
     if (map != null && map.blockStartLines.length != nodes.length) {
       const AppLogger(name: 'preview').warning(
-        'scroll map: ${nodes.length} blocks built against '
+        'scroll map: ${nodes.length} blocks against '
         '${map.blockStartLines.length} located',
       );
     }
-    if (built < nodes.length) {
-      void step() {
-        if (!mounted || revision != _parseRevision) return;
-        buildBlocks(built + _chunkSize);
-        setState(() {});
-        if (built < nodes.length) Timer.run(step);
-      }
-
-      Timer.run(step);
-    }
-    // AST → widget-tree construction is the preview's other O(doc) cost;
-    // the parse logs above separate it from the Markdown parse itself.
     const AppLogger(name: 'preview').debug(
       'apply parse: ${nodes.length} top-level nodes, '
       '${source.length} chars in ${clock.elapsedMilliseconds}ms',
@@ -413,19 +360,71 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     return TextSpan(style: styleSheet.code, text: code);
   }
 
+  /// The widget for block [index]: its inline content is paid here, on the
+  /// block's first build only — ~0.1 ms a block (block_parse.dart; the old
+  /// whole-document inline phase was 378 ms, paid up front). One sliver
+  /// child per top-level node, not one per built widget: the package
+  /// appends a block-spacing `SizedBox` after every block, so its flat list
+  /// has more entries than the source has blocks and the scroll map's
+  /// per-block measurements drifted by one every block (T-PP-22); grouping a
+  /// node's widgets keeps the map's block index = node index (the locator
+  /// tests assert the two counts match). The package spaces the blocks it
+  /// puts inside one parent, and every block here is built alone — so the
+  /// gap between two blocks is this pane's to add.
+  Widget _blockAt(int index) {
+    var inlines = _inlines?[index];
+    if (inlines == null) {
+      inlines = withInlines(_doc!, _nodes![index]);
+      _inlines![index] = inlines;
+    }
+    final block = _builder!.build(inlines);
+    final content = Padding(
+      padding: EdgeInsets.only(bottom: _spacing),
+      child: block.length == 1
+          ? block.single
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: block,
+            ),
+    );
+    final map = widget.scrollMap;
+    if (map == null) return content;
+    // The sliver forces each child's extent (the map's estimate), so the
+    // measure sits inside an unbounded box: it reports the block's natural
+    // height, which the map then uses as the real extent.
+    //
+    // Unbounded at *both* ends. The sliver's constraint is tight, and an
+    // OverflowBox inherits the minimum it does not override — so with only
+    // `maxHeight` relaxed every block was stretched to the estimate it was
+    // supposed to correct, reported that back as its height, and kept it
+    // forever: a short block (a heading, a quote, a display formula) sat in
+    // a box sized by its line count, and the map's own average drifted
+    // upward with it (device report, 2026-09-10).
+    return OverflowBox(
+      alignment: Alignment.topCenter,
+      minHeight: 0,
+      maxHeight: double.infinity,
+      child: _BlockMeasure(
+        onHeight: (height) => _onBlockMeasured(index, height),
+        child: content,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final children = _children ?? const <Widget>[];
+    final count = _nodes?.length ?? 0;
     final map = widget.scrollMap;
     map?.contentInset = widget.padding.top;
     final delegate = map == null
         ? SliverChildBuilderDelegate(
-            (context, index) => children[index],
-            childCount: children.length,
+            (context, index) => _blockAt(index),
+            childCount: count,
           )
         : _MappedChildDelegate(
-            (context, index) => children[index],
-            childCount: children.length,
+            (context, index) => _blockAt(index),
+            childCount: count,
             map: map,
           );
     return NotificationListener<ScrollNotification>(

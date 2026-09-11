@@ -1,19 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count.dart';
-import 'package:niman/src/preview/html_table.dart';
-import 'package:niman/src/preview/math_syntax.dart';
-import 'package:niman/src/preview/wikilink.dart';
+import 'package:niman/src/preview/block_parse.dart';
 
-/// Off-isolate work for the preview (T-M2-04/05/08): the whole-document
-/// markdown parse and the note stats (word count + heading outline) run in
-/// a spawned isolate so a 931K note never blocks the UI (~420 ms parse;
-/// the stats cost far more — see [statsFor]).
+/// Off-isolate work for the preview (T-M2-04/05/08): the markdown block
+/// phase and the note stats (word count + heading outline) run in a
+/// spawned isolate so a 931K note never blocks the UI. The inline phase is
+/// not here: it is the 96 % of the old whole-document parse, and the
+/// preview pays it per block as each block builds (block_parse.dart);
 ///
 /// Deliberately NOT `Isolate.run`: its wrapper closes over the calling
 /// zone, and a closure created inside a widget State carries the State's
@@ -24,7 +22,8 @@ import 'package:niman/src/preview/wikilink.dart';
 ///
 /// Results (task → returned message):
 ///
-/// * parse: `run('parse', source)` → the AST (`List` of `md.Node`s);
+/// * parse: `run('parse', source)` → the top-level blocks (`List` of
+///   `md.Node`s) with inlines left raw ([parseBlocks]);
 /// * stats: `run('stats', source)` → a record `(int words,
 ///   outline rows)` where rows are `List` of strings;
 /// * read: `run('read', path)` → the note's text, and deliberately not its
@@ -102,18 +101,8 @@ typedef _Work = ({SendPort reply, String task, String source});
   );
 }
 
-/// Parses [source] into the preview's AST (top-level; the isolate task).
-List<md.Node> _parseSource(String source) {
-  final document = md.Document(
-    blockSyntaxes: <md.BlockSyntax>[
-      const MathBlockSyntax(),
-      ...md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-    ],
-    inlineSyntaxes: [EmbedInlineSyntax(), WikilinkInlineSyntax()],
-    extensionSet: md.ExtensionSet.gitHubFlavored,
-    encodeHtml: false,
-  );
-  return splitHtmlTables(
-    splitInlineMath(document.parseLines(const LineSplitter().convert(source))),
-  );
-}
+/// The preview's block phase for [source] (the isolate task): the
+/// top-level blocks with inlines left raw. The inline phase runs per block
+/// on the render side (block_parse.dart) — measured on the 931K note the
+/// old whole-document parse split 14 ms of blocks and 378 ms of inlines.
+List<md.Node> _parseSource(String source) => parseBlocks(source);
