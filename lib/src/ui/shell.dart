@@ -15,6 +15,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -452,17 +453,22 @@ final class _LibraryShellState extends State<_LibraryShell>
     setState(() => _noteKind = type);
   }
 
+  /// The GUI behind the open note's kind (T-TK-02): null for a plain
+  /// note, no note, or a `type` without a registered GUI (a `type: list`
+  /// note is a list, everything else is a document).
+  NoteKindGUI? get _kindGui => NoteKinds.forType(_noteKind);
+
   /// Whether the app bar shows the editor/preview eye action: hidden in
   /// kind mode (the note is a list, not a document) unless the user is
   /// in raw-edit mode.
   bool get _previewToggleVisible =>
-      _previewEnabled && (_noteKind == null || _kindRawMode);
+      _previewEnabled && (_kindGui == null || _kindRawMode);
 
-  /// The kind toggle actions (T-TK-05): a kinded note offers the raw
-  /// editor (pencil); in raw mode the kind GUI is offered back. Empty
-  /// when no kinded note is open.
+  /// The kind toggle actions (T-TK-05): a note whose kind has a GUI offers
+  /// the raw editor (pencil); in raw mode the kind GUI is offered back.
+  /// Empty when the open note has no kind GUI (including unknown `type`s).
   List<Widget> get _kindActions {
-    if (_noteKind == null) return const [];
+    if (_kindGui == null) return const [];
     return [
       if (_kindRawMode)
         IconButton(
