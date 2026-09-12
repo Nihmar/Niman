@@ -39,7 +39,10 @@ enum AppLanguage {
   hindi('hi'),
 
   /// Italian.
-  italian('it');
+  italian('it'),
+
+  /// Dutch.
+  dutch('nl');
 
   new(this.id);
 
@@ -70,6 +73,7 @@ final class AppLanguages {
     AppLanguage.japanese,
     AppLanguage.hindi,
     AppLanguage.italian,
+    AppLanguage.dutch,
   ];
 
   /// Bumped whenever [resolved] changes; the app root listens to it and
