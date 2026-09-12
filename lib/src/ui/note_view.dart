@@ -292,6 +292,25 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// indicator.
   late final EditorLineView _editorLines = EditorLineView();
 
+  /// The find bar builder, hoisted so the cached editor pane below keeps a
+  /// stable closure (a fresh closure per build would defeat the identity
+  /// cache on every frame).
+  PreferredSizeWidget _findBuilder(
+    BuildContext context,
+    CodeFindController controller,
+    bool readOnly,
+  ) => NimanFindPanel(controller: controller, readOnly: readOnly);
+
+  /// The source-editor pane, cached by identity (the 0e3571e pattern): when
+  /// the parent rebuilds with unchanged editor inputs — e.g. a pure
+  /// editor↔preview flip — the identical widget instance makes the
+  /// framework skip the whole editor subtree, so the row numbers and fold
+  /// markers are not rebuilt on every switch. Any input change (path,
+  /// toggles, note font size) rebuilds the pane once.
+  Widget? _editorPaneCache;
+  ({String path, bool numbers, bool autofocus, double fontSize})?
+  _editorPaneConfig;
+
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
   /// is a revision, not a text copy.
   int _revision = 0;
@@ -637,11 +656,27 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       scrollController: _scroll,
       onIndicator: _editorLines.attach,
       findController: _findController,
-      findBuilder: (context, controller, readOnly) =>
-          NimanFindPanel(controller: controller, readOnly: readOnly),
+      findBuilder: _findBuilder,
       shortcutsActivators: const NimanShortcutsActivatorsBuilder(),
     ),
   );
+
+  /// The source editor pane, served from the identity cache above. Only the
+  /// source editor is cached: the WYSIWYG surface takes the live text every
+  /// build by design.
+  Widget _sourcePane() {
+    final config = (
+      path: widget.path,
+      numbers: widget.showLineNumbers,
+      autofocus: widget.autofocusEditor,
+      fontSize: AppTextScales.noteFontSize,
+    );
+    if (_editorPaneCache == null || _editorPaneConfig != config) {
+      _editorPaneConfig = config;
+      _editorPaneCache = _buildEditor();
+    }
+    return _editorPaneCache!;
+  }
 
   /// The editor pane: the WYSIWYG surface or the source editor (T-WYS-05).
   ///
@@ -656,7 +691,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           spellCheck: widget.spellCheck,
           activeItems: _wysiwygActive,
         )
-      : _buildEditor();
+      : _sourcePane();
 
   /// The preview, at the *note* text size rather than the interface one
   /// (T-M6-12).

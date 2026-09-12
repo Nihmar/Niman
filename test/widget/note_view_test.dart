@@ -309,5 +309,45 @@ void main() {
       await tester.pump();
       expect(tester.state<ScrollableState>(scrollable).position.pixels, offset);
     });
+
+    testWidgets('a preview switch does not rebuild the editor subtree', (
+      tester,
+    ) async {
+      Widget view({required bool preview, bool numbers = true}) => _app(
+        _view(
+          path: '/notes/a.md',
+          readNote: (_) async => '# Title\n\nbody\n',
+          showPreview: preview,
+          showLineNumbers: numbers,
+        ),
+      );
+      await tester.pumpWidget(view(preview: false));
+      await tester.pump();
+      final editor = tester.widget<NoteEditor>(find.byType(NoteEditor));
+      final codeElement = tester.element(find.byType(CodeEditor));
+      // Flip to the preview and back: same note, same toggles.
+      await tester.pumpWidget(view(preview: true));
+      await tester.pump();
+      await tester.pumpWidget(view(preview: false));
+      await tester.pump();
+      // Identical pane widget, untouched element: the framework skipped the
+      // whole editor subtree, fold markers included.
+      expect(
+        identical(tester.widget<NoteEditor>(find.byType(NoteEditor)), editor),
+        isTrue,
+      );
+      expect(
+        identical(tester.element(find.byType(CodeEditor)), codeElement),
+        isTrue,
+      );
+      // A real input change still rebuilds the pane once.
+      await tester.pumpWidget(view(preview: false, numbers: false));
+      await tester.pump();
+      expect(
+        identical(tester.widget<NoteEditor>(find.byType(NoteEditor)), editor),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+    });
   });
 }
