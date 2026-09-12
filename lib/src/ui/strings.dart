@@ -15,6 +15,7 @@ import 'package:niman/src/ui/strings/de.dart';
 import 'package:niman/src/ui/strings/en.dart';
 import 'package:niman/src/ui/strings/es.dart';
 import 'package:niman/src/ui/strings/eu.dart';
+import 'package:niman/src/ui/strings/fi.dart';
 import 'package:niman/src/ui/strings/fr.dart';
 import 'package:niman/src/ui/strings/gl.dart';
 import 'package:niman/src/ui/strings/hi.dart';
@@ -60,6 +61,7 @@ final class AppStrings {
     AppLanguage.catalan: CatalanStrings(),
     AppLanguage.galician: GalicianStrings(),
     AppLanguage.czech: CzechStrings(),
+    AppLanguage.finnish: FinnishStrings(),
     AppLanguage.polish: PolishStrings(),
   };
 
@@ -202,6 +204,7 @@ final class AppStrings {
     AppLanguage.catalan => 'Català',
     AppLanguage.galician => 'Galego',
     AppLanguage.czech => 'Čeština',
+    AppLanguage.finnish => 'Suomi',
     AppLanguage.polish => 'Polski',
   };
 
