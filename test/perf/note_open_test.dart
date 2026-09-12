@@ -15,6 +15,10 @@
 @Timeout(Duration(minutes: 5))
 library;
 
+// The whole point of this file is to print its measurements into the test
+// log, so the print lint is off for it.
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -42,8 +46,10 @@ String _mathNote({required int blocks}) {
       )
       ..writeln()
       ..writeln(r'$$')
-      ..writeln('\\sum_{k=0}^{$i} \\frac{(-1)^k}{2k+1} '
-          '= \\arctan(1) + O(2^{-$i})')
+      ..writeln(
+        '\\sum_{k=0}^{$i} \\frac{(-1)^k}{2k+1} '
+        '= \\arctan(1) + O(2^{-$i})',
+      )
       ..writeln(r'$$')
       ..writeln();
   }
@@ -57,8 +63,10 @@ void main() {
     final text = _mathNote(blocks: 800);
     final file = File('${dir.path}/Geometry.md');
     await file.writeAsString(text);
-    print('fixture: ${text.length} chars, ${'\n'.allMatches(text).length + 1} '
-        'lines, ${r'$'.allMatches(text).length} dollars');
+    print(
+      'fixture: ${text.length} chars, ${'\n'.allMatches(text).length + 1} '
+      'lines, ${r'$'.allMatches(text).length} dollars',
+    );
 
     final readClock = Stopwatch()..start();
     final loaded = await PreviewWork.run('read', file.path);
@@ -114,9 +122,11 @@ void main() {
     final fast = _ms(() => viaScan = outlineOfText(text));
     final stats = _ms(() => statsFor(text));
 
-    print('${file.uri.pathSegments.last}: ${text.length} chars, '
-        '${'\n'.allMatches(text).length + 1} lines, '
-        '${r'$'.allMatches(text).length} dollars');
+    print(
+      '${file.uri.pathSegments.last}: ${text.length} chars, '
+      '${'\n'.allMatches(text).length + 1} lines, '
+      '${r'$'.allMatches(text).length} dollars',
+    );
     print('  read:          $read ms   <- all the open path pays now');
     print('  countWords:    $words ms');
     print('  outlineOfText: $fast ms   (${viaScan.length} headings)');
