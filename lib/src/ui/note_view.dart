@@ -19,7 +19,6 @@ import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/outline.dart';
-import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
@@ -38,8 +37,11 @@ import 'package:niman/src/preview/scroll_map.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/ui/heading_level_sheet.dart';
+import 'package:niman/src/ui/note_text_offsets.dart';
+import 'package:niman/src/ui/note_view_adapters.dart';
+import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
@@ -332,14 +334,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   /// The [UnsavedNote] view handed to [_unsaved]; it reads this state's
   /// revision pair live, so it cannot hold stale text.
-  late final _UnsavedNoteAdapter _unsavedNote = _UnsavedNoteAdapter(this);
+  late final UnsavedNoteAdapter _unsavedNote = UnsavedNoteAdapter(
+    notePath: () => widget.path,
+    loading: () => _loading,
+    revision: () => _revision,
+    lastSavedRevision: () => _lastSavedRevision,
+    saveForClose: _saveForClose,
+  );
 
   /// The loaded note's kind (the frontmatter `type` value, null = plain
   /// note); null again while a load is in flight.
   String? _noteKind;
 
   /// The kind GUIs' window onto the note (T-TK-02).
-  late final _NoteKindHost _kindHost;
+  late final NoteKindHostAdapter _kindHost;
 
   @override
   void initState() {
@@ -354,7 +362,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
         : widget.controller!;
     _findController = CodeFindController(_controller);
-    _kindHost = _NoteKindHost(this);
+    _kindHost = NoteKindHostAdapter(
+      noteText: () => _currentText,
+      applyNoteEdit: _applyKindEdit,
+    );
     _unsaved = widget.unsavedTracker;
     _unsaved?.register(_unsavedNote);
     widget.spellCheck?.addListener(_onSpellCheckChanged);
@@ -514,7 +525,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       // selection-only change schedules no save (see _onValueChanged).
       if (widget.initialCaretOffset case final caret?) {
         final at = caret.clamp(0, text.length);
-        final pos = _linePosition(text, at);
+        final pos = linePosition(text, at);
         _controller.selection = CodeLineSelection.collapsed(
           index: pos.line,
           offset: pos.offset,
@@ -848,7 +859,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       setState(() {
         _wordCount = stats.words;
         _outline = stats.outline
-            .map(_parseOutlineRow)
+            .map(parseOutlineRow)
             .whereType<OutlineEntry>()
             .toList();
       });
@@ -869,19 +880,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   static const int _syncWorkLimit = 64 * 1024;
 
   int _statsRevision = 0;
-
-  static OutlineEntry? _parseOutlineRow(String row) {
-    final parts = row.split('|');
-    if (parts.length < 3) return null;
-    final line = int.tryParse(parts[0]);
-    final level = int.tryParse(parts[1]);
-    if (line == null || level == null) return null;
-    return OutlineEntry(
-      line: line,
-      level: level,
-      text: parts.sublist(2).join('|'),
-    );
-  }
 
   /// Opens the outline sheet and jumps to whatever was picked.
   Future<void> _openOutline() async {
@@ -975,7 +973,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
     if (source == null) return;
     final resolved = await source.resolveMarkdown(href);
-    log.debug('md link "$href" -> ${_describe(resolved)}');
+    log.debug('md link "$href" -> ${describeResolved(resolved)}');
     await _applyResolved(resolved);
   }
 
@@ -1005,7 +1003,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // The documented form: `[[target]]`, `[[target#heading]]`,
     // `[[target|alias]]` — the first part is the target.
     var resolved = await source.resolveWiki(ref.target);
-    log.debug('wikilink target "${ref.target}" -> ${_describe(resolved)}');
+    final outcome = describeResolved(resolved);
+    log.debug('wikilink target "${ref.target}" -> $outcome');
     var anchor = ref.heading;
     if (resolved is! ResolvedNote && ref.alias != null) {
       // Label-first links — `[[a label|filename]]`, the display text
@@ -1026,7 +1025,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           'part "$aliasTarget" as the target',
         );
         final swapped = await source.resolveWiki(aliasTarget.trim());
-        log.debug('wikilink alias "$aliasTarget" -> ${_describe(swapped)}');
+        final swappedOutcome = describeResolved(swapped);
+        log.debug('wikilink alias "$aliasTarget" -> $swappedOutcome');
         if (swapped is ResolvedNote || swapped is AmbiguousNote) {
           resolved = swapped;
           anchor = aliasHeading;
@@ -1041,18 +1041,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       return;
     }
     await _applyResolved(resolved);
-  }
-
-  /// One-line summary of a resolution, for the link trace.
-  static String _describe(ResolveResult resolved) {
-    return switch (resolved) {
-      ExternalLink(:final url) => 'ExternalLink($url)',
-      LocalAnchor(:final heading) => 'LocalAnchor(#$heading)',
-      ResolvedNote(:final note) => 'ResolvedNote(${note.path})',
-      AmbiguousNote(:final candidates) =>
-        'AmbiguousNote(${candidates.length} candidates)',
-      UnresolvedNote(:final target) => 'UnresolvedNote("$target")',
-    };
   }
 
   Future<void> _applyResolved(ResolveResult resolved) async {
@@ -1451,8 +1439,25 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!_loading && _frontmatterError != null)
-                  _frontmatterWarning(context, _frontmatterError!),
-                _statusRow(context),
+                  FrontmatterWarningBanner(message: _frontmatterError!),
+                NoteStatusRow(
+                  loading: _loading,
+                  splitPreview: widget.splitPreview,
+                  showPreview: widget.showPreview,
+                  showWysiwyg: widget.showWysiwyg,
+                  spellCheckAvailable:
+                      widget.spellCheck != null && widget.spellCheck!.available,
+                  canSwitchEditorKind: widget.onEditorKindChanged != null,
+                  wordCount: _wordCount,
+                  statusText: _status,
+                  statusActions: widget.statusActions,
+                  onOutline: _openOutline,
+                  onFind: widget.showWysiwyg
+                      ? () => _wysiwygKey.currentState?.openFind()
+                      : _findController.findMode,
+                  onSpellCheck: _openSpellCheck,
+                  onToggleEditorKind: _toggleEditorKind,
+                ),
                 // The toolbar fades + sizes in and out (hidden in preview
                 // mode). It is only mounted once loaded, so it appears
                 // immediately on load and animates only when preview mode
@@ -1481,136 +1486,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// no title, no tags, no fields — and nothing else in the app would say
   /// so. This does, with the parser's own message, while the note is open
   /// and the mistake is still in front of the person who made it.
-  Widget _frontmatterWarning(BuildContext context, String message) {
-    final theme = Theme.of(context);
-    return Container(
-      key: const Key('frontmatter-error'),
-      width: double.infinity,
-      color: theme.colorScheme.errorContainer,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_outlined,
-            size: 16,
-            color: theme.colorScheme.onErrorContainer,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              AppStrings.frontmatterInvalid(message),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// The status row (T-UI-07): outline toggle + word count left, saved/
-  /// unsaved right.
-  Widget _statusRow(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.labelSmall;
-    // Desktop breathing room (user, 2026-09-11): the phone keeps the row
-    // tight; on desktop each icon stands off its neighbours and the word
-    // count stands off the icons.
-    final desktop = !(Platform.isAndroid || Platform.isIOS);
-    final iconPadding = EdgeInsets.symmetric(horizontal: desktop ? 3 : 0);
-    return Padding(
-      key: const Key('status-row'),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: Row(
-        children: [
-          if (!_loading)
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('outline-toggle'),
-                tooltip: AppStrings.outlineTooltip,
-                icon: const Icon(Icons.toc),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: () => unawaited(_openOutline()),
-              ),
-            ),
-          // Find & replace lives in the editor pane (hidden in
-          // preview-only mode).
-          if (!_loading && (widget.splitPreview || !widget.showPreview))
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-find-open'),
-                tooltip: AppStrings.findInNoteTooltip,
-                icon: const Icon(Icons.search),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: widget.showWysiwyg
-                    ? () => _wysiwygKey.currentState?.openFind()
-                    : _findController.findMode,
-              ),
-            ),
-          if (!_loading &&
-              widget.spellCheck != null &&
-              widget.spellCheck!.available)
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('spell-check-open'),
-                tooltip: AppStrings.spellCheckTooltip,
-                icon: const Icon(Icons.spellcheck),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: () => unawaited(_openSpellCheck()),
-              ),
-            ),
-          // The quick way between the two editors (T-WYS-12): the setting
-          // stays per library, the button just flips it.
-          if (!_loading && widget.onEditorKindChanged != null)
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-kind-toggle'),
-                tooltip: widget.showWysiwyg
-                    ? AppStrings.switchToSourceTooltip
-                    : AppStrings.switchToWysiwygTooltip,
-                icon: Icon(
-                  widget.showWysiwyg ? Icons.code : Icons.edit_note,
-                  size: 18,
-                ),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: _toggleEditorKind,
-              ),
-            ),
-          if (!_loading)
-            Padding(
-              padding: EdgeInsets.only(left: desktop ? 6 : 0),
-              child: Text(
-                '$_wordCount words',
-                style: labelStyle?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          const Spacer(),
-          Text(_status, style: labelStyle),
-          for (final action in widget.statusActions) ...[
-            const SizedBox(width: 6),
-            action,
-          ],
-        ],
-      ),
-    );
-  }
-
   /// The formatting toolbar (T-UI-08): pure markdown commands applied
   /// through the controller; the image button keeps the file-picker flow
   /// (T-M2-09) it already had in the status row.
@@ -1627,30 +1502,22 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // it is toggled off (T-WYS-06).
     if (!widget.showWysiwyg) {
       return CodeEditorTapRegion(
-        child: _toolbarBar(actions, const <ToolbarItem>{}),
+        child: NoteToolbarBar(
+          actions: actions,
+          active: const <ToolbarItem>{},
+          layout: widget.toolbarLayout,
+        ),
       );
     }
     return ValueListenableBuilder<Set<ToolbarItem>>(
       valueListenable: _wysiwygActive,
-      builder: (context, active, _) => _toolbarBar(actions, active),
+      builder: (context, active, _) => NoteToolbarBar(
+        actions: actions,
+        active: active,
+        layout: widget.toolbarLayout,
+      ),
     );
   }
-
-  Widget _toolbarBar(
-    Map<ToolbarItem, VoidCallback> actions,
-    Set<ToolbarItem> active,
-  ) => EditorToolbar(
-    buttons: [
-      for (final item in widget.toolbarLayout.visible)
-        EditorToolbarButton(
-          key: item.widgetKey,
-          icon: item.icon,
-          tooltip: item.label,
-          active: active.contains(item),
-          onPressed: actions[item]!,
-        ),
-    ],
-  );
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
@@ -1689,45 +1556,15 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// defensively.
   void _applyMarkdownEdit(MarkdownEdit edit) {
     _controller.text = edit.text;
-    _controller.selection = _codeLineSelection(edit.selection);
+    _controller.selection = codeLineSelection(_controller.text, edit.selection);
     _focus.requestFocus();
-  }
-
-  /// Converts a whole-text [selection] to the controller's line+offset
-  /// form (the inverse of [_textSelection]).
-  CodeLineSelection _codeLineSelection(TextSelection selection) {
-    final text = _controller.text;
-    final (baseIndex, baseOffset) = _lineAndOffset(text, selection.baseOffset);
-    final (extentIndex, extentOffset) = _lineAndOffset(
-      text,
-      selection.extentOffset,
-    );
-    return CodeLineSelection(
-      baseIndex: baseIndex,
-      baseOffset: baseOffset,
-      extentIndex: extentIndex,
-      extentOffset: extentOffset,
-    );
-  }
-
-  /// The (line, offset-within-line) for the absolute [offset] in [text].
-  (int, int) _lineAndOffset(String text, int offset) {
-    var line = 0;
-    var lineStart = 0;
-    for (var i = 0; i < offset && i < text.length; i++) {
-      if (text.codeUnitAt(i) == 0x0A) {
-        line++;
-        lineStart = i + 1;
-      }
-    }
-    return (line, offset - lineStart);
   }
 
   void _wrapSelection({required String left, required String right}) {
     _applyMarkdownEdit(
       wrapSelection(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
         left: left,
         right: right,
       ),
@@ -1738,7 +1575,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       codeBlock(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
       ),
     );
   }
@@ -1747,7 +1584,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       prefixLines(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
         prefix: prefix,
       ),
     );
@@ -1760,7 +1597,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       wrapSelection(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
         left: markdown ? '[' : '[[',
         right: markdown ? '](...)' : ']]',
       ),
@@ -1772,7 +1609,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       orderedList(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
       ),
     );
   }
@@ -1783,7 +1620,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       indentLines(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
         width: widget.indentWidth,
         outdent: outdent,
       ),
@@ -1798,7 +1635,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _applyMarkdownEdit(
       setHeading(
         text: _controller.text,
-        selection: _textSelection(_controller.selection),
+        selection: textSelection(_controller.text, _controller.selection),
         level: level,
       ),
     );
@@ -1888,100 +1725,4 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     );
     state.requestEditorFocus();
   }
-
-  /// Converts re_editor's line+offset selection to whole-text offsets
-  /// (called once per toolbar tap, so the O(n) scan is fine).
-  TextSelection _textSelection(CodeLineSelection selection) {
-    return TextSelection(
-      baseOffset: _globalOffset(selection.baseIndex, selection.baseOffset),
-      extentOffset: _globalOffset(
-        selection.extentIndex,
-        selection.extentOffset,
-      ),
-    );
-  }
-
-  int _globalOffset(int line, int offset) {
-    final text = _controller.text;
-    var index = 0;
-    for (var current = 0; current < line; current++) {
-      final nl = text.indexOf('\n', index);
-      if (nl < 0) return text.length;
-      index = nl + 1;
-    }
-    return index + offset;
-  }
-
-  /// Flat text offset to line + column, for the template cursor landing
-  /// (#53): the inverse walk of the toolbar's offset mapping above. One
-  /// O(n) scan on note open.
-  ({int line, int offset}) _linePosition(String text, int flat) {
-    var line = 0;
-    var start = 0;
-    while (true) {
-      final nl = text.indexOf('\n', start);
-      if (nl < 0 || nl >= flat) return (line: line, offset: flat - start);
-      line++;
-      start = nl + 1;
-    }
-  }
-}
-
-/// The [UnsavedNote] view over [_NoteViewState]'s revision pair
-/// (T-PP-11): no text copy, so the dirty bit cannot drift from the buffer.
-final class _UnsavedNoteAdapter implements UnsavedNote {
-  const new(this._state);
-
-  final _NoteViewState _state;
-
-  @override
-  String get path => _state.widget.path;
-
-  @override
-  // While a load is in flight the buffer holds the outgoing note and the
-  // incoming one has nothing to save yet: not dirty, so a close landing on
-  // the swap cannot write stale text under the new path.
-  bool get unsaved =>
-      !_state._loading && _state._revision != _state._lastSavedRevision;
-
-  @override
-  Future<void> save() => _state._saveForClose();
-}
-
-/// The kind GUIs' window onto the note (T-TK-02): the buffer text, and
-/// byte-stable edits that persist through the regular save path.
-final class _NoteKindHost implements NoteKindHost {
-  new(this._state);
-
-  final _NoteViewState _state;
-
-  @override
-  String get text => _state._currentText;
-
-  @override
-  void applyEdit(String newText) => _state._applyKindEdit(newText);
-}
-
-/// Shows the heading-level picker (H1..H6); resolves to the chosen level
-/// (1..6) or null (dismissed).
-Future<int?> showHeadingLevelDialog(BuildContext context) {
-  return showActionSheet<int>(
-    context,
-    sheetKey: const Key('heading-level-sheet'),
-    title: AppStrings.headingDialogTitle,
-    items: (context) => [
-      for (var level = 1; level <= 6; level++)
-        ListTile(
-          key: ValueKey<int>(level),
-          onTap: () => Navigator.of(context).pop(level),
-          // The label is set in the size the heading will be, which says
-          // more about the choice than the number does.
-          title: Text(
-            AppStrings.headingLevelLabel(level),
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontSize: 26.0 - level * 2),
-          ),
-        ),
-    ],
-  );
 }

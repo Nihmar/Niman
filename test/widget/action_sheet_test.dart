@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 
