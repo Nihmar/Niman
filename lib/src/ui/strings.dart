@@ -18,6 +18,7 @@ import 'package:niman/src/ui/strings/it.dart';
 import 'package:niman/src/ui/strings/ja.dart';
 import 'package:niman/src/ui/strings/nl.dart';
 import 'package:niman/src/ui/strings/pt.dart';
+import 'package:niman/src/ui/strings/sv.dart';
 import 'package:niman/src/ui/strings/zh.dart';
 
 /// All user-visible app strings, one getter per label.
@@ -46,6 +47,7 @@ final class AppStrings {
     AppLanguage.hindi: HindiStrings(),
     AppLanguage.italian: ItalianStrings(),
     AppLanguage.dutch: DutchStrings(),
+    AppLanguage.swedish: SwedishStrings(),
   };
 
   /// The strings of the language actually in use.
@@ -180,6 +182,7 @@ final class AppStrings {
     AppLanguage.hindi => 'हिन्दी',
     AppLanguage.italian => 'Italiano',
     AppLanguage.dutch => 'Nederlands',
+    AppLanguage.swedish => 'Svenska',
   };
 
   // List note kind (T-TK-02).
