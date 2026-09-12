@@ -147,6 +147,45 @@ void main() {
       );
     });
 
+    testWidgets('a big note shows a skeleton before the first parse lands', (
+      tester,
+    ) async {
+      // Past the sync parse limit, so the first frames build while the
+      // isolate block phase is still in flight (issue #58). Big enough
+      // that the isolate cannot win the race against the first pumps.
+      final big = StringBuffer('# Big\n\n');
+      while (big.length <= 256 * 1024) {
+        big.write(
+          'Paragraph with enough text to grow past the async limit.\n\n',
+        );
+      }
+      await tester.pumpWidget(_app(MarkdownPreview(data: big.toString())));
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey<String>('previewSkeleton')),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Paragraph with enough', findRichText: true),
+        findsNothing,
+      );
+      // The isolate answers in real time, which pumpAndSettle does not
+      // wait for: give it a real (not fake-clock) window, then settle.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(seconds: 1)),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('previewSkeleton')),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('Paragraph with enough', findRichText: true),
+        findsWidgets,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('rebuilds when the data changes', (tester) async {
       await tester.pumpWidget(_app(const MarkdownPreview(data: '# One')));
       await tester.pump();

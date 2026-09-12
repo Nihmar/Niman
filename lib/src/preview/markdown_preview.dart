@@ -424,6 +424,28 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 
   @override
   Widget build(BuildContext context) {
+    // The first parse of a big note runs on a background isolate, so the
+    // first frames have no blocks yet (issue #58): show placeholder bars
+    // instead of a blank pane. Re-parses keep the old blocks (only the
+    // first pass starts from null), so this shows on open only.
+    if (_nodes == null) {
+      return CustomScrollView(
+        slivers: <Widget>[
+          SliverPadding(
+            padding: widget.padding,
+            sliver: SliverList(
+              key: const ValueKey<String>('previewSkeleton'),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _SkeletonBlock(index: index),
+                // Enough bars to fill a phone viewport; only the
+                // visible ones lay out.
+                childCount: 12,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     final count = _nodes?.length ?? 0;
     final map = widget.scrollMap;
     map?.contentInset = widget.padding.top;
@@ -557,4 +579,35 @@ ImageProvider? _providerFor(Uri uri, String? directory) {
 
 Widget _imageError(BuildContext context, Object error, StackTrace? stackTrace) {
   return const SizedBox();
+}
+
+/// Placeholder blocks while the first parse is in flight (issue #58): the
+/// open of a big note showed a blank pane until the isolate answered. Static
+/// bars in the theme's container color — no ticker, so the waiting frames
+/// cost nothing beyond one cheap sliver.
+final class _SkeletonBlock extends StatelessWidget {
+  const new({required this.index});
+
+  final int index;
+
+  /// Ragged right edge, so the placeholder reads as text lines.
+  static const List<double> _widths = [1.0, 0.88, 0.94, 0.7, 0.97, 0.82];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: _widths[index % _widths.length],
+        child: Container(
+          height: 12,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+        ),
+      ),
+    );
+  }
 }
