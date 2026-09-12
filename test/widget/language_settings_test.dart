@@ -71,7 +71,19 @@ void main() {
     expect(find.text('Cestino'), findsOneWidget);
     expect(find.text('Trash'), findsNothing);
     expect(await controller.language, AppLanguage.italian);
-    expect(AppLanguages.isItalian, isTrue);
+    expect(AppLanguages.resolved, AppLanguage.italian);
+  });
+
+  testWidgets('a newly added language picks its own text', (tester) async {
+    await pump(tester);
+    expect(find.text('Trash'), findsOneWidget);
+
+    await chooseLanguage(tester, AppLanguage.french);
+
+    expect(find.text('Corbeille'), findsOneWidget);
+    expect(find.text('Trash'), findsNothing);
+    expect(await controller.language, AppLanguage.french);
+    expect(AppLanguages.resolved, AppLanguage.french);
   });
 
   testWidgets('going back to English translates back', (tester) async {
@@ -98,5 +110,6 @@ void main() {
     // The OS is Italian, so "System" means Italian.
     expect(find.text('Cestino'), findsOneWidget);
     expect(await controller.language, AppLanguage.system);
+    expect(AppLanguages.resolved, AppLanguage.italian);
   });
 }

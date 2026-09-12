@@ -22,13 +22,11 @@ void main() {
     test('the default follows the system, which starts English', () {
       expect(AppLanguages.choice, AppLanguage.system);
       expect(AppLanguages.resolved, AppLanguage.english);
-      expect(AppLanguages.isItalian, isFalse);
     });
 
     test('an Italian system makes the app Italian', () {
       AppLanguages.system = AppLanguage.italian;
       expect(AppLanguages.resolved, AppLanguage.italian);
-      expect(AppLanguages.isItalian, isTrue);
       expect(AppLanguages.locale, const Locale('it'));
     });
 
@@ -54,22 +52,35 @@ void main() {
       expect(AppLanguages.revision.value, start + 1);
     });
 
-    test('the platform locales pick a supported language', () {
+    test('the platform locales pick the first supported match', () {
+      for (final language in AppLanguages.supported) {
+        expect(
+          AppLanguages.fromLocales([Locale(language.id)]),
+          language,
+          reason: language.name,
+        );
+      }
+      // A region variant still matches its language.
       expect(
-        AppLanguages.fromLocales(const [Locale('it', 'IT')]),
-        AppLanguage.italian,
+        AppLanguages.fromLocales(const [Locale('pt', 'BR')]),
+        AppLanguage.portuguese,
       );
       expect(
-        AppLanguages.fromLocales(const [Locale('en', 'GB')]),
-        AppLanguage.english,
+        AppLanguages.fromLocales(const [Locale('zh', 'Hans')]),
+        AppLanguage.chinese,
       );
-      // An unsupported first choice falls through to a supported one.
+      // The first supported match wins, even when others follow.
       expect(
         AppLanguages.fromLocales(const [Locale('de'), Locale('it')]),
+        AppLanguage.german,
+      );
+      // An unsupported first choice falls through to the next supported one.
+      expect(
+        AppLanguages.fromLocales(const [Locale('kl'), Locale('it')]),
         AppLanguage.italian,
       );
       expect(
-        AppLanguages.fromLocales(const [Locale('de')]),
+        AppLanguages.fromLocales(const [Locale('kl')]),
         AppLanguage.english,
       );
       expect(AppLanguages.fromLocales(null), AppLanguage.english);
@@ -77,9 +88,9 @@ void main() {
   });
 
   group('AppStrings', () {
-    test('every label answers in both languages, and they differ', () {
-      // A spot check across the app's areas: the point is that the
-      // Italian is really there, not that every string is listed.
+    test('every label answers in every language, and they differ', () {
+      // A spot check across the app's areas: the point is that the other
+      // languages are really there, not that every string is listed.
       final samples = <String Function()>[
         () => AppStrings.trashTitle,
         () => AppStrings.todoTitle,
@@ -88,14 +99,16 @@ void main() {
         () => AppStrings.listEmpty,
         () => AppStrings.languageTitle,
       ];
-      for (final sample in samples) {
-        AppLanguages.choice = AppLanguage.english;
-        final en = sample();
-        AppLanguages.choice = AppLanguage.italian;
-        final it = sample();
-        expect(en, isNotEmpty);
-        expect(it, isNotEmpty);
-        expect(it, isNot(en));
+      AppLanguages.choice = AppLanguage.english;
+      final en = samples.map((sample) => sample()).toList();
+      for (final language in AppLanguages.supported) {
+        if (language == AppLanguage.english) continue;
+        AppLanguages.choice = language;
+        for (var i = 0; i < samples.length; i++) {
+          final value = samples[i]();
+          expect(value, isNotEmpty, reason: '${language.name} label $i');
+          expect(value, isNot(en[i]), reason: '${language.name} label $i');
+        }
       }
     });
 
@@ -114,6 +127,29 @@ void main() {
       expect(AppStrings.weekdayNames.length, 7);
       expect(AppStrings.weekdayNames.first, 'lunedì');
       expect(AppStrings.weekdayNamesShort.first, 'lun');
+    });
+
+    test('month and weekday names are complete in every language', () {
+      for (final language in AppLanguages.supported) {
+        AppLanguages.choice = language;
+        expect(AppStrings.monthNames.length, 12, reason: language.name);
+        expect(AppStrings.monthNamesShort.length, 12, reason: language.name);
+        expect(AppStrings.weekdayNames.length, 7, reason: language.name);
+        expect(AppStrings.weekdayNamesShort.length, 7, reason: language.name);
+        expect(AppStrings.monthNames.first, isNotEmpty, reason: language.name);
+        expect(
+          AppStrings.weekdayNames.first,
+          isNotEmpty,
+          reason: language.name,
+        );
+      }
+    });
+
+    test('language names read in their own language', () {
+      expect(AppStrings.languageName(AppLanguage.italian), 'Italiano');
+      expect(AppStrings.languageName(AppLanguage.french), 'Français');
+      expect(AppStrings.languageName(AppLanguage.chinese), '中文');
+      expect(AppStrings.languageName(AppLanguage.system), isNotEmpty);
     });
   });
 }

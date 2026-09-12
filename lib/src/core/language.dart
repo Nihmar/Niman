@@ -17,6 +17,27 @@ enum AppLanguage {
   /// English.
   english('en'),
 
+  /// French.
+  french('fr'),
+
+  /// German.
+  german('de'),
+
+  /// Spanish.
+  spanish('es'),
+
+  /// Portuguese.
+  portuguese('pt'),
+
+  /// Chinese (Simplified).
+  chinese('zh'),
+
+  /// Japanese.
+  japanese('ja'),
+
+  /// Hindi.
+  hindi('hi'),
+
   /// Italian.
   italian('it');
 
@@ -41,6 +62,13 @@ final class AppLanguages {
   /// The languages the app ships, in menu order.
   static const List<AppLanguage> supported = [
     AppLanguage.english,
+    AppLanguage.french,
+    AppLanguage.german,
+    AppLanguage.spanish,
+    AppLanguage.portuguese,
+    AppLanguage.chinese,
+    AppLanguage.japanese,
+    AppLanguage.hindi,
     AppLanguage.italian,
   ];
 
@@ -76,23 +104,17 @@ final class AppLanguages {
   static AppLanguage get resolved =>
       _choice == AppLanguage.system ? _system : _choice;
 
-  /// Whether the UI is currently Italian; `ui/strings.dart` asks this on
-  /// every label.
-  static bool get isItalian => resolved == AppLanguage.italian;
-
   /// The locale to hand `MaterialApp`, so Flutter's own dialogs (dates,
   /// times, text selection) follow the app.
   static Locale get locale => Locale(resolved.id);
 
-  /// The language [locales] asks for: the first supported entry, else
-  /// English.
+  /// The language [locales] asks for: the first supported match, else
+  /// English. Only the language code is considered, so any variant of a
+  /// supported language (pt-BR, zh-Hans, …) counts.
   static AppLanguage fromLocales(List<Locale>? locales) {
     for (final locale in locales ?? const <Locale>[]) {
-      if (locale.languageCode == AppLanguage.italian.id) {
-        return AppLanguage.italian;
-      }
-      if (locale.languageCode == AppLanguage.english.id) {
-        return AppLanguage.english;
+      for (final language in supported) {
+        if (locale.languageCode == language.id) return language;
       }
     }
     return AppLanguage.english;

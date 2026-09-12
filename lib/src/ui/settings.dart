@@ -597,9 +597,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
       subtitle: AppStrings.languageSubtitle,
       current: _language,
       options: [
-        SettingsOption(AppLanguage.system, AppStrings.languageSystem),
-        SettingsOption(AppLanguage.english, AppStrings.languageEnglish),
-        SettingsOption(AppLanguage.italian, AppStrings.languageItalian),
+        SettingsOption(
+          AppLanguage.system,
+          AppStrings.languageName(AppLanguage.system),
+        ),
+        for (final language in AppLanguages.supported)
+          SettingsOption(language, AppStrings.languageName(language)),
       ],
     );
     if (language != null) await _setLanguage(language);
@@ -684,11 +687,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         SettingsValueRow(
           key: const Key('language-choice'),
           title: AppStrings.languageTitle,
-          value: switch (_language) {
-            AppLanguage.system => AppStrings.languageSystem,
-            AppLanguage.english => AppStrings.languageEnglish,
-            AppLanguage.italian => AppStrings.languageItalian,
-          },
+          value: AppStrings.languageName(_language),
           onTap: () => unawaited(_chooseLanguage()),
         ),
         SettingsValueRow(
