@@ -209,12 +209,42 @@ jobs:
     needs: [android, linux, windows]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
+      - name: Build release notes
+        # GitHub's auto-generated notes only list merged PRs, which hides
+        # everything pushed directly to main (perf fixes included). Build the
+        # notes from the full commit range instead, grouped by type.
+        run: |
+          CUR="${GITHUB_REF_NAME}"
+          PREV="$(git describe --tags --abbrev=0 "${CUR}^")"
+          RANGE="${PREV}..${CUR}"
+          section() {
+            local filter="$1" title="$2" lines
+            lines="$(git log "$RANGE" --format='%s' | grep -E "$filter" | sed 's/^/- /')"
+            if [ -n "$lines" ]; then
+              printf '## %s\n%s\n\n' "$title" "$lines"
+            fi
+          }
+          {
+            section '^perf' 'Performance'
+            section '^feat' 'Features'
+            section '^fix' 'Fixes'
+            others="$(git log "$RANGE" --format='%s' | grep -E '^.+:' | grep -Ev '^(perf|feat|fix)' | sed 's/^/- /')"
+            if [ -n "$others" ]; then
+              printf '## Other\n%s\n\n' "$others"
+            fi
+            echo "**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV}...${CUR}"
+          } > notes.md
+
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
-          generate_release_notes: true
+          body_path: notes.md
