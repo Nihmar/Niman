@@ -373,6 +373,50 @@ void main() {
       expect(selection.baseOffset, 0);
       expect(selection.extentIndex, 2);
       expect(selection.extentOffset, 0);
+      // The caret blinks on timers while focused (periodic tick plus a
+      // one-shot on Android): let them fire, then unfocus before
+      // teardown, or the test invariant fails on a live timer.
+      await tester.pump(const Duration(milliseconds: 200));
+      tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.unfocus();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a template caret takes focus even with autofocus off', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => '# Hi\n\nbody\n',
+            initialCaretOffset: 6,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(
+        tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.hasFocus,
+        isTrue,
+      );
+      // Same blink-timer teardown as above.
+      await tester.pump(const Duration(milliseconds: 200));
+      tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.unfocus();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('without a caret landing the editor takes no focus', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/b.md', readNote: (_) async => 'plain\n')),
+      );
+      await tester.pump();
+      expect(
+        tester.widget<NoteEditor>(find.byType(NoteEditor)).focusNode.hasFocus,
+        isFalse,
+      );
       expect(tester.takeException(), isNull);
     });
   });

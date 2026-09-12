@@ -313,7 +313,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// markers are not rebuilt on every switch. Any input change (path,
   /// toggles, note font size) rebuilds the pane once.
   Widget? _editorPaneCache;
-  ({String path, bool numbers, bool autofocus, double fontSize})?
+  ({String path, bool numbers, bool autofocus, double fontSize, int? caret})?
   _editorPaneConfig;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
@@ -664,7 +664,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       controller: _controller,
       focusNode: _focus,
       showLineNumbers: widget.showLineNumbers,
-      autofocus: widget.autofocusEditor,
+      // A template `{{cursor}}` landing (#53) always takes focus: the
+      // note was just created around that caret, and with the keyboard
+      // down the first tap re-places it wherever the finger lands.
+      autofocus: widget.autofocusEditor || widget.initialCaretOffset != null,
       // Read from the global rather than passed down the shell: the app
       // root rebuilds everything when the setting changes, so this is
       // read fresh on the very frame the slider moves (T-M6-12).
@@ -686,6 +689,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       numbers: widget.showLineNumbers,
       autofocus: widget.autofocusEditor,
       fontSize: AppTextScales.noteFontSize,
+      caret: widget.initialCaretOffset,
     );
     if (_editorPaneCache == null || _editorPaneConfig != config) {
       _editorPaneConfig = config;
