@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
-import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;

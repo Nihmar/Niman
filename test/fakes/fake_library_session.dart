@@ -8,7 +8,7 @@ import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';

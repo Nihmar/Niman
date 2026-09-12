@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;

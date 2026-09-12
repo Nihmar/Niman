@@ -7,7 +7,7 @@ import 'package:niman/src/core/library_root.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
-import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/known_library_list.dart';
