@@ -432,6 +432,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
 
+  /// A template `{{cursor}}` offset to land the caret on after the created
+  /// note opens (#53). Fresh notes only: appended text joins an existing
+  /// file whose length the creation flow does not know.
+  int? _pendingCaretOffset;
+
   /// The open note's kind (the frontmatter `type`, null = plain note or
   /// no note); reported by the open NoteView (T-TK-02).
   String? _noteKind;
@@ -503,6 +508,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = false;
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
+      _pendingCaretOffset = null;
       _resetNoteKind();
       _noteOpened();
     });
@@ -649,6 +655,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       linkSource: _linkSource,
       onOpenNote: _openNoteFromLink,
       initialAnchor: _pendingAnchor,
+      initialCaretOffset: _pendingCaretOffset,
       kindMode: !_kindRawMode,
       onNoteKindChanged: _onNoteKindChanged,
       unsavedTracker: widget.unsavedTracker,
@@ -957,6 +964,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = note.isDir;
       _noteFromTab = _tab;
       _pendingAnchor = null;
+      _pendingCaretOffset = null;
       _resetNoteKind();
       if (note.isDir) {
         _noteClosed();
@@ -1123,6 +1131,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _pendingCaretOffset = null;
         _noteOpened();
       });
     });
@@ -1261,13 +1270,14 @@ final class _LibraryShellState extends State<_LibraryShell>
           _awayFromTemplates(parent ?? _createParent, folder);
       // The body is rendered after the folder is settled, which is the
       // only reason `{{folder}}` can answer at all.
-      final content = renderTemplate(
+      final rendered = renderTemplateWithCaret(
         template,
         title: name,
         answers: answers,
         context: surroundings.withFolder(target),
         counter: counter,
       );
+      final content = rendered.text;
       if (directives.folder case final wanted? when wanted.isNotEmpty) {
         await ops.ensureFolder(wanted);
       }
@@ -1306,6 +1316,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _pendingCaretOffset = directives.append ? null : rendered.caret;
         _resetNoteKind();
         _noteOpened();
       });
@@ -1429,6 +1440,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selected = row.path;
         _selectedIsDir = true;
         _pendingAnchor = null;
+        _pendingCaretOffset = null;
       });
     });
   }
@@ -2053,6 +2065,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = false;
         _treeVisible = false;
         _pendingAnchor = null;
+        _pendingCaretOffset = null;
         _resetNoteKind();
         _noteOpened();
       });

@@ -17,6 +17,7 @@ NoteView _view({
   bool showLineNumbers = true,
   bool autofocusEditor = false,
   bool showPreview = false,
+  int? initialCaretOffset,
 }) => NoteView(
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
@@ -25,6 +26,7 @@ NoteView _view({
   readNote: readNote,
   writeNote: writeNote,
   controller: controller,
+  initialCaretOffset: initialCaretOffset,
 );
 
 String _editorText(WidgetTester tester) =>
@@ -347,6 +349,30 @@ void main() {
         identical(tester.widget<NoteEditor>(find.byType(NoteEditor)), editor),
         isFalse,
       );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an initial caret offset lands the caret after load', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => '# Hi\n\nbody here\n',
+            initialCaretOffset: 6,
+          ),
+        ),
+      );
+      await tester.pump();
+      final selection = tester
+          .widget<NoteEditor>(find.byType(NoteEditor))
+          .controller
+          .selection;
+      expect(selection.baseIndex, 2);
+      expect(selection.baseOffset, 0);
+      expect(selection.extentIndex, 2);
+      expect(selection.extentOffset, 0);
       expect(tester.takeException(), isNull);
     });
   });

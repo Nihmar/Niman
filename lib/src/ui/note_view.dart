@@ -90,6 +90,7 @@ final class NoteView extends StatefulWidget {
     this.linkSource,
     this.onOpenNote,
     this.initialAnchor,
+    this.initialCaretOffset,
     this.kindMode = true,
     this.onNoteKindChanged,
     this.toolbarTop = false,
@@ -180,6 +181,10 @@ final class NoteView extends StatefulWidget {
 
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
+
+  /// A template `{{cursor}}` offset to land the caret on after the note
+  /// loads (#53), measured in the created text. Clamped into the text.
+  final int? initialCaretOffset;
 
   /// Whether the note-kind GUIs are shown (T-TK-02): a note whose
   /// frontmatter declares a known `type` opens in its kind GUI instead of
@@ -504,6 +509,17 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       _noteKind = frontmatterTypeOf(text);
       _controller.text = text;
       _wysiwygText = text;
+      // A template `{{cursor}}` landing (#53): the offset was measured in
+      // this same text, so placing it is a line walk, not a guess. The
+      // selection-only change schedules no save (see _onValueChanged).
+      if (widget.initialCaretOffset case final caret?) {
+        final at = caret.clamp(0, text.length);
+        final pos = _linePosition(text, at);
+        _controller.selection = CodeLineSelection.collapsed(
+          index: pos.line,
+          offset: pos.offset,
+        );
+      }
       // The spell cache is keyed by line index + text; a different note can
       // reuse the same indices, so forget the previous file's answers.
       widget.spellCheck?.reset();
@@ -1890,6 +1906,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       index = nl + 1;
     }
     return index + offset;
+  }
+
+  /// Flat text offset to line + column, for the template cursor landing
+  /// (#53): the inverse walk of the toolbar's offset mapping above. One
+  /// O(n) scan on note open.
+  ({int line, int offset}) _linePosition(String text, int flat) {
+    var line = 0;
+    var start = 0;
+    while (true) {
+      final nl = text.indexOf('\n', start);
+      if (nl < 0 || nl >= flat) return (line: line, offset: flat - start);
+      line++;
+      start = nl + 1;
+    }
   }
 }
 

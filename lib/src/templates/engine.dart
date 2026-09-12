@@ -1,8 +1,8 @@
 /// The template placeholder engine (T-M4-06, widened by T-TPL-01).
 ///
 /// Substitution, not a template language: `{{title}}`, `{{date}}`,
-/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}`, `{{uuid}}`, `{{counter:name}}`
-/// and the two the user answers — `{{ask:Label}}` and
+/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}`, `{{uuid}}`, `{{counter:name}}`,
+/// `{{cursor}}` and the two the user answers — `{{ask:Label}}` and
 /// `{{choice:Label:a,b,c}}` — are replaced, each may be followed by
 /// filters — `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 /// `{{counter:quest|pad:3}}` — and everything else in the file is copied
@@ -10,6 +10,11 @@
 /// expressions, because a template here is a note that happens to have
 /// holes in it: a person should be able to read one and know exactly what
 /// it will produce.
+///
+/// `{{cursor}}` is the one placeholder that writes nothing: the marker is
+/// removed and the caret lands where it stood (first marker wins when
+/// there are several; it takes no filters, like every other misuse a
+/// filtered cursor is left standing).
 ///
 /// A placeholder the engine does not know is left standing, and so is one
 /// whose filter it does not know. That way a typo is visible in the note
@@ -117,16 +122,81 @@ String applyTemplate(
   Map<String, String>? answers,
   TemplateContext? context,
   int Function(String name)? counter,
+}) => _substitute(
+  source,
+  title: title,
+  now: now,
+  uuid: uuid,
+  answers: answers,
+  context: context,
+  counter: counter,
+).text;
+
+/// [source] substituted, with the caret landing (#53): the offset in the
+/// returned text where the first `{{cursor}}` stood, or null when the
+/// template holds none.
+({String text, int? caret}) applyTemplateWithCaret(
+  String source, {
+  required String title,
+  DateTime? now,
+  String Function()? uuid,
+  Map<String, String>? answers,
+  TemplateContext? context,
+  int Function(String name)? counter,
+}) {
+  final rendered = _substitute(
+    source,
+    title: title,
+    now: now,
+    uuid: uuid,
+    answers: answers,
+    context: context,
+    counter: counter,
+  );
+  return (
+    text: rendered.text,
+    caret: rendered.carets.isEmpty ? null : rendered.carets.first,
+  );
+}
+
+/// The single substitution pass both entry points share: one walk, so a
+/// `{{counter}}` or `{{uuid}}` is consumed exactly once however many
+/// markers the template holds.
+({String text, List<int> carets}) _substitute(
+  String source, {
+  required String title,
+  DateTime? now,
+  String Function()? uuid,
+  Map<String, String>? answers,
+  TemplateContext? context,
+  int Function(String name)? counter,
 }) {
   final clock = now ?? DateTime.now();
   final newUuid = uuid ?? newUuidV4;
-  return source.replaceAllMapped(templatePlaceholder, (match) {
+  final out = StringBuffer();
+  final carets = <int>[];
+  var cursor = 0;
+  for (final match in templatePlaceholder.allMatches(source)) {
+    out.write(source.substring(cursor, match.start));
+    cursor = match.end;
     final whole = match.group(0)!;
     final parsed = parsePlaceholder(match.group(1)!);
     final name = parsed.name;
     final argument = parsed.argument;
     final filters = parsed.filters;
-    return switch (name) {
+    // The caret writes nothing: the marker is dropped and its output
+    // offset recorded. Numbered stops (`{{cursor:2}}`) are accepted and
+    // land in position order — the editor cannot walk stops, so the
+    // first one wins and the rest only vanish.
+    if (name == 'cursor') {
+      if (filters.isEmpty) {
+        carets.add(out.length);
+        continue;
+      }
+      out.write(whole);
+      continue;
+    }
+    out.write(switch (name) {
       'title' => _applyTextFilters(title, filters) ?? whole,
       'uuid' => _applyTextFilters(newUuid(), filters) ?? whole,
       'counter' => switch (argument?.trim()) {
@@ -153,8 +223,10 @@ String applyTemplate(
       },
       // Not ours: left exactly as written.
       _ => whole,
-    };
-  });
+    });
+  }
+  out.write(source.substring(cursor));
+  return (text: out.toString(), carets: carets);
 }
 
 /// `{{…}}`; the body runs to the closing braces, so a format may hold

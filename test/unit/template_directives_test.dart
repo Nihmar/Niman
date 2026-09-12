@@ -133,5 +133,20 @@ tags: [character]
       const source = '---\nmeta:\n  niman: keep me\n---\n\nbody\n';
       expect(render(source), source);
     });
+
+    test('the caret is reported past the removed directives block', () {
+      const source =
+          '---\nniman:\n  folder: Journal\n---\n\n# T\n\nbody {{cursor}}here\n';
+      final out = renderTemplateWithCaret(source, title: 'N', now: clock);
+      expect(out.text.contains('{{cursor}}'), isFalse);
+      expect(out.caret, out.text.indexOf('here'));
+    });
+
+    test('a cursor inside the block lands nowhere', () {
+      const source = '---\nniman:\n  filename: "Q{{cursor}}"\n---\n\nbody\n';
+      final out = renderTemplateWithCaret(source, title: 'N', now: clock);
+      expect(out.text.contains('{{cursor}}'), isFalse);
+      expect(out.caret, isNull);
+    });
   });
 }

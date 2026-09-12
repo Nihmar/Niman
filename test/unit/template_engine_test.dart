@@ -80,6 +80,45 @@ void main() {
       );
     });
 
+    test('cursor is removed and its offset reported', () {
+      final out = applyTemplateWithCaret(
+        'A{{title}}B{{cursor}}C',
+        title: 'xy',
+        now: clock,
+      );
+      expect(out.text, 'AxyBC');
+      expect(out.caret, 4);
+      // The plain entry point strips the marker too, discarding the offset.
+      expect(render('a{{cursor}}b'), 'ab');
+    });
+
+    test('first cursor wins; numbered stops land in order', () {
+      final out = applyTemplateWithCaret(
+        '{{cursor:1}}a{{cursor:2}}',
+        title: 'x',
+        now: clock,
+      );
+      expect(out.text, 'a');
+      expect(out.caret, 0);
+    });
+
+    test('a filtered cursor is left standing, and none means null', () {
+      final filtered = applyTemplateWithCaret(
+        'a{{cursor|pad:3}}b',
+        title: 'x',
+        now: clock,
+      );
+      expect(filtered.text, 'a{{cursor|pad:3}}b');
+      expect(filtered.caret, isNull);
+      final none = applyTemplateWithCaret(
+        '# {{title}}',
+        title: 'x',
+        now: clock,
+      );
+      expect(none.text, '# x');
+      expect(none.caret, isNull);
+    });
+
     test('whitespace and case inside the braces are tolerated', () {
       expect(render('{{ title }}'), 'My Note');
       expect(render('{{TITLE}}'), 'My Note');

@@ -807,6 +807,13 @@ final class AppStrings {
         'nota scrive 1, la successiva 2. Lo stesso nome in una nota scrive '
         'lo stesso numero; da combinare con |pad:3.',
   );
+  static String get templateHelpCursorBody => _t(
+    'Lands the caret here when the note is created; the marker itself '
+        'is not written. First marker wins, no filters, fresh notes only.',
+    'Mette il cursore qui quando la nota viene creata; il marcatore non '
+        'viene scritto. Vince il primo marcatore, niente filtri, solo note '
+        'nuove.',
+  );
 
   static String get templateHelpDatesTitle =>
       _t('Writing a date', 'Scrivere una data');

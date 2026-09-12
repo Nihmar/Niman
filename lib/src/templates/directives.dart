@@ -176,6 +176,37 @@ String renderTemplate(
   directivesKey,
 );
 
+/// [source] as the created note, with the caret landing (#53).
+///
+/// The caret is measured on the substituted text and then shifted past
+/// the removed directives block, which is always a strict prefix of it —
+/// so the shift is the length the removal dropped. A marker inside the
+/// block itself lands nowhere (null): it was removed with the block.
+({String text, int? caret}) renderTemplateWithCaret(
+  String source, {
+  required String title,
+  DateTime? now,
+  String Function()? uuid,
+  Map<String, String>? answers,
+  TemplateContext? context,
+  int Function(String name)? counter,
+}) {
+  final rendered = applyTemplateWithCaret(
+    source,
+    title: title,
+    now: now,
+    uuid: uuid,
+    answers: answers,
+    context: context,
+    counter: counter,
+  );
+  final text = removeFrontmatterKey(rendered.text, directivesKey);
+  final caret = rendered.caret;
+  if (caret == null) return (text: text, caret: null);
+  final dropped = rendered.text.length - text.length;
+  return (text: text, caret: caret >= dropped ? caret - dropped : null);
+}
+
 /// `Daily.md` written in a `filename:` means `Daily`; the app adds the
 /// extension, and a template that spells it out should not get `.md.md`.
 String _withoutExtension(String name) =>
