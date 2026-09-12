@@ -36,6 +36,7 @@ final class TemplateHelpScreen extends StatelessWidget {
           HelpRow('{{date}}  {{time}}', AppStrings.templateHelpDateBody),
           HelpRow('{{now}}', AppStrings.templateHelpNowBody),
           HelpRow('{{uuid}}', AppStrings.templateHelpUuidBody),
+          HelpRow('{{counter:name}}', AppStrings.templateHelpCounterBody),
 
           HelpSection(AppStrings.templateHelpDatesTitle),
           HelpParagraph(AppStrings.templateHelpDatesBody),

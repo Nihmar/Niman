@@ -21,6 +21,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
+import 'package:niman/src/templates/counters.dart';
 import 'package:niman/src/templates/directives.dart';
 import 'package:niman/src/templates/engine.dart';
 import 'package:niman/src/templates/includes.dart';
@@ -1210,6 +1211,21 @@ final class _LibraryShellState extends State<_LibraryShell>
           ? await _clipboardText()
           : '',
     );
+    // Per-creation counters (#52): every `{{counter:name}}` in this note
+    // — directives reads and body alike — shares one memoized number, and
+    // nothing is persisted until the note below is actually created, so a
+    // cancelled creation burns no numbers. A template with no counter
+    // never touches the store file at all.
+    final root = widget.controller.root;
+    final counters = templateUses(template, 'counter') && root != null
+        ? await CounterStore.load(root)
+        : null;
+    int Function(String)? counter;
+    if (counters != null) {
+      final store = counters;
+      final used = <String, int>{};
+      counter = (name) => used.putIfAbsent(name, () => store.use(name));
+    }
     // Read once with no title, only to find out whether the template
     // names the note itself; the real read happens below, once the name
     // is known, so a folder may be built from it.
@@ -1217,6 +1233,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       template,
       answers: answers,
       context: surroundings,
+      counter: counter,
     );
     final String name;
     if (declared.namesItself) {
@@ -1237,6 +1254,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         title: name,
         answers: answers,
         context: surroundings,
+        counter: counter,
       );
       final target =
           directives.folder ??
@@ -1248,6 +1266,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         title: name,
         answers: answers,
         context: surroundings.withFolder(target),
+        counter: counter,
       );
       if (directives.folder case final wanted? when wanted.isNotEmpty) {
         await ops.ensureFolder(wanted);
@@ -1259,6 +1278,7 @@ final class _LibraryShellState extends State<_LibraryShell>
               name: name,
               content: content,
             );
+      await counters?.save();
       if (!mounted) return;
       // A template whose frontmatter does not parse declares nothing, and
       // used to do it in silence: its questions still appeared, so it

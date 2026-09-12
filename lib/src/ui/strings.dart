@@ -799,6 +799,14 @@ final class AppStrings {
     'A fresh identifier, a different one at every occurrence.',
     'Un identificatore nuovo, diverso a ogni occorrenza.',
   );
+  static String get templateHelpCounterBody => _t(
+    'A number that counts up per name, kept across restarts: the first '
+        'note writes 1, the next 2. Same name in one note writes the same '
+        'number; combine with |pad:3.',
+    'Un numero che cresce per nome, conservato tra i riavvii: la prima '
+        'nota scrive 1, la successiva 2. Lo stesso nome in una nota scrive '
+        'lo stesso numero; da combinare con |pad:3.',
+  );
 
   static String get templateHelpDatesTitle =>
       _t('Writing a date', 'Scrivere una data');

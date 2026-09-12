@@ -44,6 +44,42 @@ void main() {
       expect(out, 'id1 id2');
     });
 
+    test('counter hands out 1 then 2 per name', () {
+      final seen = <String, int>{};
+      String count(String source) => applyTemplate(
+        source,
+        title: 'x',
+        now: clock,
+        counter: (name) => seen[name] = (seen[name] ?? 0) + 1,
+      );
+      expect(count('{{counter:quest}}'), '1');
+      expect(count('{{counter:quest}}'), '2');
+      expect(count('{{counter:other}}'), '1');
+      expect(count('{{counter:quest|pad:3}}'), '003');
+    });
+
+    test('counter without a callback or a name is left standing', () {
+      expect(render('{{counter:quest}}'), '{{counter:quest}}');
+      expect(
+        applyTemplate(
+          '{{counter}} {{counter:}}',
+          title: 'x',
+          now: clock,
+          counter: (_) => 1,
+        ),
+        '{{counter}} {{counter:}}',
+      );
+      expect(
+        applyTemplate(
+          '{{counter:quest|nope}}',
+          title: 'x',
+          now: clock,
+          counter: (_) => 1,
+        ),
+        '{{counter:quest|nope}}',
+      );
+    });
+
     test('whitespace and case inside the braces are tolerated', () {
       expect(render('{{ title }}'), 'My Note');
       expect(render('{{TITLE}}'), 'My Note');

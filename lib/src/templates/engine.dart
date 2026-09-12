@@ -1,10 +1,11 @@
 /// The template placeholder engine (T-M4-06, widened by T-TPL-01).
 ///
 /// Substitution, not a template language: `{{title}}`, `{{date}}`,
-/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}`, `{{uuid}}` and the two the
-/// user answers — `{{ask:Label}}` and `{{choice:Label:a,b,c}}` — are
-/// replaced, each may be followed by filters — `{{title|slug}}`,
-/// `{{date:YYYY-MM-DD|+7d}}` — and everything else in the file is copied
+/// `{{date:YYYY-MM}}`, `{{time}}`, `{{now}}`, `{{uuid}}`, `{{counter:name}}`
+/// and the two the user answers — `{{ask:Label}}` and
+/// `{{choice:Label:a,b,c}}` — are replaced, each may be followed by
+/// filters — `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
+/// `{{counter:quest|pad:3}}` — and everything else in the file is copied
 /// through byte for byte. There are no conditionals, no loops and no
 /// expressions, because a template here is a note that happens to have
 /// holes in it: a person should be able to read one and know exactly what
@@ -105,6 +106,9 @@ const String defaultNowFormat = 'YYYY-MM-DD HH:mm';
 /// the field's label. A null map, or a label the map does not carry,
 /// leaves the placeholder standing — the same thing every other unknown
 /// does, and what a caller that never collected the answers should show.
+/// [counter] fills `{{counter:name}}` (#52): it is called with the
+/// trimmed name and must hand out the next value. A null callback, or an
+/// empty name, leaves the placeholder standing.
 String applyTemplate(
   String source, {
   required String title,
@@ -112,6 +116,7 @@ String applyTemplate(
   String Function()? uuid,
   Map<String, String>? answers,
   TemplateContext? context,
+  int Function(String name)? counter,
 }) {
   final clock = now ?? DateTime.now();
   final newUuid = uuid ?? newUuidV4;
@@ -124,6 +129,14 @@ String applyTemplate(
     return switch (name) {
       'title' => _applyTextFilters(title, filters) ?? whole,
       'uuid' => _applyTextFilters(newUuid(), filters) ?? whole,
+      'counter' => switch (argument?.trim()) {
+        null || '' => whole,
+        final counterName =>
+          counter == null
+              ? whole
+              : (_applyTextFilters(counter(counterName).toString(), filters) ??
+                    whole),
+      },
       'date' =>
         _dateValue(clock, argument, defaultDateFormat, filters) ?? whole,
       'time' =>

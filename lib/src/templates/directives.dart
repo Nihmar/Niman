@@ -110,6 +110,7 @@ TemplateDirectives readTemplateDirectives(
   DateTime? now,
   Map<String, String>? answers,
   TemplateContext? context,
+  int Function(String name)? counter,
 }) {
   final parsed = parseFrontmatter(source);
   if (parsed == null) return TemplateDirectives.none;
@@ -125,6 +126,7 @@ TemplateDirectives readTemplateDirectives(
       now: now,
       answers: answers,
       context: context,
+      counter: counter,
     ).trim();
     return rendered.isEmpty ? null : rendered;
   }
@@ -160,6 +162,7 @@ String renderTemplate(
   String Function()? uuid,
   Map<String, String>? answers,
   TemplateContext? context,
+  int Function(String name)? counter,
 }) => removeFrontmatterKey(
   applyTemplate(
     source,
@@ -168,6 +171,7 @@ String renderTemplate(
     uuid: uuid,
     answers: answers,
     context: context,
+    counter: counter,
   ),
   directivesKey,
 );
