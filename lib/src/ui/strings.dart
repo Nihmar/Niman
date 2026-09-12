@@ -9,6 +9,7 @@ library;
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/ca.dart';
+import 'package:niman/src/ui/strings/cs.dart';
 import 'package:niman/src/ui/strings/da.dart';
 import 'package:niman/src/ui/strings/de.dart';
 import 'package:niman/src/ui/strings/en.dart';
@@ -58,6 +59,7 @@ final class AppStrings {
     AppLanguage.basque: BasqueStrings(),
     AppLanguage.catalan: CatalanStrings(),
     AppLanguage.galician: GalicianStrings(),
+    AppLanguage.czech: CzechStrings(),
     AppLanguage.polish: PolishStrings(),
   };
 
@@ -199,6 +201,7 @@ final class AppStrings {
     AppLanguage.basque => 'Euskara',
     AppLanguage.catalan => 'Català',
     AppLanguage.galician => 'Galego',
+    AppLanguage.czech => 'Čeština',
     AppLanguage.polish => 'Polski',
   };
 
