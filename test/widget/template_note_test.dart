@@ -186,4 +186,45 @@ void main() {
 
     expect(controller.contentOf('Journal/Monday.md'), '# Monday\n');
   });
+
+  testWidgets('a niman: block with ask and choice directives names the note',
+      (tester) async {
+    await openWithTemplates(tester, {
+      'Personaggio':
+          '---\n'
+          'niman:\n'
+          '  folder: Mondo/{{choice:Tipo:Personaggi,Luoghi}}\n'
+          '  filename: "{{ask:Nome}}"\n'
+          'type: character\n'
+          '---\n'
+          '\n'
+          '# {{ask:Nome}}\n'
+          '\n'
+          '**Fazione**: {{choice:Fazione:Corona,Ribelli,Neutrale}}\n'
+          '**Vista in**: [[{{parent}}]]\n'
+          '**Creata**: {{date:dddd D MMMM YYYY}}\n',
+    });
+
+    await tapNewFromTemplate(tester);
+    await tester.tap(find.byKey(const Key('template-Templates/Personaggio.md')));
+    await settle(tester);
+
+    // The template's own questions, not the name dialog: `Nome` answers
+    // the `filename:` directive, so the note gets its name from there.
+    expect(find.byKey(const Key('template-form')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('template-field-Nome')),
+      'Gandalf',
+    );
+    await tester.tap(find.byKey(const Key('template-form-ok')));
+    await settle(tester);
+
+    final content = controller.contentOf('Mondo/Personaggi/Gandalf.md');
+    expect(content, isNotNull, reason: 'named by the filename directive');
+    expect(content, contains('# Gandalf'));
+    expect(content, contains('type: character'));
+    expect(content, contains('Fazione**: Corona'));
+    expect(content, isNot(contains('niman:')));
+    expect(find.byType(NoteView), findsOneWidget);
+  });
 }
