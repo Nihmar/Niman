@@ -146,6 +146,27 @@ void main() {
       );
     }
   });
+
+  // A bare empty wikilink must not wedge the parser: the syntax matched
+  // but carries nothing, and the package's tryMatch swallows a false
+  // onMatch without advancing — an infinite loop that froze the app
+  // (2026-09-12). These must parse and keep the brackets as literal text.
+  test('empty wikilink forms parse and stay literal', () {
+    for (final source in <String>['[[]]', '[[|]]', '[[#]]', '![[]]']) {
+      final nodes = makeDocument().parseInline(source);
+      expect(
+        nodes.map((n) => n.textContent).join(),
+        contains(source),
+        reason: '$source lost its literal text',
+      );
+    }
+    // A real wikilink beside an empty one still resolves.
+    final nodes = makeDocument().parseInline('[[]] and [[Avventura]]');
+    final joined = nodes.map((n) => n.textContent).join();
+    expect(joined, contains('[[]]'));
+    expect(joined, contains('Avventura'));
+    expect(nodes.any((n) => n is md.Element && n.tag == 'wikilink'), isTrue);
+  });
 }
 
 String _describe(dynamic node) {

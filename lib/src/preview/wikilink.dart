@@ -20,8 +20,13 @@ final class EmbedInlineSyntax extends md.InlineSyntax {
   bool onMatch(md.InlineParser parser, Match match) {
     final raw = match.group(0)!;
     final ref = parseWikiRef(raw.substring(3, raw.length - 2));
+    // `![[]]` / `![[|]]` / `![[#]]` carry nothing to resolve. This must
+    // render as plain text, not `return false`: the package's tryMatch
+    // swallows a false onMatch without advancing the position, which is an
+    // infinite loop on the UI isolate (app freeze, 2026-09-12).
     if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
-      return false;
+      parser.addNode(md.Text(raw));
+      return true;
     }
     final display = ref.alias ?? ref.target;
     final element = md.Element.text('embed', display)
@@ -145,9 +150,13 @@ final class WikilinkInlineSyntax extends md.InlineSyntax {
   bool onMatch(md.InlineParser parser, Match match) {
     final raw = match.group(0)!;
     final ref = parseWikiRef(raw.substring(2, raw.length - 2));
-    // `[[]]` / `[[|]]` / `[[#]]` carry nothing to show or resolve.
+    // `[[]]` / `[[|]]` / `[[#]]` carry nothing to show or resolve. This
+    // must render as plain text, not `return false`: the package's
+    // tryMatch swallows a false onMatch without advancing the position,
+    // which is an infinite loop on the UI isolate (app freeze, 2026-09-12).
     if (ref.target.isEmpty && ref.heading == null && ref.alias == null) {
-      return false;
+      parser.addNode(md.Text(raw));
+      return true;
     }
     final display = ref.alias ?? ref.heading ?? ref.target;
     final element = md.Element.text('wikilink', display)
