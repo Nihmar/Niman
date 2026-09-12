@@ -7,7 +7,6 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:niman/src/core/language.dart';
-
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/ca.dart';
 import 'package:niman/src/ui/strings/da.dart';
@@ -16,6 +15,7 @@ import 'package:niman/src/ui/strings/en.dart';
 import 'package:niman/src/ui/strings/es.dart';
 import 'package:niman/src/ui/strings/eu.dart';
 import 'package:niman/src/ui/strings/fr.dart';
+import 'package:niman/src/ui/strings/gl.dart';
 import 'package:niman/src/ui/strings/hi.dart';
 import 'package:niman/src/ui/strings/it.dart';
 import 'package:niman/src/ui/strings/ja.dart';
@@ -56,6 +56,7 @@ final class AppStrings {
     AppLanguage.danish: DanishStrings(),
     AppLanguage.basque: BasqueStrings(),
     AppLanguage.catalan: CatalanStrings(),
+    AppLanguage.galician: GalicianStrings(),
   };
 
   /// The strings of the language actually in use.
@@ -195,6 +196,7 @@ final class AppStrings {
     AppLanguage.danish => 'Dansk',
     AppLanguage.basque => 'Euskara',
     AppLanguage.catalan => 'Català',
+    AppLanguage.galician => 'Galego',
   };
 
   // List note kind (T-TK-02).
