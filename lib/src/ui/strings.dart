@@ -9,6 +9,7 @@ library;
 import 'package:niman/src/core/language.dart';
 
 import 'package:niman/src/ui/strings/base.dart';
+import 'package:niman/src/ui/strings/da.dart';
 import 'package:niman/src/ui/strings/de.dart';
 import 'package:niman/src/ui/strings/en.dart';
 import 'package:niman/src/ui/strings/es.dart';
@@ -50,6 +51,7 @@ final class AppStrings {
     AppLanguage.dutch: DutchStrings(),
     AppLanguage.swedish: SwedishStrings(),
     AppLanguage.norwegian: NorwegianStrings(),
+    AppLanguage.danish: DanishStrings(),
   };
 
   /// The strings of the language actually in use.
@@ -186,6 +188,7 @@ final class AppStrings {
     AppLanguage.dutch => 'Nederlands',
     AppLanguage.swedish => 'Svenska',
     AppLanguage.norwegian => 'Norsk bokmål',
+    AppLanguage.danish => 'Dansk',
   };
 
   // List note kind (T-TK-02).
