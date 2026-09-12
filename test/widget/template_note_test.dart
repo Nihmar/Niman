@@ -187,8 +187,9 @@ void main() {
     expect(controller.contentOf('Journal/Monday.md'), '# Monday\n');
   });
 
-  testWidgets('a niman: block with ask and choice directives names the note',
-      (tester) async {
+  testWidgets('a niman: block with ask and choice directives names the note', (
+    tester,
+  ) async {
     await openWithTemplates(tester, {
       'Personaggio':
           '---\n'
@@ -206,7 +207,9 @@ void main() {
     });
 
     await tapNewFromTemplate(tester);
-    await tester.tap(find.byKey(const Key('template-Templates/Personaggio.md')));
+    await tester.tap(
+      find.byKey(const Key('template-Templates/Personaggio.md')),
+    );
     await settle(tester);
 
     // The template's own questions, not the name dialog: `Nome` answers

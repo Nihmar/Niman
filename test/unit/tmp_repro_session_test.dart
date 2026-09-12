@@ -1,3 +1,4 @@
+// The prints are the repro timeline: which step lands when is the result.
 // ignore_for_file: avoid_print
 // Temporary reproduction: the full template-creation flow against a real
 // LibraryController (real disk + real sqlite), with the exact
@@ -45,18 +46,13 @@ void main() {
         .writeAsStringSync(personaggio);
     File(p.join(root.path, 'Avventura.md')).writeAsStringSync('# Avventura\n');
 
-    Future<AppDatabase> appDb() async => AppDatabase(
-      NativeDatabase(File(p.join(tmp.path, 'niman.db'))),
-    );
-    Future<IndexDatabase> indexDb(String libraryPath) async => IndexDatabase(
-      NativeDatabase(File(p.join(tmp.path, 'library.db'))),
-    );
+    Future<AppDatabase> appDb() async =>
+        AppDatabase(NativeDatabase(File(p.join(tmp.path, 'niman.db'))));
+    Future<IndexDatabase> indexDb(String libraryPath) async =>
+        IndexDatabase(NativeDatabase(File(p.join(tmp.path, 'library.db'))));
 
     print('>> opening controller');
-    final controller = LibraryController(
-      appDb,
-      indexDbFactory: indexDb,
-    );
+    final controller = LibraryController(appDb, indexDbFactory: indexDb);
     await controller.open(root.path, create: false);
     print('>> open done, phase=${controller.phase}');
 
@@ -77,7 +73,7 @@ void main() {
       'Nome': 'Gandalf',
       'Fazione': 'Corona',
     };
-    final surroundings = TemplateContext(parent: '', clipboard: '');
+    const surroundings = TemplateContext.empty;
     final declared = readTemplateDirectives(
       template,
       answers: answers,

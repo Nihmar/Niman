@@ -29,12 +29,12 @@ niman:
 Body
 ''',
     };
-    variants.forEach((label, source) {
-      final d = readTemplateDirectives(source);
+    for (final e in variants.entries) {
+      final d = readTemplateDirectives(e.value);
       print(
-        '$label: namesItself=${d.namesItself} '
+        '${e.key}: namesItself=${d.namesItself} '
         'filename=${d.filename ?? '-'} error=${d.error ?? '-'}',
       );
-    });
+    }
   });
 }

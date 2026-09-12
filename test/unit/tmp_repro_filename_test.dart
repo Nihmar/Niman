@@ -1,5 +1,5 @@
 // Temporary repro for the "filename directive still asks for a name" report.
-// ignore_for_file: avoid_print, prefer_const_constructors
+// ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/templates/directives.dart';
@@ -48,12 +48,12 @@ filename: Flat
 Body
 ''',
     };
-    variants.forEach((label, source) {
-      final d = readTemplateDirectives(source);
+    for (final e in variants.entries) {
+      final d = readTemplateDirectives(e.value);
       print(
-        '$label: namesItself=${d.namesItself} '
+        '${e.key}: namesItself=${d.namesItself} '
         'filename=${d.filename ?? '-'} error=${d.error ?? '-'}',
       );
-    });
+    }
   });
 }

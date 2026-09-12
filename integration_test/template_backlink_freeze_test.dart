@@ -1,3 +1,4 @@
+// The prints are the repro timeline: which step lands when is the result.
 // ignore_for_file: avoid_print
 // Reproduction: creating a note from a template that wants a backlink
 // (`[[{{parent}}]]`, like Personaggio.md) when no note is specified for
@@ -14,7 +15,6 @@
 //   cp Personaggio.md /tmp/niman/repro_lib/Templates/
 // then:
 //   flutter test integration_test/template_backlink_freeze_test.dart -d linux
-import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -65,7 +65,7 @@ Future<void> runScenario(
   await AppSettingsRepo(appDb).setLastLibraryPath(libraryPath);
   final controller = LibraryController(
     () async => appDb,
-    indexDbFactory: (String path) async => IndexDatabase(
+    indexDbFactory: (path) async => IndexDatabase(
       NativeDatabase(File('${scratch.path}/index.db')),
     ),
   );
@@ -158,10 +158,10 @@ Future<void> runScenario(
   );
 
   final onDisk = File('$libraryPath/$relPath').readAsStringSync();
+  final bigName = bigNote.split('/').last.replaceAll('.md', '');
   print(
     '>> note on disk: [[]] present: ${onDisk.contains('[[]]')}, '
-    'link to the big note: '
-    '${onDisk.contains('[[${bigNote.split('/').last.replaceAll('.md', '')}]]')}',
+    'link to the big note: ${onDisk.contains('[[$bigName]]')}',
   );
 }
 
