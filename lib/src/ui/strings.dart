@@ -42,6 +42,7 @@ import 'package:niman/src/ui/strings/sl.dart';
 import 'package:niman/src/ui/strings/sq.dart';
 import 'package:niman/src/ui/strings/sr.dart';
 import 'package:niman/src/ui/strings/sv.dart';
+import 'package:niman/src/ui/strings/tr.dart';
 import 'package:niman/src/ui/strings/uk.dart';
 import 'package:niman/src/ui/strings/zh.dart';
 
@@ -95,6 +96,7 @@ final class AppStrings {
     AppLanguage.albanian: AlbanianStrings(),
     AppLanguage.greek: GreekStrings(),
     AppLanguage.icelandic: IcelandicStrings(),
+    AppLanguage.turkish: TurkishStrings(),
     AppLanguage.hungarian: HungarianStrings(),
     AppLanguage.croatian: CroatianStrings(),
   };
@@ -257,6 +259,7 @@ final class AppStrings {
     AppLanguage.albanian => 'Shqip',
     AppLanguage.greek => 'Ελληνικά',
     AppLanguage.icelandic => 'Íslenska',
+    AppLanguage.turkish => 'Türkçe',
   };
 
   // List note kind (T-TK-02).
