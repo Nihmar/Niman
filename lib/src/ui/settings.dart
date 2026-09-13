@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -361,7 +362,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
   }
 
   /// Opens a save dialog letting the user choose where the debug log goes,
-  /// and writes the buffered lines (+ a context header) to the chosen file.
+  /// and writes the buffered lines (+ a context header, + the device
+  /// logcat on Android) to the chosen file.
   Future<void> _exportLog() async {
     final controller = widget.controller;
     // Earlier runs first: the disk mirror holds what the process before
@@ -379,7 +381,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
       for (final line in AppLog.lines())
         if (!onDisk.contains(line)) line,
     ];
-    if (lines.isEmpty && persisted.isEmpty) {
+    // The device's own logcat for this app (Android): the native Kotlin
+    // logs, the plugins and the engine lines the AppLog buffer never
+    // sees (widget provider, remote views service, config activity).
+    final logcat = await _logcatDump();
+    final hasLogcat = logcat != null && logcat.trim().isNotEmpty;
+    if (lines.isEmpty && persisted.isEmpty && !hasLogcat) {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(AppStrings.exportLogEmpty)));
@@ -400,6 +407,15 @@ final class _SettingsBodyState extends State<SettingsBody> {
       if (persisted.isNotEmpty) persisted.trimRight(),
       if (persisted.isNotEmpty && lines.isNotEmpty) '# --- not yet on disk ---',
       ...lines,
+      if (logcat case final section? when section.trim().isNotEmpty) ...[
+        '',
+        '# --- logcat (this app, device) ---',
+        section.trimRight(),
+      ],
+      if (!hasLogcat && Platform.isAndroid) ...[
+        '',
+        '# --- logcat unavailable (could not run `logcat -d`) ---',
+      ],
     ].join('\n');
     try {
       final uri = await FilePicker.saveFile(
@@ -429,6 +445,59 @@ final class _SettingsBodyState extends State<SettingsBody> {
     return '${dt.year.toString().padLeft(4, '0')}-${two(dt.month)}'
         '-${two(dt.day)}-${two(dt.hour)}${two(dt.minute)}${two(dt.second)}'
         '.${three(dt.millisecond)}';
+  }
+
+  /// The device's own logcat for this app (Android), capped to its tail.
+  ///
+  /// Since Android 7 an app may read the logd entries of its own uid, so
+  /// a child `logcat -d` answers with exactly this app's lines: the
+  /// native Kotlin logs (widget provider, remote views service, config
+  /// activity), the plugins and the Flutter engine -- none of which reach
+  /// the AppLog buffer. The dump runs off the UI isolate and is bounded
+  /// by a timeout; the file keeps only the most recent 200 KB, because
+  /// a report is about what happened last.
+  ///
+  /// Null off Android, when nothing was captured, or when the dump fails.
+  static Future<String?> _logcatDump() async {
+    if (!Platform.isAndroid) {
+      return null;
+    }
+    try {
+      final stdout = await Isolate.run(() async {
+        final process = await Process.start('logcat', [
+          '-d',
+          '-v',
+          'threadtime',
+        ]);
+        // -d exits right after the dump; the timeout is the safety net
+        // for a device where it hangs. Malformed bytes become
+        // replacements: native log lines carry arbitrary text.
+        return await process.stdout
+            .transform(const Utf8Decoder(allowMalformed: true))
+            .join()
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                process.kill(ProcessSignal.sigkill);
+                return '';
+              },
+            );
+      });
+      final out = stdout.trimRight();
+      if (out.isEmpty) {
+        return null;
+      }
+      const maxBytes = 200 * 1024;
+      if (out.length <= maxBytes) {
+        return out;
+      }
+      final cut = out.lastIndexOf('\n', out.length - maxBytes);
+      return cut <= 0
+          ? out.substring(out.length - maxBytes)
+          : out.substring(cut + 1);
+    } on Object catch (_) {
+      return null;
+    }
   }
 
   Future<void> _chooseSplitRatio() async {
