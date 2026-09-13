@@ -91,4 +91,23 @@ void main() {
       expect(payload.length, lessThanOrEqualTo(150));
     });
   });
+
+  group('note payload', () {
+    test('carries library, title, kind and body', () {
+      final payload = noteWidgetPayload(
+        libraryPath: '/lib/Work',
+        title: 'Todo',
+        kind: 'list',
+        body: '☐ milk',
+        truncated: false,
+      );
+      expect(jsonDecode(payload), {
+        'library': '/lib/Work',
+        'title': 'Todo',
+        'kind': 'list',
+        'body': '☐ milk',
+        'truncated': false,
+      });
+    });
+  });
 }

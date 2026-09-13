@@ -184,6 +184,25 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     );
   }
 
+  @override
+  Future<void> adoptNoteWidget(
+    int androidWidgetId,
+    String libraryPath,
+    String notePath,
+  ) async {
+    final existing = [
+      for (final config in _widgetConfigs)
+        if (config.androidWidgetId == androidWidgetId) config,
+    ];
+    if (existing.isNotEmpty) return;
+    seedWidgetConfig(
+      androidWidgetId: androidWidgetId,
+      provider: 'note',
+      libraryPath: libraryPath,
+      notePath: notePath,
+    );
+  }
+
   /// Test-only seeding of a widget instance reading [libraryPath].
   void seedWidgetConfig({
     required int androidWidgetId,

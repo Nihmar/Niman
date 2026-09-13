@@ -501,6 +501,23 @@ final class LibraryController implements LibrarySession {
     );
   }
 
+  /// Records a placed note widget for [notePath] (issue 6).
+  @override
+  Future<void> adoptNoteWidget(
+    int androidWidgetId,
+    String libraryPath,
+    String notePath,
+  ) async {
+    final store = WidgetConfigStore(await appDatabase);
+    if (await store.find(androidWidgetId) != null) return;
+    await store.upsert(
+      androidWidgetId: androidWidgetId,
+      provider: WidgetProvider.note,
+      libraryPath: libraryPath,
+      notePath: notePath,
+    );
+  }
+
   /// Drops [libraryPath] from the known list; the folder is untouched.
   @override
   Future<void> forgetLibrary(String libraryPath) async {

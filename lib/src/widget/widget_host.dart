@@ -9,11 +9,15 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/widget/widget_payload.dart';
 
 /// What the shell needs from the widget host.
 abstract interface class WidgetHostService {
   /// The placed todo widget ids (empty off-Android, or when none).
   Future<List<int>> todoWidgetIds();
+
+  /// The placed note widget ids (empty off-Android, or when none).
+  Future<List<int>> noteWidgetIds();
 
   /// Releases resources.
   Future<void> dispose();
@@ -44,10 +48,20 @@ final class PlatformWidgetHostService implements WidgetHostService {
   final MethodChannel _channel;
 
   @override
-  Future<List<int>> todoWidgetIds() async {
+  Future<List<int>> todoWidgetIds() {
+    return _widgetIds(todoWidgetAndroidName);
+  }
+
+  @override
+  Future<List<int>> noteWidgetIds() {
+    return _widgetIds(noteWidgetAndroidName);
+  }
+
+  /// The placed instances of the provider class [androidName].
+  Future<List<int>> _widgetIds(String androidName) async {
     try {
       final ids = await _channel.invokeListMethod<Object?>('getWidgetIds', {
-        'provider': 'TodoWidgetProvider',
+        'provider': androidName,
       });
       if (ids == null) return [];
       return [
@@ -72,6 +86,9 @@ final class NoopWidgetHostService implements WidgetHostService {
 
   @override
   Future<List<int>> todoWidgetIds() async => [];
+
+  @override
+  Future<List<int>> noteWidgetIds() async => [];
 
   @override
   Future<void> dispose() async {}

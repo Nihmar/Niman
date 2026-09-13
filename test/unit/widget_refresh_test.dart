@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_widget_host_service.dart';
+import '../fakes/fake_widget_pin_store.dart';
 
 void main() {
   late FakeLibrarySession session;
@@ -169,5 +170,113 @@ void main() {
     );
     expect(await session.widgetConfigsFor(root), isEmpty);
     expect(saves, isEmpty);
+  });
+
+  group('note widgets', () {
+    late FakeWidgetHostService host;
+    late FakeWidgetPinStore pins;
+    late Map<String, String?> files;
+
+    setUp(() {
+      host = FakeWidgetHostService();
+      pins = FakeWidgetPinStore();
+      files = {};
+    });
+
+    Future<void> refreshNotes() {
+      return refreshNoteWidgets(
+        session: session,
+        updater: recorder(),
+        host: host,
+        pinStore: pins,
+        readNote: (root, notePath) async => files[notePath],
+      );
+    }
+
+    test('without widgets nothing pushes', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      files['Note.md'] = 'hello';
+      await refreshNotes();
+      expect(saves, isEmpty);
+    });
+
+    test('an unknown instance adopts the pin and pushes', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      host.noteIds = [7];
+      pins.pin = (libraryPath: root, notePath: 'Note.md');
+      files['Note.md'] = '# hi\n\nbody text\n';
+
+      await refreshNotes();
+
+      expect(pins.pin, isNull, reason: 'the pin is consumed');
+      final adopted = await session.widgetConfigsFor(root);
+      expect(adopted.map((c) => c.notePath), ['Note.md']);
+      expect(saves.map((s) => s.$1), ['note_7']);
+      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
+      expect(payload['kind'], 'note');
+      expect(payload['title'], 'Note');
+      expect(payload['body'], '# hi\n\nbody text');
+    });
+
+    test('a list note pushes checklist rows', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      session.seedWidgetConfig(
+        androidWidgetId: 7,
+        provider: 'note',
+        libraryPath: root,
+        notePath: 'List.md',
+      );
+      files['List.md'] = '---\ntype: list\n---\n- [ ] milk\n- [x] eggs\n';
+
+      await refreshNotes();
+
+      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
+      expect(payload['kind'], 'list');
+      expect(payload['body'], '☐ milk\n☑ eggs');
+    });
+
+    test('a deleted note pushes missing', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      session.seedWidgetConfig(
+        androidWidgetId: 7,
+        provider: 'note',
+        libraryPath: root,
+        notePath: 'Gone.md',
+      );
+
+      await refreshNotes();
+
+      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
+      expect(payload['kind'], 'missing');
+      expect(payload['title'], 'Gone');
+    });
+
+    test("another library's pin is put back, not consumed", () async {
+      final root = p.join('/fake', 'Work');
+      final elsewhere = p.join('/fake', 'Personal');
+      await session.open(root, create: false);
+      host.noteIds = [7];
+      pins.pin = (libraryPath: elsewhere, notePath: 'Note.md');
+      ({String libraryPath, String notePath})? restored;
+      await refreshNoteWidgets(
+        session: session,
+        updater: recorder(),
+        host: host,
+        pinStore: pins,
+        restorePin: ({required libraryPath, required notePath}) async {
+          restored = (libraryPath: libraryPath, notePath: notePath);
+          return true;
+        },
+        readNote: (root, notePath) async => files[notePath],
+      );
+
+      expect(await session.widgetConfigsFor(root), isEmpty);
+      expect(saves, isEmpty);
+      expect(restored, (libraryPath: elsewhere, notePath: 'Note.md'));
+    });
   });
 }
