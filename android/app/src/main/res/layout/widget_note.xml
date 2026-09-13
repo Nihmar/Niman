@@ -21,18 +21,17 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <ScrollView
+    <!-- No ScrollView: RemoteViews cannot inflate it (the host throws
+         on load), so the body is a fixed block with an ellipsis. The
+         full note is one tap away. -->
+    <TextView
+        android:id="@+id/widget_note_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="4dp"
-        android:fillViewport="true">
-
-        <TextView
-            android:id="@+id/widget_note_body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/widget_text_primary"
-            android:textSize="13sp" />
-    </ScrollView>
+        android:ellipsize="end"
+        android:maxLines="12"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="13sp" />
 </LinearLayout>
