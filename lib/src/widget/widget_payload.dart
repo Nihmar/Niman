@@ -99,14 +99,16 @@ String _encode(
   });
 }
 
-/// A pinned note as JSON: `{"library", "title", "kind", "body",
+/// A pinned note as JSON: `{"library", "note", "title", "kind", "body",
 /// "truncated"}`.
 ///
-/// `kind` is `note` (prose excerpt in `body`), `list` (checklist rows in
-/// `body`) or `missing` (the note is gone; `body` empty). `library` is
-/// the absolute root the native provider taps back into.
+/// `library` is the absolute root and `note` the library-relative path
+/// the native provider taps back into; `kind` is `note` (prose excerpt
+/// in `body`), `list` (checklist rows in `body`) or `missing` (the note
+/// is gone; `body` empty).
 String noteWidgetPayload({
   required String libraryPath,
+  required String notePath,
   required String title,
   required String kind,
   required String body,
@@ -114,6 +116,7 @@ String noteWidgetPayload({
 }) {
   return jsonEncode({
     'library': libraryPath,
+    'note': notePath,
     'title': title,
     'kind': kind,
     'body': body,

@@ -146,6 +146,7 @@ Future<String> _notePayload(
   if (content == null) {
     return noteWidgetPayload(
       libraryPath: root,
+      notePath: notePath,
       title: noteWidgetTitle(notePath),
       kind: 'missing',
       body: '',
@@ -156,6 +157,7 @@ Future<String> _notePayload(
     final list = checklistExcerpt(content);
     return noteWidgetPayload(
       libraryPath: root,
+      notePath: notePath,
       title: noteWidgetTitle(notePath),
       kind: 'list',
       body: list.text,
@@ -165,6 +167,7 @@ Future<String> _notePayload(
   final excerpt = noteExcerpt(content);
   return noteWidgetPayload(
     libraryPath: root,
+    notePath: notePath,
     title: noteWidgetTitle(notePath),
     kind: 'note',
     body: excerpt.text,
