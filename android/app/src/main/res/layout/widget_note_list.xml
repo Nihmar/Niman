@@ -8,8 +8,8 @@
      updates, so a provider addView would accumulate a copy of the rows
      on every refresh. Each refresh re-fills the slots instead (text,
      color, visibility); unused slots stay gone. Row taps flip the item
-     in the background, "+" appends a new empty item, the header opens
-     the note. -->
+     in the background, "+" opens the note's add-item field, the header
+     opens the note. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_note_list_root"
     android:layout_width="match_parent"
@@ -36,9 +36,10 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Background add: appends a new empty item without opening
-             the app (the row ops live in Dart, round 2, R4). Text, not
-             a drawable, so R8 has nothing new to strip. -->
+        <!-- Quick add: opens the note with its add-item field focused
+             (the input field is in the app — RemoteViews cannot capture
+             typed text). Text, not a drawable, so R8 has nothing new to
+             strip. -->
         <TextView
             android:id="@+id/widget_note_add"
             android:layout_width="48dp"

@@ -27,8 +27,9 @@ import org.json.JSONObject
  * (text, color, visibility) instead.
  *
  * List rows are interactive: a tap flips the item in the background
- * (`niman://note-row-toggle`), and the header "+" appends a new empty
- * item (`niman://note-row-add`); the header opens the note. Checked rows
+ * (`niman://note-row-toggle`), and the header "+" opens the note with its
+ * add-item field focused (the input field is in the app — RemoteViews
+ * cannot capture typed text); the header opens the note. Checked rows
  * render checked through `setCompoundButtonChecked` (a plain `setChecked`
  * is off the RemoteViews allowlist). Normal notes stay read-only
  * (RemoteViews cannot edit text in place, and editing and moving rows
@@ -178,19 +179,13 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         views.setOnClickPendingIntent(rowIds[slot], toggle)
     }
 
-    /** The background pending intent for the header "+": appends a new
-     *  empty item through the background worker. */
+    /**
+     * The pending intent for the header "+": opens the note with its
+     * add-item field focused (the input field is in the app — RemoteViews
+     * cannot capture typed text, so the "+" never appends blindly).
+     */
     private fun addNoteRow(context: Context, id: Int, library: String, note: String): PendingIntent {
-        return HomeWidgetBackgroundIntent.getBroadcast(
-            context,
-            Uri.Builder()
-                .scheme("niman")
-                .authority("note-row-add")
-                .appendQueryParameter("id", id.toString())
-                .appendQueryParameter("library", library)
-                .appendQueryParameter("note", note)
-                .build(),
-        )
+        return mainActivityIntent(context, id, library, note, WidgetBridge.ACTION_ADD_NOTE_ITEM)
     }
 
     companion object {
@@ -240,18 +235,32 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     private fun openNote(context: Context, id: Int, library: String, note: String): PendingIntent {
+        return mainActivityIntent(context, id, library, note, WidgetBridge.ACTION_OPEN_NOTE)
+    }
+
+    /**
+     * The activity pending intent a header tap fires: [action] with the
+     * library/note extras, or a plain app launch when the target is
+     * unknown (a stale payload). One request code per instance: shared
+     * codes collapse distinct widgets into one pending intent.
+     */
+    private fun mainActivityIntent(
+        context: Context,
+        id: Int,
+        library: String,
+        note: String,
+        action: String,
+    ): PendingIntent {
         val intent = if (library.isEmpty() || note.isEmpty()) {
             context.packageManager.getLaunchIntentForPackage(context.packageName)
         } else {
             Intent(context, MainActivity::class.java)
-                .setAction(WidgetBridge.ACTION_OPEN_NOTE)
+                .setAction(action)
                 .putExtra(WidgetBridge.EXTRA_LIBRARY, library)
                 .putExtra(WidgetBridge.EXTRA_NOTE, note)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         } ?: Intent(context, MainActivity::class.java)
-        // One request code per instance: shared codes collapse distinct
-        // widgets into one pending intent.
         return PendingIntent.getActivity(
             context,
             id,
