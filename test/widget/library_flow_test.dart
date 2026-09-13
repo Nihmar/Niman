@@ -154,6 +154,16 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Sacrifice.md', offstage: true));
     await settle(tester);
+    // The row sheet scrolls on short screens (it holds eight entries),
+    // so the trailing delete may need bringing into view first.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.byKey(const Key('menu-delete')));
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
@@ -185,6 +195,16 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Sacrifice.md', offstage: true));
     await settle(tester);
+    // The row sheet scrolls on short screens (it holds eight entries),
+    // so the trailing delete may need bringing into view first.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.byKey(const Key('menu-delete')));
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
@@ -242,6 +262,16 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Sacrifice.md', offstage: true));
     await settle(tester);
+    // The row sheet scrolls on short screens (it holds eight entries),
+    // so the trailing delete may need bringing into view first.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.byKey(const Key('menu-delete')));
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
@@ -276,6 +306,16 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Victim.md', offstage: true));
     await settle(tester);
+    // The row sheet scrolls on short screens (it holds eight entries),
+    // so the trailing delete may need bringing into view first.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.tap(find.byKey(const Key('menu-delete')));
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
