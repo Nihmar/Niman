@@ -141,7 +141,9 @@ class TodoWidgetProvider : HomeWidgetProvider() {
             )
             setTextViewText(R.id.widget_todo_row_meta, meta)
             setTextViewText(R.id.widget_todo_row_text, row.optString("text", ""))
-            setBoolean(R.id.widget_todo_row_check, "setChecked", false)
+            // Every rendered row is open by definition, so the unchecked
+            // CheckBox default is already right. RemoteViews forbids
+            // CheckBox.setChecked(boolean) and would drop the whole view.
             // The whole row toggles (checkbox included); one broadcast
             // per row, the URI in its data.
             val toggle = HomeWidgetBackgroundIntent.getBroadcast(context, fillIn)
