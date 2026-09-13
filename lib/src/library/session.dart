@@ -13,6 +13,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/widget/widget_configs.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -210,6 +211,19 @@ abstract interface class LibrarySession {
     String libraryPath,
     String notePath,
   );
+
+  /// Drops [libraryPath]'s [provider] widget configurations whose
+  /// instance is no longer placed (issue 6).
+  ///
+  /// The native provider's `onDeleted` cannot reach the database (the
+  /// engine may be dead), so the refresh owns the cleanup: without it a
+  /// removed widget's row keeps pushing on every refresh, and every push
+  /// re-broadcasts the update to the instances still placed.
+  Future<void> pruneWidgetConfigs({
+    required String libraryPath,
+    required WidgetProvider provider,
+    required Set<int> placedIds,
+  });
 
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
