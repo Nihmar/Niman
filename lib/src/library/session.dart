@@ -195,6 +195,9 @@ abstract interface class LibrarySession {
   /// again with its settings.
   Future<void> forgetLibrary(String libraryPath);
 
+  /// The home-screen widget instances reading [libraryPath] (issue 6).
+  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath);
+
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
 

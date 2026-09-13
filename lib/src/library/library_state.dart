@@ -483,6 +483,12 @@ final class LibraryController implements LibrarySession {
     return await LibraryRegistry(await appDatabase).all();
   }
 
+  /// The home-screen widget instances reading [libraryPath] (issue 6).
+  @override
+  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) async {
+    return await WidgetConfigStore(await appDatabase).forLibrary(libraryPath);
+  }
+
   /// Drops [libraryPath] from the known list; the folder is untouched.
   @override
   Future<void> forgetLibrary(String libraryPath) async {
