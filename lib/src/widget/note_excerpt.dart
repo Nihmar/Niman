@@ -1,7 +1,8 @@
 /// Note excerpts for the home-screen note widget (issue 6).
 ///
-/// RemoteViews cannot render Markdown, so a pinned note is flattened to
-/// text: prose for normal notes, `☐`/`☑` rows for `type: list` notes.
+/// RemoteViews cannot render Markdown, so a pinned note is flattened:
+/// prose text for normal notes, structured rows for `type: list` notes
+/// (the widget renders one row view per item).
 /// Pure Dart, no I/O: callers read the note off the UI isolate and pass
 /// the content in.
 library;
@@ -15,6 +16,35 @@ const int widgetExcerptMaxChars = 2000;
 
 /// Max checklist rows for a list note.
 const int widgetChecklistMaxItems = 20;
+
+/// One checklist row of a list note payload: the item's prose, box state
+/// and position (the line is the file line the background ops flip).
+final class ChecklistRow {
+  /// Creates a row.
+  const new({
+    required this.text,
+    required this.checked,
+    required this.line,
+    required this.depth,
+  });
+
+  /// The item text after the task box.
+  final String text;
+
+  /// Whether the box is checked.
+  final bool checked;
+
+  /// The item's line in the note text (the flip target).
+  final int line;
+
+  /// The nesting level (0 = top), for row indentation.
+  final int depth;
+
+  /// The JSON shape the payload carries.
+  Map<String, Object?> toMap() {
+    return {'text': text, 'checked': checked, 'line': line, 'depth': depth};
+  }
+}
 
 /// The widget title for [notePath] (`Todo.md` → `Todo`).
 String noteWidgetTitle(String notePath) {
@@ -44,18 +74,24 @@ List<String> noteBodyLines(String content) {
   return (text: '${body.substring(0, maxChars).trimRight()}…', truncated: true);
 }
 
-/// The checklist text of a list note: one `☐`/`☑` row per item in
-/// document order, depth-indented, capped to [maxItems].
-({String text, bool truncated}) checklistExcerpt(
+/// The checklist rows of a list note: one [ChecklistRow] per item in
+/// document order, capped to [maxItems].
+({List<ChecklistRow> rows, bool truncated}) checklistRows(
   String content, {
   int maxItems = widgetChecklistMaxItems,
 }) {
   final items = parseListItems(content);
   final kept = items.length <= maxItems ? items : items.sublist(0, maxItems);
-  final rows = [
-    for (final item in kept)
-      '${'  ' * item.depth}${item.checked ? '☑' : '☐'} ${item.text}'
-          .trimRight(),
-  ];
-  return (text: rows.join('\n'), truncated: items.length > kept.length);
+  return (
+    rows: [
+      for (final item in kept)
+        ChecklistRow(
+          text: item.text,
+          checked: item.checked,
+          line: item.line,
+          depth: item.depth,
+        ),
+    ],
+    truncated: items.length > kept.length,
+  );
 }

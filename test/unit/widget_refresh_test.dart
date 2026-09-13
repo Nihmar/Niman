@@ -236,7 +236,10 @@ void main() {
 
       final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
       expect(payload['kind'], 'list');
-      expect(payload['body'], '☐ milk\n☑ eggs');
+      expect(payload['rows'], [
+        {'text': 'milk', 'checked': false, 'line': 3, 'depth': 0},
+        {'text': 'eggs', 'checked': true, 'line': 4, 'depth': 0},
+      ]);
     });
 
     test('a deleted note pushes missing', () async {

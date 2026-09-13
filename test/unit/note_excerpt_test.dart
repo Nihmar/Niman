@@ -41,7 +41,7 @@ void main() {
     });
   });
 
-  group('checklist excerpts', () {
+  group('checklist rows', () {
     const content =
         '---\ntype: list\n---\n'
         '- [ ] milk\n'
@@ -50,16 +50,32 @@ void main() {
         '\n'
         'prose is not an item\n';
 
-    test('renders boxes in document order', () {
-      final list = checklistExcerpt(content);
-      expect(list.text, '☐ milk\n☑ eggs\n  ☐ nested');
+    test('carries text, box, line and depth in document order', () {
+      final list = checklistRows(content);
+      expect(
+        [
+          for (final row in list.rows)
+            (row.text, row.checked, row.line, row.depth),
+        ],
+        [('milk', false, 3, 0), ('eggs', true, 4, 0), ('nested', false, 5, 1)],
+      );
       expect(list.truncated, isFalse);
     });
 
     test('caps the rows with a flag', () {
-      final list = checklistExcerpt(content, maxItems: 2);
-      expect(list.text, '☐ milk\n☑ eggs');
+      final list = checklistRows(content, maxItems: 2);
+      expect(list.rows, hasLength(2));
+      expect(list.rows.first.text, 'milk');
       expect(list.truncated, isTrue);
+    });
+
+    test('rows map to the payload JSON', () {
+      expect(checklistRows(content).rows[1].toMap(), {
+        'text': 'eggs',
+        'checked': true,
+        'line': 4,
+        'depth': 0,
+      });
     });
   });
 }

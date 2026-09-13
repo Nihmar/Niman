@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 
@@ -93,21 +94,48 @@ void main() {
   });
 
   group('note payload', () {
-    test('carries library, note, title, kind and body', () {
+    test('a prose note carries library, note, title, kind and body', () {
       final payload = noteWidgetPayload(
         libraryPath: '/lib/Work',
-        notePath: 'Todo.md',
-        title: 'Todo',
-        kind: 'list',
-        body: '☐ milk',
+        notePath: 'Note.md',
+        title: 'Note',
+        kind: 'note',
+        body: '# hi\n\nbody text',
         truncated: false,
       );
       expect(jsonDecode(payload), {
         'library': '/lib/Work',
-        'note': 'Todo.md',
-        'title': 'Todo',
+        'note': 'Note.md',
+        'title': 'Note',
+        'kind': 'note',
+        'rows': <Object?>[],
+        'body': '# hi\n\nbody text',
+        'truncated': false,
+      });
+    });
+
+    test('a list note carries the checklist rows', () {
+      final payload = noteWidgetPayload(
+        libraryPath: '/lib/Work',
+        notePath: 'List.md',
+        title: 'List',
+        kind: 'list',
+        rows: const [
+          ChecklistRow(text: 'milk', checked: false, line: 3, depth: 0),
+          ChecklistRow(text: 'eggs', checked: true, line: 4, depth: 1),
+        ],
+        truncated: false,
+      );
+      expect(jsonDecode(payload), {
+        'library': '/lib/Work',
+        'note': 'List.md',
+        'title': 'List',
         'kind': 'list',
-        'body': '☐ milk',
+        'rows': [
+          {'text': 'milk', 'checked': false, 'line': 3, 'depth': 0},
+          {'text': 'eggs', 'checked': true, 'line': 4, 'depth': 1},
+        ],
+        'body': '',
         'truncated': false,
       });
     });
