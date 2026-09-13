@@ -2,20 +2,19 @@ package dev.niman.niman
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
+import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.provider.DocumentsContract
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONObject
-import java.io.File
 
 /**
  * Placement screens for both widgets (round 2, R1/R4): which library a
@@ -23,14 +22,15 @@ import java.io.File
  *
  * One class, two launcher entries ([TodoWidgetConfig]/[NoteWidgetConfig]
  * aliases below): the alias component names the kind. No Dart engine
- * runs at placement, so everything here reads the `SharedPreferences`
- * mirror (`known_libraries`, written by Dart on every open) and the
- * per-library index files read-only. Choices land in per-instance
- * `*_config` prefs keys; Dart adopts them on the next refresh and owns
- * every database write.
+ * runs at placement, so the library list comes from the
+ * `SharedPreferences` mirror (`known_libraries`, written by Dart on
+ * every open). Choices land in per-instance `*_config` prefs keys; Dart
+ * adopts them on the next refresh and owns every database write.
  *
  * A single known library skips its step; nothing known shows how to get
- * one instead of an empty list.
+ * one instead of an empty list. The note itself is picked with the
+ * standard Android file picker starting inside the library folder
+ * (R4 follow-up): only the resulting path is Niman's business.
  */
 class WidgetConfigActivity : Activity() {
 
@@ -41,16 +41,21 @@ class WidgetConfigActivity : Activity() {
         /** Alias serving the note widget. */
         const val NOTE_ALIAS = "dev.niman.niman.NoteWidgetConfig"
 
-        /** Cap for the note list: the UI says so when it hits. */
-        const val NOTE_LIMIT = 1000
+        private const val REQUEST_PICK_NOTE = 2
+        private const val STATE_LIBRARY_PATH = "pending_library_path"
+        private const val STATE_LIBRARY_NAME = "pending_library_name"
+
+        /** The picker only understands this documents provider. */
+        private const val EXTERNAL_STORAGE_AUTHORITY =
+            "com.android.externalstorage.documents"
     }
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var isTodo = true
+    private var pendingLibrary: MirrorLibrary? = null
 
     private lateinit var titleView: TextView
     private lateinit var messageView: TextView
-    private lateinit var searchView: EditText
     private lateinit var listView: ListView
     private lateinit var openAppButton: Button
 
@@ -65,10 +70,16 @@ class WidgetConfigActivity : Activity() {
             return
         }
         isTodo = intent?.component?.className != NOTE_ALIAS
+        savedInstanceState?.let {
+            val path = it.getString(STATE_LIBRARY_PATH)
+            val name = it.getString(STATE_LIBRARY_NAME)
+            if (path != null && name != null) {
+                pendingLibrary = MirrorLibrary(path, name, "")
+            }
+        }
         setContentView(R.layout.widget_config)
         titleView = findViewById(R.id.widget_config_title)
         messageView = findViewById(R.id.widget_config_message)
-        searchView = findViewById(R.id.widget_config_search)
         listView = findViewById(R.id.widget_config_list)
         openAppButton = findViewById(R.id.widget_config_open_app)
         openAppButton.setOnClickListener {
@@ -78,8 +89,17 @@ class WidgetConfigActivity : Activity() {
         showLibraries()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        pendingLibrary?.let {
+            outState.putString(STATE_LIBRARY_PATH, it.path)
+            outState.putString(STATE_LIBRARY_NAME, it.name)
+        }
+    }
+
     /** The library step (R1): zero, one or many known libraries. */
     private fun showLibraries() {
+        pendingLibrary = null
         val libraries = readMirror()
         when {
             libraries.isEmpty() -> {
@@ -94,10 +114,13 @@ class WidgetConfigActivity : Activity() {
                 finishOk(mapOf("library" to libraries[0].path), isTodo)
             }
             libraries.size == 1 -> {
-                showNotes(libraries[0])
+                pickNote(libraries[0])
             }
             else -> {
                 titleView.text = "Choose library"
+                messageView.visibility = View.GONE
+                openAppButton.visibility = View.GONE
+                listView.visibility = View.VISIBLE
                 val adapter = ArrayAdapter(
                     this,
                     android.R.layout.simple_list_item_2,
@@ -110,91 +133,104 @@ class WidgetConfigActivity : Activity() {
                     if (isTodo) {
                         finishOk(mapOf("library" to picked.path), isTodo = true)
                     } else {
-                        showNotes(picked)
+                        pickNote(picked)
                     }
                 }
             }
         }
-    }
-
-    /** The note step (R4): searchable `.md` list of [library]. */
-    private fun showNotes(library: MirrorLibrary) {
-        titleView.text = "Choose note"
-        searchView.visibility = View.VISIBLE
-        messageView.visibility = View.VISIBLE
-        messageView.text = "Loading notes…"
-        listView.visibility = View.GONE
-        Thread {
-            val paths = queryNotes(library.index)
-            runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                messageView.visibility = View.GONE
-                if (paths.isEmpty()) {
-                    messageView.visibility = View.VISIBLE
-                    messageView.text = "No notes in ${library.name} yet."
-                    return@runOnUiThread
-                }
-                if (paths.size > NOTE_LIMIT) {
-                    messageView.visibility = View.VISIBLE
-                    messageView.text =
-                        "Showing first $NOTE_LIMIT — refine the search."
-                }
-                listView.visibility = View.VISIBLE
-                val adapter = ArrayAdapter(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    paths,
-                )
-                listView.adapter = adapter
-                listView.setOnItemClickListener { _, _, position, _ ->
-                    val picked = adapter.getItem(position) ?: return@setOnItemClickListener
-                    finishOk(
-                        mapOf("library" to library.path, "note" to picked),
-                        isTodo = false,
-                    )
-                }
-                searchView.addTextChangedListener(object : TextWatcher {
-                    override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
-                    override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
-                    override fun afterTextChanged(s: Editable?) {
-                        adapter.filter.filter(s?.toString().orEmpty())
-                    }
-                })
-            }
-        }.start()
     }
 
     /**
-     * Reads `.md` notes of the index at [indexPath], newest names first
-     * capped (the UI says when the cap hits). Read-only and off the UI
-     * thread: the table can be large and the drift writer may hold it.
+     * The note step (R4 follow-up): the standard Android file picker,
+     * starting inside the library folder. Only `.md` files inside that
+     * folder are accepted; anything else explains itself and restarts
+     * the library step.
      */
-    private fun queryNotes(indexPath: String): List<String> {
-        if (!File(indexPath).exists()) return emptyList()
-        var db: SQLiteDatabase? = null
-        try {
-            db = SQLiteDatabase.openDatabase(indexPath, null, SQLiteDatabase.OPEN_READONLY)
-            val out = ArrayList<String>()
-            db.rawQuery(
-                "SELECT path FROM notes WHERE is_dir = 0 AND name LIKE '%.md' ESCAPE '\\' " +
-                    "ORDER BY name LIMIT ${NOTE_LIMIT + 1}",
-                null,
-            ).use { cursor ->
-                val column = cursor.getColumnIndexOrThrow("path")
-                while (cursor.moveToNext() && out.size <= NOTE_LIMIT) {
-                    out.add(cursor.getString(column))
-                }
-            }
-            return out
-        } catch (e: Exception) {
-            return emptyList()
-        } finally {
-            try {
-                db?.close()
-            } catch (e: Exception) {
-                // Best effort.
+    private fun pickNote(library: MirrorLibrary) {
+        pendingLibrary = library
+        val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            initialUriFor(library.path)?.let {
+                putExtra(DocumentsContract.EXTRA_INITIAL_URI, it)
             }
         }
+        try {
+            startActivityForResult(picker, REQUEST_PICK_NOTE)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No file picker found.", Toast.LENGTH_LONG).show()
+            showLibraries()
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQUEST_PICK_NOTE) return
+        val library = pendingLibrary
+        pendingLibrary = null
+        if (resultCode != RESULT_OK || data?.data == null || library == null) {
+            showLibraries()
+            return
+        }
+        val note = notePathIn(library.path, data.data!!)
+        if (note == null) {
+            Toast.makeText(
+                this,
+                "Pick a .md file inside ${library.name}.",
+                Toast.LENGTH_LONG,
+            ).show()
+            showLibraries()
+            return
+        }
+        finishOk(
+            mapOf("library" to library.path, "note" to note),
+            isTodo = false,
+        )
+    }
+
+    /**
+     * Starts the picker inside [libraryPath] when it lives on shared
+     * storage (`/storage/<volume>/<rest>`); null otherwise, and the
+     * picker opens wherever it was last.
+     */
+    private fun initialUriFor(libraryPath: String): Uri? {
+        val match = Regex("^/storage/([^/]+)/?(.*)$").matchEntire(libraryPath)
+            ?: return null
+        val (volume, rest) = match.destructured
+        return DocumentsContract.buildDocumentUri(
+            EXTERNAL_STORAGE_AUTHORITY,
+            "$volume:$rest",
+        )
+    }
+
+    /**
+     * Maps a picked document to its library-relative `.md` path, or null
+     * when the file is not usable: another provider, outside the
+     * library, not Markdown.
+     */
+    private fun notePathIn(libraryPath: String, uri: Uri): String? {
+        if (uri.authority != EXTERNAL_STORAGE_AUTHORITY) return null
+        val docId = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
+            ?: return null
+        val libDocId = docIdFor(libraryPath) ?: return null
+        if (!docId.startsWith("$libDocId/")) return null
+        val relative = docId.removePrefix("$libDocId/")
+        if (relative.isEmpty() ||
+            relative.contains("..") ||
+            !relative.endsWith(".md", ignoreCase = true)
+        ) {
+            return null
+        }
+        return relative
+    }
+
+    /** The `volume:rest` document id of [libraryPath], if on shared storage. */
+    private fun docIdFor(libraryPath: String): String? {
+        val match = Regex("^/storage/([^/]+)/?(.*)$").matchEntire(libraryPath)
+            ?: return null
+        val (volume, rest) = match.destructured
+        return "$volume:$rest".trimEnd(':')
     }
 
     /** Writes the per-instance choice and places the widget. */
