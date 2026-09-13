@@ -524,6 +524,27 @@ final class LibraryController implements LibrarySession {
     );
   }
 
+  /// Drops [libraryPath]'s [provider] widget configurations whose
+  /// instance is no longer placed (issue 6); the refresh calls this,
+  /// since the native `onDeleted` cannot reach the database.
+  @override
+  Future<void> pruneWidgetConfigs({
+    required String libraryPath,
+    required WidgetProvider provider,
+    required Set<int> placedIds,
+  }) async {
+    final store = WidgetConfigStore(await appDatabase);
+    final stale = {
+      for (final config in await store.forLibrary(libraryPath))
+        if (config.provider == provider.name &&
+            !placedIds.contains(config.androidWidgetId))
+          config.androidWidgetId,
+    };
+    for (final id in stale) {
+      await store.remove(id);
+    }
+  }
+
   /// Drops [libraryPath] from the known list; the folder is untouched.
   @override
   Future<void> forgetLibrary(String libraryPath) async {

@@ -55,6 +55,15 @@ Future<void> refreshTodoWidgets({
           '(${choice == null ? 'open library' : 'choice'})',
         );
       }
+      // The removed instances' rows are reaped here: the native
+      // onDeleted cannot reach the database (the engine may be dead),
+      // and a stale row pushes on every refresh — and every push
+      // re-broadcasts the update to the instances still placed.
+      await session.pruneWidgetConfigs(
+        libraryPath: root,
+        provider: WidgetProvider.todo,
+        placedIds: placed.toSet(),
+      );
     }
   }
   final ids = <int>[
@@ -140,6 +149,15 @@ Future<void> refreshNoteWidgets({
           name: 'widgets',
         ).debug('note refresh: adopted $id -> $root / ${pin.notePath} (pin)');
       }
+      // The removed instances' rows are reaped here: the native
+      // onDeleted cannot reach the database (the engine may be dead),
+      // and a stale row pushes on every refresh — and every push
+      // re-broadcasts the update to the instances still placed.
+      await session.pruneWidgetConfigs(
+        libraryPath: root,
+        provider: WidgetProvider.note,
+        placedIds: placed.toSet(),
+      );
     }
   }
   final notes = <({int id, String notePath})>[

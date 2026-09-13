@@ -20,6 +20,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/widget/widget_configs.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -200,6 +201,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
       provider: 'note',
       libraryPath: libraryPath,
       notePath: notePath,
+    );
+  }
+
+  @override
+  Future<void> pruneWidgetConfigs({
+    required String libraryPath,
+    required WidgetProvider provider,
+    required Set<int> placedIds,
+  }) async {
+    _widgetConfigs.removeWhere(
+      (config) =>
+          config.libraryPath == libraryPath &&
+          config.provider == provider.name &&
+          !placedIds.contains(config.androidWidgetId),
     );
   }
 

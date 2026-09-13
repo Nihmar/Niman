@@ -338,4 +338,101 @@ void main() {
       expect(saves.map((s) => s.$1), ['note_7']);
     });
   });
+
+  group('stale configs', () {
+    late FakeWidgetHostService host;
+
+    setUp(() {
+      host = FakeWidgetHostService();
+    });
+
+    test('a removed todo widget leaves no config and no push', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      session
+        ..seedWidgetConfig(
+          androidWidgetId: 7,
+          provider: 'todo',
+          libraryPath: root,
+        )
+        ..seedWidgetConfig(
+          androidWidgetId: 8,
+          provider: 'todo',
+          libraryPath: root,
+        );
+      host.todoIds = [7];
+      await refreshTodoWidgets(
+        session: session,
+        snapshot: snapshot(['task']),
+        updater: recorder(),
+        host: host,
+      );
+
+      expect(saves.map((s) => s.$1), ['todo_7']);
+      expect(
+        (await session.widgetConfigsFor(root)).map((c) => c.androidWidgetId),
+        [7],
+      );
+    });
+
+    test('a removed note widget leaves no config and no push', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      session
+        ..seedWidgetConfig(
+          androidWidgetId: 7,
+          provider: 'note',
+          libraryPath: root,
+          notePath: 'A.md',
+        )
+        ..seedWidgetConfig(
+          androidWidgetId: 8,
+          provider: 'note',
+          libraryPath: root,
+          notePath: 'B.md',
+        );
+      host.noteIds = [7];
+      await refreshNoteWidgets(
+        session: session,
+        updater: recorder(),
+        host: host,
+        readNote: (root, notePath) async => 'body',
+      );
+
+      expect(saves.map((s) => s.$1), ['note_7']);
+      expect(
+        (await session.widgetConfigsFor(root)).map((c) => c.androidWidgetId),
+        [7],
+      );
+    });
+
+    test('pruning one provider leaves the other provider alone', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      session
+        ..seedWidgetConfig(
+          androidWidgetId: 7,
+          provider: 'todo',
+          libraryPath: root,
+        )
+        ..seedWidgetConfig(
+          androidWidgetId: 8,
+          provider: 'note',
+          libraryPath: root,
+          notePath: 'A.md',
+        );
+      host.todoIds = [7];
+      await refreshTodoWidgets(
+        session: session,
+        snapshot: snapshot(['task']),
+        updater: recorder(),
+        host: host,
+      );
+
+      final remaining = [
+        for (final c in await session.widgetConfigsFor(root)) c.androidWidgetId,
+      ]..sort();
+      expect(remaining, [7, 8]);
+    });
+  });
 }
