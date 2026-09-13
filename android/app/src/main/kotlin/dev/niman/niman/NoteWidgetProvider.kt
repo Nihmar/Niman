@@ -19,14 +19,20 @@ import org.json.JSONObject
  *
  * Renders the payload Dart pushes under `note_<id>` (see
  * `lib/src/widget/widget_payload.dart`): the title plus the excerpt for
- * normal notes, or the checklist rows for `type: list` notes — one row
- * view per item. List rows are interactive: a tap flips the item in the
- * background (`niman://note-row-toggle`), a long-press opens the note in
- * the note from the header, and the header "+" appends a new empty
- * item (`niman://note-row-add`). Normal notes stay read-only (RemoteViews
- * cannot edit text in place, nor does it support long-click — so
- * editing and moving rows live in the app). The widget never reads the
- * note file itself.
+ * normal notes, or the checklist rows for `type: list` notes — drawn
+ * like the todo widget, from 20 STATIC layout slots (one per payload
+ * row; the 20-row cap lives in Dart). The launcher reuses the inflated
+ * tree between updates, so a provider `addView` would accumulate a copy
+ * of the rows on every refresh; each refresh re-fills the slots
+ * (text, color, visibility) instead.
+ *
+ * List rows are interactive: a tap flips the item in the background
+ * (`niman://note-row-toggle`), and the header "+" appends a new empty
+ * item (`niman://note-row-add`); the header opens the note. Checked rows
+ * render dimmed (RemoteViews forbids `CheckBox.setChecked`, and has no
+ * paint flags, so no strikethrough). Normal notes stay read-only
+ * (RemoteViews cannot edit text in place, and editing and moving rows
+ * live in the app). The widget never reads the note file itself.
  */
 class NoteWidgetProvider : HomeWidgetProvider() {
 
@@ -88,8 +94,8 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         val note = parsed?.optString("note").orEmpty()
         val title = parsed?.optString("title").orEmpty().ifEmpty { "Note" }
         val kind = parsed?.optString("kind", "") ?: ""
-        // The rows render in-process, one child per payload row (Dart
-        // caps the payload at 20 rows upstream).
+        // The rows fill the 20 static slots (Dart caps the payload at
+        // 20 rows upstream).
         val rows = if (kind == "list") parsed?.optJSONArray("rows") else null
         if (kind == "list") {
             return listViews(context, id, library, note, title, rows, payload)
@@ -114,14 +120,14 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         val rowCount = rows?.length() ?: 0
         val views = RemoteViews(context.packageName, R.layout.widget_note_list)
         views.setTextViewText(R.id.widget_note_title, title)
-        for (i in 0 until rowCount) {
-            val row = rows?.optJSONObject(i) ?: continue
-            views.addView(R.id.widget_note_rows, rowViews(context, id, library, note, row))
+        for (i in 0 until rowIds.size) {
+            val row = if (i < rowCount) rows?.optJSONObject(i) else null
+            views.setViewVisibility(
+                rowIds[i],
+                if (row == null) View.GONE else View.VISIBLE,
+            )
+            if (row != null) fillRow(views, context, id, library, note, i, row)
         }
-        views.setViewVisibility(
-            R.id.widget_note_rows,
-            if (rowCount == 0) View.GONE else View.VISIBLE,
-        )
         views.setViewVisibility(
             R.id.widget_note_empty,
             if (rowCount == 0) View.VISIBLE else View.GONE,
@@ -141,54 +147,40 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     /**
-     * One checklist row: the box glyph plus the item prose. Tapping
-     * flips the item in the background; checked rows render dimmed
-     * (RemoteViews has no paint flags, so no strikethrough, and no
-     * per-row padding, so the nesting depth stays in the app).
-     * Editing and moving rows live in the app — the note opens from the
-     * header.
+     * Fills slot [slot] with [row]: the same CheckBox row as the todo
+     * widget. Tapping flips the item in the background; checked rows
+     * render dimmed (the CheckBox itself cannot be checked from
+     * RemoteViews, and the color is set both ways because the launcher
+     * keeps the tree between updates). Editing and moving rows live in
+     * the app — the note opens from the header.
      */
-    private fun rowViews(
+    private fun fillRow(
+        views: RemoteViews,
         context: Context,
         id: Int,
         library: String,
         note: String,
+        slot: Int,
         row: JSONObject,
-    ): RemoteViews {
+    ) {
         val checked = row.optBoolean("checked", false)
-        val views = RemoteViews(context.packageName, R.layout.widget_note_row)
-        views.setTextViewText(R.id.widget_note_row_box, if (checked) "☑" else "☐")
-        views.setTextViewText(R.id.widget_note_row_text, row.optString("text", ""))
-        if (checked) {
-            val secondary = context.getColor(R.color.widget_text_secondary)
-            views.setTextColor(R.id.widget_note_row_box, secondary)
-            views.setTextColor(R.id.widget_note_row_text, secondary)
-        }
-        val toggle = HomeWidgetBackgroundIntent.getBroadcast(
-            context,
-            rowFillIn("note-row-toggle", id, library, note, row.optInt("line", -1)),
+        views.setTextViewText(rowTextIds[slot], row.optString("text", ""))
+        views.setTextColor(
+            rowTextIds[slot],
+            context.getColor(
+                if (checked) R.color.widget_text_secondary else R.color.widget_text_primary,
+            ),
         )
-        views.setOnClickPendingIntent(R.id.widget_note_row, toggle)
-        return views
-    }
-
-    /** The background fill-in URI of a row op: `niman://<host>` with the
-     *  widget id, library and note, plus the item line for toggles. */
-    private fun rowFillIn(
-        host: String,
-        id: Int,
-        library: String,
-        note: String,
-        line: Int,
-    ): Uri {
-        val builder = Uri.Builder()
+        val fillIn = Uri.Builder()
             .scheme("niman")
-            .authority(host)
+            .authority("note-row-toggle")
             .appendQueryParameter("id", id.toString())
             .appendQueryParameter("library", library)
             .appendQueryParameter("note", note)
-        if (line >= 0) builder.appendQueryParameter("line", line.toString())
-        return builder.build()
+            .appendQueryParameter("line", row.optInt("line", -1).toString())
+            .build()
+        val toggle = HomeWidgetBackgroundIntent.getBroadcast(context, fillIn)
+        views.setOnClickPendingIntent(rowIds[slot], toggle)
     }
 
     /** The background pending intent for the header "+": appends a new
@@ -196,7 +188,36 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     private fun addNoteRow(context: Context, id: Int, library: String, note: String): PendingIntent {
         return HomeWidgetBackgroundIntent.getBroadcast(
             context,
-            rowFillIn("note-row-add", id, library, note, -1),
+            Uri.Builder()
+                .scheme("niman")
+                .authority("note-row-add")
+                .appendQueryParameter("id", id.toString())
+                .appendQueryParameter("library", library)
+                .appendQueryParameter("note", note)
+                .build(),
+        )
+    }
+
+    companion object {
+        // The 20 static row slots of R.layout.widget_note_list (kept in
+        // sync by hand; the cap is widgetChecklistMaxItems in Dart).
+        val rowIds = intArrayOf(
+            R.id.widget_note_row_0, R.id.widget_note_row_1, R.id.widget_note_row_2,
+            R.id.widget_note_row_3, R.id.widget_note_row_4, R.id.widget_note_row_5,
+            R.id.widget_note_row_6, R.id.widget_note_row_7, R.id.widget_note_row_8,
+            R.id.widget_note_row_9, R.id.widget_note_row_10, R.id.widget_note_row_11,
+            R.id.widget_note_row_12, R.id.widget_note_row_13, R.id.widget_note_row_14,
+            R.id.widget_note_row_15, R.id.widget_note_row_16, R.id.widget_note_row_17,
+            R.id.widget_note_row_18, R.id.widget_note_row_19,
+        )
+        val rowTextIds = intArrayOf(
+            R.id.widget_note_row_text_0, R.id.widget_note_row_text_1, R.id.widget_note_row_text_2,
+            R.id.widget_note_row_text_3, R.id.widget_note_row_text_4, R.id.widget_note_row_text_5,
+            R.id.widget_note_row_text_6, R.id.widget_note_row_text_7, R.id.widget_note_row_text_8,
+            R.id.widget_note_row_text_9, R.id.widget_note_row_text_10, R.id.widget_note_row_text_11,
+            R.id.widget_note_row_text_12, R.id.widget_note_row_text_13, R.id.widget_note_row_text_14,
+            R.id.widget_note_row_text_15, R.id.widget_note_row_text_16, R.id.widget_note_row_text_17,
+            R.id.widget_note_row_text_18, R.id.widget_note_row_text_19,
         )
     }
 
