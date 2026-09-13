@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -47,15 +46,13 @@ class WidgetConfigActivity : Activity() {
         private const val STATE_LIBRARY_PATH = "pending_library_path"
         private const val STATE_LIBRARY_NAME = "pending_library_name"
 
-        /** The log tag for this activity's placement decisions. */
-        private const val TAG = "WidgetConfig"
-
         /** The picker only understands this documents provider. */
         private const val EXTERNAL_STORAGE_AUTHORITY =
             "com.android.externalstorage.documents"
     }
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+    private var finished = false
     private var isTodo = true
     private var pendingLibrary: MirrorLibrary? = null
 
@@ -71,12 +68,13 @@ class WidgetConfigActivity : Activity() {
             AppWidgetManager.INVALID_APPWIDGET_ID,
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+            WidgetDebugLog.log(this, "config aborted: no appWidgetId extra")
             finish()
             return
         }
         isTodo = intent?.component?.className != NOTE_ALIAS
-        Log.d(
-            TAG,
+        WidgetDebugLog.log(
+            this,
             "config start: kind=${if (isTodo) "todo" else "note"} widget=$appWidgetId",
         )
         savedInstanceState?.let {
@@ -84,6 +82,7 @@ class WidgetConfigActivity : Activity() {
             val name = it.getString(STATE_LIBRARY_NAME)
             if (path != null && name != null) {
                 pendingLibrary = MirrorLibrary(path, name, "")
+                WidgetDebugLog.log(this, "restored pending library: $path")
             }
         }
         setContentView(R.layout.widget_config)
@@ -98,6 +97,21 @@ class WidgetConfigActivity : Activity() {
         showLibraries()
     }
 
+    /**
+     * The durable record that the dialog ended without a choice: the
+     * logcat line alone would be gone by the time a log is exported.
+     */
+    override fun finish() {
+        if (!finished) {
+            WidgetDebugLog.log(
+                this,
+                "config aborted without a choice: widget=$appWidgetId",
+            )
+            finished = true
+        }
+        super.finish()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingLibrary?.let {
@@ -109,7 +123,10 @@ class WidgetConfigActivity : Activity() {
     /** The library step (R1): zero, one or many known libraries. */
     private fun showLibraries() {
         val libraries = readMirror()
-        Log.d(TAG, "mirror: ${libraries.size} librar${if (libraries.size == 1) "y" else "ies"}")
+        WidgetDebugLog.log(
+            this,
+            "mirror: ${libraries.size} librar${if (libraries.size == 1) "y" else "ies"}",
+        )
         when {
             libraries.isEmpty() -> {
                 // The restored pick (if any) is moot: there is nothing to
@@ -166,12 +183,15 @@ class WidgetConfigActivity : Activity() {
      */
     private fun pickNote(library: MirrorLibrary) {
         pendingLibrary = library
+        val initial = initialUriFor(library.path)
+        WidgetDebugLog.log(
+            this,
+            "note picker: library=${library.path} initialUri=$initial",
+        )
         val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
-            initialUriFor(library.path)?.let {
-                putExtra(DocumentsContract.EXTRA_INITIAL_URI, it)
-            }
+            initial?.let { putExtra(DocumentsContract.EXTRA_INITIAL_URI, it) }
         }
         try {
             startActivityForResult(picker, REQUEST_PICK_NOTE)
@@ -188,8 +208,8 @@ class WidgetConfigActivity : Activity() {
         val library = pendingLibrary
         pendingLibrary = null
         if (resultCode != RESULT_OK || data?.data == null || library == null) {
-            Log.d(
-                TAG,
+            WidgetDebugLog.log(
+                this,
                 "picker incomplete: result=$resultCode, " +
                     "uri=${data?.data ?: "-"}, library=${library != null}",
             )
@@ -265,8 +285,8 @@ class WidgetConfigActivity : Activity() {
      */
     private fun notePathIn(libraryPath: String, uri: Uri): String? {
         if (uri.authority != EXTERNAL_STORAGE_AUTHORITY) {
-            Log.w(
-                TAG,
+            WidgetDebugLog.log(
+                this,
                 "note pick rejected: authority ${uri.authority} " +
                     "(expected $EXTERNAL_STORAGE_AUTHORITY)",
             )
@@ -274,13 +294,16 @@ class WidgetConfigActivity : Activity() {
         }
         val docId = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
         if (docId == null) {
-            Log.w(TAG, "note pick rejected: unreadable document id in $uri")
+            WidgetDebugLog.log(
+                this,
+                "note pick rejected: unreadable document id in $uri",
+            )
             return null
         }
         val libDocId = externalStorageDocId(libraryPath)
         if (libDocId == null) {
-            Log.w(
-                TAG,
+            WidgetDebugLog.log(
+                this,
                 "note pick rejected: library path not on external storage: $libraryPath",
             )
             return null
@@ -289,26 +312,35 @@ class WidgetConfigActivity : Activity() {
         // whose children use `:`; deeper ones use `/` before the child.
         val boundary = if (libDocId.contains(':')) "/" else ":"
         if (!docId.startsWith("$libDocId$boundary")) {
-            Log.w(TAG, "note pick rejected: $docId is outside $libDocId")
+            WidgetDebugLog.log(this, "note pick rejected: $docId is outside $libDocId")
             return null
         }
         val relative = docId.removePrefix("$libDocId$boundary")
         if (relative.isEmpty()) {
-            Log.w(TAG, "note pick rejected: the library root itself was picked")
+            WidgetDebugLog.log(
+                this,
+                "note pick rejected: the library root itself was picked",
+            )
             return null
         }
         // A ".." SEGMENT would escape the library; consecutive dots
         // inside a name ("note..md") are legitimate, so scan segments,
         // not the whole string.
         if (relative.split('/').any { it == ".." }) {
-            Log.w(TAG, "note pick rejected: path escapes the library: $relative")
+            WidgetDebugLog.log(
+                this,
+                "note pick rejected: path escapes the library: $relative",
+            )
             return null
         }
         if (!relative.endsWith(".md", ignoreCase = true)) {
-            Log.w(TAG, "note pick rejected: not a note file: $relative")
+            WidgetDebugLog.log(
+                this,
+                "note pick rejected: not a note file: $relative",
+            )
             return null
         }
-        Log.d(TAG, "note pick accepted: $relative in $libDocId")
+        WidgetDebugLog.log(this, "note pick accepted: $relative in $libDocId")
         return relative
     }
 
@@ -317,11 +349,12 @@ class WidgetConfigActivity : Activity() {
         val key = if (isTodo) "todo_$appWidgetId" else "note_$appWidgetId"
         val json = JSONObject(choice).toString()
         HomeWidgetPlugin.getData(this).edit().putString("${key}_config", json).apply()
-        Log.d(
-            TAG,
+        WidgetDebugLog.log(
+            this,
             "config finished: widget=$appWidgetId " +
                 "library=${choice["library"] ?: "-"} note=${choice["note"] ?: "-"}",
         )
+        finished = true
         val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         setResult(RESULT_OK, result)
         finish()

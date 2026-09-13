@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -383,8 +383,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
     ];
     // The device's own logcat for this app (Android): the native Kotlin
     // logs, the plugins and the engine lines the AppLog buffer never
-    // sees (widget provider, remote views service, config activity).
+    // sees (widget provider, config activity).
     final logcat = await _logcatDump();
+    // The durable native widget log (Kotlin): the placement decisions
+    // logcat's ring buffer has already forgotten (a config rejection,
+    // an aborted dialog).
+    final widgetLog = await _widgetDebugLog();
     final hasLogcat = logcat != null && logcat.trim().isNotEmpty;
     if (lines.isEmpty && persisted.isEmpty && !hasLogcat) {
       if (mounted) {
@@ -416,6 +420,11 @@ final class _SettingsBodyState extends State<SettingsBody> {
         '',
         '# --- logcat unavailable (could not run `logcat -d`) ---',
       ],
+      if (widgetLog case final section? when section.trim().isNotEmpty) ...[
+        '',
+        '# --- widget debug log (native) ---',
+        section.trimRight(),
+      ],
     ].join('\n');
     try {
       final uri = await FilePicker.saveFile(
@@ -445,6 +454,28 @@ final class _SettingsBodyState extends State<SettingsBody> {
     return '${dt.year.toString().padLeft(4, '0')}-${two(dt.month)}'
         '-${two(dt.day)}-${two(dt.hour)}${two(dt.minute)}${two(dt.second)}'
         '.${three(dt.millisecond)}';
+  }
+
+  /// The tail of the durable native widget decision log (Android).
+  ///
+  /// The Kotlin widget code appends every placement decision to a file
+  /// in the app's external files dir: the logcat ring buffer keeps only
+  /// tens of seconds, so the file is the record that survives until the
+  /// export. Read over the widgets channel — the native side resolves
+  /// the file, Dart never guesses the path. Null off Android or when
+  /// the file does not exist yet.
+  static Future<String?> _widgetDebugLog() async {
+    if (!Platform.isAndroid) {
+      return null;
+    }
+    try {
+      return await const MethodChannel('niman/widgets')
+          .invokeMethod<String>('widgetDebugLog');
+    } on PlatformException {
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
   }
 
   /// The device's own logcat for this app (Android), capped to its tail.
