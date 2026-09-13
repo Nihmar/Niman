@@ -4,6 +4,7 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
+import android.util.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -127,8 +128,12 @@ class WidgetBridge(private val activity: Activity) :
      * gone by export time; this file is the record the export appends.
      */
     private fun widgetDebugLog(): String? {
-        val file = WidgetDebugLog.file(activity) ?: return null
-        if (!file.exists()) return null
+        val file = WidgetDebugLog.file(activity)
+        if (!file.exists()) {
+            // Say why the export section is empty instead of failing quiet.
+            Log.w("WidgetDebug", "widget debug log read: missing ${file.path}")
+            return null
+        }
         val bytes = file.readBytes()
         // Capped: an export wants the last decisions, not the history.
         val cap = 64 * 1024

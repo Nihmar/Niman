@@ -13,9 +13,10 @@ import java.util.Locale
  * The device's logcat ring buffer keeps only tens of seconds, so the
  * lines that explain a widget problem (a config rejection, a picker
  * result) are gone by the time a debug log is exported. This file is
- * not: it lives in the app's own external files dir, survives process
- * death and reboots, and the debug export appends its tail
- * (`WidgetBridge.widgetDebugLog`).
+ * not: it lives in the app's internal files dir (the private, no-
+ * permission storage that stays reachable even on OEM ROMs where the
+ * external files dir is not), survives process death and reboots, and
+ * the debug export appends its tail (`WidgetBridge.widgetDebugLog`).
  *
  * Every call mirrors its line to logcat as well, so both channels stay
  * consistent. Never throws: logging must not break the widget flow it
@@ -23,7 +24,7 @@ import java.util.Locale
  */
 object WidgetDebugLog {
 
-    /** The file name inside the app's external files dir. */
+    /** The file name inside the app's internal files dir. */
     const val FILE_NAME = "widget-debug.log"
 
     private const val TAG = "WidgetDebug"
@@ -33,9 +34,8 @@ object WidgetDebugLog {
 
     private val lock = Any()
 
-    /** The log file in the app's external files dir, or null. */
-    fun file(context: Context): File? =
-        context.getExternalFilesDir(null)?.let { File(it, FILE_NAME) }
+    /** The log file in the app's internal files dir. */
+    fun file(context: Context): File = File(context.filesDir, FILE_NAME)
 
     /**
      * Appends one timestamped line to the file and mirrors it to
@@ -45,7 +45,7 @@ object WidgetDebugLog {
     fun log(context: Context, message: String) {
         Log.d(TAG, message)
         try {
-            val file = file(context) ?: return
+            val file = file(context)
             val line = "${timestamp()} $message\n"
             synchronized(lock) {
                 trimIfNeeded(file)
