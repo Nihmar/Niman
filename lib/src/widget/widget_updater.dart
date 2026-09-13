@@ -11,6 +11,7 @@ library;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 
@@ -91,11 +92,16 @@ final class WidgetUpdater {
     try {
       var current = payload;
       while (true) {
-        await _saveData(key, current);
-        await _updateWidgets(
+        final saved = await _saveData(key, current);
+        final updated = await _updateWidgets(
           androidName: widgetProviderAndroidName(provider),
           qualifiedAndroidName: widgetProviderQualifiedName(provider),
         );
+        if (saved == false || updated == false) {
+          const AppLogger(
+            name: 'widgets',
+          ).warning('push $key not delivered (saved=$saved updated=$updated)');
+        }
         if (!_pending.containsKey(key)) return;
         current = _pending.remove(key);
       }
