@@ -93,7 +93,10 @@ enum AppLanguage {
   latvian('lv'),
 
   /// Lithuanian.
-  lithuanian('lt');
+  lithuanian('lt'),
+
+  /// Bulgarian.
+  bulgarian('bg');
 
   new(this.id);
 
@@ -142,6 +145,7 @@ final class AppLanguages {
     AppLanguage.estonian,
     AppLanguage.latvian,
     AppLanguage.lithuanian,
+    AppLanguage.bulgarian,
   ];
 
   /// Bumped whenever [resolved] changes; the app root listens to it and
