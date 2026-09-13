@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
@@ -22,6 +23,20 @@ import org.json.JSONObject
  */
 class NoteWidgetProvider : HomeWidgetProvider() {
 
+    companion object {
+        private const val TAG = "NoteWidget"
+    }
+
+    override fun onEnabled(context: Context) {
+        Log.d(TAG, "provider enabled (first widget placed)")
+        super.onEnabled(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        Log.d(TAG, "provider disabled (last widget removed)")
+        super.onDisabled(context)
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -30,6 +45,7 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val payload = widgetData.getString("note_$id", null)
+            Log.d(TAG, "update widget $id (payload ${payload?.length ?: 0} chars)")
             appWidgetManager.updateAppWidget(id, viewsFor(context, id, payload))
         }
     }

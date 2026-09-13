@@ -21,6 +21,14 @@ import org.json.JSONObject
  */
 class TodoWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
+        val id = intent.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID,
+        )
+        // The launcher binds this service cross-process; these logs are
+        // the proof the bind reached us (the row list is invisible from
+        // the provider side).
+        Log.d(TAG, "view factory requested for widget $id")
         return TodoViewsFactory(applicationContext, intent)
     }
 }
@@ -39,13 +47,17 @@ private class TodoViewsFactory(
     private var rows: List<TodoRow> = emptyList()
     private var library: String = ""
 
-    override fun onCreate() = Unit
+    override fun onCreate() {
+        Log.d(TAG, "factory created for widget $appWidgetId")
+    }
 
     override fun onDataSetChanged() {
         rows = load()
+        Log.d(TAG, "factory data changed for widget $appWidgetId: ${rows.size} rows")
     }
 
     override fun onDestroy() {
+        Log.d(TAG, "factory destroyed for widget $appWidgetId")
         rows = emptyList()
     }
 
