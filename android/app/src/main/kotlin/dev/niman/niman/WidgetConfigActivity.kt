@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -45,6 +46,9 @@ class WidgetConfigActivity : Activity() {
         private const val STATE_LIBRARY_PATH = "pending_library_path"
         private const val STATE_LIBRARY_NAME = "pending_library_name"
 
+        /** The log tag for this activity's placement decisions. */
+        private const val TAG = "WidgetConfig"
+
         /** The picker only understands this documents provider. */
         private const val EXTERNAL_STORAGE_AUTHORITY =
             "com.android.externalstorage.documents"
@@ -70,6 +74,10 @@ class WidgetConfigActivity : Activity() {
             return
         }
         isTodo = intent?.component?.className != NOTE_ALIAS
+        Log.d(
+            TAG,
+            "config start: kind=${if (isTodo) "todo" else "note"} widget=$appWidgetId",
+        )
         savedInstanceState?.let {
             val path = it.getString(STATE_LIBRARY_PATH)
             val name = it.getString(STATE_LIBRARY_NAME)
@@ -99,10 +107,13 @@ class WidgetConfigActivity : Activity() {
 
     /** The library step (R1): zero, one or many known libraries. */
     private fun showLibraries() {
-        pendingLibrary = null
         val libraries = readMirror()
+        Log.d(TAG, "mirror: ${libraries.size} librar${if (libraries.size == 1) "y" else "ies"}")
         when {
             libraries.isEmpty() -> {
+                // The restored pick (if any) is moot: there is nothing to
+                // pick from.
+                pendingLibrary = null
                 titleView.text = if (isTodo) "Niman Todos" else "Niman Note"
                 messageView.visibility = View.VISIBLE
                 messageView.text = "No libraries yet. Open Niman, open a " +
@@ -117,6 +128,12 @@ class WidgetConfigActivity : Activity() {
                 pickNote(libraries[0])
             }
             else -> {
+                // A visible chooser resets the pending pick: the user
+                // starts over. The single-library branches above must NOT
+                // clear it, or a pick restored from the saved state
+                // (activity recreation) would be lost before the picker's
+                // result arrives.
+                pendingLibrary = null
                 titleView.text = "Choose library"
                 messageView.visibility = View.GONE
                 openAppButton.visibility = View.GONE
@@ -170,6 +187,11 @@ class WidgetConfigActivity : Activity() {
         val library = pendingLibrary
         pendingLibrary = null
         if (resultCode != RESULT_OK || data?.data == null || library == null) {
+            Log.d(
+                TAG,
+                "picker incomplete: result=$resultCode, " +
+                    "uri=${data?.data ?: "-"}, library=${library != null}",
+            )
             showLibraries()
             return
         }
@@ -206,22 +228,52 @@ class WidgetConfigActivity : Activity() {
 
     /**
      * Maps a picked document to its library-relative `.md` path, or null
-     * when the file is not usable: another provider, outside the
-     * library, not Markdown.
+     * (with the reason logged) when the file is not usable: another
+     * provider, outside the library, not Markdown.
      */
     private fun notePathIn(libraryPath: String, uri: Uri): String? {
-        if (uri.authority != EXTERNAL_STORAGE_AUTHORITY) return null
-        val docId = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
-            ?: return null
-        val libDocId = docIdFor(libraryPath) ?: return null
-        if (!docId.startsWith("$libDocId/")) return null
-        val relative = docId.removePrefix("$libDocId/")
-        if (relative.isEmpty() ||
-            relative.contains("..") ||
-            !relative.endsWith(".md", ignoreCase = true)
-        ) {
+        if (uri.authority != EXTERNAL_STORAGE_AUTHORITY) {
+            Log.w(
+                TAG,
+                "note pick rejected: authority ${uri.authority} " +
+                    "(expected $EXTERNAL_STORAGE_AUTHORITY)",
+            )
             return null
         }
+        val docId = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
+        if (docId == null) {
+            Log.w(TAG, "note pick rejected: unreadable document id in $uri")
+            return null
+        }
+        val libDocId = docIdFor(libraryPath)
+        if (libDocId == null) {
+            Log.w(
+                TAG,
+                "note pick rejected: library path not on external storage: $libraryPath",
+            )
+            return null
+        }
+        if (!docId.startsWith("$libDocId/")) {
+            Log.w(TAG, "note pick rejected: $docId is outside $libDocId")
+            return null
+        }
+        val relative = docId.removePrefix("$libDocId/")
+        if (relative.isEmpty()) {
+            Log.w(TAG, "note pick rejected: the library root itself was picked")
+            return null
+        }
+        // A ".." SEGMENT would escape the library; consecutive dots
+        // inside a name ("note..md") are legitimate, so scan segments,
+        // not the whole string.
+        if (relative.split('/').any { it == ".." }) {
+            Log.w(TAG, "note pick rejected: path escapes the library: $relative")
+            return null
+        }
+        if (!relative.endsWith(".md", ignoreCase = true)) {
+            Log.w(TAG, "note pick rejected: not a note file: $relative")
+            return null
+        }
+        Log.d(TAG, "note pick accepted: $relative in $libDocId")
         return relative
     }
 
@@ -238,6 +290,11 @@ class WidgetConfigActivity : Activity() {
         val key = if (isTodo) "todo_$appWidgetId" else "note_$appWidgetId"
         val json = JSONObject(choice).toString()
         HomeWidgetPlugin.getData(this).edit().putString("${key}_config", json).apply()
+        Log.d(
+            TAG,
+            "config finished: widget=$appWidgetId " +
+                "library=${choice["library"] ?: "-"} note=${choice["note"] ?: "-"}",
+        )
         val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         setResult(RESULT_OK, result)
         finish()
