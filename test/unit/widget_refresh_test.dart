@@ -10,6 +10,7 @@ import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/fake_widget_host_service.dart';
 
 void main() {
   late FakeLibrarySession session;
@@ -125,6 +126,48 @@ void main() {
       snapshot: snapshot(['task']),
       updater: recorder(),
     );
+    expect(saves, isEmpty);
+  });
+
+  test('an unknown placed instance adopts the open library', () async {
+    final root = p.join('/fake', 'Work');
+    await session.open(root, create: false);
+    final host = FakeWidgetHostService()..todoIds = [7];
+    await refreshTodoWidgets(
+      session: session,
+      snapshot: snapshot(['task']),
+      updater: recorder(),
+      host: host,
+    );
+
+    final adopted = await session.widgetConfigsFor(root);
+    expect(adopted.map((c) => c.androidWidgetId), [7]);
+    expect(saves.map((s) => s.$1), ['todo_7']);
+  });
+
+  test('a known instance keeps its library on adopt', () async {
+    final root = p.join('/fake', 'Work');
+    final elsewhere = p.join('/fake', 'Personal');
+    await session.open(root, create: false);
+    session.seedWidgetConfig(
+      androidWidgetId: 7,
+      provider: 'todo',
+      libraryPath: elsewhere,
+    );
+    final host = FakeWidgetHostService()..todoIds = [7];
+    await refreshTodoWidgets(
+      session: session,
+      snapshot: snapshot(['task']),
+      updater: recorder(),
+      host: host,
+    );
+
+    // Still pinned elsewhere, so the open library pushes nothing for it.
+    expect(
+      (await session.widgetConfigsFor(elsewhere)).map((c) => c.libraryPath),
+      [elsewhere],
+    );
+    expect(await session.widgetConfigsFor(root), isEmpty);
     expect(saves, isEmpty);
   });
 }

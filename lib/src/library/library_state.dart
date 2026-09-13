@@ -489,6 +489,18 @@ final class LibraryController implements LibrarySession {
     return await WidgetConfigStore(await appDatabase).forLibrary(libraryPath);
   }
 
+  /// Records a placed todo widget for [libraryPath] (issue 6).
+  @override
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async {
+    final store = WidgetConfigStore(await appDatabase);
+    if (await store.find(androidWidgetId) != null) return;
+    await store.upsert(
+      androidWidgetId: androidWidgetId,
+      provider: WidgetProvider.todo,
+      libraryPath: libraryPath,
+    );
+  }
+
   /// Drops [libraryPath] from the known list; the folder is untouched.
   @override
   Future<void> forgetLibrary(String libraryPath) async {

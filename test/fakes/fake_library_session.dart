@@ -170,6 +170,20 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     ];
   }
 
+  @override
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath) async {
+    final existing = [
+      for (final config in _widgetConfigs)
+        if (config.androidWidgetId == androidWidgetId) config,
+    ];
+    if (existing.isNotEmpty) return;
+    seedWidgetConfig(
+      androidWidgetId: androidWidgetId,
+      provider: 'todo',
+      libraryPath: libraryPath,
+    );
+  }
+
   /// Test-only seeding of a widget instance reading [libraryPath].
   void seedWidgetConfig({
     required int androidWidgetId,

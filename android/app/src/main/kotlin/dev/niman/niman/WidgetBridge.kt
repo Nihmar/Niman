@@ -1,6 +1,8 @@
 package dev.niman.niman
 
 import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -78,6 +80,9 @@ class WidgetBridge(private val activity: Activity) :
                 result.success(launchTarget)
                 launchTarget = null
             }
+            "getWidgetIds" -> {
+                result.success(widgetIds(call.argument<String>("provider")))
+            }
             else -> result.notImplemented()
         }
     }
@@ -106,6 +111,19 @@ class WidgetBridge(private val activity: Activity) :
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         if (anchor != null) intent.putExtra(EXTRA_ANCHOR, anchor)
         return intent
+    }
+
+    /**
+     * The placed instances of [provider] (a `TodoWidgetProvider` class
+     * name, e.g.): the launcher owns the ids, so Dart asks the host
+     * instead of tracking them. Empty when the provider is unknown.
+     */
+    private fun widgetIds(provider: String?): List<Int> {
+        if (provider.isNullOrEmpty()) return emptyList()
+        val manager = activity.getSystemService(AppWidgetManager::class.java)
+            ?: return emptyList()
+        val component = ComponentName(activity, "${activity.packageName}.$provider")
+        return manager.getAppWidgetIds(component).toList()
     }
 
     private fun targetOf(intent: Intent?): Map<String, String>? {

@@ -198,6 +198,11 @@ abstract interface class LibrarySession {
   /// The home-screen widget instances reading [libraryPath] (issue 6).
   Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath);
 
+  /// Records a placed todo widget for [libraryPath] (issue 6), keeping an
+  /// existing configuration: a placed widget keeps its library, and only
+  /// an unknown instance adopts the open one.
+  Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath);
+
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
 
