@@ -1,0 +1,1102 @@
+// The Greek strings.
+//
+// One class per locale file; see `base.dart` for the contract and
+// `strings.dart` for the facade the app calls.
+// ignore_for_file: public_member_api_docs, unnecessary_library_directive
+library;
+
+import 'package:niman/src/ui/strings/base.dart';
+
+final class GreekStrings extends Strings {
+  const new();
+
+  @override
+  List<String> get monthNames => const [
+    'Ιανουάριος',
+    'Φεβρουάριος',
+    'Μάρτιος',
+    'Απρίλιος',
+    'Μάιος',
+    'Ιούνιος',
+    'Ιούλιος',
+    'Αύγουστος',
+    'Σεπτέμβριος',
+    'Οκτώβριος',
+    'Νοέμβριος',
+    'Δεκέμβριος',
+  ];
+  @override
+  List<String> get monthNamesShort => const [
+    'Ιαν',
+    'Φεβ',
+    'Μαρ',
+    'Απρ',
+    'Μαΐ',
+    'Ιούν',
+    'Ιούλ',
+    'Αυγ',
+    'Σεπ',
+    'Οκτ',
+    'Νοε',
+    'Δεκ',
+  ];
+  @override
+  List<String> get weekdayNames => const [
+    'Δευτέρα',
+    'Τρίτη',
+    'Τετάρτη',
+    'Πέμπτη',
+    'Παρασκευή',
+    'Σάββατο',
+    'Κυριακή',
+  ];
+  @override
+  List<String> get weekdayNamesShort => const [
+    'Δευ',
+    'Τρι',
+    'Τετ',
+    'Πεμ',
+    'Παρ',
+    'Σαβ',
+    'Κυρ',
+  ];
+
+  // Settings: editor toggles.
+  @override
+  String get trashTitle => 'Σκουπιδιέρα';
+  @override
+  String get trashSubtitle =>
+      'Τα διαγραμμένα στοιχεία πάνε στο .trash/ (ανενεργό = μόνιμη '
+      'διαγραφή)';
+  @override
+  String get debugLogsTitle => 'Καταγραφές αποσφαλμάτωσης';
+  @override
+  String get debugLogsSubtitle =>
+      'Καταγράφει συμβάντα της εφαρμογής σε απομνημονευτήρα';
+  @override
+  String get lineNumbersTitle => 'Αριθμοί γραμμών';
+  @override
+  String get lineNumbersSubtitle =>
+      'Εμφανίζει τη στήλη με τους αριθμούς γραμμών στον επεξεργαστή';
+  @override
+  String get keyboardOnOpenTitle => 'Πληκτρολόγιο στο άνοιγμα';
+  @override
+  String get keyboardOnOpenSubtitle =>
+      'Εμφανίζει το πληκτρολόγιο μόλις ανοίξει η σημείωση '
+      '(ανενεργό = στην πρώτη άγγιση)';
+  @override
+  String get editorKindSource => 'Πηγή Markdown';
+  @override
+  String get editorKindWysiwyg => 'WYSIWYG';
+  @override
+  String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
+  @override
+  String get settingsPreviewEnabledSubtitle =>
+      'Εμφανίζει τη μορφοποιημένη σημείωση δίπλα στον επεξεργαστή '
+      'πηγής';
+  @override
+  String get switchToWysiwygTooltip => 'Μετάβαση στον επεξεργαστή WYSIWYG';
+  @override
+  String get switchToSourceTooltip => 'Μετάβαση στην πηγή Markdown';
+  @override
+  String get wysiwygTooLarge =>
+      'Αυτή η σημείωση είναι πολύ μεγάλη για τον επεξεργαστή WYSIWYG. '
+      'Ανοίξτε την στην πηγή Markdown.';
+
+  // Settings: the section headings the list is grouped under.
+  @override
+  String get settingsSectionAppearance => 'Εμφάνιση';
+  @override
+  String get settingsSectionEditor => 'Επεξεργαστής';
+  @override
+  String get settingsSectionLibrary => 'Βιβλιοθήκη';
+  @override
+  String get settingsSectionReminders => 'Υπενθυμίσεις';
+  @override
+  String get settingsSectionShortcuts => 'Πληκτρολόγιο';
+  @override
+  String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
+  @override
+  String get settingsSectionDiagnostics => 'Διάγνωση';
+  @override
+  String get settingsSpellCheckTitle => 'Έλεγχος ορθογραφίας';
+  @override
+  String get settingsSpellCheckSubtitle =>
+      'Υπογραμμίζει λέξεις που γράφτηκαν λάθος καθώς γράφετε.';
+  @override
+  String get spellCheckDictionaryTitle => 'Λεξικό';
+  @override
+  String get spellCheckDictionarySystem => 'Σύστημα προεπιλογής';
+  @override
+  String get spellCheckDictionaryChoiceTitle => 'Επιλέξτε λεξικά';
+  @override
+  String get spellCheckDictionaryChoiceSubtitle =>
+      'Επιλέξτε κάθε γλώσσα στα οποία έχει γραφεί αυτή η βιβλιοθήκη. '
+      'Η λέξη περνάει όταν ο ένας από τα επιλεγμένα λεξικά τη '
+      'αναγνωρίζει. Αν δεν υπάρχουν επιλεγμένα, το σύστημα '
+      'αποφασίζει.';
+  @override
+  String get spellCheckNoDictionaries =>
+      'Δεν βρέθηκαν λεξικά σε αυτό το σύστημα.';
+
+  // Spelling review (T-PP-09).
+  @override
+  String get spellCheckTooltip => 'Έλεγχος ορθογραφίας';
+  @override
+  String get spellCheckTitle => 'Ορθογραφία';
+  @override
+  String get spellCheckEmpty => 'Δεν υπάρχουν ορθογραφικά λάθη.';
+  @override
+  String get spellCheckUnavailable =>
+      'Το hunspell δεν είναι εγκατεστημένο σε αυτό το σύστημα.';
+  @override
+  String get spellCheckNoSuggestions => 'Δεν υπάρχουν προτάσεις';
+  @override
+  String spellCheckCount(int count) => '$count προς επιθεώρηση';
+  @override
+  String spellCheckLine(int line) => 'γραμμή $line';
+
+  @override
+  String indentWidthValue(int spaces) => '$spaces κενά';
+
+  // Settings: theme (T-M6-05).
+  @override
+  String get themeBrightnessTitle => 'Φωτεινότητα';
+  @override
+  String get themeBrightnessSubtitle =>
+      'Φωτεινό, σκούρο ή όπως έχει ορισθεί η συσκευή';
+  @override
+  String get themeBrightnessSystem => 'Σύστημα';
+  @override
+  String get themeBrightnessDay => 'Φωτεινό';
+  @override
+  String get themeBrightnessNight => 'Σκούρο';
+  @override
+  String get themePaletteTitle => 'Παλέτα';
+  @override
+  String get themePaletteSubtitle => 'Χρώματα της διεπαφής και της σημείωσης';
+  @override
+  String get themePaletteSystem => 'Σύστημα';
+
+  // Settings: text size (T-M6-12).
+  @override
+  String get uiTextScaleTitle => 'Μέγεθος κείμενου διεπαφής';
+  @override
+  String get uiTextScaleSubtitle =>
+      'Δέντρο, κάρτες και διαλόγοι. Πάνω από το ρύθμιση συστήματος';
+  @override
+  String get noteTextScaleTitle => 'Μέγεθος κείμενου σημείωσης';
+  @override
+  String get noteTextScaleSubtitle =>
+      'Επεξεργαστής και προεπισκόπηση, πάντα συγχρονισμένοι';
+
+  // Settings: preview mode.
+  @override
+  String get previewModeTitle => 'Λειτουργία προεπισκόπησης';
+  @override
+  String get previewModeSubtitle =>
+      'Αν η προεπισκόπηση μοιράζεται την οθόνη με τον επεξεργαστή ή '
+      'την αντικαθιστά';
+  @override
+  String get previewModeAuto => 'Παράλληλα';
+  @override
+  String get previewModeSwitch => 'Πλήρης οθόνη';
+  @override
+  String get splitRatioTitle => 'Ρυθμός διαίρεσης';
+  @override
+  String get splitRatioSubtitle =>
+      'Μέρος του επεξεργαστή όταν η προεπισκόπηση είναι δίπλα του';
+
+  // Settings: editor formatting.
+  @override
+  String get linkTypeTitle => 'Μορφή συνδέσμου';
+  @override
+  String get linkTypeSubtitle =>
+      'Τι ενσωματώνει το κουμπί συνδέσμων στον επεξεργαστή';
+  @override
+  String get linkTypeWikilink => 'Wikilink';
+  @override
+  String get linkTypeMarkdown => 'Markdown';
+  @override
+  String get indentWidthTitle => 'Πλάτος εισαγωγής';
+  @override
+  String get indentWidthSubtitle =>
+      'Κενά που προστίθενται ανά επίπεδο εισαγωγής στον επεξεργαστή';
+
+  // Settings: language (T-L10N-04).
+  @override
+  String get languageTitle => 'Γλώσσα';
+  @override
+  String get languageSubtitle => 'Γλώσσα του κειμένου της ίδιας της εφαρμογής';
+  @override
+  String get languageSystem => 'Σύστημα';
+
+  // List note kind (T-TK-02).
+  @override
+  String get listAddHint => 'Προσθήκη στοιχείου';
+  @override
+  String get listAddTooltip => 'Προσθήκη στοιχείου';
+  @override
+  String get listEmpty => 'Δεν υπάρχουν ακόμα στοιχεία';
+  @override
+  String get listDragHandleLabel => 'Επαναταξινόμηση στοιχείου';
+
+  // Launcher quick actions (T-SC-02), in the order they are published.
+  @override
+  String get shortcutQuickNote => 'Γρήγορη σημείωση';
+  @override
+  String get shortcutNewTodo => 'Νέο καθήκον';
+  @override
+  String get shortcutNewNote => 'Νέα σημείωση';
+  @override
+  String get shortcutNewList => 'Νέα λίστα';
+  @override
+  String get shortcutToggleSidebar => 'Εμφάνιση ή κρύψη του δέντρου αρχείων';
+  @override
+  String get shortcutEditorSection => 'Στον επεξεργαστή';
+  @override
+  String get shortcutFind => 'Εύρεση';
+  @override
+  String get shortcutReplace => 'Εύρεση και αντικατάσταση';
+  @override
+  String get shortcutSavingNote =>
+      'Οι αλλαγές αποθηκεύονται αυτόματα, οπότε δεν υπάρχει συντόμευση '
+      'αποθήκευσης.';
+
+  // Editor status bar.
+  @override
+  String get outlineTooltip => 'Περιεχόμενο';
+  @override
+  String get outlineNoHeadings => 'Δεν υπάρχουν τίτλοι';
+  @override
+  String get outlineNoTitle => '(χωρίς τίτλο)';
+
+  // Editor toolbar: one name per button, used as its tooltip in the
+  // editor and as its row title in the toolbar settings.
+  @override
+  String get toolbarBold => 'Έντονη';
+  @override
+  String get toolbarItalic => 'Πλάγια';
+  @override
+  String get toolbarStrikethrough => 'Με διαγραφή';
+  @override
+  String get toolbarSuperscript => 'Υπεργράμματο';
+  @override
+  String get toolbarUnderline => 'Υπογράμμιση';
+  @override
+  String get toolbarLink => 'Σύνδεσμος';
+  @override
+  String get toolbarCode => 'Μπλοκ κώδικα';
+  @override
+  String get toolbarImage => 'Εισαγωγή εικόνας';
+  @override
+  String get toolbarHeading => 'Τίτλος';
+  @override
+  String get toolbarList => 'Λίστα';
+  @override
+  String get toolbarOrderedList => 'Αριθμημένη λίστα';
+  @override
+  String get toolbarQuote => 'Παράθεση';
+  @override
+  String get toolbarIndent => 'Εισαγωγή';
+  @override
+  String get toolbarOutdent => 'Αφαίρεση εισαγωγής';
+  @override
+  String get headingDialogTitle => 'Επίπεδο τίτλου';
+
+  // Toolbar settings (T-TB-05).
+  @override
+  String get toolbarSettingsTitle => 'Γραμμή εργαλείων επεξεργαστή';
+  @override
+  String get toolbarSettingsHint =>
+      'Σύρετε για επαναταξινόμηση. Το μάτι εμφανίζει ή κρύβει το '
+      'κουμπί.';
+  @override
+  String get toolbarShowButton => 'Εμφάνιση';
+  @override
+  String get toolbarHideButton => 'Κρύψη';
+  @override
+  String get toolbarResetOrder => 'Επαναφορά προεπιλογών';
+
+  // Preview switch (phone mode).
+  @override
+  String get showPreviewTooltip => 'Εμφάνιση προεπισκόπησης';
+  @override
+  String get showEditorTooltip => 'Εμφάνιση επεξεργαστή';
+  @override
+  String get enterFullScreenTooltip => 'Πλήρης οθόνη';
+  @override
+  String get exitFullScreenTooltip => 'Έξοδος από πλήρη οθόνη';
+
+  // Raw-HTML table fallback.
+  @override
+  String get htmlTableFallback => '(μη αναλυμένος HTML πίνακας)';
+
+  // Search (T-M3-05).
+  @override
+  String get searchHint => 'Αναζήτηση σημειώσεων';
+  @override
+  String get searchModeWords => 'Λέξεις';
+  @override
+  String get searchModeContains => 'Περιέχει';
+  @override
+  String get searchEmptyHint =>
+      'Γράψτε για αναζήτηση στη βιβλιοθήκη ή key = value για φίλτρο '
+      'frontmatter';
+  @override
+  String get searchTooShortHint => 'Γράψτε τουλάχιστον 2 χαρακτήρες';
+  @override
+  String get searchNoMatches => 'Δεν υπάρχουν ταυτοτήτες';
+  @override
+  String get searchLoadMore => 'Εμφάνιση περισσότερων';
+
+  // Replace (T-M3-10): the search screen's optional exact-word replace.
+  @override
+  String get replaceTooltip => 'Αντικατάσταση…';
+  @override
+  String get replaceInNoteAction => 'Αντικατάσταση σε αυτή τη σημείωση…';
+  @override
+  String get replaceInThisNote => 'Αντικατάσταση σε αυτή τη σημείωση';
+  @override
+  String get replaceWithLabel => 'Αντικατάσταση με';
+  @override
+  String get replaceCaseSensitive => 'Διακρίνει πεζά/κεφαλαία';
+  @override
+  String get replaceWholeWordsHint =>
+      'αντικαθιστώνται μόνο ακριβείς ολόκληρες λέξεις';
+  @override
+  String get replaceConfirm => 'Αντικατάσταση';
+  @override
+  String get replaceCancel => 'Κλείσιμο';
+  @override
+  String get replaceUnavailable =>
+      'Η αντικατάσταση δεν είναι διαθέσιμη αυτή τη στιγμή';
+
+  // Editor find & replace (the classic in-note bar, re_editor's find
+  // controller + NimanFindPanel).
+  @override
+  String get findInNoteTooltip => 'Εύρεση στη σημείωση';
+  @override
+  String get editorFindHint => 'Εύρεση';
+  @override
+  String get editorReplaceHint => 'Αντικατάσταση';
+  @override
+  String get editorFindCaseTooltip => 'Ταύτιση πεζών/κεφαλαίων';
+  @override
+  String get editorFindPreviousTooltip => 'Προηγούμενο ταύτιμα';
+  @override
+  String get editorFindNextTooltip => 'Επόμενο ταύτιμα';
+  @override
+  String get editorFindCloseTooltip => 'Κλείσιμο αναζήτησης';
+  @override
+  String get editorFindReplaceModeTooltip => 'Λειτουργία αντικατάστασης';
+  @override
+  String get editorReplaceOneTooltip => 'Αντικατάσταση αυτού του ταυτίματος';
+  @override
+  String get editorReplaceAllTooltip => 'Αντικατάσταση όλων';
+
+  // Tags (T-M3-06).
+  @override
+  String get openTagsTooltip => 'Ετικέτες';
+  @override
+  String get tagsTitle => 'Ετικέτες';
+  @override
+  String get tagsEmpty =>
+      'Δεν υπάρχουν ακόμα ετικέτες — προσθέστε #ετικέτα ή tags στο '
+      'frontmatter';
+  @override
+  String get tagsBackTooltip => 'Επιστροφή στην αναζήτηση';
+  @override
+  String get tagsNotesEmpty => 'Δεν υπάρχουν σημειώσεις με αυτή την ετικέτα';
+  @override
+  String tagsNotesCapped(int limit) =>
+      'Εμφανίζονται μόνο οι πρώτες $limit — αναζητήστε την ετικέτα για '
+      'να περιορίσετε';
+
+  // Link navigation (T-M3-07).
+  @override
+  String get unresolvedLinkTitle => 'Ο σύνδεσμος δεν βρέθηκε';
+  @override
+  String get headingNotFoundTitle => 'Ο τίτλος δεν βρέθηκε';
+  @override
+  String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
+  @override
+  String get openLinkFailed => 'Απόρριψη ανοίγματος συνδέσμου';
+
+  // Task lists (T-TD-04).
+  @override
+  String get todoOpen => 'Ανοιχτά';
+  @override
+  String get todoDone => 'Ολοκληρωμένα';
+
+  // Filter row + sheet (T-TDM-03).
+  @override
+  String get todoAllDates => 'Όλες οι ημερομηνίες';
+  @override
+  String get todoFilter => 'Φίλτρα';
+  @override
+  String get todoNoTokens => 'Δεν υπάρχουν tokens σε αυτή τη λίστα';
+  @override
+  String get todoCountOpen => 'ανοιχτά';
+  @override
+  String get todoCountDone => 'ολοκληρωμένα';
+  @override
+  String get todoEmptyOpen => 'Δεν υπάρχουν ακόμα ανοιχτά καθήκοντα';
+  @override
+  String get todoEmptyDone => 'Δεν ολοκληρώθηκε τίποτα ακόμα';
+  @override
+  String get todoEmptyFiltered => 'Δεν υπάρχουν καθήκοντα που ταυτίζονται';
+  @override
+  String get todoTitle => 'Καθήκοντα';
+  @override
+  String get todoAddTooltip => 'Προσθήκη καθήκοντος';
+
+  // The todo.txt format help (T-TD-08).
+  @override
+  String get todoHelpTitle => 'Μορφή todo.txt';
+  @override
+  String get todoHelpTooltip => 'Βοήθεια μορφής';
+  @override
+  String get todoHelpIntro =>
+      'Τα καθήκοντά σας είναι ένα απλό αρχείο κειμένου, ένα καθήκον '
+      'ανά γραμμή. Η Niman γράφει τη σύνταξη για σας, αλλά δεν κρύβει '
+      'τίποτα: μπορείτε να επεξεργαστείτε το αρχείο σε οποιονδήποτε '
+      'επεξεργαστή, και η Niman θα το διαβάσει πίσω.';
+  @override
+  String get todoHelpFilesTitle => 'Δύο αρχεία';
+  @override
+  String get todoHelpFilesBody =>
+      'Τα ανοιχτά καθήκοντα είναι στο todo.txt στη ρίζα της '
+      'βιβλιοθήκης. Η ολοκλήρωση μετακινεί τη γραμμή του στο done.txt, '
+      'ώστε το todo.txt να παραμείνει σύντομο. Αν μια ολοκληρωμένη '
+      'γραμμή ξαναεμφανιστεί στο todo.txt, η Niman την αρχειώνει την '
+      'επόμενη φορά που θα διαβάζει τα αρχεία.';
+  @override
+  String get todoHelpLineTitle => 'Ανατομία γραμμής';
+  @override
+  String get todoHelpLineBody =>
+      'Ό,τι πριν την περιγραφή είναι προαιρετικό και πρέπει να '
+      'έρχεται σε αυτή τη σειρά:';
+  @override
+  String get todoHelpDoneBody =>
+      'Σημαίνει το καθήκον ολοκληρωμένο. Η Niman το προσθέτει όταν '
+      'τσεκάρετε το κουτάκι.';
+  @override
+  String get todoHelpPriority => '(A) έως (Z)';
+  @override
+  String get todoHelpPriorityBody =>
+      'Προτεραιότητα. Το A είναι το υψηλότερο. Εμφανίζεται ως σήμα στη '
+      'λίστα.';
+  @override
+  String get todoHelpDatesBody =>
+      'Ημερομηνία λήξης, μετά ημερομηνία δημιουργίας. Με μόνο μία '
+      'ημερομηνία, αυτή είναι ημερομηνία δημιουργίας, εκτός αν η '
+      'γραμμή ξεκινά με x.';
+  @override
+  String get todoHelpTokensTitle => 'Προγράμματα, πλαίσια και ετικέτες';
+  @override
+  String get todoHelpTokensBody =>
+      'Οπουδήποτε στην περιγραφή, μια λέξη με ένα από αυτά τα πρόθεμα '
+      'γίνεται chip με το οποίο μπορείτε να φιλτράρετε. Τίποτα δεν είναι '
+      'προεξοφλημένο: το token υπάρχει μόλις το γράψετε.';
+  @override
+  String get todoHelpProjectBody =>
+      'Τι είναι το καθήκον, π.χ. +κατασκευή ή +διπλωματική.';
+  @override
+  String get todoHelpContextBody =>
+      'Πού ή πώς θα το εκτελέσετε, π.χ. @σπίτι ή @τηλέφωνο';
+  @override
+  String get todoHelpHashtagBody =>
+      'Ελεύθερη ετικέτα, για ό,τι δεν καλύπτουν τα υπόλοιπα δύο';
+  @override
+  String get todoHelpTagsTitle => 'Ημερομηνίες και υπενθυμίσεις';
+  @override
+  String get todoHelpTagsBody =>
+      'Αυτές είναι ετικέτες key:value. Η Niman τις γράφει από τον '
+      'διάλογο καθήκοντος και τις διαβάζει όπου και αν εμφανιστούν στη '
+      'γραμμή.';
+  @override
+  String get todoHelpDueBody =>
+      'Ημερομηνία λήξης. Ορίζει το χρώμα του σήματος και τα φίλτρα '
+      'λήξης.';
+  @override
+  String get todoHelpRemBody =>
+      'Πότε αποστέλλεται η ειδοποίηση, στη τοπική σας ώρα. Εκτελείται '
+      'ακόμα και με σβηστή οθόνη και με κλειστή εφαρμογή.';
+  @override
+  String get todoHelpRemDesktop =>
+      'Στον desktop, η Niman πρέπει να τρέχει όταν έρθει η ώρα: η '
+      'υπενθύμιση εμφανίζεται όσο η εφαρμογή είναι ανοιχτή, και αν '
+      'είναι κλειστή τίποτα δεν εκτελείται.';
+  @override
+  String get todoHelpOtherBody =>
+      'Αποθηκεύονται ακριβώς όπως έχουν γραφεί, οπότε οι ετικέτες από '
+      'άλλες todo.txt εφαρμογές επιβιώνουν τη μεταγωγή. Η Niman δεν '
+      'δρα σε αυτές. rec: included: ένα επαναλαμβανόμενο καθήκον δεν '
+      'επαναλαμβάνεται ακόμα.';
+  @override
+  String get todoHelpEditTitle => 'Επεξεργασία εκτός Niman';
+  @override
+  String get todoHelpEditBody =>
+      'Ένα καθήκον που δεν το πειράξατε επιστρέφει byte-to-byte, '
+      'συμπεριλαμβανομένων των περίεργων διαστημάτων. Επεξεργαστείτε '
+      'μία γραμμή και η Niman το ξαναγράφει μόνο αυτή τη γραμμή στην '
+      'κανονική της μορφή, αφήνοντας το υπόλοιπο αρχείο ανέπαφο.';
+
+  // Task dialog (T-TD-06).
+  @override
+  String get todoAddTitle => 'Προσθήκη καθήκοντος';
+  @override
+  String get todoEditTitle => 'Επεξεργασία καθήκοντος';
+  @override
+  String get todoDescriptionHint => 'Περιγραφή';
+  @override
+  String get todoCancel => 'Ακύρωση';
+  @override
+  String get todoSave => 'Αποθήκευση';
+  @override
+  String get todoEditAction => 'Επεξεργασία';
+  @override
+  String get todoDeleteAction => 'Διαγραφή';
+
+  // Task filters (T-TD-05).
+  @override
+  String get todoDueOverdue => 'Υπέρβασε';
+  @override
+  String get todoDueToday => 'Σήμερα';
+  @override
+  String get todoDueNext7 => 'Επόμενες 7 ημέρες';
+  @override
+  String get todoDueNoDate => 'Χωρίς ημερομηνία';
+  @override
+  String get todoRowDue => 'Λήξη';
+  @override
+  String get todoRowDueToday => 'Λήξη σήμερα';
+  @override
+  String get todoSortTooltip => 'Ταξινόμηση';
+  @override
+  String get todoSortDue => 'Ημερομηνία λήξης';
+  @override
+  String get todoSortPriority => 'Προτεραιότητα';
+  @override
+  String get todoSortCreation => 'Ημερομηνία δημιουργίας';
+
+  // Task dialog pickers (T-TD-06).
+  @override
+  String get todoNoPriority => 'Χωρίς προτεραιότητα';
+  @override
+  String get todoNoPriorityShort => 'Καμία';
+  @override
+  String get todoMorePriorities => 'Περισσότερα…';
+  @override
+  String get todoPriorityTitle => 'Προτεραιότητα';
+  @override
+  String get todoNoDueDate => 'Χωρίς ημερομηνία λήξης';
+  @override
+  String get todoNoReminder => 'Χωρίς υπενθύμιση';
+  @override
+  String get todoAddProject => '+ Πρόγραμμα';
+  @override
+  String get todoAddContext => '@ Πλαίσιο';
+  @override
+  String get todoAddHashtag => '# Ετικέτα';
+
+  // Task reminders (T-TD-07).
+  @override
+  String get todoReminderChannel => 'Υπενθυμίσεις καθήκοντων';
+  @override
+  String get todoReminderChannelDescription =>
+      'Προγραμματισμένοι συναγμοί για καθήκοντα με ώρα υπενθύμισης.';
+  @override
+  String get todoReminderBody => 'Υπενθύμιση καθήκοντος';
+  @override
+  String get todoReminderFallbackTitle => 'Υπενθύμιση καθήκοντος';
+  @override
+  String get todoReminderBlocked =>
+      'Οι ειδοποιήσεις είναι απενεργοποιημένες, οπότε οι υπενθυμίσεις '
+      'δεν θα εμφανιστούν.';
+  @override
+  String get todoReminderBattery =>
+      'Η βελτιστοποίηση μπαταρίας είναι ενεργοποιημένη για την Niman. '
+      'Το σύστημα μπορεί να βάλει την εφαρμογή σε κατάσταση νύχτας και '
+      'να χάσει τις αναμενόμενες υπενθυμίσεις.';
+  @override
+  String get todoReminderInexact =>
+      'Αυτή η συσκευή δεν επιτρέπει ακριβείς συναγμούς, οπότε η '
+      'υπενθύμιση μπορεί να φτάσει μερικά λεπτά αργότερα με σβηστή '
+      'οθόνη.';
+  @override
+  String get reminderShowTokensTitle =>
+      'Ετικέτες στις ειδοποιήσεις υπενθύμισης';
+  @override
+  String get reminderShowTokensSubtitle =>
+      'Διατηρεί +πρόγραμμα, @πλαίσιο και #ετικέτα στο κείμενο της '
+      'ειδοποίησης. Ανενεργό, εμφανίζει μόνο το καθήκον που οριστήκατε.';
+  @override
+  String get todoReminderFixAction => 'Ανοίξτε τις ρυθμίσεις';
+  @override
+  String get todoReminderDismissAction => 'Απόρριψη';
+  @override
+  String get todoReminderDue => 'Λήξη';
+
+  // Actions and buttons shared by the dialogs (T-L10N-06).
+  @override
+  String get actionOk => 'OK';
+  @override
+  String get actionCancel => 'Ακύρωση';
+  @override
+  String get actionCreate => 'Δημιουργία';
+  @override
+  String get actionNew => 'Νέο';
+  @override
+  String get actionSave => 'Αποθήκευση';
+  @override
+  String get actionClear => 'Εκκαθάριση';
+  @override
+  String get actionChoose => 'Επιλογή';
+  @override
+  String get actionDelete => 'Διαγραφή';
+  @override
+  String get actionRename => 'Μετανομασία';
+  @override
+  String get actionMove => 'Μετακίνηση';
+  @override
+  String get saveAndClose => 'Αποθήκευση και κλείσιμο';
+  @override
+  String get closeUnsavedTitle => 'Μη αποθηκευμένες αλλαγές';
+  @override
+  String closeUnsavedBody(List<String> names) {
+    if (names.length == 1) {
+      return 'Το «${names.first}» έχει αλλαγές που δεν έχουν '
+          'αποθηκευτεί. Αποθήκευση πριν το κλείσιμο;';
+    }
+    return 'Στις ${names.length} σημειώσεις υπάρχουν αλλαγές που δεν '
+        'έχουν αποθηκευτεί. Αποθήκευση πριν το κλείσιμο;';
+  }
+
+  @override
+  String get closeSaveFailed => 'Δεν αποθηκεύτηκε. Είναι ακόμα ανοιχτό.';
+  @override
+  String get actionRestore => 'Επαναφορά';
+  @override
+  String get actionEmpty => 'Εκκένωση';
+
+  // The shell: app bar, tabs and tree actions.
+  @override
+  String get hideSidebarTooltip => 'Απόκρυψη πλαισίου (Ctrl+B)';
+  @override
+  String get showSidebarTooltip => 'Εμφάνιση πλαισίου (Ctrl+B)';
+  @override
+  String get windowMinimizeTooltip => 'Ελαχιστοποίηση';
+  @override
+  String get windowMaximizeTooltip => 'Μεγιστοποίηση';
+  @override
+  String get windowRestoreTooltip => 'Επαναφορά';
+  @override
+  String get windowCloseTooltip => 'Κλείσιμο';
+  @override
+  String get tabFiles => 'Αρχεία';
+  @override
+  String get tabSearch => 'Αναζήτηση';
+  @override
+  String get tabSettings => 'Ρυθμίσεις';
+  @override
+  String get quickNoteTitle => 'Γρήγορη σημείωση';
+  @override
+  String get treeEmpty => 'Δεν υπάρχουν ακόμα σημειώσεις';
+  @override
+  String get selectANote => 'Επιλέξτε σημείωση';
+  @override
+  String get showListTooltip => 'Εμφάνιση λίστας';
+  @override
+  String get editRawTooltip => 'Επεξεργασία ως είναι';
+  @override
+  String get sortAscTooltip => 'Ταξινόμηση Α-Ω';
+  @override
+  String get sortDescTooltip => 'Ταξινόμηση Ω-Α';
+  @override
+  String get newNoteTitle => 'Νέα σημείωση';
+  @override
+  String get newFolderTitle => 'Νέος φάκελος';
+  @override
+  String get newNoteHere => 'Νέα σημείωση εδώ';
+  @override
+  String get newFolderHere => 'Νέος φάκελος εδώ';
+  @override
+  String get newListNoteTitle => 'Νέα σημείωση-λίστα';
+  @override
+  String get newListNoteDefault => 'Η λίστα μου';
+  @override
+  String get setAsQuickNote => 'Ορισμός ως γρήγορη σημείωση';
+  @override
+  String get currentQuickNote => 'Τρέχουσα γρήγορη σημείωση';
+  @override
+  String get pinnedSection => 'Στιβαρωμένες';
+  @override
+  String pinnedSectionCount(int count) => 'Στιβαρωμένες · $count';
+  @override
+  String get templateFolderTitle => 'Φάκελος προτύπων';
+  @override
+  String get newFromTemplateTitle => 'Νέο από πρότυπο';
+  @override
+  String get newFromTemplateHere => 'Νέο από πρότυπο εδώ';
+  @override
+  String get templateFormTitle => 'Συμπλήρωση προτύπου';
+  @override
+  String get templateFormBacklink => 'Συνδεδεμένο από';
+  @override
+  String get templateFormNoNote => 'Χωρίς σημείωση';
+  @override
+  String get templateFormPickNote => 'Επιλογή σημείωσης';
+
+  // The template placeholder reference (T-TPL-08).
+  @override
+  String get templateHelpTitle => 'Στοιχεία αντικατάστασης στο πρότυπο';
+  @override
+  String get templateHelpIntro =>
+      'Μια πρότυπο είναι μια απλή σημείωση με κενά. Η δημιουργία '
+      'σημείωσης από αυτήν αντιγράφει το κείμενο της και γεμίζει τα '
+      'κενά.';
+  @override
+  String get templateHelpUnknown =>
+      'Ένα στοιχείο αντικατάστασης που η Niman δεν το αναγνωρίζει '
+      'παραμένει ακριβώς όπως γράφτηκε, οπότε το τυπογραφικό λάθος '
+      'φαίνεται στη σημείωση αντί να σπάσει τη γραμμή.';
+  @override
+  String get templateHelpValuesTitle => 'Τιμές';
+  @override
+  String get templateHelpTitleBody =>
+      'Το όνομα υπό το οποίο δημιουργείται η σημείωση.';
+  @override
+  String get templateHelpDateBody =>
+      'Σήμερα και τρέχουσα ώρα. Και τα δύο λαμβάνουν μορφή: '
+      '{{date:DD/MM/YYYY}}.';
+  @override
+  String get templateHelpNowBody => 'Ημερομηνία και ώρα μαζί.';
+  @override
+  String get templateHelpUuidBody =>
+      'Νέο ταυτοποιητικό, διαφορετικό σε κάθε εμφάνιση.';
+  @override
+  String get templateHelpCounterBody =>
+      'Αριθμός που αυξάνεται ανά όνομα, αποθηκευμένο δια της '
+      'επανεκκίνησης: η πρώτη σημείωση γράφει 1, η επόμενη 2. Το ίδιο '
+      'όνομα σε μία σημείωση γράφει τον ίδιο αριθμό. Συνδυάστε με '
+      '|pad:3.';
+  @override
+  String get templateHelpCursorBody =>
+      'Βάζει τον δροβιέρα εδώ όταν δημιουργείται η σημείωση. Ο '
+      'μερικός όρος αυτός δεν γράφεται. Ο πρώτος μερικός όρος κερδίζει, '
+      'χωρίς φίλτρα, μόνο νέες σημειώσεις — και το πληκτρολόγιο '
+      'ανοίγει ακόμα και αν η αυτόματη εστίαση είναι απενεργοποιημένη.';
+  @override
+  String get templateHelpDatesTitle => 'Γραφή ημερομηνιών';
+  @override
+  String get templateHelpDatesBody =>
+      'Αυτά εκπροσωπούν τμήματα της ημερομηνίας στη μορφή. Ό,τι άλλο '
+      "είναι κατ' ουσία, και κείμενο σε απλούς χαρακτήρες είναι επίσης "
+      "κατ' ουσία. Τα ονόματα των μηνών και των ημερών ακολουθούν τη "
+      'γλώσσα της εφαρμογής.';
+  @override
+  String get templateHelpYear => 'έτος: 2026, 26';
+  @override
+  String get templateHelpMonth => 'μήνας: 03, 3, Μάρτιος, Μάρ';
+  @override
+  String get templateHelpDay => 'μέρα: 09, 9, Δευτέρα, Δευ';
+  @override
+  String get templateHelpTime => 'ώρες, λεπτά, δευτερόλεπτα';
+  @override
+  String get templateHelpWeek => 'Εβδομάδα ISO και τρίμηνο: 11, 11, 1';
+  @override
+  String get templateHelpFiltersTitle => 'Φίλτρα';
+  @override
+  String get templateHelpFiltersBody =>
+      'Η τιμή μπορεί να ακολουθείται από φίλτρα, εφαρμοσμένα αριστερά '
+      'προς τα δεξιά.';
+  @override
+  String get templateHelpCaseBody =>
+      'Κεφαλαίο, πεζό και πρώτη κεφαλαία του κάθε λέξης — μια λέξη που '
+      'γράψατε με κεφαλαίο παραμένει αναλλοίωτη.';
+  @override
+  String get templateHelpSlugBody =>
+      'Η μορφή του κειμένου για συνδέσμους, για να χτίσετε wikilinks.';
+  @override
+  String get templateHelpPadBody =>
+      'Κόβει το τέλος. Συμπληρώνει με μηδενικά έως το πλάτος. '
+      'Χρησιμοποιεί εναλλακτική όταν η τιμή είναι άδεια.';
+  @override
+  String get templateHelpShiftBody =>
+      'Μετακινεί την ημερομηνία κατά ημέρες, εβδομάδες, μήνες ή έτη — '
+      'παρουσίαση την επόμενη εβδομάδα, αρχείο του προηγούμενου μήνα.';
+  @override
+  String get templateHelpSnapBody =>
+      'Προσαρμόζει την ημερομηνία στην αρχή ή το τέλος της εβδομάδας, '
+      'του μήνα ή του έτους.';
+  @override
+  String get templateHelpAskTitle => 'Κάτι σας ρωτάει';
+  @override
+  String get templateHelpAskBody =>
+      'Μια φόρμα εμφανίζεται πριν δημιουργηθεί η σημείωση, ένα πεδίο '
+      'ανά ερώτηση — και ένα για σύνδεσμο επιστροφής αν το πρότυπο το '
+      'ζητήσει. Το ίδιο όνομα δύο φορές είναι μία ερώτηση, και η '
+      'απάντηση της γεμίζει όλες τις εμφανίσεις — φάκελος και όνομα '
+      'αρχείου περιλαμβάνονται.';
+  @override
+  String get templateHelpAskFieldBody =>
+      'Πεδίο εγγραφής. Το κείμενο μετά τους δύο διπλούς άστελκους είναι '
+      'αυτό με το οποίο ξεκινά.';
+  @override
+  String get templateHelpChoiceBody =>
+      'Επιλογή από λίστα, διαχωρισμένη με κόμματα.';
+  @override
+  String get templateHelpWhereTitle => 'Πού πάει η σημείωση';
+  @override
+  String get templateHelpWhereBody =>
+      'Αυτό δεν είναι κείμενο: είναι οδηγίες, και ζουν στο μπλοκ '
+      'niman: στο ίδιο το frontmatter του προτύπου. Το μπλοκ '
+      'υποστηρίζεται και στη συνέχεια αφαιρείται, οπότε δεν '
+      'εμφανίζεται ποτέ στη σημείωση. Οι τιμές του μπορούν να '
+      'περιέχουν στοιχεία αντικατάστασης.';
+  @override
+  String get templateHelpFolderBody =>
+      'Ο φάκελος όπου δημιουργείται η σημείωση, που δημιουργείται αν '
+      'δεν υπάρχει. Αν το λείπει, η σημείωση πηγαίνει εκεί που ήσασταν.';
+  @override
+  String get templateHelpFilenameBody =>
+      'Πώς ονομάζεται η σημείωση. Ένα πρότυπο που το δηλώνει δεν '
+      'ερωτάται για όνομα.';
+  @override
+  String get templateHelpAppendBody =>
+      'Προσθέτει στη σημείωση αν αυτή ήδη υπάρχει, αντί να δημιουργήσει '
+      'δεύτερη. Αυτό μετατρέπει έναν μήνα συζητήσεων σε ένα αρχείο.';
+  @override
+  String get templateHelpOpenBody =>
+      'Τι γίνεται μόλις υπάρχει η σημείωση: επεξεργαστής (προεπιλογή), '
+      'προεπισκόπηση ή τίποτα — η σημείωση υπογραμμίζεται και εσείς '
+      'μένετε εκεί που ήσασταν.';
+  @override
+  String get templateHelpAroundTitle => 'Από πού προέρχεται';
+  @override
+  String get templateHelpParentBody =>
+      'Η σημείωση που επιλέγεται στη φόρμα, η οποία προτείνει αυτή που '
+      'είναι στην οθόνη. Γράψτε [[{{parent}}]] για σύνδεσμο επιστροφής '
+      'προς αυτήν.';
+  @override
+  String get templateHelpFolderValueBody =>
+      'Ο φάκελος όπου καταλήγει η σημείωση.';
+  @override
+  String get templateHelpClipboardBody =>
+      'Τι υπάρχει στο πρόχειρο, και η επιλογή του επεξεργαστή όταν η '
+      'σημείωση ξεκινά από αυτή.';
+  @override
+  String get templateHelpIncludeTitle => 'Επαναχρήση τμήματος';
+  @override
+  String get templateHelpIncludeBody =>
+      'Ενσωματώνει άλλο ένα πρότυπο, οπότε δέκα πρότυπα μπορούν να '
+      'μοιράζονται μία λίστα ελέγχου. Αναζητείται πρώτα στον φάκελο '
+      'των προτύπων, και το .md μπορεί να παραληφθεί. Οι ερωτήσεις του '
+      'προστίθενται στην ίδια φόρμα.';
+  @override
+  String get templateHelpExampleTitle => 'Όλα μαζί';
+
+  // What an {{include:…}} that could not be pasted leaves behind (T-TPL-06).
+  @override
+  String includeMissing(String path) => '⚠ Δεν υπάρχει πρότυπο «$path»';
+  @override
+  String includeCycle(String path) => '⚠ Το «$path» περιλαμβάνει τον εαυτό του';
+  @override
+  String includeTooDeep(String path) =>
+      '⚠ Το «$path» είναι ενταγμένο πολύ βαθιά';
+  @override
+  String frontmatterInvalid(String reason) =>
+      'Το frontmatter δεν διαβάζεται: $reason';
+  @override
+  String templateFrontmatterInvalid(String template, String reason) =>
+      'Το frontmatter του «$template» δεν διαβάζεται, οπότε ο φάκελός '
+      'και το όνομα αρχείου του δεν έκαναν τίποτα: $reason';
+  @override
+  String get templatePickerTitle => 'Επιλογή προτύπου';
+  @override
+  String templatePickerEmpty(String folder) =>
+      'Δεν υπάρχουν ακόμα πρότυπα. Τοποθετήστε μια σημείωση στο $folder/ '
+      'και θα γίνει μία.';
+
+  // Tree actions.
+  @override
+  String get actionPin => 'Στιβάρισμα';
+  @override
+  String get actionUnpin => 'Αποστιβάρισμα';
+  @override
+  String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
+  @override
+  String get deletedMessage => 'Διαγράφηκε';
+  @override
+  String deleteToTrashConfirm(String name) =>
+      'Το $name θα μεταφερθεί στο .trash/';
+  @override
+  String deleteForeverConfirm(String name) => 'Το $name θα διαγραφεί μόνιμα';
+  @override
+  String get chooseDestination => 'Επιλογή προορισμού';
+  @override
+  String get libraryRoot => 'Ρίζα βιβλιοθήκης';
+  @override
+  String moveTitle(String name) => 'Μετακίνηση $name';
+  @override
+  String headingLevelLabel(int level) => 'Επίπεδο τίτλου $level';
+
+  // Quick note tab and picker.
+  @override
+  String get quickNoteEmpty =>
+      'Δεν υπάρχει ακόμα γρήγορη σημείωση. Επιλέξτε μια μόνιμη '
+      'σημείωση ή δημιουργήστε νέα — η γρήγορη σημείωση ανοίγει εδώ.';
+  @override
+  String get quickNoteChooseAction => 'Επιλογή σημείωσης…';
+  @override
+  String get quickNoteCreateAction => 'Δημιουργία νέας σημείωσης…';
+  @override
+  String get quickNoteNewTitle => 'Νέα γρήγορη σημείωση';
+  @override
+  String get quickNotePickerTitle => 'Επιλογή γρήγορης σημείωσης';
+
+  // Folder picker (T-TK-07).
+  @override
+  String get folderPickerNewFolder => 'Νέος φάκελος';
+  @override
+  String get folderPickerEmpty => 'Δεν υπάρχουν ακόμα φάκελοι';
+  @override
+  String get listFolderTitle => 'Φάκελος λίστας';
+
+  // Trash (M1).
+  @override
+  String get trashEmpty => 'Η σκουπιδιέρα είναι άδεια';
+  @override
+  String get trashEmptyAction => 'Εκκένωση σκουπιδιέρας';
+  @override
+  String get trashEmptyConfirm =>
+      'Αυτό διαγράφει μόνιμα όλα όσα βρίσκονται στον φάκελο της '
+      'σκουπιδιέρας, συμπεριλαμβανομένων αντικειμένων που η Niman δεν '
+      'τα τοποθέτησε εκεί.';
+  @override
+  String trashDeleteConfirm(String name) =>
+      'Το $name θα διαγραφεί μόνιμα (χωρίς επιστροφή)';
+  @override
+  String get trashDeletePermanently => 'Μόνιμη διαγραφή';
+
+  // The open/create library screen.
+  @override
+  String get openLibraryIntro =>
+      'Ανοίξτε έναν φάκελο με σημειώσεις Markdown ως τη βιβλιοθήκη '
+      'σας';
+  @override
+  String get openLibraryExisting => 'Άνοιγμα υπάρχουσας';
+  @override
+  String get openLibraryCreate => 'Δημιουργία νέας';
+  @override
+  String get openLibraryCreateTitle => 'Δημιουργία νέας βιβλιοθήκης';
+  @override
+  String get openLibraryFolderName => 'Όνομα φακέλου';
+  @override
+  String get openLibraryChooseFolder => 'Επιλογή φακέλου βιβλιοθήκης';
+  @override
+  String get openLibraryChooseParent =>
+      'Επιλογή φακέλου όπου θα δημιουργηθεί η βιβλιοθήκη';
+  @override
+  String get openLibraryUnsupported =>
+      'Αυτός ο φάκελος δεν υποστηρίζεται. Επιλέξτε έναν φάκελο '
+      'αποθήκευσης του επεξεργαστή.';
+  @override
+  String indexingCount(int done, int total) => '$done από $total σημειώσεις';
+
+  // The known-library list on the home screen (T-ML-05, T-ML-07).
+  @override
+  String get knownLibrariesTitle => 'Οι βιβλιοθήκες σας';
+  @override
+  String get libraryUnreachable => 'Ανεπίτυπτη';
+  @override
+  String get libraryOpenedToday => 'Ανοίχτηκε σήμερα';
+  @override
+  String get libraryOpenedYesterday => 'Ανοίχτηκε χθες';
+  @override
+  String libraryOpenedDaysAgo(int days) => 'Ανοίχτηκε $days ημέρες πριν';
+  @override
+  String libraryOpenedOn(DateTime when) {
+    final d = when.day.toString().padLeft(2, '0');
+    final m = when.month.toString().padLeft(2, '0');
+    return 'Ανοίχτηκε ${when.year}-$m-$d';
+  }
+
+  @override
+  String get libraryOpenNow => 'Άνοιγμα τώρα';
+  @override
+  String get switchLibraryTitle => 'Αλλαγή βιβλιοθήκης';
+  @override
+  String get libraryForget => 'Λήθη';
+  @override
+  String libraryForgetTitle(String name) => 'Λήθη «$name»?';
+  @override
+  String get libraryForgetExplained =>
+      'Αφανίζεται από αυτή τη λίστα. Ο φάκελος, οι σημειώσεις και οι '
+      'ρυθμίσεις της βιβλιοθήκης μέσα του παραμένουν αναλλοίωτες, και '
+      'η επανάνοιξή της το επιστρέφει στη θέση του.';
+
+  // Android storage access.
+  @override
+  String get storageAccessAction => 'Επιτρέψτε πρόσβαση στα αρχεία';
+  @override
+  String get storageAccessNeeded =>
+      'Η Niman δεν μπορεί να διαβάσει τις σημειώσεις σας χωρίς «Πρόσβαση '
+      'σε όλα τα αρχεία». Επιτρέψτε το για να ανοίξετε μια βιβλιοθήκη.';
+  @override
+  String get storageAccessExplained =>
+      'Η Niman διαβάζει τις σημειώσεις σας ως απλά αρχεία, οπότε το '
+      'Android πρέπει να επιτρέψει πρόσβαση σε όλα τα αρχεία. Τίποτα '
+      'δεν ανεβάστηκε, και διαβάζεται μόνο ο φάκελος της βιβλιοθήκης '
+      'που επιλέξατε.';
+  @override
+  String folderAccessDenied(Object error) =>
+      'Το σύστημα δεν έδωσε πρόσβαση στον φάκελο: $error';
+  @override
+  String folderPickFailed(Object error) => 'Η επιλογή φακέλου απέτυχε: $error';
+
+  // Settings screen rows and messages.
+  @override
+  String get settingsTitle => 'Ρυθμίσεις';
+  @override
+  String get libraryPathTitle => 'Διαδρομή βιβλιοθήκης';
+  @override
+  String get reindexTitle => 'Επαναδημιουργία δείκτη τώρα';
+  @override
+  String get reindexDone => 'Ο δείκτης επαναδημιουργήθηκε';
+  @override
+  String get closeLibraryTitle => 'Κλείσιμο βιβλιοθήκης';
+  @override
+  String get exportLogTitle => 'Εξαγωγή καταγραφών αποσφαλμάτωσης';
+  @override
+  String get exportLogSubtitle =>
+      'Αποθήκευση των καταγεγραμένων συμβάντων σε αρχείο που θα '
+      'επιλέξετε';
+  @override
+  String get exportLogEmpty =>
+      'Ο απομνημονευτήρας καταγραφών αποσφαλμάτωσης είναι άδειος';
+  @override
+  String get quickNoteUnset => 'Δεν έχει οριστεί ακόμα';
+  @override
+  String exportLogDone(Object target) => 'Οι καταγραφές εξήχθησαν στο $target';
+  @override
+  String exportLogFailed(Object error) => 'Η εξαγωγή απέτυχε: $error';
+
+  // Replace results (T-M3-10).
+  @override
+  String replaceNoMatch(String term) =>
+      'Δεν βρέθηκε ακριβές ταύτιμα όλης της λέξης «$term»';
+  @override
+  String replaceDone(int occurrences, String term, int notes) =>
+      'Αντικαταστάθηκαν $occurrences εμφανίσεις του «$term» σε $notes '
+      'σημειώσεις';
+  @override
+  String replaceSkipped(int skipped) =>
+      ' ($skipped ανοιχτές σημειώσεις παραλείφθηκαν)';
+  @override
+  String replacePreviewEmpty(String term, String? only) =>
+      'Δεν υπάρχει ακριβές ταύτιμα όλης της λέξης «$term»'
+      '${only == null ? 'δεν βρέθηκε' : 'βρέθηκε στο $only'}';
+}
