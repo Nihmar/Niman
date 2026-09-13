@@ -482,9 +482,9 @@ final class _SettingsBodyState extends State<SettingsBody> {
   ///
   /// Since Android 7 an app may read the logd entries of its own uid, so
   /// a child `logcat -d` answers with exactly this app's lines: the
-  /// native Kotlin logs (widget provider, remote views service, config
-  /// activity), the plugins and the Flutter engine -- none of which reach
-  /// the AppLog buffer. The dump runs off the UI isolate and is bounded
+  /// native Kotlin logs (widget provider, config activity), the plugins
+  /// and the Flutter engine -- none of which reach the AppLog buffer.
+  /// The dump runs off the UI isolate and is bounded
   /// by a timeout; the file keeps only the most recent 200 KB, because
   /// a report is about what happened last.
   ///
