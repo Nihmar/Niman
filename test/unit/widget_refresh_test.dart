@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_widget_host_service.dart';
 import '../fakes/fake_widget_pin_store.dart';
+import '../fakes/fake_widget_placement_store.dart';
 
 void main() {
   late FakeLibrarySession session;
@@ -277,6 +278,61 @@ void main() {
       expect(await session.widgetConfigsFor(root), isEmpty);
       expect(saves, isEmpty);
       expect(restored, (libraryPath: elsewhere, notePath: 'Note.md'));
+    });
+  });
+
+  group('placement priority', () {
+    late FakeWidgetHostService host;
+    late FakeWidgetPlacementStore placement;
+
+    setUp(() {
+      host = FakeWidgetHostService();
+      placement = FakeWidgetPlacementStore();
+    });
+
+    test('a todo choice beats the open library', () async {
+      final root = p.join('/fake', 'Work');
+      final elsewhere = p.join('/fake', 'Personal');
+      await session.open(root, create: false);
+      host.todoIds = [7];
+      placement.todoConfigs[7] = (library: elsewhere);
+      await refreshTodoWidgets(
+        session: session,
+        snapshot: snapshot(['task']),
+        updater: recorder(),
+        host: host,
+        placement: placement,
+      );
+
+      expect(await session.widgetConfigsFor(root), isEmpty);
+      expect(
+        (await session.widgetConfigsFor(elsewhere)).map((c) => c.libraryPath),
+        [elsewhere],
+      );
+      expect(saves, isEmpty);
+    });
+
+    test('a note choice beats the pin', () async {
+      final root = p.join('/fake', 'Work');
+      await session.open(root, create: false);
+      host.noteIds = [7];
+      placement.noteConfigs[7] = (library: root, note: 'Picked.md');
+      final pins = FakeWidgetPinStore()
+        ..pin = (libraryPath: root, notePath: 'Pinned.md');
+      await refreshNoteWidgets(
+        session: session,
+        updater: recorder(),
+        host: host,
+        pinStore: pins,
+        placement: placement,
+        readNote: (root, notePath) async => 'body',
+      );
+
+      // The pin survives for the next unknown instance.
+      expect(pins.pin, isNotNull);
+      final adopted = await session.widgetConfigsFor(root);
+      expect(adopted.map((c) => c.notePath), ['Picked.md']);
+      expect(saves.map((s) => s.$1), ['note_7']);
     });
   });
 }
