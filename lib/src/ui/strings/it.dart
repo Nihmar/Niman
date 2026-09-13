@@ -927,6 +927,13 @@ final class ItalianStrings extends Strings {
   @override
   String get actionUnpin => 'Non fissare più';
   @override
+  String get pinToWidget => 'Fissa nel widget';
+  @override
+  String get pinnedForWidget =>
+      'Fissata: ora aggiungi il widget Nota alla schermata home';
+  @override
+  String get pinWidgetUnavailable => 'I widget sono disponibili su Android';
+  @override
   String get movedToTrash => 'Spostato nel cestino';
   @override
   String get deletedMessage => 'Eliminato';

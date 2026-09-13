@@ -1557,6 +1557,16 @@ final class _LibraryShellState extends State<_LibraryShell>
               : AppStrings.setAsQuickNote,
           value: 'quicknote',
         ),
+      // Any note, folders excluded: the next placed note widget adopts
+      // the pin (issue 6). Shown everywhere; off Android the pin just
+      // reports itself unavailable.
+      if (!note.isDir)
+        (
+          key: const Key('menu-pin-widget'),
+          icon: Icons.widgets_outlined,
+          label: AppStrings.pinToWidget,
+          value: 'pinwidget',
+        ),
       // Markdown only: the pin is a frontmatter key, and a
       // `todo.txt` has no frontmatter to put it in. An already
       // pinned row keeps the entry whatever it is, so a pin
@@ -1611,6 +1621,23 @@ final class _LibraryShellState extends State<_LibraryShell>
             pinned: !note.pinned,
           );
         });
+      case 'pinwidget':
+        final root = widget.controller.root;
+        if (root == null || !mounted) return;
+        final pinned = await saveWidgetPin(
+          libraryPath: root,
+          notePath: note.path,
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              pinned
+                  ? AppStrings.pinnedForWidget
+                  : AppStrings.pinWidgetUnavailable,
+            ),
+          ),
+        );
       case 'rename':
         await _rename(note.path);
       case 'move':
