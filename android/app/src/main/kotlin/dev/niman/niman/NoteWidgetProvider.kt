@@ -63,7 +63,9 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     private fun bodyFor(parsed: JSONObject?): String {
-        if (parsed == null) return "Pin a note in Niman, then place this widget"
+        // No payload yet: the choice was just placed and Dart has not
+        // pushed. The pin path (tree action) still exists, hence the hint.
+        if (parsed == null) return "Open Niman to load — or pin a note first"
         val body = parsed.optString("body", "")
         if (body.isNotEmpty()) {
             return if (parsed.optBoolean("truncated", false)) "$body …" else body

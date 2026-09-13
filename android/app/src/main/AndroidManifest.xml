@@ -93,6 +93,21 @@
             android:name=".TodoWidgetService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <!-- Widget placement (round 2, R1/R4): one activity, one alias
+             per widget so the alias names the kind. Starts exported
+             false; flip to true if a launcher refuses to start it. -->
+        <activity
+            android:name=".WidgetConfigActivity"
+            android:exported="false"
+            android:theme="@style/NormalTheme" />
+        <activity-alias
+            android:name=".TodoWidgetConfig"
+            android:targetActivity=".WidgetConfigActivity"
+            android:exported="false" />
+        <activity-alias
+            android:name=".NoteWidgetConfig"
+            android:targetActivity=".WidgetConfigActivity"
+            android:exported="false" />
         <!-- The pinned-note home-screen widget (issue 6): push updates
              only (Dart refreshes on every note change). -->
         <receiver
