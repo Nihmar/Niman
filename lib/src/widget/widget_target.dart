@@ -37,6 +37,7 @@ final class WidgetTarget {
     required this.libraryPath,
     this.notePath,
     this.anchor,
+    this.focusAdd = false,
   });
 
   /// Which surface to open.
@@ -51,6 +52,10 @@ final class WidgetTarget {
   /// The heading anchor (`note` targets only, optional).
   final String? anchor;
 
+  /// Whether the note's add-item field opens focused (`note` targets
+  /// only: the list widget's "+").
+  final bool focusAdd;
+
   /// The channel wire format (string keys and values only).
   Map<String, String> toMap() {
     return {
@@ -58,6 +63,7 @@ final class WidgetTarget {
       'libraryPath': libraryPath,
       'notePath': ?notePath,
       'anchor': ?anchor,
+      if (focusAdd) 'focusAdd': 'true',
     };
   }
 
@@ -84,6 +90,7 @@ final class WidgetTarget {
       libraryPath: libraryRaw,
       notePath: notePath,
       anchor: anchorRaw is String && anchorRaw.isNotEmpty ? anchorRaw : null,
+      focusAdd: map['focusAdd'] == 'true',
     );
   }
 }

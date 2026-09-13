@@ -22,6 +22,13 @@ Finder _rowEditField() => find.descendant(
   matching: find.byType(TextField),
 );
 
+Finder _addField() => find.byKey(const Key('list-add-field'));
+
+bool _addFieldFocused(WidgetTester tester) {
+  final field = tester.widget<TextField>(_addField());
+  return field.focusNode!.hasFocus;
+}
+
 /// Drags [from] to [to] (the handle drag of T-TK-09).
 Future<void> _drag(WidgetTester tester, Finder from, Offset to) async {
   final gesture = await tester.startGesture(tester.getCenter(from));
@@ -33,6 +40,33 @@ Future<void> _drag(WidgetTester tester, Finder from, Offset to) async {
 }
 
 void main() {
+  testWidgets('focusOnLoad focuses the add field (the widget "+")', (
+    tester,
+  ) async {
+    Widget app({bool focus = false}) => _app(
+      ListNoteView(
+        text: '---\ntype: list\n---\n- [ ] one\n',
+        onChanged: (_) {},
+        focusOnLoad: focus,
+      ),
+    );
+
+    await tester.pumpWidget(app());
+    expect(_addFieldFocused(tester), isFalse);
+
+    // A repeat request edges false -> true on the mounted view.
+    await tester.pumpWidget(app(focus: true));
+    await tester.pump();
+    expect(_addFieldFocused(tester), isTrue);
+
+    // No edge, no re-focus: the request is one-shot.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    await tester.pumpWidget(app(focus: true));
+    await tester.pump();
+    expect(_addFieldFocused(tester), isFalse);
+  });
+
   testWidgets('renders items; tapping the checkbox flips byte-stably', (
     tester,
   ) async {

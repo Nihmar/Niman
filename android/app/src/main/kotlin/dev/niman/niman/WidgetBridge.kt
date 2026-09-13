@@ -30,6 +30,12 @@ class WidgetBridge(private val activity: Activity) :
         /** Opens one note of the carrying library in the editor. */
         const val ACTION_OPEN_NOTE = "dev.niman.niman.OPEN_NOTE"
 
+        /**
+         * Opens one note of the carrying library in the editor with its
+         * add-item field focused (the list widget's "+").
+         */
+        const val ACTION_ADD_NOTE_ITEM = "dev.niman.niman.ADD_NOTE_ITEM"
+
         /** The intent extra holding the absolute library root. */
         const val EXTRA_LIBRARY = "library_path"
 
@@ -177,6 +183,16 @@ class WidgetBridge(private val activity: Activity) :
                     if (anchor.isNotEmpty()) target["anchor"] = anchor
                 }
                 target
+            }
+            ACTION_ADD_NOTE_ITEM -> {
+                val note = intent.getStringExtra(EXTRA_NOTE)
+                if (note.isNullOrEmpty()) return null
+                mapOf(
+                    "kind" to "note",
+                    "libraryPath" to library,
+                    "notePath" to note,
+                    "focusAdd" to "true",
+                )
             }
             else -> null
         }

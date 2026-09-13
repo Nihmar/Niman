@@ -1,5 +1,5 @@
-// Background note-row ops (issue 6): URI parsing and the flip/append-
-// and-repush against a temp library root, plus the callback dispatch.
+// Background note-row ops (issue 6): URI parsing and the flip-and-repush
+// against a temp library root, plus the callback dispatch.
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,15 +19,6 @@ void main() {
           ),
         ),
         (id: 7, library: '/lib', note: 'List.md', line: 3),
-      );
-    });
-
-    test('add parses id, library and note', () {
-      expect(
-        parseNoteRowAddUri(
-          Uri.parse('niman://note-row-add?id=7&library=%2Flib&note=List.md'),
-        ),
-        (id: 7, library: '/lib', note: 'List.md'),
       );
     });
 
@@ -51,10 +42,6 @@ void main() {
         ),
         isNull,
         reason: 'no note',
-      );
-      expect(
-        parseNoteRowAddUri(Uri.parse('niman://note-row-add?id=7')),
-        isNull,
       );
     });
   });
@@ -100,14 +87,6 @@ void main() {
       );
     }
 
-    Uri addUri() {
-      return Uri(
-        scheme: 'niman',
-        host: 'note-row-add',
-        queryParameters: {'id': '7', 'library': root.path, 'note': 'List.md'},
-      );
-    }
-
     test('toggle flips the box and re-pushes the rows', () async {
       File(p.join(root.path, 'List.md'))
           .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n- [x] eggs\n');
@@ -148,34 +127,6 @@ void main() {
         await toggleWidgetNoteRow(toggleUri(3), updater: recorder()),
         isFalse,
       );
-      expect(await addWidgetNoteRow(addUri(), updater: recorder()), isFalse);
-      expect(saves, isEmpty);
-    });
-
-    test('add appends an empty item and re-pushes', () async {
-      File(p.join(root.path, 'List.md'))
-          .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n');
-
-      expect(await addWidgetNoteRow(addUri(), updater: recorder()), isTrue);
-      expect(
-        File(p.join(root.path, 'List.md')).readAsStringSync(),
-        '---\ntype: list\n---\n- [ ] milk\n- [ ] \n',
-      );
-      expect(saves.map((s) => s.$1), ['note_7']);
-      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
-      final rows = payload['rows']! as List<Object?>;
-      expect(rows.last, {'text': '', 'checked': false, 'line': 4, 'depth': 0});
-    });
-
-    test('add on a non-list note fails quiet', () async {
-      File(p.join(root.path, 'Note.md')).writeAsStringSync('# plain\n');
-
-      final uri = Uri(
-        scheme: 'niman',
-        host: 'note-row-add',
-        queryParameters: {'id': '7', 'library': root.path, 'note': 'Note.md'},
-      );
-      expect(await addWidgetNoteRow(uri, updater: recorder()), isFalse);
       expect(saves, isEmpty);
     });
 
@@ -183,11 +134,11 @@ void main() {
       File(p.join(root.path, 'List.md'))
           .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n');
 
-      await widgetToggleCallback(addUri());
+      await widgetToggleCallback(toggleUri(3));
 
       expect(
         File(p.join(root.path, 'List.md')).readAsStringSync(),
-        contains('- [ ] \n'),
+        contains('- [x] milk'),
       );
     });
   });

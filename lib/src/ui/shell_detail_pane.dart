@@ -35,6 +35,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.linkSource,
     required this.onOpenNote,
     required this.initialAnchor,
+    required this.initialFocusAdd,
     required this.kindMode,
     required this.onNoteKindChanged,
     required this.unsavedTracker,
@@ -101,6 +102,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// A heading anchor to land on after the note loads.
   final String? initialAnchor;
 
+  /// Whether the note focuses its add-item field on open (the list
+  /// widget's "+").
+  final bool initialFocusAdd;
+
   /// Note kind mode (T-TK-02).
   final bool kindMode;
 
@@ -163,6 +168,7 @@ final class ShellDetailPane extends StatelessWidget {
                 linkSource: linkSource,
                 onOpenNote: onOpenNote,
                 initialAnchor: initialAnchor,
+                initialFocusAdd: initialFocusAdd,
                 kindMode: kindMode,
                 onNoteKindChanged: onNoteKindChanged,
                 unsavedTracker: unsavedTracker,

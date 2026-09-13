@@ -95,6 +95,29 @@ void main() {
     await close();
   });
 
+  testWidgets('a + tap hands the focus request to the note view', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await controller.createNote(parentPath: '', name: 'List');
+    await settle(tester);
+
+    targets.emit(
+      WidgetTarget(
+        kind: WidgetTargetKind.note,
+        libraryPath: home,
+        notePath: 'List.md',
+        focusAdd: true,
+      ),
+    );
+    await settle(tester);
+    // The shell hands the one-shot request to the NoteView; the view and
+    // the list GUI focus the add field once the note has loaded.
+    final noteView = tester.widget<NoteView>(find.byType(NoteView));
+    expect(noteView.initialFocusAdd, isTrue);
+    await close();
+  });
+
   testWidgets('a tap for another library switches first', (tester) async {
     await pumpApp(tester);
     expect(controller.root, home);

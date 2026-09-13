@@ -49,6 +49,37 @@ void main() {
       expect(back.anchor, 'Shopping');
     });
 
+    test('a note target with focusAdd round-trips', () {
+      const target = WidgetTarget(
+        kind: WidgetTargetKind.note,
+        libraryPath: '/lib/Work',
+        notePath: 'List.md',
+        focusAdd: true,
+      );
+      final map = target.toMap();
+      expect(map['focusAdd'], 'true');
+      final back = WidgetTarget.fromMap(map)!;
+      expect(back.focusAdd, isTrue);
+      // Absent or garbage focusAdd parses to false.
+      expect(
+        WidgetTarget.fromMap(const {
+          'kind': 'note',
+          'libraryPath': '/lib',
+          'notePath': 'List.md',
+        })!.focusAdd,
+        isFalse,
+      );
+      expect(
+        WidgetTarget.fromMap(const {
+          'kind': 'note',
+          'libraryPath': '/lib',
+          'notePath': 'List.md',
+          'focusAdd': 'maybe',
+        })!.focusAdd,
+        isFalse,
+      );
+    });
+
     test('nothing openable parses to null', () {
       expect(WidgetTarget.fromMap(const {}), isNull);
       expect(

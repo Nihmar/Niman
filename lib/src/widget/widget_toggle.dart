@@ -2,10 +2,10 @@
 ///
 /// The widget taps fire `home_widget` background intents carrying a
 /// `niman://` URI; this callback routes each to its op — todo toggle,
-/// note-row flip, note-row add — which edit the file and re-push the
-/// payload. No activity comes to the foreground, and it works with the
-/// app closed. No Drift, no UI: the background isolate owns plain file
-/// I/O through [TodoStore] and the note file.
+/// note-row flip — which edit the file and re-push the payload. No
+/// activity comes to the foreground, and it works with the app closed.
+/// No Drift, no UI: the background isolate owns plain file I/O through
+/// [TodoStore] and the note file.
 ///
 /// Known limitation: a todo toggle here does not reconcile reminders; a
 /// `rem:` tag on the completed task is cancelled on the next app open
@@ -32,8 +32,6 @@ Future<void> widgetToggleCallback(Uri? uri) async {
       await toggleWidgetTodo(uri);
     case 'note-row-toggle':
       await toggleWidgetNoteRow(uri);
-    case 'note-row-add':
-      await addWidgetNoteRow(uri);
   }
 }
 
