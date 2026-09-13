@@ -59,6 +59,7 @@ dependencies:
   flutter_timezone: ^5.1.0
   highlight: ^0.7.0
 
+  home_widget: ^0.9.4
   katex: ^1.0.0
   katex_dart: ^0.1.1
 
