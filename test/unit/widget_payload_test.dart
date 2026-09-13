@@ -93,9 +93,10 @@ void main() {
   });
 
   group('note payload', () {
-    test('carries library, title, kind and body', () {
+    test('carries library, note, title, kind and body', () {
       final payload = noteWidgetPayload(
         libraryPath: '/lib/Work',
+        notePath: 'Todo.md',
         title: 'Todo',
         kind: 'list',
         body: '☐ milk',
@@ -103,6 +104,7 @@ void main() {
       );
       expect(jsonDecode(payload), {
         'library': '/lib/Work',
+        'note': 'Todo.md',
         'title': 'Todo',
         'kind': 'list',
         'body': '☐ milk',
