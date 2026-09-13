@@ -67,6 +67,33 @@ class AppSettings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// One placed home-screen widget instance (issue 6).
+///
+/// App-side on purpose, like [KnownLibraries]: forgetting a library drops
+/// the rows that pointed at it, and the folder itself never holds widget
+/// state. Each Android `appWidgetId` gets its own row, so the same widget
+/// can appear twice for two libraries (or two notes) — a widget never
+/// assumes the last-opened library.
+class WidgetConfigs extends Table {
+  /// The Android widget instance id; the primary key.
+  IntColumn get androidWidgetId => integer().named('android_widget_id')();
+
+  /// Which widget this is: `todo` or `note`.
+  TextColumn get provider => text()();
+
+  /// Absolute, normalized path of the library root this instance reads.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// Library-relative path of the pinned note (`note` widgets only).
+  TextColumn get notePath => text().named('note_path').nullable()();
+
+  /// When the instance was last (re)configured.
+  DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+
+  @override
+  Set<Column> get primaryKey => {androidWidgetId};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -97,13 +124,13 @@ class KnownLibraries extends Table {
 /// which is why the migration chain below starts long before this class
 /// existed. It carries the only rows in the app that are NOT rebuildable
 /// from disk, so it is the one database worth backing up.
-@DriftDatabase(tables: [AppSettings, KnownLibraries])
+@DriftDatabase(tables: [AppSettings, KnownLibraries, WidgetConfigs])
 class AppDatabase extends _$AppDatabase {
   /// Creates the database on top of [e].
   new(super.e);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -133,7 +160,9 @@ class AppDatabase extends _$AppDatabase {
   /// (T-ML-10), after parking them for each known library to collect, and
   /// pre-v18 databases gain the theme: `theme_brightness` and
   /// `theme_palette` (T-M6-05), both starting at `system`, which is what
-  /// the app looked like before the setting existed.
+  /// the app looked like before the setting existed, and pre-v19
+  /// databases gain `widget_configs` (issue 6), one row per placed
+  /// home-screen widget instance, empty on upgrade.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -249,6 +278,9 @@ class AppDatabase extends _$AppDatabase {
             "TEXT NOT NULL DEFAULT 'system'",
           );
         }
+      }
+      if (from < 19) {
+        await m.createTable(widgetConfigs);
       }
     },
   );
