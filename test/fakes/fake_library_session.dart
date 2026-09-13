@@ -159,6 +159,38 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
     _bump();
   }
 
+  /// The configured widget instances (issue 6), newest first.
+  final List<WidgetConfig> _widgetConfigs = <WidgetConfig>[];
+
+  @override
+  Future<List<WidgetConfig>> widgetConfigsFor(String libraryPath) async {
+    return [
+      for (final config in _widgetConfigs)
+        if (config.libraryPath == libraryPath) config,
+    ];
+  }
+
+  /// Test-only seeding of a widget instance reading [libraryPath].
+  void seedWidgetConfig({
+    required int androidWidgetId,
+    required String provider,
+    required String libraryPath,
+    String? notePath,
+  }) {
+    _widgetConfigs
+      ..removeWhere((config) => config.androidWidgetId == androidWidgetId)
+      ..insert(
+        0,
+        WidgetConfig(
+          androidWidgetId: androidWidgetId,
+          provider: provider,
+          libraryPath: libraryPath,
+          notePath: notePath,
+          updatedAt: DateTime.now(),
+        ),
+      );
+  }
+
   /// Test-only seeding of the known list, so the home screen has rows
   /// without a real registry behind it.
   void seedKnownLibrary(String path, {String? name, DateTime? lastOpened}) {

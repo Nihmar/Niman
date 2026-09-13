@@ -49,25 +49,28 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
   return '${provider.name}_$androidWidgetId';
 }
 
-/// The todo rows as JSON: `{"rows": [{text, due, priority, line}],
-/// "truncated": bool}`.
+/// The todo rows as JSON: `{"library": path, "rows": [{text, due,
+/// priority, line}], "truncated": bool}`.
 ///
-/// [entries] arrive in widget order (the todo widget sort); `text` is
-/// the prose ([taskDisplayText], so `due:`/`rem:` slots and `+`/`@`/`#`
-/// markers do not eat widget width), `due` a `YYYY-MM-DD` date or null,
-/// `line` the file line (for future tap-to-toggle). Rows drop from the
-/// end while the payload exceeds [maxChars], setting `truncated`.
+/// [entries] arrive in widget order (the todo widget sort); `library` is
+/// the absolute library root the native provider taps back into; `text`
+/// is the prose ([taskDisplayText], so `due:`/`rem:` slots and
+/// `+`/`@`/`#` markers do not eat widget width), `due` a `YYYY-MM-DD`
+/// date or null, `line` the file line (for future tap-to-toggle). Rows
+/// drop from the end while the payload exceeds [maxChars], setting
+/// `truncated`.
 String todoWidgetPayload(
   List<TodoEntry> entries, {
+  required String libraryPath,
   int maxChars = widgetPayloadMaxChars,
 }) {
   var rows = <Map<String, Object?>>[for (final entry in entries) _row(entry)];
   var truncated = false;
-  var encoded = _encode(rows, truncated);
+  var encoded = _encode(libraryPath, rows, truncated);
   while (rows.isNotEmpty && encoded.length > maxChars) {
     rows = rows.sublist(0, rows.length - 1);
     truncated = true;
-    encoded = _encode(rows, truncated);
+    encoded = _encode(libraryPath, rows, truncated);
   }
   return encoded;
 }
@@ -83,7 +86,15 @@ Map<String, Object?> _row(TodoEntry entry) {
   };
 }
 
-/// Encodes [rows] with the [truncated] flag.
-String _encode(List<Map<String, Object?>> rows, bool truncated) {
-  return jsonEncode({'rows': rows, 'truncated': truncated});
+/// Encodes [rows] with the [libraryPath] and [truncated] flag.
+String _encode(
+  String libraryPath,
+  List<Map<String, Object?>> rows,
+  bool truncated,
+) {
+  return jsonEncode({
+    'library': libraryPath,
+    'rows': rows,
+    'truncated': truncated,
+  });
 }

@@ -45,8 +45,9 @@ void main() {
       final payload = todoWidgetPayload([
         entry(3, '(A) call the office +work due:2026-09-10'),
         entry(9, 'buy milk'),
-      ]);
+      ], libraryPath: '/lib/Work');
       final decoded = jsonDecode(payload) as Map<String, Object?>;
+      expect(decoded['library'], '/lib/Work');
       expect(decoded['truncated'], isFalse);
       final rows = decoded['rows']! as List<Object?>;
       expect(rows, [
@@ -61,8 +62,11 @@ void main() {
     });
 
     test('an empty list encodes without truncation', () {
-      final decoded = jsonDecode(todoWidgetPayload(const []));
+      final decoded = jsonDecode(
+        todoWidgetPayload(const [], libraryPath: '/lib'),
+      );
       expect(decoded, {
+        'library': '/lib',
         'rows': <Object?>[],
         'truncated': false,
       });
@@ -74,13 +78,17 @@ void main() {
         entry(1, 'second'),
         entry(2, 'third'),
       ];
-      final payload = todoWidgetPayload(entries, maxChars: 120);
+      final payload = todoWidgetPayload(
+        entries,
+        libraryPath: '/lib',
+        maxChars: 150,
+      );
       final decoded = jsonDecode(payload) as Map<String, Object?>;
       expect(decoded['truncated'], isTrue);
       final rows = decoded['rows']! as List<Object?>;
       expect(rows.length, lessThan(3));
       expect((rows.first! as Map)['text'], 'first');
-      expect(payload.length, lessThanOrEqualTo(120));
+      expect(payload.length, lessThanOrEqualTo(150));
     });
   });
 }

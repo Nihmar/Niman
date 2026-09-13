@@ -8,6 +8,7 @@
 /// independently.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_payload.dart';
@@ -19,6 +20,11 @@ typedef SaveWidgetData = Future<bool?> Function(String id, String? data);
 typedef UpdateWidgets = Future<bool?> Function({
   required String androidName,
   required String qualifiedAndroidName,
+});
+
+/// The launcher-facing widget pusher for the app session.
+final widgetUpdaterProvider = Provider<WidgetUpdater>((ref) {
+  return WidgetUpdater();
 });
 
 /// The launcher-facing widget pusher (issue 6).

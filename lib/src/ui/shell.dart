@@ -49,7 +49,9 @@ import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:niman/src/widget/widget_refresh.dart';
 import 'package:niman/src/widget/widget_target.dart';
+import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
 
 /// Root screen: the open/create screen until a library is ready, then the
@@ -167,6 +169,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
           todoSourceFactory: ref.read(todoSourceFactoryProvider),
           unsavedTracker: ref.watch(unsavedTrackerProvider),
           targets: ref.read(widgetTargetServiceProvider),
+          widgetUpdater: ref.read(widgetUpdaterProvider),
           tray: ref.read(trayServiceProvider),
           window: ref.read(windowControllerProvider),
         ),
@@ -187,6 +190,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.todoSourceFactory,
     required this.unsavedTracker,
     required this.targets,
+    required this.widgetUpdater,
     required this.tray,
     required this.window,
   });
@@ -215,6 +219,9 @@ final class _LibraryShell extends StatefulWidget {
   /// note its widget shows, switching libraries first when it points
   /// elsewhere).
   final WidgetTargetService targets;
+
+  /// Pushes todo snapshots to the home-screen widgets (issue 6).
+  final WidgetUpdater widgetUpdater;
 
   /// The desktop tray's quick actions (T-PP-06b): the same four flows the
   /// launcher publishes, on a third surface.
@@ -306,6 +313,19 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the list with no hint missing of why.
   void _openTodo() {
     _selectShellTab(ShellTab.todo);
+  }
+
+  /// Pushes the latest todo snapshot to the home-screen widgets reading
+  /// this library (issue 6). Listener on the todo controller: every
+  /// mutation and the initial open notify.
+  void _pushTodoWidgets() {
+    unawaited(
+      refreshTodoWidgets(
+        session: widget.controller,
+        snapshot: _todoController.snapshot,
+        updater: widget.widgetUpdater,
+      ),
+    );
   }
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
@@ -800,6 +820,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       reminders: widget.reminders,
       sourceFactory: widget.todoSourceFactory,
     );
+    // The todo widgets follow the snapshot: every mutation notifies, and
+    // the initial open notifies too, so one listener covers both.
+    _todoController.addListener(_pushTodoWidgets);
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
@@ -850,6 +873,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     unawaited(_widgetTargets?.cancel());
+    _todoController.removeListener(_pushTodoWidgets);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
     _todoController.dispose();
