@@ -115,6 +115,14 @@ in app reflects in widget quickly; tap opens the right library's Todo.
 Provider + library+note config (reconfigurable on Android 12+), plain excerpt
 / read-only checklist, tap → editor of that library; "note not found" state.
 
+IMPLEMENTATION NOTE (pin flow, no native picker): the tree row menu
+pins a note (`saveWidgetPin` → SharedPreferences, Android-only); the
+next `refreshNoteWidgets` lets unknown placed note instances adopt the
+pin when it names the open library (other-library pins are put back).
+Excerpts are plain text, checklists `☐`/`☑` rows in one scrolling
+TextView — RemoteViews cannot render Markdown. Strings use English
+fallbacks in `strings/base.dart` until translated (only `it` added).
+
 Acceptance: config change updates widget; tap opens the right note in the
 right library; deleted note → clean missing-note state.
 
