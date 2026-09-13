@@ -49,6 +49,7 @@ import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_refresh.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -170,6 +171,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
           unsavedTracker: ref.watch(unsavedTrackerProvider),
           targets: ref.read(widgetTargetServiceProvider),
           widgetUpdater: ref.read(widgetUpdaterProvider),
+          widgetHost: ref.read(widgetHostServiceProvider),
           tray: ref.read(trayServiceProvider),
           window: ref.read(windowControllerProvider),
         ),
@@ -191,6 +193,7 @@ final class _LibraryShell extends StatefulWidget {
     required this.unsavedTracker,
     required this.targets,
     required this.widgetUpdater,
+    required this.widgetHost,
     required this.tray,
     required this.window,
   });
@@ -222,6 +225,9 @@ final class _LibraryShell extends StatefulWidget {
 
   /// Pushes todo snapshots to the home-screen widgets (issue 6).
   final WidgetUpdater widgetUpdater;
+
+  /// Lists the placed widget instances for adoption (issue 6).
+  final WidgetHostService widgetHost;
 
   /// The desktop tray's quick actions (T-PP-06b): the same four flows the
   /// launcher publishes, on a third surface.
@@ -324,6 +330,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         session: widget.controller,
         snapshot: _todoController.snapshot,
         updater: widget.widgetUpdater,
+        host: widget.widgetHost,
       ),
     );
   }
