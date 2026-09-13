@@ -50,6 +50,7 @@ import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
+import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_refresh.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -321,6 +322,21 @@ final class _LibraryShellState extends State<_LibraryShell>
     _selectShellTab(ShellTab.todo);
   }
 
+  /// Pushes the pinned notes to the home-screen widgets reading this
+  /// library (issue 6). Listener on the session events: every note op
+  /// bumps the revision.
+  void _pushNoteWidgets() {
+    if (!mounted) return;
+    unawaited(
+      refreshNoteWidgets(
+        session: widget.controller,
+        updater: widget.widgetUpdater,
+        host: widget.widgetHost,
+        pinStore: const PlatformWidgetPinStore(),
+      ),
+    );
+  }
+
   /// Pushes the latest todo snapshot to the home-screen widgets reading
   /// this library (issue 6). Listener on the todo controller: every
   /// mutation and the initial open notify.
@@ -473,6 +489,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
   StreamSubscription<WidgetTarget>? _widgetTargets;
+
+  /// Library session events (every note op bumps the revision): the
+  /// pinned notes follow the files, so each one refreshes the note
+  /// widgets (issue 6).
+  StreamSubscription<int>? _libraryEvents;
 
   /// A widget tap that arrived for another library:
   /// [LibrarySession.switchTo] tears this shell down on its way through,
@@ -857,6 +878,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _widgetTargets = widget.targets.targets.listen(
       (target) => unawaited(_applyWidgetTarget(target)),
     );
+    _libraryEvents = widget.controller.events.listen((_) => _pushNoteWidgets());
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
@@ -880,6 +902,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     unawaited(_widgetTargets?.cancel());
+    unawaited(_libraryEvents?.cancel());
     _todoController.removeListener(_pushTodoWidgets);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());

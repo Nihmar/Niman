@@ -98,3 +98,25 @@ String _encode(
     'truncated': truncated,
   });
 }
+
+/// A pinned note as JSON: `{"library", "title", "kind", "body",
+/// "truncated"}`.
+///
+/// `kind` is `note` (prose excerpt in `body`), `list` (checklist rows in
+/// `body`) or `missing` (the note is gone; `body` empty). `library` is
+/// the absolute root the native provider taps back into.
+String noteWidgetPayload({
+  required String libraryPath,
+  required String title,
+  required String kind,
+  required String body,
+  required bool truncated,
+}) {
+  return jsonEncode({
+    'library': libraryPath,
+    'title': title,
+    'kind': kind,
+    'body': body,
+    'truncated': truncated,
+  });
+}

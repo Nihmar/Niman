@@ -8,6 +8,7 @@
 /// independently.
 library;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -103,19 +104,32 @@ final class WidgetUpdater {
     }
   }
 
-  /// Saves through the `home_widget` plugin.
-  static Future<bool?> _pluginSave(String id, String? data) {
-    return HomeWidget.saveWidgetData<String>(id, data);
+  /// Saves through the `home_widget` plugin (a silent no-op where the
+  /// plugin is missing — desktops and tests without a host channel).
+  static Future<bool?> _pluginSave(String id, String? data) async {
+    try {
+      return await HomeWidget.saveWidgetData<String>(id, data);
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
   }
 
-  /// Refreshes through the `home_widget` plugin.
+  /// Refreshes through the `home_widget` plugin (same no-op rule).
   static Future<bool?> _pluginUpdate({
     required String androidName,
     required String qualifiedAndroidName,
-  }) {
-    return HomeWidget.updateWidget(
-      androidName: androidName,
-      qualifiedAndroidName: qualifiedAndroidName,
-    );
+  }) async {
+    try {
+      return await HomeWidget.updateWidget(
+        androidName: androidName,
+        qualifiedAndroidName: qualifiedAndroidName,
+      );
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
   }
 }

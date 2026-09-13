@@ -203,6 +203,14 @@ abstract interface class LibrarySession {
   /// an unknown instance adopts the open one.
   Future<void> adoptTodoWidget(int androidWidgetId, String libraryPath);
 
+  /// Records a placed note widget for [notePath] in [libraryPath]
+  /// (issue 6), keeping an existing configuration like [adoptTodoWidget].
+  Future<void> adoptNoteWidget(
+    int androidWidgetId,
+    String libraryPath,
+    String notePath,
+  );
+
   /// Triggers a full rescan immediately (explicit re-index).
   Future<void> rescanNow();
 

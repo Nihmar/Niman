@@ -43,6 +43,7 @@ void main() {
     hostIds = [7, 'stale', 8];
     final host = PlatformWidgetHostService();
     expect(await host.todoWidgetIds(), [7, 8]);
+    expect(await host.noteWidgetIds(), [7, 8]);
     await host.dispose();
   });
 
