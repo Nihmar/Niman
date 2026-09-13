@@ -85,6 +85,9 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 19) {
+    await db.customStatement('DROP TABLE widget_configs');
+  }
   if (version < 18) {
     await drop('app_settings', 'theme_brightness');
     await drop('app_settings', 'theme_palette');
@@ -751,20 +754,54 @@ void main() {
     await db.close();
   });
 
-  test('a fresh database holds the settings and the registry alone', () async {
-    final db = AppDatabase(NativeDatabase(dbFile));
-    final tables = await db
-        .customSelect(
-          "SELECT name FROM sqlite_master WHERE type = 'table' "
-          "AND name NOT LIKE 'sqlite_%'",
-        )
-        .get();
-    expect(
-      tables.map((r) => r.read<String>('name')),
-      unorderedEquals(['app_settings', 'known_libraries']),
-    );
-    expect(await db.select(db.appSettings).get(), isEmpty);
-    expect(await db.select(db.knownLibraries).get(), isEmpty);
-    await db.close();
+  test(
+    'a fresh database holds the settings, registry and widgets alone',
+    () async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final tables = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' "
+            "AND name NOT LIKE 'sqlite_%'",
+          )
+          .get();
+      expect(
+        tables.map((r) => r.read<String>('name')),
+        unorderedEquals(['app_settings', 'known_libraries', 'widget_configs']),
+      );
+      expect(await db.select(db.appSettings).get(), isEmpty);
+      expect(await db.select(db.knownLibraries).get(), isEmpty);
+      expect(await db.select(db.widgetConfigs).get(), isEmpty);
+      await db.close();
+    },
+  );
+
+  group('v18 → v19: the widget configs appear', () {
+    test('an existing install upgrades with an empty widget table', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 18);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+        );
+        await db.customStatement(
+          'INSERT INTO known_libraries (path, name, last_opened) '
+          "VALUES ('/lib/Work', 'Work', 0)",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(await db.select(db.widgetConfigs).get(), isEmpty);
+      // The settings and the registry survive the upgrade untouched.
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/Work',
+      );
+      expect(
+        (await db.select(db.knownLibraries).get()).single.path,
+        '/lib/Work',
+      );
+      await db.close();
+    });
   });
 }

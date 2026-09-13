@@ -28,6 +28,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/widget/widget_configs.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
@@ -486,7 +487,11 @@ final class LibraryController implements LibrarySession {
   @override
   Future<void> forgetLibrary(String libraryPath) async {
     _log.info('forget library: $libraryPath');
-    await LibraryRegistry(await appDatabase).forget(libraryPath);
+    final db = await appDatabase;
+    await LibraryRegistry(db).forget(libraryPath);
+    // Widgets pointing at it would open a library the home screen no
+    // longer lists; their rows go with the entry (issue 6).
+    await WidgetConfigStore(db).removeForLibrary(libraryPath);
     // The index is derived data and the entry that named it is gone, so
     // the file would sit there forever with nothing pointing at it.
     await _deleteIndexOf(libraryPath);

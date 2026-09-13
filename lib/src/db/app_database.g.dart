@@ -296,7 +296,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// screen is the screen whichever library is open on it.
   final String themeBrightness;
 
-  /// The palette: `system` (the device's own colors), `catppuccin`,
+  /// The palette: `niman` (the app's own colors, and what a fresh install
+  /// wears), `system` (the device's own colors), `catppuccin`,
   /// `solarized` or `gruvbox`.
   final String themePalette;
 
@@ -886,11 +887,386 @@ class KnownLibrariesCompanion extends UpdateCompanion<KnownLibrary> {
   }
 }
 
+class $WidgetConfigsTable extends WidgetConfigs
+    with TableInfo<$WidgetConfigsTable, WidgetConfig> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WidgetConfigsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _androidWidgetIdMeta = const VerificationMeta(
+    'androidWidgetId',
+  );
+  @override
+  late final GeneratedColumn<int> androidWidgetId = GeneratedColumn<int>(
+    'android_widget_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _providerMeta = const VerificationMeta(
+    'provider',
+  );
+  @override
+  late final GeneratedColumn<String> provider = GeneratedColumn<String>(
+    'provider',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _libraryPathMeta = const VerificationMeta(
+    'libraryPath',
+  );
+  @override
+  late final GeneratedColumn<String> libraryPath = GeneratedColumn<String>(
+    'library_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notePathMeta = const VerificationMeta(
+    'notePath',
+  );
+  @override
+  late final GeneratedColumn<String> notePath = GeneratedColumn<String>(
+    'note_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    androidWidgetId,
+    provider,
+    libraryPath,
+    notePath,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'widget_configs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<WidgetConfig> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('android_widget_id')) {
+      context.handle(
+        _androidWidgetIdMeta,
+        androidWidgetId.isAcceptableOrUnknown(
+          data['android_widget_id']!,
+          _androidWidgetIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('provider')) {
+      context.handle(
+        _providerMeta,
+        provider.isAcceptableOrUnknown(data['provider']!, _providerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_providerMeta);
+    }
+    if (data.containsKey('library_path')) {
+      context.handle(
+        _libraryPathMeta,
+        libraryPath.isAcceptableOrUnknown(
+          data['library_path']!,
+          _libraryPathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_libraryPathMeta);
+    }
+    if (data.containsKey('note_path')) {
+      context.handle(
+        _notePathMeta,
+        notePath.isAcceptableOrUnknown(data['note_path']!, _notePathMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {androidWidgetId};
+  @override
+  WidgetConfig map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WidgetConfig(
+      androidWidgetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}android_widget_id'],
+      )!,
+      provider: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider'],
+      )!,
+      libraryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}library_path'],
+      )!,
+      notePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note_path'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $WidgetConfigsTable createAlias(String alias) {
+    return $WidgetConfigsTable(attachedDatabase, alias);
+  }
+}
+
+class WidgetConfig extends DataClass implements Insertable<WidgetConfig> {
+  /// The Android widget instance id; the primary key.
+  final int androidWidgetId;
+
+  /// Which widget this is: `todo` or `note`.
+  final String provider;
+
+  /// Absolute, normalized path of the library root this instance reads.
+  final String libraryPath;
+
+  /// Library-relative path of the pinned note (`note` widgets only).
+  final String? notePath;
+
+  /// When the instance was last (re)configured.
+  final DateTime updatedAt;
+  const WidgetConfig({
+    required this.androidWidgetId,
+    required this.provider,
+    required this.libraryPath,
+    this.notePath,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['android_widget_id'] = Variable<int>(androidWidgetId);
+    map['provider'] = Variable<String>(provider);
+    map['library_path'] = Variable<String>(libraryPath);
+    if (!nullToAbsent || notePath != null) {
+      map['note_path'] = Variable<String>(notePath);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  WidgetConfigsCompanion toCompanion(bool nullToAbsent) {
+    return WidgetConfigsCompanion(
+      androidWidgetId: Value(androidWidgetId),
+      provider: Value(provider),
+      libraryPath: Value(libraryPath),
+      notePath: notePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notePath),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory WidgetConfig.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WidgetConfig(
+      androidWidgetId: serializer.fromJson<int>(json['androidWidgetId']),
+      provider: serializer.fromJson<String>(json['provider']),
+      libraryPath: serializer.fromJson<String>(json['libraryPath']),
+      notePath: serializer.fromJson<String?>(json['notePath']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'androidWidgetId': serializer.toJson<int>(androidWidgetId),
+      'provider': serializer.toJson<String>(provider),
+      'libraryPath': serializer.toJson<String>(libraryPath),
+      'notePath': serializer.toJson<String?>(notePath),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  WidgetConfig copyWith({
+    int? androidWidgetId,
+    String? provider,
+    String? libraryPath,
+    Value<String?> notePath = const Value.absent(),
+    DateTime? updatedAt,
+  }) => WidgetConfig(
+    androidWidgetId: androidWidgetId ?? this.androidWidgetId,
+    provider: provider ?? this.provider,
+    libraryPath: libraryPath ?? this.libraryPath,
+    notePath: notePath.present ? notePath.value : this.notePath,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  WidgetConfig copyWithCompanion(WidgetConfigsCompanion data) {
+    return WidgetConfig(
+      androidWidgetId: data.androidWidgetId.present
+          ? data.androidWidgetId.value
+          : this.androidWidgetId,
+      provider: data.provider.present ? data.provider.value : this.provider,
+      libraryPath: data.libraryPath.present
+          ? data.libraryPath.value
+          : this.libraryPath,
+      notePath: data.notePath.present ? data.notePath.value : this.notePath,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WidgetConfig(')
+          ..write('androidWidgetId: $androidWidgetId, ')
+          ..write('provider: $provider, ')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('notePath: $notePath, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(androidWidgetId, provider, libraryPath, notePath, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WidgetConfig &&
+          other.androidWidgetId == this.androidWidgetId &&
+          other.provider == this.provider &&
+          other.libraryPath == this.libraryPath &&
+          other.notePath == this.notePath &&
+          other.updatedAt == this.updatedAt);
+}
+
+class WidgetConfigsCompanion extends UpdateCompanion<WidgetConfig> {
+  final Value<int> androidWidgetId;
+  final Value<String> provider;
+  final Value<String> libraryPath;
+  final Value<String?> notePath;
+  final Value<DateTime> updatedAt;
+  const WidgetConfigsCompanion({
+    this.androidWidgetId = const Value.absent(),
+    this.provider = const Value.absent(),
+    this.libraryPath = const Value.absent(),
+    this.notePath = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  WidgetConfigsCompanion.insert({
+    this.androidWidgetId = const Value.absent(),
+    required String provider,
+    required String libraryPath,
+    this.notePath = const Value.absent(),
+    required DateTime updatedAt,
+  }) : provider = Value(provider),
+       libraryPath = Value(libraryPath),
+       updatedAt = Value(updatedAt);
+  static Insertable<WidgetConfig> custom({
+    Expression<int>? androidWidgetId,
+    Expression<String>? provider,
+    Expression<String>? libraryPath,
+    Expression<String>? notePath,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (androidWidgetId != null) 'android_widget_id': androidWidgetId,
+      if (provider != null) 'provider': provider,
+      if (libraryPath != null) 'library_path': libraryPath,
+      if (notePath != null) 'note_path': notePath,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  WidgetConfigsCompanion copyWith({
+    Value<int>? androidWidgetId,
+    Value<String>? provider,
+    Value<String>? libraryPath,
+    Value<String?>? notePath,
+    Value<DateTime>? updatedAt,
+  }) {
+    return WidgetConfigsCompanion(
+      androidWidgetId: androidWidgetId ?? this.androidWidgetId,
+      provider: provider ?? this.provider,
+      libraryPath: libraryPath ?? this.libraryPath,
+      notePath: notePath ?? this.notePath,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (androidWidgetId.present) {
+      map['android_widget_id'] = Variable<int>(androidWidgetId.value);
+    }
+    if (provider.present) {
+      map['provider'] = Variable<String>(provider.value);
+    }
+    if (libraryPath.present) {
+      map['library_path'] = Variable<String>(libraryPath.value);
+    }
+    if (notePath.present) {
+      map['note_path'] = Variable<String>(notePath.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WidgetConfigsCompanion(')
+          ..write('androidWidgetId: $androidWidgetId, ')
+          ..write('provider: $provider, ')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('notePath: $notePath, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $KnownLibrariesTable knownLibraries = $KnownLibrariesTable(this);
+  late final $WidgetConfigsTable widgetConfigs = $WidgetConfigsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -898,6 +1274,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     appSettings,
     knownLibraries,
+    widgetConfigs,
   ];
 }
 
@@ -1369,6 +1746,213 @@ typedef $$KnownLibrariesTableProcessedTableManager =
       KnownLibrary,
       PrefetchHooks Function()
     >;
+typedef $$WidgetConfigsTableCreateCompanionBuilder =
+    WidgetConfigsCompanion Function({
+      Value<int> androidWidgetId,
+      required String provider,
+      required String libraryPath,
+      Value<String?> notePath,
+      required DateTime updatedAt,
+    });
+typedef $$WidgetConfigsTableUpdateCompanionBuilder =
+    WidgetConfigsCompanion Function({
+      Value<int> androidWidgetId,
+      Value<String> provider,
+      Value<String> libraryPath,
+      Value<String?> notePath,
+      Value<DateTime> updatedAt,
+    });
+
+class $$WidgetConfigsTableFilterComposer
+    extends Composer<_$AppDatabase, $WidgetConfigsTable> {
+  $$WidgetConfigsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get androidWidgetId => $composableBuilder(
+    column: $table.androidWidgetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provider => $composableBuilder(
+    column: $table.provider,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notePath => $composableBuilder(
+    column: $table.notePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WidgetConfigsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WidgetConfigsTable> {
+  $$WidgetConfigsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get androidWidgetId => $composableBuilder(
+    column: $table.androidWidgetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get provider => $composableBuilder(
+    column: $table.provider,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notePath => $composableBuilder(
+    column: $table.notePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WidgetConfigsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WidgetConfigsTable> {
+  $$WidgetConfigsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get androidWidgetId => $composableBuilder(
+    column: $table.androidWidgetId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get provider =>
+      $composableBuilder(column: $table.provider, builder: (column) => column);
+
+  GeneratedColumn<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notePath =>
+      $composableBuilder(column: $table.notePath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$WidgetConfigsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WidgetConfigsTable,
+          WidgetConfig,
+          $$WidgetConfigsTableFilterComposer,
+          $$WidgetConfigsTableOrderingComposer,
+          $$WidgetConfigsTableAnnotationComposer,
+          $$WidgetConfigsTableCreateCompanionBuilder,
+          $$WidgetConfigsTableUpdateCompanionBuilder,
+          (
+            WidgetConfig,
+            BaseReferences<_$AppDatabase, $WidgetConfigsTable, WidgetConfig>,
+          ),
+          WidgetConfig,
+          PrefetchHooks Function()
+        > {
+  $$WidgetConfigsTableTableManager(_$AppDatabase db, $WidgetConfigsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WidgetConfigsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WidgetConfigsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WidgetConfigsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> androidWidgetId = const Value.absent(),
+                Value<String> provider = const Value.absent(),
+                Value<String> libraryPath = const Value.absent(),
+                Value<String?> notePath = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => WidgetConfigsCompanion(
+                androidWidgetId: androidWidgetId,
+                provider: provider,
+                libraryPath: libraryPath,
+                notePath: notePath,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> androidWidgetId = const Value.absent(),
+                required String provider,
+                required String libraryPath,
+                Value<String?> notePath = const Value.absent(),
+                required DateTime updatedAt,
+              }) => WidgetConfigsCompanion.insert(
+                androidWidgetId: androidWidgetId,
+                provider: provider,
+                libraryPath: libraryPath,
+                notePath: notePath,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$WidgetConfigsTable, WidgetConfig>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $WidgetConfigsTable,
+                    WidgetConfig
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WidgetConfigsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WidgetConfigsTable,
+      WidgetConfig,
+      $$WidgetConfigsTableFilterComposer,
+      $$WidgetConfigsTableOrderingComposer,
+      $$WidgetConfigsTableAnnotationComposer,
+      $$WidgetConfigsTableCreateCompanionBuilder,
+      $$WidgetConfigsTableUpdateCompanionBuilder,
+      (
+        WidgetConfig,
+        BaseReferences<_$AppDatabase, $WidgetConfigsTable, WidgetConfig>,
+      ),
+      WidgetConfig,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1377,4 +1961,6 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$KnownLibrariesTableTableManager get knownLibraries =>
       $$KnownLibrariesTableTableManager(_db, _db.knownLibraries);
+  $$WidgetConfigsTableTableManager get widgetConfigs =>
+      $$WidgetConfigsTableTableManager(_db, _db.widgetConfigs);
 }
