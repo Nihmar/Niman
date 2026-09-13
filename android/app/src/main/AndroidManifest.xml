@@ -93,6 +93,15 @@
             android:name=".TodoWidgetService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <!-- Widget checkbox taps (round 2, R2): the background broadcast
+             reaches the Dart toggle through the plugin's worker. -->
+        <receiver
+            android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
+            </intent-filter>
+        </receiver>
         <!-- Widget placement (round 2, R1/R4): one activity, one alias
              per widget so the alias names the kind. Starts exported
              false; flip to true if a launcher refuses to start it. -->
