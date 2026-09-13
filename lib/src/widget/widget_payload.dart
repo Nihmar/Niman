@@ -13,6 +13,7 @@ import 'dart:convert';
 
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
+import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 
 /// The Android `AppWidgetProvider` class of the todo widget.
@@ -99,26 +100,28 @@ String _encode(
   });
 }
 
-/// A pinned note as JSON: `{"library", "note", "title", "kind", "body",
-/// "truncated"}`.
+/// A pinned note as JSON: `{"library", "note", "title", "kind", "rows",
+/// "body", "truncated"}`.
 ///
 /// `library` is the absolute root and `note` the library-relative path
 /// the native provider taps back into; `kind` is `note` (prose excerpt
-/// in `body`), `list` (checklist rows in `body`) or `missing` (the note
+/// in `body`), `list` (checklist items in `rows`) or `missing` (the note
 /// is gone; `body` empty).
 String noteWidgetPayload({
   required String libraryPath,
   required String notePath,
   required String title,
   required String kind,
-  required String body,
   required bool truncated,
+  String body = '',
+  List<ChecklistRow> rows = const [],
 }) {
   return jsonEncode({
     'library': libraryPath,
     'note': notePath,
     'title': title,
     'kind': kind,
+    'rows': [for (final row in rows) row.toMap()],
     'body': body,
     'truncated': truncated,
   });

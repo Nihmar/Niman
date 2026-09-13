@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One list-note row (issue 6): box glyph plus item prose, depth-
+     indented by the provider. Tapping flips the item in the background;
+     long-press opens the note in the app (RemoteViews cannot drag-
+     reorder, so the editor owns moving rows). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_note_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="44dp"
+    android:orientation="horizontal"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp">
+
+    <TextView
+        android:id="@+id/widget_note_row_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/widget_note_row_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="6dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="13sp" />
+</LinearLayout>

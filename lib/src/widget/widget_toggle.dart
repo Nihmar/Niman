@@ -1,12 +1,13 @@
-/// Background todo toggle for widget checkboxes (round 2, R2).
+/// Background widget ops for the home-screen widgets (round 2, R2/R4).
 ///
-/// The checkbox tap fires a `home_widget` background intent carrying a
-/// `niman://todo-toggle` URI; this callback completes the line in
-/// `todo.txt` and re-pushes the payload — no activity comes to the
-/// foreground, and it works with the app closed. No Drift, no UI: the
-/// background isolate owns plain file I/O through [TodoStore].
+/// The widget taps fire `home_widget` background intents carrying a
+/// `niman://` URI; this callback routes each to its op — todo toggle,
+/// note-row flip, note-row add — which edit the file and re-push the
+/// payload. No activity comes to the foreground, and it works with the
+/// app closed. No Drift, no UI: the background isolate owns plain file
+/// I/O through [TodoStore] and the note file.
 ///
-/// Known limitation: toggling here does not reconcile reminders; a
+/// Known limitation: a todo toggle here does not reconcile reminders; a
 /// `rem:` tag on the completed task is cancelled on the next app open
 /// or resume, like every other external todo.txt edit.
 library;
@@ -16,14 +17,24 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
 /// The background entrypoint: register with
 /// `HomeWidget.registerInteractivityCallback` at app start (Android).
+///
+/// Routes the carrying URI to its op by host; anything else is dropped.
 @pragma('vm:entry-point')
-Future<void> widgetToggleCallback(Uri? uri) {
-  return toggleWidgetTodo(uri);
+Future<void> widgetToggleCallback(Uri? uri) async {
+  switch (uri?.host) {
+    case 'todo-toggle':
+      await toggleWidgetTodo(uri);
+    case 'note-row-toggle':
+      await toggleWidgetNoteRow(uri);
+    case 'note-row-add':
+      await addWidgetNoteRow(uri);
+  }
 }
 
 /// Parses a `niman://todo-toggle?id=&library=&line=` URI, or null when
