@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
@@ -213,17 +214,48 @@ class WidgetConfigActivity : Activity() {
 
     /**
      * Starts the picker inside [libraryPath] when it lives on shared
-     * storage (`/storage/<volume>/<rest>`); null otherwise, and the
-     * picker opens wherever it was last.
+     * storage; null otherwise, and the picker opens wherever it was
+     * last.
      */
     private fun initialUriFor(libraryPath: String): Uri? {
-        val match = Regex("^/storage/([^/]+)/?(.*)$").matchEntire(libraryPath)
-            ?: return null
-        val (volume, rest) = match.destructured
-        return DocumentsContract.buildDocumentUri(
+        val docId = externalStorageDocId(libraryPath) ?: return null
+        val uri = DocumentsContract.buildDocumentUri(
             EXTERNAL_STORAGE_AUTHORITY,
-            "$volume:$rest",
+            docId,
         )
+        // The id is only a guess until the provider confirms the folder
+        // (a missing document throws FileNotFoundException).
+        return if (runCatching {
+            DocumentsContract.getDocumentMetadata(contentResolver, uri)
+        }.isSuccess) uri else null
+    }
+
+    /**
+     * The `ExternalStorageProvider` document id of [libraryPath], or null
+     * when the library is not on a shared storage volume.
+     *
+     * The id is `volumeId:rest-of-path`: `primary` is the volume id of
+     * the primary emulated volume (`/storage/emulated/0`), other volumes
+     * use their storage UUID. Parsing the first path segment as the
+     * volume is wrong -- `/storage/emulated/0/...` belongs to `primary`,
+     * not to an `emulated:0` volume -- which is why a picked note's
+     * docId never matched and every pick was rejected.
+     */
+    private fun externalStorageDocId(libraryPath: String): String? {
+        val storage = getSystemService(StorageManager::class.java) ?: return null
+        for (volume in storage.storageVolumes) {
+            val root = volume.directory?.path ?: continue
+            if (root.length <= 1) continue
+            val id = if (volume.isPrimary) "primary" else volume.uuid
+            if (libraryPath == root) {
+                return id
+            }
+            if (libraryPath.startsWith("$root/")) {
+                val rest = libraryPath.removePrefix(root).removePrefix("/")
+                return "$id:$rest"
+            }
+        }
+        return null
     }
 
     /**
@@ -245,7 +277,7 @@ class WidgetConfigActivity : Activity() {
             Log.w(TAG, "note pick rejected: unreadable document id in $uri")
             return null
         }
-        val libDocId = docIdFor(libraryPath)
+        val libDocId = externalStorageDocId(libraryPath)
         if (libDocId == null) {
             Log.w(
                 TAG,
@@ -253,11 +285,14 @@ class WidgetConfigActivity : Activity() {
             )
             return null
         }
-        if (!docId.startsWith("$libDocId/")) {
+        // A library at the volume root is a bare volume id (`primary`)
+        // whose children use `:`; deeper ones use `/` before the child.
+        val boundary = if (libDocId.contains(':')) "/" else ":"
+        if (!docId.startsWith("$libDocId$boundary")) {
             Log.w(TAG, "note pick rejected: $docId is outside $libDocId")
             return null
         }
-        val relative = docId.removePrefix("$libDocId/")
+        val relative = docId.removePrefix("$libDocId$boundary")
         if (relative.isEmpty()) {
             Log.w(TAG, "note pick rejected: the library root itself was picked")
             return null
@@ -275,14 +310,6 @@ class WidgetConfigActivity : Activity() {
         }
         Log.d(TAG, "note pick accepted: $relative in $libDocId")
         return relative
-    }
-
-    /** The `volume:rest` document id of [libraryPath], if on shared storage. */
-    private fun docIdFor(libraryPath: String): String? {
-        val match = Regex("^/storage/([^/]+)/?(.*)$").matchEntire(libraryPath)
-            ?: return null
-        val (volume, rest) = match.destructured
-        return "$volume:$rest".trimEnd(':')
     }
 
     /** Writes the per-instance choice and places the widget. */
