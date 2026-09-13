@@ -18,22 +18,25 @@ import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_pin.dart';
+import 'package:niman/src/widget/widget_placement.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
 
 /// Pushes [snapshot]'s open todos to every todo widget configured for the
 /// session's library.
 ///
-/// [host] lists the placed instances so unknown ones adopt the open
-/// library before the push (a fresh instance follows the library open
-/// when it was placed). No-ops without an open library, without todo
-/// widgets, or before the first snapshot loads (that load notifies too,
-/// so it pushes through the same path).
+/// [host] lists the placed instances; unknown ones adopt their config
+/// choice ([WidgetPlacementStore]) when present, else the open library —
+/// a fresh instance without a choice follows the library open when it
+/// was placed. No-ops without an open library, without todo widgets, or
+/// before the first snapshot loads (that load notifies too, so it pushes
+/// through the same path).
 Future<void> refreshTodoWidgets({
   required LibrarySession session,
   required TodoSnapshot? snapshot,
   WidgetUpdater? updater,
   WidgetHostService? host,
+  WidgetPlacementStore? placement,
 }) async {
   final root = session.root;
   if (root == null || snapshot == null) return;
@@ -45,9 +48,13 @@ Future<void> refreshTodoWidgets({
           config.androidWidgetId,
       };
       for (final id in placed) {
-        if (!known.contains(id)) {
-          await session.adoptTodoWidget(id, root);
-        }
+        if (known.contains(id)) continue;
+        final choice = await placement?.consumeTodoConfig(id);
+        final library = choice?.library;
+        await session.adoptTodoWidget(
+          id,
+          library == null || library.isEmpty ? root : library,
+        );
       }
     }
   }
@@ -77,16 +84,18 @@ typedef ReadNoteFile = Future<String?> Function(String root, String notePath);
 /// Pushes the pinned notes to every note widget configured for the
 /// session's library.
 ///
-/// Unknown placed instances adopt the pending pin ([WidgetPinStore])
-/// when it names the open library; a pin for another library is put
-/// back for that library's refresh. A pinned note that is gone pushes a
-/// `missing` payload instead of going quiet. No-ops without an open
-/// library or without note widgets.
+/// Unknown placed instances adopt in priority order: their config choice
+/// ([WidgetPlacementStore]), then the pending pin ([WidgetPinStore]) when
+/// it names the open library. A pin for another library is put back for
+/// that library's refresh. A pinned note that is gone pushes a `missing`
+/// payload instead of going quiet. No-ops without an open library or
+/// without note widgets.
 Future<void> refreshNoteWidgets({
   required LibrarySession session,
   WidgetUpdater? updater,
   WidgetHostService? host,
   WidgetPinStore? pinStore,
+  WidgetPlacementStore? placement,
   Future<bool> Function({
     required String libraryPath,
     required String notePath,
@@ -106,6 +115,13 @@ Future<void> refreshNoteWidgets({
       final restore = restorePin ?? saveWidgetPin;
       for (final id in placed) {
         if (known.contains(id)) continue;
+        final choice = await placement?.consumeNoteConfig(id);
+        if (choice != null &&
+            choice.library.isNotEmpty &&
+            choice.note.isNotEmpty) {
+          await session.adoptNoteWidget(id, choice.library, choice.note);
+          continue;
+        }
         final pin = await pinStore?.consumePin();
         if (pin == null) continue;
         if (pin.libraryPath != root) {

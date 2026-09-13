@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
@@ -29,6 +31,7 @@ import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
@@ -428,6 +431,9 @@ final class LibraryController implements LibrarySession {
       // folder on it, so a library the app has never seen needs no
       // registration step of its own.
       await LibraryRegistry(appDb).touch(abs);
+      // The native widget config activity cannot read the registry (no
+      // Dart engine at placement), so it reads this mirror instead.
+      unawaited(_saveWidgetLibraryMirror(appDb));
       _bump();
       if (!blockingScan) {
         _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
@@ -527,10 +533,37 @@ final class LibraryController implements LibrarySession {
     // Widgets pointing at it would open a library the home screen no
     // longer lists; their rows go with the entry (issue 6).
     await WidgetConfigStore(db).removeForLibrary(libraryPath);
+    // The mirror would otherwise keep offering a forgotten library.
+    unawaited(_saveWidgetLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
     // the file would sit there forever with nothing pointing at it.
     await _deleteIndexOf(libraryPath);
     _bump();
+  }
+
+  /// Mirrors the known libraries for the native widget config activity
+  /// (round 2, R1): path, display name and index file per library.
+  ///
+  /// Best effort and Android-only: the activity treats the mirror as a
+  /// cache, and a failure here must never break an open or a forget.
+  Future<void> _saveWidgetLibraryMirror(AppDatabase appDb) async {
+    if (!Platform.isAndroid) return;
+    try {
+      final libraries = await LibraryRegistry(appDb).all();
+      final locate = indexFileOf ?? libraryIndexFile;
+      final indexByPath = <String, String>{};
+      for (final lib in libraries) {
+        indexByPath[lib.path] = (await locate(lib.path)).path;
+      }
+      await HomeWidget.saveWidgetData<String>(
+        widgetLibrariesKey,
+        encodeLibraryMirror(libraries, indexByPath),
+      );
+    } on MissingPluginException {
+      // No host handler (tests, desktops).
+    } on PlatformException catch (error) {
+      _log.warning('widget library mirror not saved ($error)');
+    }
   }
 
   /// Deletes the index file of a forgotten library, if it can be found.
