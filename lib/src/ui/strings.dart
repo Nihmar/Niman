@@ -24,6 +24,7 @@ import 'package:niman/src/ui/strings/hr.dart';
 import 'package:niman/src/ui/strings/hu.dart';
 import 'package:niman/src/ui/strings/it.dart';
 import 'package:niman/src/ui/strings/ja.dart';
+import 'package:niman/src/ui/strings/lt.dart';
 import 'package:niman/src/ui/strings/lv.dart';
 import 'package:niman/src/ui/strings/nb.dart';
 import 'package:niman/src/ui/strings/nl.dart';
@@ -75,6 +76,7 @@ final class AppStrings {
     AppLanguage.slovenian: SlovenianStrings(),
     AppLanguage.estonian: EstonianStrings(),
     AppLanguage.latvian: LatvianStrings(),
+    AppLanguage.lithuanian: LithuanianStrings(),
     AppLanguage.hungarian: HungarianStrings(),
     AppLanguage.croatian: CroatianStrings(),
   };
@@ -227,6 +229,7 @@ final class AppStrings {
     AppLanguage.slovenian => 'Slovenščina',
     AppLanguage.estonian => 'Eesti',
     AppLanguage.latvian => 'Latviešu',
+    AppLanguage.lithuanian => 'Lietuvių',
   };
 
   // List note kind (T-TK-02).

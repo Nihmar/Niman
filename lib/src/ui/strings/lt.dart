@@ -1,0 +1,1051 @@
+// The Lithuanian strings.
+//
+// One class per locale file; see `base.dart` for the contract and
+// `strings.dart` for the facade the app calls.
+// ignore_for_file: public_member_api_docs, unnecessary_library_directive
+library;
+
+import 'package:niman/src/ui/strings/base.dart';
+
+final class LithuanianStrings extends Strings {
+  const new();
+
+  @override
+  List<String> get monthNames => const [
+    'sausis',
+    'vasaris',
+    'kovas',
+    'balandis',
+    'gegužė',
+    'birželis',
+    'liepa',
+    'rugpjūtis',
+    'rugsėjis',
+    'spalis',
+    'lapkritis',
+    'gruodis',
+  ];
+  @override
+  List<String> get monthNamesShort => const [
+    'saus',
+    'vas',
+    'kov',
+    'bal',
+    'geg',
+    'birž',
+    'liep',
+    'rgp',
+    'rgs',
+    'spal',
+    'lapk',
+    'gruo',
+  ];
+  @override
+  List<String> get weekdayNames => const [
+    'pirmadienis',
+    'antradienis',
+    'trečiadienis',
+    'ketvirtadienis',
+    'penktadienis',
+    'šeštadienis',
+    'sekmadienis',
+  ];
+  @override
+  List<String> get weekdayNamesShort => const [
+    'pr',
+    'an',
+    'tr',
+    'kt',
+    'pk',
+    'št',
+    'sk',
+  ];
+
+  // Settings: editor toggles.
+  @override
+  String get trashTitle => 'Laužas';
+  @override
+  String get trashSubtitle =>
+      'Ištrinti elementai perkeliama į .trash/ (išjungta = nevildinamas '
+      'ištrininimas)';
+  @override
+  String get debugLogsTitle => 'Derinimo žurnalai';
+  @override
+  String get debugLogsSubtitle =>
+      'Fiksuoja programos įvykius atminties buferiui';
+  @override
+  String get lineNumbersTitle => 'Eilučių numeriai';
+  @override
+  String get lineNumbersSubtitle =>
+      'Rodys eilučių numerių stulpelį pastabų redaktoriaus ekrane';
+  @override
+  String get keyboardOnOpenTitle => 'Klaviatūra atidarant';
+  @override
+  String get keyboardOnOpenSubtitle =>
+      'Rodys klaviatūrą atidarant pastabą (išjungta = pirmojo prisilietimo '
+      'metu)';
+  @override
+  String get editorKindSource => 'Markdown šaltinis';
+  @override
+  String get editorKindWysiwyg => 'WYSIWYG';
+  @override
+  String get settingsPreviewEnabledTitle => 'Peržiūra';
+  @override
+  String get settingsPreviewEnabledSubtitle =>
+      'Rodys sukurtą pastabą šalia šaltinio redaktoriaus';
+  @override
+  String get switchToWysiwygTooltip => 'Perjungti į WYSIWYG redaktorių';
+  @override
+  String get switchToSourceTooltip => 'Perjungti į Markdown šaltinį';
+  @override
+  String get wysiwygTooLarge =>
+      'Ši pastaba per didelė WYSIWYG redaktoriui. Atidarykite ją kaip '
+      'Markdown šaltinį.';
+
+  // Settings: the section headings the list is grouped under.
+  @override
+  String get settingsSectionAppearance => 'Išvaizda';
+  @override
+  String get settingsSectionEditor => 'Redaktorius';
+  @override
+  String get settingsSectionLibrary => 'Biblioteka';
+  @override
+  String get settingsSectionReminders => 'PrimINIMAI';
+  @override
+  String get settingsSectionShortcuts => 'Klaviatūra';
+  @override
+  String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
+  @override
+  String get settingsSectionDiagnostics => 'Diagnostika';
+  @override
+  String get settingsSpellCheckTitle => 'Rašybos patikra';
+  @override
+  String get settingsSpellCheckSubtitle => 'Paryškina rašybos klaidas rašant.';
+  @override
+  String get spellCheckDictionaryTitle => 'Žodynas';
+  @override
+  String get spellCheckDictionarySystem => 'Sistemos numatytasis';
+  @override
+  String get spellCheckDictionaryChoiceTitle => 'Žodynų parinkimas';
+  @override
+  String get spellCheckDictionaryChoiceSubtitle =>
+      'Pasirinkite visas kalbas, kuriose parašyta biblioteka. Žodis praeina, '
+      'jei jį atpažįsta bent vienas pasirinktas žodynas; ne pasirinkus – '
+      'sistemos kalba.';
+  @override
+  String get spellCheckNoDictionaries => 'Šioje sistemoje žodynai nerasta.';
+
+  // Spelling review (T-PP-09).
+  @override
+  String get spellCheckTooltip => 'Rašybos patikra';
+  @override
+  String get spellCheckTitle => 'Rašyba';
+  @override
+  String get spellCheckEmpty => 'Rašybos klaidų nėra.';
+  @override
+  String get spellCheckUnavailable => 'hunspell nėra įdiegtas šioje sistemoje.';
+  @override
+  String get spellCheckNoSuggestions => 'Pasiūlymų nėra';
+  @override
+  String spellCheckCount(int count) => '$count tikrinamų';
+  @override
+  String spellCheckLine(int line) => 'eilutė $line';
+
+  @override
+  String indentWidthValue(int spaces) => '$spaces tarpai';
+
+  // Settings: theme (T-M6-05).
+  @override
+  String get themeBrightnessTitle => 'Šviesumas';
+  @override
+  String get themeBrightnessSubtitle =>
+      'Šviesi, tamsi arba įrenginio nustatymas';
+  @override
+  String get themeBrightnessSystem => 'Sistema';
+  @override
+  String get themeBrightnessDay => 'Šviesi';
+  @override
+  String get themeBrightnessNight => 'Tamsi';
+  @override
+  String get themePaletteTitle => 'Spalvų paletė';
+  @override
+  String get themePaletteSubtitle => 'Sąsajos ir pastabų spalvos';
+  @override
+  String get themePaletteSystem => 'Sistema';
+
+  // Settings: text size (T-M6-12).
+  @override
+  String get uiTextScaleTitle => 'Sąsijos teksto dydis';
+  @override
+  String get uiTextScaleSubtitle =>
+      'Medis, kortelės ir dialogai; virš sistemos nustatymo';
+  @override
+  String get noteTextScaleTitle => 'Pastabų teksto dydis';
+  @override
+  String get noteTextScaleSubtitle =>
+      'Redaktorius ir peržiūra visada suderinami';
+
+  // Settings: preview mode.
+  @override
+  String get previewModeTitle => 'Peržiūros režimas';
+  @override
+  String get previewModeSubtitle =>
+      'Ar peržiūra dalija ekraną su redaktoriumi, ar jį pakeičia';
+  @override
+  String get previewModeAuto => 'Šalia';
+  @override
+  String get previewModeSwitch => 'Visas ekranas';
+  @override
+  String get splitRatioTitle => 'Padalinimo santykis';
+  @override
+  String get splitRatioSubtitle => 'Redaktoriaus dalis, kai peržiūra yra šalia';
+
+  // Settings: editor formatting.
+  @override
+  String get linkTypeTitle => 'Nuorodos formatas';
+  @override
+  String get linkTypeSubtitle => 'Ką nuorodos mygtukas įrašo redaktoriuje';
+  @override
+  String get linkTypeWikilink => 'Vikinuoroda';
+  @override
+  String get linkTypeMarkdown => 'Markdown';
+  @override
+  String get indentWidthTitle => 'Įtraukos plotis';
+  @override
+  String get indentWidthSubtitle =>
+      'Tarpų skaičius, pridedamas kiekvienu įtraukos lygmenyje redaktoriuje';
+  @override
+  String get languageTitle => 'Kalba';
+  @override
+  String get languageSubtitle => 'Pati programos teksto kalba';
+  @override
+  String get languageSystem => 'Sistema';
+
+  // List note kind (T-TK-02).
+  @override
+  String get listAddHint => 'Pridėti elementą';
+  @override
+  String get listAddTooltip => 'Pridėti elementą';
+  @override
+  String get listEmpty => 'Elementų dar nėra';
+  @override
+  String get listDragHandleLabel => 'Keisti elemento tvarką';
+
+  // Launcher quick actions (T-SC-02), in the order they are published.
+  @override
+  String get shortcutQuickNote => 'Greita pastaba';
+  @override
+  String get shortcutNewTodo => 'Nauja užduotis';
+  @override
+  String get shortcutNewNote => 'Nauja pastaba';
+  @override
+  String get shortcutNewList => 'Naujas sąrašas';
+  @override
+  String get shortcutToggleSidebar => 'Rodyti arba slėpti filtrą';
+  @override
+  String get shortcutEditorSection => 'Redaktoriuje';
+  @override
+  String get shortcutFind => 'Ieškoti';
+  @override
+  String get shortcutReplace => 'Ieškoti ir pakeisti';
+  @override
+  String get shortcutSavingNote =>
+      'Pakeitimai išsaugomi automatiškai, todėl išsaugojimo santraukos '
+      'nėra.';
+
+  // Editor status bar.
+  @override
+  String get outlineTooltip => 'Struktūra';
+  @override
+  String get outlineNoHeadings => 'Antraščių nėra';
+  @override
+  String get outlineNoTitle => '(be pavadinimo)';
+
+  // Editor toolbar: one name per button.
+  @override
+  String get toolbarBold => 'Paryškintas';
+  @override
+  String get toolbarItalic => 'Kursyvas';
+  @override
+  String get toolbarStrikethrough => 'Perbrauktas';
+  @override
+  String get toolbarSuperscript => 'Viršutinis indeksas';
+  @override
+  String get toolbarUnderline => 'Pabrauktas';
+  @override
+  String get toolbarLink => 'Nuoroda';
+  @override
+  String get toolbarCode => 'Kodo blokas';
+  @override
+  String get toolbarImage => 'Įterpti vaizdą';
+  @override
+  String get toolbarHeading => 'Antraštė';
+  @override
+  String get toolbarList => 'Sąrašas';
+  @override
+  String get toolbarOrderedList => 'Numeruotas sąrašas';
+  @override
+  String get toolbarQuote => 'Citata';
+  @override
+  String get toolbarIndent => 'Įtrauka';
+  @override
+  String get toolbarOutdent => 'Atleisti įtrauką';
+  @override
+  String get headingDialogTitle => 'Antraštės lygis';
+
+  // Toolbar settings (T-TB-05).
+  @override
+  String get toolbarSettingsTitle => 'Redaktoriaus įrankių juosta';
+  @override
+  String get toolbarSettingsHint =>
+      'Tempkite, kad keistumėte tvarką; akis rodo arba slepia mygtuką.';
+  @override
+  String get toolbarShowButton => 'Rodyti';
+  @override
+  String get toolbarHideButton => 'Slėpti';
+  @override
+  String get toolbarResetOrder => 'Atkurti numatytąjį';
+
+  // Preview switch (phone mode).
+  @override
+  String get showPreviewTooltip => 'Rodyti peržiūrą';
+  @override
+  String get showEditorTooltip => 'Rodyti redaktorių';
+  @override
+  String get enterFullScreenTooltip => 'Visas ekranas';
+  @override
+  String get exitFullScreenTooltip => 'Išeiti iš viso ekrano';
+
+  // Raw-HTML table fallback.
+  @override
+  String get htmlTableFallback => '(neapdorota HTML lentelė)';
+
+  // Search (T-M3-05).
+  @override
+  String get searchHint => 'Ieškoti pastabose';
+  @override
+  String get searchModeWords => 'Žodžiai';
+  @override
+  String get searchModeContains => 'Turi';
+  @override
+  String get searchEmptyHint =>
+      'Rašykite, kad ieškotumėte bibliotekoje, arba raktas = vertė, kad '
+      'filtruotumėte pagal metaduomenis';
+  @override
+  String get searchTooShortHint => 'Rašykite bent 2 simbolius';
+  @override
+  String get searchNoMatches => 'Rezultatų nėra';
+  @override
+  String get searchLoadMore => 'Rodyti daugiau';
+
+  // Replace (T-M3-10).
+  @override
+  String get replaceTooltip => 'Pakeisti…';
+  @override
+  String get replaceInNoteAction => 'Pakeisti šioje pastaboje…';
+  @override
+  String get replaceInThisNote => 'Pakeisti šioje pastaboje';
+  @override
+  String get replaceWithLabel => 'Pakeisti į';
+  @override
+  String get replaceCaseSensitive => 'Skirti didžiąsias ir mažąsias raides';
+  @override
+  String get replaceWholeWordsHint =>
+      'keičiami tik visą žodį tiksliai atitinkantys';
+  @override
+  String get replaceConfirm => 'Pakeisti';
+  @override
+  String get replaceCancel => 'Uždaryti';
+  @override
+  String get replaceUnavailable => 'Pakeitimas dabar nepasiekiamas';
+
+  // Editor find & replace.
+  @override
+  String get findInNoteTooltip => 'Ieškoti pastaboje';
+  @override
+  String get editorFindHint => 'Ieškoti';
+  @override
+  String get editorReplaceHint => 'Pakeisti';
+  @override
+  String get editorFindCaseTooltip => 'Skirti didžiąsias ir mažąsias raides';
+  @override
+  String get editorFindPreviousTooltip => 'Ankstesnis rezultatas';
+  @override
+  String get editorFindNextTooltip => 'Kitas rezultatas';
+  @override
+  String get editorFindCloseTooltip => 'Uždaryti paiešką';
+  @override
+  String get editorFindReplaceModeTooltip => 'Pakeitimo režimas';
+  @override
+  String get editorReplaceOneTooltip => 'Pakeisti šį rezultatą';
+  @override
+  String get editorReplaceAllTooltip => 'Pakeisti visus rezultatus';
+
+  // Tags (T-M3-06).
+  @override
+  String get openTagsTooltip => 'Žymos';
+  @override
+  String get tagsTitle => 'Žymos';
+  @override
+  String get tagsEmpty =>
+      'Žymų dar nėra – pridėkite pastaboje #žyma ar žymas metaduomenyse';
+  @override
+  String get tagsBackTooltip => 'Atgal į paiešką';
+  @override
+  String get tagsNotesEmpty => 'Pastabos su šia žyma nėra';
+  @override
+  String tagsNotesCapped(int limit) =>
+      'Rodomos tik pirmos $limit – ieškokite žymos, kad susiaurintumėte';
+
+  // Link navigation (T-M3-07).
+  @override
+  String get unresolvedLinkTitle => 'Nuoroda nerasta';
+  @override
+  String get headingNotFoundTitle => 'Antraštė nerasta';
+  @override
+  String get ambiguousLinkTitle => 'Kelioms pastaboms tinka';
+  @override
+  String get openLinkFailed => 'Nepavyko atidaryti nuorodos';
+
+  // Task lists (T-TD-04).
+  @override
+  String get todoOpen => 'Atidarytos';
+  @override
+  String get todoDone => 'Atliktos';
+
+  // Filter row + sheet (T-TDM-03).
+  @override
+  String get todoAllDates => 'Visos datos';
+  @override
+  String get todoFilter => 'Filtruoti';
+  @override
+  String get todoNoTokens => 'Šiame sąraše žetonų nėra';
+  @override
+  String get todoCountOpen => 'atidarytos';
+  @override
+  String get todoCountDone => 'atliktos';
+  @override
+  String get todoEmptyOpen => 'Atidarytų užduočių dar nėra';
+  @override
+  String get todoEmptyDone => 'Atliktų dar nėra';
+  @override
+  String get todoEmptyFiltered => 'Atitinkančių užduočių nėra';
+  @override
+  String get todoTitle => 'Užduotys';
+  @override
+  String get todoAddTooltip => 'Pridėti užduotį';
+
+  // The todo.txt format help (T-TD-08).
+  @override
+  String get todoHelpTitle => 'todo.txt formatas';
+  @override
+  String get todoHelpTooltip => 'Informacija apie formatą';
+  @override
+  String get todoHelpIntro =>
+      'Jūsų užduotys – įprastas teksto failas, viena užduotis eilutėje. Niman '
+      'rašo sintaksę jūsų vietoje, tačiau failą galima redaguoti bet kuriame '
+      'redaktoriuje, o Niman jį vėl perskaitys.';
+  @override
+  String get todoHelpFilesTitle => 'Du failai';
+  @override
+  String get todoHelpFilesBody =>
+      'Atidarytos užduotys gyvena todo.txt bibliotekos šaknyje. Atlikus '
+      'vieną, eilutė perkel į done.txt, kad todo.txt liktų trumpa. Atlikta '
+      'eilutė, vėl patekusi į todo.txt, Niman archyvuoja sekaname failo '
+      'skaityme.';
+  @override
+  String get todoHelpLineTitle => 'Eilutės anatomija';
+  @override
+  String get todoHelpLineBody =>
+      'Viskas prieš aprašą – pasirinkimai, ir jie turi būti šia tvarka:';
+  @override
+  String get todoHelpDoneBody =>
+      'Žyma užduotį kaip atliktą. Niman ją prideda, kai pažymėjote langelį.';
+  @override
+  String get todoHelpPriority => '(A)–(Z)';
+  @override
+  String get todoHelpPriorityBody =>
+      'Prioritetas. A yra aukščiausias. Rodomas kaip simbolis sąraše.';
+  @override
+  String get todoHelpDatesBody =>
+      'Įvykdymo data, tada sukūrimo data. Su viena data tai sukūrimo data, '
+      'jei eilutė nesideda nuo x.';
+  @override
+  String get todoHelpTokensTitle => 'Projektai, kontekstai ir žymos';
+  @override
+  String get todoHelpTokensBody =>
+      'Bet kuris aprašo žodis su vienu iš šių priesakių tampa filtruojama '
+      'žyma. Nieko nėra išanksto apibrėžta: žetonas egzistuoja, kol jis '
+      'neįrašytas.';
+  @override
+  String get todoHelpProjectBody =>
+      'Kuriam projektui užduotis priklauso, pvz., +virtuvė ar +darbas.';
+  @override
+  String get todoHelpContextBody =>
+      'Kur arba kaip tai atlikti, pvz., @namie arba @susitikimas.';
+  @override
+  String get todoHelpHashtagBody => 'Laisva žyma tam, ko kitos dvi neapsengia.';
+  @override
+  String get todoHelpTagsTitle => 'Datos ir primINIMAI';
+  @override
+  String get todoHelpTagsBody =>
+      'Šios yra raktas:vertė žymos. Niman jas rašo iš užduoties dialogo ir '
+      'skaitys ten, kur jos pasirodys eilutėje.';
+  @override
+  String get todoHelpDueBody =>
+      'Įvykdymo terminas. Valdo simbolio spalvą ir datų filtrus.';
+  @override
+  String get todoHelpRemBody =>
+      'Kai siųsti prANEŠIMĄ jūsų laiko juostoje. Veikia, kai ekranas '
+      'išjungtas, o programa uždaryta.';
+  @override
+  String get todoHelpRemDesktop =>
+      'Kompiuteryje, kad veiktų laiku, Niman turi veikti: primINIMAS rodomas, '
+      'kol programa atidaryta, o uždarius nieko nenutinka.';
+  @override
+  String get todoHelpOtherBody =>
+      'Ji saugoma taip, kaip įrašyta, kad kitų todo.txt programų žymos '
+      'išgyventų kelionę. Niman jų nenaudoja, rec: included: pasikartojanti '
+      'užduotis vis dar nekartojasi.';
+  @override
+  String get todoHelpEditTitle => 'Redagavimas išoriškai';
+  @override
+  String get todoHelpEditBody =>
+      'Eilutės, kurių nepadarėte, saugomos bajtų bajtais. Niman tik tai '
+      'eilutę įrašo kanonine tvarka, o likusi failo dalis lieka nepaliesta.';
+
+  // Task dialog (T-TD-06).
+  @override
+  String get todoAddTitle => 'Pridėti užduotį';
+  @override
+  String get todoEditTitle => 'Redaguoti užduotį';
+  @override
+  String get todoDescriptionHint => 'Aprašas';
+  @override
+  String get todoCancel => 'Atšaukti';
+  @override
+  String get todoSave => 'Išsaugoti';
+  @override
+  String get todoEditAction => 'Redaguoti';
+  @override
+  String get todoDeleteAction => 'Ištrinti';
+
+  // Task filters (T-TD-05).
+  @override
+  String get todoDueOverdue => 'Terminas praleistas';
+  @override
+  String get todoDueToday => 'Šiandien';
+  @override
+  String get todoDueNext7 => 'Kitos 7 dienos';
+  @override
+  String get todoDueNoDate => 'Bez datos';
+  @override
+  String get todoRowDue => 'Terminas';
+  @override
+  String get todoRowDueToday => 'Terminas šiandien';
+  @override
+  String get todoSortTooltip => 'Rizuoti';
+  @override
+  String get todoSortDue => 'Įvykdymo data';
+  @override
+  String get todoSortPriority => 'Prioritetas';
+  @override
+  String get todoSortCreation => 'Sukūrimo data';
+
+  // Task dialog pickers (T-TD-06).
+  @override
+  String get todoNoPriority => 'Bez prioriteto';
+  @override
+  String get todoNoPriorityShort => 'Nėra';
+  @override
+  String get todoMorePriorities => 'Daugiau…';
+  @override
+  String get todoPriorityTitle => 'Prioritetas';
+  @override
+  String get todoNoDueDate => 'Bez termino';
+  @override
+  String get todoNoReminder => 'Bez primINIMO';
+  @override
+  String get todoAddProject => '+ Projektai';
+  @override
+  String get todoAddContext => '@ Kontekstas';
+  @override
+  String get todoAddHashtag => '# Žyma';
+
+  // Task reminders (T-TD-07).
+  @override
+  String get todoReminderChannel => 'Užduočių primINIMAI';
+  @override
+  String get todoReminderChannelDescription =>
+      'Suplanuoti prANEŠIMAI užduotims, turinčioms primINIMO laiką.';
+  @override
+  String get todoReminderBody => 'Užduoties primINIMAS';
+  @override
+  String get todoReminderFallbackTitle => 'Užduoties primINIMAS';
+  @override
+  String get todoReminderBlocked =>
+      'PrANEŠIMAI išjungti, todėl primINIMAI nerodomi.';
+  @override
+  String get todoReminderBattery =>
+      'Niman yra įjungta baterijų optimizacija. Sistema gali sustabdyti '
+      'programą ir prarasti laukiančius primINIMUS.';
+  @override
+  String get todoReminderInexact =>
+      'Šis įrenginys nepalaiko tikslių pabudimų, todėl, jei ekranas '
+      'išjungtas, primINIMAS gali pasiekti po kelių minučių.';
+  @override
+  String get reminderShowTokensTitle => 'Žymos primINIMO prANEŠIMUOSE';
+  @override
+  String get reminderShowTokensSubtitle =>
+      'Palikite +projektą, @konteksą ir #žymą prANEŠIMO tekste. Išjungus '
+      'rodoma tik užduotis, kurią parašėte.';
+  @override
+  String get todoReminderFixAction => 'Atidaryti nustatymus';
+  @override
+  String get todoReminderDismissAction => 'Atmesti';
+  @override
+  String get todoReminderDue => 'Terminas';
+
+  // Actions and buttons shared by the dialogs (T-L10N-06).
+  @override
+  String get actionOk => 'Gerai';
+  @override
+  String get actionCancel => 'Atšaukti';
+  @override
+  String get actionCreate => 'Sukurti';
+  @override
+  String get actionNew => 'Naujas';
+  @override
+  String get actionSave => 'Išsaugoti';
+  @override
+  String get actionClear => 'Išvalyti';
+  @override
+  String get actionChoose => 'Pasirinkti';
+  @override
+  String get actionDelete => 'Ištrinti';
+  @override
+  String get actionRename => 'Pervadinti';
+  @override
+  String get actionMove => 'Perkelti';
+  @override
+  String get saveAndClose => 'Išsaugoti ir uždaryti';
+  @override
+  String get closeUnsavedTitle => 'Neišsaugoti pakeitimai';
+  @override
+  String closeUnsavedBody(List<String> names) {
+    if (names.length == 1) {
+      return '„${names.first}” turi neišsaugotų pakeitimų. '
+          'Išsaugoti prieš uždarydami?';
+    }
+    return '${names.length} pastabos turi neišsaugotų pakeitimų. '
+        'Išsaugoti prieš uždarydami?';
+  }
+
+  @override
+  String get closeSaveFailed => 'Išsaugoti nepavyko; pastaba lieka atidaryta.';
+  @override
+  String get actionRestore => 'Atkurti';
+  @override
+  String get actionEmpty => 'Ištuštinti';
+
+  // The shell: app bar, tabs and tree actions.
+  @override
+  String get hideSidebarTooltip => 'Paslėpti šoninį panelį (Ctrl+B)';
+  @override
+  String get showSidebarTooltip => 'Rodyti šoninį panelį (Ctrl+B)';
+  @override
+  String get windowMinimizeTooltip => 'Sup mažinti';
+  @override
+  String get windowMaximizeTooltip => 'Padidinti';
+  @override
+  String get windowRestoreTooltip => 'Atkurti';
+  @override
+  String get windowCloseTooltip => 'Uždaryti';
+  @override
+  String get tabFiles => 'Failai';
+  @override
+  String get tabSearch => 'Paieška';
+  @override
+  String get tabSettings => 'Nustatymai';
+  @override
+  String get quickNoteTitle => 'Greita pastaba';
+  @override
+  String get treeEmpty => 'Pastabų dar nėra';
+  @override
+  String get selectANote => 'Pasirinkite pastabą';
+  @override
+  String get showListTooltip => 'Rodyti sąrašą';
+  @override
+  String get editRawTooltip => 'Redaguoti žalią';
+  @override
+  String get sortAscTooltip => 'Rizuoti A–Z';
+  @override
+  String get sortDescTooltip => 'Rizuoti Z–A';
+  @override
+  String get newNoteTitle => 'Nauja pastaba';
+  @override
+  String get newFolderTitle => 'Naujas katalogas';
+  @override
+  String get newNoteHere => 'Nauja pastaba čia';
+  @override
+  String get newFolderHere => 'Naujas katalogas čia';
+  @override
+  String get newListNoteTitle => 'Nauja sąrašo pastaba';
+  @override
+  String get newListNoteDefault => 'Mano sąrašas';
+  @override
+  String get setAsQuickNote => 'Nustatyti kaip greitą pastabą';
+  @override
+  String get currentQuickNote => 'Dabartinė greita pastaba';
+  @override
+  String get pinnedSection => 'Prisegta';
+  @override
+  String pinnedSectionCount(int count) => 'Prisegta · $count';
+  @override
+  String get templateFolderTitle => 'Šablonų katalogas';
+  @override
+  String get newFromTemplateTitle => 'Nauja iš šablonų';
+  @override
+  String get newFromTemplateHere => 'Nauja iš šablonų čia';
+  @override
+  String get templateFormTitle => 'Užpildyti šabloną';
+  @override
+  String get templateFormBacklink => 'Atgalinė nuoroda';
+  @override
+  String get templateFormNoNote => 'Bez pastabos';
+  @override
+  String get templateFormPickNote => 'Pasirinkti pastabą';
+
+  // The template placeholder reference (T-TPL-08).
+  @override
+  String get templateHelpTitle => 'Šablonų vietos';
+  @override
+  String get templateHelpIntro =>
+      'Šablonas – įprasta pastaba su vietomis. Sukūrus pastabą iš jo, '
+      'tekstas nukopijuojamas, o vietos užpildomos.';
+  @override
+  String get templateHelpUnknown =>
+      'Vietojos, kurios Niman nežino, lieka taip, kaip įrašytos, kad '
+      'klaviatūros klaida būtų matoma pastaboje, o ne tyliai praleistos '
+      'eilutės.';
+  @override
+  String get templateHelpValuesTitle => 'Vertės';
+  @override
+  String get templateHelpTitleBody =>
+      'Pavadinimas, kuriuo pastaba turi būti sukurta.';
+  @override
+  String get templateHelpDateBody =>
+      'Šiandien ir dabartinis laikas. Abi priima formatą: '
+      '{{date:DD.MM.YYYY}}.';
+  @override
+  String get templateHelpNowBody => 'Data ir laikas kartu.';
+  @override
+  String get templateHelpUuidBody =>
+      'Naujas unikalus identifikatorius, skirtingas kiekviename naudojime.';
+  @override
+  String get templateHelpCounterBody =>
+      'Skaičius, skaičiuojamas pagal pavadinimą, saugojamas tarp '
+      'paleidimų: pirmoji pastaba rašo 1, antroji – 2. Tas pats pavadinimas '
+      'pastaboje rašo tą patį skaičių; sujungite su |pad:3.';
+  @override
+  String get templateHelpCursorBody =>
+      'Padėkite kursorą čia sukurdami pastabą; simbolis nėra įrašomas. '
+      'Pirmasis simbolis laimėja, be filtrų, tik naujose pastabose – ir '
+      'klaviatūra atsivers netgi, jei autofocus yra išjungtas.';
+  @override
+  String get templateHelpDatesTitle => 'Datos rašymas';
+  @override
+  String get templateHelpDatesBody =>
+      'Šios žymi datas formato dalyje. Viskas, kas nėra, yra tiesioginis, '
+      'įskaitant tekstą tiesioginėse kabutėse. Mėnesio ir savaitės dienos '
+      'pavadinimai naudoja programos kalbą.';
+  @override
+  String get templateHelpYear => 'metai: 2026, 26';
+  @override
+  String get templateHelpMonth => 'mėnuo: 03, 3, kovas, kov';
+  @override
+  String get templateHelpDay => 'diena: 09, 9, pirmadienis, pr';
+  @override
+  String get templateHelpTime => 'valandos, minutės, sekundės';
+  @override
+  String get templateHelpWeek => 'ISO savaitė ir ketvirtis: 11, 11, 1';
+  @override
+  String get templateHelpFiltersTitle => 'Filtrai';
+  @override
+  String get templateHelpFiltersBody =>
+      'Po vertės gali eiti filtrai, taikomi iš kairės į dešinę.';
+  @override
+  String get templateHelpCaseBody =>
+      'Didžiosios, mažosios ir pirmoji kiekvieno žodžio raidė – žodis, '
+      'įrašytas su didžiąja raide, lieka nepasikeitęs.';
+  @override
+  String get templateHelpSlugBody =>
+      'Teksto nuorodos forma, kad sukurtumėte vikinuorodą.';
+  @override
+  String get templateHelpPadBody =>
+      'Sup trinti galus; užpildyti nuliais iki norimo pločio; alternatyva, '
+      'jei vertė tuščia.';
+  @override
+  String get templateHelpShiftBody =>
+      'Perkelti datą dienomis, savaitėmis, mėnesiais ar metais – '
+      'konferencija po savaitės, dokumentas iš praėjusio mėnesio.';
+  @override
+  String get templateHelpSnapBody =>
+      'Prisegti datą savaitės, mėnesio ar metų pradžiai arba pabaigai.';
+  @override
+  String get templateHelpAskTitle => 'Klausti kažko';
+  @override
+  String get templateHelpAskBody =>
+      'Prieš sukūrant pastabą rodosi forma su klausimų laukais – ir viena '
+      'atgalinė nuoroda, jei šablonas jos prašo. Toks pats simbolis du '
+      'kartus yra klausimas, ir jo atsakymas užpildo visus pasirodymus – '
+      'katalogą ir failo pavadinimą.';
+  @override
+  String get templateHelpAskFieldBody =>
+      'Laukas, apie kurį klausiamasi; tekstas po antrojo kablelio yra '
+      'pradžia.';
+  @override
+  String get templateHelpChoiceBody =>
+      'Parinkimas iš sąrašo, atskirta kableliais.';
+  @override
+  String get templateHelpWhereTitle => 'Kur pastaba patenka';
+  @override
+  String get templateHelpWhereBody =>
+      'Tai ne tekstas: tai nurodymai, gyvuojantys šablonų metaduomenų '
+      'niman: bloke. Blokas paleidžiamas ir išimamas, kad niekada '
+      'nerodytų pastaboje. Vertė gali turėti vietų.';
+  @override
+  String get templateHelpFolderBody =>
+      'Katalogas, kuriame sukuriama pastaba, sukuriamas, jei jo nėra. Be '
+      'jos pastaba patenka ten, kur buvote.';
+  @override
+  String get templateHelpFilenameBody =>
+      'Kaip pavadinama pastaba. Šablonas, kuris to sako, neklausia '
+      'pavadinimo.';
+  @override
+  String get templateHelpAppendBody =>
+      'Pridėti prie pastabos, jei ji jau egzistuoja, o ne kurti naują. Taip '
+      'kas mėnesį susitikimas tampa vienu failu.';
+  @override
+  String get templateHelpOpenBody =>
+      'Kas nutinka, jei pastaba egzistuoja: redaktorius (numatytas), '
+      'peržiūra arba niekas – pastaba archyvuojama ir liekate ten, kur '
+      'buvote.';
+  @override
+  String get templateHelpAroundTitle => 'Iš kur ji ateina';
+  @override
+  String get templateHelpParentBody =>
+      'Pastaba, kurią pasirinkote formoje; įrašykite [[{{parent}}]] kaip '
+      'atgalinę nuorodą.';
+  @override
+  String get templateHelpFolderValueBody =>
+      'Katalogas, kuriame pastaba patenka.';
+  @override
+  String get templateHelpClipboardBody =>
+      'Kas yra tarpinėje atmintyje ir kas pasirinkta redaktoriuje, jei '
+      'pastaba prasidėjo ten.';
+  @override
+  String get templateHelpIncludeTitle => 'Dalies pakartotinas naudojimas';
+  @override
+  String get templateHelpIncludeBody =>
+      'Įterpkite kitą šabloną, kad keli šablonai dalytų vieną kontrolinį '
+      'sąrašą. Paieška pirmiausia vyksta šablonų kataloge, .md gali būti '
+      'praleista. Tokie pat klausimai eina į tą pačią formą.';
+  @override
+  String get templateHelpExampleTitle => 'Viskas vienoje vietoje';
+
+  // What an {{include:…}} that could not be pasted leaves behind (T-TPL-06).
+  @override
+  String includeMissing(String path) => '⚠ šablonas „$path” neegzistuoja';
+  @override
+  String includeCycle(String path) => '⚠ „$path” įterpia pats save';
+  @override
+  String includeTooDeep(String path) => '⚠ „$path” įterpta per giliai';
+  @override
+  String frontmatterInvalid(String reason) =>
+      'Metaduomenų nepavyko perskaityti: $reason';
+  @override
+  String templateFrontmatterInvalid(String template, String reason) =>
+      'Šablonas „$template” metaduomenų nepavyko perskaityti, todėl '
+      'katalogas ir failo pavadinimas netaikė: $reason';
+  @override
+  String get templatePickerTitle => 'Šablonų parinkimas';
+  @override
+  String templatePickerEmpty(String folder) =>
+      'Šablonų dar nėra. Įdėkite pastabą $folder/ ir ji bus šablonu.';
+
+  // Tree actions.
+  @override
+  String get actionPin => 'Prisegti';
+  @override
+  String get actionUnpin => 'Atsegti';
+  @override
+  String get movedToTrash => 'Perkeltas į lažvus';
+  @override
+  String get deletedMessage => 'Ištrintas';
+  @override
+  String deleteToTrashConfirm(String name) => '$name bus perkeltas į .trash/';
+  @override
+  String deleteForeverConfirm(String name) =>
+      '$name bus nevildinamai ištrintas';
+  @override
+  String get chooseDestination => 'Pasirinkti paskirtį';
+  @override
+  String get libraryRoot => 'Bibliotekos šaknis';
+  @override
+  String moveTitle(String name) => 'Perkelti $name';
+  @override
+  String headingLevelLabel(int level) => 'Antraštės lygis $level';
+
+  // Quick note tab and picker.
+  @override
+  String get quickNoteEmpty =>
+      'Greitos pastabos dar nėra. Pasirinkite esamą pastabą arba sukurkite '
+      'naują – greita pastaba atsivers čia.';
+  @override
+  String get quickNoteChooseAction => 'Pasirinkti pastabą…';
+  @override
+  String get quickNoteCreateAction => 'Sukurti naują pastabą…';
+  @override
+  String get quickNoteNewTitle => 'Nauja greita pastaba';
+  @override
+  String get quickNotePickerTitle => 'Greitos pastabos parinkimas';
+
+  // Folder picker (T-TK-07).
+  @override
+  String get folderPickerNewFolder => 'Naujas katalogas';
+  @override
+  String get folderPickerEmpty => 'Katalogų dar nėra';
+  @override
+  String get listFolderTitle => 'Sąrašų katalogas';
+
+  // Trash (M1).
+  @override
+  String get trashEmpty => 'Laužas tuščias';
+  @override
+  String get trashEmptyAction => 'Ištuštinti lažvus';
+  @override
+  String get trashEmptyConfirm =>
+      'Tai nevildinamai ištrins viską, kas yra lažvuose, įskaitant '
+      'elementus, kurių Niman ten neįdėjo.';
+  @override
+  String trashDeleteConfirm(String name) =>
+      '$name bus nevildinamai ištrintas (be atkūrimo)';
+  @override
+  String get trashDeletePermanently => 'Ištrinti nevildinamai';
+
+  // The open/create library screen.
+  @override
+  String get openLibraryIntro =>
+      'Atidarykite Markdown pastabų katalogą kaip biblioteką';
+  @override
+  String get openLibraryExisting => 'Atidaryti esamą';
+  @override
+  String get openLibraryCreate => 'Sukurti naują';
+  @override
+  String get openLibraryCreateTitle => 'Sukurti naują biblioteką';
+  @override
+  String get openLibraryFolderName => 'Katalogo pavadinimas';
+  @override
+  String get openLibraryChooseFolder => 'Pasirinkti bibliotekos katalogą';
+  @override
+  String get openLibraryChooseParent =>
+      'Pasirinkite katalogą, kuriame sukuriama biblioteka';
+  @override
+  String get openLibraryUnsupported =>
+      'Šio katalogo nepalaikoma. Pasirinkite katalogą iš įrenginio '
+      'saugyklos.';
+  @override
+  String indexingCount(int done, int total) => '$done / $total pastabos';
+
+  // The known-library list on the home screen (T-ML-05, T-ML-07).
+  @override
+  String get knownLibrariesTitle => 'Jūsų bibliotekos';
+  @override
+  String get libraryUnreachable => 'Nepasiekiama';
+  @override
+  String get libraryOpenedToday => 'Atidaryta šiandien';
+  @override
+  String get libraryOpenedYesterday => 'Atidaryta vakar';
+  @override
+  String libraryOpenedDaysAgo(int days) => 'Atidaryta prieš $days dienas';
+  @override
+  String libraryOpenedOn(DateTime when) {
+    final d = when.day.toString().padLeft(2, '0');
+    final m = when.month.toString().padLeft(2, '0');
+    return 'Atidaryta ${when.year}-$m-$d';
+  }
+
+  @override
+  String get libraryOpenNow => 'Dabar atidaryta';
+  @override
+  String get switchLibraryTitle => 'Perjungti biblioteką';
+  @override
+  String get libraryForget => 'Pamiršti';
+  @override
+  String libraryForgetTitle(String name) => 'Pamiršti „$name”?';
+  @override
+  String get libraryForgetExplained =>
+      'Ji išnyks iš šio sąrašo. Katalogas, pastabos ir bibliotekos '
+      'nustatymai lieka nepaliesti, ir dar kartą atidarius grįžta į '
+      'vietą.';
+
+  // Android storage access.
+  @override
+  String get storageAccessAction => 'Leisti failų prieigą';
+  @override
+  String get storageAccessNeeded =>
+      'Niman negali skaityti jūsų pastabų be „Prieiga visiems failams”. '
+      'Leiskite tai, kad atidarytumėte biblioteką.';
+  @override
+  String get storageAccessExplained =>
+      'Niman skaitys jūsų pastabas kaip įprastus failus, todėl Android '
+      'reikia duoti prieigą prie visų failų. Nieko nesiunčiama, ir skaitymas '
+      'vyksta tik pasirinktame bibliotekos kataloge.';
+  @override
+  String folderAccessDenied(Object error) =>
+      'Sistema neleido prieiti prie katalogo: $error';
+  @override
+  String folderPickFailed(Object error) =>
+      'Katalogo parinkimas nepavyko: $error';
+
+  // Settings screen rows and messages.
+  @override
+  String get settingsTitle => 'Nustatymai';
+  @override
+  String get libraryPathTitle => 'Bibliotekos kelias';
+  @override
+  String get reindexTitle => 'Perskirti dabar';
+  @override
+  String get reindexDone => 'Perskirta baigta';
+  @override
+  String get closeLibraryTitle => 'Uždaryti biblioteką';
+  @override
+  String get exportLogTitle => 'Eksportuoti derinimo žurnalą';
+  @override
+  String get exportLogSubtitle =>
+      'Išsaugoti užregistruotus įvykius faile, kurį pasirinksite';
+  @override
+  String get exportLogEmpty => 'Žurnalo buferis tuščias';
+  @override
+  String get quickNoteUnset => 'Nenustatyta';
+  @override
+  String exportLogDone(Object target) => 'Žurnalas eksportuotas į $target';
+  @override
+  String exportLogFailed(Object error) => 'Eksportas nepavyko: $error';
+
+  // Replace results (T-M3-10).
+  @override
+  String replaceNoMatch(String term) =>
+      '„$term” neturi tikslaus visą žodį atitinkančio atitikmens';
+  @override
+  String replaceDone(int occurrences, String term, int notes) =>
+      'Pakeisti $occurrences „$term” pasirodymų $notes pastabose';
+  @override
+  String replaceSkipped(int skipped) =>
+      ' ($skipped atidarytų pastabų praleista)';
+  @override
+  String replacePreviewEmpty(String term, String? only) =>
+      '„$term” neturi tikslaus visą žodį atitinkančio atitikmens'
+      '${only == null ? '' : ' – tik $only rasta'}';
+}
