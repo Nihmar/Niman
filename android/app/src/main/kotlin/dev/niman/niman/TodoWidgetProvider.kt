@@ -82,6 +82,10 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         views.setOnClickPendingIntent(R.id.widget_todo_header, open)
         views.setOnClickPendingIntent(R.id.widget_todo_empty, open)
         views.setPendingIntentTemplate(R.id.widget_todo_list, open)
+        // Same flow as the launcher shortcut (round 2, R3): the "+"
+        // button opens the app's add-task dialog. A different action
+        // from the open intent keeps the two pending intents distinct.
+        views.setOnClickPendingIntent(R.id.widget_todo_add, addTodo(context, id))
         return views
     }
 
@@ -94,6 +98,20 @@ class TodoWidgetProvider : HomeWidgetProvider() {
     private fun countFor(count: Int, truncated: Boolean): String {
         if (count == 0) return ""
         return if (truncated) "$count+ open" else "$count open"
+    }
+
+    private fun addTodo(context: Context, id: Int): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+            .setAction(ShortcutsBridge.ACTION)
+            .putExtra(ShortcutsBridge.EXTRA_ID, "new_todo")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(
+            context,
+            id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     private fun openTodo(context: Context, id: Int, library: String): PendingIntent {
