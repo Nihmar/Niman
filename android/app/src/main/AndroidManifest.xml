@@ -76,10 +76,11 @@
             </intent-filter>
         </receiver>
         <!-- The open-todos home-screen widget (issue 6): push updates
-             only (Dart refreshes on every todo change), collection rows
-             served by TodoWidgetService. The service must be exported so
-             the LAUNCHER (another process) can bind it; BIND_REMOTEVIEWS
-             is what actually authorizes that bind. -->
+             only (Dart refreshes on every todo change). The rows render
+             in-process from the payload (no remote views service): a
+             service would need the LAUNCHER to bind it, and that bind
+             only happens when the widget is placed; an already-placed
+             widget could never recover its rows. -->
         <receiver
             android:name=".TodoWidgetProvider"
             android:exported="false"
@@ -91,10 +92,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/todo_widget_info" />
         </receiver>
-        <service
-            android:name=".TodoWidgetService"
-            android:exported="true"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
         <!-- Widget checkbox taps (round 2, R2): the background broadcast
              reaches the Dart toggle through the plugin's worker. -->
         <receiver

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Todo home-screen widget (issue 6): header plus task list.
+<!-- Todo home-screen widget (issue 6): header plus task rows.
      RemoteViews only (the launcher inflates this out of process), so
-     plain views: no fragments, no custom views, no data binding. -->
+     plain views: no fragments, no custom views, no data binding. The
+     rows container is filled in-process by the provider (one child per
+     payload row); no remote views service, no launcher bind. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_todo_root"
     android:layout_width="match_parent"
@@ -56,13 +58,11 @@
         android:layout_weight="1"
         android:layout_marginTop="4dp">
 
-        <ListView
-            android:id="@+id/widget_todo_list"
+        <LinearLayout
+            android:id="@+id/widget_todo_rows"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="4dp"
-            android:scrollbars="vertical" />
+            android:orientation="vertical" />
 
         <TextView
             android:id="@+id/widget_todo_empty"

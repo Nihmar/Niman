@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
 import org.json.JSONObject
@@ -16,8 +18,16 @@ import org.json.JSONObject
  *
  * Renders the payload Dart pushes under `todo_<id>` (see
  * `lib/src/widget/widget_payload.dart`): the header names the library,
- * the list shows due-soonest first. Every tap opens that library's Todo
- * tab through [WidgetBridge]; the widget never reads todo.txt itself.
+ * the rows show due-soonest first. Header taps open that library's Todo
+ * tab through [WidgetBridge]; row taps complete the task through the
+ * background toggle; the widget never reads todo.txt itself.
+ *
+ * The rows render in-process (one child [RemoteViews] per payload row):
+ * the payload already carries every row, and a remote views service
+ * would need the LAUNCHER to bind it cross-process -- a bind that only
+ * happens when the widget is placed, so an already-placed widget could
+ * never recover. Pushing the whole view tree keeps every instance alive
+ * on the very next refresh.
  */
 class TodoWidgetProvider : HomeWidgetProvider() {
 
@@ -44,10 +54,6 @@ class TodoWidgetProvider : HomeWidgetProvider() {
                 "todo update widget $id (payload ${payload?.length ?: 0} chars)",
             )
             appWidgetManager.updateAppWidget(id, viewsFor(context, id, payload))
-            // The collection does not always rebind on a full update
-            // alone: invalidate its data explicitly so the rows follow
-            // the new snapshot.
-            appWidgetManager.notifyAppWidgetViewDataChanged(id, R.id.widget_todo_list)
         }
     }
 
@@ -73,35 +79,62 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_todo)
         views.setTextViewText(R.id.widget_todo_title, titleFor(library))
         views.setTextViewText(R.id.widget_todo_count, countFor(rows?.length() ?: 0, truncated))
-        views.setEmptyView(R.id.widget_todo_list, R.id.widget_todo_empty)
         views.setTextViewText(
             R.id.widget_todo_empty,
             if (payload == null) "Open Niman to load todos" else "No open tasks",
         )
 
-        // The collection needs a per-instance adapter identity, or every
-        // widget shows the first one's rows.
-        val adapter = Intent(context, TodoWidgetService::class.java).apply {
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-            data = Uri.parse("niman://todo/$id")
+        // The rows render in-process, one child per payload row (Dart
+        // caps the payload at 20 rows upstream).
+        val rowCount = rows?.length() ?: 0
+        for (i in 0 until rowCount) {
+            val row = rows?.optJSONObject(i) ?: continue
+            views.addView(R.id.widget_todo_rows, rowViews(context, id, library, row))
         }
-        views.setRemoteAdapter(R.id.widget_todo_list, adapter)
+        views.setViewVisibility(R.id.widget_todo_rows, if (rowCount == 0) View.GONE else View.VISIBLE)
+        views.setViewVisibility(R.id.widget_todo_empty, if (rowCount == 0) View.VISIBLE else View.GONE)
 
         val open = openTodo(context, id, library)
         views.setOnClickPendingIntent(R.id.widget_todo_header, open)
         views.setOnClickPendingIntent(R.id.widget_todo_empty, open)
-        // Row taps complete the task without opening the app (round 2,
-        // R2): the broadcast reaches the Dart background toggle, one
-        // row's fill-in URI at a time.
-        views.setPendingIntentTemplate(
-            R.id.widget_todo_list,
-            es.antonborri.home_widget.HomeWidgetBackgroundIntent.getBroadcast(context),
-        )
         // Same flow as the launcher shortcut (round 2, R3): the "+"
         // button opens the app's add-task dialog. A different action
         // from the open intent keeps the two pending intents distinct.
         views.setOnClickPendingIntent(R.id.widget_todo_add, addTodo(context, id))
         return views
+    }
+
+    /**
+     * One row (round 2, R2): tapping anywhere on it completes the task
+     * without opening the app. The per-row broadcast carries the
+     * fill-in URI the background worker forwards to Dart.
+     */
+    private fun rowViews(context: Context, id: Int, library: String, row: JSONObject): RemoteViews {
+        val meta = listOfNotNull(
+            row.optString("priority", "").takeIf { it.isNotEmpty() }?.let { "($it)" },
+            row.optString("due", "").takeIf { it.isNotEmpty() },
+        ).joinToString(" · ")
+        val fillIn = Uri.Builder()
+            .scheme("niman")
+            .authority("todo-toggle")
+            .appendQueryParameter("id", id.toString())
+            .appendQueryParameter("library", library)
+            .appendQueryParameter("line", row.optInt("line", -1).toString())
+            .build()
+        return RemoteViews(context.packageName, R.layout.widget_todo_row).apply {
+            setViewVisibility(
+                R.id.widget_todo_row_meta,
+                if (meta.isEmpty()) View.GONE else View.VISIBLE,
+            )
+            setTextViewText(R.id.widget_todo_row_meta, meta)
+            setTextViewText(R.id.widget_todo_row_text, row.optString("text", ""))
+            setBoolean(R.id.widget_todo_row_check, "setChecked", false)
+            // The whole row toggles (checkbox included); one broadcast
+            // per row, the URI in its data.
+            val toggle = HomeWidgetBackgroundIntent.getBroadcast(context, fillIn)
+            setOnClickPendingIntent(R.id.widget_todo_row, toggle)
+            setOnClickPendingIntent(R.id.widget_todo_row_check, toggle)
+        }
     }
 
     private fun titleFor(library: String): String {
