@@ -35,6 +35,19 @@
             android:layout_marginStart="8dp"
             android:textColor="@color/widget_text_secondary"
             android:textSize="12sp" />
+
+        <!-- Same flow as the launcher shortcut: opens the app's
+             add-task dialog (round 2, R3). Text, not a drawable, so R8
+             has nothing new to strip. -->
+        <TextView
+            android:id="@+id/widget_todo_add"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="22sp" />
     </LinearLayout>
 
     <FrameLayout
