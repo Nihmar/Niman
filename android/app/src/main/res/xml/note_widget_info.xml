@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Pinned-note widget metadata (issue 6): push updates only (Dart
-     refreshes on every note change), resizable, home screen. -->
+     refreshes on every note change), resizable, home screen. Placement
+     goes through the config activity (round 2, R1/R4). -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="180dp"
     android:minHeight="110dp"
@@ -9,5 +10,6 @@
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/widget_note"
     android:previewLayout="@layout/widget_note"
+    android:configure="dev.niman.niman.NoteWidgetConfig"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />
