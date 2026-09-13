@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One list-note row (issue 6): box glyph plus item prose, depth-
-     indented by the provider. Tapping flips the item in the background;
-     long-press opens the note in the app (RemoteViews cannot drag-
-     reorder, so the editor owns moving rows). -->
+<!-- One list-note row (issue 6): box glyph plus item prose. Tapping
+     flips the item in the background (RemoteViews has no long-click,
+     so the note opens from the header instead). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_note_row"
     android:layout_width="match_parent"
