@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
@@ -9,6 +11,7 @@ import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -17,6 +20,7 @@ void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
   unawaited(_attachLogFile());
+  unawaited(_registerWidgetToggle());
   _reportSlowFrames();
   // Desktop only by construction: Android launches with no arguments, so
   // the platform service stays in charge there.
@@ -37,6 +41,22 @@ void main(List<String> args) {
       child: const NimanApp(),
     ),
   );
+}
+
+/// Registers the widget checkbox toggle (round 2, R2): without this the
+/// background taps have no Dart callback to reach.
+///
+/// Android-only and best-effort — like the log file, a missing handler
+/// is a degraded mode, not a launch failure.
+Future<void> _registerWidgetToggle() async {
+  if (!Platform.isAndroid) return;
+  try {
+    await registerWidgetToggle();
+  } on MissingPluginException {
+    // No host handler (tests).
+  } on PlatformException catch (error) {
+    const AppLogger(name: 'widgets').warning('toggle not registered ($error)');
+  }
 }
 
 /// Points the log buffer at a file in the app's private support directory.

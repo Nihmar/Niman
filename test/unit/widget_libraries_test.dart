@@ -30,8 +30,6 @@ void main() {
 
   test('skips libraries without a known index file', () {
     final encoded = encodeLibraryMirror([library('/lib/Work', 'Work')], {});
-    expect(jsonDecode(encoded), {
-      'libraries': <Object?>[],
-    });
+    expect(jsonDecode(encoded), {'libraries': <Object?>[]});
   });
 }

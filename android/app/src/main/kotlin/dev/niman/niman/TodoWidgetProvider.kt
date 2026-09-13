@@ -81,7 +81,13 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         val open = openTodo(context, id, library)
         views.setOnClickPendingIntent(R.id.widget_todo_header, open)
         views.setOnClickPendingIntent(R.id.widget_todo_empty, open)
-        views.setPendingIntentTemplate(R.id.widget_todo_list, open)
+        // Row taps complete the task without opening the app (round 2,
+        // R2): the broadcast reaches the Dart background toggle, one
+        // row's fill-in URI at a time.
+        views.setPendingIntentTemplate(
+            R.id.widget_todo_list,
+            es.antonborri.home_widget.HomeWidgetBackgroundIntent.getBroadcast(context),
+        )
         // Same flow as the launcher shortcut (round 2, R3): the "+"
         // button opens the app's add-task dialog. A different action
         // from the open intent keeps the two pending intents distinct.
