@@ -618,6 +618,9 @@ final class AppStrings {
       _s.templatePickerEmpty(folder);
   static String get actionPin => _s.actionPin;
   static String get actionUnpin => _s.actionUnpin;
+  static String get pinToWidget => _s.pinToWidget;
+  static String get pinnedForWidget => _s.pinnedForWidget;
+  static String get pinWidgetUnavailable => _s.pinWidgetUnavailable;
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
   static String deleteToTrashConfirm(String name) =>
