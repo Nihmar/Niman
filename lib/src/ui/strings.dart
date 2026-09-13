@@ -35,6 +35,7 @@ import 'package:niman/src/ui/strings/ro.dart';
 import 'package:niman/src/ui/strings/sk.dart';
 import 'package:niman/src/ui/strings/sl.dart';
 import 'package:niman/src/ui/strings/sv.dart';
+import 'package:niman/src/ui/strings/uk.dart';
 import 'package:niman/src/ui/strings/zh.dart';
 
 /// All user-visible app strings, one getter per label.
@@ -79,6 +80,7 @@ final class AppStrings {
     AppLanguage.latvian: LatvianStrings(),
     AppLanguage.lithuanian: LithuanianStrings(),
     AppLanguage.bulgarian: BulgarianStrings(),
+    AppLanguage.ukrainian: UkrainianStrings(),
     AppLanguage.hungarian: HungarianStrings(),
     AppLanguage.croatian: CroatianStrings(),
   };
@@ -233,6 +235,7 @@ final class AppStrings {
     AppLanguage.latvian => 'Latviešu',
     AppLanguage.lithuanian => 'Lietuvių',
     AppLanguage.bulgarian => 'Български',
+    AppLanguage.ukrainian => 'Українська',
   };
 
   // List note kind (T-TK-02).
