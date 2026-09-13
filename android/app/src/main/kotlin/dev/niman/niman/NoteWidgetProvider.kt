@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Paint
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
@@ -23,11 +22,11 @@ import org.json.JSONObject
  * normal notes, or the checklist rows for `type: list` notes — one row
  * view per item. List rows are interactive: a tap flips the item in the
  * background (`niman://note-row-toggle`), a long-press opens the note in
- * the editor (RemoteViews cannot drag-reorder, so the app owns moving
- * rows), and the header "+" appends a new empty item
- * (`niman://note-row-add`). Normal notes stay read-only (RemoteViews
- * cannot edit text in place). The widget never reads the note file
- * itself.
+ * the note from the header, and the header "+" appends a new empty
+ * item (`niman://note-row-add`). Normal notes stay read-only (RemoteViews
+ * cannot edit text in place, nor does it support long-click — so
+ * editing and moving rows live in the app). The widget never reads the
+ * note file itself.
  */
 class NoteWidgetProvider : HomeWidgetProvider() {
 
@@ -142,10 +141,12 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     /**
-     * One checklist row: the box glyph plus the item prose, depth-
-     * indented. Tapping flips the item in the background; long-press
-     * opens the note (editing and moving rows live in the app —
-     * RemoteViews cannot drag-reorder or edit text in place).
+     * One checklist row: the box glyph plus the item prose. Tapping
+     * flips the item in the background; checked rows render dimmed
+     * (RemoteViews has no paint flags, so no strikethrough, and no
+     * per-row padding, so the nesting depth stays in the app).
+     * Editing and moving rows live in the app — the note opens from the
+     * header.
      */
     private fun rowViews(
         context: Context,
@@ -155,7 +156,6 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         row: JSONObject,
     ): RemoteViews {
         val checked = row.optBoolean("checked", false)
-        val depth = row.optInt("depth", 0).coerceIn(0, 6)
         val views = RemoteViews(context.packageName, R.layout.widget_note_row)
         views.setTextViewText(R.id.widget_note_row_box, if (checked) "☑" else "☐")
         views.setTextViewText(R.id.widget_note_row_text, row.optString("text", ""))
@@ -163,21 +163,12 @@ class NoteWidgetProvider : HomeWidgetProvider() {
             val secondary = context.getColor(R.color.widget_text_secondary)
             views.setTextColor(R.id.widget_note_row_box, secondary)
             views.setTextColor(R.id.widget_note_row_text, secondary)
-            views.setPaintFlags(
-                R.id.widget_note_row_text,
-                Paint.STRIKE_THRU_TEXT_FLAG,
-                Paint.STRIKE_THRU_TEXT_FLAG,
-            )
         }
-        // Depth indentation, in px (the row is one child per item).
-        val pad = (context.resources.displayMetrics.density * 8f * depth).toInt()
-        views.setPadding(R.id.widget_note_row_text, pad, 0, 0, 0)
         val toggle = HomeWidgetBackgroundIntent.getBroadcast(
             context,
             rowFillIn("note-row-toggle", id, library, note, row.optInt("line", -1)),
         )
         views.setOnClickPendingIntent(R.id.widget_note_row, toggle)
-        views.setOnLongClickPendingIntent(R.id.widget_note_row, openNote(context, id, library, note))
         return views
     }
 
