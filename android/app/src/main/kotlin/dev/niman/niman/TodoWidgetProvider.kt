@@ -53,7 +53,20 @@ class TodoWidgetProvider : HomeWidgetProvider() {
                 context,
                 "todo update widget $id (payload ${payload?.length ?: 0} chars)",
             )
-            appWidgetManager.updateAppWidget(id, viewsFor(context, id, payload))
+            val views = viewsFor(context, id, payload)
+            // Dry-run the very inflation the launcher performs: a tree
+            // that cannot inflate in-process (a layout or resource
+            // error) cannot render anywhere, and the export would
+            // otherwise show only that the push happened.
+            val inflateFailure =
+                runCatching { views.apply(context, null) }.exceptionOrNull()
+            if (inflateFailure != null) {
+                WidgetDebugLog.log(
+                    context,
+                    "todo views failed to inflate for widget $id: $inflateFailure",
+                )
+            }
+            appWidgetManager.updateAppWidget(id, views)
         }
     }
 
