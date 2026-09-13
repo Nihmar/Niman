@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget palette, light (issue 6): explicit colors rather than theme
+     attributes, so the launcher renders the widget the same on every
+     device. The night twin lives in values-night. -->
+<resources>
+    <color name="widget_background">#E6FFFFFF</color>
+    <color name="widget_text_primary">#1A1C1E</color>
+    <color name="widget_text_secondary">#44474E</color>
+</resources>

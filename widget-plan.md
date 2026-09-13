@@ -94,9 +94,18 @@ config row — never assume "last opened library":
 
 ### Phase 1 — Todo widget (first)
 
-Provider + collection (or static top-N) per `appWidgetId`, library-chooser
-config, tap → Todo tab of that library, refresh action, empty/error states
-(no `todo.txt`, library closed, permissions missing).
+Provider + collection (or static top-N) per `appWidgetId`, tap → Todo tab
+of that library, refresh action, empty/error states (no `todo.txt`,
+library closed, permissions missing).
+
+IMPLEMENTATION NOTE (adopt-first): no configuration activity yet. Dart
+enumerates placed ids (`WidgetBridge.getWidgetIds` → `WidgetHostService`)
+and unknown instances adopt the open library (`adoptTodoWidget`); a
+placed widget is therefore pinned to the library open at placement time.
+A native library picker (reconfigure) is deferred — the provider is
+already per-id, so no rework. Known limitation: `WidgetConfigs` rows of
+deleted instances are reaped on a later refresh (payloads are cleared
+natively in `onDeleted`); a full sync rides with the picker.
 
 Acceptance: N instances on N libraries show correct distinct orderings; edit
 in app reflects in widget quickly; tap opens the right library's Todo.

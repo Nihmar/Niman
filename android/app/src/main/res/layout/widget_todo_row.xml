@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One todo row (issue 6): optional priority/due meta over the prose. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_todo_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp">
+
+    <TextView
+        android:id="@+id/widget_todo_row_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/widget_todo_row_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="13sp" />
+</LinearLayout>

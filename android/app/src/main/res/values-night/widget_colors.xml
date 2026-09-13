@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget palette, night (issue 6): the twin of values/widget_colors. -->
+<resources>
+    <color name="widget_background">#E61A1C1E</color>
+    <color name="widget_text_primary">#E2E2E5</color>
+    <color name="widget_text_secondary">#C3C6CF</color>
+</resources>
