@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
@@ -22,17 +21,13 @@ import org.json.JSONObject
  */
 class TodoWidgetProvider : HomeWidgetProvider() {
 
-    companion object {
-        private const val TAG = "TodoWidget"
-    }
-
     override fun onEnabled(context: Context) {
-        Log.d(TAG, "provider enabled (first widget placed)")
+        WidgetDebugLog.log(context, "todo provider enabled (first widget placed)")
         super.onEnabled(context)
     }
 
     override fun onDisabled(context: Context) {
-        Log.d(TAG, "provider disabled (last widget removed)")
+        WidgetDebugLog.log(context, "todo provider disabled (last widget removed)")
         super.onDisabled(context)
     }
 
@@ -44,7 +39,10 @@ class TodoWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val payload = widgetData.getString("todo_$id", null)
-            Log.d(TAG, "update widget $id (payload ${payload?.length ?: 0} chars)")
+            WidgetDebugLog.log(
+                context,
+                "todo update widget $id (payload ${payload?.length ?: 0} chars)",
+            )
             appWidgetManager.updateAppWidget(id, viewsFor(context, id, payload))
             // The collection does not always rebind on a full update
             // alone: invalidate its data explicitly so the rows follow
@@ -59,6 +57,7 @@ class TodoWidgetProvider : HomeWidgetProvider() {
      * Dart refresh, which cannot run from here: the engine may be dead.)
      */
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        WidgetDebugLog.log(context, "todo deleted: ${appWidgetIds.toList()}")
         super.onDeleted(context, appWidgetIds)
         HomeWidgetPlugin.getData(context).edit().apply {
             for (id in appWidgetIds) remove("todo_$id")

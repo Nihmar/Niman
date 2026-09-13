@@ -83,6 +83,9 @@ class WidgetBridge(private val activity: Activity) :
             "getWidgetIds" -> {
                 result.success(widgetIds(call.argument<String>("provider")))
             }
+            "widgetDebugLog" -> {
+                result.success(widgetDebugLog())
+            }
             else -> result.notImplemented()
         }
     }
@@ -118,6 +121,28 @@ class WidgetBridge(private val activity: Activity) :
      * name, e.g.): the launcher owns the ids, so Dart asks the host
      * instead of tracking them. Empty when the provider is unknown.
      */
+    /**
+     * The tail of the durable widget decision log ([WidgetDebugLog]), or
+     * null when the file does not exist yet. The logcat ring buffer is
+     * gone by export time; this file is the record the export appends.
+     */
+    private fun widgetDebugLog(): String? {
+        val file = WidgetDebugLog.file(activity) ?: return null
+        if (!file.exists()) return null
+        val bytes = file.readBytes()
+        // Capped: an export wants the last decisions, not the history.
+        val cap = 64 * 1024
+        val start = bytes.size.coerceAtMost(cap)
+        val text = String(bytes, start, bytes.size - start)
+        // A partial first line would confuse the export; drop it.
+        return if (start == 0) {
+            text.takeIf { it.isNotBlank() }
+        } else {
+            val nl = text.indexOf('\n')
+            if (nl >= 0) text.substring(nl + 1).takeIf { it.isNotBlank() } else null
+        }
+    }
+
     private fun widgetIds(provider: String?): List<Int> {
         if (provider.isNullOrEmpty()) return emptyList()
         val manager = activity.getSystemService(AppWidgetManager::class.java)
