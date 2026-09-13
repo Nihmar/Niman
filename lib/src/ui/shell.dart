@@ -51,6 +51,7 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_pin.dart';
+import 'package:niman/src/widget/widget_placement.dart';
 import 'package:niman/src/widget/widget_refresh.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -333,6 +334,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         updater: widget.widgetUpdater,
         host: widget.widgetHost,
         pinStore: const PlatformWidgetPinStore(),
+        placement: const PlatformWidgetPlacementStore(),
       ),
     );
   }
@@ -347,6 +349,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         snapshot: _todoController.snapshot,
         updater: widget.widgetUpdater,
         host: widget.widgetHost,
+        placement: const PlatformWidgetPlacementStore(),
       ),
     );
   }

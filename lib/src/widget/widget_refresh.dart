@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/todo/widget_todos.dart';
@@ -42,6 +43,7 @@ Future<void> refreshTodoWidgets({
   if (root == null || snapshot == null) return;
   if (host != null) {
     final placed = await host.todoWidgetIds();
+    const AppLogger(name: 'widgets').debug('todo refresh: placed=$placed');
     if (placed.isNotEmpty) {
       final known = {
         for (final config in await session.widgetConfigsFor(root))
@@ -51,9 +53,11 @@ Future<void> refreshTodoWidgets({
         if (known.contains(id)) continue;
         final choice = await placement?.consumeTodoConfig(id);
         final library = choice?.library;
-        await session.adoptTodoWidget(
-          id,
-          library == null || library.isEmpty ? root : library,
+        final adopted = library == null || library.isEmpty ? root : library;
+        await session.adoptTodoWidget(id, adopted);
+        const AppLogger(name: 'widgets').debug(
+          'todo refresh: adopted $id -> $adopted '
+          '(${choice == null ? 'open library' : 'choice'})',
         );
       }
     }
@@ -74,6 +78,8 @@ Future<void> refreshTodoWidgets({
       androidWidgetId: id,
       payload: payload,
     );
+    const AppLogger(name: 'widgets')
+        .debug('todo refresh: pushed $id (${payload.length} chars)');
   }
 }
 
@@ -107,6 +113,7 @@ Future<void> refreshNoteWidgets({
   if (root == null) return;
   if (host != null) {
     final placed = await host.noteWidgetIds();
+    const AppLogger(name: 'widgets').debug('note refresh: placed=$placed');
     if (placed.isNotEmpty) {
       final known = {
         for (final config in await session.widgetConfigsFor(root))
@@ -120,6 +127,10 @@ Future<void> refreshNoteWidgets({
             choice.library.isNotEmpty &&
             choice.note.isNotEmpty) {
           await session.adoptNoteWidget(id, choice.library, choice.note);
+          const AppLogger(name: 'widgets').debug(
+            'note refresh: adopted $id -> ${choice.library} / ${choice.note} '
+            '(choice)',
+          );
           continue;
         }
         final pin = await pinStore?.consumePin();
@@ -130,6 +141,9 @@ Future<void> refreshNoteWidgets({
           continue;
         }
         await session.adoptNoteWidget(id, root, pin.notePath);
+        const AppLogger(
+          name: 'widgets',
+        ).debug('note refresh: adopted $id -> $root / ${pin.notePath} (pin)');
       }
     }
   }
@@ -143,10 +157,15 @@ Future<void> refreshNoteWidgets({
   final push = updater ?? WidgetUpdater();
   final read = readNote ?? _readNoteFile;
   for (final note in notes) {
+    final payload = await _notePayload(read, root, note.notePath);
     await push.push(
       provider: WidgetProvider.note,
       androidWidgetId: note.id,
-      payload: await _notePayload(read, root, note.notePath),
+      payload: payload,
+    );
+    const AppLogger(name: 'widgets').debug(
+      'note refresh: pushed ${note.id} ${note.notePath} '
+      '(${payload.length} chars)',
     );
   }
 }
