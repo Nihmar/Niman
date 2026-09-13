@@ -921,14 +921,21 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      unawaited(_todoController.resyncReminders());
+    if (state != AppLifecycleState.resumed) {
+      // Leaving the foreground may be the last thing this process does
+      // (a swipe away, an OEM battery kill): get the buffered log on
+      // disk while there is still a chance to.
+      unawaited(AppLog.flush());
       return;
     }
-    // Leaving the foreground may be the last thing this process does (a
-    // swipe away, an OEM battery kill): get the buffered log on disk
-    // while there is still a chance to.
-    unawaited(AppLog.flush());
+    unawaited(_todoController.resyncReminders());
+    // Pushes the home-screen widgets. A widget placed while the app was
+    // away has no other trigger: the placement happens in the launcher,
+    // with no Dart engine to hear about it, and the todo resync above
+    // skips its notification when the files did not move. Both refreshes
+    // are cheap no-ops when nothing is placed.
+    _pushNoteWidgets();
+    _pushTodoWidgets();
   }
 
   /// A notification tap that started the app lands on the Todo tab.
