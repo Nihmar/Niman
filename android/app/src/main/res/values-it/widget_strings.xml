@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Etichette dei widget nella lista (issue 6). -->
+<resources>
+    <string name="todo_widget_label">Niman Attività</string>
+    <string name="note_widget_label">Niman Nota</string>
+</resources>

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
@@ -21,6 +22,10 @@ import org.json.JSONObject
  */
 class TodoWidgetProvider : HomeWidgetProvider() {
 
+    companion object {
+        private const val TAG = "TodoWidget"
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -29,7 +34,12 @@ class TodoWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val payload = widgetData.getString("todo_$id", null)
+            Log.d(TAG, "update widget $id (payload ${payload?.length ?: 0} chars)")
             appWidgetManager.updateAppWidget(id, viewsFor(context, id, payload))
+            // The collection does not always rebind on a full update
+            // alone: invalidate its data explicitly so the rows follow
+            // the new snapshot.
+            appWidgetManager.notifyAppWidgetViewDataChanged(id, R.id.widget_todo_list)
         }
     }
 

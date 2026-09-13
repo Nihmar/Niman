@@ -80,7 +80,8 @@
              served by TodoWidgetService. -->
         <receiver
             android:name=".TodoWidgetProvider"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/todo_widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -96,7 +97,8 @@
              only (Dart refreshes on every note change). -->
         <receiver
             android:name=".NoteWidgetProvider"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/note_widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

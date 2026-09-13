@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget picker labels (issue 6). -->
+<resources>
+    <string name="todo_widget_label">Niman Todos</string>
+    <string name="note_widget_label">Niman Note</string>
+</resources>

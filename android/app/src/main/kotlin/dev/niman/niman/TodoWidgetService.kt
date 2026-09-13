@@ -3,6 +3,7 @@ package dev.niman.niman
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -22,6 +23,8 @@ class TodoWidgetService : RemoteViewsService() {
         return TodoViewsFactory(applicationContext, intent)
     }
 }
+
+private const val TAG = "TodoWidget"
 
 private class TodoViewsFactory(
     private val context: Context,
@@ -71,9 +74,11 @@ private class TodoViewsFactory(
 
     private fun load(): List<TodoRow> {
         val payload = HomeWidgetPlugin.getData(context).getString("todo_$appWidgetId", null)
+        Log.d(TAG, "load widget $appWidgetId (payload ${payload?.length ?: 0} chars)")
+        val rows = payload?.let { runCatching { JSONObject(it).optJSONArray("rows") }.getOrNull() }
             ?: return emptyList()
-        val rows = runCatching { JSONObject(payload).optJSONArray("rows") }.getOrNull()
-            ?: return emptyList()
+        // No empty-text filtering: the header counts raw rows, so every
+        // row renders (a textless task still shows its priority/due).
         return List(rows.length()) { i ->
             val row = rows.optJSONObject(i) ?: return@List TodoRow("", "")
             val text = row.optString("text", "")
@@ -82,7 +87,7 @@ private class TodoViewsFactory(
                 row.optString("due", "").takeIf { it.isNotEmpty() },
             ).joinToString(" · ")
             TodoRow(meta, text)
-        }.filter { it.text.isNotEmpty() }
+        }
     }
 }
 
