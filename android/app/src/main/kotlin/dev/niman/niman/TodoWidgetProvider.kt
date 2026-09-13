@@ -26,6 +26,16 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         private const val TAG = "TodoWidget"
     }
 
+    override fun onEnabled(context: Context) {
+        Log.d(TAG, "provider enabled (first widget placed)")
+        super.onEnabled(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        Log.d(TAG, "provider disabled (last widget removed)")
+        super.onDisabled(context)
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
