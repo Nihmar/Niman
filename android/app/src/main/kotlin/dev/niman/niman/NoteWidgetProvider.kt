@@ -29,8 +29,8 @@ import org.json.JSONObject
  * List rows are interactive: a tap flips the item in the background
  * (`niman://note-row-toggle`), and the header "+" appends a new empty
  * item (`niman://note-row-add`); the header opens the note. Checked rows
- * render dimmed (RemoteViews forbids `CheckBox.setChecked`, and has no
- * paint flags, so no strikethrough). Normal notes stay read-only
+ * render checked through `setCompoundButtonChecked` (a plain `setChecked`
+ * is off the RemoteViews allowlist). Normal notes stay read-only
  * (RemoteViews cannot edit text in place, and editing and moving rows
  * live in the app). The widget never reads the note file itself.
  */
@@ -148,11 +148,11 @@ class NoteWidgetProvider : HomeWidgetProvider() {
 
     /**
      * Fills slot [slot] with [row]: the same CheckBox row as the todo
-     * widget. Tapping flips the item in the background; checked rows
-     * render dimmed (the CheckBox itself cannot be checked from
-     * RemoteViews, and the color is set both ways because the launcher
-     * keeps the tree between updates). Editing and moving rows live in
-     * the app — the note opens from the header.
+     * widget. Tapping flips the item in the background; the checked state
+     * is set with `setCompoundButtonChecked` (a plain `setChecked` is off
+     * the RemoteViews allowlist — see the todo widget's inflation fix).
+     * Editing and moving rows live in the app — the note opens from the
+     * header.
      */
     private fun fillRow(
         views: RemoteViews,
@@ -165,12 +165,7 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     ) {
         val checked = row.optBoolean("checked", false)
         views.setTextViewText(rowTextIds[slot], row.optString("text", ""))
-        views.setTextColor(
-            rowTextIds[slot],
-            context.getColor(
-                if (checked) R.color.widget_text_secondary else R.color.widget_text_primary,
-            ),
-        )
+        views.setCompoundButtonChecked(rowCheckIds[slot], checked)
         val fillIn = Uri.Builder()
             .scheme("niman")
             .authority("note-row-toggle")
@@ -209,6 +204,15 @@ class NoteWidgetProvider : HomeWidgetProvider() {
             R.id.widget_note_row_12, R.id.widget_note_row_13, R.id.widget_note_row_14,
             R.id.widget_note_row_15, R.id.widget_note_row_16, R.id.widget_note_row_17,
             R.id.widget_note_row_18, R.id.widget_note_row_19,
+        )
+        val rowCheckIds = intArrayOf(
+            R.id.widget_note_row_check_0, R.id.widget_note_row_check_1, R.id.widget_note_row_check_2,
+            R.id.widget_note_row_check_3, R.id.widget_note_row_check_4, R.id.widget_note_row_check_5,
+            R.id.widget_note_row_check_6, R.id.widget_note_row_check_7, R.id.widget_note_row_check_8,
+            R.id.widget_note_row_check_9, R.id.widget_note_row_check_10, R.id.widget_note_row_check_11,
+            R.id.widget_note_row_check_12, R.id.widget_note_row_check_13, R.id.widget_note_row_check_14,
+            R.id.widget_note_row_check_15, R.id.widget_note_row_check_16, R.id.widget_note_row_check_17,
+            R.id.widget_note_row_check_18, R.id.widget_note_row_check_19,
         )
         val rowTextIds = intArrayOf(
             R.id.widget_note_row_text_0, R.id.widget_note_row_text_1, R.id.widget_note_row_text_2,
