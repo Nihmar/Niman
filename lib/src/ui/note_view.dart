@@ -95,7 +95,6 @@ final class NoteView extends StatefulWidget {
     this.onOpenNote,
     this.initialAnchor,
     this.initialCaretOffset,
-    this.initialFocusAdd = false,
     this.kindMode = true,
     this.onNoteKindChanged,
     this.toolbarTop = false,
@@ -195,11 +194,6 @@ final class NoteView extends StatefulWidget {
   /// loads (#53), measured in the created text. Clamped into the text.
   final int? initialCaretOffset;
 
-  /// Whether the note's add-item field takes focus on open (the list
-  /// widget's "+"): the list-kind GUI's input field starts with the
-  /// keyboard up, ready to type a new item.
-  final bool initialFocusAdd;
-
   /// Whether the note-kind GUIs are shown (T-TK-02): a note whose
   /// frontmatter declares a known `type` opens in its kind GUI instead of
   /// the editor. False = always the raw editor.
@@ -247,11 +241,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// (editor/highlighting.dart) in sync with [_controller] (changed lines
   /// only) and builds/serves each line's styled span.
   late final EditorHighlightSync _highlight;
-
-  /// One-shot focus request for the add-item field (the list widget's
-  /// "+"): armed by initialFocusAdd, consumed by the first build that
-  /// can show the kind body.
-  bool _focusAddArmed = false;
 
   /// Whether a controller was supplied by the owner (a test seam the state
   /// must not dispose) or created here.
@@ -390,7 +379,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _unsaved = widget.unsavedTracker;
     _unsaved?.register(_unsavedNote);
     widget.spellCheck?.addListener(_onSpellCheckChanged);
-    _focusAddArmed = widget.initialFocusAdd;
     // Listen to the controller itself, not CodeEditor.onChanged: the value
     // set in _load happens BEFORE the editor field exists (its change
     // callback would never fire for it), and the load is exactly when the
@@ -402,11 +390,6 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(covariant NoteView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // A repeat "+" tap re-arms the one-shot focus request: the note is
-    // already open, so [initialFocusAdd] edges false -> true.
-    if (widget.initialFocusAdd && !oldWidget.initialFocusAdd) {
-      _focusAddArmed = true;
-    }
     // Device trace (preview toggle needs two presses on huge notes) —
     // temporary: remove once the trace is in.
     if (oldWidget.showPreview != widget.showPreview) {
@@ -1398,16 +1381,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // note is a list, not a document, on screen.
     final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
     final kindBody = widget.kindMode && kindGui != null;
-    // The add-item focus request (the list widget's "+") is one-shot: this
-    // build consumes it, kind body or not, so a later rebuild (or a raw-mode
-    // toggle) cannot re-fire a stale request.
-    // Consumed only when it is actually handed to the kind GUI: the
-    // loading builds run first and must not eat the request.
-    final focusAddItem = kindBody && _focusAddArmed;
-    if (focusAddItem) _focusAddArmed = false;
-    final kindChild = kindBody
-        ? kindGui.buildBody(context, _kindHost, focusAddItem: focusAddItem)
-        : null;
+    final kindChild = kindBody ? kindGui.buildBody(context, _kindHost) : null;
     return Column(
       children: [
         // Desktop: the toolbar is editor chrome, above the editor, with a

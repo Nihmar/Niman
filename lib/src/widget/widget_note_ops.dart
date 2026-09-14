@@ -1,11 +1,12 @@
 /// Background note-row ops for the list widget (issue 6).
 ///
 /// The list widget's row taps fire `home_widget` background intents
-/// carrying `niman://note-row-toggle` URIs; this op edits the note file
-/// off the UI isolate and re-pushes the widget payload — no activity
-/// comes to the foreground, and it works with the app closed. No Drift,
-/// no UI: the background isolate owns plain file I/O, like the todo
-/// toggle.
+/// carrying `niman://note-row-toggle` URIs, and its "+" fires a
+/// `niman://note-row-add` URI (typed from the home-screen dialog); these
+/// ops edit the note file off the UI isolate and re-push the widget
+/// payload — no activity comes to the foreground, and it works with the
+/// app closed. No Drift, no UI: the background isolate owns plain file
+/// I/O, like the todo toggle.
 ///
 /// Known limitation: an edit here is an external file edit — a note open
 /// in the editor converges like any other disk change.
@@ -167,6 +168,84 @@ Future<bool> toggleWidgetNoteRow(
     // A note edited or moved since the push: the widget converges on the
     // next refresh.
     const AppLogger(name: 'widgets').warning('note-row toggle failed ($error)');
+    return false;
+  }
+}
+
+/// Parses a `niman://note-row-add?id=&library=&note=&text=` URI, or null
+/// when it carries nothing appendable.
+///
+/// The `text` param is what the home-screen add dialog captured:
+/// RemoteViews cannot take typed text, so the dialog types it and the
+/// background op lands it.
+({int id, String library, String note, String text})? parseNoteRowAddUri(
+  Uri? uri,
+) {
+  if (uri == null) return null;
+  if (uri.scheme != 'niman' || uri.host != 'note-row-add') return null;
+  final params = uri.queryParameters;
+  final id = int.tryParse(params['id'] ?? '');
+  final library = params['library'];
+  final note = params['note'];
+  final text = params['text'];
+  if (id == null ||
+      id < 0 ||
+      library == null ||
+      library.isEmpty ||
+      note == null ||
+      note.isEmpty ||
+      text == null ||
+      text.trim().isEmpty) {
+    return null;
+  }
+  return (id: id, library: library, note: note, text: text);
+}
+
+/// Appends the typed item to the note and re-pushes the widget.
+///
+/// True when the append landed; false (quiet) on a stale tap — the note
+/// missing or no longer a list note since the push — the next refresh
+/// converges the widget anyway. [readNote]/[writeNote] and [updater] are
+/// injected in tests.
+Future<bool> addWidgetNoteRow(
+  Uri? uri, {
+  Future<String?> Function(String root, String notePath)? readNote,
+  Future<void> Function(String root, String notePath, String content)?
+  writeNote,
+  WidgetUpdater? updater,
+}) async {
+  final target = parseNoteRowAddUri(uri);
+  if (target == null) {
+    const AppLogger(name: 'widgets').warning('note-row add without a target');
+    return false;
+  }
+  try {
+    final read = readNote ?? readNoteText;
+    final content = await read(target.library, target.note);
+    if (content == null) {
+      const AppLogger(name: 'widgets').warning('note-row add: note missing');
+      return false;
+    }
+    if (!isListNoteContent(content)) {
+      const AppLogger(name: 'widgets')
+          .warning('note-row add: note is no longer a list');
+      return false;
+    }
+    final updated = appendListItem(content, target.text.trim());
+    final write = writeNote ?? writeNoteText;
+    await write(target.library, target.note, updated);
+    await _pushNoteWidget(
+      target.id,
+      target.library,
+      target.note,
+      updated,
+      updater,
+    );
+    return true;
+  } on Object catch (error) {
+    // A note edited or moved since the push: the widget converges on the
+    // next refresh.
+    const AppLogger(name: 'widgets').warning('note-row add failed ($error)');
     return false;
   }
 }

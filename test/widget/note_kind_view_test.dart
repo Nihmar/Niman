@@ -12,7 +12,6 @@ NoteView _view({
   required String path,
   required String content,
   bool kindMode = true,
-  bool initialFocusAdd = false,
   void Function(String?)? onNoteKindChanged,
   Future<void> Function(String path, String content)? writeNote,
 }) => NoteView(
@@ -20,7 +19,6 @@ NoteView _view({
   showLineNumbers: true,
   autofocusEditor: false,
   kindMode: kindMode,
-  initialFocusAdd: initialFocusAdd,
   onNoteKindChanged: onNoteKindChanged,
   readNote: (_) async => content,
   writeNote: writeNote,
@@ -47,25 +45,6 @@ void main() {
     expect(kind, 'list');
     expect(find.byType(ListNoteView), findsOneWidget);
     expect(find.byType(NoteEditor), findsNothing);
-  });
-
-  testWidgets('initialFocusAdd focuses the add field (the widget "+")', (
-    tester,
-  ) async {
-    const content = '---\ntype: list\n---\n- [ ] one\n';
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: _view(path: '/n/a.md', content: content, initialFocusAdd: true),
-        ),
-      ),
-    );
-    await tester.pump(); // Let the async load land.
-    await tester.pump();
-    final field = tester.widget<TextField>(
-      find.byKey(const Key('list-add-field')),
-    );
-    expect(field.focusNode!.hasFocus, isTrue);
   });
 
   testWidgets('a plain note and an unknown kind show the editor', (

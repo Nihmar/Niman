@@ -123,6 +123,16 @@
             android:name=".NoteWidgetConfig"
             android:targetActivity=".WidgetConfigActivity"
             android:exported="true" />
+        <!-- The list widget's "+" (issue 6 follow-up): a floating dialog
+             over the launcher that types the new item on the home
+             screen. Launched only through the app's own pending intent,
+             so it can stay unexported; no recents entry, its own task. -->
+        <activity
+            android:name=".NoteItemAddActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Niman.WidgetDialog" />
         <!-- The pinned-note home-screen widget (issue 6): push updates
              only (Dart refreshes on every note change). -->
         <receiver

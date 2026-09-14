@@ -3,4 +3,7 @@
 <resources>
     <string name="todo_widget_label">Niman Todos</string>
     <string name="note_widget_label">Niman Note</string>
+    <string name="widget_note_add_hint">New item</string>
+    <string name="widget_note_add_add">Add</string>
+    <string name="widget_note_add_cancel">Cancel</string>
 </resources>

@@ -17,13 +17,14 @@ import org.json.JSONObject
  * `lib/src/widget/widget_payload.dart`): the title plus the excerpt for
  * normal notes, or the checklist rows for `type: list` notes.
  *
- * List rows are a SCROLLABLE remote collection bound to
+ * List rows are a SCROLLABLE `RemoteCollection` bound to
  * [NoteWidgetService] (the launcher binds the service on demand, so a
  * long checklist scrolls instead of clipping): a row tap flips the item
- * in the background (`niman://note-row-toggle`), and the header "+" opens
- * the note with its add-item field focused (the input field is in the
- * app — RemoteViews cannot capture typed text); the header opens the
- * note. Checked rows render checked through
+ * in the background (`niman://note-row-toggle`), the header "+" opens
+ * [NoteItemAddActivity] — a floating dialog over the launcher where the
+ * item is typed on the home screen (RemoteViews cannot capture typed
+ * text) and lands through the same background path — and the header
+ * opens the note. Checked rows render checked through
  * `setCompoundButtonChecked` (a plain `setChecked` is off the RemoteViews
  * allowlist). Normal notes stay read-only (RemoteViews cannot edit text
  * in place, and editing and moving rows live in the app). The widget
@@ -145,12 +146,26 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     /**
-     * The pending intent for the header "+": opens the note with its
-     * add-item field focused (the input field is in the app — RemoteViews
-     * cannot capture typed text, so the "+" never appends blindly).
+     * The pending intent for the header "+": the floating add dialog
+     * over the launcher ([NoteItemAddActivity]) — the item is typed on
+     * the home screen and lands through the background add broadcast,
+     * so the launcher is never left. RemoteViews cannot capture typed
+     * text, so the "+" never appends blindly.
      */
     private fun addNoteRow(context: Context, id: Int, library: String, note: String): PendingIntent {
-        return mainActivityIntent(context, id, library, note, WidgetBridge.ACTION_ADD_NOTE_ITEM)
+        val intent = Intent(context, NoteItemAddActivity::class.java)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+            .putExtra(WidgetBridge.EXTRA_LIBRARY, library)
+            .putExtra(WidgetBridge.EXTRA_NOTE, note)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // One request code per instance: shared codes collapse distinct
+        // widgets into one pending intent.
+        return PendingIntent.getActivity(
+            context,
+            id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     private fun bodyFor(parsed: JSONObject?, payload: String?): String {

@@ -15,4 +15,13 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- The list widget's "+" dialog (issue 6 follow-up): a floating
+         window over the launcher, styled like the widget card (its
+         palette already has a night twin). -->
+    <style name="Theme.Niman.WidgetDialog" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:windowBackground">@drawable/widget_dialog_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:colorBackground">@color/widget_background</item>
+    </style>
 </resources>

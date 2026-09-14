@@ -46,6 +46,43 @@ void main() {
     });
   });
 
+  group('add URI parsing', () {
+    test('add parses id, library, note and text', () {
+      expect(
+        parseNoteRowAddUri(
+          Uri.parse(
+            'niman://note-row-add?id=7&library=%2Flib&note=List.md&text=buy%20milk',
+          ),
+        ),
+        (id: 7, library: '/lib', note: 'List.md', text: 'buy milk'),
+      );
+    });
+
+    test('add rejects garbage', () {
+      expect(parseNoteRowAddUri(null), isNull);
+      expect(
+        parseNoteRowAddUri(
+          Uri.parse('niman://other?id=7&library=/l&note=n&text=x'),
+        ),
+        isNull,
+      );
+      expect(
+        parseNoteRowAddUri(
+          Uri.parse('niman://note-row-add?id=7&library=/l&note=n'),
+        ),
+        isNull,
+        reason: 'no text',
+      );
+      expect(
+        parseNoteRowAddUri(
+          Uri.parse('niman://note-row-add?id=7&library=/l&note=n&text=%20'),
+        ),
+        isNull,
+        reason: 'blank text',
+      );
+    });
+  });
+
   group('row ops', () {
     late Directory root;
     late List<(String, String?)> saves;
@@ -139,6 +176,102 @@ void main() {
       expect(
         File(p.join(root.path, 'List.md')).readAsStringSync(),
         contains('- [x] milk'),
+      );
+    });
+  });
+
+  group('add op', () {
+    late Directory root;
+    late List<(String, String?)> saves;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('niman_note_ops_');
+      saves = [];
+    });
+
+    tearDown(() async {
+      if (root.existsSync()) {
+        await root.delete(recursive: true);
+      }
+    });
+
+    WidgetUpdater recorder() {
+      return WidgetUpdater(
+        saveData: (id, data) async {
+          saves.add((id, data));
+          return true;
+        },
+        updateWidgets:
+            ({required androidName, required qualifiedAndroidName}) async {
+              return true;
+            },
+      );
+    }
+
+    Uri addUri(String text) {
+      return Uri(
+        scheme: 'niman',
+        host: 'note-row-add',
+        queryParameters: {
+          'id': '7',
+          'library': root.path,
+          'note': 'List.md',
+          'text': text,
+        },
+      );
+    }
+
+    test('add appends the item and re-pushes the rows', () async {
+      File(p.join(root.path, 'List.md'))
+          .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n- [x] eggs\n');
+
+      expect(
+        await addWidgetNoteRow(addUri('bread'), updater: recorder()),
+        isTrue,
+      );
+      expect(
+        File(p.join(root.path, 'List.md')).readAsStringSync(),
+        '---\ntype: list\n---\n- [ ] milk\n- [x] eggs\n- [ ] bread\n',
+      );
+      expect(saves.map((s) => s.$1), ['note_7']);
+      final payload = jsonDecode(saves.single.$2!) as Map<String, Object?>;
+      expect(payload['kind'], 'list');
+      final rows = payload['rows']! as List<Object?>;
+      expect(rows.last, {
+        'text': 'bread',
+        'checked': false,
+        'line': 5,
+        'depth': 0,
+      });
+    });
+
+    test('an add into a non-list note fails quiet', () async {
+      File(p.join(root.path, 'List.md')).writeAsStringSync('# not a list\n');
+
+      expect(
+        await addWidgetNoteRow(addUri('bread'), updater: recorder()),
+        isFalse,
+      );
+      expect(saves, isEmpty);
+    });
+
+    test('a missing note fails quiet', () async {
+      expect(
+        await addWidgetNoteRow(addUri('bread'), updater: recorder()),
+        isFalse,
+      );
+      expect(saves, isEmpty);
+    });
+
+    test('the callback routes note-row-add to the add op', () async {
+      File(p.join(root.path, 'List.md'))
+          .writeAsStringSync('---\ntype: list\n---\n- [ ] milk\n');
+
+      await widgetToggleCallback(addUri('eggs'));
+
+      expect(
+        File(p.join(root.path, 'List.md')).readAsStringSync(),
+        contains('- [ ] eggs'),
       );
     });
   });

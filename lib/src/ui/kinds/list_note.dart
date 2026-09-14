@@ -17,16 +17,8 @@ final class ListKindGui implements NoteKindGUI {
   String get type => 'list';
 
   @override
-  Widget buildBody(
-    BuildContext context,
-    NoteKindHost host, {
-    bool focusAddItem = false,
-  }) {
-    return ListNoteView(
-      text: host.text,
-      onChanged: host.applyEdit,
-      focusOnLoad: focusAddItem,
-    );
+  Widget buildBody(BuildContext context, NoteKindHost host) {
+    return ListNoteView(text: host.text, onChanged: host.applyEdit);
   }
 }
 
@@ -39,12 +31,7 @@ final class ListKindGui implements NoteKindGUI {
 /// keeps its bytes apart from the leading spaces.
 class ListNoteView extends StatefulWidget {
   /// Creates the view; [onChanged] receives the new full note text.
-  const new({
-    required this.text,
-    required this.onChanged,
-    this.focusOnLoad = false,
-    super.key,
-  });
+  const new({required this.text, required this.onChanged, super.key});
 
   /// The full note text.
   final String text;
@@ -52,10 +39,6 @@ class ListNoteView extends StatefulWidget {
   /// Called with the new full note text after an edit; the host persists
   /// it.
   final ValueChanged<String> onChanged;
-
-  /// One-shot (the list widget's "+"): the add-item field takes focus on
-  /// load, with the keyboard up, so a new item can be typed straight away.
-  final bool focusOnLoad;
 
   @override
   State<ListNoteView> createState() => _ListNoteViewState();
@@ -82,9 +65,6 @@ class _ListNoteViewState extends State<ListNoteView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late List<ListItem> _items;
   final TextEditingController _newItem = TextEditingController();
-
-  /// The add-field's focus: the "+" focus-on-load request lands here.
-  final FocusNode _addFocus = FocusNode();
 
   final ScrollController _scroll = ScrollController();
   final GlobalKey _listKey = GlobalKey();
@@ -117,10 +97,6 @@ class _ListNoteViewState extends State<ListNoteView>
     super.initState();
     _items = parseListItems(widget.text);
     WidgetsBinding.instance.addObserver(this);
-    // Post-frame: the field only exists after this first build.
-    if (widget.focusOnLoad) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _focusAddField());
-    }
   }
 
   /// Ends an in-place edit when the software keyboard is dismissed
@@ -163,9 +139,6 @@ class _ListNoteViewState extends State<ListNoteView>
   @override
   void didUpdateWidget(ListNoteView old) {
     super.didUpdateWidget(old);
-    // A repeat "+" tap re-arms the one-shot request while the view is
-    // already mounted (the note was opened again without a remount).
-    if (widget.focusOnLoad && !old.focusOnLoad) _focusAddField();
     if (old.text != widget.text) {
       final oldItems = _items;
       _items = parseListItems(widget.text);
@@ -185,7 +158,6 @@ class _ListNoteViewState extends State<ListNoteView>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _newItem.dispose();
-    _addFocus.dispose();
     _scroll.dispose();
     _addRowShown.dispose();
     _addRowController.dispose();
@@ -193,14 +165,6 @@ class _ListNoteViewState extends State<ListNoteView>
   }
 
   GlobalKey _rowKey(int index) => _rowKeys.putIfAbsent(index, GlobalKey.new);
-
-  /// Focuses the add-item field, taking the keyboard from whatever held
-  /// it: the entry point of the list widget's "+" flow.
-  void _focusAddField() {
-    if (!mounted) return;
-    FocusManager.instance.primaryFocus?.unfocus();
-    _addFocus.requestFocus();
-  }
 
   void _toggle(int index) {
     widget.onChanged(flipListItem(widget.text, _items[index]));
@@ -459,7 +423,6 @@ class _ListNoteViewState extends State<ListNoteView>
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: TextField(
         key: const Key('list-add-field'),
-        focusNode: _addFocus,
         controller: _newItem,
         style: Theme.of(context).textTheme.bodyMedium
             ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),

@@ -33,15 +33,7 @@ abstract interface class NoteKindGUI {
   String get type;
 
   /// Builds the kind body over [host]'s note text.
-  ///
-  /// [focusAddItem] (one-shot, the list widget's "+") asks the body to
-  /// focus its add-item input field so a new item can be typed straight
-  /// away.
-  Widget buildBody(
-    BuildContext context,
-    NoteKindHost host, {
-    bool focusAddItem = false,
-  });
+  Widget buildBody(BuildContext context, NoteKindHost host);
 }
 
 /// The note-kind registry (T-TK-02).
