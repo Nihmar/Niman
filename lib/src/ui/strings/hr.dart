@@ -914,6 +914,14 @@ final class CroatianStrings extends Strings {
   @override
   String get actionUnpin => 'Odkvaci';
   @override
+  String get pinToWidget => 'Zakači u widget';
+  @override
+  String get pinnedForWidget =>
+      'Zakačeno: sada postavite widget Bilješke na početni ekran';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widgeti početnog ekrana dostupni su na Androidu';
+  @override
   String get movedToTrash => 'Premješteno u korpu';
   @override
   String get deletedMessage => 'Obrisano';

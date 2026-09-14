@@ -931,6 +931,14 @@ final class DutchStrings extends Strings {
   @override
   String get actionUnpin => 'Losmaken';
   @override
+  String get pinToWidget => 'Vastmaken aan startschermwidget';
+  @override
+  String get pinnedForWidget =>
+      'Vastgemaakt: plaats nu de Notitie-widget op het startscherm';
+  @override
+  String get pinWidgetUnavailable =>
+      'Startschermwidgets zijn beschikbaar op Android';
+  @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';
   @override
   String get deletedMessage => 'Verwijderd';

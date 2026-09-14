@@ -831,6 +831,12 @@ final class ChineseStrings extends Strings {
   @override
   String get actionUnpin => '取消置顶';
   @override
+  String get pinToWidget => '固定到主屏幕组件';
+  @override
+  String get pinnedForWidget => '已固定：现在请将笔记组件放到主屏幕';
+  @override
+  String get pinWidgetUnavailable => '主屏幕组件可在 Android 上使用';
+  @override
   String get movedToTrash => '已移入回收站';
   @override
   String get deletedMessage => '已删除';

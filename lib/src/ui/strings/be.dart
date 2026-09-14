@@ -913,6 +913,14 @@ final class BelarusianStrings extends Strings {
   @override
   String get actionUnpin => 'Адмацаваць';
   @override
+  String get pinToWidget => 'Замацаваць у віджэце';
+  @override
+  String get pinnedForWidget =>
+      'Замацавана: дадайте віджет «Нотатка» на галоўны экран';
+  @override
+  String get pinWidgetUnavailable =>
+      'Віджэты галоўнага экрана даступныя ў Android';
+  @override
   String get movedToTrash => 'Перамешчана ў смус';
   @override
   String get deletedMessage => 'Выдалена';

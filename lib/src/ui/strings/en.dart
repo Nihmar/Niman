@@ -912,6 +912,14 @@ final class EnglishStrings extends Strings {
   @override
   String get actionUnpin => 'Unpin';
   @override
+  String get pinToWidget => 'Pin to home widget';
+  @override
+  String get pinnedForWidget =>
+      'Pinned: now place the Note widget on the home screen';
+  @override
+  String get pinWidgetUnavailable =>
+      'Home-screen widgets are available on Android';
+  @override
   String get movedToTrash => 'Moved to trash';
   @override
   String get deletedMessage => 'Deleted';

@@ -905,6 +905,13 @@ final class EstonianStrings extends Strings {
   @override
   String get actionUnpin => 'Eemalda kinnitus';
   @override
+  String get pinToWidget => 'Kinnita avakuva vidžetisse';
+  @override
+  String get pinnedForWidget =>
+      'Kinnitatud: paiguta nüüd Märkuse vidžet avakuvale';
+  @override
+  String get pinWidgetUnavailable => 'Avakuva vidžetid on Androidis saadaval';
+  @override
   String get movedToTrash => 'Liigutatud prügikastu';
   @override
   String get deletedMessage => 'Kustutatud';

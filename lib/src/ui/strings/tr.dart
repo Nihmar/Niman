@@ -910,6 +910,14 @@ final class TurkishStrings extends Strings {
   @override
   String get actionUnpin => 'Sabitlemeyi kaldır';
   @override
+  String get pinToWidget => 'Ana ekran widget’ına sabitle';
+  @override
+  String get pinnedForWidget =>
+      'Sabitlendi: şimdi Not widget’ını ana ekrana yerleştir';
+  @override
+  String get pinWidgetUnavailable =>
+      'Ana ekran widget’ları Android’da kullanılabilir';
+  @override
   String get movedToTrash => 'Çöp kutusuna taşındı';
   @override
   String get deletedMessage => 'Silindi';

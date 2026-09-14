@@ -940,6 +940,14 @@ final class GermanStrings extends Strings {
   @override
   String get actionUnpin => 'Loslösen';
   @override
+  String get pinToWidget => 'An Home-Widget anheften';
+  @override
+  String get pinnedForWidget =>
+      'Geheftet: füge jetzt das Notiz-Widget zum Startbildschirm hinzu';
+  @override
+  String get pinWidgetUnavailable =>
+      'Home-Bildschirm-Widgets sind auf Android verfügbar';
+  @override
   String get movedToTrash => 'In den Papierkorb verschoben';
   @override
   String get deletedMessage => 'Gelöscht';

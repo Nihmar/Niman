@@ -927,6 +927,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get actionUnpin => 'Откаквај';
   @override
+  String get pinToWidget => 'Заквиј на домашен виджет';
+  @override
+  String get pinnedForWidget =>
+      'Заквиено: сега постави го виджетот Белешка на домашниот екран';
+  @override
+  String get pinWidgetUnavailable =>
+      'Виджетите на домашниот екран се достапни на Android';
+  @override
   String get movedToTrash => 'Преместено во корпа';
   @override
   String get deletedMessage => 'Избришано';

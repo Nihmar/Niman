@@ -945,6 +945,14 @@ final class FrenchStrings extends Strings {
   @override
   String get actionUnpin => 'Désépingler';
   @override
+  String get pinToWidget => 'Épingler dans le widget d’accueil';
+  @override
+  String get pinnedForWidget =>
+      'Épinglé : placez maintenant le widget Note sur l’écran d’accueil';
+  @override
+  String get pinWidgetUnavailable =>
+      'Les widgets de l’écran d’accueil sont disponibles sur Android';
+  @override
   String get movedToTrash => 'Mis à la corbeille';
   @override
   String get deletedMessage => 'Supprimé';

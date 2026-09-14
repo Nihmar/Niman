@@ -911,6 +911,13 @@ final class CzechStrings extends Strings {
   @override
   String get actionUnpin => 'Odepnout';
   @override
+  String get pinToWidget => 'Připnout k vidžetu na ploše';
+  @override
+  String get pinnedForWidget => 'Připnuto: umístěte vidžet Poznámka na plochu';
+  @override
+  String get pinWidgetUnavailable =>
+      'Vidžety na ploše jsou k dispozici v systému Android';
+  @override
   String get movedToTrash => 'Přesunuto do koše';
   @override
   String get deletedMessage => 'Smazáno';

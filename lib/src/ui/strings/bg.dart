@@ -927,6 +927,14 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionUnpin => 'Откачи';
   @override
+  String get pinToWidget => 'Закачи към домашен виджет';
+  @override
+  String get pinnedForWidget =>
+      'Закачено: поставете виджета „Бележка“ на домашния екран';
+  @override
+  String get pinWidgetUnavailable =>
+      'Виджетите на домашния екран са достъпни в Android';
+  @override
   String get movedToTrash => 'Преместен в коса';
   @override
   String get deletedMessage => 'Изтрито';

@@ -932,6 +932,14 @@ final class AlbanianStrings extends Strings {
   @override
   String get actionUnpin => 'Hiq ngjitjen';
   @override
+  String get pinToWidget => 'Ngjit në widget-in e ekranit kryesor';
+  @override
+  String get pinnedForWidget =>
+      'U ngjite: tani vendos widget-in Shënim në ekranin kryesor';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widget-et e ekranit kryesor janë të disponueshme në Android';
+  @override
   String get movedToTrash => 'Lëvizur te hundë';
   @override
   String get deletedMessage => 'U fshi';

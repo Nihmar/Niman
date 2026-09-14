@@ -928,6 +928,14 @@ final class HungarianStrings extends Strings {
   @override
   String get actionUnpin => 'Rögzítés feloldása';
   @override
+  String get pinToWidget => 'Rögzítés widgetre';
+  @override
+  String get pinnedForWidget =>
+      'Rögzítve: most addja a Megjegyzés-widgetet a kezdőképernyőhöz';
+  @override
+  String get pinWidgetUnavailable =>
+      'A kezdőképernyő-widgetek Androidon érhetők el';
+  @override
   String get movedToTrash => 'A kukába került';
   @override
   String get deletedMessage => 'Törölve';

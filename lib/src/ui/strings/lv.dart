@@ -913,6 +913,13 @@ final class LatvianStrings extends Strings {
   @override
   String get actionUnpin => 'Atdzīt';
   @override
+  String get pinToWidget => 'Piestiprināt sākumekrāna vidžetā';
+  @override
+  String get pinnedForWidget =>
+      'Piestiprināts: tagad novietojiet Notis vidžetu sākumekrānā';
+  @override
+  String get pinWidgetUnavailable => 'Sākumekrāna vidžeti ir pieejami Android';
+  @override
   String get movedToTrash => 'Pārvietots konteinerā';
   @override
   String get deletedMessage => 'Dzēsts';

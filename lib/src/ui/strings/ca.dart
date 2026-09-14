@@ -946,6 +946,14 @@ final class CatalanStrings extends Strings {
   @override
   String get actionUnpin => 'Desfixa';
   @override
+  String get pinToWidget => 'Fixa al giny d’inici';
+  @override
+  String get pinnedForWidget =>
+      'Fixat: ara col·loca el giny de Nota a la pantalla d’inici';
+  @override
+  String get pinWidgetUnavailable =>
+      'Els ginys de la pantalla d’inici estan disponibles a Android';
+  @override
   String get movedToTrash => 'Moguda a la paperera';
   @override
   String get deletedMessage => 'Esborrat';

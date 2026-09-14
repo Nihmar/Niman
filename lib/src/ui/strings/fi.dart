@@ -928,6 +928,14 @@ final class FinnishStrings extends Strings {
   @override
   String get actionUnpin => 'Irrota';
   @override
+  String get pinToWidget => 'Kiinnitä aloitusnäytön widgettiin';
+  @override
+  String get pinnedForWidget =>
+      'Kiinnitetty: lisää nyt Muistio-widget aloitusnäyttöön';
+  @override
+  String get pinWidgetUnavailable =>
+      'Aloitusnäytön widgetit ovat Androidilla käytettävissä';
+  @override
   String get movedToTrash => 'Siirretty koriin';
   @override
   String get deletedMessage => 'Poistettu';
