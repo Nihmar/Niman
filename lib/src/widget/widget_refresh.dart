@@ -16,6 +16,7 @@ import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_payload.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_placement.dart';
+import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
 /// Pushes [snapshot]'s open todos to every todo widget configured for the
@@ -75,6 +76,7 @@ Future<void> refreshTodoWidgets({
     sortTodosForWidget(snapshot),
     libraryPath: root,
     total: widgetTodoTotal(snapshot),
+    theme: resolveWidgetTheme(),
   );
   final push = updater ?? WidgetUpdater();
   for (final id in ids) {
@@ -170,8 +172,9 @@ Future<void> refreshNoteWidgets({
   if (notes.isEmpty) return;
   final push = updater ?? WidgetUpdater();
   final read = readNote ?? readNoteText;
+  final theme = resolveWidgetTheme();
   for (final note in notes) {
-    final payload = await _notePayload(read, root, note.notePath);
+    final payload = await _notePayload(read, root, note.notePath, theme);
     await push.push(
       provider: WidgetProvider.note,
       androidWidgetId: note.id,
@@ -190,6 +193,12 @@ Future<String> _notePayload(
   ReadNoteFile read,
   String root,
   String notePath,
+  WidgetTheme theme,
 ) async {
-  return await notePayloadFor(root, notePath, await read(root, notePath));
+  return await notePayloadFor(
+    root,
+    notePath,
+    await read(root, notePath),
+    theme: theme,
+  );
 }

@@ -22,6 +22,7 @@ import 'package:niman/src/ui/kinds/list_parser.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_payload.dart';
+import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
 
@@ -52,11 +53,14 @@ Future<void> writeNoteText(String root, String notePath, String content) async {
 
 /// The payload for the note at [notePath] in [root] from [content]
 /// (excerpt, checklist rows or `missing` when the file is gone).
+/// [theme] wears the app theme (absent in old callers: the widget
+/// renders its defaults).
 Future<String> notePayloadFor(
   String root,
   String notePath,
-  String? content,
-) async {
+  String? content, {
+  WidgetTheme? theme,
+}) async {
   if (content == null) {
     return noteWidgetPayload(
       libraryPath: root,
@@ -64,6 +68,7 @@ Future<String> notePayloadFor(
       title: noteWidgetTitle(notePath),
       kind: 'missing',
       truncated: false,
+      theme: theme,
     );
   }
   if (isListNoteContent(content)) {
@@ -76,6 +81,7 @@ Future<String> notePayloadFor(
       rows: list.rows,
       truncated: list.truncated,
       total: list.total,
+      theme: theme,
     );
   }
   final excerpt = noteExcerpt(content);
@@ -86,14 +92,17 @@ Future<String> notePayloadFor(
     kind: 'note',
     body: excerpt.text,
     truncated: excerpt.truncated,
+    theme: theme,
   );
 }
 
 /// Parses a `niman://note-row-toggle?id=&library=&note=&line=` URI, or
 /// null when it carries nothing toggleable.
-({int id, String library, String note, int line})? parseNoteRowToggleUri(
-  Uri? uri,
-) {
+///
+/// Like the todo toggle, the native rows append the payload's theme,
+/// so the re-push wears it; taps without it resolve live.
+({int id, String library, String note, int line, WidgetTheme? theme})?
+parseNoteRowToggleUri(Uri? uri) {
   if (uri == null) return null;
   if (uri.scheme != 'niman' || uri.host != 'note-row-toggle') return null;
   final params = uri.queryParameters;
@@ -111,7 +120,13 @@ Future<String> notePayloadFor(
       note.isEmpty) {
     return null;
   }
-  return (id: id, library: library, note: note, line: line);
+  return (
+    id: id,
+    library: library,
+    note: note,
+    line: line,
+    theme: widgetThemeFromUri(uri),
+  );
 }
 
 /// Flips the task box of the note's target line and re-pushes the
@@ -162,6 +177,7 @@ Future<bool> toggleWidgetNoteRow(
       target.note,
       updated,
       updater,
+      target.theme,
     );
     return true;
   } on Object catch (error) {
@@ -177,10 +193,10 @@ Future<bool> toggleWidgetNoteRow(
 ///
 /// The `text` param is what the home-screen add dialog captured:
 /// RemoteViews cannot take typed text, so the dialog types it and the
-/// background op lands it.
-({int id, String library, String note, String text})? parseNoteRowAddUri(
-  Uri? uri,
-) {
+/// background op lands it. The dialog appends the payload's theme like
+/// the rows do, so the re-push wears it.
+({int id, String library, String note, String text, WidgetTheme? theme})?
+parseNoteRowAddUri(Uri? uri) {
   if (uri == null) return null;
   if (uri.scheme != 'niman' || uri.host != 'note-row-add') return null;
   final params = uri.queryParameters;
@@ -198,7 +214,13 @@ Future<bool> toggleWidgetNoteRow(
       text.trim().isEmpty) {
     return null;
   }
-  return (id: id, library: library, note: note, text: text);
+  return (
+    id: id,
+    library: library,
+    note: note,
+    text: text,
+    theme: widgetThemeFromUri(uri),
+  );
 }
 
 /// Appends the typed item to the note and re-pushes the widget.
@@ -240,6 +262,7 @@ Future<bool> addWidgetNoteRow(
       target.note,
       updated,
       updater,
+      target.theme,
     );
     return true;
   } on Object catch (error) {
@@ -250,15 +273,22 @@ Future<bool> addWidgetNoteRow(
   }
 }
 
-/// Re-pushes the note widget of [id] from [content].
+/// Re-pushes the note widget of [id] from [content], wearing [theme]
+/// (live-resolved when the tap carried none).
 Future<void> _pushNoteWidget(
   int id,
   String library,
   String note,
   String content,
   WidgetUpdater? updater,
+  WidgetTheme? theme,
 ) async {
-  final payload = await notePayloadFor(library, note, content);
+  final payload = await notePayloadFor(
+    library,
+    note,
+    content,
+    theme: theme ?? resolveWidgetTheme(),
+  );
   final push = updater ?? WidgetUpdater();
   await push.push(
     provider: WidgetProvider.note,

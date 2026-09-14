@@ -18,7 +18,7 @@ void main() {
             'niman://note-row-toggle?id=7&library=%2Flib&note=List.md&line=3',
           ),
         ),
-        (id: 7, library: '/lib', note: 'List.md', line: 3),
+        (id: 7, library: '/lib', note: 'List.md', line: 3, theme: null),
       );
     });
 
@@ -54,7 +54,13 @@ void main() {
             'niman://note-row-add?id=7&library=%2Flib&note=List.md&text=buy%20milk',
           ),
         ),
-        (id: 7, library: '/lib', note: 'List.md', text: 'buy milk'),
+        (
+          id: 7,
+          library: '/lib',
+          note: 'List.md',
+          text: 'buy milk',
+          theme: null,
+        ),
       );
     });
 

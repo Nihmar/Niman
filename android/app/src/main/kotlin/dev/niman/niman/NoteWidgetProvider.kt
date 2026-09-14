@@ -105,6 +105,13 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_note)
         views.setTextViewText(R.id.widget_note_title, title)
         views.setTextViewText(R.id.widget_note_body, bodyFor(parsed, payload))
+        // The app theme rides in the payload: without it (an old push)
+        // the layout defaults stand.
+        WidgetTheme.fromPayload(payload)?.let { theme ->
+            views.setInt(R.id.widget_note_root, "setBackgroundColor", theme.background)
+            views.setTextColor(R.id.widget_note_title, theme.primary)
+            views.setTextColor(R.id.widget_note_body, theme.primary)
+        }
         val open = openNote(context, id, library, note)
         views.setOnClickPendingIntent(R.id.widget_note_root, open)
         return views
@@ -124,6 +131,14 @@ class NoteWidgetProvider : HomeWidgetProvider() {
             R.id.widget_note_empty,
             if (payload == null) "Open Niman to load — or pin a note first" else "No items",
         )
+        // The app theme rides in the payload: without it (an old push)
+        // the layout defaults stand.
+        WidgetTheme.fromPayload(payload)?.let { theme ->
+            views.setInt(R.id.widget_note_list_root, "setBackgroundColor", theme.background)
+            views.setTextColor(R.id.widget_note_title, theme.primary)
+            views.setTextColor(R.id.widget_note_empty, theme.secondary)
+            views.setTextColor(R.id.widget_note_add, theme.accent)
+        }
         // The rows scroll: the launcher binds NoteWidgetService on
         // demand and the factory serves the payload's checklist rows
         // (row taps and the checked-state rendering live there). The

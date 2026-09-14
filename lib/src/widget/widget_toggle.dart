@@ -20,6 +20,7 @@ import 'package:niman/src/todo/widget_todos.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_note_ops.dart';
 import 'package:niman/src/widget/widget_payload.dart';
+import 'package:niman/src/widget/widget_theme.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 
 /// The background entrypoint: register with
@@ -40,7 +41,13 @@ Future<void> widgetToggleCallback(Uri? uri) async {
 
 /// Parses a `niman://todo-toggle?id=&library=&line=` URI, or null when
 /// it carries nothing toggleable.
-({int id, String library, int line})? parseToggleUri(Uri? uri) {
+///
+/// The native rows append the payload's theme (`td/bg/fg/fs/ac`), so
+/// the re-push wears the same theme instead of flashing the defaults;
+/// taps without it (old widgets) resolve live in the pushing isolate.
+({int id, String library, int line, WidgetTheme? theme})? parseToggleUri(
+  Uri? uri,
+) {
   if (uri == null) return null;
   if (uri.scheme != 'niman' || uri.host != 'todo-toggle') return null;
   final params = uri.queryParameters;
@@ -55,7 +62,7 @@ Future<void> widgetToggleCallback(Uri? uri) async {
       library.isEmpty) {
     return null;
   }
-  return (id: id, library: library, line: line);
+  return (id: id, library: library, line: line, theme: widgetThemeFromUri(uri));
 }
 
 /// Completes the toggled line and re-pushes its widget.
@@ -81,6 +88,7 @@ Future<bool> toggleWidgetTodo(
       sortTodosForWidget(snapshot),
       libraryPath: target.library,
       total: widgetTodoTotal(snapshot),
+      theme: target.theme ?? resolveWidgetTheme(),
     );
     final push = updater ?? WidgetUpdater();
     await push.push(
