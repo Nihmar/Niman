@@ -97,7 +97,17 @@
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
         <!-- Widget checkbox taps (round 2, R2): the background broadcast
-             reaches the Dart toggle through the plugin's worker. -->
+              reaches the Dart toggle through the plugin's worker.
+              WidgetTapReceiver logs the row URI first (the background
+              isolate's own log never reaches the export), then delegates
+              to the same worker. -->
+        <receiver
+            android:name=".WidgetTapReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"
             android:exported="true">

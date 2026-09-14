@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
 import org.json.JSONObject
@@ -129,10 +128,12 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         // Row taps: the framework drops a setOnClickPendingIntent set on
         // a collection child (a row of the bound ListView), so the rows
         // hand their URI to this template instead — the merged
-        // broadcast feeds the headless engine that does the toggle.
+        // broadcast feeds the headless engine that does the toggle. The
+        // template must stay MUTABLE (see WidgetBackgroundTemplate):
+        // an immutable one drops the fill-in URI and taps do nothing.
         views.setPendingIntentTemplate(
             R.id.widget_todo_rows,
-            HomeWidgetBackgroundIntent.getBroadcast(context),
+            WidgetBackgroundTemplate.intent(context),
         )
 
         val open = openTodo(context, id, library)

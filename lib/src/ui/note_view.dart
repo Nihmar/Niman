@@ -101,6 +101,7 @@ final class NoteView extends StatefulWidget {
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
     this.spellCheck,
+    this.reloadToken = 0,
     super.key,
   });
 
@@ -221,6 +222,12 @@ final class NoteView extends StatefulWidget {
   /// The editor's spelling state (T-PP-09): underlines misspelled prose.
   /// Null (most widget tests, and a platform without hunspell) draws none.
   final EditorSpellCheck? spellCheck;
+
+  /// External-change reload requests (home-screen widget toggles): the
+  /// shell bumps this when the already-open note may have changed on
+  /// disk (a same-note reopen, an app resume). A change triggers a
+  /// clean-only re-read — unsaved edits always win over the disk.
+  final int reloadToken;
 
   @override
   State<NoteView> createState() => _NoteViewState();
@@ -418,6 +425,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       _unsaved?.noteChanged();
       unawaited(_load());
     }
+    // An external change may have landed while the note stayed open (a
+    // home-screen widget toggle edits the file in a background isolate):
+    // re-read when the buffer is clean, keep unsaved edits otherwise.
+    if (widget.reloadToken != oldWidget.reloadToken) {
+      unawaited(_reloadIfChanged());
+    }
     // Coming back to the editor no longer remounts it (both panes stay
     // mounted below), so the source editor's autofocus no longer fires on
     // its own — request it like a fresh mount did. Split mode never
@@ -583,6 +596,71 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       });
       _log.error('note load failed: $path ($error)');
     }
+  }
+
+  /// Adopts the disk text when it changed under the open note (a
+  /// home-screen widget toggle edits the file in a background isolate,
+  /// like any other external edit).
+  ///
+  /// Only when the buffer is clean: a save in flight, a pending save, or
+  /// unsaved edits keep the user's text — the disk converges on the next
+  /// save instead. Identical content is a no-op, so a resume without an
+  /// external edit never disturbs the caret. The WYSIWYG surface owns a
+  /// live document the buffer cannot replace, so it never auto-reloads.
+  Future<void> _reloadIfChanged() async {
+    if (_loading || _saving || _savePending) {
+      _log.debug('reload skipped (busy): ${widget.path}');
+      return;
+    }
+    if (_revision != _lastSavedRevision) {
+      _log.debug('reload skipped (unsaved edits): ${widget.path}');
+      return;
+    }
+    if (widget.showWysiwyg) {
+      _log.debug('reload skipped (wysiwyg): ${widget.path}');
+      return;
+    }
+    final path = widget.path;
+    final String content;
+    try {
+      if (widget.readNote != null) {
+        content = await widget.readNote!(path);
+      } else {
+        final loaded = await PreviewWork.run('read', path);
+        if (loaded is! String) return;
+        content = loaded;
+      }
+    } on Object catch (error) {
+      _log.warning('reload read failed: $path ($error)');
+      return;
+    }
+    if (!mounted || widget.path != path) return;
+    // The user may have typed during the read: re-check clean before
+    // adopting anything.
+    if (_loading ||
+        _saving ||
+        _savePending ||
+        _revision != _lastSavedRevision) {
+      return;
+    }
+    final text = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    if (text == _controller.text) return;
+    // Mute the programmatic change like _load does: the listener returns
+    // before the revision bump and the save schedule.
+    _loading = true;
+    _controller.text = text;
+    _wysiwygText = text;
+    _lastLines = _controller.codeLines;
+    _lastSavedRevision = _revision;
+    _noteKind = frontmatterTypeOf(text);
+    widget.spellCheck?.reset();
+    _loading = false;
+    _unsaved?.noteChanged();
+    widget.onNoteKindChanged?.call(_noteKind);
+    _refreshStats();
+    _refreshPreview();
+    if (mounted) setState(() {});
+    _log.info('note reloaded: $path (external change, ${text.length} chars)');
   }
 
   void _onValueChanged() {
