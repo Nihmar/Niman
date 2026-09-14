@@ -11,6 +11,20 @@ source of truth. No lock-in, no proprietary format.
 
 > **Status:** the project is under active development.
 
+## Documentation
+
+Full guides live in [`docs/`](docs/):
+
+- **User:** [getting started](docs/user/getting-started.md),
+  [editing](docs/user/editing.md), [organization](docs/user/organization.md),
+  [search](docs/user/search.md), [links](docs/user/links.md),
+  [templates](docs/user/templates.md), [tasks & reminders](docs/user/tasks.md),
+  [settings](docs/user/settings.md), [shortcuts](docs/user/shortcuts.md),
+  [sync](docs/user/sync.md), [platform notes](docs/user/platforms.md).
+- **Contributor:** [architecture](docs/dev/architecture.md),
+  [building](docs/dev/building.md), [conventions](docs/dev/conventions.md),
+  [releasing](docs/dev/releasing.md).
+
 ## What you get today
 
 ### Writing
