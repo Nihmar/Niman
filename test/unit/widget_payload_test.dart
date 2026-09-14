@@ -42,10 +42,10 @@ void main() {
   });
 
   group('todo payload', () {
-    test('rows carry prose, due, priority and line', () {
+    test('rows carry prose, due, priority, tokens and line', () {
       final payload = todoWidgetPayload(
         [
-          entry(3, '(A) call the office +work due:2026-09-10'),
+          entry(3, '(A) call the office +work @home #urgent due:2026-09-10'),
           entry(9, 'buy milk'),
         ],
         libraryPath: '/lib/Work',
@@ -61,9 +61,20 @@ void main() {
           'text': 'call the office',
           'due': '2026-09-10',
           'priority': 'A',
+          'projects': ['work'],
+          'contexts': ['home'],
+          'tags': ['urgent'],
           'line': 3,
         },
-        {'text': 'buy milk', 'due': null, 'priority': null, 'line': 9},
+        {
+          'text': 'buy milk',
+          'due': null,
+          'priority': null,
+          'projects': <Object?>[],
+          'contexts': <Object?>[],
+          'tags': <Object?>[],
+          'line': 9,
+        },
       ]);
     });
 
