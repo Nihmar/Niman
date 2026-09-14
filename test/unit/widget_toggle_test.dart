@@ -15,8 +15,24 @@ void main() {
         parseToggleUri(
           Uri.parse('niman://todo-toggle?id=7&library=%2Flib&line=3'),
         ),
-        (id: 7, library: '/lib', line: 3),
+        (id: 7, library: '/lib', line: 3, theme: null),
       );
+    });
+
+    test('parses the theme params', () {
+      final target = parseToggleUri(
+        Uri.parse(
+          'niman://todo-toggle?id=7&library=%2Flib&line=3'
+          '&td=1&bg=%23E61A1C1E&fg=%23FFE2E2E5&fs=%23FFC3C6CF&ac=%23FFD0BCFF',
+        ),
+      );
+      expect(target?.theme, (
+        dark: true,
+        background: '#E61A1C1E',
+        primary: '#FFE2E2E5',
+        secondary: '#FFC3C6CF',
+        accent: '#FFD0BCFF',
+      ));
     });
 
     test('rejects garbage', () {

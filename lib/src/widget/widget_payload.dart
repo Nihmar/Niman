@@ -15,6 +15,7 @@ import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/widget/note_excerpt.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/widget/widget_theme.dart';
 
 /// The Android `AppWidgetProvider` class of the todo widget.
 const String todoWidgetAndroidName = 'TodoWidgetProvider';
@@ -60,20 +61,35 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
 /// date or null, `line` the file line (for future tap-to-toggle). Rows
 /// drop from the end while the payload exceeds [maxChars], setting
 /// `truncated`. [total] is the open-task count before capping, so the
-/// header count stays true when the rows are truncated.
+/// header count stays true when the rows are truncated. [theme] wears
+/// the app theme (absent in old callers: the widget renders its
+/// defaults).
 String todoWidgetPayload(
   List<TodoEntry> entries, {
   required String libraryPath,
   int? total,
+  WidgetTheme? theme,
   int maxChars = widgetPayloadMaxChars,
 }) {
   var rows = <Map<String, Object?>>[for (final entry in entries) _row(entry)];
   var truncated = false;
-  var encoded = _encode(libraryPath, rows, truncated, total ?? rows.length);
+  var encoded = _encode(
+    libraryPath,
+    rows,
+    truncated,
+    total ?? rows.length,
+    theme,
+  );
   while (rows.isNotEmpty && encoded.length > maxChars) {
     rows = rows.sublist(0, rows.length - 1);
     truncated = true;
-    encoded = _encode(libraryPath, rows, truncated, total ?? rows.length);
+    encoded = _encode(
+      libraryPath,
+      rows,
+      truncated,
+      total ?? rows.length,
+      theme,
+    );
   }
   return encoded;
 }
@@ -95,12 +111,14 @@ String _encode(
   List<Map<String, Object?>> rows,
   bool truncated,
   int total,
+  WidgetTheme? theme,
 ) {
   return jsonEncode({
     'library': libraryPath,
     'rows': rows,
     'truncated': truncated,
     'total': total,
+    if (theme != null) 'theme': widgetThemeToMap(theme),
   });
 }
 
@@ -111,7 +129,9 @@ String _encode(
 /// the native provider taps back into; `kind` is `note` (prose excerpt
 /// in `body`), `list` (checklist items in `rows`) or `missing` (the note
 /// is gone; `body` empty). `total` is the item count before capping
-/// (the row count when absent), so a capped list stays honest.
+/// (the row count when absent), so a capped list stays honest. [theme]
+/// wears the app theme (absent in old callers: the widget renders its
+/// defaults).
 String noteWidgetPayload({
   required String libraryPath,
   required String notePath,
@@ -121,6 +141,7 @@ String noteWidgetPayload({
   String body = '',
   List<ChecklistRow> rows = const [],
   int? total,
+  WidgetTheme? theme,
 }) {
   return jsonEncode({
     'library': libraryPath,
@@ -131,5 +152,6 @@ String noteWidgetPayload({
     'body': body,
     'truncated': truncated,
     'total': total ?? rows.length,
+    if (theme != null) 'theme': widgetThemeToMap(theme),
   });
 }

@@ -21,7 +21,8 @@ import android.content.Intent
  * directly, so every tap leaves a line in the exported debug log.
  */
 object WidgetBackgroundTemplate {
-    private const val ACTION = "es.antonborri.home_widget.action.BACKGROUND"
+    /** The background-tap action the plugin's worker listens for. */
+    const val ACTION = "es.antonborri.home_widget.action.BACKGROUND"
 
     fun intent(context: Context): PendingIntent {
         val intent = Intent(context, WidgetTapReceiver::class.java)

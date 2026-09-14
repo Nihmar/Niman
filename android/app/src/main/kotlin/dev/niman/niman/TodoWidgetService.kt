@@ -47,6 +47,7 @@ class TodoWidgetService : RemoteViewsService() {
         private var loadedPayload: String? = null
         private var rows: List<JSONObject> = emptyList()
         private var library = ""
+        private var theme: WidgetTheme? = null
 
         override fun onCreate() = Unit
 
@@ -73,7 +74,7 @@ class TodoWidgetService : RemoteViewsService() {
 
         override fun getViewAt(position: Int): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_todo_row)
-            val (row, library) = snapshot(position)
+            val (row, library, theme) = snapshot(position)
             if (row == null) return views
             val meta = listOfNotNull(
                 jsonString(row, "priority").takeIf { it.isNotEmpty() }?.let { "($it)" },
@@ -81,6 +82,12 @@ class TodoWidgetService : RemoteViewsService() {
             ).joinToString(" · ")
             views.setTextViewText(R.id.widget_todo_row_meta, meta)
             views.setTextViewText(R.id.widget_todo_row_text, jsonString(row, "text"))
+            // The app theme rides in the payload: without it (an old
+            // push) the layout defaults stand.
+            if (theme != null) {
+                views.setTextColor(R.id.widget_todo_row_meta, theme.secondary)
+                views.setTextColor(R.id.widget_todo_row_text, theme.primary)
+            }
             // Every rendered row is open by definition, so the unchecked
             // CheckBox default is already right.
             val fillIn = Uri.Builder()
@@ -89,6 +96,7 @@ class TodoWidgetService : RemoteViewsService() {
                 .appendQueryParameter("id", widgetId.toString())
                 .appendQueryParameter("library", library)
                 .appendQueryParameter("line", row.optInt("line", -1).toString())
+                .also { WidgetTheme.appendParams(it, theme) }
                 .build()
             // The whole row toggles (checkbox included). A
             // setOnClickPendingIntent is dropped by the framework on a
@@ -108,15 +116,16 @@ class TodoWidgetService : RemoteViewsService() {
         }
 
         /**
-         * The [position] row and its library under the parse lock, so a
-         * concurrent re-parse never hands out a mix of two payloads.
+         * The [position] row with its library and theme under the parse
+         * lock, so a concurrent re-parse never hands out a mix of two
+         * payloads.
          */
         private fun snapshot(
             position: Int,
-        ): Pair<JSONObject?, String> {
+        ): Triple<JSONObject?, String, WidgetTheme?> {
             synchronized(this) {
                 load()
-                return rows.getOrNull(position) to library
+                return Triple(rows.getOrNull(position), library, theme)
             }
         }
 
@@ -134,6 +143,7 @@ class TodoWidgetService : RemoteViewsService() {
                 }
                 val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
                 library = parsed?.optString("library").orEmpty()
+                theme = WidgetTheme.fromPayload(payload)
                 val array = parsed?.optJSONArray("rows")
                 rows = if (array == null) {
                     emptyList()

@@ -107,6 +107,15 @@ class TodoWidgetProvider : HomeWidgetProvider() {
             R.id.widget_todo_empty,
             if (payload == null) "Open Niman to load todos" else "No open tasks",
         )
+        // The app theme rides in the payload: without it (an old push)
+        // the layout defaults stand.
+        WidgetTheme.fromPayload(payload)?.let { theme ->
+            views.setInt(R.id.widget_todo_root, "setBackgroundColor", theme.background)
+            views.setTextColor(R.id.widget_todo_title, theme.primary)
+            views.setTextColor(R.id.widget_todo_count, theme.secondary)
+            views.setTextColor(R.id.widget_todo_empty, theme.secondary)
+            views.setTextColor(R.id.widget_todo_add, theme.accent)
+        }
         // The rows scroll: the launcher binds TodoWidgetService on
         // demand and the factory serves the payload's rows (row taps
         // and the checked/unchecked rendering live there). The instance

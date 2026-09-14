@@ -177,5 +177,33 @@ void main() {
       );
       expect((jsonDecode(payload) as Map<String, Object?>)['total'], 1);
     });
+
+    test('a theme rides along when given, and is absent otherwise', () {
+      const theme = (
+        dark: true,
+        background: '#E61A1C1E',
+        primary: '#FFE2E2E5',
+        secondary: '#FFC3C6CF',
+        accent: '#FFD0BCFF',
+      );
+      final themed = jsonDecode(
+        todoWidgetPayload(
+          [entry(0, 'first')],
+          libraryPath: '/lib',
+          theme: theme,
+        ),
+      ) as Map<String, Object?>;
+      expect(themed['theme'], {
+        'dark': true,
+        'background': '#E61A1C1E',
+        'primary': '#FFE2E2E5',
+        'secondary': '#FFC3C6CF',
+        'accent': '#FFD0BCFF',
+      });
+      final plain = jsonDecode(
+        todoWidgetPayload([entry(0, 'first')], libraryPath: '/lib'),
+      ) as Map<String, Object?>;
+      expect(plain.containsKey('theme'), isFalse);
+    });
   });
 }

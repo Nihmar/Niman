@@ -360,6 +360,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
+  /// Re-pushes both widget kinds when the app theme changes (brightness
+  /// or palette): the payloads wear the resolved colors, so the widgets
+  /// follow the app instead of the system night mode.
+  void _pushWidgetsOnTheme() {
+    _pushNoteWidgets();
+    _pushTodoWidgets();
+  }
+
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).
   void _selectShellTab(ShellTab tab) {
@@ -895,6 +903,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       (target) => unawaited(_applyWidgetTarget(target)),
     );
     _libraryEvents = widget.controller.events.listen((_) => _pushNoteWidgets());
+    AppThemes.revision.addListener(_pushWidgetsOnTheme);
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
@@ -915,6 +924,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
+    AppThemes.revision.removeListener(_pushWidgetsOnTheme);
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
     unawaited(_widgetTargets?.cancel());

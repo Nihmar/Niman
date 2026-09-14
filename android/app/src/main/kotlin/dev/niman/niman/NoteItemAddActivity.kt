@@ -1,7 +1,9 @@
 package dev.niman.niman
 
 import android.app.Activity
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -11,7 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
+import es.antonborri.home_widget.HomeWidgetPlugin
 
 /**
  * The list widget's "+" dialog (issue 6 follow-up): adds an item to the
@@ -91,6 +93,9 @@ class NoteItemAddActivity : Activity() {
     /**
      * Fires the background add broadcast and closes: the headless engine
      * does the edit and the widget refreshes when the payload lands.
+     * The payload's theme rides along, so the re-push wears it; the
+     * send is direct (no fill-in), so the pending intent stays
+     * IMMUTABLE.
      */
     private fun commit(appWidgetId: Int, library: String, note: String, text: String) {
         val trimmed = text.trim()
@@ -98,6 +103,9 @@ class NoteItemAddActivity : Activity() {
             finish()
             return
         }
+        val theme = WidgetTheme.fromPayload(
+            HomeWidgetPlugin.getData(this).getString("note_$appWidgetId", null),
+        )
         val uri = Uri.Builder()
             .scheme("niman")
             .authority("note-row-add")
@@ -105,9 +113,18 @@ class NoteItemAddActivity : Activity() {
             .appendQueryParameter("library", library)
             .appendQueryParameter("note", note)
             .appendQueryParameter("text", trimmed)
+            .also { WidgetTheme.appendParams(it, theme) }
             .build()
+        val intent = Intent(this, WidgetTapReceiver::class.java)
+            .setAction(WidgetBackgroundTemplate.ACTION)
+            .setData(uri)
         val sent = try {
-            HomeWidgetBackgroundIntent.getBroadcast(this, uri).send()
+            PendingIntent.getBroadcast(
+                this,
+                appWidgetId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            ).send()
         } catch (e: Exception) {
             WidgetDebugLog.log(this, "note add broadcast failed: $e")
             false

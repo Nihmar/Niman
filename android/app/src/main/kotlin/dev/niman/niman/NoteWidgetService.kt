@@ -45,6 +45,7 @@ class NoteWidgetService : RemoteViewsService() {
         private var rows: List<JSONObject> = emptyList()
         private var library = ""
         private var note = ""
+        private var theme: WidgetTheme? = null
 
         override fun onCreate() = Unit
 
@@ -71,7 +72,7 @@ class NoteWidgetService : RemoteViewsService() {
 
         override fun getViewAt(position: Int): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_note_row)
-            val (row, library, note) = snapshot(position)
+            val (row, library, note, theme) = snapshot(position)
             if (row == null) return views
             views.setTextViewText(R.id.widget_note_row_text, row.optString("text", ""))
             // The checked state is what makes a done row read as done:
@@ -81,6 +82,11 @@ class NoteWidgetService : RemoteViewsService() {
                 R.id.widget_note_row_check,
                 row.optBoolean("checked", false),
             )
+            // The app theme rides in the payload: without it (an old
+            // push) the layout defaults stand.
+            if (theme != null) {
+                views.setTextColor(R.id.widget_note_row_text, theme.primary)
+            }
             val fillIn = Uri.Builder()
                 .scheme("niman")
                 .authority("note-row-toggle")
@@ -88,6 +94,7 @@ class NoteWidgetService : RemoteViewsService() {
                 .appendQueryParameter("library", library)
                 .appendQueryParameter("note", note)
                 .appendQueryParameter("line", row.optInt("line", -1).toString())
+                .also { WidgetTheme.appendParams(it, theme) }
                 .build()
             // The whole row toggles (checkbox included). A
             // setOnClickPendingIntent is dropped by the framework on a
@@ -100,16 +107,26 @@ class NoteWidgetService : RemoteViewsService() {
         }
 
         /**
-         * The [position] row with its library/note under the parse lock,
-         * so a concurrent re-parse never hands out a mix of two
+         * One row with the payload it was parsed from (library, note and
+         * theme), so a concurrent re-parse never hands out a mix of two
          * payloads.
          */
-        private fun snapshot(
-            position: Int,
-        ): Triple<JSONObject?, String, String> {
+        private data class RowSnapshot(
+            val row: JSONObject?,
+            val library: String,
+            val note: String,
+            val theme: WidgetTheme?,
+        )
+
+        /**
+         * The [position] row with its library, note and theme under the
+         * parse lock, so a concurrent re-parse never hands out a mix of
+         * two payloads.
+         */
+        private fun snapshot(position: Int): RowSnapshot {
             synchronized(this) {
                 load()
-                return Triple(rows.getOrNull(position), library, note)
+                return RowSnapshot(rows.getOrNull(position), library, note, theme)
             }
         }
 
@@ -132,10 +149,12 @@ class NoteWidgetService : RemoteViewsService() {
                     rows = emptyList()
                     library = ""
                     note = ""
+                    theme = null
                     return
                 }
                 library = parsed.optString("library").orEmpty()
                 note = parsed.optString("note").orEmpty()
+                theme = WidgetTheme.fromPayload(payload)
                 val array = parsed.optJSONArray("rows")
                 rows = if (array == null) {
                     emptyList()
