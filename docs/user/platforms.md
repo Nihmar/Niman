@@ -16,6 +16,8 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   optimization when prompted, or alarms may not arrive.
 - **Launcher shortcuts:** long-press the icon (see
   [shortcuts](shortcuts.md)).
+- **Home-screen widgets:** the Niman Todos and Niman Note widgets
+  (see [widgets](widgets.md)).
 
 ## Linux
 

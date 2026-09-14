@@ -22,6 +22,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers |
 | `ui/` | Shell, tree, settings screens, shared widgets |
+| `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 
 State: Riverpod. No god classes — one class per file, split at ~300
 lines or when responsibilities mix.
@@ -40,3 +41,8 @@ lines or when responsibilities mix.
 - **Reminders:** first valid `rem:YYYY-MM-DDTHH:MM` per task schedules an
   exact alarm (Android plugin backend, desktop backend); health/warnings
   surface permission problems.
+- **Home-screen widgets (Android):** placed instances are pushed a
+  payload whenever the todo snapshot or pinned note moves; rows render
+  natively (RemoteViews) and row taps come back as `niman://` intents
+  handled off the UI isolate. Placement runs a native config activity
+  (library/note pick).

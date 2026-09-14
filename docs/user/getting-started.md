@@ -29,5 +29,6 @@ disk; the app's SQLite database is only a rebuildable index.
 - [Editing](editing.md) — Markdown, math, images, spellcheck, preview.
 - [Organization](organization.md) — trash, history, templates, tags.
 - [Tasks and reminders](tasks.md) — todo.txt plus `rem:` alarms.
+- [Home-screen widgets](widgets.md) — todo and note widgets (Android).
 - [Platforms](platforms.md) — Android / Linux / Windows notes.
 - [Sync](sync.md) — moving a library between machines today.
