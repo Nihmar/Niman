@@ -924,6 +924,14 @@ final class PortugueseStrings extends Strings {
   @override
   String get actionUnpin => 'Não fixar mais';
   @override
+  String get pinToWidget => 'Fixar no widget da tela inicial';
+  @override
+  String get pinnedForWidget =>
+      'Fixado: agora adicione o widget de Nota à tela inicial';
+  @override
+  String get pinWidgetUnavailable =>
+      'Os widgets da tela inicial estão disponíveis no Android';
+  @override
   String get movedToTrash => 'Movido para a lixeira';
   @override
   String get deletedMessage => 'Excluído';

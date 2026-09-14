@@ -925,6 +925,14 @@ final class BasqueStrings extends Strings {
   @override
   String get actionUnpin => 'Askatu';
   @override
+  String get pinToWidget => 'Festu hasierako widgetean';
+  @override
+  String get pinnedForWidget =>
+      'Festuta: jarri orain Oharraren widgeta hasierako pantailan';
+  @override
+  String get pinWidgetUnavailable =>
+      'Hasierako pantailako widgetak Android-en daude eskuragarri';
+  @override
   String get movedToTrash => 'Zaborrontzara mugitua';
   @override
   String get deletedMessage => 'Ezabatua';

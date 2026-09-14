@@ -957,6 +957,14 @@ final class GreekStrings extends Strings {
   @override
   String get actionUnpin => 'Αποστιβάρισμα';
   @override
+  String get pinToWidget => 'Σταθεροποίηση στο widget';
+  @override
+  String get pinnedForWidget =>
+      'Σταθεροποιήθηκε: τοποθετήστε το widget Σημειώσεων στην αρχική οθόνη';
+  @override
+  String get pinWidgetUnavailable =>
+      'Τα widgets της αρχικής οθόνης είναι διαθέσιμα στο Android';
+  @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
   @override
   String get deletedMessage => 'Διαγράφηκε';

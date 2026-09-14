@@ -914,6 +914,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get actionUnpin => 'Відкріпити';
   @override
+  String get pinToWidget => 'Закріпити у віджеті';
+  @override
+  String get pinnedForWidget =>
+      'Закріплено: тепер додайте віджет «Нотатка» на головний екран';
+  @override
+  String get pinWidgetUnavailable =>
+      'Віджети головного екрана доступні в Android';
+  @override
   String get movedToTrash => 'Переміщено в кошик';
   @override
   String get deletedMessage => 'Видалено';

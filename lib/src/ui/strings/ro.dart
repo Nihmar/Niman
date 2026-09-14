@@ -921,6 +921,14 @@ final class RomanianStrings extends Strings {
   @override
   String get actionUnpin => 'Dezfixează';
   @override
+  String get pinToWidget => 'Fixează în widgetul de start';
+  @override
+  String get pinnedForWidget =>
+      'Fixat: acum plasează widgetul Notă pe ecranul de start';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widgeturile de pe ecranul de start sunt disponibile pe Android';
+  @override
   String get movedToTrash => 'Mutat în coș';
   @override
   String get deletedMessage => 'Șters';

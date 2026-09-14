@@ -929,6 +929,14 @@ final class GalicianStrings extends Strings {
   @override
   String get actionUnpin => 'Desfacer';
   @override
+  String get pinToWidget => 'Fixar no widget da pantalla de inicio';
+  @override
+  String get pinnedForWidget =>
+      'Fixado: agora coloca o widget de Nota na pantalla de inicio';
+  @override
+  String get pinWidgetUnavailable =>
+      'Os widgets da pantalla de inicio están dispoñibles en Android';
+  @override
   String get movedToTrash => 'Movida ao paperilleiro';
   @override
   String get deletedMessage => 'Borrado';

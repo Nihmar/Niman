@@ -921,6 +921,14 @@ final class BosnianStrings extends Strings {
   @override
   String get actionUnpin => 'Otkvaci';
   @override
+  String get pinToWidget => 'Zakači u widget';
+  @override
+  String get pinnedForWidget =>
+      'Zakačeno: sada postavite widget Bilješke na početni ekran';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widgeti početnog ekrana dostupni su na Androidu';
+  @override
   String get movedToTrash => 'Pomaknuto u korpu';
   @override
   String get deletedMessage => 'Obrisano';

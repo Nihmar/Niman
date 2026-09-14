@@ -911,6 +911,14 @@ final class SlovakStrings extends Strings {
   @override
   String get actionUnpin => 'Odpnúť';
   @override
+  String get pinToWidget => 'Pripnúť k vidžetu na ploche';
+  @override
+  String get pinnedForWidget =>
+      'Pripnuté: umiestnite vidžet Poznámka na plochu';
+  @override
+  String get pinWidgetUnavailable =>
+      'Vidžety na ploche sú k dispozícii v Androide';
+  @override
   String get movedToTrash => 'Presunuté do koša';
   @override
   String get deletedMessage => 'Vymazané';

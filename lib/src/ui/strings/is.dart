@@ -917,6 +917,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get actionUnpin => 'Leyfa lausa';
   @override
+  String get pinToWidget => 'Festu á forsíðu-vísí';
+  @override
+  String get pinnedForWidget => 'Fest: settu núna vísíð Nota á forsíðuna';
+  @override
+  String get pinWidgetUnavailable => 'Forsíðu-vísí eru til fáan á Android';
+  @override
   String get movedToTrash => 'Fært í korpu';
   @override
   String get deletedMessage => 'Eytt';

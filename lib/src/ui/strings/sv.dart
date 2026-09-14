@@ -922,6 +922,14 @@ final class SwedishStrings extends Strings {
   @override
   String get actionUnpin => 'Lösen';
   @override
+  String get pinToWidget => 'Fäst på startskärmswidget';
+  @override
+  String get pinnedForWidget =>
+      'Fäst: placera nu Notis-widgeten på startskärmen';
+  @override
+  String get pinWidgetUnavailable =>
+      'Startskärmswidgets är tillgängliga på Android';
+  @override
   String get movedToTrash => 'Flyttad till papperskorgen';
   @override
   String get deletedMessage => 'Togs bort';

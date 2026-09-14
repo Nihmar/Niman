@@ -908,6 +908,14 @@ final class SlovenianStrings extends Strings {
   @override
   String get actionUnpin => 'Odpni';
   @override
+  String get pinToWidget => 'Pripni v widget na domačem zaslonu';
+  @override
+  String get pinnedForWidget =>
+      'Pripeto: zdaj namesti widget Zapis na domači zaslon';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widgeti domačega zaslona so na voljo na Androidu';
+  @override
   String get movedToTrash => 'Preneseno v koš';
   @override
   String get deletedMessage => 'Izbrisano';

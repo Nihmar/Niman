@@ -899,6 +899,13 @@ final class HindiStrings extends Strings {
   @override
   String get actionUnpin => 'पिन हटाएँ';
   @override
+  String get pinToWidget => 'होम विजेट में पिन करें';
+  @override
+  String get pinnedForWidget =>
+      'पिन हो गया: अब नोट विजेट को होम स्क्रीन पर रखें';
+  @override
+  String get pinWidgetUnavailable => 'होम-स्क्रीन विजेट Android पर उपलब्ध हैं';
+  @override
   String get movedToTrash => 'ट्रैश में गया';
   @override
   String get deletedMessage => 'हटाया गया';

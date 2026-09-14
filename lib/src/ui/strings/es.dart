@@ -940,6 +940,14 @@ final class SpanishStrings extends Strings {
   @override
   String get actionUnpin => 'Dejar de fijar';
   @override
+  String get pinToWidget => 'Fijar en el widget de inicio';
+  @override
+  String get pinnedForWidget =>
+      'Fijada: ahora coloca el widget de Nota en la pantalla de inicio';
+  @override
+  String get pinWidgetUnavailable =>
+      'Los widgets de la pantalla de inicio están disponibles en Android';
+  @override
   String get movedToTrash => 'Movido a la papelera';
   @override
   String get deletedMessage => 'Eliminado';

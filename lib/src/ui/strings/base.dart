@@ -434,14 +434,10 @@ abstract base class Strings {
   String get actionPin;
   String get actionUnpin;
 
-  // Home-screen note widget (issue 6). English until translated: these
-  // stay concrete so the other languages fall back to English instead of
-  // each needing a placeholder; override per language like the rest.
-  String get pinToWidget => 'Pin to home widget';
-  String get pinnedForWidget =>
-      'Pinned: now place the Note widget on the home screen';
-  String get pinWidgetUnavailable =>
-      'Home-screen widgets are available on Android';
+  // Home-screen note widget (issue 6).
+  String get pinToWidget;
+  String get pinnedForWidget;
+  String get pinWidgetUnavailable;
   String get movedToTrash;
   String get deletedMessage;
   String deleteToTrashConfirm(String name);

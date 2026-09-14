@@ -928,6 +928,14 @@ final class PolishStrings extends Strings {
   @override
   String get actionUnpin => 'Odepnij';
   @override
+  String get pinToWidget => 'Przypnij do widgeta ekranu głównego';
+  @override
+  String get pinnedForWidget =>
+      'Przypięto: umieść teraz widget Notatka na ekranie głównym';
+  @override
+  String get pinWidgetUnavailable =>
+      'Widgety ekranu głównego są dostępne w Androidzie';
+  @override
   String get movedToTrash => 'Przeniesiono do kosza';
   @override
   String get deletedMessage => 'Usunięto';

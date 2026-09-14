@@ -918,6 +918,14 @@ final class DanishStrings extends Strings {
   @override
   String get actionUnpin => 'Løs';
   @override
+  String get pinToWidget => 'Fastgør til startskærmswidget';
+  @override
+  String get pinnedForWidget =>
+      'Fastgjort: placer nu Notits-widgeten på startskærmen';
+  @override
+  String get pinWidgetUnavailable =>
+      'Startskærmswidgets er tilgængelige på Android';
+  @override
   String get movedToTrash => 'Flyttet til affald';
   @override
   String get deletedMessage => 'Slettet';

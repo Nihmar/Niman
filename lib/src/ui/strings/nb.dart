@@ -915,6 +915,13 @@ final class NorwegianStrings extends Strings {
   @override
   String get actionUnpin => 'Løs';
   @override
+  String get pinToWidget => 'Fest til startskjermwidgeten';
+  @override
+  String get pinnedForWidget => 'Festet: legg nå Notat-widgeten på startsiden';
+  @override
+  String get pinWidgetUnavailable =>
+      'Startskjermwidgets er tilgjengelige på Android';
+  @override
   String get movedToTrash => 'Flyttet til papirkorg';
   @override
   String get deletedMessage => 'Slettet';

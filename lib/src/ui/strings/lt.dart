@@ -911,6 +911,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get actionUnpin => 'Atsegti';
   @override
+  String get pinToWidget => 'Užfiksuoti į pradinio ekrano valdiklį';
+  @override
+  String get pinnedForWidget =>
+      'Užfiksuota: dabar įdėkite „Pastaba“ valdiklį į pradinį ekraną';
+  @override
+  String get pinWidgetUnavailable =>
+      'Pradinio ekrano valdikliai prieinami Android';
+  @override
   String get movedToTrash => 'Perkeltas į lažvus';
   @override
   String get deletedMessage => 'Ištrintas';

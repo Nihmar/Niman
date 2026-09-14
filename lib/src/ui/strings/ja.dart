@@ -859,6 +859,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get actionUnpin => 'ピン留めを解除';
   @override
+  String get pinToWidget => 'ホームウィジェットにピン留め';
+  @override
+  String get pinnedForWidget => 'ピン留めしました: ノートウィジェットをホーム画面に配置してください';
+  @override
+  String get pinWidgetUnavailable => 'ホーム画面のウィジェットはAndroidで利用できます';
+  @override
   String get movedToTrash => 'ごみ箱に移動しました';
   @override
   String get deletedMessage => '削除しました';

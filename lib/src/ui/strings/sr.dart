@@ -920,6 +920,14 @@ final class SerbianStrings extends Strings {
   @override
   String get actionUnpin => 'Откачи';
   @override
+  String get pinToWidget => 'Закочи у виџет';
+  @override
+  String get pinnedForWidget =>
+      'Закачено: сада постави виџет Белешке на почетни екран';
+  @override
+  String get pinWidgetUnavailable =>
+      'Виџети почетног екрана доступни су на Андроиду';
+  @override
   String get movedToTrash => 'Премештено у кош';
   @override
   String get deletedMessage => 'Обрисано';
