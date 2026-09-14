@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONObject
 
@@ -77,11 +76,11 @@ class TodoWidgetService : RemoteViewsService() {
             val (row, library) = snapshot(position)
             if (row == null) return views
             val meta = listOfNotNull(
-                row.optString("priority", "").takeIf { it.isNotEmpty() }?.let { "($it)" },
-                row.optString("due", "").takeIf { it.isNotEmpty() },
+                jsonString(row, "priority").takeIf { it.isNotEmpty() }?.let { "($it)" },
+                jsonString(row, "due").takeIf { it.isNotEmpty() },
             ).joinToString(" · ")
             views.setTextViewText(R.id.widget_todo_row_meta, meta)
-            views.setTextViewText(R.id.widget_todo_row_text, row.optString("text", ""))
+            views.setTextViewText(R.id.widget_todo_row_text, jsonString(row, "text"))
             // Every rendered row is open by definition, so the unchecked
             // CheckBox default is already right.
             val fillIn = Uri.Builder()
@@ -91,14 +90,21 @@ class TodoWidgetService : RemoteViewsService() {
                 .appendQueryParameter("library", library)
                 .appendQueryParameter("line", row.optInt("line", -1).toString())
                 .build()
-            // The whole row toggles (checkbox included); one broadcast
-            // per row, the URI in its data, the headless Dart engine does
+            // The whole row toggles (checkbox included). A
+            // setOnClickPendingIntent is dropped by the framework on a
+            // collection child, so the row hands its URI to the
+            // provider's pending-intent template: one broadcast per row,
+            // the URI in the merged data, the headless Dart engine does
             // the edit and re-push.
-            views.setOnClickPendingIntent(
-                R.id.widget_todo_row,
-                HomeWidgetBackgroundIntent.getBroadcast(context, fillIn),
-            )
+            views.setOnClickFillInIntent(R.id.widget_todo_row, Intent().setData(fillIn))
             return views
+        }
+
+        /// The [key] string of [row]; an explicit JSON null reads as
+        /// absent (optString would hand back the string "null").
+        private fun jsonString(row: JSONObject, key: String): String {
+            val value = row.opt(key)
+            return if (value == null || value == JSONObject.NULL) "" else value.toString()
         }
 
         /**
