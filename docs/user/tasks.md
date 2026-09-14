@@ -24,6 +24,12 @@ Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`
 is true).
 
+## Home-screen widget
+
+Android: the **Niman Todos** widget mirrors the tab's open view —
+due-soonest first — and toggles a task on a row tap, with the app
+closed or not. See [widgets](widgets.md).
+
 ## Settings
 
 Per library (`.niman/settings.json`): `reminderShowTokens` (default
