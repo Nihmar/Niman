@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONObject
 
@@ -90,13 +89,13 @@ class NoteWidgetService : RemoteViewsService() {
                 .appendQueryParameter("note", note)
                 .appendQueryParameter("line", row.optInt("line", -1).toString())
                 .build()
-            // The whole row toggles (checkbox included); one broadcast
-            // per row, the URI in its data, the headless Dart engine does
+            // The whole row toggles (checkbox included). A
+            // setOnClickPendingIntent is dropped by the framework on a
+            // collection child, so the row hands its URI to the
+            // provider's pending-intent template: one broadcast per row,
+            // the URI in the merged data, the headless Dart engine does
             // the edit and re-push.
-            views.setOnClickPendingIntent(
-                R.id.widget_note_row,
-                HomeWidgetBackgroundIntent.getBroadcast(context, fillIn),
-            )
+            views.setOnClickFillInIntent(R.id.widget_note_row, Intent().setData(fillIn))
             return views
         }
 

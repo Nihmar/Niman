@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
 import org.json.JSONObject
@@ -141,6 +142,14 @@ class NoteWidgetProvider : HomeWidgetProvider() {
             R.id.widget_note_rows,
             Intent(context, NoteWidgetService::class.java)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
+        )
+        // Row taps: the framework drops a setOnClickPendingIntent set on
+        // a collection child (a row of the bound ListView), so the rows
+        // hand their URI to this template instead — the merged
+        // broadcast feeds the headless engine that does the flip.
+        views.setPendingIntentTemplate(
+            R.id.widget_note_rows,
+            HomeWidgetBackgroundIntent.getBroadcast(context),
         )
         val open = openNote(context, id, library, note)
         views.setOnClickPendingIntent(R.id.widget_note_header, open)
