@@ -18,10 +18,12 @@ import 'package:niman/src/todo/todo_store.dart';
 
 /// Max rows pushed to one widget instance.
 ///
-/// A home-screen list is a glance, not the tab: past this the payload only
-/// costs battery and RemoteViews binder time. The widget links back to the
-/// tab for the full list.
-const int widgetTodoLimit = 20;
+/// The widget rows are a scrollable `RemoteCollection`, so the cap is a
+/// payload-size guard, not a visibility one: a home-screen glance rarely
+/// scrolls past this, and the count text still names the true total via
+/// the payload's `total` field. The widget links back to the tab for the
+/// full list.
+const int widgetTodoLimit = 100;
 
 /// Open todos of [snapshot] in widget order, capped to [limit] rows.
 ///
@@ -43,4 +45,12 @@ List<TodoEntry> sortTodosForWidget(
     return sorted;
   }
   return sorted.sublist(0, limit);
+}
+
+/// The open (non-blank) todo count of [snapshot]: the widget's count
+/// text, independent of the row cap.
+int widgetTodoTotal(TodoSnapshot snapshot) {
+  return snapshot.todo
+      .where((entry) => entry.task.raw.trim().isNotEmpty)
+      .length;
 }

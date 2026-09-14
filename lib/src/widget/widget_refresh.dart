@@ -74,6 +74,7 @@ Future<void> refreshTodoWidgets({
   final payload = todoWidgetPayload(
     sortTodosForWidget(snapshot),
     libraryPath: root,
+    total: widgetTodoTotal(snapshot),
   );
   final push = updater ?? WidgetUpdater();
   for (final id in ids) {
