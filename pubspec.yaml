@@ -76,7 +76,7 @@ dependencies:
   # pre-1.0 with a moving API. Its vendored C++ compiles into every
   # platform build, the Android APK included (accepted in the T-PP-16
   # verdict; see the Risks section of plan/m-platform-parity.md).
-  nativeapi: 0.2.3
+  nativeapi: 0.2.4
 
   path: ^1.9.1
   path_provider: ^2.1.6
