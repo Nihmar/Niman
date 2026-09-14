@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The list widget's "+" dialog (issue 6 follow-up): one input field and
+     Add/Cancel. Shown by NoteItemAddActivity as a floating window over
+     the launcher (Theme.Niman.WidgetDialog), so the item is typed on the
+     home screen; the commit goes to the background add broadcast. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/widget_note_add_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/widget_note_add_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/widget_note_add_hint"
+        android:imeOptions="actionDone"
+        android:inputType="textCapSentences"
+        android:maxLines="1"
+        android:singleLine="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/widget_note_add_cancel"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_note_add_cancel"
+            android:textColor="@color/widget_text_primary" />
+
+        <Button
+            android:id="@+id/widget_note_add_add"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:enabled="false"
+            android:text="@string/widget_note_add_add"
+            android:textColor="@color/widget_text_primary" />
+    </LinearLayout>
+</LinearLayout>

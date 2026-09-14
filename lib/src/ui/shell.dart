@@ -512,10 +512,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// file whose length the creation flow does not know.
   int? _pendingCaretOffset;
 
-  /// Whether the next note open focuses its add-item field (the list
-  /// widget's "+"): the list-kind GUI's input field takes the keyboard.
-  bool _pendingFocusAdd = false;
-
   /// The open note's kind (the frontmatter `type`, null = plain note or
   /// no note); reported by the open NoteView (T-TK-02).
   String? _noteKind;
@@ -583,9 +579,8 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Opens a note reached through a link (T-M3-07): selects it, remembers
   /// the heading anchor, and clears pending anchors for direct
-  /// selections. [focusAdd] (the list widget's "+") focuses the note's
-  /// add-item field instead of letting it open quiescent.
-  void _openNoteFromLink(String path, String? anchor, {bool focusAdd = false}) {
+  /// selections.
+  void _openNoteFromLink(String path, String? anchor) {
     const AppLogger(name: 'links').debug(
       'shell open request: $path anchor=${anchor == null ? '-' : '"$anchor"'} '
       '(current tab ${_tab.name})',
@@ -598,7 +593,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = anchor;
       _pendingCaretOffset = null;
-      _pendingFocusAdd = focusAdd;
       _resetNoteKind();
       _noteOpened();
     });
@@ -747,7 +741,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       onOpenNote: _openNoteFromLink,
       initialAnchor: _pendingAnchor,
       initialCaretOffset: _pendingCaretOffset,
-      initialFocusAdd: _pendingFocusAdd,
       kindMode: !_kindRawMode,
       onNoteKindChanged: _onNoteKindChanged,
       unsavedTracker: widget.unsavedTracker,
@@ -1032,7 +1025,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       case WidgetTargetKind.note:
         final note = target.notePath;
         if (note != null) {
-          _openNoteFromLink(note, target.anchor, focusAdd: target.focusAdd);
+          _openNoteFromLink(note, target.anchor);
         }
     }
   }
@@ -1165,7 +1158,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteFromTab = _tab;
       _pendingAnchor = null;
       _pendingCaretOffset = null;
-      _pendingFocusAdd = false;
       _resetNoteKind();
       if (note.isDir) {
         _noteClosed();
@@ -1333,7 +1325,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         _treeVisible = false;
         _pendingAnchor = null;
         _pendingCaretOffset = null;
-        _pendingFocusAdd = false;
         _noteOpened();
       });
     });
@@ -1354,7 +1345,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       _treeVisible = false;
       _pendingAnchor = null;
       _pendingCaretOffset = caret;
-      _pendingFocusAdd = false;
       _resetNoteKind();
       _noteOpened();
     });
@@ -1378,7 +1368,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         _selectedIsDir = true;
         _pendingAnchor = null;
         _pendingCaretOffset = null;
-        _pendingFocusAdd = false;
       });
     });
   }
@@ -2035,7 +2024,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         _treeVisible = false;
         _pendingAnchor = null;
         _pendingCaretOffset = null;
-        _pendingFocusAdd = false;
         _resetNoteKind();
         _noteOpened();
       });
@@ -2378,7 +2366,6 @@ final class _LibraryShellState extends State<_LibraryShell>
                   linkSource: _linkSource,
                   onOpenNote: _openNoteFromLink,
                   initialAnchor: _pendingAnchor,
-                  initialFocusAdd: _pendingFocusAdd,
                   kindMode: !_kindRawMode,
                   onNoteKindChanged: _onNoteKindChanged,
                   unsavedTracker: widget.unsavedTracker,
