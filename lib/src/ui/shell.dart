@@ -286,6 +286,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   final Set<String> _expanded = <String>{};
   bool _busy = false;
 
+  /// External-change reload requests for the open note (home-screen
+  /// widget toggles edit the file in a background isolate): bumped when
+  /// the already-open note is reopened and on app resume, so the
+  /// mounted NoteView re-reads the file when its buffer is clean.
+  int _noteReloadToken = 0;
+
   /// The currently selected bottom tab (narrow layout).
   ///
   /// A [ValueNotifier] rather than a plain field so a plain tab switch can
@@ -586,6 +592,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       '(current tab ${_tab.name})',
     );
     if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+    // Reopening the already-open note (a widget header tap after a row
+    // toggle): the path does not change, so the NoteView would keep its
+    // buffer — ask it to re-read the file instead.
+    final sameNote = _selected == path && !_selectedIsDir;
     setState(() {
       _selected = path;
       _selectedIsDir = false;
@@ -594,6 +604,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       _pendingAnchor = anchor;
       _pendingCaretOffset = null;
       _resetNoteKind();
+      if (sameNote) _noteReloadToken++;
       _noteOpened();
     });
   }
@@ -745,6 +756,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       onNoteKindChanged: _onNoteKindChanged,
       unsavedTracker: widget.unsavedTracker,
       spellCheck: widget.spellCheck,
+      reloadToken: _noteReloadToken,
     );
   }
 
@@ -930,6 +942,14 @@ final class _LibraryShellState extends State<_LibraryShell>
       return;
     }
     unawaited(_todoController.resyncReminders());
+    // A home-screen widget toggle edits todo.txt / the note file in a
+    // background isolate while the app is away (the Android watcher is
+    // unreliable, so no session event may arrive): re-read both surfaces
+    // when clean instead of showing the pre-toggle state.
+    unawaited(_todoController.open());
+    if (_selected != null && !_selectedIsDir) {
+      setState(() => _noteReloadToken++);
+    }
     // Pushes the home-screen widgets. A widget placed while the app was
     // away has no other trigger: the placement happens in the launcher,
     // with no Dart engine to hear about it, and the todo resync above
@@ -2370,6 +2390,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   onNoteKindChanged: _onNoteKindChanged,
                   unsavedTracker: widget.unsavedTracker,
                   spellCheck: widget.spellCheck,
+                  reloadToken: _noteReloadToken,
                   statusActions: [
                     // The view controls live in the note's status row on the
                     // desktop (T-PP-22): the header above is about the file,

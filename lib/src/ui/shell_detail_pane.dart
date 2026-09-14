@@ -40,6 +40,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.unsavedTracker,
     required this.statusActions,
     required this.spellCheck,
+    this.reloadToken = 0,
     super.key,
   });
 
@@ -117,6 +118,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// The editor's spelling state (T-PP-09).
   final EditorSpellCheck spellCheck;
 
+  /// External-change reload requests for the open note (home-screen
+  /// widget toggles); forwarded to the NoteView.
+  final int reloadToken;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -168,6 +173,7 @@ final class ShellDetailPane extends StatelessWidget {
                 unsavedTracker: unsavedTracker,
                 statusActions: statusActions,
                 spellCheck: spellCheck,
+                reloadToken: reloadToken,
               ),
             ),
     );
