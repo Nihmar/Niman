@@ -14,6 +14,7 @@ environment:
 
 dependencies:
   # Rebuildable index (SQLite + FTS5); schema lands in M1.
+  audioplayers: ^6.8.1
   crypto: ^3.0.7
   drift: ^2.34.3
 
@@ -87,6 +88,7 @@ dependencies:
   re_editor: ^0.10.0
 
   # State management (app-wide).
+  record: ^7.1.1
   riverpod: ^3.4.3
 
   # The SQLite the index runs on, bundled with the app. Android and Linux

@@ -27,6 +27,7 @@ import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -132,6 +133,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
+      ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     };
     await ref.read(shortcutServiceProvider).publish(labels);
     await ref.read(trayServiceProvider).init(labels);
@@ -243,6 +245,9 @@ enum _NewItem {
 
   /// A list note (frontmatter type: list) in the list folder.
   listNote,
+
+  /// A voice note (frontmatter type: audio) in the current folder.
+  audioNote,
 
   /// A note copied from a template.
   template,
@@ -384,6 +389,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
 
+  /// The folder new attachments are copied into (settings, issue #56).
+  String _attachmentsFolder = defaultAttachmentsFolder;
+
   /// The editor toolbar the user arranged (settings, T-TB-04).
   ToolbarLayout _toolbarLayout = ToolbarLayout.defaults;
 
@@ -469,12 +477,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Empty when the open note has no kind GUI (including unknown `type`s).
   List<Widget> get _kindActions {
     if (_kindGui == null) return const [];
+    final isAudio = _noteKind == 'audio';
     return [
       if (_kindRawMode)
         IconButton(
           key: const Key('kind-show-list'),
-          tooltip: AppStrings.showListTooltip,
-          icon: const Icon(Icons.checklist),
+          tooltip: isAudio
+              ? AppStrings.showAudioTooltip
+              : AppStrings.showListTooltip,
+          icon: Icon(isAudio ? Icons.mic_outlined : Icons.checklist),
           onPressed: () => setState(() => _kindRawMode = false),
         )
       else
@@ -641,6 +652,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       showLineNumbers: _lineNumbers,
       autofocusEditor: _autofocusEditor,
       linkType: _linkType,
+      attachmentsFolder: _attachmentsFolder,
       indentWidth: _indentWidth,
       toolbarLayout: _toolbarLayout,
       splitPreview: previewSplits(
@@ -876,6 +888,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         await _createNote();
       case ShortcutAction.newList:
         await _createListNote();
+      case ShortcutAction.newVoice:
+        await _createAudioNote();
     }
   }
 
@@ -892,6 +906,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
     final linkType = await controller.linkType;
+    final attachmentsFolder =
+        await controller.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
     final indentWidth = await controller.indentWidth;
     final treeSort = await controller.treeSort;
     final treeWidth = await controller.treeWidth;
@@ -926,6 +942,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             !setEquals(effectiveEnabled, _editorsEnabled) ||
             previewEnabled != _previewEnabled ||
             linkType != _linkType ||
+            attachmentsFolder != _attachmentsFolder ||
             indentWidth != _indentWidth ||
             treeSort != _treeSort ||
             treeWidth != _treeWidth ||
@@ -939,6 +956,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _editorsEnabled = {...effectiveEnabled};
         _previewEnabled = previewEnabled;
         _linkType = linkType;
+        _attachmentsFolder = attachmentsFolder;
         _indentWidth = indentWidth;
         _treeSort = treeSort;
         _treeWidth = treeWidth;
@@ -1781,6 +1799,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         _closeFab();
         unawaited(_createListNote());
       },
+      onNewAudioNote: () {
+        _closeFab();
+        unawaited(_createAudioNote());
+      },
       onNewFromTemplate: () {
         _closeFab();
         unawaited(_templateFlow.createFromTemplate(context));
@@ -1809,6 +1831,37 @@ final class _LibraryShellState extends State<_LibraryShell>
         parentPath: folder,
         name: name,
         content: listNoteContent(),
+      );
+      if (!mounted) return;
+      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
+      setState(() {
+        _selected = row.path;
+        _selectedIsDir = false;
+        _treeVisible = false;
+        _pendingAnchor = null;
+        _pendingCaretOffset = null;
+        _resetNoteKind();
+        _noteOpened();
+      });
+    });
+  }
+
+  /// Creates a voice note (issue #56): a note file with `type: audio`
+  /// frontmatter in the FAB target folder (the selected folder, root if
+  /// none) — like a plain note, since clips live in the shared `assets/`
+  /// and need no dedicated folder.
+  Future<void> _createAudioNote() async {
+    final name = await showNameDialog(
+      context,
+      title: AppStrings.newAudioNoteTitle,
+      initial: AppStrings.newAudioNoteDefault,
+    );
+    if (name == null) return;
+    await _guard(() async {
+      final row = await widget.controller.ops!.createNote(
+        parentPath: _createParent,
+        name: name,
+        content: audioNoteContent(),
       );
       if (!mounted) return;
       if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
@@ -2055,6 +2108,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     return appShortcutBindings({
       AppCommand.newNote: () => unawaited(_createNote()),
       AppCommand.newListNote: () => unawaited(_createListNote()),
+      AppCommand.newAudioNote: () => unawaited(_createAudioNote()),
       AppCommand.newTodo: () {
         _openTodo();
         unawaited(_addTodo());
@@ -2105,6 +2159,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   showLineNumbers: _lineNumbers,
                   autofocusEditor: _autofocusEditor,
                   linkType: _linkType,
+                  attachmentsFolder: _attachmentsFolder,
                   indentWidth: _indentWidth,
                   toolbarLayout: _toolbarLayout,
                   splitPreview: previewSplits(
@@ -2308,6 +2363,12 @@ final class _LibraryShellState extends State<_LibraryShell>
                 key: const Key('new-list-note-action'),
               ),
               _newItemMenuItem(
+                _NewItem.audioNote,
+                Icons.mic_outlined,
+                AppStrings.newAudioNoteTitle,
+                key: const Key('new-audio-note-action'),
+              ),
+              _newItemMenuItem(
                 _NewItem.template,
                 Icons.file_copy_outlined,
                 AppStrings.newFromTemplateTitle,
@@ -2381,6 +2442,8 @@ final class _LibraryShellState extends State<_LibraryShell>
         unawaited(_createNote());
       case _NewItem.listNote:
         unawaited(_createListNote());
+      case _NewItem.audioNote:
+        unawaited(_createAudioNote());
       case _NewItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case _NewItem.folder:

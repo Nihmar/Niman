@@ -2,6 +2,16 @@
 
 ## Keyboard (desktop)
 
+App-level accelerators (listed in-app under Settings → Keyboard):
+
+- `Ctrl/⌘+N` — new note
+- `Ctrl/⌘+Shift+N` — new list note
+- `Ctrl/⌘+Shift+A` — new voice note
+- `Ctrl/⌘+T` — new todo
+- `Ctrl/⌘+Q` — quick note
+- `Ctrl/⌘+B` — show or hide the sidebar
+- `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
+
 Editor find/replace follows the familiar bindings:
 
 - `Ctrl/⌘+F` — find
@@ -20,11 +30,14 @@ published at startup):
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
 - **New list note** — the Files FAB's "New list note" flow
+- **New voice note** — the Files FAB's "New voice note" flow (desktop
+  tray only; Android launchers show the first four)
 
 Each shortcut runs the same flow as its in-app button, so the two can
-never drift. Desktop has no equivalent menu.
+never drift.
 
 ## CLI launch flags (desktop)
 
 Desktop builds accept `--quick-note`, `--new-todo`, `--new-note`,
-`--new-list`, routed through the same handler as the launcher actions.
+`--new-list`, `--new-voice`, routed through the same handler as the
+launcher actions.

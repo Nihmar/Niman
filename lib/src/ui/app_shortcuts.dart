@@ -21,6 +21,9 @@ enum AppCommand {
   /// A new `type: list` note in the list folder.
   newListNote,
 
+  /// A new `type: audio` note in the current folder.
+  newAudioNote,
+
   /// A new todo task.
   newTodo,
 
@@ -73,6 +76,10 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.keyN, control: true, shift: true),
     ),
     AppShortcut(
+      AppCommand.newAudioNote,
+      SingleActivator(LogicalKeyboardKey.keyA, control: true, shift: true),
+    ),
+    AppShortcut(
       AppCommand.newTodo,
       SingleActivator(LogicalKeyboardKey.keyT, control: true),
     ),
@@ -111,6 +118,7 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
 String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newNote => AppStrings.shortcutNewNote,
   AppCommand.newListNote => AppStrings.shortcutNewList,
+  AppCommand.newAudioNote => AppStrings.shortcutNewAudio,
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
   AppCommand.toggleSidebar => AppStrings.shortcutToggleSidebar,

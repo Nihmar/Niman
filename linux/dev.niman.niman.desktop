@@ -10,7 +10,7 @@ Terminal=false
 Categories=Office;TextEditor;Utility;
 Keywords=notes;markdown;note;todo;task;list;quick;new;reminder;niman;
 StartupWMClass=dev.niman.niman
-Actions=quick-note;new-todo;new-note;new-list;
+Actions=quick-note;new-todo;new-note;new-list;new-voice;
 
 [Desktop Action quick-note]
 Name=Quick note
@@ -27,3 +27,7 @@ Exec=niman --new-note
 [Desktop Action new-list]
 Name=New list
 Exec=niman --new-list
+
+[Desktop Action new-voice]
+Name=New voice note
+Exec=niman --new-voice

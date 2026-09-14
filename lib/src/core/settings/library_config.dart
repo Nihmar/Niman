@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         EditorKind,
         LinkType,
         TreeSort,
+        defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
 import 'package:path/path.dart' as p;
@@ -175,6 +176,11 @@ String cleanListFolder(String folder) =>
 String cleanTemplateFolder(String folder) =>
     cleanFolderPath(folder, defaultTemplateFolder);
 
+/// Sanitizes an attachments-folder path; an empty result is
+/// [defaultAttachmentsFolder].
+String cleanAttachmentsFolder(String folder) =>
+    cleanFolderPath(folder, defaultAttachmentsFolder);
+
 /// The per-library settings, stored in the library folder itself as
 /// `<library>/.niman/settings.json` (T-ML-01, T-ML-10).
 ///
@@ -201,6 +207,7 @@ final class LibraryConfig {
     required this.quickNotePath,
     required this.listNoteFolder,
     this.templateFolder = defaultTemplateFolder,
+    this.attachmentsFolder = defaultAttachmentsFolder,
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
     this.editorAutofocus = false,
@@ -237,6 +244,7 @@ final class LibraryConfig {
     final quick = json['quickNotePath'];
     final folder = json['listNoteFolder'];
     final templates = json['templateFolder'];
+    final attachments = json['attachmentsFolder'];
     return LibraryConfig(
       trashEnabled: switch (trash) {
         final bool enabled => enabled,
@@ -250,6 +258,9 @@ final class LibraryConfig {
       templateFolder: templates is String
           ? cleanTemplateFolder(templates)
           : defaultTemplateFolder,
+      attachmentsFolder: attachments is String
+          ? cleanAttachmentsFolder(attachments)
+          : defaultAttachmentsFolder,
       pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
@@ -290,7 +301,7 @@ final class LibraryConfig {
 
   /// The settings of a fresh library: trash enabled, 10 history versions,
   /// the default quick note at the root, list notes in `Lists`, templates
-  /// in `Templates`.
+  /// in `Templates`, attachments in `assets`.
   static const LibraryConfig defaults = LibraryConfig(
     trashEnabled: true,
     historyVersions: defaultHistoryVersions,
@@ -315,6 +326,10 @@ final class LibraryConfig {
 
   /// The folder (library-relative) holding the note templates.
   final String templateFolder;
+
+  /// The folder (library-relative) holding the attachments: editor images
+  /// and voice-note clips, copied in and linked (issue #56).
+  final String attachmentsFolder;
 
   /// Whether the tree's pinned section is rolled up (default false).
   final bool pinnedCollapsed;
@@ -385,6 +400,7 @@ final class LibraryConfig {
     bool clearQuickNotePath = false,
     String? listNoteFolder,
     String? templateFolder,
+    String? attachmentsFolder,
     bool? pinnedCollapsed,
     bool? lineNumbers,
     bool? editorAutofocus,
@@ -409,6 +425,7 @@ final class LibraryConfig {
           : quickNotePath ?? this.quickNotePath,
       listNoteFolder: listNoteFolder ?? this.listNoteFolder,
       templateFolder: templateFolder ?? this.templateFolder,
+      attachmentsFolder: attachmentsFolder ?? this.attachmentsFolder,
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
@@ -434,6 +451,7 @@ final class LibraryConfig {
     'quickNotePath',
     'listNoteFolder',
     'templateFolder',
+    'attachmentsFolder',
     'pinnedCollapsed',
     'lineNumbers',
     'editorAutofocus',
@@ -468,6 +486,7 @@ final class LibraryConfig {
       'historyVersions': historyVersions,
       'listNoteFolder': listNoteFolder,
       'templateFolder': templateFolder,
+      'attachmentsFolder': attachmentsFolder,
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
       'editorAutofocus': editorAutofocus,
@@ -549,6 +568,7 @@ final class LibraryConfig {
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
         templateFolder == other.templateFolder &&
+        attachmentsFolder == other.attachmentsFolder &&
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
         editorAutofocus == other.editorAutofocus &&

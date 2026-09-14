@@ -242,6 +242,35 @@ final class CatalanStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Canvia l’ordre de l’element';
 
+  // Audio note kind (issue #56): English fallback until translated.
+  @override
+  String get audioEmpty => 'No recordings yet';
+  @override
+  String get audioRecord => 'Record';
+  @override
+  String get audioStop => 'Stop';
+  @override
+  String get audioPlay => 'Play';
+  @override
+  String get audioStopPlayback => 'Stop playback';
+  @override
+  String get audioDelete => 'Delete recording';
+  @override
+  String get audioImport => 'Import an audio file';
+  @override
+  String get audioRecording => 'Recording…';
+  @override
+  String get audioPlaying => 'Playing';
+  @override
+  String get audioPermissionDenied =>
+      'Microphone permission denied — recording needs it.';
+  @override
+  String get newAudioNoteTitle => 'New voice note';
+  @override
+  String get newAudioNoteDefault => 'My recording';
+  @override
+  String get showAudioTooltip => 'Show recordings';
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
   String get shortcutQuickNote => 'Nota ràpida';
@@ -251,6 +280,8 @@ final class CatalanStrings extends Strings {
   String get shortcutNewNote => 'Nota nova';
   @override
   String get shortcutNewList => 'Llista nova';
+  @override
+  String get shortcutNewAudio => 'New voice note';
   @override
   String get shortcutToggleSidebar => 'Mostra o amaga el filtre';
   @override
@@ -952,6 +983,8 @@ final class CatalanStrings extends Strings {
   String get folderPickerEmpty => 'Encara no hi ha carpetes';
   @override
   String get listFolderTitle => 'Carpeta de llista';
+  @override
+  String get attachmentsFolderTitle => 'Attachments folder';
 
   // Trash (M1).
   @override

@@ -1,4 +1,4 @@
-// T-PP-06: the Linux desktop entry is the right-click surface for the four
+// T-PP-06: the Linux desktop entry is the right-click surface for the
 // quick actions. It must stay the CLI's twin: each Desktop Action's Exec is
 // fed back through the same parser the app runs, so an entry that points at
 // a flag `parseLaunchArgs` does not understand fails here instead of
@@ -15,6 +15,7 @@ const _expected = <String, ShortcutAction>{
   'new-todo': ShortcutAction.newTodo,
   'new-note': ShortcutAction.newNote,
   'new-list': ShortcutAction.newList,
+  'new-voice': ShortcutAction.newVoice,
 };
 
 void main() {
@@ -34,7 +35,7 @@ void main() {
     return null;
   }
 
-  test('the four actions are declared in the main entry', () {
+  test('the five actions are declared in the main entry', () {
     final declared = valueOf('Actions')!
         .split(';')
         .where((action) => action.isNotEmpty)
@@ -42,7 +43,7 @@ void main() {
     expect(
       declared,
       _expected.keys,
-      reason: 'the right-click menu must list all four, in tray order',
+      reason: 'the right-click menu must list all five, in tray order',
     );
   });
 

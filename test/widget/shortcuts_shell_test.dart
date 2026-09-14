@@ -44,7 +44,7 @@ void main() {
     await shortcuts.dispose();
   }
 
-  testWidgets('the four actions are published in order at start', (
+  testWidgets('the five actions are published in order at start', (
     tester,
   ) async {
     await tester.pumpWidget(buildApp());
@@ -55,6 +55,7 @@ void main() {
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
+      ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     });
     expect(
       shortcuts.published!.keys.toList(),

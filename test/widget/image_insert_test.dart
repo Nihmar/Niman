@@ -11,6 +11,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:path/path.dart' as p;
@@ -164,11 +165,55 @@ void main() {
       await tester.pump(); // pick + copy futures complete.
       await tester.pump(); // snippet lands in the editor.
       expect(tester.takeException(), isNull);
-      expect(controller.text, contains('![pic](assets/xx.png)'));
+      // The library default is wikilink: the image lands as an embed.
+      expect(controller.text, contains('![[assets/xx.png]]'));
       expect(File(p.join(dir.path, 'assets/xx.png')).existsSync(), isTrue);
       // The inserted link autosaves like any edit:
       await tester.pump(const Duration(milliseconds: 600));
-      expect(writes.single, contains('![pic](assets/xx.png)'));
+      expect(writes.single, contains('![[assets/xx.png]]'));
+      controller.dispose();
+    } finally {
+      await tester.runAsync(() => dir.delete(recursive: true));
+    }
+  });
+
+  testWidgets('a Markdown library links the image Markdown-style', (
+    tester,
+  ) async {
+    final dir = (await tester.runAsync(
+      () => Directory.systemTemp.createTemp('niman_ins_md_'),
+    ))!;
+    try {
+      final source = File(p.join(dir.path, 'pic.png'));
+      await tester.runAsync(() => source.writeAsBytes(_png));
+      final controller = CodeLineEditingController.fromText('hello');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteView(
+              path: p.join(dir.path, 'note.md'),
+              showLineNumbers: true,
+              autofocusEditor: false,
+              libraryRoot: dir.path,
+              linkType: LinkType.markdown,
+              controller: controller,
+              readNote: (_) async => 'hello',
+              writeNote: (path, content) async {},
+              pickImagePath: () async => source.path,
+              importImage: (root, src) => Future.value('assets/xx.png'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(); // load lands; caret at 0.
+      await tester.tap(find.byKey(const Key('insert-image')));
+      await tester.pump(); // pick + copy futures complete.
+      await tester.pump(); // snippet lands in the editor.
+      expect(tester.takeException(), isNull);
+      expect(controller.text, contains('![pic](assets/xx.png)'));
+      // Drain the autosave debounce, or the save timer outlives the test.
+      await tester.pump(const Duration(milliseconds: 600));
       controller.dispose();
     } finally {
       await tester.runAsync(() => dir.delete(recursive: true));

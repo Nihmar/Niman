@@ -98,6 +98,13 @@ abstract interface class NoteOperations {
   /// Sets the template folder.
   Future<void> setTemplateFolder({required String folder});
 
+  /// The folder (library-relative) that holds the attachments
+  /// (default `assets`, issue #56).
+  Future<String> get attachmentsFolder;
+
+  /// Sets the attachments folder.
+  Future<void> setAttachmentsFolder({required String folder});
+
   /// Sets (or clears, with null) the user-chosen quick note.
   Future<void> setQuickNotePath({required String? path});
 

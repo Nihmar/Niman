@@ -14,6 +14,7 @@ device.
 | `quickNotePath` | null (= `Quick note.md` at root) | Quick-note target, library-relative |
 | `listNoteFolder` | `Lists` | Where new list notes go |
 | `templateFolder` | `Templates` | Where note templates live |
+| `attachmentsFolder` | `assets` | Where copied-in images and voice clips live |
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
 | `previewEnabled` | true | Whether the preview exists at all |

@@ -234,6 +234,35 @@ final class BasqueStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Aldatu elementuaren ordena';
 
+  // Audio note kind (issue #56): English fallback until translated.
+  @override
+  String get audioEmpty => 'No recordings yet';
+  @override
+  String get audioRecord => 'Record';
+  @override
+  String get audioStop => 'Stop';
+  @override
+  String get audioPlay => 'Play';
+  @override
+  String get audioStopPlayback => 'Stop playback';
+  @override
+  String get audioDelete => 'Delete recording';
+  @override
+  String get audioImport => 'Import an audio file';
+  @override
+  String get audioRecording => 'Recording…';
+  @override
+  String get audioPlaying => 'Playing';
+  @override
+  String get audioPermissionDenied =>
+      'Microphone permission denied — recording needs it.';
+  @override
+  String get newAudioNoteTitle => 'New voice note';
+  @override
+  String get newAudioNoteDefault => 'My recording';
+  @override
+  String get showAudioTooltip => 'Show recordings';
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
   String get shortcutQuickNote => 'Ohar azkarra';
@@ -243,6 +272,8 @@ final class BasqueStrings extends Strings {
   String get shortcutNewNote => 'Ohar berria';
   @override
   String get shortcutNewList => 'Zerrenda berria';
+  @override
+  String get shortcutNewAudio => 'New voice note';
   @override
   String get shortcutToggleSidebar => 'Ezkutatu edo erakutsi iragazkia';
   @override
@@ -931,6 +962,8 @@ final class BasqueStrings extends Strings {
   String get folderPickerEmpty => 'Oraindik ez dago fitxategi-biltegirik';
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
+  @override
+  String get attachmentsFolderTitle => 'Attachments folder';
 
   // Trash (M1).
   @override

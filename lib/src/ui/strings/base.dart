@@ -114,11 +114,27 @@ abstract base class Strings {
   String get listEmpty;
   String get listDragHandleLabel;
 
+  // Audio note kind (issue #56).
+  String get audioEmpty;
+  String get audioRecord;
+  String get audioStop;
+  String get audioPlay;
+  String get audioStopPlayback;
+  String get audioDelete;
+  String get audioImport;
+  String get audioRecording;
+  String get audioPlaying;
+  String get audioPermissionDenied;
+  String get newAudioNoteTitle;
+  String get newAudioNoteDefault;
+  String get showAudioTooltip;
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;
   String get shortcutNewTodo;
   String get shortcutNewNote;
   String get shortcutNewList;
+  String get shortcutNewAudio;
   String get shortcutToggleSidebar;
   String get shortcutEditorSection;
   String get shortcutFind;
@@ -437,6 +453,7 @@ abstract base class Strings {
   String get folderPickerNewFolder;
   String get folderPickerEmpty;
   String get listFolderTitle;
+  String get attachmentsFolderTitle;
 
   // Trash (M1).
   String get trashEmpty;

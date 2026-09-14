@@ -6,17 +6,17 @@ import 'package:niman/src/core/settings/library_settings.dart'
     show defaultAttachmentsFolder;
 import 'package:path/path.dart' as p;
 
-/// Copies a picked image into the library's attachments folder and returns
-/// its library-relative path (T-M2-09): the content-addressed name is the
-/// file's sha256 (so the same image never duplicates) and the file lands
-/// in `<library>/<attachmentsFolder>/` (created on demand) — the design's
-/// "copy file into the library, insert a link, no base64". The copy runs
-/// off the UI isolate (reads/writes are FUSE round trips on Android).
+/// Copies a recorded or picked audio file into the library's attachments
+/// folder and returns its library-relative path (issue #56): the
+/// content-addressed name is the file's sha256 (so the same clip never
+/// duplicates) and the file lands in `<library>/<attachmentsFolder>/`
+/// (created on demand) — the same layout images use ("copy file into the
+/// library, insert a link, no base64"). The copy runs off the UI isolate
+/// (reads/writes are FUSE round trips on Android).
 ///
-/// Returns something like `assets/ab12…cd.png` — exactly what the preview
-/// resolves against the library root (its `imageDirectory`) and what the
-/// editor highlights as an image link.
-Future<String> importImageToLibrary({
+/// Returns something like `assets/ab12…cd.wav` — exactly what the audio
+/// view resolves against the library root.
+Future<String> importAudioToLibrary({
   required String libraryRoot,
   required String sourcePath,
   String attachmentsFolder = defaultAttachmentsFolder,
@@ -34,7 +34,7 @@ String _copyIntoLibrary(
   final source = File(sourcePath);
   final bytes = source.readAsBytesSync();
   final digest = sha256.convert(bytes).toString();
-  final extension = p.extension(sourcePath); // '' or '.png'
+  final extension = p.extension(sourcePath).toLowerCase();
   final assets = Directory(p.join(libraryRoot, attachmentsFolder))
     ..createSync(recursive: true);
   final target = p.join(assets.path, '$digest$extension');

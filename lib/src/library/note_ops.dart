@@ -119,6 +119,18 @@ final class NoteOps implements NoteOperations {
     (c) => c.copyWith(templateFolder: cleanTemplateFolder(folder)),
   );
 
+  /// The folder holding the attachments (default `assets`).
+  @override
+  Future<String> get attachmentsFolder async =>
+      (await config.config).attachmentsFolder;
+
+  /// Sets the attachments folder (sanitized; an empty result falls back
+  /// to the default).
+  @override
+  Future<void> setAttachmentsFolder({required String folder}) => config.update(
+    (c) => c.copyWith(attachmentsFolder: cleanAttachmentsFolder(folder)),
+  );
+
   /// The user-chosen quick note, or null for the default.
   @override
   Future<String?> get quickNotePath async =>

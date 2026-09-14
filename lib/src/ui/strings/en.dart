@@ -235,6 +235,35 @@ final class EnglishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Reorder item';
 
+  // Audio note kind (issue #56).
+  @override
+  String get audioEmpty => 'No recordings yet';
+  @override
+  String get audioRecord => 'Record';
+  @override
+  String get audioStop => 'Stop';
+  @override
+  String get audioPlay => 'Play';
+  @override
+  String get audioStopPlayback => 'Stop playback';
+  @override
+  String get audioDelete => 'Delete recording';
+  @override
+  String get audioImport => 'Import an audio file';
+  @override
+  String get audioRecording => 'Recording…';
+  @override
+  String get audioPlaying => 'Playing';
+  @override
+  String get audioPermissionDenied =>
+      'Microphone permission denied — recording needs it.';
+  @override
+  String get newAudioNoteTitle => 'New voice note';
+  @override
+  String get newAudioNoteDefault => 'My recording';
+  @override
+  String get showAudioTooltip => 'Show recordings';
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
   String get shortcutQuickNote => 'Quick note';
@@ -244,6 +273,8 @@ final class EnglishStrings extends Strings {
   String get shortcutNewNote => 'New note';
   @override
   String get shortcutNewList => 'New list';
+  @override
+  String get shortcutNewAudio => 'New voice note';
   @override
   String get shortcutToggleSidebar => 'Show or hide the file tree';
   @override
@@ -919,6 +950,8 @@ final class EnglishStrings extends Strings {
   String get folderPickerEmpty => 'No folders yet';
   @override
   String get listFolderTitle => 'List folder';
+  @override
+  String get attachmentsFolderTitle => 'Attachments folder';
 
   // Trash (M1).
   @override
