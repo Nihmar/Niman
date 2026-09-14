@@ -62,11 +62,12 @@ void main() {
       expect(list.truncated, isFalse);
     });
 
-    test('caps the rows with a flag', () {
+    test('caps the rows with a flag and a true total', () {
       final list = checklistRows(content, maxItems: 2);
       expect(list.rows, hasLength(2));
       expect(list.rows.first.text, 'milk');
       expect(list.truncated, isTrue);
+      expect(list.total, 3);
     });
 
     test('rows map to the payload JSON', () {

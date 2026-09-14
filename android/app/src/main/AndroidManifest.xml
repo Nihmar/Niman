@@ -76,11 +76,7 @@
             </intent-filter>
         </receiver>
         <!-- The open-todos home-screen widget (issue 6): push updates
-             only (Dart refreshes on every todo change). The rows render
-             in-process from the payload (no remote views service): a
-             service would need the LAUNCHER to bind it, and that bind
-             only happens when the widget is placed; an already-placed
-             widget could never recover its rows. -->
+             only (Dart refreshes on every todo change). -->
         <receiver
             android:name=".TodoWidgetProvider"
             android:exported="false"
@@ -92,6 +88,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/todo_widget_info" />
         </receiver>
+        <!-- The widget's scrollable rows (issue 6 follow-up): the
+             launcher binds this on demand when it renders the remote
+             collection, so a long list scrolls; BIND_REMOTEVIEWS keeps
+             other apps from binding it. -->
+        <service
+            android:name=".TodoWidgetService"
+            android:exported="true"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
         <!-- Widget checkbox taps (round 2, R2): the background broadcast
              reaches the Dart toggle through the plugin's worker. -->
         <receiver
@@ -132,6 +136,12 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/note_widget_info" />
         </receiver>
+        <!-- The list-note widget's scrollable rows (issue 6 follow-up);
+             same bind model as TodoWidgetService. -->
+        <service
+            android:name=".NoteWidgetService"
+            android:exported="true"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

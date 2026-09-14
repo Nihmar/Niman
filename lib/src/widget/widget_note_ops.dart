@@ -1,14 +1,11 @@
 /// Background note-row ops for the list widget (issue 6).
 ///
 /// The list widget's row taps fire `home_widget` background intents
-/// carrying `niman://note-row-toggle` URIs; these ops edit the note file
-/// off the UI isolate and re-push the widget payload — no activity comes
-/// to the foreground, and it works with the app closed. No Drift, no UI:
-/// the background isolate owns plain file I/O, like the todo toggle.
-///
-/// The "+" button is not a background op: it opens the note with its
-/// add-item field focused (RemoteViews cannot capture typed text, so the
-/// item is typed in the app).
+/// carrying `niman://note-row-toggle` URIs; this op edits the note file
+/// off the UI isolate and re-pushes the widget payload — no activity
+/// comes to the foreground, and it works with the app closed. No Drift,
+/// no UI: the background isolate owns plain file I/O, like the todo
+/// toggle.
 ///
 /// Known limitation: an edit here is an external file edit — a note open
 /// in the editor converges like any other disk change.
@@ -77,6 +74,7 @@ Future<String> notePayloadFor(
       kind: 'list',
       rows: list.rows,
       truncated: list.truncated,
+      total: list.total,
     );
   }
   final excerpt = noteExcerpt(content);

@@ -5,13 +5,9 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
-import android.view.View
 import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -19,21 +15,19 @@ import org.json.JSONObject
  *
  * Renders the payload Dart pushes under `note_<id>` (see
  * `lib/src/widget/widget_payload.dart`): the title plus the excerpt for
- * normal notes, or the checklist rows for `type: list` notes — drawn
- * like the todo widget, from 20 STATIC layout slots (one per payload
- * row; the 20-row cap lives in Dart). The launcher reuses the inflated
- * tree between updates, so a provider `addView` would accumulate a copy
- * of the rows on every refresh; each refresh re-fills the slots
- * (text, color, visibility) instead.
+ * normal notes, or the checklist rows for `type: list` notes.
  *
- * List rows are interactive: a tap flips the item in the background
- * (`niman://note-row-toggle`), and the header "+" opens the note with its
- * add-item field focused (the input field is in the app — RemoteViews
- * cannot capture typed text); the header opens the note. Checked rows
- * render checked through `setCompoundButtonChecked` (a plain `setChecked`
- * is off the RemoteViews allowlist). Normal notes stay read-only
- * (RemoteViews cannot edit text in place, and editing and moving rows
- * live in the app). The widget never reads the note file itself.
+ * List rows are a SCROLLABLE remote collection bound to
+ * [NoteWidgetService] (the launcher binds the service on demand, so a
+ * long checklist scrolls instead of clipping): a row tap flips the item
+ * in the background (`niman://note-row-toggle`), and the header "+" opens
+ * the note with its add-item field focused (the input field is in the
+ * app — RemoteViews cannot capture typed text); the header opens the
+ * note. Checked rows render checked through
+ * `setCompoundButtonChecked` (a plain `setChecked` is off the RemoteViews
+ * allowlist). Normal notes stay read-only (RemoteViews cannot edit text
+ * in place, and editing and moving rows live in the app). The widget
+ * never reads the note file itself.
  */
 class NoteWidgetProvider : HomeWidgetProvider() {
 
@@ -73,6 +67,15 @@ class NoteWidgetProvider : HomeWidgetProvider() {
                 )
             }
             appWidgetManager.updateAppWidget(id, views)
+            // Force the host to re-query the rows after the payload
+            // landed: a tap-to-flip re-pushes a changed payload while the
+            // widget is already bound, and the host otherwise keeps
+            // showing the cached rows (no-op for normal notes, which
+            // have no collection view).
+            appWidgetManager.notifyAppWidgetViewDataChanged(
+                id,
+                R.id.widget_note_rows,
+            )
         }
     }
 
@@ -95,11 +98,8 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         val note = parsed?.optString("note").orEmpty()
         val title = parsed?.optString("title").orEmpty().ifEmpty { "Note" }
         val kind = parsed?.optString("kind", "") ?: ""
-        // The rows fill the 20 static slots (Dart caps the payload at
-        // 20 rows upstream).
-        val rows = if (kind == "list") parsed?.optJSONArray("rows") else null
         if (kind == "list") {
-            return listViews(context, id, library, note, title, rows, payload)
+            return listViews(context, id, library, note, title, payload)
         }
         val views = RemoteViews(context.packageName, R.layout.widget_note)
         views.setTextViewText(R.id.widget_note_title, title)
@@ -115,27 +115,24 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         library: String,
         note: String,
         title: String,
-        rows: JSONArray?,
         payload: String?,
     ): RemoteViews {
-        val rowCount = rows?.length() ?: 0
         val views = RemoteViews(context.packageName, R.layout.widget_note_list)
         views.setTextViewText(R.id.widget_note_title, title)
-        for (i in 0 until rowIds.size) {
-            val row = if (i < rowCount) rows?.optJSONObject(i) else null
-            views.setViewVisibility(
-                rowIds[i],
-                if (row == null) View.GONE else View.VISIBLE,
-            )
-            if (row != null) fillRow(views, context, id, library, note, i, row)
-        }
-        views.setViewVisibility(
-            R.id.widget_note_empty,
-            if (rowCount == 0) View.VISIBLE else View.GONE,
-        )
         views.setTextViewText(
             R.id.widget_note_empty,
             if (payload == null) "Open Niman to load — or pin a note first" else "No items",
+        )
+        // The rows scroll: the launcher binds NoteWidgetService on
+        // demand and the factory serves the payload's checklist rows
+        // (row taps and the checked-state rendering live there). The
+        // instance id rides with the bind, so each instance gets its
+        // own factory.
+        views.setEmptyView(R.id.widget_note_rows, R.id.widget_note_empty)
+        views.setRemoteAdapter(
+            R.id.widget_note_rows,
+            id,
+            Intent(context, NoteWidgetService::class.java),
         )
         val open = openNote(context, id, library, note)
         views.setOnClickPendingIntent(R.id.widget_note_header, open)
@@ -148,76 +145,12 @@ class NoteWidgetProvider : HomeWidgetProvider() {
     }
 
     /**
-     * Fills slot [slot] with [row]: the same CheckBox row as the todo
-     * widget. Tapping flips the item in the background; the checked state
-     * is set with `setCompoundButtonChecked` (a plain `setChecked` is off
-     * the RemoteViews allowlist — see the todo widget's inflation fix).
-     * Editing and moving rows live in the app — the note opens from the
-     * header.
-     */
-    private fun fillRow(
-        views: RemoteViews,
-        context: Context,
-        id: Int,
-        library: String,
-        note: String,
-        slot: Int,
-        row: JSONObject,
-    ) {
-        val checked = row.optBoolean("checked", false)
-        views.setTextViewText(rowTextIds[slot], row.optString("text", ""))
-        views.setCompoundButtonChecked(rowCheckIds[slot], checked)
-        val fillIn = Uri.Builder()
-            .scheme("niman")
-            .authority("note-row-toggle")
-            .appendQueryParameter("id", id.toString())
-            .appendQueryParameter("library", library)
-            .appendQueryParameter("note", note)
-            .appendQueryParameter("line", row.optInt("line", -1).toString())
-            .build()
-        val toggle = HomeWidgetBackgroundIntent.getBroadcast(context, fillIn)
-        views.setOnClickPendingIntent(rowIds[slot], toggle)
-    }
-
-    /**
      * The pending intent for the header "+": opens the note with its
      * add-item field focused (the input field is in the app — RemoteViews
      * cannot capture typed text, so the "+" never appends blindly).
      */
     private fun addNoteRow(context: Context, id: Int, library: String, note: String): PendingIntent {
         return mainActivityIntent(context, id, library, note, WidgetBridge.ACTION_ADD_NOTE_ITEM)
-    }
-
-    companion object {
-        // The 20 static row slots of R.layout.widget_note_list (kept in
-        // sync by hand; the cap is widgetChecklistMaxItems in Dart).
-        val rowIds = intArrayOf(
-            R.id.widget_note_row_0, R.id.widget_note_row_1, R.id.widget_note_row_2,
-            R.id.widget_note_row_3, R.id.widget_note_row_4, R.id.widget_note_row_5,
-            R.id.widget_note_row_6, R.id.widget_note_row_7, R.id.widget_note_row_8,
-            R.id.widget_note_row_9, R.id.widget_note_row_10, R.id.widget_note_row_11,
-            R.id.widget_note_row_12, R.id.widget_note_row_13, R.id.widget_note_row_14,
-            R.id.widget_note_row_15, R.id.widget_note_row_16, R.id.widget_note_row_17,
-            R.id.widget_note_row_18, R.id.widget_note_row_19,
-        )
-        val rowCheckIds = intArrayOf(
-            R.id.widget_note_row_check_0, R.id.widget_note_row_check_1, R.id.widget_note_row_check_2,
-            R.id.widget_note_row_check_3, R.id.widget_note_row_check_4, R.id.widget_note_row_check_5,
-            R.id.widget_note_row_check_6, R.id.widget_note_row_check_7, R.id.widget_note_row_check_8,
-            R.id.widget_note_row_check_9, R.id.widget_note_row_check_10, R.id.widget_note_row_check_11,
-            R.id.widget_note_row_check_12, R.id.widget_note_row_check_13, R.id.widget_note_row_check_14,
-            R.id.widget_note_row_check_15, R.id.widget_note_row_check_16, R.id.widget_note_row_check_17,
-            R.id.widget_note_row_check_18, R.id.widget_note_row_check_19,
-        )
-        val rowTextIds = intArrayOf(
-            R.id.widget_note_row_text_0, R.id.widget_note_row_text_1, R.id.widget_note_row_text_2,
-            R.id.widget_note_row_text_3, R.id.widget_note_row_text_4, R.id.widget_note_row_text_5,
-            R.id.widget_note_row_text_6, R.id.widget_note_row_text_7, R.id.widget_note_row_text_8,
-            R.id.widget_note_row_text_9, R.id.widget_note_row_text_10, R.id.widget_note_row_text_11,
-            R.id.widget_note_row_text_12, R.id.widget_note_row_text_13, R.id.widget_note_row_text_14,
-            R.id.widget_note_row_text_15, R.id.widget_note_row_text_16, R.id.widget_note_row_text_17,
-            R.id.widget_note_row_text_18, R.id.widget_note_row_text_19,
-        )
     }
 
     private fun bodyFor(parsed: JSONObject?, payload: String?): String {

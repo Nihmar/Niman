@@ -15,7 +15,11 @@ import 'package:path/path.dart' as p;
 const int widgetExcerptMaxChars = 2000;
 
 /// Max checklist rows for a list note.
-const int widgetChecklistMaxItems = 20;
+///
+/// The widget rows are a scrollable `RemoteCollection`, so the cap is a
+/// payload-size guard (the note file may be novel-length), not a
+/// visibility one.
+const int widgetChecklistMaxItems = 100;
 
 /// One checklist row of a list note payload: the item's prose, box state
 /// and position (the line is the file line the background ops flip).
@@ -75,8 +79,9 @@ List<String> noteBodyLines(String content) {
 }
 
 /// The checklist rows of a list note: one [ChecklistRow] per item in
-/// document order, capped to [maxItems].
-({List<ChecklistRow> rows, bool truncated}) checklistRows(
+/// document order, capped to [maxItems], with the true item count
+/// (`total`) so the widget can stay honest when the rows are capped.
+({List<ChecklistRow> rows, bool truncated, int total}) checklistRows(
   String content, {
   int maxItems = widgetChecklistMaxItems,
 }) {
@@ -93,5 +98,6 @@ List<String> noteBodyLines(String content) {
         ),
     ],
     truncated: items.length > kept.length,
+    total: items.length,
   );
 }

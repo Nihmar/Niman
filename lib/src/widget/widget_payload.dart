@@ -51,7 +51,7 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
 }
 
 /// The todo rows as JSON: `{"library": path, "rows": [{text, due,
-/// priority, line}], "truncated": bool}`.
+/// priority, line}], "truncated": bool, "total": int}`.
 ///
 /// [entries] arrive in widget order (the todo widget sort); `library` is
 /// the absolute library root the native provider taps back into; `text`
@@ -59,19 +59,21 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
 /// `+`/`@`/`#` markers do not eat widget width), `due` a `YYYY-MM-DD`
 /// date or null, `line` the file line (for future tap-to-toggle). Rows
 /// drop from the end while the payload exceeds [maxChars], setting
-/// `truncated`.
+/// `truncated`. [total] is the open-task count before capping, so the
+/// header count stays true when the rows are truncated.
 String todoWidgetPayload(
   List<TodoEntry> entries, {
   required String libraryPath,
+  int? total,
   int maxChars = widgetPayloadMaxChars,
 }) {
   var rows = <Map<String, Object?>>[for (final entry in entries) _row(entry)];
   var truncated = false;
-  var encoded = _encode(libraryPath, rows, truncated);
+  var encoded = _encode(libraryPath, rows, truncated, total ?? rows.length);
   while (rows.isNotEmpty && encoded.length > maxChars) {
     rows = rows.sublist(0, rows.length - 1);
     truncated = true;
-    encoded = _encode(libraryPath, rows, truncated);
+    encoded = _encode(libraryPath, rows, truncated, total ?? rows.length);
   }
   return encoded;
 }
@@ -87,26 +89,29 @@ Map<String, Object?> _row(TodoEntry entry) {
   };
 }
 
-/// Encodes [rows] with the [libraryPath] and [truncated] flag.
+/// Encodes [rows] with the [libraryPath], [truncated] and [total] fields.
 String _encode(
   String libraryPath,
   List<Map<String, Object?>> rows,
   bool truncated,
+  int total,
 ) {
   return jsonEncode({
     'library': libraryPath,
     'rows': rows,
     'truncated': truncated,
+    'total': total,
   });
 }
 
 /// A pinned note as JSON: `{"library", "note", "title", "kind", "rows",
-/// "body", "truncated"}`.
+/// "body", "truncated", "total"}`.
 ///
 /// `library` is the absolute root and `note` the library-relative path
 /// the native provider taps back into; `kind` is `note` (prose excerpt
 /// in `body`), `list` (checklist items in `rows`) or `missing` (the note
-/// is gone; `body` empty).
+/// is gone; `body` empty). `total` is the item count before capping
+/// (the row count when absent), so a capped list stays honest.
 String noteWidgetPayload({
   required String libraryPath,
   required String notePath,
@@ -115,6 +120,7 @@ String noteWidgetPayload({
   required bool truncated,
   String body = '',
   List<ChecklistRow> rows = const [],
+  int? total,
 }) {
   return jsonEncode({
     'library': libraryPath,
@@ -124,5 +130,6 @@ String noteWidgetPayload({
     'rows': [for (final row in rows) row.toMap()],
     'body': body,
     'truncated': truncated,
+    'total': total ?? rows.length,
   });
 }
