@@ -127,13 +127,20 @@ class NoteWidgetProvider : HomeWidgetProvider() {
         // The rows scroll: the launcher binds NoteWidgetService on
         // demand and the factory serves the payload's checklist rows
         // (row taps and the checked-state rendering live there). The
-        // instance id rides with the bind, so each instance gets its
-        // own factory.
+        // instance id rides with the bind as EXTRA_APPWIDGET_ID, so
+        // each instance gets its own factory.
+        //
+        // The two-argument overload targets the ListView by its layout
+        // id: the deprecated three-argument overload's first parameter
+        // is the appWidgetId (ignored) and its second the view id, so
+        // passing (viewId, appWidgetId) binds the service to a view
+        // that does not exist and the rows never render.
         views.setEmptyView(R.id.widget_note_rows, R.id.widget_note_empty)
+        @Suppress("DEPRECATION") // RemoteCollectionItems is static-only
         views.setRemoteAdapter(
             R.id.widget_note_rows,
-            id,
-            Intent(context, NoteWidgetService::class.java),
+            Intent(context, NoteWidgetService::class.java)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
         )
         val open = openNote(context, id, library, note)
         views.setOnClickPendingIntent(R.id.widget_note_header, open)
