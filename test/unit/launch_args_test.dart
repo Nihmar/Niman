@@ -1,4 +1,4 @@
-// T-PP-05: the CLI is the desktop floor for the four quick actions. Each
+// T-PP-05: the CLI is the desktop floor for the quick actions. Each
 // flag must map to the same ShortcutAction its launcher and tray twins
 // use, and the hand-off must stay one-shot like the platform's.
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +11,7 @@ void main() {
     expect(parseLaunchArgs(['--new-note']).action, ShortcutAction.newNote);
     expect(parseLaunchArgs(['--new-todo']).action, ShortcutAction.newTodo);
     expect(parseLaunchArgs(['--new-list']).action, ShortcutAction.newList);
+    expect(parseLaunchArgs(['--new-voice']).action, ShortcutAction.newVoice);
   });
 
   test('an ordinary start asks for nothing', () {

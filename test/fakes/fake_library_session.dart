@@ -58,6 +58,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   String? _quickNotePath;
   String _listNoteFolder = 'Lists';
   String _templateFolder = defaultTemplateFolder;
+  String _attachmentsFolder = defaultAttachmentsFolder;
 
   /// Search hits returned for every word query (empty = no results).
   ///
@@ -506,6 +507,14 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setTemplateFolder({required String folder}) async {
     _templateFolder = folder;
+  }
+
+  @override
+  Future<String> get attachmentsFolder async => _attachmentsFolder;
+
+  @override
+  Future<void> setAttachmentsFolder({required String folder}) async {
+    _attachmentsFolder = folder;
   }
 
   /// Templates come from the fake's own rows, so a test that creates a

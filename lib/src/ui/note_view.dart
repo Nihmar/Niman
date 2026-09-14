@@ -26,6 +26,7 @@ import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/image_import.dart';
+import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/slug.dart';
@@ -73,6 +74,7 @@ final class NoteView extends StatefulWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     this.linkType = LinkType.wikilink,
+    this.attachmentsFolder = defaultAttachmentsFolder,
     this.indentWidth = 2,
     this.toolbarLayout = ToolbarLayout.defaults,
     this.splitPreview = false,
@@ -113,6 +115,10 @@ final class NoteView extends StatefulWidget {
 
   /// The link format the link button inserts (settings).
   final LinkType linkType;
+
+  /// The folder (library-relative) picked images are copied into
+  /// (settings, issue #56).
+  final String attachmentsFolder;
 
   /// The indent/outdent width in spaces (settings).
   final int indentWidth;
@@ -365,6 +371,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _kindHost = NoteKindHostAdapter(
       noteText: () => _currentText,
       applyNoteEdit: _applyKindEdit,
+      noteFilePath: () => widget.path,
+      rootDirectory: () => widget.libraryRoot,
+      attachmentsFolderOf: () => widget.attachmentsFolder,
+      linkTypeOf: () => widget.linkType,
     );
     _unsaved = widget.unsavedTracker;
     _unsaved?.register(_unsavedNote);
@@ -808,8 +818,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
   }
 
-  /// T-M2-09: pick an image, copy it into the library's `assets/`, insert a
-  /// library-relative link at the caret.
+  /// T-M2-09: pick an image, copy it into the library's attachments
+  /// folder, insert a library-relative link at the caret — in the
+  /// library's link format (wikilink embed or Markdown image).
   Future<void> _insertImage() async {
     final root = widget.libraryRoot;
     if (root == null) return;
@@ -817,12 +828,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     if (source == null || !mounted) return;
     final relative =
         await (widget.importImage?.call(root, source) ??
-            importImageToLibrary(libraryRoot: root, sourcePath: source));
+            importImageToLibrary(
+              libraryRoot: root,
+              sourcePath: source,
+              attachmentsFolder: widget.attachmentsFolder,
+            ));
     if (!mounted) return;
     // Alt text comes from the picked file's name; the link itself is the
     // content-addressed library path, so `photo.png` keeps a readable label.
     final label = p.basenameWithoutExtension(source);
-    final snippet = '![$label]($relative)';
+    final snippet = attachmentEmbed(
+      relativePath: relative,
+      label: label,
+      linkType: widget.linkType,
+    );
     _controller.replaceSelection(snippet);
     _scroll.makeCenterIfInvisible(
       CodeLinePosition(index: _controller.selection.extentIndex, offset: 0),
@@ -1711,10 +1730,18 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     }
     final relative =
         await (widget.importImage?.call(root, source) ??
-            importImageToLibrary(libraryRoot: root, sourcePath: source));
+            importImageToLibrary(
+              libraryRoot: root,
+              sourcePath: source,
+              attachmentsFolder: widget.attachmentsFolder,
+            ));
     if (!mounted) return;
     final label = p.basenameWithoutExtension(source);
-    final snippet = '![$label]($relative)';
+    final snippet = attachmentEmbed(
+      relativePath: relative,
+      label: label,
+      linkType: widget.linkType,
+    );
     final controller = state.controller;
     final index = controller.selection.start;
     controller.replaceText(

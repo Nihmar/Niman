@@ -30,7 +30,14 @@ enum ShortcutAction {
   newNote('new_note'),
 
   /// Opens the new list-note flow (the Files FAB's "New list note").
-  newList('new_list');
+  newList('new_list'),
+
+  /// Opens the new voice-note flow (the Files FAB's "New voice note").
+  ///
+  /// Last in the publish order: launchers that show fewer than all
+  /// shortcuts keep the leading ones, and the Android bridge drops ids
+  /// without a drawable rather than failing the whole set.
+  newVoice('new_voice');
 
   new(this.id);
 

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// The expandable "+" FAB (T-UI-05): the main round button reveals three
-/// mini FABs above it — New note, New list note and New folder — instead
-/// of opening the note dialog directly. Controlled by the shell
-/// ([expanded]) so it can cover the body with a tap-to-dismiss scrim
-/// while the menu is open; tapping the main FAB again (or choosing an
-/// action) collapses the menu.
+/// The expandable "+" FAB (T-UI-05): the main round button reveals the
+/// mini FABs above it — New note, New from template, New list note, New
+/// voice note and New folder — instead of opening the note dialog
+/// directly. Controlled by the shell ([expanded]) so it can cover the
+/// body with a tap-to-dismiss scrim while the menu is open; tapping the
+/// main FAB again (or choosing an action) collapses the menu.
 final class NewItemFab extends StatelessWidget {
   /// Creates an expandable FAB wired to the shell's create handlers.
   ///
@@ -19,6 +19,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onToggle,
     required this.onNewNote,
     required this.onNewListNote,
+    required this.onNewAudioNote,
     required this.onNewFromTemplate,
     required this.onNewFolder,
     super.key,
@@ -47,6 +48,9 @@ final class NewItemFab extends StatelessWidget {
 
   /// Creates a new list note in the configured list folder.
   final VoidCallback onNewListNote;
+
+  /// Creates a new voice note in the FAB target folder.
+  final VoidCallback onNewAudioNote;
 
   /// Creates a note from a template, in the FAB target folder.
   final VoidCallback onNewFromTemplate;
@@ -82,6 +86,14 @@ final class NewItemFab extends StatelessWidget {
           tooltip: AppStrings.newListNoteTitle,
           open: expanded,
           onTap: onNewListNote,
+        ),
+        const SizedBox(height: 12),
+        _MiniFab(
+          key: const Key('new-audio-note-action'),
+          icon: Icons.mic_outlined,
+          tooltip: AppStrings.newAudioNoteTitle,
+          open: expanded,
+          onTap: onNewAudioNote,
         ),
         const SizedBox(height: 12),
         _MiniFab(

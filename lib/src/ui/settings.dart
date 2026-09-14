@@ -66,6 +66,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   String? _quickNotePath;
   String? _listFolder;
   String? _templateFolder;
+  String? _attachmentsFolder;
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
   AppPalette _themePalette = AppPalette.system;
@@ -106,6 +107,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final quickNotePath = await ops.quickNotePath;
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
+    final attachmentsFolder = await ops.attachmentsFolder;
     final language = await controller.language;
     final themeBrightness = await controller.themeBrightness;
     final themePalette = await controller.themePalette;
@@ -130,6 +132,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _quickNotePath = quickNotePath;
         _listFolder = listFolder;
         _templateFolder = templateFolder;
+        _attachmentsFolder = attachmentsFolder;
         _language = language;
         _themeBrightness = themeBrightness;
         _themePalette = themePalette;
@@ -217,6 +220,30 @@ final class _SettingsBodyState extends State<SettingsBody> {
     widget.controller.notify();
     if (mounted) {
       setState(() => _templateFolder = saved);
+    }
+  }
+
+  /// Opens the attachments-folder picker (issue #56): where images
+  /// copied in by the editor and voice-note clips live, chosen from the
+  /// library's folders rather than typed.
+  Future<void> _pickAttachmentsFolder() async {
+    final ops = widget.controller.ops;
+    if (ops == null) return;
+    final folders = await widget.controller.folders();
+    if (!mounted) return;
+    final folder = await showFolderPicker(
+      context,
+      title: AppStrings.attachmentsFolderTitle,
+      folders: folders,
+      ops: ops,
+      current: _attachmentsFolder ?? defaultAttachmentsFolder,
+    );
+    if (folder == null) return;
+    await ops.setAttachmentsFolder(folder: folder);
+    final saved = await ops.attachmentsFolder;
+    widget.controller.notify();
+    if (mounted) {
+      setState(() => _attachmentsFolder = saved);
     }
   }
 
@@ -876,6 +903,12 @@ final class _SettingsBodyState extends State<SettingsBody> {
           title: AppStrings.templateFolderTitle,
           value: _templateFolder ?? defaultTemplateFolder,
           onTap: _pickTemplateFolder,
+        ),
+        SettingsValueRow(
+          key: const Key('attachments-folder-setting'),
+          title: AppStrings.attachmentsFolderTitle,
+          value: _attachmentsFolder ?? defaultAttachmentsFolder,
+          onTap: _pickAttachmentsFolder,
         ),
         // Next to the folder, because that is where someone setting
         // templates up is already standing (T-TPL-08).

@@ -50,7 +50,7 @@ void main() {
     await tray.dispose();
   }
 
-  testWidgets('the tray is offered the four actions at start', (tester) async {
+  testWidgets('the tray is offered the five actions at start', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
 
@@ -59,6 +59,7 @@ void main() {
       ShortcutAction.newTodo: AppStrings.shortcutNewTodo,
       ShortcutAction.newNote: AppStrings.shortcutNewNote,
       ShortcutAction.newList: AppStrings.shortcutNewList,
+      ShortcutAction.newVoice: AppStrings.shortcutNewAudio,
     });
     expect(
       tray.labels!.keys.toList(),

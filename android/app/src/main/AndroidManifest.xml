@@ -26,6 +26,10 @@
          in its own manifest, so the app must add these itself. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Voice notes (issue #56): the microphone is runtime-granted on
+         Android 6+ (asked when the first recording starts). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:label="Niman"
         android:name="${applicationName}"

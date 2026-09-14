@@ -235,6 +235,35 @@ final class NorwegianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Endre rekkefølge på elementet';
 
+  // Audio note kind (issue #56): English fallback until translated.
+  @override
+  String get audioEmpty => 'No recordings yet';
+  @override
+  String get audioRecord => 'Record';
+  @override
+  String get audioStop => 'Stop';
+  @override
+  String get audioPlay => 'Play';
+  @override
+  String get audioStopPlayback => 'Stop playback';
+  @override
+  String get audioDelete => 'Delete recording';
+  @override
+  String get audioImport => 'Import an audio file';
+  @override
+  String get audioRecording => 'Recording…';
+  @override
+  String get audioPlaying => 'Playing';
+  @override
+  String get audioPermissionDenied =>
+      'Microphone permission denied — recording needs it.';
+  @override
+  String get newAudioNoteTitle => 'New voice note';
+  @override
+  String get newAudioNoteDefault => 'My recording';
+  @override
+  String get showAudioTooltip => 'Show recordings';
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
   String get shortcutQuickNote => 'Hurtignotat';
@@ -244,6 +273,8 @@ final class NorwegianStrings extends Strings {
   String get shortcutNewNote => 'Nytt notat';
   @override
   String get shortcutNewList => 'Ny liste';
+  @override
+  String get shortcutNewAudio => 'New voice note';
   @override
   String get shortcutToggleSidebar => 'Vis eller skjul filtreet';
   @override
@@ -921,6 +952,8 @@ final class NorwegianStrings extends Strings {
   String get folderPickerEmpty => 'Ingen mapper ennå';
   @override
   String get listFolderTitle => 'Listemappe';
+  @override
+  String get attachmentsFolderTitle => 'Attachments folder';
 
   // Trash (M1).
   @override

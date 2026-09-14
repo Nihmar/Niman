@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 
 /// The note text as seen and edited by a kind GUI.
@@ -8,6 +10,20 @@ abstract interface class NoteKindHost {
 
   /// Applies a byte-stable edit to the note text; the host persists it.
   void applyEdit(String newText);
+
+  /// The library root, or null outside a library (tests).
+  ///
+  /// Kinds that link files (audio clips) resolve their targets under it.
+  String? get libraryRoot;
+
+  /// The note's absolute file path, for resolving note-relative links.
+  String get notePath;
+
+  /// The folder (library-relative) new attachments are copied into.
+  String get attachmentsFolder;
+
+  /// What new attachment links look like (wikilink or Markdown).
+  LinkType get linkType;
 }
 
 /// A note-kind GUI: the dedicated UI for notes whose frontmatter declares
@@ -29,7 +45,7 @@ abstract interface class NoteKindGUI {
 final class NoteKinds {
   new _();
 
-  static final List<NoteKindGUI> _all = [ListKindGui()];
+  static final List<NoteKindGUI> _all = [ListKindGui(), AudioKindGui()];
 
   /// The GUI for [type], or null for an unknown or absent kind.
   static NoteKindGUI? forType(String? type) {

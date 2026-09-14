@@ -268,11 +268,27 @@ final class AppStrings {
   static String get listEmpty => _s.listEmpty;
   static String get listDragHandleLabel => _s.listDragHandleLabel;
 
+  // Audio note kind (issue #56).
+  static String get audioEmpty => _s.audioEmpty;
+  static String get audioRecord => _s.audioRecord;
+  static String get audioStop => _s.audioStop;
+  static String get audioPlay => _s.audioPlay;
+  static String get audioStopPlayback => _s.audioStopPlayback;
+  static String get audioDelete => _s.audioDelete;
+  static String get audioImport => _s.audioImport;
+  static String get audioRecording => _s.audioRecording;
+  static String get audioPlaying => _s.audioPlaying;
+  static String get audioPermissionDenied => _s.audioPermissionDenied;
+  static String get newAudioNoteTitle => _s.newAudioNoteTitle;
+  static String get newAudioNoteDefault => _s.newAudioNoteDefault;
+  static String get showAudioTooltip => _s.showAudioTooltip;
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;
   static String get shortcutNewTodo => _s.shortcutNewTodo;
   static String get shortcutNewNote => _s.shortcutNewNote;
   static String get shortcutNewList => _s.shortcutNewList;
+  static String get shortcutNewAudio => _s.shortcutNewAudio;
   static String get shortcutToggleSidebar => _s.shortcutToggleSidebar;
   static String get shortcutEditorSection => _s.shortcutEditorSection;
   static String get shortcutFind => _s.shortcutFind;
@@ -624,6 +640,7 @@ final class AppStrings {
   static String get folderPickerNewFolder => _s.folderPickerNewFolder;
   static String get folderPickerEmpty => _s.folderPickerEmpty;
   static String get listFolderTitle => _s.listFolderTitle;
+  static String get attachmentsFolderTitle => _s.attachmentsFolderTitle;
 
   // Trash (M1).
   static String get trashEmpty => _s.trashEmpty;

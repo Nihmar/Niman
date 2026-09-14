@@ -219,6 +219,35 @@ final class ChineseStrings extends Strings {
   @override
   String get listDragHandleLabel => '重新排列条目';
 
+  // Audio note kind (issue #56): English fallback until translated.
+  @override
+  String get audioEmpty => 'No recordings yet';
+  @override
+  String get audioRecord => 'Record';
+  @override
+  String get audioStop => 'Stop';
+  @override
+  String get audioPlay => 'Play';
+  @override
+  String get audioStopPlayback => 'Stop playback';
+  @override
+  String get audioDelete => 'Delete recording';
+  @override
+  String get audioImport => 'Import an audio file';
+  @override
+  String get audioRecording => 'Recording…';
+  @override
+  String get audioPlaying => 'Playing';
+  @override
+  String get audioPermissionDenied =>
+      'Microphone permission denied — recording needs it.';
+  @override
+  String get newAudioNoteTitle => 'New voice note';
+  @override
+  String get newAudioNoteDefault => 'My recording';
+  @override
+  String get showAudioTooltip => 'Show recordings';
+
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
   String get shortcutQuickNote => '快速笔记';
@@ -228,6 +257,8 @@ final class ChineseStrings extends Strings {
   String get shortcutNewNote => '新建笔记';
   @override
   String get shortcutNewList => '新建列表';
+  @override
+  String get shortcutNewAudio => 'New voice note';
   @override
   String get shortcutToggleSidebar => '显示或隐藏文件树';
   @override
@@ -835,6 +866,8 @@ final class ChineseStrings extends Strings {
   String get folderPickerEmpty => '还没有文件夹';
   @override
   String get listFolderTitle => '列表文件夹';
+  @override
+  String get attachmentsFolderTitle => 'Attachments folder';
 
   // Trash (M1).
   @override

@@ -43,4 +43,5 @@ const Map<String, ShortcutAction> _flags = {
   '--new-note': ShortcutAction.newNote,
   '--new-todo': ShortcutAction.newTodo,
   '--new-list': ShortcutAction.newList,
+  '--new-voice': ShortcutAction.newVoice,
 };

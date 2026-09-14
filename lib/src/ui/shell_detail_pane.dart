@@ -22,6 +22,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     required this.linkType,
+    required this.attachmentsFolder,
     required this.indentWidth,
     required this.toolbarLayout,
     required this.splitPreview,
@@ -59,6 +60,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// The link format the link button inserts.
   final LinkType linkType;
+
+  /// The folder (library-relative) picked images are copied into.
+  final String attachmentsFolder;
 
   /// The indent/outdent width in spaces.
   final int indentWidth;
@@ -141,6 +145,7 @@ final class ShellDetailPane extends StatelessWidget {
                 showLineNumbers: showLineNumbers,
                 autofocusEditor: autofocusEditor,
                 linkType: linkType,
+                attachmentsFolder: attachmentsFolder,
                 indentWidth: indentWidth,
                 toolbarLayout: toolbarLayout,
                 // Wide only: the formatting toolbar sits above the editor

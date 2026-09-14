@@ -4,6 +4,7 @@
 /// surface for them.
 library;
 
+import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 
@@ -52,7 +53,14 @@ final class UnsavedNoteAdapter implements UnsavedNote {
 /// byte-stable edits that persist through the regular save path.
 final class NoteKindHostAdapter implements NoteKindHost {
   /// Creates a host reading [noteText] and applying [applyNoteEdit].
-  const new({required this.noteText, required this.applyNoteEdit});
+  const new({
+    required this.noteText,
+    required this.applyNoteEdit,
+    required this.noteFilePath,
+    required this.rootDirectory,
+    required this.attachmentsFolderOf,
+    required this.linkTypeOf,
+  });
 
   /// The full note text (frontmatter + body).
   final String Function() noteText;
@@ -60,9 +68,33 @@ final class NoteKindHostAdapter implements NoteKindHost {
   /// Applies a byte-stable edit to the note text; the host persists it.
   final void Function(String newText) applyNoteEdit;
 
+  /// The note's absolute file path.
+  final String Function() noteFilePath;
+
+  /// The library root, or null outside a library.
+  final String? Function() rootDirectory;
+
+  /// The folder (library-relative) new attachments are copied into.
+  final String Function() attachmentsFolderOf;
+
+  /// What new attachment links look like.
+  final LinkType Function() linkTypeOf;
+
   @override
   String get text => noteText();
 
   @override
   void applyEdit(String newText) => applyNoteEdit(newText);
+
+  @override
+  String get notePath => noteFilePath();
+
+  @override
+  String? get libraryRoot => rootDirectory();
+
+  @override
+  String get attachmentsFolder => attachmentsFolderOf();
+
+  @override
+  LinkType get linkType => linkTypeOf();
 }

@@ -79,6 +79,10 @@ const String defaultListFolder = 'Lists';
 /// (T-M4-05).
 const String defaultTemplateFolder = 'Templates';
 
+/// The default folder (library-relative) holding the attachments: images
+/// copied in by the editor and voice-note clips alike (issue #56).
+const String defaultAttachmentsFolder = 'assets';
+
 /// The lower bound of the allowed split range.
 const double minSplitRatio = 0.2;
 

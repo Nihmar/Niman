@@ -3,7 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
-    show EditorKind, LinkType, TreeSort, defaultListFolder;
+    show
+        EditorKind,
+        LinkType,
+        TreeSort,
+        defaultAttachmentsFolder,
+        defaultListFolder;
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -351,6 +356,19 @@ void main() {
       expect(folderOf('../../etc'), 'etc');
       expect(folderOf('//'), defaultListFolder);
       expect(folderOf('  '), defaultListFolder);
+    });
+
+    test('a hand-written attachmentsFolder is sanitized on read', () {
+      String folderOf(String raw) =>
+          LibraryConfig.fromJsonMap({'attachmentsFolder': raw})
+              .attachmentsFolder;
+      expect(folderOf('/Attachments/'), 'Attachments');
+      expect(folderOf('  '), defaultAttachmentsFolder);
+      expect(
+        LibraryConfig.fromJsonMap(const {}).attachmentsFolder,
+        defaultAttachmentsFolder,
+      );
+      expect(LibraryConfig.defaults.attachmentsFolder, 'assets');
     });
 
     test('a fresh library gets the shipped editor settings', () {

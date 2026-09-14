@@ -58,4 +58,20 @@ void main() {
 
     await dir.delete(recursive: true);
   });
+
+  test('a configured attachments folder receives the copy', () async {
+    final dir = await Directory.systemTemp.createTemp('niman_img3_');
+    final source = File(p.join(dir.path, 'a.png'));
+    await source.writeAsBytes(const [1, 2, 3]);
+
+    final relative = await importImageToLibrary(
+      libraryRoot: dir.path,
+      sourcePath: source.path,
+      attachmentsFolder: 'Attachments',
+    );
+    expect(relative.startsWith('Attachments/'), isTrue);
+    expect(File(p.join(dir.path, relative)).existsSync(), isTrue);
+
+    await dir.delete(recursive: true);
+  });
 }

@@ -30,7 +30,8 @@ aliases: [My alias]
 ```
 
 Any key is stored and filterable (`key = value` in search). Keys the app
-acts on: `title`, `tags`, `date`, `pinned`, `aliases`. Everything else is
+acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
+shows the checklist, `audio` shows the recordings). Everything else is
 your own vocabulary — stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
@@ -44,11 +45,21 @@ Two places, both searchable:
 
 Search a single tag with `#tag` (see [search](search.md)).
 
-## Folders, quick note, list notes
+## Folders, quick note, list notes, voice notes
 
 - Notes live in plain folders inside the library.
 - **Quick note:** one tap target for scratch text. Defaults to
   `Quick note.md` at the library root; `quickNotePath` overrides it.
 - **List notes:** created under `listNoteFolder` (default `Lists`).
+- **Voice notes:** a note with `type: audio` frontmatter shows its
+  recordings (one clip per line) instead of the editor. Record appends a
+  clip; clips are plain audio files under the attachments folder
+  (`attachmentsFolder`, default `assets`), content-addressed like images
+  and linked in the library's link format (`![[…]]` for wikilink
+  libraries, `![](…)` for Markdown ones), so they travel with the
+  library. Recording writes WAV (PCM 16-bit: playable on Android,
+  Linux and Windows with no extra codec); attaching keeps the file's own
+  format (`.mp3`, `.m4a`, `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux
+  recording needs `pulseaudio-utils` and `ffmpeg` installed.
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).
