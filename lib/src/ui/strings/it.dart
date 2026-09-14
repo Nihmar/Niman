@@ -265,6 +265,20 @@ final class ItalianStrings extends Strings {
   String get newAudioNoteDefault => 'My recording';
   @override
   String get showAudioTooltip => 'Show recordings';
+  @override
+  String get audioMessageHint => 'Scrivi una nota…';
+  @override
+  String get audioSend => 'Invia';
+  @override
+  String get audioRename => 'Rinomina registrazione';
+  @override
+  String get audioDescriptionHint => 'Descrivi questa registrazione…';
+  @override
+  String get audioEditDescription => 'Modifica descrizione';
+  @override
+  String get audioDeleteNote => 'Elimina nota';
+  @override
+  String get audioEditNote => 'Modifica nota';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

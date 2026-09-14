@@ -43,3 +43,52 @@ String _copyIntoLibrary(
   }
   return '$attachmentsFolder/$digest$extension';
 }
+
+/// Renames an audio file inside the library, off the UI isolate (reads
+/// are FUSE round trips on Android).
+///
+/// [oldRelative] and [newFileName] resolve under [libraryRoot]; the
+/// extension of the current file is kept when [newFileName] carries none,
+/// and a `-1`, `-2` suffix disambiguates a collision. Returns the new
+/// library-relative path for the note's embed.
+Future<String> renameAudioInLibrary({
+  required String libraryRoot,
+  required String oldRelative,
+  required String newFileName,
+}) {
+  return Isolate.run(
+    () => _renameInLibrary(libraryRoot, oldRelative, newFileName),
+  );
+}
+
+String _renameInLibrary(
+  String libraryRoot,
+  String oldRelative,
+  String newFileName,
+) {
+  final oldFile = File(p.join(libraryRoot, oldRelative));
+  if (!oldFile.existsSync()) {
+    throw StateError('Recording not found: $oldRelative');
+  }
+  var name = newFileName.trim();
+  if (name.isEmpty) {
+    throw ArgumentError('The new name must not be empty');
+  }
+  // A bare name keeps the recording's extension.
+  if (!name.contains('.')) {
+    name = '$name${p.extension(oldFile.path)}';
+  }
+  final dir = p.dirname(oldFile.path);
+  var candidate = p.join(dir, name);
+  var counter = 1;
+  while (File(candidate).existsSync() &&
+      p.normalize(candidate) != p.normalize(oldFile.path)) {
+    counter++;
+    final stem = p.basenameWithoutExtension(name);
+    candidate = p.join(dir, '$stem-$counter${p.extension(name)}');
+  }
+  if (p.normalize(candidate) != p.normalize(oldFile.path)) {
+    oldFile.renameSync(candidate);
+  }
+  return p.relative(candidate, from: libraryRoot);
+}

@@ -51,15 +51,21 @@ Search a single tag with `#tag` (see [search](search.md)).
 - **Quick note:** one tap target for scratch text. Defaults to
   `Quick note.md` at the library root; `quickNotePath` overrides it.
 - **List notes:** created under `listNoteFolder` (default `Lists`).
-- **Voice notes:** a note with `type: audio` frontmatter shows its
-  recordings (one clip per line) instead of the editor. Record appends a
-  clip; clips are plain audio files under the attachments folder
+- **Voice notes:** a note with `type: audio` frontmatter shows a chat
+  instead of the editor — vocals on the left, written notes on the
+  right. Record (or attach) appends a vocal; clips are plain audio
+  files under the attachments folder
   (`attachmentsFolder`, default `assets`), content-addressed like images
   and linked in the library's link format (`![[…]]` for wikilink
   libraries, `![](…)` for Markdown ones), so they travel with the
-  library. Recording writes WAV (PCM 16-bit: playable on Android,
+  library. Each vocal carries a description: the `> …` blockquote lines
+  right under its embed in the `.md`, shown as a bubble under the vocal
+  and editable from the page. The input field sends written notes as
+  plain lines (right bubbles). The rename action renames the audio file
+  and updates its link. Recording writes WAV (PCM 16-bit: playable on Android,
   Linux and Windows with no extra codec); attaching keeps the file's own
   format (`.mp3`, `.m4a`, `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux
-  recording needs `pulseaudio-utils` and `ffmpeg` installed.
+  recording needs `pulseaudio-utils` and `ffmpeg` installed. While
+  recording, a red `Recording…` hint shows above the input.
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).

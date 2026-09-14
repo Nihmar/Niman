@@ -58,7 +58,7 @@ void main() {
 
   group('appendAudioClip', () {
     test('appends in the library link format, keeping bytes', () {
-      const text = '---\ntype: audio\n---\n![[assets/a.wav]]\n';
+      const text = '---\ntype: audio\n---\n';
       expect(
         appendAudioClip(text, 'assets/b.wav', linkType: LinkType.wikilink),
         '$text![[assets/b.wav]]\n',
@@ -66,6 +66,14 @@ void main() {
       expect(
         appendAudioClip(text, 'assets/b.wav', linkType: LinkType.markdown),
         '$text![](assets/b.wav)\n',
+      );
+    });
+
+    test('every bubble is its own blank-line separated paragraph', () {
+      const text = '---\ntype: audio\n---\n![[assets/a.wav]]\n';
+      expect(
+        appendAudioClip(text, 'assets/b.wav', linkType: LinkType.wikilink),
+        '$text\n![[assets/b.wav]]\n',
       );
     });
   });

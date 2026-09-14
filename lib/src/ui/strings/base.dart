@@ -128,6 +128,13 @@ abstract base class Strings {
   String get newAudioNoteTitle;
   String get newAudioNoteDefault;
   String get showAudioTooltip;
+  String get audioMessageHint;
+  String get audioSend;
+  String get audioRename;
+  String get audioDescriptionHint;
+  String get audioEditDescription;
+  String get audioDeleteNote;
+  String get audioEditNote;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;

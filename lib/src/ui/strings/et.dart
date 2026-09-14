@@ -259,6 +259,20 @@ final class EstonianStrings extends Strings {
   String get newAudioNoteDefault => 'My recording';
   @override
   String get showAudioTooltip => 'Show recordings';
+  @override
+  String get audioMessageHint => 'Write a note…';
+  @override
+  String get audioSend => 'Send';
+  @override
+  String get audioRename => 'Rename recording';
+  @override
+  String get audioDescriptionHint => 'Describe this recording…';
+  @override
+  String get audioEditDescription => 'Edit description';
+  @override
+  String get audioDeleteNote => 'Delete note';
+  @override
+  String get audioEditNote => 'Edit note';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
