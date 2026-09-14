@@ -120,6 +120,12 @@ class TodoWidgetService : RemoteViewsService() {
                     .getString("todo_$widgetId", null)
                 if (loadedPayload == payload) return
                 loadedPayload = payload
+                if (payload == null) {
+                    WidgetDebugLog.log(
+                        context,
+                        "todo factory $widgetId: no payload (unconfigured or never pushed)",
+                    )
+                }
                 val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
                 library = parsed?.optString("library").orEmpty()
                 val array = parsed?.optJSONArray("rows")

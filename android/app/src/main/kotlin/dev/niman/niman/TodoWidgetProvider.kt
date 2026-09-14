@@ -110,12 +110,20 @@ class TodoWidgetProvider : HomeWidgetProvider() {
         // The rows scroll: the launcher binds TodoWidgetService on
         // demand and the factory serves the payload's rows (row taps
         // and the checked/unchecked rendering live there). The instance
-        // id rides with the bind, so each instance gets its own factory.
+        // id rides with the bind as EXTRA_APPWIDGET_ID, so each
+        // instance gets its own factory.
+        //
+        // The two-argument overload targets the ListView by its layout
+        // id: the deprecated three-argument overload's first parameter
+        // is the appWidgetId (ignored) and its second the view id, so
+        // passing (viewId, appWidgetId) binds the service to a view
+        // that does not exist and the rows never render.
         views.setEmptyView(R.id.widget_todo_rows, R.id.widget_todo_empty)
+        @Suppress("DEPRECATION") // RemoteCollectionItems is static-only
         views.setRemoteAdapter(
             R.id.widget_todo_rows,
-            id,
-            Intent(context, TodoWidgetService::class.java),
+            Intent(context, TodoWidgetService::class.java)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id),
         )
 
         val open = openTodo(context, id, library)

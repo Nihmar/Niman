@@ -120,6 +120,12 @@ class NoteWidgetService : RemoteViewsService() {
                     .getString("note_$widgetId", null)
                 if (loadedPayload == payload) return
                 loadedPayload = payload
+                if (payload == null) {
+                    WidgetDebugLog.log(
+                        context,
+                        "note factory $widgetId: no payload (unconfigured or never pushed)",
+                    )
+                }
                 val parsed = payload?.let { runCatching { JSONObject(it) }.getOrNull() }
                 // Only list notes carry rows; anything else (a note-kind
                 // payload, a stale or missing one) renders no rows.
