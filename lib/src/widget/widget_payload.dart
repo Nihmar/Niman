@@ -52,13 +52,18 @@ String widgetPayloadKey(WidgetProvider provider, int androidWidgetId) {
 }
 
 /// The todo rows as JSON: `{"library": path, "rows": [{text, due,
-/// priority, line}], "truncated": bool, "total": int}`.
+/// priority, projects, contexts, tags, line}], "truncated": bool,
+/// "total": int}`.
 ///
-/// [entries] arrive in widget order (the todo widget sort); `library` is
+/// [entries] arrive in widget order (the todo widget sort: due date
+/// first, then priority); `library` is
 /// the absolute library root the native provider taps back into; `text`
 /// is the prose ([taskDisplayText], so `due:`/`rem:` slots and
 /// `+`/`@`/`#` markers do not eat widget width), `due` a `YYYY-MM-DD`
-/// date or null, `line` the file line (for future tap-to-toggle). Rows
+/// date or null, `projects`/`contexts`/`tags` the `+project`/`@context`/
+/// `#tag` markers for the meta line (empty when the task carries none,
+/// so the row aligns its text), `line` the file line (for future
+/// tap-to-toggle). Rows
 /// drop from the end while the payload exceeds [maxChars], setting
 /// `truncated`. [total] is the open-task count before capping, so the
 /// header count stays true when the rows are truncated. [theme] wears
@@ -101,6 +106,9 @@ Map<String, Object?> _row(TodoEntry entry) {
     'text': taskDisplayText(task.description),
     'due': task.due == null ? null : formatTodoDate(task.due!),
     'priority': task.priority,
+    'projects': task.projects,
+    'contexts': task.contexts,
+    'tags': task.hashtags,
     'line': entry.lineIndex,
   };
 }

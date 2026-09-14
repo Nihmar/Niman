@@ -76,11 +76,25 @@ class TodoWidgetService : RemoteViewsService() {
             val views = RemoteViews(context.packageName, R.layout.widget_todo_row)
             val (row, library, theme) = snapshot(position)
             if (row == null) return views
+            // The meta line names priority, the due date and the
+            // +project/@context/#tag markers. Rows without any of them
+            // hide the line, so their text aligns with the others
+            // instead of leaving a blank gap.
+            val tokens = listOf(
+                jsonStrings(row, "projects").map { "+$it" },
+                jsonStrings(row, "contexts").map { "@$it" },
+                jsonStrings(row, "tags").map { "#$it" },
+            ).flatten()
             val meta = listOfNotNull(
                 jsonString(row, "priority").takeIf { it.isNotEmpty() }?.let { "($it)" },
                 jsonString(row, "due").takeIf { it.isNotEmpty() },
+                tokens.joinToString(" ").takeIf { it.isNotEmpty() },
             ).joinToString(" · ")
             views.setTextViewText(R.id.widget_todo_row_meta, meta)
+            views.setViewVisibility(
+                R.id.widget_todo_row_meta,
+                if (meta.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE,
+            )
             views.setTextViewText(R.id.widget_todo_row_text, jsonString(row, "text"))
             // The app theme rides in the payload: without it (an old
             // push) the layout defaults stand.
@@ -113,6 +127,21 @@ class TodoWidgetService : RemoteViewsService() {
         private fun jsonString(row: JSONObject, key: String): String {
             val value = row.opt(key)
             return if (value == null || value == JSONObject.NULL) "" else value.toString()
+        }
+
+        /// The [key] string list of [row]; absent, null or non-array
+        /// reads as empty.
+        private fun jsonStrings(row: JSONObject, key: String): List<String> {
+            val array = row.optJSONArray(key) ?: return emptyList()
+            return (0 until array.length())
+                .mapNotNull {
+                    val value = array.opt(it)
+                    if (value == null || value == JSONObject.NULL) {
+                        null
+                    } else {
+                        value.toString().takeIf { it.isNotEmpty() }
+                    }
+                }
         }
 
         /**

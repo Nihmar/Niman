@@ -11,8 +11,11 @@ short setup dialog: pick the library from the ones you have open
 ## Niman Todos
 
 - **Rows:** the same open tasks the Todo tab shows with its default
-  filter — due-soonest first, overdue on top — up to 100 rows in a
-  scrollable list. The header names the true total even when capped.
+  filter — due date first (overdue on top), ties broken by priority
+  (`(A)` first) — up to 100 rows in a scrollable list. The header names the true total even when capped.
+- **Meta line:** each row names its priority, due date and
+  `+project` / `@context` / `#tag` markers; rows without any of them
+  hide the line so the text stays aligned.
 - **Tap a row:** toggles the task; works with the app closed.
 - **Tap the header:** opens the app on that library.
 - **"+":** opens the app with the task add field focused.
