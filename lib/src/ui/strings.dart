@@ -282,6 +282,13 @@ final class AppStrings {
   static String get newAudioNoteTitle => _s.newAudioNoteTitle;
   static String get newAudioNoteDefault => _s.newAudioNoteDefault;
   static String get showAudioTooltip => _s.showAudioTooltip;
+  static String get audioMessageHint => _s.audioMessageHint;
+  static String get audioSend => _s.audioSend;
+  static String get audioRename => _s.audioRename;
+  static String get audioDescriptionHint => _s.audioDescriptionHint;
+  static String get audioEditDescription => _s.audioEditDescription;
+  static String get audioDeleteNote => _s.audioDeleteNote;
+  static String get audioEditNote => _s.audioEditNote;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;

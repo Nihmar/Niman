@@ -11,6 +11,7 @@ library;
 
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/frontmatter/parser.dart' show frontmatterLineCount;
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/parser.dart' show parseWikiRef;
 import 'package:niman/src/ui/kinds/audio_clip.dart';
@@ -76,6 +77,20 @@ List<AudioClip> parseAudioClips(String text) {
   return out;
 }
 
+/// The prefix a new chat paragraph appends to [text]: the text itself
+/// ending with a newline, plus a blank line when the body already holds
+/// a paragraph — every bubble is its own paragraph, so the file stays
+/// easy to edit by hand.
+String chatParagraphPrefix(String text) {
+  if (text.isEmpty) return '';
+  final prefix = text.endsWith('\n') ? text : '$text\n';
+  final lines = prefix.split('\n');
+  final bodyHasContent = lines
+      .skip(frontmatterLineCount(lines))
+      .any((line) => line.trim().isNotEmpty);
+  return bodyHasContent ? '$prefix\n' : prefix;
+}
+
 /// The note text with [relativePath] appended as a new clip line
 /// (byte-stable otherwise), in the library's link format.
 String appendAudioClip(
@@ -84,13 +99,12 @@ String appendAudioClip(
   required LinkType linkType,
   String label = '',
 }) {
-  final prefix = text.isEmpty || text.endsWith('\n') ? text : '$text\n';
   final embed = attachmentEmbed(
     relativePath: relativePath,
     label: label,
     linkType: linkType,
   );
-  return '$prefix$embed\n';
+  return '${chatParagraphPrefix(text)}$embed\n';
 }
 
 /// The note text with [clip]'s embed removed.
