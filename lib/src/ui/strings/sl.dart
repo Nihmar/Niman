@@ -171,6 +171,8 @@ final class SlovenianStrings extends Strings {
   String spellCheckCount(int count) => '$count za preverjanje';
   @override
   String spellCheckLine(int line) => 'vrstica $line';
+  @override
+  String get addWordToDictionary => 'Dodaj v slovník';
 
   @override
   String indentWidthValue(int spaces) => '$spaces presledkov';

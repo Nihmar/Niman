@@ -173,6 +173,8 @@ final class PolishStrings extends Strings {
   String spellCheckCount(int count) => '$count do sprawdzenia';
   @override
   String spellCheckLine(int line) => 'linia $line';
+  @override
+  String get addWordToDictionary => 'Dodaj do słownika';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spacje';

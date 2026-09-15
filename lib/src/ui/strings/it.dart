@@ -172,6 +172,8 @@ final class ItalianStrings extends Strings {
   String spellCheckCount(int count) => '$count da rivedere';
   @override
   String spellCheckLine(int line) => 'riga $line';
+  @override
+  String get addWordToDictionary => 'Aggiungi al dizionario';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spazi';

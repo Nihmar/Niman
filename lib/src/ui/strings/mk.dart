@@ -172,6 +172,8 @@ final class MacedonianStrings extends Strings {
   String spellCheckCount(int count) => '$count за преглед';
   @override
   String spellCheckLine(int line) => 'ред $line';
+  @override
+  String get addWordToDictionary => 'Додади во речник';
 
   @override
   String indentWidthValue(int spaces) => '$spaces празнини';

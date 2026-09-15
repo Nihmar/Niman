@@ -174,6 +174,8 @@ final class BulgarianStrings extends Strings {
   String spellCheckCount(int count) => '$count за преглед';
   @override
   String spellCheckLine(int line) => 'ред $line';
+  @override
+  String get addWordToDictionary => 'Добави в речника';
 
   @override
   String indentWidthValue(int spaces) => '$spaces интервала';

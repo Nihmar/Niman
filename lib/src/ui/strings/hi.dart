@@ -165,6 +165,8 @@ final class HindiStrings extends Strings {
   String spellCheckCount(int count) => '$count की समीक्षा बाकी';
   @override
   String spellCheckLine(int line) => 'पंक्ति $line';
+  @override
+  String get addWordToDictionary => 'शब्दकोश में जोड़ें';
 
   @override
   String indentWidthValue(int spaces) => '$spaces स्पेस';

@@ -175,6 +175,8 @@ final class GreekStrings extends Strings {
   String spellCheckCount(int count) => '$count προς επιθεώρηση';
   @override
   String spellCheckLine(int line) => 'γραμμή $line';
+  @override
+  String get addWordToDictionary => 'Προσθήκη στο λεξικό';
 
   @override
   String indentWidthValue(int spaces) => '$spaces κενά';

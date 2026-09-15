@@ -172,6 +172,8 @@ final class CzechStrings extends Strings {
   String spellCheckCount(int count) => '$count ke kontrole';
   @override
   String spellCheckLine(int line) => 'řádek $line';
+  @override
+  String get addWordToDictionary => 'Přidat do slovníku';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mezerníky';

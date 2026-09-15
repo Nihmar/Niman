@@ -172,6 +172,8 @@ final class HungarianStrings extends Strings {
   String spellCheckCount(int count) => '$count ellenőrizendő';
   @override
   String spellCheckLine(int line) => '$line. sor';
+  @override
+  String get addWordToDictionary => 'Hozzáadás a szótárhoz';
 
   @override
   String indentWidthValue(int spaces) => '$spaces szóköz';

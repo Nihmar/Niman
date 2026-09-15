@@ -77,6 +77,10 @@ abstract base class Strings {
   String spellCheckCount(int count);
   String spellCheckLine(int line);
 
+  /// The context-menu entry that adds a word to the personal dictionary
+  /// (issue #60).
+  String get addWordToDictionary;
+
   /// The indent width as a row's value, e.g. "4 spaces".
   String indentWidthValue(int spaces);
 
