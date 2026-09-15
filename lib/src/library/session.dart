@@ -6,6 +6,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -77,6 +78,18 @@ abstract interface class NoteOperations {
   /// session the save belongs to — one opening of the note, however many
   /// autosaves it makes.
   Future<void> saveNote(String path, String content, {int? editSession});
+
+  /// The kept history of the note at [path]: its versions, oldest first,
+  /// and the pinned ones (issue #55).
+  Future<HistoryManifest> noteHistory(String path);
+
+  /// The text of version [number] of the note at [path]; throws when the
+  /// version is gone.
+  Future<String> readNoteVersion(String path, int number);
+
+  /// Writes version [number] back as the note's text, keeping the text it
+  /// replaces as a version first — a restore is itself undoable.
+  Future<void> restoreNoteVersion(String path, int number);
 
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
