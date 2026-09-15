@@ -63,7 +63,7 @@ final class BulgarianStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Косът';
+  String get trashTitle => 'Кошът';
   @override
   String get trashSubtitle =>
       'Изтритите елементи се преместват в .trash/ (изключено = окончателно '
@@ -441,7 +441,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get replaceConfirm => 'Замени';
   @override
-  String get replaceCancel => 'Заключи';
+  String get replaceCancel => 'Затвори';
   @override
   String get replaceUnavailable => 'Заместването не е налично в момента';
 
@@ -459,7 +459,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get editorFindNextTooltip => 'Следващ резултат';
   @override
-  String get editorFindCloseTooltip => 'Заключи търсенето';
+  String get editorFindCloseTooltip => 'Затвори търсенето';
   @override
   String get editorFindReplaceModeTooltip => 'Режим на заместване';
   @override
@@ -723,17 +723,17 @@ final class BulgarianStrings extends Strings {
   @override
   String get actionMove => 'Премести';
   @override
-  String get saveAndClose => 'Запази и заключи';
+  String get saveAndClose => 'Запази и затвори';
   @override
   String get closeUnsavedTitle => 'Незапазени промени';
   @override
   String closeUnsavedBody(List<String> names) {
     if (names.length == 1) {
       return '„${names.first}” има незапазени промени. '
-          'Да се запази ли преди заключване?';
+          'Да се запази ли преди затваряне?';
     }
     return '${names.length} бележки имат незапазени промени. '
-        'Да се запази ли преди заключване?';
+        'Да се запази ли преди затваряне?';
   }
 
   @override
@@ -756,7 +756,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get windowRestoreTooltip => 'Възстанови';
   @override
-  String get windowCloseTooltip => 'Заключи';
+  String get windowCloseTooltip => 'Затвори';
   @override
   String get tabFiles => 'Файлове';
   @override
@@ -984,7 +984,7 @@ final class BulgarianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Виджетите на домашния екран са достъпни в Android';
   @override
-  String get movedToTrash => 'Преместен в коса';
+  String get movedToTrash => 'Преместен в коша';
   @override
   String get deletedMessage => 'Изтрито';
   @override
@@ -1028,12 +1028,12 @@ final class BulgarianStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Косът е празен';
+  String get trashEmpty => 'Кошът е празен';
   @override
-  String get trashEmptyAction => 'Изпразни коса';
+  String get trashEmptyAction => 'Изпразни коша';
   @override
   String get trashEmptyConfirm =>
-      'Това окончателно ще изтрие всичко в коса, включително елементи, '
+      'Това окончателно ще изтрие всичко в коша, включително елементи, '
       'които Niman не е поставил там.';
   @override
   String trashDeleteConfirm(String name) =>
@@ -1125,7 +1125,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get reindexDone => 'Презиндексирането е завършено';
   @override
-  String get closeLibraryTitle => 'Заключи библиотеката';
+  String get closeLibraryTitle => 'Затвори библиотеката';
   @override
   String get exportLogTitle => 'Експортирай джурнала за отключване';
   @override

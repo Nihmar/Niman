@@ -63,7 +63,7 @@ final class AlbanianStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Hundë';
+  String get trashTitle => 'Koshi';
   @override
   String get trashSubtitle =>
       'Elementët e fshirë shkojnë në .trash/ (jo aktiv = fshirje '
@@ -990,7 +990,7 @@ final class AlbanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widget-et e ekranit kryesor janë të disponueshme në Android';
   @override
-  String get movedToTrash => 'Lëvizur te hundë';
+  String get movedToTrash => 'U zhvendos në kosh';
   @override
   String get deletedMessage => 'U fshi';
   @override
@@ -1034,12 +1034,12 @@ final class AlbanianStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Hundë është bosh';
+  String get trashEmpty => 'Koshi është bosh';
   @override
-  String get trashEmptyAction => 'Boshtëso hundën';
+  String get trashEmptyAction => 'Boshatis koshin';
   @override
   String get trashEmptyConfirm =>
-      'Kjo i fshin përfundimisht të gjitha gjërat në tresën e hundës, '
+      'Kjo i fshin përfundimisht të gjitha gjërat në kosh, '
       "përfshirë objekte që Niman s'i vendosi aty.";
   @override
   String trashDeleteConfirm(String name) =>

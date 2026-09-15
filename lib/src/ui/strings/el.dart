@@ -502,7 +502,7 @@ final class GreekStrings extends Strings {
   @override
   String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
   @override
-  String get openLinkFailed => 'Απόρριψη ανοίγματος συνδέσμου';
+  String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
 
   // Task lists (T-TD-04).
   @override

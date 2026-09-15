@@ -107,7 +107,7 @@ final class SlovakStrings extends Strings {
   @override
   String get settingsSectionEditor => 'Editor';
   @override
-  String get settingsSectionLibrary => 'Knihovna';
+  String get settingsSectionLibrary => 'Knižnica';
   @override
   String get settingsSectionReminders => 'Pripomienky';
   @override
@@ -149,7 +149,7 @@ final class SlovakStrings extends Strings {
   String get spellCheckDictionaryChoiceTitle => 'Výber slovníkov';
   @override
   String get spellCheckDictionaryChoiceSubtitle =>
-      'Vyberte všetky jazyky, v ktorých je knihovna napísaná. Slovo prejde, '
+      'Vyberte všetky jazyky, v ktorých je knižnica napísaná. Slovo prejde, '
       'ak ho pozná niektorý z vybraných slovníkov; bez výberu rozhoduje '
       'jazyk systému.';
   @override

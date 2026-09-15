@@ -63,7 +63,7 @@ final class BasqueStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Zaborrontza';
+  String get trashTitle => 'Zakarrontzia';
   @override
   String get trashSubtitle =>
       'Ezabatzeak .trash/-ra joaten dira (desaktibatuta = betirako ezabatzea)';
@@ -780,11 +780,11 @@ final class BasqueStrings extends Strings {
   @override
   String get newNoteTitle => 'Ohar berria';
   @override
-  String get newFolderTitle => 'Fitxategi-biltegi berria';
+  String get newFolderTitle => 'Karpeta berria';
   @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
-  String get newFolderHere => 'Fitxategi-biltegi berria hemen';
+  String get newFolderHere => 'Karpeta berria hemen';
   @override
   String get newListNoteTitle => 'Ohar zerrenda berria';
   @override
@@ -983,7 +983,7 @@ final class BasqueStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Hasierako pantailako widgetak Android-en daude eskuragarri';
   @override
-  String get movedToTrash => 'Zaborrontzara mugitua';
+  String get movedToTrash => 'Zakarrontzira mugitua';
   @override
   String get deletedMessage => 'Ezabatua';
   @override
@@ -1015,9 +1015,9 @@ final class BasqueStrings extends Strings {
 
   // Folder picker (T-TK-07).
   @override
-  String get folderPickerNewFolder => 'Fitxategi-biltegi berria';
+  String get folderPickerNewFolder => 'Karpeta berria';
   @override
-  String get folderPickerEmpty => 'Oraindik ez dago fitxategi-biltegirik';
+  String get folderPickerEmpty => 'Oraindik ez dago karpetarik';
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override
@@ -1025,12 +1025,12 @@ final class BasqueStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Zaborrontza hutsik dago';
+  String get trashEmpty => 'Zakarrontzia hutsik dago';
   @override
-  String get trashEmptyAction => 'Huts zaborrontza';
+  String get trashEmptyAction => 'Hustu zakarrontzia';
   @override
   String get trashEmptyConfirm =>
-      'Honek zaborrontzako guztia betirako ezabatuko du, Niman ez zuen '
+      'Honek zakarrontziko guztia betirako ezabatuko du, Niman ez zuen '
       'bertan jarriko elementuak ere.';
   @override
   String trashDeleteConfirm(String name) =>
@@ -1041,7 +1041,7 @@ final class BasqueStrings extends Strings {
   // The open/create library screen.
   @override
   String get openLibraryIntro =>
-      'Ireki ohar Markdownen fitxategi-biltegi bat biblioteka gisa';
+      'Ireki ohar Markdownen karpeta bat biblioteka gisa';
   @override
   String get openLibraryExisting => 'Ireki dagoena';
   @override
@@ -1051,14 +1051,12 @@ final class BasqueStrings extends Strings {
   @override
   String get openLibraryFolderName => 'Biltegiko izena';
   @override
-  String get openLibraryChooseFolder =>
-      'Hautatu bibliotekararen fitxategi-biltegia';
+  String get openLibraryChooseFolder => 'Hautatu bibliotekaren karpeta';
   @override
-  String get openLibraryChooseParent =>
-      'Hautatu fitxategi-biltegia non sortuko den';
+  String get openLibraryChooseParent => 'Hautatu karpeta non sortuko den';
   @override
   String get openLibraryUnsupported =>
-      'Fitxategi-biltegi hau ez da onartzen. Hautatu gailuaren gordailuko '
+      'Karpeta hau ez da onartzen. Hautatu gailuaren gordailuko '
       'biltegia.';
   @override
   String indexingCount(int done, int total) => '$total oharretako $done';
@@ -1091,7 +1089,7 @@ final class BasqueStrings extends Strings {
   String libraryForgetTitle(String name) => '“$name” ahaztu?';
   @override
   String get libraryForgetExplained =>
-      'Zerrenda honetatik desagertuko da. Fitxategi-biltegia, ohar eta '
+      'Zerrenda honetatik desagertuko da. Karpeta, oharrak eta '
       'bibliotekararen ezarpenak ez dira ukitzen, berriro irekitzean '
       'itzuliko da.';
 
@@ -1110,10 +1108,10 @@ final class BasqueStrings extends Strings {
       'irakurtzen da.';
   @override
   String folderAccessDenied(Object error) =>
-      'Sistemak ez du fitxategi-biltegiako sarbiderik eman: $error';
+      'Sistemak ez du karpetarako sarbiderik eman: $error';
   @override
   String folderPickFailed(Object error) =>
-      'Ezin izan da fitxategi-biltegi bat hautatu: $error';
+      'Ezin izan da karpeta bat hautatu: $error';
 
   // Settings screen rows and messages.
   @override
