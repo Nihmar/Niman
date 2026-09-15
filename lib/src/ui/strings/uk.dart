@@ -1135,4 +1135,97 @@ final class UkrainianStrings extends Strings {
   String get changelogEmpty => 'Записи журналу змін недоступні';
   @override
   String changelogWhatsNew(String version) => 'Новини у версії $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Історія';
+  @override
+  String get noteMenuTooltip => 'Дії з нотаткою';
+  @override
+  String get historyCurrentVersion => 'Поточна версія';
+  @override
+  String get historyCurrentSubtitle => 'Нотатка в її поточному стані';
+  @override
+  String get historyToday => 'Сьогодні';
+  @override
+  String get historyYesterday => 'Вчора';
+  @override
+  String get historyReasonSession => 'до редагування';
+  @override
+  String get historyReasonInterval => 'під час редагування';
+  @override
+  String get historyReasonRestore => 'до відновлення';
+  @override
+  String get historyReasonSync => 'до синхронізації';
+  @override
+  String get historyReasonReplace => 'до заміни';
+  @override
+  String get historyReasonUnknown => 'віднайдена';
+  @override
+  String get historySyncBase => 'база синхронізації';
+  @override
+  String get historyEmpty =>
+      'Версій ще немає. Niman зберігає одну, коли ви починаєте редагувати '
+      'нотатку, а далі щонайбільше одну раз на кілька хвилин, поки ви '
+      'пишете.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Збережено версій: $kept із $limit';
+  @override
+  String get historyBaseKept => 'База синхронізації зберігається понад ліміт.';
+  @override
+  String get historyOff =>
+      'Історію вимкнено для цієї бібліотеки (Налаштування, Бібліотека).';
+  @override
+  String get historyLoadFailed => 'Не вдалося прочитати історію';
+  @override
+  String get historyCompareSubtitle => 'Порівняно з поточною версією';
+  @override
+  String get historyTabChanges => 'Зміни';
+  @override
+  String get historyTabVersion => 'Версія';
+  @override
+  String get historyNoChanges => 'Текст такий самий, як у поточній версії.';
+  @override
+  String get historyRestoreAction => 'Відновити цю версію';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Відновити версію від $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Спершу поточний текст збережеться в історії, тож ви завжди зможете '
+      'повернутися.';
+  @override
+  String get historyRestoreConfirm => 'Відновити';
+  @override
+  String historyRestored(String when) => 'Відновлено версію від $when';
+  @override
+  String get historyRestoreFailed => 'Не вдалося відновити версію';
+  @override
+  String get actionUndo => 'Скасувати';
+  @override
+  String diffLineRange(int start, int end) => 'Рядки $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Рядок $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 14) => '$count незмінених рядків',
+    (1, _) => '$count незмінений рядок',
+    (>= 2 && <= 4, _) => '$count незмінені рядки',
+    _ => '$count незмінених рядків',
+  };
+  @override
+  String get historyVersionsTitle => 'Скільки версій зберігати';
+  @override
+  String get historyVersionsSubtitle => 'Для кожної нотатки, у .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Жодної' : '$count';
+  @override
+  String get historyIntervalTitle => 'Нова версія щонайбільше раз на';
+  @override
+  String get historyIntervalSubtitle =>
+      'Поки ви пишете; на початку редагування нотатки версія зберігається '
+      'завжди';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes хв';
 }

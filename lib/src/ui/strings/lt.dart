@@ -1134,4 +1134,96 @@ final class LithuanianStrings extends Strings {
   String get changelogEmpty => 'Pakeitimų žurnalo įrašų nėra';
   @override
   String changelogWhatsNew(String version) => 'Naujienos versijoje $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Istorija';
+  @override
+  String get noteMenuTooltip => 'Pastabos veiksmai';
+  @override
+  String get historyCurrentVersion => 'Dabartinė versija';
+  @override
+  String get historyCurrentSubtitle => 'Pastaba tokia, kokia yra dabar';
+  @override
+  String get historyToday => 'Šiandien';
+  @override
+  String get historyYesterday => 'Vakar';
+  @override
+  String get historyReasonSession => 'prieš redagavimą';
+  @override
+  String get historyReasonInterval => 'redaguojant';
+  @override
+  String get historyReasonRestore => 'prieš atkūrimą';
+  @override
+  String get historyReasonSync => 'prieš sinchronizavimą';
+  @override
+  String get historyReasonReplace => 'prieš pakeitimą';
+  @override
+  String get historyReasonUnknown => 'atgauta';
+  @override
+  String get historySyncBase => 'sinchronizavimo bazė';
+  @override
+  String get historyEmpty =>
+      'Versijų dar nėra. Niman išsaugo vieną, kai pradedate redaguoti '
+      'pastabą, o paskui – ne dažniau nei kas kelias minutes, kol rašote.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Išsaugota versijų: $kept iš $limit';
+  @override
+  String get historyBaseKept =>
+      'Sinchronizavimo bazė išsaugoma ir viršijus ribą.';
+  @override
+  String get historyOff =>
+      'Šios bibliotekos istorija išjungta (Nustatymai, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Nepavyko perskaityti istorijos';
+  @override
+  String get historyCompareSubtitle => 'Palyginta su dabartine versija';
+  @override
+  String get historyTabChanges => 'Pakeitimai';
+  @override
+  String get historyTabVersion => 'Versija';
+  @override
+  String get historyNoChanges => 'Tekstas toks pat kaip dabartinėje versijoje.';
+  @override
+  String get historyRestoreAction => 'Atkurti šią versiją';
+  @override
+  String historyRestoreConfirmTitle(String when) => 'Atkurti versiją ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Dabartinis tekstas pirmiausia išsaugomas istorijoje, todėl visada '
+      'galėsite grįžti.';
+  @override
+  String get historyRestoreConfirm => 'Atkurti';
+  @override
+  String historyRestored(String when) => 'Versija atkurta ($when)';
+  @override
+  String get historyRestoreFailed => 'Nepavyko atkurti versijos';
+  @override
+  String get actionUndo => 'Anuliuoti';
+  @override
+  String diffLineRange(int start, int end) => 'Eilutės $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Eilutė $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 19) => '$count nepakeistų eilučių',
+    (1, _) => '$count nepakeista eilutė',
+    (0, _) => '$count nepakeistų eilučių',
+    _ => '$count nepakeistos eilutės',
+  };
+  @override
+  String get historyVersionsTitle => 'Kiek versijų saugoti';
+  @override
+  String get historyVersionsSubtitle =>
+      'Kiekvienai pastabai, kataloge .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nė vienos' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nauja versija ne dažniau nei kas';
+  @override
+  String get historyIntervalSubtitle =>
+      'Rašant; pradėjus redaguoti pastabą, versija išsaugoma visada';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

@@ -1149,4 +1149,91 @@ final class HungarianStrings extends Strings {
   @override
   String changelogWhatsNew(String version) =>
       'Újdonságok a(z) $version verzióban';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Előzmények';
+  @override
+  String get noteMenuTooltip => 'Jegyzetműveletek';
+  @override
+  String get historyCurrentVersion => 'Jelenlegi verzió';
+  @override
+  String get historyCurrentSubtitle => 'A jegyzet jelenlegi állapota';
+  @override
+  String get historyToday => 'Ma';
+  @override
+  String get historyYesterday => 'Tegnap';
+  @override
+  String get historyReasonSession => 'szerkesztés előtt';
+  @override
+  String get historyReasonInterval => 'szerkesztés közben';
+  @override
+  String get historyReasonRestore => 'visszaállítás előtt';
+  @override
+  String get historyReasonSync => 'szinkronizálás előtt';
+  @override
+  String get historyReasonReplace => 'csere előtt';
+  @override
+  String get historyReasonUnknown => 'helyreállított';
+  @override
+  String get historySyncBase => 'szinkronalap';
+  @override
+  String get historyEmpty =>
+      'Még nincsenek verziók. A Niman ment egyet, amikor elkezded szerkeszteni '
+      'a jegyzetet, majd írás közben legfeljebb néhány percenként egyet.';
+  @override
+  String historyKept(int kept, int limit) => '$kept/$limit verzió megőrizve';
+  @override
+  String get historyBaseKept => 'A szinkronalap a korláton felül is megmarad.';
+  @override
+  String get historyOff =>
+      'Az előzmények ki vannak kapcsolva ebben a könyvtárban '
+      '(Beállítások, Könyvtár).';
+  @override
+  String get historyLoadFailed => 'Az előzmények nem olvashatók';
+  @override
+  String get historyCompareSubtitle => 'Összevetve a jelenlegi verzióval';
+  @override
+  String get historyTabChanges => 'Változások';
+  @override
+  String get historyTabVersion => 'Verzió';
+  @override
+  String get historyNoChanges =>
+      'Ugyanaz a szöveg, mint a jelenlegi verzióban.';
+  @override
+  String get historyRestoreAction => 'Visszaállítás erre a verzióra';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Visszaállítod ezt a verziót: $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'A jelenlegi szöveg előbb bekerül az előzményekbe, így bármikor '
+      'visszatérhetsz.';
+  @override
+  String get historyRestoreConfirm => 'Visszaállítás';
+  @override
+  String historyRestored(String when) => 'Verzió visszaállítva: $when';
+  @override
+  String get historyRestoreFailed => 'A verzió nem állítható vissza';
+  @override
+  String get actionUndo => 'Visszavonás';
+  @override
+  String diffLineRange(int start, int end) => '$start–$end. sor';
+  @override
+  String diffLineSingle(int line) => '$line. sor';
+  @override
+  String diffUnchanged(int count) => '$count változatlan sor';
+  @override
+  String get historyVersionsTitle => 'Megőrzendő verziók';
+  @override
+  String get historyVersionsSubtitle => 'Jegyzetenként, a .history/ mappában';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nincs' : '$count';
+  @override
+  String get historyIntervalTitle => 'Új verzió legfeljebb';
+  @override
+  String get historyIntervalSubtitle =>
+      'Írás közben; a szerkesztés megkezdésekor mindig készül egy';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes percenként';
 }

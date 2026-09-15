@@ -1143,4 +1143,104 @@ final class RomanianStrings extends Strings {
   String get changelogEmpty => 'Nicio intrare în jurnal disponibilă';
   @override
   String changelogWhatsNew(String version) => 'Noutăți în versiunea $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Istoric';
+  @override
+  String get noteMenuTooltip => 'Acțiuni pentru notă';
+  @override
+  String get historyCurrentVersion => 'Versiunea curentă';
+  @override
+  String get historyCurrentSubtitle => 'Nota așa cum este acum';
+  @override
+  String get historyToday => 'Azi';
+  @override
+  String get historyYesterday => 'Ieri';
+  @override
+  String get historyReasonSession => 'înainte de editare';
+  @override
+  String get historyReasonInterval => 'în timpul editării';
+  @override
+  String get historyReasonRestore => 'înainte de restaurare';
+  @override
+  String get historyReasonSync => 'înainte de sincronizare';
+  @override
+  String get historyReasonReplace => 'înainte de înlocuire';
+  @override
+  String get historyReasonUnknown => 'recuperată';
+  @override
+  String get historySyncBase => 'bază de sincronizare';
+  @override
+  String get historyEmpty =>
+      'Încă nicio versiune. Niman păstrează una când începi să editezi '
+      'nota, apoi cel mult una la câteva minute cât timp scrii.';
+  @override
+  String historyKept(int kept, int limit) {
+    final noun = limit == 1
+        ? 'versiune'
+        : limit % 100 == 0 || limit % 100 >= 20
+        ? 'de versiuni'
+        : 'versiuni';
+    return '$kept din $limit $noun păstrate';
+  }
+
+  @override
+  String get historyBaseKept =>
+      'Baza de sincronizare se păstrează și peste limită.';
+  @override
+  String get historyOff =>
+      'Istoricul este dezactivat pentru această bibliotecă '
+      '(Setări, Bibliotecă).';
+  @override
+  String get historyLoadFailed => 'Istoricul nu a putut fi citit';
+  @override
+  String get historyCompareSubtitle => 'Comparată cu versiunea curentă';
+  @override
+  String get historyTabChanges => 'Modificări';
+  @override
+  String get historyTabVersion => 'Versiune';
+  @override
+  String get historyNoChanges => 'Același text ca în versiunea curentă.';
+  @override
+  String get historyRestoreAction => 'Restaurează această versiune';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restaurezi versiunea din $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Textul curent este mai întâi păstrat în istoric, așa că poți reveni '
+      'oricând.';
+  @override
+  String get historyRestoreConfirm => 'Restaurează';
+  @override
+  String historyRestored(String when) =>
+      'Versiunea din $when a fost restaurată';
+  @override
+  String get historyRestoreFailed => 'Versiunea nu a putut fi restaurată';
+  @override
+  String get actionUndo => 'Anulează';
+  @override
+  String diffLineRange(int start, int end) => 'Liniile $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Linia $line';
+  @override
+  String diffUnchanged(int count) => count == 1
+      ? '1 linie nemodificată'
+      : count % 100 == 0 || count % 100 >= 20
+      ? '$count de linii nemodificate'
+      : '$count linii nemodificate';
+  @override
+  String get historyVersionsTitle => 'Versiuni de păstrat';
+  @override
+  String get historyVersionsSubtitle => 'Pentru fiecare notă, în .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Niciuna' : '$count';
+  @override
+  String get historyIntervalTitle => 'Versiune nouă cel mult o dată la';
+  @override
+  String get historyIntervalSubtitle =>
+      'Cât timp scrii; începerea editării unei note păstrează mereu una';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

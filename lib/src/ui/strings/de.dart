@@ -1167,4 +1167,94 @@ final class GermanStrings extends Strings {
   String get changelogEmpty => 'Keine Einträge im Änderungsprotokoll';
   @override
   String changelogWhatsNew(String version) => 'Neu in Version $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Verlauf';
+  @override
+  String get noteMenuTooltip => 'Notizaktionen';
+  @override
+  String get historyCurrentVersion => 'Aktuelle Version';
+  @override
+  String get historyCurrentSubtitle => 'Die Notiz in ihrem jetzigen Stand';
+  @override
+  String get historyToday => 'Heute';
+  @override
+  String get historyYesterday => 'Gestern';
+  @override
+  String get historyReasonSession => 'vor dem Bearbeiten';
+  @override
+  String get historyReasonInterval => 'beim Bearbeiten';
+  @override
+  String get historyReasonRestore => 'vor dem Wiederherstellen';
+  @override
+  String get historyReasonSync => 'vor dem Synchronisieren';
+  @override
+  String get historyReasonReplace => 'vor dem Ersetzen';
+  @override
+  String get historyReasonUnknown => 'wiedergefunden';
+  @override
+  String get historySyncBase => 'Sync-Basis';
+  @override
+  String get historyEmpty =>
+      'Noch keine Versionen. Niman legt eine an, wenn du mit dem Bearbeiten '
+      'der Notiz beginnst, und danach höchstens alle paar Minuten eine, '
+      'während du schreibst.';
+  @override
+  String historyKept(int kept, int limit) => '$kept von $limit Versionen';
+  @override
+  String get historyBaseKept =>
+      'Die Sync-Basis bleibt auch über das Limit hinaus erhalten.';
+  @override
+  String get historyOff =>
+      'Der Verlauf ist für diese Bibliothek ausgeschaltet '
+      '(Einstellungen, Bibliothek).';
+  @override
+  String get historyLoadFailed => 'Verlauf konnte nicht gelesen werden';
+  @override
+  String get historyCompareSubtitle => 'Verglichen mit der aktuellen Version';
+  @override
+  String get historyTabChanges => 'Änderungen';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Gleicher Text wie die aktuelle Version.';
+  @override
+  String get historyRestoreAction => 'Diese Version wiederherstellen';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Version von $when wiederherstellen?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Der aktuelle Text wird vorher im Verlauf gesichert, du kannst also '
+      'jederzeit zurück.';
+  @override
+  String get historyRestoreConfirm => 'Wiederherstellen';
+  @override
+  String historyRestored(String when) => 'Version von $when wiederhergestellt';
+  @override
+  String get historyRestoreFailed =>
+      'Version konnte nicht wiederhergestellt werden';
+  @override
+  String get actionUndo => 'Rückgängig';
+  @override
+  String diffLineRange(int start, int end) => 'Zeilen $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Zeile $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 unveränderte Zeile' : '$count unveränderte Zeilen';
+  @override
+  String get historyVersionsTitle => 'Aufbewahrte Versionen';
+  @override
+  String get historyVersionsSubtitle => 'Pro Notiz, in .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Keine' : '$count';
+  @override
+  String get historyIntervalTitle => 'Neue Version höchstens alle';
+  @override
+  String get historyIntervalSubtitle =>
+      'Beim Schreiben; zu Beginn einer Bearbeitung entsteht immer eine';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

@@ -1186,4 +1186,94 @@ final class GreekStrings extends Strings {
   String get changelogEmpty => 'Δεν υπάρχουν διαθέσιμες καταχωρίσεις';
   @override
   String changelogWhatsNew(String version) => 'Νέα στην έκδοση $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Ιστορικό';
+  @override
+  String get noteMenuTooltip => 'Ενέργειες σημείωσης';
+  @override
+  String get historyCurrentVersion => 'Τρέχουσα έκδοση';
+  @override
+  String get historyCurrentSubtitle => 'Η σημείωση όπως είναι τώρα';
+  @override
+  String get historyToday => 'Σήμερα';
+  @override
+  String get historyYesterday => 'Χθες';
+  @override
+  String get historyReasonSession => 'πριν την επεξεργασία';
+  @override
+  String get historyReasonInterval => 'κατά την επεξεργασία';
+  @override
+  String get historyReasonRestore => 'πριν την επαναφορά';
+  @override
+  String get historyReasonSync => 'πριν τον συγχρονισμό';
+  @override
+  String get historyReasonReplace => 'πριν την αντικατάσταση';
+  @override
+  String get historyReasonUnknown => 'ανακτημένη';
+  @override
+  String get historySyncBase => 'βάση συγχρονισμού';
+  @override
+  String get historyEmpty =>
+      'Δεν υπάρχουν ακόμα εκδόσεις. Το Niman κρατά μία όταν αρχίζετε να '
+      'επεξεργάζεστε τη σημείωση και μετά το πολύ μία κάθε λίγα λεπτά όσο '
+      'γράφετε.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Εκδόσεις που διατηρούνται: $kept από $limit';
+  @override
+  String get historyBaseKept =>
+      'Η βάση συγχρονισμού διατηρείται και πέρα από το όριο.';
+  @override
+  String get historyOff =>
+      'Το ιστορικό είναι απενεργοποιημένο για αυτή τη βιβλιοθήκη '
+      '(Ρυθμίσεις, Βιβλιοθήκη).';
+  @override
+  String get historyLoadFailed => 'Δεν ήταν δυνατή η ανάγνωση του ιστορικού';
+  @override
+  String get historyCompareSubtitle => 'Σε σύγκριση με την τρέχουσα έκδοση';
+  @override
+  String get historyTabChanges => 'Αλλαγές';
+  @override
+  String get historyTabVersion => 'Έκδοση';
+  @override
+  String get historyNoChanges => 'Ίδιο κείμενο με την τρέχουσα έκδοση.';
+  @override
+  String get historyRestoreAction => 'Επαναφορά αυτής της έκδοσης';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Επαναφορά της έκδοσης ($when);';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Το τρέχον κείμενο αποθηκεύεται πρώτα στο ιστορικό, οπότε μπορείτε '
+      'πάντα να επιστρέψετε.';
+  @override
+  String get historyRestoreConfirm => 'Επαναφορά';
+  @override
+  String historyRestored(String when) => 'Έγινε επαναφορά της έκδοσης ($when)';
+  @override
+  String get historyRestoreFailed => 'Δεν ήταν δυνατή η επαναφορά της έκδοσης';
+  @override
+  String get actionUndo => 'Αναίρεση';
+  @override
+  String diffLineRange(int start, int end) => 'Γραμμές $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Γραμμή $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 αμετάβλητη γραμμή' : '$count αμετάβλητες γραμμές';
+  @override
+  String get historyVersionsTitle => 'Εκδόσεις προς διατήρηση';
+  @override
+  String get historyVersionsSubtitle => 'Ανά σημείωση, στο .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Καμία' : '$count';
+  @override
+  String get historyIntervalTitle => 'Νέα έκδοση το πολύ κάθε';
+  @override
+  String get historyIntervalSubtitle =>
+      'Όσο γράφετε· η έναρξη επεξεργασίας μιας σημείωσης κρατά πάντα μία';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes λεπ.';
 }

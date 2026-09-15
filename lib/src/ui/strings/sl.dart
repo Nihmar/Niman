@@ -1125,4 +1125,97 @@ final class SlovenianStrings extends Strings {
   String get changelogEmpty => 'Vnosi dnevnika niso na voljo';
   @override
   String changelogWhatsNew(String version) => 'Novo v verziji $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Zgodovina';
+  @override
+  String get noteMenuTooltip => 'Dejanja opombe';
+  @override
+  String get historyCurrentVersion => 'Trenutna različica';
+  @override
+  String get historyCurrentSubtitle => 'Opomba, kakršna je zdaj';
+  @override
+  String get historyToday => 'Danes';
+  @override
+  String get historyYesterday => 'Včeraj';
+  @override
+  String get historyReasonSession => 'pred urejanjem';
+  @override
+  String get historyReasonInterval => 'med urejanjem';
+  @override
+  String get historyReasonRestore => 'pred obnovitvijo';
+  @override
+  String get historyReasonSync => 'pred sinhronizacijo';
+  @override
+  String get historyReasonReplace => 'pred zamenjavo';
+  @override
+  String get historyReasonUnknown => 'najdena';
+  @override
+  String get historySyncBase => 'osnova sinhronizacije';
+  @override
+  String get historyEmpty =>
+      'Še ni različic. Niman eno shrani, ko začnete urejati opombo, nato '
+      'pa največ eno na nekaj minut, medtem ko pišete.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Shranjene različice: $kept od $limit';
+  @override
+  String get historyBaseKept =>
+      'Osnova sinhronizacije se ohrani tudi prek omejitve.';
+  @override
+  String get historyOff =>
+      'Zgodovina je za to knjižnico izklopljena (Nastavitve, Knjižnica).';
+  @override
+  String get historyLoadFailed => 'Zgodovine ni bilo mogoče prebrati';
+  @override
+  String get historyCompareSubtitle => 'V primerjavi s trenutno različico';
+  @override
+  String get historyTabChanges => 'Spremembe';
+  @override
+  String get historyTabVersion => 'Različica';
+  @override
+  String get historyNoChanges => 'Enako besedilo kot trenutna različica.';
+  @override
+  String get historyRestoreAction => 'Obnovi to različico';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Želite obnoviti različico, shranjeno $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Trenutno besedilo se najprej shrani v zgodovino, zato se lahko '
+      'vedno vrnete.';
+  @override
+  String get historyRestoreConfirm => 'Obnovi';
+  @override
+  String historyRestored(String when) =>
+      'Obnovljena različica, shranjena $when';
+  @override
+  String get historyRestoreFailed => 'Različice ni bilo mogoče obnoviti';
+  @override
+  String get actionUndo => 'Razveljavi';
+  @override
+  String diffLineRange(int start, int end) => 'Vrstice $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Vrstica $line';
+  @override
+  String diffUnchanged(int count) => switch (count % 100) {
+    1 => '$count nespremenjena vrstica',
+    2 => '$count nespremenjeni vrstici',
+    3 || 4 => '$count nespremenjene vrstice',
+    _ => '$count nespremenjenih vrstic',
+  };
+  @override
+  String get historyVersionsTitle => 'Število shranjenih različic';
+  @override
+  String get historyVersionsSubtitle => 'Za vsako opombo, v .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Brez' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nova različica največ vsakih';
+  @override
+  String get historyIntervalSubtitle =>
+      'Med pisanjem; ob začetku urejanja opombe se ena vedno shrani';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

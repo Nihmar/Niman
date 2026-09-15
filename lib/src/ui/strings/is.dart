@@ -1134,4 +1134,94 @@ final class IcelandicStrings extends Strings {
   String get changelogEmpty => 'Engar færslur í breytingaloggunum';
   @override
   String changelogWhatsNew(String version) => 'Nýtt í útgáfu $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Ferill';
+  @override
+  String get noteMenuTooltip => 'Aðgerðir athugasrafnar';
+  @override
+  String get historyCurrentVersion => 'Núverandi útgáfa';
+  @override
+  String get historyCurrentSubtitle => 'Athugasrafan eins og hún er núna';
+  @override
+  String get historyToday => 'Í dag';
+  @override
+  String get historyYesterday => 'Í gær';
+  @override
+  String get historyReasonSession => 'fyrir breytingar';
+  @override
+  String get historyReasonInterval => 'við breytingar';
+  @override
+  String get historyReasonRestore => 'fyrir endurheimt';
+  @override
+  String get historyReasonSync => 'fyrir samstillingu';
+  @override
+  String get historyReasonReplace => 'fyrir útskiptingu';
+  @override
+  String get historyReasonUnknown => 'fundin aftur';
+  @override
+  String get historySyncBase => 'samstillingargrunnur';
+  @override
+  String get historyEmpty =>
+      'Engar útgáfur enn. Niman geymir eina þegar þú byrjar að breyta '
+      'athugasrafnu, síðan í mesta lagi eina á nokkurra mínútna fresti meðan '
+      'þú skrifar.';
+  @override
+  String historyKept(int kept, int limit) => 'Geymdar útgáfur: $kept af $limit';
+  @override
+  String get historyBaseKept =>
+      'Samstillingargrunnurinn er geymdur umfram hámarkið.';
+  @override
+  String get historyOff =>
+      'Ferill er óvirkur fyrir þetta bókasafn (Stillingar, Bókasafn).';
+  @override
+  String get historyLoadFailed => 'Gat ekki lesið ferilinn';
+  @override
+  String get historyCompareSubtitle => 'Borin saman við núverandi útgáfu';
+  @override
+  String get historyTabChanges => 'Breytingar';
+  @override
+  String get historyTabVersion => 'Útgáfa';
+  @override
+  String get historyNoChanges => 'Sami texti og í núverandi útgáfu.';
+  @override
+  String get historyRestoreAction => 'Endurheimta þessa útgáfu';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Endurheimta útgáfuna frá $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Núverandi texti er fyrst vistaður í ferlinum, svo þú getur alltaf '
+      'farið til baka.';
+  @override
+  String get historyRestoreConfirm => 'Endurheimta';
+  @override
+  String historyRestored(String when) => 'Útgáfan frá $when var endurheimt';
+  @override
+  String get historyRestoreFailed => 'Gat ekki endurheimt útgáfuna';
+  @override
+  String get actionUndo => 'Afturkalla';
+  @override
+  String diffLineRange(int start, int end) => 'Línur $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Lína $line';
+  @override
+  String diffUnchanged(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count óbreytt lína'
+      : '$count óbreyttar línur';
+  @override
+  String get historyVersionsTitle => 'Fjöldi geymdra útgáfna';
+  @override
+  String get historyVersionsSubtitle => 'Fyrir hverja athugasrafa, í .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Engar' : '$count';
+  @override
+  String get historyIntervalTitle => 'Minnsta bil milli útgáfna';
+  @override
+  String get historyIntervalSubtitle =>
+      'Meðan þú skrifar; alltaf er ein geymd þegar byrjað er að breyta '
+      'athugasrafnu';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes mín';
 }

@@ -41,6 +41,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.statusActions,
     required this.spellCheck,
     this.reloadToken = 0,
+    this.saveNote,
     super.key,
   });
 
@@ -122,6 +123,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
 
+  /// The library's note write path, forwarded to the NoteView; null (no
+  /// open library) lets the editor write directly.
+  final NoteSaver? saveNote;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -174,6 +179,7 @@ final class ShellDetailPane extends StatelessWidget {
                 statusActions: statusActions,
                 spellCheck: spellCheck,
                 reloadToken: reloadToken,
+                saveNote: saveNote,
               ),
             ),
     );

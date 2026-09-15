@@ -78,6 +78,47 @@ void main() {
       controller.dispose();
     });
 
+    testWidgets('saves go through saveNote with one session per opening', (
+      tester,
+    ) async {
+      final saves = <(String, String, int)>[];
+      var seamWrites = 0;
+      final controller = CodeLineEditingController.fromText('start');
+      Widget view(String path) => _app(
+        NoteView(
+          showLineNumbers: true,
+          autofocusEditor: false,
+          path: path,
+          readNote: (_) async => 'start',
+          writeNote: (_, _) async => seamWrites++,
+          saveNote: (path, content, {required editSession}) async =>
+              saves.add((path, content, editSession)),
+          controller: controller,
+        ),
+      );
+      await tester.pumpWidget(view('/notes/a.md'));
+      await tester.pump();
+      controller.text = 'one';
+      await tester.pump(const Duration(milliseconds: 600));
+      controller.text = 'two';
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(saves.map((s) => s.$2), ['one', 'two']);
+      expect(saves[0].$1, '/notes/a.md');
+      // Two autosaves of one opening share the session.
+      expect(saves[1].$3, saves[0].$3);
+      // saveNote wins over the writeNote seam.
+      expect(seamWrites, 0);
+
+      await tester.pumpWidget(view('/notes/b.md'));
+      await tester.pump();
+      controller.text = 'three';
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(saves.last.$1, '/notes/b.md');
+      expect(saves.last.$3, isNot(saves[0].$3));
+      controller.dispose();
+    });
+
     testWidgets('a selection-only change does not schedule a save', (
       tester,
     ) async {

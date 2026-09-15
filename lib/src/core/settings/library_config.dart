@@ -39,6 +39,29 @@ int normalizeHistoryVersions(Object? raw) {
   return count;
 }
 
+/// The least minutes between two history versions taken while editing,
+/// in a fresh library.
+const int defaultHistoryIntervalMinutes = 5;
+
+/// The history intervals the settings screen offers, in minutes; a
+/// hand-edited file may hold any whole number in between.
+const List<int> historyIntervalChoices = [1, 2, 5, 10, 15, 30, 60];
+
+/// Reads a `historyIntervalMinutes` value out of the settings file.
+///
+/// Defaulted rather than clamped, like `historyVersions`: 0 would mean a
+/// version on every autosave, and anything outside 1 .. 60 is no more
+/// informative than a missing key.
+int normalizeHistoryIntervalMinutes(Object? raw) {
+  if (raw is! num) return defaultHistoryIntervalMinutes;
+  final minutes = raw.toInt();
+  if (minutes < historyIntervalChoices.first ||
+      minutes > historyIntervalChoices.last) {
+    return defaultHistoryIntervalMinutes;
+  }
+  return minutes;
+}
+
 /// The editor's indent width in a fresh library.
 const int defaultIndentWidth = 2;
 
@@ -206,6 +229,7 @@ final class LibraryConfig {
     required this.historyVersions,
     required this.quickNotePath,
     required this.listNoteFolder,
+    this.historyIntervalMinutes = defaultHistoryIntervalMinutes,
     this.templateFolder = defaultTemplateFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.pinnedCollapsed = false,
@@ -251,6 +275,9 @@ final class LibraryConfig {
         _ => true,
       },
       historyVersions: normalizeHistoryVersions(versions),
+      historyIntervalMinutes: normalizeHistoryIntervalMinutes(
+        json['historyIntervalMinutes'],
+      ),
       quickNotePath: quick is String ? quick : null,
       listNoteFolder: folder is String
           ? cleanListFolder(folder)
@@ -316,6 +343,11 @@ final class LibraryConfig {
   /// [minHistoryVersions] .. [maxHistoryVersions] when it came from the
   /// file.
   final int historyVersions;
+
+  /// The least minutes between two history versions taken while editing
+  /// (default 5); an editing session's first save and a restore always
+  /// take one.
+  final int historyIntervalMinutes;
 
   /// The user-chosen quick note (library-relative path), or null when the
   /// default `Quick note.md` at the library root is used.
@@ -396,6 +428,7 @@ final class LibraryConfig {
   LibraryConfig copyWith({
     bool? trashEnabled,
     int? historyVersions,
+    int? historyIntervalMinutes,
     String? quickNotePath,
     bool clearQuickNotePath = false,
     String? listNoteFolder,
@@ -420,6 +453,8 @@ final class LibraryConfig {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
       historyVersions: historyVersions ?? this.historyVersions,
+      historyIntervalMinutes:
+          historyIntervalMinutes ?? this.historyIntervalMinutes,
       quickNotePath: clearQuickNotePath
           ? null
           : quickNotePath ?? this.quickNotePath,
@@ -448,6 +483,7 @@ final class LibraryConfig {
   static const _knownKeys = {
     'trashEnabled',
     'historyVersions',
+    'historyIntervalMinutes',
     'quickNotePath',
     'listNoteFolder',
     'templateFolder',
@@ -484,6 +520,7 @@ final class LibraryConfig {
     final json = <String, Object?>{
       'trashEnabled': trashEnabled,
       'historyVersions': historyVersions,
+      'historyIntervalMinutes': historyIntervalMinutes,
       'listNoteFolder': listNoteFolder,
       'templateFolder': templateFolder,
       'attachmentsFolder': attachmentsFolder,
@@ -565,6 +602,7 @@ final class LibraryConfig {
     if (other is! LibraryConfig) return false;
     return trashEnabled == other.trashEnabled &&
         historyVersions == other.historyVersions &&
+        historyIntervalMinutes == other.historyIntervalMinutes &&
         quickNotePath == other.quickNotePath &&
         listNoteFolder == other.listNoteFolder &&
         templateFolder == other.templateFolder &&

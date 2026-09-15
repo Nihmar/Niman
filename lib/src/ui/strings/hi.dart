@@ -1117,4 +1117,93 @@ final class HindiStrings extends Strings {
   @override
   String changelogWhatsNew(String version) =>
       'संस्करण $version में क्या नया है';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'इतिहास';
+  @override
+  String get noteMenuTooltip => 'नोट क्रियाएँ';
+  @override
+  String get historyCurrentVersion => 'मौजूदा संस्करण';
+  @override
+  String get historyCurrentSubtitle => 'नोट जैसा अभी है';
+  @override
+  String get historyToday => 'आज';
+  @override
+  String get historyYesterday => 'कल';
+  @override
+  String get historyReasonSession => 'संपादन से पहले';
+  @override
+  String get historyReasonInterval => 'संपादन के दौरान';
+  @override
+  String get historyReasonRestore => 'पुनर्स्थापना से पहले';
+  @override
+  String get historyReasonSync => 'सिंक से पहले';
+  @override
+  String get historyReasonReplace => 'बदलने से पहले';
+  @override
+  String get historyReasonUnknown => 'पुनर्प्राप्त';
+  @override
+  String get historySyncBase => 'सिंक आधार';
+  @override
+  String get historyEmpty =>
+      'अभी कोई संस्करण नहीं। नोट संपादित करना शुरू करने पर Niman एक '
+      'संस्करण रखता है, फिर लिखते समय हर कुछ मिनट में अधिकतम एक।';
+  @override
+  String historyKept(int kept, int limit) =>
+      '$limit में से $kept संस्करण रखे गए';
+  @override
+  String get historyBaseKept =>
+      'सिंक आधार सीमा से अधिक होने पर भी रखा जाता है।';
+  @override
+  String get historyOff =>
+      'इस लाइब्रेरी के लिए इतिहास बंद है (सेटिंग, लाइब्रेरी)।';
+  @override
+  String get historyLoadFailed => 'इतिहास नहीं पढ़ा जा सका';
+  @override
+  String get historyCompareSubtitle => 'मौजूदा संस्करण से तुलना';
+  @override
+  String get historyTabChanges => 'बदलाव';
+  @override
+  String get historyTabVersion => 'संस्करण';
+  @override
+  String get historyNoChanges => 'पाठ मौजूदा संस्करण जैसा ही है।';
+  @override
+  String get historyRestoreAction => 'यह संस्करण पुनर्स्थापित करें';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      '$when का संस्करण पुनर्स्थापित करें?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'मौजूदा पाठ पहले इतिहास में रखा जाता है, इसलिए आप कभी भी वापस जा '
+      'सकते हैं।';
+  @override
+  String get historyRestoreConfirm => 'पुनर्स्थापित करें';
+  @override
+  String historyRestored(String when) =>
+      '$when का संस्करण पुनर्स्थापित किया गया';
+  @override
+  String get historyRestoreFailed => 'संस्करण पुनर्स्थापित नहीं किया जा सका';
+  @override
+  String get actionUndo => 'पूर्ववत करें';
+  @override
+  String diffLineRange(int start, int end) => 'पंक्तियाँ $start–$end';
+  @override
+  String diffLineSingle(int line) => 'पंक्ति $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 अपरिवर्तित पंक्ति' : '$count अपरिवर्तित पंक्तियाँ';
+  @override
+  String get historyVersionsTitle => 'कितने संस्करण रखें';
+  @override
+  String get historyVersionsSubtitle => 'प्रति नोट, .history/ में';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'कोई नहीं' : '$count';
+  @override
+  String get historyIntervalTitle => 'नए संस्करणों के बीच कम से कम';
+  @override
+  String get historyIntervalSubtitle =>
+      'लिखते समय; नोट संपादित करना शुरू करने पर एक संस्करण हमेशा रखा जाता है';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes मिनट';
 }

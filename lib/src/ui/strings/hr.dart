@@ -1136,4 +1136,95 @@ final class CroatianStrings extends Strings {
   String get changelogEmpty => 'Nema dostupnih zapisa u dnevniku';
   @override
   String changelogWhatsNew(String version) => 'Novo u verziji $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Povijest';
+  @override
+  String get noteMenuTooltip => 'Radnje s napomenom';
+  @override
+  String get historyCurrentVersion => 'Trenutna verzija';
+  @override
+  String get historyCurrentSubtitle => 'Napomena kakva je sada';
+  @override
+  String get historyToday => 'Danas';
+  @override
+  String get historyYesterday => 'Jučer';
+  @override
+  String get historyReasonSession => 'prije uređivanja';
+  @override
+  String get historyReasonInterval => 'tijekom uređivanja';
+  @override
+  String get historyReasonRestore => 'prije vraćanja';
+  @override
+  String get historyReasonSync => 'prije sinkronizacije';
+  @override
+  String get historyReasonReplace => 'prije zamjene';
+  @override
+  String get historyReasonUnknown => 'pronađena';
+  @override
+  String get historySyncBase => 'osnova sinkronizacije';
+  @override
+  String get historyEmpty =>
+      'Još nema verzija. Niman sprema jednu kad počneš uređivati napomenu, '
+      'a zatim najviše jednu svakih nekoliko minuta dok pišeš.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Spremljene verzije: $kept od $limit';
+  @override
+  String get historyBaseKept =>
+      'Osnova sinkronizacije čuva se i iznad ograničenja.';
+  @override
+  String get historyOff =>
+      'Povijest je isključena za ovu biblioteku (Postavke, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Povijest se nije mogla pročitati';
+  @override
+  String get historyCompareSubtitle => 'U usporedbi s trenutnom verzijom';
+  @override
+  String get historyTabChanges => 'Promjene';
+  @override
+  String get historyTabVersion => 'Verzija';
+  @override
+  String get historyNoChanges => 'Isti tekst kao trenutna verzija.';
+  @override
+  String get historyRestoreAction => 'Vrati ovu verziju';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Vratiti verziju spremljenu $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Trenutni tekst najprije se sprema u povijest, pa se uvijek možeš '
+      'vratiti.';
+  @override
+  String get historyRestoreConfirm => 'Vrati';
+  @override
+  String historyRestored(String when) => 'Vraćena verzija spremljena $when';
+  @override
+  String get historyRestoreFailed => 'Verzija se nije mogla vratiti';
+  @override
+  String get actionUndo => 'Poništi';
+  @override
+  String diffLineRange(int start, int end) => 'Retci $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Redak $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count nepromijenjen redak',
+    (2 || 3 || 4, < 12 || > 14) => '$count nepromijenjena retka',
+    _ => '$count nepromijenjenih redaka',
+  };
+  @override
+  String get historyVersionsTitle => 'Broj čuvanih verzija';
+  @override
+  String get historyVersionsSubtitle => 'Po napomeni, u .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nijedna' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nova verzija najviše svakih';
+  @override
+  String get historyIntervalSubtitle =>
+      'Dok pišeš; početak uređivanja napomene uvijek sprema jednu';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

@@ -1158,4 +1158,94 @@ final class AlbanianStrings extends Strings {
   String get changelogEmpty => 'Nuk ka hyrje të regjistrit të disponueshme';
   @override
   String changelogWhatsNew(String version) => 'E re në versionin $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historiku';
+  @override
+  String get noteMenuTooltip => 'Veprimet e shënimit';
+  @override
+  String get historyCurrentVersion => 'Versioni aktual';
+  @override
+  String get historyCurrentSubtitle => 'Shënimi siç është tani';
+  @override
+  String get historyToday => 'Sot';
+  @override
+  String get historyYesterday => 'Dje';
+  @override
+  String get historyReasonSession => 'para ndryshimit';
+  @override
+  String get historyReasonInterval => 'gjatë ndryshimit';
+  @override
+  String get historyReasonRestore => 'para rikthimit';
+  @override
+  String get historyReasonSync => 'para sinkronizimit';
+  @override
+  String get historyReasonReplace => 'para zëvendësimit';
+  @override
+  String get historyReasonUnknown => 'i rikuperuar';
+  @override
+  String get historySyncBase => 'baza e sinkronizimit';
+  @override
+  String get historyEmpty =>
+      'Ende nuk ka versione. Niman ruan një kur filloni të ndryshoni '
+      'shënimin, pastaj më së shumti një në pak minuta ndërsa shkruani.';
+  @override
+  String historyKept(int kept, int limit) =>
+      '$kept nga $limit versione të ruajtura';
+  @override
+  String get historyBaseKept =>
+      'Baza e sinkronizimit ruhet edhe përtej kufirit.';
+  @override
+  String get historyOff =>
+      'Historiku është i çaktivizuar për këtë bibliotekë '
+      '(Vendosjet, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Historiku nuk u lexua';
+  @override
+  String get historyCompareSubtitle => 'Krahasuar me versionin aktual';
+  @override
+  String get historyTabChanges => 'Ndryshimet';
+  @override
+  String get historyTabVersion => 'Versioni';
+  @override
+  String get historyNoChanges => 'I njëjti tekst si versioni aktual.';
+  @override
+  String get historyRestoreAction => 'Rikthe këtë version';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Të rikthehet versioni ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Teksti aktual ruhet më parë në historik, kështu që mund të ktheheni '
+      'gjithmonë pas.';
+  @override
+  String get historyRestoreConfirm => 'Rikthe';
+  @override
+  String historyRestored(String when) => 'Versioni ($when) u rikthye';
+  @override
+  String get historyRestoreFailed => 'Versioni nuk u rikthye';
+  @override
+  String get actionUndo => 'Zhbëj';
+  @override
+  String diffLineRange(int start, int end) => 'Rreshtat $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rreshti $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 rresht i pandryshuar' : '$count rreshta të pandryshuar';
+  @override
+  String get historyVersionsTitle => 'Versionet që ruhen';
+  @override
+  String get historyVersionsSubtitle => 'Për çdo shënim, në .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Asnjë' : '$count';
+  @override
+  String get historyIntervalTitle => 'Version i ri më së shumti çdo';
+  @override
+  String get historyIntervalSubtitle =>
+      'Ndërsa shkruani; fillimi i ndryshimit të një shënimi ruan gjithmonë '
+      'një';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

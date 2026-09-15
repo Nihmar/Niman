@@ -10,7 +10,8 @@ device.
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `trashEnabled` | true | Deletes move to `.trash/`; false = hard delete |
-| `historyVersions` | 10 | Kept `.history/` versions per note (0–100) |
+| `historyVersions` | 10 | Kept `.history/` versions per note (0–100, 0 = none) |
+| `historyIntervalMinutes` | 5 | Least minutes between two versions kept while editing (1–60) |
 | `quickNotePath` | null (= `Quick note.md` at root) | Quick-note target, library-relative |
 | `listNoteFolder` | `Lists` | Where new list notes go |
 | `templateFolder` | `Templates` | Where note templates live |
