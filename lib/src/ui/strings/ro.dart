@@ -1259,4 +1259,67 @@ final class RomanianStrings extends Strings {
       'Cât timp scrii; începerea editării unei note păstrează mereu una';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transcriere';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Niciunul';
+  @override
+  String get transcriptionLanguageTitle => 'Limbă';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Limba vorbită în înregistrările tale. S-o indici e mai precis decât '
+      's-o lași detectată.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Ca aplicația ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Detectează automat';
+  @override
+  String get transcriptionModelsTitle => 'Modele de transcriere';
+  @override
+  String transcriptionModelsUsed(String size) => '$size folosiți';
+  @override
+  String get transcriptionModelsInstalled => 'Descărcate';
+  @override
+  String get transcriptionModelsDownloading => 'Se descarcă';
+  @override
+  String get transcriptionModelsAvailable => 'Disponibile';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modelele rămân în spațiul de stocare al aplicației pe acest '
+      'dispozitiv. Nu sunt copiate în bibliotecă și nici sincronizate.';
+  @override
+  String get transcriptionModelDefault => 'Implicit';
+  @override
+  String get transcriptionModelSlow => 'Lent';
+  @override
+  String get transcriptionModelHintTiny =>
+      'Cel mai rapid, cel mai puțin precis';
+  @override
+  String get transcriptionModelHintBase =>
+      'Echilibru bun între viteză și precizie';
+  @override
+  String get transcriptionModelHintSmall => 'Mai precis, de circa 3× mai lent';
+  @override
+  String get transcriptionModelHintMedium => 'Foarte precis, lent pe telefon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Cel mai precis, are nevoie de multă memorie';
+  @override
+  String get transcriptionModelDownload => 'Descarcă';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Ștergi modelul $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Se eliberează $size. Poți descărca modelul din nou mai târziu.';
+  @override
+  String get transcriptionModelFailed =>
+      'Descărcarea a eșuat. Verifică conexiunea și încearcă din nou.';
+  @override
+  String get actionRetry => 'Încearcă din nou';
+  @override
+  String get decimalSeparator => ',';
 }

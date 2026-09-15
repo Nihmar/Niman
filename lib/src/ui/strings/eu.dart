@@ -1258,4 +1258,65 @@ final class BasqueStrings extends Strings {
       'da bat';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkripzioa';
+  @override
+  String get transcriptionModelTitle => 'Eredua';
+  @override
+  String get transcriptionModelNone => 'Bat ere ez';
+  @override
+  String get transcriptionLanguageTitle => 'Hizkuntza';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Grabazioetan hitz egiten den hizkuntza. Zehaztea automatikoki '
+      'hautematea baino zehatzagoa da.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Aplikazioaren berdina ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Hauteman automatikoki';
+  @override
+  String get transcriptionModelsTitle => 'Transkripzio-ereduak';
+  @override
+  String transcriptionModelsUsed(String size) => '$size erabilita';
+  @override
+  String get transcriptionModelsInstalled => 'Deskargatuak';
+  @override
+  String get transcriptionModelsDownloading => 'Deskargatzen';
+  @override
+  String get transcriptionModelsAvailable => 'Erabilgarri';
+  @override
+  String get transcriptionModelsFooter =>
+      'Ereduak gailu honetako aplikazioaren biltegian geratzen dira. Ez dira '
+      'liburutegira kopiatzen, ezta sinkronizatzen ere.';
+  @override
+  String get transcriptionModelDefault => 'Lehenetsia';
+  @override
+  String get transcriptionModelSlow => 'Motela';
+  @override
+  String get transcriptionModelHintTiny => 'Azkarrena, zehaztasun txikienekoa';
+  @override
+  String get transcriptionModelHintBase =>
+      'Abiaduraren eta zehaztasunaren arteko oreka ona';
+  @override
+  String get transcriptionModelHintSmall => 'Zehatzagoa, 3× inguru motelagoa';
+  @override
+  String get transcriptionModelHintMedium => 'Oso zehatza, motela telefonoan';
+  @override
+  String get transcriptionModelHintLarge => 'Zehatzena, memoria asko behar du';
+  @override
+  String get transcriptionModelDownload => 'Deskargatu';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      '$model eredua ezabatu?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      '$size askatuko dira. Eredua geroago berriro deskarga dezakezu.';
+  @override
+  String get transcriptionModelFailed =>
+      'Ezin izan da deskargatu. Egiaztatu konexioa eta saiatu berriro.';
+  @override
+  String get actionRetry => 'Saiatu berriro';
+  @override
+  String get decimalSeparator => ',';
 }

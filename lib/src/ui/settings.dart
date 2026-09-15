@@ -15,6 +15,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
@@ -24,6 +25,7 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/template_help.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
+import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/update_actions.dart';
 import 'package:niman/src/update/update_service.dart';
 
@@ -39,6 +41,7 @@ final class SettingsBody extends StatefulWidget {
     required this.controller,
     this.onClosed,
     this.spellCheck,
+    this.transcription,
     super.key,
   });
 
@@ -47,6 +50,10 @@ final class SettingsBody extends StatefulWidget {
 
   /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
   final EditorSpellCheck? spellCheck;
+
+  /// The installation's transcription models, for the Transcription
+  /// section; null hides it.
+  final TranscriptionModels? transcription;
 
   /// Called after "Close library" closes the session; the pushed screen
   /// pops its own route, the shell tab returns to the Files tab. When null
@@ -1185,6 +1192,11 @@ final class _SettingsBodyState extends State<SettingsBody> {
             widget.onClosed?.call();
           },
         ),
+
+        // App-wide, like the models it points at, but next to the library
+        // because that is where the voice notes it transcribes live.
+        if (widget.transcription case final transcription?)
+          TranscriptionSettingsSection(models: transcription),
 
         SettingsSection(AppStrings.settingsSectionReminders),
         SwitchListTile(

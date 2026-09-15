@@ -1292,4 +1292,67 @@ final class GreekStrings extends Strings {
       'Όσο γράφετε· η έναρξη επεξεργασίας μιας σημείωσης κρατά πάντα μία';
   @override
   String historyIntervalValue(int minutes) => '$minutes λεπ.';
+  @override
+  String get settingsSectionTranscription => 'Μεταγραφή';
+  @override
+  String get transcriptionModelTitle => 'Μοντέλο';
+  @override
+  String get transcriptionModelNone => 'Κανένα';
+  @override
+  String get transcriptionLanguageTitle => 'Γλώσσα';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Η γλώσσα που μιλιέται στις ηχογραφήσεις σας. Αν την ορίσετε, η '
+      'μεταγραφή είναι ακριβέστερη από την αυτόματη ανίχνευση.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Όπως η εφαρμογή ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Αυτόματη ανίχνευση';
+  @override
+  String get transcriptionModelsTitle => 'Μοντέλα μεταγραφής';
+  @override
+  String transcriptionModelsUsed(String size) => 'Σε χρήση $size';
+  @override
+  String get transcriptionModelsInstalled => 'Ληφθέντα';
+  @override
+  String get transcriptionModelsDownloading => 'Λήψη σε εξέλιξη';
+  @override
+  String get transcriptionModelsAvailable => 'Διαθέσιμα';
+  @override
+  String get transcriptionModelsFooter =>
+      'Τα μοντέλα μένουν στον χώρο αποθήκευσης της εφαρμογής σε αυτή τη '
+      'συσκευή. Δεν αντιγράφονται στη βιβλιοθήκη ούτε συγχρονίζονται.';
+  @override
+  String get transcriptionModelDefault => 'Προεπιλογή';
+  @override
+  String get transcriptionModelSlow => 'Αργό';
+  @override
+  String get transcriptionModelHintTiny => 'Το ταχύτερο, το λιγότερο ακριβές';
+  @override
+  String get transcriptionModelHintBase =>
+      'Καλή ισορροπία ταχύτητας και ακρίβειας';
+  @override
+  String get transcriptionModelHintSmall => 'Πιο ακριβές, περίπου 3× πιο αργό';
+  @override
+  String get transcriptionModelHintMedium => 'Πολύ ακριβές, αργό σε τηλέφωνο';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Το πιο ακριβές, χρειάζεται πολλή μνήμη';
+  @override
+  String get transcriptionModelDownload => 'Λήψη';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Διαγραφή του μοντέλου $model;';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Θα ελευθερωθούν $size. Μπορείτε να κατεβάσετε ξανά το μοντέλο '
+      'αργότερα.';
+  @override
+  String get transcriptionModelFailed =>
+      'Η λήψη απέτυχε. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά.';
+  @override
+  String get actionRetry => 'Δοκιμή ξανά';
+  @override
+  String get decimalSeparator => ',';
 }

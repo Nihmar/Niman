@@ -589,4 +589,32 @@ abstract base class Strings {
   String get historyIntervalTitle;
   String get historyIntervalSubtitle;
   String historyIntervalValue(int minutes);
+  String get settingsSectionTranscription;
+  String get transcriptionModelTitle;
+  String get transcriptionModelNone;
+  String get transcriptionLanguageTitle;
+  String get transcriptionLanguageSubtitle;
+  String transcriptionLanguageApp(String language);
+  String get transcriptionLanguageDetect;
+  String get transcriptionModelsTitle;
+  String transcriptionModelsUsed(String size);
+  String get transcriptionModelsInstalled;
+  String get transcriptionModelsDownloading;
+  String get transcriptionModelsAvailable;
+  String get transcriptionModelsFooter;
+  String get transcriptionModelDefault;
+  String get transcriptionModelSlow;
+  String get transcriptionModelHintTiny;
+  String get transcriptionModelHintBase;
+  String get transcriptionModelHintSmall;
+  String get transcriptionModelHintMedium;
+  String get transcriptionModelHintLarge;
+  String get transcriptionModelDownload;
+  String transcriptionModelDeleteTitle(String model);
+  String transcriptionModelDeleteBody(String size);
+  String get transcriptionModelFailed;
+  String get actionRetry;
+
+  /// The decimal separator of the language's numbers (`1.5` / `1,5`).
+  String get decimalSeparator;
 }

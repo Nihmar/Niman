@@ -1259,4 +1259,65 @@ final class GalicianStrings extends Strings {
       'Mentres escribes; comezar a editar unha nota sempre garda unha';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transcrición';
+  @override
+  String get transcriptionModelTitle => 'Modelo';
+  @override
+  String get transcriptionModelNone => 'Ningún';
+  @override
+  String get transcriptionLanguageTitle => 'Idioma';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'O idioma que se fala nas túas gravacións. Indicalo é máis preciso ca '
+      'detectalo.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Como a app ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Detectar automaticamente';
+  @override
+  String get transcriptionModelsTitle => 'Modelos de transcrición';
+  @override
+  String transcriptionModelsUsed(String size) => '$size en uso';
+  @override
+  String get transcriptionModelsInstalled => 'Descargados';
+  @override
+  String get transcriptionModelsDownloading => 'Descargando';
+  @override
+  String get transcriptionModelsAvailable => 'Dispoñibles';
+  @override
+  String get transcriptionModelsFooter =>
+      'Os modelos quedan no almacenamento da app neste dispositivo. Non se '
+      'copian na biblioteca nin se sincronizan.';
+  @override
+  String get transcriptionModelDefault => 'Predeterminado';
+  @override
+  String get transcriptionModelSlow => 'Lento';
+  @override
+  String get transcriptionModelHintTiny => 'O máis rápido, o menos preciso';
+  @override
+  String get transcriptionModelHintBase =>
+      'Bo equilibrio entre velocidade e precisión';
+  @override
+  String get transcriptionModelHintSmall => 'Máis preciso, unhas 3× máis lento';
+  @override
+  String get transcriptionModelHintMedium => 'Moi preciso, lento nun teléfono';
+  @override
+  String get transcriptionModelHintLarge =>
+      'O máis preciso, precisa moita memoria';
+  @override
+  String get transcriptionModelDownload => 'Descargar';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Eliminar o modelo $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Libera $size. Podes volver descargar o modelo máis adiante.';
+  @override
+  String get transcriptionModelFailed =>
+      'Non se puido descargar. Comproba a conexión e téntao de novo.';
+  @override
+  String get actionRetry => 'Tentar de novo';
+  @override
+  String get decimalSeparator => ',';
 }

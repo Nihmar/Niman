@@ -1238,4 +1238,65 @@ final class SlovakStrings extends Strings {
       'Počas písania; začiatok úprav poznámky vždy jednu uchová';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Prepis';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Žiadny';
+  @override
+  String get transcriptionLanguageTitle => 'Jazyk';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Jazyk, ktorým sa vo vašich nahrávkach hovorí. Zadať ho je presnejšie '
+      'ako ho nechať rozpoznať.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Ako aplikácia ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Rozpoznať automaticky';
+  @override
+  String get transcriptionModelsTitle => 'Modely prepisu';
+  @override
+  String transcriptionModelsUsed(String size) => 'Využité $size';
+  @override
+  String get transcriptionModelsInstalled => 'Stiahnuté';
+  @override
+  String get transcriptionModelsDownloading => 'Sťahuje sa';
+  @override
+  String get transcriptionModelsAvailable => 'Dostupné';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modely zostávajú v úložisku aplikácie v tomto zariadení. Nekopírujú sa '
+      'do knižnice ani sa nesynchronizujú.';
+  @override
+  String get transcriptionModelDefault => 'Predvolený';
+  @override
+  String get transcriptionModelSlow => 'Pomalý';
+  @override
+  String get transcriptionModelHintTiny => 'Najrýchlejší, najmenej presný';
+  @override
+  String get transcriptionModelHintBase => 'Dobrý pomer rýchlosti a presnosti';
+  @override
+  String get transcriptionModelHintSmall => 'Presnejší, približne 3× pomalší';
+  @override
+  String get transcriptionModelHintMedium => 'Veľmi presný, v telefóne pomalý';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Najpresnejší, potrebuje veľa pamäte';
+  @override
+  String get transcriptionModelDownload => 'Stiahnuť';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Odstrániť model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Uvoľní sa $size. Model si môžete neskôr stiahnuť znova.';
+  @override
+  String get transcriptionModelFailed =>
+      'Stiahnutie zlyhalo. Skontrolujte pripojenie a skúste to znova.';
+  @override
+  String get actionRetry => 'Skúsiť znova';
+  @override
+  String get decimalSeparator => ',';
 }

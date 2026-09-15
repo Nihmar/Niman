@@ -1125,4 +1125,56 @@ final class ChineseStrings extends Strings {
   String get historyIntervalSubtitle => '书写期间生效；开始编辑笔记时总会保留一个版本';
   @override
   String historyIntervalValue(int minutes) => '$minutes 分钟';
+  @override
+  String get settingsSectionTranscription => '转写';
+  @override
+  String get transcriptionModelTitle => '模型';
+  @override
+  String get transcriptionModelNone => '无';
+  @override
+  String get transcriptionLanguageTitle => '语言';
+  @override
+  String get transcriptionLanguageSubtitle => '录音中所说的语言。指定语言比自动检测更准确。';
+  @override
+  String transcriptionLanguageApp(String language) => '与应用相同（$language）';
+  @override
+  String get transcriptionLanguageDetect => '自动检测';
+  @override
+  String get transcriptionModelsTitle => '转写模型';
+  @override
+  String transcriptionModelsUsed(String size) => '已使用 $size';
+  @override
+  String get transcriptionModelsInstalled => '已下载';
+  @override
+  String get transcriptionModelsDownloading => '正在下载';
+  @override
+  String get transcriptionModelsAvailable => '可下载';
+  @override
+  String get transcriptionModelsFooter => '模型保存在本设备的应用存储中，不会复制到笔记库，也不会同步。';
+  @override
+  String get transcriptionModelDefault => '默认';
+  @override
+  String get transcriptionModelSlow => '较慢';
+  @override
+  String get transcriptionModelHintTiny => '最快，准确度最低';
+  @override
+  String get transcriptionModelHintBase => '速度与准确度兼顾';
+  @override
+  String get transcriptionModelHintSmall => '更准确，约慢 3 倍';
+  @override
+  String get transcriptionModelHintMedium => '非常准确，在手机上较慢';
+  @override
+  String get transcriptionModelHintLarge => '最准确，需要大量内存';
+  @override
+  String get transcriptionModelDownload => '下载';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '删除 $model 模型？';
+  @override
+  String transcriptionModelDeleteBody(String size) => '将释放 $size。之后可以重新下载该模型。';
+  @override
+  String get transcriptionModelFailed => '下载失败。请检查网络连接后重试。';
+  @override
+  String get actionRetry => '重试';
+  @override
+  String get decimalSeparator => '.';
 }

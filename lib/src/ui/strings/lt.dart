@@ -1242,4 +1242,66 @@ final class LithuanianStrings extends Strings {
       'Rašant; pradėjus redaguoti pastabą, versija išsaugoma visada';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkripcija';
+  @override
+  String get transcriptionModelTitle => 'Modelis';
+  @override
+  String get transcriptionModelNone => 'Nėra';
+  @override
+  String get transcriptionLanguageTitle => 'Kalba';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kalba, kuria kalbama jūsų įrašuose. Ją nurodyti tiksliau nei leisti '
+      'atpažinti.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Kaip programoje ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Atpažinti automatiškai';
+  @override
+  String get transcriptionModelsTitle => 'Transkripcijos modeliai';
+  @override
+  String transcriptionModelsUsed(String size) => 'Užimta $size';
+  @override
+  String get transcriptionModelsInstalled => 'Atsisiųsti';
+  @override
+  String get transcriptionModelsDownloading => 'Siunčiama';
+  @override
+  String get transcriptionModelsAvailable => 'Galimi';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeliai lieka programos saugykloje šiame įrenginyje. Jie '
+      'nekopijuojami į biblioteką ir nesinchronizuojami.';
+  @override
+  String get transcriptionModelDefault => 'Numatytasis';
+  @override
+  String get transcriptionModelSlow => 'Lėtas';
+  @override
+  String get transcriptionModelHintTiny => 'Greičiausias, mažiausiai tikslus';
+  @override
+  String get transcriptionModelHintBase =>
+      'Gera greičio ir tikslumo pusiausvyra';
+  @override
+  String get transcriptionModelHintSmall => 'Tikslesnis, maždaug 3× lėtesnis';
+  @override
+  String get transcriptionModelHintMedium => 'Labai tikslus, telefone lėtas';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Tiksliausias, reikia daug atminties';
+  @override
+  String get transcriptionModelDownload => 'Atsisiųsti';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Ištrinti modelį $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Bus atlaisvinta $size. Modelį vėliau galėsite atsisiųsti iš naujo.';
+  @override
+  String get transcriptionModelFailed =>
+      'Atsisiųsti nepavyko. Patikrinkite ryšį ir bandykite dar kartą.';
+  @override
+  String get actionRetry => 'Bandyti dar kartą';
+  @override
+  String get decimalSeparator => ',';
 }

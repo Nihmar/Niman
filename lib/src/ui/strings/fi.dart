@@ -1254,4 +1254,65 @@ final class FinnishStrings extends Strings {
       'Kirjoittaessa; muokkauksen aloittaminen säilyttää aina yhden version';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Litterointi';
+  @override
+  String get transcriptionModelTitle => 'Malli';
+  @override
+  String get transcriptionModelNone => 'Ei mitään';
+  @override
+  String get transcriptionLanguageTitle => 'Kieli';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kieli, jota tallenteissasi puhutaan. Sen valitseminen on tarkempaa '
+      'kuin tunnistus.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Sama kuin sovelluksessa ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Tunnista automaattisesti';
+  @override
+  String get transcriptionModelsTitle => 'Litterointimallit';
+  @override
+  String transcriptionModelsUsed(String size) => '$size käytössä';
+  @override
+  String get transcriptionModelsInstalled => 'Ladatut';
+  @override
+  String get transcriptionModelsDownloading => 'Ladataan';
+  @override
+  String get transcriptionModelsAvailable => 'Saatavilla';
+  @override
+  String get transcriptionModelsFooter =>
+      'Mallit pysyvät sovelluksen tallennustilassa tällä laitteella. Niitä ei '
+      'kopioida kirjastoon eikä synkronoida.';
+  @override
+  String get transcriptionModelDefault => 'Oletus';
+  @override
+  String get transcriptionModelSlow => 'Hidas';
+  @override
+  String get transcriptionModelHintTiny => 'Nopein, epätarkin';
+  @override
+  String get transcriptionModelHintBase =>
+      'Hyvä tasapaino nopeuden ja tarkkuuden välillä';
+  @override
+  String get transcriptionModelHintSmall => 'Tarkempi, noin 3× hitaampi';
+  @override
+  String get transcriptionModelHintMedium => 'Hyvin tarkka, hidas puhelimessa';
+  @override
+  String get transcriptionModelHintLarge => 'Tarkin, vaatii paljon muistia';
+  @override
+  String get transcriptionModelDownload => 'Lataa';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Poistetaanko malli $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Tämä vapauttaa $size. Voit ladata mallin myöhemmin uudelleen.';
+  @override
+  String get transcriptionModelFailed =>
+      'Lataus epäonnistui. Tarkista yhteys ja yritä uudelleen.';
+  @override
+  String get actionRetry => 'Yritä uudelleen';
+  @override
+  String get decimalSeparator => ',';
 }

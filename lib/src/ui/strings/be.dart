@@ -1242,4 +1242,68 @@ final class BelarusianStrings extends Strings {
       'Падчас пісьма; пачатак рэдагавання заўвагі заўсёды захоўвае адну';
   @override
   String historyIntervalValue(int minutes) => '$minutes хв';
+  @override
+  String get settingsSectionTranscription => 'Транскрыпцыя';
+  @override
+  String get transcriptionModelTitle => 'Мадэль';
+  @override
+  String get transcriptionModelNone => 'Няма';
+  @override
+  String get transcriptionLanguageTitle => 'Мова';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Мова, на якой гавораць у вашых запісах. Указаць яе дакладней, чым '
+      'вызначаць аўтаматычна.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Як у праграме ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Вызначаць аўтаматычна';
+  @override
+  String get transcriptionModelsTitle => 'Мадэлі транскрыпцыі';
+  @override
+  String transcriptionModelsUsed(String size) => 'Занята $size';
+  @override
+  String get transcriptionModelsInstalled => 'Спампаваныя';
+  @override
+  String get transcriptionModelsDownloading => 'Спампоўваюцца';
+  @override
+  String get transcriptionModelsAvailable => 'Даступныя';
+  @override
+  String get transcriptionModelsFooter =>
+      'Мадэлі застаюцца ў сховішчы праграмы на гэтай прыладзе. Яны не '
+      'капіруюцца ў бібліятэку і не сінхранізуюцца.';
+  @override
+  String get transcriptionModelDefault => 'Прадвызначаная';
+  @override
+  String get transcriptionModelSlow => 'Павольная';
+  @override
+  String get transcriptionModelHintTiny => 'Найхутчэйшая, найменш дакладная';
+  @override
+  String get transcriptionModelHintBase =>
+      'Добры баланс хуткасці і дакладнасці';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Больш дакладная, прыблізна ў 3× павольнейшая';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Вельмі дакладная, павольная на тэлефоне';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Найдакладнейшая, патрабуе шмат памяці';
+  @override
+  String get transcriptionModelDownload => 'Спампаваць';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Выдаліць мадэль $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Вызваліцца $size. Вы зможаце спампаваць мадэль зноў пазней.';
+  @override
+  String get transcriptionModelFailed =>
+      'Не ўдалося спампаваць. Праверце злучэнне і паспрабуйце яшчэ раз.';
+  @override
+  String get actionRetry => 'Паспрабаваць яшчэ раз';
+  @override
+  String get decimalSeparator => ',';
 }
