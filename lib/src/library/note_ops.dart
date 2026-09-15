@@ -9,6 +9,7 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
@@ -48,7 +49,8 @@ final class NoteOps implements NoteOperations {
     required IndexDatabase db,
     required this.indexer,
     required this.config,
-  }) : _dao = NoteDao(db);
+  }) : _dao = NoteDao(db),
+       writer = NoteWriter(root: root, indexer: indexer);
 
   /// Absolute path of the library root.
   final String root;
@@ -59,6 +61,10 @@ final class NoteOps implements NoteOperations {
   /// The library's `.niman/settings.json`, shared with the session so
   /// both read one cached copy.
   final LibraryConfigRepo config;
+
+  /// The note-text write path, outside the op chain: saves never wait on
+  /// a rename or an empty-trash, only on earlier saves of the same note.
+  final NoteWriter writer;
 
   final NoteDao _dao;
 
@@ -350,6 +356,10 @@ final class NoteOps implements NoteOperations {
       return await _mustFind(path);
     });
   }
+
+  @override
+  Future<void> saveNote(String path, String content, {int? editSession}) =>
+      writer.save(path, content, editSession: editSession);
 
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
   /// delete otherwise.

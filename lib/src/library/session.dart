@@ -68,6 +68,16 @@ abstract interface class NoteOperations {
   /// template, so far. Throws when the note is not there.
   Future<String> readNote(String path);
 
+  /// Saves [content] as the text of the note at library-relative [path],
+  /// creating the file when it is not there.
+  ///
+  /// The editor's write path: it completes once the disk holds the text
+  /// (the index follows on its own). Saves of one note run in order, saves
+  /// of different notes independently. [editSession] names the editor
+  /// session the save belongs to — one opening of the note, however many
+  /// autosaves it makes.
+  Future<void> saveNote(String path, String content, {int? editSession});
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 

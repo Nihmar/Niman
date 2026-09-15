@@ -17,6 +17,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -773,7 +774,28 @@ final class _LibraryShellState extends State<_LibraryShell>
       unsavedTracker: widget.unsavedTracker,
       spellCheck: widget.spellCheck,
       reloadToken: _noteReloadToken,
+      saveNote: _noteSaver(controller),
     );
+  }
+
+  /// The editor's write path into the open library: [NoteOperations.saveNote]
+  /// with the editor's absolute path turned library-relative. Null while no
+  /// library is ready, or for a note outside the library root — the editor
+  /// then writes the file itself.
+  NoteSaver? _noteSaver(LibrarySession controller) {
+    final ops = controller.ops;
+    final root = controller.root;
+    if (ops == null || root == null) return null;
+    return (path, content, {required editSession}) {
+      if (!p.isWithin(root, path)) {
+        return writeNoteOffIsolate(path, content).then((_) {});
+      }
+      return ops.saveNote(
+        relPath(path, root),
+        content,
+        editSession: editSession,
+      );
+    };
   }
 
   /// The way back out of [_previewFullScreen], floating over the preview.
@@ -2409,6 +2431,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   unsavedTracker: widget.unsavedTracker,
                   spellCheck: widget.spellCheck,
                   reloadToken: _noteReloadToken,
+                  saveNote: _noteSaver(controller),
                   statusActions: [
                     // The view controls live in the note's status row on the
                     // desktop (T-PP-22): the header above is about the file,
