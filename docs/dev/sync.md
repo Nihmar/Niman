@@ -9,12 +9,13 @@ settled before the code. History ships first; sync builds on it.
   folder (`.history/`), so it survives an index rebuild and a folder
   copy. Sync state is the one exception: it is per device, cannot be
   rebuilt from disk, and lives in `AppDatabase`.
-- **Every write of a note goes through `NoteOps`.** The editor, replace
-  and the todo store save through one call that writes atomically, takes
-  the history snapshot, updates the index and (later) marks the file
-  dirty for sync. The Android widget writes from a background isolate
-  and stays outside; the periodic rescan and the sync reconcile catch
-  it. `NoteOps` makes things *fast*; correctness never depends on it,
+- **The editor writes through `NoteOps`.** `NoteOps.saveNote`
+  (`NoteWriter`) writes atomically, takes the history snapshot in the
+  same isolate pass, updates the index and (later) marks the file dirty
+  for sync. Replace runs its own isolate chunks and calls the same
+  snapshot routine with reason `replace`. The Android widget writes from
+  a background isolate and stays outside; the periodic rescan and the
+  sync reconcile catch it. `NoteOps` makes things *fast*; correctness never depends on it,
   because anything can edit the folder.
 - **No global write queue for saves.** `NoteOps` serializes structural
   ops (create, rename, move, delete, trash) on one chain; saves take a
@@ -67,6 +68,8 @@ when any of these holds:
 | `interval` | the newest version is older than `historyIntervalMinutes` (default 5) |
 | `restore` | right before a restore overwrites the note |
 | `sync` | right before sync overwrites the note with a download or merge result |
+| `replace` | right before a library-wide replace rewrites the note |
+| `unknown` | a `.v<n>` file the manifest did not describe, read back on rebuild |
 
 A snapshot is skipped — and logged as skipped — when the old content's
 sha256 equals the newest version's (nothing to keep), when the note did
