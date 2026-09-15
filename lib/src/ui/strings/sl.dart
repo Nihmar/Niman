@@ -303,6 +303,14 @@ final class SlovenianStrings extends Strings {
   String get audioMoreActions => 'Več dejanj';
   @override
   String get audioDiscardRecording => 'Zavrzi posnetek';
+  @override
+  String get audioPauseRecording => 'Začasno ustavi snemanje';
+  @override
+  String get audioResumeRecording => 'Nadaljuj snemanje';
+  @override
+  String get audioRecordingPaused => 'Začasno ustavljeno';
+  @override
+  String get audioSavingRecording => 'Shranjevanje …';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

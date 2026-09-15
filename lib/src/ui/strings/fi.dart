@@ -304,6 +304,14 @@ final class FinnishStrings extends Strings {
   String get audioMoreActions => 'Lisää toimintoja';
   @override
   String get audioDiscardRecording => 'Hylkää tallenne';
+  @override
+  String get audioPauseRecording => 'Keskeytä äänitys';
+  @override
+  String get audioResumeRecording => 'Jatka äänitystä';
+  @override
+  String get audioRecordingPaused => 'Tauolla';
+  @override
+  String get audioSavingRecording => 'Tallennetaan…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

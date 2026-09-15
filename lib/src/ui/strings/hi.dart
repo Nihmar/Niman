@@ -298,6 +298,14 @@ final class HindiStrings extends Strings {
   String get audioMoreActions => 'और क्रियाएँ';
   @override
   String get audioDiscardRecording => 'रिकॉर्डिंग रद्द करें';
+  @override
+  String get audioPauseRecording => 'रिकॉर्डिंग रोकें';
+  @override
+  String get audioResumeRecording => 'रिकॉर्डिंग फिर शुरू करें';
+  @override
+  String get audioRecordingPaused => 'रुकी हुई';
+  @override
+  String get audioSavingRecording => 'सहेजा जा रहा है…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -301,6 +301,14 @@ final class LithuanianStrings extends Strings {
   String get audioMoreActions => 'Daugiau veiksmų';
   @override
   String get audioDiscardRecording => 'Atmesti įrašą';
+  @override
+  String get audioPauseRecording => 'Pristabdyti įrašymą';
+  @override
+  String get audioResumeRecording => 'Tęsti įrašymą';
+  @override
+  String get audioRecordingPaused => 'Pristabdyta';
+  @override
+  String get audioSavingRecording => 'Išsaugoma…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

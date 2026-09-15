@@ -28,6 +28,14 @@ final class _FakeRecorder implements VoiceRecorder {
     startedPath = path;
   }
 
+  final calls = <String>[];
+
+  @override
+  Future<void> pause() async => calls.add('pause');
+
+  @override
+  Future<void> resume() async => calls.add('resume');
+
   @override
   Future<String?> stop() async => stoppedPath;
 
@@ -307,6 +315,70 @@ void main() {
     expect(find.byIcon(Icons.mic_outlined), findsOneWidget);
     expect(find.byIcon(Icons.stop), findsNothing);
     expect(find.byKey(const Key('audio-message-field')), findsOneWidget);
+  });
+
+  testWidgets('pause holds the clock and resume carries on', (tester) async {
+    final recorder = _FakeRecorder();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: [],
+      recorder: recorder,
+    );
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('Recording… 0:02'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('audio-record-pause')));
+    await tester.pump();
+    expect(recorder.calls, ['pause']);
+    await tester.pump(const Duration(seconds: 3));
+    // The breathing dot repeats, so no pumpAndSettle while paused.
+    expect(find.text('Paused 0:02'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('audio-record-pause')));
+    await tester.pump();
+    expect(recorder.calls, ['pause', 'resume']);
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Recording… 0:03'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('stop keeps the bar, saving, until the clip lands', (
+    tester,
+  ) async {
+    final edits = <String>[];
+    final imported = Completer<String>();
+    await _pump(
+      tester,
+      text: '---\ntype: audio\n---\n',
+      edits: edits,
+      importAudio: (_, _) => imported.future,
+    );
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('audio-record-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    // No in-between state: the bar stays, reading "Saving…", and the
+    // field has not come back yet.
+    expect(find.text('Saving…'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('audio-recording-saving')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('audio-message-field')), findsNothing);
+    expect(edits, isEmpty);
+
+    imported.complete(p.join('assets', 'imported.wav'));
+    await tester.pumpAndSettle();
+    expect(edits.single, contains(p.join('assets', 'imported.wav')));
+    expect(find.byKey(const Key('audio-message-field')), findsOneWidget);
+    expect(find.byIcon(Icons.mic_outlined), findsOneWidget);
   });
 
   testWidgets('discard throws the recording away', (tester) async {

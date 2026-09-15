@@ -302,6 +302,14 @@ final class LatvianStrings extends Strings {
   String get audioMoreActions => 'Citas darbības';
   @override
   String get audioDiscardRecording => 'Atmest ierakstu';
+  @override
+  String get audioPauseRecording => 'Pauzēt ierakstīšanu';
+  @override
+  String get audioResumeRecording => 'Turpināt ierakstīšanu';
+  @override
+  String get audioRecordingPaused => 'Pauzēts';
+  @override
+  String get audioSavingRecording => 'Saglabā…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

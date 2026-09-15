@@ -305,6 +305,14 @@ final class NorwegianStrings extends Strings {
   String get audioMoreActions => 'Flere handlinger';
   @override
   String get audioDiscardRecording => 'Forkast opptak';
+  @override
+  String get audioPauseRecording => 'Sett opptaket på pause';
+  @override
+  String get audioResumeRecording => 'Fortsett opptaket';
+  @override
+  String get audioRecordingPaused => 'Pauset';
+  @override
+  String get audioSavingRecording => 'Lagrer…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

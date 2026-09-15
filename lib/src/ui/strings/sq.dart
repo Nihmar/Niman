@@ -306,6 +306,14 @@ final class AlbanianStrings extends Strings {
   String get audioMoreActions => 'Më shumë veprime';
   @override
   String get audioDiscardRecording => 'Hidh regjistrimin';
+  @override
+  String get audioPauseRecording => 'Pezullo regjistrimin';
+  @override
+  String get audioResumeRecording => 'Vazhdo regjistrimin';
+  @override
+  String get audioRecordingPaused => 'Në pauzë';
+  @override
+  String get audioSavingRecording => 'Po ruhet…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

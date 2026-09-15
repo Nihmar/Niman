@@ -308,6 +308,14 @@ final class HungarianStrings extends Strings {
   String get audioMoreActions => 'További műveletek';
   @override
   String get audioDiscardRecording => 'Felvétel elvetése';
+  @override
+  String get audioPauseRecording => 'Felvétel szüneteltetése';
+  @override
+  String get audioResumeRecording => 'Felvétel folytatása';
+  @override
+  String get audioRecordingPaused => 'Szüneteltetve';
+  @override
+  String get audioSavingRecording => 'Mentés…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

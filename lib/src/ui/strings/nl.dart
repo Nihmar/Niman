@@ -307,6 +307,14 @@ final class DutchStrings extends Strings {
   String get audioMoreActions => 'Meer acties';
   @override
   String get audioDiscardRecording => 'Opname weggooien';
+  @override
+  String get audioPauseRecording => 'Opname pauzeren';
+  @override
+  String get audioResumeRecording => 'Opname hervatten';
+  @override
+  String get audioRecordingPaused => 'Gepauzeerd';
+  @override
+  String get audioSavingRecording => 'Opslaan…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

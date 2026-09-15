@@ -307,6 +307,14 @@ final class BulgarianStrings extends Strings {
   String get audioMoreActions => 'Още действия';
   @override
   String get audioDiscardRecording => 'Отхвърляне на записа';
+  @override
+  String get audioPauseRecording => 'Пауза на записа';
+  @override
+  String get audioResumeRecording => 'Продължи записа';
+  @override
+  String get audioRecordingPaused => 'На пауза';
+  @override
+  String get audioSavingRecording => 'Запазване…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

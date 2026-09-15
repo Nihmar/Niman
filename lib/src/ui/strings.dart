@@ -303,6 +303,10 @@ final class AppStrings {
   static String audioUntitled(int n) => _s.audioUntitled(n);
   static String get audioMoreActions => _s.audioMoreActions;
   static String get audioDiscardRecording => _s.audioDiscardRecording;
+  static String get audioPauseRecording => _s.audioPauseRecording;
+  static String get audioResumeRecording => _s.audioResumeRecording;
+  static String get audioRecordingPaused => _s.audioRecordingPaused;
+  static String get audioSavingRecording => _s.audioSavingRecording;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;

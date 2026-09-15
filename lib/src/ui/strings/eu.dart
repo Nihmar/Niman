@@ -304,6 +304,14 @@ final class BasqueStrings extends Strings {
   String get audioMoreActions => 'Ekintza gehiago';
   @override
   String get audioDiscardRecording => 'Baztertu grabazioa';
+  @override
+  String get audioPauseRecording => 'Grabazioa pausatu';
+  @override
+  String get audioResumeRecording => 'Grabazioari berrekin';
+  @override
+  String get audioRecordingPaused => 'Pausatuta';
+  @override
+  String get audioSavingRecording => 'Gordetzen…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show LinkType, defaultAttachmentsFolder;
 import 'package:niman/src/frontmatter/note_kind.dart';
@@ -128,6 +129,8 @@ class AudioNoteView extends StatefulWidget {
 
 class _AudioNoteViewState extends State<AudioNoteView>
     with SingleTickerProviderStateMixin {
+  static const _log = AppLogger(name: 'audio');
+
   late final AudioPlayback _playback = AudioPlayback(
     () => widget.player ?? AudioplayersClipPlayer(),
     ownsPlayer: widget.player == null,
@@ -305,6 +308,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
   Future<void> _attach(String source) async {
     final root = widget.libraryRoot;
     if (root == null || !mounted) return;
+    final clock = Stopwatch()..start();
     final relative =
         await (widget.importAudio?.call(root, source) ??
             importAudioToLibrary(
@@ -312,10 +316,16 @@ class _AudioNoteViewState extends State<AudioNoteView>
               sourcePath: source,
               attachmentsFolder: widget.attachmentsFolder,
             ));
+    _log.info(
+      'clip imported: $source -> $relative '
+      '(${clock.elapsedMilliseconds} ms)',
+    );
     if (!mounted) return;
+    final append = Stopwatch()..start();
     widget.onChanged(
       appendAudioClip(widget.text, relative, linkType: widget.linkType),
     );
+    _log.debug('clip appended to the note (${append.elapsedMilliseconds} ms)');
   }
 
   Future<void> _import() {
@@ -432,6 +442,9 @@ class _AudioNoteViewState extends State<AudioNoteView>
             child: AudioComposer(
               controller: _input,
               recording: _capture.recording,
+              paused: _capture.paused,
+              saving: _capture.saving,
+              onPause: _capture.busy ? null : _capture.togglePause,
               stopSwell: _pulse,
               onRecord: canRecord ? _toggleRecord : null,
               onSend: _sendNote,

@@ -304,6 +304,14 @@ final class SlovakStrings extends Strings {
   String get audioMoreActions => 'Ďalšie akcie';
   @override
   String get audioDiscardRecording => 'Zahodiť nahrávku';
+  @override
+  String get audioPauseRecording => 'Pozastaviť nahrávanie';
+  @override
+  String get audioResumeRecording => 'Pokračovať v nahrávaní';
+  @override
+  String get audioRecordingPaused => 'Pozastavené';
+  @override
+  String get audioSavingRecording => 'Ukladanie…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

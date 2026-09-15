@@ -308,6 +308,14 @@ final class SpanishStrings extends Strings {
   String get audioMoreActions => 'Más acciones';
   @override
   String get audioDiscardRecording => 'Descartar grabación';
+  @override
+  String get audioPauseRecording => 'Pausar grabación';
+  @override
+  String get audioResumeRecording => 'Reanudar grabación';
+  @override
+  String get audioRecordingPaused => 'En pausa';
+  @override
+  String get audioSavingRecording => 'Guardando…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

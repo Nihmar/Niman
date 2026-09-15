@@ -300,6 +300,14 @@ final class BelarusianStrings extends Strings {
   String get audioMoreActions => 'Больш дзеянняў';
   @override
   String get audioDiscardRecording => 'Адкінуць запіс';
+  @override
+  String get audioPauseRecording => 'Прыпыніць запіс';
+  @override
+  String get audioResumeRecording => 'Працягнуць запіс';
+  @override
+  String get audioRecordingPaused => 'Прыпынена';
+  @override
+  String get audioSavingRecording => 'Захаванне…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

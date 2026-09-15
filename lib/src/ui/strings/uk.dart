@@ -301,6 +301,14 @@ final class UkrainianStrings extends Strings {
   String get audioMoreActions => 'Більше дій';
   @override
   String get audioDiscardRecording => 'Відкинути запис';
+  @override
+  String get audioPauseRecording => 'Призупинити запис';
+  @override
+  String get audioResumeRecording => 'Продовжити запис';
+  @override
+  String get audioRecordingPaused => 'Призупинено';
+  @override
+  String get audioSavingRecording => 'Збереження…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -312,6 +312,14 @@ final class CatalanStrings extends Strings {
   String get audioMoreActions => 'Més accions';
   @override
   String get audioDiscardRecording => 'Descarta la gravació';
+  @override
+  String get audioPauseRecording => 'Posa en pausa la gravació';
+  @override
+  String get audioResumeRecording => 'Reprèn la gravació';
+  @override
+  String get audioRecordingPaused => 'En pausa';
+  @override
+  String get audioSavingRecording => 'Desant…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

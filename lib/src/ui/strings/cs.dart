@@ -303,6 +303,14 @@ final class CzechStrings extends Strings {
   String get audioMoreActions => 'Další akce';
   @override
   String get audioDiscardRecording => 'Zahodit nahrávku';
+  @override
+  String get audioPauseRecording => 'Pozastavit nahrávání';
+  @override
+  String get audioResumeRecording => 'Pokračovat v nahrávání';
+  @override
+  String get audioRecordingPaused => 'Pozastaveno';
+  @override
+  String get audioSavingRecording => 'Ukládání…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

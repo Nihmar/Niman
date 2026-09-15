@@ -15,6 +15,12 @@ abstract interface class VoiceRecorder {
   /// Starts recording to [path] (a `.wav` file).
   Future<void> start({required String path});
 
+  /// Pauses the live recording; [resume] carries on in the same file.
+  Future<void> pause();
+
+  /// Resumes a paused recording.
+  Future<void> resume();
+
   /// Stops the recording; returns the file path, or null when nothing was
   /// recorded.
   Future<String?> stop();
