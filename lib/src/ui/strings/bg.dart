@@ -1323,4 +1323,33 @@ final class BulgarianStrings extends Strings {
       'На пауза при $progress';
   @override
   String get actionResume => 'Продължи';
+  @override
+  String get audioTranscribe => 'Транскрибиране';
+  @override
+  String get audioTranscribeUnsupported => 'На това устройство само WAV записи';
+  @override
+  String get transcriptionQueued => 'На опашка';
+  @override
+  String get transcriptionPreparing => 'Аудиото се подготвя…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрибиране… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Изтегляне на $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрипцията е добавена към описанието';
+  @override
+  String get transcriptionNoSpeech => 'В този запис не е разпозната реч';
+  @override
+  String get transcriptionFailed => 'Транскрибирането не бе успешно';
+  @override
+  String get transcriptionPickModelTitle => 'Изберете модел';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрибирането става на това устройство и записът никога не се '
+      'изпраща. Моделът се изтегля само веднъж.';
+  @override
+  String get transcriptionPickModelAction => 'Изтегляне и транскрибиране';
+  @override
+  String get transcriptionModelRecommended => 'Препоръчан';
 }

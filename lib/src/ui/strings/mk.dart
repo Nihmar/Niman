@@ -1324,4 +1324,33 @@ final class MacedonianStrings extends Strings {
       'Паузирано на $progress';
   @override
   String get actionResume => 'Продолжи';
+  @override
+  String get audioTranscribe => 'Транскрибирај';
+  @override
+  String get audioTranscribeUnsupported => 'На овој уред само WAV снимки';
+  @override
+  String get transcriptionQueued => 'Во редица';
+  @override
+  String get transcriptionPreparing => 'Се подготвува звукот…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрипција… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Се презема $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрипцијата е додадена во описот';
+  @override
+  String get transcriptionNoSpeech => 'Во оваа снимка не е препознаен говор';
+  @override
+  String get transcriptionFailed => 'Транскрипцијата не успеа';
+  @override
+  String get transcriptionPickModelTitle => 'Изберете модел';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрипцијата се извршува на овој уред и снимката никогаш не се '
+      'испраќа. Моделот се презема само еднаш.';
+  @override
+  String get transcriptionPickModelAction => 'Преземи и транскрибирај';
+  @override
+  String get transcriptionModelRecommended => 'Препорачано';
 }

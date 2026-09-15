@@ -617,6 +617,19 @@ abstract base class Strings {
   String get transcriptionModelRetrying;
   String transcriptionModelInterrupted(String progress);
   String get actionResume;
+  String get audioTranscribe;
+  String get audioTranscribeUnsupported;
+  String get transcriptionQueued;
+  String get transcriptionPreparing;
+  String transcriptionRunning(int percent);
+  String transcriptionWaitingForModel(String model, int percent);
+  String get transcriptionSaved;
+  String get transcriptionNoSpeech;
+  String get transcriptionFailed;
+  String get transcriptionPickModelTitle;
+  String get transcriptionPickModelBody;
+  String get transcriptionPickModelAction;
+  String get transcriptionModelRecommended;
 
   /// The decimal separator of the language's numbers (`1.5` / `1,5`).
   String get decimalSeparator;

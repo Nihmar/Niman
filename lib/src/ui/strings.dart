@@ -822,6 +822,24 @@ final class AppStrings {
   static String transcriptionModelInterrupted(String progress) =>
       _s.transcriptionModelInterrupted(progress);
   static String get actionResume => _s.actionResume;
+  static String get audioTranscribe => _s.audioTranscribe;
+  static String get audioTranscribeUnsupported => _s.audioTranscribeUnsupported;
+  static String get transcriptionQueued => _s.transcriptionQueued;
+  static String get transcriptionPreparing => _s.transcriptionPreparing;
+  static String transcriptionRunning(int percent) =>
+      _s.transcriptionRunning(percent);
+  static String transcriptionWaitingForModel(String model, int percent) =>
+      _s.transcriptionWaitingForModel(model, percent);
+  static String get transcriptionSaved => _s.transcriptionSaved;
+  static String get transcriptionNoSpeech => _s.transcriptionNoSpeech;
+  static String get transcriptionFailed => _s.transcriptionFailed;
+  static String get transcriptionPickModelTitle =>
+      _s.transcriptionPickModelTitle;
+  static String get transcriptionPickModelBody => _s.transcriptionPickModelBody;
+  static String get transcriptionPickModelAction =>
+      _s.transcriptionPickModelAction;
+  static String get transcriptionModelRecommended =>
+      _s.transcriptionModelRecommended;
 
   /// Whisper's own model names, the same in every language.
   static String transcriptionModelName(TranscriptionModel model) =>

@@ -1303,4 +1303,33 @@ final class EnglishStrings extends Strings {
       'Paused at $progress';
   @override
   String get actionResume => 'Resume';
+  @override
+  String get audioTranscribe => 'Transcribe';
+  @override
+  String get audioTranscribeUnsupported => 'Only WAV recordings on this device';
+  @override
+  String get transcriptionQueued => 'Queued';
+  @override
+  String get transcriptionPreparing => 'Preparing the audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcribing… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Downloading $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transcription added to the description';
+  @override
+  String get transcriptionNoSpeech => 'No speech recognized in this recording';
+  @override
+  String get transcriptionFailed => 'Transcription failed';
+  @override
+  String get transcriptionPickModelTitle => 'Choose a model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transcription runs on this device and the recording is never uploaded. '
+      'The model is downloaded once.';
+  @override
+  String get transcriptionPickModelAction => 'Download and transcribe';
+  @override
+  String get transcriptionModelRecommended => 'Recommended';
 }

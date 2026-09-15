@@ -1353,4 +1353,35 @@ final class FrenchStrings extends Strings {
       'En pause à $progress';
   @override
   String get actionResume => 'Reprendre';
+  @override
+  String get audioTranscribe => 'Transcrire';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Enregistrements WAV uniquement sur cet appareil';
+  @override
+  String get transcriptionQueued => "En file d'attente";
+  @override
+  String get transcriptionPreparing => "Préparation de l'audio…";
+  @override
+  String transcriptionRunning(int percent) => 'Transcription… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Téléchargement de $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transcription ajoutée à la description';
+  @override
+  String get transcriptionNoSpeech =>
+      'Aucune parole reconnue dans cet enregistrement';
+  @override
+  String get transcriptionFailed => 'Échec de la transcription';
+  @override
+  String get transcriptionPickModelTitle => 'Choisissez un modèle';
+  @override
+  String get transcriptionPickModelBody =>
+      "La transcription se fait sur cet appareil et l'enregistrement n'est "
+      "jamais envoyé. Le modèle n'est téléchargé qu'une fois.";
+  @override
+  String get transcriptionPickModelAction => 'Télécharger et transcrire';
+  @override
+  String get transcriptionModelRecommended => 'Recommandé';
 }

@@ -1311,4 +1311,33 @@ final class LithuanianStrings extends Strings {
       'Pristabdyta: $progress';
   @override
   String get actionResume => 'Tęsti';
+  @override
+  String get audioTranscribe => 'Transkribuoti';
+  @override
+  String get audioTranscribeUnsupported => 'Šiame įrenginyje tik WAV įrašai';
+  @override
+  String get transcriptionQueued => 'Eilėje';
+  @override
+  String get transcriptionPreparing => 'Ruošiamas garsas…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribuojama… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Siunčiamas $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkripcija pridėta prie aprašo';
+  @override
+  String get transcriptionNoSpeech => 'Šiame įraše kalba neatpažinta';
+  @override
+  String get transcriptionFailed => 'Transkribuoti nepavyko';
+  @override
+  String get transcriptionPickModelTitle => 'Pasirinkite modelį';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkribuojama šiame įrenginyje, įrašas niekur nesiunčiamas. Modelis '
+      'atsisiunčiamas tik kartą.';
+  @override
+  String get transcriptionPickModelAction => 'Atsisiųsti ir transkribuoti';
+  @override
+  String get transcriptionModelRecommended => 'Rekomenduojama';
 }

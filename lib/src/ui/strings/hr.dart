@@ -1311,4 +1311,33 @@ final class CroatianStrings extends Strings {
       'Pauzirano na $progress';
   @override
   String get actionResume => 'Nastavi';
+  @override
+  String get audioTranscribe => 'Transkribiraj';
+  @override
+  String get audioTranscribeUnsupported => 'Na ovom uređaju samo WAV snimke';
+  @override
+  String get transcriptionQueued => 'U redu čekanja';
+  @override
+  String get transcriptionPreparing => 'Priprema zvuka…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkripcija… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Preuzimanje modela $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkripcija je dodana u opis';
+  @override
+  String get transcriptionNoSpeech => 'U ovoj snimci nije prepoznat govor';
+  @override
+  String get transcriptionFailed => 'Transkripcija nije uspjela';
+  @override
+  String get transcriptionPickModelTitle => 'Odaberi model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripcija se izvodi na ovom uređaju i snimka se nikad ne šalje. '
+      'Model se preuzima samo jednom.';
+  @override
+  String get transcriptionPickModelAction => 'Preuzmi i transkribiraj';
+  @override
+  String get transcriptionModelRecommended => 'Preporučeno';
 }

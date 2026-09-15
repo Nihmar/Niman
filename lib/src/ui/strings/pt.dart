@@ -1325,4 +1325,34 @@ final class PortugueseStrings extends Strings {
       'Pausado em $progress';
   @override
   String get actionResume => 'Retomar';
+  @override
+  String get audioTranscribe => 'Transcrever';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Somente gravações WAV neste dispositivo';
+  @override
+  String get transcriptionQueued => 'Na fila';
+  @override
+  String get transcriptionPreparing => 'Preparando o áudio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcrevendo… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Baixando $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transcrição adicionada à descrição';
+  @override
+  String get transcriptionNoSpeech => 'Nenhuma fala reconhecida nesta gravação';
+  @override
+  String get transcriptionFailed => 'Falha na transcrição';
+  @override
+  String get transcriptionPickModelTitle => 'Escolha um modelo';
+  @override
+  String get transcriptionPickModelBody =>
+      'A transcrição acontece neste dispositivo e a gravação nunca é enviada. '
+      'O modelo é baixado uma única vez.';
+  @override
+  String get transcriptionPickModelAction => 'Baixar e transcrever';
+  @override
+  String get transcriptionModelRecommended => 'Recomendado';
 }

@@ -1346,4 +1346,35 @@ final class CatalanStrings extends Strings {
       'En pausa a $progress';
   @override
   String get actionResume => 'Reprèn';
+  @override
+  String get audioTranscribe => 'Transcriu';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Només enregistraments WAV en aquest dispositiu';
+  @override
+  String get transcriptionQueued => 'A la cua';
+  @override
+  String get transcriptionPreparing => "S'està preparant l'àudio…";
+  @override
+  String transcriptionRunning(int percent) => "S'està transcrivint… $percent %";
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      "S'està baixant $model · $percent %";
+  @override
+  String get transcriptionSaved => 'Transcripció afegida a la descripció';
+  @override
+  String get transcriptionNoSpeech =>
+      "No s'ha reconegut cap veu en aquest enregistrament";
+  @override
+  String get transcriptionFailed => "No s'ha pogut transcriure";
+  @override
+  String get transcriptionPickModelTitle => 'Tria un model';
+  @override
+  String get transcriptionPickModelBody =>
+      "La transcripció es fa en aquest dispositiu i l'enregistrament no "
+      "s'envia mai. El model es baixa una sola vegada.";
+  @override
+  String get transcriptionPickModelAction => 'Baixa i transcriu';
+  @override
+  String get transcriptionModelRecommended => 'Recomanat';
 }

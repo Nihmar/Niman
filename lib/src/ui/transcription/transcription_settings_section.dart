@@ -45,7 +45,8 @@ final class TranscriptionSettingsSection extends StatelessWidget {
               key: const Key('transcription-language-setting'),
               title: AppStrings.transcriptionLanguageTitle,
               value: languageLabel(models.settings.language),
-              onTap: () => unawaited(_chooseLanguage(context)),
+              onTap: () =>
+                  unawaited(chooseTranscriptionLanguage(context, models)),
             ),
           ],
         );
@@ -61,22 +62,30 @@ final class TranscriptionSettingsSection extends StatelessWidget {
     TranscriptionSettings.detect => AppStrings.transcriptionLanguageDetect,
     _ => AppStrings.languageName(AppLanguage.fromId(language)),
   };
+}
 
-  Future<void> _chooseLanguage(BuildContext context) async {
-    final choice = await showSettingsChoice<String>(
-      context,
-      title: AppStrings.transcriptionLanguageTitle,
-      subtitle: AppStrings.transcriptionLanguageSubtitle,
-      current: models.settings.language,
-      options: [
-        for (final value in [
-          TranscriptionSettings.followApp,
-          TranscriptionSettings.detect,
-          for (final language in AppLanguages.supported) language.id,
-        ])
-          SettingsOption(value, languageLabel(value)),
-      ],
-    );
-    if (choice != null) await models.setLanguage(choice);
-  }
+/// Asks for the recordings' language and stores it in [models]; shared
+/// by the settings row and the model sheet of the first transcription.
+Future<void> chooseTranscriptionLanguage(
+  BuildContext context,
+  TranscriptionModels models,
+) async {
+  final choice = await showSettingsChoice<String>(
+    context,
+    title: AppStrings.transcriptionLanguageTitle,
+    subtitle: AppStrings.transcriptionLanguageSubtitle,
+    current: models.settings.language,
+    options: [
+      for (final value in [
+        TranscriptionSettings.followApp,
+        TranscriptionSettings.detect,
+        for (final language in AppLanguages.supported) language.id,
+      ])
+        SettingsOption(
+          value,
+          TranscriptionSettingsSection.languageLabel(value),
+        ),
+    ],
+  );
+  if (choice != null) await models.setLanguage(choice);
 }

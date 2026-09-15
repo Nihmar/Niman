@@ -1307,4 +1307,33 @@ final class LatvianStrings extends Strings {
   String transcriptionModelInterrupted(String progress) => 'Pauzēts: $progress';
   @override
   String get actionResume => 'Turpināt';
+  @override
+  String get audioTranscribe => 'Transkribēt';
+  @override
+  String get audioTranscribeUnsupported => 'Šajā ierīcē tikai WAV ieraksti';
+  @override
+  String get transcriptionQueued => 'Rindā';
+  @override
+  String get transcriptionPreparing => 'Sagatavo audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribē… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Lejupielādē $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkripcija pievienota aprakstam';
+  @override
+  String get transcriptionNoSpeech => 'Šajā ierakstā runa netika atpazīta';
+  @override
+  String get transcriptionFailed => 'Transkripcija neizdevās';
+  @override
+  String get transcriptionPickModelTitle => 'Izvēlieties modeli';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripcija notiek šajā ierīcē, un ieraksts netiek nekur sūtīts. '
+      'Modelis tiek lejupielādēts tikai vienreiz.';
+  @override
+  String get transcriptionPickModelAction => 'Lejupielādēt un transkribēt';
+  @override
+  String get transcriptionModelRecommended => 'Ieteicams';
 }

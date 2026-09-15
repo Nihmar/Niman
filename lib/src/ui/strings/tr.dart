@@ -1299,4 +1299,33 @@ final class TurkishStrings extends Strings {
       '$progress noktasında duraklatıldı';
   @override
   String get actionResume => 'Devam et';
+  @override
+  String get audioTranscribe => 'Metne dök';
+  @override
+  String get audioTranscribeUnsupported => 'Bu cihazda yalnızca WAV kayıtları';
+  @override
+  String get transcriptionQueued => 'Sırada';
+  @override
+  String get transcriptionPreparing => 'Ses hazırlanıyor…';
+  @override
+  String transcriptionRunning(int percent) => 'Metne dökülüyor… %$percent';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model indiriliyor · %$percent';
+  @override
+  String get transcriptionSaved => 'Metin açıklamaya eklendi';
+  @override
+  String get transcriptionNoSpeech => 'Bu kayıtta konuşma algılanmadı';
+  @override
+  String get transcriptionFailed => 'Metne dökme başarısız oldu';
+  @override
+  String get transcriptionPickModelTitle => 'Bir model seçin';
+  @override
+  String get transcriptionPickModelBody =>
+      'Metne dökme bu cihazda yapılır ve kayıt hiçbir yere gönderilmez. Model '
+      'yalnızca bir kez indirilir.';
+  @override
+  String get transcriptionPickModelAction => 'İndir ve metne dök';
+  @override
+  String get transcriptionModelRecommended => 'Önerilen';
 }

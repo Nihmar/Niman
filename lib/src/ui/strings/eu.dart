@@ -1327,4 +1327,35 @@ final class BasqueStrings extends Strings {
       'Pausatuta: $progress';
   @override
   String get actionResume => 'Jarraitu';
+  @override
+  String get audioTranscribe => 'Transkribatu';
+  @override
+  String get audioTranscribeUnsupported =>
+      'WAV grabazioak soilik gailu honetan';
+  @override
+  String get transcriptionQueued => 'Ilaran';
+  @override
+  String get transcriptionPreparing => 'Audioa prestatzen…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribatzen… % $percent';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model deskargatzen · % $percent';
+  @override
+  String get transcriptionSaved => 'Transkripzioa deskribapenari gehitu zaio';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ez da hizketarik hauteman grabazio honetan';
+  @override
+  String get transcriptionFailed => 'Ezin izan da transkribatu';
+  @override
+  String get transcriptionPickModelTitle => 'Aukeratu eredu bat';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripzioa gailu honetan egiten da eta grabazioa ez da inoiz '
+      'igotzen. Eredua behin bakarrik deskargatzen da.';
+  @override
+  String get transcriptionPickModelAction => 'Deskargatu eta transkribatu';
+  @override
+  String get transcriptionModelRecommended => 'Gomendatua';
 }

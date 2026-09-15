@@ -1307,4 +1307,34 @@ final class SlovakStrings extends Strings {
       'Pozastavené na $progress';
   @override
   String get actionResume => 'Pokračovať';
+  @override
+  String get audioTranscribe => 'Prepísať';
+  @override
+  String get audioTranscribeUnsupported => 'V tomto zariadení len nahrávky WAV';
+  @override
+  String get transcriptionQueued => 'V poradí';
+  @override
+  String get transcriptionPreparing => 'Pripravuje sa zvuk…';
+  @override
+  String transcriptionRunning(int percent) => 'Prepisuje sa… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Sťahuje sa $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Prepis bol pridaný do popisu';
+  @override
+  String get transcriptionNoSpeech =>
+      'V tejto nahrávke sa nerozpoznala žiadna reč';
+  @override
+  String get transcriptionFailed => 'Prepis zlyhal';
+  @override
+  String get transcriptionPickModelTitle => 'Vyberte model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Prepis prebieha v tomto zariadení a nahrávka sa nikam neodosiela. '
+      'Model sa sťahuje len raz.';
+  @override
+  String get transcriptionPickModelAction => 'Stiahnuť a prepísať';
+  @override
+  String get transcriptionModelRecommended => 'Odporúčaný';
 }

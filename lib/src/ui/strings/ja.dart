@@ -1220,4 +1220,32 @@ final class JapaneseStrings extends Strings {
   String transcriptionModelInterrupted(String progress) => '一時停止中：$progress';
   @override
   String get actionResume => '再開';
+  @override
+  String get audioTranscribe => '文字起こし';
+  @override
+  String get audioTranscribeUnsupported => 'このデバイスでは WAV 録音のみ対応';
+  @override
+  String get transcriptionQueued => '待機中';
+  @override
+  String get transcriptionPreparing => '音声を準備しています…';
+  @override
+  String transcriptionRunning(int percent) => '文字起こし中… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model をダウンロード中 · $percent%';
+  @override
+  String get transcriptionSaved => '文字起こしを説明に追加しました';
+  @override
+  String get transcriptionNoSpeech => 'この録音では音声が認識されませんでした';
+  @override
+  String get transcriptionFailed => '文字起こしに失敗しました';
+  @override
+  String get transcriptionPickModelTitle => 'モデルを選択';
+  @override
+  String get transcriptionPickModelBody =>
+      '文字起こしはこのデバイス上で行われ、録音がアップロードされることはありません。モデルのダウンロードは一度だけです。';
+  @override
+  String get transcriptionPickModelAction => 'ダウンロードして文字起こし';
+  @override
+  String get transcriptionModelRecommended => 'おすすめ';
 }

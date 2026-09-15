@@ -1314,4 +1314,33 @@ final class UkrainianStrings extends Strings {
       'Призупинено на $progress';
   @override
   String get actionResume => 'Продовжити';
+  @override
+  String get audioTranscribe => 'Транскрибувати';
+  @override
+  String get audioTranscribeUnsupported => 'На цьому пристрої лише записи WAV';
+  @override
+  String get transcriptionQueued => 'У черзі';
+  @override
+  String get transcriptionPreparing => 'Підготовка аудіо…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрибування… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Завантаження $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрипцію додано до опису';
+  @override
+  String get transcriptionNoSpeech => 'У цьому записі мовлення не розпізнано';
+  @override
+  String get transcriptionFailed => 'Не вдалося транскрибувати';
+  @override
+  String get transcriptionPickModelTitle => 'Виберіть модель';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрибування відбувається на цьому пристрої, запис ніколи не '
+      'надсилається. Модель завантажується лише один раз.';
+  @override
+  String get transcriptionPickModelAction => 'Завантажити й транскрибувати';
+  @override
+  String get transcriptionModelRecommended => 'Рекомендовано';
 }

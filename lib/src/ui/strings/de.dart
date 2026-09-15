@@ -1343,4 +1343,34 @@ final class GermanStrings extends Strings {
       'Pausiert bei $progress';
   @override
   String get actionResume => 'Fortsetzen';
+  @override
+  String get audioTranscribe => 'Transkribieren';
+  @override
+  String get audioTranscribeUnsupported => 'Auf diesem Gerät nur WAV-Aufnahmen';
+  @override
+  String get transcriptionQueued => 'In der Warteschlange';
+  @override
+  String get transcriptionPreparing => 'Audio wird vorbereitet…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkription… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model wird geladen · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkription zur Beschreibung hinzugefügt';
+  @override
+  String get transcriptionNoSpeech =>
+      'In dieser Aufnahme wurde keine Sprache erkannt';
+  @override
+  String get transcriptionFailed => 'Transkription fehlgeschlagen';
+  @override
+  String get transcriptionPickModelTitle => 'Modell auswählen';
+  @override
+  String get transcriptionPickModelBody =>
+      'Die Transkription läuft auf diesem Gerät, die Aufnahme wird nie '
+      'hochgeladen. Das Modell wird nur einmal heruntergeladen.';
+  @override
+  String get transcriptionPickModelAction => 'Herunterladen und transkribieren';
+  @override
+  String get transcriptionModelRecommended => 'Empfohlen';
 }

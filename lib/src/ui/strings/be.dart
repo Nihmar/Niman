@@ -1314,4 +1314,34 @@ final class BelarusianStrings extends Strings {
       'Прыпынена на $progress';
   @override
   String get actionResume => 'Працягнуць';
+  @override
+  String get audioTranscribe => 'Транскрыбаваць';
+  @override
+  String get audioTranscribeUnsupported =>
+      'На гэтай прыладзе толькі запісы WAV';
+  @override
+  String get transcriptionQueued => 'У чарзе';
+  @override
+  String get transcriptionPreparing => 'Падрыхтоўка аўдыя…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрыбаванне… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Спампоўка $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрыпцыя дададзена да апісання';
+  @override
+  String get transcriptionNoSpeech => 'У гэтым запісе маўленне не распазнана';
+  @override
+  String get transcriptionFailed => 'Не ўдалося транскрыбаваць';
+  @override
+  String get transcriptionPickModelTitle => 'Выберыце мадэль';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрыбаванне адбываецца на гэтай прыладзе, запіс ніколі не '
+      'адпраўляецца. Мадэль спампоўваецца толькі адзін раз.';
+  @override
+  String get transcriptionPickModelAction => 'Спампаваць і транскрыбаваць';
+  @override
+  String get transcriptionModelRecommended => 'Рэкамендавана';
 }

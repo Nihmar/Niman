@@ -1321,4 +1321,35 @@ final class HungarianStrings extends Strings {
       'Szüneteltetve: $progress';
   @override
   String get actionResume => 'Folytatás';
+  @override
+  String get audioTranscribe => 'Átírás';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Ezen az eszközön csak WAV-felvételek';
+  @override
+  String get transcriptionQueued => 'Sorban áll';
+  @override
+  String get transcriptionPreparing => 'Hang előkészítése…';
+  @override
+  String transcriptionRunning(int percent) => 'Átírás… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model letöltése · $percent%';
+  @override
+  String get transcriptionSaved => 'Az átirat bekerült a leírásba';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ebben a felvételben nem sikerült beszédet felismerni';
+  @override
+  String get transcriptionFailed => 'Az átírás sikertelen';
+  @override
+  String get transcriptionPickModelTitle => 'Válassz modellt';
+  @override
+  String get transcriptionPickModelBody =>
+      'Az átírás ezen az eszközön történik, a felvétel sosem kerül '
+      'feltöltésre. A modellt csak egyszer kell letölteni.';
+  @override
+  String get transcriptionPickModelAction => 'Letöltés és átírás';
+  @override
+  String get transcriptionModelRecommended => 'Ajánlott';
 }

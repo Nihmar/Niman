@@ -1311,4 +1311,34 @@ final class DanishStrings extends Strings {
       'Sat på pause ved $progress';
   @override
   String get actionResume => 'Genoptag';
+  @override
+  String get audioTranscribe => 'Transskriber';
+  @override
+  String get audioTranscribeUnsupported => 'Kun WAV-optagelser på denne enhed';
+  @override
+  String get transcriptionQueued => 'I kø';
+  @override
+  String get transcriptionPreparing => 'Forbereder lyden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transskriberer… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Downloader $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transskriptionen er føjet til beskrivelsen';
+  @override
+  String get transcriptionNoSpeech =>
+      'Der blev ikke genkendt tale i denne optagelse';
+  @override
+  String get transcriptionFailed => 'Transskriptionen mislykkedes';
+  @override
+  String get transcriptionPickModelTitle => 'Vælg en model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transskriptionen sker på denne enhed, og optagelsen uploades aldrig. '
+      'Modellen downloades kun én gang.';
+  @override
+  String get transcriptionPickModelAction => 'Download og transskriber';
+  @override
+  String get transcriptionModelRecommended => 'Anbefalet';
 }

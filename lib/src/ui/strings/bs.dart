@@ -1318,4 +1318,33 @@ final class BosnianStrings extends Strings {
       'Pauzirano na $progress';
   @override
   String get actionResume => 'Nastavi';
+  @override
+  String get audioTranscribe => 'Transkribuj';
+  @override
+  String get audioTranscribeUnsupported => 'Na ovom uređaju samo WAV snimci';
+  @override
+  String get transcriptionQueued => 'Na čekanju';
+  @override
+  String get transcriptionPreparing => 'Priprema zvuka…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkripcija… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Preuzimanje modela $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkripcija je dodana u opis';
+  @override
+  String get transcriptionNoSpeech => 'U ovom snimku nije prepoznat govor';
+  @override
+  String get transcriptionFailed => 'Transkripcija nije uspjela';
+  @override
+  String get transcriptionPickModelTitle => 'Odaberi model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripcija se radi na ovom uređaju i snimak se nikad ne šalje. '
+      'Model se preuzima samo jednom.';
+  @override
+  String get transcriptionPickModelAction => 'Preuzmi i transkribuj';
+  @override
+  String get transcriptionModelRecommended => 'Preporučeno';
 }

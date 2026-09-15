@@ -1316,4 +1316,36 @@ final class SwedishStrings extends Strings {
       'Pausad vid $progress';
   @override
   String get actionResume => 'Återuppta';
+  @override
+  String get audioTranscribe => 'Transkribera';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Endast WAV-inspelningar på den här enheten';
+  @override
+  String get transcriptionQueued => 'I kö';
+  @override
+  String get transcriptionPreparing => 'Förbereder ljudet…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkriberar… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Laddar ned $model · $percent %';
+  @override
+  String get transcriptionSaved =>
+      'Transkriberingen lades till i beskrivningen';
+  @override
+  String get transcriptionNoSpeech =>
+      'Inget tal kändes igen i den här inspelningen';
+  @override
+  String get transcriptionFailed => 'Transkriberingen misslyckades';
+  @override
+  String get transcriptionPickModelTitle => 'Välj en modell';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkriberingen sker på den här enheten och inspelningen laddas '
+      'aldrig upp. Modellen laddas ned en gång.';
+  @override
+  String get transcriptionPickModelAction => 'Ladda ned och transkribera';
+  @override
+  String get transcriptionModelRecommended => 'Rekommenderad';
 }

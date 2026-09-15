@@ -1306,4 +1306,33 @@ final class SlovenianStrings extends Strings {
       'Začasno ustavljeno pri $progress';
   @override
   String get actionResume => 'Nadaljuj';
+  @override
+  String get audioTranscribe => 'Prepiši';
+  @override
+  String get audioTranscribeUnsupported => 'V tej napravi samo posnetki WAV';
+  @override
+  String get transcriptionQueued => 'V čakalni vrsti';
+  @override
+  String get transcriptionPreparing => 'Pripravljanje zvoka…';
+  @override
+  String transcriptionRunning(int percent) => 'Prepisovanje… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Prenašanje modela $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Prepis je dodan v opis';
+  @override
+  String get transcriptionNoSpeech => 'V tem posnetku ni bil prepoznan govor';
+  @override
+  String get transcriptionFailed => 'Prepis ni uspel';
+  @override
+  String get transcriptionPickModelTitle => 'Izberite model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Prepis poteka v tej napravi in posnetek se nikoli ne pošlje. Model se '
+      'prenese samo enkrat.';
+  @override
+  String get transcriptionPickModelAction => 'Prenesi in prepiši';
+  @override
+  String get transcriptionModelRecommended => 'Priporočeno';
 }

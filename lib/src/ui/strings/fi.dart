@@ -1323,4 +1323,34 @@ final class FinnishStrings extends Strings {
       'Keskeytetty: $progress';
   @override
   String get actionResume => 'Jatka';
+  @override
+  String get audioTranscribe => 'Litteroi';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Tällä laitteella vain WAV-tallenteet';
+  @override
+  String get transcriptionQueued => 'Jonossa';
+  @override
+  String get transcriptionPreparing => 'Valmistellaan ääntä…';
+  @override
+  String transcriptionRunning(int percent) => 'Litteroidaan… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Ladataan $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Litterointi lisättiin kuvaukseen';
+  @override
+  String get transcriptionNoSpeech => 'Tallenteesta ei tunnistettu puhetta';
+  @override
+  String get transcriptionFailed => 'Litterointi epäonnistui';
+  @override
+  String get transcriptionPickModelTitle => 'Valitse malli';
+  @override
+  String get transcriptionPickModelBody =>
+      'Litterointi tehdään tällä laitteella, eikä tallennetta lähetetä '
+      'minnekään. Malli ladataan vain kerran.';
+  @override
+  String get transcriptionPickModelAction => 'Lataa ja litteroi';
+  @override
+  String get transcriptionModelRecommended => 'Suositeltu';
 }

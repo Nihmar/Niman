@@ -1288,4 +1288,36 @@ final class HindiStrings extends Strings {
       '$progress पर रुका हुआ';
   @override
   String get actionResume => 'फिर शुरू करें';
+  @override
+  String get audioTranscribe => 'ट्रांसक्राइब करें';
+  @override
+  String get audioTranscribeUnsupported => 'इस डिवाइस पर केवल WAV रिकॉर्डिंग';
+  @override
+  String get transcriptionQueued => 'कतार में';
+  @override
+  String get transcriptionPreparing => 'ऑडियो तैयार हो रहा है…';
+  @override
+  String transcriptionRunning(int percent) =>
+      'ट्रांसक्राइब हो रहा है… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model डाउनलोड हो रहा है · $percent%';
+  @override
+  String get transcriptionSaved => 'ट्रांसक्रिप्शन विवरण में जोड़ दिया गया';
+  @override
+  String get transcriptionNoSpeech =>
+      'इस रिकॉर्डिंग में कोई बोली नहीं पहचानी गई';
+  @override
+  String get transcriptionFailed => 'ट्रांसक्रिप्शन नहीं हो सका';
+  @override
+  String get transcriptionPickModelTitle => 'मॉडल चुनें';
+  @override
+  String get transcriptionPickModelBody =>
+      'ट्रांसक्रिप्शन इसी डिवाइस पर होता है और रिकॉर्डिंग कभी अपलोड नहीं '
+      'होती। मॉडल एक ही बार डाउनलोड होता है।';
+  @override
+  String get transcriptionPickModelAction =>
+      'डाउनलोड करें और ट्रांसक्राइब करें';
+  @override
+  String get transcriptionModelRecommended => 'सुझाया गया';
 }
