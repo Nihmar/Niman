@@ -128,11 +128,9 @@ abstract base class Strings {
   String get audioRecord;
   String get audioStop;
   String get audioPlay;
-  String get audioStopPlayback;
   String get audioDelete;
   String get audioImport;
   String get audioRecording;
-  String get audioPlaying;
   String get audioPermissionDenied;
   String get newAudioNoteTitle;
   String get newAudioNoteDefault;
@@ -144,6 +142,12 @@ abstract base class Strings {
   String get audioEditDescription;
   String get audioDeleteNote;
   String get audioEditNote;
+  String get audioPause;
+  String get audioEditTitle;
+  String get audioTitleHint;
+  String audioUntitled(int n);
+  String get audioMoreActions;
+  String get audioDiscardRecording;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;

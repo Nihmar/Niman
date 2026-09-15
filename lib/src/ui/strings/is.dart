@@ -262,15 +262,11 @@ final class IcelandicStrings extends Strings {
   @override
   String get audioPlay => 'Play';
   @override
-  String get audioStopPlayback => 'Stop playback';
-  @override
   String get audioDelete => 'Delete recording';
   @override
   String get audioImport => 'Import an audio file';
   @override
   String get audioRecording => 'Recording…';
-  @override
-  String get audioPlaying => 'Playing';
   @override
   String get audioPermissionDenied =>
       'Microphone permission denied — recording needs it.';
@@ -294,6 +290,18 @@ final class IcelandicStrings extends Strings {
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
+  @override
+  String get audioPause => 'Gera hlé';
+  @override
+  String get audioEditTitle => 'Breyta titli';
+  @override
+  String get audioTitleHint => 'Titill upptökunnar…';
+  @override
+  String audioUntitled(int n) => 'Upptaka $n';
+  @override
+  String get audioMoreActions => 'Fleiri aðgerðir';
+  @override
+  String get audioDiscardRecording => 'Henda upptöku';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

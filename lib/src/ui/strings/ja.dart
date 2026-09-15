@@ -249,15 +249,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get audioPlay => 'Play';
   @override
-  String get audioStopPlayback => 'Stop playback';
-  @override
   String get audioDelete => 'Delete recording';
   @override
   String get audioImport => 'Import an audio file';
   @override
   String get audioRecording => 'Recording…';
-  @override
-  String get audioPlaying => 'Playing';
   @override
   String get audioPermissionDenied =>
       'Microphone permission denied — recording needs it.';
@@ -281,6 +277,18 @@ final class JapaneseStrings extends Strings {
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
+  @override
+  String get audioPause => '一時停止';
+  @override
+  String get audioEditTitle => 'タイトルを編集';
+  @override
+  String get audioTitleHint => 'この録音のタイトル…';
+  @override
+  String audioUntitled(int n) => '録音 $n';
+  @override
+  String get audioMoreActions => 'その他の操作';
+  @override
+  String get audioDiscardRecording => '録音を破棄';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -21,10 +21,25 @@ final class AudioplayersClipPlayer implements ClipPlayer {
       _player.play(DeviceFileSource(absolutePath));
 
   @override
+  Future<void> pause() => _player.pause();
+
+  @override
+  Future<void> resume() => _player.resume();
+
+  @override
+  Future<void> seek(Duration position) => _player.seek(position);
+
+  @override
   Future<void> stop() => _player.stop();
 
   @override
   Stream<void> get onFinished => _done.stream;
+
+  @override
+  Stream<Duration> get onPosition => _player.onPositionChanged;
+
+  @override
+  Stream<Duration> get onDuration => _player.onDurationChanged;
 
   @override
   void dispose() {

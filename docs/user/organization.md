@@ -61,12 +61,23 @@ Search a single tag with `#tag` (see [search](search.md)).
   library. Each vocal carries a title and a description: the `> …`
   blockquote lines right above its embed are the title, the ones right
   under it the description (a quote run sitting between two vocals stays
-  the description of the upper one). Both are editable from the page. The input field sends written notes as
-  plain lines (right bubbles). The rename action renames the audio file
-  and updates its link. Recording writes WAV (PCM 16-bit: playable on Android,
-  Linux and Windows with no extra codec); attaching keeps the file's own
-  format (`.mp3`, `.m4a`, `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux
-  recording needs `pulseaudio-utils` and `ffmpeg` installed. While
-  recording, a red `Recording…` hint shows above the input.
+  the description of the upper one). A vocal without a title reads as
+  `Recording 1`, `Recording 2`, … Each vocal bubble has a round
+  play/pause button, a progress track you can tap or drag to seek, and
+  the elapsed and total time (WAV lengths are read from the file before
+  playing; other formats show theirs once played). Its ⋮ menu — also
+  opened by a long press or a right click — edits the title and the
+  description, renames the audio file (updating its link) and deletes
+  the vocal. Written notes are sent from the field at the bottom as
+  plain lines (right bubbles); tap one to edit it, long-press or
+  right-click it to delete it. The round button beside the field is the
+  microphone while the field is empty and becomes send as soon as you
+  type; the paperclip inside the field attaches an audio file. While
+  recording, the field shows a red bar with the elapsed time and a
+  discard button, and the round button stops and saves. Recording
+  writes WAV (PCM 16-bit: playable on Android, Linux and Windows with no
+  extra codec); attaching keeps the file's own format (`.mp3`, `.m4a`,
+  `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux recording needs
+  `pulseaudio-utils` and `ffmpeg` installed.
 - **Templates:** live under `templateFolder` (default `Templates`).
   See [templates](templates.md).
