@@ -19,7 +19,9 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "dev.niman.niman"
     compileSdk = 37
-    ndkVersion = flutter.ndkVersion
+    // whisper_ggml builds whisper.cpp with NDK 29; NDKs are backward
+    // compatible, so the highest one any plugin asks for wins.
+    ndkVersion = "29.0.13113456"
 
     compileOptions {
         // Required by flutter_local_notifications (Java 8+ APIs in the

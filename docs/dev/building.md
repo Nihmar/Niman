@@ -11,6 +11,8 @@
   native binary via Dart build hooks — required on Windows, which ships
   no `sqlite3.dll`).
 
+- Android NDK 29.0.13113456 (required by `whisper_ggml`).
+
 ## Helper scripts
 
 Terse output; full logs in `/tmp/niman/niman-<cmd>.log`

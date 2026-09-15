@@ -107,6 +107,12 @@ dependencies:
   timezone: ^0.11.1
   url_launcher: ^6.3.2
 
+  # On-device speech-to-text (whisper.cpp) for the audio notes'
+  # "Trascrivi" action. Pulls ffmpeg_kit_flutter_new_min on Android;
+  # on desktop it only reads 16 kHz mono PCM16 WAV unless `ffmpeg` is on
+  # PATH, so clips are converted before they reach it.
+  whisper_ggml: ^2.6.0
+
   # The desktop window is owned by this package (T-PP-16 spike winner):
   # the only candidate with a runtime-verified close-request event, which
   # the dirty-check on close (T-PP-11) rides, plus a real Linux drag.
