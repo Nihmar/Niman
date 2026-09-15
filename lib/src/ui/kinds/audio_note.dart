@@ -316,10 +316,13 @@ class _AudioNoteViewState extends State<AudioNoteView>
     super.dispose();
   }
 
+  /// The clip at [target] (a Markdown link, always `/`-separated) as a
+  /// file path in the host's own spelling: on Windows a bare join would
+  /// hand the player `C:\lib\assets/a.wav`.
   String _absoluteOf(String target) {
     final root = widget.libraryRoot;
-    if (root != null) return p.join(root, target);
-    return p.join(p.dirname(widget.notePath), target);
+    final base = root ?? p.dirname(widget.notePath);
+    return p.normalize(p.join(base, target));
   }
 
   void _fail(Object error) {
