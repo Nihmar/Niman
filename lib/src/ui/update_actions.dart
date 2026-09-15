@@ -8,6 +8,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/update/update_service.dart';
@@ -23,9 +24,12 @@ Future<void> downloadAndApplyUpdate(
   UpdateAvailable update,
 ) async {
   final messenger = ScaffoldMessenger.of(context);
+  const AppLogger(name: 'update').debug('downloading ${update.asset.name}');
   try {
     final file = await downloadAsset(update.asset);
     final launched = await applyDownloadedUpdate(file);
+    const AppLogger(name: 'update')
+        .debug('saved ${file.path} (launched=$launched)');
     if (!context.mounted) return;
     messenger.showSnackBar(
       SnackBar(
@@ -36,7 +40,8 @@ Future<void> downloadAndApplyUpdate(
         ),
       ),
     );
-  } on Object catch (_) {
+  } on Object catch (error) {
+    const AppLogger(name: 'update').warning('download failed: $error');
     if (!context.mounted) return;
     messenger.showSnackBar(
       SnackBar(content: Text(AppStrings.updateCheckFailed)),

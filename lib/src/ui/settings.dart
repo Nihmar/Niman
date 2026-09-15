@@ -331,20 +331,26 @@ final class _SettingsBodyState extends State<SettingsBody> {
       _updateStatus = null;
     });
     try {
-      final update = await checkNow(current: await currentAppVersion());
+      final current = await currentAppVersion();
+      const AppLogger(name: 'update').debug('manual check from $current');
+      final update = await checkNow(current: current);
       if (!mounted) return;
       if (update == null) {
+        const AppLogger(name: 'update').debug('manual check: up to date');
         setState(() => _updateStatus = AppStrings.updateUpToDate);
         return;
       }
+      const AppLogger(name: 'update')
+          .debug('manual check: available ${update.version}');
       setState(
-        () => _updateStatus = AppStrings.updateAvailableMessage(
-          update.version,
-        ),
+        () => _updateStatus = AppStrings.updateAvailableMessage(update.version),
       );
       await downloadAndApplyUpdate(context, update);
       widget.controller.clearPendingUpdate();
-    } on Object catch (_) {
+    } on Object catch (error) {
+      // The row stays generic; the reason goes to the debug log so an
+      // exported log shows what the check tripped on (issue #81).
+      const AppLogger(name: 'update').warning('manual check failed: $error');
       if (!mounted) return;
       setState(() => _updateStatus = AppStrings.updateCheckFailed);
     } finally {
@@ -1150,9 +1156,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 )
               : const Icon(Icons.system_update),
           title: Text(AppStrings.checkForUpdatesTitle),
-          subtitle: _updateStatus == null
-              ? null
-              : Text(_updateStatus!),
+          subtitle: _updateStatus == null ? null : Text(_updateStatus!),
           onTap: _checkUpdatesManually,
         ),
 
