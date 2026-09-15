@@ -1235,4 +1235,268 @@ final class EnglishStrings extends Strings {
       'While you write; starting to edit a note always keeps one';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionSync => 'Sync';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Not set up for this library';
+  @override
+  String get syncNeverSynced => 'Never synced';
+  @override
+  String syncLastSynced(String when) => 'Synced $when';
+  @override
+  String get syncRunning => 'Syncing…';
+  @override
+  String syncScreenSubtitle(String library) => 'Library $library';
+  @override
+  String get syncUrlLabel => 'Folder address';
+  @override
+  String get syncUrlHint =>
+      'The folder must exist. Copy the address as the server '
+      'shows it.';
+  @override
+  String get syncHttpWarning =>
+      'Unencrypted connection: fine over a VPN or on your local '
+      'network.';
+  @override
+  String get syncUserLabel => 'User';
+  @override
+  String get syncUserHint =>
+      'Leave empty if the server asks for no credentials.';
+  @override
+  String get syncPasswordLabel => 'Password';
+  @override
+  String get syncPasswordHint =>
+      "Kept in this device's keychain, never in the library "
+      'files.';
+  @override
+  String get syncPasswordKeepHint => 'Leave empty to keep the saved password.';
+  @override
+  String get syncShowPassword => 'Show password';
+  @override
+  String get syncHidePassword => 'Hide password';
+  @override
+  String get syncTestAction => 'Test connection';
+  @override
+  String get syncTesting => 'Testing…';
+  @override
+  String get syncRetargetWarning =>
+      'A new address or user makes the next sync start over as a '
+      'first sync.';
+  @override
+  String get syncTestOk => 'Connection works';
+  @override
+  String get syncModeFull => 'Full mode';
+  @override
+  String get syncModeCompatible => 'Compatible mode';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Read, write and delete';
+  @override
+  String get syncCapEtags => 'File fingerprints (ETags)';
+  @override
+  String get syncCapNoEtags => 'No file fingerprints (ETags)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Compares size and date; downloads again when in doubt';
+  @override
+  String get syncCapGuarded => 'Protected writes';
+  @override
+  String get syncCapUnguarded => 'Unprotected writes';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Checks the file on the server right before writing';
+  @override
+  String get syncCapMove => 'Renames without uploading again';
+  @override
+  String get syncCapNoMove => 'No renames on the server';
+  @override
+  String get syncCapNoMoveDetail =>
+      'A rename becomes a delete and a new upload';
+  @override
+  String get syncCompatibleNote =>
+      'In compatible mode sync works the same, with a few more '
+      'requests.';
+  @override
+  String get syncTestInvalidUrl => 'Not a valid address';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Enter an http:// or https:// address, without user or '
+      'password in it.';
+  @override
+  String get syncTestOffline => 'Server not reachable';
+  @override
+  String get syncTestOfflineHint =>
+      'Is the VPN on? A 10.x or 192.168.x address only works '
+      'from the same network.';
+  @override
+  String get syncTestAuth => 'User or password rejected';
+  @override
+  String get syncTestAuthHint => 'Check them, then test again.';
+  @override
+  String get syncTestNotFound => 'The folder does not exist';
+  @override
+  String get syncTestNotFoundHint =>
+      'Create it on the server or fix the address.';
+  @override
+  String get syncTestUnsupported => 'Not a WebDAV folder';
+  @override
+  String get syncTestUnsupportedHint =>
+      'The server answers, but not as WebDAV.';
+  @override
+  String get syncTestFailed => 'The test did not work';
+  @override
+  String get syncNowAction => 'Sync now';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Address, user and password';
+  @override
+  String get syncRetestTitle => 'Test the server again';
+  @override
+  String syncProbedAgo(String when) => 'Last test $when';
+  @override
+  String get syncDisconnectTitle => 'Disconnect this library';
+  @override
+  String get syncDisconnectSubtitle => 'Files stay here and on the server';
+  @override
+  String get syncDisconnectConfirmTitle => 'Disconnect sync?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'This library stops syncing on this device. No file is '
+      'deleted, here or on the server. If you connect it again, '
+      'the first sync starts over.';
+  @override
+  String get syncDisconnectConfirm => 'Disconnect';
+  @override
+  String get syncFirstTitle => 'First sync';
+  @override
+  String get syncFirstIntro =>
+      'I compared the library with the folder on the server:';
+  @override
+  String get syncFirstUpload => 'To upload';
+  @override
+  String get syncFirstDownload => 'To download';
+  @override
+  String get syncFirstBoth => 'On both sides';
+  @override
+  String get syncFirstBothHint =>
+      'Identical: no transfer. Different: to resolve';
+  @override
+  String get syncFirstNoDelete =>
+      'The first sync deletes nothing, here or on the server.';
+  @override
+  String get syncStartAction => 'Start';
+  @override
+  String syncMassTrashTitle(int count) => 'Move $count files to the trash?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '$count of the $total synced files are missing on the '
+      'server. That usually means a wrong address, an unmounted '
+      'NAS disk or a folder emptied by mistake.';
+  @override
+  String get syncMassTrashHint =>
+      'If you really deleted them on another device, confirm: '
+      'here they go to the trash.';
+  @override
+  String get syncMassTrashConfirm => 'Move to trash';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Delete $count files from the server?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '$count of the $total synced files are missing here. If '
+      'you did not delete them, cancel and check the library '
+      'folder.';
+  @override
+  String get syncMassDeleteConfirm => 'Delete from server';
+  @override
+  String get syncTooltip => 'Sync';
+  @override
+  String get syncStageConnecting => 'Connecting to the server…';
+  @override
+  String get syncStageComparing => 'Comparing with the server…';
+  @override
+  String syncStageApplying(int done, int total) => 'Syncing · $done of $total';
+  @override
+  String get syncStatusWarnings => 'Synced with warnings';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Changed here and on the server · $count';
+  @override
+  String get syncConflictHint => 'Neither version was touched';
+  @override
+  String get syncResolveAction => 'Resolve';
+  @override
+  String syncFailuresHeader(int count) => 'Not synced · $count';
+  @override
+  String get syncFailuresHint => 'Tried again at the next sync';
+  @override
+  String get syncAbortAuth => 'Password rejected by the server';
+  @override
+  String get syncAbortMissingPassword => 'No password saved';
+  @override
+  String get syncAbortOffline => 'Server not reachable';
+  @override
+  String get syncAbortRemoteMissing => 'The folder on the server is gone';
+  @override
+  String get syncAbortUnsupported => 'The server no longer works as WebDAV';
+  @override
+  String get syncAbortFailed => 'Sync did not work';
+  @override
+  String get syncAbortNotConfirmed => 'Sync cancelled';
+  @override
+  String get syncAbortNothingTouched =>
+      'No file was touched. Your changes stay here until the '
+      'next successful sync.';
+  @override
+  String syncLastSuccess(String when) => 'Last successful sync $when';
+  @override
+  String get syncNoSuccessYet => 'No successful sync yet';
+  @override
+  String get syncUpdatePasswordAction => 'Update password';
+  @override
+  String get syncRetryAction => 'Try again';
+  @override
+  String get syncOpenSettingsAction => 'Settings';
+  @override
+  String get syncCloseAction => 'Close';
+  @override
+  String get syncDoneSnack => 'Synced';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Synced · 1 file deleted elsewhere is in the trash'
+      : 'Synced · $count files deleted elsewhere are in the trash';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Synced · 1 conflict to resolve'
+      : 'Synced · $count conflicts to resolve';
+  @override
+  String get syncShowAction => 'Show';
+  @override
+  String get syncConflictTitle => 'Resolve conflict';
+  @override
+  String get syncConflictLegend =>
+      "Lines marked − are the server's, lines marked + are this "
+      "device's.";
+  @override
+  String get syncConflictBinary =>
+      'Not a text file: choose which copy to keep.';
+  @override
+  String get syncConflictKeepNote =>
+      'The copy you do not keep stays in the note history.';
+  @override
+  String get syncKeepLocal => "Keep this device's";
+  @override
+  String get syncKeepRemote => "Keep the server's";
+  @override
+  String get syncConflictIdentical => 'The two versions are identical';
+  @override
+  String get syncConflictLoadFailed => 'Could not read both versions';
+  @override
+  String get syncResolveFailed => 'Could not resolve the conflict';
+  @override
+  String get syncResolved => 'Conflict resolved';
 }

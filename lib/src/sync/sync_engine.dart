@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -86,6 +87,10 @@ final class SyncReport {
   /// Paths skipped because they changed while the run was going.
   final List<String> skipped = [];
 
+  /// Local paths the run wrote, moved or trashed — what an open editor
+  /// has to re-read.
+  final Set<String> changedLocally = {};
+
   /// The plan the run carried out (the last hashing pass).
   SyncPlan? plan;
 
@@ -117,6 +122,48 @@ typedef SyncConfirm = Future<bool> Function(
   SyncPlan plan, {
   required bool firstSync,
 });
+
+/// Where a run is, for a progress indicator.
+enum SyncStage {
+  /// Reading the destination, probing the server when needed.
+  connecting,
+
+  /// Listing both sides.
+  scanning,
+
+  /// Hashing and planning.
+  comparing,
+
+  /// Carrying out the plan; comes with done / total.
+  applying,
+}
+
+/// Reports a run's [stage] and, while applying, [done] of [total].
+typedef SyncProgress = void Function(SyncStage stage, int done, int total);
+
+/// Why a conflict resolution or a conflict read could not complete.
+final class SyncFailure implements Exception {
+  /// A failure for [reason], with a [detail] safe to show.
+  const new(this.reason, this.detail);
+
+  /// The failure a WebDAV [error] amounts to.
+  factory of(WebDavFailure error) => SyncFailure(switch (error) {
+    WebDavAuthFailure() => SyncAbort.authentication,
+    WebDavNotFound() => SyncAbort.remoteMissing,
+    WebDavUnsupported() => SyncAbort.unsupported,
+    WebDavRetryable() => SyncAbort.offline,
+    WebDavPrecondition() || WebDavProtocolFailure() => SyncAbort.failed,
+  }, error.message);
+
+  /// The same classification a run's abort uses.
+  final SyncAbort reason;
+
+  /// What went wrong; never a secret.
+  final String detail;
+
+  @override
+  String toString() => 'SyncFailure(${reason.name}: $detail)';
+}
 
 /// Carries out sync runs for one library (docs/dev/sync.md): scans both
 /// sides, plans with `reconcile.dart`, and applies the plan through
@@ -165,6 +212,33 @@ final class SyncEngine {
 
   Future<SyncReport>? _running;
 
+  /// Runs and conflict resolutions go one at a time.
+  Future<void> _lock = Future<void>.value();
+
+  Future<T> _exclusively<T>(Future<T> Function() body) {
+    final next = _lock.then((_) => body());
+    _lock = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
+
+  /// The destination and a client for it; throws [SyncFailure] when the
+  /// library has none or its password is missing.
+  Future<({SyncDestination destination, WebDavClient client})>
+  _connect() async {
+    final destination = await store.destination(root);
+    if (destination == null) {
+      throw const SyncFailure(SyncAbort.notConfigured, 'no destination');
+    }
+    final password = await secrets.read(root) ?? '';
+    if (destination.username.isNotEmpty && password.isEmpty) {
+      throw const SyncFailure(SyncAbort.missingPassword, 'no password stored');
+    }
+    return (
+      destination: destination,
+      client: _clientFactory(destination, password),
+    );
+  }
+
   static WebDavClient _defaultClient(
     SyncDestination destination,
     String password,
@@ -176,43 +250,43 @@ final class SyncEngine {
 
   /// Runs a full sync. [confirm] is asked before a first sync and before a
   /// plan that looks like a mass deletion; without it a first sync goes
-  /// ahead (it never deletes) and a mass deletion is refused.
-  Future<SyncReport> run({SyncConfirm? confirm}) {
+  /// ahead (it never deletes) and a mass deletion is refused. [onProgress]
+  /// hears the stages and, while applying, the count.
+  Future<SyncReport> run({SyncConfirm? confirm, SyncProgress? onProgress}) {
     final running = _running;
     if (running != null) {
       _log.info('run: already running for $root, joining it');
       return running;
     }
-    final next = _run(confirm).whenComplete(() => _running = null);
+    final next = _exclusively(() => _run(confirm, onProgress))
+        .whenComplete(() => _running = null);
     _running = next;
     return next;
   }
 
-  Future<SyncReport> _run(SyncConfirm? confirm) async {
+  Future<SyncReport> _run(
+    SyncConfirm? confirm,
+    SyncProgress? onProgress,
+  ) async {
     final clock = Stopwatch()..start();
     final report = SyncReport();
     _log.info('run: start for $root');
-    final destination = await store.destination(root);
-    if (destination == null) {
-      return await _finish(
-        report,
-        SyncAbort.notConfigured,
-        'no destination',
-        clock,
-      );
-    }
-    final password = await secrets.read(root) ?? '';
-    if (destination.username.isNotEmpty && password.isEmpty) {
-      return await _finish(
-        report,
-        SyncAbort.missingPassword,
-        'no password stored',
-        clock,
-      );
-    }
-    final client = _clientFactory(destination, password);
+    onProgress?.call(SyncStage.connecting, 0, 0);
+    final ({SyncDestination destination, WebDavClient client}) connection;
     try {
-      await _runWith(client, destination, report, confirm);
+      connection = await _connect();
+    } on SyncFailure catch (e) {
+      return await _finish(report, e.reason, e.detail, clock);
+    }
+    final client = connection.client;
+    try {
+      await _runWith(
+        client,
+        connection.destination,
+        report,
+        confirm,
+        onProgress,
+      );
     } on WebDavAuthFailure catch (e) {
       _abort(report, SyncAbort.authentication, e.message);
     } on WebDavNotFound catch (e) {
@@ -270,9 +344,11 @@ final class SyncEngine {
     SyncDestination destination,
     SyncReport report,
     SyncConfirm? confirm,
+    SyncProgress? onProgress,
   ) async {
     final capabilities = await _capabilities(client, destination);
 
+    onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
     final local = await _scanLocal(root);
     final localMs = scanClock.elapsedMilliseconds;
@@ -286,6 +362,7 @@ final class SyncEngine {
       '${rows.length} agreed rows',
     );
 
+    onProgress?.call(SyncStage.comparing, 0, 0);
     final localSha = <String, String>{};
     final remoteSha = <String, String>{};
     var plan = planSync(
@@ -344,13 +421,23 @@ final class SyncEngine {
       folders: remoteScan.folders,
       report: report,
     );
+    final total = plan.decisions.length;
+    var index = 0;
     for (final decision in plan.decisions) {
+      onProgress?.call(SyncStage.applying, index++, total);
       final clock = Stopwatch()..start();
       try {
         final outcome = await _apply(context, decision);
         switch (outcome) {
           case _Outcome.done:
             report.done.update(decision.kind, (n) => n + 1, ifAbsent: () => 1);
+            if (const {
+              SyncActionKind.download,
+              SyncActionKind.trashLocal,
+              SyncActionKind.moveLocal,
+            }.contains(decision.kind)) {
+              report.changedLocally.addAll([decision.path, ?decision.fromPath]);
+            }
             _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
           case _Outcome.skipped:
             report.skipped.add(decision.path);
@@ -378,6 +465,114 @@ final class SyncEngine {
       'apply failed: ${decision.kind.name} ${decision.path}: $error',
     );
   }
+
+  // --- conflicts, one file at a time ---------------------------------
+
+  /// Both texts of a conflicted [path]: the local file and the server's
+  /// copy, decoded as UTF-8 (malformed bytes replaced). Throws
+  /// [SyncFailure].
+  Future<({String local, String remote})> conflictTexts(String path) =>
+      _exclusively(() async {
+        final connection = await _connect();
+        try {
+          final localBytes = await File(p.join(root, path)).readAsBytes();
+          final remoteBytes = await connection.client.readBytes(path);
+          _log.info(
+            'conflict $path: read ${localBytes.length} b local, '
+            '${remoteBytes.length} b remote',
+          );
+          return (
+            local: utf8.decode(localBytes, allowMalformed: true),
+            remote: utf8.decode(remoteBytes, allowMalformed: true),
+          );
+        } on WebDavFailure catch (e) {
+          throw SyncFailure.of(e);
+        } on FileSystemException catch (e) {
+          throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
+        } finally {
+          connection.client.close();
+        }
+      });
+
+  /// Resolves a conflict at [path] by keeping one whole side: with
+  /// [keepLocal] the local file is uploaded over the server's (guarded by
+  /// `If-Match` where the server honors it); otherwise the server's copy
+  /// replaces the local file, whose text becomes a `sync` history
+  /// version. Either way the agreed row and the merge base are recorded.
+  /// Throws [SyncFailure].
+  Future<void> resolveConflict(
+    String path, {
+    required bool keepLocal,
+  }) => _exclusively(() async {
+    final clock = Stopwatch()..start();
+    _log.info('resolve $path: keep ${keepLocal ? 'local' : 'remote'}');
+    final connection = await _connect();
+    final client = connection.client;
+    try {
+      final capabilities = await _capabilities(client, connection.destination);
+      final remote = await client.stat(path);
+      final c = _RunContext(
+        client: client,
+        capabilities: capabilities,
+        local: const {},
+        remote: {path: ?remote},
+        rows: const {},
+        localSha: const {},
+        remoteSha: const {},
+        folders: {''},
+        report: SyncReport(),
+      );
+      if (keepLocal) {
+        final local = await _stat(path);
+        if (local == null) {
+          throw SyncFailure(SyncAbort.failed, '$path is gone here');
+        }
+        final sha = (await _hashLocal(root, [path]))[path]!;
+        await _ensureRemoteParent(c, path);
+        await client.uploadFile(
+          path,
+          File(p.join(root, path)),
+          ifMatch: capabilities.ifMatch ? remote?.etag : null,
+          ifNoneMatch: remote == null && capabilities.ifNoneMatch,
+        );
+        final listed = await client.stat(path);
+        if (listed == null) {
+          throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
+        }
+        await store.putItems([
+          await _row(c, path, sha: sha, local: local, remote: listed),
+        ]);
+      } else {
+        if (remote == null) {
+          throw SyncFailure(SyncAbort.failed, '$path is gone on the server');
+        }
+        final fetched = await _fetch(c, path);
+        await ops.syncReplace(path, fetched.temp.path);
+        final local = await _stat(path);
+        if (local == null) {
+          throw SyncFailure(SyncAbort.failed, '$path not on disk');
+        }
+        await store.putItems([
+          await _row(
+            c,
+            path,
+            sha: fetched.download.sha256,
+            local: local,
+            remote: _remoteFrom(c, path, fetched.download),
+          ),
+        ]);
+      }
+      _log.info('resolve $path: done (${clock.elapsedMilliseconds} ms)');
+    } on WebDavFailure catch (e) {
+      _log.warning('resolve $path failed: ${e.message}');
+      throw SyncFailure.of(e);
+    } on FileSystemException catch (e) {
+      _log.warning('resolve $path failed: ${e.message}');
+      throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
+    } finally {
+      client.close();
+    }
+  });
 
   // --- capabilities ---------------------------------------------------
 
@@ -776,6 +971,7 @@ final class SyncEngine {
         await store.putItems([
           await _row(c, d.path, sha: remoteSha, local: after, remote: remote),
         ]);
+        c.report.changedLocally.add(d.path);
         _log.info('conflict ${d.path}: remote is newer, taken');
       } else {
         await fetched.temp.delete();

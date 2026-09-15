@@ -1259,4 +1259,281 @@ final class RomanianStrings extends Strings {
       'Cât timp scrii; începerea editării unei note păstrează mereu una';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionSync => 'Sincronizare';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Neconfigurată pentru această bibliotecă';
+  @override
+  String get syncNeverSynced => 'Nesincronizată niciodată';
+  @override
+  String syncLastSynced(String when) => 'Sincronizată $when';
+  @override
+  String get syncRunning => 'Se sincronizează…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteca $library';
+  @override
+  String get syncUrlLabel => 'Adresa dosarului';
+  @override
+  String get syncUrlHint =>
+      'Dosarul trebuie să existe. Copiază adresa așa cum o arată '
+      'serverul.';
+  @override
+  String get syncHttpWarning =>
+      'Conexiune necriptată: e în regulă prin VPN sau în rețeaua '
+      'locală.';
+  @override
+  String get syncUserLabel => 'Utilizator';
+  @override
+  String get syncUserHint =>
+      'Lasă gol dacă serverul nu cere date de autentificare.';
+  @override
+  String get syncPasswordLabel => 'Parolă';
+  @override
+  String get syncPasswordHint =>
+      'Păstrată în depozitul de chei al acestui dispozitiv, '
+      'niciodată în fișierele bibliotecii.';
+  @override
+  String get syncPasswordKeepHint => 'Lasă gol pentru a păstra parola salvată.';
+  @override
+  String get syncShowPassword => 'Arată parola';
+  @override
+  String get syncHidePassword => 'Ascunde parola';
+  @override
+  String get syncTestAction => 'Testează conexiunea';
+  @override
+  String get syncTesting => 'Se testează…';
+  @override
+  String get syncRetargetWarning =>
+      'Cu o adresă sau un utilizator nou, următoarea '
+      'sincronizare o ia de la capăt ca primă sincronizare.';
+  @override
+  String get syncTestOk => 'Conexiunea funcționează';
+  @override
+  String get syncModeFull => 'Mod complet';
+  @override
+  String get syncModeCompatible => 'Mod compatibil';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Citire, scriere și ștergere';
+  @override
+  String get syncCapEtags => 'Amprente de fișier (ETag)';
+  @override
+  String get syncCapNoEtags => 'Fără amprente de fișier (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Compară dimensiunea și data; în caz de îndoială descarcă '
+      'din nou';
+  @override
+  String get syncCapGuarded => 'Scrieri protejate';
+  @override
+  String get syncCapUnguarded => 'Scrieri neprotejate';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Verifică fișierul pe server chiar înainte de scriere';
+  @override
+  String get syncCapMove => 'Redenumește fără reîncărcare';
+  @override
+  String get syncCapNoMove => 'Fără redenumire pe server';
+  @override
+  String get syncCapNoMoveDetail =>
+      'O redenumire devine o ștergere și o nouă încărcare';
+  @override
+  String get syncCompatibleNote =>
+      'În modul compatibil sincronizarea funcționează la fel, cu '
+      'câteva cereri în plus.';
+  @override
+  String get syncTestInvalidUrl => 'Adresă nevalidă';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Introdu o adresă http:// sau https://, fără utilizator '
+      'sau parolă în ea.';
+  @override
+  String get syncTestOffline => 'Serverul nu poate fi accesat';
+  @override
+  String get syncTestOfflineHint =>
+      'VPN-ul este pornit? O adresă 10.x sau 192.168.x '
+      'funcționează doar din aceeași rețea.';
+  @override
+  String get syncTestAuth => 'Utilizator sau parolă respinse';
+  @override
+  String get syncTestAuthHint => 'Verifică-le, apoi testează din nou.';
+  @override
+  String get syncTestNotFound => 'Dosarul nu există';
+  @override
+  String get syncTestNotFoundHint =>
+      'Creează-l pe server sau corectează adresa.';
+  @override
+  String get syncTestUnsupported => 'Nu este un dosar WebDAV';
+  @override
+  String get syncTestUnsupportedHint => 'Serverul răspunde, dar nu ca WebDAV.';
+  @override
+  String get syncTestFailed => 'Testul nu a reușit';
+  @override
+  String get syncNowAction => 'Sincronizează acum';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Adresă, utilizator și parolă';
+  @override
+  String get syncRetestTitle => 'Testează din nou serverul';
+  @override
+  String syncProbedAgo(String when) => 'Ultimul test $when';
+  @override
+  String get syncDisconnectTitle => 'Deconectează această bibliotecă';
+  @override
+  String get syncDisconnectSubtitle => 'Fișierele rămân aici și pe server';
+  @override
+  String get syncDisconnectConfirmTitle => 'Deconectezi sincronizarea?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Această bibliotecă nu se mai sincronizează pe acest '
+      'dispozitiv. Niciun fișier nu este șters, nici aici, nici '
+      'pe server. Dacă o conectezi din nou, prima sincronizare o '
+      'ia de la capăt.';
+  @override
+  String get syncDisconnectConfirm => 'Deconectează';
+  @override
+  String get syncFirstTitle => 'Prima sincronizare';
+  @override
+  String get syncFirstIntro =>
+      'Biblioteca a fost comparată cu dosarul de pe server:';
+  @override
+  String get syncFirstUpload => 'De încărcat';
+  @override
+  String get syncFirstDownload => 'De descărcat';
+  @override
+  String get syncFirstBoth => 'Pe ambele părți';
+  @override
+  String get syncFirstBothHint =>
+      'Identice: niciun transfer. Diferite: de rezolvat';
+  @override
+  String get syncFirstNoDelete =>
+      'Prima sincronizare nu șterge nimic, nici aici, nici pe '
+      'server.';
+  @override
+  String get syncStartAction => 'Pornește';
+  @override
+  String syncMassTrashTitle(int count) => count % 100 == 0 || count % 100 >= 20
+      ? 'Muți $count de fișiere în coș?'
+      : 'Muți $count fișiere în coș?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Fișiere sincronizate care lipsesc de pe server: $count '
+      'din $total. De obicei asta înseamnă o adresă greșită, un '
+      'disc NAS nemontat sau un dosar golit din greșeală.';
+  @override
+  String get syncMassTrashHint =>
+      'Dacă chiar le-ai șters pe alt dispozitiv, confirmă: aici '
+      'ajung în coș.';
+  @override
+  String get syncMassTrashConfirm => 'Mută în coș';
+  @override
+  String syncMassDeleteTitle(int count) => count % 100 == 0 || count % 100 >= 20
+      ? 'Ștergi $count de fișiere de pe server?'
+      : 'Ștergi $count fișiere de pe server?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Fișiere sincronizate care lipsesc aici: $count din '
+      '$total. Dacă nu le-ai șters tu, anulează și verifică '
+      'dosarul bibliotecii.';
+  @override
+  String get syncMassDeleteConfirm => 'Șterge de pe server';
+  @override
+  String get syncTooltip => 'Sincronizează';
+  @override
+  String get syncStageConnecting => 'Conectare la server…';
+  @override
+  String get syncStageComparing => 'Comparare cu serverul…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sincronizare · $done din $total';
+  @override
+  String get syncStatusWarnings => 'Sincronizată cu avertismente';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Modificate aici și pe server · $count';
+  @override
+  String get syncConflictHint => 'Niciuna dintre versiuni nu a fost atinsă';
+  @override
+  String get syncResolveAction => 'Rezolvă';
+  @override
+  String syncFailuresHeader(int count) => 'Nesincronizate · $count';
+  @override
+  String get syncFailuresHint => 'Se reîncearcă la următoarea sincronizare';
+  @override
+  String get syncAbortAuth => 'Parolă respinsă de server';
+  @override
+  String get syncAbortMissingPassword => 'Nicio parolă salvată';
+  @override
+  String get syncAbortOffline => 'Serverul nu poate fi accesat';
+  @override
+  String get syncAbortRemoteMissing => 'Dosarul de pe server nu mai există';
+  @override
+  String get syncAbortUnsupported => 'Serverul nu mai funcționează ca WebDAV';
+  @override
+  String get syncAbortFailed => 'Sincronizarea nu a reușit';
+  @override
+  String get syncAbortNotConfirmed => 'Sincronizare anulată';
+  @override
+  String get syncAbortNothingTouched =>
+      'Niciun fișier nu a fost atins. Modificările tale rămân '
+      'aici până la următoarea sincronizare reușită.';
+  @override
+  String syncLastSuccess(String when) => 'Ultima sincronizare reușită $when';
+  @override
+  String get syncNoSuccessYet => 'Nicio sincronizare reușită încă';
+  @override
+  String get syncUpdatePasswordAction => 'Actualizează parola';
+  @override
+  String get syncRetryAction => 'Încearcă din nou';
+  @override
+  String get syncOpenSettingsAction => 'Setări';
+  @override
+  String get syncCloseAction => 'Închide';
+  @override
+  String get syncDoneSnack => 'Sincronizată';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sincronizată · 1 fișier șters în altă parte este în coș'
+      : count % 100 == 0 || count % 100 >= 20
+      ? 'Sincronizată · $count de fișiere șterse în altă parte '
+            'sunt în coș'
+      : 'Sincronizată · $count fișiere șterse în altă parte sunt '
+            'în coș';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sincronizată · 1 conflict de rezolvat'
+      : count % 100 == 0 || count % 100 >= 20
+      ? 'Sincronizată · $count de conflicte de rezolvat'
+      : 'Sincronizată · $count conflicte de rezolvat';
+  @override
+  String get syncShowAction => 'Arată';
+  @override
+  String get syncConflictTitle => 'Rezolvă conflictul';
+  @override
+  String get syncConflictLegend =>
+      'Liniile cu − sunt de pe server, cele cu + de pe acest '
+      'dispozitiv.';
+  @override
+  String get syncConflictBinary =>
+      'Nu este un fișier text: alege ce copie păstrezi.';
+  @override
+  String get syncConflictKeepNote =>
+      'Copia pe care nu o păstrezi rămâne în istoricul notei.';
+  @override
+  String get syncKeepLocal => 'Păstrează varianta de pe acest dispozitiv';
+  @override
+  String get syncKeepRemote => 'Păstrează varianta de pe server';
+  @override
+  String get syncConflictIdentical => 'Cele două versiuni sunt identice';
+  @override
+  String get syncConflictLoadFailed =>
+      'Cele două versiuni nu au putut fi citite';
+  @override
+  String get syncResolveFailed => 'Conflictul nu a putut fi rezolvat';
+  @override
+  String get syncResolved => 'Conflict rezolvat';
 }

@@ -22,10 +22,13 @@ import 'package:niman/src/ui/note_picker.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
+import 'package:niman/src/ui/sync/sync_labels.dart';
+import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:niman/src/ui/template_help.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
 import 'package:niman/src/ui/update_actions.dart';
 import 'package:niman/src/update/update_service.dart';
+import 'package:path/path.dart' as p;
 
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
@@ -1185,6 +1188,36 @@ final class _SettingsBodyState extends State<SettingsBody> {
             widget.onClosed?.call();
           },
         ),
+
+        if (controller.sync case final sync?) ...[
+          SettingsSection(AppStrings.settingsSectionSync),
+          ListenableBuilder(
+            listenable: sync,
+            builder: (context, _) {
+              final status = sync.status;
+              return ListTile(
+                key: const Key('sync-setting'),
+                leading: Icon(
+                  status.configured
+                      ? syncStatusIcon(status)
+                      : Icons.cloud_off_outlined,
+                ),
+                title: Text(AppStrings.syncWebDavTitle),
+                subtitle: Text(syncStatusLine(status, DateTime.now())),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => SyncSettingsScreen(
+                      sync: sync,
+                      libraryName: p.basename(controller.root ?? ''),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
 
         SettingsSection(AppStrings.settingsSectionReminders),
         SwitchListTile(

@@ -1251,4 +1251,267 @@ final class ItalianStrings extends Strings {
       'Mentre scrivi; iniziare a modificare una nota ne conserva sempre una';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionSync => 'Sincronizzazione';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Non configurata per questa libreria';
+  @override
+  String get syncNeverSynced => 'Mai sincronizzata';
+  @override
+  String syncLastSynced(String when) => 'Sincronizzata $when';
+  @override
+  String get syncRunning => 'Sincronizzazione in corso…';
+  @override
+  String syncScreenSubtitle(String library) => 'Libreria $library';
+  @override
+  String get syncUrlLabel => 'Indirizzo della cartella';
+  @override
+  String get syncUrlHint =>
+      "La cartella deve esistere. Copia l'indirizzo come lo "
+      'mostra il server.';
+  @override
+  String get syncHttpWarning =>
+      'Connessione non cifrata: va bene in VPN o in rete locale.';
+  @override
+  String get syncUserLabel => 'Utente';
+  @override
+  String get syncUserHint => 'Vuoto se il server non chiede credenziali.';
+  @override
+  String get syncPasswordLabel => 'Password';
+  @override
+  String get syncPasswordHint =>
+      'Salvata nel portachiavi del dispositivo, mai nei file '
+      'della libreria.';
+  @override
+  String get syncPasswordKeepHint => 'Lascia vuoto per tenere quella salvata.';
+  @override
+  String get syncShowPassword => 'Mostra password';
+  @override
+  String get syncHidePassword => 'Nascondi password';
+  @override
+  String get syncTestAction => 'Prova connessione';
+  @override
+  String get syncTesting => 'Prova in corso…';
+  @override
+  String get syncRetargetWarning =>
+      'Con un altro indirizzo o utente il prossimo sync riparte '
+      'come primo sync.';
+  @override
+  String get syncTestOk => 'Connessione riuscita';
+  @override
+  String get syncModeFull => 'Modalità completa';
+  @override
+  String get syncModeCompatible => 'Modalità compatibile';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lettura, scrittura e cancellazione';
+  @override
+  String get syncCapEtags => 'Impronte dei file (ETag)';
+  @override
+  String get syncCapNoEtags => 'Nessuna impronta dei file (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Confronto dimensione e data; in caso di dubbio riscarico';
+  @override
+  String get syncCapGuarded => 'Scritture protette';
+  @override
+  String get syncCapUnguarded => 'Scritture non protette';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Controllo il file sul server subito prima di scrivere';
+  @override
+  String get syncCapMove => 'Rinomina senza ricaricare';
+  @override
+  String get syncCapNoMove => 'Nessuna rinomina sul server';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Una rinomina diventa eliminazione e nuovo caricamento';
+  @override
+  String get syncCompatibleNote =>
+      'In modalità compatibile il sync funziona uguale, con '
+      'qualche richiesta in più.';
+  @override
+  String get syncTestInvalidUrl => 'Indirizzo non valido';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Scrivi un indirizzo http:// o https:// senza utente e '
+      'password dentro.';
+  @override
+  String get syncTestOffline => 'Server non raggiungibile';
+  @override
+  String get syncTestOfflineHint =>
+      'La VPN è attiva? Un indirizzo 10.x o 192.168.x si '
+      'raggiunge solo dalla stessa rete.';
+  @override
+  String get syncTestAuth => 'Utente o password rifiutati';
+  @override
+  String get syncTestAuthHint => 'Controllali e prova di nuovo.';
+  @override
+  String get syncTestNotFound => 'La cartella non esiste';
+  @override
+  String get syncTestNotFoundHint =>
+      "Creala sul server o correggi l'indirizzo.";
+  @override
+  String get syncTestUnsupported => 'Non è una cartella WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Il server risponde, ma non come WebDAV.';
+  @override
+  String get syncTestFailed => 'Prova non riuscita';
+  @override
+  String get syncNowAction => 'Sincronizza ora';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Indirizzo, utente e password';
+  @override
+  String get syncRetestTitle => 'Prova di nuovo il server';
+  @override
+  String syncProbedAgo(String when) => 'Ultima prova $when';
+  @override
+  String get syncDisconnectTitle => 'Scollega questa libreria';
+  @override
+  String get syncDisconnectSubtitle => 'I file restano qui e sul server';
+  @override
+  String get syncDisconnectConfirmTitle => 'Scollegare la sincronizzazione?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'La libreria smette di sincronizzarsi su questo '
+      'dispositivo. Nessun file viene eliminato, né qui né sul '
+      'server. Se la ricolleghi, il primo sync riparte da capo.';
+  @override
+  String get syncDisconnectConfirm => 'Scollega';
+  @override
+  String get syncFirstTitle => 'Prima sincronizzazione';
+  @override
+  String get syncFirstIntro =>
+      'Ho confrontato la libreria con la cartella sul server:';
+  @override
+  String get syncFirstUpload => 'Da caricare';
+  @override
+  String get syncFirstDownload => 'Da scaricare';
+  @override
+  String get syncFirstBoth => 'Su entrambi';
+  @override
+  String get syncFirstBothHint =>
+      'Uguali: nessun trasferimento. Diversi: da risolvere';
+  @override
+  String get syncFirstNoDelete =>
+      'Il primo sync non elimina nulla, né qui né sul server.';
+  @override
+  String get syncStartAction => 'Avvia';
+  @override
+  String syncMassTrashTitle(int count) => 'Spostare $count file nel cestino?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Sul server mancano $count dei $total file sincronizzati. '
+      'Di solito vuol dire indirizzo sbagliato, disco del NAS '
+      'non montato o cartella svuotata per errore.';
+  @override
+  String get syncMassTrashHint =>
+      'Se li hai eliminati davvero da un altro dispositivo, '
+      'conferma: qui finiscono nel cestino.';
+  @override
+  String get syncMassTrashConfirm => 'Sposta nel cestino';
+  @override
+  String syncMassDeleteTitle(int count) => 'Eliminare $count file dal server?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Qui mancano $count dei $total file sincronizzati. Se non '
+      'li hai eliminati tu, annulla e controlla la cartella '
+      'della libreria.';
+  @override
+  String get syncMassDeleteConfirm => 'Elimina dal server';
+  @override
+  String get syncTooltip => 'Sincronizza';
+  @override
+  String get syncStageConnecting => 'Connessione al server…';
+  @override
+  String get syncStageComparing => 'Confronto con il server…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sincronizzazione · $done di $total';
+  @override
+  String get syncStatusWarnings => 'Sincronizzata con avvisi';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Modificati qui e sul server · $count';
+  @override
+  String get syncConflictHint => 'Nessuna delle due versioni è stata toccata';
+  @override
+  String get syncResolveAction => 'Risolvi';
+  @override
+  String syncFailuresHeader(int count) => 'Non riusciti · $count';
+  @override
+  String get syncFailuresHint => 'Riprovati al prossimo sync';
+  @override
+  String get syncAbortAuth => 'Password rifiutata dal server';
+  @override
+  String get syncAbortMissingPassword => 'Nessuna password salvata';
+  @override
+  String get syncAbortOffline => 'Server non raggiungibile';
+  @override
+  String get syncAbortRemoteMissing => "La cartella sul server non c'è più";
+  @override
+  String get syncAbortUnsupported => 'Il server non risponde più come WebDAV';
+  @override
+  String get syncAbortFailed => 'Sincronizzazione non riuscita';
+  @override
+  String get syncAbortNotConfirmed => 'Sincronizzazione annullata';
+  @override
+  String get syncAbortNothingTouched =>
+      'Nessun file è stato toccato. Le modifiche restano qui '
+      'fino al prossimo sync riuscito.';
+  @override
+  String syncLastSuccess(String when) => 'Ultimo sync riuscito $when';
+  @override
+  String get syncNoSuccessYet => 'Nessun sync riuscito finora';
+  @override
+  String get syncUpdatePasswordAction => 'Aggiorna password';
+  @override
+  String get syncRetryAction => 'Riprova';
+  @override
+  String get syncOpenSettingsAction => 'Impostazioni';
+  @override
+  String get syncCloseAction => 'Chiudi';
+  @override
+  String get syncDoneSnack => 'Sincronizzata';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sincronizzata · 1 file eliminato altrove è nel cestino'
+      : 'Sincronizzata · $count file eliminati altrove sono nel '
+            'cestino';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sincronizzata · 1 conflitto da risolvere'
+      : 'Sincronizzata · $count conflitti da risolvere';
+  @override
+  String get syncShowAction => 'Mostra';
+  @override
+  String get syncConflictTitle => 'Risolvi conflitto';
+  @override
+  String get syncConflictLegend =>
+      'Le righe con − sono del server, quelle con + di questo '
+      'dispositivo.';
+  @override
+  String get syncConflictBinary =>
+      'Non è un file di testo: scegli quale copia tenere.';
+  @override
+  String get syncConflictKeepNote =>
+      'La copia che non tieni resta nella cronologia della nota.';
+  @override
+  String get syncKeepLocal => 'Tieni questo dispositivo';
+  @override
+  String get syncKeepRemote => 'Tieni la versione del server';
+  @override
+  String get syncConflictIdentical => 'Le due versioni sono identiche';
+  @override
+  String get syncConflictLoadFailed => 'Non riesco a leggere le due versioni';
+  @override
+  String get syncResolveFailed => 'Risoluzione non riuscita';
+  @override
+  String get syncResolved => 'Conflitto risolto';
 }

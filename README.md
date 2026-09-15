@@ -49,6 +49,10 @@ Full guides live in [`docs/`](docs/):
 - Each library is independent: its own editor preferences, trash policy,
   template folder, tree sort order, and so on.
 - Open multiple libraries from a remembered list; switch anytime.
+- **WebDAV sync** per library to Nextcloud, ownCloud, a NAS or any WebDAV
+  folder, `http://` over a VPN included: a first sync that deletes
+  nothing, remote deletions landing in the trash, and conflicts resolved
+  by comparing both copies.
 
 ### Organization
 
@@ -93,9 +97,9 @@ delivery and other background behavior.
 These are tracked as GitHub issues — see the
 [issue tracker](https://github.com/Nihmar/Niman/issues) for details.
 
-- **WebDAV sync** ([#9](https://github.com/Nihmar/Niman/issues/9)) —
-  whole-library sync to Nextcloud, ownCloud, or any WebDAV server. Includes
-  offline queue, conflict detection, and a hunk-level merge UI.
+- **WebDAV sync, the rest** ([#9](https://github.com/Nihmar/Niman/issues/9)) —
+  automatic syncing (after edits, on resume, periodic), an offline queue,
+  and a hunk-level merge for conflicts.
 - **Multi-tab editing** ([#23](https://github.com/Nihmar/Niman/issues/23)) —
   open several notes at once.
 - **Export** ([#24](https://github.com/Nihmar/Niman/issues/24)) —

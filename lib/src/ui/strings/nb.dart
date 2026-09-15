@@ -1240,4 +1240,274 @@ final class NorwegianStrings extends Strings {
       'Mens du skriver; når du begynner å redigere et notat, lagres alltid én';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionSync => 'Synkronisering';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ikke satt opp for dette biblioteket';
+  @override
+  String get syncNeverSynced => 'Aldri synkronisert';
+  @override
+  String syncLastSynced(String when) => 'Synkronisert $when';
+  @override
+  String get syncRunning => 'Synkroniserer…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bibliotek $library';
+  @override
+  String get syncUrlLabel => 'Mappeadresse';
+  @override
+  String get syncUrlHint =>
+      'Mappen må finnes. Kopier adressen slik serveren viser den.';
+  @override
+  String get syncHttpWarning =>
+      'Ukryptert tilkobling: greit over VPN eller på det lokale '
+      'nettverket.';
+  @override
+  String get syncUserLabel => 'Bruker';
+  @override
+  String get syncUserHint =>
+      'La stå tomt hvis serveren ikke ber om '
+      'påloggingsinformasjon.';
+  @override
+  String get syncPasswordLabel => 'Passord';
+  @override
+  String get syncPasswordHint =>
+      'Lagres i nøkkelringen på denne enheten, aldri i '
+      'bibliotekfilene.';
+  @override
+  String get syncPasswordKeepHint =>
+      'La stå tomt for å beholde det lagrede passordet.';
+  @override
+  String get syncShowPassword => 'Vis passord';
+  @override
+  String get syncHidePassword => 'Skjul passord';
+  @override
+  String get syncTestAction => 'Test tilkoblingen';
+  @override
+  String get syncTesting => 'Tester…';
+  @override
+  String get syncRetargetWarning =>
+      'Med ny adresse eller bruker starter neste synk på nytt '
+      'som en første synk.';
+  @override
+  String get syncTestOk => 'Tilkoblingen virker';
+  @override
+  String get syncModeFull => 'Full modus';
+  @override
+  String get syncModeCompatible => 'Kompatibel modus';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lese, skrive og slette';
+  @override
+  String get syncCapEtags => 'Filfingeravtrykk (ETag)';
+  @override
+  String get syncCapNoEtags => 'Ingen filfingeravtrykk (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Sammenligner størrelse og dato; laster ned på nytt ved '
+      'tvil';
+  @override
+  String get syncCapGuarded => 'Beskyttet skriving';
+  @override
+  String get syncCapUnguarded => 'Ubeskyttet skriving';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Sjekker filen på serveren rett før skriving';
+  @override
+  String get syncCapMove => 'Endrer navn uten ny opplasting';
+  @override
+  String get syncCapNoMove => 'Ingen navneendring på serveren';
+  @override
+  String get syncCapNoMoveDetail =>
+      'En navneendring blir en sletting og en ny opplasting';
+  @override
+  String get syncCompatibleNote =>
+      'I kompatibel modus fungerer synk likt, med noen flere '
+      'forespørsler.';
+  @override
+  String get syncTestInvalidUrl => 'Ikke en gyldig adresse';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Skriv inn en adresse med http:// eller https://, uten '
+      'bruker eller passord i den.';
+  @override
+  String get syncTestOffline => 'Serveren kan ikke nås';
+  @override
+  String get syncTestOfflineHint =>
+      'Er VPN på? En adresse på 10.x eller 192.168.x virker bare '
+      'fra samme nettverk.';
+  @override
+  String get syncTestAuth => 'Bruker eller passord avvist';
+  @override
+  String get syncTestAuthHint => 'Sjekk dem, og test igjen.';
+  @override
+  String get syncTestNotFound => 'Mappen finnes ikke';
+  @override
+  String get syncTestNotFoundHint =>
+      'Opprett den på serveren eller rett adressen.';
+  @override
+  String get syncTestUnsupported => 'Ikke en WebDAV-mappe';
+  @override
+  String get syncTestUnsupportedHint => 'Serveren svarer, men ikke som WebDAV.';
+  @override
+  String get syncTestFailed => 'Testen mislyktes';
+  @override
+  String get syncNowAction => 'Synkroniser nå';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Adresse, bruker og passord';
+  @override
+  String get syncRetestTitle => 'Test serveren igjen';
+  @override
+  String syncProbedAgo(String when) => 'Siste test $when';
+  @override
+  String get syncDisconnectTitle => 'Koble fra dette biblioteket';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Filene blir liggende her og på serveren';
+  @override
+  String get syncDisconnectConfirmTitle => 'Koble fra synk?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Dette biblioteket slutter å synkronisere på denne '
+      'enheten. Ingen filer slettes, verken her eller på '
+      'serveren. Kobler du det til igjen, starter første synk på '
+      'nytt.';
+  @override
+  String get syncDisconnectConfirm => 'Koble fra';
+  @override
+  String get syncFirstTitle => 'Første synk';
+  @override
+  String get syncFirstIntro =>
+      'Biblioteket er sammenlignet med mappen på serveren:';
+  @override
+  String get syncFirstUpload => 'Skal lastes opp';
+  @override
+  String get syncFirstDownload => 'Skal lastes ned';
+  @override
+  String get syncFirstBoth => 'På begge sider';
+  @override
+  String get syncFirstBothHint => 'Like: ingen overføring. Ulike: må løses';
+  @override
+  String get syncFirstNoDelete =>
+      'Første synk sletter ingenting, verken her eller på '
+      'serveren.';
+  @override
+  String get syncStartAction => 'Start';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Flytte $count filer til papirkorgen?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '$count av de $total synkroniserte filene mangler på '
+      'serveren. Det betyr som regel feil adresse, en NAS-disk '
+      'som ikke er montert, eller en mappe som er tømt ved en '
+      'feil.';
+  @override
+  String get syncMassTrashHint =>
+      'Hvis du virkelig slettet dem på en annen enhet, bekreft: '
+      'her havner de i papirkorgen.';
+  @override
+  String get syncMassTrashConfirm => 'Flytt til papirkorgen';
+  @override
+  String syncMassDeleteTitle(int count) => 'Slette $count filer fra serveren?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '$count av de $total synkroniserte filene mangler her. '
+      'Hvis du ikke slettet dem, avbryt og sjekk bibliotekmappen.';
+  @override
+  String get syncMassDeleteConfirm => 'Slett fra serveren';
+  @override
+  String get syncTooltip => 'Synkroniser';
+  @override
+  String get syncStageConnecting => 'Kobler til serveren…';
+  @override
+  String get syncStageComparing => 'Sammenligner med serveren…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synkroniserer · $done av $total';
+  @override
+  String get syncStatusWarnings => 'Synkronisert med advarsler';
+  @override
+  String syncConflictsHeader(int count) => 'Endret her og på serveren · $count';
+  @override
+  String get syncConflictHint => 'Ingen av versjonene ble rørt';
+  @override
+  String get syncResolveAction => 'Løs';
+  @override
+  String syncFailuresHeader(int count) => 'Ikke synkronisert · $count';
+  @override
+  String get syncFailuresHint => 'Prøves igjen ved neste synk';
+  @override
+  String get syncAbortAuth => 'Passordet ble avvist av serveren';
+  @override
+  String get syncAbortMissingPassword => 'Ingen passord lagret';
+  @override
+  String get syncAbortOffline => 'Serveren kan ikke nås';
+  @override
+  String get syncAbortRemoteMissing => 'Mappen på serveren er borte';
+  @override
+  String get syncAbortUnsupported => 'Serveren virker ikke lenger som WebDAV';
+  @override
+  String get syncAbortFailed => 'Synk mislyktes';
+  @override
+  String get syncAbortNotConfirmed => 'Synk avbrutt';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ingen filer ble rørt. Endringene dine blir liggende her '
+      'til neste vellykkede synk.';
+  @override
+  String syncLastSuccess(String when) => 'Siste vellykkede synk $when';
+  @override
+  String get syncNoSuccessYet => 'Ingen vellykket synk ennå';
+  @override
+  String get syncUpdatePasswordAction => 'Oppdater passord';
+  @override
+  String get syncRetryAction => 'Prøv igjen';
+  @override
+  String get syncOpenSettingsAction => 'Innstillinger';
+  @override
+  String get syncCloseAction => 'Lukk';
+  @override
+  String get syncDoneSnack => 'Synkronisert';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Synkronisert · 1 fil slettet et annet sted ligger i '
+            'papirkorgen'
+      : 'Synkronisert · $count filer slettet et annet sted ligger '
+            'i papirkorgen';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Synkronisert · 1 konflikt å løse'
+      : 'Synkronisert · $count konflikter å løse';
+  @override
+  String get syncShowAction => 'Vis';
+  @override
+  String get syncConflictTitle => 'Løs konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Linjer merket − er fra serveren, linjer merket + er fra '
+      'denne enheten.';
+  @override
+  String get syncConflictBinary =>
+      'Ikke en tekstfil: velg hvilken kopi du vil beholde.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopien du ikke beholder, blir liggende i historikken til '
+      'notatet.';
+  @override
+  String get syncKeepLocal => 'Behold denne enhetens';
+  @override
+  String get syncKeepRemote => 'Behold serverens';
+  @override
+  String get syncConflictIdentical => 'De to versjonene er identiske';
+  @override
+  String get syncConflictLoadFailed => 'Kunne ikke lese begge versjonene';
+  @override
+  String get syncResolveFailed => 'Kunne ikke løse konflikten';
+  @override
+  String get syncResolved => 'Konflikten er løst';
 }

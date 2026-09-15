@@ -1125,4 +1125,227 @@ final class ChineseStrings extends Strings {
   String get historyIntervalSubtitle => '书写期间生效；开始编辑笔记时总会保留一个版本';
   @override
   String historyIntervalValue(int minutes) => '$minutes 分钟';
+  @override
+  String get settingsSectionSync => '同步';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => '此文库尚未设置同步';
+  @override
+  String get syncNeverSynced => '从未同步';
+  @override
+  String syncLastSynced(String when) => '同步于 $when';
+  @override
+  String get syncRunning => '正在同步…';
+  @override
+  String syncScreenSubtitle(String library) => '文库 $library';
+  @override
+  String get syncUrlLabel => '文件夹地址';
+  @override
+  String get syncUrlHint => '文件夹必须已存在。请按服务器显示的样子复制地址。';
+  @override
+  String get syncHttpWarning => '未加密的连接：在 VPN 或本地网络中使用没有问题。';
+  @override
+  String get syncUserLabel => '用户';
+  @override
+  String get syncUserHint => '如果服务器不要求凭据，请留空。';
+  @override
+  String get syncPasswordLabel => '密码';
+  @override
+  String get syncPasswordHint => '保存在此设备的钥匙串中，绝不写入文库文件。';
+  @override
+  String get syncPasswordKeepHint => '留空则保留已保存的密码。';
+  @override
+  String get syncShowPassword => '显示密码';
+  @override
+  String get syncHidePassword => '隐藏密码';
+  @override
+  String get syncTestAction => '测试连接';
+  @override
+  String get syncTesting => '正在测试…';
+  @override
+  String get syncRetargetWarning => '更换地址或用户后，下次同步将作为首次同步重新开始。';
+  @override
+  String get syncTestOk => '连接正常';
+  @override
+  String get syncModeFull => '完整模式';
+  @override
+  String get syncModeCompatible => '兼容模式';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => '读取、写入和删除';
+  @override
+  String get syncCapEtags => '文件指纹（ETag）';
+  @override
+  String get syncCapNoEtags => '无文件指纹（ETag）';
+  @override
+  String get syncCapNoEtagsDetail => '比较大小和日期；有疑问时重新下载';
+  @override
+  String get syncCapGuarded => '受保护的写入';
+  @override
+  String get syncCapUnguarded => '不受保护的写入';
+  @override
+  String get syncCapUnguardedDetail => '写入前先检查服务器上的文件';
+  @override
+  String get syncCapMove => '重命名无需重新上传';
+  @override
+  String get syncCapNoMove => '服务器不支持重命名';
+  @override
+  String get syncCapNoMoveDetail => '重命名会变为删除加重新上传';
+  @override
+  String get syncCompatibleNote => '兼容模式下同步效果相同，只是请求会多一些。';
+  @override
+  String get syncTestInvalidUrl => '地址无效';
+  @override
+  String get syncTestInvalidUrlHint =>
+      '请输入 http:// 或 https:// 地址，地址中不要包含用户名或密码。';
+  @override
+  String get syncTestOffline => '无法连接服务器';
+  @override
+  String get syncTestOfflineHint => 'VPN 已开启吗？10.x 或 192.168.x 地址只能在同一网络内访问。';
+  @override
+  String get syncTestAuth => '用户或密码被拒绝';
+  @override
+  String get syncTestAuthHint => '请检查后再次测试。';
+  @override
+  String get syncTestNotFound => '文件夹不存在';
+  @override
+  String get syncTestNotFoundHint => '请在服务器上创建它，或修正地址。';
+  @override
+  String get syncTestUnsupported => '不是 WebDAV 文件夹';
+  @override
+  String get syncTestUnsupportedHint => '服务器有响应，但不是 WebDAV。';
+  @override
+  String get syncTestFailed => '测试失败';
+  @override
+  String get syncNowAction => '立即同步';
+  @override
+  String get syncSectionServer => '服务器';
+  @override
+  String get syncServerRow => '地址、用户和密码';
+  @override
+  String get syncRetestTitle => '重新测试服务器';
+  @override
+  String syncProbedAgo(String when) => '上次测试 $when';
+  @override
+  String get syncDisconnectTitle => '断开此文库';
+  @override
+  String get syncDisconnectSubtitle => '文件会保留在本地和服务器上';
+  @override
+  String get syncDisconnectConfirmTitle => '断开同步？';
+  @override
+  String get syncDisconnectConfirmBody =>
+      '此文库将不再在此设备上同步。不会删除任何文件，本地和服务器上都不会。如果重新连接，首次同步会从头开始。';
+  @override
+  String get syncDisconnectConfirm => '断开';
+  @override
+  String get syncFirstTitle => '首次同步';
+  @override
+  String get syncFirstIntro => '已将文库与服务器上的文件夹进行比较：';
+  @override
+  String get syncFirstUpload => '待上传';
+  @override
+  String get syncFirstDownload => '待下载';
+  @override
+  String get syncFirstBoth => '两边都有';
+  @override
+  String get syncFirstBothHint => '相同：无需传输。不同：需要解决';
+  @override
+  String get syncFirstNoDelete => '首次同步不会删除任何内容，本地和服务器上都不会。';
+  @override
+  String get syncStartAction => '开始';
+  @override
+  String syncMassTrashTitle(int count) => '将 $count 个文件移入回收站？';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '在已同步的 $total 个文件中，有 $count 个在服务器上缺失。这通常意味着地址错误、NAS '
+      '磁盘未挂载，或文件夹被误清空。';
+  @override
+  String get syncMassTrashHint => '如果你确实在其他设备上删除了它们，请确认：它们在这里会移入回收站。';
+  @override
+  String get syncMassTrashConfirm => '移入回收站';
+  @override
+  String syncMassDeleteTitle(int count) => '从服务器删除 $count 个文件？';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '在已同步的 $total 个文件中，有 $count 个在本地缺失。如果不是你删除的，请取消并检查文库文件夹。';
+  @override
+  String get syncMassDeleteConfirm => '从服务器删除';
+  @override
+  String get syncTooltip => '同步';
+  @override
+  String get syncStageConnecting => '正在连接服务器…';
+  @override
+  String get syncStageComparing => '正在与服务器比较…';
+  @override
+  String syncStageApplying(int done, int total) => '正在同步 · $done / $total';
+  @override
+  String get syncStatusWarnings => '已同步，但有警告';
+  @override
+  String syncConflictsHeader(int count) => '本地和服务器上都有更改 · $count';
+  @override
+  String get syncConflictHint => '两个版本都未被改动';
+  @override
+  String get syncResolveAction => '解决';
+  @override
+  String syncFailuresHeader(int count) => '未同步 · $count';
+  @override
+  String get syncFailuresHint => '将在下次同步时重试';
+  @override
+  String get syncAbortAuth => '服务器拒绝了密码';
+  @override
+  String get syncAbortMissingPassword => '没有保存的密码';
+  @override
+  String get syncAbortOffline => '无法连接服务器';
+  @override
+  String get syncAbortRemoteMissing => '服务器上的文件夹已不存在';
+  @override
+  String get syncAbortUnsupported => '服务器不再以 WebDAV 方式工作';
+  @override
+  String get syncAbortFailed => '同步失败';
+  @override
+  String get syncAbortNotConfirmed => '同步已取消';
+  @override
+  String get syncAbortNothingTouched => '没有改动任何文件。你的更改会保留在本地，直到下次同步成功。';
+  @override
+  String syncLastSuccess(String when) => '上次成功同步 $when';
+  @override
+  String get syncNoSuccessYet => '尚无成功的同步';
+  @override
+  String get syncUpdatePasswordAction => '更新密码';
+  @override
+  String get syncRetryAction => '重试';
+  @override
+  String get syncOpenSettingsAction => '设置';
+  @override
+  String get syncCloseAction => '关闭';
+  @override
+  String get syncDoneSnack => '已同步';
+  @override
+  String syncTrashedSnack(int count) => '已同步 · $count 个在其他地方删除的文件已移入回收站';
+  @override
+  String syncConflictsSnack(int count) => '已同步 · $count 个冲突待解决';
+  @override
+  String get syncShowAction => '显示';
+  @override
+  String get syncConflictTitle => '解决冲突';
+  @override
+  String get syncConflictLegend => '标记为 − 的行来自服务器，标记为 + 的行来自此设备。';
+  @override
+  String get syncConflictBinary => '不是文本文件：请选择要保留的副本。';
+  @override
+  String get syncConflictKeepNote => '未保留的副本会留在笔记的历史记录中。';
+  @override
+  String get syncKeepLocal => '保留此设备的版本';
+  @override
+  String get syncKeepRemote => '保留服务器的版本';
+  @override
+  String get syncConflictIdentical => '两个版本完全相同';
+  @override
+  String get syncConflictLoadFailed => '无法读取两个版本';
+  @override
+  String get syncResolveFailed => '无法解决冲突';
+  @override
+  String get syncResolved => '冲突已解决';
 }

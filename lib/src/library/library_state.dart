@@ -30,7 +30,9 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
@@ -152,6 +154,7 @@ final class LibraryController implements LibrarySession {
   LibraryConfigRepo? _configRepo;
   Indexer? _indexer;
   NoteOps? _ops;
+  LibrarySyncService? _sync;
   FileWatcher? _watcher;
   Timer? _rescanTimer;
 
@@ -222,6 +225,10 @@ final class LibraryController implements LibrarySession {
   /// CRUD ops for the open library, or null while closed.
   @override
   NoteOps? get ops => _ops;
+
+  /// The open library's WebDAV sync, or null while closed.
+  @override
+  SyncService? get sync => _sync;
 
   /// Children of the row with id [parentId] (0 = library root),
   /// directories first, then by name.
@@ -429,6 +436,22 @@ final class LibraryController implements LibrarySession {
       _indexer = indexer;
       _ops = ops;
       _root = abs;
+      // The library's WebDAV sync (M5): idle until configured; the state and
+      // the password are per device, keyed by this root.
+      final syncStore = SyncStore(appDb);
+      final sync = LibrarySyncService(
+        root: abs,
+        engine: SyncEngine(
+          root: abs,
+          ops: ops,
+          store: syncStore,
+          secrets: syncSecrets,
+        ),
+        store: syncStore,
+        secrets: syncSecrets,
+      );
+      _sync = sync;
+      unawaited(sync.load());
       // The library's own text sizes, on screen with it (T-M6-12) and
       // before the ready bump, so nothing paints at the wrong size first.
       final settings = await config.config;
@@ -1052,6 +1075,8 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops = null;
     _configRepo = null;
+    _sync?.dispose();
+    _sync = null;
     // The text sizes belonged to the library that just went away; the
     // home screen is nobody's library and reads at the shipped sizes.
     AppTextScales.reset();

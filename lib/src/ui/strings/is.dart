@@ -1240,4 +1240,279 @@ final class IcelandicStrings extends Strings {
       'athugasrafnu';
   @override
   String historyIntervalValue(int minutes) => '$minutes mín';
+  @override
+  String get settingsSectionSync => 'Samstilling';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ekki sett upp fyrir þetta bókasafn';
+  @override
+  String get syncNeverSynced => 'Aldrei samstillt';
+  @override
+  String syncLastSynced(String when) => 'Samstillt: $when';
+  @override
+  String get syncRunning => 'Samstillir…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bókasafn $library';
+  @override
+  String get syncUrlLabel => 'Slóð möppu';
+  @override
+  String get syncUrlHint =>
+      'Mappan verður að vera til. Afritaðu slóðina eins og '
+      'netþjónninn sýnir hana.';
+  @override
+  String get syncHttpWarning =>
+      'Ódulkóðuð tenging: í lagi um VPN eða á staðarnetinu þínu.';
+  @override
+  String get syncUserLabel => 'Notandi';
+  @override
+  String get syncUserHint =>
+      'Skildu eftir autt ef netþjónninn biður ekki um auðkenni.';
+  @override
+  String get syncPasswordLabel => 'Lykilorð';
+  @override
+  String get syncPasswordHint =>
+      'Geymt í lyklakippu þessa tækis, aldrei í skjölum '
+      'bókasafnsins.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Skildu eftir autt til að halda vistaða lykilorðinu.';
+  @override
+  String get syncShowPassword => 'Sýna lykilorð';
+  @override
+  String get syncHidePassword => 'Fela lykilorð';
+  @override
+  String get syncTestAction => 'Prófa tengingu';
+  @override
+  String get syncTesting => 'Prófar…';
+  @override
+  String get syncRetargetWarning =>
+      'Með nýrri slóð eða notanda byrjar næsta samstilling upp á '
+      'nýtt sem fyrsta samstilling.';
+  @override
+  String get syncTestOk => 'Tengingin virkar';
+  @override
+  String get syncModeFull => 'Fullur hamur';
+  @override
+  String get syncModeCompatible => 'Samhæfður hamur';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lestur, skrif og eyðing';
+  @override
+  String get syncCapEtags => 'Fingraför skjala (ETag)';
+  @override
+  String get syncCapNoEtags => 'Engin fingraför skjala (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Ber saman stærð og dagsetningu; sækir aftur ef vafi '
+      'leikur á';
+  @override
+  String get syncCapGuarded => 'Varin skrif';
+  @override
+  String get syncCapUnguarded => 'Óvarin skrif';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Athugar skjalið á netþjóninum rétt áður en skrifað er';
+  @override
+  String get syncCapMove => 'Endurnefnir án þess að hlaða upp aftur';
+  @override
+  String get syncCapNoMove => 'Engin endurnefning á netþjóninum';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Endurnefning verður að eyðingu og nýrri upphleðslu';
+  @override
+  String get syncCompatibleNote =>
+      'Í samhæfðum ham virkar samstilling eins, bara með nokkrum '
+      'fleiri beiðnum.';
+  @override
+  String get syncTestInvalidUrl => 'Ógild slóð';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Sláðu inn http:// eða https:// slóð, án notanda eða '
+      'lykilorðs í henni.';
+  @override
+  String get syncTestOffline => 'Ekki næst í netþjóninn';
+  @override
+  String get syncTestOfflineHint =>
+      'Er kveikt á VPN? 10.x eða 192.168.x slóð virkar aðeins á '
+      'sama neti.';
+  @override
+  String get syncTestAuth => 'Notanda eða lykilorði hafnað';
+  @override
+  String get syncTestAuthHint => 'Athugaðu þau og prófaðu aftur.';
+  @override
+  String get syncTestNotFound => 'Mappan er ekki til';
+  @override
+  String get syncTestNotFoundHint =>
+      'Búðu hana til á netþjóninum eða lagaðu slóðina.';
+  @override
+  String get syncTestUnsupported => 'Ekki WebDAV-mappa';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Netþjónninn svarar, en ekki sem WebDAV.';
+  @override
+  String get syncTestFailed => 'Prófunin tókst ekki';
+  @override
+  String get syncNowAction => 'Samstilla núna';
+  @override
+  String get syncSectionServer => 'Netþjónn';
+  @override
+  String get syncServerRow => 'Slóð, notandi og lykilorð';
+  @override
+  String get syncRetestTitle => 'Prófa netþjóninn aftur';
+  @override
+  String syncProbedAgo(String when) => 'Síðasta prófun: $when';
+  @override
+  String get syncDisconnectTitle => 'Aftengja þetta bókasafn';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Skjölin verða áfram hér og á netþjóninum';
+  @override
+  String get syncDisconnectConfirmTitle => 'Aftengja samstillingu?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Þetta bókasafn hættir að samstillast á þessu tæki. Engu '
+      'skjali er eytt, hvorki hér né á netþjóninum. Ef þú tengir '
+      'það aftur byrjar fyrsta samstillingin upp á nýtt.';
+  @override
+  String get syncDisconnectConfirm => 'Aftengja';
+  @override
+  String get syncFirstTitle => 'Fyrsta samstilling';
+  @override
+  String get syncFirstIntro =>
+      'Ég bar bókasafnið saman við möppuna á netþjóninum:';
+  @override
+  String get syncFirstUpload => 'Til að hlaða upp';
+  @override
+  String get syncFirstDownload => 'Til að sækja';
+  @override
+  String get syncFirstBoth => 'Á báðum stöðum';
+  @override
+  String get syncFirstBothHint =>
+      'Eins: enginn flutningur. Ólík: þarf að leysa';
+  @override
+  String get syncFirstNoDelete =>
+      'Fyrsta samstillingin eyðir engu, hvorki hér né á '
+      'netþjóninum.';
+  @override
+  String get syncStartAction => 'Byrja';
+  @override
+  String syncMassTrashTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Færa $count skjal í korpu?'
+      : 'Færa $count skjöl í korpu?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Á netþjóninum vantar $count af $total samstilltum '
+      'skjölum. Það þýðir yfirleitt ranga slóð, NAS-disk sem er '
+      'ekki tengdur eða möppu sem var tæmd fyrir mistök.';
+  @override
+  String get syncMassTrashHint =>
+      'Ef þú eyddir þeim í alvöru á öðru tæki skaltu staðfesta: '
+      'hér fara þau í korpu.';
+  @override
+  String get syncMassTrashConfirm => 'Færa í korpu';
+  @override
+  String syncMassDeleteTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Eyða $count skjali af netþjóninum?'
+      : 'Eyða $count skjölum af netþjóninum?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Hér vantar $count af $total samstilltum skjölum. Ef þú '
+      'eyddir þeim ekki skaltu hætta við og athuga möppu '
+      'bókasafnsins.';
+  @override
+  String get syncMassDeleteConfirm => 'Eyða af netþjóni';
+  @override
+  String get syncTooltip => 'Samstilla';
+  @override
+  String get syncStageConnecting => 'Tengist netþjóninum…';
+  @override
+  String get syncStageComparing => 'Ber saman við netþjóninn…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Samstillir · $done af $total';
+  @override
+  String get syncStatusWarnings => 'Samstillt með viðvörunum';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Breytt hér og á netþjóninum · $count';
+  @override
+  String get syncConflictHint => 'Hvorug útgáfan var snert';
+  @override
+  String get syncResolveAction => 'Leysa';
+  @override
+  String syncFailuresHeader(int count) => 'Ekki samstillt · $count';
+  @override
+  String get syncFailuresHint => 'Reynt aftur við næstu samstillingu';
+  @override
+  String get syncAbortAuth => 'Netþjónninn hafnaði lykilorðinu';
+  @override
+  String get syncAbortMissingPassword => 'Ekkert lykilorð vistað';
+  @override
+  String get syncAbortOffline => 'Ekki næst í netþjóninn';
+  @override
+  String get syncAbortRemoteMissing => 'Mappan á netþjóninum er horfin';
+  @override
+  String get syncAbortUnsupported =>
+      'Netþjónninn virkar ekki lengur sem WebDAV';
+  @override
+  String get syncAbortFailed => 'Samstillingin tókst ekki';
+  @override
+  String get syncAbortNotConfirmed => 'Hætt við samstillingu';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ekkert skjal var snert. Breytingarnar þínar verða áfram '
+      'hér fram að næstu vel heppnuðu samstillingu.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Síðasta vel heppnaða samstilling: $when';
+  @override
+  String get syncNoSuccessYet => 'Engin vel heppnuð samstilling enn';
+  @override
+  String get syncUpdatePasswordAction => 'Uppfæra lykilorð';
+  @override
+  String get syncRetryAction => 'Reyna aftur';
+  @override
+  String get syncOpenSettingsAction => 'Stillingar';
+  @override
+  String get syncCloseAction => 'Loka';
+  @override
+  String get syncDoneSnack => 'Samstillt';
+  @override
+  String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Samstillt · $count skjal sem var eytt annars staðar er í '
+            'korpunni'
+      : 'Samstillt · $count skjöl sem var eytt annars staðar eru í '
+            'korpunni';
+  @override
+  String syncConflictsSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Samstillt · $count óleystur árekstur'
+      : 'Samstillt · $count óleystir árekstrar';
+  @override
+  String get syncShowAction => 'Sýna';
+  @override
+  String get syncConflictTitle => 'Leysa árekstur';
+  @override
+  String get syncConflictLegend =>
+      'Línur merktar − eru af netþjóninum, línur merktar + af '
+      'þessu tæki.';
+  @override
+  String get syncConflictBinary =>
+      'Ekki textaskjal: veldu hvaða afrit á að halda.';
+  @override
+  String get syncConflictKeepNote =>
+      'Afritið sem þú heldur ekki verður áfram í ferlinum.';
+  @override
+  String get syncKeepLocal => 'Halda útgáfu þessa tækis';
+  @override
+  String get syncKeepRemote => 'Halda útgáfu netþjónsins';
+  @override
+  String get syncConflictIdentical => 'Útgáfurnar tvær eru eins';
+  @override
+  String get syncConflictLoadFailed => 'Gat ekki lesið báðar útgáfurnar';
+  @override
+  String get syncResolveFailed => 'Gat ekki leyst áreksturinn';
+  @override
+  String get syncResolved => 'Árekstur leystur';
 }

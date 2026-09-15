@@ -417,6 +417,45 @@ ETag, pruning remote folders left empty, `Retry-After` waits (the
 queue's job, step 6), and telling an open editor that its note was
 replaced (step 5/6).
 
+### UI (`lib/src/ui/sync/`, mockups S1–S11)
+
+`LibrarySyncService` (`lib/src/sync/sync_service.dart`) is what the UI
+drives, exposed as `LibrarySession.sync` for every open library. It
+holds a `SyncStatus` (destination, capabilities, running stage and
+count, the session's last `SyncReport`), notifies on every change, and
+streams the local paths a run or a resolution changed, so the shell
+re-reads the open note.
+
+- **Settings → Sync → WebDAV** (`SyncSettingsScreen`): unconfigured or
+  editing, a form (one URL field, user, password) whose **Save** is
+  enabled only for the exact fields a successful **Test connection**
+  measured; a password left empty while editing keeps the stored one.
+  Saving a destination that never synced starts the first sync.
+  Configured, an overview: status, **Sync now**, edit, **Test the server
+  again**, **Disconnect** (removes the rows and the password, touches no
+  file).
+- **Status icon** (`SyncStatusButton`) in the Files app bar (phone) and
+  the tree footer (desktop), only with a destination: a tap syncs, or
+  opens the panel when the last run left conflicts, failures or an
+  abort; a long press always opens it. A progress strip sits under the
+  tree while a run goes.
+- **Panel** (`showSyncPanel`): the last result, conflicts with
+  **Resolve**, failed paths, **Sync now** / **Try again**, and
+  **Settings** (**Update password** after an authentication failure).
+- **Conflicts** (`SyncConflictScreen`), whole-file for now:
+  `SyncEngine.conflictTexts` feeds a read-only `DiffView` (server −,
+  device +); **Keep this device's** uploads with `If-Match`, **Keep the
+  server's** downloads with a `sync` snapshot. Both record the row and
+  pin the base. Non-text files get the two buttons only. The hunk merge
+  (step 7) replaces the diff in the same screen.
+- `runSyncFromUi` saves open editors, answers the engine's `confirm`
+  with the first-sync summary or the mass-deletion question, and shows a
+  snackbar only when there is something to say (files trashed here,
+  conflicts, an abort).
+
+The trigger options (`auto_sync`, `interval_seconds`, `wifi_only`) are
+stored but have no rows yet: they appear with the triggers in step 6.
+
 ### Queue and triggers
 
 `sync_ops` in `AppDatabase` persists across restarts; ops on the same
