@@ -63,7 +63,7 @@ final class LithuanianStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Laužas';
+  String get trashTitle => 'Šiukšlinė';
   @override
   String get trashSubtitle =>
       'Ištrinti elementai perkeliama į .trash/ (išjungta = nevildinamas '
@@ -968,7 +968,7 @@ final class LithuanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Pradinio ekrano valdikliai prieinami Android';
   @override
-  String get movedToTrash => 'Perkeltas į lažvus';
+  String get movedToTrash => 'Perkelta į šiukšlinę';
   @override
   String get deletedMessage => 'Ištrintas';
   @override
@@ -1011,12 +1011,12 @@ final class LithuanianStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Laužas tuščias';
+  String get trashEmpty => 'Šiukšlinė tuščia';
   @override
-  String get trashEmptyAction => 'Ištuštinti lažvus';
+  String get trashEmptyAction => 'Ištuštinti šiukšlinę';
   @override
   String get trashEmptyConfirm =>
-      'Tai nevildinamai ištrins viską, kas yra lažvuose, įskaitant '
+      'Tai negrįžtamai ištrins viską, kas yra šiukšlinėje, įskaitant '
       'elementus, kurių Niman ten neįdėjo.';
   @override
   String trashDeleteConfirm(String name) =>
