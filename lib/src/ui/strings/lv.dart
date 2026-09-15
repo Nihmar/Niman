@@ -114,25 +114,24 @@ final class LatvianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Atjauninājumi';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automātiskie atjauninājumi';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Pārbaudīt GitHub Releases palaišanas brīdī un ik pēc 6 stundām';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Pārbaudīt atjauninājumus';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Pieejama Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Jums ir jaunākā Niman versija';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Neizdevās pārbaudīt atjauninājumus';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instalētājs palaists';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -252,48 +251,48 @@ final class LatvianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Mainīt elementa secību';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Vēl nav ierakstu';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Ierakstīt';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Apturēt';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Atskaņot';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Apturēt atskaņošanu';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Dzēst ierakstu';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importēt audio failu';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Notiek ierakstīšana…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Notiek atskaņošana';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Nav atļaujas izmantot mikrofonu — tā nepieciešama ierakstīšanai.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Jauna balss piezīme';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mans ieraksts';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Rādīt ierakstus';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Uzrakstiet piezīmi…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Sūtīt';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Pārsaukt ierakstu';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Aprakstiet šo ierakstu…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Rediģēt aprakstu';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Dzēst piezīmi';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Rediģēt piezīmi';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -305,7 +304,7 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutNewList => 'Jauns saraksts';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Jauna balss piezīme';
   @override
   String get shortcutToggleSidebar => 'Rādīt vai paslēpt filtru';
   @override

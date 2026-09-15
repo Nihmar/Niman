@@ -117,23 +117,23 @@ final class GermanStrings extends Strings {
   @override
   String get settingsSectionUpdates => 'Updates';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatische Updates';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'GitHub Releases beim Start und alle 6 Stunden prüfen';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Nach Updates suchen';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version ist verfügbar';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman ist auf dem neuesten Stand';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Update-Prüfung fehlgeschlagen';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Update gespeichert unter $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Installationsprogramm gestartet';
   @override
   String get settingsSectionDiagnostics => 'Diagnose';
   @override
@@ -257,48 +257,48 @@ final class GermanStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Eintrag umsortieren';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Noch keine Aufnahmen';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Aufnehmen';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stopp';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Abspielen';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Wiedergabe stoppen';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Aufnahme löschen';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Audiodatei importieren';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Aufnahme läuft…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Wiedergabe läuft';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonzugriff verweigert — für Aufnahmen erforderlich.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Neue Sprachnotiz';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Meine Aufnahme';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Aufnahmen anzeigen';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Notiz schreiben…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Senden';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Aufnahme umbenennen';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Beschreibe diese Aufnahme…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Beschreibung bearbeiten';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Notiz löschen';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Notiz bearbeiten';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -310,7 +310,7 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutNewList => 'Neue Liste';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Neue Sprachnotiz';
   @override
   String get shortcutToggleSidebar => 'Dateibaum anzeigen oder ausblenden';
   @override

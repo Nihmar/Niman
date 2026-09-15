@@ -108,25 +108,23 @@ final class ChineseStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => '更新';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => '自动更新';
   @override
-  String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+  String get autoUpdateSubtitle => '启动时及每 6 小时检查 GitHub Releases';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => '检查更新';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version 已发布';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman 已是最新版本';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => '检查更新失败';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => '更新已保存到 $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => '安装程序已启动';
   @override
   String get settingsSectionDiagnostics => '诊断';
   @override
@@ -239,48 +237,47 @@ final class ChineseStrings extends Strings {
   @override
   String get listDragHandleLabel => '重新排列条目';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => '还没有录音';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => '录音';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => '停止';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => '播放';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => '停止播放';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => '删除录音';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => '导入音频文件';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => '正在录音…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => '正在播放';
   @override
-  String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+  String get audioPermissionDenied => '麦克风权限被拒绝 — 录音需要此权限。';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => '新建语音笔记';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => '我的录音';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => '显示录音';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => '添加备注…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => '发送';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => '重命名录音';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => '描述此录音…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => '编辑描述';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => '删除备注';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => '编辑备注';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -292,7 +289,7 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutNewList => '新建列表';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => '新建语音笔记';
   @override
   String get shortcutToggleSidebar => '显示或隐藏文件树';
   @override

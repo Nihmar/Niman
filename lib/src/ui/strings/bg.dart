@@ -118,25 +118,24 @@ final class BulgarianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Клавишни комбинации';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Актуализации';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Автоматични актуализации';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Проверява GitHub Releases при стартиране и на всеки 6 часа';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Провери за актуализации';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version е наличен';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman е актуален';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Проверката за актуализации е неуспешна';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Актуализацията е запазена в $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Инсталаторът е стартиран';
   @override
   String get settingsSectionDiagnostics => 'Диагностика';
   @override
@@ -257,48 +256,48 @@ final class BulgarianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Сменете реда на елементите';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Все още няма записи';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Запиши';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Спри';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Пусни';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Спри възпроизвеждането';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Изтрий записа';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Импортирай аудиофайл';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Записване…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Възпроизвеждане';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Достъпът до микрофона е отказан — нужен е за записване.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Нова гласова бележка';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Моят запис';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Покажи записите';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Напишете бележка…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Изпрати';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Презаглави записа';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Опишете този запис…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Редактирай описанието';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Изтрий бележката';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Редактирай бележката';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -310,7 +309,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutNewList => 'Нов списък';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Нова гласова бележка';
   @override
   String get shortcutToggleSidebar => 'Покажи или скрий филтъра';
   @override

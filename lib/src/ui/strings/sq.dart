@@ -115,25 +115,25 @@ final class AlbanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Përditësime';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Përditësime automatike';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontrollon GitHub Releases në nisje dhe çdo 6 orë';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Kontrollo për përditësime';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version është i disponueshëm';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman është i përditësuar';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kontrolli i përditësimeve dështoi';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Përditësimi u ruajt në $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instaluesi u nis';
   @override
   String get settingsSectionDiagnostics => 'Diagnostikimi';
   @override
@@ -256,48 +256,48 @@ final class AlbanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Rirrendni elementin';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => "Ende s'ka regjistrime";
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Regjistro';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Ndalo';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Luaj';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Ndalo luajtjen';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Fshi regjistrimin';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importo një skedar audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Po regjistrohet…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Po luhet';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Leja për mikrofonin u refuzua — nevojitet për regjistrim.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Shënim zanor i ri';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Regjistrimi im';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Shfaq regjistrimet';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Shkruaj një shënim…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Dërgo';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Riemërto regjistrimin';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Përshkruaj këtë regjistrim…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Ndrysho përshkrimin';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Fshi shënimin';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Ndrysho shënimin';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -309,7 +309,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Listë e re';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Shënim zanor i ri';
   @override
   String get shortcutToggleSidebar => 'Shfaq ose fsheh pemën e skedarëve';
   @override
