@@ -128,8 +128,11 @@ void main() {
       expect(find.text('08:24'), findsOneWidget);
       expect(find.byKey(const Key('history-sync-base')), findsOneWidget);
       expect(find.text('before editing'), findsNWidgets(2));
-      // v2 against v1 added one line.
-      expect(find.text('+1 −0'), findsOneWidget);
+      // Each row counts against the current note ("current\ntext\n"), as
+      // the version screen does: v3 "old\ntext\n" is one line swapped.
+      expect(find.text('+1 −1'), findsOneWidget);
+      expect(find.text('+2 −1'), findsOneWidget);
+      expect(find.text('+2 −2'), findsOneWidget);
       // The pinned base is not counted against the limit.
       expect(find.textContaining('2 of 10 versions kept'), findsOneWidget);
 

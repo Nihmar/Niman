@@ -21,7 +21,8 @@ replace — never a copy of what is already on screen:
 - right before a restore, before a library-wide replace, and (with sync)
   before a download overwrites the note.
 
-A version identical to the newest one is not kept twice. Autosave runs
+A version identical to the newest one is not kept twice, and an empty
+note (one just created) has nothing to keep. Autosave runs
 every half second, so without the interval ten versions would last five
 seconds.
 
@@ -33,7 +34,8 @@ out-of-range values in a hand-edited file read back as the defaults.
 **Browse and restore.** Long-press a note in the tree (right-click on
 desktop) or open the note's ⋮ menu and pick **History**. Versions are
 listed newest first, grouped by day, each with why it was kept and how
-many lines it added and removed. Open one to see what changed against
+many lines differ from the note as it is now (`+` added since, `−`
+gone since) — the same comparison the version opens on. Open one to see what changed against
 the current note (removed lines in red, added in green; tap a folded
 row to show the unchanged lines) or to read its whole text. **Restore
 this version** keeps the current text as a version first, then puts the
