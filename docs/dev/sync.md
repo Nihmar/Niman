@@ -195,6 +195,7 @@ every file look new on both sides.
 | `remote_size` | int | |
 | `remote_mtime_ms` | int | `getlastmodified` (second resolution) |
 | `remote_file_id` | text, nullable | `oc:fileid` when offered |
+| `remote_unverified` | bool | the listing could not rule out a same-second rewrite (no ETags, mtime = the server's current second): the next reconcile hashes the remote |
 | `base_version` | int, nullable | the `.history` version pinned as `syncBase`; null for attachments and when history is off |
 | `synced_at_ms` | int | |
 
@@ -214,12 +215,47 @@ Reconcile compares disk now and remote now against the row:
 | deleted | same | delete remote |
 | same | deleted | move the local file to `.trash/` |
 | deleted | changed | download again (the edit wins) |
+| changed | deleted | upload again (the edit wins) |
+| deleted | deleted | drop the row |
 | new (no row) | absent | upload |
 | absent | new (no row) | download |
 | new | new | same sha: record only; different: 2-way conflict |
 
 The first sync (empty table) compares by content only and **never
 deletes** on either side; it shows a summary before it starts.
+
+#### Reconcile (`lib/src/sync/reconcile.dart`)
+
+Pure functions, no I/O and no clock, one unit test per row above:
+
+- **Local verdict:** size + mtime equal to the row → unchanged without
+  reading the file; otherwise the sha256 decides. A new file needs its
+  hash too (the upload records it, move pairing uses it).
+- **Remote verdict:** with file ETags (probed) on both the row and the
+  listing, the ETag decides. Otherwise size + `getlastmodified`, except
+  when they cannot rule out a same-second rewrite (`remote_unverified`,
+  or a server that sends no mtime or size): then the downloaded
+  content's sha256 decides.
+- A side that needs a hash comes back as `hashLocal` / `hashRemote`; the
+  engine hashes and plans again until nothing waits for one.
+- Two more outcomes: `record` (content agrees but the row is stale —
+  a touched file, a cleared doubt) and the table's actions carry their
+  write guards: `If-Match` with the remote ETag, `If-None-Match: *` for
+  a path that should not exist, or `checkRemoteFirst` when the server
+  honors neither.
+- **Renames:** a `deleteRemote` of A and an `upload` of a new B with A's
+  agreed content (unique on both sides) become one `moveRemote` when the
+  server has `MOVE`; a `trashLocal` of A and a `download` of a new B with
+  A's `oc:fileid` become one `moveLocal`.
+- **Mass-deletion guard:** a plan that would delete or trash more than
+  10 files and more than half of the synced rows is more likely a wrong
+  URL, an unmounted share or an emptied folder. The engine stops and asks
+  before carrying it out.
+
+**What syncs:** every file except dot entries (`.trash/`, `.history/`,
+temp files, a user's `.git/`) and `Thumbs.db` / `desktop.ini` — with two
+exceptions inside `.niman/`: `settings.json` and `counters.json`, which
+belong on every device. Folders get no rows (see above).
 
 Moving a note to the trash deletes it remotely; other devices then move
 their copy into their own trash. `.trash/` and `.history/` never sync.
