@@ -267,7 +267,7 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
 
   @override
-  Future<bool> get autoUpdateEnabled async => true;
+  Future<bool> get autoUpdateEnabled async => false;
 
   @override
   Future<void> setAutoUpdateEnabled({required bool enabled}) async {}

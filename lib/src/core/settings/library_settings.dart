@@ -125,10 +125,10 @@ final class AppSettingsRepo {
   }
 
   /// Whether the app checks GitHub Releases for updates (issue #81,
-  /// default true). The manual check in Settings works regardless.
+  /// default false). The manual check in Settings works regardless.
   Future<bool> autoUpdateEnabled() async {
     final rows = await _db.select(_db.appSettings).get();
-    return rows.isEmpty || rows.first.autoUpdateEnabled;
+    return rows.isNotEmpty && rows.first.autoUpdateEnabled;
   }
 
   /// Persists the auto-update toggle.

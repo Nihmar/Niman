@@ -57,7 +57,7 @@ class $AppSettingsTable extends AppSettings
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("auto_update_enabled" IN (0, 1))',
     ),
-    defaultValue: const Constant(true),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _lastUpdateCheckMsMeta = const VerificationMeta(
     'lastUpdateCheckMs',
@@ -355,8 +355,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// Whether the app checks GitHub Releases for updates (issue #81).
   ///
-  /// On by default: the check is a quiet status, never a dialog. The
-  /// manual "Check for updates" row in Settings works regardless.
+  /// Off by default: the user opts into the launch + six-hourly check.
+  /// The manual "Check for updates" row in Settings works regardless.
   final bool autoUpdateEnabled;
 
   /// Last update-check time, milliseconds since epoch; null until the

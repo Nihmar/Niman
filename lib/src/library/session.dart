@@ -238,7 +238,7 @@ abstract interface class LibrarySession {
   Future<void> setDebugLogsEnabled({required bool enabled});
 
   /// Whether the app checks GitHub Releases for updates (issue #81,
-  /// default true). The manual check in Settings works regardless.
+  /// default false). The manual check in Settings works regardless.
   Future<bool> get autoUpdateEnabled;
 
   /// Sets (and persists) the auto-update toggle.
