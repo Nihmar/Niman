@@ -1280,4 +1280,12 @@ final class HindiStrings extends Strings {
   String get actionRetry => 'फिर से कोशिश करें';
   @override
   String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying =>
+      'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      '$progress पर रुका हुआ';
+  @override
+  String get actionResume => 'फिर शुरू करें';
 }

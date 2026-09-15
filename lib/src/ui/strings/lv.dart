@@ -1300,4 +1300,11 @@ final class LatvianStrings extends Strings {
   String get actionRetry => 'Mēģināt vēlreiz';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Savienojums pārtrūka, notiek atkārtots mēģinājums…';
+  @override
+  String transcriptionModelInterrupted(String progress) => 'Pauzēts: $progress';
+  @override
+  String get actionResume => 'Turpināt';
 }

@@ -1320,4 +1320,12 @@ final class GalicianStrings extends Strings {
   String get actionRetry => 'Tentar de novo';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Perdeuse a conexión, tentando de novo…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa en $progress';
+  @override
+  String get actionResume => 'Retomar';
 }

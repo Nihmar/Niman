@@ -1315,4 +1315,12 @@ final class FinnishStrings extends Strings {
   String get actionRetry => 'Yritä uudelleen';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Yhteys katkesi, yritetään uudelleen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Keskeytetty: $progress';
+  @override
+  String get actionResume => 'Jatka';
 }

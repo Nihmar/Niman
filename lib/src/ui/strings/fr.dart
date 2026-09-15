@@ -1345,4 +1345,12 @@ final class FrenchStrings extends Strings {
   String get actionRetry => 'Réessayer';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Connexion perdue, nouvelle tentative…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pause à $progress';
+  @override
+  String get actionResume => 'Reprendre';
 }

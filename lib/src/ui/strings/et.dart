@@ -1283,4 +1283,12 @@ final class EstonianStrings extends Strings {
   String get actionRetry => 'Proovi uuesti';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Ühendus katkes, proovitakse uuesti…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Peatatud: $progress';
+  @override
+  String get actionResume => 'Jätka';
 }

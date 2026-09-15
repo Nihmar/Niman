@@ -1309,4 +1309,11 @@ final class SwedishStrings extends Strings {
   String get actionRetry => 'Försök igen';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Anslutningen bröts, försöker igen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pausad vid $progress';
+  @override
+  String get actionResume => 'Återuppta';
 }

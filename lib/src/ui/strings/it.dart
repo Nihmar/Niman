@@ -1313,4 +1313,12 @@ final class ItalianStrings extends Strings {
   String get actionRetry => 'Riprova';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Connessione persa, nuovo tentativo…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'In pausa a $progress';
+  @override
+  String get actionResume => 'Riprendi';
 }

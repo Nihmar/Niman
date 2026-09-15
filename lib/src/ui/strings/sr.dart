@@ -1310,4 +1310,12 @@ final class SerbianStrings extends Strings {
   String get actionRetry => 'Покушај поново';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Веза је прекинута, поновни покушај…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Паузирано на $progress';
+  @override
+  String get actionResume => 'Настави';
 }

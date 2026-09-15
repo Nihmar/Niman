@@ -1306,4 +1306,12 @@ final class UkrainianStrings extends Strings {
   String get actionRetry => 'Спробувати ще раз';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      "З'єднання втрачено, повторна спроба…";
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Призупинено на $progress';
+  @override
+  String get actionResume => 'Продовжити';
 }

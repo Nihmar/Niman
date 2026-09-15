@@ -1355,4 +1355,11 @@ final class GreekStrings extends Strings {
   String get actionRetry => 'Δοκιμή ξανά';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Σε παύση στο $progress';
+  @override
+  String get actionResume => 'Συνέχιση';
 }

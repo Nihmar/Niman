@@ -1327,4 +1327,12 @@ final class AlbanianStrings extends Strings {
   String get actionRetry => 'Provo sërish';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Lidhja u ndërpre, po provohet sërish…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Në pauzë te $progress';
+  @override
+  String get actionResume => 'Vazhdo';
 }

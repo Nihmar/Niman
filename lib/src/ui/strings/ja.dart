@@ -1214,4 +1214,10 @@ final class JapaneseStrings extends Strings {
   String get actionRetry => '再試行';
   @override
   String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => '接続が切れました。再試行しています…';
+  @override
+  String transcriptionModelInterrupted(String progress) => '一時停止中：$progress';
+  @override
+  String get actionResume => '再開';
 }

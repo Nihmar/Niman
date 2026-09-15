@@ -1335,4 +1335,12 @@ final class GermanStrings extends Strings {
   String get actionRetry => 'Erneut versuchen';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Verbindung unterbrochen, neuer Versuch…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pausiert bei $progress';
+  @override
+  String get actionResume => 'Fortsetzen';
 }

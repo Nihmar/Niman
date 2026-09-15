@@ -54,7 +54,7 @@ final class _TranscriptionModelsScreenState
             switch (models.stateOf(model)) {
               case ModelInstalled():
                 installed.add(model);
-              case ModelDownloading():
+              case ModelDownloading() || ModelFailed(resumable: true):
                 downloading.add(model);
               case ModelAbsent() || ModelFailed():
                 available.add(model);

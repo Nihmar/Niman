@@ -614,6 +614,9 @@ abstract base class Strings {
   String transcriptionModelDeleteBody(String size);
   String get transcriptionModelFailed;
   String get actionRetry;
+  String get transcriptionModelRetrying;
+  String transcriptionModelInterrupted(String progress);
+  String get actionResume;
 
   /// The decimal separator of the language's numbers (`1.5` / `1,5`).
   String get decimalSeparator;

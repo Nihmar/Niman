@@ -1296,4 +1296,11 @@ final class EnglishStrings extends Strings {
   String get actionRetry => 'Retry';
   @override
   String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => 'Connection lost, trying again…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Paused at $progress';
+  @override
+  String get actionResume => 'Resume';
 }

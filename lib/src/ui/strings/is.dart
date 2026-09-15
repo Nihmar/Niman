@@ -1299,4 +1299,11 @@ final class IcelandicStrings extends Strings {
   String get actionRetry => 'Reyna aftur';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Tengingin rofnaði, reynt aftur…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Í bið við $progress';
+  @override
+  String get actionResume => 'Halda áfram';
 }

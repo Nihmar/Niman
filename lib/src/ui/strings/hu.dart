@@ -1313,4 +1313,12 @@ final class HungarianStrings extends Strings {
   String get actionRetry => 'Újra';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Megszakadt a kapcsolat, újrapróbálkozás…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Szüneteltetve: $progress';
+  @override
+  String get actionResume => 'Folytatás';
 }

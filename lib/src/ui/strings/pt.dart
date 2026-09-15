@@ -1317,4 +1317,12 @@ final class PortugueseStrings extends Strings {
   String get actionRetry => 'Tentar novamente';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Conexão perdida, tentando novamente…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pausado em $progress';
+  @override
+  String get actionResume => 'Retomar';
 }

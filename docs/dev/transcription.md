@@ -15,8 +15,9 @@ Code: `lib/src/transcription/` (logic) and `lib/src/ui/transcription/`
 | File | Role |
 |------|------|
 | `transcription_model.dart` | The catalog: multilingual tiny, base, small, medium, large-v3 with their published sizes. Android hides large-v3 and flags medium as slow. |
-| `model_files.dart` | Disk state. A model is installed when `<model dir>/ggml-<name>.bin` exists; the scan also removes `.part` files no download owns. |
-| `model_download.dart` | One download in a spawned isolate: HTTP stream to `<file>.part`, progress every 250 ms, rename only when the byte count matches `Content-Length`, 30 s stall timeout, cancel kills the isolate and removes the partial file. |
+| `model_files.dart` | Disk state. A model is installed when `<model dir>/ggml-<name>.bin` exists; a `<file>.part` is an interrupted download, kept for resuming. |
+| `model_download.dart` | One download attempt in a spawned isolate: HTTP stream to `<file>.part` (resumed with `Range: bytes=<size>-` when the file exists), progress every 250 ms, rename only when the byte count matches the full size, 30 s stall timeout. A failure keeps the partial file and says whether it is transient; cancel kills the isolate and removes it. |
+| `model_downloader.dart` | Attempts, retries and resumes: transient failures (network, timeout, 5xx, a cut-off body) retry after 2, 5, 10, 20, 30 s from the bytes on disk; when those run out the model is paused with its bytes kept. |
 | `transcription_settings.dart`, `transcription_settings_store.dart` | Default model and language, stored as `transcription.json` in the model directory (temp write + rename, off the UI isolate). |
 | `transcription_models.dart` | `TranscriptionModels` (ChangeNotifier) behind `transcriptionModelsProvider`: per-model state, downloads that outlive the page, default and language. |
 
@@ -26,6 +27,14 @@ Code: `lib/src/transcription/` (logic) and `lib/src/ui/transcription/`
 - **Settings live next to the models, not in `AppDatabase`.** They
   describe the files on this device, and the schema's next migration
   (v22) belongs to the sync work; a JSON file keeps the two independent.
+- **Leaving the app mid-download (Android):** a process that is not in
+  the foreground is frozen within seconds (and some vendors cut its
+  network), so the connection drops. The download does not start over:
+  the retry resumes from the `.part` once the app runs again, and
+  `AppLifecycleListener.onResume` restarts paused downloads. It does not
+  continue *while* the app is in the background; that needs a foreground
+  service. Hugging Face honors `Range` through its CDN redirect (`206`
+  with `Content-Range`, checked 2026-09-15).
 - **Default model:** the first model to finish downloading becomes the
   default when none is set; deleting the default hands it to the smallest
   model left, or none.
@@ -35,11 +44,14 @@ Code: `lib/src/transcription/` (logic) and `lib/src/ui/transcription/`
 - **UI:** Settings → Transcription has *Model* (opens the models page)
   and *Language* (a choice dialog). The page groups Downloaded /
   Downloading / Available; tapping a downloaded row makes it the default,
-  delete asks first, a failed download offers Retry.
+  delete asks first, a failed download offers Retry, a paused one shows
+  the bytes kept with Resume (and a discard button), and a download
+  waiting to retry reads "Connection lost, trying again…".
 - **Logs** (`[transcription]`): settings load/save time, directory scan
-  (time, sizes, stale `.part` removed), download headers latency, every
-  10 %, total time and MB/s, cancel and failure time, delete time and
-  bytes freed.
+  (time, installed and partial sizes), download start with bytes on disk,
+  headers latency and resume offset, every 10 %, each failed attempt with
+  its reason and retry delay, give-up with bytes kept, total time and
+  MB/s of the last attempt, cancel time, delete time and bytes freed.
 
 ## Phase 0 spike (2026-09-15)
 

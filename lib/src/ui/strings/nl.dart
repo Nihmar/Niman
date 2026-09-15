@@ -1322,4 +1322,12 @@ final class DutchStrings extends Strings {
   String get actionRetry => 'Opnieuw proberen';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Verbinding verbroken, nieuwe poging…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Gepauzeerd bij $progress';
+  @override
+  String get actionResume => 'Hervatten';
 }
