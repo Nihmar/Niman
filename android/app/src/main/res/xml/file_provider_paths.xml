@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Auto-update APKs (issue #81): downloaded into the app support
+         directory's updates/ folder and shared read-only with the system
+         package installer. -->
+    <files-path name="updates" path="updates/" />
+</paths>

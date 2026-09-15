@@ -7,9 +7,11 @@ import android.net.Uri
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 class MainActivity : FlutterActivity() {
     private var pendingResult: MethodChannel.Result? = null
@@ -44,6 +46,14 @@ class MainActivity : FlutterActivity() {
                         result.success(openBatterySettings())
                     "openNotificationSettings" ->
                         result.success(openNotificationSettings())
+                    else -> result.notImplemented()
+                }
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "niman/update")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "installApk" ->
+                        result.success(installApk(call.argument("path")))
                     else -> result.notImplemented()
                 }
             }
@@ -116,6 +126,34 @@ class MainActivity : FlutterActivity() {
         } catch (e: ActivityNotFoundException) {
             false
         }
+    }
+
+    /**
+     * Hands the downloaded update [path] to the system package installer
+     * (issue #81).
+     *
+     * The APK lives in the app support directory, which no other app can
+     * read, so it is shared read-only through FileProvider (see
+     * file_provider_paths.xml). False when the file is gone, outside the
+     * shared folder, or no installer handles the intent — the user still
+     * has to confirm the install (and the "unknown apps" allowlist) on
+     * the system screen.
+     */
+    private fun installApk(path: String?): Boolean {
+        if (path.isNullOrEmpty()) return false
+        val file = File(path)
+        if (!file.isFile) return false
+        val uri = try {
+            FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        } catch (e: IllegalArgumentException) {
+            return false
+        }
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        return open(intent)
     }
 
     /**
