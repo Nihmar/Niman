@@ -53,6 +53,48 @@ Code: `lib/src/transcription/` (logic) and `lib/src/ui/transcription/`
   its reason and retry delay, give-up with bytes kept, total time and
   MB/s of the last attempt, cancel time, delete time and bytes freed.
 
+## Transcribe action (phase 2)
+
+A clip's ⋮ menu has **Transcribe**, with the model and language on its
+second line. The work runs in the app-wide queue, the bubble shows its
+progress, and the text goes into the clip's description.
+
+| File | Role |
+|------|------|
+| `transcription/wav_convert.dart`, `wav_resampler.dart` | WAV (PCM 8/16/24/32, float 32/64, extensible, any channels) to 16 kHz mono PCM16 in an isolate, streamed in blocks. Windowed-sinc filter, cutoff at 90 % of the lower Nyquist, 256 precomputed phases. |
+| `transcription/clip_preparation.dart` | The clip copied into a temp work folder: converted when WAV; on Android other formats are copied for the package's FFmpeg; elsewhere refused. |
+| `transcription/speech_transcriber.dart` | `SpeechTranscriber` seam; `WhisperTranscriber` (keeps the model loaded, suppresses non-speech tokens, turns the package's `null` into an error); `cleanTranscript` drops `[...]` markers and joins segments. |
+| `transcription/transcription_job.dart`, `transcription_queue.dart` | `TranscriptionQueue` behind `transcriptionQueueProvider`: one job at a time, jobs wait for a downloading model, a cancelled running job's result is discarded, the model is released when the queue empties, finished jobs wait until their note takes them. |
+| `ui/kinds/audio_clip_menu.dart` | The clip menu, split out of the bubble, with the Transcribe item. |
+| `ui/kinds/audio_transcription_strip.dart` | The strip under the player: downloading model %, queued, preparing, transcribing % (with Cancel). |
+| `ui/kinds/audio_transcription_flow.dart` | Per open note: picks the model (sheet the first time), queues the clip, builds the strips, writes results with a snackbar and Undo. |
+| `ui/transcription/model_picker_sheet.dart` | First-time sheet: models with size and trade-off (base recommended), language, "Download and transcribe". |
+
+- **Where the text goes:** an empty description is replaced; an existing
+  one keeps its text, then a `> ` blank line, then the transcript. Undo
+  restores the previous description only while the description is still
+  what was written. The clip is found again by its embed target, so edits
+  made while the job ran are kept; if the clip is gone the text is
+  dropped (logged).
+- **Progress:** whisper reports 2–3 steps, so the strip blends them with
+  an estimate (clip length × the last real-time factor of that model;
+  0.15 desktop, 0.6 phone before the first job), capped at 95 %.
+- **Note closed mid-job:** the job finishes in the queue and its text is
+  applied the next time a view of that note is open (in memory only).
+- **No `ProviderScope`** (widget tests that build the note directly): the
+  action is hidden.
+- **Logs** (`[transcription]`): queued job and queue length; conversion
+  (input format, bytes, read / filter / write / total ms, audio length);
+  whisper wall time, real-time factor, estimate, progress steps, raw and
+  kept characters; cancellations; failures with reason; text written
+  (chars, replaced or appended, ms) or dropped; undo; model release time.
+
+### Real engine check (Windows, base, 2026-09-15)
+
+The 30 s Italian clip as the app records it (44.1 kHz stereo) through
+`convertWavForWhisper`: conversion 120 ms (filter 98 ms), whisper 2.4 s
+warm, transcript as accurate as the native 16 kHz file.
+
 ## Phase 0 spike (2026-09-15)
 
 Harness: [`tool/whisper_spike.dart`](../../tool/whisper_spike.dart). It
