@@ -1155,4 +1155,90 @@ final class DutchStrings extends Strings {
   String get changelogEmpty => 'Geen wijzigingen beschikbaar';
   @override
   String changelogWhatsNew(String version) => 'Nieuw in versie $version';
+
+  // Note history (issues #13, #55, #67): English until translated.
+  @override
+  String get noteHistoryTitle => 'History';
+  @override
+  String get noteMenuTooltip => 'Note actions';
+  @override
+  String get historyCurrentVersion => 'Current version';
+  @override
+  String get historyCurrentSubtitle => 'The note as it is now';
+  @override
+  String get historyToday => 'Today';
+  @override
+  String get historyYesterday => 'Yesterday';
+  @override
+  String get historyReasonSession => 'before editing';
+  @override
+  String get historyReasonInterval => 'while editing';
+  @override
+  String get historyReasonRestore => 'before restore';
+  @override
+  String get historyReasonSync => 'before sync';
+  @override
+  String get historyReasonReplace => 'before replace';
+  @override
+  String get historyReasonUnknown => 'recovered';
+  @override
+  String get historySyncBase => 'sync base';
+  @override
+  String get historyEmpty =>
+      'No versions yet. Niman keeps one when you start editing the note, '
+      'then at most one every few minutes while you write.';
+  @override
+  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  @override
+  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  @override
+  String get historyOff =>
+      'History is off for this library (Settings, Library).';
+  @override
+  String get historyLoadFailed => 'Could not read the history';
+  @override
+  String get historyCompareSubtitle => 'Compared with the current version';
+  @override
+  String get historyTabChanges => 'Changes';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Same text as the current version.';
+  @override
+  String get historyRestoreAction => 'Restore this version';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restore the version of $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'The current text is kept in the history first, so you can always '
+      'go back.';
+  @override
+  String get historyRestoreConfirm => 'Restore';
+  @override
+  String historyRestored(String when) => 'Restored the version of $when';
+  @override
+  String get historyRestoreFailed => 'Could not restore the version';
+  @override
+  String get actionUndo => 'Undo';
+  @override
+  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Line $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  @override
+  String get historyVersionsTitle => 'Versions to keep';
+  @override
+  String get historyVersionsSubtitle => 'Per note, in .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  @override
+  String get historyIntervalTitle => 'New version at most every';
+  @override
+  String get historyIntervalSubtitle =>
+      'While you write; starting to edit a note always keeps one';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

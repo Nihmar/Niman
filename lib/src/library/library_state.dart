@@ -889,6 +889,31 @@ final class LibraryController implements LibrarySession {
     );
   }
 
+  @override
+  Future<int> get historyVersions async => (await _library).historyVersions;
+
+  @override
+  Future<void> setHistoryVersions(int versions) async {
+    _log.info('history versions set to $versions');
+    await _editLibrary(
+      (c) => c.copyWith(historyVersions: normalizeHistoryVersions(versions)),
+    );
+  }
+
+  @override
+  Future<int> get historyIntervalMinutes async =>
+      (await _library).historyIntervalMinutes;
+
+  @override
+  Future<void> setHistoryIntervalMinutes(int minutes) async {
+    _log.info('history interval set to $minutes min');
+    await _editLibrary(
+      (c) => c.copyWith(
+        historyIntervalMinutes: normalizeHistoryIntervalMinutes(minutes),
+      ),
+    );
+  }
+
   /// The stored editor-toolbar layout (empty = the shipped toolbar).
   @override
   Future<String> get editorToolbar async => (await _library).editorToolbar;

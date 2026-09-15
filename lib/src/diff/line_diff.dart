@@ -284,7 +284,14 @@ final class DiffHunk {
 /// side) and the unchanged runs between them.
 @immutable
 final class DiffSummary {
-  const new _(this.hunks, this.gaps, this.added, this.removed);
+  const new _(
+    this.lines,
+    this.ranges,
+    this.hunks,
+    this.gaps,
+    this.added,
+    this.removed,
+  );
 
   /// Groups [lines] into hunks; unchanged runs longer than twice
   /// [context] between hunks are folded into gaps.
@@ -299,7 +306,9 @@ final class DiffSummary {
       if (l.kind == DiffKind.added) added++;
       if (l.kind == DiffKind.removed) removed++;
     }
-    if (changed.isEmpty) return const DiffSummary._([], [], 0, 0);
+    if (changed.isEmpty) {
+      return DiffSummary._(lines, const [], const [], const [], 0, 0);
+    }
     final ranges = <(int, int)>[];
     var start = (changed.first - context).clamp(0, lines.length);
     var end = (changed.first + context + 1).clamp(0, lines.length);
@@ -321,8 +330,14 @@ final class DiffSummary {
       for (var r = 1; r < ranges.length; r++) ranges[r].$1 - ranges[r - 1].$2,
       lines.length - ranges.last.$2,
     ];
-    return DiffSummary._(hunks, gaps, added, removed);
+    return DiffSummary._(lines, ranges, hunks, gaps, added, removed);
   }
+
+  /// Every line of the diff, unchanged ones included.
+  final List<DiffLine> lines;
+
+  /// Each hunk's `(start, end)` indices into [lines], end exclusive.
+  final List<(int, int)> ranges;
 
   /// The hunks, in order.
   final List<DiffHunk> hunks;

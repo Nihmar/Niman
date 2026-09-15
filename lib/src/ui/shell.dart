@@ -28,10 +28,12 @@ import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
+import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
@@ -1651,6 +1653,13 @@ final class _LibraryShellState extends State<_LibraryShell>
           label: note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
           value: 'pin',
         ),
+      if (!note.isDir)
+        (
+          key: const Key('menu-history'),
+          icon: Icons.history,
+          label: AppStrings.noteHistoryTitle,
+          value: 'history',
+        ),
       (
         key: const Key('menu-rename'),
         icon: Icons.edit,
@@ -1711,6 +1720,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             ),
           ),
         );
+      case 'history':
+        await _openHistory(note.path);
       case 'rename':
         await _rename(note.path);
       case 'move':
@@ -1719,6 +1730,34 @@ final class _LibraryShellState extends State<_LibraryShell>
         await _delete(note.path);
     }
   }
+
+  /// Opens the history of the note at [path]; a restore reloads the open
+  /// note when it is that one.
+  Future<void> _openHistory(String path) => openNoteHistory(
+    context,
+    session: widget.controller,
+    unsaved: widget.unsavedTracker,
+    path: path,
+    onRestored: () {
+      if (!mounted || _selected != path) return;
+      setState(() => _noteReloadToken++);
+    },
+  );
+
+  /// The open note's ⋮ menu (mockup H2), on the phone's note bar and in
+  /// the wide layout's editor header.
+  Widget _noteMenu() => NoteMenuButton(
+    onSelected: (action) {
+      final path = _selected;
+      if (path == null) return;
+      unawaited(switch (action) {
+        NoteMenuAction.history => _openHistory(path),
+        NoteMenuAction.rename => _rename(path),
+        NoteMenuAction.move => _move(path),
+        NoteMenuAction.delete => _delete(path),
+      });
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1818,6 +1857,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                                         if (_previewVisible)
                                           _previewFullScreenAction(),
                                       ],
+                                      _noteMenu(),
                                     ],
                                   ),
                             body: Stack(
@@ -2740,6 +2780,7 @@ final class _LibraryShellState extends State<_LibraryShell>
           ],
           const Spacer(),
           ..._kindActions,
+          _noteMenu(),
         ],
       ),
     );

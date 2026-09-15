@@ -406,6 +406,27 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<int> get historyVersions async => _config.historyVersions;
+
+  @override
+  Future<void> setHistoryVersions(int versions) async {
+    _config = _config.copyWith(
+      historyVersions: normalizeHistoryVersions(versions),
+    );
+  }
+
+  @override
+  Future<int> get historyIntervalMinutes async =>
+      _config.historyIntervalMinutes;
+
+  @override
+  Future<void> setHistoryIntervalMinutes(int minutes) async {
+    _config = _config.copyWith(
+      historyIntervalMinutes: normalizeHistoryIntervalMinutes(minutes),
+    );
+  }
+
+  @override
   Future<String> get editorToolbar async => _config.editorToolbar;
 
   @override
