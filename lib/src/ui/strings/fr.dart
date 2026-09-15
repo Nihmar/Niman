@@ -1026,7 +1026,7 @@ final class FrenchStrings extends Strings {
   @override
   String get listFolderTitle => 'Dossier des listes';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Dossier des pièces jointes';
 
   // Trash (M1).
   @override

@@ -994,7 +994,7 @@ final class LatvianStrings extends Strings {
   @override
   String get listFolderTitle => 'Sarakstu katalogs';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Pielikumu katalogs';
 
   // Trash (M1).
   @override

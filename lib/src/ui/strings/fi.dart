@@ -1008,7 +1008,7 @@ final class FinnishStrings extends Strings {
   @override
   String get listFolderTitle => 'Listojen kansio';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Liitteiden kansio';
 
   // Trash (M1).
   @override

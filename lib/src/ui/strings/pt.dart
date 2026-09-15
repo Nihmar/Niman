@@ -1005,7 +1005,7 @@ final class PortugueseStrings extends Strings {
   @override
   String get listFolderTitle => 'Pasta de listas';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Pasta de anexos';
 
   // Trash (M1).
   @override

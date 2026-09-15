@@ -1021,7 +1021,7 @@ final class SpanishStrings extends Strings {
   @override
   String get listFolderTitle => 'Carpeta de listas';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Carpeta de adjuntos';
 
   // Trash (M1).
   @override

@@ -1038,7 +1038,7 @@ final class GreekStrings extends Strings {
   @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Φάκελος συνημμένων';
 
   // Trash (M1).
   @override

@@ -994,7 +994,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка спісаў';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка ўкладанняў';
 
   // Trash (M1).
   @override

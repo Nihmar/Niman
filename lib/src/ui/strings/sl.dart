@@ -988,7 +988,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get listFolderTitle => 'Mapa seznamov';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mapa prilog';
 
   // Trash (M1).
   @override

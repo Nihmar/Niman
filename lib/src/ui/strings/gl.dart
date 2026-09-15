@@ -1009,7 +1009,7 @@ final class GalicianStrings extends Strings {
   @override
   String get listFolderTitle => 'Cartafol de lista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Cartafol de anexos';
 
   // Trash (M1).
   @override

@@ -1002,7 +1002,7 @@ final class SwedishStrings extends Strings {
   @override
   String get listFolderTitle => 'Listmapp';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mapp för bilagor';
 
   // Trash (M1).
   @override

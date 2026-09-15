@@ -991,7 +991,7 @@ final class TurkishStrings extends Strings {
   @override
   String get listFolderTitle => 'Liste klasörü';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Ekler klasörü';
 
   // Trash (M1).
   @override

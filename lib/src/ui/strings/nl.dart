@@ -1013,7 +1013,7 @@ final class DutchStrings extends Strings {
   @override
   String get listFolderTitle => 'Lijstmap';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Bijlagenmap';
 
   // Trash (M1).
   @override

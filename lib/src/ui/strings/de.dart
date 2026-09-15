@@ -1021,7 +1021,7 @@ final class GermanStrings extends Strings {
   @override
   String get listFolderTitle => 'Listen-Ordner';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Anhänge-Ordner';
 
   // Trash (M1).
   @override

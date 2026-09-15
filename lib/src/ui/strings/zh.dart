@@ -907,7 +907,7 @@ final class ChineseStrings extends Strings {
   @override
   String get listFolderTitle => '列表文件夹';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => '附件文件夹';
 
   // Trash (M1).
   @override

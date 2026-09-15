@@ -1001,7 +1001,7 @@ final class RomanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Dosar de liste';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Dosar de atașamente';
 
   // Trash (M1).
   @override

@@ -984,7 +984,7 @@ final class EstonianStrings extends Strings {
   @override
   String get listFolderTitle => 'Loetelute kaust';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Manuste kaust';
 
   // Trash (M1).
   @override

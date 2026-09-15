@@ -994,7 +994,7 @@ final class CroatianStrings extends Strings {
   @override
   String get listFolderTitle => 'Direktorij popisa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Direktorij privitaka';
 
   // Trash (M1).
   @override

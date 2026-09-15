@@ -1008,7 +1008,7 @@ final class MacedonianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка на листа';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка со прилози';
 
   // Trash (M1).
   @override
