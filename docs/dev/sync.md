@@ -164,9 +164,15 @@ remote with a separate state.
 
 One URL rather than server + folder: servers disagree on where the
 WebDAV root lives, and the user copies the address the server shows.
-The password lives only in `flutter_secure_storage`; forgetting a
+The password lives only in `flutter_secure_storage`
+(`SecureSyncSecretStore`, key `sync.<library path>`); forgetting a
 library deletes the row, its `sync_items`, its `sync_ops` and the
-secret.
+secret (a keychain failure is logged and does not block forgetting).
+
+Saving the destination with another URL or user clears the library's
+`sync_items` and capabilities: they describe a different remote, so the
+next sync is a first sync, which never deletes. The queue stays, since
+it describes the local side.
 
 ### State: `sync_items`
 
@@ -336,9 +342,24 @@ so a stale or lost op can make a sync slower but never wrong.
 | `kind` | text | `changed`, `deleted`, `moved` |
 | `from_path` | text, nullable | `moved` only: lets the sync issue a `MOVE` instead of DELETE + PUT |
 | `attempts` | int | failed runs so far |
-| `next_attempt_at_ms` | int | backoff: 5 s · 2^attempts, capped at 10 min |
+| `next_attempt_at_ms` | int | after the n-th failure: 5 s · 2^(n−1), capped at 10 min |
 | `last_error` | text, nullable | |
-| `created_at_ms` | int | |
+| `created_at_ms` | int | strictly increases on every rewrite of the hint |
+
+Coalescing (`SyncStore.enqueue`), one hint per path:
+
+| Queued | New | Result |
+|---|---|---|
+| `changed` / `deleted` | `changed` / `deleted` | the new kind |
+| `moved` from A | `changed` | `moved` from A (content is checked at the target anyway) |
+| `moved` from A | `deleted` | `deleted`, plus `deleted` at A unless A has its own hint |
+| anything at B | `moved` B → C | the hint at B goes; `moved` from B, or from A when B's hint was `moved` from A (and `changed` when that brings it back to A) |
+| hints under folder B | `moved` B → C | they move to C with it |
+
+A rewrite keeps the backoff: edits during an outage do not bypass it,
+the network coming back (`retryNow`) does. A sync removes a hint only
+if `created_at_ms` is still the one it read, so a save that lands while
+its path is syncing is never lost.
 
 - **Quick sync** (the 5 s after-edit trigger) handles only the queued
   paths: a PROPFIND `Depth: 0` per path, then the table above.

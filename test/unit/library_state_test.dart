@@ -9,7 +9,11 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
+
+import '../fakes/fake_sync_secret_store.dart';
 
 void main() {
   // The tests deliberately open the shared on-disk database several times
@@ -185,6 +189,50 @@ void main() {
     await db.close();
   });
 
+  test('forgetting a library drops its sync state and password', () async {
+    final secrets = FakeSyncSecretStore();
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      rescanInterval: const Duration(hours: 1),
+      syncSecrets: secrets,
+    );
+    await controller.open(root.path, create: false);
+    await controller.close();
+    final store = SyncStore(await controller.appDatabase);
+    const elsewhere = '/somewhere/else';
+    for (final library in [root.path, elsewhere]) {
+      await store.saveDestination(
+        libraryPath: library,
+        url: Uri.parse('http://nas/dav/'),
+      );
+      await store.enqueue(library, 'a.md', SyncOpKind.changed);
+      await secrets.write(library, 'pw');
+    }
+
+    await controller.forgetLibrary(root.path);
+    expect(await store.destination(root.path), isNull);
+    expect(await store.pendingOps(root.path), isEmpty);
+    expect(await secrets.read(root.path), isNull);
+    expect(await store.destination(elsewhere), isNotNull);
+    expect(await secrets.read(elsewhere), 'pw');
+    await controller.dispose();
+  });
+
+  test('a failing keychain does not stop forgetting a library', () async {
+    final controller = LibraryController(
+      appDb,
+      indexDbFactory: indexDb,
+      rescanInterval: const Duration(hours: 1),
+      syncSecrets: _BrokenSecrets(),
+    );
+    await controller.open(root.path, create: false);
+    await controller.close();
+    await controller.forgetLibrary(root.path);
+    expect(await LibraryRegistry(await controller.appDatabase).all(), isEmpty);
+    await controller.dispose();
+  });
+
   test('a closed session reads no tree at all', () async {
     // The index belongs to the open library, so there is nothing to read
     // before the first open — and the tree UI asks anyway.
@@ -248,4 +296,16 @@ void main() {
     await second.close();
     await second.dispose();
   });
+}
+
+final class _BrokenSecrets implements SyncSecretStore {
+  @override
+  Future<String?> read(String libraryPath) async => null;
+
+  @override
+  Future<void> write(String libraryPath, String password) async {}
+
+  @override
+  Future<void> delete(String libraryPath) =>
+      Future.error(Exception('no keychain'));
 }
