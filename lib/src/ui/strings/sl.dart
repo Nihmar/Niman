@@ -1234,4 +1234,68 @@ final class SlovenianStrings extends Strings {
       'Med pisanjem; ob začetku urejanja opombe se ena vedno shrani';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Prepis';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Brez';
+  @override
+  String get transcriptionLanguageTitle => 'Jezik';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Jezik, ki se govori v vaših posnetkih. Izbira jezika je natančnejša od '
+      'samodejnega zaznavanja.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Kot aplikacija ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Zaznaj samodejno';
+  @override
+  String get transcriptionModelsTitle => 'Modeli za prepis';
+  @override
+  String transcriptionModelsUsed(String size) => 'Zasedeno: $size';
+  @override
+  String get transcriptionModelsInstalled => 'Preneseni';
+  @override
+  String get transcriptionModelsDownloading => 'Prenašanje';
+  @override
+  String get transcriptionModelsAvailable => 'Na voljo';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeli ostanejo v shrambi aplikacije v tej napravi. Ne kopirajo se v '
+      'knjižnico in se ne sinhronizirajo.';
+  @override
+  String get transcriptionModelDefault => 'Privzeto';
+  @override
+  String get transcriptionModelSlow => 'Počasen';
+  @override
+  String get transcriptionModelHintTiny => 'Najhitrejši, najmanj natančen';
+  @override
+  String get transcriptionModelHintBase =>
+      'Dobro razmerje med hitrostjo in natančnostjo';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Natančnejši, približno 3× počasnejši';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Zelo natančen, počasen na telefonu';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Najnatančnejši, potrebuje veliko pomnilnika';
+  @override
+  String get transcriptionModelDownload => 'Prenesi';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Želite izbrisati model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Sprostilo se bo $size. Model lahko pozneje znova prenesete.';
+  @override
+  String get transcriptionModelFailed =>
+      'Prenos ni uspel. Preverite povezavo in poskusite znova.';
+  @override
+  String get actionRetry => 'Poskusi znova';
+  @override
+  String get decimalSeparator => ',';
 }

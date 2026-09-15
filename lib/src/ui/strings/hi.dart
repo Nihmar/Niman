@@ -1222,4 +1222,62 @@ final class HindiStrings extends Strings {
       'लिखते समय; नोट संपादित करना शुरू करने पर एक संस्करण हमेशा रखा जाता है';
   @override
   String historyIntervalValue(int minutes) => '$minutes मिनट';
+  @override
+  String get settingsSectionTranscription => 'ट्रांसक्रिप्शन';
+  @override
+  String get transcriptionModelTitle => 'मॉडल';
+  @override
+  String get transcriptionModelNone => 'कोई नहीं';
+  @override
+  String get transcriptionLanguageTitle => 'भाषा';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'आपकी रिकॉर्डिंग में बोली गई भाषा। इसे चुनना अपने आप पहचानने से ज़्यादा '
+      'सटीक है।';
+  @override
+  String transcriptionLanguageApp(String language) => 'ऐप जैसी ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'अपने आप पहचानें';
+  @override
+  String get transcriptionModelsTitle => 'ट्रांसक्रिप्शन मॉडल';
+  @override
+  String transcriptionModelsUsed(String size) => '$size इस्तेमाल में';
+  @override
+  String get transcriptionModelsInstalled => 'डाउनलोड किए गए';
+  @override
+  String get transcriptionModelsDownloading => 'डाउनलोड हो रहे हैं';
+  @override
+  String get transcriptionModelsAvailable => 'उपलब्ध';
+  @override
+  String get transcriptionModelsFooter =>
+      'मॉडल इस डिवाइस पर ऐप के स्टोरेज में रहते हैं। वे लाइब्रेरी में कॉपी या '
+      'सिंक नहीं किए जाते।';
+  @override
+  String get transcriptionModelDefault => 'डिफ़ॉल्ट';
+  @override
+  String get transcriptionModelSlow => 'धीमा';
+  @override
+  String get transcriptionModelHintTiny => 'सबसे तेज़, सबसे कम सटीक';
+  @override
+  String get transcriptionModelHintBase => 'गति और सटीकता का अच्छा संतुलन';
+  @override
+  String get transcriptionModelHintSmall => 'ज़्यादा सटीक, लगभग 3× धीमा';
+  @override
+  String get transcriptionModelHintMedium => 'बहुत सटीक, फ़ोन पर धीमा';
+  @override
+  String get transcriptionModelHintLarge => 'सबसे सटीक, बहुत मेमोरी चाहिए';
+  @override
+  String get transcriptionModelDownload => 'डाउनलोड करें';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '$model मॉडल हटाएँ?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'इससे $size खाली होगा। आप बाद में मॉडल फिर से डाउनलोड कर सकते हैं।';
+  @override
+  String get transcriptionModelFailed =>
+      'डाउनलोड नहीं हो सका। कनेक्शन जाँचें और फिर से कोशिश करें।';
+  @override
+  String get actionRetry => 'फिर से कोशिश करें';
+  @override
+  String get decimalSeparator => '.';
 }

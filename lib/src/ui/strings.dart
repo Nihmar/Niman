@@ -7,6 +7,7 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/be.dart';
 import 'package:niman/src/ui/strings/bg.dart';
@@ -785,4 +786,68 @@ final class AppStrings {
   static String get historyIntervalSubtitle => _s.historyIntervalSubtitle;
   static String historyIntervalValue(int minutes) =>
       _s.historyIntervalValue(minutes);
+
+  // Transcription: the settings section and the models page.
+  static String get settingsSectionTranscription =>
+      _s.settingsSectionTranscription;
+  static String get transcriptionModelTitle => _s.transcriptionModelTitle;
+  static String get transcriptionModelNone => _s.transcriptionModelNone;
+  static String get transcriptionLanguageTitle => _s.transcriptionLanguageTitle;
+  static String get transcriptionLanguageSubtitle =>
+      _s.transcriptionLanguageSubtitle;
+  static String transcriptionLanguageApp(String language) =>
+      _s.transcriptionLanguageApp(language);
+  static String get transcriptionLanguageDetect =>
+      _s.transcriptionLanguageDetect;
+  static String get transcriptionModelsTitle => _s.transcriptionModelsTitle;
+  static String transcriptionModelsUsed(String size) =>
+      _s.transcriptionModelsUsed(size);
+  static String get transcriptionModelsInstalled =>
+      _s.transcriptionModelsInstalled;
+  static String get transcriptionModelsDownloading =>
+      _s.transcriptionModelsDownloading;
+  static String get transcriptionModelsAvailable =>
+      _s.transcriptionModelsAvailable;
+  static String get transcriptionModelsFooter => _s.transcriptionModelsFooter;
+  static String get transcriptionModelDefault => _s.transcriptionModelDefault;
+  static String get transcriptionModelSlow => _s.transcriptionModelSlow;
+  static String get transcriptionModelDownload => _s.transcriptionModelDownload;
+  static String transcriptionModelDeleteTitle(String model) =>
+      _s.transcriptionModelDeleteTitle(model);
+  static String transcriptionModelDeleteBody(String size) =>
+      _s.transcriptionModelDeleteBody(size);
+  static String get transcriptionModelFailed => _s.transcriptionModelFailed;
+  static String get actionRetry => _s.actionRetry;
+
+  /// Whisper's own model names, the same in every language.
+  static String transcriptionModelName(TranscriptionModel model) =>
+      switch (model.id) {
+        'tiny' => 'Tiny',
+        'base' => 'Base',
+        'small' => 'Small',
+        'medium' => 'Medium',
+        'large-v3' => 'Large v3',
+        final id => id,
+      };
+
+  /// What choosing [model] trades: speed against accuracy and memory.
+  static String transcriptionModelHint(TranscriptionModel model) =>
+      switch (model.id) {
+        'tiny' => _s.transcriptionModelHintTiny,
+        'base' => _s.transcriptionModelHintBase,
+        'small' => _s.transcriptionModelHintSmall,
+        'medium' => _s.transcriptionModelHintMedium,
+        _ => _s.transcriptionModelHintLarge,
+      };
+
+  /// A file size: whole megabytes below a gigabyte, gigabytes with one
+  /// decimal (in the language's separator) above. Binary units, as the
+  /// model downloads are published.
+  static String byteSize(int bytes) {
+    const mb = 1024 * 1024;
+    const gb = 1024 * mb;
+    if (bytes < gb) return '${(bytes / mb).round()} MB';
+    final value = (bytes / gb).toStringAsFixed(1);
+    return '${value.replaceAll('.', _s.decimalSeparator)} GB';
+  }
 }

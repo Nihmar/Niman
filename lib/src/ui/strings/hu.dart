@@ -1252,4 +1252,65 @@ final class HungarianStrings extends Strings {
       'Írás közben; a szerkesztés megkezdésekor mindig készül egy';
   @override
   String historyIntervalValue(int minutes) => '$minutes percenként';
+  @override
+  String get settingsSectionTranscription => 'Átirat';
+  @override
+  String get transcriptionModelTitle => 'Modell';
+  @override
+  String get transcriptionModelNone => 'Nincs';
+  @override
+  String get transcriptionLanguageTitle => 'Nyelv';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'A felvételeiden beszélt nyelv. Megadni pontosabb, mint felismertetni.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Mint az alkalmazás ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Automatikus felismerés';
+  @override
+  String get transcriptionModelsTitle => 'Átiratmodellek';
+  @override
+  String transcriptionModelsUsed(String size) => '$size foglalt';
+  @override
+  String get transcriptionModelsInstalled => 'Letöltve';
+  @override
+  String get transcriptionModelsDownloading => 'Letöltés folyamatban';
+  @override
+  String get transcriptionModelsAvailable => 'Elérhető';
+  @override
+  String get transcriptionModelsFooter =>
+      'A modellek az alkalmazás tárhelyén maradnak ezen az eszközön. Nem '
+      'kerülnek a könyvtárba, és nem szinkronizálódnak.';
+  @override
+  String get transcriptionModelDefault => 'Alapértelmezett';
+  @override
+  String get transcriptionModelSlow => 'Lassú';
+  @override
+  String get transcriptionModelHintTiny => 'A leggyorsabb, a legkevésbé pontos';
+  @override
+  String get transcriptionModelHintBase =>
+      'Jó egyensúly a sebesség és a pontosság között';
+  @override
+  String get transcriptionModelHintSmall => 'Pontosabb, nagyjából 3× lassabb';
+  @override
+  String get transcriptionModelHintMedium => 'Nagyon pontos, telefonon lassú';
+  @override
+  String get transcriptionModelHintLarge =>
+      'A legpontosabb, sok memóriát igényel';
+  @override
+  String get transcriptionModelDownload => 'Letöltés';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Törlöd a(z) $model modellt?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Ezzel $size szabadul fel. A modellt később újra letöltheted.';
+  @override
+  String get transcriptionModelFailed =>
+      'A letöltés sikertelen. Ellenőrizd a kapcsolatot, és próbáld újra.';
+  @override
+  String get actionRetry => 'Újra';
+  @override
+  String get decimalSeparator => ',';
 }

@@ -1250,4 +1250,64 @@ final class SerbianStrings extends Strings {
       'Док пишете; почетак уређивања белешке увек чува једну';
   @override
   String historyIntervalValue(int minutes) => '$minutes мин';
+  @override
+  String get settingsSectionTranscription => 'Транскрипција';
+  @override
+  String get transcriptionModelTitle => 'Модел';
+  @override
+  String get transcriptionModelNone => 'Ниједан';
+  @override
+  String get transcriptionLanguageTitle => 'Језик';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Језик којим се говори у вашим снимцима. Навести га је тачније него '
+      'препуштати препознавању.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Као апликација ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Препознај аутоматски';
+  @override
+  String get transcriptionModelsTitle => 'Модели за транскрипцију';
+  @override
+  String transcriptionModelsUsed(String size) => 'Заузето $size';
+  @override
+  String get transcriptionModelsInstalled => 'Преузети';
+  @override
+  String get transcriptionModelsDownloading => 'Преузимање';
+  @override
+  String get transcriptionModelsAvailable => 'Доступни';
+  @override
+  String get transcriptionModelsFooter =>
+      'Модели остају у складишту апликације на овом уређају. Не копирају се у '
+      'библиотеку и не синхронизују се.';
+  @override
+  String get transcriptionModelDefault => 'Подразумевани';
+  @override
+  String get transcriptionModelSlow => 'Спор';
+  @override
+  String get transcriptionModelHintTiny => 'Најбржи, најмање тачан';
+  @override
+  String get transcriptionModelHintBase => 'Добар однос брзине и тачности';
+  @override
+  String get transcriptionModelHintSmall => 'Тачнији, око 3× спорији';
+  @override
+  String get transcriptionModelHintMedium => 'Веома тачан, спор на телефону';
+  @override
+  String get transcriptionModelHintLarge => 'Најтачнији, треба много меморије';
+  @override
+  String get transcriptionModelDownload => 'Преузми';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Избрисати модел $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Ослобађа се $size. Модел можете касније поново да преузмете.';
+  @override
+  String get transcriptionModelFailed =>
+      'Преузимање није успело. Проверите везу и покушајте поново.';
+  @override
+  String get actionRetry => 'Покушај поново';
+  @override
+  String get decimalSeparator => ',';
 }

@@ -1242,4 +1242,65 @@ final class DanishStrings extends Strings {
       'altid én';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transskription';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Ingen';
+  @override
+  String get transcriptionLanguageTitle => 'Sprog';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Sproget, der tales i dine optagelser. Det er mere præcist at angive '
+      'det end at lade det genkende.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Som appen ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Genkend automatisk';
+  @override
+  String get transcriptionModelsTitle => 'Transskriptionsmodeller';
+  @override
+  String transcriptionModelsUsed(String size) => '$size brugt';
+  @override
+  String get transcriptionModelsInstalled => 'Downloadet';
+  @override
+  String get transcriptionModelsDownloading => 'Downloader';
+  @override
+  String get transcriptionModelsAvailable => 'Tilgængelige';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modellerne ligger i appens lager på denne enhed. De kopieres ikke til '
+      'biblioteket og synkroniseres ikke.';
+  @override
+  String get transcriptionModelDefault => 'Standard';
+  @override
+  String get transcriptionModelSlow => 'Langsom';
+  @override
+  String get transcriptionModelHintTiny => 'Hurtigst, mindst præcis';
+  @override
+  String get transcriptionModelHintBase =>
+      'God balance mellem hastighed og præcision';
+  @override
+  String get transcriptionModelHintSmall => 'Mere præcis, cirka 3× langsommere';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Meget præcis, langsom på en telefon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Mest præcis, kræver meget hukommelse';
+  @override
+  String get transcriptionModelDownload => 'Download';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Slet modellen $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Det frigør $size. Du kan downloade modellen igen senere.';
+  @override
+  String get transcriptionModelFailed =>
+      'Download mislykkedes. Tjek forbindelsen, og prøv igen.';
+  @override
+  String get actionRetry => 'Prøv igen';
+  @override
+  String get decimalSeparator => ',';
 }

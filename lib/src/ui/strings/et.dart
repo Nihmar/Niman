@@ -1222,4 +1222,65 @@ final class EstonianStrings extends Strings {
       'Kirjutamise ajal; märkme muutmise alustamine salvestab alati ühe';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkriptsioon';
+  @override
+  String get transcriptionModelTitle => 'Mudel';
+  @override
+  String get transcriptionModelNone => 'Puudub';
+  @override
+  String get transcriptionLanguageTitle => 'Keel';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Keel, mida su salvestistes räägitakse. Selle määramine on täpsem kui '
+      'tuvastamine.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Nagu rakendus ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Tuvasta automaatselt';
+  @override
+  String get transcriptionModelsTitle => 'Transkriptsioonimudelid';
+  @override
+  String transcriptionModelsUsed(String size) => 'Kasutusel $size';
+  @override
+  String get transcriptionModelsInstalled => 'Allalaaditud';
+  @override
+  String get transcriptionModelsDownloading => 'Allalaadimisel';
+  @override
+  String get transcriptionModelsAvailable => 'Saadaval';
+  @override
+  String get transcriptionModelsFooter =>
+      'Mudelid jäävad selle seadme rakenduse salvestusruumi. Neid ei '
+      'kopeerita teeki ega sünkroonita.';
+  @override
+  String get transcriptionModelDefault => 'Vaikimisi';
+  @override
+  String get transcriptionModelSlow => 'Aeglane';
+  @override
+  String get transcriptionModelHintTiny => 'Kiireim, kõige ebatäpsem';
+  @override
+  String get transcriptionModelHintBase =>
+      'Hea tasakaal kiiruse ja täpsuse vahel';
+  @override
+  String get transcriptionModelHintSmall => 'Täpsem, umbes 3× aeglasem';
+  @override
+  String get transcriptionModelHintMedium => 'Väga täpne, telefonis aeglane';
+  @override
+  String get transcriptionModelHintLarge => 'Kõige täpsem, vajab palju mälu';
+  @override
+  String get transcriptionModelDownload => 'Laadi alla';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Kas kustutada mudel $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'See vabastab $size. Saad mudeli hiljem uuesti alla laadida.';
+  @override
+  String get transcriptionModelFailed =>
+      'Allalaadimine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.';
+  @override
+  String get actionRetry => 'Proovi uuesti';
+  @override
+  String get decimalSeparator => ',';
 }

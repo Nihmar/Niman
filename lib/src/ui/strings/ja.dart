@@ -1159,4 +1159,59 @@ final class JapaneseStrings extends Strings {
   String get historyIntervalSubtitle => '入力中に適用。ノートの編集を始めたときは必ず 1 つ保存されます';
   @override
   String historyIntervalValue(int minutes) => '$minutes 分';
+  @override
+  String get settingsSectionTranscription => '文字起こし';
+  @override
+  String get transcriptionModelTitle => 'モデル';
+  @override
+  String get transcriptionModelNone => 'なし';
+  @override
+  String get transcriptionLanguageTitle => '言語';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      '録音で話されている言語です。自動検出より指定したほうが正確です。';
+  @override
+  String transcriptionLanguageApp(String language) => 'アプリと同じ（$language）';
+  @override
+  String get transcriptionLanguageDetect => '自動検出';
+  @override
+  String get transcriptionModelsTitle => '文字起こしモデル';
+  @override
+  String transcriptionModelsUsed(String size) => '$size 使用中';
+  @override
+  String get transcriptionModelsInstalled => 'ダウンロード済み';
+  @override
+  String get transcriptionModelsDownloading => 'ダウンロード中';
+  @override
+  String get transcriptionModelsAvailable => '利用可能';
+  @override
+  String get transcriptionModelsFooter =>
+      'モデルはこのデバイスのアプリ用ストレージに保存されます。ライブラリにはコピーも同期もされません。';
+  @override
+  String get transcriptionModelDefault => 'デフォルト';
+  @override
+  String get transcriptionModelSlow => '低速';
+  @override
+  String get transcriptionModelHintTiny => '最速、精度は最も低い';
+  @override
+  String get transcriptionModelHintBase => '速度と精度のバランスが良い';
+  @override
+  String get transcriptionModelHintSmall => 'より正確、約 3 倍遅い';
+  @override
+  String get transcriptionModelHintMedium => 'とても正確、スマートフォンでは遅い';
+  @override
+  String get transcriptionModelHintLarge => '最も正確、大量のメモリが必要';
+  @override
+  String get transcriptionModelDownload => 'ダウンロード';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '$model モデルを削除しますか？';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      '$size が解放されます。モデルは後でもう一度ダウンロードできます。';
+  @override
+  String get transcriptionModelFailed => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
+  @override
+  String get actionRetry => '再試行';
+  @override
+  String get decimalSeparator => '.';
 }

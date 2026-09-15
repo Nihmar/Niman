@@ -1255,4 +1255,65 @@ final class BulgarianStrings extends Strings {
       'Докато пишете; започването на редакция винаги запазва една';
   @override
   String historyIntervalValue(int minutes) => '$minutes мин';
+  @override
+  String get settingsSectionTranscription => 'Транскрипция';
+  @override
+  String get transcriptionModelTitle => 'Модел';
+  @override
+  String get transcriptionModelNone => 'Няма';
+  @override
+  String get transcriptionLanguageTitle => 'Език';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Езикът, който се говори във вашите записи. Да го посочите е по-точно '
+      'от автоматичното разпознаване.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Като приложението ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Автоматично разпознаване';
+  @override
+  String get transcriptionModelsTitle => 'Модели за транскрипция';
+  @override
+  String transcriptionModelsUsed(String size) => 'Заети $size';
+  @override
+  String get transcriptionModelsInstalled => 'Изтеглени';
+  @override
+  String get transcriptionModelsDownloading => 'Изтеглят се';
+  @override
+  String get transcriptionModelsAvailable => 'Налични';
+  @override
+  String get transcriptionModelsFooter =>
+      'Моделите остават в хранилището на приложението на това устройство. Не '
+      'се копират в библиотеката и не се синхронизират.';
+  @override
+  String get transcriptionModelDefault => 'По подразбиране';
+  @override
+  String get transcriptionModelSlow => 'Бавен';
+  @override
+  String get transcriptionModelHintTiny => 'Най-бърз, най-малко точен';
+  @override
+  String get transcriptionModelHintBase =>
+      'Добър баланс между скорост и точност';
+  @override
+  String get transcriptionModelHintSmall => 'По-точен, около 3× по-бавен';
+  @override
+  String get transcriptionModelHintMedium => 'Много точен, бавен на телефон';
+  @override
+  String get transcriptionModelHintLarge => 'Най-точен, изисква много памет';
+  @override
+  String get transcriptionModelDownload => 'Изтегляне';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Да се изтрие ли моделът $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Ще се освободят $size. Можете да изтеглите модела отново по-късно.';
+  @override
+  String get transcriptionModelFailed =>
+      'Изтеглянето не бе успешно. Проверете връзката и опитайте отново.';
+  @override
+  String get actionRetry => 'Опитай отново';
+  @override
+  String get decimalSeparator => ',';
 }

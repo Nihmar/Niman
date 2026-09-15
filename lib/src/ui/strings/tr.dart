@@ -1231,4 +1231,65 @@ final class TurkishStrings extends Strings {
       'Yazarken; bir notu düzenlemeye başlamak her zaman bir sürüm saklar';
   @override
   String historyIntervalValue(int minutes) => '$minutes dk';
+  @override
+  String get settingsSectionTranscription => 'Metne dökme';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Yok';
+  @override
+  String get transcriptionLanguageTitle => 'Dil';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kayıtlarınızda konuşulan dil. Dili belirtmek, otomatik algılamadan '
+      'daha doğru sonuç verir.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Uygulamayla aynı ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Otomatik algıla';
+  @override
+  String get transcriptionModelsTitle => 'Metne dökme modelleri';
+  @override
+  String transcriptionModelsUsed(String size) => '$size kullanılıyor';
+  @override
+  String get transcriptionModelsInstalled => 'İndirilenler';
+  @override
+  String get transcriptionModelsDownloading => 'İndiriliyor';
+  @override
+  String get transcriptionModelsAvailable => 'Kullanılabilir';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeller bu cihazda uygulamanın depolama alanında kalır. Kitaplığa '
+      'kopyalanmaz ve eşitlenmez.';
+  @override
+  String get transcriptionModelDefault => 'Varsayılan';
+  @override
+  String get transcriptionModelSlow => 'Yavaş';
+  @override
+  String get transcriptionModelHintTiny => 'En hızlı, en az doğru';
+  @override
+  String get transcriptionModelHintBase => 'Hız ve doğruluk arasında iyi denge';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Daha doğru, yaklaşık 3× daha yavaş';
+  @override
+  String get transcriptionModelHintMedium => 'Çok doğru, telefonda yavaş';
+  @override
+  String get transcriptionModelHintLarge => 'En doğru, çok bellek gerektirir';
+  @override
+  String get transcriptionModelDownload => 'İndir';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      '$model modeli silinsin mi?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Bu işlem $size yer açar. Modeli daha sonra yeniden indirebilirsiniz.';
+  @override
+  String get transcriptionModelFailed =>
+      'İndirme başarısız oldu. Bağlantınızı kontrol edip yeniden deneyin.';
+  @override
+  String get actionRetry => 'Yeniden dene';
+  @override
+  String get decimalSeparator => ',';
 }

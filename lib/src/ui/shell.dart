@@ -26,6 +26,7 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -176,6 +177,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 controller: controller,
                 reminders: ref.read(reminderServiceProvider),
                 spellCheck: ref.read(spellCheckProvider),
+                transcription: ref.read(transcriptionModelsProvider),
                 shortcuts: ref.read(shortcutServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
@@ -209,9 +211,14 @@ final class _LibraryShell extends StatefulWidget {
     required this.widgetHost,
     required this.tray,
     required this.window,
+    this.transcription,
   });
 
   final LibrarySession controller;
+
+  /// The installation's transcription models (settings section); null
+  /// hides it.
+  final TranscriptionModels? transcription;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
@@ -2563,6 +2570,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.settings => SettingsTab(
         controller: controller,
         spellCheck: widget.spellCheck,
+        transcription: widget.transcription,
       ),
     };
   }

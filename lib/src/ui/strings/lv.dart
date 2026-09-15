@@ -1239,4 +1239,65 @@ final class LatvianStrings extends Strings {
       'Rakstot; sākot rediģēt piezīmi, versija tiek saglabāta vienmēr';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkripcija';
+  @override
+  String get transcriptionModelTitle => 'Modelis';
+  @override
+  String get transcriptionModelNone => 'Nav';
+  @override
+  String get transcriptionLanguageTitle => 'Valoda';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Valoda, kurā runā jūsu ierakstos. Norādīt to ir precīzāk nekā ļaut to '
+      'noteikt.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Kā lietotnē ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Noteikt automātiski';
+  @override
+  String get transcriptionModelsTitle => 'Transkripcijas modeļi';
+  @override
+  String transcriptionModelsUsed(String size) => 'Aizņemti $size';
+  @override
+  String get transcriptionModelsInstalled => 'Lejupielādēti';
+  @override
+  String get transcriptionModelsDownloading => 'Notiek lejupielāde';
+  @override
+  String get transcriptionModelsAvailable => 'Pieejami';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeļi paliek lietotnes krātuvē šajā ierīcē. Tie netiek kopēti '
+      'bibliotēkā un netiek sinhronizēti.';
+  @override
+  String get transcriptionModelDefault => 'Noklusējums';
+  @override
+  String get transcriptionModelSlow => 'Lēns';
+  @override
+  String get transcriptionModelHintTiny => 'Ātrākais, vismazāk precīzs';
+  @override
+  String get transcriptionModelHintBase =>
+      'Labs ātruma un precizitātes līdzsvars';
+  @override
+  String get transcriptionModelHintSmall => 'Precīzāks, apmēram 3× lēnāks';
+  @override
+  String get transcriptionModelHintMedium => 'Ļoti precīzs, tālrunī lēns';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Visprecīzākais, vajag daudz atmiņas';
+  @override
+  String get transcriptionModelDownload => 'Lejupielādēt';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Vai dzēst modeli $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Tiks atbrīvoti $size. Modeli vēlāk varēsiet lejupielādēt atkārtoti.';
+  @override
+  String get transcriptionModelFailed =>
+      'Lejupielāde neizdevās. Pārbaudiet savienojumu un mēģiniet vēlreiz.';
+  @override
+  String get actionRetry => 'Mēģināt vēlreiz';
+  @override
+  String get decimalSeparator => ',';
 }
