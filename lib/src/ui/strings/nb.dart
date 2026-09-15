@@ -994,7 +994,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get listFolderTitle => 'Listemappe';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Vedleggsmappe';
 
   // Trash (M1).
   @override

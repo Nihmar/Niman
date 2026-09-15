@@ -998,7 +998,7 @@ final class DanishStrings extends Strings {
   @override
   String get listFolderTitle => 'Listemappe';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mappe til vedhæftninger';
 
   // Trash (M1).
   @override

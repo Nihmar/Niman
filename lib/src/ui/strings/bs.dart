@@ -1002,7 +1002,7 @@ final class BosnianStrings extends Strings {
   @override
   String get listFolderTitle => 'Mapa popisa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mapa priloga';
 
   // Trash (M1).
   @override

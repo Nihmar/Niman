@@ -1026,7 +1026,7 @@ final class CatalanStrings extends Strings {
   @override
   String get listFolderTitle => 'Carpeta de llista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => "Carpeta d'adjunts";
 
   // Trash (M1).
   @override

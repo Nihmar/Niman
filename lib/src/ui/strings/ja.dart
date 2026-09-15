@@ -937,7 +937,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get listFolderTitle => 'リストフォルダ';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => '添付ファイルフォルダ';
 
   // Trash (M1).
   @override

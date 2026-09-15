@@ -1008,7 +1008,7 @@ final class HungarianStrings extends Strings {
   @override
   String get listFolderTitle => 'Listamappa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mellékletmappa';
 
   // Trash (M1).
   @override

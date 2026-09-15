@@ -979,7 +979,7 @@ final class HindiStrings extends Strings {
   @override
   String get listFolderTitle => 'सूची-फ़ोल्डर';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'अनुलग्नक फ़ोल्डर';
 
   // Trash (M1).
   @override

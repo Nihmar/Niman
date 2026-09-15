@@ -992,7 +992,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Sąrašų katalogas';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priedų katalogas';
 
   // Trash (M1).
   @override

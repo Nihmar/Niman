@@ -995,7 +995,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get listFolderTitle => 'Mappa lista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mappa fyrir viðhengi';
 
   // Trash (M1).
   @override

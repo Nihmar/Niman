@@ -990,7 +990,7 @@ final class CzechStrings extends Strings {
   @override
   String get listFolderTitle => 'Složka seznamů';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Složka příloh';
 
   // Trash (M1).
   @override

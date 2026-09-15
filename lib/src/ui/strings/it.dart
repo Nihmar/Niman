@@ -1007,7 +1007,7 @@ final class ItalianStrings extends Strings {
   @override
   String get listFolderTitle => 'Cartella delle liste';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Cartella degli allegati';
 
   // Trash (M1).
   @override

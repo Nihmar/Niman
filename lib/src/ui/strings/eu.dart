@@ -1005,7 +1005,7 @@ final class BasqueStrings extends Strings {
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Eranskinen biltegia';
 
   // Trash (M1).
   @override

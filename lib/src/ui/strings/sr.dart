@@ -1001,7 +1001,7 @@ final class SerbianStrings extends Strings {
   @override
   String get listFolderTitle => 'Фасцикла списка';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Фасцикла прилога';
 
   // Trash (M1).
   @override

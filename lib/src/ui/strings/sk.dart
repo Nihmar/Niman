@@ -991,7 +991,7 @@ final class SlovakStrings extends Strings {
   @override
   String get listFolderTitle => 'Priečinok zoznamov';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priečinok príloh';
 
   // Trash (M1).
   @override

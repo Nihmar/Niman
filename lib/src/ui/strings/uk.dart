@@ -994,7 +994,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка списків';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка вкладень';
 
   // Trash (M1).
   @override

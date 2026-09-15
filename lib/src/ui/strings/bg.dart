@@ -1009,7 +1009,7 @@ final class BulgarianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка за списъци';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка за прикачени файлове';
 
   // Trash (M1).
   @override

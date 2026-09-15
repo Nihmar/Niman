@@ -1014,7 +1014,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Tresë e listës';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Tresë e bashkëngjitjeve';
 
   // Trash (M1).
   @override

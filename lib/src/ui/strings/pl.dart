@@ -1009,7 +1009,7 @@ final class PolishStrings extends Strings {
   @override
   String get listFolderTitle => 'Katalog list';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Katalog załączników';
 
   // Trash (M1).
   @override
