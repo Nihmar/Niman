@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Network (issue #81): GitHub Releases checks/downloads and WebDAV
+         sync. The debug manifest declares its own copy; without this the
+         release build fails every network call with a SocketException. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- The library root is a user-chosen folder on shared storage, read
          and written with plain file I/O (walk, watch, open). Without "All
          files access" the FUSE layer backing /storage/emulated/0 hands the

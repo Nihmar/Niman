@@ -678,7 +678,13 @@ final class LibraryController implements LibrarySession {
       isEnabled: repo.autoUpdateEnabled,
       runCheck: () async {
         try {
-          return await checkNow(current: await currentAppVersion());
+          final current = await currentAppVersion();
+          final update = await checkNow(current: current);
+          _log.debug(
+            'update check: current $current -> '
+            '${update == null ? 'up to date' : 'available ${update.version}'}',
+          );
+          return update;
         } on Object catch (error) {
           _log.warning('update check failed: $error');
           return null;
