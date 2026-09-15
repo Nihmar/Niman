@@ -456,6 +456,10 @@ final class SyncPlan {
 ///   `MOVE` and the content is unique on both sides;
 /// - a `trashLocal` of A and a `download` of a new B carrying A's
 ///   `oc:fileid` become one `moveLocal` A→B, when the server has file ids.
+///
+/// A quick sync plans a few paths with only their [rows]; [rowCount] then
+/// passes the library's whole row count, which the mass-deletion guard
+/// measures against.
 SyncPlan planSync({
   required Map<String, LocalFileState> local,
   required Map<String, WebDavResource> remote,
@@ -463,6 +467,7 @@ SyncPlan planSync({
   WebDavCapabilities? capabilities,
   Map<String, String> localSha256 = const {},
   Map<String, String> remoteSha256 = const {},
+  int? rowCount,
 }) {
   final paths = {
     ...local.keys,
@@ -498,7 +503,7 @@ SyncPlan planSync({
   }
   return SyncPlan(
     paths.map((path) => decisions[path]).nonNulls,
-    rowCount: rows.keys.where(isSyncablePath).length,
+    rowCount: rowCount ?? rows.keys.where(isSyncablePath).length,
   );
 }
 

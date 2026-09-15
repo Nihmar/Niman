@@ -97,6 +97,20 @@ final class _Device {
     return report;
   }
 
+  Future<SyncReport> quick() async {
+    final report = await engine.run(quick: true);
+    await ops.writer.indexed;
+    return report;
+  }
+
+  Future<void> hint(String rel, SyncOpKind kind, {String? from}) =>
+      store.enqueue(path, rel, kind, fromPath: from);
+
+  Future<List<String>> queue() async => [
+    for (final op in await store.pendingOps(path))
+      '${op.kind} ${op.path} x${op.attempts}',
+  ];
+
   Future<void> close() async {
     await ops.writer.indexed;
     await index.close();
@@ -563,4 +577,176 @@ void main() {
       expect(report.changedLocally, {'r1.md', 'r2.md'});
     },
   );
+
+  group('quick sync and the queue', () {
+    /// PROPFINDs that list a folder's children.
+    List<String> listings() => [
+      for (final r in server.requests)
+        if (r.method == 'PROPFIND' && r.headers['depth'] == '1') r.path,
+    ];
+
+    setUp(() async {
+      a
+        ..write('a.md', 'one')
+        ..write('Dir/x.md', 'x')
+        ..write('Dir/y.md', 'y');
+      final first = await a.sync();
+      expect(first.clean, isTrue, reason: first.summary());
+      server.requests.clear();
+    });
+
+    test('uploads only the queued paths, without listing folders', () async {
+      a
+        ..write('a.md', 'two')
+        ..write('Dir/x.md', 'not queued');
+      await a.hint('a.md', SyncOpKind.changed);
+
+      final report = await a.quick();
+      expect(report.quick, isTrue);
+      expect(report.done[SyncActionKind.upload], 1, reason: report.summary());
+      expect(remoteText('a.md'), 'two');
+      expect(remoteText('Dir/x.md'), 'x', reason: 'not queued, not looked at');
+      expect(listings(), isEmpty);
+      expect(report.hintsDone, 1);
+      expect(await a.queue(), isEmpty);
+
+      // The full sync still finds what no hint pointed at.
+      final full = await a.sync();
+      expect(full.done[SyncActionKind.upload], 1, reason: full.summary());
+      expect(remoteText('Dir/x.md'), 'not queued');
+    });
+
+    test('with nothing due it does not even connect', () async {
+      final report = await a.quick();
+      expect(report.summary(), 'nothing to do');
+      expect(server.requests, isEmpty);
+    });
+
+    test('is never a first sync, and leaves the hints alone', () async {
+      b.write('b.md', 'new device');
+      await b.hint('b.md', SyncOpKind.changed);
+      final report = await b.quick();
+      expect(report.aborted, SyncAbort.notConfirmed);
+      expect(server.exists('b.md'), isFalse);
+      expect(await b.queue(), ['changed b.md x0']);
+    });
+
+    test('a queued rename becomes a MOVE', () async {
+      await a.ops.writer.indexed;
+      File(p.join(a.path, 'a.md')).renameSync(p.join(a.path, 'b.md'));
+      await a.hint('b.md', SyncOpKind.moved, from: 'a.md');
+
+      final report = await a.quick();
+      expect(
+        report.done[SyncActionKind.moveRemote],
+        1,
+        reason: report.summary(),
+      );
+      expect(server.exists('a.md'), isFalse);
+      expect(remoteText('b.md'), 'one');
+      expect(server.requests.where((r) => r.method == 'PUT'), isEmpty);
+      expect((await a.store.items(a.path)).keys, contains('b.md'));
+    });
+
+    test('a queued folder deletion deletes every file under it', () async {
+      Directory(p.join(a.path, 'Dir')).deleteSync(recursive: true);
+      await a.hint('Dir', SyncOpKind.deleted);
+
+      final report = await a.quick();
+      expect(
+        report.done[SyncActionKind.deleteRemote],
+        2,
+        reason: report.summary(),
+      );
+      expect(server.exists('Dir/x.md'), isFalse);
+      expect(server.exists('Dir/y.md'), isFalse);
+      expect(remoteText('a.md'), 'one');
+    });
+
+    test(
+      'a file missing remotely is left for the full sync to trash',
+      () async {
+        server.remove('a.md');
+        await a.hint('a.md', SyncOpKind.changed);
+
+        final report = await a.quick();
+        expect(report.deferred.single.kind, SyncActionKind.trashLocal);
+        expect(a.read('a.md'), 'one');
+        expect(await a.queue(), isEmpty);
+
+        final full = await a.sync();
+        expect(full.done[SyncActionKind.trashLocal], 1);
+        expect(a.read('a.md'), isNull);
+      },
+    );
+
+    test('a server that goes away keeps the queue, which resumes', () async {
+      a.write('a.md', 'written offline');
+      await a.hint('a.md', SyncOpKind.changed);
+      server.failNext(503, retryAfter: '30');
+
+      final down = await a.quick();
+      expect(down.aborted, SyncAbort.offline);
+      expect(down.retryAfter, const Duration(seconds: 30));
+      expect(down.hintsFailed, 1);
+      expect(await a.queue(), ['changed a.md x1']);
+      expect(
+        (await a.store.pendingOps(a.path)).single.lastError,
+        contains('offline'),
+      );
+      expect(await a.store.dueOps(a.path), isEmpty, reason: 'backing off');
+      expect(remoteText('a.md'), 'one');
+
+      await a.store.retryNow(a.path);
+      final up = await a.quick();
+      expect(up.clean, isTrue, reason: up.summary());
+      expect(remoteText('a.md'), 'written offline');
+      expect(await a.queue(), isEmpty);
+    });
+
+    test('a path that fails backs off alone', () async {
+      a
+        ..write('a.md', 'two')
+        ..write('Dir/x.md', 'x2');
+      await a.hint('a.md', SyncOpKind.changed);
+      await a.hint('Dir/x.md', SyncOpKind.changed);
+      server.failPutsTo('Dir/x.md', 507);
+
+      final report = await a.quick();
+      expect(report.failures.single.path, 'Dir/x.md');
+      expect(await a.queue(), ['changed Dir/x.md x1']);
+      expect(remoteText('a.md'), 'two');
+    });
+
+    test('a full sync settles every hint, backing off or not', () async {
+      a.write('a.md', 'two');
+      await a.hint('a.md', SyncOpKind.changed);
+      final op = (await a.store.pendingOps(a.path)).single;
+      await a.store.failOp(op, 'offline');
+      await a.hint('Dir/gone.md', SyncOpKind.deleted);
+
+      final report = await a.sync();
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.hintsDone, 2);
+      expect(await a.queue(), isEmpty);
+    });
+
+    test('a hint rewritten during the run survives it', () async {
+      a.write('a.md', 'two');
+      await a.hint('a.md', SyncOpKind.changed);
+      Future<void>? rewrite;
+      await a.engine.run(
+        quick: true,
+        onProgress: (stage, _, _) {
+          // Lands once the run has read the older hint.
+          if (stage == SyncStage.scanning) {
+            rewrite ??= a.hint('a.md', SyncOpKind.changed);
+          }
+        },
+      );
+      await rewrite;
+      await a.ops.writer.indexed;
+      expect(await a.queue(), ['changed a.md x0']);
+    });
+  });
 }
