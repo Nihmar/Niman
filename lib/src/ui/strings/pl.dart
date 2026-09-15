@@ -266,15 +266,11 @@ final class PolishStrings extends Strings {
   @override
   String get audioPlay => 'Odtwórz';
   @override
-  String get audioStopPlayback => 'Zatrzymaj odtwarzanie';
-  @override
   String get audioDelete => 'Usuń nagranie';
   @override
   String get audioImport => 'Importuj plik audio';
   @override
   String get audioRecording => 'Nagrywanie…';
-  @override
-  String get audioPlaying => 'Odtwarzanie';
   @override
   String get audioPermissionDenied =>
       'Brak uprawnienia do mikrofonu — jest potrzebne do nagrywania.';
@@ -298,6 +294,26 @@ final class PolishStrings extends Strings {
   String get audioDeleteNote => 'Usuń notatkę';
   @override
   String get audioEditNote => 'Edytuj notatkę';
+  @override
+  String get audioPause => 'Wstrzymaj';
+  @override
+  String get audioEditTitle => 'Edytuj tytuł';
+  @override
+  String get audioTitleHint => 'Tytuł tego nagrania…';
+  @override
+  String audioUntitled(int n) => 'Nagranie $n';
+  @override
+  String get audioMoreActions => 'Więcej działań';
+  @override
+  String get audioDiscardRecording => 'Odrzuć nagranie';
+  @override
+  String get audioPauseRecording => 'Wstrzymaj nagrywanie';
+  @override
+  String get audioResumeRecording => 'Wznów nagrywanie';
+  @override
+  String get audioRecordingPaused => 'Wstrzymano';
+  @override
+  String get audioSavingRecording => 'Zapisywanie…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -1,19 +1,23 @@
 /// The chat model of an `type: audio` note.
 ///
 /// A voice note reads as a chat: recordings on the left, written notes on
-/// the right, and each recording's description as a blockquote bubble
-/// under its vocal. On disk everything stays plain Markdown:
+/// the right, each recording titled and described by blockquotes around
+/// its embed. On disk everything stays plain Markdown:
 ///
 /// ```text
+/// > the title
 /// ![](assets/a.wav)
 /// > what was said
+///
 /// a written note
 /// ```
 ///
 /// An audio embed line (Markdown or wikilink, per [parseAudioClips]) is a
-/// vocal; the `> ` lines directly after it are its description; any other
-/// non-blank line run is a written note. Blank lines are separators only.
-/// Edits are byte-stable: untouched lines keep their bytes.
+/// vocal; the `> ` lines directly after it are its description, the `> `
+/// lines directly before it its title — unless they already follow a
+/// vocal, whose description they stay. Any other non-blank line run is a
+/// written note. Blank lines are separators only. Edits are byte-stable:
+/// untouched lines keep their bytes.
 ///
 /// Pure Dart, no I/O: the view renames the audio file itself.
 library;
@@ -22,16 +26,27 @@ import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/ui/kinds/audio_clip.dart';
 import 'package:niman/src/ui/kinds/audio_parser.dart';
 
-/// A vocal bubble: [clip] with its blockquote [description].
+/// A vocal bubble: [clip] with its blockquote [title] and [description].
 final class AudioChatMessage {
   /// Creates a vocal message.
-  const new({required this.clip, required this.description});
+  const new({
+    required this.clip,
+    required this.description,
+    this.title = '',
+    this.titleStart,
+  });
 
   /// The recording embed.
   final AudioClip clip;
 
   /// The description without the `> ` markers (may be empty).
   final String description;
+
+  /// The title without the `> ` markers (may be empty).
+  final String title;
+
+  /// The first absolute file line of the title, or null without one.
+  final int? titleStart;
 }
 
 /// A written-note bubble: raw body lines [start]..[end] (exclusive).
@@ -84,16 +99,7 @@ List<AudioChatItem> parseAudioChat(String text) {
   while (i < lines.length) {
     final clip = clips[i];
     if (clip != null) {
-      final description = <String>[];
-      var j = i + 1;
-      while (j < lines.length && isQuoteLine(lines[j])) {
-        description.add(stripQuoteMarker(lines[j]));
-        j++;
-      }
-      out.add(
-        AudioChatMessage(clip: clip, description: description.join('\n')),
-      );
-      i = j;
+      i = _addVocal(out, lines, clip, null);
       continue;
     }
     if (lines[i].trim().isEmpty) {
@@ -101,6 +107,19 @@ List<AudioChatItem> parseAudioChat(String text) {
       continue;
     }
     if (isQuoteLine(lines[i])) {
+      // A quote run that ends right on a vocal is that vocal's title (a
+      // run right after a vocal never gets here: it is its description).
+      var end = i;
+      while (end < lines.length &&
+          isQuoteLine(lines[end]) &&
+          clips[end] == null) {
+        end++;
+      }
+      final titled = end < lines.length ? clips[end] : null;
+      if (titled != null) {
+        i = _addVocal(out, lines, titled, i);
+        continue;
+      }
       // A stray quote with no vocal above it is a written note that
       // keeps its markers.
       final start = i;
@@ -134,6 +153,69 @@ List<AudioChatItem> parseAudioChat(String text) {
     );
   }
   return out;
+}
+
+/// Adds the vocal of [clip] (titled from [titleStart] when not null) to
+/// [out]; returns the line after its description.
+int _addVocal(
+  List<AudioChatItem> out,
+  List<String> lines,
+  AudioClip clip,
+  int? titleStart,
+) {
+  final description = <String>[];
+  var j = clip.line + 1;
+  while (j < lines.length && isQuoteLine(lines[j])) {
+    description.add(stripQuoteMarker(lines[j]));
+    j++;
+  }
+  out.add(
+    AudioChatMessage(
+      clip: clip,
+      description: description.join('\n'),
+      title: titleStart == null
+          ? ''
+          : lines
+                .sublist(titleStart, clip.line)
+                .map(stripQuoteMarker)
+                .join('\n'),
+      titleStart: titleStart,
+    ),
+  );
+  return j;
+}
+
+/// The vocal of [clip] as parsed from [text], or null when the clip is
+/// no longer there.
+AudioChatMessage? _vocalOf(String text, AudioClip clip) {
+  for (final item in parseAudioChat(text)) {
+    if (item is AudioChatMessage && item.clip.line == clip.line) return item;
+  }
+  return null;
+}
+
+/// The note text with [clip]'s title replaced by [title].
+///
+/// The title lives in the `> ` lines directly before the embed; an empty
+/// [title] removes them. A new title opens its own paragraph: a blank
+/// line goes before it when the line above holds text, so it never reads
+/// as the description of the bubble above.
+String setClipTitle(String text, AudioClip clip, String title) {
+  final lines = text.split('\n');
+  if (clip.line < 0 || clip.line >= lines.length) return text;
+  final start = _vocalOf(text, clip)?.titleStart ?? clip.line;
+  final clean = title.trim();
+  final replacement = <String>[
+    if (clean.isNotEmpty) ...[
+      if (start == clip.line &&
+          start > frontmatterLineCount(lines) &&
+          lines[start - 1].trim().isNotEmpty)
+        '',
+      for (final line in clean.split('\n')) '> $line',
+    ],
+  ];
+  lines.replaceRange(start, clip.line, replacement);
+  return lines.join('\n');
 }
 
 /// The note text with [message] appended as written-note lines: its own
@@ -188,10 +270,18 @@ String editTextNote(String text, int start, int end, String message) {
   return lines.join('\n');
 }
 
-/// The note text with [clip]'s vocal (embed plus its `> ` description
+/// The note text with [clip]'s vocal (title, embed and description
 /// lines) removed.
 String removeAudioMessage(String text, AudioClip clip) {
-  return removeAudioClip(setClipDescription(text, clip, ''), clip);
+  final vocal = _vocalOf(text, clip);
+  final start = vocal?.titleStart;
+  final untitled = setClipDescription(text, clip, '');
+  if (start == null) return removeAudioClip(untitled, clip);
+  // Drop the embed first, while the clip still sits on its own line.
+  return (removeAudioClip(
+    untitled,
+    clip,
+  ).split('\n')..removeRange(start, clip.line)).join('\n');
 }
 
 /// The note text with [clip]'s embed target renamed to [newTarget].

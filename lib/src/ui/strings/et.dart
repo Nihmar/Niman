@@ -260,15 +260,11 @@ final class EstonianStrings extends Strings {
   @override
   String get audioPlay => 'Esita';
   @override
-  String get audioStopPlayback => 'Peata esitus';
-  @override
   String get audioDelete => 'Kustuta salvestis';
   @override
   String get audioImport => 'Impordi helifail';
   @override
   String get audioRecording => 'Salvestamine…';
-  @override
-  String get audioPlaying => 'Esitamine';
   @override
   String get audioPermissionDenied =>
       'Mikrofoni luba keelatud — salvestamiseks on see vajalik.';
@@ -292,6 +288,26 @@ final class EstonianStrings extends Strings {
   String get audioDeleteNote => 'Kustuta märge';
   @override
   String get audioEditNote => 'Muuda märget';
+  @override
+  String get audioPause => 'Paus';
+  @override
+  String get audioEditTitle => 'Muuda pealkirja';
+  @override
+  String get audioTitleHint => 'Anna salvestisele pealkiri…';
+  @override
+  String audioUntitled(int n) => 'Salvestis $n';
+  @override
+  String get audioMoreActions => 'Rohkem toiminguid';
+  @override
+  String get audioDiscardRecording => 'Loobu salvestisest';
+  @override
+  String get audioPauseRecording => 'Peata salvestamine';
+  @override
+  String get audioResumeRecording => 'Jätka salvestamist';
+  @override
+  String get audioRecordingPaused => 'Peatatud';
+  @override
+  String get audioSavingRecording => 'Salvestamine…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

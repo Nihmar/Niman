@@ -247,15 +247,11 @@ final class ChineseStrings extends Strings {
   @override
   String get audioPlay => '播放';
   @override
-  String get audioStopPlayback => '停止播放';
-  @override
   String get audioDelete => '删除录音';
   @override
   String get audioImport => '导入音频文件';
   @override
   String get audioRecording => '正在录音…';
-  @override
-  String get audioPlaying => '正在播放';
   @override
   String get audioPermissionDenied => '麦克风权限被拒绝 — 录音需要此权限。';
   @override
@@ -278,6 +274,26 @@ final class ChineseStrings extends Strings {
   String get audioDeleteNote => '删除备注';
   @override
   String get audioEditNote => '编辑备注';
+  @override
+  String get audioPause => '暂停';
+  @override
+  String get audioEditTitle => '编辑标题';
+  @override
+  String get audioTitleHint => '为这段录音添加标题…';
+  @override
+  String audioUntitled(int n) => '录音 $n';
+  @override
+  String get audioMoreActions => '更多操作';
+  @override
+  String get audioDiscardRecording => '放弃录音';
+  @override
+  String get audioPauseRecording => '暂停录音';
+  @override
+  String get audioResumeRecording => '继续录音';
+  @override
+  String get audioRecordingPaused => '已暂停';
+  @override
+  String get audioSavingRecording => '正在保存…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

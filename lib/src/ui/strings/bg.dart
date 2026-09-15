@@ -266,15 +266,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get audioPlay => 'Пусни';
   @override
-  String get audioStopPlayback => 'Спри възпроизвеждането';
-  @override
   String get audioDelete => 'Изтрий записа';
   @override
   String get audioImport => 'Импортирай аудиофайл';
   @override
   String get audioRecording => 'Записване…';
-  @override
-  String get audioPlaying => 'Възпроизвеждане';
   @override
   String get audioPermissionDenied =>
       'Достъпът до микрофона е отказан — нужен е за записване.';
@@ -298,6 +294,26 @@ final class BulgarianStrings extends Strings {
   String get audioDeleteNote => 'Изтрий бележката';
   @override
   String get audioEditNote => 'Редактирай бележката';
+  @override
+  String get audioPause => 'Пауза';
+  @override
+  String get audioEditTitle => 'Редактиране на заглавието';
+  @override
+  String get audioTitleHint => 'Заглавие на записа…';
+  @override
+  String audioUntitled(int n) => 'Запис $n';
+  @override
+  String get audioMoreActions => 'Още действия';
+  @override
+  String get audioDiscardRecording => 'Отхвърляне на записа';
+  @override
+  String get audioPauseRecording => 'Пауза на записа';
+  @override
+  String get audioResumeRecording => 'Продължи записа';
+  @override
+  String get audioRecordingPaused => 'На пауза';
+  @override
+  String get audioSavingRecording => 'Запазване…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

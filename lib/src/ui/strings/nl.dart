@@ -267,15 +267,11 @@ final class DutchStrings extends Strings {
   @override
   String get audioPlay => 'Afspelen';
   @override
-  String get audioStopPlayback => 'Afspelen stoppen';
-  @override
   String get audioDelete => 'Opname verwijderen';
   @override
   String get audioImport => 'Audiobestand importeren';
   @override
   String get audioRecording => 'Opnemen…';
-  @override
-  String get audioPlaying => 'Wordt afgespeeld';
   @override
   String get audioPermissionDenied =>
       'Microfoontoegang geweigerd — nodig om op te nemen.';
@@ -299,6 +295,26 @@ final class DutchStrings extends Strings {
   String get audioDeleteNote => 'Notitie verwijderen';
   @override
   String get audioEditNote => 'Notitie bewerken';
+  @override
+  String get audioPause => 'Pauzeren';
+  @override
+  String get audioEditTitle => 'Titel bewerken';
+  @override
+  String get audioTitleHint => 'Titel voor deze opname…';
+  @override
+  String audioUntitled(int n) => 'Opname $n';
+  @override
+  String get audioMoreActions => 'Meer acties';
+  @override
+  String get audioDiscardRecording => 'Opname weggooien';
+  @override
+  String get audioPauseRecording => 'Opname pauzeren';
+  @override
+  String get audioResumeRecording => 'Opname hervatten';
+  @override
+  String get audioRecordingPaused => 'Gepauzeerd';
+  @override
+  String get audioSavingRecording => 'Opslaan…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

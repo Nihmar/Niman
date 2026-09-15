@@ -265,15 +265,11 @@ final class BosnianStrings extends Strings {
   @override
   String get audioPlay => 'Pusti';
   @override
-  String get audioStopPlayback => 'Zaustavi reprodukciju';
-  @override
   String get audioDelete => 'Obriši snimak';
   @override
   String get audioImport => 'Uvezi audio datoteku';
   @override
   String get audioRecording => 'Snimanje…';
-  @override
-  String get audioPlaying => 'Reprodukcija';
   @override
   String get audioPermissionDenied =>
       'Dozvola za mikrofon je odbijena — potrebna je za snimanje.';
@@ -297,6 +293,26 @@ final class BosnianStrings extends Strings {
   String get audioDeleteNote => 'Obriši bilješku';
   @override
   String get audioEditNote => 'Uredi bilješku';
+  @override
+  String get audioPause => 'Pauza';
+  @override
+  String get audioEditTitle => 'Uredi naslov';
+  @override
+  String get audioTitleHint => 'Naslov ovog snimka…';
+  @override
+  String audioUntitled(int n) => 'Snimak $n';
+  @override
+  String get audioMoreActions => 'Više radnji';
+  @override
+  String get audioDiscardRecording => 'Odbaci snimak';
+  @override
+  String get audioPauseRecording => 'Pauziraj snimanje';
+  @override
+  String get audioResumeRecording => 'Nastavi snimanje';
+  @override
+  String get audioRecordingPaused => 'Pauzirano';
+  @override
+  String get audioSavingRecording => 'Spremanje…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

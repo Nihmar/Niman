@@ -268,15 +268,11 @@ final class GalicianStrings extends Strings {
   @override
   String get audioPlay => 'Reproducir';
   @override
-  String get audioStopPlayback => 'Deter a reprodución';
-  @override
   String get audioDelete => 'Borrar a gravación';
   @override
   String get audioImport => 'Importar un ficheiro de audio';
   @override
   String get audioRecording => 'Gravando…';
-  @override
-  String get audioPlaying => 'Reproducindo';
   @override
   String get audioPermissionDenied =>
       'Permiso do micrófono denegado — é necesario para gravar.';
@@ -300,6 +296,26 @@ final class GalicianStrings extends Strings {
   String get audioDeleteNote => 'Borrar a nota';
   @override
   String get audioEditNote => 'Editar a nota';
+  @override
+  String get audioPause => 'Pausa';
+  @override
+  String get audioEditTitle => 'Editar título';
+  @override
+  String get audioTitleHint => 'Título desta gravación…';
+  @override
+  String audioUntitled(int n) => 'Gravación $n';
+  @override
+  String get audioMoreActions => 'Máis accións';
+  @override
+  String get audioDiscardRecording => 'Descartar gravación';
+  @override
+  String get audioPauseRecording => 'Pausar a gravación';
+  @override
+  String get audioResumeRecording => 'Retomar a gravación';
+  @override
+  String get audioRecordingPaused => 'En pausa';
+  @override
+  String get audioSavingRecording => 'Gardando…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

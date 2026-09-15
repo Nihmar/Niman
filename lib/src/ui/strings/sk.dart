@@ -264,15 +264,11 @@ final class SlovakStrings extends Strings {
   @override
   String get audioPlay => 'Prehrať';
   @override
-  String get audioStopPlayback => 'Zastaviť prehrávanie';
-  @override
   String get audioDelete => 'Vymazať nahrávku';
   @override
   String get audioImport => 'Importovať zvukový súbor';
   @override
   String get audioRecording => 'Nahráva sa…';
-  @override
-  String get audioPlaying => 'Prehráva sa';
   @override
   String get audioPermissionDenied =>
       'Povolenie na mikrofón bolo zamietnuté — nahrávanie ho vyžaduje.';
@@ -296,6 +292,26 @@ final class SlovakStrings extends Strings {
   String get audioDeleteNote => 'Vymazať poznámku';
   @override
   String get audioEditNote => 'Upraviť poznámku';
+  @override
+  String get audioPause => 'Pozastaviť';
+  @override
+  String get audioEditTitle => 'Upraviť názov';
+  @override
+  String get audioTitleHint => 'Názov tejto nahrávky…';
+  @override
+  String audioUntitled(int n) => 'Nahrávka $n';
+  @override
+  String get audioMoreActions => 'Ďalšie akcie';
+  @override
+  String get audioDiscardRecording => 'Zahodiť nahrávku';
+  @override
+  String get audioPauseRecording => 'Pozastaviť nahrávanie';
+  @override
+  String get audioResumeRecording => 'Pokračovať v nahrávaní';
+  @override
+  String get audioRecordingPaused => 'Pozastavené';
+  @override
+  String get audioSavingRecording => 'Ukladanie…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

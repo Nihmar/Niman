@@ -265,15 +265,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get audioPlay => 'Spill av';
   @override
-  String get audioStopPlayback => 'Stopp avspilling';
-  @override
   String get audioDelete => 'Slett opptak';
   @override
   String get audioImport => 'Importer en lydfil';
   @override
   String get audioRecording => 'Tar opp…';
-  @override
-  String get audioPlaying => 'Spiller av';
   @override
   String get audioPermissionDenied =>
       'Mikrofontillatelse avslått — opptak krever den.';
@@ -297,6 +293,26 @@ final class NorwegianStrings extends Strings {
   String get audioDeleteNote => 'Slett notat';
   @override
   String get audioEditNote => 'Rediger notat';
+  @override
+  String get audioPause => 'Pause';
+  @override
+  String get audioEditTitle => 'Rediger tittel';
+  @override
+  String get audioTitleHint => 'Gi opptaket en tittel…';
+  @override
+  String audioUntitled(int n) => 'Opptak $n';
+  @override
+  String get audioMoreActions => 'Flere handlinger';
+  @override
+  String get audioDiscardRecording => 'Forkast opptak';
+  @override
+  String get audioPauseRecording => 'Sett opptaket på pause';
+  @override
+  String get audioResumeRecording => 'Fortsett opptaket';
+  @override
+  String get audioRecordingPaused => 'Pauset';
+  @override
+  String get audioSavingRecording => 'Lagrer…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

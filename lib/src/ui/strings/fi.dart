@@ -264,15 +264,11 @@ final class FinnishStrings extends Strings {
   @override
   String get audioPlay => 'Toista';
   @override
-  String get audioStopPlayback => 'Pysäytä toisto';
-  @override
   String get audioDelete => 'Poista äänitys';
   @override
   String get audioImport => 'Tuo äänitiedosto';
   @override
   String get audioRecording => 'Äänitetään…';
-  @override
-  String get audioPlaying => 'Toistetaan';
   @override
   String get audioPermissionDenied =>
       'Mikrofonin käyttöoikeus evätty — äänittäminen edellyttää sitä.';
@@ -296,6 +292,26 @@ final class FinnishStrings extends Strings {
   String get audioDeleteNote => 'Poista muistiinpano';
   @override
   String get audioEditNote => 'Muokkaa muistiinpanoa';
+  @override
+  String get audioPause => 'Tauko';
+  @override
+  String get audioEditTitle => 'Muokkaa otsikkoa';
+  @override
+  String get audioTitleHint => 'Anna tallenteelle otsikko…';
+  @override
+  String audioUntitled(int n) => 'Tallenne $n';
+  @override
+  String get audioMoreActions => 'Lisää toimintoja';
+  @override
+  String get audioDiscardRecording => 'Hylkää tallenne';
+  @override
+  String get audioPauseRecording => 'Keskeytä äänitys';
+  @override
+  String get audioResumeRecording => 'Jatka äänitystä';
+  @override
+  String get audioRecordingPaused => 'Tauolla';
+  @override
+  String get audioSavingRecording => 'Tallennetaan…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

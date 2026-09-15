@@ -263,15 +263,11 @@ final class CroatianStrings extends Strings {
   @override
   String get audioPlay => 'Reproduciraj';
   @override
-  String get audioStopPlayback => 'Zaustavi reprodukciju';
-  @override
   String get audioDelete => 'Obriši snimku';
   @override
   String get audioImport => 'Uvezi audiodatoteku';
   @override
   String get audioRecording => 'Snimanje…';
-  @override
-  String get audioPlaying => 'Reprodukcija';
   @override
   String get audioPermissionDenied =>
       'Dopuštenje za mikrofon je odbijeno — potrebno je za snimanje.';
@@ -295,6 +291,26 @@ final class CroatianStrings extends Strings {
   String get audioDeleteNote => 'Obriši napomenu';
   @override
   String get audioEditNote => 'Uredi napomenu';
+  @override
+  String get audioPause => 'Pauza';
+  @override
+  String get audioEditTitle => 'Uredi naslov';
+  @override
+  String get audioTitleHint => 'Naslov ove snimke…';
+  @override
+  String audioUntitled(int n) => 'Snimka $n';
+  @override
+  String get audioMoreActions => 'Više radnji';
+  @override
+  String get audioDiscardRecording => 'Odbaci snimku';
+  @override
+  String get audioPauseRecording => 'Pauziraj snimanje';
+  @override
+  String get audioResumeRecording => 'Nastavi snimanje';
+  @override
+  String get audioRecordingPaused => 'Pauzirano';
+  @override
+  String get audioSavingRecording => 'Spremanje…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

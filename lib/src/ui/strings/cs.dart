@@ -263,15 +263,11 @@ final class CzechStrings extends Strings {
   @override
   String get audioPlay => 'Přehrát';
   @override
-  String get audioStopPlayback => 'Zastavit přehrávání';
-  @override
   String get audioDelete => 'Smazat nahrávku';
   @override
   String get audioImport => 'Importovat zvukový soubor';
   @override
   String get audioRecording => 'Nahrávání…';
-  @override
-  String get audioPlaying => 'Přehrávání';
   @override
   String get audioPermissionDenied =>
       'Oprávnění k mikrofonu bylo zamítnuto — nahrávání ho vyžaduje.';
@@ -295,6 +291,26 @@ final class CzechStrings extends Strings {
   String get audioDeleteNote => 'Smazat poznámku';
   @override
   String get audioEditNote => 'Upravit poznámku';
+  @override
+  String get audioPause => 'Pozastavit';
+  @override
+  String get audioEditTitle => 'Upravit název';
+  @override
+  String get audioTitleHint => 'Název této nahrávky…';
+  @override
+  String audioUntitled(int n) => 'Nahrávka $n';
+  @override
+  String get audioMoreActions => 'Další akce';
+  @override
+  String get audioDiscardRecording => 'Zahodit nahrávku';
+  @override
+  String get audioPauseRecording => 'Pozastavit nahrávání';
+  @override
+  String get audioResumeRecording => 'Pokračovat v nahrávání';
+  @override
+  String get audioRecordingPaused => 'Pozastaveno';
+  @override
+  String get audioSavingRecording => 'Ukládání…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -266,15 +266,11 @@ final class DanishStrings extends Strings {
   @override
   String get audioPlay => 'Afspil';
   @override
-  String get audioStopPlayback => 'Stop afspilning';
-  @override
   String get audioDelete => 'Slet optagelse';
   @override
   String get audioImport => 'Importér en lydfil';
   @override
   String get audioRecording => 'Optager…';
-  @override
-  String get audioPlaying => 'Afspiller';
   @override
   String get audioPermissionDenied =>
       'Adgang til mikrofonen nægtet — den er nødvendig for at optage.';
@@ -298,6 +294,26 @@ final class DanishStrings extends Strings {
   String get audioDeleteNote => 'Slet note';
   @override
   String get audioEditNote => 'Rediger note';
+  @override
+  String get audioPause => 'Pause';
+  @override
+  String get audioEditTitle => 'Rediger titel';
+  @override
+  String get audioTitleHint => 'Giv optagelsen en titel…';
+  @override
+  String audioUntitled(int n) => 'Optagelse $n';
+  @override
+  String get audioMoreActions => 'Flere handlinger';
+  @override
+  String get audioDiscardRecording => 'Kassér optagelse';
+  @override
+  String get audioPauseRecording => 'Sæt optagelsen på pause';
+  @override
+  String get audioResumeRecording => 'Genoptag optagelsen';
+  @override
+  String get audioRecordingPaused => 'På pause';
+  @override
+  String get audioSavingRecording => 'Gemmer…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

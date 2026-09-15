@@ -261,15 +261,11 @@ final class TurkishStrings extends Strings {
   @override
   String get audioPlay => 'Oynat';
   @override
-  String get audioStopPlayback => 'Oynatmayı durdur';
-  @override
   String get audioDelete => 'Kaydı sil';
   @override
   String get audioImport => 'Ses dosyası içe aktar';
   @override
   String get audioRecording => 'Kaydediliyor…';
-  @override
-  String get audioPlaying => 'Oynatılıyor';
   @override
   String get audioPermissionDenied =>
       'Mikrofon izni reddedildi — kayıt için gerekli.';
@@ -293,6 +289,26 @@ final class TurkishStrings extends Strings {
   String get audioDeleteNote => 'Notu sil';
   @override
   String get audioEditNote => 'Notu düzenle';
+  @override
+  String get audioPause => 'Duraklat';
+  @override
+  String get audioEditTitle => 'Başlığı düzenle';
+  @override
+  String get audioTitleHint => 'Bu kayda bir başlık ver…';
+  @override
+  String audioUntitled(int n) => 'Kayıt $n';
+  @override
+  String get audioMoreActions => 'Diğer işlemler';
+  @override
+  String get audioDiscardRecording => 'Kaydı at';
+  @override
+  String get audioPauseRecording => 'Kaydı duraklat';
+  @override
+  String get audioResumeRecording => 'Kayda devam et';
+  @override
+  String get audioRecordingPaused => 'Duraklatıldı';
+  @override
+  String get audioSavingRecording => 'Kaydediliyor…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
