@@ -51,6 +51,27 @@ void main() {
       expect(await store.read(), config);
     });
 
+    test(
+      'round trips the history interval; nonsense reads back as 5',
+      () async {
+        final lib = await makeLibrary();
+        final store = LibraryConfigStore(lib.path);
+        const config = LibraryConfig(
+          trashEnabled: true,
+          historyVersions: 10,
+          quickNotePath: null,
+          listNoteFolder: 'Lists',
+          historyIntervalMinutes: 15,
+        );
+        await store.write(config);
+        expect((await store.read()).historyIntervalMinutes, 15);
+        expect(normalizeHistoryIntervalMinutes(0), 5);
+        expect(normalizeHistoryIntervalMinutes(61), 5);
+        expect(normalizeHistoryIntervalMinutes('10'), 5);
+        expect(normalizeHistoryIntervalMinutes(60), 60);
+      },
+    );
+
     test('round trips the spell-check dictionaries', () async {
       final lib = await makeLibrary();
       final store = LibraryConfigStore(lib.path);

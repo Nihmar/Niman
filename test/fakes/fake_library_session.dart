@@ -12,6 +12,7 @@ import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
@@ -601,6 +602,73 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   Future<void> saveNote(String path, String content, {int? editSession}) async {
     saves.add((path, content, editSession));
     (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
+    _bump();
+  }
+
+  /// Kept versions by note path: `(version, text)`, oldest first.
+  final Map<String, List<(HistoryVersion, String)>> _history = {};
+
+  /// Pins by note path.
+  final Map<String, Map<String, int>> _historyPins = {};
+
+  /// Test-only seeding of a history version of [path].
+  void seedVersion(
+    String path, {
+    required int number,
+    required DateTime savedAt,
+    required String text,
+    HistoryReason reason = HistoryReason.session,
+    String? pin,
+  }) {
+    (_history[path] ??= []).add((
+      HistoryVersion(
+        number: number,
+        savedAt: savedAt,
+        reason: reason,
+        size: text.length,
+        sha256: 'sha-$number',
+      ),
+      text,
+    ));
+    if (pin != null) (_historyPins[path] ??= {})[pin] = number;
+  }
+
+  @override
+  Future<HistoryManifest> noteHistory(String path) async => HistoryManifest(
+    versions: [
+      for (final (v, _) in _history[path] ?? const <(HistoryVersion, String)>[])
+        v,
+    ],
+    pins: _historyPins[path] ?? const {},
+  );
+
+  @override
+  Future<String> readNoteVersion(String path, int number) async {
+    for (final (v, text)
+        in _history[path] ?? const <(HistoryVersion, String)>[]) {
+      if (v.number == number) return text;
+    }
+    throw StateError('"$path" has no version $number');
+  }
+
+  /// Every [restoreNoteVersion] call, in order: `(path, number)`.
+  final List<(String, int)> restores = [];
+
+  @override
+  Future<void> restoreNoteVersion(String path, int number) async {
+    restores.add((path, number));
+    final text = await readNoteVersion(path, number);
+    final row = _requireRow(path);
+    final kept = _history[path] ??= [];
+    final next = kept.fold<int>(0, (m, e) => e.$1.number > m ? e.$1.number : m);
+    seedVersion(
+      path,
+      number: next + 1,
+      savedAt: DateTime.now(),
+      text: row.content,
+      reason: HistoryReason.restore,
+    );
+    row.content = text;
     _bump();
   }
 
