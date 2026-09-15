@@ -54,7 +54,8 @@ Full guides live in [`docs/`](docs/):
 
 - **Trash:** soft delete to `.trash/`, or hard delete — your choice per
   library.
-- **History:** local `.history/` keeps the last N versions of each note.
+- **History:** local `.history/` keeps past versions of each note; browse
+  them, compare with the current text and restore from the note's menu.
 - **Templates:** with placeholders like `{{title}}`, `{{date:YYYY-MM-DD}}`,
   `{{time}}`, `{{uuid}}`; frontmatter from the template merges into the new
   note.
@@ -109,8 +110,6 @@ These are tracked as GitHub issues — see the
   background indexing and bounded memory for very large libraries.
 - **Platform parity** ([#39](https://github.com/Nihmar/Niman/issues/39)) —
   share-in on Android, file association on desktop, single-instance guard.
-- **Note history viewer** ([#55](https://github.com/Nihmar/Niman/issues/55)) —
-  browse and restore past versions of a note.
 - **Performance** ([#45](https://github.com/Nihmar/Niman/issues/45)) —
   tab-switch smoothness and editor performance on large notes.
 - **Packaging & release** ([#31](https://github.com/Nihmar/Niman/issues/31)) —
