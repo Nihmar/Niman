@@ -358,6 +358,65 @@ any isolate and is tested against an in-process fake server
 switches turn ETags, collection ETags, `If-Match`, `MOVE`, auth,
 redirects and injected failures on and off.
 
+### The engine (`lib/src/sync/sync_engine.dart`)
+
+`SyncEngine.run` does one full sync of a library; a second call while
+one runs joins it.
+
+1. **Destination:** row, password (a user without a stored password
+   stops the run), client. Capabilities come from the store; missing or
+   older than 30 days, the probe runs and stores them.
+2. **Scan:** the local tree off the UI isolate (size + mtime, dot
+   folders skipped except `.niman`), the remote tree with `Depth: 1` per
+   folder. A missing remote folder stops the run — it never reads as an
+   empty one.
+3. **Plan:** `planSync`, then up to three hashing passes (local files
+   hashed streamed in an isolate; remote ones downloaded to a discarding
+   sink) until nothing waits for a hash.
+4. **Confirm:** a first sync (no rows, never synced) and a plan that
+   looks like a mass deletion go through the caller's `confirm`. Without
+   one, a first sync goes ahead — it cannot delete — and a mass deletion
+   is refused.
+5. **Apply**, one decision at a time. Before touching a side, the engine
+   checks it still is what the scan saw (local size + mtime; the remote
+   with a PROPFIND when the decision has no precondition): a path that
+   moved meanwhile is skipped and decided again next run.
+   - *upload*: missing remote folders are created (once per run), `PUT`
+     streamed from disk with `If-Match` / `If-None-Match` and
+     `X-OC-Mtime`, then a `PROPFIND Depth: 0` for the metadata to record.
+   - *download*: `GET` into `.<name>.niman-tmp-sync-<µs>` next to the
+     target, size checked against the listing (unless the ETag says the
+     file was rewritten since), then `NoteOps.syncReplace`: in the note's
+     save order, the replaced text becomes a `sync` version, the temp
+     file is renamed over, the index follows. Replacing
+     `.niman/settings.json` reloads the settings.
+   - *deleteRemote*: `DELETE` with `If-Match`. *trashLocal*:
+     `NoteOps.syncTrash`, which uses `.trash/` whatever the trash toggle.
+   - *moveRemote*: `MOVE`, then the row moves; a server that turns out
+     not to support it gets `move: false` stored. *moveLocal*:
+     `NoteOps.syncMove`, history included.
+   - *conflict*: the remote is downloaded and hashed. Equal content is
+     recorded. For `.niman/*.json` the newer side (local mtime vs remote
+     `getlastmodified`) wins whole, since a line merge could break JSON.
+     Anything else is left untouched on both sides and reported, with the
+     pinned base, for the merge (step 7).
+6. **Rows:** every success records local sha/size/mtime, remote ETag/
+   size/mtime/file id, `remote_unverified` (no file ETags and the mtime
+   within 2 s of the server's `Date`, never this device's clock), and —
+   for notes — the pinned base: the newest history version with the
+   agreed content, kept as a new `sync` version when none has it
+   (`NoteHistory.pinSyncBase`).
+7. **Errors:** 401/403 and a lost connection stop the run; any other
+   failure fails that path only and the run goes on. The outcome goes to
+   `sync_destinations.last_error` (cleared by a clean run) and comes back
+   as a `SyncReport`: counts per action, conflicts, failures, skipped
+   paths, or why it stopped.
+
+Not yet: parallel transfers, skipping unchanged folders by collection
+ETag, pruning remote folders left empty, `Retry-After` waits (the
+queue's job, step 6), and telling an open editor that its note was
+replaced (step 5/6).
+
 ### Queue and triggers
 
 `sync_ops` in `AppDatabase` persists across restarts; ops on the same

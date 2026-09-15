@@ -28,14 +28,14 @@ final class _Node {
   final bool folder;
   Uint8List bytes;
   int version;
-  DateTime modified = _now();
+  DateTime modified = DateTime.utc(2000);
   late final String id = '${_ids++}'.padLeft(8, '0');
 
   static int _ids = 1;
 }
 
-DateTime _now() {
-  final now = DateTime.now().toUtc();
+DateTime _second(DateTime at) {
+  final now = at.toUtc();
   return DateTime.utc(
     now.year,
     now.month,
@@ -119,6 +119,10 @@ final class FakeWebDavServer {
   /// `PROPFIND` answers 405.
   bool propfindRefused = false;
 
+  /// The server's clock: file mtimes (whole seconds) and the `Date`
+  /// header. Tests move it to put writes in different seconds.
+  DateTime Function() clock = DateTime.now;
+
   final List<({int status, String? retryAfter})> _failures = [];
   int _skipBeforeFailures = 0;
   int _dropGets = 0;
@@ -140,17 +144,30 @@ final class FakeWebDavServer {
   /// The next GET sends half its body, then drops the connection.
   void dropNextGet() => _dropGets++;
 
+  final Map<String, int> _failPuts = {};
+
+  /// The next PUT to [path] answers [status] (once).
+  void failPutsTo(String path, int status) => _failPuts[path] = status;
+
+  /// Removes the file or folder at [path], as another client would.
+  void remove(String path) {
+    _tree.removeWhere((k, _) => k == path || k.startsWith('$path/'));
+    _tick++;
+    _touchAncestors(path);
+  }
+
   /// Creates or replaces the file at [path] (parents created).
   void putFile(String path, List<int> bytes) {
     _mkdirs(_parent(path));
     final node = _tree[path];
     if (node == null) {
-      _tree[path] = _Node.file(Uint8List.fromList(bytes), ++_tick);
+      _tree[path] = _Node.file(Uint8List.fromList(bytes), ++_tick)
+        ..modified = _second(clock());
     } else {
       node
         ..bytes = Uint8List.fromList(bytes)
         ..version = ++_tick
-        ..modified = _now();
+        ..modified = _second(clock());
     }
     _touchAncestors(path);
   }
@@ -184,7 +201,7 @@ final class FakeWebDavServer {
   void _mkdirs(String folder) {
     if (folder.isEmpty || _tree.containsKey(folder)) return;
     _mkdirs(_parent(folder));
-    _tree[folder] = _Node.folder(++_tick);
+    _tree[folder] = _Node.folder(++_tick)..modified = _second(clock());
   }
 
   void _touchAncestors(String path) {
@@ -205,6 +222,7 @@ final class FakeWebDavServer {
     final headers = <String, String>{};
     request.headers.forEach((name, values) => headers[name] = values.first);
     requests.add(FakeWebDavRequest(request.method, request.uri.path, headers));
+    request.response.headers.date = clock();
     try {
       await _route(request, headers);
     } on Object catch (e) {
@@ -293,7 +311,7 @@ final class FakeWebDavServer {
         } else if (!(_tree[_parent(path)]?.folder ?? false)) {
           response.statusCode = 409;
         } else {
-          _tree[path] = _Node.folder(++_tick);
+          _tree[path] = _Node.folder(++_tick)..modified = _second(clock());
           _touchAncestors(path);
           response.statusCode = 201;
         }
@@ -301,6 +319,14 @@ final class FakeWebDavServer {
         await request.drain<void>();
         if (path.isEmpty || !_tree.containsKey(path)) {
           response.statusCode = 404;
+          return;
+        }
+        final ifMatch = headers['if-match'];
+        if (preconditions &&
+            ifMatch != null &&
+            ifMatch != '*' &&
+            ifMatch != _etag(_tree[path]!)) {
+          response.statusCode = 412;
           return;
         }
         _tree.removeWhere((k, _) => k == path || k.startsWith('$path/'));
@@ -440,6 +466,11 @@ final class FakeWebDavServer {
     await request.forEach(builder.add);
     final bytes = builder.takeBytes();
     final response = request.response;
+    final injected = _failPuts.remove(path);
+    if (injected != null) {
+      response.statusCode = injected;
+      return;
+    }
     if (!(_tree[_parent(path)]?.folder ?? false)) {
       response.statusCode = 409;
       return;
