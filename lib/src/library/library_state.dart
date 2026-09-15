@@ -30,6 +30,8 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/update/update_scheduler.dart';
@@ -77,7 +79,9 @@ final class LibraryController implements LibrarySession {
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
-  }) : _searchDbFactory = searchDbFactory ?? indexDbFactory;
+    SyncSecretStore? syncSecrets,
+  }) : _searchDbFactory = searchDbFactory ?? indexDbFactory,
+       syncSecrets = syncSecrets ?? SecureSyncSecretStore();
 
   /// Full-rescan fallback cadence: the watcher covers live changes, so the
   /// full walk is the safety net (a missed event, a network mount). One
@@ -125,6 +129,10 @@ final class LibraryController implements LibrarySession {
 
   /// Debounce window for the file watcher.
   final Duration watcherDebounce;
+
+  /// Where each library's WebDAV password lives (M5); the OS secure
+  /// storage unless a test injects another.
+  final SyncSecretStore syncSecrets;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
@@ -563,6 +571,16 @@ final class LibraryController implements LibrarySession {
     // Widgets pointing at it would open a library the home screen no
     // longer lists; their rows go with the entry (issue 6).
     await WidgetConfigStore(db).removeForLibrary(libraryPath);
+    // Its sync state describes a library the app no longer knows; opened
+    // again, it starts unconfigured (docs/dev/sync.md, "Configuration").
+    await SyncStore(db).removeLibrary(libraryPath);
+    try {
+      await syncSecrets.delete(libraryPath);
+    } on Exception catch (e) {
+      // A missing keychain must not block forgetting; the entry is inert
+      // without its destination row.
+      _log.warning('forget library: sync password not deleted: $e');
+    }
     // The mirror would otherwise keep offering a forgotten library.
     unawaited(_saveWidgetLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
