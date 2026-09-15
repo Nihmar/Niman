@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/audio_import.dart';
 import 'package:niman/src/library/wav_duration.dart';
+import 'package:niman/src/ui/kinds/audio_capture.dart';
 import 'package:niman/src/ui/kinds/audio_chat.dart';
 import 'package:niman/src/ui/kinds/audio_chat_list.dart';
 import 'package:niman/src/ui/kinds/audio_chat_row.dart';
@@ -128,16 +128,16 @@ class AudioNoteView extends StatefulWidget {
 
 class _AudioNoteViewState extends State<AudioNoteView>
     with SingleTickerProviderStateMixin {
-  // The microphone is created lazily on first use, like the player inside
-  // [AudioPlayback]: the page should open instantly.
-  VoiceRecorder? _recorder;
   late final AudioPlayback _playback = AudioPlayback(
     () => widget.player ?? AudioplayersClipPlayer(),
     ownsPlayer: widget.player == null,
   );
+  late final AudioCapture _capture = AudioCapture(
+    () => widget.recorder ?? RecordVoiceRecorder(),
+    ownsRecorder: widget.recorder == null,
+    onError: _fail,
+  );
   final TextEditingController _input = TextEditingController();
-  bool _recording = false;
-  bool _busy = false;
   late List<AudioChatRow> _rows = AudioChatRow.rowsOf(widget.text);
   // Clip files whose length was already asked for.
   final Set<String> _probed = {};
@@ -150,11 +150,19 @@ class _AudioNoteViewState extends State<AudioNoteView>
   @override
   void initState() {
     super.initState();
+    var wasRecording = false;
+    _capture.addListener(() {
+      // Swell the stop button once when the microphone goes live.
+      if (_capture.recording && !wasRecording) {
+        _pulse
+          ..stop()
+          ..value = 0
+          ..forward();
+      }
+      wasRecording = _capture.recording;
+      if (mounted) setState(() {});
+    });
     _probeLengths();
-  }
-
-  VoiceRecorder _ensureRecorder() {
-    return _recorder ??= widget.recorder ?? RecordVoiceRecorder();
   }
 
   @override
@@ -174,7 +182,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
     _pulse.dispose();
     _input.dispose();
     _playback.dispose();
-    if (widget.recorder == null) _recorder?.dispose();
+    _capture.dispose();
     super.dispose();
   }
 
@@ -210,27 +218,8 @@ class _AudioNoteViewState extends State<AudioNoteView>
         .showSnackBar(SnackBar(content: Text('$error')));
   }
 
-  Future<String?> _prompt({
-    required String title,
-    required String initial,
-    String? hint,
-    String? confirm,
-    bool singleLine = false,
-  }) {
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AudioPromptDialog(
-        title: title,
-        initial: initial,
-        hint: hint,
-        confirm: confirm,
-        singleLine: singleLine,
-      ),
-    );
-  }
-
   Future<void> _togglePlay(AudioChatRow row, AudioClip clip) async {
-    if (_recording) return;
+    if (_capture.recording) return;
     try {
       await _playback.toggle(row.key, _absoluteOf(clip.target));
     } on Object catch (error) {
@@ -251,7 +240,8 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   Future<void> _editTextNote(TextChatMessage item) async {
-    final saved = await _prompt(
+    final saved = await AudioPromptDialog.show(
+      context,
       title: AppStrings.audioEditNote,
       hint: AppStrings.audioMessageHint,
       initial: item.text,
@@ -261,7 +251,8 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   Future<void> _editTitle(AudioChatMessage item) async {
-    final saved = await _prompt(
+    final saved = await AudioPromptDialog.show(
+      context,
       title: AppStrings.audioEditTitle,
       hint: AppStrings.audioTitleHint,
       initial: item.title,
@@ -272,7 +263,8 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   Future<void> _editDescription(AudioChatMessage item) async {
-    final saved = await _prompt(
+    final saved = await AudioPromptDialog.show(
+      context,
       title: AppStrings.audioEditDescription,
       hint: AppStrings.audioDescriptionHint,
       initial: item.description,
@@ -282,7 +274,8 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   Future<void> _renameClip(AudioClip clip) async {
-    final renamed = await _prompt(
+    final renamed = await AudioPromptDialog.show(
+      context,
       title: AppStrings.audioRename,
       initial: clip.name,
       confirm: AppStrings.actionRename,
@@ -290,19 +283,14 @@ class _AudioNoteViewState extends State<AudioNoteView>
     );
     if (renamed == null || !mounted) return;
     final wanted = renamed.trim();
-    final root = widget.libraryRoot;
-    if (wanted.isEmpty || wanted == clip.name || root == null) return;
-    setState(() => _busy = true);
-    try {
+    if (wanted.isEmpty || wanted == clip.name) return;
+    if (widget.libraryRoot == null) return;
+    await _capture.guard(() async {
       final rename = widget.renameAudio ?? _renameInLibrary;
       final next = await rename(clip.target, wanted);
       if (!mounted) return;
       widget.onChanged(renameAudioClipTarget(widget.text, clip, next));
-    } on Object catch (error) {
-      _fail(error);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    });
   }
 
   Future<String> _renameInLibrary(String oldRelative, String wanted) {
@@ -314,7 +302,9 @@ class _AudioNoteViewState extends State<AudioNoteView>
   }
 
   /// Copies [source] into the library and appends it as a new vocal.
-  Future<void> _attach(String root, String source) async {
+  Future<void> _attach(String source) async {
+    final root = widget.libraryRoot;
+    if (root == null || !mounted) return;
     final relative =
         await (widget.importAudio?.call(root, source) ??
             importAudioToLibrary(
@@ -328,19 +318,11 @@ class _AudioNoteViewState extends State<AudioNoteView>
     );
   }
 
-  Future<void> _import() async {
-    final root = widget.libraryRoot;
-    if (root == null || _busy || _recording) return;
-    setState(() => _busy = true);
-    try {
+  Future<void> _import() {
+    return _capture.guard(() async {
       final source = await (widget.pickAudioPath?.call() ?? _pickAudioFile());
-      if (source == null || !mounted) return;
-      await _attach(root, source);
-    } on Object catch (error) {
-      _fail(error);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+      if (source != null) await _attach(source);
+    });
   }
 
   Future<String?> _pickAudioFile() async {
@@ -349,74 +331,11 @@ class _AudioNoteViewState extends State<AudioNoteView>
     return file?.path;
   }
 
-  Future<void> _toggleRecord() async {
-    final root = widget.libraryRoot;
-    if (root == null || _busy) return;
-    if (_recording) {
-      await _stopRecording(root);
-      return;
-    }
-    setState(() => _busy = true);
-    await _playback.stop();
-    try {
-      if (!await _ensureRecorder().hasPermission()) {
-        if (mounted) _fail(AppStrings.audioPermissionDenied);
-        return;
-      }
-      final path = await (widget.newRecordPath?.call() ?? _tempRecordPath());
-      await _ensureRecorder().start(path: path);
-      if (!mounted) return;
-      setState(() => _recording = true);
-      _pulse
-        ..stop()
-        ..value = 0
-        ..forward();
-    } on Object catch (error) {
-      _fail(error);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _stopRecording(String root) async {
-    setState(() => _busy = true);
-    try {
-      final path = await _ensureRecorder().stop();
-      if (!mounted) return;
-      setState(() => _recording = false);
-      if (path == null) return;
-      await _attach(root, path);
-    } on Object catch (error) {
-      if (mounted) setState(() => _recording = false);
-      _fail(error);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  /// Throws the live recording away: nothing reaches the note.
-  Future<void> _discardRecording() async {
-    if (!_recording || _busy) return;
-    setState(() => _busy = true);
-    try {
-      await _ensureRecorder().cancel();
-    } on Object catch (error) {
-      _fail(error);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _recording = false;
-          _busy = false;
-        });
-      }
-    }
-  }
-
-  Future<String> _tempRecordPath() async {
-    final dir = await Directory.systemTemp.createTemp('niman_rec_');
-    return p.join(
-      dir.path,
-      'clip-${DateTime.now().millisecondsSinceEpoch}.wav',
+  Future<void> _toggleRecord() {
+    return _capture.toggle(
+      beforeStart: _playback.stop,
+      onRecorded: _attach,
+      newPath: widget.newRecordPath,
     );
   }
 
@@ -433,7 +352,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
       );
     }
     final vocal = item as AudioChatMessage;
-    final canRename = widget.libraryRoot != null && !_busy;
+    final canRename = widget.libraryRoot != null && !_capture.busy;
     return ListenableBuilder(
       key: ValueKey('audio-clip-${row.suffix}'),
       listenable: _playback,
@@ -463,7 +382,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final canRecord = widget.libraryRoot != null && !_busy;
+    final canRecord = widget.libraryRoot != null && !_capture.busy;
     return Padding(
       padding: EdgeInsets.only(
         bottom: 12 + MediaQuery.of(context).viewPadding.bottom,
@@ -512,14 +431,17 @@ class _AudioNoteViewState extends State<AudioNoteView>
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: AudioComposer(
               controller: _input,
-              recording: _recording,
+              recording: _capture.recording,
               stopSwell: _pulse,
               onRecord: canRecord ? _toggleRecord : null,
               onSend: _sendNote,
-              onImport: widget.libraryRoot == null || _busy || _recording
+              onImport:
+                  widget.libraryRoot == null ||
+                      _capture.busy ||
+                      _capture.recording
                   ? null
                   : _import,
-              onDiscard: _busy ? null : _discardRecording,
+              onDiscard: _capture.busy ? null : _capture.discard,
             ),
           ),
         ],

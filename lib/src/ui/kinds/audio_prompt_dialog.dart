@@ -29,6 +29,27 @@ class AudioPromptDialog extends StatefulWidget {
   /// Whether the field holds one line (Enter confirms).
   final bool singleLine;
 
+  /// Shows the dialog; completes with the typed text, or null on cancel.
+  static Future<String?> show(
+    BuildContext context, {
+    required String title,
+    required String initial,
+    String? hint,
+    String? confirm,
+    bool singleLine = false,
+  }) {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AudioPromptDialog(
+        title: title,
+        initial: initial,
+        hint: hint,
+        confirm: confirm,
+        singleLine: singleLine,
+      ),
+    );
+  }
+
   @override
   State<AudioPromptDialog> createState() => _AudioPromptDialogState();
 }
