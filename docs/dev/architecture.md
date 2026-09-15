@@ -14,6 +14,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image import |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](sync.md) |
 | `diff/` | Myers line diff and hunk summary, shared by history and (later) sync conflicts |
+| `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](sync.md) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); indexer, scan, tree materialization |
 | `editor/` | Source editor (`re_editor` + own incremental tokenizer `highlighting.dart`), WYSIWYG (`flutter_quill` + Markdown codec), toolbar, find panel, folding, outline, word count |
 | `preview/` | Markdown render (`flutter_markdown_plus` + `markdown` AST), KaTeX math, code highlight, scroll sync |

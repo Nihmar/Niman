@@ -247,23 +247,27 @@ that should have failed and did not). It works in a scratch folder
 `.niman-probe-<random>/` under the destination and deletes it at the
 end, even on failure:
 
-1. `OPTIONS` on the URL: `DAV:` header present (class 1 required),
-   `Allow` lists `PROPFIND`, `PUT`, `MKCOL`, `DELETE` (`MOVE` noted).
-   401 → wrong credentials; no `DAV:` → "not a WebDAV folder".
-2. `MKCOL` the scratch folder, `PUT a.txt`, `PROPFIND Depth: 1` on the
-   folder asking for `getetag`, `getcontentlength`, `getlastmodified`,
-   `resourcetype`, `oc:fileid`, `oc:checksums`.
-3. **file ETags**: `a.txt` carries a `getetag`, and a second `PUT` with
-   different content changes it.
-4. **collection ETags**: the folder's `getetag` changed after that
-   second PUT.
-5. **`If-Match`**: `PUT a.txt` with `If-Match: "niman-wrong"` → must
-   answer 412 and leave the content alone (checked with a GET).
-   **`If-None-Match: *`**: `PUT a.txt` with it → must answer 412.
-6. **`MOVE`** `a.txt` → `b.txt` with `Overwrite: F`: 201/204 and the
-   PROPFIND shows `b.txt` only.
-7. **`X-OC-Mtime`**: a PUT with it returns `X-OC-MTime: accepted`.
-8. `DELETE` the scratch folder.
+1. `OPTIONS` on the URL: records the `DAV:` classes. 401 → wrong
+   credentials. When `OPTIONS` is refused or advertises no class 1
+   (some proxies eat it), a `PROPFIND Depth: 0` on the folder decides:
+   207 → usable, anything else → "not a WebDAV folder".
+2. `MKCOL` the scratch folder and `sub/` in it (refused → unusable),
+   `PUT sub/a.txt`, `PROPFIND Depth: 0` on the scratch folder and on
+   the file, asking for `getetag`, `getcontentlength`,
+   `getlastmodified`, `resourcetype`, `oc:fileid`, `oc:checksums`.
+3. **file ETags**: the file carries a `getetag`, and a second `PUT`
+   with different content changes it.
+4. **collection ETags**: the scratch folder's `getetag` changed after
+   that second PUT — two levels up, with no entry added, so a server
+   whose folder ETag is only the directory mtime does not pass.
+5. **`If-Match`**: `PUT` with `If-Match: "niman-wrong"` must answer
+   412. **`If-None-Match: *`**: `PUT` onto the existing file with it
+   must answer 412.
+6. **`X-OC-Mtime`**: a PUT with it returns `X-OC-MTime: accepted`, or
+   the next PROPFIND shows that mtime.
+7. **`MOVE`** `a.txt` → `b.txt` with `Overwrite: F`: 201/204 and a
+   PROPFIND finds `b.txt` and no `a.txt`.
+8. `DELETE` the scratch folder (in a `finally`).
 
 The result is stored as JSON with a `probedAt` time, and each missing
 capability is logged with the fallback it selects. A server that fails
@@ -298,10 +302,13 @@ for multistatus parsing: servers pick their own namespace prefixes
   auth only while the host stays the same;
 - maps statuses to typed failures: `WebDavAuthFailure` (401/403),
   `WebDavNotFound` (404/409 on a missing parent), `WebDavPrecondition`
-  (412), `WebDavRetryable` (429/502/503/504/423 and socket errors,
-  carrying `Retry-After`), `WebDavProtocolFailure` (anything else);
+  (412), `WebDavRetryable` (408/423/425/429/500/502/503/504 and socket
+  errors, carrying `Retry-After`), `WebDavUnsupported` (no `DAV:`
+  header, a needed verb refused), `WebDavProtocolFailure` (anything
+  else);
 - logs one line per request under `webdav`: verb, relative path, status,
-  ETag (short), bytes, ms, attempt.
+  ETag (short), bytes, ms. It makes one attempt per call (plus
+  redirects); retries and backoff belong to the queue, which logs them.
 
 It knows nothing about libraries, the database or Flutter, so it runs in
 any isolate and is tested against an in-process fake server
