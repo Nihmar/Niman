@@ -58,9 +58,10 @@ Search a single tag with `#tag` (see [search](search.md)).
   (`attachmentsFolder`, default `assets`), content-addressed like images
   and linked in the library's link format (`![[…]]` for wikilink
   libraries, `![](…)` for Markdown ones), so they travel with the
-  library. Each vocal carries a description: the `> …` blockquote lines
-  right under its embed in the `.md`, shown as a bubble under the vocal
-  and editable from the page. The input field sends written notes as
+  library. Each vocal carries a title and a description: the `> …`
+  blockquote lines right above its embed are the title, the ones right
+  under it the description (a quote run sitting between two vocals stays
+  the description of the upper one). Both are editable from the page. The input field sends written notes as
   plain lines (right bubbles). The rename action renames the audio file
   and updates its link. Recording writes WAV (PCM 16-bit: playable on Android,
   Linux and Windows with no extra codec); attaching keeps the file's own

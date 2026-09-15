@@ -47,6 +47,77 @@ void main() {
     });
   });
 
+  group('titles', () {
+    test('a quote right above the embed is its title', () {
+      const text =
+          '---\ntype: audio\n---\n'
+          '> the title\n'
+          '![](assets/a.wav)\n'
+          '> what was said\n';
+      final vocal = parseAudioChat(text).single as AudioChatMessage;
+      expect(vocal.title, 'the title');
+      expect(vocal.titleStart, 3);
+      expect(vocal.description, 'what was said');
+    });
+
+    test('a quote between two vocals stays the upper description', () {
+      const text =
+          '---\ntype: audio\n---\n'
+          '![](assets/a.wav)\n'
+          '> said\n'
+          '![](assets/b.wav)\n';
+      final items = parseAudioChat(text);
+      expect(items, hasLength(2));
+      expect((items.first as AudioChatMessage).description, 'said');
+      expect((items.last as AudioChatMessage).title, isEmpty);
+      expect((items.last as AudioChatMessage).titleStart, isNull);
+    });
+
+    test('a blank-separated quote is a written note, not a title', () {
+      const text = '---\ntype: audio\n---\n> quoted\n\n![](assets/a.wav)\n';
+      final items = parseAudioChat(text);
+      expect(items, hasLength(2));
+      expect((items.first as TextChatMessage).text, '> quoted');
+      expect((items.last as AudioChatMessage).title, isEmpty);
+    });
+
+    test('setting a title opens its own paragraph', () {
+      const text =
+          '---\ntype: audio\n---\n![](assets/a.wav)\n> said\n![](assets/b.wav)\n';
+      final clip = parseAudioClips(text).last;
+      expect(
+        setClipTitle(text, clip, 'title'),
+        '---\ntype: audio\n---\n![](assets/a.wav)\n> said\n\n> title\n'
+        '![](assets/b.wav)\n',
+      );
+    });
+
+    test('the first vocal takes its title right under the frontmatter', () {
+      const text = '---\ntype: audio\n---\n![](assets/a.wav)\n';
+      final clip = parseAudioClips(text).single;
+      expect(
+        setClipTitle(text, clip, 'title'),
+        '---\ntype: audio\n---\n> title\n![](assets/a.wav)\n',
+      );
+    });
+
+    test('editing and clearing replace only the title run', () {
+      const text = 'hi\n\n> old\n![](assets/a.wav)\n> kept\n';
+      final clip = parseAudioClips(text).single;
+      expect(
+        setClipTitle(text, clip, 'new'),
+        'hi\n\n> new\n![](assets/a.wav)\n> kept\n',
+      );
+      expect(setClipTitle(text, clip, ''), 'hi\n\n![](assets/a.wav)\n> kept\n');
+    });
+
+    test('delete removes the title with the vocal', () {
+      const text = 'hi\n\n> title\n![](assets/a.wav)\n> gone\n\nbye\n';
+      final clip = parseAudioClips(text).single;
+      expect(removeAudioMessage(text, clip), 'hi\n\n\nbye\n');
+    });
+  });
+
   group('description edits', () {
     test('setting replaces the quote run', () {
       const text =
