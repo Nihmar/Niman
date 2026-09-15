@@ -594,6 +594,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<String> readNote(String path) async => _requireRow(path).content;
 
+  /// Every [saveNote] call, in order: `(path, content, editSession)`.
+  final List<(String, String, int?)> saves = [];
+
+  @override
+  Future<void> saveNote(String path, String content, {int? editSession}) async {
+    saves.add((path, content, editSession));
+    (_findRow(path) ?? _addRow(path, isDir: false)).content = content;
+    _bump();
+  }
+
   @override
   Future<String> get templateFolder async => _templateFolder;
 
