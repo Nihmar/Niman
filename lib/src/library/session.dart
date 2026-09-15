@@ -370,6 +370,22 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the indent/outdent width.
   Future<void> setIndentWidth(int width);
 
+  /// How many versions of each note `.history/` keeps (default 10, 0 =
+  /// none).
+  Future<int> get historyVersions;
+
+  /// Sets (and persists) the kept versions; out of 0..100 reads back as
+  /// the default.
+  Future<void> setHistoryVersions(int versions);
+
+  /// The least minutes between two versions kept while editing (default
+  /// 5).
+  Future<int> get historyIntervalMinutes;
+
+  /// Sets (and persists) the history interval; out of 1..60 reads back as
+  /// the default.
+  Future<void> setHistoryIntervalMinutes(int minutes);
+
   /// The stored editor-toolbar layout (empty = the shipped toolbar);
   /// `ToolbarLayout.parse` turns it into the toolbar.
   Future<String> get editorToolbar;

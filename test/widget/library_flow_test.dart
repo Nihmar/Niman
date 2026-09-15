@@ -109,6 +109,10 @@ void main() {
     await settle(tester);
     await tester.longPress(noteRow('Nested.md', offstage: true));
     await settle(tester);
+    // A note's menu is longer than the test window's sheet (History sits
+    // above Rename): the sheet scrolls, so scroll to the row first.
+    await tester.ensureVisible(find.byKey(const Key('menu-move')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('menu-move')));
     await settle(tester);
     await tester.tap(find.byType(DropdownButton<String>));

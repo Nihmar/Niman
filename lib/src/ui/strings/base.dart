@@ -541,4 +541,44 @@ abstract base class Strings {
   String get changelogTitle;
   String get changelogEmpty;
   String changelogWhatsNew(String version);
+
+  // Note history (issues #13, #55, #67).
+  String get noteHistoryTitle;
+  String get noteMenuTooltip;
+  String get historyCurrentVersion;
+  String get historyCurrentSubtitle;
+  String get historyToday;
+  String get historyYesterday;
+  String get historyReasonSession;
+  String get historyReasonInterval;
+  String get historyReasonRestore;
+  String get historyReasonSync;
+  String get historyReasonReplace;
+  String get historyReasonUnknown;
+  String get historySyncBase;
+  String get historyEmpty;
+  String historyKept(int kept, int limit);
+  String get historyBaseKept;
+  String get historyOff;
+  String get historyLoadFailed;
+  String get historyCompareSubtitle;
+  String get historyTabChanges;
+  String get historyTabVersion;
+  String get historyNoChanges;
+  String get historyRestoreAction;
+  String historyRestoreConfirmTitle(String when);
+  String get historyRestoreConfirmBody;
+  String get historyRestoreConfirm;
+  String historyRestored(String when);
+  String get historyRestoreFailed;
+  String get actionUndo;
+  String diffLineRange(int start, int end);
+  String diffLineSingle(int line);
+  String diffUnchanged(int count);
+  String get historyVersionsTitle;
+  String get historyVersionsSubtitle;
+  String historyVersionsValue(int count);
+  String get historyIntervalTitle;
+  String get historyIntervalSubtitle;
+  String historyIntervalValue(int minutes);
 }
