@@ -147,6 +147,27 @@ remote with a separate state.
 
 `http://` is allowed (VPN, LAN) with an informational warning.
 
+`sync_destinations` (schema v22), one row per library:
+
+| Column | Type | Notes |
+|---|---|---|
+| `library_path` | text, PK | absolute, normalized, like `known_libraries.path` |
+| `url` | text | the remote folder the library maps to, e.g. `http://nas:8080/webdav/Notes/` (always stored with a trailing `/`) |
+| `username` | text | empty for no auth |
+| `enabled` | bool | off stops every trigger; rows and state stay |
+| `auto_sync` | bool, default true | on-change, resume and periodic triggers |
+| `interval_seconds` | int, default 60 | periodic trigger while the app is open; 0 = off |
+| `wifi_only` | bool, default false | automatic triggers skip mobile data |
+| `capabilities` | text (JSON) | the probe result, see below; `{}` = never probed |
+| `last_sync_at_ms` | int, nullable | last full reconcile that ended without errors |
+| `last_error` | text, nullable | short, user-readable, never a secret |
+
+One URL rather than server + folder: servers disagree on where the
+WebDAV root lives, and the user copies the address the server shows.
+The password lives only in `flutter_secure_storage`; forgetting a
+library deletes the row, its `sync_items`, its `sync_ops` and the
+secret.
+
 ### State: `sync_items`
 
 One row per synced path, per library: local `sha256`, `size`, `mtime`;
@@ -156,6 +177,25 @@ agreed on at the last success, which is what tells "deleted here" from
 "created there". It lives in `AppDatabase` (schema v22) because the
 index database is dropped on every schema bump, and losing it would make
 every file look new on both sides.
+
+| Column | Type | Notes |
+|---|---|---|
+| `library_path` | text | PK part 1 |
+| `path` | text | PK part 2; library-relative, `/`-separated, files only |
+| `local_sha256` | text | content both sides agreed on |
+| `local_size` | int | |
+| `local_mtime_ms` | int | disk mtime right after the sync wrote or read it |
+| `remote_etag` | text, nullable | null when the server has no ETags |
+| `remote_size` | int | |
+| `remote_mtime_ms` | int | `getlastmodified` (second resolution) |
+| `remote_file_id` | text, nullable | `oc:fileid` when offered |
+| `base_version` | int, nullable | the `.history` version pinned as `syncBase`; null for attachments and when history is off |
+| `synced_at_ms` | int | |
+
+Folders get no rows: a folder exists remotely when a file under it
+does, and MKCOL is idempotent enough (405 = already there). Local
+change detection is cheap: `size` + `mtime` against the row, sha256
+only when either differs (a touch without an edit uploads nothing).
 
 Reconcile compares disk now and remote now against the row:
 
@@ -199,6 +239,76 @@ Also: explicit PROPFIND properties (no `allprop`), reused connections,
 redirects that keep the method, download to a temp file then atomic
 rename after the size/hash check. No `LOCK`.
 
+#### The probe
+
+"Test connection" runs it, and a sync re-runs it when the stored result
+is older than 30 days or a request contradicts it (an `If-Match` PUT
+that should have failed and did not). It works in a scratch folder
+`.niman-probe-<random>/` under the destination and deletes it at the
+end, even on failure:
+
+1. `OPTIONS` on the URL: `DAV:` header present (class 1 required),
+   `Allow` lists `PROPFIND`, `PUT`, `MKCOL`, `DELETE` (`MOVE` noted).
+   401 → wrong credentials; no `DAV:` → "not a WebDAV folder".
+2. `MKCOL` the scratch folder, `PUT a.txt`, `PROPFIND Depth: 1` on the
+   folder asking for `getetag`, `getcontentlength`, `getlastmodified`,
+   `resourcetype`, `oc:fileid`, `oc:checksums`.
+3. **file ETags**: `a.txt` carries a `getetag`, and a second `PUT` with
+   different content changes it.
+4. **collection ETags**: the folder's `getetag` changed after that
+   second PUT.
+5. **`If-Match`**: `PUT a.txt` with `If-Match: "niman-wrong"` → must
+   answer 412 and leave the content alone (checked with a GET).
+   **`If-None-Match: *`**: `PUT a.txt` with it → must answer 412.
+6. **`MOVE`** `a.txt` → `b.txt` with `Overwrite: F`: 201/204 and the
+   PROPFIND shows `b.txt` only.
+7. **`X-OC-Mtime`**: a PUT with it returns `X-OC-MTime: accepted`.
+8. `DELETE` the scratch folder.
+
+The result is stored as JSON with a `probedAt` time, and each missing
+capability is logged with the fallback it selects. A server that fails
+step 1 or 2 cannot be used; everything after that only turns
+optimizations off.
+
+**Compatible mode without ETags.** `getlastmodified` has a one-second
+resolution, so two writes of the same size within a second look equal.
+The row keeps `remote_mtime_ms` and `synced_at_ms`; when the remote
+mtime is within 2 s of `synced_at_ms` the item is "doubtful" and the
+next reconcile GETs it and compares sha256 instead of trusting size +
+mtime. A clean result clears the doubt (the row's `synced_at_ms` moves
+on).
+
+### The client (`lib/src/sync/webdav/`)
+
+`dart:io` `HttpClient`, no WebDAV package. The `xml` package (already
+in the lock file through other packages) becomes a direct dependency
+for multistatus parsing: servers pick their own namespace prefixes
+(`D:`, `d:`, `lp1:`), which a hand parser gets wrong. The client:
+
+- takes a base URL, user and password; Basic auth sent preemptively
+  (no challenge round trip per request), never logged;
+- speaks `PROPFIND` (Depth 0/1), `GET`, `PUT`, `MKCOL`, `DELETE`,
+  `MOVE`, `OPTIONS`; paths are library-relative and percent-encoded per
+  segment; hrefs in responses are decoded and made relative to the
+  base, whatever mix of absolute URL / absolute path the server uses;
+- streams both ways: `PUT` from a file stream with `Content-Length`,
+  `GET` into a sink with sha256 computed in flight, never a whole file
+  in memory;
+- follows 301/302/307/308 itself (at most 5), keeping method, body and
+  auth only while the host stays the same;
+- maps statuses to typed failures: `WebDavAuthFailure` (401/403),
+  `WebDavNotFound` (404/409 on a missing parent), `WebDavPrecondition`
+  (412), `WebDavRetryable` (429/502/503/504/423 and socket errors,
+  carrying `Retry-After`), `WebDavProtocolFailure` (anything else);
+- logs one line per request under `webdav`: verb, relative path, status,
+  ETag (short), bytes, ms, attempt.
+
+It knows nothing about libraries, the database or Flutter, so it runs in
+any isolate and is tested against an in-process fake server
+(`test/fakes/fake_webdav_server.dart`, `HttpServer` on loopback) whose
+switches turn ETags, collection ETags, `If-Match`, `MOVE`, auth,
+redirects and injected failures on and off.
+
 ### Queue and triggers
 
 `sync_ops` in `AppDatabase` persists across restarts; ops on the same
@@ -206,6 +316,32 @@ path coalesce (ten saves = one upload). Exponential backoff 5 s → 10 m,
 immediate retry when the network returns. Triggers: manual, app resume,
 5 s after the last edit, periodic (default every minute, only while the
 app is open), optionally not on mobile data.
+
+The queue holds **hints, not commands**: what `NoteOps` saw happen to
+a path. The reconcile decides the action from disk, remote and the row,
+so a stale or lost op can make a sync slower but never wrong.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | int, autoincrement | |
+| `library_path` | text | |
+| `path` | text | unique with `library_path`: a new hint replaces the old |
+| `kind` | text | `changed`, `deleted`, `moved` |
+| `from_path` | text, nullable | `moved` only: lets the sync issue a `MOVE` instead of DELETE + PUT |
+| `attempts` | int | failed runs so far |
+| `next_attempt_at_ms` | int | backoff: 5 s · 2^attempts, capped at 10 min |
+| `last_error` | text, nullable | |
+| `created_at_ms` | int | |
+
+- **Quick sync** (the 5 s after-edit trigger) handles only the queued
+  paths: a PROPFIND `Depth: 0` per path, then the table above.
+- **Full sync** (manual, resume, periodic) walks the remote tree
+  (skipping folders whose collection ETag is unchanged when the server
+  has them) and the local tree, reconciles every path, then drops the
+  ops it covered.
+- An op is removed when its path reconciles cleanly; a failure bumps
+  `attempts` and `next_attempt_at_ms`. 401/403 stops the run and marks
+  the destination (`last_error`) instead of backing off forever.
 
 ### Conflicts
 
@@ -221,6 +357,18 @@ or keep a whole side. The result is saved through `NoteOps` and queued.
    renames/moves/trash; settings key.
 3. Line diff + `DiffView` (readonly, rollback).
 4. History UI (H1–H7), strings in every locale, user docs.
-5. Sync: WebDAV client + mock server, then `sync_items` and reconcile,
-   configuration UI, upload/download/delete, queue, triggers, conflicts,
-   end-to-end tests.
+5. Sync, one PR per step:
+   1. WebDAV client + fake server + probe (#10, part of #20).
+   2. Schema v22: `sync_destinations`, `sync_items`, `sync_ops` +
+      secure password store (#12, #19 storage).
+   3. Reconcile as a pure function over (local, remote, row) → action,
+      unit-tested on every row of the table (#12).
+   4. Engine: upload with MKCOL propagation, download with `sync`
+      snapshot + temp + rename + hash, delete / trash, pin move (#14,
+      #15, #16).
+   5. Configuration UI + Test connection + status (#11, part of #28),
+      strings in every locale, user docs.
+   6. Queue hints from `NoteOps`, triggers, backoff (#18, #19).
+   7. Conflicts: automatic non-overlapping merge + `DiffView` merge mode
+      (#17, #67).
+   8. End-to-end tests (#20).
