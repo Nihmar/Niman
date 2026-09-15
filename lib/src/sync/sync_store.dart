@@ -131,6 +131,39 @@ final class SyncStore {
     );
   }
 
+  /// Changes [libraryPath]'s trigger options, leaving the rest (and the
+  /// recorded state) alone. Returns false when it has no destination.
+  Future<bool> setTriggers(
+    String libraryPath, {
+    bool? autoSync,
+    int? intervalSeconds,
+    bool? wifiOnly,
+  }) async {
+    final path = p.normalize(libraryPath);
+    final changed =
+        await (_db.update(
+          _db.syncDestinations,
+        )..where((t) => t.libraryPath.equals(path))).write(
+          SyncDestinationsCompanion(
+            autoSync: autoSync == null ? const Value.absent() : Value(autoSync),
+            intervalSeconds: intervalSeconds == null
+                ? const Value.absent()
+                : Value(math.max(0, intervalSeconds)),
+            wifiOnly: wifiOnly == null ? const Value.absent() : Value(wifiOnly),
+          ),
+        );
+    final parts = [
+      if (autoSync != null) 'auto $autoSync',
+      if (intervalSeconds != null) 'every ${intervalSeconds}s',
+      if (wifiOnly != null) 'wifi only $wifiOnly',
+    ];
+    _log.info(
+      'destination: triggers of $path: ${parts.join(', ')}'
+      '${changed == 0 ? ' (no destination)' : ''}',
+    );
+    return changed > 0;
+  }
+
   /// Stores the probe result for [libraryPath].
   Future<void> setCapabilities(
     String libraryPath,

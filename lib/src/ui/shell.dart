@@ -990,6 +990,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // The queued changes go now: the process may not come back.
+      widget.controller.sync?.appBackgrounded();
+    }
     if (state != AppLifecycleState.resumed) {
       // Leaving the foreground may be the last thing this process does
       // (a swipe away, an OEM battery kill): get the buffered log on
@@ -998,6 +1002,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       return;
     }
     unawaited(_todoController.resyncReminders());
+    // Changes made on other devices while the app was away.
+    widget.controller.sync?.appResumed();
     // A home-screen widget toggle edits todo.txt / the note file in a
     // background isolate while the app is away (the Android watcher is
     // unreliable, so no session event may arrive): re-read both surfaces

@@ -122,20 +122,58 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
     notifyListeners();
   }
 
+  /// What [offersWifiOnly] answers.
+  bool phone = true;
+
+  @override
+  bool get offersWifiOnly => phone;
+
+  @override
+  Future<void> setTriggers({
+    bool? autoSync,
+    int? intervalSeconds,
+    bool? wifiOnly,
+  }) async {
+    final parts = [
+      if (autoSync != null) 'auto $autoSync',
+      if (intervalSeconds != null) 'every $intervalSeconds',
+      if (wifiOnly != null) 'wifi $wifiOnly',
+    ];
+    calls.add('triggers ${parts.join(' ')}');
+    final row = _status.destination;
+    if (row == null) return;
+    status = _status.copyWith(
+      destination: row.copyWith(
+        autoSync: autoSync,
+        intervalSeconds: intervalSeconds,
+        wifiOnly: wifiOnly,
+      ),
+    );
+  }
+
+  @override
+  void appResumed() => calls.add('resumed');
+
+  @override
+  void appBackgrounded() => calls.add('backgrounded');
+
   /// A destination row for tests.
   static SyncDestination destination({
     String url = 'http://10.8.0.1:8080/webdav/Niman/',
     String username = 'ale',
     int? lastSyncAtMs,
     String? lastError,
+    bool autoSync = true,
+    int intervalSeconds = 60,
+    bool wifiOnly = false,
   }) => SyncDestination(
     libraryPath: '/lib',
     url: url,
     username: username,
     enabled: true,
-    autoSync: true,
-    intervalSeconds: 60,
-    wifiOnly: false,
+    autoSync: autoSync,
+    intervalSeconds: intervalSeconds,
+    wifiOnly: wifiOnly,
     capabilities: '{}',
     lastSyncAtMs: lastSyncAtMs,
     lastError: lastError,

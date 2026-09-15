@@ -1,14 +1,21 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/sync/network_monitor.dart';
+import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_scheduler.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/sync/webdav/webdav_client.dart';
 import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
+import 'package:path/path.dart' as p;
+
+export 'package:niman/src/sync/sync_scheduler.dart' show SyncPause;
 
 /// How a connection test ended (mockups S3, S3b).
 enum SyncTestOutcome {
@@ -70,10 +77,15 @@ final class SyncStatus {
     this.destination,
     this.capabilities,
     this.running = false,
+    this.background = false,
     this.stage,
     this.done = 0,
     this.total = 0,
     this.lastReport,
+    this.pendingHints = 0,
+    this.nextRetryAt,
+    this.autoPaused,
+    this.waitingForNetwork = false,
   });
 
   /// The destination, or null when the library does not sync.
@@ -84,6 +96,21 @@ final class SyncStatus {
 
   /// Whether a run is going.
   final bool running;
+
+  /// Whether the running sync started by itself (no progress strip).
+  final bool background;
+
+  /// Changes queued and not uploaded yet.
+  final int pendingHints;
+
+  /// When the queue or the automatic sync tries again, or null.
+  final DateTime? nextRetryAt;
+
+  /// Why the automatic sync stopped until the user acts, or null.
+  final SyncPause? autoPaused;
+
+  /// Whether the automatic sync waits for Wi-Fi (or any network).
+  final bool waitingForNetwork;
 
   /// The running stage, while [running].
   final SyncStage? stage;
@@ -123,6 +150,7 @@ final class SyncStatus {
   bool get needsAttention =>
       conflicts.isNotEmpty ||
       failures.isNotEmpty ||
+      autoPaused != null ||
       (aborted != null && aborted != SyncAbort.notConfirmed);
 
   /// A copy with the given fields replaced.
@@ -132,19 +160,31 @@ final class SyncStatus {
     WebDavCapabilities? capabilities,
     bool clearCapabilities = false,
     bool? running,
+    bool? background,
     SyncStage? stage,
     int? done,
     int? total,
     SyncReport? lastReport,
     bool clearReport = false,
+    int? pendingHints,
+    DateTime? nextRetryAt,
+    bool clearRetry = false,
+    SyncPause? autoPaused,
+    bool clearPause = false,
+    bool? waitingForNetwork,
   }) => SyncStatus(
     destination: clearDestination ? null : destination ?? this.destination,
     capabilities: clearCapabilities ? null : capabilities ?? this.capabilities,
     running: running ?? this.running,
+    background: (running ?? this.running) && (background ?? this.background),
     stage: (running ?? this.running) ? stage ?? this.stage : null,
     done: done ?? this.done,
     total: total ?? this.total,
     lastReport: clearReport ? null : lastReport ?? this.lastReport,
+    pendingHints: pendingHints ?? this.pendingHints,
+    nextRetryAt: clearRetry ? null : nextRetryAt ?? this.nextRetryAt,
+    autoPaused: clearPause ? null : autoPaused ?? this.autoPaused,
+    waitingForNetwork: waitingForNetwork ?? this.waitingForNetwork,
   );
 }
 
@@ -192,21 +232,60 @@ abstract interface class SyncService implements Listenable {
 
   /// Keeps one whole side of a conflicted [path]; throws [SyncFailure].
   Future<void> resolveConflict(String path, {required bool keepLocal});
+
+  /// Whether the "Wi-Fi only" option means anything on this device.
+  bool get offersWifiOnly;
+
+  /// Changes the automatic trigger options of the destination.
+  Future<void> setTriggers({
+    bool? autoSync,
+    int? intervalSeconds,
+    bool? wifiOnly,
+  });
+
+  /// The app came back to the foreground.
+  void appResumed();
+
+  /// The app went to the background.
+  void appBackgrounded();
 }
 
-/// [SyncService] over a real [SyncEngine].
+/// [SyncService] over a real [SyncEngine], with its [SyncScheduler].
 final class LibrarySyncService extends ChangeNotifier implements SyncService {
   /// The service for the library at [root].
+  ///
+  /// [network] and [phone] go to the scheduler; [start] starts it.
   new({
     required this.root,
     required this.engine,
     required this.store,
     required this.secrets,
+    NetworkMonitor? network,
+    this.phone = false,
     WebDavClient Function(Uri url, String username, String password)?
     testClientFactory,
     DateTime Function()? now,
+    Duration quickDelay = const Duration(seconds: 5),
   }) : _testClient = testClientFactory ?? _defaultTestClient,
-       _now = now ?? DateTime.now;
+       _now = now ?? DateTime.now {
+    scheduler = SyncScheduler(
+      run: ({required quick}) => _runEngine(quick: quick, background: true),
+      triggers: _triggers,
+      hasDueHints: () async => (await store.dueOps(root)).isNotEmpty,
+      retryNow: () => store.retryNow(root),
+      network: network,
+      phone: phone,
+      onChanged: () => unawaited(_refreshQueue()),
+      now: _now,
+      quickDelay: quickDelay,
+    );
+  }
+
+  /// Whether this is a phone (Wi-Fi only, background rules).
+  final bool phone;
+
+  /// Starts the automatic syncs.
+  late final SyncScheduler scheduler;
 
   /// Absolute, normalized library root.
   final String root;
@@ -261,7 +340,101 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
         clearCapabilities: capabilities == null,
       ),
     );
+    await _refreshQueue();
   }
+
+  /// Loads the status and starts the automatic syncs.
+  Future<void> start() async {
+    await load();
+    if (_disposed) return;
+    await scheduler.start();
+  }
+
+  Future<SyncTriggers?> _triggers() async {
+    final row = await store.destination(root);
+    if (row == null) return null;
+    return SyncTriggers(
+      enabled: row.enabled,
+      autoSync: row.autoSync,
+      intervalSeconds: row.intervalSeconds,
+      wifiOnly: row.wifiOnly,
+      everSynced: row.lastSyncAtMs != null,
+    );
+  }
+
+  /// Re-reads the queue and the scheduler's state into [status].
+  Future<void> _refreshQueue() async {
+    if (_disposed) return;
+    final pending = await store.pendingOps(root);
+    final queueRetry = await store.nextRetryAt(root);
+    if (_disposed) return;
+    final backoff = scheduler.backoffUntil;
+    final retry = backoff != null && backoff.isAfter(_now())
+        ? backoff
+        : queueRetry;
+    final destination = _status.destination;
+    final waiting =
+        destination != null &&
+        destination.autoSync &&
+        !scheduler.networkAllows(SyncTriggers(wifiOnly: destination.wifiOnly));
+    _set(
+      _status.copyWith(
+        pendingHints: pending.length,
+        nextRetryAt: retry,
+        clearRetry: retry == null,
+        autoPaused: scheduler.paused,
+        clearPause: scheduler.paused == null,
+        waitingForNetwork: waiting,
+      ),
+    );
+  }
+
+  static const _pathSeparator = '/';
+
+  /// Queues a hint from `NoteOps` and tells the scheduler.
+  void hint(String path, SyncOpKind kind, {String? fromPath}) {
+    if (_disposed || !_inScope(path)) return;
+    unawaited(
+      store.enqueue(root, path, kind, fromPath: fromPath).then(
+        (_) {
+          scheduler.hinted();
+          return _refreshQueue();
+        },
+        onError: (Object e) =>
+            _log.warning('queue: hint for "$path" not stored: $e'),
+      ),
+    );
+  }
+
+  /// Queues hints for what the file watcher saw: [paths] changed (or
+  /// vanished), [folders] need a look as a whole. Echoes of the sync's
+  /// own writes are dropped.
+  void watched(List<String> paths, List<String> folders) {
+    if (_disposed || _status.destination == null) return;
+    var queued = 0;
+    for (final abs in {...paths, ...folders}) {
+      final rel = _relative(abs);
+      if (rel == null || rel.isEmpty || !_inScope(rel)) continue;
+      if (engine.ops.changedBySync(rel)) continue;
+      final exists = File(abs).existsSync() || Directory(abs).existsSync();
+      hint(rel, exists ? SyncOpKind.changed : SyncOpKind.deleted);
+      queued++;
+    }
+    if (queued > 0) _log.debug('queue: $queued hints from the watcher');
+  }
+
+  String? _relative(String abs) {
+    final rel = p.relative(p.normalize(abs), from: root);
+    if (rel == '.') return '';
+    if (rel.startsWith('..') || p.isAbsolute(rel)) return null;
+    return p.split(rel).join(_pathSeparator);
+  }
+
+  /// Whether [path] can concern the sync: a syncable file, or a folder
+  /// outside the dot folders.
+  static bool _inScope(String path) =>
+      isSyncablePath(path) ||
+      !path.split(_pathSeparator).any((s) => s.startsWith('.'));
 
   /// The URL in [text], or null with the reason for the log.
   static ({Uri? url, String reason}) parseUrl(String text) {
@@ -357,7 +530,9 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       }
     }
     if (capabilities != null) await store.setCapabilities(root, capabilities);
+    scheduler.clearPause();
     await load();
+    await scheduler.settingsChanged();
   }
 
   @override
@@ -370,13 +545,43 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       _log.warning('disconnect: password not deleted: $e');
     }
     _set(const SyncStatus());
+    await scheduler.settingsChanged();
   }
 
   @override
   Future<SyncReport> syncNow({SyncConfirm? confirm}) async {
-    _set(_status.copyWith(running: true, stage: SyncStage.connecting));
+    await scheduler.manualRunStarting();
+    final report = await _runEngine(
+      quick: false,
+      background: false,
+      confirm: confirm,
+    );
+    scheduler.runFinished(report);
+    await _refreshQueue();
+    return report;
+  }
+
+  /// Runs going, and how many of them the user started.
+  int _runs = 0;
+  int _manualRuns = 0;
+
+  Future<SyncReport> _runEngine({
+    required bool quick,
+    required bool background,
+    SyncConfirm? confirm,
+  }) async {
+    _runs++;
+    if (!background) _manualRuns++;
+    _set(
+      _status.copyWith(
+        running: true,
+        background: _manualRuns == 0,
+        stage: _status.running ? null : SyncStage.connecting,
+      ),
+    );
     try {
       final report = await engine.run(
+        quick: quick,
         confirm: confirm,
         onProgress: (stage, done, total) =>
             _set(_status.copyWith(stage: stage, done: done, total: total)),
@@ -384,15 +589,69 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
       if (report.changedLocally.isNotEmpty && !_changes.isClosed) {
         _changes.add(Set.unmodifiable(report.changedLocally));
       }
+      final idle = _runs == 1;
       _set(
-        _status.copyWith(running: false, done: 0, total: 0, lastReport: report),
+        _status.copyWith(
+          running: !idle,
+          done: idle ? 0 : null,
+          total: idle ? 0 : null,
+          lastReport: _reportToShow(report),
+        ),
       );
       return report;
     } finally {
-      if (_status.running) _set(_status.copyWith(running: false));
+      _runs--;
+      if (!background) _manualRuns--;
+      if (_runs == 0 && _status.running) {
+        _set(_status.copyWith(running: false));
+      } else if (_runs > 0) {
+        _set(_status.copyWith(background: _manualRuns == 0));
+      }
       await load();
     }
   }
+
+  /// What the panel shows after [report]: a quick sync that had nothing
+  /// to do keeps the previous result, and one that ran keeps the earlier
+  /// conflicts it did not look at.
+  SyncReport? _reportToShow(SyncReport report) {
+    final previous = _status.lastReport;
+    if (!report.quick || previous == null) return report;
+    if (report.plan == null && report.aborted == null) return previous;
+    final looked = {
+      for (final d in report.plan?.decisions ?? const <SyncDecision>[]) d.path,
+      for (final c in report.conflicts) c.path,
+    };
+    report.conflicts.addAll(
+      previous.conflicts.where((c) => !looked.contains(c.path)),
+    );
+    return report;
+  }
+
+  @override
+  bool get offersWifiOnly => phone;
+
+  @override
+  Future<void> setTriggers({
+    bool? autoSync,
+    int? intervalSeconds,
+    bool? wifiOnly,
+  }) async {
+    await store.setTriggers(
+      root,
+      autoSync: autoSync,
+      intervalSeconds: intervalSeconds,
+      wifiOnly: wifiOnly,
+    );
+    await load();
+    await scheduler.settingsChanged();
+  }
+
+  @override
+  void appResumed() => scheduler.resumed();
+
+  @override
+  void appBackgrounded() => scheduler.backgrounded();
 
   @override
   Future<({String local, String remote})> conflictTexts(String path) =>
@@ -408,9 +667,22 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
     _set(_status.copyWith());
   }
 
+  /// Stops the triggers and waits, up to [wait], for a run that is going
+  /// (the library's databases close next).
+  Future<void> close({Duration wait = const Duration(seconds: 10)}) async {
+    dispose();
+    try {
+      await engine.idle.timeout(wait);
+    } on TimeoutException {
+      _log.warning('close: a sync still runs after ${wait.inSeconds}s');
+    }
+  }
+
   @override
   void dispose() {
+    if (_disposed) return;
     _disposed = true;
+    scheduler.dispose();
     unawaited(_changes.close());
     super.dispose();
   }

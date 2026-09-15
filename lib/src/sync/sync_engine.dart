@@ -234,6 +234,10 @@ final class SyncEngine {
   /// Runs and conflict resolutions go one at a time.
   Future<void> _lock = Future<void>.value();
 
+  /// Completes when the run or resolution going now (if any) and those
+  /// already waiting have finished.
+  Future<void> get idle => _lock;
+
   Future<T> _exclusively<T>(Future<T> Function() body) {
     final next = _lock.then((_) => body());
     _lock = next.then<void>((_) {}, onError: (Object _) {});
