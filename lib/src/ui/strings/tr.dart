@@ -113,25 +113,24 @@ final class TurkishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Güncellemeler';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Otomatik güncellemeler';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      "GitHub Releases'ı açılışta ve 6 saatte bir kontrol et";
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Güncellemeleri kontrol et';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version mevcut';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman güncel';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Güncelleme kontrolü başarısız';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Yükleyici başlatıldı';
   @override
   String get settingsSectionDiagnostics => 'Teşhis';
   @override
@@ -252,44 +251,44 @@ final class TurkishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Öğeyi yeniden sırala';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Henüz kayıt yok';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Kayda başla';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Durdur';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Oynat';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Kaydı sil';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Ses dosyası içe aktar';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Kaydediliyor…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofon izni reddedildi — kayıt için gerekli.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Yeni sesli not';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Kaydım';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Kayıtları göster';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Bir not yaz…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Gönder';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Kaydı yeniden adlandır';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Bu kaydı açıkla…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Açıklamayı düzenle';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Notu sil';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Notu düzenle';
   @override
   String get audioPause => 'Duraklat';
   @override
@@ -321,7 +320,7 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutNewList => 'Yeni liste';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Yeni sesli not';
   @override
   String get shortcutToggleSidebar => 'Dosya ağacını göster veya gizle';
   @override
@@ -1007,7 +1006,7 @@ final class TurkishStrings extends Strings {
   @override
   String get listFolderTitle => 'Liste klasörü';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Ekler klasörü';
 
   // Trash (M1).
   @override
@@ -1147,4 +1146,89 @@ final class TurkishStrings extends Strings {
   String get changelogEmpty => 'Değişiklik geçmişi girişleri yok';
   @override
   String changelogWhatsNew(String version) => 'Sürüm $version yenilikleri';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Geçmiş';
+  @override
+  String get noteMenuTooltip => 'Not işlemleri';
+  @override
+  String get historyCurrentVersion => 'Geçerli sürüm';
+  @override
+  String get historyCurrentSubtitle => 'Notun şu anki hâli';
+  @override
+  String get historyToday => 'Bugün';
+  @override
+  String get historyYesterday => 'Dün';
+  @override
+  String get historyReasonSession => 'düzenleme öncesi';
+  @override
+  String get historyReasonInterval => 'düzenleme sırasında';
+  @override
+  String get historyReasonRestore => 'geri yükleme öncesi';
+  @override
+  String get historyReasonSync => 'eşitleme öncesi';
+  @override
+  String get historyReasonReplace => 'değiştirme öncesi';
+  @override
+  String get historyReasonUnknown => 'kurtarılan';
+  @override
+  String get historySyncBase => 'eşitleme tabanı';
+  @override
+  String get historyEmpty =>
+      'Henüz sürüm yok. Niman, notu düzenlemeye başladığınızda bir sürüm, '
+      'ardından siz yazarken en fazla birkaç dakikada bir yeni sürüm saklar.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Saklanan sürümler: $kept / $limit';
+  @override
+  String get historyBaseKept => 'Eşitleme tabanı sınırın ötesinde de saklanır.';
+  @override
+  String get historyOff => 'Bu kütüphanede geçmiş kapalı (Ayarlar, Kütüphane).';
+  @override
+  String get historyLoadFailed => 'Geçmiş okunamadı';
+  @override
+  String get historyCompareSubtitle => 'Geçerli sürümle karşılaştırıldı';
+  @override
+  String get historyTabChanges => 'Değişiklikler';
+  @override
+  String get historyTabVersion => 'Sürüm';
+  @override
+  String get historyNoChanges => 'Metin geçerli sürümle aynı.';
+  @override
+  String get historyRestoreAction => 'Bu sürümü geri yükle';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      '$when tarihli sürüm geri yüklensin mi?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Geçerli metin önce geçmişe kaydedilir, böylece her zaman geri '
+      'dönebilirsiniz.';
+  @override
+  String get historyRestoreConfirm => 'Geri yükle';
+  @override
+  String historyRestored(String when) => '$when tarihli sürüm geri yüklendi';
+  @override
+  String get historyRestoreFailed => 'Sürüm geri yüklenemedi';
+  @override
+  String get actionUndo => 'Geri al';
+  @override
+  String diffLineRange(int start, int end) => 'Satır $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Satır $line';
+  @override
+  String diffUnchanged(int count) => '$count değişmemiş satır';
+  @override
+  String get historyVersionsTitle => 'Saklanacak sürüm sayısı';
+  @override
+  String get historyVersionsSubtitle => 'Not başına, .history/ içinde';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Yok' : '$count';
+  @override
+  String get historyIntervalTitle => 'Yeni sürümler arasında en az';
+  @override
+  String get historyIntervalSubtitle =>
+      'Yazarken; bir notu düzenlemeye başlamak her zaman bir sürüm saklar';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes dk';
 }

@@ -122,8 +122,10 @@ void main() {
     expect(onDisk, contains('# Gandalf'));
     expect(onDisk, isNot(contains('niman:')));
 
-    print('>> close');
-    await controller.close();
+    print('>> dispose');
+    // Dispose, not close: close keeps the databases open, and Windows will
+    // not delete a folder whose sqlite files another handle still holds.
+    await controller.dispose();
     print('>> DONE');
   });
 }

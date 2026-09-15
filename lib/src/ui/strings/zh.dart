@@ -108,25 +108,23 @@ final class ChineseStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => '更新';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => '自动更新';
   @override
-  String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+  String get autoUpdateSubtitle => '启动时及每 6 小时检查 GitHub Releases';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => '检查更新';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version 已发布';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman 已是最新版本';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => '检查更新失败';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => '更新已保存到 $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => '安装程序已启动';
   @override
   String get settingsSectionDiagnostics => '诊断';
   @override
@@ -239,44 +237,43 @@ final class ChineseStrings extends Strings {
   @override
   String get listDragHandleLabel => '重新排列条目';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => '还没有录音';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => '录音';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => '停止';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => '播放';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => '删除录音';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => '导入音频文件';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => '正在录音…';
   @override
-  String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+  String get audioPermissionDenied => '麦克风权限被拒绝 — 录音需要此权限。';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => '新建语音笔记';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => '我的录音';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => '显示录音';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => '添加备注…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => '发送';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => '重命名录音';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => '描述此录音…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => '编辑描述';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => '删除备注';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => '编辑备注';
   @override
   String get audioPause => '暂停';
   @override
@@ -308,7 +305,7 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutNewList => '新建列表';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => '新建语音笔记';
   @override
   String get shortcutToggleSidebar => '显示或隐藏文件树';
   @override
@@ -923,7 +920,7 @@ final class ChineseStrings extends Strings {
   @override
   String get listFolderTitle => '列表文件夹';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => '附件文件夹';
 
   // Trash (M1).
   @override
@@ -1048,4 +1045,84 @@ final class ChineseStrings extends Strings {
   String get changelogEmpty => '暂无更新日志内容';
   @override
   String changelogWhatsNew(String version) => '$version 的新内容';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => '历史记录';
+  @override
+  String get noteMenuTooltip => '笔记操作';
+  @override
+  String get historyCurrentVersion => '当前版本';
+  @override
+  String get historyCurrentSubtitle => '笔记的当前内容';
+  @override
+  String get historyToday => '今天';
+  @override
+  String get historyYesterday => '昨天';
+  @override
+  String get historyReasonSession => '编辑前';
+  @override
+  String get historyReasonInterval => '编辑中';
+  @override
+  String get historyReasonRestore => '恢复前';
+  @override
+  String get historyReasonSync => '同步前';
+  @override
+  String get historyReasonReplace => '替换前';
+  @override
+  String get historyReasonUnknown => '已找回';
+  @override
+  String get historySyncBase => '同步基准';
+  @override
+  String get historyEmpty =>
+      '暂无版本。开始编辑笔记时 Niman 会保留一个版本，之后在书写期间'
+      '最多每隔几分钟保留一个。';
+  @override
+  String historyKept(int kept, int limit) => '已保留 $kept 个版本（上限 $limit 个）';
+  @override
+  String get historyBaseKept => '同步基准不受上限限制，始终保留。';
+  @override
+  String get historyOff => '此文库的历史记录已关闭（设置，文库）。';
+  @override
+  String get historyLoadFailed => '无法读取历史记录';
+  @override
+  String get historyCompareSubtitle => '与当前版本比较';
+  @override
+  String get historyTabChanges => '更改';
+  @override
+  String get historyTabVersion => '版本';
+  @override
+  String get historyNoChanges => '文本与当前版本相同。';
+  @override
+  String get historyRestoreAction => '恢复此版本';
+  @override
+  String historyRestoreConfirmTitle(String when) => '恢复 $when 的版本？';
+  @override
+  String get historyRestoreConfirmBody => '当前文本会先保存到历史记录中，因此随时可以回退。';
+  @override
+  String get historyRestoreConfirm => '恢复';
+  @override
+  String historyRestored(String when) => '已恢复 $when 的版本';
+  @override
+  String get historyRestoreFailed => '无法恢复该版本';
+  @override
+  String get actionUndo => '撤销';
+  @override
+  String diffLineRange(int start, int end) => '第 $start–$end 行';
+  @override
+  String diffLineSingle(int line) => '第 $line 行';
+  @override
+  String diffUnchanged(int count) => '$count 行未更改';
+  @override
+  String get historyVersionsTitle => '保留版本数';
+  @override
+  String get historyVersionsSubtitle => '每篇笔记，存于 .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? '无' : '$count';
+  @override
+  String get historyIntervalTitle => '新版本最短间隔';
+  @override
+  String get historyIntervalSubtitle => '书写期间生效；开始编辑笔记时总会保留一个版本';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes 分钟';
 }

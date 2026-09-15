@@ -6,6 +6,7 @@ import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -67,6 +68,28 @@ abstract interface class NoteOperations {
   /// that need a note's content without opening it — creating one from a
   /// template, so far. Throws when the note is not there.
   Future<String> readNote(String path);
+
+  /// Saves [content] as the text of the note at library-relative [path],
+  /// creating the file when it is not there.
+  ///
+  /// The editor's write path: it completes once the disk holds the text
+  /// (the index follows on its own). Saves of one note run in order, saves
+  /// of different notes independently. [editSession] names the editor
+  /// session the save belongs to — one opening of the note, however many
+  /// autosaves it makes.
+  Future<void> saveNote(String path, String content, {int? editSession});
+
+  /// The kept history of the note at [path]: its versions, oldest first,
+  /// and the pinned ones (issue #55).
+  Future<HistoryManifest> noteHistory(String path);
+
+  /// The text of version [number] of the note at [path]; throws when the
+  /// version is gone.
+  Future<String> readNoteVersion(String path, int number);
+
+  /// Writes version [number] back as the note's text, keeping the text it
+  /// replaces as a version first — a restore is itself undoable.
+  Future<void> restoreNoteVersion(String path, int number);
 
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
@@ -346,6 +369,22 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the indent/outdent width.
   Future<void> setIndentWidth(int width);
+
+  /// How many versions of each note `.history/` keeps (default 10, 0 =
+  /// none).
+  Future<int> get historyVersions;
+
+  /// Sets (and persists) the kept versions; out of 0..100 reads back as
+  /// the default.
+  Future<void> setHistoryVersions(int versions);
+
+  /// The least minutes between two versions kept while editing (default
+  /// 5).
+  Future<int> get historyIntervalMinutes;
+
+  /// Sets (and persists) the history interval; out of 1..60 reads back as
+  /// the default.
+  Future<void> setHistoryIntervalMinutes(int minutes);
 
   /// The stored editor-toolbar layout (empty = the shipped toolbar);
   /// `ToolbarLayout.parse` turns it into the toolbar.

@@ -115,25 +115,25 @@ final class UkrainianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Комбінації клавіш';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Оновлення';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Автоматичні оновлення';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Перевіряти GitHub Releases під час запуску та кожні 6 годин';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Перевірити оновлення';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Доступна версія Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'У вас остання версія Niman';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Не вдалося перевірити оновлення';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Оновлення збережено в $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Інсталятор запущено';
   @override
   String get settingsSectionDiagnostics => 'Діагностика';
   @override
@@ -251,44 +251,44 @@ final class UkrainianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Змінити порядок елементів';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Записів ще немає';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Записати';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Зупинити';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Відтворити';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Видалити запис';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Імпортувати аудіофайл';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Триває запис…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Немає дозволу на мікрофон — він потрібен для запису.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Нова голосова нотатка';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Мій запис';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Показати записи';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Напишіть нотатку…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Надіслати';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Перейменувати запис';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Опишіть цей запис…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Редагувати опис';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Видалити нотатку';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Редагувати нотатку';
   @override
   String get audioPause => 'Пауза';
   @override
@@ -320,7 +320,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutNewList => 'Новий список';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Нова голосова нотатка';
   @override
   String get shortcutToggleSidebar => 'Показати або приховати фільтр';
   @override
@@ -1010,7 +1010,7 @@ final class UkrainianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка списків';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка вкладень';
 
   // Trash (M1).
   @override
@@ -1151,4 +1151,97 @@ final class UkrainianStrings extends Strings {
   String get changelogEmpty => 'Записи журналу змін недоступні';
   @override
   String changelogWhatsNew(String version) => 'Новини у версії $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Історія';
+  @override
+  String get noteMenuTooltip => 'Дії з нотаткою';
+  @override
+  String get historyCurrentVersion => 'Поточна версія';
+  @override
+  String get historyCurrentSubtitle => 'Нотатка в її поточному стані';
+  @override
+  String get historyToday => 'Сьогодні';
+  @override
+  String get historyYesterday => 'Вчора';
+  @override
+  String get historyReasonSession => 'до редагування';
+  @override
+  String get historyReasonInterval => 'під час редагування';
+  @override
+  String get historyReasonRestore => 'до відновлення';
+  @override
+  String get historyReasonSync => 'до синхронізації';
+  @override
+  String get historyReasonReplace => 'до заміни';
+  @override
+  String get historyReasonUnknown => 'віднайдена';
+  @override
+  String get historySyncBase => 'база синхронізації';
+  @override
+  String get historyEmpty =>
+      'Версій ще немає. Niman зберігає одну, коли ви починаєте редагувати '
+      'нотатку, а далі щонайбільше одну раз на кілька хвилин, поки ви '
+      'пишете.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Збережено версій: $kept із $limit';
+  @override
+  String get historyBaseKept => 'База синхронізації зберігається понад ліміт.';
+  @override
+  String get historyOff =>
+      'Історію вимкнено для цієї бібліотеки (Налаштування, Бібліотека).';
+  @override
+  String get historyLoadFailed => 'Не вдалося прочитати історію';
+  @override
+  String get historyCompareSubtitle => 'Порівняно з поточною версією';
+  @override
+  String get historyTabChanges => 'Зміни';
+  @override
+  String get historyTabVersion => 'Версія';
+  @override
+  String get historyNoChanges => 'Текст такий самий, як у поточній версії.';
+  @override
+  String get historyRestoreAction => 'Відновити цю версію';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Відновити версію від $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Спершу поточний текст збережеться в історії, тож ви завжди зможете '
+      'повернутися.';
+  @override
+  String get historyRestoreConfirm => 'Відновити';
+  @override
+  String historyRestored(String when) => 'Відновлено версію від $when';
+  @override
+  String get historyRestoreFailed => 'Не вдалося відновити версію';
+  @override
+  String get actionUndo => 'Скасувати';
+  @override
+  String diffLineRange(int start, int end) => 'Рядки $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Рядок $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 14) => '$count незмінених рядків',
+    (1, _) => '$count незмінений рядок',
+    (>= 2 && <= 4, _) => '$count незмінені рядки',
+    _ => '$count незмінених рядків',
+  };
+  @override
+  String get historyVersionsTitle => 'Скільки версій зберігати';
+  @override
+  String get historyVersionsSubtitle => 'Для кожної нотатки, у .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Жодної' : '$count';
+  @override
+  String get historyIntervalTitle => 'Нова версія щонайбільше раз на';
+  @override
+  String get historyIntervalSubtitle =>
+      'Поки ви пишете; на початку редагування нотатки версія зберігається '
+      'завжди';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes хв';
 }

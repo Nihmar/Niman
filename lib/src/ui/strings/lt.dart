@@ -116,25 +116,24 @@ final class LithuanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Atnaujinimai';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiniai atnaujinimai';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Tikrinti GitHub Releases paleidžiant ir kas 6 valandas';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Tikrinti atnaujinimus';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Pasiekiama Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Naudojate naujausią Niman versiją';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Nepavyko patikrinti atnaujinimų';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Diegimo programa paleista';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -251,44 +250,44 @@ final class LithuanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Keisti elemento tvarką';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Įrašų dar nėra';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Įrašyti';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stabdyti';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Groti';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Ištrinti įrašą';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importuoti garso failą';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Įrašoma…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Nėra leidimo naudoti mikrofoną — jis reikalingas įrašymui.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nauja balso pastaba';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mano įrašas';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Rodyti įrašus';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Parašykite pastabą…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Siųsti';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Pervadinti įrašą';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Aprašykite šį įrašą…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Redaguoti aprašą';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Ištrinti pastabą';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Redaguoti pastabą';
   @override
   String get audioPause => 'Pristabdyti';
   @override
@@ -320,7 +319,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Naujas sąrašas';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nauja balso pastaba';
   @override
   String get shortcutToggleSidebar => 'Rodyti arba slėpti filtrą';
   @override
@@ -1008,7 +1007,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Sąrašų katalogas';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priedų katalogas';
 
   // Trash (M1).
   @override
@@ -1151,4 +1150,96 @@ final class LithuanianStrings extends Strings {
   String get changelogEmpty => 'Pakeitimų žurnalo įrašų nėra';
   @override
   String changelogWhatsNew(String version) => 'Naujienos versijoje $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Istorija';
+  @override
+  String get noteMenuTooltip => 'Pastabos veiksmai';
+  @override
+  String get historyCurrentVersion => 'Dabartinė versija';
+  @override
+  String get historyCurrentSubtitle => 'Pastaba tokia, kokia yra dabar';
+  @override
+  String get historyToday => 'Šiandien';
+  @override
+  String get historyYesterday => 'Vakar';
+  @override
+  String get historyReasonSession => 'prieš redagavimą';
+  @override
+  String get historyReasonInterval => 'redaguojant';
+  @override
+  String get historyReasonRestore => 'prieš atkūrimą';
+  @override
+  String get historyReasonSync => 'prieš sinchronizavimą';
+  @override
+  String get historyReasonReplace => 'prieš pakeitimą';
+  @override
+  String get historyReasonUnknown => 'atgauta';
+  @override
+  String get historySyncBase => 'sinchronizavimo bazė';
+  @override
+  String get historyEmpty =>
+      'Versijų dar nėra. Niman išsaugo vieną, kai pradedate redaguoti '
+      'pastabą, o paskui – ne dažniau nei kas kelias minutes, kol rašote.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Išsaugota versijų: $kept iš $limit';
+  @override
+  String get historyBaseKept =>
+      'Sinchronizavimo bazė išsaugoma ir viršijus ribą.';
+  @override
+  String get historyOff =>
+      'Šios bibliotekos istorija išjungta (Nustatymai, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Nepavyko perskaityti istorijos';
+  @override
+  String get historyCompareSubtitle => 'Palyginta su dabartine versija';
+  @override
+  String get historyTabChanges => 'Pakeitimai';
+  @override
+  String get historyTabVersion => 'Versija';
+  @override
+  String get historyNoChanges => 'Tekstas toks pat kaip dabartinėje versijoje.';
+  @override
+  String get historyRestoreAction => 'Atkurti šią versiją';
+  @override
+  String historyRestoreConfirmTitle(String when) => 'Atkurti versiją ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Dabartinis tekstas pirmiausia išsaugomas istorijoje, todėl visada '
+      'galėsite grįžti.';
+  @override
+  String get historyRestoreConfirm => 'Atkurti';
+  @override
+  String historyRestored(String when) => 'Versija atkurta ($when)';
+  @override
+  String get historyRestoreFailed => 'Nepavyko atkurti versijos';
+  @override
+  String get actionUndo => 'Anuliuoti';
+  @override
+  String diffLineRange(int start, int end) => 'Eilutės $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Eilutė $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 19) => '$count nepakeistų eilučių',
+    (1, _) => '$count nepakeista eilutė',
+    (0, _) => '$count nepakeistų eilučių',
+    _ => '$count nepakeistos eilutės',
+  };
+  @override
+  String get historyVersionsTitle => 'Kiek versijų saugoti';
+  @override
+  String get historyVersionsSubtitle =>
+      'Kiekvienai pastabai, kataloge .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nė vienos' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nauja versija ne dažniau nei kas';
+  @override
+  String get historyIntervalSubtitle =>
+      'Rašant; pradėjus redaguoti pastabą, versija išsaugoma visada';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

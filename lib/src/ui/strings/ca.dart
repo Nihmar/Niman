@@ -116,25 +116,26 @@ final class CatalanStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Actualitzacions';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Actualitzacions automàtiques';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Comprova GitHub Releases en iniciar i cada 6 hores';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Cerca actualitzacions';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version està disponible';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman està actualitzat';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed =>
+      'No s’han pogut comprovar les actualitzacions';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Actualització guardada a $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instal·lador iniciat';
   @override
   String get settingsSectionDiagnostics => 'Diagnòstic';
   @override
@@ -262,44 +263,44 @@ final class CatalanStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Canvia l’ordre de l’element';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Encara no hi ha enregistraments';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Enregistra';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Atura';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Reprodueix';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Esborra l’enregistrament';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importa un fitxer d’àudio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Enregistrant…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permís del micròfon denegat — cal per enregistrar.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nota de veu nova';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'El meu enregistrament';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Mostra els enregistraments';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Escriu una nota…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Envia';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Canvia el nom de l’enregistrament';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Descriu aquest enregistrament…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Edita la descripció';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Esborra la nota';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Edita la nota';
   @override
   String get audioPause => 'Pausa';
   @override
@@ -331,7 +332,7 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutNewList => 'Llista nova';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nota de veu nova';
   @override
   String get shortcutToggleSidebar => 'Mostra o amaga el filtre';
   @override
@@ -1042,7 +1043,7 @@ final class CatalanStrings extends Strings {
   @override
   String get listFolderTitle => 'Carpeta de llista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => "Carpeta d'adjunts";
 
   // Trash (M1).
   @override
@@ -1188,4 +1189,92 @@ final class CatalanStrings extends Strings {
   String get changelogEmpty => 'No hi ha entrades de registre disponibles';
   @override
   String changelogWhatsNew(String version) => 'Novetats a la versió $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historial';
+  @override
+  String get noteMenuTooltip => 'Accions de la nota';
+  @override
+  String get historyCurrentVersion => 'Versió actual';
+  @override
+  String get historyCurrentSubtitle => 'La nota tal com és ara';
+  @override
+  String get historyToday => 'Avui';
+  @override
+  String get historyYesterday => 'Ahir';
+  @override
+  String get historyReasonSession => 'abans d’editar';
+  @override
+  String get historyReasonInterval => 'durant l’edició';
+  @override
+  String get historyReasonRestore => 'abans de restaurar';
+  @override
+  String get historyReasonSync => 'abans de sincronitzar';
+  @override
+  String get historyReasonReplace => 'abans de reemplaçar';
+  @override
+  String get historyReasonUnknown => 'recuperada';
+  @override
+  String get historySyncBase => 'base de sincronització';
+  @override
+  String get historyEmpty =>
+      'Encara no hi ha versions. Niman en guarda una quan comences a editar '
+      'la nota i després, com a màxim, una cada pocs minuts mentre escrius.';
+  @override
+  String historyKept(int kept, int limit) => '$kept de $limit versions';
+  @override
+  String get historyBaseKept =>
+      'La base de sincronització es conserva més enllà del límit.';
+  @override
+  String get historyOff =>
+      'L’historial està desactivat per a aquesta biblioteca '
+      '(Configuració, Biblioteca).';
+  @override
+  String get historyLoadFailed => 'No s’ha pogut llegir l’historial';
+  @override
+  String get historyCompareSubtitle => 'Comparada amb la versió actual';
+  @override
+  String get historyTabChanges => 'Canvis';
+  @override
+  String get historyTabVersion => 'Versió';
+  @override
+  String get historyNoChanges => 'El mateix text que la versió actual.';
+  @override
+  String get historyRestoreAction => 'Restaura aquesta versió';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restaurar la versió ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Abans es guarda el text actual a l’historial, així que sempre pots '
+      'tornar enrere.';
+  @override
+  String get historyRestoreConfirm => 'Restaura';
+  @override
+  String historyRestored(String when) => 'S’ha restaurat la versió ($when)';
+  @override
+  String get historyRestoreFailed => 'No s’ha pogut restaurar la versió';
+  @override
+  String get actionUndo => 'Desfés';
+  @override
+  String diffLineRange(int start, int end) => 'Línies $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Línia $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 línia sense canvis' : '$count línies sense canvis';
+  @override
+  String get historyVersionsTitle => 'Versions que es conserven';
+  @override
+  String get historyVersionsSubtitle => 'Per nota, a .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Cap' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nova versió com a màxim cada';
+  @override
+  String get historyIntervalSubtitle =>
+      'Mentre escrius; començar a editar una nota sempre en guarda una';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

@@ -114,25 +114,25 @@ final class DanishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Genveje';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Opdateringer';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiske opdateringer';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Tjek GitHub Releases ved start og hver 6. time';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Søg efter opdateringer';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version er tilgængelig';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman er opdateret';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kunne ikke søge efter opdateringer';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Opdatering gemt i $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Installationsprogrammet er startet';
   @override
   String get settingsSectionDiagnostics => 'Diagnostik';
   @override
@@ -256,44 +256,44 @@ final class DanishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Omordn element';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Ingen optagelser endnu';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Optag';
   @override
   String get audioStop => 'Stop';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Afspil';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Slet optagelse';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importér en lydfil';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Optager…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Adgang til mikrofonen nægtet — den er nødvendig for at optage.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Ny stemmenote';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Min optagelse';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Vis optagelser';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Skriv en note…';
   @override
   String get audioSend => 'Send';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Omdøb optagelse';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Beskriv denne optagelse…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Rediger beskrivelse';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Slet note';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Rediger note';
   @override
   String get audioPause => 'Pause';
   @override
@@ -325,7 +325,7 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutNewList => 'Ny liste';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Ny stemmenote';
   @override
   String get shortcutToggleSidebar => 'Vis eller skjul filtræet';
   @override
@@ -1014,7 +1014,7 @@ final class DanishStrings extends Strings {
   @override
   String get listFolderTitle => 'Listemappe';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mappe til vedhæftninger';
 
   // Trash (M1).
   @override
@@ -1154,4 +1154,92 @@ final class DanishStrings extends Strings {
   String get changelogEmpty => 'Ingen ændringslogposter tilgængelige';
   @override
   String changelogWhatsNew(String version) => 'Ny i version $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historik';
+  @override
+  String get noteMenuTooltip => 'Notehandlinger';
+  @override
+  String get historyCurrentVersion => 'Aktuel version';
+  @override
+  String get historyCurrentSubtitle => 'Noten, som den er nu';
+  @override
+  String get historyToday => 'I dag';
+  @override
+  String get historyYesterday => 'I går';
+  @override
+  String get historyReasonSession => 'før redigering';
+  @override
+  String get historyReasonInterval => 'under redigering';
+  @override
+  String get historyReasonRestore => 'før gendannelse';
+  @override
+  String get historyReasonSync => 'før synk';
+  @override
+  String get historyReasonReplace => 'før erstatning';
+  @override
+  String get historyReasonUnknown => 'genfundet';
+  @override
+  String get historySyncBase => 'synkbase';
+  @override
+  String get historyEmpty =>
+      'Ingen versioner endnu. Niman gemmer en, når du begynder at redigere '
+      'noten, og derefter højst én med få minutters mellemrum, mens du '
+      'skriver.';
+  @override
+  String historyKept(int kept, int limit) => '$kept af $limit versioner gemt';
+  @override
+  String get historyBaseKept => 'Synkbasen bevares ud over grænsen.';
+  @override
+  String get historyOff =>
+      'Historik er slået fra for dette bibliotek (Indstillinger, Bibliotek).';
+  @override
+  String get historyLoadFailed => 'Kunne ikke læse historikken';
+  @override
+  String get historyCompareSubtitle => 'Sammenlignet med den aktuelle version';
+  @override
+  String get historyTabChanges => 'Ændringer';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Samme tekst som den aktuelle version.';
+  @override
+  String get historyRestoreAction => 'Gendan denne version';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Gendan versionen fra $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Den aktuelle tekst gemmes først i historikken, så du altid kan gå '
+      'tilbage.';
+  @override
+  String get historyRestoreConfirm => 'Gendan';
+  @override
+  String historyRestored(String when) => 'Versionen fra $when er gendannet';
+  @override
+  String get historyRestoreFailed => 'Kunne ikke gendanne versionen';
+  @override
+  String get actionUndo => 'Fortryd';
+  @override
+  String diffLineRange(int start, int end) => 'Linjer $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Linje $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 uændret linje' : '$count uændrede linjer';
+  @override
+  String get historyVersionsTitle => 'Versioner, der gemmes';
+  @override
+  String get historyVersionsSubtitle => 'Pr. note, i .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Ingen' : '$count';
+  @override
+  String get historyIntervalTitle => 'Ny version højst hver';
+  @override
+  String get historyIntervalSubtitle =>
+      'Mens du skriver; når du begynder at redigere en note, gemmes der '
+      'altid én';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

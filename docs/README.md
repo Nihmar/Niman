@@ -6,7 +6,8 @@ Two audiences, two folders:
   tasks and reminders, home-screen widgets, settings, shortcuts, sync,
   platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
-  instructions, code conventions, release process.
+  instructions, code conventions, release process, the note history and
+  WebDAV sync design.
 
 Start with [user/getting-started.md](user/getting-started.md) if you use
 the app, or [dev/architecture.md](dev/architecture.md) if you hack on it.

@@ -71,6 +71,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
   bool _splitLoaded = false;
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
+  int _historyVersions = defaultHistoryVersions;
+  int _historyInterval = defaultHistoryIntervalMinutes;
   String? _quickNotePath;
   String? _listFolder;
   String? _templateFolder;
@@ -132,6 +134,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final splitRatio = await controller.splitRatio;
     final linkType = await controller.linkType;
     final indentWidth = await controller.indentWidth;
+    final historyVersions = await controller.historyVersions;
+    final historyInterval = await controller.historyIntervalMinutes;
     final quickNotePath = await ops.quickNotePath;
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
@@ -158,6 +162,8 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _splitLoaded = true;
         _linkType = linkType;
         _indentWidth = indentWidth;
+        _historyVersions = historyVersions;
+        _historyInterval = historyInterval;
         _quickNotePath = quickNotePath;
         _listFolder = listFolder;
         _templateFolder = templateFolder;
@@ -676,6 +682,42 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (type != null) await _setLinkType(type);
   }
 
+  /// Asks how many versions of each note the history keeps.
+  Future<void> _chooseHistoryVersions() async {
+    final versions = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('history-versions-dialog'),
+      title: AppStrings.historyVersionsTitle,
+      subtitle: AppStrings.historyVersionsSubtitle,
+      current: _historyVersions,
+      options: [
+        for (final count in const [0, 5, 10, 20, 50, 100])
+          SettingsOption(count, AppStrings.historyVersionsValue(count)),
+      ],
+    );
+    if (versions == null) return;
+    await widget.controller.setHistoryVersions(versions);
+    if (mounted) setState(() => _historyVersions = versions);
+  }
+
+  /// Asks for the least minutes between two versions kept while editing.
+  Future<void> _chooseHistoryInterval() async {
+    final minutes = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('history-interval-dialog'),
+      title: AppStrings.historyIntervalTitle,
+      subtitle: AppStrings.historyIntervalSubtitle,
+      current: _historyInterval,
+      options: [
+        for (final choice in historyIntervalChoices)
+          SettingsOption(choice, AppStrings.historyIntervalValue(choice)),
+      ],
+    );
+    if (minutes == null) return;
+    await widget.controller.setHistoryIntervalMinutes(minutes);
+    if (mounted) setState(() => _historyInterval = minutes);
+  }
+
   /// Asks for the spaces added per indent level.
   Future<void> _chooseIndentWidth() async {
     final width = await showSettingsChoice<int>(
@@ -1105,6 +1147,21 @@ final class _SettingsBodyState extends State<SettingsBody> {
           subtitle: Text(AppStrings.trashSubtitle),
           value: _trash ?? true,
           onChanged: _toggleTrash,
+        ),
+        SettingsValueRow(
+          key: const Key('history-versions-setting'),
+          title: AppStrings.historyVersionsTitle,
+          subtitle: AppStrings.historyVersionsSubtitle,
+          value: AppStrings.historyVersionsValue(_historyVersions),
+          onTap: _chooseHistoryVersions,
+        ),
+        SettingsValueRow(
+          key: const Key('history-interval-setting'),
+          title: AppStrings.historyIntervalTitle,
+          subtitle: AppStrings.historyIntervalSubtitle,
+          value: AppStrings.historyIntervalValue(_historyInterval),
+          enabled: _historyVersions > 0,
+          onTap: _chooseHistoryInterval,
         ),
         ListTile(
           key: const Key('reindex-setting'),

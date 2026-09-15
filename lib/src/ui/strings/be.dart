@@ -114,25 +114,25 @@ final class BelarusianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Абнаўленні';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Аўтаматычныя абнаўленні';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Правяраць GitHub Releases пры запуску і кожныя 6 гадзін';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Праверыць абнаўленні';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Даступная версія Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'У вас апошняя версія Niman';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Не ўдалося праверыць абнаўленні';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Усталёўшчык запушчаны';
   @override
   String get settingsSectionDiagnostics => 'Дыягустыка';
   @override
@@ -250,44 +250,44 @@ final class BelarusianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Змяніць парадак элементаў';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Запісаў яшчэ няма';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Запісаць';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Спыніць';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Прайграць';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Выдаліць запіс';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Імпартаваць аўдыяфайл';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Ідзе запіс…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Няма дазволу на мікрафон — ён патрэбны для запісу.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Новая галасавая заўвага';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Мой запіс';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Паказаць запісы';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Напішыце заўвагу…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Адправіць';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Перайменаваць запіс';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Апішыце гэты запіс…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Рэдагаваць апісанне';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Выдаліць заўвагу';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Рэдагаваць заўвагу';
   @override
   String get audioPause => 'Паўза';
   @override
@@ -319,7 +319,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutNewList => 'Новы спіс';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Новая галасавая заўвага';
   @override
   String get shortcutToggleSidebar => 'Паказаць або схаваць фільтр';
   @override
@@ -1010,7 +1010,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка спісаў';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка ўкладанняў';
 
   // Trash (M1).
   @override
@@ -1151,4 +1151,95 @@ final class BelarusianStrings extends Strings {
   String get changelogEmpty => 'Запісы журналу змен недаступныя';
   @override
   String changelogWhatsNew(String version) => 'Новае ў версіі $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Гісторыя';
+  @override
+  String get noteMenuTooltip => 'Дзеянні з заўвагай';
+  @override
+  String get historyCurrentVersion => 'Бягучая версія';
+  @override
+  String get historyCurrentSubtitle => 'Заўвага ў цяперашнім выглядзе';
+  @override
+  String get historyToday => 'Сёння';
+  @override
+  String get historyYesterday => 'Учора';
+  @override
+  String get historyReasonSession => 'перад рэдагаваннем';
+  @override
+  String get historyReasonInterval => 'падчас рэдагавання';
+  @override
+  String get historyReasonRestore => 'перад аднаўленнем';
+  @override
+  String get historyReasonSync => 'перад сінхранізацыяй';
+  @override
+  String get historyReasonReplace => 'перад заменай';
+  @override
+  String get historyReasonUnknown => 'знойдзеная';
+  @override
+  String get historySyncBase => 'аснова сінхранізацыі';
+  @override
+  String get historyEmpty =>
+      'Версій пакуль няма. Niman захоўвае адну, калі вы пачынаеце '
+      'рэдагаваць заўвагу, а потым не часцей за адну раз на некалькі '
+      'хвілін, пакуль вы пішаце.';
+  @override
+  String historyKept(int kept, int limit) => 'Захавана версій: $kept з $limit';
+  @override
+  String get historyBaseKept =>
+      'Аснова сінхранізацыі захоўваецца і па-за лімітам.';
+  @override
+  String get historyOff =>
+      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Бібліятэка).';
+  @override
+  String get historyLoadFailed => 'Не ўдалося прачытаць гісторыю';
+  @override
+  String get historyCompareSubtitle => 'У параўнанні з бягучай версіяй';
+  @override
+  String get historyTabChanges => 'Змены';
+  @override
+  String get historyTabVersion => 'Версія';
+  @override
+  String get historyNoChanges => 'Той жа тэкст, што і ў бягучай версіі.';
+  @override
+  String get historyRestoreAction => 'Аднавіць гэту версію';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Аднавіць версію, захаваную $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Бягучы тэкст спачатку захоўваецца ў гісторыі, таму вы заўсёды '
+      'можаце вярнуцца.';
+  @override
+  String get historyRestoreConfirm => 'Аднавіць';
+  @override
+  String historyRestored(String when) => 'Адноўлена версія, захаваная $when';
+  @override
+  String get historyRestoreFailed => 'Не ўдалося аднавіць версію';
+  @override
+  String get actionUndo => 'Адрабіць';
+  @override
+  String diffLineRange(int start, int end) => 'Радкі $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Радок $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count нязменены радок',
+    (2 || 3 || 4, < 12 || > 14) => '$count нязмененыя радкі',
+    _ => '$count нязмененых радкоў',
+  };
+  @override
+  String get historyVersionsTitle => 'Колькі версій захоўваць';
+  @override
+  String get historyVersionsSubtitle => 'Для кожнай заўвагі, у .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Няма' : '$count';
+  @override
+  String get historyIntervalTitle => 'Новая версія не часцей, чым раз на';
+  @override
+  String get historyIntervalSubtitle =>
+      'Падчас пісьма; пачатак рэдагавання заўвагі заўсёды захоўвае адну';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes хв';
 }

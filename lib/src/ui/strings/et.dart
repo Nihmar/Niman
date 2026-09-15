@@ -114,25 +114,24 @@ final class EstonianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klaviatuuri lühendid';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Uuendused';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automaatsed uuendused';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontrolli GitHub Releases uuendusi käivitamisel ja iga 6 tunni järel';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Otsi uuendusi';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version on saadaval';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman on ajakohane';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Uuenduste kontroll ebaõnnestus';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Uuendus salvestati asukohta $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Paigaldusprogramm käivitati';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -251,44 +250,44 @@ final class EstonianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Muuda elemendi järjekorda';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Salvestisi veel pole';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Salvesta';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Peata';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Esita';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Kustuta salvestis';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Impordi helifail';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Salvestamine…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofoni luba keelatud — salvestamiseks on see vajalik.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Uus häälmärge';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Minu salvestis';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Kuva salvestised';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Kirjuta märge…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Saada';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Muuda salvestise nime';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Kirjelda seda salvestist…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Muuda kirjeldust';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Kustuta märge';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Muuda märget';
   @override
   String get audioPause => 'Paus';
   @override
@@ -320,7 +319,7 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutNewList => 'Uus loetelu';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Uus häälmärge';
   @override
   String get shortcutToggleSidebar => 'Kuva või peida filter';
   @override
@@ -1000,7 +999,7 @@ final class EstonianStrings extends Strings {
   @override
   String get listFolderTitle => 'Loetelute kaust';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Manuste kaust';
 
   // Trash (M1).
   @override
@@ -1136,4 +1135,91 @@ final class EstonianStrings extends Strings {
   String get changelogEmpty => 'Muudatuste logis ei ole kirjeid';
   @override
   String changelogWhatsNew(String version) => 'Uut versioonis $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Ajalugu';
+  @override
+  String get noteMenuTooltip => 'Märkme toimingud';
+  @override
+  String get historyCurrentVersion => 'Praegune versioon';
+  @override
+  String get historyCurrentSubtitle => 'Märge praegusel kujul';
+  @override
+  String get historyToday => 'Täna';
+  @override
+  String get historyYesterday => 'Eile';
+  @override
+  String get historyReasonSession => 'enne muutmist';
+  @override
+  String get historyReasonInterval => 'muutmise ajal';
+  @override
+  String get historyReasonRestore => 'enne taastamist';
+  @override
+  String get historyReasonSync => 'enne sünkroonimist';
+  @override
+  String get historyReasonReplace => 'enne asendamist';
+  @override
+  String get historyReasonUnknown => 'taasleitud';
+  @override
+  String get historySyncBase => 'sünkroonimisalus';
+  @override
+  String get historyEmpty =>
+      'Versioone veel pole. Niman salvestab ühe, kui hakkad märget muutma, '
+      'ning seejärel kirjutamise ajal kõige rohkem ühe iga paari minuti järel.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Säilitatud versioone: $kept/$limit';
+  @override
+  String get historyBaseKept =>
+      'Sünkroonimisalus säilitatakse ka üle piirangu.';
+  @override
+  String get historyOff =>
+      'Ajalugu on selles kogus välja lülitatud (Seaded, Kogu).';
+  @override
+  String get historyLoadFailed => 'Ajalugu ei õnnestunud lugeda';
+  @override
+  String get historyCompareSubtitle => 'Võrreldud praeguse versiooniga';
+  @override
+  String get historyTabChanges => 'Muudatused';
+  @override
+  String get historyTabVersion => 'Versioon';
+  @override
+  String get historyNoChanges => 'Sama tekst mis praeguses versioonis.';
+  @override
+  String get historyRestoreAction => 'Taasta see versioon';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Kas taastada versioon $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Praegune tekst salvestatakse enne ajalukku, nii et saad alati tagasi '
+      'minna.';
+  @override
+  String get historyRestoreConfirm => 'Taasta';
+  @override
+  String historyRestored(String when) => 'Versioon $when taastati';
+  @override
+  String get historyRestoreFailed => 'Versiooni ei õnnestunud taastada';
+  @override
+  String get actionUndo => 'Võta tagasi';
+  @override
+  String diffLineRange(int start, int end) => 'Read $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rida $line';
+  @override
+  String diffUnchanged(int count) => '$count muutmata rida';
+  @override
+  String get historyVersionsTitle => 'Säilitatavad versioonid';
+  @override
+  String get historyVersionsSubtitle => 'Iga märkme kohta, kaustas .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Pole' : '$count';
+  @override
+  String get historyIntervalTitle => 'Versioonide vähim vahe';
+  @override
+  String get historyIntervalSubtitle =>
+      'Kirjutamise ajal; märkme muutmise alustamine salvestab alati ühe';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }
