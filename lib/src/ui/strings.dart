@@ -715,4 +715,12 @@ final class AppStrings {
   static String replaceSkipped(int skipped) => _s.replaceSkipped(skipped);
   static String replacePreviewEmpty(String term, String? only) =>
       _s.replacePreviewEmpty(term, only);
+
+  // About (issue #80): the app's version and its changelog.
+  static String get settingsSectionAbout => _s.settingsSectionAbout;
+  static String get versionTitle => _s.versionTitle;
+  static String get changelogTitle => _s.changelogTitle;
+  static String get changelogEmpty => _s.changelogEmpty;
+  static String changelogWhatsNew(String version) =>
+      _s.changelogWhatsNew(version);
 }

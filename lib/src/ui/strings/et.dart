@@ -1088,4 +1088,16 @@ final class EstonianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” täpset täissõna vastet ei ole'
       '${only == null ? '' : ' ei leitud $only-s'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Rakendusest';
+  @override
+  String get versionTitle => 'Versioon';
+  @override
+  String get changelogTitle => 'Muudatuste logi';
+  @override
+  String get changelogEmpty => 'Muudatuste logis ei ole kirjeid';
+  @override
+  String changelogWhatsNew(String version) => 'Uut versioonis $version';
 }

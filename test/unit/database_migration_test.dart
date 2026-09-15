@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
@@ -85,6 +86,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 20) await drop('app_settings', 'changelog_seen_version');
   if (version < 19) {
     await db.customStatement('DROP TABLE widget_configs');
   }
@@ -803,5 +805,39 @@ void main() {
       );
       await db.close();
     });
+  });
+
+  group('v19 → v20: the changelog-seen version appears (issue #80)', () {
+    test('an existing install is seeded to the pre-feature version', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 19);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final row = (await db.select(db.appSettings).get()).single;
+      // Seeded, not null: an upgrade into the build that ships the
+      // changelog shows that build's notes on its first launch, while a
+      // fresh install's null is what keeps the dialog off.
+      expect(row.changelogSeenVersion, '0.0.3');
+      await db.close();
+    });
+
+    test(
+      'a fresh install carries no seen version, keeping the dialog off',
+      () async {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await db
+            .into(db.appSettings)
+            .insert(AppSettingsCompanion.insert(id: const Value(1)));
+        final row = (await db.select(db.appSettings).get()).single;
+        expect(row.changelogSeenVersion, equals(null));
+        await db.close();
+      },
+    );
   });
 }

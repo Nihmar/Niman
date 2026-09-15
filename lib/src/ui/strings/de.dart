@@ -1135,4 +1135,16 @@ final class GermanStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Kein exakter Treffer des ganzen Worts „$term“ '
       '${only == null ? 'gefunden' : 'gefunden in $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Info';
+  @override
+  String get versionTitle => 'Version';
+  @override
+  String get changelogTitle => 'Änderungsprotokoll';
+  @override
+  String get changelogEmpty => 'Keine Einträge im Änderungsprotokoll';
+  @override
+  String changelogWhatsNew(String version) => 'Neu in Version $version';
 }

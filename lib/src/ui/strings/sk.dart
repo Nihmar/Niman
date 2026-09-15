@@ -1101,4 +1101,16 @@ final class SlovakStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Žiadny presný výsledok celého slova pre „$term”'
       '${only == null ? '' : ' sa nenašiel v $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikácii';
+  @override
+  String get versionTitle => 'Verzia';
+  @override
+  String get changelogTitle => 'Changelog';
+  @override
+  String get changelogEmpty => 'Záznamy changelogu nie sú dostupné';
+  @override
+  String changelogWhatsNew(String version) => 'Novinky vo verzii $version';
 }

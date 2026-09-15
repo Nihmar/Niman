@@ -1117,4 +1117,17 @@ final class HungarianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nincs pontos, teljes szó találat a „$term” esetén'
       '${only == null ? '' : ' a $only-ban'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Névjegy';
+  @override
+  String get versionTitle => 'Verzió';
+  @override
+  String get changelogTitle => 'Változási napló';
+  @override
+  String get changelogEmpty => 'Nincs elérhető naplóbejegyzés';
+  @override
+  String changelogWhatsNew(String version) =>
+      'Újdonságok a(z) $version verzióban';
 }

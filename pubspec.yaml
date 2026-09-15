@@ -78,6 +78,7 @@ dependencies:
   # verdict; see the Risks section of plan/m-platform-parity.md).
   nativeapi: 0.2.4
 
+  package_info_plus: ^10.2.1
   path: ^1.9.1
   path_provider: ^2.1.6
 
@@ -141,3 +142,4 @@ flutter:
   # Placeholder branding; replaced by the real asset pipeline in M7.
   assets:
     - assets/branding/
+    - CHANGELOG.md

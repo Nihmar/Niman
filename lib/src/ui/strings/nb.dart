@@ -1103,4 +1103,16 @@ final class NorwegianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ingen eksakt helt-ord-treff på “$term” '
       '${only == null ? 'ble funnet' : 'funnet i $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Om';
+  @override
+  String get versionTitle => 'Versjon';
+  @override
+  String get changelogTitle => 'Endringslogg';
+  @override
+  String get changelogEmpty => 'Ingen endringsloggposter tilgjengelig';
+  @override
+  String changelogWhatsNew(String version) => 'Nyhet i versjon $version';
 }

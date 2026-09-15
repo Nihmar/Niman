@@ -1119,4 +1119,16 @@ final class MacedonianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Нема точно совпаѓање на цел збор „$term"'
       '${only == null ? 'не е пронајдено' : 'пронајдено во $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'За';
+  @override
+  String get versionTitle => 'Верзија';
+  @override
+  String get changelogTitle => 'Дневник на промени';
+  @override
+  String get changelogEmpty => 'Нема достапни записи во дневникот';
+  @override
+  String changelogWhatsNew(String version) => 'Ново во верзијата $version';
 }

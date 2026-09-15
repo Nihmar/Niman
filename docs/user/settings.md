@@ -40,3 +40,9 @@ Brightness (day / night / system) × palette (system or Catppuccin),
 preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
 ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
 log toggle (default on).
+
+The last section, **About**, holds two read-only facts about the
+installation: the app's own **Version**, and **Changelog**, which opens
+the full list of shipped versions, newest first. The same changelog
+appears as a dialog on the first launch after an update, listing only
+what is new since the version you last saw.

@@ -1104,4 +1104,16 @@ final class LatvianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” nav precīza visa vārda sakritējuma'
       '${only == null ? '' : ' netika atrasts $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Par lietotni';
+  @override
+  String get versionTitle => 'Versija';
+  @override
+  String get changelogTitle => 'Izmaiņu žurnāls';
+  @override
+  String get changelogEmpty => 'Izmaiņu žurnāls ieraksti nav pieejami';
+  @override
+  String changelogWhatsNew(String version) => 'Jaunums versijā $version';
 }

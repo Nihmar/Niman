@@ -1094,4 +1094,16 @@ final class SlovenianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ni natančnega zadetka celih besed za „$term”'
       '${only == null ? '' : ' ni bilo najdeno v $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikaciji';
+  @override
+  String get versionTitle => 'Versija';
+  @override
+  String get changelogTitle => 'Dnevnik sprememb';
+  @override
+  String get changelogEmpty => 'Vnosi dnevnika niso na voljo';
+  @override
+  String changelogWhatsNew(String version) => 'Novo v verziji $version';
 }

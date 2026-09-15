@@ -1110,4 +1110,16 @@ final class RomanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nicio potrivire exactă de cuvânt întreg pentru „$term”'
       '${only == null ? ' a fost găsită' : ' a fost găsită în $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Despre';
+  @override
+  String get versionTitle => 'Versiune';
+  @override
+  String get changelogTitle => 'Jurnalul modificărilor';
+  @override
+  String get changelogEmpty => 'Nicio intrare în jurnal disponibilă';
+  @override
+  String changelogWhatsNew(String version) => 'Noutăți în versiunea $version';
 }

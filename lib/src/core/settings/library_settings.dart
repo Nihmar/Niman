@@ -210,6 +210,22 @@ final class AppSettingsRepo {
     );
   }
 
+  /// The app version whose changelog was last seen (issue #80), or null
+  /// on a fresh install — which is what keeps the update dialog off on
+  /// the first launch.
+  Future<String?> changelogSeenVersion() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? null : rows.first.changelogSeenVersion;
+  }
+
+  /// Persists [version] as the one the user has now seen.
+  Future<void> setChangelogSeenVersion(String version) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(changelogSeenVersion: Value(version)),
+    );
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

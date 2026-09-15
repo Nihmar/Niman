@@ -1105,4 +1105,16 @@ final class CroatianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nema točnog rezultata cijele riječi za „$term”'
       '${only == null ? '' : ' u $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikaciji';
+  @override
+  String get versionTitle => 'Verzija';
+  @override
+  String get changelogTitle => 'Dnevnik promjena';
+  @override
+  String get changelogEmpty => 'Nema dostupnih zapisa u dnevniku';
+  @override
+  String changelogWhatsNew(String version) => 'Novo u verziji $version';
 }

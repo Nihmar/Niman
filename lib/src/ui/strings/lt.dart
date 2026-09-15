@@ -1103,4 +1103,16 @@ final class LithuanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” neturi tikslaus visą žodį atitinkančio atitikmens'
       '${only == null ? '' : ' – tik $only rasta'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Apie';
+  @override
+  String get versionTitle => 'Versija';
+  @override
+  String get changelogTitle => 'Pakeitimų žurnalas';
+  @override
+  String get changelogEmpty => 'Pakeitimų žurnalo įrašų nėra';
+  @override
+  String changelogWhatsNew(String version) => 'Naujienos versijoje $version';
 }

@@ -1141,4 +1141,17 @@ final class FrenchStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Aucun mot entier exact « $term » '
       '${only == null ? 'trouvé' : 'trouvé dans $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'À propos';
+  @override
+  String get versionTitle => 'Version';
+  @override
+  String get changelogTitle => 'Journal des modifications';
+  @override
+  String get changelogEmpty => 'Aucune entrée du journal disponible';
+  @override
+  String changelogWhatsNew(String version) =>
+      'Nouveautés de la version $version';
 }

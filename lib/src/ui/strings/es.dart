@@ -1133,4 +1133,17 @@ final class SpanishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'No hay ninguna palabra completa exacta «$term» '
       '${only == null ? 'encontrada' : 'encontrada en $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Acerca de';
+  @override
+  String get versionTitle => 'Versión';
+  @override
+  String get changelogTitle => 'Registro de cambios';
+  @override
+  String get changelogEmpty => 'No hay entradas de registro disponibles';
+  @override
+  String changelogWhatsNew(String version) =>
+      'Novedades en la versión $version';
 }

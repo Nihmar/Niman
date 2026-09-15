@@ -1,11 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
+import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/close_guard.dart';
 import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/theme/device_colors.dart';
@@ -99,11 +102,30 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
         // it: the ask is a dialog, so it needs the Navigator and the
         // ScaffoldMessenger the app provides.
         home: Consumer(
-          builder: (context, ref, _) => CloseGuard(
-            tracker: ref.watch(unsavedTrackerProvider),
-            window: ref.watch(windowControllerProvider),
-            child: const LibraryHome(),
-          ),
+          builder: (context, ref, _) {
+            // The update notice (issue #80): what changed since the
+            // launch the user last saw. The provider marks the version
+            // seen before it reports, so a force-quit with the dialog up
+            // does not re-ask on the next launch.
+            ref.listen<AsyncValue<List<ChangelogVersion>?>>(
+              changelogUpdateProvider,
+              (previous, next) {
+                final versions = next.value;
+                if (versions == null || versions.isEmpty) return;
+                // The dialog needs the Navigator, which exists only once
+                // the home is in the tree: defer to the next frame.
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  if (!context.mounted) return;
+                  unawaited(showChangelogUpdateDialog(context, versions));
+                });
+              },
+            );
+            return CloseGuard(
+              tracker: ref.watch(unsavedTrackerProvider),
+              window: ref.watch(windowControllerProvider),
+              child: const LibraryHome(),
+            );
+          },
         ),
       ),
     );

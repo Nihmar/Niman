@@ -1112,4 +1112,16 @@ final class SerbianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Нема тачног поклапања целих речи за „$term"'
       '${only == null ? 'није пронађено' : 'пронађено у $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikaciji';
+  @override
+  String get versionTitle => 'Verzija';
+  @override
+  String get changelogTitle => 'Beleške o izmenama';
+  @override
+  String get changelogEmpty => 'Nema dostupnih zapisa u beleškama';
+  @override
+  String changelogWhatsNew(String version) => 'Novo u verziji $version';
 }

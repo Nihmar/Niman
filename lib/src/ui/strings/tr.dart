@@ -1099,4 +1099,16 @@ final class TurkishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '“$term” için tam kelime eşleşmesi yok'
       '${only == null ? ' bulunamadı' : ' $only içinde bulundu'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Hakkında';
+  @override
+  String get versionTitle => 'Sürüm';
+  @override
+  String get changelogTitle => 'Değişiklik geçmişi';
+  @override
+  String get changelogEmpty => 'Değişiklik geçmişi girişleri yok';
+  @override
+  String changelogWhatsNew(String version) => 'Sürüm $version yenilikleri';
 }

@@ -1154,4 +1154,16 @@ final class GreekStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Δεν υπάρχει ακριβές ταύτιμα όλης της λέξης «$term»'
       '${only == null ? 'δεν βρέθηκε' : 'βρέθηκε στο $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Σχετικά';
+  @override
+  String get versionTitle => 'Έκδοση';
+  @override
+  String get changelogTitle => 'Χangelog';
+  @override
+  String get changelogEmpty => 'Δεν υπάρχουν διαθέσιμες καταχωρίσεις';
+  @override
+  String changelogWhatsNew(String version) => 'Νέα στην έκδοση $version';
 }

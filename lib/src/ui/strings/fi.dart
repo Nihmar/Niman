@@ -1118,4 +1118,16 @@ final class FinnishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ei täsmällistä kokonaissanan “$term” osumaa'
       '${only == null ? '' : ' löytyi ${only}ssa'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Tietoja';
+  @override
+  String get versionTitle => 'Versio';
+  @override
+  String get changelogTitle => 'Muutoshistoria';
+  @override
+  String get changelogEmpty => 'Muutoshistoriassa ei ole merkintöjä';
+  @override
+  String changelogWhatsNew(String version) => 'Uutta versiossa $version';
 }

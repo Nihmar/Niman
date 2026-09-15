@@ -1116,4 +1116,16 @@ final class ItalianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nessuna parola intera esatta "$term" '
       '${only == null ? 'trovata' : 'trovata in $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Informazioni';
+  @override
+  String get versionTitle => 'Versione';
+  @override
+  String get changelogTitle => 'Registro delle modifiche';
+  @override
+  String get changelogEmpty => 'Nessuna voce del registro disponibile';
+  @override
+  String changelogWhatsNew(String version) => 'Novità nella versione $version';
 }
