@@ -1306,4 +1306,34 @@ final class CzechStrings extends Strings {
       'Pozastaveno na $progress';
   @override
   String get actionResume => 'Pokračovat';
+  @override
+  String get audioTranscribe => 'Přepsat';
+  @override
+  String get audioTranscribeUnsupported => 'V tomto zařízení jen nahrávky WAV';
+  @override
+  String get transcriptionQueued => 'Ve frontě';
+  @override
+  String get transcriptionPreparing => 'Připravuje se zvuk…';
+  @override
+  String transcriptionRunning(int percent) => 'Přepisuje se… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Stahuje se $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Přepis byl přidán do popisu';
+  @override
+  String get transcriptionNoSpeech =>
+      'V této nahrávce nebyla rozpoznána žádná řeč';
+  @override
+  String get transcriptionFailed => 'Přepis se nezdařil';
+  @override
+  String get transcriptionPickModelTitle => 'Vyberte model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Přepis probíhá v tomto zařízení a nahrávka se nikam neodesílá. Model '
+      'se stahuje jen jednou.';
+  @override
+  String get transcriptionPickModelAction => 'Stáhnout a přepsat';
+  @override
+  String get transcriptionModelRecommended => 'Doporučený';
 }

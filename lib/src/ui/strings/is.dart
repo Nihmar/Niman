@@ -1306,4 +1306,33 @@ final class IcelandicStrings extends Strings {
       'Í bið við $progress';
   @override
   String get actionResume => 'Halda áfram';
+  @override
+  String get audioTranscribe => 'Umrita';
+  @override
+  String get audioTranscribeUnsupported => 'Aðeins WAV-upptökur á þessu tæki';
+  @override
+  String get transcriptionQueued => 'Í biðröð';
+  @override
+  String get transcriptionPreparing => 'Undirbý hljóðið…';
+  @override
+  String transcriptionRunning(int percent) => 'Umritar… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Sæki $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Umrituninni var bætt við lýsinguna';
+  @override
+  String get transcriptionNoSpeech => 'Ekkert tal greindist í þessari upptöku';
+  @override
+  String get transcriptionFailed => 'Umritun mistókst';
+  @override
+  String get transcriptionPickModelTitle => 'Veldu líkan';
+  @override
+  String get transcriptionPickModelBody =>
+      'Umritunin fer fram á þessu tæki og upptakan er aldrei send. Líkanið er '
+      'sótt einu sinni.';
+  @override
+  String get transcriptionPickModelAction => 'Sækja og umrita';
+  @override
+  String get transcriptionModelRecommended => 'Mælt með';
 }

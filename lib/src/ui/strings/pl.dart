@@ -1331,4 +1331,34 @@ final class PolishStrings extends Strings {
       'Wstrzymano przy $progress';
   @override
   String get actionResume => 'Wznów';
+  @override
+  String get audioTranscribe => 'Transkrybuj';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Na tym urządzeniu tylko nagrania WAV';
+  @override
+  String get transcriptionQueued => 'W kolejce';
+  @override
+  String get transcriptionPreparing => 'Przygotowywanie dźwięku…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkrypcja… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Pobieranie $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkrypcję dodano do opisu';
+  @override
+  String get transcriptionNoSpeech => 'Nie rozpoznano mowy w tym nagraniu';
+  @override
+  String get transcriptionFailed => 'Transkrypcja nie powiodła się';
+  @override
+  String get transcriptionPickModelTitle => 'Wybierz model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkrypcja odbywa się na tym urządzeniu, a nagranie nigdy nie jest '
+      'wysyłane. Model pobierasz tylko raz.';
+  @override
+  String get transcriptionPickModelAction => 'Pobierz i transkrybuj';
+  @override
+  String get transcriptionModelRecommended => 'Zalecany';
 }

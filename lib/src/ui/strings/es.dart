@@ -1339,4 +1339,34 @@ final class SpanishStrings extends Strings {
       'En pausa en $progress';
   @override
   String get actionResume => 'Reanudar';
+  @override
+  String get audioTranscribe => 'Transcribir';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Solo grabaciones WAV en este dispositivo';
+  @override
+  String get transcriptionQueued => 'En cola';
+  @override
+  String get transcriptionPreparing => 'Preparando el audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcribiendo… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Descargando $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transcripción añadida a la descripción';
+  @override
+  String get transcriptionNoSpeech => 'No se reconoció voz en esta grabación';
+  @override
+  String get transcriptionFailed => 'No se pudo transcribir';
+  @override
+  String get transcriptionPickModelTitle => 'Elige un modelo';
+  @override
+  String get transcriptionPickModelBody =>
+      'La transcripción se hace en este dispositivo y la grabación nunca se '
+      'sube. El modelo se descarga una sola vez.';
+  @override
+  String get transcriptionPickModelAction => 'Descargar y transcribir';
+  @override
+  String get transcriptionModelRecommended => 'Recomendado';
 }

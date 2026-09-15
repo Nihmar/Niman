@@ -1329,4 +1329,35 @@ final class RomanianStrings extends Strings {
       'Întrerupt la $progress';
   @override
   String get actionResume => 'Reia';
+  @override
+  String get audioTranscribe => 'Transcrie';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Doar înregistrări WAV pe acest dispozitiv';
+  @override
+  String get transcriptionQueued => 'În așteptare';
+  @override
+  String get transcriptionPreparing => 'Se pregătește sunetul…';
+  @override
+  String transcriptionRunning(int percent) => 'Se transcrie… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Se descarcă $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transcrierea a fost adăugată la descriere';
+  @override
+  String get transcriptionNoSpeech =>
+      'Nu s-a recunoscut vorbire în această înregistrare';
+  @override
+  String get transcriptionFailed => 'Transcrierea a eșuat';
+  @override
+  String get transcriptionPickModelTitle => 'Alege un model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transcrierea se face pe acest dispozitiv, iar înregistrarea nu este '
+      'trimisă nicăieri. Modelul se descarcă o singură dată.';
+  @override
+  String get transcriptionPickModelAction => 'Descarcă și transcrie';
+  @override
+  String get transcriptionModelRecommended => 'Recomandat';
 }

@@ -1183,4 +1183,31 @@ final class ChineseStrings extends Strings {
   String transcriptionModelInterrupted(String progress) => '已暂停：$progress';
   @override
   String get actionResume => '继续';
+  @override
+  String get audioTranscribe => '转写';
+  @override
+  String get audioTranscribeUnsupported => '此设备仅支持 WAV 录音';
+  @override
+  String get transcriptionQueued => '排队中';
+  @override
+  String get transcriptionPreparing => '正在准备音频…';
+  @override
+  String transcriptionRunning(int percent) => '正在转写… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '正在下载 $model · $percent%';
+  @override
+  String get transcriptionSaved => '转写内容已添加到描述';
+  @override
+  String get transcriptionNoSpeech => '此录音中未识别到语音';
+  @override
+  String get transcriptionFailed => '转写失败';
+  @override
+  String get transcriptionPickModelTitle => '选择模型';
+  @override
+  String get transcriptionPickModelBody => '转写在本设备上进行，录音不会上传。模型只需下载一次。';
+  @override
+  String get transcriptionPickModelAction => '下载并转写';
+  @override
+  String get transcriptionModelRecommended => '推荐';
 }

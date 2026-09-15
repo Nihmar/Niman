@@ -1308,4 +1308,35 @@ final class NorwegianStrings extends Strings {
       'Satt på pause ved $progress';
   @override
   String get actionResume => 'Fortsett';
+  @override
+  String get audioTranscribe => 'Transkriber';
+  @override
+  String get audioTranscribeUnsupported => 'Bare WAV-opptak på denne enheten';
+  @override
+  String get transcriptionQueued => 'I kø';
+  @override
+  String get transcriptionPreparing => 'Klargjør lyden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkriberer… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Laster ned $model · $percent %';
+  @override
+  String get transcriptionSaved =>
+      'Transkripsjonen ble lagt til i beskrivelsen';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ingen tale ble gjenkjent i dette opptaket';
+  @override
+  String get transcriptionFailed => 'Transkriberingen mislyktes';
+  @override
+  String get transcriptionPickModelTitle => 'Velg en modell';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkriberingen skjer på denne enheten, og opptaket lastes aldri opp. '
+      'Modellen lastes ned én gang.';
+  @override
+  String get transcriptionPickModelAction => 'Last ned og transkriber';
+  @override
+  String get transcriptionModelRecommended => 'Anbefalt';
 }

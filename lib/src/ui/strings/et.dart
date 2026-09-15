@@ -1291,4 +1291,34 @@ final class EstonianStrings extends Strings {
       'Peatatud: $progress';
   @override
   String get actionResume => 'Jätka';
+  @override
+  String get audioTranscribe => 'Transkribeeri';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Selles seadmes ainult WAV-salvestised';
+  @override
+  String get transcriptionQueued => 'Järjekorras';
+  @override
+  String get transcriptionPreparing => 'Heli ettevalmistamine…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribeerimine… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Mudeli $model allalaadimine · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkriptsioon lisati kirjeldusse';
+  @override
+  String get transcriptionNoSpeech => 'Selles salvestises kõnet ei tuvastatud';
+  @override
+  String get transcriptionFailed => 'Transkribeerimine ebaõnnestus';
+  @override
+  String get transcriptionPickModelTitle => 'Vali mudel';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkribeerimine toimub selles seadmes ja salvestist ei saadeta '
+      'kuhugi. Mudel laaditakse alla vaid korra.';
+  @override
+  String get transcriptionPickModelAction => 'Laadi alla ja transkribeeri';
+  @override
+  String get transcriptionModelRecommended => 'Soovitatud';
 }

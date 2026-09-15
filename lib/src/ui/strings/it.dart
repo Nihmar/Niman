@@ -1321,4 +1321,35 @@ final class ItalianStrings extends Strings {
       'In pausa a $progress';
   @override
   String get actionResume => 'Riprendi';
+  @override
+  String get audioTranscribe => 'Trascrivi';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Solo registrazioni WAV su questo dispositivo';
+  @override
+  String get transcriptionQueued => 'In coda';
+  @override
+  String get transcriptionPreparing => "Preparo l'audio…";
+  @override
+  String transcriptionRunning(int percent) => 'Trascrizione… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Scarico $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Trascrizione aggiunta alla descrizione';
+  @override
+  String get transcriptionNoSpeech =>
+      'Nessun parlato riconosciuto in questa registrazione';
+  @override
+  String get transcriptionFailed => 'Trascrizione non riuscita';
+  @override
+  String get transcriptionPickModelTitle => 'Scegli un modello';
+  @override
+  String get transcriptionPickModelBody =>
+      'La trascrizione avviene su questo dispositivo e la registrazione non '
+      'viene mai inviata. Il modello si scarica una volta sola.';
+  @override
+  String get transcriptionPickModelAction => 'Scarica e trascrivi';
+  @override
+  String get transcriptionModelRecommended => 'Consigliato';
 }

@@ -1330,4 +1330,34 @@ final class DutchStrings extends Strings {
       'Gepauzeerd bij $progress';
   @override
   String get actionResume => 'Hervatten';
+  @override
+  String get audioTranscribe => 'Transcriberen';
+  @override
+  String get audioTranscribeUnsupported => 'Alleen WAV-opnames op dit apparaat';
+  @override
+  String get transcriptionQueued => 'In de wachtrij';
+  @override
+  String get transcriptionPreparing => 'Audio voorbereiden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcriberen… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model downloaden · $percent%';
+  @override
+  String get transcriptionSaved =>
+      'Transcriptie toegevoegd aan de beschrijving';
+  @override
+  String get transcriptionNoSpeech => 'Geen spraak herkend in deze opname';
+  @override
+  String get transcriptionFailed => 'Transcriptie mislukt';
+  @override
+  String get transcriptionPickModelTitle => 'Kies een model';
+  @override
+  String get transcriptionPickModelBody =>
+      'De transcriptie gebeurt op dit apparaat en de opname wordt nooit '
+      'geüpload. Het model wordt één keer gedownload.';
+  @override
+  String get transcriptionPickModelAction => 'Downloaden en transcriberen';
+  @override
+  String get transcriptionModelRecommended => 'Aanbevolen';
 }

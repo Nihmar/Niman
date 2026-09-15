@@ -1335,4 +1335,34 @@ final class AlbanianStrings extends Strings {
       'Në pauzë te $progress';
   @override
   String get actionResume => 'Vazhdo';
+  @override
+  String get audioTranscribe => 'Transkripto';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Vetëm regjistrime WAV në këtë pajisje';
+  @override
+  String get transcriptionQueued => 'Në radhë';
+  @override
+  String get transcriptionPreparing => 'Po përgatitet audioja…';
+  @override
+  String transcriptionRunning(int percent) => 'Po transkriptohet… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Po shkarkohet $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkriptimi u shtua te përshkrimi';
+  @override
+  String get transcriptionNoSpeech => 'Nuk u njoh e folur në këtë regjistrim';
+  @override
+  String get transcriptionFailed => 'Transkriptimi dështoi';
+  @override
+  String get transcriptionPickModelTitle => 'Zgjidhni një model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkriptimi bëhet në këtë pajisje dhe regjistrimi nuk dërgohet '
+      'kurrë. Modeli shkarkohet vetëm një herë.';
+  @override
+  String get transcriptionPickModelAction => 'Shkarko dhe transkripto';
+  @override
+  String get transcriptionModelRecommended => 'I rekomanduar';
 }

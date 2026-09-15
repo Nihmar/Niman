@@ -1328,4 +1328,34 @@ final class GalicianStrings extends Strings {
       'En pausa en $progress';
   @override
   String get actionResume => 'Retomar';
+  @override
+  String get audioTranscribe => 'Transcribir';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Só gravacións WAV neste dispositivo';
+  @override
+  String get transcriptionQueued => 'Na cola';
+  @override
+  String get transcriptionPreparing => 'Preparando o audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcribindo… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Descargando $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transcrición engadida á descrición';
+  @override
+  String get transcriptionNoSpeech => 'Non se recoñeceu fala nesta gravación';
+  @override
+  String get transcriptionFailed => 'Non se puido transcribir';
+  @override
+  String get transcriptionPickModelTitle => 'Escolle un modelo';
+  @override
+  String get transcriptionPickModelBody =>
+      'A transcrición faise neste dispositivo e a gravación nunca se envía. O '
+      'modelo descárgase unha soa vez.';
+  @override
+  String get transcriptionPickModelAction => 'Descargar e transcribir';
+  @override
+  String get transcriptionModelRecommended => 'Recomendado';
 }

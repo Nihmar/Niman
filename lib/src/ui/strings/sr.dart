@@ -1318,4 +1318,33 @@ final class SerbianStrings extends Strings {
       'Паузирано на $progress';
   @override
   String get actionResume => 'Настави';
+  @override
+  String get audioTranscribe => 'Транскрибуј';
+  @override
+  String get audioTranscribeUnsupported => 'На овом уређају само WAV снимци';
+  @override
+  String get transcriptionQueued => 'У реду';
+  @override
+  String get transcriptionPreparing => 'Припрема звука…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрипција… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Преузимање модела $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрипција је додата у опис';
+  @override
+  String get transcriptionNoSpeech => 'У овом снимку није препознат говор';
+  @override
+  String get transcriptionFailed => 'Транскрипција није успела';
+  @override
+  String get transcriptionPickModelTitle => 'Изаберите модел';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрипција се обавља на овом уређају и снимак се никад не шаље. '
+      'Модел се преузима само једном.';
+  @override
+  String get transcriptionPickModelAction => 'Преузми и транскрибуј';
+  @override
+  String get transcriptionModelRecommended => 'Препоручено';
 }

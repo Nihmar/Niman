@@ -1362,4 +1362,35 @@ final class GreekStrings extends Strings {
       'Σε παύση στο $progress';
   @override
   String get actionResume => 'Συνέχιση';
+  @override
+  String get audioTranscribe => 'Μεταγραφή';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Μόνο ηχογραφήσεις WAV σε αυτή τη συσκευή';
+  @override
+  String get transcriptionQueued => 'Σε αναμονή';
+  @override
+  String get transcriptionPreparing => 'Προετοιμασία ήχου…';
+  @override
+  String transcriptionRunning(int percent) => 'Μεταγραφή… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Λήψη $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Η μεταγραφή προστέθηκε στην περιγραφή';
+  @override
+  String get transcriptionNoSpeech =>
+      'Δεν αναγνωρίστηκε ομιλία σε αυτή την ηχογράφηση';
+  @override
+  String get transcriptionFailed => 'Η μεταγραφή απέτυχε';
+  @override
+  String get transcriptionPickModelTitle => 'Επιλέξτε μοντέλο';
+  @override
+  String get transcriptionPickModelBody =>
+      'Η μεταγραφή γίνεται σε αυτή τη συσκευή και η ηχογράφηση δεν '
+      'αποστέλλεται ποτέ. Το μοντέλο λαμβάνεται μία φορά.';
+  @override
+  String get transcriptionPickModelAction => 'Λήψη και μεταγραφή';
+  @override
+  String get transcriptionModelRecommended => 'Προτεινόμενο';
 }
