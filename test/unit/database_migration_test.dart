@@ -846,30 +846,27 @@ void main() {
   });
 
   group('v20 → v21: the auto-update state appears', () {
-    test(
-      'an existing install upgrades with checks off and no last check',
-      () async {
-        {
-          final db = AppDatabase(NativeDatabase(dbFile));
-          await _rewindTo(db, 20);
-          await db.customStatement(
-            "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
-          );
-          await db.close();
-        }
-
+    test('an existing install upgrades with checks off', () async {
+      {
         final db = AppDatabase(NativeDatabase(dbFile));
-        final repo = AppSettingsRepo(db);
-        expect(await repo.autoUpdateEnabled(), false);
-        expect(await repo.lastUpdateCheck(), equals(null));
-        // The settings survive the upgrade untouched.
-        expect(
-          (await db.select(db.appSettings).get()).single.libraryPath,
-          '/lib/Work',
+        await _rewindTo(db, 20);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
         );
         await db.close();
-      },
-    );
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      expect(await repo.autoUpdateEnabled(), false);
+      expect(await repo.lastUpdateCheck(), equals(null));
+      // The settings survive the upgrade untouched.
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/Work',
+      );
+      await db.close();
+    });
 
     test('the toggle and the last check round-trip', () async {
       final db = AppDatabase(NativeDatabase(dbFile));
