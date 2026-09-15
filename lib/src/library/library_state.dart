@@ -30,6 +30,7 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/network_monitor.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
 import 'package:niman/src/sync/sync_service.dart';
@@ -82,6 +83,7 @@ final class LibraryController implements LibrarySession {
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
     SyncSecretStore? syncSecrets,
+    this.syncNetwork,
   }) : _searchDbFactory = searchDbFactory ?? indexDbFactory,
        syncSecrets = syncSecrets ?? SecureSyncSecretStore();
 
@@ -135,6 +137,11 @@ final class LibraryController implements LibrarySession {
   /// Where each library's WebDAV password lives (M5); the OS secure
   /// storage unless a test injects another.
   final SyncSecretStore syncSecrets;
+
+  /// Builds the network monitor the sync's automatic triggers read (the
+  /// app passes `connectivity_plus`); null, as in tests, counts the
+  /// network as always usable.
+  final NetworkMonitor Function()? syncNetwork;
 
   final StreamController<int> _events = StreamController<int>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
@@ -449,9 +456,15 @@ final class LibraryController implements LibrarySession {
         ),
         store: syncStore,
         secrets: syncSecrets,
+        network: syncNetwork?.call(),
+        phone: Platform.isAndroid || Platform.isIOS,
       );
       _sync = sync;
-      unawaited(sync.load());
+      ops.syncHints = sync.hint;
+      // Loads the status, then the automatic triggers take over (the
+      // "library opened" full sync among them) — idle without a
+      // destination.
+      unawaited(sync.start());
       // The library's own text sizes, on screen with it (T-M6-12) and
       // before the ready bump, so nothing paints at the wrong size first.
       final settings = await config.config;
@@ -1075,8 +1088,11 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops = null;
     _configRepo = null;
-    _sync?.dispose();
+    final sync = _sync;
     _sync = null;
+    // A sync going now writes through the index about to close: its
+    // triggers stop, and it gets a moment to finish.
+    await sync?.close();
     // The text sizes belonged to the library that just went away; the
     // home screen is nobody's library and reads at the shipped sizes.
     AppTextScales.reset();
@@ -1108,6 +1124,9 @@ final class LibraryController implements LibrarySession {
       if (batch.paths.isNotEmpty) {
         await indexer.applyEvents(root, batch.paths);
       }
+      // What changed behind the ops' back (another app, a background
+      // isolate, a hand edit) reaches the sync queue this way.
+      _sync?.watched(batch.paths, batch.resyncDirs);
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');
@@ -1219,6 +1238,7 @@ final librarySessionProvider = Provider<LibrarySession>((ref) {
     indexDbFactory: defaultIndexDatabase,
     indexFileOf: libraryIndexFile,
     searchDbFactory: defaultSearchDatabase,
+    syncNetwork: ConnectivityNetworkMonitor.new,
   );
   ref.onDispose(controller.dispose);
   return controller;
