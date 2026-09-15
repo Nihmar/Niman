@@ -48,6 +48,7 @@ import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_pin.dart';
@@ -164,18 +165,25 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       stream: controller.events,
       initialData: controller.revision,
       builder: (context, _) => switch (controller.phase) {
-        LibraryPhase.ready => _LibraryShell(
-          controller: controller,
-          reminders: ref.read(reminderServiceProvider),
-          spellCheck: ref.read(spellCheckProvider),
-          shortcuts: ref.read(shortcutServiceProvider),
-          todoSourceFactory: ref.read(todoSourceFactoryProvider),
-          unsavedTracker: ref.watch(unsavedTrackerProvider),
-          targets: ref.read(widgetTargetServiceProvider),
-          widgetUpdater: ref.read(widgetUpdaterProvider),
-          widgetHost: ref.read(widgetHostServiceProvider),
-          tray: ref.read(trayServiceProvider),
-          window: ref.read(windowControllerProvider),
+        LibraryPhase.ready => Column(
+          children: [
+            UpdateAvailableBanner(session: controller),
+            Expanded(
+              child: _LibraryShell(
+                controller: controller,
+                reminders: ref.read(reminderServiceProvider),
+                spellCheck: ref.read(spellCheckProvider),
+                shortcuts: ref.read(shortcutServiceProvider),
+                todoSourceFactory: ref.read(todoSourceFactoryProvider),
+                unsavedTracker: ref.watch(unsavedTrackerProvider),
+                targets: ref.read(widgetTargetServiceProvider),
+                widgetUpdater: ref.read(widgetUpdaterProvider),
+                widgetHost: ref.read(widgetHostServiceProvider),
+                tray: ref.read(trayServiceProvider),
+                window: ref.read(windowControllerProvider),
+              ),
+            ),
+          ],
         ),
         _ => OpenLibraryScreen(controller: controller),
       },

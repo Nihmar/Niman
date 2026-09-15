@@ -86,6 +86,10 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 21) {
+    await drop('app_settings', 'auto_update_enabled');
+    await drop('app_settings', 'last_update_check_ms');
+  }
   if (version < 20) await drop('app_settings', 'changelog_seen_version');
   if (version < 19) {
     await db.customStatement('DROP TABLE widget_configs');
@@ -777,8 +781,7 @@ void main() {
     },
   );
 
-  group('v18 → v19: the widget configs appear', () {
-    test('an existing install upgrades with an empty widget table', () async {
+  group('v18 → v19: the widget configs appear', () {    test('an existing install upgrades with an empty widget table', () async {
       {
         final db = AppDatabase(NativeDatabase(dbFile));
         await _rewindTo(db, 18);

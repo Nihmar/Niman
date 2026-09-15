@@ -18,6 +18,18 @@ class AppSettings extends Table {
   BoolColumn get debugLogsEnabled =>
       boolean().named('debug_logs_enabled').withDefault(const Constant(true))();
 
+  /// Whether the app checks GitHub Releases for updates (issue #81).
+  ///
+  /// On by default: the check is a quiet status, never a dialog. The
+  /// manual "Check for updates" row in Settings works regardless.
+  BoolColumn get autoUpdateEnabled =>
+      boolean().named('auto_update_enabled').withDefault(const Constant(true))();
+
+  /// Last update-check time, milliseconds since epoch; null until the
+  /// first check runs (issue #81).
+  IntColumn get lastUpdateCheckMs =>
+      integer().named('last_update_check_ms').nullable()();
+
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
   ///
@@ -136,7 +148,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -172,7 +184,10 @@ class AppDatabase extends _$AppDatabase {
   /// databases gain `changelog_seen_version` (issue #80), seeded with
   /// `0.0.3` — the last version before this feature shipped — so an
   /// upgrade into this build shows its own notes rather than nothing,
-  /// while a fresh install's null stays what turns the dialog off.
+  /// while a fresh install's null stays what turns the dialog off, and
+  /// pre-v21 databases gain the auto-update state (issue #81):
+  /// `auto_update_enabled` (on, like a fresh install) and
+  /// `last_update_check_ms` (null until the first check runs).
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -299,6 +314,16 @@ class AppDatabase extends _$AppDatabase {
         await m.database.customStatement(
           "UPDATE app_settings SET changelog_seen_version = '0.0.3' "
           'WHERE id = 1',
+        );
+      }
+      if (from < 21) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN auto_update_enabled '
+          'BOOLEAN NOT NULL DEFAULT 1',
+        );
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN last_update_check_ms '
+          'INTEGER',
         );
       }
     },

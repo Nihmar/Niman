@@ -50,6 +50,15 @@ abstract base class Strings {
   String get settingsSectionReminders;
   String get settingsSectionShortcuts;
   String get keyboardShortcutsTitle;
+  String get settingsSectionUpdates;
+  String get autoUpdateTitle;
+  String get autoUpdateSubtitle;
+  String get checkForUpdatesTitle;
+  String updateAvailableMessage(Object version);
+  String get updateUpToDate;
+  String get updateCheckFailed;
+  String updateSavedTo(Object path);
+  String get updateInstallerStarted;
   String get settingsSectionDiagnostics;
   String get settingsSpellCheckTitle;
   String get settingsSpellCheckSubtitle;

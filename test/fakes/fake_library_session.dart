@@ -20,6 +20,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:path/path.dart' as p;
 
@@ -264,6 +265,18 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<void> setDebugLogsEnabled({required bool enabled}) async {}
+
+  @override
+  Future<bool> get autoUpdateEnabled async => true;
+
+  @override
+  Future<void> setAutoUpdateEnabled({required bool enabled}) async {}
+
+  @override
+  UpdateAvailable? get pendingUpdate => null;
+
+  @override
+  void clearPendingUpdate() {}
 
   /// The settings a library keeps for itself (T-ML-10), in memory. A
   /// fresh fake starts at the shipped defaults, as a fresh library does.

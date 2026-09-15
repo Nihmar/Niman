@@ -140,6 +140,16 @@ final class AppStrings {
   static String get settingsSectionReminders => _s.settingsSectionReminders;
   static String get settingsSectionShortcuts => _s.settingsSectionShortcuts;
   static String get keyboardShortcutsTitle => _s.keyboardShortcutsTitle;
+  static String get settingsSectionUpdates => _s.settingsSectionUpdates;
+  static String get autoUpdateTitle => _s.autoUpdateTitle;
+  static String get autoUpdateSubtitle => _s.autoUpdateSubtitle;
+  static String get checkForUpdatesTitle => _s.checkForUpdatesTitle;
+  static String updateAvailableMessage(Object version) =>
+      _s.updateAvailableMessage(version);
+  static String get updateUpToDate => _s.updateUpToDate;
+  static String get updateCheckFailed => _s.updateCheckFailed;
+  static String updateSavedTo(Object path) => _s.updateSavedTo(path);
+  static String get updateInstallerStarted => _s.updateInstallerStarted;
   static String get settingsSectionDiagnostics => _s.settingsSectionDiagnostics;
   static String get settingsSpellCheckTitle => _s.settingsSpellCheckTitle;
   static String get settingsSpellCheckSubtitle => _s.settingsSpellCheckSubtitle;

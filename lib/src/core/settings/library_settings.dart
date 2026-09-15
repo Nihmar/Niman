@@ -124,6 +124,42 @@ final class AppSettingsRepo {
     );
   }
 
+  /// Whether the app checks GitHub Releases for updates (issue #81,
+  /// default true). The manual check in Settings works regardless.
+  Future<bool> autoUpdateEnabled() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty || rows.first.autoUpdateEnabled;
+  }
+
+  /// Persists the auto-update toggle.
+  Future<void> setAutoUpdateEnabled({required bool enabled}) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(autoUpdateEnabled: Value(enabled)),
+    );
+  }
+
+  /// The last update-check time, or null before the first check (issue
+  /// #81).
+  Future<DateTime?> lastUpdateCheck() async {
+    final rows = await _db.select(_db.appSettings).get();
+    if (rows.isEmpty) return null;
+    final ms = rows.first.lastUpdateCheckMs;
+    return ms == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  }
+
+  /// Persists the last update-check time.
+  Future<void> setLastUpdateCheck(DateTime time) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(
+        lastUpdateCheckMs: Value(time.millisecondsSinceEpoch),
+      ),
+    );
+  }
+
   /// The preview layout mode (default [PreviewLayoutMode.auto]).
   Future<PreviewLayoutMode> previewMode() async {
     final rows = await _db.select(_db.appSettings).get();
