@@ -1136,89 +1136,94 @@ final class BelarusianStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Новае ў версіі $version';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Гісторыя';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Дзеянні з заўвагай';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Бягучая версія';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Заўвага ў цяперашнім выглядзе';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Сёння';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Учора';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'перад рэдагаваннем';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'падчас рэдагавання';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'перад аднаўленнем';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'перад сінхранізацыяй';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'перад заменай';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'знойдзеная';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'аснова сінхранізацыі';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Версій пакуль няма. Niman захоўвае адну, калі вы пачынаеце '
+      'рэдагаваць заўвагу, а потым не часцей за адну раз на некалькі '
+      'хвілін, пакуль вы пішаце.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => 'Захавана версій: $kept з $limit';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept =>
+      'Аснова сінхранізацыі захоўваецца і па-за лімітам.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Бібліятэка).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Не ўдалося прачытаць гісторыю';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'У параўнанні з бягучай версіяй';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Змены';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Версія';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Той жа тэкст, што і ў бягучай версіі.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Аднавіць гэту версію';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Аднавіць версію, захаваную $when?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Бягучы тэкст спачатку захоўваецца ў гісторыі, таму вы заўсёды '
+      'можаце вярнуцца.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Аднавіць';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Адноўлена версія, захаваная $when';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Не ўдалося аднавіць версію';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Адрабіць';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Радкі $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Радок $line';
   @override
-  String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count нязменены радок',
+    (2 || 3 || 4, < 12 || > 14) => '$count нязмененыя радкі',
+    _ => '$count нязмененых радкоў',
+  };
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Колькі версій захоўваць';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Для кожнай заўвагі, у .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Няма' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Новая версія не часцей, чым раз на';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Падчас пісьма; пачатак рэдагавання заўвагі заўсёды захоўвае адну';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes хв';
 }

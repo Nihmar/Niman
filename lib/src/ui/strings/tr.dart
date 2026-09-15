@@ -1132,89 +1132,88 @@ final class TurkishStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Sürüm $version yenilikleri';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Geçmiş';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Not işlemleri';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Geçerli sürüm';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Notun şu anki hâli';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Bugün';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Dün';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'düzenleme öncesi';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'düzenleme sırasında';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'geri yükleme öncesi';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'eşitleme öncesi';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'değiştirme öncesi';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'kurtarılan';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'eşitleme tabanı';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Henüz sürüm yok. Niman, notu düzenlemeye başladığınızda bir sürüm, '
+      'ardından siz yazarken en fazla birkaç dakikada bir yeni sürüm saklar.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) =>
+      'Saklanan sürümler: $kept / $limit';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept => 'Eşitleme tabanı sınırın ötesinde de saklanır.';
   @override
-  String get historyOff =>
-      'History is off for this library (Settings, Library).';
+  String get historyOff => 'Bu kütüphanede geçmiş kapalı (Ayarlar, Kütüphane).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Geçmiş okunamadı';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Geçerli sürümle karşılaştırıldı';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Değişiklikler';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Sürüm';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Metin geçerli sürümle aynı.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Bu sürümü geri yükle';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      '$when tarihli sürüm geri yüklensin mi?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Geçerli metin önce geçmişe kaydedilir, böylece her zaman geri '
+      'dönebilirsiniz.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Geri yükle';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => '$when tarihli sürüm geri yüklendi';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Sürüm geri yüklenemedi';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Geri al';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Satır $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Satır $line';
   @override
-  String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  String diffUnchanged(int count) => '$count değişmemiş satır';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Saklanacak sürüm sayısı';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Not başına, .history/ içinde';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Yok' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Yeni sürümler arasında en az';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Yazarken; bir notu düzenlemeye başlamak her zaman bir sürüm saklar';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes dk';
 }

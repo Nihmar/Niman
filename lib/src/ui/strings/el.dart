@@ -1187,89 +1187,93 @@ final class GreekStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Νέα στην έκδοση $version';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Ιστορικό';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Ενέργειες σημείωσης';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Τρέχουσα έκδοση';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Η σημείωση όπως είναι τώρα';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Σήμερα';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Χθες';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'πριν την επεξεργασία';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'κατά την επεξεργασία';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'πριν την επαναφορά';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'πριν τον συγχρονισμό';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'πριν την αντικατάσταση';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'ανακτημένη';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'βάση συγχρονισμού';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Δεν υπάρχουν ακόμα εκδόσεις. Το Niman κρατά μία όταν αρχίζετε να '
+      'επεξεργάζεστε τη σημείωση και μετά το πολύ μία κάθε λίγα λεπτά όσο '
+      'γράφετε.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) =>
+      'Εκδόσεις που διατηρούνται: $kept από $limit';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept =>
+      'Η βάση συγχρονισμού διατηρείται και πέρα από το όριο.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Το ιστορικό είναι απενεργοποιημένο για αυτή τη βιβλιοθήκη '
+      '(Ρυθμίσεις, Βιβλιοθήκη).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Δεν ήταν δυνατή η ανάγνωση του ιστορικού';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Σε σύγκριση με την τρέχουσα έκδοση';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Αλλαγές';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Έκδοση';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Ίδιο κείμενο με την τρέχουσα έκδοση.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Επαναφορά αυτής της έκδοσης';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Επαναφορά της έκδοσης ($when);';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Το τρέχον κείμενο αποθηκεύεται πρώτα στο ιστορικό, οπότε μπορείτε '
+      'πάντα να επιστρέψετε.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Επαναφορά';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Έγινε επαναφορά της έκδοσης ($when)';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Δεν ήταν δυνατή η επαναφορά της έκδοσης';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Αναίρεση';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Γραμμές $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Γραμμή $line';
   @override
   String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+      count == 1 ? '1 αμετάβλητη γραμμή' : '$count αμετάβλητες γραμμές';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Εκδόσεις προς διατήρηση';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Ανά σημείωση, στο .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Καμία' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Νέα έκδοση το πολύ κάθε';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Όσο γράφετε· η έναρξη επεξεργασίας μιας σημείωσης κρατά πάντα μία';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes λεπ.';
 }

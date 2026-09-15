@@ -1152,89 +1152,94 @@ final class BasqueStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Berria $version bertsioan';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Historia';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Oharraren ekintzak';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Uneko bertsioa';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Oharra orain dagoen bezala';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Gaur';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Atzo';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'editatu aurretik';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'editatzean';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'berrezarri aurretik';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'sinkronizatu aurretik';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'ordezkatu aurretik';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'berreskuratua';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'sinkronizazio-oinarria';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Oraindik ez dago bertsiorik. Niman-ek bat gordetzen du oharra '
+      'editatzen hasten zarenean, eta gero, gehienez, bat minutu gutxiro '
+      'idazten duzun bitartean.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => '$kept/$limit bertsio gordeta';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept =>
+      'Sinkronizazio-oinarria mugaz gain ere gordetzen da.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Historia desaktibatuta dago biblioteka honetan '
+      '(Ezarpenak, Biblioteka).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Ezin izan da historia irakurri';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Uneko bertsioarekin alderatuta';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Aldaketak';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Bertsioa';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Uneko bertsioaren testu bera.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Berrezarri bertsio hau';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Berrezarri bertsio hau ($when)?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Uneko testua historian gordetzen da lehenik, beraz beti itzul '
+      'zaitezke atzera.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Berrezarri';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Bertsioa ($when) berrezarri da';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Ezin izan da bertsioa berrezarri';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Desegin';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Lerroak $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Lerroa $line';
   @override
   String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+      count == 1 ? 'lerro 1 aldatu gabe' : '$count lerro aldatu gabe';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Gorde beharreko bertsioak';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Ohar bakoitzeko, .history/ karpetan';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) =>
+      count == 0 ? 'Bat ere ez' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Bertsio berrien arteko tarte txikiena';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Idazten duzun bitartean; ohar bat editatzen hastean beti gordetzen '
+      'da bat';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
 }
