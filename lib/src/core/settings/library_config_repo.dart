@@ -22,6 +22,10 @@ final class LibraryConfigRepo {
   Future<LibraryConfig>? _config;
   Future<void> _chain = Future<void>.value();
 
+  /// Called after every write that changed the file (the sync queues the
+  /// file for upload).
+  void Function()? onWritten;
+
   /// The library's settings; the first call reads the file, later ones
   /// return the cached value.
   Future<LibraryConfig> get config => _config ??= _store.read();
@@ -46,6 +50,7 @@ final class LibraryConfigRepo {
       if (updated == current) return;
       await _store.write(updated);
       _config = Future<LibraryConfig>.value(updated);
+      onWritten?.call();
     });
     _chain = next.then<void>((_) {}, onError: (Object _) {});
     return next;
