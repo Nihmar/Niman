@@ -21,6 +21,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -276,10 +277,14 @@ final class LibraryController implements LibrarySession {
     final indexer = _indexer;
     final db = _indexDb;
     if (root == null || indexer == null || db == null) return null;
+    final history = _ops?.history;
     return ReplaceRunner(
       db,
       root,
       onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
+      historyRequest: history == null
+          ? null
+          : () => history.requestFor('', forced: HistoryReason.replace),
     );
   }
 

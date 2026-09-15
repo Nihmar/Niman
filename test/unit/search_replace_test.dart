@@ -1,4 +1,5 @@
 // T-M3-10: the exact whole-word replace runner over a real index + disk.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Variable;
@@ -6,6 +7,9 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/history/history_store.dart';
+import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:path/path.dart' as p;
 
@@ -240,6 +244,34 @@ void main() {
       expect(report.notesScanned, 0);
       expect(report.occurrences, 0);
     });
+
+    test(
+      'each rewritten note keeps its old text as a replace version',
+      () async {
+        final kept = ReplaceRunner(
+          db,
+          root.path,
+          historyRequest: () async => SnapshotRequest(
+            limit: 10,
+            interval: const Duration(minutes: 5),
+            now: DateTime(2026, 9, 15),
+            forced: HistoryReason.replace,
+          ),
+        );
+        final before = file('sub/x.md').readAsStringSync();
+        await kept.replaceAll(
+          term: 'cat',
+          replacement: 'dog',
+          caseSensitive: false,
+        );
+        final manifest = readHistoryManifest(root.path, 'sub/x.md');
+        expect(manifest.versions.single.reason, HistoryReason.replace);
+        expect(
+          utf8.decode(readHistoryVersion(root.path, 'sub/x.md', 1)!),
+          before,
+        );
+      },
+    );
 
     test('rewritten notes are re-indexed through the hook per batch', () async {
       final batches = <List<String>>[];
