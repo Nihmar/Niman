@@ -268,15 +268,11 @@ final class SwedishStrings extends Strings {
   @override
   String get audioPlay => 'Play';
   @override
-  String get audioStopPlayback => 'Stop playback';
-  @override
   String get audioDelete => 'Delete recording';
   @override
   String get audioImport => 'Import an audio file';
   @override
   String get audioRecording => 'Recording…';
-  @override
-  String get audioPlaying => 'Playing';
   @override
   String get audioPermissionDenied =>
       'Microphone permission denied — recording needs it.';
@@ -300,6 +296,18 @@ final class SwedishStrings extends Strings {
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
+  @override
+  String get audioPause => 'Pausa';
+  @override
+  String get audioEditTitle => 'Redigera titel';
+  @override
+  String get audioTitleHint => 'Ge inspelningen en titel…';
+  @override
+  String audioUntitled(int n) => 'Inspelning $n';
+  @override
+  String get audioMoreActions => 'Fler åtgärder';
+  @override
+  String get audioDiscardRecording => 'Kasta inspelning';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

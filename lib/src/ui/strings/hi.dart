@@ -258,15 +258,11 @@ final class HindiStrings extends Strings {
   @override
   String get audioPlay => 'Play';
   @override
-  String get audioStopPlayback => 'Stop playback';
-  @override
   String get audioDelete => 'Delete recording';
   @override
   String get audioImport => 'Import an audio file';
   @override
   String get audioRecording => 'Recording…';
-  @override
-  String get audioPlaying => 'Playing';
   @override
   String get audioPermissionDenied =>
       'Microphone permission denied — recording needs it.';
@@ -290,6 +286,18 @@ final class HindiStrings extends Strings {
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
+  @override
+  String get audioPause => 'रोकें';
+  @override
+  String get audioEditTitle => 'शीर्षक संपादित करें';
+  @override
+  String get audioTitleHint => 'इस रिकॉर्डिंग का शीर्षक…';
+  @override
+  String audioUntitled(int n) => 'रिकॉर्डिंग $n';
+  @override
+  String get audioMoreActions => 'और क्रियाएँ';
+  @override
+  String get audioDiscardRecording => 'रिकॉर्डिंग रद्द करें';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

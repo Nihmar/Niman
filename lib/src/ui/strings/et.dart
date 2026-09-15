@@ -261,15 +261,11 @@ final class EstonianStrings extends Strings {
   @override
   String get audioPlay => 'Play';
   @override
-  String get audioStopPlayback => 'Stop playback';
-  @override
   String get audioDelete => 'Delete recording';
   @override
   String get audioImport => 'Import an audio file';
   @override
   String get audioRecording => 'Recording…';
-  @override
-  String get audioPlaying => 'Playing';
   @override
   String get audioPermissionDenied =>
       'Microphone permission denied — recording needs it.';
@@ -293,6 +289,18 @@ final class EstonianStrings extends Strings {
   String get audioDeleteNote => 'Delete note';
   @override
   String get audioEditNote => 'Edit note';
+  @override
+  String get audioPause => 'Paus';
+  @override
+  String get audioEditTitle => 'Muuda pealkirja';
+  @override
+  String get audioTitleHint => 'Anna salvestisele pealkiri…';
+  @override
+  String audioUntitled(int n) => 'Salvestis $n';
+  @override
+  String get audioMoreActions => 'Rohkem toiminguid';
+  @override
+  String get audioDiscardRecording => 'Loobu salvestisest';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
