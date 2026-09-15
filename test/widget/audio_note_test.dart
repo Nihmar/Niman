@@ -225,6 +225,34 @@ void main() {
     expect(find.text('0:00'), findsOneWidget);
   });
 
+  testWidgets('an outside edit that drops the playing clip stops it', (
+    tester,
+  ) async {
+    final player = _FakePlayer();
+    Widget view(String text) => MaterialApp(
+      home: Scaffold(
+        body: AudioNoteView(
+          text: text,
+          onChanged: (_) {},
+          notePath: p.join('root', 'note.md'),
+          libraryRoot: p.join('root'),
+          recorder: _FakeRecorder(),
+          player: player,
+          readLengths: (_) async => const {},
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      view('---\ntype: audio\n---\n![](assets/a.wav)\n\nhello\n'),
+    );
+    await tester.tap(find.byKey(const ValueKey('audio-play-0')));
+    await tester.pump();
+    await tester.pumpWidget(view('---\ntype: audio\n---\nhello\n'));
+    await tester.pumpAndSettle();
+    expect(player.stops, 1);
+    expect(find.byKey(const ValueKey('audio-play-0')), findsNothing);
+  });
+
   testWidgets('record appends the imported clip to the note', (tester) async {
     final edits = <String>[];
     final recorder = _FakeRecorder();
