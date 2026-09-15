@@ -32,6 +32,7 @@ void main() {
     remoteEtag: '"e1"',
     remoteSize: 3,
     remoteMtimeMs: 1000,
+    remoteUnverified: false,
     baseVersion: 4,
     syncedAtMs: 2000,
   );

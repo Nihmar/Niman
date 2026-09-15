@@ -212,6 +212,13 @@ class SyncItems extends Table {
   /// The remote `getlastmodified`, ms (one-second resolution).
   IntColumn get remoteMtimeMs => integer().named('remote_mtime_ms')();
 
+  /// Whether the listing this row was recorded from could not rule out a
+  /// second write within the same second: a server without ETags whose
+  /// `getlastmodified` was the server's current second. The next
+  /// reconcile hashes the remote instead of trusting size and mtime.
+  BoolColumn get remoteUnverified =>
+      boolean().named('remote_unverified').withDefault(const Constant(false))();
+
   /// The remote `oc:fileid`, when the server has one.
   TextColumn get remoteFileId => text().named('remote_file_id').nullable()();
 

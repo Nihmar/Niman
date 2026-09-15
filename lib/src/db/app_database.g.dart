@@ -2187,6 +2187,21 @@ class $SyncItemsTable extends SyncItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _remoteUnverifiedMeta = const VerificationMeta(
+    'remoteUnverified',
+  );
+  @override
+  late final GeneratedColumn<bool> remoteUnverified = GeneratedColumn<bool>(
+    'remote_unverified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("remote_unverified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _remoteFileIdMeta = const VerificationMeta(
     'remoteFileId',
   );
@@ -2230,6 +2245,7 @@ class $SyncItemsTable extends SyncItems
     remoteEtag,
     remoteSize,
     remoteMtimeMs,
+    remoteUnverified,
     remoteFileId,
     baseVersion,
     syncedAtMs,
@@ -2320,6 +2336,15 @@ class $SyncItemsTable extends SyncItems
     } else if (isInserting) {
       context.missing(_remoteMtimeMsMeta);
     }
+    if (data.containsKey('remote_unverified')) {
+      context.handle(
+        _remoteUnverifiedMeta,
+        remoteUnverified.isAcceptableOrUnknown(
+          data['remote_unverified']!,
+          _remoteUnverifiedMeta,
+        ),
+      );
+    }
     if (data.containsKey('remote_file_id')) {
       context.handle(
         _remoteFileIdMeta,
@@ -2390,6 +2415,10 @@ class $SyncItemsTable extends SyncItems
         DriftSqlType.int,
         data['${effectivePrefix}remote_mtime_ms'],
       )!,
+      remoteUnverified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}remote_unverified'],
+      )!,
       remoteFileId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remote_file_id'],
@@ -2436,6 +2465,12 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
   /// The remote `getlastmodified`, ms (one-second resolution).
   final int remoteMtimeMs;
 
+  /// Whether the listing this row was recorded from could not rule out a
+  /// second write within the same second: a server without ETags whose
+  /// `getlastmodified` was the server's current second. The next
+  /// reconcile hashes the remote instead of trusting size and mtime.
+  final bool remoteUnverified;
+
   /// The remote `oc:fileid`, when the server has one.
   final String? remoteFileId;
 
@@ -2454,6 +2489,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     this.remoteEtag,
     required this.remoteSize,
     required this.remoteMtimeMs,
+    required this.remoteUnverified,
     this.remoteFileId,
     this.baseVersion,
     required this.syncedAtMs,
@@ -2471,6 +2507,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     }
     map['remote_size'] = Variable<int>(remoteSize);
     map['remote_mtime_ms'] = Variable<int>(remoteMtimeMs);
+    map['remote_unverified'] = Variable<bool>(remoteUnverified);
     if (!nullToAbsent || remoteFileId != null) {
       map['remote_file_id'] = Variable<String>(remoteFileId);
     }
@@ -2493,6 +2530,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           : Value(remoteEtag),
       remoteSize: Value(remoteSize),
       remoteMtimeMs: Value(remoteMtimeMs),
+      remoteUnverified: Value(remoteUnverified),
       remoteFileId: remoteFileId == null && nullToAbsent
           ? const Value.absent()
           : Value(remoteFileId),
@@ -2517,6 +2555,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       remoteEtag: serializer.fromJson<String?>(json['remoteEtag']),
       remoteSize: serializer.fromJson<int>(json['remoteSize']),
       remoteMtimeMs: serializer.fromJson<int>(json['remoteMtimeMs']),
+      remoteUnverified: serializer.fromJson<bool>(json['remoteUnverified']),
       remoteFileId: serializer.fromJson<String?>(json['remoteFileId']),
       baseVersion: serializer.fromJson<int?>(json['baseVersion']),
       syncedAtMs: serializer.fromJson<int>(json['syncedAtMs']),
@@ -2534,6 +2573,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       'remoteEtag': serializer.toJson<String?>(remoteEtag),
       'remoteSize': serializer.toJson<int>(remoteSize),
       'remoteMtimeMs': serializer.toJson<int>(remoteMtimeMs),
+      'remoteUnverified': serializer.toJson<bool>(remoteUnverified),
       'remoteFileId': serializer.toJson<String?>(remoteFileId),
       'baseVersion': serializer.toJson<int?>(baseVersion),
       'syncedAtMs': serializer.toJson<int>(syncedAtMs),
@@ -2549,6 +2589,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     Value<String?> remoteEtag = const Value.absent(),
     int? remoteSize,
     int? remoteMtimeMs,
+    bool? remoteUnverified,
     Value<String?> remoteFileId = const Value.absent(),
     Value<int?> baseVersion = const Value.absent(),
     int? syncedAtMs,
@@ -2561,6 +2602,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteEtag: remoteEtag.present ? remoteEtag.value : this.remoteEtag,
     remoteSize: remoteSize ?? this.remoteSize,
     remoteMtimeMs: remoteMtimeMs ?? this.remoteMtimeMs,
+    remoteUnverified: remoteUnverified ?? this.remoteUnverified,
     remoteFileId: remoteFileId.present ? remoteFileId.value : this.remoteFileId,
     baseVersion: baseVersion.present ? baseVersion.value : this.baseVersion,
     syncedAtMs: syncedAtMs ?? this.syncedAtMs,
@@ -2587,6 +2629,9 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
       remoteMtimeMs: data.remoteMtimeMs.present
           ? data.remoteMtimeMs.value
           : this.remoteMtimeMs,
+      remoteUnverified: data.remoteUnverified.present
+          ? data.remoteUnverified.value
+          : this.remoteUnverified,
       remoteFileId: data.remoteFileId.present
           ? data.remoteFileId.value
           : this.remoteFileId,
@@ -2610,6 +2655,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           ..write('remoteEtag: $remoteEtag, ')
           ..write('remoteSize: $remoteSize, ')
           ..write('remoteMtimeMs: $remoteMtimeMs, ')
+          ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
           ..write('syncedAtMs: $syncedAtMs')
@@ -2627,6 +2673,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
     remoteEtag,
     remoteSize,
     remoteMtimeMs,
+    remoteUnverified,
     remoteFileId,
     baseVersion,
     syncedAtMs,
@@ -2643,6 +2690,7 @@ class SyncItem extends DataClass implements Insertable<SyncItem> {
           other.remoteEtag == this.remoteEtag &&
           other.remoteSize == this.remoteSize &&
           other.remoteMtimeMs == this.remoteMtimeMs &&
+          other.remoteUnverified == this.remoteUnverified &&
           other.remoteFileId == this.remoteFileId &&
           other.baseVersion == this.baseVersion &&
           other.syncedAtMs == this.syncedAtMs);
@@ -2657,6 +2705,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
   final Value<String?> remoteEtag;
   final Value<int> remoteSize;
   final Value<int> remoteMtimeMs;
+  final Value<bool> remoteUnverified;
   final Value<String?> remoteFileId;
   final Value<int?> baseVersion;
   final Value<int> syncedAtMs;
@@ -2670,6 +2719,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteEtag = const Value.absent(),
     this.remoteSize = const Value.absent(),
     this.remoteMtimeMs = const Value.absent(),
+    this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
     this.syncedAtMs = const Value.absent(),
@@ -2684,6 +2734,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     this.remoteEtag = const Value.absent(),
     required int remoteSize,
     required int remoteMtimeMs,
+    this.remoteUnverified = const Value.absent(),
     this.remoteFileId = const Value.absent(),
     this.baseVersion = const Value.absent(),
     required int syncedAtMs,
@@ -2705,6 +2756,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Expression<String>? remoteEtag,
     Expression<int>? remoteSize,
     Expression<int>? remoteMtimeMs,
+    Expression<bool>? remoteUnverified,
     Expression<String>? remoteFileId,
     Expression<int>? baseVersion,
     Expression<int>? syncedAtMs,
@@ -2719,6 +2771,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       if (remoteEtag != null) 'remote_etag': remoteEtag,
       if (remoteSize != null) 'remote_size': remoteSize,
       if (remoteMtimeMs != null) 'remote_mtime_ms': remoteMtimeMs,
+      if (remoteUnverified != null) 'remote_unverified': remoteUnverified,
       if (remoteFileId != null) 'remote_file_id': remoteFileId,
       if (baseVersion != null) 'base_version': baseVersion,
       if (syncedAtMs != null) 'synced_at_ms': syncedAtMs,
@@ -2735,6 +2788,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     Value<String?>? remoteEtag,
     Value<int>? remoteSize,
     Value<int>? remoteMtimeMs,
+    Value<bool>? remoteUnverified,
     Value<String?>? remoteFileId,
     Value<int?>? baseVersion,
     Value<int>? syncedAtMs,
@@ -2749,6 +2803,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
       remoteEtag: remoteEtag ?? this.remoteEtag,
       remoteSize: remoteSize ?? this.remoteSize,
       remoteMtimeMs: remoteMtimeMs ?? this.remoteMtimeMs,
+      remoteUnverified: remoteUnverified ?? this.remoteUnverified,
       remoteFileId: remoteFileId ?? this.remoteFileId,
       baseVersion: baseVersion ?? this.baseVersion,
       syncedAtMs: syncedAtMs ?? this.syncedAtMs,
@@ -2783,6 +2838,9 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
     if (remoteMtimeMs.present) {
       map['remote_mtime_ms'] = Variable<int>(remoteMtimeMs.value);
     }
+    if (remoteUnverified.present) {
+      map['remote_unverified'] = Variable<bool>(remoteUnverified.value);
+    }
     if (remoteFileId.present) {
       map['remote_file_id'] = Variable<String>(remoteFileId.value);
     }
@@ -2809,6 +2867,7 @@ class SyncItemsCompanion extends UpdateCompanion<SyncItem> {
           ..write('remoteEtag: $remoteEtag, ')
           ..write('remoteSize: $remoteSize, ')
           ..write('remoteMtimeMs: $remoteMtimeMs, ')
+          ..write('remoteUnverified: $remoteUnverified, ')
           ..write('remoteFileId: $remoteFileId, ')
           ..write('baseVersion: $baseVersion, ')
           ..write('syncedAtMs: $syncedAtMs, ')
@@ -4490,6 +4549,7 @@ typedef $$SyncItemsTableCreateCompanionBuilder = SyncItemsCompanion Function({
   Value<String?> remoteEtag,
   required int remoteSize,
   required int remoteMtimeMs,
+  Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
   required int syncedAtMs,
@@ -4504,6 +4564,7 @@ typedef $$SyncItemsTableUpdateCompanionBuilder = SyncItemsCompanion Function({
   Value<String?> remoteEtag,
   Value<int> remoteSize,
   Value<int> remoteMtimeMs,
+  Value<bool> remoteUnverified,
   Value<String?> remoteFileId,
   Value<int?> baseVersion,
   Value<int> syncedAtMs,
@@ -4556,6 +4617,11 @@ class $$SyncItemsTableFilterComposer
 
   ColumnFilters<int> get remoteMtimeMs => $composableBuilder(
     column: $table.remoteMtimeMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get remoteUnverified => $composableBuilder(
+    column: $table.remoteUnverified,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4624,6 +4690,11 @@ class $$SyncItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get remoteUnverified => $composableBuilder(
+    column: $table.remoteUnverified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get remoteFileId => $composableBuilder(
     column: $table.remoteFileId,
     builder: (column) => ColumnOrderings(column),
@@ -4685,6 +4756,11 @@ class $$SyncItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get remoteUnverified => $composableBuilder(
+    column: $table.remoteUnverified,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get remoteFileId => $composableBuilder(
     column: $table.remoteFileId,
     builder: (column) => column,
@@ -4737,6 +4813,7 @@ class $$SyncItemsTableTableManager
                 Value<String?> remoteEtag = const Value.absent(),
                 Value<int> remoteSize = const Value.absent(),
                 Value<int> remoteMtimeMs = const Value.absent(),
+                Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
                 Value<int> syncedAtMs = const Value.absent(),
@@ -4750,6 +4827,7 @@ class $$SyncItemsTableTableManager
                 remoteEtag: remoteEtag,
                 remoteSize: remoteSize,
                 remoteMtimeMs: remoteMtimeMs,
+                remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
                 syncedAtMs: syncedAtMs,
@@ -4765,6 +4843,7 @@ class $$SyncItemsTableTableManager
                 Value<String?> remoteEtag = const Value.absent(),
                 required int remoteSize,
                 required int remoteMtimeMs,
+                Value<bool> remoteUnverified = const Value.absent(),
                 Value<String?> remoteFileId = const Value.absent(),
                 Value<int?> baseVersion = const Value.absent(),
                 required int syncedAtMs,
@@ -4778,6 +4857,7 @@ class $$SyncItemsTableTableManager
                 remoteEtag: remoteEtag,
                 remoteSize: remoteSize,
                 remoteMtimeMs: remoteMtimeMs,
+                remoteUnverified: remoteUnverified,
                 remoteFileId: remoteFileId,
                 baseVersion: baseVersion,
                 syncedAtMs: syncedAtMs,
