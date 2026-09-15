@@ -7,6 +7,40 @@ description (the `> ` lines after the embed, see
 `lib/src/ui/kinds/audio_chat.dart`). Work in progress on
 `feat/whisper-transcription`.
 
+## Models and settings (phase 1)
+
+Code: `lib/src/transcription/` (logic) and `lib/src/ui/transcription/`
+(settings section, models page).
+
+| File | Role |
+|------|------|
+| `transcription_model.dart` | The catalog: multilingual tiny, base, small, medium, large-v3 with their published sizes. Android hides large-v3 and flags medium as slow. |
+| `model_files.dart` | Disk state. A model is installed when `<model dir>/ggml-<name>.bin` exists; the scan also removes `.part` files no download owns. |
+| `model_download.dart` | One download in a spawned isolate: HTTP stream to `<file>.part`, progress every 250 ms, rename only when the byte count matches `Content-Length`, 30 s stall timeout, cancel kills the isolate and removes the partial file. |
+| `transcription_settings.dart`, `transcription_settings_store.dart` | Default model and language, stored as `transcription.json` in the model directory (temp write + rename, off the UI isolate). |
+| `transcription_models.dart` | `TranscriptionModels` (ChangeNotifier) behind `transcriptionModelsProvider`: per-model state, downloads that outlive the page, default and language. |
+
+- **Model directory:** `WhisperController.getModelDir()`, the app support
+  directory (`%APPDATA%\dev.niman\niman` on Windows). `whisper_ggml` loads
+  `ggml-<name>.bin` from there by enum, so downloads must land there.
+- **Settings live next to the models, not in `AppDatabase`.** They
+  describe the files on this device, and the schema's next migration
+  (v22) belongs to the sync work; a JSON file keeps the two independent.
+- **Default model:** the first model to finish downloading becomes the
+  default when none is set; deleting the default hands it to the smallest
+  model left, or none.
+- **Language:** `app` (the app's language, the default), `auto` (whisper
+  detects it) or an app language id. Whisper gets ISO 639-1 codes;
+  Norwegian Bokmål `nb` becomes `no`.
+- **UI:** Settings → Transcription has *Model* (opens the models page)
+  and *Language* (a choice dialog). The page groups Downloaded /
+  Downloading / Available; tapping a downloaded row makes it the default,
+  delete asks first, a failed download offers Retry.
+- **Logs** (`[transcription]`): settings load/save time, directory scan
+  (time, sizes, stale `.part` removed), download headers latency, every
+  10 %, total time and MB/s, cancel and failure time, delete time and
+  bytes freed.
+
 ## Phase 0 spike (2026-09-15)
 
 Harness: [`tool/whisper_spike.dart`](../../tool/whisper_spike.dart). It
