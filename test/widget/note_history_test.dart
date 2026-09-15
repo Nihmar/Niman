@@ -63,7 +63,6 @@ void main() {
           number: 1,
           savedAt: DateTime(2026, 9, 12, 9, 15),
           text: 'first\n',
-          reason: HistoryReason.session,
         )
         ..seedVersion(
           'Plan.md',
@@ -78,7 +77,6 @@ void main() {
           number: 3,
           savedAt: DateTime(2026, 9, 15, 8, 24),
           text: 'old\ntext\n',
-          reason: HistoryReason.session,
         );
     });
 
