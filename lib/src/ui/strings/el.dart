@@ -1292,4 +1292,286 @@ final class GreekStrings extends Strings {
       'Όσο γράφετε· η έναρξη επεξεργασίας μιας σημείωσης κρατά πάντα μία';
   @override
   String historyIntervalValue(int minutes) => '$minutes λεπ.';
+  @override
+  String get settingsSectionSync => 'Συγχρονισμός';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Δεν έχει ρυθμιστεί για αυτή τη βιβλιοθήκη';
+  @override
+  String get syncNeverSynced => 'Δεν έχει συγχρονιστεί ποτέ';
+  @override
+  String syncLastSynced(String when) => 'Συγχρονίστηκε $when';
+  @override
+  String get syncRunning => 'Συγχρονισμός…';
+  @override
+  String syncScreenSubtitle(String library) => 'Βιβλιοθήκη $library';
+  @override
+  String get syncUrlLabel => 'Διεύθυνση φακέλου';
+  @override
+  String get syncUrlHint =>
+      'Ο φάκελος πρέπει να υπάρχει. Αντιγράψτε τη διεύθυνση όπως '
+      'τη δείχνει ο διακομιστής.';
+  @override
+  String get syncHttpWarning =>
+      'Μη κρυπτογραφημένη σύνδεση: εντάξει μέσω VPN ή στο τοπικό '
+      'σας δίκτυο.';
+  @override
+  String get syncUserLabel => 'Χρήστης';
+  @override
+  String get syncUserHint =>
+      'Αφήστε το κενό αν ο διακομιστής δεν ζητά διαπιστευτήρια.';
+  @override
+  String get syncPasswordLabel => 'Κωδικός πρόσβασης';
+  @override
+  String get syncPasswordHint =>
+      'Φυλάσσεται στην κλειδοθήκη αυτής της συσκευής, ποτέ στα '
+      'αρχεία της βιβλιοθήκης.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Αφήστε το κενό για να κρατήσετε τον αποθηκευμένο κωδικό.';
+  @override
+  String get syncShowPassword => 'Εμφάνιση κωδικού';
+  @override
+  String get syncHidePassword => 'Απόκρυψη κωδικού';
+  @override
+  String get syncTestAction => 'Δοκιμή σύνδεσης';
+  @override
+  String get syncTesting => 'Δοκιμή…';
+  @override
+  String get syncRetargetWarning =>
+      'Με νέα διεύθυνση ή νέο χρήστη, ο επόμενος συγχρονισμός '
+      'ξεκινά από την αρχή ως πρώτος.';
+  @override
+  String get syncTestOk => 'Η σύνδεση λειτουργεί';
+  @override
+  String get syncModeFull => 'Πλήρης λειτουργία';
+  @override
+  String get syncModeCompatible => 'Συμβατή λειτουργία';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Ανάγνωση, εγγραφή και διαγραφή';
+  @override
+  String get syncCapEtags => 'Αποτυπώματα αρχείων (ETag)';
+  @override
+  String get syncCapNoEtags => 'Χωρίς αποτυπώματα αρχείων (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Συγκρίνει μέγεθος και ημερομηνία· αν υπάρχει αμφιβολία, '
+      'κατεβάζει ξανά';
+  @override
+  String get syncCapGuarded => 'Προστατευμένες εγγραφές';
+  @override
+  String get syncCapUnguarded => 'Μη προστατευμένες εγγραφές';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Ελέγχει το αρχείο στον διακομιστή ακριβώς πριν την εγγραφή';
+  @override
+  String get syncCapMove => 'Μετονομασία χωρίς νέα αποστολή';
+  @override
+  String get syncCapNoMove => 'Χωρίς μετονομασίες στον διακομιστή';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Η μετονομασία γίνεται διαγραφή και νέα αποστολή';
+  @override
+  String get syncCompatibleNote =>
+      'Στη συμβατή λειτουργία ο συγχρονισμός δουλεύει το ίδιο, '
+      'με λίγα περισσότερα αιτήματα.';
+  @override
+  String get syncTestInvalidUrl => 'Μη έγκυρη διεύθυνση';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Γράψτε μια διεύθυνση http:// ή https://, χωρίς χρήστη ή '
+      'κωδικό μέσα της.';
+  @override
+  String get syncTestOffline => 'Ο διακομιστής δεν είναι προσβάσιμος';
+  @override
+  String get syncTestOfflineHint =>
+      'Είναι ενεργό το VPN; Μια διεύθυνση 10.x ή 192.168.x '
+      'λειτουργεί μόνο από το ίδιο δίκτυο.';
+  @override
+  String get syncTestAuth => 'Ο χρήστης ή ο κωδικός απορρίφθηκε';
+  @override
+  String get syncTestAuthHint => 'Ελέγξτε τα και δοκιμάστε ξανά.';
+  @override
+  String get syncTestNotFound => 'Ο φάκελος δεν υπάρχει';
+  @override
+  String get syncTestNotFoundHint =>
+      'Δημιουργήστε τον στον διακομιστή ή διορθώστε τη διεύθυνση.';
+  @override
+  String get syncTestUnsupported => 'Δεν είναι φάκελος WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Ο διακομιστής απαντά, αλλά όχι ως WebDAV.';
+  @override
+  String get syncTestFailed => 'Η δοκιμή δεν πέτυχε';
+  @override
+  String get syncNowAction => 'Συγχρονισμός τώρα';
+  @override
+  String get syncSectionServer => 'Διακομιστής';
+  @override
+  String get syncServerRow => 'Διεύθυνση, χρήστης και κωδικός';
+  @override
+  String get syncRetestTitle => 'Νέα δοκιμή του διακομιστή';
+  @override
+  String syncProbedAgo(String when) => 'Τελευταία δοκιμή: $when';
+  @override
+  String get syncDisconnectTitle => 'Αποσύνδεση αυτής της βιβλιοθήκης';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Τα αρχεία μένουν εδώ και στον διακομιστή';
+  @override
+  String get syncDisconnectConfirmTitle => 'Αποσύνδεση του συγχρονισμού;';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Αυτή η βιβλιοθήκη σταματά να συγχρονίζεται σε αυτή τη '
+      'συσκευή. Κανένα αρχείο δεν διαγράφεται, ούτε εδώ ούτε '
+      'στον διακομιστή. Αν τη συνδέσετε ξανά, ο πρώτος '
+      'συγχρονισμός ξεκινά από την αρχή.';
+  @override
+  String get syncDisconnectConfirm => 'Αποσύνδεση';
+  @override
+  String get syncFirstTitle => 'Πρώτος συγχρονισμός';
+  @override
+  String get syncFirstIntro =>
+      'Σύγκρινα τη βιβλιοθήκη με τον φάκελο στον διακομιστή:';
+  @override
+  String get syncFirstUpload => 'Για αποστολή';
+  @override
+  String get syncFirstDownload => 'Για λήψη';
+  @override
+  String get syncFirstBoth => 'Και στις δύο πλευρές';
+  @override
+  String get syncFirstBothHint =>
+      'Ίδια: καμία μεταφορά. Διαφορετικά: προς επίλυση';
+  @override
+  String get syncFirstNoDelete =>
+      'Ο πρώτος συγχρονισμός δεν διαγράφει τίποτα, ούτε εδώ ούτε '
+      'στον διακομιστή.';
+  @override
+  String get syncStartAction => 'Έναρξη';
+  @override
+  String syncMassTrashTitle(int count) => count == 1
+      ? 'Μετακίνηση 1 αρχείου στη σκουπιδιέρα;'
+      : 'Μετακίνηση $count αρχείων στη σκουπιδιέρα;';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Από τον διακομιστή λείπουν $count από τα $total '
+      'συγχρονισμένα αρχεία. Συνήθως αυτό σημαίνει λάθος '
+      'διεύθυνση, μη προσαρτημένο δίσκο NAS ή φάκελο που '
+      'αδειάστηκε κατά λάθος.';
+  @override
+  String get syncMassTrashHint =>
+      'Αν τα διαγράψατε πράγματι σε άλλη συσκευή, επιβεβαιώστε: '
+      'εδώ πηγαίνουν στη σκουπιδιέρα.';
+  @override
+  String get syncMassTrashConfirm => 'Μετακίνηση στη σκουπιδιέρα';
+  @override
+  String syncMassDeleteTitle(int count) => count == 1
+      ? 'Διαγραφή 1 αρχείου από τον διακομιστή;'
+      : 'Διαγραφή $count αρχείων από τον διακομιστή;';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Εδώ λείπουν $count από τα $total συγχρονισμένα αρχεία. Αν '
+      'δεν τα διαγράψατε εσείς, ακυρώστε και ελέγξτε τον φάκελο '
+      'της βιβλιοθήκης.';
+  @override
+  String get syncMassDeleteConfirm => 'Διαγραφή από τον διακομιστή';
+  @override
+  String get syncTooltip => 'Συγχρονισμός';
+  @override
+  String get syncStageConnecting => 'Σύνδεση με τον διακομιστή…';
+  @override
+  String get syncStageComparing => 'Σύγκριση με τον διακομιστή…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Συγχρονισμός · $done από $total';
+  @override
+  String get syncStatusWarnings => 'Συγχρονίστηκε με προειδοποιήσεις';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Άλλαξαν εδώ και στον διακομιστή · $count';
+  @override
+  String get syncConflictHint => 'Καμία από τις δύο εκδόσεις δεν αγγίχτηκε';
+  @override
+  String get syncResolveAction => 'Επίλυση';
+  @override
+  String syncFailuresHeader(int count) => 'Δεν συγχρονίστηκαν · $count';
+  @override
+  String get syncFailuresHint => 'Νέα προσπάθεια στον επόμενο συγχρονισμό';
+  @override
+  String get syncAbortAuth => 'Ο διακομιστής απέρριψε τον κωδικό';
+  @override
+  String get syncAbortMissingPassword => 'Δεν υπάρχει αποθηκευμένος κωδικός';
+  @override
+  String get syncAbortOffline => 'Ο διακομιστής δεν είναι προσβάσιμος';
+  @override
+  String get syncAbortRemoteMissing =>
+      'Ο φάκελος στον διακομιστή δεν υπάρχει πια';
+  @override
+  String get syncAbortUnsupported =>
+      'Ο διακομιστής δεν λειτουργεί πια ως WebDAV';
+  @override
+  String get syncAbortFailed => 'Ο συγχρονισμός δεν πέτυχε';
+  @override
+  String get syncAbortNotConfirmed => 'Ο συγχρονισμός ακυρώθηκε';
+  @override
+  String get syncAbortNothingTouched =>
+      'Κανένα αρχείο δεν αγγίχτηκε. Οι αλλαγές σας μένουν εδώ ως '
+      'τον επόμενο επιτυχημένο συγχρονισμό.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Τελευταίος επιτυχημένος συγχρονισμός: $when';
+  @override
+  String get syncNoSuccessYet => 'Κανένας επιτυχημένος συγχρονισμός ακόμα';
+  @override
+  String get syncUpdatePasswordAction => 'Ενημέρωση κωδικού';
+  @override
+  String get syncRetryAction => 'Νέα προσπάθεια';
+  @override
+  String get syncOpenSettingsAction => 'Ρυθμίσεις';
+  @override
+  String get syncCloseAction => 'Κλείσιμο';
+  @override
+  String get syncDoneSnack => 'Συγχρονίστηκε';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Συγχρονίστηκε · 1 αρχείο που διαγράφηκε αλλού είναι στη '
+            'σκουπιδιέρα'
+      : 'Συγχρονίστηκε · $count αρχεία που διαγράφηκαν αλλού είναι '
+            'στη σκουπιδιέρα';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Συγχρονίστηκε · 1 διένεξη προς επίλυση'
+      : 'Συγχρονίστηκε · $count διενέξεις προς επίλυση';
+  @override
+  String get syncShowAction => 'Εμφάνιση';
+  @override
+  String get syncConflictTitle => 'Επίλυση διένεξης';
+  @override
+  String get syncConflictLegend =>
+      'Οι γραμμές με − είναι του διακομιστή, οι γραμμές με + '
+      'αυτής της συσκευής.';
+  @override
+  String get syncConflictBinary =>
+      'Δεν είναι αρχείο κειμένου: επιλέξτε ποιο αντίγραφο θα '
+      'κρατήσετε.';
+  @override
+  String get syncConflictKeepNote =>
+      'Το αντίγραφο που δεν κρατάτε μένει στο ιστορικό της '
+      'σημείωσης.';
+  @override
+  String get syncKeepLocal => 'Διατήρηση έκδοσης συσκευής';
+  @override
+  String get syncKeepRemote => 'Διατήρηση έκδοσης διακομιστή';
+  @override
+  String get syncConflictIdentical => 'Οι δύο εκδόσεις είναι ίδιες';
+  @override
+  String get syncConflictLoadFailed =>
+      'Δεν ήταν δυνατή η ανάγνωση των δύο εκδόσεων';
+  @override
+  String get syncResolveFailed => 'Δεν ήταν δυνατή η επίλυση της διένεξης';
+  @override
+  String get syncResolved => 'Η διένεξη επιλύθηκε';
 }

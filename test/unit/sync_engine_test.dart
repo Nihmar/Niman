@@ -475,4 +475,92 @@ void main() {
       expect(remoteText('a.md'), 'a2');
     });
   });
+
+  group('one conflict at a time', () {
+    Future<void> makeConflict() async {
+      a.write('a.md', 'base');
+      await a.sync();
+      await b.sync();
+      a.write('a.md', 'mine');
+      b.write('a.md', 'theirs');
+      await b.sync();
+      final report = await a.sync();
+      expect(report.conflicts.single.path, 'a.md');
+    }
+
+    test('both texts can be read', () async {
+      await makeConflict();
+      final texts = await a.engine.conflictTexts('a.md');
+      expect(texts.local, 'mine');
+      expect(texts.remote, 'theirs');
+    });
+
+    test('keeping this device uploads it and the next sync is quiet', () async {
+      await makeConflict();
+      await a.engine.resolveConflict('a.md', keepLocal: true);
+      expect(remoteText('a.md'), 'mine');
+      expect((await a.sync()).summary(), 'nothing to do');
+      await b.sync();
+      expect(b.read('a.md'), 'mine');
+    });
+
+    test(
+      'keeping the server replaces the file and keeps ours in history',
+      () async {
+        await makeConflict();
+        await a.engine.resolveConflict('a.md', keepLocal: false);
+        expect(a.read('a.md'), 'theirs');
+        final versions = (await a.ops.noteHistory('a.md')).versions;
+        final kept = versions.lastWhere((v) => v.reason == HistoryReason.sync);
+        final texts = <String>[
+          for (final v in versions)
+            await a.ops.readNoteVersion('a.md', v.number),
+        ];
+        expect(texts, contains('mine'));
+        expect(kept, isNotNull);
+        expect((await a.sync()).summary(), 'nothing to do');
+      },
+    );
+
+    test('a resolution without a destination fails as SyncFailure', () async {
+      final lone = await _Device.create('lone2');
+      addTearDown(lone.close);
+      await expectLater(
+        lone.engine.resolveConflict('a.md', keepLocal: true),
+        throwsA(
+          isA<SyncFailure>().having(
+            (f) => f.reason,
+            'reason',
+            SyncAbort.notConfigured,
+          ),
+        ),
+      );
+    });
+  });
+
+  test(
+    'progress reports the stages and counts; changed paths are listed',
+    () async {
+      server
+        ..putFile('r1.md', utf8.encode('one'))
+        ..putFile('r2.md', utf8.encode('two'));
+      a.write('l.md', 'local');
+      final stages = <SyncStage>[];
+      final counts = <(int, int)>[];
+      final report = await a.engine.run(
+        onProgress: (stage, done, total) {
+          if (stages.isEmpty || stages.last != stage) stages.add(stage);
+          if (stage == SyncStage.applying) counts.add((done, total));
+        },
+      );
+      expect(stages, [
+        SyncStage.connecting,
+        SyncStage.scanning,
+        SyncStage.comparing,
+        SyncStage.applying,
+      ]);
+      expect(counts, [(0, 3), (1, 3), (2, 3)]);
+      expect(report.changedLocally, {'r1.md', 'r2.md'});
+    },
+  );
 }

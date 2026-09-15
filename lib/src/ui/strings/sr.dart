@@ -1250,4 +1250,287 @@ final class SerbianStrings extends Strings {
       'Док пишете; почетак уређивања белешке увек чува једну';
   @override
   String historyIntervalValue(int minutes) => '$minutes мин';
+  @override
+  String get settingsSectionSync => 'Синхронизација';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Није подешена за ову библиотеку';
+  @override
+  String get syncNeverSynced => 'Још није синхронизована';
+  @override
+  String syncLastSynced(String when) => 'Синхронизована $when';
+  @override
+  String get syncRunning => 'Синхронизација у току…';
+  @override
+  String syncScreenSubtitle(String library) => 'Библиотека $library';
+  @override
+  String get syncUrlLabel => 'Адреса фасцикле';
+  @override
+  String get syncUrlHint =>
+      'Фасцикла мора да постоји. Копирајте адресу онако како је '
+      'приказује сервер.';
+  @override
+  String get syncHttpWarning =>
+      'Нешифрована веза: у реду уз VPN или у локалној мрежи.';
+  @override
+  String get syncUserLabel => 'Корисник';
+  @override
+  String get syncUserHint => 'Оставите празно ако сервер не тражи акредитиве.';
+  @override
+  String get syncPasswordLabel => 'Лозинка';
+  @override
+  String get syncPasswordHint =>
+      'Чува се у привеску кључева овог уређаја, никад у '
+      'фајловима библиотеке.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Оставите празно да бисте задржали сачувану лозинку.';
+  @override
+  String get syncShowPassword => 'Прикажи лозинку';
+  @override
+  String get syncHidePassword => 'Сакриј лозинку';
+  @override
+  String get syncTestAction => 'Тестирај везу';
+  @override
+  String get syncTesting => 'Тестирање…';
+  @override
+  String get syncRetargetWarning =>
+      'Са новом адресом или корисником следећа синхронизација '
+      'почиње испочетка, као прва.';
+  @override
+  String get syncTestOk => 'Веза ради';
+  @override
+  String get syncModeFull => 'Пун режим';
+  @override
+  String get syncModeCompatible => 'Компатибилни режим';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Читање, писање и брисање';
+  @override
+  String get syncCapEtags => 'Отисци фајлова (ETag)';
+  @override
+  String get syncCapNoEtags => 'Без отисака фајлова (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Пореди величину и датум; у случају сумње поново преузима';
+  @override
+  String get syncCapGuarded => 'Заштићени уписи';
+  @override
+  String get syncCapUnguarded => 'Незаштићени уписи';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Проверава фајл на серверу непосредно пре уписа';
+  @override
+  String get syncCapMove => 'Преименује без поновног отпремања';
+  @override
+  String get syncCapNoMove => 'Без преименовања на серверу';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Преименовање постаје брисање и ново отпремање';
+  @override
+  String get syncCompatibleNote =>
+      'У компатибилном режиму синхронизација ради исто, уз нешто '
+      'више захтева.';
+  @override
+  String get syncTestInvalidUrl => 'Неважећа адреса';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Унесите адресу http:// или https:// без корисника и '
+      'лозинке у њој.';
+  @override
+  String get syncTestOffline => 'Сервер није доступан';
+  @override
+  String get syncTestOfflineHint =>
+      'Да ли је VPN укључен? Адреса 10.x или 192.168.x ради само '
+      'из исте мреже.';
+  @override
+  String get syncTestAuth => 'Корисник или лозинка су одбијени';
+  @override
+  String get syncTestAuthHint => 'Проверите их, па тестирајте поново.';
+  @override
+  String get syncTestNotFound => 'Фасцикла не постоји';
+  @override
+  String get syncTestNotFoundHint =>
+      'Направите је на серверу или исправите адресу.';
+  @override
+  String get syncTestUnsupported => 'Није WebDAV фасцикла';
+  @override
+  String get syncTestUnsupportedHint => 'Сервер одговара, али не као WebDAV.';
+  @override
+  String get syncTestFailed => 'Тест није успео';
+  @override
+  String get syncNowAction => 'Синхронизуј сада';
+  @override
+  String get syncSectionServer => 'Сервер';
+  @override
+  String get syncServerRow => 'Адреса, корисник и лозинка';
+  @override
+  String get syncRetestTitle => 'Поново тестирај сервер';
+  @override
+  String syncProbedAgo(String when) => 'Последњи тест $when';
+  @override
+  String get syncDisconnectTitle => 'Искључи ову библиотеку';
+  @override
+  String get syncDisconnectSubtitle => 'Фајлови остају овде и на серверу';
+  @override
+  String get syncDisconnectConfirmTitle => 'Искључити синхронизацију?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Ова библиотека престаје да се синхронизује на овом '
+      'уређају. Ниједан фајл се не брише, ни овде ни на серверу. '
+      'Ако је поново повежете, прва синхронизација почиње '
+      'испочетка.';
+  @override
+  String get syncDisconnectConfirm => 'Искључи';
+  @override
+  String get syncFirstTitle => 'Прва синхронизација';
+  @override
+  String get syncFirstIntro =>
+      'Библиотека је упоређена са фасциклом на серверу:';
+  @override
+  String get syncFirstUpload => 'За отпремање';
+  @override
+  String get syncFirstDownload => 'За преузимање';
+  @override
+  String get syncFirstBoth => 'На обе стране';
+  @override
+  String get syncFirstBothHint => 'Исти: без преноса. Различити: за решавање';
+  @override
+  String get syncFirstNoDelete =>
+      'Прва синхронизација ништа не брише, ни овде ни на серверу.';
+  @override
+  String get syncStartAction => 'Покрени';
+  @override
+  String syncMassTrashTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Преместити $count фајл у кош?'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Преместити $count фајла у кош?'
+      : 'Преместити $count фајлова у кош?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'На серверу недостаје $count од $total синхронизованих '
+      'фајлова. То обично значи погрешну адресу, немонтиран NAS '
+      'диск или фасциклу испражњену грешком.';
+  @override
+  String get syncMassTrashHint =>
+      'Ако сте их заиста обрисали на другом уређају, потврдите: '
+      'овде иду у кош.';
+  @override
+  String get syncMassTrashConfirm => 'Премести у кош';
+  @override
+  String syncMassDeleteTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Обрисати $count фајл са сервера?'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Обрисати $count фајла са сервера?'
+      : 'Обрисати $count фајлова са сервера?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Овде недостаје $count од $total синхронизованих фајлова. '
+      'Ако их нисте ви обрисали, откажите и проверите фасциклу '
+      'библиотеке.';
+  @override
+  String get syncMassDeleteConfirm => 'Обриши са сервера';
+  @override
+  String get syncTooltip => 'Синхронизуј';
+  @override
+  String get syncStageConnecting => 'Повезивање са сервером…';
+  @override
+  String get syncStageComparing => 'Поређење са сервером…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Синхронизација · $done од $total';
+  @override
+  String get syncStatusWarnings => 'Синхронизована уз упозорења';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Измењено овде и на серверу · $count';
+  @override
+  String get syncConflictHint => 'Ниједна верзија није дирана';
+  @override
+  String get syncResolveAction => 'Реши';
+  @override
+  String syncFailuresHeader(int count) => 'Није синхронизовано · $count';
+  @override
+  String get syncFailuresHint => 'Нови покушај при следећој синхронизацији';
+  @override
+  String get syncAbortAuth => 'Сервер је одбио лозинку';
+  @override
+  String get syncAbortMissingPassword => 'Нема сачуване лозинке';
+  @override
+  String get syncAbortOffline => 'Сервер није доступан';
+  @override
+  String get syncAbortRemoteMissing => 'Фасцикла на серверу више не постоји';
+  @override
+  String get syncAbortUnsupported => 'Сервер више не ради као WebDAV';
+  @override
+  String get syncAbortFailed => 'Синхронизација није успела';
+  @override
+  String get syncAbortNotConfirmed => 'Синхронизација је отказана';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ниједан фајл није диран. Ваше измене остају овде до '
+      'следеће успешне синхронизације.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Последња успешна синхронизација $when';
+  @override
+  String get syncNoSuccessYet => 'Још нема успешне синхронизације';
+  @override
+  String get syncUpdatePasswordAction => 'Ажурирај лозинку';
+  @override
+  String get syncRetryAction => 'Покушај поново';
+  @override
+  String get syncOpenSettingsAction => 'Подешавања';
+  @override
+  String get syncCloseAction => 'Затвори';
+  @override
+  String get syncDoneSnack => 'Синхронизовано';
+  @override
+  String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Синхронизовано · $count фајл обрисан другде је у кошу'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Синхронизовано · $count фајла обрисана другде су у кошу'
+      : 'Синхронизовано · $count фајлова обрисаних другде је у кошу';
+  @override
+  String syncConflictsSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Синхронизовано · $count конфликт за решавање'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Синхронизовано · $count конфликта за решавање'
+      : 'Синхронизовано · $count конфликата за решавање';
+  @override
+  String get syncShowAction => 'Прикажи';
+  @override
+  String get syncConflictTitle => 'Реши конфликт';
+  @override
+  String get syncConflictLegend =>
+      'Редови означени са − су са сервера, редови означени са + '
+      'са овог уређаја.';
+  @override
+  String get syncConflictBinary =>
+      'Није текстуални фајл: изаберите коју копију да задржите.';
+  @override
+  String get syncConflictKeepNote =>
+      'Копија коју не задржите остаје у историји белешке.';
+  @override
+  String get syncKeepLocal => 'Задржи верзију овог уређаја';
+  @override
+  String get syncKeepRemote => 'Задржи верзију са сервера';
+  @override
+  String get syncConflictIdentical => 'Две верзије су идентичне';
+  @override
+  String get syncConflictLoadFailed => 'Није могуће прочитати обе верзије';
+  @override
+  String get syncResolveFailed => 'Није могуће решити конфликт';
+  @override
+  String get syncResolved => 'Конфликт је решен';
 }
