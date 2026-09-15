@@ -6,6 +6,11 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.0.5] - 2026-09-15
+
+### Added
+- Android auto-update opens the system package installer for the downloaded APK (FileProvider share, `REQUEST_INSTALL_PACKAGES` declared); the download alone was all 0.0.4 did
+
 ## [0.0.4] - 2026-09-15
 
 ### Added
