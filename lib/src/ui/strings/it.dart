@@ -267,15 +267,11 @@ final class ItalianStrings extends Strings {
   @override
   String get audioPlay => 'Riproduci';
   @override
-  String get audioStopPlayback => 'Ferma riproduzione';
-  @override
   String get audioDelete => 'Elimina registrazione';
   @override
   String get audioImport => 'Importa un file audio';
   @override
   String get audioRecording => 'Registrazione…';
-  @override
-  String get audioPlaying => 'In riproduzione';
   @override
   String get audioPermissionDenied =>
       'Permesso del microfono negato — serve per registrare.';
@@ -299,6 +295,26 @@ final class ItalianStrings extends Strings {
   String get audioDeleteNote => 'Elimina nota';
   @override
   String get audioEditNote => 'Modifica nota';
+  @override
+  String get audioPause => 'Pausa';
+  @override
+  String get audioEditTitle => 'Modifica titolo';
+  @override
+  String get audioTitleHint => 'Dai un titolo alla registrazione…';
+  @override
+  String audioUntitled(int n) => 'Registrazione $n';
+  @override
+  String get audioMoreActions => 'Altre azioni';
+  @override
+  String get audioDiscardRecording => 'Scarta registrazione';
+  @override
+  String get audioPauseRecording => 'Metti in pausa la registrazione';
+  @override
+  String get audioResumeRecording => 'Riprendi la registrazione';
+  @override
+  String get audioRecordingPaused => 'In pausa';
+  @override
+  String get audioSavingRecording => 'Salvataggio…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -271,15 +271,11 @@ final class GreekStrings extends Strings {
   @override
   String get audioPlay => 'Αναπαραγωγή';
   @override
-  String get audioStopPlayback => 'Διακοπή αναπαραγωγής';
-  @override
   String get audioDelete => 'Διαγραφή ηχογράφησης';
   @override
   String get audioImport => 'Εισαγωγή αρχείου ήχου';
   @override
   String get audioRecording => 'Ηχογράφηση…';
-  @override
-  String get audioPlaying => 'Αναπαράγεται';
   @override
   String get audioPermissionDenied =>
       'Δεν δόθηκε άδεια μικροφώνου — απαιτείται για την ηχογράφηση.';
@@ -303,6 +299,26 @@ final class GreekStrings extends Strings {
   String get audioDeleteNote => 'Διαγραφή σημείωσης';
   @override
   String get audioEditNote => 'Επεξεργασία σημείωσης';
+  @override
+  String get audioPause => 'Παύση';
+  @override
+  String get audioEditTitle => 'Επεξεργασία τίτλου';
+  @override
+  String get audioTitleHint => 'Τίτλος ηχογράφησης…';
+  @override
+  String audioUntitled(int n) => 'Ηχογράφηση $n';
+  @override
+  String get audioMoreActions => 'Περισσότερες ενέργειες';
+  @override
+  String get audioDiscardRecording => 'Απόρριψη ηχογράφησης';
+  @override
+  String get audioPauseRecording => 'Παύση ηχογράφησης';
+  @override
+  String get audioResumeRecording => 'Συνέχιση ηχογράφησης';
+  @override
+  String get audioRecordingPaused => 'Σε παύση';
+  @override
+  String get audioSavingRecording => 'Αποθήκευση…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

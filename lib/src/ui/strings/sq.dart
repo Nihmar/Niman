@@ -266,15 +266,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get audioPlay => 'Luaj';
   @override
-  String get audioStopPlayback => 'Ndalo luajtjen';
-  @override
   String get audioDelete => 'Fshi regjistrimin';
   @override
   String get audioImport => 'Importo një skedar audio';
   @override
   String get audioRecording => 'Po regjistrohet…';
-  @override
-  String get audioPlaying => 'Po luhet';
   @override
   String get audioPermissionDenied =>
       'Leja për mikrofonin u refuzua — nevojitet për regjistrim.';
@@ -298,6 +294,26 @@ final class AlbanianStrings extends Strings {
   String get audioDeleteNote => 'Fshi shënimin';
   @override
   String get audioEditNote => 'Ndrysho shënimin';
+  @override
+  String get audioPause => 'Pauzë';
+  @override
+  String get audioEditTitle => 'Ndrysho titullin';
+  @override
+  String get audioTitleHint => 'Titulli i këtij regjistrimi…';
+  @override
+  String audioUntitled(int n) => 'Regjistrimi $n';
+  @override
+  String get audioMoreActions => 'Më shumë veprime';
+  @override
+  String get audioDiscardRecording => 'Hidh regjistrimin';
+  @override
+  String get audioPauseRecording => 'Pezullo regjistrimin';
+  @override
+  String get audioResumeRecording => 'Vazhdo regjistrimin';
+  @override
+  String get audioRecordingPaused => 'Në pauzë';
+  @override
+  String get audioSavingRecording => 'Po ruhet…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

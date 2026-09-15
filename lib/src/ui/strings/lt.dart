@@ -260,15 +260,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get audioPlay => 'Groti';
   @override
-  String get audioStopPlayback => 'Stabdyti atkūrimą';
-  @override
   String get audioDelete => 'Ištrinti įrašą';
   @override
   String get audioImport => 'Importuoti garso failą';
   @override
   String get audioRecording => 'Įrašoma…';
-  @override
-  String get audioPlaying => 'Grojama';
   @override
   String get audioPermissionDenied =>
       'Nėra leidimo naudoti mikrofoną — jis reikalingas įrašymui.';
@@ -292,6 +288,26 @@ final class LithuanianStrings extends Strings {
   String get audioDeleteNote => 'Ištrinti pastabą';
   @override
   String get audioEditNote => 'Redaguoti pastabą';
+  @override
+  String get audioPause => 'Pristabdyti';
+  @override
+  String get audioEditTitle => 'Redaguoti pavadinimą';
+  @override
+  String get audioTitleHint => 'Įrašo pavadinimas…';
+  @override
+  String audioUntitled(int n) => 'Įrašas $n';
+  @override
+  String get audioMoreActions => 'Daugiau veiksmų';
+  @override
+  String get audioDiscardRecording => 'Atmesti įrašą';
+  @override
+  String get audioPauseRecording => 'Pristabdyti įrašymą';
+  @override
+  String get audioResumeRecording => 'Tęsti įrašymą';
+  @override
+  String get audioRecordingPaused => 'Pristabdyta';
+  @override
+  String get audioSavingRecording => 'Išsaugoma…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

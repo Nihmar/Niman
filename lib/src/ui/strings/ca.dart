@@ -273,15 +273,11 @@ final class CatalanStrings extends Strings {
   @override
   String get audioPlay => 'Reprodueix';
   @override
-  String get audioStopPlayback => 'Atura la reproducció';
-  @override
   String get audioDelete => 'Esborra l’enregistrament';
   @override
   String get audioImport => 'Importa un fitxer d’àudio';
   @override
   String get audioRecording => 'Enregistrant…';
-  @override
-  String get audioPlaying => 'Reproduint';
   @override
   String get audioPermissionDenied =>
       'Permís del micròfon denegat — cal per enregistrar.';
@@ -305,6 +301,26 @@ final class CatalanStrings extends Strings {
   String get audioDeleteNote => 'Esborra la nota';
   @override
   String get audioEditNote => 'Edita la nota';
+  @override
+  String get audioPause => 'Pausa';
+  @override
+  String get audioEditTitle => 'Edita el títol';
+  @override
+  String get audioTitleHint => "Títol d'aquesta gravació…";
+  @override
+  String audioUntitled(int n) => 'Gravació $n';
+  @override
+  String get audioMoreActions => 'Més accions';
+  @override
+  String get audioDiscardRecording => 'Descarta la gravació';
+  @override
+  String get audioPauseRecording => 'Posa en pausa la gravació';
+  @override
+  String get audioResumeRecording => 'Reprèn la gravació';
+  @override
+  String get audioRecordingPaused => 'En pausa';
+  @override
+  String get audioSavingRecording => 'Desant…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

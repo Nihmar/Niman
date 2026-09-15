@@ -261,15 +261,11 @@ final class LatvianStrings extends Strings {
   @override
   String get audioPlay => 'Atskaņot';
   @override
-  String get audioStopPlayback => 'Apturēt atskaņošanu';
-  @override
   String get audioDelete => 'Dzēst ierakstu';
   @override
   String get audioImport => 'Importēt audio failu';
   @override
   String get audioRecording => 'Notiek ierakstīšana…';
-  @override
-  String get audioPlaying => 'Notiek atskaņošana';
   @override
   String get audioPermissionDenied =>
       'Nav atļaujas izmantot mikrofonu — tā nepieciešama ierakstīšanai.';
@@ -293,6 +289,26 @@ final class LatvianStrings extends Strings {
   String get audioDeleteNote => 'Dzēst piezīmi';
   @override
   String get audioEditNote => 'Rediģēt piezīmi';
+  @override
+  String get audioPause => 'Pauze';
+  @override
+  String get audioEditTitle => 'Rediģēt nosaukumu';
+  @override
+  String get audioTitleHint => 'Ieraksta nosaukums…';
+  @override
+  String audioUntitled(int n) => 'Ieraksts $n';
+  @override
+  String get audioMoreActions => 'Citas darbības';
+  @override
+  String get audioDiscardRecording => 'Atmest ierakstu';
+  @override
+  String get audioPauseRecording => 'Pauzēt ierakstīšanu';
+  @override
+  String get audioResumeRecording => 'Turpināt ierakstīšanu';
+  @override
+  String get audioRecordingPaused => 'Pauzēts';
+  @override
+  String get audioSavingRecording => 'Saglabā…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

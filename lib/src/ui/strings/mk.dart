@@ -265,15 +265,11 @@ final class MacedonianStrings extends Strings {
   @override
   String get audioPlay => 'Пушти';
   @override
-  String get audioStopPlayback => 'Запри репродукција';
-  @override
   String get audioDelete => 'Избриши снимка';
   @override
   String get audioImport => 'Увези аудио датотека';
   @override
   String get audioRecording => 'Се снима…';
-  @override
-  String get audioPlaying => 'Се репродуцира';
   @override
   String get audioPermissionDenied =>
       'Дозволата за микрофонот е одбиена — потребна е за снимање.';
@@ -297,6 +293,26 @@ final class MacedonianStrings extends Strings {
   String get audioDeleteNote => 'Избриши белешка';
   @override
   String get audioEditNote => 'Уреди белешка';
+  @override
+  String get audioPause => 'Пауза';
+  @override
+  String get audioEditTitle => 'Уреди наслов';
+  @override
+  String get audioTitleHint => 'Наслов на снимката…';
+  @override
+  String audioUntitled(int n) => 'Снимка $n';
+  @override
+  String get audioMoreActions => 'Повеќе дејства';
+  @override
+  String get audioDiscardRecording => 'Отфрли ја снимката';
+  @override
+  String get audioPauseRecording => 'Паузирај го снимањето';
+  @override
+  String get audioResumeRecording => 'Продолжи го снимањето';
+  @override
+  String get audioRecordingPaused => 'Паузирано';
+  @override
+  String get audioSavingRecording => 'Се зачувува…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

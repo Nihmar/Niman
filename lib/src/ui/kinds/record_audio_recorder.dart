@@ -25,6 +25,12 @@ final class RecordVoiceRecorder implements VoiceRecorder {
   }
 
   @override
+  Future<void> pause() => _record.pause();
+
+  @override
+  Future<void> resume() => _record.resume();
+
+  @override
   Future<String?> stop() => _record.stop();
 
   @override

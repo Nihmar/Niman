@@ -267,15 +267,11 @@ final class HungarianStrings extends Strings {
   @override
   String get audioPlay => 'Lejátszás';
   @override
-  String get audioStopPlayback => 'Lejátszás leállítása';
-  @override
   String get audioDelete => 'Felvétel törlése';
   @override
   String get audioImport => 'Hangfájl importálása';
   @override
   String get audioRecording => 'Felvétel folyamatban…';
-  @override
-  String get audioPlaying => 'Lejátszás folyamatban';
   @override
   String get audioPermissionDenied =>
       'Mikrofonhozzáférés megtagadva — a felvételhez szükséges.';
@@ -299,6 +295,26 @@ final class HungarianStrings extends Strings {
   String get audioDeleteNote => 'Jegyzet törlése';
   @override
   String get audioEditNote => 'Jegyzet szerkesztése';
+  @override
+  String get audioPause => 'Szünet';
+  @override
+  String get audioEditTitle => 'Cím szerkesztése';
+  @override
+  String get audioTitleHint => 'A felvétel címe…';
+  @override
+  String audioUntitled(int n) => '$n. felvétel';
+  @override
+  String get audioMoreActions => 'További műveletek';
+  @override
+  String get audioDiscardRecording => 'Felvétel elvetése';
+  @override
+  String get audioPauseRecording => 'Felvétel szüneteltetése';
+  @override
+  String get audioResumeRecording => 'Felvétel folytatása';
+  @override
+  String get audioRecordingPaused => 'Szüneteltetve';
+  @override
+  String get audioSavingRecording => 'Mentés…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

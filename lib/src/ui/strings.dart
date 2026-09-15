@@ -283,11 +283,9 @@ final class AppStrings {
   static String get audioRecord => _s.audioRecord;
   static String get audioStop => _s.audioStop;
   static String get audioPlay => _s.audioPlay;
-  static String get audioStopPlayback => _s.audioStopPlayback;
   static String get audioDelete => _s.audioDelete;
   static String get audioImport => _s.audioImport;
   static String get audioRecording => _s.audioRecording;
-  static String get audioPlaying => _s.audioPlaying;
   static String get audioPermissionDenied => _s.audioPermissionDenied;
   static String get newAudioNoteTitle => _s.newAudioNoteTitle;
   static String get newAudioNoteDefault => _s.newAudioNoteDefault;
@@ -299,6 +297,16 @@ final class AppStrings {
   static String get audioEditDescription => _s.audioEditDescription;
   static String get audioDeleteNote => _s.audioDeleteNote;
   static String get audioEditNote => _s.audioEditNote;
+  static String get audioPause => _s.audioPause;
+  static String get audioEditTitle => _s.audioEditTitle;
+  static String get audioTitleHint => _s.audioTitleHint;
+  static String audioUntitled(int n) => _s.audioUntitled(n);
+  static String get audioMoreActions => _s.audioMoreActions;
+  static String get audioDiscardRecording => _s.audioDiscardRecording;
+  static String get audioPauseRecording => _s.audioPauseRecording;
+  static String get audioResumeRecording => _s.audioResumeRecording;
+  static String get audioRecordingPaused => _s.audioRecordingPaused;
+  static String get audioSavingRecording => _s.audioSavingRecording;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;

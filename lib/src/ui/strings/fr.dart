@@ -268,15 +268,11 @@ final class FrenchStrings extends Strings {
   @override
   String get audioPlay => 'Lire';
   @override
-  String get audioStopPlayback => 'Arrêter la lecture';
-  @override
   String get audioDelete => 'Supprimer l’enregistrement';
   @override
   String get audioImport => 'Importer un fichier audio';
   @override
   String get audioRecording => 'Enregistrement…';
-  @override
-  String get audioPlaying => 'Lecture en cours';
   @override
   String get audioPermissionDenied =>
       'Accès au microphone refusé — il est nécessaire pour enregistrer.';
@@ -300,6 +296,26 @@ final class FrenchStrings extends Strings {
   String get audioDeleteNote => 'Supprimer la note';
   @override
   String get audioEditNote => 'Modifier la note';
+  @override
+  String get audioPause => 'Pause';
+  @override
+  String get audioEditTitle => 'Modifier le titre';
+  @override
+  String get audioTitleHint => 'Titre de cet enregistrement…';
+  @override
+  String audioUntitled(int n) => 'Enregistrement $n';
+  @override
+  String get audioMoreActions => "Plus d'actions";
+  @override
+  String get audioDiscardRecording => "Abandonner l'enregistrement";
+  @override
+  String get audioPauseRecording => 'Mettre l’enregistrement en pause';
+  @override
+  String get audioResumeRecording => 'Reprendre l’enregistrement';
+  @override
+  String get audioRecordingPaused => 'En pause';
+  @override
+  String get audioSavingRecording => 'Enregistrement du fichier…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

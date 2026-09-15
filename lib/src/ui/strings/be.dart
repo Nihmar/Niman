@@ -260,15 +260,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get audioPlay => 'Прайграць';
   @override
-  String get audioStopPlayback => 'Спыніць прайграванне';
-  @override
   String get audioDelete => 'Выдаліць запіс';
   @override
   String get audioImport => 'Імпартаваць аўдыяфайл';
   @override
   String get audioRecording => 'Ідзе запіс…';
-  @override
-  String get audioPlaying => 'Прайграванне';
   @override
   String get audioPermissionDenied =>
       'Няма дазволу на мікрафон — ён патрэбны для запісу.';
@@ -292,6 +288,26 @@ final class BelarusianStrings extends Strings {
   String get audioDeleteNote => 'Выдаліць заўвагу';
   @override
   String get audioEditNote => 'Рэдагаваць заўвагу';
+  @override
+  String get audioPause => 'Паўза';
+  @override
+  String get audioEditTitle => 'Рэдагаваць назву';
+  @override
+  String get audioTitleHint => 'Назва гэтага запісу…';
+  @override
+  String audioUntitled(int n) => 'Запіс $n';
+  @override
+  String get audioMoreActions => 'Больш дзеянняў';
+  @override
+  String get audioDiscardRecording => 'Адкінуць запіс';
+  @override
+  String get audioPauseRecording => 'Прыпыніць запіс';
+  @override
+  String get audioResumeRecording => 'Працягнуць запіс';
+  @override
+  String get audioRecordingPaused => 'Прыпынена';
+  @override
+  String get audioSavingRecording => 'Захаванне…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -261,15 +261,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get audioPlay => 'Відтворити';
   @override
-  String get audioStopPlayback => 'Зупинити відтворення';
-  @override
   String get audioDelete => 'Видалити запис';
   @override
   String get audioImport => 'Імпортувати аудіофайл';
   @override
   String get audioRecording => 'Триває запис…';
-  @override
-  String get audioPlaying => 'Відтворення';
   @override
   String get audioPermissionDenied =>
       'Немає дозволу на мікрофон — він потрібен для запису.';
@@ -293,6 +289,26 @@ final class UkrainianStrings extends Strings {
   String get audioDeleteNote => 'Видалити нотатку';
   @override
   String get audioEditNote => 'Редагувати нотатку';
+  @override
+  String get audioPause => 'Пауза';
+  @override
+  String get audioEditTitle => 'Редагувати назву';
+  @override
+  String get audioTitleHint => 'Назва цього запису…';
+  @override
+  String audioUntitled(int n) => 'Запис $n';
+  @override
+  String get audioMoreActions => 'Більше дій';
+  @override
+  String get audioDiscardRecording => 'Відкинути запис';
+  @override
+  String get audioPauseRecording => 'Призупинити запис';
+  @override
+  String get audioResumeRecording => 'Продовжити запис';
+  @override
+  String get audioRecordingPaused => 'Призупинено';
+  @override
+  String get audioSavingRecording => 'Збереження…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

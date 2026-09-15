@@ -267,15 +267,11 @@ final class GermanStrings extends Strings {
   @override
   String get audioPlay => 'Abspielen';
   @override
-  String get audioStopPlayback => 'Wiedergabe stoppen';
-  @override
   String get audioDelete => 'Aufnahme löschen';
   @override
   String get audioImport => 'Audiodatei importieren';
   @override
   String get audioRecording => 'Aufnahme läuft…';
-  @override
-  String get audioPlaying => 'Wiedergabe läuft';
   @override
   String get audioPermissionDenied =>
       'Mikrofonzugriff verweigert — für Aufnahmen erforderlich.';
@@ -299,6 +295,26 @@ final class GermanStrings extends Strings {
   String get audioDeleteNote => 'Notiz löschen';
   @override
   String get audioEditNote => 'Notiz bearbeiten';
+  @override
+  String get audioPause => 'Pause';
+  @override
+  String get audioEditTitle => 'Titel bearbeiten';
+  @override
+  String get audioTitleHint => 'Titel für diese Aufnahme…';
+  @override
+  String audioUntitled(int n) => 'Aufnahme $n';
+  @override
+  String get audioMoreActions => 'Weitere Aktionen';
+  @override
+  String get audioDiscardRecording => 'Aufnahme verwerfen';
+  @override
+  String get audioPauseRecording => 'Aufnahme pausieren';
+  @override
+  String get audioResumeRecording => 'Aufnahme fortsetzen';
+  @override
+  String get audioRecordingPaused => 'Pausiert';
+  @override
+  String get audioSavingRecording => 'Wird gespeichert…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

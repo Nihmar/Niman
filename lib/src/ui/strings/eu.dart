@@ -264,15 +264,11 @@ final class BasqueStrings extends Strings {
   @override
   String get audioPlay => 'Erreproduzitu';
   @override
-  String get audioStopPlayback => 'Gelditu erreprodukzioa';
-  @override
   String get audioDelete => 'Ezabatu grabazioa';
   @override
   String get audioImport => 'Inportatu audio-fitxategi bat';
   @override
   String get audioRecording => 'Grabatzen…';
-  @override
-  String get audioPlaying => 'Erreproduzitzen';
   @override
   String get audioPermissionDenied =>
       'Mikrofonoaren baimena ukatu da — grabatzeko beharrezkoa da.';
@@ -296,6 +292,26 @@ final class BasqueStrings extends Strings {
   String get audioDeleteNote => 'Ezabatu oharra';
   @override
   String get audioEditNote => 'Editatu oharra';
+  @override
+  String get audioPause => 'Pausatu';
+  @override
+  String get audioEditTitle => 'Editatu izenburua';
+  @override
+  String get audioTitleHint => 'Grabazio honen izenburua…';
+  @override
+  String audioUntitled(int n) => '$n. grabazioa';
+  @override
+  String get audioMoreActions => 'Ekintza gehiago';
+  @override
+  String get audioDiscardRecording => 'Baztertu grabazioa';
+  @override
+  String get audioPauseRecording => 'Grabazioa pausatu';
+  @override
+  String get audioResumeRecording => 'Grabazioari berrekin';
+  @override
+  String get audioRecordingPaused => 'Pausatuta';
+  @override
+  String get audioSavingRecording => 'Gordetzen…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

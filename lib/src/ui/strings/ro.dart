@@ -267,15 +267,11 @@ final class RomanianStrings extends Strings {
   @override
   String get audioPlay => 'Redă';
   @override
-  String get audioStopPlayback => 'Oprește redarea';
-  @override
   String get audioDelete => 'Șterge înregistrarea';
   @override
   String get audioImport => 'Importă un fișier audio';
   @override
   String get audioRecording => 'Se înregistrează…';
-  @override
-  String get audioPlaying => 'Se redă';
   @override
   String get audioPermissionDenied =>
       'Permisiunea pentru microfon a fost refuzată — este necesară pentru '
@@ -300,6 +296,26 @@ final class RomanianStrings extends Strings {
   String get audioDeleteNote => 'Șterge nota';
   @override
   String get audioEditNote => 'Editează nota';
+  @override
+  String get audioPause => 'Pauză';
+  @override
+  String get audioEditTitle => 'Editează titlul';
+  @override
+  String get audioTitleHint => 'Titlul acestei înregistrări…';
+  @override
+  String audioUntitled(int n) => 'Înregistrarea $n';
+  @override
+  String get audioMoreActions => 'Mai multe acțiuni';
+  @override
+  String get audioDiscardRecording => 'Renunță la înregistrare';
+  @override
+  String get audioPauseRecording => 'Întrerupe înregistrarea';
+  @override
+  String get audioResumeRecording => 'Reia înregistrarea';
+  @override
+  String get audioRecordingPaused => 'În pauză';
+  @override
+  String get audioSavingRecording => 'Se salvează…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
