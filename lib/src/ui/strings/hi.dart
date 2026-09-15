@@ -111,25 +111,24 @@ final class HindiStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'कीबोर्ड शॉर्टकट';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'अपडेट';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'स्वचालित अपडेट';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'लॉन्च पर और हर 6 घंटे में GitHub Releases जाँचें';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'अपडेट जाँचें';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version उपलब्ध है';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman अप-टू-डेट है';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'अपडेट की जाँच विफल';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'अपडेट $path में सहेजा गया';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'इंस्टॉलर शुरू हुआ';
   @override
   String get settingsSectionDiagnostics => 'निदान';
   @override
@@ -168,7 +167,7 @@ final class HindiStrings extends Strings {
   String spellCheckLine(int line) => 'पंक्ति $line';
 
   @override
-  String indentWidthValue(int spaces) => '$spaces spaces';
+  String indentWidthValue(int spaces) => '$spaces स्पेस';
 
   // Settings: theme (T-M6-05).
   @override
@@ -248,48 +247,48 @@ final class HindiStrings extends Strings {
   @override
   String get listDragHandleLabel => 'आइटम का क्रम बदलें';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'अभी कोई रिकॉर्डिंग नहीं';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'रिकॉर्ड करें';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'रोकें';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'चलाएँ';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'प्लेबैक रोकें';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'रिकॉर्डिंग हटाएँ';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'ऑडियो फ़ाइल आयात करें';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'रिकॉर्ड हो रहा है…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'चल रहा है';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'माइक्रोफ़ोन की अनुमति नहीं मिली — रिकॉर्डिंग के लिए यह ज़रूरी है।';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'नया वॉइस नोट';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'मेरी रिकॉर्डिंग';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'रिकॉर्डिंग दिखाएँ';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'नोट लिखें…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'भेजें';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'रिकॉर्डिंग का नाम बदलें';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'इस रिकॉर्डिंग का वर्णन करें…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'वर्णन संपादित करें';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'नोट हटाएँ';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'नोट संपादित करें';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -301,7 +300,7 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutNewList => 'नई सूची';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'नया वॉइस नोट';
   @override
   String get shortcutToggleSidebar => 'फ़ाइल ट्री दिखाएँ/छिपाएँ';
   @override
@@ -979,7 +978,7 @@ final class HindiStrings extends Strings {
   @override
   String get listFolderTitle => 'सूची-फ़ोल्डर';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'अनुलग्नक फ़ोल्डर';
 
   // Trash (M1).
   @override

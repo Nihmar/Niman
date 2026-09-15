@@ -114,25 +114,25 @@ final class BasqueStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Teklatu-lasterdarrak';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Eguneratzeak';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Eguneratze automatikoak';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Egiaztatu GitHub Releases abiaraztean eta 6 orduro';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Bilatu eguneratzeak';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version erabilgarri dago';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman eguneratuta dago';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Ezin izan dira eguneratzeak egiaztatu';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Eguneratzea hemen gorde da: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instalatzailea abiarazi da';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -254,48 +254,48 @@ final class BasqueStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Aldatu elementuaren ordena';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Oraindik ez dago grabaziorik';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Grabatu';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Gelditu';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Erreproduzitu';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Gelditu erreprodukzioa';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Ezabatu grabazioa';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Inportatu audio-fitxategi bat';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Grabatzen…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Erreproduzitzen';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonoaren baimena ukatu da — grabatzeko beharrezkoa da.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Ahots-ohar berria';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Nire grabazioa';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Erakutsi grabazioak';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Idatzi ohar bat…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Bidali';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Grabazioaren izena aldatu';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Deskribatu grabazio hau…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Editatu deskribapena';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Ezabatu oharra';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Editatu oharra';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -307,7 +307,7 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutNewList => 'Zerrenda berria';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Ahots-ohar berria';
   @override
   String get shortcutToggleSidebar => 'Ezkutatu edo erakutsi iragazkia';
   @override
@@ -1005,7 +1005,7 @@ final class BasqueStrings extends Strings {
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Eranskinen biltegia';
 
   // Trash (M1).
   @override

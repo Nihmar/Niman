@@ -116,25 +116,26 @@ final class CatalanStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Actualitzacions';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Actualitzacions automàtiques';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Comprova GitHub Releases en iniciar i cada 6 hores';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Cerca actualitzacions';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version està disponible';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman està actualitzat';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed =>
+      'No s’han pogut comprovar les actualitzacions';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Actualització guardada a $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instal·lador iniciat';
   @override
   String get settingsSectionDiagnostics => 'Diagnòstic';
   @override
@@ -262,48 +263,48 @@ final class CatalanStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Canvia l’ordre de l’element';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Encara no hi ha enregistraments';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Enregistra';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Atura';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Reprodueix';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Atura la reproducció';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Esborra l’enregistrament';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importa un fitxer d’àudio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Enregistrant…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Reproduint';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permís del micròfon denegat — cal per enregistrar.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nota de veu nova';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'El meu enregistrament';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Mostra els enregistraments';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Escriu una nota…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Envia';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Canvia el nom de l’enregistrament';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Descriu aquest enregistrament…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Edita la descripció';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Esborra la nota';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Edita la nota';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -315,7 +316,7 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutNewList => 'Llista nova';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nota de veu nova';
   @override
   String get shortcutToggleSidebar => 'Mostra o amaga el filtre';
   @override
@@ -1026,7 +1027,7 @@ final class CatalanStrings extends Strings {
   @override
   String get listFolderTitle => 'Carpeta de llista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => "Carpeta d'adjunts";
 
   // Trash (M1).
   @override

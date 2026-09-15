@@ -116,25 +116,24 @@ final class HungarianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Frissítések';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatikus frissítések';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'GitHub Releases ellenőrzése indításkor és 6 óránként';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Frissítések keresése';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Elérhető a Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'A Niman naprakész';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'A frissítések ellenőrzése nem sikerült';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'A telepítő elindult';
   @override
   String get settingsSectionDiagnostics => 'Diagnosztika';
   @override
@@ -258,48 +257,48 @@ final class HungarianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Elem sorrendjének módosítása';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Még nincs felvétel';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Felvétel';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Leállítás';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Lejátszás';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Lejátszás leállítása';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Felvétel törlése';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Hangfájl importálása';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Felvétel folyamatban…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Lejátszás folyamatban';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonhozzáférés megtagadva — a felvételhez szükséges.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Új hangjegyzet';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'A felvételem';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Felvételek megjelenítése';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Írj egy jegyzetet…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Küldés';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Felvétel átnevezése';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Írd le ezt a felvételt…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Leírás szerkesztése';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Jegyzet törlése';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Jegyzet szerkesztése';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -311,7 +310,7 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutNewList => 'Új lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Új hangjegyzet';
   @override
   String get shortcutToggleSidebar => 'Szűrő megjelenítése vagy elrejtése';
   @override
@@ -1008,7 +1007,7 @@ final class HungarianStrings extends Strings {
   @override
   String get listFolderTitle => 'Listamappa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mellékletmappa';
 
   // Trash (M1).
   @override

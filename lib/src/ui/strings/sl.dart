@@ -116,25 +116,24 @@ final class SlovenianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Bližnjice';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Posodobitve';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Samodejne posodobitve';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Preverja GitHub Releases ob zagonu in vsakih 6 ur';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Preveri posodobitve';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Na voljo je Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman je posodobljen';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Preverjanje posodobitev ni uspelo';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Posodobitev shranjena v $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Namestitveni program zagnan';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -253,48 +252,48 @@ final class SlovenianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Spremeni vrstni red elementa';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Ni še posnetkov';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Snemaj';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Ustavi';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Predvajaj';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Ustavi predvajanje';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Izbriši posnetek';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Uvozi zvočno datoteko';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Snemanje …';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Predvajanje';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Dovoljenje za mikrofon je zavrnjeno — potrebno je za snemanje.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nova glasovna opomba';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Moj posnetek';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Prikaži posnetke';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Napišite opombo …';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Pošlji';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Preimenuj posnetek';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Opišite ta posnetek …';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Uredi opis';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Izbriši opombo';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Uredi opombo';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -306,7 +305,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutNewList => 'Nov seznam';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nova glasovna opomba';
   @override
   String get shortcutToggleSidebar => 'Prikaži ali skrij filter';
   @override
@@ -988,7 +987,7 @@ final class SlovenianStrings extends Strings {
   @override
   String get listFolderTitle => 'Mapa seznamov';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mapa prilog';
 
   // Trash (M1).
   @override

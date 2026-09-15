@@ -113,25 +113,24 @@ final class IcelandicStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Lyklaborðssnarstæður';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Uppfærslur';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Sjálfvirkar uppfærslur';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Athuga GitHub Releases við ræsingu og á 6 klst. fresti';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Leita að uppfærslum';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version er fáanlegt';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman er uppfært';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Ekki tókst að leita að uppfærslum';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Uppfærsla vistuð í $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Uppsetningarforrit ræst';
   @override
   String get settingsSectionDiagnostics => 'Greining';
   @override
@@ -252,48 +251,48 @@ final class IcelandicStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Raða lið aftur';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Engar upptökur enn';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Taka upp';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stöðva';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Spila';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Stöðva spilun';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Eyða upptöku';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Flytja inn hljóðskrá';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Tekur upp…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Í spilun';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Aðgangi að hljóðnema hafnað — hann þarf til að taka upp.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Ný raddathugasrafa';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Upptakan mín';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Sýna upptökur';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Skrifa athugasröfu…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Senda';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Endurheita upptöku';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Lýsa þessari upptöku…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Breyta lýsingu';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Eyða athugasröfu';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Breyta athugasröfu';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -305,7 +304,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutNewList => 'Nýr listi';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Ný raddathugasrafa';
   @override
   String get shortcutToggleSidebar => 'Sýna eða fela skjalatré';
   @override
@@ -995,7 +994,7 @@ final class IcelandicStrings extends Strings {
   @override
   String get listFolderTitle => 'Mappa lista';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mappa fyrir viðhengi';
 
   // Trash (M1).
   @override

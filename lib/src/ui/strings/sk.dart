@@ -115,25 +115,25 @@ final class SlovakStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Aktualizácie';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatické aktualizácie';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontroluje GitHub Releases pri spustení a každých 6 hodín';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Skontrolovať aktualizácie';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'K dispozícii je Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman je aktuálny';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kontrola aktualizácií zlyhala';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Inštalátor spustený';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -254,48 +254,48 @@ final class SlovakStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Zmeniť poradie položky';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Zatiaľ žiadne nahrávky';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Nahrať';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Zastaviť';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Prehrať';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Zastaviť prehrávanie';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Vymazať nahrávku';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importovať zvukový súbor';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Nahráva sa…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Prehráva sa';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Povolenie na mikrofón bolo zamietnuté — nahrávanie ho vyžaduje.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nová hlasová poznámka';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Moja nahrávka';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Zobraziť nahrávky';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Napíšte poznámku…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Odoslať';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Premenovať nahrávku';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Opíšte túto nahrávku…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Upraviť popis';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Vymazať poznámku';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Upraviť poznámku';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -307,7 +307,7 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutNewList => 'Nový zoznam';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nová hlasová poznámka';
   @override
   String get shortcutToggleSidebar => 'Zobraziť alebo skryť filter';
   @override
@@ -991,7 +991,7 @@ final class SlovakStrings extends Strings {
   @override
   String get listFolderTitle => 'Priečinok zoznamov';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priečinok príloh';
 
   // Trash (M1).
   @override

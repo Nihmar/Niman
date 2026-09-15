@@ -114,25 +114,25 @@ final class BelarusianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Абнаўленні';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Аўтаматычныя абнаўленні';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Правяраць GitHub Releases пры запуску і кожныя 6 гадзін';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Праверыць абнаўленні';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Даступная версія Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'У вас апошняя версія Niman';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Не ўдалося праверыць абнаўленні';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Абнаўленне захавана ў $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Усталёўшчык запушчаны';
   @override
   String get settingsSectionDiagnostics => 'Дыягустыка';
   @override
@@ -250,48 +250,48 @@ final class BelarusianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Змяніць парадак элементаў';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Запісаў яшчэ няма';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Запісаць';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Спыніць';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Прайграць';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Спыніць прайграванне';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Выдаліць запіс';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Імпартаваць аўдыяфайл';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Ідзе запіс…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Прайграванне';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Няма дазволу на мікрафон — ён патрэбны для запісу.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Новая галасавая заўвага';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Мой запіс';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Паказаць запісы';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Напішыце заўвагу…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Адправіць';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Перайменаваць запіс';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Апішыце гэты запіс…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Рэдагаваць апісанне';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Выдаліць заўвагу';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Рэдагаваць заўвагу';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -303,7 +303,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutNewList => 'Новы спіс';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Новая галасавая заўвага';
   @override
   String get shortcutToggleSidebar => 'Паказаць або схаваць фільтр';
   @override
@@ -994,7 +994,7 @@ final class BelarusianStrings extends Strings {
   @override
   String get listFolderTitle => 'Папка спісаў';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Папка ўкладанняў';
 
   // Trash (M1).
   @override
