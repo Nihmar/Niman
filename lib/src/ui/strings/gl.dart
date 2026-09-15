@@ -172,6 +172,8 @@ final class GalicianStrings extends Strings {
   String spellCheckCount(int count) => '$count por revisar';
   @override
   String spellCheckLine(int line) => 'liña $line';
+  @override
+  String get addWordToDictionary => 'Engade ao diccionario';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espazos';

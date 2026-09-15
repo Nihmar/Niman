@@ -159,6 +159,8 @@ final class JapaneseStrings extends Strings {
   String spellCheckCount(int count) => '未確認 $count 件';
   @override
   String spellCheckLine(int line) => '$line 行目';
+  @override
+  String get addWordToDictionary => '辞書に追加';
 
   @override
   String indentWidthValue(int spaces) => 'スペース $spaces 個';

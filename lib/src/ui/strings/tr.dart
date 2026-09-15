@@ -167,6 +167,8 @@ final class TurkishStrings extends Strings {
   String spellCheckCount(int count) => '$count incelemeye';
   @override
   String spellCheckLine(int line) => '$line. satır';
+  @override
+  String get addWordToDictionary => 'Sözlüğe ekle';
 
   @override
   String indentWidthValue(int spaces) => '$spaces boşluk';

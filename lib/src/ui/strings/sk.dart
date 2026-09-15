@@ -172,6 +172,8 @@ final class SlovakStrings extends Strings {
   String spellCheckCount(int count) => '$count na kontrolu';
   @override
   String spellCheckLine(int line) => 'riadok $line';
+  @override
+  String get addWordToDictionary => 'Pridať do slovníka';
 
   @override
   String indentWidthValue(int spaces) => '$spaces medzier';

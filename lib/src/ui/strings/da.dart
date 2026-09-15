@@ -171,6 +171,8 @@ final class DanishStrings extends Strings {
   String spellCheckCount(int count) => '$count at gennemgå';
   @override
   String spellCheckLine(int line) => 'linje $line';
+  @override
+  String get addWordToDictionary => 'Tilføj til ordbog';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellemrum';

@@ -170,6 +170,8 @@ final class AppStrings {
   static String spellCheckCount(int count) => _s.spellCheckCount(count);
   static String spellCheckLine(int line) => _s.spellCheckLine(line);
 
+  static String get addWordToDictionary => _s.addWordToDictionary;
+
   /// The indent width as a row's value, e.g. "4 spaces".
   static String indentWidthValue(int spaces) => _s.indentWidthValue(spaces);
 

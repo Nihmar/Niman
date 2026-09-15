@@ -171,6 +171,8 @@ final class PortugueseStrings extends Strings {
   String spellCheckCount(int count) => '$count para revisar';
   @override
   String spellCheckLine(int line) => 'linha $line';
+  @override
+  String get addWordToDictionary => 'Adicionar ao dicionário';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaços';

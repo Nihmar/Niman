@@ -172,6 +172,8 @@ final class FrenchStrings extends Strings {
   String spellCheckCount(int count) => '$count à relire';
   @override
   String spellCheckLine(int line) => 'ligne $line';
+  @override
+  String get addWordToDictionary => 'Ajouter au dictionnaire';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espaces';
