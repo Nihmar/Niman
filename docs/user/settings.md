@@ -48,7 +48,7 @@ launch and then every 6 hours, quietly: a failure (offline, no network)
 is a skipped check, never an error dialog. When a newer release is
 found, a banner offers the download:
 
-- Android: downloads the `.apk` (the system installer step is pending).
+- Android: downloads the `.apk` into the app folder and opens the system installer — confirm there, including the per-app "unknown apps" allowlist.
 - Windows: downloads the setup `.exe` and launches the installer.
 - Linux: downloads the installed variant (AppImage, `.tar.gz`, Arch
   package) into Downloads; when the variant cannot be detected, the

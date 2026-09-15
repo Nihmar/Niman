@@ -34,6 +34,11 @@
          Android 6+ (asked when the first recording starts). -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Auto-update (issue #81): installing the downloaded APK through
+         the system installer. The user still confirms on the system
+         screen (including the per-app "unknown apps" allowlist). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <application
         android:label="Niman"
         android:name="${applicationName}"
@@ -166,6 +171,18 @@
             android:name=".NoteWidgetService"
             android:exported="true"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Auto-update (issue #81): shares the downloaded APK read-only
+             with the system package installer. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

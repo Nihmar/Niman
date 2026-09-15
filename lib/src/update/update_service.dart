@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/services.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/update/app_version.dart';
 import 'package:niman/src/update/release_asset.dart';
@@ -127,12 +128,28 @@ Future<Directory> downloadDirectory() async {
   throw StateError('no downloads folder is reachable');
 }
 
-/// Streams [asset] into [into] (default [downloadDirectory]).
+/// The folder update downloads land in.
+///
+/// The platform Downloads everywhere except Android, where the APK goes
+/// into the app support directory's `updates/` folder instead: it needs
+/// no storage permission there, and the system installer reads it
+/// through FileProvider (see `file_provider_paths.xml`).
+Future<Directory> updateDownloadDirectory() {
+  if (Platform.isAndroid) {
+    return getApplicationSupportDirectory().then(
+      (support) =>
+          Directory(p.join(support.path, 'updates')).create(recursive: true),
+    );
+  }
+  return downloadDirectory();
+}
+
+/// Streams [asset] into [into] (default [updateDownloadDirectory]).
 ///
 /// The file name is the asset's base name, so a hostile release cannot
 /// escape the folder.
 Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
-  final dir = into ?? await downloadDirectory();
+  final dir = into ?? await updateDownloadDirectory();
   final file = File(p.join(dir.path, p.basename(asset.name)));
   final client = HttpClient();
   try {
@@ -155,12 +172,18 @@ Future<File> downloadAsset(ReleaseAsset asset, {Directory? into}) async {
 
 /// Hands a downloaded [file] to the platform.
 ///
+/// - Android: opens the system package installer for the APK (issue #81)
+///   and returns whether it launched; the user still confirms there.
 /// - Windows: launches the setup installer and returns true.
 /// - Linux: reveals the Downloads folder (best effort) and returns false.
-/// - Android: the APK stays in Downloads — launching the system installer
-///   needs a native FileProvider intent, the next step of issue #81 — and
-///   returns false.
-Future<bool> applyDownloadedUpdate(File file) async {
+Future<bool> applyDownloadedUpdate(File file) {
+  if (Platform.isAndroid) return installApk(file);
+  return _applyDesktop(file);
+}
+
+/// Hands a downloaded [file] to a desktop platform: see
+/// [applyDownloadedUpdate].
+Future<bool> _applyDesktop(File file) async {
   if (Platform.isWindows) {
     await Process.start(file.path, []);
     return true;
@@ -173,4 +196,18 @@ Future<bool> applyDownloadedUpdate(File file) async {
     }
   }
   return false;
+}
+
+/// Opens the system package installer for the downloaded [apk].
+///
+/// False when the bridge is unreachable (tests) or the installer
+/// refuses the file; the APK stays in the updates folder either way.
+Future<bool> installApk(File apk) async {
+  try {
+    final launched = await const MethodChannel('niman/update')
+        .invokeMethod<bool>('installApk', {'path': apk.path});
+    return launched ?? false;
+  } on Object {
+    return false;
+  }
 }
