@@ -1033,89 +1033,83 @@ final class ChineseStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => '$version 的新内容';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => '历史记录';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => '笔记操作';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => '当前版本';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => '笔记的当前内容';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => '今天';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => '昨天';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => '编辑前';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => '编辑中';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => '恢复前';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => '同步前';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => '替换前';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => '已找回';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => '同步基准';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      '暂无版本。开始编辑笔记时 Niman 会保留一个版本，之后在书写期间'
+      '最多每隔几分钟保留一个。';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => '已保留 $kept 个版本（上限 $limit 个）';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept => '同步基准不受上限限制，始终保留。';
   @override
-  String get historyOff =>
-      'History is off for this library (Settings, Library).';
+  String get historyOff => '此文库的历史记录已关闭（设置，文库）。';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => '无法读取历史记录';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => '与当前版本比较';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => '更改';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => '版本';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => '文本与当前版本相同。';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => '恢复此版本';
   @override
-  String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+  String historyRestoreConfirmTitle(String when) => '恢复 $when 的版本？';
   @override
-  String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+  String get historyRestoreConfirmBody => '当前文本会先保存到历史记录中，因此随时可以回退。';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => '恢复';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => '已恢复 $when 的版本';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => '无法恢复该版本';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => '撤销';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => '第 $start–$end 行';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => '第 $line 行';
   @override
-  String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  String diffUnchanged(int count) => '$count 行未更改';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => '保留版本数';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => '每篇笔记，存于 .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? '无' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => '新版本最短间隔';
   @override
-  String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+  String get historyIntervalSubtitle => '书写期间生效；开始编辑笔记时总会保留一个版本';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes 分钟';
 }

@@ -1136,89 +1136,93 @@ final class IcelandicStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Nýtt í útgáfu $version';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Ferill';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Aðgerðir athugasrafnar';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Núverandi útgáfa';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Athugasrafan eins og hún er núna';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Í dag';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Í gær';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'fyrir breytingar';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'við breytingar';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'fyrir endurheimt';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'fyrir samstillingu';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'fyrir útskiptingu';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'fundin aftur';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'samstillingargrunnur';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Engar útgáfur enn. Niman geymir eina þegar þú byrjar að breyta '
+      'athugasrafnu, síðan í mesta lagi eina á nokkurra mínútna fresti meðan '
+      'þú skrifar.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => 'Geymdar útgáfur: $kept af $limit';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept =>
+      'Samstillingargrunnurinn er geymdur umfram hámarkið.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Ferill er óvirkur fyrir þetta bókasafn (Stillingar, Bókasafn).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Gat ekki lesið ferilinn';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Borin saman við núverandi útgáfu';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Breytingar';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Útgáfa';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Sami texti og í núverandi útgáfu.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Endurheimta þessa útgáfu';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Endurheimta útgáfuna frá $when?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Núverandi texti er fyrst vistaður í ferlinum, svo þú getur alltaf '
+      'farið til baka.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Endurheimta';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Útgáfan frá $when var endurheimt';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Gat ekki endurheimt útgáfuna';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Afturkalla';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Línur $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Lína $line';
   @override
-  String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  String diffUnchanged(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count óbreytt lína'
+      : '$count óbreyttar línur';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Fjöldi geymdra útgáfna';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Fyrir hverja athugasrafa, í .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Engar' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Minnsta bil milli útgáfna';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Meðan þú skrifar; alltaf er ein geymd þegar byrjað er að breyta '
+      'athugasrafnu';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes mín';
 }

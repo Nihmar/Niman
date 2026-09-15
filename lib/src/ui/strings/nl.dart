@@ -1156,89 +1156,91 @@ final class DutchStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Nieuw in versie $version';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Geschiedenis';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Notitieacties';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Huidige versie';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'De notitie zoals die nu is';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Vandaag';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Gisteren';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'vóór bewerken';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'tijdens bewerken';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'vóór herstel';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'vóór sync';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'vóór vervangen';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'teruggevonden';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'sync-basis';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Nog geen versies. Niman bewaart er een zodra je de notitie gaat '
+      'bewerken, en daarna hooguit één om de paar minuten terwijl je schrijft.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => '$kept van $limit versies bewaard';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept =>
+      'De sync-basis blijft ook boven de limiet bewaard.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Geschiedenis staat uit voor deze bibliotheek '
+      '(Instellingen, Bibliotheek).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Kon de geschiedenis niet lezen';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Vergeleken met de huidige versie';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Wijzigingen';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Versie';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Zelfde tekst als de huidige versie.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Deze versie herstellen';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Versie van $when herstellen?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'De huidige tekst wordt eerst in de geschiedenis bewaard, dus je kunt '
+      'altijd terug.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Herstellen';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Versie van $when hersteld';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Kon de versie niet herstellen';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Ongedaan maken';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Regels $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Regel $line';
   @override
   String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+      count == 1 ? '1 ongewijzigde regel' : '$count ongewijzigde regels';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Te bewaren versies';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Per notitie, in .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Geen' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Nieuwe versie hooguit elke';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Tijdens het schrijven; beginnen met bewerken bewaart er altijd een';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
 }

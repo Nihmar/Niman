@@ -1151,89 +1151,90 @@ final class HungarianStrings extends Strings {
   String changelogWhatsNew(String version) =>
       'Újdonságok a(z) $version verzióban';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Előzmények';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Jegyzetműveletek';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Jelenlegi verzió';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'A jegyzet jelenlegi állapota';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'Ma';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'Tegnap';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'szerkesztés előtt';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'szerkesztés közben';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'visszaállítás előtt';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'szinkronizálás előtt';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'csere előtt';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'helyreállított';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'szinkronalap';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Még nincsenek verziók. A Niman ment egyet, amikor elkezded szerkeszteni '
+      'a jegyzetet, majd írás közben legfeljebb néhány percenként egyet.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) => '$kept/$limit verzió megőrizve';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept => 'A szinkronalap a korláton felül is megmarad.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Az előzmények ki vannak kapcsolva ebben a könyvtárban '
+      '(Beállítások, Könyvtár).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Az előzmények nem olvashatók';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Összevetve a jelenlegi verzióval';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Változások';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Verzió';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges =>
+      'Ugyanaz a szöveg, mint a jelenlegi verzióban.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Visszaállítás erre a verzióra';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Visszaállítod ezt a verziót: $when?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'A jelenlegi szöveg előbb bekerül az előzményekbe, így bármikor '
+      'visszatérhetsz.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Visszaállítás';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Verzió visszaállítva: $when';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'A verzió nem állítható vissza';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Visszavonás';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => '$start–$end. sor';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => '$line. sor';
   @override
-  String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+  String diffUnchanged(int count) => '$count változatlan sor';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Megőrzendő verziók';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Jegyzetenként, a .history/ mappában';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Nincs' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Új verzió legfeljebb';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Írás közben; a szerkesztés megkezdésekor mindig készül egy';
   @override
-  String historyIntervalValue(int minutes) => '$minutes min';
+  String historyIntervalValue(int minutes) => '$minutes percenként';
 }

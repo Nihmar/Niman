@@ -1136,89 +1136,92 @@ final class NorwegianStrings extends Strings {
   @override
   String changelogWhatsNew(String version) => 'Nyhet i versjon $version';
 
-  // Note history (issues #13, #55, #67): English until translated.
+  // Note history (issues #13, #55, #67).
   @override
-  String get noteHistoryTitle => 'History';
+  String get noteHistoryTitle => 'Historikk';
   @override
-  String get noteMenuTooltip => 'Note actions';
+  String get noteMenuTooltip => 'Notathandlinger';
   @override
-  String get historyCurrentVersion => 'Current version';
+  String get historyCurrentVersion => 'Gjeldende versjon';
   @override
-  String get historyCurrentSubtitle => 'The note as it is now';
+  String get historyCurrentSubtitle => 'Notatet slik det er nå';
   @override
-  String get historyToday => 'Today';
+  String get historyToday => 'I dag';
   @override
-  String get historyYesterday => 'Yesterday';
+  String get historyYesterday => 'I går';
   @override
-  String get historyReasonSession => 'before editing';
+  String get historyReasonSession => 'før redigering';
   @override
-  String get historyReasonInterval => 'while editing';
+  String get historyReasonInterval => 'under redigering';
   @override
-  String get historyReasonRestore => 'before restore';
+  String get historyReasonRestore => 'før gjenoppretting';
   @override
-  String get historyReasonSync => 'before sync';
+  String get historyReasonSync => 'før synk';
   @override
-  String get historyReasonReplace => 'before replace';
+  String get historyReasonReplace => 'før erstatning';
   @override
-  String get historyReasonUnknown => 'recovered';
+  String get historyReasonUnknown => 'gjenfunnet';
   @override
-  String get historySyncBase => 'sync base';
+  String get historySyncBase => 'synkbase';
   @override
   String get historyEmpty =>
-      'No versions yet. Niman keeps one when you start editing the note, '
-      'then at most one every few minutes while you write.';
+      'Ingen versjoner ennå. Niman tar vare på én når du begynner å redigere '
+      'notatet, og deretter høyst én med noen minutters mellomrom mens du '
+      'skriver.';
   @override
-  String historyKept(int kept, int limit) => '$kept of $limit versions kept';
+  String historyKept(int kept, int limit) =>
+      '$kept av $limit versjoner beholdt';
   @override
-  String get historyBaseKept => 'The sync base is kept beyond the limit.';
+  String get historyBaseKept => 'Synkbasen beholdes utover grensen.';
   @override
   String get historyOff =>
-      'History is off for this library (Settings, Library).';
+      'Historikk er slått av for dette biblioteket '
+      '(Innstillinger, Bibliotek).';
   @override
-  String get historyLoadFailed => 'Could not read the history';
+  String get historyLoadFailed => 'Kunne ikke lese historikken';
   @override
-  String get historyCompareSubtitle => 'Compared with the current version';
+  String get historyCompareSubtitle => 'Sammenlignet med gjeldende versjon';
   @override
-  String get historyTabChanges => 'Changes';
+  String get historyTabChanges => 'Endringer';
   @override
-  String get historyTabVersion => 'Version';
+  String get historyTabVersion => 'Versjon';
   @override
-  String get historyNoChanges => 'Same text as the current version.';
+  String get historyNoChanges => 'Samme tekst som gjeldende versjon.';
   @override
-  String get historyRestoreAction => 'Restore this version';
+  String get historyRestoreAction => 'Gjenopprett denne versjonen';
   @override
   String historyRestoreConfirmTitle(String when) =>
-      'Restore the version of $when?';
+      'Gjenopprette versjonen fra $when?';
   @override
   String get historyRestoreConfirmBody =>
-      'The current text is kept in the history first, so you can always '
-      'go back.';
+      'Gjeldende tekst lagres først i historikken, så du kan alltid gå '
+      'tilbake.';
   @override
-  String get historyRestoreConfirm => 'Restore';
+  String get historyRestoreConfirm => 'Gjenopprett';
   @override
-  String historyRestored(String when) => 'Restored the version of $when';
+  String historyRestored(String when) => 'Gjenopprettet versjonen fra $when';
   @override
-  String get historyRestoreFailed => 'Could not restore the version';
+  String get historyRestoreFailed => 'Kunne ikke gjenopprette versjonen';
   @override
-  String get actionUndo => 'Undo';
+  String get actionUndo => 'Angre';
   @override
-  String diffLineRange(int start, int end) => 'Lines $start–$end';
+  String diffLineRange(int start, int end) => 'Linjer $start–$end';
   @override
-  String diffLineSingle(int line) => 'Line $line';
+  String diffLineSingle(int line) => 'Linje $line';
   @override
   String diffUnchanged(int count) =>
-      count == 1 ? '1 unchanged line' : '$count unchanged lines';
+      count == 1 ? '1 uendret linje' : '$count uendrede linjer';
   @override
-  String get historyVersionsTitle => 'Versions to keep';
+  String get historyVersionsTitle => 'Versjoner som beholdes';
   @override
-  String get historyVersionsSubtitle => 'Per note, in .history/';
+  String get historyVersionsSubtitle => 'Per notat, i .history/';
   @override
-  String historyVersionsValue(int count) => count == 0 ? 'None' : '$count';
+  String historyVersionsValue(int count) => count == 0 ? 'Ingen' : '$count';
   @override
-  String get historyIntervalTitle => 'New version at most every';
+  String get historyIntervalTitle => 'Ny versjon høyst hver';
   @override
   String get historyIntervalSubtitle =>
-      'While you write; starting to edit a note always keeps one';
+      'Mens du skriver; når du begynner å redigere et notat, lagres alltid én';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
 }
