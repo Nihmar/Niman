@@ -41,6 +41,22 @@ preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
 ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
 log toggle (default on).
 
+### Updates
+
+`Automatic updates` (default off) checks GitHub Releases shortly after
+launch and then every 6 hours, quietly: a failure (offline, no network)
+is a skipped check, never an error dialog. When a newer release is
+found, a banner offers the download:
+
+- Android: downloads the `.apk` (the system installer step is pending).
+- Windows: downloads the setup `.exe` and launches the installer.
+- Linux: downloads the installed variant (AppImage, `.tar.gz`, Arch
+  package) into Downloads; when the variant cannot be detected, the
+  release's Linux assets are listed instead.
+
+`Check for updates` runs the same check on demand and downloads
+immediately when newer; it works even with automatic updates off.
+
 The last section, **About**, holds two read-only facts about the
 installation: the app's own **Version**, and **Changelog**, which opens
 the full list of shipped versions, newest first. The same changelog
