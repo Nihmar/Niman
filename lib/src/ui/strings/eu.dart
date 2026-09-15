@@ -171,6 +171,8 @@ final class BasqueStrings extends Strings {
   String spellCheckCount(int count) => '$count begiratzeko';
   @override
   String spellCheckLine(int line) => 'lerroa $line';
+  @override
+  String get addWordToDictionary => 'Gehitu hiztehirian';
 
   @override
   String indentWidthValue(int spaces) => '$spaces zuriune';

@@ -171,6 +171,8 @@ final class FinnishStrings extends Strings {
   String spellCheckCount(int count) => '$count tarkistettavana';
   @override
   String spellCheckLine(int line) => 'rivi $line';
+  @override
+  String get addWordToDictionary => 'Lisää sanakirjaan';
 
   @override
   String indentWidthValue(int spaces) => '$spaces välilyöntiä';

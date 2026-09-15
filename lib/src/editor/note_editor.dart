@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/editor/markdown_chunks.dart';
+import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:re_editor/re_editor.dart';
 
 /// The note source editor: a thin wrapper over re_editor's [CodeEditor].
@@ -43,6 +44,7 @@ final class NoteEditor extends StatelessWidget {
     this.findBuilder,
     this.shortcutsActivators,
     this.onIndicator,
+    this.spellCheck,
     super.key,
   });
 
@@ -85,6 +87,11 @@ final class NoteEditor extends StatelessWidget {
   /// as a single row, so it grows as wrapped lines scroll in and a
   /// fraction of it cannot say which line is on screen.
   final ValueChanged<CodeIndicatorValueNotifier>? onIndicator;
+
+  /// The editor's spelling state (issue #60): the context menu's
+  /// Add-to-dictionary entry. Null (tests, or a platform without hunspell)
+  /// offers none.
+  final EditorSpellCheck? spellCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -212,6 +219,34 @@ final class NoteEditor extends StatelessWidget {
         },
       ),
     ];
+    // The word under the caret (or the selection, when it is one word),
+    // in the line's own coordinates: multi-line selections name no word.
+    final spell = spellCheck;
+    final selection = controller.selection;
+    if (spell != null) {
+      final lines = controller.codeLines;
+      String? text;
+      var start = 0;
+      var end = 0;
+      if (selection.isCollapsed) {
+        text = lines[selection.extentIndex].text;
+        start = end = selection.extentOffset;
+      } else if (selection.baseIndex == selection.extentIndex) {
+        text = lines[selection.baseIndex].text;
+        start = selection.baseOffset;
+        end = selection.extentOffset;
+      }
+      if (text != null) {
+        final item = addToDictionaryItem(
+          spell: spell,
+          text: text,
+          start: start,
+          end: end,
+          onDismiss: onDismiss,
+        );
+        if (item != null) items.add(item);
+      }
+    }
     return AdaptiveTextSelectionToolbar.buttonItems(
       anchors: anchors,
       buttonItems: items,

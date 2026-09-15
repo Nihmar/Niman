@@ -171,6 +171,8 @@ final class DutchStrings extends Strings {
   String spellCheckCount(int count) => '$count te controleren';
   @override
   String spellCheckLine(int line) => 'regel $line';
+  @override
+  String get addWordToDictionary => 'Toevoegen aan woordenlijst';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaties';
