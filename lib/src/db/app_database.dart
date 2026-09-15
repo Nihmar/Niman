@@ -20,10 +20,11 @@ class AppSettings extends Table {
 
   /// Whether the app checks GitHub Releases for updates (issue #81).
   ///
-  /// On by default: the check is a quiet status, never a dialog. The
-  /// manual "Check for updates" row in Settings works regardless.
-  BoolColumn get autoUpdateEnabled =>
-      boolean().named('auto_update_enabled').withDefault(const Constant(true))();
+  /// Off by default: the user opts into the launch + six-hourly check.
+  /// The manual "Check for updates" row in Settings works regardless.
+  BoolColumn get autoUpdateEnabled => boolean()
+      .named('auto_update_enabled')
+      .withDefault(const Constant(false))();
 
   /// Last update-check time, milliseconds since epoch; null until the
   /// first check runs (issue #81).
@@ -186,7 +187,7 @@ class AppDatabase extends _$AppDatabase {
   /// upgrade into this build shows its own notes rather than nothing,
   /// while a fresh install's null stays what turns the dialog off, and
   /// pre-v21 databases gain the auto-update state (issue #81):
-  /// `auto_update_enabled` (on, like a fresh install) and
+  /// `auto_update_enabled` (off, like a fresh install) and
   /// `last_update_check_ms` (null until the first check runs).
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -319,7 +320,7 @@ class AppDatabase extends _$AppDatabase {
       if (from < 21) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN auto_update_enabled '
-          'BOOLEAN NOT NULL DEFAULT 1',
+          'BOOLEAN NOT NULL DEFAULT 0',
         );
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN last_update_check_ms '

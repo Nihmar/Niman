@@ -781,7 +781,8 @@ void main() {
     },
   );
 
-  group('v18 → v19: the widget configs appear', () {    test('an existing install upgrades with an empty widget table', () async {
+  group('v18 → v19: the widget configs appear', () {
+    test('an existing install upgrades with an empty widget table', () async {
       {
         final db = AppDatabase(NativeDatabase(dbFile));
         await _rewindTo(db, 18);
@@ -842,5 +843,43 @@ void main() {
         await db.close();
       },
     );
+  });
+
+  group('v20 → v21: the auto-update state appears', () {
+    test(
+      'an existing install upgrades with checks off and no last check',
+      () async {
+        {
+          final db = AppDatabase(NativeDatabase(dbFile));
+          await _rewindTo(db, 20);
+          await db.customStatement(
+            "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+          );
+          await db.close();
+        }
+
+        final db = AppDatabase(NativeDatabase(dbFile));
+        final repo = AppSettingsRepo(db);
+        expect(await repo.autoUpdateEnabled(), false);
+        expect(await repo.lastUpdateCheck(), equals(null));
+        // The settings survive the upgrade untouched.
+        expect(
+          (await db.select(db.appSettings).get()).single.libraryPath,
+          '/lib/Work',
+        );
+        await db.close();
+      },
+    );
+
+    test('the toggle and the last check round-trip', () async {
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      await repo.setAutoUpdateEnabled(enabled: false);
+      expect(await repo.autoUpdateEnabled(), false);
+      final time = DateTime.utc(2026, 9, 15, 12);
+      await repo.setLastUpdateCheck(time);
+      expect(await repo.lastUpdateCheck(), time);
+      await db.close();
+    });
   });
 }
