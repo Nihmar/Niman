@@ -26,6 +26,16 @@ final class LibraryConfigRepo {
   /// return the cached value.
   Future<LibraryConfig> get config => _config ??= _store.read();
 
+  /// Drops the cached settings, so the next read comes from the file —
+  /// after something other than this repo replaced it (a sync download).
+  /// Waits for a write in progress, which would otherwise put its own
+  /// copy back into the cache.
+  Future<void> reload() {
+    final next = _chain.then((_) => _config = null);
+    _chain = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
+
   /// Applies [change] to the current settings and persists the result.
   ///
   /// A change that produces an equal config writes nothing.

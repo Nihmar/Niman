@@ -397,25 +397,7 @@ final class NoteOps implements NoteOperations {
       final trash = await trashEnabled;
       String? trashAbs;
       if (trash) {
-        final trashDir = Directory(_abs('.trash'));
-        if (!trashDir.existsSync()) {
-          await trashDir.create(recursive: true);
-        }
-        final name = p.basename(path);
-        String target;
-        if (row.isDir) {
-          target = await trashDirName(trashDir, name);
-        } else {
-          final parts = splitFileName(name);
-          target = await trashFileName(trashDir, parts.base, parts.ext);
-        }
-        trashAbs = _abs('.trash/$target');
-        if (row.isDir) {
-          await Directory(oldAbs).rename(trashAbs);
-        } else {
-          await File(oldAbs).rename(trashAbs);
-        }
-        await _manifestAdd(trashDir, target, path);
+        trashAbs = await _moveIntoTrash(path, isDir: row.isDir);
       } else {
         if (row.isDir) {
           await Directory(oldAbs).delete(recursive: true);
@@ -429,6 +411,94 @@ final class NoteOps implements NoteOperations {
       if (trashAbs != null) events.add(trashAbs);
       await indexer.applyEvents(root, events);
     });
+  }
+
+  /// Moves [path] into `.trash/` under a collision-safe name and records
+  /// it in the manifest; returns the absolute trash path. The history
+  /// stays at [path] (a restore brings it back).
+  Future<String> _moveIntoTrash(String path, {required bool isDir}) async {
+    final trashDir = Directory(_abs('.trash'));
+    if (!trashDir.existsSync()) {
+      await trashDir.create(recursive: true);
+    }
+    final name = p.basename(path);
+    String target;
+    if (isDir) {
+      target = await trashDirName(trashDir, name);
+    } else {
+      final parts = splitFileName(name);
+      target = await trashFileName(trashDir, parts.base, parts.ext);
+    }
+    final trashAbs = _abs('.trash/$target');
+    if (isDir) {
+      await Directory(_abs(path)).rename(trashAbs);
+    } else {
+      await File(_abs(path)).rename(trashAbs);
+    }
+    await _manifestAdd(trashDir, target, path);
+    return trashAbs;
+  }
+
+  // -- sync (docs/dev/sync.md) -------------------------------------------
+
+  /// Whether [path] keeps history: the text notes the editor saves.
+  static bool keepsHistory(String path) {
+    final lower = path.toLowerCase();
+    return lower.endsWith('.md') || lower.endsWith('.txt');
+  }
+
+  /// Swaps the verified sync download at [tempAbs] in for the file at
+  /// [path] (new or existing): a note's replaced text becomes a `sync`
+  /// version first, and it runs in the note's save order so an editor
+  /// save never interleaves. Replacing `.niman/settings.json` drops the
+  /// cached settings.
+  Future<void> syncReplace(String path, String tempAbs) async {
+    await writer.replaceFromFile(
+      path,
+      tempAbs,
+      forced: keepsHistory(path) ? HistoryReason.sync : null,
+    );
+    if (path == '.niman/settings.json') await config.reload();
+  }
+
+  /// Moves [path] into `.trash/` because the remote deleted it — always
+  /// the trash, whatever the trash toggle: a deletion that arrives from
+  /// another device must stay recoverable here.
+  Future<void> syncTrash(String path) {
+    return _synchronized(() async {
+      final abs = _abs(path);
+      final isDir = Directory(abs).existsSync();
+      if (!isDir && !File(abs).existsSync()) return;
+      final trashAbs = await _moveIntoTrash(path, isDir: isDir);
+      await indexer.applyEvents(root, [abs, trashAbs]);
+    });
+  }
+
+  /// Renames the file at [from] to [to] (any folder, created on demand)
+  /// because the remote renamed it; the history follows. Throws
+  /// [StateError] when [from] is gone or [to] is taken.
+  Future<void> syncMove(String from, String to) {
+    return _synchronized(() async {
+      final fromAbs = _abs(from);
+      final toAbs = _abs(to);
+      if (!File(fromAbs).existsSync()) {
+        throw FileSystemException('Nothing to move', fromAbs);
+      }
+      if (File(toAbs).existsSync() || Directory(toAbs).existsSync()) {
+        throw FileSystemException('Already taken', toAbs);
+      }
+      await Directory(p.dirname(toAbs)).create(recursive: true);
+      await File(fromAbs).rename(toAbs);
+      await history.moved(from, to, isDir: false);
+      await indexer.applyEvents(root, [fromAbs, toAbs]);
+    });
+  }
+
+  /// Pins the sync base of [path] to the version holding content [sha];
+  /// null for files without history, or when the content is gone.
+  Future<int?> pinSyncBase(String path, String sha) async {
+    if (!keepsHistory(path)) return null;
+    return await history.pinSyncBase(path, sha);
   }
 
   /// Lists the managed trash items (manifest-backed), in deletion order.

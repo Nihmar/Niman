@@ -119,6 +119,12 @@ final class WebDavClient {
   final bool _ownsHttp;
   final HttpClient _http;
   late final List<String> _baseSegments;
+  DateTime? _serverDate;
+
+  /// The server's clock (`Date` header, UTC) on the latest response, or
+  /// null before one carried it. The sync compares remote mtimes with it,
+  /// never with this device's clock, which can be minutes off.
+  DateTime? get serverDate => _serverDate;
 
   static const _maxRedirects = 5;
   static const _log = AppLogger(name: 'webdav');
@@ -465,9 +471,21 @@ final class WebDavClient {
 
   /// `DELETE` [path] (a folder with [collection], recursively): true
   /// when something was deleted, false when nothing was there.
-  Future<bool> delete(String path, {bool collection = false}) async {
+  ///
+  /// [ifMatch] sends `If-Match`: a remote changed since fails as
+  /// [WebDavPrecondition] and stays.
+  Future<bool> delete(
+    String path, {
+    bool collection = false,
+    String? ifMatch,
+  }) async {
     final clock = Stopwatch()..start();
-    final response = await _send('DELETE', path, collection: collection);
+    final response = await _send(
+      'DELETE',
+      path,
+      collection: collection,
+      headers: {'If-Match': ?ifMatch},
+    );
     final status = response.statusCode;
     if (status == 404) {
       await response.drain<void>();
@@ -559,6 +577,8 @@ final class WebDavClient {
         throw _transportFailure(method, path, e);
       }
       final status = response.statusCode;
+      final date = response.headers.date;
+      if (date != null) _serverDate = date.toUtc();
       if (!const {301, 302, 303, 307, 308}.contains(status)) return response;
       final location = response.headers.value(HttpHeaders.locationHeader);
       await response.drain<void>().catchError((Object _) {});
