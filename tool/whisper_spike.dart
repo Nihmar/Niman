@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/wav_duration.dart';
+import 'package:niman/src/transcription/wav_convert.dart';
 import 'package:path/path.dart' as p;
 import 'package:record/record.dart' as record;
 import 'package:whisper_ggml/whisper_ggml.dart';
@@ -266,19 +267,30 @@ class _Spike {
 
     await _probeConversion(copy);
 
+    // The app's own conversion (phase 2): what the Transcribe action
+    // hands whisper, whatever the recording's rate and channels.
+    final converted = p.join(work.path, 'app16k.wav');
+    final report = await convertWavForWhisper(source: copy, target: converted);
+    say(
+      'app conversion: ${report.sampleRate} Hz ${report.channels} ch -> '
+      '16 kHz mono, ${report.outputFrames} frames; read ${report.readMs} ms, '
+      'filter ${report.dspMs} ms, write ${report.writeMs} ms, '
+      'total ${report.totalMs} ms',
+    );
+
     for (final model in models) {
       say('--- model ${model.modelName} ---');
       await _ensureModel(model);
       final cold = await _transcribe(
         model,
-        copy,
+        converted,
         lang,
         'cold',
         format.duration,
       );
       final warm = await _transcribe(
         model,
-        copy,
+        converted,
         lang,
         'warm',
         format.duration,
