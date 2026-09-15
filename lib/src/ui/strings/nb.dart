@@ -170,6 +170,8 @@ final class NorwegianStrings extends Strings {
   String spellCheckCount(int count) => '$count å gjennomgå';
   @override
   String spellCheckLine(int line) => 'linje $line';
+  @override
+  String get addWordToDictionary => 'Legg til i ordbogen';
 
   @override
   String indentWidthValue(int spaces) => '$spaces mellomrom';

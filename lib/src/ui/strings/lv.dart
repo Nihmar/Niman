@@ -169,6 +169,8 @@ final class LatvianStrings extends Strings {
   String spellCheckCount(int count) => '$count pārbaudei';
   @override
   String spellCheckLine(int line) => 'rinda $line';
+  @override
+  String get addWordToDictionary => 'Pievienot vārdnīcai';
 
   @override
   String indentWidthValue(int spaces) => '$spaces atstarpes';

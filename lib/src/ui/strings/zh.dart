@@ -159,6 +159,8 @@ final class ChineseStrings extends Strings {
   String spellCheckCount(int count) => '待检查 $count 处';
   @override
   String spellCheckLine(int line) => '第 $line 行';
+  @override
+  String get addWordToDictionary => '加入词典';
 
   @override
   String indentWidthValue(int spaces) => '$spaces 个空格';

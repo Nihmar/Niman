@@ -172,6 +172,8 @@ final class BosnianStrings extends Strings {
   String spellCheckCount(int count) => '$count za pregled';
   @override
   String spellCheckLine(int line) => 'red $line';
+  @override
+  String get addWordToDictionary => 'Dodaj u rječnik';
 
   @override
   String indentWidthValue(int spaces) => '$spaces razmaka';

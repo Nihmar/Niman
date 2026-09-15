@@ -810,6 +810,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       findController: _findController,
       findBuilder: _findBuilder,
       shortcutsActivators: const NimanShortcutsActivatorsBuilder(),
+      spellCheck: widget.spellCheck,
     ),
   );
 

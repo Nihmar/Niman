@@ -171,6 +171,9 @@ final class EnglishStrings extends Strings {
   String spellCheckLine(int line) => 'line $line';
 
   @override
+  String get addWordToDictionary => 'Add to dictionary';
+
+  @override
   String indentWidthValue(int spaces) => '$spaces spaces';
 
   // Settings: theme (T-M6-05).

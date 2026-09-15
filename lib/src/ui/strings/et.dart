@@ -170,6 +170,8 @@ final class EstonianStrings extends Strings {
   String spellCheckCount(int count) => '$count kontrollimiseks';
   @override
   String spellCheckLine(int line) => 'rida $line';
+  @override
+  String get addWordToDictionary => 'Lisa sõnaraamatusse';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tühikut';

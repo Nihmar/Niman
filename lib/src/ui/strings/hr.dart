@@ -172,6 +172,8 @@ final class CroatianStrings extends Strings {
   String spellCheckCount(int count) => '$count za provjeru';
   @override
   String spellCheckLine(int line) => 'redak $line';
+  @override
+  String get addWordToDictionary => 'Dodaj u rječnik';
 
   @override
   String indentWidthValue(int spaces) => '$spaces razmaka';

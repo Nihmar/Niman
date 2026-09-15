@@ -22,7 +22,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `frontmatter/` | YAML parse, known fields (`title tags date pinned aliases`), field repo |
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
-| `spellcheck/` | hunspell (desktop) / system IME (Android) providers |
+| `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
 | `ui/` | Shell, tree, settings screens, shared widgets |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 

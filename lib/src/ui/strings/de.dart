@@ -172,6 +172,8 @@ final class GermanStrings extends Strings {
   String spellCheckCount(int count) => '$count zu prüfen';
   @override
   String spellCheckLine(int line) => 'Zeile $line';
+  @override
+  String get addWordToDictionary => 'Zum Wörterbuch hinzufügen';
 
   @override
   String indentWidthValue(int spaces) => '$spaces Leerzeichen';
