@@ -5,7 +5,12 @@ Workflow: `.github/workflows/release.yml`.
 
 ## Cutting a release
 
-1. Bump `version:` in `pubspec.yaml` and commit.
+1. Add the release's entries to `CHANGELOG.md` under a new
+   `## [X.Y.Z] - YYYY-MM-DD` heading, and bump `version:` in
+   `pubspec.yaml`; commit both together. The file ships inside the build
+   and feeds the in-app changelog (the launch dialog after an update and
+   the screen under Settings → About), so it must describe the version
+   the tag is about, not the next one.
 2. Tag: `git tag vX.Y.Z`.
 3. Push: `git push origin vX.Y.Z`.
 

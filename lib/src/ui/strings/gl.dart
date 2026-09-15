@@ -1122,4 +1122,16 @@ final class GalicianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Non se encontrou coincidencia exacta de palabra completa para '
       '“$term” ${only == null ? 'atopouse' : 'atopouse en $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Sobre';
+  @override
+  String get versionTitle => 'Versión';
+  @override
+  String get changelogTitle => 'Rexistro de cambios';
+  @override
+  String get changelogEmpty => 'Non hai entradas de rexistro dispoñibles';
+  @override
+  String changelogWhatsNew(String version) => 'Novidades na versión $version';
 }

@@ -1103,4 +1103,16 @@ final class IcelandicStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ekki nákvæmur heilar orð samanburður „$term"'
       '${only == null ? "ekki fannst" : "fannst í $only"}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Um';
+  @override
+  String get versionTitle => 'Útgáfa';
+  @override
+  String get changelogTitle => 'Breytingalogg';
+  @override
+  String get changelogEmpty => 'Engar færslur í breytingaloggunum';
+  @override
+  String changelogWhatsNew(String version) => 'Nýtt í útgáfu $version';
 }

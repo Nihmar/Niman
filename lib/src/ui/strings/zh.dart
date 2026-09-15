@@ -1000,4 +1000,16 @@ final class ChineseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '没有找到整词「$term」的完全匹配'
       '${only == null ? '' : '，$only 中也没有'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => '关于';
+  @override
+  String get versionTitle => '版本';
+  @override
+  String get changelogTitle => '更新日志';
+  @override
+  String get changelogEmpty => '暂无更新日志内容';
+  @override
+  String changelogWhatsNew(String version) => '$version 的新内容';
 }

@@ -1103,4 +1103,16 @@ final class BelarusianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '«$term» не мае дакладнага супадзення цэлага слова'
       '${only == null ? '' : ' — знойдзена толькі $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Пра праграму';
+  @override
+  String get versionTitle => 'Версія';
+  @override
+  String get changelogTitle => 'Журнал змен';
+  @override
+  String get changelogEmpty => 'Запісы журналу змен недаступныя';
+  @override
+  String changelogWhatsNew(String version) => 'Новае ў версіі $version';
 }

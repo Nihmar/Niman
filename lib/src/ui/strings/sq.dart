@@ -1126,4 +1126,16 @@ final class AlbanianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'S\'ka përputhje të plotë të fjalës „$term"'
       '${only == null ? "s'u gjet" : 'u gjet në $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Rreth';
+  @override
+  String get versionTitle => 'Versioni';
+  @override
+  String get changelogTitle => 'Regjistri i ndryshimeve';
+  @override
+  String get changelogEmpty => 'Nuk ka hyrje të regjistrit të disponueshme';
+  @override
+  String changelogWhatsNew(String version) => 'E re në versionin $version';
 }

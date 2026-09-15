@@ -1119,4 +1119,16 @@ final class BulgarianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '„$term” няма точното съвпадение на цялата дума'
       '${only == null ? '' : ' — намерено е само $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'За';
+  @override
+  String get versionTitle => 'Версия';
+  @override
+  String get changelogTitle => 'Дневник на промените';
+  @override
+  String get changelogEmpty => 'Няма налични записи в дневника';
+  @override
+  String changelogWhatsNew(String version) => 'Ново във версия $version';
 }

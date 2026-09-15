@@ -1101,4 +1101,16 @@ final class CzechStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nenalezena přesná shoda celého slova pro „$term“'
       '${only == null ? '' : ' v $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikaci';
+  @override
+  String get versionTitle => 'Verze';
+  @override
+  String get changelogTitle => 'Changelog';
+  @override
+  String get changelogEmpty => 'Záznamy changelogu nejsou k dispozici';
+  @override
+  String changelogWhatsNew(String version) => 'Novinky ve verzi $version';
 }

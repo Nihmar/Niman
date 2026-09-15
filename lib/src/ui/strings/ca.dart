@@ -1140,4 +1140,16 @@ final class CatalanStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'No s’ha trobat cap coincidència exacta de paraula sencera per '
       'a “$term” ${only == null ? 's’ha trobat' : 'trobat a $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Quant a';
+  @override
+  String get versionTitle => 'Versió';
+  @override
+  String get changelogTitle => 'Registre de canvis';
+  @override
+  String get changelogEmpty => 'No hi ha entrades de registre disponibles';
+  @override
+  String changelogWhatsNew(String version) => 'Novetats a la versió $version';
 }

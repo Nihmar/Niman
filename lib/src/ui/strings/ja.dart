@@ -1034,4 +1034,16 @@ final class JapaneseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '語全体「$term」の完全一致はありません'
       '${only == null ? '' : ' — $only 内には'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'アプリについて';
+  @override
+  String get versionTitle => 'バージョン';
+  @override
+  String get changelogTitle => '変更履歴';
+  @override
+  String get changelogEmpty => '変更履歴の項目がありません';
+  @override
+  String changelogWhatsNew(String version) => 'バージョン $version の新機能';
 }

@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the list is grouped under its five headings', (tester) async {
+  testWidgets('the list is grouped under its six headings', (tester) async {
     await pump(tester);
     for (final heading in [
       AppStrings.settingsSectionAppearance,
@@ -40,6 +40,7 @@ void main() {
       AppStrings.settingsSectionLibrary,
       AppStrings.settingsSectionReminders,
       AppStrings.settingsSectionDiagnostics,
+      AppStrings.settingsSectionAbout,
     ]) {
       expect(find.text(heading), findsOne, reason: heading);
     }

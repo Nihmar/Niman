@@ -1119,4 +1119,16 @@ final class BasqueStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '“$term”-en hitz osoko emaitzazko emaitzarik ez da '
       '${only == null ? 'aurkitu' : '$only-n aurkitu'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Informazioa';
+  @override
+  String get versionTitle => 'Bertsioa';
+  @override
+  String get changelogTitle => 'Aldaketen erregistroa';
+  @override
+  String get changelogEmpty => 'Ez dago aldaketa-sarerik';
+  @override
+  String changelogWhatsNew(String version) => 'Berria $version bertsioan';
 }

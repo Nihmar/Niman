@@ -1101,4 +1101,16 @@ final class EnglishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'No exact whole-word match of "$term" '
       '${only == null ? 'was found' : 'found in $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'About';
+  @override
+  String get versionTitle => 'Version';
+  @override
+  String get changelogTitle => 'Changelog';
+  @override
+  String get changelogEmpty => 'No changelog entries available';
+  @override
+  String changelogWhatsNew(String version) => "What's new in $version";
 }

@@ -116,6 +116,17 @@ class $AppSettingsTable extends AppSettings
         requiredDuringInsert: false,
         defaultValue: const Constant(''),
       );
+  static const VerificationMeta _changelogSeenVersionMeta =
+      const VerificationMeta('changelogSeenVersion');
+  @override
+  late final GeneratedColumn<String> changelogSeenVersion =
+      GeneratedColumn<String>(
+        'changelog_seen_version',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -127,6 +138,7 @@ class $AppSettingsTable extends AppSettings
     themeBrightness,
     themePalette,
     legacyLibrarySettings,
+    changelogSeenVersion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -209,6 +221,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('changelog_seen_version')) {
+      context.handle(
+        _changelogSeenVersionMeta,
+        changelogSeenVersion.isAcceptableOrUnknown(
+          data['changelog_seen_version']!,
+          _changelogSeenVersionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -254,6 +275,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}legacy_library_settings'],
       )!,
+      changelogSeenVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}changelog_seen_version'],
+      ),
     );
   }
 
@@ -313,6 +338,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// only writable later, after the storage permission — and a library on
   /// a disconnected drive may not be writable for weeks.
   final String legacyLibrarySettings;
+
+  /// The app version whose changelog the user last saw (issue #80);
+  /// null until the first launch has written it, which is what turns the
+  /// update dialog off on a fresh install.
+  final String? changelogSeenVersion;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -323,6 +353,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.themeBrightness,
     required this.themePalette,
     required this.legacyLibrarySettings,
+    this.changelogSeenVersion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -338,6 +369,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['theme_brightness'] = Variable<String>(themeBrightness);
     map['theme_palette'] = Variable<String>(themePalette);
     map['legacy_library_settings'] = Variable<String>(legacyLibrarySettings);
+    if (!nullToAbsent || changelogSeenVersion != null) {
+      map['changelog_seen_version'] = Variable<String>(changelogSeenVersion);
+    }
     return map;
   }
 
@@ -354,6 +388,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       themeBrightness: Value(themeBrightness),
       themePalette: Value(themePalette),
       legacyLibrarySettings: Value(legacyLibrarySettings),
+      changelogSeenVersion: changelogSeenVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(changelogSeenVersion),
     );
   }
 
@@ -374,6 +411,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       legacyLibrarySettings: serializer.fromJson<String>(
         json['legacyLibrarySettings'],
       ),
+      changelogSeenVersion: serializer.fromJson<String?>(
+        json['changelogSeenVersion'],
+      ),
     );
   }
   @override
@@ -389,6 +429,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'themeBrightness': serializer.toJson<String>(themeBrightness),
       'themePalette': serializer.toJson<String>(themePalette),
       'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
+      'changelogSeenVersion': serializer.toJson<String?>(changelogSeenVersion),
     };
   }
 
@@ -402,6 +443,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? themeBrightness,
     String? themePalette,
     String? legacyLibrarySettings,
+    Value<String?> changelogSeenVersion = const Value.absent(),
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -412,6 +454,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     themeBrightness: themeBrightness ?? this.themeBrightness,
     themePalette: themePalette ?? this.themePalette,
     legacyLibrarySettings: legacyLibrarySettings ?? this.legacyLibrarySettings,
+    changelogSeenVersion: changelogSeenVersion.present
+        ? changelogSeenVersion.value
+        : this.changelogSeenVersion,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -438,6 +483,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       legacyLibrarySettings: data.legacyLibrarySettings.present
           ? data.legacyLibrarySettings.value
           : this.legacyLibrarySettings,
+      changelogSeenVersion: data.changelogSeenVersion.present
+          ? data.changelogSeenVersion.value
+          : this.changelogSeenVersion,
     );
   }
 
@@ -452,7 +500,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('language: $language, ')
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
-          ..write('legacyLibrarySettings: $legacyLibrarySettings')
+          ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
+          ..write('changelogSeenVersion: $changelogSeenVersion')
           ..write(')'))
         .toString();
   }
@@ -468,6 +517,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     themeBrightness,
     themePalette,
     legacyLibrarySettings,
+    changelogSeenVersion,
   );
   @override
   bool operator ==(Object other) =>
@@ -481,7 +531,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.language == this.language &&
           other.themeBrightness == this.themeBrightness &&
           other.themePalette == this.themePalette &&
-          other.legacyLibrarySettings == this.legacyLibrarySettings);
+          other.legacyLibrarySettings == this.legacyLibrarySettings &&
+          other.changelogSeenVersion == this.changelogSeenVersion);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -494,6 +545,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> themeBrightness;
   final Value<String> themePalette;
   final Value<String> legacyLibrarySettings;
+  final Value<String?> changelogSeenVersion;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -504,6 +556,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.themeBrightness = const Value.absent(),
     this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
+    this.changelogSeenVersion = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -515,6 +568,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.themeBrightness = const Value.absent(),
     this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
+    this.changelogSeenVersion = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -526,6 +580,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? themeBrightness,
     Expression<String>? themePalette,
     Expression<String>? legacyLibrarySettings,
+    Expression<String>? changelogSeenVersion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -538,6 +593,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (themePalette != null) 'theme_palette': themePalette,
       if (legacyLibrarySettings != null)
         'legacy_library_settings': legacyLibrarySettings,
+      if (changelogSeenVersion != null)
+        'changelog_seen_version': changelogSeenVersion,
     });
   }
 
@@ -551,6 +608,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? themeBrightness,
     Value<String>? themePalette,
     Value<String>? legacyLibrarySettings,
+    Value<String?>? changelogSeenVersion,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -563,6 +621,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       themePalette: themePalette ?? this.themePalette,
       legacyLibrarySettings:
           legacyLibrarySettings ?? this.legacyLibrarySettings,
+      changelogSeenVersion: changelogSeenVersion ?? this.changelogSeenVersion,
     );
   }
 
@@ -598,6 +657,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
         legacyLibrarySettings.value,
       );
     }
+    if (changelogSeenVersion.present) {
+      map['changelog_seen_version'] = Variable<String>(
+        changelogSeenVersion.value,
+      );
+    }
     return map;
   }
 
@@ -612,7 +676,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('language: $language, ')
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
-          ..write('legacyLibrarySettings: $legacyLibrarySettings')
+          ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
+          ..write('changelogSeenVersion: $changelogSeenVersion')
           ..write(')'))
         .toString();
   }
@@ -1289,6 +1354,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> themeBrightness,
       Value<String> themePalette,
       Value<String> legacyLibrarySettings,
+      Value<String?> changelogSeenVersion,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -1301,6 +1367,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> themeBrightness,
       Value<String> themePalette,
       Value<String> legacyLibrarySettings,
+      Value<String?> changelogSeenVersion,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -1354,6 +1421,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get legacyLibrarySettings => $composableBuilder(
     column: $table.legacyLibrarySettings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get changelogSeenVersion => $composableBuilder(
+    column: $table.changelogSeenVersion,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1411,6 +1483,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.legacyLibrarySettings,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get changelogSeenVersion => $composableBuilder(
+    column: $table.changelogSeenVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -1462,6 +1539,11 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.legacyLibrarySettings,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get changelogSeenVersion => $composableBuilder(
+    column: $table.changelogSeenVersion,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -1504,6 +1586,7 @@ class $$AppSettingsTableTableManager
                 Value<String> themeBrightness = const Value.absent(),
                 Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
+                Value<String?> changelogSeenVersion = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -1514,6 +1597,7 @@ class $$AppSettingsTableTableManager
                 themeBrightness: themeBrightness,
                 themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
+                changelogSeenVersion: changelogSeenVersion,
               ),
           createCompanionCallback:
               ({
@@ -1526,6 +1610,7 @@ class $$AppSettingsTableTableManager
                 Value<String> themeBrightness = const Value.absent(),
                 Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
+                Value<String?> changelogSeenVersion = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -1536,6 +1621,7 @@ class $$AppSettingsTableTableManager
                 themeBrightness: themeBrightness,
                 themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
+                changelogSeenVersion: changelogSeenVersion,
               ),
           withReferenceMapper: (p0) => p0
               .map(

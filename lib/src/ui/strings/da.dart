@@ -1106,4 +1106,16 @@ final class DanishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ingen præcis helt-ord-match på “$term” '
       '${only == null ? 'blev fundet' : 'fundet i $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Om';
+  @override
+  String get versionTitle => 'Version';
+  @override
+  String get changelogTitle => 'Ændringslog';
+  @override
+  String get changelogEmpty => 'Ingen ændringslogposter tilgængelige';
+  @override
+  String changelogWhatsNew(String version) => 'Ny i version $version';
 }

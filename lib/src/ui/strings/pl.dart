@@ -1121,4 +1121,16 @@ final class PolishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nie znaleziono dokładnego dopasowania całego słowa dla “$term”'
       '${only == null ? '' : ' w $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'O aplikacji';
+  @override
+  String get versionTitle => 'Wersja';
+  @override
+  String get changelogTitle => 'Dziennik zmian';
+  @override
+  String get changelogEmpty => 'Brak wpisów w dzienniku zmian';
+  @override
+  String changelogWhatsNew(String version) => 'Nowości w wersji $version';
 }

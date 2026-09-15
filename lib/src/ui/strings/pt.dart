@@ -1117,4 +1117,16 @@ final class PortugueseStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Nenhuma palavra inteira exata “$term” '
       '${only == null ? 'encontrada' : 'encontrada em $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Sobre';
+  @override
+  String get versionTitle => 'Versão';
+  @override
+  String get changelogTitle => 'Registro de alterações';
+  @override
+  String get changelogEmpty => 'Nenhuma entrada de registro disponível';
+  @override
+  String changelogWhatsNew(String version) => 'Novidades na versão $version';
 }

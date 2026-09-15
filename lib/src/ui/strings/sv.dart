@@ -1111,4 +1111,16 @@ final class SwedishStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Ingen exakt helt-ord-träff på “$term” '
       '${only == null ? 'hittades' : 'hittad i $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Om';
+  @override
+  String get versionTitle => 'Version';
+  @override
+  String get changelogTitle => 'Ändringslogg';
+  @override
+  String get changelogEmpty => 'Inga ändringsloggsposter tillgängliga';
+  @override
+  String changelogWhatsNew(String version) => 'Nytt i version $version';
 }

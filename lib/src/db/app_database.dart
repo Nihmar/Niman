@@ -63,6 +63,12 @@ class AppSettings extends Table {
   TextColumn get legacyLibrarySettings =>
       text().named('legacy_library_settings').withDefault(const Constant(''))();
 
+  /// The app version whose changelog the user last saw (issue #80);
+  /// null until the first launch has written it, which is what turns the
+  /// update dialog off on a fresh install.
+  TextColumn get changelogSeenVersion =>
+      text().named('changelog_seen_version').nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -130,7 +136,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -162,7 +168,11 @@ class AppDatabase extends _$AppDatabase {
   /// `theme_palette` (T-M6-05), both starting at `system`, which is what
   /// the app looked like before the setting existed, and pre-v19
   /// databases gain `widget_configs` (issue 6), one row per placed
-  /// home-screen widget instance, empty on upgrade.
+  /// home-screen widget instance, empty on upgrade, and pre-v20
+  /// databases gain `changelog_seen_version` (issue #80), seeded with
+  /// `0.0.3` — the last version before this feature shipped — so an
+  /// upgrade into this build shows its own notes rather than nothing,
+  /// while a fresh install's null stays what turns the dialog off.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -281,6 +291,15 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 19) {
         await m.createTable(widgetConfigs);
+      }
+      if (from < 20) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN changelog_seen_version TEXT',
+        );
+        await m.database.customStatement(
+          "UPDATE app_settings SET changelog_seen_version = '0.0.3' "
+          'WHERE id = 1',
+        );
       }
     },
   );

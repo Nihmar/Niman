@@ -1123,4 +1123,16 @@ final class DutchStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       'Geen exacte heel-woordmatch van “$term” '
       '${only == null ? 'gevonden' : 'gevonden in $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Over';
+  @override
+  String get versionTitle => 'Versie';
+  @override
+  String get changelogTitle => 'Wijzigingslog';
+  @override
+  String get changelogEmpty => 'Geen wijzigingen beschikbaar';
+  @override
+  String changelogWhatsNew(String version) => 'Nieuw in versie $version';
 }

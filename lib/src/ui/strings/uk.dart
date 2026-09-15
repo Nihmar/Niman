@@ -1103,4 +1103,16 @@ final class UkrainianStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '«$term» не має точного збігу цілого слова'
       '${only == null ? '' : ' — знайдено лише $only'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'Про застосунок';
+  @override
+  String get versionTitle => 'Версія';
+  @override
+  String get changelogTitle => 'Журнал змін';
+  @override
+  String get changelogEmpty => 'Записи журналу змін недоступні';
+  @override
+  String changelogWhatsNew(String version) => 'Новини у версії $version';
 }

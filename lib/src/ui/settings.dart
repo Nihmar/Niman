@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_config.dart';
@@ -14,6 +15,7 @@ import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/note_picker.dart';
@@ -68,6 +70,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   String? _listFolder;
   String? _templateFolder;
   String? _attachmentsFolder;
+  String? _version;
   AppLanguage _language = AppLanguage.system;
   AppBrightness _themeBrightness = AppBrightness.system;
   AppPalette _themePalette = AppPalette.system;
@@ -90,6 +93,24 @@ final class _SettingsBodyState extends State<SettingsBody> {
   void initState() {
     super.initState();
     unawaited(_load());
+    unawaited(_loadVersion());
+  }
+
+  /// Loads the app's own version for the About row (issue #80).
+  ///
+  /// Kept out of [_load]: the platform channel behind [appVersion] has no
+  /// answer in the test environment and would hold the settings list's
+  /// first build hostage.
+  Future<void> _loadVersion() async {
+    String? version;
+    try {
+      version = await appVersion();
+    } on Exception catch (_) {
+      // Display-only: no answer just leaves the row out.
+    }
+    if (mounted && version != null) {
+      setState(() => _version = version);
+    }
   }
 
   Future<void> _load() async {
@@ -1074,6 +1095,31 @@ final class _SettingsBodyState extends State<SettingsBody> {
           title: Text(AppStrings.exportLogTitle),
           subtitle: Text(AppStrings.exportLogSubtitle),
           onTap: _exportLog,
+        ),
+
+        SettingsSection(AppStrings.settingsSectionAbout),
+        // A fact about the installation, like the library path above:
+        // nothing to change, only to know (issue #80).
+        if (_version != null)
+          ListTile(
+            key: const Key('app-version'),
+            title: Text(AppStrings.versionTitle),
+            trailing: Text(
+              _version!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        SettingsValueRow(
+          key: const Key('changelog-setting'),
+          title: AppStrings.changelogTitle,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const ChangelogScreen(),
+            ),
+          ),
         ),
       ],
     );

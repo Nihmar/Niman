@@ -54,7 +54,8 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 
 ## Release
 - CI builds **only from version tags** (`vX.Y.Z`, no suffixes).
-- Cut a release: bump `version:` in `pubspec.yaml`, commit, `git tag vX.Y.Z`, `git push origin vX.Y.Z`.
+- Update `CHANGELOG.md` at every release: a new `## [X.Y.Z] - YYYY-MM-DD` section describing the tagged version. It ships as an asset and feeds the in-app changelog (launch dialog after an update, Settings → About).
+- Cut a release: bump `version:` in `pubspec.yaml`, commit both with the changelog, `git tag vX.Y.Z`, `git push origin vX.Y.Z`.
 - Workflow: `.github/workflows/release.yml`. Artifacts: Android `.apk`; Linux `.tar.gz` + `.AppImage` + `.pkg.tar.zst`; Windows `.exe` (Inno Setup) + `.zip`.
 - Android APK is debug-signed until release keys are added as Actions secrets.
 - To re-run: delete the tag locally and remotely, fix, tag again.

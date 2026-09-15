@@ -525,4 +525,11 @@ abstract base class Strings {
   String replaceDone(int occurrences, String term, int notes);
   String replaceSkipped(int skipped);
   String replacePreviewEmpty(String term, String? only);
+
+  // The about section (issue #80): the app's version and its changelog.
+  String get settingsSectionAbout;
+  String get versionTitle;
+  String get changelogTitle;
+  String get changelogEmpty;
+  String changelogWhatsNew(String version);
 }

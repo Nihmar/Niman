@@ -1085,4 +1085,17 @@ final class HindiStrings extends Strings {
   String replacePreviewEmpty(String term, String? only) =>
       '«$term» का कोई सटीक पूरा-शब्द मेल नहीं '
       '${only == null ? 'मिला' : '$only में मिला'}';
+
+  // About (issue #80).
+  @override
+  String get settingsSectionAbout => 'परिचय';
+  @override
+  String get versionTitle => 'संस्करण';
+  @override
+  String get changelogTitle => 'बदलावों की सूची';
+  @override
+  String get changelogEmpty => 'कोई बदलाव दर्ज नहीं';
+  @override
+  String changelogWhatsNew(String version) =>
+      'संस्करण $version में क्या नया है';
 }
