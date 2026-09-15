@@ -113,25 +113,25 @@ final class NorwegianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tastaturforkortelser';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Oppdateringer';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiske oppdateringer';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Sjekk GitHub Releases ved oppstart og hver 6. time';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Se etter oppdateringer';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version er tilgjengelig';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman er oppdatert';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kunne ikke se etter oppdateringer';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Oppdateringen er lagret i $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Installasjonsprogrammet er startet';
   @override
   String get settingsSectionDiagnostics => 'Diagnostikk';
   @override
@@ -255,48 +255,48 @@ final class NorwegianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Endre rekkefølge på elementet';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Ingen opptak ennå';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Ta opp';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stopp';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Spill av';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Stopp avspilling';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Slett opptak';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importer en lydfil';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Tar opp…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Spiller av';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofontillatelse avslått — opptak krever den.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nytt talenotat';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mitt opptak';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Vis opptak';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Skriv et notat…';
   @override
   String get audioSend => 'Send';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Endre navn på opptak';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Beskriv dette opptaket…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Rediger beskrivelse';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Slett notat';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Rediger notat';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -308,7 +308,7 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutNewList => 'Ny liste';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nytt talenotat';
   @override
   String get shortcutToggleSidebar => 'Vis eller skjul filtreet';
   @override

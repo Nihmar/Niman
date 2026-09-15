@@ -115,25 +115,25 @@ final class SpanishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Atajos de teclado';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Actualizaciones';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Actualizaciones automáticas';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Comprueba GitHub Releases al iniciar y cada 6 horas';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Buscar actualizaciones';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version está disponible';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman está actualizado';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Error al buscar actualizaciones';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Actualización guardada en $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instalador iniciado';
   @override
   String get settingsSectionDiagnostics => 'Diagnóstico';
   @override
@@ -258,48 +258,48 @@ final class SpanishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Reordenar el elemento';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Aún no hay grabaciones';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Grabar';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Detener';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Reproducir';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Detener la reproducción';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Eliminar la grabación';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importar un archivo de audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Grabando…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Reproduciendo';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permiso del micrófono denegado — hace falta para grabar.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nueva nota de voz';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mi grabación';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Mostrar las grabaciones';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Escribe una nota…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Enviar';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Renombrar la grabación';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Describe esta grabación…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Editar la descripción';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Eliminar la nota';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Editar la nota';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -311,7 +311,7 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutNewList => 'Nueva lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nueva nota de voz';
   @override
   String get shortcutToggleSidebar => 'Mostrar u ocultar el árbol de archivos';
   @override

@@ -115,25 +115,25 @@ final class SwedishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Uppdateringar';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiska uppdateringar';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontrollera GitHub Releases vid start och var 6:e timme';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Sök efter uppdateringar';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version finns tillgänglig';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman är uppdaterad';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Det gick inte att söka efter uppdateringar';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Uppdateringen sparades i $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Installationsprogrammet har startats';
   @override
   String get settingsSectionDiagnostics => 'Diagnostik';
   @override
@@ -258,48 +258,48 @@ final class SwedishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Byt ordning på objektet';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Inga inspelningar ännu';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Spela in';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stoppa';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Spela upp';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Stoppa uppspelning';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Ta bort inspelning';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importera en ljudfil';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Spelar in…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Spelar upp';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonåtkomst nekad — den behövs för inspelning.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Ny röstanteckning';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Min inspelning';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Visa inspelningar';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Skriv en anteckning…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Skicka';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Byt namn på inspelning';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Beskriv den här inspelningen…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Redigera beskrivning';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Ta bort anteckning';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Redigera anteckning';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -311,7 +311,7 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutNewList => 'Ny lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Ny röstanteckning';
   @override
   String get shortcutToggleSidebar => 'Visa eller dölj filträdet';
   @override

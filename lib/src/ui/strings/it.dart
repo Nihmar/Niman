@@ -257,34 +257,34 @@ final class ItalianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Riordina l’elemento';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Nessuna registrazione per ora';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Registra';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Ferma';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Riproduci';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Ferma riproduzione';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Elimina registrazione';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importa un file audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Registrazione…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'In riproduzione';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permesso del microfono negato — serve per registrare.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nuova nota vocale';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'La mia registrazione';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Mostra registrazioni';
   @override
   String get audioMessageHint => 'Scrivi una nota…';
   @override
@@ -310,7 +310,7 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutNewList => 'Nuova lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nuova nota vocale';
   @override
   String get shortcutToggleSidebar => 'Mostra o nascondi l’albero dei file';
   @override

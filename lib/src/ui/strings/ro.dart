@@ -116,25 +116,25 @@ final class RomanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Actualizări';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Actualizări automate';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Verifică GitHub Releases la pornire și la fiecare 6 ore';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Caută actualizări';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version este disponibil';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman este actualizat';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Verificarea actualizărilor a eșuat';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Actualizare salvată în $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Programul de instalare a pornit';
   @override
   String get settingsSectionDiagnostics => 'Diagnostic';
   @override
@@ -257,48 +257,49 @@ final class RomanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Schimbă ordinea elementului';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Nicio înregistrare încă';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Înregistrează';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Oprește';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Redă';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Oprește redarea';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Șterge înregistrarea';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importă un fișier audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Se înregistrează…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Se redă';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permisiunea pentru microfon a fost refuzată — este necesară pentru '
+      'înregistrare.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Notă vocală nouă';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Înregistrarea mea';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Afișează înregistrările';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Scrie o notă…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Trimite';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Redenumește înregistrarea';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Descrie această înregistrare…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Editează descrierea';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Șterge nota';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Editează nota';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -310,7 +311,7 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Listă nouă';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Notă vocală nouă';
   @override
   String get shortcutToggleSidebar => 'Afișează sau ascunde filtrul';
   @override

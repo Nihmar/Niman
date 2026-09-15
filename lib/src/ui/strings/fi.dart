@@ -114,25 +114,25 @@ final class FinnishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Näppäimistön oikotiet';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Päivitykset';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automaattiset päivitykset';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Tarkista GitHub Releases käynnistyksessä ja 6 tunnin välein';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Tarkista päivitykset';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version on saatavilla';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman on ajan tasalla';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Päivitysten tarkistus epäonnistui';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Päivitys tallennettu sijaintiin $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Asennusohjelma käynnistetty';
   @override
   String get settingsSectionDiagnostics => 'Diagnostiikka';
   @override
@@ -254,48 +254,48 @@ final class FinnishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Muuta kohteen järjestys';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Ei vielä äänityksiä';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Äänitä';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Pysäytä';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Toista';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Pysäytä toisto';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Poista äänitys';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Tuo äänitiedosto';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Äänitetään…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Toistetaan';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonin käyttöoikeus evätty — äänittäminen edellyttää sitä.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Uusi äänimuistiinpano';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Äänitykseni';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Näytä äänitykset';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Kirjoita muistiinpano…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Lähetä';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Nimeä äänitys uudelleen';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Kuvaile tätä äänitystä…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Muokkaa kuvausta';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Poista muistiinpano';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Muokkaa muistiinpanoa';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -307,7 +307,7 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutNewList => 'Uusi lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Uusi äänimuistiinpano';
   @override
   String get shortcutToggleSidebar => 'Näytä tai piilota suodatin';
   @override

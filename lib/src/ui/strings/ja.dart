@@ -109,25 +109,23 @@ final class JapaneseStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'アップデート';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => '自動アップデート';
   @override
-  String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+  String get autoUpdateSubtitle => '起動時と 6 時間ごとに GitHub Releases を確認';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'アップデートを確認';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version が利用可能です';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman は最新です';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'アップデートの確認に失敗しました';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'インストーラーを起動しました';
   @override
   String get settingsSectionDiagnostics => '診断';
   @override
@@ -239,48 +237,47 @@ final class JapaneseStrings extends Strings {
   @override
   String get listDragHandleLabel => '項目を並べ替え';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => '録音はまだありません';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => '録音';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => '停止';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => '再生';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => '再生を停止';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => '録音を削除';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => '音声ファイルをインポート';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => '録音中…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => '再生中';
   @override
-  String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+  String get audioPermissionDenied => 'マイクの権限がありません — 録音に必要です。';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => '新しい音声ノート';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => '録音';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => '録音を表示';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'メモを入力…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => '送信';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => '録音の名前を変更';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'この録音の説明を入力…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => '説明を編集';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'メモを削除';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'メモを編集';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -292,7 +289,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutNewList => '新しいリスト';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => '新しい音声ノート';
   @override
   String get shortcutToggleSidebar => 'ファイルツリーの表示 / 非表示';
   @override
