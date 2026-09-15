@@ -1298,4 +1298,12 @@ final class SlovenianStrings extends Strings {
   String get actionRetry => 'Poskusi znova';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Povezava je prekinjena, ponovni poskus…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Začasno ustavljeno pri $progress';
+  @override
+  String get actionResume => 'Nadaljuj';
 }

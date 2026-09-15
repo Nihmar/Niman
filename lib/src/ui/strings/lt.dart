@@ -1304,4 +1304,11 @@ final class LithuanianStrings extends Strings {
   String get actionRetry => 'Bandyti dar kartą';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pristabdyta: $progress';
+  @override
+  String get actionResume => 'Tęsti';
 }

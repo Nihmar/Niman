@@ -1303,4 +1303,12 @@ final class CroatianStrings extends Strings {
   String get actionRetry => 'Pokušaj ponovno';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Veza je prekinuta, ponovni pokušaj…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pauzirano na $progress';
+  @override
+  String get actionResume => 'Nastavi';
 }

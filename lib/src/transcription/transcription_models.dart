@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/transcription/model_download.dart';
+import 'package:niman/src/transcription/model_downloader.dart';
 import 'package:niman/src/transcription/model_files.dart';
 import 'package:niman/src/transcription/model_state.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
@@ -12,40 +12,46 @@ import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/transcription/transcription_settings_store.dart';
 import 'package:whisper_ggml/whisper_ggml.dart';
 
-/// Starts a download; [ModelDownload.start] in the app, a fake in tests.
-typedef ModelDownloadStarter = Future<ModelDownload> Function({
-  required Uri uri,
-  required String target,
-  required void Function(int received) onProgress,
-  void Function(int? total, int elapsedMs)? onHeaders,
-});
+export 'package:niman/src/transcription/model_downloader.dart'
+    show ModelDownloadStarter;
 
 /// The transcription models of this installation: what is downloaded,
 /// what is downloading, and the default model and language.
 ///
 /// App-wide and long-lived ([transcriptionModelsProvider]): a download
 /// keeps running when its page closes, and the settings rows and the
-/// audio note read the same state.
+/// audio note read the same state. The downloads themselves, with their
+/// retries and resumes, run in [ModelDownloader].
 final class TranscriptionModels extends ChangeNotifier {
   /// Models kept in the directory [directory] resolves to.
   new({
     required Future<String> Function() directory,
     bool? phone,
     ModelDownloadStarter? startDownload,
+    List<Duration> retryDelays = ModelDownloader.defaultRetryDelays,
   }) : _files = ModelFiles(directory),
        _store = TranscriptionSettingsStore(directory),
-       phone = phone ?? Platform.isAndroid,
-       _startDownload = startDownload ?? ModelDownload.start;
+       phone = phone ?? Platform.isAndroid {
+    _downloader = ModelDownloader(
+      files: _files,
+      state: stateOf,
+      setState: _set,
+      onInstalled: (model) async {
+        if (defaultModel == null) await setDefault(model);
+      },
+      start: startDownload,
+      retryDelays: retryDelays,
+    );
+  }
 
   final ModelFiles _files;
   final TranscriptionSettingsStore _store;
-  final ModelDownloadStarter _startDownload;
+  late final ModelDownloader _downloader;
 
   /// Whether this is a phone: fewer models, and "slow" warnings.
   final bool phone;
 
   final Map<String, ModelState> _states = {};
-  final Map<String, ModelDownload> _downloads = {};
   TranscriptionSettings _settings = const TranscriptionSettings();
   Future<void>? _loading;
   bool _disposed = false;
@@ -92,10 +98,10 @@ final class TranscriptionModels extends ChangeNotifier {
   Future<void> _load() async {
     final clock = Stopwatch()..start();
     final TranscriptionSettings settings;
-    final Map<String, int> sizes;
+    final ModelScan scan;
     try {
       settings = await _store.load();
-      sizes = await _files.installed(active: _downloads.keys.toSet());
+      scan = await _files.scan();
     } on Object catch (error) {
       // No model directory (a platform without path_provider, a widget
       // test): the page shows every model as downloadable instead of
@@ -109,98 +115,42 @@ final class TranscriptionModels extends ChangeNotifier {
     if (_disposed) return;
     _settings = settings;
     for (final model in transcriptionModels) {
-      if (_downloads.containsKey(model.id)) continue;
-      final bytes = sizes[model.id];
-      if (bytes != null) {
-        _states[model.id] = ModelInstalled(bytes);
-      } else if (_states[model.id] is! ModelFailed) {
-        _states[model.id] = const ModelAbsent();
-      }
+      if (stateOf(model) is ModelDownloading) continue;
+      final bytes = scan.installed[model.id];
+      final partial = scan.partial[model.id];
+      _states[model.id] = switch ((bytes, partial)) {
+        (final int bytes, _) => ModelInstalled(bytes),
+        // A download cut off by the app closing: resumable from here.
+        (_, final int partial) => ModelFailed(
+          'interrupted',
+          received: partial,
+          total: model.bytes,
+        ),
+        _ when _states[model.id] is ModelFailed => _states[model.id]!,
+        _ => const ModelAbsent(),
+      };
     }
     _loaded = true;
     _log.info(
       'loaded in ${clock.elapsedMilliseconds} ms: '
       '${installed.length} installed ($installedBytes b), '
+      '${scan.partial.length} interrupted, '
       'default ${defaultModel?.id ?? '-'}',
     );
     notifyListeners();
   }
 
-  /// Downloads [model]; the first model to arrive becomes the default
-  /// when none is set.
-  Future<void> download(TranscriptionModel model) async {
-    // Downloading covers the moment the isolate is still spawning, before
-    // _downloads has the entry: a second tap must not start a second one.
-    if (stateOf(model) case ModelDownloading() || ModelInstalled()) return;
-    final clock = Stopwatch()..start();
-    var total = model.bytes;
-    var nextLog = 10;
-    _set(model, ModelDownloading(received: 0, total: total));
-    _log.info('download ${model.id}: start ${model.uri}');
-    final ModelDownload download;
-    try {
-      download = await _startDownload(
-        uri: model.uri,
-        target: await _files.pathOf(model),
-        onHeaders: (announced, ms) {
-          if (announced != null) total = announced;
-          _log.info(
-            'download ${model.id}: headers after $ms ms, '
-            '${announced ?? 'unknown'} b',
-          );
-        },
-        onProgress: (received) {
-          if (stateOf(model) is! ModelDownloading) return;
-          _set(model, ModelDownloading(received: received, total: total));
-          final percent = total <= 0 ? 0 : received * 100 ~/ total;
-          if (percent >= nextLog) {
-            _log.debug(
-              'download ${model.id}: $percent% $received b '
-              'at ${clock.elapsedMilliseconds} ms',
-            );
-            nextLog = (percent ~/ 10 + 1) * 10;
-          }
-        },
-      );
-    } on Object catch (error) {
-      _log.warning('download ${model.id}: could not start ($error)');
-      _set(model, ModelFailed(error.toString()));
-      return;
-    }
-    _downloads[model.id] = download;
-    try {
-      final bytes = await download.done;
-      final seconds = clock.elapsedMilliseconds / 1000;
-      _log.info(
-        'download ${model.id}: done, $bytes b in '
-        '${clock.elapsedMilliseconds} ms '
-        '(${seconds == 0 ? '-' : (bytes / 1048576 / seconds).toStringAsFixed(1)} MB/s)',
-      );
-      _downloads.remove(model.id);
-      _set(model, ModelInstalled(bytes));
-      if (defaultModel == null) await setDefault(model);
-    } on ModelDownloadCancelled {
-      _log.info(
-        'download ${model.id}: cancelled after ${clock.elapsedMilliseconds} ms',
-      );
-      _downloads.remove(model.id);
-      _set(model, const ModelAbsent());
-    } on ModelDownloadException catch (error) {
-      _log.warning(
-        'download ${model.id}: failed after '
-        '${clock.elapsedMilliseconds} ms (${error.reason})',
-      );
-      _downloads.remove(model.id);
-      _set(model, ModelFailed(error.reason));
-    }
-  }
+  /// Downloads [model], resuming what is on disk; the first model to
+  /// arrive becomes the default when none is set.
+  Future<void> download(TranscriptionModel model) =>
+      _downloader.download(model);
 
-  /// Stops [model]'s download.
-  Future<void> cancel(TranscriptionModel model) async {
-    final download = _downloads[model.id];
-    if (download == null) return;
-    await download.cancel();
-  }
+  /// Starts again the downloads a lost connection stopped; the app calls
+  /// it when it returns to the foreground.
+  Future<void> resumeInterrupted() => _downloader.resumeInterrupted(models);
+
+  /// Stops [model]'s download and discards its partial file.
+  Future<void> cancel(TranscriptionModel model) => _downloader.cancel(model);
 
   /// Deletes [model]'s file. When it was the default, the smallest model
   /// still downloaded takes over (or none).
@@ -239,10 +189,7 @@ final class TranscriptionModels extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    for (final download in _downloads.values) {
-      unawaited(download.cancel());
-    }
-    _downloads.clear();
+    _downloader.close();
     super.dispose();
   }
 }
@@ -254,6 +201,28 @@ const _log = AppLogger(name: 'transcription');
 final transcriptionModelsProvider = Provider<TranscriptionModels>((ref) {
   final models = TranscriptionModels(directory: WhisperController.getModelDir);
   unawaited(models.load());
-  ref.onDispose(models.dispose);
+  // Back in the foreground: pick up the downloads the freeze cut off.
+  final observer = _ResumeObserver(() => unawaited(models.resumeInterrupted()));
+  WidgetsBinding.instance.addObserver(observer);
+  ref.onDispose(() {
+    WidgetsBinding.instance.removeObserver(observer);
+    models.dispose();
+  });
   return models;
 });
+
+/// Calls [onResume] whenever the app returns to the foreground.
+///
+/// A plain observer rather than `AppLifecycleListener`, which asserts on
+/// the order of lifecycle states and so fails on the shortcuts platforms
+/// and tests take (paused straight to resumed).
+final class _ResumeObserver with WidgetsBindingObserver {
+  new(this.onResume);
+
+  final VoidCallback onResume;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) onResume();
+  }
+}

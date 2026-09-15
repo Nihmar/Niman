@@ -1332,4 +1332,11 @@ final class SpanishStrings extends Strings {
   String get actionRetry => 'Reintentar';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Conexión perdida, reintentando…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa en $progress';
+  @override
+  String get actionResume => 'Reanudar';
 }

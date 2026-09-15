@@ -1299,4 +1299,12 @@ final class SlovakStrings extends Strings {
   String get actionRetry => 'Skúsiť znova';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Pripojenie sa prerušilo, skúša sa znova…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pozastavené na $progress';
+  @override
+  String get actionResume => 'Pokračovať';
 }

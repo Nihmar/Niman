@@ -38,26 +38,48 @@ final class TranscriptionModelRow extends StatelessWidget {
         dimension: 22,
         child: CircularProgressIndicator(value: fraction, strokeWidth: 2.5),
       ),
+      ModelFailed(resumable: true) => const Icon(Icons.pause_circle_outline),
       ModelFailed() => Icon(Icons.error_outline, color: colors.error),
       ModelAbsent() => const Icon(Icons.cloud_download_outlined),
     };
 
+    String progress(int received, int total, double fraction) =>
+        '${AppStrings.byteSize(received)} / '
+        '${AppStrings.byteSize(total)} · ${(fraction * 100).floor()}%';
+    const figures = TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
+
     final subtitle = switch (state) {
-      ModelDownloading(:final received, :final total, :final fraction) =>
+      ModelDownloading(
+        :final received,
+        :final total,
+        :final fraction,
+        :final retrying,
+      ) =>
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${AppStrings.byteSize(received)} / '
-              '${AppStrings.byteSize(total)} · ${(fraction * 100).floor()}%',
-              style: const TextStyle(
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
+              retrying
+                  ? AppStrings.transcriptionModelRetrying
+                  : progress(received, total, fraction),
+              style: figures,
             ),
             const SizedBox(height: 6),
             LinearProgressIndicator(value: fraction),
           ],
+        ),
+      ModelFailed(
+        resumable: true,
+        :final received,
+        :final total,
+        :final fraction,
+      ) =>
+        Text(
+          AppStrings.transcriptionModelInterrupted(
+            progress(received, total, fraction),
+          ),
+          style: figures,
         ),
       ModelFailed() => Text(
         AppStrings.transcriptionModelFailed,
@@ -79,10 +101,24 @@ final class TranscriptionModelRow extends StatelessWidget {
         icon: const Icon(Icons.close),
         onPressed: () => unawaited(models.cancel(model)),
       ),
-      ModelFailed() => TextButton(
-        key: Key('transcription-retry-${model.id}'),
-        onPressed: () => unawaited(models.download(model)),
-        child: Text(AppStrings.actionRetry),
+      ModelFailed(:final resumable) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (resumable)
+            IconButton(
+              key: Key('transcription-discard-${model.id}'),
+              tooltip: AppStrings.actionCancel,
+              icon: const Icon(Icons.close),
+              onPressed: () => unawaited(models.cancel(model)),
+            ),
+          TextButton(
+            key: Key('transcription-retry-${model.id}'),
+            onPressed: () => unawaited(models.download(model)),
+            child: Text(
+              resumable ? AppStrings.actionResume : AppStrings.actionRetry,
+            ),
+          ),
+        ],
       ),
       ModelAbsent() => IconButton(
         key: Key('transcription-download-${model.id}'),

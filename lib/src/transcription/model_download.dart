@@ -12,21 +12,26 @@ import 'package:niman/src/transcription/model_files.dart';
 /// reports progress back a few times a second.
 ///
 /// The file is written as `<target>.part` and renamed to [target] only
-/// when the byte count matches the response's `Content-Length`: a
-/// finished name is always a whole model ([ModelFiles] relies on it).
+/// when the byte count matches the announced size: a finished name is
+/// always a whole model ([ModelFiles] relies on it). A failure keeps the
+/// partial file, and the next download of the same target resumes it
+/// with an HTTP `Range` request: Android freezes an app that leaves the
+/// foreground, which drops the connection, and starting a 466 MB model
+/// over each time would never finish.
 final class ModelDownload {
   new _(this._isolate, this._port, this._exit, this.target);
 
-  /// Starts downloading [uri] into [target].
+  /// Starts downloading [uri] into [target], resuming a partial file.
   ///
-  /// [onHeaders] gets the announced size (null when the server sends
-  /// none) once the response starts; [onProgress] the bytes received so
-  /// far, throttled to about [progressInterval].
+  /// [onHeaders] gets the model's full size (null when the server sends
+  /// none), the time to the first response and the byte offset it
+  /// resumed from; [onProgress] the bytes on disk so far, throttled to
+  /// about [progressInterval].
   static Future<ModelDownload> start({
     required Uri uri,
     required String target,
     required void Function(int received) onProgress,
-    void Function(int? total, int elapsedMs)? onHeaders,
+    void Function(int? total, int elapsedMs, int resumedFrom)? onHeaders,
     Duration progressInterval = const Duration(milliseconds: 250),
     Duration stallTimeout = const Duration(seconds: 30),
   }) async {
@@ -50,14 +55,16 @@ final class ModelDownload {
     download._done.future.ignore();
     port.listen((message) {
       switch (message) {
-        case ('headers', final int? total, final int ms):
-          onHeaders?.call(total, ms);
+        case ('headers', final int? total, final int ms, final int from):
+          onHeaders?.call(total, ms, from);
         case ('progress', final int received):
           onProgress(received);
         case ('done', final int bytes):
           download._finish(bytes: bytes);
-        case ('error', final String reason):
-          download._finish(error: ModelDownloadException(reason));
+        case ('error', final String reason, final bool transient):
+          download._finish(
+            error: ModelDownloadException(reason, transient: transient),
+          );
       }
     });
     exit.listen((_) {
@@ -65,7 +72,10 @@ final class ModelDownload {
       download._finish(
         error: download._cancelled
             ? const ModelDownloadCancelled()
-            : const ModelDownloadException('download stopped unexpectedly'),
+            : const ModelDownloadException(
+                'download stopped unexpectedly',
+                transient: true,
+              ),
       );
     });
     return download;
@@ -81,28 +91,25 @@ final class ModelDownload {
   final Completer<int> _done = Completer<int>();
   bool _cancelled = false;
 
-  /// Completes with the bytes written once the model is in place; fails
-  /// with [ModelDownloadException], or [ModelDownloadCancelled] after
-  /// [cancel].
+  /// Completes with the model's size once it is in place; fails with
+  /// [ModelDownloadException], or [ModelDownloadCancelled] after [cancel].
   Future<int> get done => _done.future;
 
-  /// Stops the download and removes its partial file.
+  /// Stops the download and removes its partial file: unlike a failure, a
+  /// cancel means the bytes are not wanted.
   Future<void> cancel() async {
+    if (_done.isCompleted) return;
+    stop();
+    await ModelFiles.deletePart(target);
+  }
+
+  /// Stops the download and keeps its partial file for a later resume
+  /// (the app shutting down).
+  void stop() {
     if (_done.isCompleted) return;
     _cancelled = true;
     _isolate.kill(priority: Isolate.immediate);
     _finish(error: const ModelDownloadCancelled());
-    final part = '$target${ModelFiles.partSuffix}';
-    await Isolate.run(() {
-      // The killed isolate may still hold the handle for a moment on
-      // Windows; the next scan removes whatever this cannot.
-      try {
-        final file = File(part);
-        if (file.existsSync()) file.deleteSync();
-      } on FileSystemException {
-        // Left for ModelFiles.installed.
-      }
-    });
   }
 
   void _finish({int? bytes, Object? error}) {
@@ -120,13 +127,18 @@ final class ModelDownload {
 /// A download that failed; [reason] is short and safe to log.
 final class ModelDownloadException implements Exception {
   /// Creates the failure with [reason].
-  const new(this.reason);
+  const new(this.reason, {this.transient = false});
 
   /// What went wrong.
   final String reason;
 
+  /// Whether trying again may work: the network, a timeout, a server
+  /// error, a connection cut short. The partial file is kept for it.
+  final bool transient;
+
   @override
-  String toString() => 'ModelDownloadException: $reason';
+  String toString() =>
+      'ModelDownloadException: $reason${transient ? ' (transient)' : ''}';
 }
 
 /// A download stopped by [ModelDownload.cancel].
@@ -150,29 +162,57 @@ final class _Request {
 
 Future<void> _run(_Request request) async {
   final port = request.port;
+  final stall = Duration(milliseconds: request.stallMs);
   final clock = Stopwatch()..start();
-  final client = HttpClient()
-    ..connectionTimeout = Duration(milliseconds: request.stallMs);
+  final client = HttpClient()..connectionTimeout = stall;
   final part = File('${request.target}${ModelFiles.partSuffix}');
   IOSink? sink;
   try {
-    final response = await (await client.getUrl(Uri.parse(request.uri)))
-        .close()
-        .timeout(Duration(milliseconds: request.stallMs));
-    if (response.statusCode != HttpStatus.ok) {
-      port.send(('error', 'HTTP ${response.statusCode}'));
+    final existing = part.existsSync() ? part.lengthSync() : 0;
+    final httpRequest = await client.getUrl(Uri.parse(request.uri));
+    if (existing > 0) {
+      httpRequest.headers.set(HttpHeaders.rangeHeader, 'bytes=$existing-');
+    }
+    final response = await httpRequest.close().timeout(stall);
+    final status = response.statusCode;
+    final int from;
+    final int? total;
+    if (existing > 0 && status == HttpStatus.partialContent) {
+      from = existing;
+      total =
+          _totalOf(response.headers.value(HttpHeaders.contentRangeHeader)) ??
+          (response.contentLength < 0
+              ? null
+              : existing + response.contentLength);
+    } else if (status == HttpStatus.ok) {
+      // No range support, or nothing to resume: start over.
+      from = 0;
+      total = response.contentLength < 0 ? null : response.contentLength;
+    } else {
+      if (status == HttpStatus.requestedRangeNotSatisfiable) {
+        // The partial file does not fit the model any more.
+        await part.delete();
+      }
+      await response.drain<void>();
+      port.send((
+        'error',
+        'HTTP $status',
+        status >= 500 ||
+            status == HttpStatus.requestTimeout ||
+            status == HttpStatus.tooManyRequests ||
+            status == HttpStatus.requestedRangeNotSatisfiable,
+      ));
       return;
     }
-    final total = response.contentLength < 0 ? null : response.contentLength;
-    port.send(('headers', total, clock.elapsedMilliseconds));
+    port.send(('headers', total, clock.elapsedMilliseconds, from));
     await part.parent.create(recursive: true);
-    sink = part.openWrite();
-    var received = 0;
+    sink = part.openWrite(mode: from > 0 ? FileMode.append : FileMode.write);
+    var received = from;
     var lastReport = 0;
     await sink.addStream(
       response
           .timeout(
-            Duration(milliseconds: request.stallMs),
+            stall,
             onTimeout: (events) => events.addError(
               TimeoutException('no data for ${request.stallMs} ms'),
             ),
@@ -190,9 +230,13 @@ Future<void> _run(_Request request) async {
     await sink.close();
     sink = null;
     port.send(('progress', received));
-    if (total != null && received != total) {
+    if (total != null && received < total) {
+      port.send(('error', 'incomplete: $received of $total bytes', true));
+      return;
+    }
+    if (total != null && received > total) {
       await part.delete();
-      port.send(('error', 'incomplete: $received of $total bytes'));
+      port.send(('error', 'too long: $received of $total bytes', true));
       return;
     }
     await part.rename(request.target);
@@ -203,15 +247,31 @@ Future<void> _run(_Request request) async {
     } on Object {
       // The write already failed; the reason below is what matters.
     }
+    // The partial file stays: the next attempt resumes from it. Progress
+    // is throttled, so report what actually reached the disk.
     try {
-      if (part.existsSync()) await part.delete();
+      if (part.existsSync()) port.send(('progress', part.lengthSync()));
     } on FileSystemException {
-      // ModelFiles.installed removes it on the next scan.
+      // The size is only for the page; the resume reads it again.
     }
-    port.send(('error', _short(error)));
+    port.send((
+      'error',
+      _short(error),
+      error is SocketException ||
+          error is HttpException ||
+          error is TimeoutException,
+    ));
   } finally {
     client.close(force: true);
   }
+}
+
+/// The full size from a `Content-Range: bytes 100-199/1234` header.
+int? _totalOf(String? contentRange) {
+  if (contentRange == null) return null;
+  final slash = contentRange.lastIndexOf('/');
+  if (slash < 0) return null;
+  return int.tryParse(contentRange.substring(slash + 1).trim());
 }
 
 /// The failure without stack or URL noise, for the page and the log.

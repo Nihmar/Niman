@@ -1319,4 +1319,12 @@ final class BasqueStrings extends Strings {
   String get actionRetry => 'Saiatu berriro';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Konexioa galdu da, berriro saiatzen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pausatuta: $progress';
+  @override
+  String get actionResume => 'Jarraitu';
 }

@@ -1324,4 +1324,11 @@ final class PolishStrings extends Strings {
   String get actionRetry => 'Spróbuj ponownie';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Utracono połączenie, ponawianie…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Wstrzymano przy $progress';
+  @override
+  String get actionResume => 'Wznów';
 }

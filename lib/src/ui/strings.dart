@@ -818,6 +818,10 @@ final class AppStrings {
       _s.transcriptionModelDeleteBody(size);
   static String get transcriptionModelFailed => _s.transcriptionModelFailed;
   static String get actionRetry => _s.actionRetry;
+  static String get transcriptionModelRetrying => _s.transcriptionModelRetrying;
+  static String transcriptionModelInterrupted(String progress) =>
+      _s.transcriptionModelInterrupted(progress);
+  static String get actionResume => _s.actionResume;
 
   /// Whisper's own model names, the same in every language.
   static String transcriptionModelName(TranscriptionModel model) =>

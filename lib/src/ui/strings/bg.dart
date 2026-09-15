@@ -1316,4 +1316,11 @@ final class BulgarianStrings extends Strings {
   String get actionRetry => 'Опитай отново';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Връзката прекъсна, нов опит…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'На пауза при $progress';
+  @override
+  String get actionResume => 'Продължи';
 }

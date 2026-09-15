@@ -1300,4 +1300,12 @@ final class NorwegianStrings extends Strings {
   String get actionRetry => 'Prøv igjen';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Tilkoblingen ble brutt, prøver igjen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Satt på pause ved $progress';
+  @override
+  String get actionResume => 'Fortsett';
 }

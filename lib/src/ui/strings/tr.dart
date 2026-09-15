@@ -1292,4 +1292,11 @@ final class TurkishStrings extends Strings {
   String get actionRetry => 'Yeniden dene';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Bağlantı koptu, yeniden deneniyor…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      '$progress noktasında duraklatıldı';
+  @override
+  String get actionResume => 'Devam et';
 }

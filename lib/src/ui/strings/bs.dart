@@ -1310,4 +1310,12 @@ final class BosnianStrings extends Strings {
   String get actionRetry => 'Pokušaj ponovo';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Veza je prekinuta, ponovni pokušaj…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pauzirano na $progress';
+  @override
+  String get actionResume => 'Nastavi';
 }

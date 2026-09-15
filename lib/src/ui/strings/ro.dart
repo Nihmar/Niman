@@ -1322,4 +1322,11 @@ final class RomanianStrings extends Strings {
   String get actionRetry => 'Încearcă din nou';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Conexiune pierdută, se reîncearcă…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Întrerupt la $progress';
+  @override
+  String get actionResume => 'Reia';
 }

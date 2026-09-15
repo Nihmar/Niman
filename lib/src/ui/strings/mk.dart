@@ -1317,4 +1317,11 @@ final class MacedonianStrings extends Strings {
   String get actionRetry => 'Обиди се повторно';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Врската е прекината, нов обид…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Паузирано на $progress';
+  @override
+  String get actionResume => 'Продолжи';
 }

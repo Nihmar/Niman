@@ -1306,4 +1306,12 @@ final class BelarusianStrings extends Strings {
   String get actionRetry => 'Паспрабаваць яшчэ раз';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Злучэнне страчана, паўторная спроба…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Прыпынена на $progress';
+  @override
+  String get actionResume => 'Працягнуць';
 }

@@ -1298,4 +1298,12 @@ final class CzechStrings extends Strings {
   String get actionRetry => 'Zkusit znovu';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Připojení se přerušilo, zkouší se znovu…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pozastaveno na $progress';
+  @override
+  String get actionResume => 'Pokračovat';
 }

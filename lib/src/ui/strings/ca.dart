@@ -1338,4 +1338,12 @@ final class CatalanStrings extends Strings {
   String get actionRetry => 'Torna-ho a provar';
   @override
   String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      "S'ha perdut la connexió, s'està tornant a provar…";
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa a $progress';
+  @override
+  String get actionResume => 'Reprèn';
 }

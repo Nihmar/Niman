@@ -50,7 +50,7 @@ void main() {
     final download = await ModelDownload.start(
       uri: url(),
       target: target(),
-      onHeaders: (total, _) => announced = total,
+      onHeaders: (total, _, _) => announced = total,
       onProgress: progress.add,
       progressInterval: Duration.zero,
     );
@@ -61,7 +61,46 @@ void main() {
     expect(File('${target()}${ModelFiles.partSuffix}').existsSync(), false);
   });
 
-  test('a response cut short fails and leaves no file', () async {
+  test('a cut-off download resumes from its partial file', () async {
+    final ranges = <String?>[];
+    handler = (request) async {
+      final range = request.headers.value(HttpHeaders.rangeHeader);
+      ranges.add(range);
+      final from = range == null
+          ? 0
+          : int.parse(range.substring('bytes='.length, range.length - 1));
+      request.response
+        ..statusCode = from == 0 ? HttpStatus.ok : HttpStatus.partialContent
+        ..contentLength = payload.length - from;
+      if (from > 0) {
+        request.response.headers.set(
+          HttpHeaders.contentRangeHeader,
+          'bytes $from-${payload.length - 1}/${payload.length}',
+        );
+      }
+      request.response.add(payload.sublist(from));
+      await request.response.close();
+    };
+    // What a download cut off at 120 kB leaves behind.
+    final part = File('${target()}${ModelFiles.partSuffix}');
+    await part.parent.create(recursive: true);
+    await part.writeAsBytes(payload.sublist(0, 120000));
+
+    int? resumedFrom;
+    final download = await ModelDownload.start(
+      uri: url(),
+      target: target(),
+      onHeaders: (_, _, from) => resumedFrom = from,
+      onProgress: (_) {},
+    );
+
+    expect(await download.done, payload.length);
+    expect(ranges, ['bytes=120000-']);
+    expect(resumedFrom, 120000);
+    expect(await File(target()).readAsBytes(), payload);
+  });
+
+  test('a response cut short fails, keeping the bytes for a resume', () async {
     // A raw socket: announce the full length, send a little, hang up.
     final raw = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(raw.close);
@@ -81,9 +120,18 @@ void main() {
       target: target(),
       onProgress: (_) {},
     );
-    await expectLater(download.done, throwsA(isA<ModelDownloadException>()));
+    await expectLater(
+      download.done,
+      throwsA(
+        isA<ModelDownloadException>().having(
+          (e) => e.transient,
+          'transient',
+          true,
+        ),
+      ),
+    );
     expect(File(target()).existsSync(), false);
-    expect(File('${target()}${ModelFiles.partSuffix}').existsSync(), false);
+    expect(File('${target()}${ModelFiles.partSuffix}').lengthSync(), 1000);
   });
 
   test('an HTTP error fails with the status', () async {
@@ -100,9 +148,9 @@ void main() {
       download.done,
       throwsA(
         isA<ModelDownloadException>().having(
-          (e) => e.reason,
-          'reason',
-          'HTTP 404',
+          (e) => (e.reason, e.transient),
+          'reason, transient',
+          ('HTTP 404', false),
         ),
       ),
     );
@@ -120,7 +168,7 @@ void main() {
     final download = await ModelDownload.start(
       uri: url(),
       target: target(),
-      onHeaders: (_, _) => headers.complete(),
+      onHeaders: (_, _, _) => headers.complete(),
       onProgress: (_) {},
     );
     await headers.future;

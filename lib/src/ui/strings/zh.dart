@@ -1177,4 +1177,10 @@ final class ChineseStrings extends Strings {
   String get actionRetry => '重试';
   @override
   String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => '连接中断，正在重试…';
+  @override
+  String transcriptionModelInterrupted(String progress) => '已暂停：$progress';
+  @override
+  String get actionResume => '继续';
 }
