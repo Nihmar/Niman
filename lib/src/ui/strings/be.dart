@@ -63,7 +63,7 @@ final class BelarusianStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Смус';
+  String get trashTitle => 'Кошык';
   @override
   String get trashSubtitle =>
       'Выдаленыя элементы перамяшчаюцца ў .trash/ (адключана = канчатковае '
@@ -971,7 +971,7 @@ final class BelarusianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Віджэты галоўнага экрана даступныя ў Android';
   @override
-  String get movedToTrash => 'Перамешчана ў смус';
+  String get movedToTrash => 'Перамешчана ў кошык';
   @override
   String get deletedMessage => 'Выдалена';
   @override
@@ -1014,12 +1014,12 @@ final class BelarusianStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Смус пусты';
+  String get trashEmpty => 'Кошык пусты';
   @override
-  String get trashEmptyAction => 'Ачысціць смус';
+  String get trashEmptyAction => 'Ачысціць кошык';
   @override
   String get trashEmptyConfirm =>
-      'Гэта канчаткова выдаліць усё ў смусе, уключна з элементамі, якія '
+      'Гэта канчаткова выдаліць усё ў кошыку, уключна з элементамі, якія '
       'Niman туды не паклаў.';
   @override
   String trashDeleteConfirm(String name) =>

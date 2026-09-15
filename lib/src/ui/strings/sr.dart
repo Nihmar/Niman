@@ -1150,13 +1150,13 @@ final class SerbianStrings extends Strings {
 
   // About (issue #80).
   @override
-  String get settingsSectionAbout => 'O aplikaciji';
+  String get settingsSectionAbout => 'О апликацији';
   @override
-  String get versionTitle => 'Verzija';
+  String get versionTitle => 'Верзија';
   @override
-  String get changelogTitle => 'Beleške o izmenama';
+  String get changelogTitle => 'Белешке о изменама';
   @override
-  String get changelogEmpty => 'Nema dostupnih zapisa u beleškama';
+  String get changelogEmpty => 'Нема доступних записа у белешкама';
   @override
   String changelogWhatsNew(String version) => 'Novo u verziji $version';
 
