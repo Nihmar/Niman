@@ -117,25 +117,25 @@ final class GreekStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Ενημερώσεις';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Αυτόματες ενημερώσεις';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Έλεγχος στο GitHub Releases κατά την εκκίνηση και κάθε 6 ώρες';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Έλεγχος για ενημερώσεις';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Το Niman $version είναι διαθέσιμο';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Το Niman είναι ενημερωμένο';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Ο έλεγχος ενημερώσεων απέτυχε';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Η ενημέρωση αποθηκεύτηκε στο $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
   @override
   String get settingsSectionDiagnostics => 'Διάγνωση';
   @override
@@ -261,48 +261,48 @@ final class GreekStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Επαναταξινόμηση στοιχείου';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Δεν υπάρχουν ακόμα ηχογραφήσεις';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Εγγραφή';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Διακοπή';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Αναπαραγωγή';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Διακοπή αναπαραγωγής';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Διαγραφή ηχογράφησης';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Εισαγωγή αρχείου ήχου';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Ηχογράφηση…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Αναπαράγεται';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Δεν δόθηκε άδεια μικροφώνου — απαιτείται για την ηχογράφηση.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Νέα φωνητική σημείωση';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Η ηχογράφησή μου';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Εμφάνιση ηχογραφήσεων';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Γράψτε μια σημείωση…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Αποστολή';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Μετονομασία ηχογράφησης';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Περιγράψτε αυτή την ηχογράφηση…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Επεξεργασία περιγραφής';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Διαγραφή σημείωσης';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Επεξεργασία σημείωσης';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -314,7 +314,7 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutNewList => 'Νέα λίστα';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Νέα φωνητική σημείωση';
   @override
   String get shortcutToggleSidebar => 'Εμφάνιση ή κρύψη του δέντρου αρχείων';
   @override
@@ -1038,7 +1038,7 @@ final class GreekStrings extends Strings {
   @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Φάκελος συνημμένων';
 
   // Trash (M1).
   @override

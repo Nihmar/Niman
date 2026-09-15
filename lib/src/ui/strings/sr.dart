@@ -116,25 +116,24 @@ final class SerbianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Пречице на тастатури';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Ажурирања';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Аутоматска ажурирања';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Проверава GitHub Releases при покретању и сваких 6 сати';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Провери ажурирања';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Доступан је Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman је ажуран';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Провера ажурирања није успела';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Ажурирање сачувано у $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Инсталер је покренут';
   @override
   String get settingsSectionDiagnostics => 'Диагностика';
   @override
@@ -256,48 +255,48 @@ final class SerbianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Преређуј ставку';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Још нема снимака';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Сними';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Заустави';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Пусти';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Заустави репродукцију';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Обриши снимак';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Увези аудио фајл';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Снимање…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Репродукција';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Дозвола за микрофон је одбијена — потребна је за снимање.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Нова гласовна белешка';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Мој снимак';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Прикажи снимке';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Напишите белешку…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Пошаљи';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Промени име снимка';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Опишите овај снимак…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Уреди опис';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Обриши белешку';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Уреди белешку';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -309,7 +308,7 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutNewList => 'Нов списак';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Нова гласовна белешка';
   @override
   String get shortcutToggleSidebar => 'Прикажи или сакриј стабло датотека';
   @override
@@ -1001,7 +1000,7 @@ final class SerbianStrings extends Strings {
   @override
   String get listFolderTitle => 'Фасцикла списка';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Фасцикла прилога';
 
   // Trash (M1).
   @override

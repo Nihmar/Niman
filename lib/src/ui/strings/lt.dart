@@ -116,25 +116,24 @@ final class LithuanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Atnaujinimai';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiniai atnaujinimai';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Tikrinti GitHub Releases paleidžiant ir kas 6 valandas';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Tikrinti atnaujinimus';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Pasiekiama Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Naudojate naujausią Niman versiją';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Nepavyko patikrinti atnaujinimų';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Atnaujinimas išsaugotas: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Diegimo programa paleista';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -251,48 +250,48 @@ final class LithuanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Keisti elemento tvarką';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Įrašų dar nėra';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Įrašyti';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stabdyti';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Groti';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Stabdyti atkūrimą';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Ištrinti įrašą';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importuoti garso failą';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Įrašoma…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Grojama';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Nėra leidimo naudoti mikrofoną — jis reikalingas įrašymui.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nauja balso pastaba';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mano įrašas';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Rodyti įrašus';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Parašykite pastabą…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Siųsti';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Pervadinti įrašą';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Aprašykite šį įrašą…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Redaguoti aprašą';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Ištrinti pastabą';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Redaguoti pastabą';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -304,7 +303,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Naujas sąrašas';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nauja balso pastaba';
   @override
   String get shortcutToggleSidebar => 'Rodyti arba slėpti filtrą';
   @override
@@ -992,7 +991,7 @@ final class LithuanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Sąrašų katalogas';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priedų katalogas';
 
   // Trash (M1).
   @override

@@ -113,25 +113,24 @@ final class TurkishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Güncellemeler';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Otomatik güncellemeler';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      "GitHub Releases'ı açılışta ve 6 saatte bir kontrol et";
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Güncellemeleri kontrol et';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version mevcut';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman güncel';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Güncelleme kontrolü başarısız';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Güncelleme şuraya kaydedildi: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Yükleyici başlatıldı';
   @override
   String get settingsSectionDiagnostics => 'Teşhis';
   @override
@@ -252,48 +251,48 @@ final class TurkishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Öğeyi yeniden sırala';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Henüz kayıt yok';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Kayda başla';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Durdur';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Oynat';
   @override
-  String get audioStopPlayback => 'Stop playback';
+  String get audioStopPlayback => 'Oynatmayı durdur';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Kaydı sil';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Ses dosyası içe aktar';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Kaydediliyor…';
   @override
-  String get audioPlaying => 'Playing';
+  String get audioPlaying => 'Oynatılıyor';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofon izni reddedildi — kayıt için gerekli.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Yeni sesli not';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Kaydım';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Kayıtları göster';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Bir not yaz…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Gönder';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Kaydı yeniden adlandır';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Bu kaydı açıkla…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Açıklamayı düzenle';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Notu sil';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Notu düzenle';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
@@ -305,7 +304,7 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutNewList => 'Yeni liste';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Yeni sesli not';
   @override
   String get shortcutToggleSidebar => 'Dosya ağacını göster veya gizle';
   @override
@@ -991,7 +990,7 @@ final class TurkishStrings extends Strings {
   @override
   String get listFolderTitle => 'Liste klasörü';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Ekler klasörü';
 
   // Trash (M1).
   @override
