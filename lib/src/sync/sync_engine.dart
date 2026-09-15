@@ -100,6 +100,23 @@ final class SyncReport {
   /// Detail for [aborted], safe to show.
   String? abortDetail;
 
+  /// Whether the run was a quick sync of the queued paths only.
+  bool quick = false;
+
+  /// What a quick sync left for the next full sync: trashing or moving a
+  /// local file because a single path is missing remotely is a full
+  /// sync's call, which sees the whole remote tree.
+  final List<SyncDecision> deferred = [];
+
+  /// The longest `Retry-After` the server asked for, if any.
+  Duration? retryAfter;
+
+  /// Queued hints the run settled.
+  int hintsDone = 0;
+
+  /// Queued hints the run left backing off.
+  int hintsFailed = 0;
+
   /// Whether the run reached the end with nothing failed or left over.
   bool get clean => aborted == null && failures.isEmpty && conflicts.isEmpty;
 
@@ -111,6 +128,7 @@ final class SyncReport {
       if (conflicts.isNotEmpty) '${conflicts.length} conflicts',
       if (skipped.isNotEmpty) '${skipped.length} skipped',
       if (failures.isNotEmpty) '${failures.length} failed',
+      if (deferred.isNotEmpty) '${deferred.length} left for a full sync',
     ];
     return parts.isEmpty ? 'nothing to do' : parts.join(', ');
   }
@@ -211,6 +229,7 @@ final class SyncEngine {
   static const _hashPasses = 3;
 
   Future<SyncReport>? _running;
+  bool _runningQuick = false;
 
   /// Runs and conflict resolutions go one at a time.
   Future<void> _lock = Future<void>.value();
@@ -248,35 +267,65 @@ final class SyncEngine {
     password: password,
   );
 
-  /// Runs a full sync. [confirm] is asked before a first sync and before a
-  /// plan that looks like a mass deletion; without it a first sync goes
-  /// ahead (it never deletes) and a mass deletion is refused. [onProgress]
-  /// hears the stages and, while applying, the count.
-  Future<SyncReport> run({SyncConfirm? confirm, SyncProgress? onProgress}) {
+  /// Runs a sync. [confirm] is asked before a first sync and before a plan
+  /// that looks like a mass deletion; without it a first sync goes ahead
+  /// (it never deletes) and a mass deletion is refused. [onProgress] hears
+  /// the stages and, while applying, the count.
+  ///
+  /// A full sync walks both trees; a [quick] one reconciles only the
+  /// paths of the queued hints that are due (docs/dev/sync.md, "Queue and
+  /// triggers"), refuses to be a first sync, and leaves local trashing
+  /// and moves to the next full sync. Either settles the hints it read:
+  /// done when their paths reconciled, backing off when not.
+  ///
+  /// A call while a full run goes joins it, as does a quick call while a
+  /// quick run goes; a full call while a quick run goes waits for it and
+  /// then runs.
+  Future<SyncReport> run({
+    SyncConfirm? confirm,
+    SyncProgress? onProgress,
+    bool quick = false,
+  }) {
     final running = _running;
-    if (running != null) {
-      _log.info('run: already running for $root, joining it');
+    if (running != null && (!_runningQuick || quick)) {
+      _log.info(
+        'run: a ${_runningQuick ? 'quick' : 'full'} run is going for $root, '
+        'joining it',
+      );
       return running;
     }
-    final next = _exclusively(() => _run(confirm, onProgress))
-        .whenComplete(() => _running = null);
+    late final Future<SyncReport> next;
+    next = _exclusively(() => _run(confirm, onProgress, quick: quick))
+        .whenComplete(() {
+          if (identical(_running, next)) _running = null;
+        });
     _running = next;
+    _runningQuick = quick;
     return next;
   }
 
   Future<SyncReport> _run(
     SyncConfirm? confirm,
-    SyncProgress? onProgress,
-  ) async {
+    SyncProgress? onProgress, {
+    required bool quick,
+  }) async {
     final clock = Stopwatch()..start();
-    final report = SyncReport();
-    _log.info('run: start for $root');
+    final report = SyncReport()..quick = quick;
+    final hints = quick
+        ? await store.dueOps(root)
+        : await store.pendingOps(root);
+    final kind = quick ? 'quick' : 'full';
+    _log.info('run: $kind start for $root (${hints.length} queued hints)');
+    if (quick && hints.isEmpty) {
+      _log.info('run: quick, nothing due in the queue');
+      return report;
+    }
     onProgress?.call(SyncStage.connecting, 0, 0);
     final ({SyncDestination destination, WebDavClient client}) connection;
     try {
       connection = await _connect();
     } on SyncFailure catch (e) {
-      return await _finish(report, e.reason, e.detail, clock);
+      return await _finish(report, hints, e.reason, e.detail, clock);
     }
     final client = connection.client;
     try {
@@ -284,6 +333,7 @@ final class SyncEngine {
         client,
         connection.destination,
         report,
+        hints,
         confirm,
         onProgress,
       );
@@ -294,6 +344,7 @@ final class SyncEngine {
     } on WebDavUnsupported catch (e) {
       _abort(report, SyncAbort.unsupported, e.message);
     } on WebDavRetryable catch (e) {
+      _noteRetryAfter(report, e.retryAfter);
       _abort(report, SyncAbort.offline, e.message);
     } on WebDavFailure catch (e) {
       _abort(report, SyncAbort.failed, e.message);
@@ -302,7 +353,13 @@ final class SyncEngine {
     } finally {
       client.close();
     }
-    return await _finish(report, report.aborted, report.abortDetail, clock);
+    return await _finish(
+      report,
+      hints,
+      report.aborted,
+      report.abortDetail,
+      clock,
+    );
   }
 
   void _abort(SyncReport report, SyncAbort why, String detail) {
@@ -311,13 +368,72 @@ final class SyncEngine {
       ..abortDetail = detail;
   }
 
+  static void _noteRetryAfter(SyncReport report, Duration? wait) {
+    if (wait == null) return;
+    final known = report.retryAfter;
+    if (known == null || wait > known) report.retryAfter = wait;
+  }
+
+  /// Settles the [hints] a run read: none when the run did not get to
+  /// look (no destination, no password, not confirmed); all backing off
+  /// when it stopped; otherwise each done unless a path it covers failed
+  /// or changed during the run. A conflict settles its hint: the report
+  /// carries it, and the next full sync finds it again.
+  Future<void> _settleHints(SyncReport report, List<SyncOp> hints) async {
+    if (hints.isEmpty) return;
+    final why = report.aborted;
+    if (why == SyncAbort.notConfigured ||
+        why == SyncAbort.missingPassword ||
+        why == SyncAbort.notConfirmed) {
+      _log.info('queue: ${hints.length} hints left as they are (${why!.name})');
+      return;
+    }
+    if (why != null) {
+      for (final hint in hints) {
+        if (await store.failOp(hint, '${why.name}: ${report.abortDetail}') !=
+            null) {
+          report.hintsFailed++;
+        }
+      }
+      return;
+    }
+    final troubles = <String, String>{
+      for (final path in report.skipped) path: 'changed during the sync',
+      for (final failure in report.failures) failure.path: failure.error,
+    };
+    for (final hint in hints) {
+      final error = _troubleFor(troubles, hint);
+      if (error == null) {
+        if (await store.completeOp(hint)) report.hintsDone++;
+      } else if (await store.failOp(hint, error) != null) {
+        report.hintsFailed++;
+      }
+    }
+  }
+
+  /// The error of the first troubled path [hint] covers (its path, its
+  /// move source, or anything under either), or null.
+  static String? _troubleFor(Map<String, String> troubles, SyncOp hint) {
+    final covered = [hint.path, ?hint.fromPath];
+    for (final entry in troubles.entries) {
+      for (final path in covered) {
+        if (entry.key == path || entry.key.startsWith('$path/')) {
+          return entry.value;
+        }
+      }
+    }
+    return null;
+  }
+
   Future<SyncReport> _finish(
     SyncReport report,
+    List<SyncOp> hints,
     SyncAbort? why,
     String? detail,
     Stopwatch clock,
   ) async {
     if (why != null) _abort(report, why, detail ?? why.name);
+    await _settleHints(report, hints);
     final error = report.aborted != null
         ? '${report.aborted!.name}: ${report.abortDetail}'
         : report.failures.isNotEmpty
@@ -329,8 +445,12 @@ final class SyncEngine {
       await store.recordSyncResult(root, error: error);
     }
     final line =
-        'run: done for $root in ${clock.elapsedMilliseconds} ms: '
-        '${report.summary()}';
+        'run: ${report.quick ? 'quick' : 'full'} done for $root in '
+        '${clock.elapsedMilliseconds} ms: ${report.summary()}'
+        '${hints.isEmpty ? '' : '; hints ${report.hintsDone} done, '
+                  '${report.hintsFailed} backing off'}'
+        '${report.retryAfter == null ? '' : '; server asked to wait '
+                  '${report.retryAfter!.inSeconds}s'}';
     if (report.clean) {
       _log.info(line);
     } else {
@@ -343,33 +463,53 @@ final class SyncEngine {
     WebDavClient client,
     SyncDestination destination,
     SyncReport report,
+    List<SyncOp> hints,
     SyncConfirm? confirm,
     SyncProgress? onProgress,
   ) async {
+    final allRows = await store.items(root);
+    final firstSync = allRows.isEmpty && destination.lastSyncAtMs == null;
+    if (report.quick && firstSync) {
+      _abort(report, SyncAbort.notConfirmed, 'no quick sync before the first');
+      return;
+    }
     final capabilities = await _capabilities(client, destination);
 
     onProgress?.call(SyncStage.scanning, 0, 0);
     final scanClock = Stopwatch()..start();
-    final local = await _scanLocal(root);
-    final localMs = scanClock.elapsedMilliseconds;
-    final remoteScan = await _scanRemote(client);
-    final remote = remoteScan.files;
-    final rows = await store.items(root);
+    final _Scan scan;
+    if (report.quick) {
+      scan = await _scanQuick(client, hints, allRows);
+    } else {
+      final local = await _scanLocal(root);
+      final remoteScan = await _scanRemote(client);
+      scan = (
+        local: local,
+        remote: remoteScan.files,
+        folders: remoteScan.folders,
+        rows: allRows,
+      );
+    }
+    final local = scan.local;
+    final remote = scan.remote;
+    final rows = scan.rows;
     _log.info(
-      'scan: ${local.length} local files ($localMs ms), '
-      '${remote.length} remote files in ${remoteScan.folders.length} '
-      'folders (${scanClock.elapsedMilliseconds - localMs} ms), '
-      '${rows.length} agreed rows',
+      'scan: ${report.quick ? 'quick, ' : ''}${local.length} local files, '
+      '${remote.length} remote files, ${scan.folders.length} remote folders '
+      'known, ${rows.length} of ${allRows.length} agreed rows '
+      '(${scanClock.elapsedMilliseconds} ms)',
     );
 
     onProgress?.call(SyncStage.comparing, 0, 0);
     final localSha = <String, String>{};
     final remoteSha = <String, String>{};
+    final rowCount = allRows.keys.where(isSyncablePath).length;
     var plan = planSync(
       local: local,
       remote: remote,
       rows: rows,
       capabilities: capabilities,
+      rowCount: rowCount,
     );
     for (var pass = 1; plan.needsHashes && pass <= _hashPasses; pass++) {
       await _hash(client, plan, localSha, remoteSha);
@@ -380,7 +520,27 @@ final class SyncEngine {
         capabilities: capabilities,
         localSha256: localSha,
         remoteSha256: remoteSha,
+        rowCount: rowCount,
       );
+    }
+    if (report.quick) {
+      final kept = <SyncDecision>[];
+      for (final decision in plan.decisions) {
+        if (decision.kind == SyncActionKind.trashLocal ||
+            decision.kind == SyncActionKind.moveLocal) {
+          report.deferred.add(decision);
+        } else {
+          kept.add(decision);
+        }
+      }
+      if (report.deferred.isNotEmpty) {
+        _log.info(
+          'plan: quick sync leaves ${report.deferred.length} for a full '
+          'sync (${report.deferred.take(3).join('; ')}'
+          '${report.deferred.length > 3 ? '; …' : ''})',
+        );
+        plan = SyncPlan(kept, rowCount: plan.rowCount);
+      }
     }
     report.plan = plan;
     _log.info(
@@ -388,7 +548,6 @@ final class SyncEngine {
       '${plan.rowCount} rows)',
     );
 
-    final firstSync = rows.isEmpty && destination.lastSyncAtMs == null;
     if (plan.looksLikeMassDeletion ||
         (firstSync && plan.decisions.isNotEmpty)) {
       final approved = confirm == null
@@ -418,7 +577,7 @@ final class SyncEngine {
       rows: rows,
       localSha: localSha,
       remoteSha: remoteSha,
-      folders: remoteScan.folders,
+      folders: scan.folders,
       report: report,
     );
     final total = plan.decisions.length;
@@ -448,6 +607,7 @@ final class SyncEngine {
         rethrow;
       } on WebDavRetryable catch (e) {
         if (e.status == null) rethrow; // the network: everything will fail
+        _noteRetryAfter(report, e.retryAfter);
         _failed(report, decision, e.message);
       } on WebDavFailure catch (e) {
         _failed(report, decision, e.message);
@@ -595,14 +755,85 @@ final class SyncEngine {
 
   // --- scanning -------------------------------------------------------
 
-  static Future<Map<String, LocalFileState>> _scanLocal(String root) =>
-      Isolate.run(() => scanLocalFiles(root));
+  static Future<Map<String, LocalFileState>> _scanLocal(
+    String root, {
+    String under = '',
+  }) => Isolate.run(() => scanLocalFiles(root, under: under));
+
+  /// The sides of the queued [hints]' paths only: each path (and a move's
+  /// source) is a file or a folder on either side; a folder brings every
+  /// file under it, locally, remotely and in the rows. One `PROPFIND
+  /// Depth: 0` per path, plus the walk of the folders among them.
+  Future<_Scan> _scanQuick(
+    WebDavClient client,
+    List<SyncOp> hints,
+    Map<String, SyncItem> allRows,
+  ) async {
+    // A missing destination must stop the run, not read as "every hinted
+    // file is gone remotely".
+    final top = await client.stat('', collection: true);
+    if (top == null || !top.isCollection) {
+      throw const WebDavNotFound('the destination folder is gone');
+    }
+    final scope = <String>{
+      for (final hint in hints) ...[hint.path, ?hint.fromPath],
+    }..removeWhere((path) => path.isEmpty || !_inSyncScope(path));
+    final local = <String, LocalFileState>{};
+    final remote = <String, WebDavResource>{};
+    final rows = <String, SyncItem>{};
+    final folders = <String>{''};
+    for (final path in scope) {
+      final under = '$path/';
+      for (final entry in allRows.entries) {
+        if (entry.key == path || entry.key.startsWith(under)) {
+          rows[entry.key] = entry.value;
+        }
+      }
+      final localDir = Directory(p.join(root, path)).existsSync();
+      if (localDir) {
+        local.addAll(await _scanLocal(root, under: path));
+      } else {
+        final state = await _stat(path);
+        if (state != null && isSyncablePath(path)) local[path] = state;
+      }
+      final folderLike =
+          localDir || allRows.keys.any((key) => key.startsWith(under));
+      final item = await client.stat(path, collection: folderLike);
+      if (item == null) continue;
+      _addFolderChain(folders, _parentOf(path));
+      if (item.isCollection) {
+        final walked = await _scanRemote(client, from: path);
+        remote.addAll(walked.files);
+        folders.addAll(walked.folders);
+      } else if (isSyncablePath(path)) {
+        remote[path] = item;
+      }
+    }
+    return (local: local, remote: remote, folders: folders, rows: rows);
+  }
+
+  /// Whether [path] can hold syncable files: a syncable file, or a folder
+  /// the scans walk.
+  static bool _inSyncScope(String path) =>
+      isSyncablePath(path) || _descends(path);
+
+  static String _parentOf(String path) {
+    final slash = path.lastIndexOf('/');
+    return slash < 0 ? '' : path.substring(0, slash);
+  }
+
+  static void _addFolderChain(Set<String> folders, String folder) {
+    var current = folder;
+    while (current.isNotEmpty && folders.add(current)) {
+      current = _parentOf(current);
+    }
+  }
 
   Future<({Map<String, WebDavResource> files, Set<String> folders})>
-  _scanRemote(WebDavClient client) async {
+  _scanRemote(WebDavClient client, {String from = ''}) async {
     final files = <String, WebDavResource>{};
-    final folders = <String>{''};
-    final queue = [''];
+    final folders = <String>{from};
+    final queue = [from];
     while (queue.isNotEmpty) {
       final folder = queue.removeLast();
       for (final item in await client.list(folder)) {
@@ -1087,6 +1318,15 @@ final class _StepFailure implements Exception {
   final String message;
 }
 
+/// What a scan found: files on both sides, the remote folders known to
+/// exist, and the agreed rows in scope.
+typedef _Scan = ({
+  Map<String, LocalFileState> local,
+  Map<String, WebDavResource> remote,
+  Set<String> folders,
+  Map<String, SyncItem> rows,
+});
+
 final class _RunContext {
   new({
     required this.client,
@@ -1128,12 +1368,20 @@ bool _descends(String path) {
   return !path.split('/').any((s) => s.startsWith('.'));
 }
 
-/// Every syncable file under [root], with size and mtime (no hashes).
+/// Every syncable file under [root] — or only under its folder [under] —
+/// with size and mtime (no hashes).
 ///
 /// Top-level so `Isolate.run` can take it. Symlinks are not followed.
-Future<Map<String, LocalFileState>> scanLocalFiles(String root) async {
+Future<Map<String, LocalFileState>> scanLocalFiles(
+  String root, {
+  String under = '',
+}) async {
   final files = <String, LocalFileState>{};
-  final queue = [''];
+  if (under.isNotEmpty &&
+      (!_descends(under) || !Directory(p.join(root, under)).existsSync())) {
+    return files;
+  }
+  final queue = [under];
   while (queue.isNotEmpty) {
     final folder = queue.removeLast();
     final dir = Directory(folder.isEmpty ? root : p.join(root, folder));
