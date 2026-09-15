@@ -1137,7 +1137,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
           key: const Key('auto-update-setting'),
           title: Text(AppStrings.autoUpdateTitle),
           subtitle: Text(AppStrings.autoUpdateSubtitle),
-          value: _autoUpdate ?? true,
+          value: _autoUpdate ?? false,
           onChanged: _toggleAutoUpdate,
         ),
         ListTile(

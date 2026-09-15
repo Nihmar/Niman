@@ -639,9 +639,8 @@ final class LibraryController implements LibrarySession {
 
   /// Whether the app checks GitHub Releases for updates (issue #81).
   @override
-  Future<bool> get autoUpdateEnabled async {
-    return AppSettingsRepo(await appDatabase).autoUpdateEnabled();
-  }
+  Future<bool> get autoUpdateEnabled async =>
+      await AppSettingsRepo(await appDatabase).autoUpdateEnabled();
 
   /// Sets (and persists) the auto-update toggle.
   @override
