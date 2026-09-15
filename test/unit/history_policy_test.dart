@@ -42,6 +42,16 @@ void main() {
     expect(d.take, isFalse);
   });
 
+  test('an empty note has nothing to keep, even at a session start', () {
+    final d = decide(
+      HistoryManifest(),
+      request(sessionStart: true, forced: HistoryReason.restore),
+      oldSha: emptySha256,
+    );
+    expect(d.take, isFalse);
+    expect(d.why, contains('empty'));
+  });
+
   test('history off keeps nothing, even a restore', () {
     final d = decide(
       HistoryManifest(),

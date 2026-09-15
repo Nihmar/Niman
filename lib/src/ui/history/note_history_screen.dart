@@ -13,8 +13,8 @@ import 'package:path/path.dart' as p;
 
 /// The kept versions of one note (issue #55, mockup H3): the current
 /// version on top, then the versions newest first, grouped by day, each
-/// with why it was kept and how many lines it changed against the
-/// version before it.
+/// with why it was kept and how many lines differ between it and the note
+/// as it is now (`+` added since, `−` gone since).
 ///
 /// Pops with the restored [HistoryVersion] when one was restored, so the
 /// caller can reload the note and offer Undo.
@@ -83,27 +83,31 @@ final class _NoteHistoryScreenState extends State<NoteHistoryScreen> {
     }
   }
 
-  /// Diffs each version against the one before it, oldest first, so the
-  /// rows fill in without holding the list back.
+  /// Diffs each version against the current note — the same comparison
+  /// the version screen opens on, so a row's numbers match what tapping it
+  /// shows — newest first, so the rows fill in without holding the list
+  /// back.
   Future<void> _loadStats(HistoryManifest manifest) async {
-    String? previous;
-    for (final version in manifest.versions) {
+    final String current;
+    try {
+      current = await widget.ops.readNote(widget.path);
+    } on Object catch (e) {
+      _log.warning('stats "${widget.path}": current text unreadable: $e');
+      return;
+    }
+    for (final version in manifest.versions.reversed) {
       final String text;
       try {
         text = await widget.ops.readNoteVersion(widget.path, version.number);
       } on Object catch (e) {
         _log.warning('stats "${widget.path}" v${version.number}: $e');
-        previous = null;
         continue;
       }
-      if (previous != null) {
-        final summary = await widget.compute(previous, text);
-        if (!mounted) return;
-        setState(() {
-          _stats[version.number] = (summary.added, summary.removed);
-        });
-      }
-      previous = text;
+      final summary = await widget.compute(text, current);
+      if (!mounted) return;
+      setState(() {
+        _stats[version.number] = (summary.added, summary.removed);
+      });
     }
   }
 

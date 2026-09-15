@@ -58,6 +58,11 @@ final class SnapshotDecision {
   String toString() => take ? 'take ${reason!.name} ($why)' : 'skip ($why)';
 }
 
+/// The sha256 of zero bytes: an empty note, which has nothing worth
+/// keeping (a note freshly created and not yet written in).
+const String emptySha256 =
+    'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
 /// Decides whether the content about to be overwritten becomes a version.
 ///
 /// [oldSha] is the sha256 of the note's current bytes, null when the note
@@ -69,6 +74,9 @@ SnapshotDecision decideSnapshot({
 }) {
   if (oldSha == null) {
     return const SnapshotDecision.skip('new note, nothing to keep');
+  }
+  if (oldSha == emptySha256) {
+    return const SnapshotDecision.skip('empty note, nothing to keep');
   }
   if (request.limit <= 0) {
     return const SnapshotDecision.skip('history off (historyVersions 0)');
