@@ -115,6 +115,26 @@ final class ItalianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Scorciatoie da tastiera';
   @override
+  String get settingsSectionUpdates => 'Aggiornamenti';
+  @override
+  String get autoUpdateTitle => 'Aggiornamenti automatici';
+  @override
+  String get autoUpdateSubtitle =>
+      'Controlla GitHub Releases all’avvio e ogni 6 ore';
+  @override
+  String get checkForUpdatesTitle => 'Controlla aggiornamenti';
+  @override
+  String updateAvailableMessage(Object version) =>
+      'Niman $version è disponibile';
+  @override
+  String get updateUpToDate => 'Niman è aggiornato';
+  @override
+  String get updateCheckFailed => 'Controllo aggiornamenti non riuscito';
+  @override
+  String updateSavedTo(Object path) => 'Aggiornamento salvato in $path';
+  @override
+  String get updateInstallerStarted => 'Programma di installazione avviato';
+  @override
   String get settingsSectionDiagnostics => 'Diagnostica';
   @override
   String get settingsSpellCheckTitle => 'Controlla ortografia';

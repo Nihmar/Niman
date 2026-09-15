@@ -30,6 +30,9 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/update/update_check.dart';
+import 'package:niman/src/update/update_scheduler.dart';
+import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_libraries.dart';
 import 'package:path/path.dart' as p;
@@ -369,6 +372,7 @@ final class LibraryController implements LibrarySession {
       }
       final appDb = await appDatabase;
       AppLog.enabled = await AppSettingsRepo(appDb).debugLogsEnabled();
+      _startUpdateChecks(appDb);
       // Before anything reads the settings: a library upgraded from the
       // `library_settings` table gets its `.niman/settings.json` here,
       // now that the folder is known to be reachable (T-ML-02).
@@ -631,6 +635,62 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase)
         .setDebugLogsEnabled(enabled: enabled);
     AppLog.enabled = enabled;
+  }
+
+  /// Whether the app checks GitHub Releases for updates (issue #81).
+  @override
+  Future<bool> get autoUpdateEnabled async {
+    return AppSettingsRepo(await appDatabase).autoUpdateEnabled();
+  }
+
+  /// Sets (and persists) the auto-update toggle.
+  @override
+  Future<void> setAutoUpdateEnabled({required bool enabled}) async {
+    _log.info('auto-update set to $enabled');
+    await AppSettingsRepo(await appDatabase)
+        .setAutoUpdateEnabled(enabled: enabled);
+  }
+
+  UpdateScheduler? _updateScheduler;
+
+  /// The latest available update the scheduler found, if any (issue #81).
+  ///
+  /// Read by the shell banner and the settings row; both rebuild on
+  /// session events, which [UpdateScheduler.onUpdate] bumps.
+  @override
+  UpdateAvailable? get pendingUpdate => _pendingUpdate;
+  UpdateAvailable? _pendingUpdate;
+
+  /// Drops the pending update (the banner's dismiss action).
+  @override
+  void clearPendingUpdate() {
+    _pendingUpdate = null;
+    notify();
+  }
+
+  /// Starts the launch + six-hourly update checks, once per controller.
+  ///
+  /// The scheduler only reads the settings store and GitHub; drift writes
+  /// stay on the main isolate, in its callbacks.
+  void _startUpdateChecks(AppDatabase appDb) {
+    if (_updateScheduler != null) return;
+    final repo = AppSettingsRepo(appDb);
+    _updateScheduler = UpdateScheduler(
+      isEnabled: repo.autoUpdateEnabled,
+      runCheck: () async {
+        try {
+          return await checkNow(current: await currentAppVersion());
+        } on Object catch (error) {
+          _log.warning('update check failed: $error');
+          return null;
+        }
+      },
+      noteChecked: repo.setLastUpdateCheck,
+      onUpdate: (update) {
+        _pendingUpdate = update;
+        notify();
+      },
+    )..start();
   }
 
   /// The open library's settings, or the shipped defaults while none is
@@ -904,6 +964,8 @@ final class LibraryController implements LibrarySession {
   /// app settings database, which outlives every library.
   @override
   Future<void> dispose() async {
+    _updateScheduler?.stop();
+    _updateScheduler = null;
     await close();
     if (!_events.isClosed) {
       await _events.close();

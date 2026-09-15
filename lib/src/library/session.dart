@@ -13,6 +13,7 @@ import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
 import 'package:niman/src/templates/repo.dart';
+import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 
 /// Operations the UI layer performs on an open library.
@@ -235,6 +236,21 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the debug log recording toggle.
   Future<void> setDebugLogsEnabled({required bool enabled});
+
+  /// Whether the app checks GitHub Releases for updates (issue #81,
+  /// default true). The manual check in Settings works regardless.
+  Future<bool> get autoUpdateEnabled;
+
+  /// Sets (and persists) the auto-update toggle.
+  Future<void> setAutoUpdateEnabled({required bool enabled});
+
+  /// The latest available update the background check found, if any
+  /// (issue #81). The shell banner and the settings row read it; both
+  /// rebuild on session events.
+  UpdateAvailable? get pendingUpdate;
+
+  /// Drops the pending update (the banner's dismiss action).
+  void clearPendingUpdate();
 
   /// Whether the note editor shows the row-number column (default true).
   Future<bool> get lineNumbersEnabled;

@@ -115,6 +115,26 @@ final class SwedishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
   @override
+  String get settingsSectionUpdates => 'Updates';
+  @override
+  String get autoUpdateTitle => 'Automatic updates';
+  @override
+  String get autoUpdateSubtitle =>
+      'Check GitHub Releases at launch and every 6 hours';
+  @override
+  String get checkForUpdatesTitle => 'Check for updates';
+  @override
+  String updateAvailableMessage(Object version) =>
+      'Niman $version is available';
+  @override
+  String get updateUpToDate => 'Niman is up to date';
+  @override
+  String get updateCheckFailed => 'Update check failed';
+  @override
+  String updateSavedTo(Object path) => 'Update saved to $path';
+  @override
+  String get updateInstallerStarted => 'Installer started';
+  @override
   String get settingsSectionDiagnostics => 'Diagnostik';
   @override
   String get settingsSpellCheckTitle => 'Stavkontroll';

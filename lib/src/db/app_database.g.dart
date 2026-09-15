@@ -44,6 +44,32 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _autoUpdateEnabledMeta = const VerificationMeta(
+    'autoUpdateEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> autoUpdateEnabled = GeneratedColumn<bool>(
+    'auto_update_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("auto_update_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _lastUpdateCheckMsMeta = const VerificationMeta(
+    'lastUpdateCheckMs',
+  );
+  @override
+  late final GeneratedColumn<int> lastUpdateCheckMs = GeneratedColumn<int>(
+    'last_update_check_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _previewModeMeta = const VerificationMeta(
     'previewMode',
   );
@@ -132,6 +158,8 @@ class $AppSettingsTable extends AppSettings
     id,
     libraryPath,
     debugLogsEnabled,
+    autoUpdateEnabled,
+    lastUpdateCheckMs,
     previewMode,
     splitRatio,
     language,
@@ -170,6 +198,24 @@ class $AppSettingsTable extends AppSettings
         debugLogsEnabled.isAcceptableOrUnknown(
           data['debug_logs_enabled']!,
           _debugLogsEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('auto_update_enabled')) {
+      context.handle(
+        _autoUpdateEnabledMeta,
+        autoUpdateEnabled.isAcceptableOrUnknown(
+          data['auto_update_enabled']!,
+          _autoUpdateEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_update_check_ms')) {
+      context.handle(
+        _lastUpdateCheckMsMeta,
+        lastUpdateCheckMs.isAcceptableOrUnknown(
+          data['last_update_check_ms']!,
+          _lastUpdateCheckMsMeta,
         ),
       );
     }
@@ -251,6 +297,14 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}debug_logs_enabled'],
       )!,
+      autoUpdateEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}auto_update_enabled'],
+      )!,
+      lastUpdateCheckMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_update_check_ms'],
+      ),
       previewMode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}preview_mode'],
@@ -298,6 +352,16 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 
   /// Whether the in-app debug log buffer records events (default true).
   final bool debugLogsEnabled;
+
+  /// Whether the app checks GitHub Releases for updates (issue #81).
+  ///
+  /// On by default: the check is a quiet status, never a dialog. The
+  /// manual "Check for updates" row in Settings works regardless.
+  final bool autoUpdateEnabled;
+
+  /// Last update-check time, milliseconds since epoch; null until the
+  /// first check runs (issue #81).
+  final int? lastUpdateCheckMs;
 
   /// The preview layout mode: `auto` (width-based), `split` or `switch`
   /// (forced; default `auto`).
@@ -347,6 +411,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.id,
     this.libraryPath,
     required this.debugLogsEnabled,
+    required this.autoUpdateEnabled,
+    this.lastUpdateCheckMs,
     required this.previewMode,
     required this.splitRatio,
     required this.language,
@@ -363,6 +429,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['library_path'] = Variable<String>(libraryPath);
     }
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
+    map['auto_update_enabled'] = Variable<bool>(autoUpdateEnabled);
+    if (!nullToAbsent || lastUpdateCheckMs != null) {
+      map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs);
+    }
     map['preview_mode'] = Variable<String>(previewMode);
     map['split_ratio'] = Variable<double>(splitRatio);
     map['language'] = Variable<String>(language);
@@ -382,6 +452,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? const Value.absent()
           : Value(libraryPath),
       debugLogsEnabled: Value(debugLogsEnabled),
+      autoUpdateEnabled: Value(autoUpdateEnabled),
+      lastUpdateCheckMs: lastUpdateCheckMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUpdateCheckMs),
       previewMode: Value(previewMode),
       splitRatio: Value(splitRatio),
       language: Value(language),
@@ -403,6 +477,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: serializer.fromJson<int>(json['id']),
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
+      autoUpdateEnabled: serializer.fromJson<bool>(json['autoUpdateEnabled']),
+      lastUpdateCheckMs: serializer.fromJson<int?>(json['lastUpdateCheckMs']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
       language: serializer.fromJson<String>(json['language']),
@@ -423,6 +499,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'id': serializer.toJson<int>(id),
       'libraryPath': serializer.toJson<String?>(libraryPath),
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
+      'autoUpdateEnabled': serializer.toJson<bool>(autoUpdateEnabled),
+      'lastUpdateCheckMs': serializer.toJson<int?>(lastUpdateCheckMs),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
       'language': serializer.toJson<String>(language),
@@ -437,6 +515,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? id,
     Value<String?> libraryPath = const Value.absent(),
     bool? debugLogsEnabled,
+    bool? autoUpdateEnabled,
+    Value<int?> lastUpdateCheckMs = const Value.absent(),
     String? previewMode,
     double? splitRatio,
     String? language,
@@ -448,6 +528,10 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+    autoUpdateEnabled: autoUpdateEnabled ?? this.autoUpdateEnabled,
+    lastUpdateCheckMs: lastUpdateCheckMs.present
+        ? lastUpdateCheckMs.value
+        : this.lastUpdateCheckMs,
     previewMode: previewMode ?? this.previewMode,
     splitRatio: splitRatio ?? this.splitRatio,
     language: language ?? this.language,
@@ -467,6 +551,12 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       debugLogsEnabled: data.debugLogsEnabled.present
           ? data.debugLogsEnabled.value
           : this.debugLogsEnabled,
+      autoUpdateEnabled: data.autoUpdateEnabled.present
+          ? data.autoUpdateEnabled.value
+          : this.autoUpdateEnabled,
+      lastUpdateCheckMs: data.lastUpdateCheckMs.present
+          ? data.lastUpdateCheckMs.value
+          : this.lastUpdateCheckMs,
       previewMode: data.previewMode.present
           ? data.previewMode.value
           : this.previewMode,
@@ -495,6 +585,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
+          ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
@@ -511,6 +603,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     id,
     libraryPath,
     debugLogsEnabled,
+    autoUpdateEnabled,
+    lastUpdateCheckMs,
     previewMode,
     splitRatio,
     language,
@@ -526,6 +620,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.id == this.id &&
           other.libraryPath == this.libraryPath &&
           other.debugLogsEnabled == this.debugLogsEnabled &&
+          other.autoUpdateEnabled == this.autoUpdateEnabled &&
+          other.lastUpdateCheckMs == this.lastUpdateCheckMs &&
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
           other.language == this.language &&
@@ -539,6 +635,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String?> libraryPath;
   final Value<bool> debugLogsEnabled;
+  final Value<bool> autoUpdateEnabled;
+  final Value<int?> lastUpdateCheckMs;
   final Value<String> previewMode;
   final Value<double> splitRatio;
   final Value<String> language;
@@ -550,6 +648,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.autoUpdateEnabled = const Value.absent(),
+    this.lastUpdateCheckMs = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
@@ -562,6 +662,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
+    this.autoUpdateEnabled = const Value.absent(),
+    this.lastUpdateCheckMs = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
     this.language = const Value.absent(),
@@ -574,6 +676,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<int>? id,
     Expression<String>? libraryPath,
     Expression<bool>? debugLogsEnabled,
+    Expression<bool>? autoUpdateEnabled,
+    Expression<int>? lastUpdateCheckMs,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
     Expression<String>? language,
@@ -586,6 +690,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (id != null) 'id': id,
       if (libraryPath != null) 'library_path': libraryPath,
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
+      if (autoUpdateEnabled != null) 'auto_update_enabled': autoUpdateEnabled,
+      if (lastUpdateCheckMs != null) 'last_update_check_ms': lastUpdateCheckMs,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
       if (language != null) 'language': language,
@@ -602,6 +708,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? id,
     Value<String?>? libraryPath,
     Value<bool>? debugLogsEnabled,
+    Value<bool>? autoUpdateEnabled,
+    Value<int?>? lastUpdateCheckMs,
     Value<String>? previewMode,
     Value<double>? splitRatio,
     Value<String>? language,
@@ -614,6 +722,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       id: id ?? this.id,
       libraryPath: libraryPath ?? this.libraryPath,
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
+      autoUpdateEnabled: autoUpdateEnabled ?? this.autoUpdateEnabled,
+      lastUpdateCheckMs: lastUpdateCheckMs ?? this.lastUpdateCheckMs,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
       language: language ?? this.language,
@@ -636,6 +746,12 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     }
     if (debugLogsEnabled.present) {
       map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled.value);
+    }
+    if (autoUpdateEnabled.present) {
+      map['auto_update_enabled'] = Variable<bool>(autoUpdateEnabled.value);
+    }
+    if (lastUpdateCheckMs.present) {
+      map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs.value);
     }
     if (previewMode.present) {
       map['preview_mode'] = Variable<String>(previewMode.value);
@@ -671,6 +787,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('id: $id, ')
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
+          ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
+          ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
           ..write('language: $language, ')
@@ -1348,6 +1466,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> autoUpdateEnabled,
+      Value<int?> lastUpdateCheckMs,
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> language,
@@ -1361,6 +1481,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
+      Value<bool> autoUpdateEnabled,
+      Value<int?> lastUpdateCheckMs,
       Value<String> previewMode,
       Value<double> splitRatio,
       Value<String> language,
@@ -1391,6 +1513,16 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get autoUpdateEnabled => $composableBuilder(
+    column: $table.autoUpdateEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastUpdateCheckMs => $composableBuilder(
+    column: $table.lastUpdateCheckMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1454,6 +1586,16 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get autoUpdateEnabled => $composableBuilder(
+    column: $table.autoUpdateEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastUpdateCheckMs => $composableBuilder(
+    column: $table.lastUpdateCheckMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get previewMode => $composableBuilder(
     column: $table.previewMode,
     builder: (column) => ColumnOrderings(column),
@@ -1509,6 +1651,16 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get debugLogsEnabled => $composableBuilder(
     column: $table.debugLogsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get autoUpdateEnabled => $composableBuilder(
+    column: $table.autoUpdateEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastUpdateCheckMs => $composableBuilder(
+    column: $table.lastUpdateCheckMs,
     builder: (column) => column,
   );
 
@@ -1580,6 +1732,8 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> autoUpdateEnabled = const Value.absent(),
+                Value<int?> lastUpdateCheckMs = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
@@ -1591,6 +1745,8 @@ class $$AppSettingsTableTableManager
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                autoUpdateEnabled: autoUpdateEnabled,
+                lastUpdateCheckMs: lastUpdateCheckMs,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 language: language,
@@ -1604,6 +1760,8 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
+                Value<bool> autoUpdateEnabled = const Value.absent(),
+                Value<int?> lastUpdateCheckMs = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
                 Value<String> language = const Value.absent(),
@@ -1615,6 +1773,8 @@ class $$AppSettingsTableTableManager
                 id: id,
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
+                autoUpdateEnabled: autoUpdateEnabled,
+                lastUpdateCheckMs: lastUpdateCheckMs,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
                 language: language,
@@ -1624,16 +1784,7 @@ class $$AppSettingsTableTableManager
                 changelogSeenVersion: changelogSeenVersion,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$AppSettingsTable, AppSetting>(table),
-                  BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1799,16 +1950,7 @@ class $$KnownLibrariesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$KnownLibrariesTable, KnownLibrary>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $KnownLibrariesTable,
-                    KnownLibrary
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2006,16 +2148,7 @@ class $$WidgetConfigsTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<$WidgetConfigsTable, WidgetConfig>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $WidgetConfigsTable,
-                    WidgetConfig
-                  >(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
         ),

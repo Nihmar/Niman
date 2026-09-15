@@ -24,6 +24,8 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/template_help.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
+import 'package:niman/src/ui/update_actions.dart';
+import 'package:niman/src/update/update_service.dart';
 
 /// Library-level settings (M1: trash toggle, re-index, close).
 ///
@@ -58,6 +60,9 @@ final class SettingsBody extends StatefulWidget {
 final class _SettingsBodyState extends State<SettingsBody> {
   bool? _trash;
   bool? _debugLogs;
+  bool? _autoUpdate;
+  bool _checkingUpdates = false;
+  String? _updateStatus;
   bool? _lineNumbers;
   bool? _autofocusEditor;
   bool? _reminderShowTokens;
@@ -119,6 +124,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (ops == null) return;
     final enabled = await ops.trashEnabled;
     final debug = await controller.debugLogsEnabled;
+    final autoUpdate = await controller.autoUpdateEnabled;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
     final reminderTokens = await controller.reminderShowTokens;
@@ -143,6 +149,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
       setState(() {
         _trash = enabled;
         _debugLogs = debug;
+        _autoUpdate = autoUpdate;
         _lineNumbers = lineNumbers;
         _autofocusEditor = autofocus;
         _reminderShowTokens = reminderTokens;
@@ -301,6 +308,49 @@ final class _SettingsBodyState extends State<SettingsBody> {
     await controller.setDebugLogsEnabled(enabled: value);
     if (mounted) {
       setState(() => _debugLogs = value);
+    }
+  }
+
+  Future<void> _toggleAutoUpdate(bool value) async {
+    final controller = widget.controller;
+    await controller.setAutoUpdateEnabled(enabled: value);
+    if (mounted) {
+      setState(() => _autoUpdate = value);
+    }
+  }
+
+  /// Runs a manual update check (issue #81) and downloads when newer.
+  ///
+  /// Works regardless of the automatic toggle. The outcome — available
+  /// (then downloaded), up to date, or failed — lands in the row's
+  /// status line, never in a dialog.
+  Future<void> _checkUpdatesManually() async {
+    if (_checkingUpdates) return;
+    setState(() {
+      _checkingUpdates = true;
+      _updateStatus = null;
+    });
+    try {
+      final update = await checkNow(current: await currentAppVersion());
+      if (!mounted) return;
+      if (update == null) {
+        setState(() => _updateStatus = AppStrings.updateUpToDate);
+        return;
+      }
+      setState(
+        () => _updateStatus = AppStrings.updateAvailableMessage(
+          update.version,
+        ),
+      );
+      await downloadAndApplyUpdate(context, update);
+      widget.controller.clearPendingUpdate();
+    } on Object catch (_) {
+      if (!mounted) return;
+      setState(() => _updateStatus = AppStrings.updateCheckFailed);
+    } finally {
+      if (mounted) {
+        setState(() => _checkingUpdates = false);
+      }
     }
   }
 
@@ -1080,6 +1130,30 @@ final class _SettingsBodyState extends State<SettingsBody> {
           subtitle: Text(AppStrings.reminderShowTokensSubtitle),
           value: _reminderShowTokens ?? false,
           onChanged: _toggleReminderTokens,
+        ),
+
+        SettingsSection(AppStrings.settingsSectionUpdates),
+        SwitchListTile(
+          key: const Key('auto-update-setting'),
+          title: Text(AppStrings.autoUpdateTitle),
+          subtitle: Text(AppStrings.autoUpdateSubtitle),
+          value: _autoUpdate ?? true,
+          onChanged: _toggleAutoUpdate,
+        ),
+        ListTile(
+          key: const Key('check-updates-setting'),
+          leading: _checkingUpdates
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.system_update),
+          title: Text(AppStrings.checkForUpdatesTitle),
+          subtitle: _updateStatus == null
+              ? null
+              : Text(_updateStatus!),
+          onTap: _checkUpdatesManually,
         ),
 
         SettingsSection(AppStrings.settingsSectionDiagnostics),
