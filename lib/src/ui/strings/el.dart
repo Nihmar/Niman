@@ -311,6 +311,14 @@ final class GreekStrings extends Strings {
   String get audioMoreActions => 'Περισσότερες ενέργειες';
   @override
   String get audioDiscardRecording => 'Απόρριψη ηχογράφησης';
+  @override
+  String get audioPauseRecording => 'Παύση ηχογράφησης';
+  @override
+  String get audioResumeRecording => 'Συνέχιση ηχογράφησης';
+  @override
+  String get audioRecordingPaused => 'Σε παύση';
+  @override
+  String get audioSavingRecording => 'Αποθήκευση…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

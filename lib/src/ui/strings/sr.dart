@@ -306,6 +306,14 @@ final class SerbianStrings extends Strings {
   String get audioMoreActions => 'Још радњи';
   @override
   String get audioDiscardRecording => 'Одбаци снимак';
+  @override
+  String get audioPauseRecording => 'Паузирај снимање';
+  @override
+  String get audioResumeRecording => 'Настави снимање';
+  @override
+  String get audioRecordingPaused => 'Паузирано';
+  @override
+  String get audioSavingRecording => 'Чување…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

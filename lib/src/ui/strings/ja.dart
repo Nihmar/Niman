@@ -289,6 +289,14 @@ final class JapaneseStrings extends Strings {
   String get audioMoreActions => 'その他の操作';
   @override
   String get audioDiscardRecording => '録音を破棄';
+  @override
+  String get audioPauseRecording => '録音を一時停止';
+  @override
+  String get audioResumeRecording => '録音を再開';
+  @override
+  String get audioRecordingPaused => '一時停止中';
+  @override
+  String get audioSavingRecording => '保存中…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

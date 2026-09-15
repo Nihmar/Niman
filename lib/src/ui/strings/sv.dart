@@ -308,6 +308,14 @@ final class SwedishStrings extends Strings {
   String get audioMoreActions => 'Fler åtgärder';
   @override
   String get audioDiscardRecording => 'Kasta inspelning';
+  @override
+  String get audioPauseRecording => 'Pausa inspelningen';
+  @override
+  String get audioResumeRecording => 'Återuppta inspelningen';
+  @override
+  String get audioRecordingPaused => 'Pausad';
+  @override
+  String get audioSavingRecording => 'Sparar…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

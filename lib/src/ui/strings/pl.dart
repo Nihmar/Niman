@@ -306,6 +306,14 @@ final class PolishStrings extends Strings {
   String get audioMoreActions => 'Więcej działań';
   @override
   String get audioDiscardRecording => 'Odrzuć nagranie';
+  @override
+  String get audioPauseRecording => 'Wstrzymaj nagrywanie';
+  @override
+  String get audioResumeRecording => 'Wznów nagrywanie';
+  @override
+  String get audioRecordingPaused => 'Wstrzymano';
+  @override
+  String get audioSavingRecording => 'Zapisywanie…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

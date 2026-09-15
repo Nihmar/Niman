@@ -73,8 +73,10 @@ Search a single tag with `#tag` (see [search](search.md)).
   right-click it to delete it. The round button beside the field is the
   microphone while the field is empty and becomes send as soon as you
   type; the paperclip inside the field attaches an audio file. While
-  recording, the field shows a red bar with the elapsed time and a
-  discard button, and the round button stops and saves. Recording
+  recording, the field shows a red bar with the elapsed time, a pause
+  button (the clock holds and the dot breathes until you resume) and a
+  discard button, and the round button stops and saves; the bar reads
+  `Saving…` until the new vocal is in the note. Recording
   writes WAV (PCM 16-bit: playable on Android, Linux and Windows with no
   extra codec); attaching keeps the file's own format (`.mp3`, `.m4a`,
   `.ogg`, `.opus`, `.aac`, `.flac`, …). On Linux recording needs

@@ -306,6 +306,14 @@ final class MacedonianStrings extends Strings {
   String get audioMoreActions => 'Повеќе дејства';
   @override
   String get audioDiscardRecording => 'Отфрли ја снимката';
+  @override
+  String get audioPauseRecording => 'Паузирај го снимањето';
+  @override
+  String get audioResumeRecording => 'Продолжи го снимањето';
+  @override
+  String get audioRecordingPaused => 'Паузирано';
+  @override
+  String get audioSavingRecording => 'Се зачувува…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

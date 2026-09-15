@@ -304,6 +304,14 @@ final class CroatianStrings extends Strings {
   String get audioMoreActions => 'Više radnji';
   @override
   String get audioDiscardRecording => 'Odbaci snimku';
+  @override
+  String get audioPauseRecording => 'Pauziraj snimanje';
+  @override
+  String get audioResumeRecording => 'Nastavi snimanje';
+  @override
+  String get audioRecordingPaused => 'Pauzirano';
+  @override
+  String get audioSavingRecording => 'Spremanje…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

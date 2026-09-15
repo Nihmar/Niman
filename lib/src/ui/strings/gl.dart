@@ -308,6 +308,14 @@ final class GalicianStrings extends Strings {
   String get audioMoreActions => 'Máis accións';
   @override
   String get audioDiscardRecording => 'Descartar gravación';
+  @override
+  String get audioPauseRecording => 'Pausar a gravación';
+  @override
+  String get audioResumeRecording => 'Retomar a gravación';
+  @override
+  String get audioRecordingPaused => 'En pausa';
+  @override
+  String get audioSavingRecording => 'Gardando…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -301,6 +301,14 @@ final class EstonianStrings extends Strings {
   String get audioMoreActions => 'Rohkem toiminguid';
   @override
   String get audioDiscardRecording => 'Loobu salvestisest';
+  @override
+  String get audioPauseRecording => 'Peata salvestamine';
+  @override
+  String get audioResumeRecording => 'Jätka salvestamist';
+  @override
+  String get audioRecordingPaused => 'Peatatud';
+  @override
+  String get audioSavingRecording => 'Salvestamine…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

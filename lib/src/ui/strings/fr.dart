@@ -308,6 +308,14 @@ final class FrenchStrings extends Strings {
   String get audioMoreActions => "Plus d'actions";
   @override
   String get audioDiscardRecording => "Abandonner l'enregistrement";
+  @override
+  String get audioPauseRecording => 'Mettre l’enregistrement en pause';
+  @override
+  String get audioResumeRecording => 'Reprendre l’enregistrement';
+  @override
+  String get audioRecordingPaused => 'En pause';
+  @override
+  String get audioSavingRecording => 'Enregistrement du fichier…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

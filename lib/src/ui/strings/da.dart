@@ -306,6 +306,14 @@ final class DanishStrings extends Strings {
   String get audioMoreActions => 'Flere handlinger';
   @override
   String get audioDiscardRecording => 'Kassér optagelse';
+  @override
+  String get audioPauseRecording => 'Sæt optagelsen på pause';
+  @override
+  String get audioResumeRecording => 'Genoptag optagelsen';
+  @override
+  String get audioRecordingPaused => 'På pause';
+  @override
+  String get audioSavingRecording => 'Gemmer…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

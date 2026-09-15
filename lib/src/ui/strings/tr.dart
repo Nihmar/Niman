@@ -302,6 +302,14 @@ final class TurkishStrings extends Strings {
   String get audioMoreActions => 'Diğer işlemler';
   @override
   String get audioDiscardRecording => 'Kaydı at';
+  @override
+  String get audioPauseRecording => 'Kaydı duraklat';
+  @override
+  String get audioResumeRecording => 'Kayda devam et';
+  @override
+  String get audioRecordingPaused => 'Duraklatıldı';
+  @override
+  String get audioSavingRecording => 'Kaydediliyor…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

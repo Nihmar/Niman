@@ -307,6 +307,14 @@ final class RomanianStrings extends Strings {
   String get audioMoreActions => 'Mai multe acțiuni';
   @override
   String get audioDiscardRecording => 'Renunță la înregistrare';
+  @override
+  String get audioPauseRecording => 'Întrerupe înregistrarea';
+  @override
+  String get audioResumeRecording => 'Reia înregistrarea';
+  @override
+  String get audioRecordingPaused => 'În pauză';
+  @override
+  String get audioSavingRecording => 'Se salvează…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

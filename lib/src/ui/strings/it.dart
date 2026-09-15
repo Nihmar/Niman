@@ -307,6 +307,14 @@ final class ItalianStrings extends Strings {
   String get audioMoreActions => 'Altre azioni';
   @override
   String get audioDiscardRecording => 'Scarta registrazione';
+  @override
+  String get audioPauseRecording => 'Metti in pausa la registrazione';
+  @override
+  String get audioResumeRecording => 'Riprendi la registrazione';
+  @override
+  String get audioRecordingPaused => 'In pausa';
+  @override
+  String get audioSavingRecording => 'Salvataggio…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

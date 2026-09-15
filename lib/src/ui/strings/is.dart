@@ -302,6 +302,14 @@ final class IcelandicStrings extends Strings {
   String get audioMoreActions => 'Fleiri aðgerðir';
   @override
   String get audioDiscardRecording => 'Henda upptöku';
+  @override
+  String get audioPauseRecording => 'Gera hlé á upptöku';
+  @override
+  String get audioResumeRecording => 'Halda upptöku áfram';
+  @override
+  String get audioRecordingPaused => 'Í hléi';
+  @override
+  String get audioSavingRecording => 'Vistar…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

@@ -307,6 +307,14 @@ final class GermanStrings extends Strings {
   String get audioMoreActions => 'Weitere Aktionen';
   @override
   String get audioDiscardRecording => 'Aufnahme verwerfen';
+  @override
+  String get audioPauseRecording => 'Aufnahme pausieren';
+  @override
+  String get audioResumeRecording => 'Aufnahme fortsetzen';
+  @override
+  String get audioRecordingPaused => 'Pausiert';
+  @override
+  String get audioSavingRecording => 'Wird gespeichert…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

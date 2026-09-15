@@ -148,6 +148,10 @@ abstract base class Strings {
   String audioUntitled(int n);
   String get audioMoreActions;
   String get audioDiscardRecording;
+  String get audioPauseRecording;
+  String get audioResumeRecording;
+  String get audioRecordingPaused;
+  String get audioSavingRecording;
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;

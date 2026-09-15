@@ -305,6 +305,14 @@ final class EnglishStrings extends Strings {
   String get audioMoreActions => 'More actions';
   @override
   String get audioDiscardRecording => 'Discard recording';
+  @override
+  String get audioPauseRecording => 'Pause recording';
+  @override
+  String get audioResumeRecording => 'Resume recording';
+  @override
+  String get audioRecordingPaused => 'Paused';
+  @override
+  String get audioSavingRecording => 'Saving…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override

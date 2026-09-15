@@ -289,6 +289,14 @@ final class ChineseStrings extends Strings {
   String get audioMoreActions => '更多操作';
   @override
   String get audioDiscardRecording => '放弃录音';
+  @override
+  String get audioPauseRecording => '暂停录音';
+  @override
+  String get audioResumeRecording => '继续录音';
+  @override
+  String get audioRecordingPaused => '已暂停';
+  @override
+  String get audioSavingRecording => '正在保存…';
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   @override
