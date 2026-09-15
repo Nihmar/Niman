@@ -1135,4 +1135,92 @@ final class LatvianStrings extends Strings {
   String get changelogEmpty => 'Izmaiņu žurnāls ieraksti nav pieejami';
   @override
   String changelogWhatsNew(String version) => 'Jaunums versijā $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Vēsture';
+  @override
+  String get noteMenuTooltip => 'Piezīmes darbības';
+  @override
+  String get historyCurrentVersion => 'Pašreizējā versija';
+  @override
+  String get historyCurrentSubtitle => 'Piezīme tāda, kāda tā ir tagad';
+  @override
+  String get historyToday => 'Šodien';
+  @override
+  String get historyYesterday => 'Vakar';
+  @override
+  String get historyReasonSession => 'pirms rediģēšanas';
+  @override
+  String get historyReasonInterval => 'rediģējot';
+  @override
+  String get historyReasonRestore => 'pirms atjaunošanas';
+  @override
+  String get historyReasonSync => 'pirms sinhronizācijas';
+  @override
+  String get historyReasonReplace => 'pirms aizstāšanas';
+  @override
+  String get historyReasonUnknown => 'atgūta';
+  @override
+  String get historySyncBase => 'sinhronizācijas bāze';
+  @override
+  String get historyEmpty =>
+      'Versiju vēl nav. Niman saglabā vienu, kad sākat rediģēt piezīmi, un '
+      'pēc tam ne biežāk kā reizi dažās minūtēs, kamēr rakstāt.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Saglabātas versijas: $kept no $limit';
+  @override
+  String get historyBaseKept =>
+      'Sinhronizācijas bāze tiek saglabāta arī pāri limitam.';
+  @override
+  String get historyOff =>
+      'Šai bibliotēkai vēsture ir izslēgta (Iestatījumi, Bibliotēka).';
+  @override
+  String get historyLoadFailed => 'Nevarēja nolasīt vēsturi';
+  @override
+  String get historyCompareSubtitle => 'Salīdzinājumā ar pašreizējo versiju';
+  @override
+  String get historyTabChanges => 'Izmaiņas';
+  @override
+  String get historyTabVersion => 'Versija';
+  @override
+  String get historyNoChanges => 'Teksts ir tāds pats kā pašreizējā versijā.';
+  @override
+  String get historyRestoreAction => 'Atjaunot šo versiju';
+  @override
+  String historyRestoreConfirmTitle(String when) => 'Atjaunot versiju ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Pašreizējais teksts vispirms tiek saglabāts vēsturē, tāpēc vienmēr '
+      'varēsiet atgriezties.';
+  @override
+  String get historyRestoreConfirm => 'Atjaunot';
+  @override
+  String historyRestored(String when) => 'Versija atjaunota ($when)';
+  @override
+  String get historyRestoreFailed => 'Nevarēja atjaunot versiju';
+  @override
+  String get actionUndo => 'Atsaukt';
+  @override
+  String diffLineRange(int start, int end) => 'Rindas $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rinda $line';
+  @override
+  String diffUnchanged(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count nemainīta rinda'
+      : '$count nemainītas rindas';
+  @override
+  String get historyVersionsTitle => 'Cik versiju glabāt';
+  @override
+  String get historyVersionsSubtitle => 'Katrai piezīmei, katalogā .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nevienu' : '$count';
+  @override
+  String get historyIntervalTitle => 'Jauna versija ne biežāk kā ik pēc';
+  @override
+  String get historyIntervalSubtitle =>
+      'Rakstot; sākot rediģēt piezīmi, versija tiek saglabāta vienmēr';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

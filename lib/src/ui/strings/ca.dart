@@ -1173,4 +1173,92 @@ final class CatalanStrings extends Strings {
   String get changelogEmpty => 'No hi ha entrades de registre disponibles';
   @override
   String changelogWhatsNew(String version) => 'Novetats a la versió $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historial';
+  @override
+  String get noteMenuTooltip => 'Accions de la nota';
+  @override
+  String get historyCurrentVersion => 'Versió actual';
+  @override
+  String get historyCurrentSubtitle => 'La nota tal com és ara';
+  @override
+  String get historyToday => 'Avui';
+  @override
+  String get historyYesterday => 'Ahir';
+  @override
+  String get historyReasonSession => 'abans d’editar';
+  @override
+  String get historyReasonInterval => 'durant l’edició';
+  @override
+  String get historyReasonRestore => 'abans de restaurar';
+  @override
+  String get historyReasonSync => 'abans de sincronitzar';
+  @override
+  String get historyReasonReplace => 'abans de reemplaçar';
+  @override
+  String get historyReasonUnknown => 'recuperada';
+  @override
+  String get historySyncBase => 'base de sincronització';
+  @override
+  String get historyEmpty =>
+      'Encara no hi ha versions. Niman en guarda una quan comences a editar '
+      'la nota i després, com a màxim, una cada pocs minuts mentre escrius.';
+  @override
+  String historyKept(int kept, int limit) => '$kept de $limit versions';
+  @override
+  String get historyBaseKept =>
+      'La base de sincronització es conserva més enllà del límit.';
+  @override
+  String get historyOff =>
+      'L’historial està desactivat per a aquesta biblioteca '
+      '(Configuració, Biblioteca).';
+  @override
+  String get historyLoadFailed => 'No s’ha pogut llegir l’historial';
+  @override
+  String get historyCompareSubtitle => 'Comparada amb la versió actual';
+  @override
+  String get historyTabChanges => 'Canvis';
+  @override
+  String get historyTabVersion => 'Versió';
+  @override
+  String get historyNoChanges => 'El mateix text que la versió actual.';
+  @override
+  String get historyRestoreAction => 'Restaura aquesta versió';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restaurar la versió ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Abans es guarda el text actual a l’historial, així que sempre pots '
+      'tornar enrere.';
+  @override
+  String get historyRestoreConfirm => 'Restaura';
+  @override
+  String historyRestored(String when) => 'S’ha restaurat la versió ($when)';
+  @override
+  String get historyRestoreFailed => 'No s’ha pogut restaurar la versió';
+  @override
+  String get actionUndo => 'Desfés';
+  @override
+  String diffLineRange(int start, int end) => 'Línies $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Línia $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 línia sense canvis' : '$count línies sense canvis';
+  @override
+  String get historyVersionsTitle => 'Versions que es conserven';
+  @override
+  String get historyVersionsSubtitle => 'Per nota, a .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Cap' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nova versió com a màxim cada';
+  @override
+  String get historyIntervalSubtitle =>
+      'Mentre escrius; començar a editar una nota sempre en guarda una';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

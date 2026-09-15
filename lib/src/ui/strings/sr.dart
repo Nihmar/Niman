@@ -1143,4 +1143,95 @@ final class SerbianStrings extends Strings {
   String get changelogEmpty => 'Nema dostupnih zapisa u beleškama';
   @override
   String changelogWhatsNew(String version) => 'Novo u verziji $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Историја';
+  @override
+  String get noteMenuTooltip => 'Радње са белешком';
+  @override
+  String get historyCurrentVersion => 'Тренутна верзија';
+  @override
+  String get historyCurrentSubtitle => 'Белешка каква је сада';
+  @override
+  String get historyToday => 'Данас';
+  @override
+  String get historyYesterday => 'Јуче';
+  @override
+  String get historyReasonSession => 'пре уређивања';
+  @override
+  String get historyReasonInterval => 'током уређивања';
+  @override
+  String get historyReasonRestore => 'пре враћања';
+  @override
+  String get historyReasonSync => 'пре синхронизације';
+  @override
+  String get historyReasonReplace => 'пре замене';
+  @override
+  String get historyReasonUnknown => 'пронађена';
+  @override
+  String get historySyncBase => 'основа синхронизације';
+  @override
+  String get historyEmpty =>
+      'Још нема верзија. Niman чува једну када почнете да уређујете '
+      'белешку, а затим највише једну на сваких неколико минута док пишете.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Сачуване верзије: $kept од $limit';
+  @override
+  String get historyBaseKept =>
+      'Основа синхронизације се чува и преко ограничења.';
+  @override
+  String get historyOff =>
+      'Историја је искључена за ову библиотеку (Подешавања, Библиотека).';
+  @override
+  String get historyLoadFailed => 'Историја се не може прочитати';
+  @override
+  String get historyCompareSubtitle => 'У поређењу са тренутном верзијом';
+  @override
+  String get historyTabChanges => 'Измене';
+  @override
+  String get historyTabVersion => 'Верзија';
+  @override
+  String get historyNoChanges => 'Исти текст као тренутна верзија.';
+  @override
+  String get historyRestoreAction => 'Врати ову верзију';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Вратити верзију сачувану $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Тренутни текст се прво чува у историји, па увек можете да се '
+      'вратите.';
+  @override
+  String get historyRestoreConfirm => 'Врати';
+  @override
+  String historyRestored(String when) => 'Враћена верзија сачувана $when';
+  @override
+  String get historyRestoreFailed => 'Верзија се не може вратити';
+  @override
+  String get actionUndo => 'Поништи';
+  @override
+  String diffLineRange(int start, int end) => 'Редови $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Ред $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count непромењен ред',
+    (2 || 3 || 4, < 12 || > 14) => '$count непромењена реда',
+    _ => '$count непромењених редова',
+  };
+  @override
+  String get historyVersionsTitle => 'Број чуваних верзија';
+  @override
+  String get historyVersionsSubtitle => 'По белешци, у .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Ниједна' : '$count';
+  @override
+  String get historyIntervalTitle => 'Нова верзија највише на сваких';
+  @override
+  String get historyIntervalSubtitle =>
+      'Док пишете; почетак уређивања белешке увек чува једну';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes мин';
 }

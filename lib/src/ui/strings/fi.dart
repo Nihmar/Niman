@@ -1150,4 +1150,92 @@ final class FinnishStrings extends Strings {
   String get changelogEmpty => 'Muutoshistoriassa ei ole merkintöjä';
   @override
   String changelogWhatsNew(String version) => 'Uutta versiossa $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historia';
+  @override
+  String get noteMenuTooltip => 'Muistiinpanon toiminnot';
+  @override
+  String get historyCurrentVersion => 'Nykyinen versio';
+  @override
+  String get historyCurrentSubtitle => 'Muistiinpano sellaisena kuin se on nyt';
+  @override
+  String get historyToday => 'Tänään';
+  @override
+  String get historyYesterday => 'Eilen';
+  @override
+  String get historyReasonSession => 'ennen muokkausta';
+  @override
+  String get historyReasonInterval => 'muokkauksen aikana';
+  @override
+  String get historyReasonRestore => 'ennen palautusta';
+  @override
+  String get historyReasonSync => 'ennen synkronointia';
+  @override
+  String get historyReasonReplace => 'ennen korvausta';
+  @override
+  String get historyReasonUnknown => 'löydetty';
+  @override
+  String get historySyncBase => 'synkronointipohja';
+  @override
+  String get historyEmpty =>
+      'Ei vielä versioita. Niman säilyttää yhden, kun alat muokata '
+      'muistiinpanoa, ja sen jälkeen enintään yhden muutaman minuutin välein '
+      'kirjoittaessasi.';
+  @override
+  String historyKept(int kept, int limit) => 'Säilytetty $kept/$limit versiota';
+  @override
+  String get historyBaseKept => 'Synkronointipohja säilyy myös rajan yli.';
+  @override
+  String get historyOff =>
+      'Historia on pois päältä tässä kirjastossa (Asetukset, Kirjasto).';
+  @override
+  String get historyLoadFailed => 'Historiaa ei voitu lukea';
+  @override
+  String get historyCompareSubtitle => 'Verrattu nykyiseen versioon';
+  @override
+  String get historyTabChanges => 'Muutokset';
+  @override
+  String get historyTabVersion => 'Versio';
+  @override
+  String get historyNoChanges => 'Sama teksti kuin nykyisessä versiossa.';
+  @override
+  String get historyRestoreAction => 'Palauta tämä versio';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Palautetaanko versio $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Nykyinen teksti tallennetaan ensin historiaan, joten voit aina palata '
+      'takaisin.';
+  @override
+  String get historyRestoreConfirm => 'Palauta';
+  @override
+  String historyRestored(String when) => 'Palautettiin versio $when';
+  @override
+  String get historyRestoreFailed => 'Versiota ei voitu palauttaa';
+  @override
+  String get actionUndo => 'Kumoa';
+  @override
+  String diffLineRange(int start, int end) => 'Rivit $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rivi $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 muuttumaton rivi' : '$count muuttumatonta riviä';
+  @override
+  String get historyVersionsTitle => 'Säilytettävät versiot';
+  @override
+  String get historyVersionsSubtitle =>
+      'Muistiinpanoa kohden, kansiossa .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Ei yhtään' : '$count';
+  @override
+  String get historyIntervalTitle => 'Versioiden vähimmäisväli';
+  @override
+  String get historyIntervalSubtitle =>
+      'Kirjoittaessa; muokkauksen aloittaminen säilyttää aina yhden version';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

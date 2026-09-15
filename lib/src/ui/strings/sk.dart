@@ -1133,4 +1133,93 @@ final class SlovakStrings extends Strings {
   String get changelogEmpty => 'Záznamy changelogu nie sú dostupné';
   @override
   String changelogWhatsNew(String version) => 'Novinky vo verzii $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'História';
+  @override
+  String get noteMenuTooltip => 'Akcie poznámky';
+  @override
+  String get historyCurrentVersion => 'Aktuálna verzia';
+  @override
+  String get historyCurrentSubtitle => 'Poznámka v súčasnej podobe';
+  @override
+  String get historyToday => 'Dnes';
+  @override
+  String get historyYesterday => 'Včera';
+  @override
+  String get historyReasonSession => 'pred úpravami';
+  @override
+  String get historyReasonInterval => 'počas úprav';
+  @override
+  String get historyReasonRestore => 'pred obnovením';
+  @override
+  String get historyReasonSync => 'pred synchronizáciou';
+  @override
+  String get historyReasonReplace => 'pred nahradením';
+  @override
+  String get historyReasonUnknown => 'nájdená';
+  @override
+  String get historySyncBase => 'základ synchronizácie';
+  @override
+  String get historyEmpty =>
+      'Zatiaľ žiadne verzie. Niman jednu uchová, keď začnete poznámku '
+      'upravovať, a potom najviac jednu za pár minút, kým píšete.';
+  @override
+  String historyKept(int kept, int limit) => 'Uchované verzie: $kept z $limit';
+  @override
+  String get historyBaseKept => 'Základ synchronizácie sa uchová aj nad limit.';
+  @override
+  String get historyOff =>
+      'História je pre túto knižnicu vypnutá (Nastavenia, Knižnica).';
+  @override
+  String get historyLoadFailed => 'Históriu sa nepodarilo načítať';
+  @override
+  String get historyCompareSubtitle => 'Porovnané s aktuálnou verziou';
+  @override
+  String get historyTabChanges => 'Zmeny';
+  @override
+  String get historyTabVersion => 'Verzia';
+  @override
+  String get historyNoChanges => 'Rovnaký text ako aktuálna verzia.';
+  @override
+  String get historyRestoreAction => 'Obnoviť túto verziu';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Obnoviť verziu uloženú $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Aktuálny text sa najprv uloží do histórie, takže sa môžete '
+      'kedykoľvek vrátiť.';
+  @override
+  String get historyRestoreConfirm => 'Obnoviť';
+  @override
+  String historyRestored(String when) => 'Obnovená verzia uložená $when';
+  @override
+  String get historyRestoreFailed => 'Verziu sa nepodarilo obnoviť';
+  @override
+  String get actionUndo => 'Späť';
+  @override
+  String diffLineRange(int start, int end) => 'Riadky $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Riadok $line';
+  @override
+  String diffUnchanged(int count) => switch (count) {
+    1 => '1 nezmenený riadok',
+    >= 2 && <= 4 => '$count nezmenené riadky',
+    _ => '$count nezmenených riadkov',
+  };
+  @override
+  String get historyVersionsTitle => 'Počet uchovaných verzií';
+  @override
+  String get historyVersionsSubtitle => 'Pre každú poznámku, v .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Žiadne' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nová verzia najviac každých';
+  @override
+  String get historyIntervalSubtitle =>
+      'Počas písania; začiatok úprav poznámky vždy jednu uchová';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

@@ -8,12 +8,48 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 
 ## History
 
-Each library keeps the last N versions of every note under `.history/`
-(`historyVersions`, default 10, 0–100; out-of-range values in a
-hand-edited `settings.json` read back as 10). Set 0 to keep no history.
-A history viewer (browse/restore) is planned
-([#55](https://github.com/Nihmar/Niman/issues/55)); today, restore by
-copying the wanted version back over the note.
+Niman keeps past versions of every note under `.history/`, so an edit
+you regret can be undone.
+
+**When a version is kept.** A version is the text a save is about to
+replace — never a copy of what is already on screen:
+
+- when you start editing a note (the note as it was before you touched
+  it);
+- while you write, at most once every few minutes
+  (`historyIntervalMinutes`, default 5);
+- right before a restore, before a library-wide replace, and (with sync)
+  before a download overwrites the note.
+
+A version identical to the newest one is not kept twice, and an empty
+note (one just created) has nothing to keep. Autosave runs
+every half second, so without the interval ten versions would last five
+seconds.
+
+**How many.** The last `historyVersions` versions per note (default 10;
+0 keeps none). Older ones are dropped as new ones arrive. Both settings
+live in **Settings → Library** and in `.niman/settings.json`;
+out-of-range values in a hand-edited file read back as the defaults.
+
+**Browse and restore.** Long-press a note in the tree (right-click on
+desktop) or open the note's ⋮ menu and pick **History**. Versions are
+listed newest first, grouped by day, each with why it was kept and how
+many lines differ from the note as it is now (`+` added since, `−`
+gone since) — the same comparison the version opens on. Open one to see what changed against
+the current note (removed lines in red, added in green; tap a folded
+row to show the unchanged lines) or to read its whole text. **Restore
+this version** keeps the current text as a version first, then puts the
+old one back — the snackbar's **Undo** swaps them again.
+
+**Following the note.** Renaming or moving a note (or its folder) moves
+its history too. A note in the trash keeps its history until the trash
+is emptied or the item deleted for good; a hard delete (trash off)
+removes it at once.
+
+**On disk.** `.history/<path>.v<n>` holds each version byte for byte,
+and `.history/<path>.json` lists them (time, reason, size, hash). The
+folder is plain files: if the list is lost it is rebuilt from the
+version files. It is never indexed, searched, or synced.
 
 ## Frontmatter
 

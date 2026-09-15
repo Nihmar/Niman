@@ -1151,4 +1151,95 @@ final class BasqueStrings extends Strings {
   String get changelogEmpty => 'Ez dago aldaketa-sarerik';
   @override
   String changelogWhatsNew(String version) => 'Berria $version bertsioan';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historia';
+  @override
+  String get noteMenuTooltip => 'Oharraren ekintzak';
+  @override
+  String get historyCurrentVersion => 'Uneko bertsioa';
+  @override
+  String get historyCurrentSubtitle => 'Oharra orain dagoen bezala';
+  @override
+  String get historyToday => 'Gaur';
+  @override
+  String get historyYesterday => 'Atzo';
+  @override
+  String get historyReasonSession => 'editatu aurretik';
+  @override
+  String get historyReasonInterval => 'editatzean';
+  @override
+  String get historyReasonRestore => 'berrezarri aurretik';
+  @override
+  String get historyReasonSync => 'sinkronizatu aurretik';
+  @override
+  String get historyReasonReplace => 'ordezkatu aurretik';
+  @override
+  String get historyReasonUnknown => 'berreskuratua';
+  @override
+  String get historySyncBase => 'sinkronizazio-oinarria';
+  @override
+  String get historyEmpty =>
+      'Oraindik ez dago bertsiorik. Niman-ek bat gordetzen du oharra '
+      'editatzen hasten zarenean, eta gero, gehienez, bat minutu gutxiro '
+      'idazten duzun bitartean.';
+  @override
+  String historyKept(int kept, int limit) => '$kept/$limit bertsio gordeta';
+  @override
+  String get historyBaseKept =>
+      'Sinkronizazio-oinarria mugaz gain ere gordetzen da.';
+  @override
+  String get historyOff =>
+      'Historia desaktibatuta dago biblioteka honetan '
+      '(Ezarpenak, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Ezin izan da historia irakurri';
+  @override
+  String get historyCompareSubtitle => 'Uneko bertsioarekin alderatuta';
+  @override
+  String get historyTabChanges => 'Aldaketak';
+  @override
+  String get historyTabVersion => 'Bertsioa';
+  @override
+  String get historyNoChanges => 'Uneko bertsioaren testu bera.';
+  @override
+  String get historyRestoreAction => 'Berrezarri bertsio hau';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Berrezarri bertsio hau ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Uneko testua historian gordetzen da lehenik, beraz beti itzul '
+      'zaitezke atzera.';
+  @override
+  String get historyRestoreConfirm => 'Berrezarri';
+  @override
+  String historyRestored(String when) => 'Bertsioa ($when) berrezarri da';
+  @override
+  String get historyRestoreFailed => 'Ezin izan da bertsioa berrezarri';
+  @override
+  String get actionUndo => 'Desegin';
+  @override
+  String diffLineRange(int start, int end) => 'Lerroak $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Lerroa $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? 'lerro 1 aldatu gabe' : '$count lerro aldatu gabe';
+  @override
+  String get historyVersionsTitle => 'Gorde beharreko bertsioak';
+  @override
+  String get historyVersionsSubtitle => 'Ohar bakoitzeko, .history/ karpetan';
+  @override
+  String historyVersionsValue(int count) =>
+      count == 0 ? 'Bat ere ez' : '$count';
+  @override
+  String get historyIntervalTitle => 'Bertsio berrien arteko tarte txikiena';
+  @override
+  String get historyIntervalSubtitle =>
+      'Idazten duzun bitartean; ohar bat editatzen hastean beti gordetzen '
+      'da bat';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

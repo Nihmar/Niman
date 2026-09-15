@@ -9,6 +9,9 @@ import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/edit.dart';
+import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/history/note_history.dart';
+import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:path/path.dart' as p;
 
@@ -48,7 +51,10 @@ final class NoteOps implements NoteOperations {
     required IndexDatabase db,
     required this.indexer,
     required this.config,
-  }) : _dao = NoteDao(db);
+  }) : _dao = NoteDao(db),
+       history = NoteHistory(root: root, config: config) {
+    writer = NoteWriter(root: root, indexer: indexer, history: history);
+  }
 
   /// Absolute path of the library root.
   final String root;
@@ -59,6 +65,14 @@ final class NoteOps implements NoteOperations {
   /// The library's `.niman/settings.json`, shared with the session so
   /// both read one cached copy.
   final LibraryConfigRepo config;
+
+  /// The note-text write path, outside the op chain: saves never wait on
+  /// a rename or an empty-trash, only on earlier saves of the same note.
+  late final NoteWriter writer;
+
+  /// The library's `.history/`: the ops carry it along when a note is
+  /// renamed, moved or deleted for good.
+  final NoteHistory history;
 
   final NoteDao _dao;
 
@@ -264,6 +278,7 @@ final class NoteOps implements NoteOperations {
       } else {
         await File(oldAbs).rename(_abs(newRel));
       }
+      await history.moved(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
@@ -300,6 +315,7 @@ final class NoteOps implements NoteOperations {
       } else {
         await File(oldAbs).rename(_abs(newRel));
       }
+      await history.moved(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
@@ -351,6 +367,26 @@ final class NoteOps implements NoteOperations {
     });
   }
 
+  @override
+  Future<void> saveNote(String path, String content, {int? editSession}) =>
+      writer.save(path, content, editSession: editSession);
+
+  @override
+  Future<HistoryManifest> noteHistory(String path) => history.manifestOf(path);
+
+  @override
+  Future<String> readNoteVersion(String path, int number) =>
+      history.readVersion(path, number);
+
+  /// Keeps the current text as a [HistoryReason.restore] version, then
+  /// writes version [number] back through the writer — so the restore is
+  /// itself undoable, and the index and sync see an ordinary save.
+  @override
+  Future<void> restoreNoteVersion(String path, int number) async {
+    final text = await history.readVersion(path, number);
+    await writer.save(path, text, forced: HistoryReason.restore);
+  }
+
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
   /// delete otherwise.
   @override
@@ -386,6 +422,8 @@ final class NoteOps implements NoteOperations {
         } else {
           await File(oldAbs).delete();
         }
+        // No trash to come back from: the history goes with the note.
+        await history.deleted(path, isDir: row.isDir);
       }
       final events = <String>[oldAbs];
       if (trashAbs != null) events.add(trashAbs);
@@ -447,6 +485,9 @@ final class NoteOps implements NoteOperations {
       }
       manifest.remove(trashName);
       await _writeManifest(manifest);
+      // The history stayed at the original path while the item was in the
+      // trash; it follows only when the item came back somewhere else.
+      await history.moved(entry.originalPath, newRel, isDir: isDir);
       await indexer.applyEvents(root, [trashAbs, _abs(newRel)]);
       return await _mustFind(newRel);
     });
@@ -457,16 +498,19 @@ final class NoteOps implements NoteOperations {
   Future<void> deleteTrashPermanently(String trashName) {
     return _synchronized(() async {
       final manifest = await _readManifest();
-      if (manifest.remove(trashName) == null) {
+      final entry = manifest.remove(trashName);
+      if (entry == null) {
         throw StateError('Not a managed trash item: "$trashName"');
       }
       final trashAbs = _abs('.trash/$trashName');
-      if (Directory(trashAbs).existsSync()) {
+      final isDir = Directory(trashAbs).existsSync();
+      if (isDir) {
         await Directory(trashAbs).delete(recursive: true);
       } else if (File(trashAbs).existsSync()) {
         await File(trashAbs).delete();
       }
       await _writeManifest(manifest);
+      await _dropTrashedHistory(entry.originalPath, isDir: isDir);
     });
   }
 
@@ -479,6 +523,15 @@ final class NoteOps implements NoteOperations {
   Future<void> emptyTrash() {
     return _synchronized(() async {
       final trashDir = Directory(_abs('.trash'));
+      // Read before the items go: the manifest is what knows where each
+      // one came from, and so whose history is now orphaned.
+      final origins = [
+        for (final entry in (await _readManifest()).entries)
+          (
+            entry.value.originalPath,
+            Directory(_abs('.trash/${entry.key}')).existsSync(),
+          ),
+      ];
       if (trashDir.existsSync()) {
         for (final entry in trashDir.listSync()) {
           if (entry is Directory) {
@@ -489,7 +542,22 @@ final class NoteOps implements NoteOperations {
         }
       }
       await _writeManifest(<String, _ManifestEntry>{});
+      for (final (originalPath, isDir) in origins) {
+        await _dropTrashedHistory(originalPath, isDir: isDir);
+      }
     });
+  }
+
+  /// Removes the history a permanently deleted trash item left at
+  /// [originalPath] — unless a note lives there again, whose history it
+  /// now is.
+  Future<void> _dropTrashedHistory(
+    String originalPath, {
+    required bool isDir,
+  }) async {
+    final abs = _abs(originalPath);
+    if (File(abs).existsSync() || Directory(abs).existsSync()) return;
+    await history.deleted(originalPath, isDir: isDir);
   }
 
   bool _existsInTrash(String name) {

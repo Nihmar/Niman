@@ -1063,4 +1063,84 @@ final class JapaneseStrings extends Strings {
   String get changelogEmpty => '変更履歴の項目がありません';
   @override
   String changelogWhatsNew(String version) => 'バージョン $version の新機能';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => '履歴';
+  @override
+  String get noteMenuTooltip => 'ノートの操作';
+  @override
+  String get historyCurrentVersion => '現在のバージョン';
+  @override
+  String get historyCurrentSubtitle => '現在のノートの内容';
+  @override
+  String get historyToday => '今日';
+  @override
+  String get historyYesterday => '昨日';
+  @override
+  String get historyReasonSession => '編集前';
+  @override
+  String get historyReasonInterval => '編集中';
+  @override
+  String get historyReasonRestore => '復元前';
+  @override
+  String get historyReasonSync => '同期前';
+  @override
+  String get historyReasonReplace => '置換前';
+  @override
+  String get historyReasonUnknown => '回復';
+  @override
+  String get historySyncBase => '同期ベース';
+  @override
+  String get historyEmpty =>
+      'まだバージョンはありません。Niman はノートの編集を始めたときに '
+      '1 つ保存し、その後は入力中に数分ごとに最大 1 つ保存します。';
+  @override
+  String historyKept(int kept, int limit) => '$limit 件中 $kept 件のバージョンを保持';
+  @override
+  String get historyBaseKept => '同期ベースは上限を超えても保持されます。';
+  @override
+  String get historyOff => 'このライブラリでは履歴がオフです（設定、ライブラリ）。';
+  @override
+  String get historyLoadFailed => '履歴を読み込めませんでした';
+  @override
+  String get historyCompareSubtitle => '現在のバージョンとの比較';
+  @override
+  String get historyTabChanges => '変更点';
+  @override
+  String get historyTabVersion => 'バージョン';
+  @override
+  String get historyNoChanges => '現在のバージョンと同じテキストです。';
+  @override
+  String get historyRestoreAction => 'このバージョンを復元';
+  @override
+  String historyRestoreConfirmTitle(String when) => '$when のバージョンを復元しますか？';
+  @override
+  String get historyRestoreConfirmBody => '現在のテキストは先に履歴へ保存されるため、いつでも元に戻せます。';
+  @override
+  String get historyRestoreConfirm => '復元';
+  @override
+  String historyRestored(String when) => '$when のバージョンを復元しました';
+  @override
+  String get historyRestoreFailed => 'バージョンを復元できませんでした';
+  @override
+  String get actionUndo => '元に戻す';
+  @override
+  String diffLineRange(int start, int end) => '$start–$end 行目';
+  @override
+  String diffLineSingle(int line) => '$line 行目';
+  @override
+  String diffUnchanged(int count) => '変更のない $count 行';
+  @override
+  String get historyVersionsTitle => '保持するバージョン数';
+  @override
+  String get historyVersionsSubtitle => 'ノートごとに .history/ に保存';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'なし' : '$count';
+  @override
+  String get historyIntervalTitle => '新しいバージョンの最短間隔';
+  @override
+  String get historyIntervalSubtitle => '入力中に適用。ノートの編集を始めたときは必ず 1 つ保存されます';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes 分';
 }

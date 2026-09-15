@@ -1150,4 +1150,93 @@ final class MacedonianStrings extends Strings {
   String get changelogEmpty => 'Нема достапни записи во дневникот';
   @override
   String changelogWhatsNew(String version) => 'Ново во верзијата $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Историја';
+  @override
+  String get noteMenuTooltip => 'Дејства за белешката';
+  @override
+  String get historyCurrentVersion => 'Тековна верзија';
+  @override
+  String get historyCurrentSubtitle => 'Белешката каква што е сега';
+  @override
+  String get historyToday => 'Денес';
+  @override
+  String get historyYesterday => 'Вчера';
+  @override
+  String get historyReasonSession => 'пред уредување';
+  @override
+  String get historyReasonInterval => 'при уредување';
+  @override
+  String get historyReasonRestore => 'пред враќање';
+  @override
+  String get historyReasonSync => 'пред синхронизација';
+  @override
+  String get historyReasonReplace => 'пред замена';
+  @override
+  String get historyReasonUnknown => 'пронајдена';
+  @override
+  String get historySyncBase => 'основа за синхронизација';
+  @override
+  String get historyEmpty =>
+      'Сè уште нема верзии. Niman зачувува една кога ќе почнете да ја '
+      'уредувате белешката, а потоа најмногу една на секои неколку минути '
+      'додека пишувате.';
+  @override
+  String historyKept(int kept, int limit) => 'Зачувани верзии: $kept од $limit';
+  @override
+  String get historyBaseKept =>
+      'Основата за синхронизација се чува и над ограничувањето.';
+  @override
+  String get historyOff =>
+      'Историјата е исклучена за оваа библиотека (Поставки, Библиотека).';
+  @override
+  String get historyLoadFailed => 'Не може да се прочита историјата';
+  @override
+  String get historyCompareSubtitle => 'Споредено со тековната верзија';
+  @override
+  String get historyTabChanges => 'Промени';
+  @override
+  String get historyTabVersion => 'Верзија';
+  @override
+  String get historyNoChanges => 'Ист текст како тековната верзија.';
+  @override
+  String get historyRestoreAction => 'Врати ја оваа верзија';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Да се врати верзијата зачувана $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Тековниот текст прво се зачувува во историјата, па секогаш можете '
+      'да се вратите.';
+  @override
+  String get historyRestoreConfirm => 'Врати';
+  @override
+  String historyRestored(String when) => 'Вратена е верзијата зачувана $when';
+  @override
+  String get historyRestoreFailed => 'Не може да се врати верзијата';
+  @override
+  String get actionUndo => 'Поништи';
+  @override
+  String diffLineRange(int start, int end) => 'Редови $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Ред $line';
+  @override
+  String diffUnchanged(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count непроменет ред'
+      : '$count непроменети редови';
+  @override
+  String get historyVersionsTitle => 'Број на зачувани верзии';
+  @override
+  String get historyVersionsSubtitle => 'За секоја белешка, во .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Ниедна' : '$count';
+  @override
+  String get historyIntervalTitle => 'Нова верзија најмногу на секои';
+  @override
+  String get historyIntervalSubtitle =>
+      'Додека пишувате; почнувањето со уредување секогаш зачувува една';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes мин';
 }

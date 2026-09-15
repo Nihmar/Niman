@@ -1143,4 +1143,92 @@ final class SwedishStrings extends Strings {
   String get changelogEmpty => 'Inga ändringsloggsposter tillgängliga';
   @override
   String changelogWhatsNew(String version) => 'Nytt i version $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historik';
+  @override
+  String get noteMenuTooltip => 'Anteckningsåtgärder';
+  @override
+  String get historyCurrentVersion => 'Aktuell version';
+  @override
+  String get historyCurrentSubtitle => 'Anteckningen som den är nu';
+  @override
+  String get historyToday => 'I dag';
+  @override
+  String get historyYesterday => 'I går';
+  @override
+  String get historyReasonSession => 'före redigering';
+  @override
+  String get historyReasonInterval => 'under redigering';
+  @override
+  String get historyReasonRestore => 'före återställning';
+  @override
+  String get historyReasonSync => 'före synk';
+  @override
+  String get historyReasonReplace => 'före ersättning';
+  @override
+  String get historyReasonUnknown => 'återfunnen';
+  @override
+  String get historySyncBase => 'synkbas';
+  @override
+  String get historyEmpty =>
+      'Inga versioner än. Niman sparar en när du börjar redigera anteckningen '
+      'och sedan högst en med några minuters mellanrum medan du skriver.';
+  @override
+  String historyKept(int kept, int limit) =>
+      '$kept av $limit versioner sparade';
+  @override
+  String get historyBaseKept => 'Synkbasen sparas även utöver gränsen.';
+  @override
+  String get historyOff =>
+      'Historiken är avstängd för det här biblioteket '
+      '(Inställningar, Bibliotek).';
+  @override
+  String get historyLoadFailed => 'Kunde inte läsa historiken';
+  @override
+  String get historyCompareSubtitle => 'Jämförd med den aktuella versionen';
+  @override
+  String get historyTabChanges => 'Ändringar';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Samma text som den aktuella versionen.';
+  @override
+  String get historyRestoreAction => 'Återställ den här versionen';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Återställa versionen från $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Den aktuella texten sparas först i historiken, så du kan alltid gå '
+      'tillbaka.';
+  @override
+  String get historyRestoreConfirm => 'Återställ';
+  @override
+  String historyRestored(String when) => 'Versionen från $when återställdes';
+  @override
+  String get historyRestoreFailed => 'Kunde inte återställa versionen';
+  @override
+  String get actionUndo => 'Ångra';
+  @override
+  String diffLineRange(int start, int end) => 'Rader $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rad $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 oförändrad rad' : '$count oförändrade rader';
+  @override
+  String get historyVersionsTitle => 'Versioner att spara';
+  @override
+  String get historyVersionsSubtitle => 'Per anteckning, i .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Inga' : '$count';
+  @override
+  String get historyIntervalTitle => 'Ny version högst var';
+  @override
+  String get historyIntervalSubtitle =>
+      'Medan du skriver; när du börjar redigera en anteckning sparas alltid en';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

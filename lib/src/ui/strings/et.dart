@@ -1119,4 +1119,91 @@ final class EstonianStrings extends Strings {
   String get changelogEmpty => 'Muudatuste logis ei ole kirjeid';
   @override
   String changelogWhatsNew(String version) => 'Uut versioonis $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Ajalugu';
+  @override
+  String get noteMenuTooltip => 'Märkme toimingud';
+  @override
+  String get historyCurrentVersion => 'Praegune versioon';
+  @override
+  String get historyCurrentSubtitle => 'Märge praegusel kujul';
+  @override
+  String get historyToday => 'Täna';
+  @override
+  String get historyYesterday => 'Eile';
+  @override
+  String get historyReasonSession => 'enne muutmist';
+  @override
+  String get historyReasonInterval => 'muutmise ajal';
+  @override
+  String get historyReasonRestore => 'enne taastamist';
+  @override
+  String get historyReasonSync => 'enne sünkroonimist';
+  @override
+  String get historyReasonReplace => 'enne asendamist';
+  @override
+  String get historyReasonUnknown => 'taasleitud';
+  @override
+  String get historySyncBase => 'sünkroonimisalus';
+  @override
+  String get historyEmpty =>
+      'Versioone veel pole. Niman salvestab ühe, kui hakkad märget muutma, '
+      'ning seejärel kirjutamise ajal kõige rohkem ühe iga paari minuti järel.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Säilitatud versioone: $kept/$limit';
+  @override
+  String get historyBaseKept =>
+      'Sünkroonimisalus säilitatakse ka üle piirangu.';
+  @override
+  String get historyOff =>
+      'Ajalugu on selles kogus välja lülitatud (Seaded, Kogu).';
+  @override
+  String get historyLoadFailed => 'Ajalugu ei õnnestunud lugeda';
+  @override
+  String get historyCompareSubtitle => 'Võrreldud praeguse versiooniga';
+  @override
+  String get historyTabChanges => 'Muudatused';
+  @override
+  String get historyTabVersion => 'Versioon';
+  @override
+  String get historyNoChanges => 'Sama tekst mis praeguses versioonis.';
+  @override
+  String get historyRestoreAction => 'Taasta see versioon';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Kas taastada versioon $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Praegune tekst salvestatakse enne ajalukku, nii et saad alati tagasi '
+      'minna.';
+  @override
+  String get historyRestoreConfirm => 'Taasta';
+  @override
+  String historyRestored(String when) => 'Versioon $when taastati';
+  @override
+  String get historyRestoreFailed => 'Versiooni ei õnnestunud taastada';
+  @override
+  String get actionUndo => 'Võta tagasi';
+  @override
+  String diffLineRange(int start, int end) => 'Read $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rida $line';
+  @override
+  String diffUnchanged(int count) => '$count muutmata rida';
+  @override
+  String get historyVersionsTitle => 'Säilitatavad versioonid';
+  @override
+  String get historyVersionsSubtitle => 'Iga märkme kohta, kaustas .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Pole' : '$count';
+  @override
+  String get historyIntervalTitle => 'Versioonide vähim vahe';
+  @override
+  String get historyIntervalSubtitle =>
+      'Kirjutamise ajal; märkme muutmise alustamine salvestab alati ühe';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

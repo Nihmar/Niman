@@ -1135,4 +1135,95 @@ final class BelarusianStrings extends Strings {
   String get changelogEmpty => 'Запісы журналу змен недаступныя';
   @override
   String changelogWhatsNew(String version) => 'Новае ў версіі $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Гісторыя';
+  @override
+  String get noteMenuTooltip => 'Дзеянні з заўвагай';
+  @override
+  String get historyCurrentVersion => 'Бягучая версія';
+  @override
+  String get historyCurrentSubtitle => 'Заўвага ў цяперашнім выглядзе';
+  @override
+  String get historyToday => 'Сёння';
+  @override
+  String get historyYesterday => 'Учора';
+  @override
+  String get historyReasonSession => 'перад рэдагаваннем';
+  @override
+  String get historyReasonInterval => 'падчас рэдагавання';
+  @override
+  String get historyReasonRestore => 'перад аднаўленнем';
+  @override
+  String get historyReasonSync => 'перад сінхранізацыяй';
+  @override
+  String get historyReasonReplace => 'перад заменай';
+  @override
+  String get historyReasonUnknown => 'знойдзеная';
+  @override
+  String get historySyncBase => 'аснова сінхранізацыі';
+  @override
+  String get historyEmpty =>
+      'Версій пакуль няма. Niman захоўвае адну, калі вы пачынаеце '
+      'рэдагаваць заўвагу, а потым не часцей за адну раз на некалькі '
+      'хвілін, пакуль вы пішаце.';
+  @override
+  String historyKept(int kept, int limit) => 'Захавана версій: $kept з $limit';
+  @override
+  String get historyBaseKept =>
+      'Аснова сінхранізацыі захоўваецца і па-за лімітам.';
+  @override
+  String get historyOff =>
+      'Гісторыя выключаная для гэтай бібліятэкі (Налады, Бібліятэка).';
+  @override
+  String get historyLoadFailed => 'Не ўдалося прачытаць гісторыю';
+  @override
+  String get historyCompareSubtitle => 'У параўнанні з бягучай версіяй';
+  @override
+  String get historyTabChanges => 'Змены';
+  @override
+  String get historyTabVersion => 'Версія';
+  @override
+  String get historyNoChanges => 'Той жа тэкст, што і ў бягучай версіі.';
+  @override
+  String get historyRestoreAction => 'Аднавіць гэту версію';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Аднавіць версію, захаваную $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Бягучы тэкст спачатку захоўваецца ў гісторыі, таму вы заўсёды '
+      'можаце вярнуцца.';
+  @override
+  String get historyRestoreConfirm => 'Аднавіць';
+  @override
+  String historyRestored(String when) => 'Адноўлена версія, захаваная $when';
+  @override
+  String get historyRestoreFailed => 'Не ўдалося аднавіць версію';
+  @override
+  String get actionUndo => 'Адрабіць';
+  @override
+  String diffLineRange(int start, int end) => 'Радкі $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Радок $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count нязменены радок',
+    (2 || 3 || 4, < 12 || > 14) => '$count нязмененыя радкі',
+    _ => '$count нязмененых радкоў',
+  };
+  @override
+  String get historyVersionsTitle => 'Колькі версій захоўваць';
+  @override
+  String get historyVersionsSubtitle => 'Для кожнай заўвагі, у .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Няма' : '$count';
+  @override
+  String get historyIntervalTitle => 'Новая версія не часцей, чым раз на';
+  @override
+  String get historyIntervalSubtitle =>
+      'Падчас пісьма; пачатак рэдагавання заўвагі заўсёды захоўвае адну';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes хв';
 }

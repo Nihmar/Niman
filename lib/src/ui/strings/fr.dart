@@ -1174,4 +1174,96 @@ final class FrenchStrings extends Strings {
   @override
   String changelogWhatsNew(String version) =>
       'Nouveautés de la version $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historique';
+  @override
+  String get noteMenuTooltip => 'Actions sur la note';
+  @override
+  String get historyCurrentVersion => 'Version actuelle';
+  @override
+  String get historyCurrentSubtitle => 'La note telle qu’elle est maintenant';
+  @override
+  String get historyToday => 'Aujourd’hui';
+  @override
+  String get historyYesterday => 'Hier';
+  @override
+  String get historyReasonSession => 'avant modification';
+  @override
+  String get historyReasonInterval => 'pendant la modification';
+  @override
+  String get historyReasonRestore => 'avant restauration';
+  @override
+  String get historyReasonSync => 'avant synchronisation';
+  @override
+  String get historyReasonReplace => 'avant remplacement';
+  @override
+  String get historyReasonUnknown => 'récupérée';
+  @override
+  String get historySyncBase => 'base de synchronisation';
+  @override
+  String get historyEmpty =>
+      'Aucune version pour l’instant. Niman en conserve une quand vous '
+      'commencez à modifier la note, puis au plus une toutes les quelques '
+      'minutes pendant que vous écrivez.';
+  @override
+  String historyKept(int kept, int limit) => kept < 2
+      ? '$kept version conservée sur $limit'
+      : '$kept versions conservées sur $limit';
+  @override
+  String get historyBaseKept =>
+      'La base de synchronisation est conservée au-delà de la limite.';
+  @override
+  String get historyOff =>
+      'L’historique est désactivé pour cette bibliothèque '
+      '(Paramètres, Bibliothèque).';
+  @override
+  String get historyLoadFailed => 'Impossible de lire l’historique';
+  @override
+  String get historyCompareSubtitle => 'Comparée à la version actuelle';
+  @override
+  String get historyTabChanges => 'Modifications';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Même texte que la version actuelle.';
+  @override
+  String get historyRestoreAction => 'Restaurer cette version';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restaurer la version ($when) ?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Le texte actuel est d’abord conservé dans l’historique : vous '
+      'pourrez toujours revenir en arrière.';
+  @override
+  String get historyRestoreConfirm => 'Restaurer';
+  @override
+  String historyRestored(String when) => 'Version ($when) restaurée';
+  @override
+  String get historyRestoreFailed => 'Impossible de restaurer la version';
+  @override
+  String get actionUndo => 'Annuler';
+  @override
+  String diffLineRange(int start, int end) => 'Lignes $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Ligne $line';
+  @override
+  String diffUnchanged(int count) =>
+      count < 2 ? '$count ligne inchangée' : '$count lignes inchangées';
+  @override
+  String get historyVersionsTitle => 'Versions à conserver';
+  @override
+  String get historyVersionsSubtitle => 'Par note, dans .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Aucune' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nouvelle version au plus toutes les';
+  @override
+  String get historyIntervalSubtitle =>
+      'Pendant l’écriture ; commencer à modifier une note en conserve '
+      'toujours une';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }
