@@ -114,25 +114,24 @@ final class LatvianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Atjauninājumi';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automātiskie atjauninājumi';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Pārbaudīt GitHub Releases palaišanas brīdī un ik pēc 6 stundām';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Pārbaudīt atjauninājumus';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Pieejama Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Jums ir jaunākā Niman versija';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Neizdevās pārbaudīt atjauninājumus';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Atjauninājums saglabāts: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instalētājs palaists';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -252,44 +251,44 @@ final class LatvianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Mainīt elementa secību';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Vēl nav ierakstu';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Ierakstīt';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Apturēt';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Atskaņot';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Dzēst ierakstu';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importēt audio failu';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Notiek ierakstīšana…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Nav atļaujas izmantot mikrofonu — tā nepieciešama ierakstīšanai.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Jauna balss piezīme';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Mans ieraksts';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Rādīt ierakstus';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Uzrakstiet piezīmi…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Sūtīt';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Pārsaukt ierakstu';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Aprakstiet šo ierakstu…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Rediģēt aprakstu';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Dzēst piezīmi';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Rediģēt piezīmi';
   @override
   String get audioPause => 'Pauze';
   @override
@@ -321,7 +320,7 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutNewList => 'Jauns saraksts';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Jauna balss piezīme';
   @override
   String get shortcutToggleSidebar => 'Rādīt vai paslēpt filtru';
   @override
@@ -1010,7 +1009,7 @@ final class LatvianStrings extends Strings {
   @override
   String get listFolderTitle => 'Sarakstu katalogs';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Pielikumu katalogs';
 
   // Trash (M1).
   @override
@@ -1152,4 +1151,92 @@ final class LatvianStrings extends Strings {
   String get changelogEmpty => 'Izmaiņu žurnāls ieraksti nav pieejami';
   @override
   String changelogWhatsNew(String version) => 'Jaunums versijā $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Vēsture';
+  @override
+  String get noteMenuTooltip => 'Piezīmes darbības';
+  @override
+  String get historyCurrentVersion => 'Pašreizējā versija';
+  @override
+  String get historyCurrentSubtitle => 'Piezīme tāda, kāda tā ir tagad';
+  @override
+  String get historyToday => 'Šodien';
+  @override
+  String get historyYesterday => 'Vakar';
+  @override
+  String get historyReasonSession => 'pirms rediģēšanas';
+  @override
+  String get historyReasonInterval => 'rediģējot';
+  @override
+  String get historyReasonRestore => 'pirms atjaunošanas';
+  @override
+  String get historyReasonSync => 'pirms sinhronizācijas';
+  @override
+  String get historyReasonReplace => 'pirms aizstāšanas';
+  @override
+  String get historyReasonUnknown => 'atgūta';
+  @override
+  String get historySyncBase => 'sinhronizācijas bāze';
+  @override
+  String get historyEmpty =>
+      'Versiju vēl nav. Niman saglabā vienu, kad sākat rediģēt piezīmi, un '
+      'pēc tam ne biežāk kā reizi dažās minūtēs, kamēr rakstāt.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Saglabātas versijas: $kept no $limit';
+  @override
+  String get historyBaseKept =>
+      'Sinhronizācijas bāze tiek saglabāta arī pāri limitam.';
+  @override
+  String get historyOff =>
+      'Šai bibliotēkai vēsture ir izslēgta (Iestatījumi, Bibliotēka).';
+  @override
+  String get historyLoadFailed => 'Nevarēja nolasīt vēsturi';
+  @override
+  String get historyCompareSubtitle => 'Salīdzinājumā ar pašreizējo versiju';
+  @override
+  String get historyTabChanges => 'Izmaiņas';
+  @override
+  String get historyTabVersion => 'Versija';
+  @override
+  String get historyNoChanges => 'Teksts ir tāds pats kā pašreizējā versijā.';
+  @override
+  String get historyRestoreAction => 'Atjaunot šo versiju';
+  @override
+  String historyRestoreConfirmTitle(String when) => 'Atjaunot versiju ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Pašreizējais teksts vispirms tiek saglabāts vēsturē, tāpēc vienmēr '
+      'varēsiet atgriezties.';
+  @override
+  String get historyRestoreConfirm => 'Atjaunot';
+  @override
+  String historyRestored(String when) => 'Versija atjaunota ($when)';
+  @override
+  String get historyRestoreFailed => 'Nevarēja atjaunot versiju';
+  @override
+  String get actionUndo => 'Atsaukt';
+  @override
+  String diffLineRange(int start, int end) => 'Rindas $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rinda $line';
+  @override
+  String diffUnchanged(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count nemainīta rinda'
+      : '$count nemainītas rindas';
+  @override
+  String get historyVersionsTitle => 'Cik versiju glabāt';
+  @override
+  String get historyVersionsSubtitle => 'Katrai piezīmei, katalogā .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nevienu' : '$count';
+  @override
+  String get historyIntervalTitle => 'Jauna versija ne biežāk kā ik pēc';
+  @override
+  String get historyIntervalSubtitle =>
+      'Rakstot; sākot rediģēt piezīmi, versija tiek saglabāta vienmēr';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

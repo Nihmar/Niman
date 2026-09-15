@@ -116,25 +116,25 @@ final class PolishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Skróty klawiszowe';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Aktualizacje';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatyczne aktualizacje';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Sprawdza GitHub Releases przy uruchomieniu i co 6 godzin';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Sprawdź aktualizacje';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Dostępny jest Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman jest aktualny';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Nie udało się sprawdzić aktualizacji';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Aktualizację zapisano w $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Uruchomiono instalator';
   @override
   String get settingsSectionDiagnostics => 'Diagnostyka';
   @override
@@ -256,44 +256,44 @@ final class PolishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Zmień kolejność elementu';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Nie ma jeszcze nagrań';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Nagraj';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Zatrzymaj';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Odtwórz';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Usuń nagranie';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importuj plik audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Nagrywanie…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Brak uprawnienia do mikrofonu — jest potrzebne do nagrywania.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nowa notatka głosowa';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Moje nagranie';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Pokaż nagrania';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Napisz notatkę…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Wyślij';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Zmień nazwę nagrania';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Opisz to nagranie…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Edytuj opis';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Usuń notatkę';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Edytuj notatkę';
   @override
   String get audioPause => 'Wstrzymaj';
   @override
@@ -325,7 +325,7 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutNewList => 'Nowa lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nowa notatka głosowa';
   @override
   String get shortcutToggleSidebar => 'Pokaż lub ukryj filtr';
   @override
@@ -1025,7 +1025,7 @@ final class PolishStrings extends Strings {
   @override
   String get listFolderTitle => 'Katalog list';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Katalog załączników';
 
   // Trash (M1).
   @override
@@ -1169,4 +1169,96 @@ final class PolishStrings extends Strings {
   String get changelogEmpty => 'Brak wpisów w dzienniku zmian';
   @override
   String changelogWhatsNew(String version) => 'Nowości w wersji $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historia';
+  @override
+  String get noteMenuTooltip => 'Działania na notatce';
+  @override
+  String get historyCurrentVersion => 'Bieżąca wersja';
+  @override
+  String get historyCurrentSubtitle => 'Notatka w obecnej postaci';
+  @override
+  String get historyToday => 'Dzisiaj';
+  @override
+  String get historyYesterday => 'Wczoraj';
+  @override
+  String get historyReasonSession => 'przed edycją';
+  @override
+  String get historyReasonInterval => 'podczas edycji';
+  @override
+  String get historyReasonRestore => 'przed przywróceniem';
+  @override
+  String get historyReasonSync => 'przed synchronizacją';
+  @override
+  String get historyReasonReplace => 'przed zamianą';
+  @override
+  String get historyReasonUnknown => 'odzyskana';
+  @override
+  String get historySyncBase => 'baza synchronizacji';
+  @override
+  String get historyEmpty =>
+      'Brak wersji. Niman zachowuje jedną, gdy zaczynasz edytować notatkę, '
+      'a potem najwyżej jedną co kilka minut podczas pisania.';
+  @override
+  String historyKept(int kept, int limit) => 'Zachowano $kept z $limit wersji';
+  @override
+  String get historyBaseKept =>
+      'Baza synchronizacji jest zachowywana ponad limit.';
+  @override
+  String get historyOff =>
+      'Historia jest wyłączona dla tej biblioteki (Ustawienia, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Nie udało się odczytać historii';
+  @override
+  String get historyCompareSubtitle => 'W porównaniu z bieżącą wersją';
+  @override
+  String get historyTabChanges => 'Zmiany';
+  @override
+  String get historyTabVersion => 'Wersja';
+  @override
+  String get historyNoChanges => 'Taki sam tekst jak w bieżącej wersji.';
+  @override
+  String get historyRestoreAction => 'Przywróć tę wersję';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Przywrócić wersję z $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Bieżący tekst zostanie najpierw zapisany w historii, więc zawsze '
+      'możesz wrócić.';
+  @override
+  String get historyRestoreConfirm => 'Przywróć';
+  @override
+  String historyRestored(String when) => 'Przywrócono wersję z $when';
+  @override
+  String get historyRestoreFailed => 'Nie udało się przywrócić wersji';
+  @override
+  String get actionUndo => 'Cofnij';
+  @override
+  String diffLineRange(int start, int end) => 'Linie $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Linia $line';
+  @override
+  String diffUnchanged(int count) => count == 1
+      ? '1 niezmieniona linia'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? '$count niezmienione linie'
+      : '$count niezmienionych linii';
+  @override
+  String get historyVersionsTitle => 'Liczba wersji do zachowania';
+  @override
+  String get historyVersionsSubtitle => 'Dla każdej notatki, w .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Brak' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nowa wersja najwyżej co';
+  @override
+  String get historyIntervalSubtitle =>
+      'Podczas pisania; rozpoczęcie edycji notatki zawsze zachowuje jedną';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

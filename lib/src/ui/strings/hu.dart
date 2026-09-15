@@ -116,25 +116,24 @@ final class HungarianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Frissítések';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatikus frissítések';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'GitHub Releases ellenőrzése indításkor és 6 óránként';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Frissítések keresése';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Elérhető a Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'A Niman naprakész';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'A frissítések ellenőrzése nem sikerült';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Frissítés mentve ide: $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'A telepítő elindult';
   @override
   String get settingsSectionDiagnostics => 'Diagnosztika';
   @override
@@ -258,44 +257,44 @@ final class HungarianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Elem sorrendjének módosítása';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Még nincs felvétel';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Felvétel';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Leállítás';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Lejátszás';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Felvétel törlése';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Hangfájl importálása';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Felvétel folyamatban…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonhozzáférés megtagadva — a felvételhez szükséges.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Új hangjegyzet';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'A felvételem';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Felvételek megjelenítése';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Írj egy jegyzetet…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Küldés';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Felvétel átnevezése';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Írd le ezt a felvételt…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Leírás szerkesztése';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Jegyzet törlése';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Jegyzet szerkesztése';
   @override
   String get audioPause => 'Szünet';
   @override
@@ -327,7 +326,7 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutNewList => 'Új lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Új hangjegyzet';
   @override
   String get shortcutToggleSidebar => 'Szűrő megjelenítése vagy elrejtése';
   @override
@@ -1024,7 +1023,7 @@ final class HungarianStrings extends Strings {
   @override
   String get listFolderTitle => 'Listamappa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mellékletmappa';
 
   // Trash (M1).
   @override
@@ -1166,4 +1165,91 @@ final class HungarianStrings extends Strings {
   @override
   String changelogWhatsNew(String version) =>
       'Újdonságok a(z) $version verzióban';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Előzmények';
+  @override
+  String get noteMenuTooltip => 'Jegyzetműveletek';
+  @override
+  String get historyCurrentVersion => 'Jelenlegi verzió';
+  @override
+  String get historyCurrentSubtitle => 'A jegyzet jelenlegi állapota';
+  @override
+  String get historyToday => 'Ma';
+  @override
+  String get historyYesterday => 'Tegnap';
+  @override
+  String get historyReasonSession => 'szerkesztés előtt';
+  @override
+  String get historyReasonInterval => 'szerkesztés közben';
+  @override
+  String get historyReasonRestore => 'visszaállítás előtt';
+  @override
+  String get historyReasonSync => 'szinkronizálás előtt';
+  @override
+  String get historyReasonReplace => 'csere előtt';
+  @override
+  String get historyReasonUnknown => 'helyreállított';
+  @override
+  String get historySyncBase => 'szinkronalap';
+  @override
+  String get historyEmpty =>
+      'Még nincsenek verziók. A Niman ment egyet, amikor elkezded szerkeszteni '
+      'a jegyzetet, majd írás közben legfeljebb néhány percenként egyet.';
+  @override
+  String historyKept(int kept, int limit) => '$kept/$limit verzió megőrizve';
+  @override
+  String get historyBaseKept => 'A szinkronalap a korláton felül is megmarad.';
+  @override
+  String get historyOff =>
+      'Az előzmények ki vannak kapcsolva ebben a könyvtárban '
+      '(Beállítások, Könyvtár).';
+  @override
+  String get historyLoadFailed => 'Az előzmények nem olvashatók';
+  @override
+  String get historyCompareSubtitle => 'Összevetve a jelenlegi verzióval';
+  @override
+  String get historyTabChanges => 'Változások';
+  @override
+  String get historyTabVersion => 'Verzió';
+  @override
+  String get historyNoChanges =>
+      'Ugyanaz a szöveg, mint a jelenlegi verzióban.';
+  @override
+  String get historyRestoreAction => 'Visszaállítás erre a verzióra';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Visszaállítod ezt a verziót: $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'A jelenlegi szöveg előbb bekerül az előzményekbe, így bármikor '
+      'visszatérhetsz.';
+  @override
+  String get historyRestoreConfirm => 'Visszaállítás';
+  @override
+  String historyRestored(String when) => 'Verzió visszaállítva: $when';
+  @override
+  String get historyRestoreFailed => 'A verzió nem állítható vissza';
+  @override
+  String get actionUndo => 'Visszavonás';
+  @override
+  String diffLineRange(int start, int end) => '$start–$end. sor';
+  @override
+  String diffLineSingle(int line) => '$line. sor';
+  @override
+  String diffUnchanged(int count) => '$count változatlan sor';
+  @override
+  String get historyVersionsTitle => 'Megőrzendő verziók';
+  @override
+  String get historyVersionsSubtitle => 'Jegyzetenként, a .history/ mappában';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nincs' : '$count';
+  @override
+  String get historyIntervalTitle => 'Új verzió legfeljebb';
+  @override
+  String get historyIntervalSubtitle =>
+      'Írás közben; a szerkesztés megkezdésekor mindig készül egy';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes percenként';
 }

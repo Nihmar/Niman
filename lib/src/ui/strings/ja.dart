@@ -109,25 +109,23 @@ final class JapaneseStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'アップデート';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => '自動アップデート';
   @override
-  String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+  String get autoUpdateSubtitle => '起動時と 6 時間ごとに GitHub Releases を確認';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'アップデートを確認';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Niman $version が利用可能です';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman は最新です';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'アップデートの確認に失敗しました';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'アップデートを $path に保存しました';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'インストーラーを起動しました';
   @override
   String get settingsSectionDiagnostics => '診断';
   @override
@@ -239,44 +237,43 @@ final class JapaneseStrings extends Strings {
   @override
   String get listDragHandleLabel => '項目を並べ替え';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => '録音はまだありません';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => '録音';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => '停止';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => '再生';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => '録音を削除';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => '音声ファイルをインポート';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => '録音中…';
   @override
-  String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+  String get audioPermissionDenied => 'マイクの権限がありません — 録音に必要です。';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => '新しい音声ノート';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => '録音';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => '録音を表示';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'メモを入力…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => '送信';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => '録音の名前を変更';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'この録音の説明を入力…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => '説明を編集';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'メモを削除';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'メモを編集';
   @override
   String get audioPause => '一時停止';
   @override
@@ -308,7 +305,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutNewList => '新しいリスト';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => '新しい音声ノート';
   @override
   String get shortcutToggleSidebar => 'ファイルツリーの表示 / 非表示';
   @override
@@ -953,7 +950,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get listFolderTitle => 'リストフォルダ';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => '添付ファイルフォルダ';
 
   // Trash (M1).
   @override
@@ -1082,4 +1079,84 @@ final class JapaneseStrings extends Strings {
   String get changelogEmpty => '変更履歴の項目がありません';
   @override
   String changelogWhatsNew(String version) => 'バージョン $version の新機能';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => '履歴';
+  @override
+  String get noteMenuTooltip => 'ノートの操作';
+  @override
+  String get historyCurrentVersion => '現在のバージョン';
+  @override
+  String get historyCurrentSubtitle => '現在のノートの内容';
+  @override
+  String get historyToday => '今日';
+  @override
+  String get historyYesterday => '昨日';
+  @override
+  String get historyReasonSession => '編集前';
+  @override
+  String get historyReasonInterval => '編集中';
+  @override
+  String get historyReasonRestore => '復元前';
+  @override
+  String get historyReasonSync => '同期前';
+  @override
+  String get historyReasonReplace => '置換前';
+  @override
+  String get historyReasonUnknown => '回復';
+  @override
+  String get historySyncBase => '同期ベース';
+  @override
+  String get historyEmpty =>
+      'まだバージョンはありません。Niman はノートの編集を始めたときに '
+      '1 つ保存し、その後は入力中に数分ごとに最大 1 つ保存します。';
+  @override
+  String historyKept(int kept, int limit) => '$limit 件中 $kept 件のバージョンを保持';
+  @override
+  String get historyBaseKept => '同期ベースは上限を超えても保持されます。';
+  @override
+  String get historyOff => 'このライブラリでは履歴がオフです（設定、ライブラリ）。';
+  @override
+  String get historyLoadFailed => '履歴を読み込めませんでした';
+  @override
+  String get historyCompareSubtitle => '現在のバージョンとの比較';
+  @override
+  String get historyTabChanges => '変更点';
+  @override
+  String get historyTabVersion => 'バージョン';
+  @override
+  String get historyNoChanges => '現在のバージョンと同じテキストです。';
+  @override
+  String get historyRestoreAction => 'このバージョンを復元';
+  @override
+  String historyRestoreConfirmTitle(String when) => '$when のバージョンを復元しますか？';
+  @override
+  String get historyRestoreConfirmBody => '現在のテキストは先に履歴へ保存されるため、いつでも元に戻せます。';
+  @override
+  String get historyRestoreConfirm => '復元';
+  @override
+  String historyRestored(String when) => '$when のバージョンを復元しました';
+  @override
+  String get historyRestoreFailed => 'バージョンを復元できませんでした';
+  @override
+  String get actionUndo => '元に戻す';
+  @override
+  String diffLineRange(int start, int end) => '$start–$end 行目';
+  @override
+  String diffLineSingle(int line) => '$line 行目';
+  @override
+  String diffUnchanged(int count) => '変更のない $count 行';
+  @override
+  String get historyVersionsTitle => '保持するバージョン数';
+  @override
+  String get historyVersionsSubtitle => 'ノートごとに .history/ に保存';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'なし' : '$count';
+  @override
+  String get historyIntervalTitle => '新しいバージョンの最短間隔';
+  @override
+  String get historyIntervalSubtitle => '入力中に適用。ノートの編集を始めたときは必ず 1 つ保存されます';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes 分';
 }

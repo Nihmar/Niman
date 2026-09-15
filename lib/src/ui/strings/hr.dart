@@ -116,25 +116,24 @@ final class CroatianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tipkovnički prečaci';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Ažuriranja';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatska ažuriranja';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Provjerava GitHub Releases pri pokretanju i svakih 6 sati';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Provjeri ažuriranja';
   @override
-  String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+  String updateAvailableMessage(Object version) => 'Dostupan je Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman je ažuran';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Provjera ažuriranja nije uspjela';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Ažuriranje spremljeno u $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instalacijski program pokrenut';
   @override
   String get settingsSectionDiagnostics => 'Dijagnostika';
   @override
@@ -254,44 +253,44 @@ final class CroatianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Promijeni redoslijed stavke';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Još nema snimaka';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Snimi';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Zaustavi';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Reproduciraj';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Obriši snimku';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Uvezi audiodatoteku';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Snimanje…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Dopuštenje za mikrofon je odbijeno — potrebno je za snimanje.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nova glasovna napomena';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Moja snimka';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Prikaži snimke';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Napiši napomenu…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Pošalji';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Preimenuj snimku';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Opiši ovu snimku…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Uredi opis';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Obriši napomenu';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Uredi napomenu';
   @override
   String get audioPause => 'Pauza';
   @override
@@ -323,7 +322,7 @@ final class CroatianStrings extends Strings {
   @override
   String get shortcutNewList => 'Novi popis';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nova glasovna napomena';
   @override
   String get shortcutToggleSidebar => 'Prikaži ili sakrij filter';
   @override
@@ -1010,7 +1009,7 @@ final class CroatianStrings extends Strings {
   @override
   String get listFolderTitle => 'Direktorij popisa';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Direktorij privitaka';
 
   // Trash (M1).
   @override
@@ -1153,4 +1152,95 @@ final class CroatianStrings extends Strings {
   String get changelogEmpty => 'Nema dostupnih zapisa u dnevniku';
   @override
   String changelogWhatsNew(String version) => 'Novo u verziji $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Povijest';
+  @override
+  String get noteMenuTooltip => 'Radnje s napomenom';
+  @override
+  String get historyCurrentVersion => 'Trenutna verzija';
+  @override
+  String get historyCurrentSubtitle => 'Napomena kakva je sada';
+  @override
+  String get historyToday => 'Danas';
+  @override
+  String get historyYesterday => 'Jučer';
+  @override
+  String get historyReasonSession => 'prije uređivanja';
+  @override
+  String get historyReasonInterval => 'tijekom uređivanja';
+  @override
+  String get historyReasonRestore => 'prije vraćanja';
+  @override
+  String get historyReasonSync => 'prije sinkronizacije';
+  @override
+  String get historyReasonReplace => 'prije zamjene';
+  @override
+  String get historyReasonUnknown => 'pronađena';
+  @override
+  String get historySyncBase => 'osnova sinkronizacije';
+  @override
+  String get historyEmpty =>
+      'Još nema verzija. Niman sprema jednu kad počneš uređivati napomenu, '
+      'a zatim najviše jednu svakih nekoliko minuta dok pišeš.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Spremljene verzije: $kept od $limit';
+  @override
+  String get historyBaseKept =>
+      'Osnova sinkronizacije čuva se i iznad ograničenja.';
+  @override
+  String get historyOff =>
+      'Povijest je isključena za ovu biblioteku (Postavke, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Povijest se nije mogla pročitati';
+  @override
+  String get historyCompareSubtitle => 'U usporedbi s trenutnom verzijom';
+  @override
+  String get historyTabChanges => 'Promjene';
+  @override
+  String get historyTabVersion => 'Verzija';
+  @override
+  String get historyNoChanges => 'Isti tekst kao trenutna verzija.';
+  @override
+  String get historyRestoreAction => 'Vrati ovu verziju';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Vratiti verziju spremljenu $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Trenutni tekst najprije se sprema u povijest, pa se uvijek možeš '
+      'vratiti.';
+  @override
+  String get historyRestoreConfirm => 'Vrati';
+  @override
+  String historyRestored(String when) => 'Vraćena verzija spremljena $when';
+  @override
+  String get historyRestoreFailed => 'Verzija se nije mogla vratiti';
+  @override
+  String get actionUndo => 'Poništi';
+  @override
+  String diffLineRange(int start, int end) => 'Retci $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Redak $line';
+  @override
+  String diffUnchanged(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count nepromijenjen redak',
+    (2 || 3 || 4, < 12 || > 14) => '$count nepromijenjena retka',
+    _ => '$count nepromijenjenih redaka',
+  };
+  @override
+  String get historyVersionsTitle => 'Broj čuvanih verzija';
+  @override
+  String get historyVersionsSubtitle => 'Po napomeni, u .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Nijedna' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nova verzija najviše svakih';
+  @override
+  String get historyIntervalSubtitle =>
+      'Dok pišeš; početak uređivanja napomene uvijek sprema jednu';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

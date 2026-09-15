@@ -741,4 +741,48 @@ final class AppStrings {
   static String get changelogEmpty => _s.changelogEmpty;
   static String changelogWhatsNew(String version) =>
       _s.changelogWhatsNew(version);
+
+  // Note history (issues #13, #55, #67).
+  static String get noteHistoryTitle => _s.noteHistoryTitle;
+  static String get noteMenuTooltip => _s.noteMenuTooltip;
+  static String get historyCurrentVersion => _s.historyCurrentVersion;
+  static String get historyCurrentSubtitle => _s.historyCurrentSubtitle;
+  static String get historyToday => _s.historyToday;
+  static String get historyYesterday => _s.historyYesterday;
+  static String get historyReasonSession => _s.historyReasonSession;
+  static String get historyReasonInterval => _s.historyReasonInterval;
+  static String get historyReasonRestore => _s.historyReasonRestore;
+  static String get historyReasonSync => _s.historyReasonSync;
+  static String get historyReasonReplace => _s.historyReasonReplace;
+  static String get historyReasonUnknown => _s.historyReasonUnknown;
+  static String get historySyncBase => _s.historySyncBase;
+  static String get historyEmpty => _s.historyEmpty;
+  static String historyKept(int kept, int limit) => _s.historyKept(kept, limit);
+  static String get historyBaseKept => _s.historyBaseKept;
+  static String get historyOff => _s.historyOff;
+  static String get historyLoadFailed => _s.historyLoadFailed;
+  static String get historyCompareSubtitle => _s.historyCompareSubtitle;
+  static String get historyTabChanges => _s.historyTabChanges;
+  static String get historyTabVersion => _s.historyTabVersion;
+  static String get historyNoChanges => _s.historyNoChanges;
+  static String get historyRestoreAction => _s.historyRestoreAction;
+  static String historyRestoreConfirmTitle(String when) =>
+      _s.historyRestoreConfirmTitle(when);
+  static String get historyRestoreConfirmBody => _s.historyRestoreConfirmBody;
+  static String get historyRestoreConfirm => _s.historyRestoreConfirm;
+  static String historyRestored(String when) => _s.historyRestored(when);
+  static String get historyRestoreFailed => _s.historyRestoreFailed;
+  static String get actionUndo => _s.actionUndo;
+  static String diffLineRange(int start, int end) =>
+      _s.diffLineRange(start, end);
+  static String diffLineSingle(int line) => _s.diffLineSingle(line);
+  static String diffUnchanged(int count) => _s.diffUnchanged(count);
+  static String get historyVersionsTitle => _s.historyVersionsTitle;
+  static String get historyVersionsSubtitle => _s.historyVersionsSubtitle;
+  static String historyVersionsValue(int count) =>
+      _s.historyVersionsValue(count);
+  static String get historyIntervalTitle => _s.historyIntervalTitle;
+  static String get historyIntervalSubtitle => _s.historyIntervalSubtitle;
+  static String historyIntervalValue(int minutes) =>
+      _s.historyIntervalValue(minutes);
 }

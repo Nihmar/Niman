@@ -117,25 +117,25 @@ final class GreekStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Ενημερώσεις';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Αυτόματες ενημερώσεις';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Έλεγχος στο GitHub Releases κατά την εκκίνηση και κάθε 6 ώρες';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Έλεγχος για ενημερώσεις';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Το Niman $version είναι διαθέσιμο';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Το Niman είναι ενημερωμένο';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Ο έλεγχος ενημερώσεων απέτυχε';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Η ενημέρωση αποθηκεύτηκε στο $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Το πρόγραμμα εγκατάστασης ξεκίνησε';
   @override
   String get settingsSectionDiagnostics => 'Διάγνωση';
   @override
@@ -261,44 +261,44 @@ final class GreekStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Επαναταξινόμηση στοιχείου';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Δεν υπάρχουν ακόμα ηχογραφήσεις';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Εγγραφή';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Διακοπή';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Αναπαραγωγή';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Διαγραφή ηχογράφησης';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Εισαγωγή αρχείου ήχου';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Ηχογράφηση…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Δεν δόθηκε άδεια μικροφώνου — απαιτείται για την ηχογράφηση.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Νέα φωνητική σημείωση';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Η ηχογράφησή μου';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Εμφάνιση ηχογραφήσεων';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Γράψτε μια σημείωση…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Αποστολή';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Μετονομασία ηχογράφησης';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Περιγράψτε αυτή την ηχογράφηση…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Επεξεργασία περιγραφής';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Διαγραφή σημείωσης';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Επεξεργασία σημείωσης';
   @override
   String get audioPause => 'Παύση';
   @override
@@ -330,7 +330,7 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutNewList => 'Νέα λίστα';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Νέα φωνητική σημείωση';
   @override
   String get shortcutToggleSidebar => 'Εμφάνιση ή κρύψη του δέντρου αρχείων';
   @override
@@ -1054,7 +1054,7 @@ final class GreekStrings extends Strings {
   @override
   String get listFolderTitle => 'Φάκελος λίστας';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Φάκελος συνημμένων';
 
   // Trash (M1).
   @override
@@ -1202,4 +1202,94 @@ final class GreekStrings extends Strings {
   String get changelogEmpty => 'Δεν υπάρχουν διαθέσιμες καταχωρίσεις';
   @override
   String changelogWhatsNew(String version) => 'Νέα στην έκδοση $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Ιστορικό';
+  @override
+  String get noteMenuTooltip => 'Ενέργειες σημείωσης';
+  @override
+  String get historyCurrentVersion => 'Τρέχουσα έκδοση';
+  @override
+  String get historyCurrentSubtitle => 'Η σημείωση όπως είναι τώρα';
+  @override
+  String get historyToday => 'Σήμερα';
+  @override
+  String get historyYesterday => 'Χθες';
+  @override
+  String get historyReasonSession => 'πριν την επεξεργασία';
+  @override
+  String get historyReasonInterval => 'κατά την επεξεργασία';
+  @override
+  String get historyReasonRestore => 'πριν την επαναφορά';
+  @override
+  String get historyReasonSync => 'πριν τον συγχρονισμό';
+  @override
+  String get historyReasonReplace => 'πριν την αντικατάσταση';
+  @override
+  String get historyReasonUnknown => 'ανακτημένη';
+  @override
+  String get historySyncBase => 'βάση συγχρονισμού';
+  @override
+  String get historyEmpty =>
+      'Δεν υπάρχουν ακόμα εκδόσεις. Το Niman κρατά μία όταν αρχίζετε να '
+      'επεξεργάζεστε τη σημείωση και μετά το πολύ μία κάθε λίγα λεπτά όσο '
+      'γράφετε.';
+  @override
+  String historyKept(int kept, int limit) =>
+      'Εκδόσεις που διατηρούνται: $kept από $limit';
+  @override
+  String get historyBaseKept =>
+      'Η βάση συγχρονισμού διατηρείται και πέρα από το όριο.';
+  @override
+  String get historyOff =>
+      'Το ιστορικό είναι απενεργοποιημένο για αυτή τη βιβλιοθήκη '
+      '(Ρυθμίσεις, Βιβλιοθήκη).';
+  @override
+  String get historyLoadFailed => 'Δεν ήταν δυνατή η ανάγνωση του ιστορικού';
+  @override
+  String get historyCompareSubtitle => 'Σε σύγκριση με την τρέχουσα έκδοση';
+  @override
+  String get historyTabChanges => 'Αλλαγές';
+  @override
+  String get historyTabVersion => 'Έκδοση';
+  @override
+  String get historyNoChanges => 'Ίδιο κείμενο με την τρέχουσα έκδοση.';
+  @override
+  String get historyRestoreAction => 'Επαναφορά αυτής της έκδοσης';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Επαναφορά της έκδοσης ($when);';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Το τρέχον κείμενο αποθηκεύεται πρώτα στο ιστορικό, οπότε μπορείτε '
+      'πάντα να επιστρέψετε.';
+  @override
+  String get historyRestoreConfirm => 'Επαναφορά';
+  @override
+  String historyRestored(String when) => 'Έγινε επαναφορά της έκδοσης ($when)';
+  @override
+  String get historyRestoreFailed => 'Δεν ήταν δυνατή η επαναφορά της έκδοσης';
+  @override
+  String get actionUndo => 'Αναίρεση';
+  @override
+  String diffLineRange(int start, int end) => 'Γραμμές $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Γραμμή $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 αμετάβλητη γραμμή' : '$count αμετάβλητες γραμμές';
+  @override
+  String get historyVersionsTitle => 'Εκδόσεις προς διατήρηση';
+  @override
+  String get historyVersionsSubtitle => 'Ανά σημείωση, στο .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Καμία' : '$count';
+  @override
+  String get historyIntervalTitle => 'Νέα έκδοση το πολύ κάθε';
+  @override
+  String get historyIntervalSubtitle =>
+      'Όσο γράφετε· η έναρξη επεξεργασίας μιας σημείωσης κρατά πάντα μία';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes λεπ.';
 }

@@ -51,6 +51,14 @@ import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Saves [content] as the note at absolute [path]; [editSession] is the
+/// editor session the save belongs to (one opening of the note).
+typedef NoteSaver = Future<void> Function(
+  String path,
+  String content, {
+  required int editSession,
+});
+
 /// Opens a note file in the source editor and keeps disk in sync.
 ///
 /// The file is the source of truth (design.md): the initial read happens
@@ -90,6 +98,7 @@ final class NoteView extends StatefulWidget {
     this.importImage,
     this.readNote,
     this.writeNote,
+    this.saveNote,
     this.controller,
     this.linkSource,
     this.onOpenNote,
@@ -175,7 +184,14 @@ final class NoteView extends StatefulWidget {
   final Future<String> Function(String path)? readNote;
 
   /// Persists a note's content. Defaults to an atomic file write.
+  ///
+  /// A test seam; production passes [saveNote] instead.
   final Future<void> Function(String path, String content)? writeNote;
+
+  /// Saves a note's content through the library's write path (`NoteOps`),
+  /// with the editor session the save belongs to. Takes precedence over
+  /// [writeNote]; null (no open library) falls back to a direct write.
+  final NoteSaver? saveNote;
 
   /// The editor's controller (a test seam; one is created by default).
   final CodeLineEditingController? controller;
@@ -336,6 +352,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   int _revision = 0;
   int _lastSavedRevision = 0;
 
+  /// Process-wide source of [_editSession] ids.
+  static int _editSessions = 0;
+
+  /// The editor session: a new id each time a note's text is taken from
+  /// disk (opened, or adopted after an outside change). History keys its
+  /// "state before this session's edits" snapshot on it.
+  int _editSession = 0;
+
   /// The save in flight, if any: a coalesced [_save] hands it back, so a
   /// caller that must know the disk moved ([_saveForClose]) awaits the
   /// real write instead of the pending flag.
@@ -481,7 +505,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<void> _write(String path, String content) async {
+  Future<void> _write(String path, String content, int editSession) async {
+    final saver = widget.saveNote;
+    if (saver != null) {
+      await saver(path, content, editSession: editSession);
+      return;
+    }
     final seam = widget.writeNote;
     if (seam != null) {
       await seam(path, content);
@@ -559,6 +588,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       widget.spellCheck?.reset();
       _lastLines = _controller.codeLines;
       _lastSavedRevision = _revision;
+      _editSession = ++_editSessions;
+      _log.debug('edit session $_editSession: $path');
       _unsaved?.noteChanged();
       setState(() {
         _loading = false;
@@ -652,6 +683,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _wysiwygText = text;
     _lastLines = _controller.codeLines;
     _lastSavedRevision = _revision;
+    // Text taken from disk again: edits from here on are a new session.
+    _editSession = ++_editSessions;
+    _log.debug('edit session $_editSession: $path (adopted disk text)');
     _noteKind = frontmatterTypeOf(text);
     widget.spellCheck?.reset();
     _loading = false;
@@ -1292,9 +1326,16 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final joinClock = Stopwatch()..start();
     final text = _currentText;
     final joinMs = joinClock.elapsedMilliseconds;
-    _log.info('save start: $target (${text.length} chars, join $joinMs ms)');
+    // Read with the text, before the first await: a note switch that
+    // saves the outgoing note is followed by a _load that starts the next
+    // session, and this save belongs to the one it came from.
+    final session = _editSession;
+    _log.info(
+      'save start: $target (${text.length} chars, join $joinMs ms, '
+      'session $session)',
+    );
     try {
-      await _write(target, text);
+      await _write(target, text, session);
       if (target == widget.path) {
         _lastSavedRevision = revision;
         _unsaved?.noteChanged();

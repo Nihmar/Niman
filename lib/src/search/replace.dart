@@ -22,6 +22,9 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
+import 'package:niman/src/history/history_manifest.dart';
+import 'package:niman/src/history/history_store.dart';
+import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:path/path.dart' as p;
 
 /// One replace run's outcome.
@@ -117,7 +120,7 @@ final class ReplaceRunner implements ReplaceSource {
   /// Creates a runner for the library root and index database given to it;
   /// [onNotesReindexed] is invoked with the absolute paths of every note
   /// this run rewrote, right after the batch that rewrote them.
-  new(this._db, this._root, {this.onNotesReindexed});
+  new(this._db, this._root, {this.onNotesReindexed, this.historyRequest});
 
   final IndexDatabase _db;
   final String _root;
@@ -125,6 +128,11 @@ final class ReplaceRunner implements ReplaceSource {
   /// Called with the rewritten notes' absolute paths, per write batch, so
   /// the caller can re-index them without waiting for the watcher.
   final Future<void> Function(List<String> absolutePaths)? onNotesReindexed;
+
+  /// What history keeps before each rewrite: a [HistoryReason.replace]
+  /// request, so a library-wide replace is undoable note by note. Null
+  /// keeps no versions.
+  final Future<SnapshotRequest> Function()? historyRequest;
 
   /// How many context characters a preview sample keeps around a match.
   static const int _sampleRadius = 30;
@@ -208,15 +216,25 @@ final class ReplaceRunner implements ReplaceSource {
     // The isolate closure must not capture the runner (its drift database
     // is unsendable) — only plain values cross the boundary.
     final root = _root;
+    final history = await historyRequest?.call();
+    const historyLog = AppLogger(name: 'history');
     const chunk = 24;
     for (var i = 0; i < todo.length; i += chunk) {
       final rels = todo.sublist(i, math.min(i + chunk, todo.length));
       final results = await Isolate.run(
-        () => _replaceChunk(root, rels, term, replacement, caseSensitive),
+        () => _replaceChunk(
+          root,
+          rels,
+          term,
+          replacement,
+          caseSensitive,
+          history,
+        ),
       );
       final changed = <String>[];
       for (var j = 0; j < results.length; j++) {
-        final (wasChanged, count) = results[j];
+        final (wasChanged, count, snapshotLog) = results[j];
+        if (snapshotLog != null) historyLog.info(snapshotLog);
         if (wasChanged) {
           notesChanged++;
           changed.add(p.join(root, rels[j]));
@@ -324,19 +342,24 @@ ReplaceSample _sampleAround(String text, int start, int end, int radius) {
 }
 
 /// The off-isolate entry: replaces the term in every file of [rels]
-/// (absolute under [root]); one `(changed, occurrences)` per file.
-Future<List<(bool, int)>> _replaceChunk(
+/// (absolute under [root]); one `(changed, occurrences, history log)` per
+/// file. With [history], each note's text is kept as a version before it
+/// is rewritten; the log line describes that snapshot (the isolate's own
+/// log buffer is not the app's, so the caller logs it).
+Future<List<(bool, int, String?)>> _replaceChunk(
   String root,
   List<String> rels,
   String term,
   String replacement,
   bool caseSensitive,
+  SnapshotRequest? history,
 ) async {
-  final out = <(bool, int)>[];
+  final out = <(bool, int, String?)>[];
   for (final rel in rels) {
     final file = File(p.join(root, rel));
     var changed = false;
     var count = 0;
+    String? snapshotLog;
     try {
       final original = file.readAsStringSync();
       final result = replaceWholeWords(
@@ -347,6 +370,13 @@ Future<List<(bool, int)>> _replaceChunk(
       );
       count = result.$1;
       if (count > 0) {
+        if (history != null) {
+          try {
+            snapshotLog = snapshotBeforeWrite(root, rel, history).describe(rel);
+          } on Object catch (e) {
+            snapshotLog = 'snapshot "$rel" failed, replacing anyway: $e';
+          }
+        }
         await writeFileAtomically(file, utf8.encode(result.$2));
         changed = true;
       }
@@ -355,7 +385,7 @@ Future<List<(bool, int)>> _replaceChunk(
       changed = false;
       count = 0;
     }
-    out.add((changed, count));
+    out.add((changed, count, snapshotLog));
   }
   return out;
 }

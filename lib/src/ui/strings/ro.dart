@@ -116,25 +116,25 @@ final class RomanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Actualizări';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Actualizări automate';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Verifică GitHub Releases la pornire și la fiecare 6 ore';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Caută actualizări';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version este disponibil';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman este actualizat';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Verificarea actualizărilor a eșuat';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Actualizare salvată în $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Programul de instalare a pornit';
   @override
   String get settingsSectionDiagnostics => 'Diagnostic';
   @override
@@ -257,44 +257,45 @@ final class RomanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Schimbă ordinea elementului';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Nicio înregistrare încă';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Înregistrează';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Oprește';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Redă';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Șterge înregistrarea';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importă un fișier audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Se înregistrează…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Permisiunea pentru microfon a fost refuzată — este necesară pentru '
+      'înregistrare.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Notă vocală nouă';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Înregistrarea mea';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Afișează înregistrările';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Scrie o notă…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Trimite';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Redenumește înregistrarea';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Descrie această înregistrare…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Editează descrierea';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Șterge nota';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Editează nota';
   @override
   String get audioPause => 'Pauză';
   @override
@@ -326,7 +327,7 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Listă nouă';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Notă vocală nouă';
   @override
   String get shortcutToggleSidebar => 'Afișează sau ascunde filtrul';
   @override
@@ -1017,7 +1018,7 @@ final class RomanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Dosar de liste';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Dosar de atașamente';
 
   // Trash (M1).
   @override
@@ -1158,4 +1159,104 @@ final class RomanianStrings extends Strings {
   String get changelogEmpty => 'Nicio intrare în jurnal disponibilă';
   @override
   String changelogWhatsNew(String version) => 'Noutăți în versiunea $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Istoric';
+  @override
+  String get noteMenuTooltip => 'Acțiuni pentru notă';
+  @override
+  String get historyCurrentVersion => 'Versiunea curentă';
+  @override
+  String get historyCurrentSubtitle => 'Nota așa cum este acum';
+  @override
+  String get historyToday => 'Azi';
+  @override
+  String get historyYesterday => 'Ieri';
+  @override
+  String get historyReasonSession => 'înainte de editare';
+  @override
+  String get historyReasonInterval => 'în timpul editării';
+  @override
+  String get historyReasonRestore => 'înainte de restaurare';
+  @override
+  String get historyReasonSync => 'înainte de sincronizare';
+  @override
+  String get historyReasonReplace => 'înainte de înlocuire';
+  @override
+  String get historyReasonUnknown => 'recuperată';
+  @override
+  String get historySyncBase => 'bază de sincronizare';
+  @override
+  String get historyEmpty =>
+      'Încă nicio versiune. Niman păstrează una când începi să editezi '
+      'nota, apoi cel mult una la câteva minute cât timp scrii.';
+  @override
+  String historyKept(int kept, int limit) {
+    final noun = limit == 1
+        ? 'versiune'
+        : limit % 100 == 0 || limit % 100 >= 20
+        ? 'de versiuni'
+        : 'versiuni';
+    return '$kept din $limit $noun păstrate';
+  }
+
+  @override
+  String get historyBaseKept =>
+      'Baza de sincronizare se păstrează și peste limită.';
+  @override
+  String get historyOff =>
+      'Istoricul este dezactivat pentru această bibliotecă '
+      '(Setări, Bibliotecă).';
+  @override
+  String get historyLoadFailed => 'Istoricul nu a putut fi citit';
+  @override
+  String get historyCompareSubtitle => 'Comparată cu versiunea curentă';
+  @override
+  String get historyTabChanges => 'Modificări';
+  @override
+  String get historyTabVersion => 'Versiune';
+  @override
+  String get historyNoChanges => 'Același text ca în versiunea curentă.';
+  @override
+  String get historyRestoreAction => 'Restaurează această versiune';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Restaurezi versiunea din $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Textul curent este mai întâi păstrat în istoric, așa că poți reveni '
+      'oricând.';
+  @override
+  String get historyRestoreConfirm => 'Restaurează';
+  @override
+  String historyRestored(String when) =>
+      'Versiunea din $when a fost restaurată';
+  @override
+  String get historyRestoreFailed => 'Versiunea nu a putut fi restaurată';
+  @override
+  String get actionUndo => 'Anulează';
+  @override
+  String diffLineRange(int start, int end) => 'Liniile $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Linia $line';
+  @override
+  String diffUnchanged(int count) => count == 1
+      ? '1 linie nemodificată'
+      : count % 100 == 0 || count % 100 >= 20
+      ? '$count de linii nemodificate'
+      : '$count linii nemodificate';
+  @override
+  String get historyVersionsTitle => 'Versiuni de păstrat';
+  @override
+  String get historyVersionsSubtitle => 'Pentru fiecare notă, în .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Niciuna' : '$count';
+  @override
+  String get historyIntervalTitle => 'Versiune nouă cel mult o dată la';
+  @override
+  String get historyIntervalSubtitle =>
+      'Cât timp scrii; începerea editării unei note păstrează mereu una';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

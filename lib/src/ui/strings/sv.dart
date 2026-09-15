@@ -115,25 +115,25 @@ final class SwedishStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Uppdateringar';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatiska uppdateringar';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontrollera GitHub Releases vid start och var 6:e timme';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Sök efter uppdateringar';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version finns tillgänglig';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman är uppdaterad';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Det gick inte att söka efter uppdateringar';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Uppdateringen sparades i $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Installationsprogrammet har startats';
   @override
   String get settingsSectionDiagnostics => 'Diagnostik';
   @override
@@ -258,44 +258,44 @@ final class SwedishStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Byt ordning på objektet';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Inga inspelningar ännu';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Spela in';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Stoppa';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Spela upp';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Ta bort inspelning';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importera en ljudfil';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Spelar in…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Mikrofonåtkomst nekad — den behövs för inspelning.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Ny röstanteckning';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Min inspelning';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Visa inspelningar';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Skriv en anteckning…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Skicka';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Byt namn på inspelning';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Beskriv den här inspelningen…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Redigera beskrivning';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Ta bort anteckning';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Redigera anteckning';
   @override
   String get audioPause => 'Pausa';
   @override
@@ -327,7 +327,7 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutNewList => 'Ny lista';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Ny röstanteckning';
   @override
   String get shortcutToggleSidebar => 'Visa eller dölj filträdet';
   @override
@@ -1018,7 +1018,7 @@ final class SwedishStrings extends Strings {
   @override
   String get listFolderTitle => 'Listmapp';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Mapp för bilagor';
 
   // Trash (M1).
   @override
@@ -1159,4 +1159,92 @@ final class SwedishStrings extends Strings {
   String get changelogEmpty => 'Inga ändringsloggsposter tillgängliga';
   @override
   String changelogWhatsNew(String version) => 'Nytt i version $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historik';
+  @override
+  String get noteMenuTooltip => 'Anteckningsåtgärder';
+  @override
+  String get historyCurrentVersion => 'Aktuell version';
+  @override
+  String get historyCurrentSubtitle => 'Anteckningen som den är nu';
+  @override
+  String get historyToday => 'I dag';
+  @override
+  String get historyYesterday => 'I går';
+  @override
+  String get historyReasonSession => 'före redigering';
+  @override
+  String get historyReasonInterval => 'under redigering';
+  @override
+  String get historyReasonRestore => 'före återställning';
+  @override
+  String get historyReasonSync => 'före synk';
+  @override
+  String get historyReasonReplace => 'före ersättning';
+  @override
+  String get historyReasonUnknown => 'återfunnen';
+  @override
+  String get historySyncBase => 'synkbas';
+  @override
+  String get historyEmpty =>
+      'Inga versioner än. Niman sparar en när du börjar redigera anteckningen '
+      'och sedan högst en med några minuters mellanrum medan du skriver.';
+  @override
+  String historyKept(int kept, int limit) =>
+      '$kept av $limit versioner sparade';
+  @override
+  String get historyBaseKept => 'Synkbasen sparas även utöver gränsen.';
+  @override
+  String get historyOff =>
+      'Historiken är avstängd för det här biblioteket '
+      '(Inställningar, Bibliotek).';
+  @override
+  String get historyLoadFailed => 'Kunde inte läsa historiken';
+  @override
+  String get historyCompareSubtitle => 'Jämförd med den aktuella versionen';
+  @override
+  String get historyTabChanges => 'Ändringar';
+  @override
+  String get historyTabVersion => 'Version';
+  @override
+  String get historyNoChanges => 'Samma text som den aktuella versionen.';
+  @override
+  String get historyRestoreAction => 'Återställ den här versionen';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Återställa versionen från $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Den aktuella texten sparas först i historiken, så du kan alltid gå '
+      'tillbaka.';
+  @override
+  String get historyRestoreConfirm => 'Återställ';
+  @override
+  String historyRestored(String when) => 'Versionen från $when återställdes';
+  @override
+  String get historyRestoreFailed => 'Kunde inte återställa versionen';
+  @override
+  String get actionUndo => 'Ångra';
+  @override
+  String diffLineRange(int start, int end) => 'Rader $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rad $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 oförändrad rad' : '$count oförändrade rader';
+  @override
+  String get historyVersionsTitle => 'Versioner att spara';
+  @override
+  String get historyVersionsSubtitle => 'Per anteckning, i .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Inga' : '$count';
+  @override
+  String get historyIntervalTitle => 'Ny version högst var';
+  @override
+  String get historyIntervalSubtitle =>
+      'Medan du skriver; när du börjar redigera en anteckning sparas alltid en';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

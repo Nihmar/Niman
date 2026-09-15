@@ -21,6 +21,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/index_scan.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/frontmatter/fields.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/note_ops.dart';
@@ -276,10 +277,14 @@ final class LibraryController implements LibrarySession {
     final indexer = _indexer;
     final db = _indexDb;
     if (root == null || indexer == null || db == null) return null;
+    final history = _ops?.history;
     return ReplaceRunner(
       db,
       root,
       onNotesReindexed: (paths) => indexer.rescanFiles(root, paths),
+      historyRequest: history == null
+          ? null
+          : () => history.requestFor('', forced: HistoryReason.replace),
     );
   }
 
@@ -881,6 +886,31 @@ final class LibraryController implements LibrarySession {
     _log.info('indent width set to $width');
     await _editLibrary(
       (c) => c.copyWith(indentWidth: normalizeIndentWidth(width)),
+    );
+  }
+
+  @override
+  Future<int> get historyVersions async => (await _library).historyVersions;
+
+  @override
+  Future<void> setHistoryVersions(int versions) async {
+    _log.info('history versions set to $versions');
+    await _editLibrary(
+      (c) => c.copyWith(historyVersions: normalizeHistoryVersions(versions)),
+    );
+  }
+
+  @override
+  Future<int> get historyIntervalMinutes async =>
+      (await _library).historyIntervalMinutes;
+
+  @override
+  Future<void> setHistoryIntervalMinutes(int minutes) async {
+    _log.info('history interval set to $minutes min');
+    await _editLibrary(
+      (c) => c.copyWith(
+        historyIntervalMinutes: normalizeHistoryIntervalMinutes(minutes),
+      ),
     );
   }
 

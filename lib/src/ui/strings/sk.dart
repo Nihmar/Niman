@@ -115,25 +115,25 @@ final class SlovakStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Aktualizácie';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Automatické aktualizácie';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontroluje GitHub Releases pri spustení a každých 6 hodín';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Skontrolovať aktualizácie';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'K dispozícii je Niman $version';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman je aktuálny';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kontrola aktualizácií zlyhala';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Aktualizácia uložená do $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Inštalátor spustený';
   @override
   String get settingsSectionDiagnostics => 'Diagnostika';
   @override
@@ -254,44 +254,44 @@ final class SlovakStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Zmeniť poradie položky';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => 'Zatiaľ žiadne nahrávky';
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Nahrať';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Zastaviť';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Prehrať';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Vymazať nahrávku';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importovať zvukový súbor';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Nahráva sa…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Povolenie na mikrofón bolo zamietnuté — nahrávanie ho vyžaduje.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Nová hlasová poznámka';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Moja nahrávka';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Zobraziť nahrávky';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Napíšte poznámku…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Odoslať';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Premenovať nahrávku';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Opíšte túto nahrávku…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Upraviť popis';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Vymazať poznámku';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Upraviť poznámku';
   @override
   String get audioPause => 'Pozastaviť';
   @override
@@ -323,7 +323,7 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutNewList => 'Nový zoznam';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Nová hlasová poznámka';
   @override
   String get shortcutToggleSidebar => 'Zobraziť alebo skryť filter';
   @override
@@ -1007,7 +1007,7 @@ final class SlovakStrings extends Strings {
   @override
   String get listFolderTitle => 'Priečinok zoznamov';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Priečinok príloh';
 
   // Trash (M1).
   @override
@@ -1149,4 +1149,93 @@ final class SlovakStrings extends Strings {
   String get changelogEmpty => 'Záznamy changelogu nie sú dostupné';
   @override
   String changelogWhatsNew(String version) => 'Novinky vo verzii $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'História';
+  @override
+  String get noteMenuTooltip => 'Akcie poznámky';
+  @override
+  String get historyCurrentVersion => 'Aktuálna verzia';
+  @override
+  String get historyCurrentSubtitle => 'Poznámka v súčasnej podobe';
+  @override
+  String get historyToday => 'Dnes';
+  @override
+  String get historyYesterday => 'Včera';
+  @override
+  String get historyReasonSession => 'pred úpravami';
+  @override
+  String get historyReasonInterval => 'počas úprav';
+  @override
+  String get historyReasonRestore => 'pred obnovením';
+  @override
+  String get historyReasonSync => 'pred synchronizáciou';
+  @override
+  String get historyReasonReplace => 'pred nahradením';
+  @override
+  String get historyReasonUnknown => 'nájdená';
+  @override
+  String get historySyncBase => 'základ synchronizácie';
+  @override
+  String get historyEmpty =>
+      'Zatiaľ žiadne verzie. Niman jednu uchová, keď začnete poznámku '
+      'upravovať, a potom najviac jednu za pár minút, kým píšete.';
+  @override
+  String historyKept(int kept, int limit) => 'Uchované verzie: $kept z $limit';
+  @override
+  String get historyBaseKept => 'Základ synchronizácie sa uchová aj nad limit.';
+  @override
+  String get historyOff =>
+      'História je pre túto knižnicu vypnutá (Nastavenia, Knižnica).';
+  @override
+  String get historyLoadFailed => 'Históriu sa nepodarilo načítať';
+  @override
+  String get historyCompareSubtitle => 'Porovnané s aktuálnou verziou';
+  @override
+  String get historyTabChanges => 'Zmeny';
+  @override
+  String get historyTabVersion => 'Verzia';
+  @override
+  String get historyNoChanges => 'Rovnaký text ako aktuálna verzia.';
+  @override
+  String get historyRestoreAction => 'Obnoviť túto verziu';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Obnoviť verziu uloženú $when?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Aktuálny text sa najprv uloží do histórie, takže sa môžete '
+      'kedykoľvek vrátiť.';
+  @override
+  String get historyRestoreConfirm => 'Obnoviť';
+  @override
+  String historyRestored(String when) => 'Obnovená verzia uložená $when';
+  @override
+  String get historyRestoreFailed => 'Verziu sa nepodarilo obnoviť';
+  @override
+  String get actionUndo => 'Späť';
+  @override
+  String diffLineRange(int start, int end) => 'Riadky $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Riadok $line';
+  @override
+  String diffUnchanged(int count) => switch (count) {
+    1 => '1 nezmenený riadok',
+    >= 2 && <= 4 => '$count nezmenené riadky',
+    _ => '$count nezmenených riadkov',
+  };
+  @override
+  String get historyVersionsTitle => 'Počet uchovaných verzií';
+  @override
+  String get historyVersionsSubtitle => 'Pre každú poznámku, v .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Žiadne' : '$count';
+  @override
+  String get historyIntervalTitle => 'Nová verzia najviac každých';
+  @override
+  String get historyIntervalSubtitle =>
+      'Počas písania; začiatok úprav poznámky vždy jednu uchová';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }

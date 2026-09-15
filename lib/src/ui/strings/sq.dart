@@ -115,25 +115,25 @@ final class AlbanianStrings extends Strings {
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
   @override
-  String get settingsSectionUpdates => 'Updates';
+  String get settingsSectionUpdates => 'Përditësime';
   @override
-  String get autoUpdateTitle => 'Automatic updates';
+  String get autoUpdateTitle => 'Përditësime automatike';
   @override
   String get autoUpdateSubtitle =>
-      'Check GitHub Releases at launch and every 6 hours';
+      'Kontrollon GitHub Releases në nisje dhe çdo 6 orë';
   @override
-  String get checkForUpdatesTitle => 'Check for updates';
+  String get checkForUpdatesTitle => 'Kontrollo për përditësime';
   @override
   String updateAvailableMessage(Object version) =>
-      'Niman $version is available';
+      'Niman $version është i disponueshëm';
   @override
-  String get updateUpToDate => 'Niman is up to date';
+  String get updateUpToDate => 'Niman është i përditësuar';
   @override
-  String get updateCheckFailed => 'Update check failed';
+  String get updateCheckFailed => 'Kontrolli i përditësimeve dështoi';
   @override
-  String updateSavedTo(Object path) => 'Update saved to $path';
+  String updateSavedTo(Object path) => 'Përditësimi u ruajt në $path';
   @override
-  String get updateInstallerStarted => 'Installer started';
+  String get updateInstallerStarted => 'Instaluesi u nis';
   @override
   String get settingsSectionDiagnostics => 'Diagnostikimi';
   @override
@@ -256,44 +256,44 @@ final class AlbanianStrings extends Strings {
   @override
   String get listDragHandleLabel => 'Rirrendni elementin';
 
-  // Audio note kind (issue #56): English fallback until translated.
+  // Audio note kind (issue #56).
   @override
-  String get audioEmpty => 'No recordings yet';
+  String get audioEmpty => "Ende s'ka regjistrime";
   @override
-  String get audioRecord => 'Record';
+  String get audioRecord => 'Regjistro';
   @override
-  String get audioStop => 'Stop';
+  String get audioStop => 'Ndalo';
   @override
-  String get audioPlay => 'Play';
+  String get audioPlay => 'Luaj';
   @override
-  String get audioDelete => 'Delete recording';
+  String get audioDelete => 'Fshi regjistrimin';
   @override
-  String get audioImport => 'Import an audio file';
+  String get audioImport => 'Importo një skedar audio';
   @override
-  String get audioRecording => 'Recording…';
+  String get audioRecording => 'Po regjistrohet…';
   @override
   String get audioPermissionDenied =>
-      'Microphone permission denied — recording needs it.';
+      'Leja për mikrofonin u refuzua — nevojitet për regjistrim.';
   @override
-  String get newAudioNoteTitle => 'New voice note';
+  String get newAudioNoteTitle => 'Shënim zanor i ri';
   @override
-  String get newAudioNoteDefault => 'My recording';
+  String get newAudioNoteDefault => 'Regjistrimi im';
   @override
-  String get showAudioTooltip => 'Show recordings';
+  String get showAudioTooltip => 'Shfaq regjistrimet';
   @override
-  String get audioMessageHint => 'Write a note…';
+  String get audioMessageHint => 'Shkruaj një shënim…';
   @override
-  String get audioSend => 'Send';
+  String get audioSend => 'Dërgo';
   @override
-  String get audioRename => 'Rename recording';
+  String get audioRename => 'Riemërto regjistrimin';
   @override
-  String get audioDescriptionHint => 'Describe this recording…';
+  String get audioDescriptionHint => 'Përshkruaj këtë regjistrim…';
   @override
-  String get audioEditDescription => 'Edit description';
+  String get audioEditDescription => 'Ndrysho përshkrimin';
   @override
-  String get audioDeleteNote => 'Delete note';
+  String get audioDeleteNote => 'Fshi shënimin';
   @override
-  String get audioEditNote => 'Edit note';
+  String get audioEditNote => 'Ndrysho shënimin';
   @override
   String get audioPause => 'Pauzë';
   @override
@@ -325,7 +325,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutNewList => 'Listë e re';
   @override
-  String get shortcutNewAudio => 'New voice note';
+  String get shortcutNewAudio => 'Shënim zanor i ri';
   @override
   String get shortcutToggleSidebar => 'Shfaq ose fsheh pemën e skedarëve';
   @override
@@ -1030,7 +1030,7 @@ final class AlbanianStrings extends Strings {
   @override
   String get listFolderTitle => 'Tresë e listës';
   @override
-  String get attachmentsFolderTitle => 'Attachments folder';
+  String get attachmentsFolderTitle => 'Tresë e bashkëngjitjeve';
 
   // Trash (M1).
   @override
@@ -1174,4 +1174,94 @@ final class AlbanianStrings extends Strings {
   String get changelogEmpty => 'Nuk ka hyrje të regjistrit të disponueshme';
   @override
   String changelogWhatsNew(String version) => 'E re në versionin $version';
+
+  // Note history (issues #13, #55, #67).
+  @override
+  String get noteHistoryTitle => 'Historiku';
+  @override
+  String get noteMenuTooltip => 'Veprimet e shënimit';
+  @override
+  String get historyCurrentVersion => 'Versioni aktual';
+  @override
+  String get historyCurrentSubtitle => 'Shënimi siç është tani';
+  @override
+  String get historyToday => 'Sot';
+  @override
+  String get historyYesterday => 'Dje';
+  @override
+  String get historyReasonSession => 'para ndryshimit';
+  @override
+  String get historyReasonInterval => 'gjatë ndryshimit';
+  @override
+  String get historyReasonRestore => 'para rikthimit';
+  @override
+  String get historyReasonSync => 'para sinkronizimit';
+  @override
+  String get historyReasonReplace => 'para zëvendësimit';
+  @override
+  String get historyReasonUnknown => 'i rikuperuar';
+  @override
+  String get historySyncBase => 'baza e sinkronizimit';
+  @override
+  String get historyEmpty =>
+      'Ende nuk ka versione. Niman ruan një kur filloni të ndryshoni '
+      'shënimin, pastaj më së shumti një në pak minuta ndërsa shkruani.';
+  @override
+  String historyKept(int kept, int limit) =>
+      '$kept nga $limit versione të ruajtura';
+  @override
+  String get historyBaseKept =>
+      'Baza e sinkronizimit ruhet edhe përtej kufirit.';
+  @override
+  String get historyOff =>
+      'Historiku është i çaktivizuar për këtë bibliotekë '
+      '(Vendosjet, Biblioteka).';
+  @override
+  String get historyLoadFailed => 'Historiku nuk u lexua';
+  @override
+  String get historyCompareSubtitle => 'Krahasuar me versionin aktual';
+  @override
+  String get historyTabChanges => 'Ndryshimet';
+  @override
+  String get historyTabVersion => 'Versioni';
+  @override
+  String get historyNoChanges => 'I njëjti tekst si versioni aktual.';
+  @override
+  String get historyRestoreAction => 'Rikthe këtë version';
+  @override
+  String historyRestoreConfirmTitle(String when) =>
+      'Të rikthehet versioni ($when)?';
+  @override
+  String get historyRestoreConfirmBody =>
+      'Teksti aktual ruhet më parë në historik, kështu që mund të ktheheni '
+      'gjithmonë pas.';
+  @override
+  String get historyRestoreConfirm => 'Rikthe';
+  @override
+  String historyRestored(String when) => 'Versioni ($when) u rikthye';
+  @override
+  String get historyRestoreFailed => 'Versioni nuk u rikthye';
+  @override
+  String get actionUndo => 'Zhbëj';
+  @override
+  String diffLineRange(int start, int end) => 'Rreshtat $start–$end';
+  @override
+  String diffLineSingle(int line) => 'Rreshti $line';
+  @override
+  String diffUnchanged(int count) =>
+      count == 1 ? '1 rresht i pandryshuar' : '$count rreshta të pandryshuar';
+  @override
+  String get historyVersionsTitle => 'Versionet që ruhen';
+  @override
+  String get historyVersionsSubtitle => 'Për çdo shënim, në .history/';
+  @override
+  String historyVersionsValue(int count) => count == 0 ? 'Asnjë' : '$count';
+  @override
+  String get historyIntervalTitle => 'Version i ri më së shumti çdo';
+  @override
+  String get historyIntervalSubtitle =>
+      'Ndërsa shkruani; fillimi i ndryshimit të një shënimi ruan gjithmonë '
+      'një';
+  @override
+  String historyIntervalValue(int minutes) => '$minutes min';
 }
