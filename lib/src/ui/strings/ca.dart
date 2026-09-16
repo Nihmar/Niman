@@ -1021,6 +1021,18 @@ final class CatalanStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Els ginys de la pantalla d’inici estan disponibles a Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Mostra al gestor de fitxers';
+  @override
+  String get openInDefaultApp => 'Obre amb l’aplicació per defecte';
+  @override
+  String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
+  @override
+  String get openFileFailed =>
+      'No s’ha pogut obrir aquesta nota fora del Niman';
+
   @override
   String get movedToTrash => 'Moguda a la paperera';
   @override

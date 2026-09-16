@@ -32,6 +32,7 @@ import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
@@ -1796,6 +1797,23 @@ final class _LibraryShellState extends State<_LibraryShell>
           label: AppStrings.noteHistoryTitle,
           value: 'history',
         ),
+      // A note is also a file (issue #76). Desktop only: Android has no
+      // file manager to select a path in, so the entries stay off there
+      // rather than being shown and then failing.
+      if (!note.isDir && supportsTreeContextActions) ...[
+        (
+          key: const Key('menu-open-file-manager'),
+          icon: Icons.folder_open,
+          label: AppStrings.openInFileManager,
+          value: 'reveal',
+        ),
+        (
+          key: const Key('menu-open-default-app'),
+          icon: Icons.open_in_new,
+          label: AppStrings.openInDefaultApp,
+          value: 'openexternal',
+        ),
+      ],
       (
         key: const Key('menu-rename'),
         icon: Icons.edit,
@@ -1858,6 +1876,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         );
       case 'history':
         await _openHistory(note.path);
+      case 'reveal':
+        await _openOutside(note, TreeContextAction.openInFileManager);
+      case 'openexternal':
+        await _openOutside(note, TreeContextAction.openInDefaultApp);
       case 'rename':
         await _rename(note.path);
       case 'move':
@@ -1865,6 +1887,24 @@ final class _LibraryShellState extends State<_LibraryShell>
       case 'delete':
         await _delete(note.path);
     }
+  }
+
+  /// Hands [note]'s file to the OS (issue #76): the file manager, or the
+  /// default application for its type.
+  ///
+  /// Nothing in the library moves, so a failure is a snackbar and not an
+  /// error the caller has to undo.
+  Future<void> _openOutside(Note note, TreeContextAction action) async {
+    final root = widget.controller.root;
+    if (root == null) return;
+    final outcome = await runTreeContextAction(p.join(root, note.path), action);
+    if (!mounted || outcome == TreeContextOutcome.opened) return;
+    final message = switch (outcome) {
+      TreeContextOutcome.missing => AppStrings.openFileMissing,
+      _ => AppStrings.openFileFailed,
+    };
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   /// Opens the history of the note at [path]; a restore reloads the open

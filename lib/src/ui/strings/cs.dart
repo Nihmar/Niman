@@ -984,6 +984,17 @@ final class CzechStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Vidžety na ploše jsou k dispozici v systému Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Zobrazit ve správci souborů';
+  @override
+  String get openInDefaultApp => 'Otevřít ve výchozí aplikaci';
+  @override
+  String get openFileMissing => 'Soubor této poznámky na disku není';
+  @override
+  String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';
+
   @override
   String get movedToTrash => 'Přesunuto do koše';
   @override

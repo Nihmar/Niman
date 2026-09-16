@@ -1001,6 +1001,18 @@ final class HungarianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'A kezdőképernyő-widgetek Androidon érhetők el';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Megjelenítés a fájlkezelőben';
+  @override
+  String get openInDefaultApp => 'Megnyitás az alapértelmezett alkalmazással';
+  @override
+  String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
+  @override
+  String get openFileFailed =>
+      'A jegyzetet nem sikerült a Nimanon kívül megnyitni';
+
   @override
   String get movedToTrash => 'A kukába került';
   @override

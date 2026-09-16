@@ -984,6 +984,17 @@ final class LithuanianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Pradinio ekrano valdikliai prieinami Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Rodyti failų tvarkytuvėje';
+  @override
+  String get openInDefaultApp => 'Atverti numatytąja programa';
+  @override
+  String get openFileMissing => 'Šios pastabos failo diske nėra';
+  @override
+  String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';
+
   @override
   String get movedToTrash => 'Perkelta į šiukšlinę';
   @override

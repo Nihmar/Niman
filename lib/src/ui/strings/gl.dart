@@ -1003,6 +1003,17 @@ final class GalicianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Os widgets da pantalla de inicio están dispoñibles en Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Amosar no xestor de ficheiros';
+  @override
+  String get openInDefaultApp => 'Abrir coa aplicación predeterminada';
+  @override
+  String get openFileMissing => 'O ficheiro desta nota non está no disco';
+  @override
+  String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';
+
   @override
   String get movedToTrash => 'Movida ao paperilleiro';
   @override

@@ -1005,6 +1005,18 @@ final class DutchStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Startschermwidgets zijn beschikbaar op Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Tonen in bestandsbeheer';
+  @override
+  String get openInDefaultApp => 'Openen met standaardapp';
+  @override
+  String get openFileMissing =>
+      'Het bestand van deze notitie staat niet op de schijf';
+  @override
+  String get openFileFailed => 'Kon deze notitie niet buiten Niman openen';
+
   @override
   String get movedToTrash => 'Naar de prullenbak verplaatst';
   @override

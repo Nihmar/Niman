@@ -1019,6 +1019,19 @@ final class FrenchStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Les widgets de l’écran d’accueil sont disponibles sur Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Afficher dans le gestionnaire de fichiers';
+  @override
+  String get openInDefaultApp => 'Ouvrir avec l’application par défaut';
+  @override
+  String get openFileMissing =>
+      'Le fichier de cette note est introuvable sur le disque';
+  @override
+  String get openFileFailed =>
+      'Impossible d’ouvrir cette note en dehors de Niman';
+
   @override
   String get movedToTrash => 'Mis à la corbeille';
   @override
