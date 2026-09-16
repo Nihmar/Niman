@@ -70,24 +70,47 @@ progress, and the text goes into the clip's description.
 | `ui/kinds/audio_transcription_flow.dart` | Per open note: picks the model (sheet the first time), queues the clip, builds the strips, writes results with a snackbar and Undo. |
 | `ui/transcription/model_picker_sheet.dart` | First-time sheet: models with size and trade-off (base recommended), language, "Download and transcribe". |
 
-- **Where the text goes:** an empty description is replaced; an existing
-  one keeps its text, then a `> ` blank line, then the transcript. Undo
-  restores the previous description only while the description is still
-  what was written. The clip is found again by its embed target, so edits
-  made while the job ran are kept; if the clip is gone the text is
-  dropped (logged).
-- **Progress:** whisper reports 2–3 steps, so the strip blends them with
-  an estimate (clip length × the last real-time factor of that model;
-  0.15 desktop, 0.6 phone before the first job), capped at 95 %.
-- **Note closed mid-job:** the job finishes in the queue and its text is
-  applied the next time a view of that note is open (in memory only).
+- **Where the text goes** (`ui/kinds/audio_transcript_placement.dart`):
+  an empty description is filled. Over an existing one a dialog asks,
+  before the job is queued, **Replace** or **Add below** (Cancel queues
+  nothing); the choice and the description at that moment travel with
+  the job. Replace only replaces that same description: if it was edited
+  while the job ran, the transcript goes below it instead, so no
+  hand-written text is lost. Add below leaves the text, a `> ` blank line,
+  then the transcript. Undo restores the previous description only while
+  the description is still what was written. The clip is found again by
+  its embed target, so other edits made meanwhile are kept; if the clip
+  is gone the text is dropped (logged).
+- **Renamed or deleted clips:** renaming a clip in the note moves its job
+  to the new target and file; deleting it cancels the job.
+- **Progress** (`transcription/transcription_progress.dart`): whisper
+  reports 2–3 steps, so the strip blends them with an estimate (clip
+  length × the last real-time factor of that model; 0.15 desktop, 0.6
+  phone before the first job), capped at 95 %.
+- **Note closed mid-job** (`transcription/open_audio_notes.dart`,
+  `ui/kinds/audio_transcript_writer.dart`): an audio note view marks its
+  note open while mounted. A finished job whose note is not open is
+  written straight into the file by `AudioTranscriptWriter` (started by
+  the shell), through `NoteOperations.readNote`/`saveNote` — the same
+  save path as the editor, with its history snapshot and index update —
+  using the same placement rules, without an Undo. A result that waited
+  for a view is written as soon as the view closes; a note reopened while
+  the file was being read gets its job back for the view to apply. Notes
+  outside the open library keep their result in memory. The shell also
+  marks its selected note open, in whatever editor shows it: in the raw
+  editor there is no audio view to apply the text, and writing the file
+  under the editor's buffer would let its next autosave undo it, so the
+  result waits until the note is left.
 - **No `ProviderScope`** (widget tests that build the note directly): the
   action is hidden.
 - **Logs** (`[transcription]`): queued job and queue length; conversion
   (input format, bytes, read / filter / write / total ms, audio length);
   whisper wall time, real-time factor, estimate, progress steps, raw and
   kept characters; cancellations; failures with reason; text written
-  (chars, replaced or appended, ms) or dropped; undo; model release time.
+  (chars, replaced or appended, whether edits made meanwhile were kept,
+  ms) or dropped; text written into a closed note (file, ms) or handed
+  back to a reopened view; clip renames followed; undo; model release
+  time.
 
 ### Real engine check (Windows, base, 2026-09-15)
 
