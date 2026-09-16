@@ -6,6 +6,7 @@ import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 
 /// The sync icon in the tree's bar (mockups S6–S11), shown only for a
@@ -60,7 +61,7 @@ final class SyncStatusButton extends StatelessWidget {
                 backgroundColor: syncStatusColor(status, scheme),
                 smallSize: 8,
                 child: status.running
-                    ? const _SpinningSync()
+                    ? const SpinningSyncIcon()
                     : Icon(
                         syncStatusIcon(status),
                         color: syncStatusColor(status, scheme),
@@ -72,45 +73,6 @@ final class SyncStatusButton extends StatelessWidget {
       },
     );
   }
-}
-
-final class _SpinningSync extends StatefulWidget {
-  const new();
-
-  @override
-  State<_SpinningSync> createState() => _SpinningSyncState();
-}
-
-final class _SpinningSyncState extends State<_SpinningSync>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _turns = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1400),
-  );
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Reduced motion: the icon still says "syncing", it just holds still.
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _turns.stop();
-    } else if (!_turns.isAnimating) {
-      _turns.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _turns.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => RotationTransition(
-    // Material's sync arrows turn clockwise; the icon reads backwards.
-    turns: ReverseAnimation(_turns),
-    child: Icon(Icons.sync, color: Theme.of(context).colorScheme.primary),
-  );
 }
 
 /// The progress strip under the tree while a sync runs (mockup S6).
@@ -150,8 +112,7 @@ final class SyncProgressStrip extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.sync,
+                    SpinningSyncIcon(
                       size: 16,
                       color: theme.colorScheme.primary,
                     ),
