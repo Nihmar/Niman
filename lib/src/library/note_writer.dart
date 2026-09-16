@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -189,7 +190,7 @@ final class NoteWriter {
     String rel,
     String content,
     SnapshotRequest? request,
-  ) => Isolate.run(
+  ) => IsolateGauge.run(
     () => writeNoteFile(
       p.join(root, rel),
       content,
@@ -197,6 +198,7 @@ final class NoteWriter {
       rel: rel,
       snapshot: request,
     ),
+    'write "$rel"',
   );
 
   /// Runs [replaceFileFrom] on a short-lived isolate; static for the same
@@ -209,7 +211,7 @@ final class NoteWriter {
     String rel,
     String tempAbs,
     SnapshotRequest? request,
-  ) => Isolate.run(
+  ) => IsolateGauge.run(
     () => replaceFileFrom(
       p.join(root, rel),
       tempAbs,
@@ -217,6 +219,7 @@ final class NoteWriter {
       rel: rel,
       snapshot: request,
     ),
+    'replace "$rel"',
   );
 
   /// Re-reads the saved note into the index, after the save completed.
