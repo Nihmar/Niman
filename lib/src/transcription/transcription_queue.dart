@@ -10,6 +10,7 @@ import 'package:niman/src/transcription/speech_transcriber.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/transcription/transcription_progress.dart';
 import 'package:niman/src/transcription/wav_convert.dart';
 import 'package:path/path.dart' as p;
 
@@ -50,7 +51,7 @@ final class TranscriptionQueue extends ChangeNotifier {
 
   final List<TranscriptionJob> _jobs = [];
   TranscriptionJob? _running;
-  Timer? _estimate;
+  TranscriptionProgress? _progress;
   bool _modelLoaded = false;
   bool _disposed = false;
   int _nextId = 1;
@@ -230,34 +231,26 @@ final class TranscriptionQueue extends ChangeNotifier {
         ..phase = TranscriptionPhase.transcribing
         ..progress = 0;
       _notify();
-      final whisperClock = Stopwatch()..start();
-      final expectedMs =
-          prepared.lengthMs *
-          (_realTimeFactor[job.model.id] ?? (_packageConverts ? 0.6 : 0.15));
-      var reported = 0.0;
-      var steps = 0;
-      _estimate = Timer.periodic(const Duration(milliseconds: 250), (_) {
-        final guess = expectedMs <= 0
-            ? 0.0
-            : whisperClock.elapsedMilliseconds / expectedMs;
-        final next = (guess > reported ? guess : reported).clamp(0.0, 0.95);
-        if (next > job.progress) {
-          job.progress = next;
+      final progress = _progress = TranscriptionProgress(
+        lengthMs: prepared.lengthMs,
+        realTimeFactor:
+            _realTimeFactor[job.model.id] ?? (_packageConverts ? 0.6 : 0.15),
+        onChanged: (value) {
+          job.progress = value;
           _notify();
-        }
-      });
+        },
+      );
       final raw = await _transcriber.transcribe(
         model: job.model,
         audioPath: prepared.path,
         language: job.language,
-        onProgress: (percent) {
-          steps++;
-          reported = percent / 100;
-        },
+        onProgress: progress.report,
       );
       _modelLoaded = true;
-      _estimate?.cancel();
-      final wallMs = whisperClock.elapsedMilliseconds;
+      progress.stop();
+      final wallMs = progress.elapsedMs;
+      final steps = progress.steps;
+      final expectedMs = progress.expectedMs;
       if (prepared.lengthMs > 0) {
         _realTimeFactor[job.model.id] = wallMs / prepared.lengthMs;
       }
@@ -293,7 +286,7 @@ final class TranscriptionQueue extends ChangeNotifier {
         ..error = reason
         ..phase = TranscriptionPhase.failed;
     } finally {
-      _estimate?.cancel();
+      _progress?.stop();
       await _cleanUp(work);
       _running = null;
       if (!_disposed) {
@@ -332,7 +325,7 @@ final class TranscriptionQueue extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    _estimate?.cancel();
+    _progress?.stop();
     models.removeListener(_onModels);
     if (_modelLoaded) unawaited(_release());
     super.dispose();
