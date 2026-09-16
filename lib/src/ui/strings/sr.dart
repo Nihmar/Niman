@@ -1347,4 +1347,13 @@ final class SerbianStrings extends Strings {
   String get transcriptionPickModelAction => 'Преузми и транскрибуј';
   @override
   String get transcriptionModelRecommended => 'Препоручено';
+  @override
+  String get transcriptionExistingTitle => 'Овај снимак већ има опис';
+  @override
+  String get transcriptionExistingBody =>
+      'Заменити га транскрипцијом или додати транскрипцију испод?';
+  @override
+  String get transcriptionAppend => 'Додај испод';
+  @override
+  String get transcriptionReplace => 'Замени';
 }

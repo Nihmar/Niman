@@ -1360,4 +1360,14 @@ final class DutchStrings extends Strings {
   String get transcriptionPickModelAction => 'Downloaden en transcriberen';
   @override
   String get transcriptionModelRecommended => 'Aanbevolen';
+  @override
+  String get transcriptionExistingTitle =>
+      'Deze opname heeft al een beschrijving';
+  @override
+  String get transcriptionExistingBody =>
+      'Vervangen door de transcriptie, of de transcriptie eronder toevoegen?';
+  @override
+  String get transcriptionAppend => 'Eronder toevoegen';
+  @override
+  String get transcriptionReplace => 'Vervangen';
 }

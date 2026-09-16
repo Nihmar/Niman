@@ -1377,4 +1377,15 @@ final class CatalanStrings extends Strings {
   String get transcriptionPickModelAction => 'Baixa i transcriu';
   @override
   String get transcriptionModelRecommended => 'Recomanat';
+  @override
+  String get transcriptionExistingTitle =>
+      'Aquest enregistrament ja té una descripció';
+  @override
+  String get transcriptionExistingBody =>
+      'Vols substituir-la per la transcripció o afegir la transcripció a '
+      'sota?';
+  @override
+  String get transcriptionAppend => 'Afegeix a sota';
+  @override
+  String get transcriptionReplace => 'Substitueix';
 }

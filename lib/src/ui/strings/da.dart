@@ -1341,4 +1341,15 @@ final class DanishStrings extends Strings {
   String get transcriptionPickModelAction => 'Download og transskriber';
   @override
   String get transcriptionModelRecommended => 'Anbefalet';
+  @override
+  String get transcriptionExistingTitle =>
+      'Optagelsen har allerede en beskrivelse';
+  @override
+  String get transcriptionExistingBody =>
+      'Erstat den med transskriptionen, eller tilføj transskriptionen '
+      'nedenunder?';
+  @override
+  String get transcriptionAppend => 'Tilføj nedenunder';
+  @override
+  String get transcriptionReplace => 'Erstat';
 }

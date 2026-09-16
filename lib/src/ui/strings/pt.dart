@@ -1355,4 +1355,13 @@ final class PortugueseStrings extends Strings {
   String get transcriptionPickModelAction => 'Baixar e transcrever';
   @override
   String get transcriptionModelRecommended => 'Recomendado';
+  @override
+  String get transcriptionExistingTitle => 'Esta gravação já tem uma descrição';
+  @override
+  String get transcriptionExistingBody =>
+      'Substituí-la pela transcrição ou adicionar a transcrição abaixo?';
+  @override
+  String get transcriptionAppend => 'Adicionar abaixo';
+  @override
+  String get transcriptionReplace => 'Substituir';
 }

@@ -1358,4 +1358,14 @@ final class GalicianStrings extends Strings {
   String get transcriptionPickModelAction => 'Descargar e transcribir';
   @override
   String get transcriptionModelRecommended => 'Recomendado';
+  @override
+  String get transcriptionExistingTitle =>
+      'Esta gravación xa ten unha descrición';
+  @override
+  String get transcriptionExistingBody =>
+      'Substituíla pola transcrición ou engadir a transcrición debaixo?';
+  @override
+  String get transcriptionAppend => 'Engadir debaixo';
+  @override
+  String get transcriptionReplace => 'Substituír';
 }

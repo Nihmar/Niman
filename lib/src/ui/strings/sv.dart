@@ -1348,4 +1348,15 @@ final class SwedishStrings extends Strings {
   String get transcriptionPickModelAction => 'Ladda ned och transkribera';
   @override
   String get transcriptionModelRecommended => 'Rekommenderad';
+  @override
+  String get transcriptionExistingTitle =>
+      'Inspelningen har redan en beskrivning';
+  @override
+  String get transcriptionExistingBody =>
+      'Ersätta den med transkriberingen, eller lägga till transkriberingen '
+      'under?';
+  @override
+  String get transcriptionAppend => 'Lägg till under';
+  @override
+  String get transcriptionReplace => 'Ersätt';
 }

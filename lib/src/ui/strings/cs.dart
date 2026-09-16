@@ -1336,4 +1336,13 @@ final class CzechStrings extends Strings {
   String get transcriptionPickModelAction => 'Stáhnout a přepsat';
   @override
   String get transcriptionModelRecommended => 'Doporučený';
+  @override
+  String get transcriptionExistingTitle => 'Tato nahrávka už má popis';
+  @override
+  String get transcriptionExistingBody =>
+      'Nahradit ho přepisem, nebo přepis přidat pod něj?';
+  @override
+  String get transcriptionAppend => 'Přidat pod';
+  @override
+  String get transcriptionReplace => 'Nahradit';
 }

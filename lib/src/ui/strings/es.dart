@@ -1369,4 +1369,14 @@ final class SpanishStrings extends Strings {
   String get transcriptionPickModelAction => 'Descargar y transcribir';
   @override
   String get transcriptionModelRecommended => 'Recomendado';
+  @override
+  String get transcriptionExistingTitle =>
+      'Esta grabación ya tiene una descripción';
+  @override
+  String get transcriptionExistingBody =>
+      '¿Reemplazarla por la transcripción o añadir la transcripción debajo?';
+  @override
+  String get transcriptionAppend => 'Añadir debajo';
+  @override
+  String get transcriptionReplace => 'Reemplazar';
 }

@@ -21,8 +21,17 @@ enum TranscriptionPhase {
   failed,
 }
 
-/// One clip to transcribe, from the moment it is asked for until the note
-/// takes its text.
+/// What the transcript does to the clip's description.
+enum TranscriptPlacement {
+  /// Takes the description's place (the choice when it was empty).
+  replace,
+
+  /// Goes below the description as a new paragraph.
+  append,
+}
+
+/// One clip to transcribe, from the moment it is asked for until its text
+/// is written into the note.
 ///
 /// The queue updates the mutable fields; everything else reads them.
 final class TranscriptionJob {
@@ -36,12 +45,14 @@ final class TranscriptionJob {
     required this.model,
     required this.language,
     required this.phase,
+    this.placement = TranscriptPlacement.replace,
+    this.originalDescription = '',
   });
 
   /// Unique within the app session.
   final int id;
 
-  /// The note the clip belongs to.
+  /// The note the clip belongs to (absolute path).
   final String notePath;
 
   /// The clip's embed target, as written in the note.
@@ -55,6 +66,13 @@ final class TranscriptionJob {
 
   /// The whisper language code (`it`, `auto`, …).
   final String language;
+
+  /// What the transcript does to the description.
+  final TranscriptPlacement placement;
+
+  /// The description when the transcription was asked for: a
+  /// [TranscriptPlacement.replace] only replaces it while it is unchanged.
+  final String originalDescription;
 
   /// Where the job is.
   TranscriptionPhase phase;
@@ -76,5 +94,6 @@ final class TranscriptionJob {
 
   @override
   String toString() =>
-      'job $id ($clipTarget, ${model.id}, $language, ${phase.name})';
+      'job $id ($clipTarget, ${model.id}, $language, ${placement.name}, '
+      '${phase.name})';
 }

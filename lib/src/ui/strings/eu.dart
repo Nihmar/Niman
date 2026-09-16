@@ -1358,4 +1358,13 @@ final class BasqueStrings extends Strings {
   String get transcriptionPickModelAction => 'Deskargatu eta transkribatu';
   @override
   String get transcriptionModelRecommended => 'Gomendatua';
+  @override
+  String get transcriptionExistingTitle => 'Grabazio honek badu deskribapena';
+  @override
+  String get transcriptionExistingBody =>
+      'Transkripzioarekin ordeztu, edo transkripzioa azpian gehitu?';
+  @override
+  String get transcriptionAppend => 'Gehitu azpian';
+  @override
+  String get transcriptionReplace => 'Ordeztu';
 }

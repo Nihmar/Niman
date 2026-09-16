@@ -840,6 +840,10 @@ final class AppStrings {
       _s.transcriptionPickModelAction;
   static String get transcriptionModelRecommended =>
       _s.transcriptionModelRecommended;
+  static String get transcriptionExistingTitle => _s.transcriptionExistingTitle;
+  static String get transcriptionExistingBody => _s.transcriptionExistingBody;
+  static String get transcriptionAppend => _s.transcriptionAppend;
+  static String get transcriptionReplace => _s.transcriptionReplace;
 
   /// Whisper's own model names, the same in every language.
   static String transcriptionModelName(TranscriptionModel model) =>

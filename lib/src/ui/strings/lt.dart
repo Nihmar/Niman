@@ -1340,4 +1340,13 @@ final class LithuanianStrings extends Strings {
   String get transcriptionPickModelAction => 'Atsisiųsti ir transkribuoti';
   @override
   String get transcriptionModelRecommended => 'Rekomenduojama';
+  @override
+  String get transcriptionExistingTitle => 'Šis įrašas jau turi aprašą';
+  @override
+  String get transcriptionExistingBody =>
+      'Pakeisti jį transkripcija ar pridėti transkripciją po juo?';
+  @override
+  String get transcriptionAppend => 'Pridėti apačioje';
+  @override
+  String get transcriptionReplace => 'Pakeisti';
 }

@@ -1373,4 +1373,15 @@ final class GermanStrings extends Strings {
   String get transcriptionPickModelAction => 'Herunterladen und transkribieren';
   @override
   String get transcriptionModelRecommended => 'Empfohlen';
+  @override
+  String get transcriptionExistingTitle =>
+      'Diese Aufnahme hat schon eine Beschreibung';
+  @override
+  String get transcriptionExistingBody =>
+      'Durch die Transkription ersetzen oder die Transkription darunter '
+      'anfügen?';
+  @override
+  String get transcriptionAppend => 'Darunter anfügen';
+  @override
+  String get transcriptionReplace => 'Ersetzen';
 }

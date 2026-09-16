@@ -1335,4 +1335,13 @@ final class IcelandicStrings extends Strings {
   String get transcriptionPickModelAction => 'Sækja og umrita';
   @override
   String get transcriptionModelRecommended => 'Mælt með';
+  @override
+  String get transcriptionExistingTitle => 'Þessi upptaka er þegar með lýsingu';
+  @override
+  String get transcriptionExistingBody =>
+      'Skipta henni út fyrir umritunina eða bæta umrituninni fyrir neðan?';
+  @override
+  String get transcriptionAppend => 'Bæta við fyrir neðan';
+  @override
+  String get transcriptionReplace => 'Skipta út';
 }

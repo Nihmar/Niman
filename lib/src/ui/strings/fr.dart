@@ -1384,4 +1384,15 @@ final class FrenchStrings extends Strings {
   String get transcriptionPickModelAction => 'Télécharger et transcrire';
   @override
   String get transcriptionModelRecommended => 'Recommandé';
+  @override
+  String get transcriptionExistingTitle =>
+      'Cet enregistrement a déjà une description';
+  @override
+  String get transcriptionExistingBody =>
+      'La remplacer par la transcription, ou ajouter la transcription en '
+      'dessous ?';
+  @override
+  String get transcriptionAppend => 'Ajouter en dessous';
+  @override
+  String get transcriptionReplace => 'Remplacer';
 }

@@ -1365,4 +1365,14 @@ final class AlbanianStrings extends Strings {
   String get transcriptionPickModelAction => 'Shkarko dhe transkripto';
   @override
   String get transcriptionModelRecommended => 'I rekomanduar';
+  @override
+  String get transcriptionExistingTitle =>
+      'Ky regjistrim ka tashmë një përshkrim';
+  @override
+  String get transcriptionExistingBody =>
+      'Ta zëvendësoni me transkriptimin apo ta shtoni transkriptimin poshtë?';
+  @override
+  String get transcriptionAppend => 'Shto poshtë';
+  @override
+  String get transcriptionReplace => 'Zëvendëso';
 }

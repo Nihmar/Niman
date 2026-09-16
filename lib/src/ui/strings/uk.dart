@@ -1343,4 +1343,13 @@ final class UkrainianStrings extends Strings {
   String get transcriptionPickModelAction => 'Завантажити й транскрибувати';
   @override
   String get transcriptionModelRecommended => 'Рекомендовано';
+  @override
+  String get transcriptionExistingTitle => 'Цей запис уже має опис';
+  @override
+  String get transcriptionExistingBody =>
+      'Замінити його транскрипцією чи додати транскрипцію під ним?';
+  @override
+  String get transcriptionAppend => 'Додати нижче';
+  @override
+  String get transcriptionReplace => 'Замінити';
 }

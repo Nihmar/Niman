@@ -1210,4 +1210,12 @@ final class ChineseStrings extends Strings {
   String get transcriptionPickModelAction => '下载并转写';
   @override
   String get transcriptionModelRecommended => '推荐';
+  @override
+  String get transcriptionExistingTitle => '此录音已有描述';
+  @override
+  String get transcriptionExistingBody => '用转写内容替换它，还是将转写内容添加在下方？';
+  @override
+  String get transcriptionAppend => '添加在下方';
+  @override
+  String get transcriptionReplace => '替换';
 }
