@@ -23,6 +23,10 @@ android {
     // compatible, so the highest one any plugin asks for wins.
     ndkVersion = "29.0.13113456"
 
+    // AGP requires every flavor to belong to a named dimension; the
+    // testing build is the only one (issue #106).
+    flavorDimensions += "channel"
+
     compileOptions {
         // Required by flutter_local_notifications (Java 8+ APIs in the
         // plugin's AAR need desugaring on Android).
@@ -56,6 +60,20 @@ android {
             // its own target platforms, so the ABI is dropped at packaging,
             // which every build path (scripts, CI, flutter run) goes through.
             excludes += "**/armeabi-v7a/**"
+        }
+    }
+
+    // The testing build (issue #106): the release pipeline with a
+    // separate application ID, so the official app and the testing
+    // build install side by side. AGP forbids flavor names starting
+    // with "test" (reserved for test variants), hence "beta". Build
+    // it with `flutter build apk --release --flavor beta
+    // --dart-define=APP_CHANNEL=testing` — the define gates the Dart
+    // side (update management hidden and skipped); keep both in step.
+    productFlavors {
+        create("beta") {
+            dimension = "channel"
+            applicationIdSuffix = ".beta"
         }
     }
 
