@@ -1244,6 +1244,20 @@ final class IcelandicStrings extends Strings {
       ? '$count óbreytt lína'
       : '$count óbreyttar línur';
   @override
+  String get historyTakeHunk => 'Endurheimta hér';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Endurheimta 1 breytingu' : 'Endurheimta $count breytingar';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valdar breytingar fara aftur í texta þessarar útgáfu. Minnispunkturinn '
+      'eins og hann er núna er fyrst geymdur sem útgáfa, svo þú getur '
+      'afturkallað þetta.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Minnispunkturinn breyttist á meðan þú varst hér — samanburðurinn hefur '
+      'verið uppfærður.';
+  @override
   String get historyVersionsTitle => 'Fjöldi geymdra útgáfna';
   @override
   String get historyVersionsSubtitle => 'Fyrir hvert minnisblað, í .history/';
@@ -1257,4 +1271,471 @@ final class IcelandicStrings extends Strings {
       'minnisblaði';
   @override
   String historyIntervalValue(int minutes) => '$minutes mín';
+  @override
+  String get settingsSectionTranscription => 'Umritun';
+  @override
+  String get transcriptionModelTitle => 'Líkan';
+  @override
+  String get transcriptionModelNone => 'Ekkert';
+  @override
+  String get transcriptionLanguageTitle => 'Tungumál';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Tungumálið sem er talað í upptökunum þínum. Nákvæmara er að velja það '
+      'en að láta greina það.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Eins og forritið ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Greina sjálfkrafa';
+  @override
+  String get transcriptionModelsTitle => 'Umritunarlíkön';
+  @override
+  String transcriptionModelsUsed(String size) => '$size í notkun';
+  @override
+  String get transcriptionModelsInstalled => 'Sótt';
+  @override
+  String get transcriptionModelsDownloading => 'Í niðurhali';
+  @override
+  String get transcriptionModelsAvailable => 'Í boði';
+  @override
+  String get transcriptionModelsFooter =>
+      'Líkönin eru geymd í geymslu forritsins á þessu tæki. Þau eru hvorki '
+      'afrituð í safnið né samstillt.';
+  @override
+  String get transcriptionModelDefault => 'Sjálfgefið';
+  @override
+  String get transcriptionModelSlow => 'Hægt';
+  @override
+  String get transcriptionModelHintTiny => 'Hraðast, minnst nákvæmt';
+  @override
+  String get transcriptionModelHintBase => 'Gott jafnvægi hraða og nákvæmni';
+  @override
+  String get transcriptionModelHintSmall => 'Nákvæmara, um 3× hægara';
+  @override
+  String get transcriptionModelHintMedium => 'Mjög nákvæmt, hægt í síma';
+  @override
+  String get transcriptionModelHintLarge => 'Nákvæmast, þarf mikið minni';
+  @override
+  String get transcriptionModelDownload => 'Sækja';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Eyða líkaninu $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Þetta losar $size. Þú getur sótt líkanið aftur seinna.';
+  @override
+  String get transcriptionModelFailed =>
+      'Niðurhal mistókst. Athugaðu tenginguna og reyndu aftur.';
+  @override
+  String get actionRetry => 'Reyna aftur';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Tengingin rofnaði, reynt aftur…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Í bið við $progress';
+  @override
+  String get actionResume => 'Halda áfram';
+  @override
+  String get audioTranscribe => 'Umrita';
+  @override
+  String get audioTranscribeUnsupported => 'Aðeins WAV-upptökur á þessu tæki';
+  @override
+  String get transcriptionQueued => 'Í biðröð';
+  @override
+  String get transcriptionPreparing => 'Undirbý hljóðið…';
+  @override
+  String transcriptionRunning(int percent) => 'Umritar… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Sæki $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Umrituninni var bætt við lýsinguna';
+  @override
+  String get transcriptionNoSpeech => 'Ekkert tal greindist í þessari upptöku';
+  @override
+  String get transcriptionFailed => 'Umritun mistókst';
+  @override
+  String get transcriptionPickModelTitle => 'Veldu líkan';
+  @override
+  String get transcriptionPickModelBody =>
+      'Umritunin fer fram á þessu tæki og upptakan er aldrei send. Líkanið er '
+      'sótt einu sinni.';
+  @override
+  String get transcriptionPickModelAction => 'Sækja og umrita';
+  @override
+  String get transcriptionModelRecommended => 'Mælt með';
+  @override
+  String get transcriptionExistingTitle => 'Þessi upptaka er þegar með lýsingu';
+  @override
+  String get transcriptionExistingBody =>
+      'Skipta henni út fyrir umritunina eða bæta umrituninni fyrir neðan?';
+  @override
+  String get transcriptionAppend => 'Bæta við fyrir neðan';
+  @override
+  String get transcriptionReplace => 'Skipta út';
+  @override
+  String get settingsSectionSync => 'Samstilling';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ekki sett upp fyrir þetta bókasafn';
+  @override
+  String get syncNeverSynced => 'Aldrei samstillt';
+  @override
+  String syncLastSynced(String when) => 'Samstillt: $when';
+  @override
+  String get syncRunning => 'Samstillir…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bókasafn $library';
+  @override
+  String get syncUrlLabel => 'Slóð möppu';
+  @override
+  String get syncUrlHint =>
+      'Mappan verður að vera til. Afritaðu slóðina eins og '
+      'netþjónninn sýnir hana.';
+  @override
+  String get syncHttpWarning =>
+      'Ódulkóðuð tenging: í lagi um VPN eða á staðarnetinu þínu.';
+  @override
+  String get syncUserLabel => 'Notandi';
+  @override
+  String get syncUserHint =>
+      'Skildu eftir autt ef netþjónninn biður ekki um auðkenni.';
+  @override
+  String get syncPasswordLabel => 'Lykilorð';
+  @override
+  String get syncPasswordHint =>
+      'Geymt í lyklakippu þessa tækis, aldrei í skjölum '
+      'bókasafnsins.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Skildu eftir autt til að halda vistaða lykilorðinu.';
+  @override
+  String get syncShowPassword => 'Sýna lykilorð';
+  @override
+  String get syncHidePassword => 'Fela lykilorð';
+  @override
+  String get syncTestAction => 'Prófa tengingu';
+  @override
+  String get syncTesting => 'Prófar…';
+  @override
+  String get syncRetargetWarning =>
+      'Með nýrri slóð eða notanda byrjar næsta samstilling upp á '
+      'nýtt sem fyrsta samstilling.';
+  @override
+  String get syncTestOk => 'Tengingin virkar';
+  @override
+  String get syncModeFull => 'Fullur hamur';
+  @override
+  String get syncModeCompatible => 'Samhæfður hamur';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lestur, skrif og eyðing';
+  @override
+  String get syncCapEtags => 'Fingraför skjala (ETag)';
+  @override
+  String get syncCapNoEtags => 'Engin fingraför skjala (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Ber saman stærð og dagsetningu; sækir aftur ef vafi '
+      'leikur á';
+  @override
+  String get syncCapGuarded => 'Varin skrif';
+  @override
+  String get syncCapUnguarded => 'Óvarin skrif';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Athugar skjalið á netþjóninum rétt áður en skrifað er';
+  @override
+  String get syncCapMove => 'Endurnefnir án þess að hlaða upp aftur';
+  @override
+  String get syncCapNoMove => 'Engin endurnefning á netþjóninum';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Endurnefning verður að eyðingu og nýrri upphleðslu';
+  @override
+  String get syncCompatibleNote =>
+      'Í samhæfðum ham virkar samstilling eins, bara með nokkrum '
+      'fleiri beiðnum.';
+  @override
+  String get syncTestInvalidUrl => 'Ógild slóð';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Sláðu inn http:// eða https:// slóð, án notanda eða '
+      'lykilorðs í henni.';
+  @override
+  String get syncTestOffline => 'Ekki næst í netþjóninn';
+  @override
+  String get syncTestOfflineHint =>
+      'Er kveikt á VPN? 10.x eða 192.168.x slóð virkar aðeins á '
+      'sama neti.';
+  @override
+  String get syncTestAuth => 'Notanda eða lykilorði hafnað';
+  @override
+  String get syncTestAuthHint => 'Athugaðu þau og prófaðu aftur.';
+  @override
+  String get syncTestNotFound => 'Mappan er ekki til';
+  @override
+  String get syncTestNotFoundHint =>
+      'Búðu hana til á netþjóninum eða lagaðu slóðina.';
+  @override
+  String get syncTestUnsupported => 'Ekki WebDAV-mappa';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Netþjónninn svarar, en ekki sem WebDAV.';
+  @override
+  String get syncTestFailed => 'Prófunin tókst ekki';
+  @override
+  String get syncNowAction => 'Samstilla núna';
+  @override
+  String get syncSectionServer => 'Netþjónn';
+  @override
+  String get syncServerRow => 'Slóð, notandi og lykilorð';
+  @override
+  String get syncRetestTitle => 'Prófa netþjóninn aftur';
+  @override
+  String syncProbedAgo(String when) => 'Síðasta prófun: $when';
+  @override
+  String get syncDisconnectTitle => 'Aftengja þetta bókasafn';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Skjölin verða áfram hér og á netþjóninum';
+  @override
+  String get syncDisconnectConfirmTitle => 'Aftengja samstillingu?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Þetta bókasafn hættir að samstillast á þessu tæki. Engu '
+      'skjali er eytt, hvorki hér né á netþjóninum. Ef þú tengir '
+      'það aftur byrjar fyrsta samstillingin upp á nýtt.';
+  @override
+  String get syncDisconnectConfirm => 'Aftengja';
+  @override
+  String get syncFirstTitle => 'Fyrsta samstilling';
+  @override
+  String get syncFirstIntro =>
+      'Ég bar bókasafnið saman við möppuna á netþjóninum:';
+  @override
+  String get syncFirstUpload => 'Til að hlaða upp';
+  @override
+  String get syncFirstDownload => 'Til að sækja';
+  @override
+  String get syncFirstBoth => 'Á báðum stöðum';
+  @override
+  String get syncFirstBothHint =>
+      'Eins: enginn flutningur. Ólík: þarf að leysa';
+  @override
+  String get syncFirstNoDelete =>
+      'Fyrsta samstillingin eyðir engu, hvorki hér né á '
+      'netþjóninum.';
+  @override
+  String get syncStartAction => 'Byrja';
+  @override
+  String syncMassTrashTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Færa $count skjal í korpu?'
+      : 'Færa $count skjöl í korpu?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Á netþjóninum vantar $count af $total samstilltum '
+      'skjölum. Það þýðir yfirleitt ranga slóð, NAS-disk sem er '
+      'ekki tengdur eða möppu sem var tæmd fyrir mistök.';
+  @override
+  String get syncMassTrashHint =>
+      'Ef þú eyddir þeim í alvöru á öðru tæki skaltu staðfesta: '
+      'hér fara þau í korpu.';
+  @override
+  String get syncMassTrashConfirm => 'Færa í korpu';
+  @override
+  String syncMassDeleteTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Eyða $count skjali af netþjóninum?'
+      : 'Eyða $count skjölum af netþjóninum?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Hér vantar $count af $total samstilltum skjölum. Ef þú '
+      'eyddir þeim ekki skaltu hætta við og athuga möppu '
+      'bókasafnsins.';
+  @override
+  String get syncMassDeleteConfirm => 'Eyða af netþjóni';
+  @override
+  String get syncTooltip => 'Samstilla';
+  @override
+  String get syncStageConnecting => 'Tengist netþjóninum…';
+  @override
+  String get syncStageComparing => 'Ber saman við netþjóninn…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Samstillir · $done af $total';
+  @override
+  String get syncStatusWarnings => 'Samstillt með viðvörunum';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Breytt hér og á netþjóninum · $count';
+  @override
+  String get syncConflictHint => 'Hvorug útgáfan var snert';
+  @override
+  String get syncResolveAction => 'Leysa';
+  @override
+  String syncFailuresHeader(int count) => 'Ekki samstillt · $count';
+  @override
+  String get syncFailuresHint => 'Reynt aftur við næstu samstillingu';
+  @override
+  String get syncAbortAuth => 'Netþjónninn hafnaði lykilorðinu';
+  @override
+  String get syncAbortMissingPassword => 'Ekkert lykilorð vistað';
+  @override
+  String get syncAbortOffline => 'Ekki næst í netþjóninn';
+  @override
+  String get syncAbortRemoteMissing => 'Mappan á netþjóninum er horfin';
+  @override
+  String get syncAbortUnsupported =>
+      'Netþjónninn virkar ekki lengur sem WebDAV';
+  @override
+  String get syncAbortFailed => 'Samstillingin tókst ekki';
+  @override
+  String get syncAbortNotConfirmed => 'Hætt við samstillingu';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ekkert skjal var snert. Breytingarnar þínar verða áfram '
+      'hér fram að næstu vel heppnuðu samstillingu.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Síðasta vel heppnaða samstilling: $when';
+  @override
+  String get syncNoSuccessYet => 'Engin vel heppnuð samstilling enn';
+  @override
+  String get syncUpdatePasswordAction => 'Uppfæra lykilorð';
+  @override
+  String get syncRetryAction => 'Reyna aftur';
+  @override
+  String get syncOpenSettingsAction => 'Stillingar';
+  @override
+  String get syncCloseAction => 'Loka';
+  @override
+  String get syncDoneSnack => 'Samstillt';
+  @override
+  String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Samstillt · $count skjal sem var eytt annars staðar er í '
+            'korpunni'
+      : 'Samstillt · $count skjöl sem var eytt annars staðar eru í '
+            'korpunni';
+  @override
+  String syncConflictsSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Samstillt · $count óleystur árekstur'
+      : 'Samstillt · $count óleystir árekstrar';
+  @override
+  String get syncShowAction => 'Sýna';
+  @override
+  String get syncConflictTitle => 'Leysa árekstur';
+  @override
+  String get syncConflictLegend =>
+      'Línur merktar − eru af netþjóninum, línur merktar + af '
+      'þessu tæki.';
+  @override
+  String get syncConflictBinary =>
+      'Ekki textaskjal: veldu hvaða afrit á að halda.';
+  @override
+  String get syncConflictKeepNote =>
+      'Afritið sem þú heldur ekki verður áfram í ferlinum.';
+  @override
+  String get syncKeepLocal => 'Halda útgáfu þessa tækis';
+  @override
+  String get syncKeepRemote => 'Halda útgáfu netþjónsins';
+  @override
+  String get syncConflictIdentical => 'Útgáfurnar tvær eru eins';
+  @override
+  String get syncConflictLoadFailed => 'Gat ekki lesið báðar útgáfurnar';
+  @override
+  String get syncResolveFailed => 'Gat ekki leyst áreksturinn';
+  @override
+  String get syncResolved => 'Árekstur leystur';
+  @override
+  String get syncSectionWhen => 'Hvenær á að samstilla';
+  @override
+  String get syncAutoTitle => 'Sjálfvirkt';
+  @override
+  String get syncAutoSubtitle =>
+      'Eftir breytingar, við opnun og með reglulegu millibili';
+  @override
+  String get syncIntervalTitle => 'Tíðni athugana á netþjóni';
+  @override
+  String get syncIntervalSubtitle => 'Aðeins meðan forritið er opið';
+  @override
+  String get syncIntervalDialogBody =>
+      'Til að sjá breytingar sem gerðar eru í öðrum tækjum meðan forritið er '
+      'opið. Með „Aldrei“ aðeins eftir breytingar og við opnun.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count mínúta' : '$count mínútur';
+  @override
+  String get syncIntervalNever => 'Aldrei';
+  @override
+  String get syncWifiOnlyTitle => 'Aðeins á Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Á farsímagögnum er aðeins samstillt handvirkt';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count breyting bíður'
+      : '$count breytingar bíða';
+  @override
+  String syncRetryIn(String wait) => 'reynt aftur eftir $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes mín';
+  @override
+  String get syncWaitingForWifi => 'Bíður eftir Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Bíður eftir tengingu';
+  @override
+  String get syncMobileDataHint => '„Samstilla núna“ notar samt farsímagögn.';
+  @override
+  String get syncQueueKeptHint =>
+      'Breytingarnar verða áfram hér, jafnvel þótt þú lokir forritinu, og '
+      'fara sjálfkrafa af stað þegar netþjónninn svarar.';
+  @override
+  String get syncAutoPaused => 'Sjálfvirk samstilling í bið';
+  @override
+  String get syncPausedAuthHint =>
+      'Hún heldur áfram þegar þú uppfærir lykilorðið eða samstillir '
+      'handvirkt.';
+  @override
+  String get syncPausedServerHint =>
+      'Hún heldur áfram þegar þú lagfærir slóðina eða samstillir handvirkt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Samstilla núna“ sýnir hvað yrði fjarlægt og spyr fyrst.';
+  @override
+  String get syncNeedsConfirmation => 'Bíður eftir staðfestingu þinni';
+  @override
+  String get syncMergeIntro =>
+      'Breytingar sem skarast ekki eru þegar sameinaðar; veldu hverju á að '
+      'halda þar sem þær skarast.';
+  @override
+  String get syncMergeClean =>
+      'Útgáfurnar tvær sameinast af sjálfu sér: ekkert skarast.';
+  @override
+  String get syncMergeNoBase =>
+      'Engin sameiginleg útgáfa til að sameina á, svo velja verður alla '
+      'skrána.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Skörun $index af $total';
+  @override
+  String get syncMergeFromLocal => 'Úr þessu tæki';
+  @override
+  String get syncMergeFromRemote => 'Frá netþjóninum';
+  @override
+  String get syncMergeRemovedLines => 'Línur fjarlægðar';
+  @override
+  String get syncMergeKeepLocal => 'Mínar';
+  @override
+  String get syncMergeKeepRemote => 'Netþjónsins';
+  @override
+  String get syncMergeKeepBoth => 'Báðar';
+  @override
+  String get syncMergeSave => 'Vista sameininguna';
+  @override
+  String get syncMergeKeepWhole => 'Eða halda einu heilu eintaki';
 }

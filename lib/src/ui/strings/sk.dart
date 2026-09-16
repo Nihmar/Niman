@@ -1243,6 +1243,18 @@ final class SlovakStrings extends Strings {
     _ => '$count nezmenených riadkov',
   };
   @override
+  String get historyTakeHunk => 'Obnoviť tu';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Obnoviť 1 zmenu' : 'Obnoviť $count zmien';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Vybrané zmeny sa vrátia k textu tejto verzie. Poznámka v súčasnej '
+      'podobe sa najprv uchová ako verzia, takže to môžeš vrátiť späť.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Poznámka sa zmenila, kým si tu bol — porovnanie bolo aktualizované.';
+  @override
   String get historyVersionsTitle => 'Počet uchovaných verzií';
   @override
   String get historyVersionsSubtitle => 'Pre každú poznámku, v .history/';
@@ -1255,4 +1267,480 @@ final class SlovakStrings extends Strings {
       'Počas písania; začiatok úprav poznámky vždy jednu uchová';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Prepis';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Žiadny';
+  @override
+  String get transcriptionLanguageTitle => 'Jazyk';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Jazyk, ktorým sa vo vašich nahrávkach hovorí. Zadať ho je presnejšie '
+      'ako ho nechať rozpoznať.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Ako aplikácia ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Rozpoznať automaticky';
+  @override
+  String get transcriptionModelsTitle => 'Modely prepisu';
+  @override
+  String transcriptionModelsUsed(String size) => 'Využité $size';
+  @override
+  String get transcriptionModelsInstalled => 'Stiahnuté';
+  @override
+  String get transcriptionModelsDownloading => 'Sťahuje sa';
+  @override
+  String get transcriptionModelsAvailable => 'Dostupné';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modely zostávajú v úložisku aplikácie v tomto zariadení. Nekopírujú sa '
+      'do knižnice ani sa nesynchronizujú.';
+  @override
+  String get transcriptionModelDefault => 'Predvolený';
+  @override
+  String get transcriptionModelSlow => 'Pomalý';
+  @override
+  String get transcriptionModelHintTiny => 'Najrýchlejší, najmenej presný';
+  @override
+  String get transcriptionModelHintBase => 'Dobrý pomer rýchlosti a presnosti';
+  @override
+  String get transcriptionModelHintSmall => 'Presnejší, približne 3× pomalší';
+  @override
+  String get transcriptionModelHintMedium => 'Veľmi presný, v telefóne pomalý';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Najpresnejší, potrebuje veľa pamäte';
+  @override
+  String get transcriptionModelDownload => 'Stiahnuť';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Odstrániť model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Uvoľní sa $size. Model si môžete neskôr stiahnuť znova.';
+  @override
+  String get transcriptionModelFailed =>
+      'Stiahnutie zlyhalo. Skontrolujte pripojenie a skúste to znova.';
+  @override
+  String get actionRetry => 'Skúsiť znova';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Pripojenie sa prerušilo, skúša sa znova…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pozastavené na $progress';
+  @override
+  String get actionResume => 'Pokračovať';
+  @override
+  String get audioTranscribe => 'Prepísať';
+  @override
+  String get audioTranscribeUnsupported => 'V tomto zariadení len nahrávky WAV';
+  @override
+  String get transcriptionQueued => 'V poradí';
+  @override
+  String get transcriptionPreparing => 'Pripravuje sa zvuk…';
+  @override
+  String transcriptionRunning(int percent) => 'Prepisuje sa… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Sťahuje sa $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Prepis bol pridaný do popisu';
+  @override
+  String get transcriptionNoSpeech =>
+      'V tejto nahrávke sa nerozpoznala žiadna reč';
+  @override
+  String get transcriptionFailed => 'Prepis zlyhal';
+  @override
+  String get transcriptionPickModelTitle => 'Vyberte model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Prepis prebieha v tomto zariadení a nahrávka sa nikam neodosiela. '
+      'Model sa sťahuje len raz.';
+  @override
+  String get transcriptionPickModelAction => 'Stiahnuť a prepísať';
+  @override
+  String get transcriptionModelRecommended => 'Odporúčaný';
+  @override
+  String get transcriptionExistingTitle => 'Táto nahrávka už má popis';
+  @override
+  String get transcriptionExistingBody =>
+      'Nahradiť ho prepisom, alebo prepis pridať pod neho?';
+  @override
+  String get transcriptionAppend => 'Pridať pod';
+  @override
+  String get transcriptionReplace => 'Nahradiť';
+  @override
+  String get settingsSectionSync => 'Synchronizácia';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Pre túto knižnicu nie je nastavená';
+  @override
+  String get syncNeverSynced => 'Ešte nesynchronizovaná';
+  @override
+  String syncLastSynced(String when) => 'Synchronizovaná $when';
+  @override
+  String get syncRunning => 'Synchronizuje sa…';
+  @override
+  String syncScreenSubtitle(String library) => 'Knižnica $library';
+  @override
+  String get syncUrlLabel => 'Adresa priečinka';
+  @override
+  String get syncUrlHint =>
+      'Priečinok musí existovať. Skopírujte adresu tak, ako ju '
+      'zobrazuje server.';
+  @override
+  String get syncHttpWarning =>
+      'Nešifrované pripojenie: v poriadku cez VPN alebo v '
+      'lokálnej sieti.';
+  @override
+  String get syncUserLabel => 'Používateľ';
+  @override
+  String get syncUserHint =>
+      'Nechajte prázdne, ak server nevyžaduje prihlasovacie '
+      'údaje.';
+  @override
+  String get syncPasswordLabel => 'Heslo';
+  @override
+  String get syncPasswordHint =>
+      'Uložené v kľúčenke tohto zariadenia, nikdy v súboroch '
+      'knižnice.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Nechajte prázdne, ak chcete ponechať uložené heslo.';
+  @override
+  String get syncShowPassword => 'Zobraziť heslo';
+  @override
+  String get syncHidePassword => 'Skryť heslo';
+  @override
+  String get syncTestAction => 'Otestovať pripojenie';
+  @override
+  String get syncTesting => 'Testuje sa…';
+  @override
+  String get syncRetargetWarning =>
+      'S novou adresou alebo používateľom začne ďalšia '
+      'synchronizácia odznova ako prvá.';
+  @override
+  String get syncTestOk => 'Pripojenie funguje';
+  @override
+  String get syncModeFull => 'Úplný režim';
+  @override
+  String get syncModeCompatible => 'Kompatibilný režim';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Čítanie, zápis a mazanie';
+  @override
+  String get syncCapEtags => 'Odtlačky súborov (ETag)';
+  @override
+  String get syncCapNoEtags => 'Bez odtlačkov súborov (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Porovnáva veľkosť a dátum; pri pochybnostiach sťahuje '
+      'znova';
+  @override
+  String get syncCapGuarded => 'Chránené zápisy';
+  @override
+  String get syncCapUnguarded => 'Nechránené zápisy';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Tesne pred zápisom skontroluje súbor na serveri';
+  @override
+  String get syncCapMove => 'Premenúva bez opätovného nahrávania';
+  @override
+  String get syncCapNoMove => 'Bez premenovania na serveri';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Premenovanie sa zmení na vymazanie a nové nahranie';
+  @override
+  String get syncCompatibleNote =>
+      'V kompatibilnom režime funguje synchronizácia rovnako, '
+      'len s niekoľkými požiadavkami navyše.';
+  @override
+  String get syncTestInvalidUrl => 'Neplatná adresa';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Zadajte adresu http:// alebo https:// bez používateľa a '
+      'hesla.';
+  @override
+  String get syncTestOffline => 'Server je nedostupný';
+  @override
+  String get syncTestOfflineHint =>
+      'Je zapnutá VPN? Adresa 10.x alebo 192.168.x funguje len z '
+      'tej istej siete.';
+  @override
+  String get syncTestAuth => 'Používateľ alebo heslo boli odmietnuté';
+  @override
+  String get syncTestAuthHint => 'Skontrolujte ich a otestujte znova.';
+  @override
+  String get syncTestNotFound => 'Priečinok neexistuje';
+  @override
+  String get syncTestNotFoundHint =>
+      'Vytvorte ho na serveri alebo opravte adresu.';
+  @override
+  String get syncTestUnsupported => 'Nie je to priečinok WebDAV';
+  @override
+  String get syncTestUnsupportedHint => 'Server odpovedá, ale nie ako WebDAV.';
+  @override
+  String get syncTestFailed => 'Test sa nepodaril';
+  @override
+  String get syncNowAction => 'Synchronizovať teraz';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Adresa, používateľ a heslo';
+  @override
+  String get syncRetestTitle => 'Otestovať server znova';
+  @override
+  String syncProbedAgo(String when) => 'Posledný test $when';
+  @override
+  String get syncDisconnectTitle => 'Odpojiť túto knižnicu';
+  @override
+  String get syncDisconnectSubtitle => 'Súbory zostanú tu aj na serveri';
+  @override
+  String get syncDisconnectConfirmTitle => 'Odpojiť synchronizáciu?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Táto knižnica sa na tomto zariadení prestane '
+      'synchronizovať. Nevymaže sa žiadny súbor, ani tu, ani na '
+      'serveri. Ak ju znova pripojíte, prvá synchronizácia začne '
+      'odznova.';
+  @override
+  String get syncDisconnectConfirm => 'Odpojiť';
+  @override
+  String get syncFirstTitle => 'Prvá synchronizácia';
+  @override
+  String get syncFirstIntro => 'Knižnica porovnaná s priečinkom na serveri:';
+  @override
+  String get syncFirstUpload => 'Na nahratie';
+  @override
+  String get syncFirstDownload => 'Na stiahnutie';
+  @override
+  String get syncFirstBoth => 'Na oboch stranách';
+  @override
+  String get syncFirstBothHint =>
+      'Rovnaké: bez prenosu. Rozdielne: na vyriešenie';
+  @override
+  String get syncFirstNoDelete =>
+      'Prvá synchronizácia nič nevymaže, ani tu, ani na serveri.';
+  @override
+  String get syncStartAction => 'Spustiť';
+  @override
+  String syncMassTrashTitle(int count) => count == 1
+      ? 'Presunúť 1 súbor do koša?'
+      : count >= 2 && count <= 4
+      ? 'Presunúť $count súbory do koša?'
+      : 'Presunúť $count súborov do koša?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Na serveri chýba $count z $total synchronizovaných '
+      'súborov. Zvyčajne to znamená nesprávnu adresu, '
+      'nepripojený disk NAS alebo omylom vyprázdnený priečinok.';
+  @override
+  String get syncMassTrashHint =>
+      'Ak ste ich naozaj vymazali na inom zariadení, potvrďte: '
+      'tu sa presunú do koša.';
+  @override
+  String get syncMassTrashConfirm => 'Presunúť do koša';
+  @override
+  String syncMassDeleteTitle(int count) => count == 1
+      ? 'Vymazať 1 súbor zo servera?'
+      : count >= 2 && count <= 4
+      ? 'Vymazať $count súbory zo servera?'
+      : 'Vymazať $count súborov zo servera?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Tu chýba $count z $total synchronizovaných súborov. Ak '
+      'ste ich nevymazali vy, zrušte akciu a skontrolujte '
+      'priečinok knižnice.';
+  @override
+  String get syncMassDeleteConfirm => 'Vymazať zo servera';
+  @override
+  String get syncTooltip => 'Synchronizácia';
+  @override
+  String get syncStageConnecting => 'Pripája sa k serveru…';
+  @override
+  String get syncStageComparing => 'Porovnáva sa so serverom…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synchronizácia · $done z $total';
+  @override
+  String get syncStatusWarnings => 'Synchronizovaná s upozorneniami';
+  @override
+  String syncConflictsHeader(int count) => 'Zmenené tu aj na serveri · $count';
+  @override
+  String get syncConflictHint => 'Žiadna z verzií nebola zmenená';
+  @override
+  String get syncResolveAction => 'Vyriešiť';
+  @override
+  String syncFailuresHeader(int count) => 'Nesynchronizované · $count';
+  @override
+  String get syncFailuresHint => 'Skúsia sa znova pri ďalšej synchronizácii';
+  @override
+  String get syncAbortAuth => 'Server odmietol heslo';
+  @override
+  String get syncAbortMissingPassword => 'Nie je uložené žiadne heslo';
+  @override
+  String get syncAbortOffline => 'Server je nedostupný';
+  @override
+  String get syncAbortRemoteMissing => 'Priečinok na serveri už neexistuje';
+  @override
+  String get syncAbortUnsupported => 'Server už nefunguje ako WebDAV';
+  @override
+  String get syncAbortFailed => 'Synchronizácia sa nepodarila';
+  @override
+  String get syncAbortNotConfirmed => 'Synchronizácia zrušená';
+  @override
+  String get syncAbortNothingTouched =>
+      'Žiadny súbor nebol zmenený. Vaše zmeny zostanú tu až do '
+      'ďalšej úspešnej synchronizácie.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Posledná úspešná synchronizácia $when';
+  @override
+  String get syncNoSuccessYet => 'Zatiaľ žiadna úspešná synchronizácia';
+  @override
+  String get syncUpdatePasswordAction => 'Aktualizovať heslo';
+  @override
+  String get syncRetryAction => 'Skúsiť znova';
+  @override
+  String get syncOpenSettingsAction => 'Nastavenia';
+  @override
+  String get syncCloseAction => 'Zavrieť';
+  @override
+  String get syncDoneSnack => 'Synchronizovaná';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Synchronizovaná · 1 súbor vymazaný inde je v koši'
+      : count >= 2 && count <= 4
+      ? 'Synchronizovaná · $count súbory vymazané inde sú v koši'
+      : 'Synchronizovaná · $count súborov vymazaných inde je v koši';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Synchronizovaná · 1 konflikt na vyriešenie'
+      : count >= 2 && count <= 4
+      ? 'Synchronizovaná · $count konflikty na vyriešenie'
+      : 'Synchronizovaná · $count konfliktov na vyriešenie';
+  @override
+  String get syncShowAction => 'Zobraziť';
+  @override
+  String get syncConflictTitle => 'Vyriešiť konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Riadky označené − sú zo servera, riadky označené + z '
+      'tohto zariadenia.';
+  @override
+  String get syncConflictBinary =>
+      'Nie je to textový súbor: vyberte, ktorú kópiu ponechať.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kópia, ktorú neponecháte, zostane v histórii poznámky.';
+  @override
+  String get syncKeepLocal => 'Ponechať verziu zariadenia';
+  @override
+  String get syncKeepRemote => 'Ponechať verziu servera';
+  @override
+  String get syncConflictIdentical => 'Obe verzie sú rovnaké';
+  @override
+  String get syncConflictLoadFailed => 'Obe verzie sa nepodarilo načítať';
+  @override
+  String get syncResolveFailed => 'Konflikt sa nepodarilo vyriešiť';
+  @override
+  String get syncResolved => 'Konflikt vyriešený';
+  @override
+  String get syncSectionWhen => 'Kedy synchronizovať';
+  @override
+  String get syncAutoTitle => 'Automaticky';
+  @override
+  String get syncAutoSubtitle => 'Po úpravách, pri otvorení a v intervaloch';
+  @override
+  String get syncIntervalTitle => 'Kontrolovať server každých';
+  @override
+  String get syncIntervalSubtitle => 'Len keď je aplikácia otvorená';
+  @override
+  String get syncIntervalDialogBody =>
+      'Aby ste videli zmeny urobené na iných zariadeniach, kým je aplikácia '
+      'otvorená. Pri „Nikdy” len po úpravách a pri otvorení.';
+  @override
+  String syncIntervalMinutes(int count) => switch (count) {
+    1 => '1 minúta',
+    >= 2 && <= 4 => '$count minúty',
+    _ => '$count minút',
+  };
+  @override
+  String get syncIntervalNever => 'Nikdy';
+  @override
+  String get syncWifiOnlyTitle => 'Len cez Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Na mobilných dátach synchronizovať len ručne';
+  @override
+  String syncPendingChanges(int count) => switch (count) {
+    1 => '1 zmena čaká',
+    >= 2 && <= 4 => '$count zmeny čakajú',
+    _ => '$count zmien čaká',
+  };
+  @override
+  String syncRetryIn(String wait) => 'ďalší pokus o $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čaká sa na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čaká sa na pripojenie';
+  @override
+  String get syncMobileDataHint =>
+      '„Synchronizovať teraz” aj tak použije mobilné dáta.';
+  @override
+  String get syncQueueKeptHint =>
+      'Zmeny tu zostanú, aj keď aplikáciu zavriete, a odídu samy, keď server '
+      'odpovie.';
+  @override
+  String get syncAutoPaused => 'Automatická synchronizácia je pozastavená';
+  @override
+  String get syncPausedAuthHint =>
+      'Pokračuje, keď aktualizujete heslo alebo synchronizujete ručne.';
+  @override
+  String get syncPausedServerHint =>
+      'Pokračuje, keď opravíte adresu alebo synchronizujete ručne.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Synchronizovať teraz” ukáže, čo by sa odstránilo, a najprv sa spýta.';
+  @override
+  String get syncNeedsConfirmation => 'Čaká sa na vaše potvrdenie';
+  @override
+  String get syncMergeIntro =>
+      'Úpravy, ktoré sa neprekrývajú, sú už zlúčené; tam, kde sa prekrývajú, '
+      'vyberte, čo ponechať.';
+  @override
+  String get syncMergeClean => 'Obe verzie sa zlúčia samy: nič sa neprekrýva.';
+  @override
+  String get syncMergeNoBase =>
+      'Nie je spoločná verzia, na ktorej zlúčiť, takže sa vyberá celý súbor.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Prekryv $index z $total';
+  @override
+  String get syncMergeFromLocal => 'Z tohto zariadenia';
+  @override
+  String get syncMergeFromRemote => 'Zo servera';
+  @override
+  String get syncMergeRemovedLines => 'Odstránené riadky';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Servera';
+  @override
+  String get syncMergeKeepBoth => 'Oboje';
+  @override
+  String get syncMergeSave => 'Uložiť zlúčenie';
+  @override
+  String get syncMergeKeepWhole => 'Alebo ponechať jednu celú kópiu';
 }

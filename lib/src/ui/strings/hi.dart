@@ -1227,6 +1227,19 @@ final class HindiStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 अपरिवर्तित पंक्ति' : '$count अपरिवर्तित पंक्तियाँ';
   @override
+  String get historyTakeHunk => 'यहाँ पुनर्स्थापित करें';
+  @override
+  String historyRestoreSelectedAction(int count) => count == 1
+      ? '1 बदलाव पुनर्स्थापित करें'
+      : '$count बदलाव पुनर्स्थापित करें';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'चुने गए बदलाव इस संस्करण के पाठ पर लौट जाते हैं। नोट जैसा अभी है, पहले '
+      'एक संस्करण के रूप में रखा जाता है, इसलिए आप इसे पूर्ववत कर सकते हैं।';
+  @override
+  String get historyNoteChangedReloaded =>
+      'आप यहाँ थे तब नोट बदल गया — तुलना ताज़ा कर दी गई है।';
+  @override
   String get historyVersionsTitle => 'कितने संस्करण रखें';
   @override
   String get historyVersionsSubtitle => 'प्रति नोट, .history/ में';
@@ -1239,4 +1252,461 @@ final class HindiStrings extends Strings {
       'लिखते समय; नोट संपादित करना शुरू करने पर एक संस्करण हमेशा रखा जाता है';
   @override
   String historyIntervalValue(int minutes) => '$minutes मिनट';
+  @override
+  String get settingsSectionTranscription => 'ट्रांसक्रिप्शन';
+  @override
+  String get transcriptionModelTitle => 'मॉडल';
+  @override
+  String get transcriptionModelNone => 'कोई नहीं';
+  @override
+  String get transcriptionLanguageTitle => 'भाषा';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'आपकी रिकॉर्डिंग में बोली गई भाषा। इसे चुनना अपने आप पहचानने से ज़्यादा '
+      'सटीक है।';
+  @override
+  String transcriptionLanguageApp(String language) => 'ऐप जैसी ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'अपने आप पहचानें';
+  @override
+  String get transcriptionModelsTitle => 'ट्रांसक्रिप्शन मॉडल';
+  @override
+  String transcriptionModelsUsed(String size) => '$size इस्तेमाल में';
+  @override
+  String get transcriptionModelsInstalled => 'डाउनलोड किए गए';
+  @override
+  String get transcriptionModelsDownloading => 'डाउनलोड हो रहे हैं';
+  @override
+  String get transcriptionModelsAvailable => 'उपलब्ध';
+  @override
+  String get transcriptionModelsFooter =>
+      'मॉडल इस डिवाइस पर ऐप के स्टोरेज में रहते हैं। वे लाइब्रेरी में कॉपी या '
+      'सिंक नहीं किए जाते।';
+  @override
+  String get transcriptionModelDefault => 'डिफ़ॉल्ट';
+  @override
+  String get transcriptionModelSlow => 'धीमा';
+  @override
+  String get transcriptionModelHintTiny => 'सबसे तेज़, सबसे कम सटीक';
+  @override
+  String get transcriptionModelHintBase => 'गति और सटीकता का अच्छा संतुलन';
+  @override
+  String get transcriptionModelHintSmall => 'ज़्यादा सटीक, लगभग 3× धीमा';
+  @override
+  String get transcriptionModelHintMedium => 'बहुत सटीक, फ़ोन पर धीमा';
+  @override
+  String get transcriptionModelHintLarge => 'सबसे सटीक, बहुत मेमोरी चाहिए';
+  @override
+  String get transcriptionModelDownload => 'डाउनलोड करें';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '$model मॉडल हटाएँ?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'इससे $size खाली होगा। आप बाद में मॉडल फिर से डाउनलोड कर सकते हैं।';
+  @override
+  String get transcriptionModelFailed =>
+      'डाउनलोड नहीं हो सका। कनेक्शन जाँचें और फिर से कोशिश करें।';
+  @override
+  String get actionRetry => 'फिर से कोशिश करें';
+  @override
+  String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying =>
+      'कनेक्शन टूट गया, फिर से कोशिश हो रही है…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      '$progress पर रुका हुआ';
+  @override
+  String get actionResume => 'फिर शुरू करें';
+  @override
+  String get audioTranscribe => 'ट्रांसक्राइब करें';
+  @override
+  String get audioTranscribeUnsupported => 'इस डिवाइस पर केवल WAV रिकॉर्डिंग';
+  @override
+  String get transcriptionQueued => 'कतार में';
+  @override
+  String get transcriptionPreparing => 'ऑडियो तैयार हो रहा है…';
+  @override
+  String transcriptionRunning(int percent) =>
+      'ट्रांसक्राइब हो रहा है… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model डाउनलोड हो रहा है · $percent%';
+  @override
+  String get transcriptionSaved => 'ट्रांसक्रिप्शन विवरण में जोड़ दिया गया';
+  @override
+  String get transcriptionNoSpeech =>
+      'इस रिकॉर्डिंग में कोई बोली नहीं पहचानी गई';
+  @override
+  String get transcriptionFailed => 'ट्रांसक्रिप्शन नहीं हो सका';
+  @override
+  String get transcriptionPickModelTitle => 'मॉडल चुनें';
+  @override
+  String get transcriptionPickModelBody =>
+      'ट्रांसक्रिप्शन इसी डिवाइस पर होता है और रिकॉर्डिंग कभी अपलोड नहीं '
+      'होती। मॉडल एक ही बार डाउनलोड होता है।';
+  @override
+  String get transcriptionPickModelAction =>
+      'डाउनलोड करें और ट्रांसक्राइब करें';
+  @override
+  String get transcriptionModelRecommended => 'सुझाया गया';
+  @override
+  String get transcriptionExistingTitle => 'इस रिकॉर्डिंग का विवरण पहले से है';
+  @override
+  String get transcriptionExistingBody =>
+      'इसे ट्रांसक्रिप्शन से बदलें या ट्रांसक्रिप्शन नीचे जोड़ें?';
+  @override
+  String get transcriptionAppend => 'नीचे जोड़ें';
+  @override
+  String get transcriptionReplace => 'बदलें';
+  @override
+  String get settingsSectionSync => 'सिंक';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'इस लाइब्रेरी के लिए सेट नहीं है';
+  @override
+  String get syncNeverSynced => 'कभी सिंक नहीं हुआ';
+  @override
+  String syncLastSynced(String when) => 'सिंक किया गया: $when';
+  @override
+  String get syncRunning => 'सिंक हो रहा है…';
+  @override
+  String syncScreenSubtitle(String library) => 'लाइब्रेरी $library';
+  @override
+  String get syncUrlLabel => 'फ़ोल्डर का पता';
+  @override
+  String get syncUrlHint =>
+      'फ़ोल्डर पहले से मौजूद होना चाहिए। पता वैसे ही कॉपी करें '
+      'जैसे सर्वर उसे दिखाता है।';
+  @override
+  String get syncHttpWarning =>
+      'बिना एन्क्रिप्शन का कनेक्शन: VPN पर या आपके लोकल नेटवर्क '
+      'में ठीक है।';
+  @override
+  String get syncUserLabel => 'उपयोगकर्ता';
+  @override
+  String get syncUserHint =>
+      'अगर सर्वर क्रेडेंशियल नहीं माँगता, तो खाली छोड़ें।';
+  @override
+  String get syncPasswordLabel => 'पासवर्ड';
+  @override
+  String get syncPasswordHint =>
+      'इस डिवाइस के कीचेन में रखा जाता है, लाइब्रेरी की फ़ाइलों '
+      'में कभी नहीं।';
+  @override
+  String get syncPasswordKeepHint =>
+      'सहेजा गया पासवर्ड रखने के लिए खाली छोड़ें।';
+  @override
+  String get syncShowPassword => 'पासवर्ड दिखाएँ';
+  @override
+  String get syncHidePassword => 'पासवर्ड छिपाएँ';
+  @override
+  String get syncTestAction => 'कनेक्शन जाँचें';
+  @override
+  String get syncTesting => 'जाँच हो रही है…';
+  @override
+  String get syncRetargetWarning =>
+      'नया पता या उपयोगकर्ता होने पर अगला सिंक पहले सिंक की तरह '
+      'फिर से शुरू होगा।';
+  @override
+  String get syncTestOk => 'कनेक्शन काम कर रहा है';
+  @override
+  String get syncModeFull => 'पूर्ण मोड';
+  @override
+  String get syncModeCompatible => 'संगत मोड';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'पढ़ना, लिखना और हटाना';
+  @override
+  String get syncCapEtags => 'फ़ाइल फ़िंगरप्रिंट (ETag)';
+  @override
+  String get syncCapNoEtags => 'फ़ाइल फ़िंगरप्रिंट (ETag) नहीं';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'आकार और तारीख़ की तुलना होती है; शक होने पर फिर से '
+      'डाउनलोड होता है';
+  @override
+  String get syncCapGuarded => 'सुरक्षित लेखन';
+  @override
+  String get syncCapUnguarded => 'असुरक्षित लेखन';
+  @override
+  String get syncCapUnguardedDetail =>
+      'लिखने से ठीक पहले सर्वर पर फ़ाइल जाँची जाती है';
+  @override
+  String get syncCapMove => 'दोबारा अपलोड किए बिना नाम बदलना';
+  @override
+  String get syncCapNoMove => 'सर्वर पर नाम नहीं बदला जा सकता';
+  @override
+  String get syncCapNoMoveDetail =>
+      'नाम बदलना एक हटाना और नया अपलोड बन जाता है';
+  @override
+  String get syncCompatibleNote =>
+      'संगत मोड में सिंक वैसे ही काम करता है, बस कुछ ज़्यादा '
+      'अनुरोधों के साथ।';
+  @override
+  String get syncTestInvalidUrl => 'मान्य पता नहीं';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'http:// या https:// पता डालें, उसमें उपयोगकर्ता या '
+      'पासवर्ड न हो।';
+  @override
+  String get syncTestOffline => 'सर्वर तक पहुँच नहीं';
+  @override
+  String get syncTestOfflineHint =>
+      'क्या VPN चालू है? 10.x या 192.168.x पता सिर्फ़ उसी '
+      'नेटवर्क से काम करता है।';
+  @override
+  String get syncTestAuth => 'उपयोगकर्ता या पासवर्ड अस्वीकार';
+  @override
+  String get syncTestAuthHint => 'इन्हें जाँचें, फिर दोबारा टेस्ट करें।';
+  @override
+  String get syncTestNotFound => 'फ़ोल्डर मौजूद नहीं है';
+  @override
+  String get syncTestNotFoundHint => 'इसे सर्वर पर बनाएँ या पता ठीक करें।';
+  @override
+  String get syncTestUnsupported => 'यह WebDAV फ़ोल्डर नहीं है';
+  @override
+  String get syncTestUnsupportedHint =>
+      'सर्वर जवाब देता है, पर WebDAV की तरह नहीं।';
+  @override
+  String get syncTestFailed => 'जाँच सफल नहीं हुई';
+  @override
+  String get syncNowAction => 'अभी सिंक करें';
+  @override
+  String get syncSectionServer => 'सर्वर';
+  @override
+  String get syncServerRow => 'पता, उपयोगकर्ता और पासवर्ड';
+  @override
+  String get syncRetestTitle => 'सर्वर को फिर से जाँचें';
+  @override
+  String syncProbedAgo(String when) => 'पिछली जाँच: $when';
+  @override
+  String get syncDisconnectTitle => 'इस लाइब्रेरी को डिस्कनेक्ट करें';
+  @override
+  String get syncDisconnectSubtitle => 'फ़ाइलें यहाँ और सर्वर पर बनी रहती हैं';
+  @override
+  String get syncDisconnectConfirmTitle => 'सिंक डिस्कनेक्ट करें?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'यह लाइब्रेरी इस डिवाइस पर सिंक होना बंद कर देती है। कोई '
+      'फ़ाइल नहीं हटती, न यहाँ न सर्वर पर। अगर आप इसे फिर से '
+      'जोड़ते हैं, तो पहला सिंक शुरू से होगा।';
+  @override
+  String get syncDisconnectConfirm => 'डिस्कनेक्ट करें';
+  @override
+  String get syncFirstTitle => 'पहला सिंक';
+  @override
+  String get syncFirstIntro =>
+      'मैंने लाइब्रेरी की तुलना सर्वर के फ़ोल्डर से की:';
+  @override
+  String get syncFirstUpload => 'अपलोड करनी हैं';
+  @override
+  String get syncFirstDownload => 'डाउनलोड करनी हैं';
+  @override
+  String get syncFirstBoth => 'दोनों तरफ़';
+  @override
+  String get syncFirstBothHint =>
+      'एक जैसी: कोई ट्रांसफ़र नहीं। अलग: सुलझानी हैं';
+  @override
+  String get syncFirstNoDelete =>
+      'पहला सिंक कुछ नहीं हटाता, न यहाँ न सर्वर पर।';
+  @override
+  String get syncStartAction => 'शुरू करें';
+  @override
+  String syncMassTrashTitle(int count) => '$count फ़ाइलें ट्रैश में भेजें?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'सिंक की गई $total में से $count फ़ाइलें सर्वर पर नहीं '
+      'हैं। आमतौर पर इसका मतलब होता है गलत पता, NAS की डिस्क '
+      'माउंट न होना या गलती से खाली हुआ फ़ोल्डर।';
+  @override
+  String get syncMassTrashHint =>
+      'अगर आपने इन्हें सच में किसी दूसरे डिवाइस पर हटाया है, तो '
+      'पुष्टि करें: यहाँ ये ट्रैश में जाएँगी।';
+  @override
+  String get syncMassTrashConfirm => 'ट्रैश में भेजें';
+  @override
+  String syncMassDeleteTitle(int count) => 'सर्वर से $count फ़ाइलें हटाएँ?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'सिंक की गई $total में से $count फ़ाइलें यहाँ नहीं हैं। '
+      'अगर आपने इन्हें नहीं हटाया, तो रद्द करें और लाइब्रेरी का '
+      'फ़ोल्डर जाँचें।';
+  @override
+  String get syncMassDeleteConfirm => 'सर्वर से हटाएँ';
+  @override
+  String get syncTooltip => 'सिंक करें';
+  @override
+  String get syncStageConnecting => 'सर्वर से जुड़ रहा है…';
+  @override
+  String get syncStageComparing => 'सर्वर से तुलना हो रही है…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'सिंक हो रहा है · $total में से $done';
+  @override
+  String get syncStatusWarnings => 'चेतावनियों के साथ सिंक हुआ';
+  @override
+  String syncConflictsHeader(int count) => 'यहाँ और सर्वर पर बदली गईं · $count';
+  @override
+  String get syncConflictHint => 'किसी भी संस्करण को छुआ नहीं गया';
+  @override
+  String get syncResolveAction => 'सुलझाएँ';
+  @override
+  String syncFailuresHeader(int count) => 'सिंक नहीं हुईं · $count';
+  @override
+  String get syncFailuresHint => 'अगले सिंक में फिर कोशिश होगी';
+  @override
+  String get syncAbortAuth => 'सर्वर ने पासवर्ड अस्वीकार किया';
+  @override
+  String get syncAbortMissingPassword => 'कोई पासवर्ड सहेजा नहीं गया';
+  @override
+  String get syncAbortOffline => 'सर्वर तक पहुँच नहीं';
+  @override
+  String get syncAbortRemoteMissing => 'सर्वर पर फ़ोल्डर अब नहीं है';
+  @override
+  String get syncAbortUnsupported => 'सर्वर अब WebDAV की तरह काम नहीं करता';
+  @override
+  String get syncAbortFailed => 'सिंक सफल नहीं हुआ';
+  @override
+  String get syncAbortNotConfirmed => 'सिंक रद्द किया गया';
+  @override
+  String get syncAbortNothingTouched =>
+      'किसी फ़ाइल को छुआ नहीं गया। आपके बदलाव अगले सफल सिंक तक '
+      'यहीं रहेंगे।';
+  @override
+  String syncLastSuccess(String when) => 'पिछला सफल सिंक: $when';
+  @override
+  String get syncNoSuccessYet => 'अभी तक कोई सफल सिंक नहीं';
+  @override
+  String get syncUpdatePasswordAction => 'पासवर्ड अपडेट करें';
+  @override
+  String get syncRetryAction => 'फिर कोशिश करें';
+  @override
+  String get syncOpenSettingsAction => 'सेटिंग';
+  @override
+  String get syncCloseAction => 'बंद करें';
+  @override
+  String get syncDoneSnack => 'सिंक पूरा हुआ';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'सिंक पूरा हुआ · कहीं और हटाई गई 1 फ़ाइल ट्रैश में है'
+      : 'सिंक पूरा हुआ · कहीं और हटाई गई $count फ़ाइलें ट्रैश में '
+            'हैं';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'सिंक पूरा हुआ · सुलझाने के लिए 1 टकराव'
+      : 'सिंक पूरा हुआ · सुलझाने के लिए $count टकराव';
+  @override
+  String get syncShowAction => 'दिखाएँ';
+  @override
+  String get syncConflictTitle => 'टकराव सुलझाएँ';
+  @override
+  String get syncConflictLegend =>
+      '− वाली पंक्तियाँ सर्वर की हैं, + वाली पंक्तियाँ इस डिवाइस '
+      'की।';
+  @override
+  String get syncConflictBinary =>
+      'यह टेक्स्ट फ़ाइल नहीं है: चुनें कि कौन-सी कॉपी रखनी है।';
+  @override
+  String get syncConflictKeepNote =>
+      'जो कॉपी आप नहीं रखते, वह नोट के इतिहास में रहती है।';
+  @override
+  String get syncKeepLocal => 'इस डिवाइस वाली रखें';
+  @override
+  String get syncKeepRemote => 'सर्वर वाली रखें';
+  @override
+  String get syncConflictIdentical => 'दोनों संस्करण एक जैसे हैं';
+  @override
+  String get syncConflictLoadFailed => 'दोनों संस्करण नहीं पढ़े जा सके';
+  @override
+  String get syncResolveFailed => 'टकराव नहीं सुलझाया जा सका';
+  @override
+  String get syncResolved => 'टकराव सुलझ गया';
+  @override
+  String get syncSectionWhen => 'कब सिंक करें';
+  @override
+  String get syncAutoTitle => 'अपने-आप';
+  @override
+  String get syncAutoSubtitle => 'बदलावों के बाद, खोलने पर और तय अंतराल पर';
+  @override
+  String get syncIntervalTitle => 'सर्वर जाँचने का अंतराल';
+  @override
+  String get syncIntervalSubtitle => 'सिर्फ़ ऐप खुला रहने पर';
+  @override
+  String get syncIntervalDialogBody =>
+      'ऐप खुला रहते हुए दूसरे डिवाइस पर किए गए बदलाव देखने के लिए। '
+      '«कभी नहीं» चुनने पर सिर्फ़ बदलावों के बाद और खोलने पर।';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 मिनट' : '$count मिनट';
+  @override
+  String get syncIntervalNever => 'कभी नहीं';
+  @override
+  String get syncWifiOnlyTitle => 'सिर्फ़ Wi-Fi पर';
+  @override
+  String get syncWifiOnlySubtitle => 'मोबाइल डेटा पर सिर्फ़ हाथ से सिंक करें';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 बदलाव बाकी है' : '$count बदलाव बाकी हैं';
+  @override
+  String syncRetryIn(String wait) => '$wait में फिर कोशिश होगी';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds सेकंड';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes मिनट';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi का इंतज़ार';
+  @override
+  String get syncWaitingForNetwork => 'कनेक्शन का इंतज़ार';
+  @override
+  String get syncMobileDataHint =>
+      '«अभी सिंक करें» फिर भी मोबाइल डेटा इस्तेमाल करता है।';
+  @override
+  String get syncQueueKeptHint =>
+      'बदलाव यहीं रहते हैं, ऐप बंद करने पर भी, और सर्वर के जवाब देते ही '
+      'अपने-आप भेज दिए जाते हैं।';
+  @override
+  String get syncAutoPaused => 'अपने-आप सिंक रुका हुआ है';
+  @override
+  String get syncPausedAuthHint =>
+      'पासवर्ड अपडेट करने या हाथ से सिंक करने पर यह फिर शुरू होगा।';
+  @override
+  String get syncPausedServerHint =>
+      'पता ठीक करने या हाथ से सिंक करने पर यह फिर शुरू होगा।';
+  @override
+  String get syncPausedConfirmHint =>
+      '«अभी सिंक करें» दिखाता है कि क्या हटेगा, और पहले पूछता है।';
+  @override
+  String get syncNeedsConfirmation => 'आपकी पुष्टि का इंतज़ार';
+  @override
+  String get syncMergeIntro =>
+      'जो बदलाव ओवरलैप नहीं होते वे पहले ही मिला दिए गए हैं; '
+      'जहाँ होते हैं वहाँ चुनें कि क्या रखना है।';
+  @override
+  String get syncMergeClean =>
+      'दोनों संस्करण अपने-आप मिल जाते हैं: कुछ भी ओवरलैप नहीं होता।';
+  @override
+  String get syncMergeNoBase =>
+      'मिलाने के लिए कोई साझा संस्करण नहीं है, इसलिए पूरी फ़ाइल '
+      'चुननी होगी।';
+  @override
+  String syncMergeOverlap(int index, int total) => 'ओवरलैप $index / $total';
+  @override
+  String get syncMergeFromLocal => 'इस डिवाइस से';
+  @override
+  String get syncMergeFromRemote => 'सर्वर से';
+  @override
+  String get syncMergeRemovedLines => 'हटाई गई पंक्तियाँ';
+  @override
+  String get syncMergeKeepLocal => 'मेरी';
+  @override
+  String get syncMergeKeepRemote => 'सर्वर की';
+  @override
+  String get syncMergeKeepBoth => 'दोनों';
+  @override
+  String get syncMergeSave => 'मिलान सहेजें';
+  @override
+  String get syncMergeKeepWhole => 'या पूरी एक कॉपी रखें';
 }

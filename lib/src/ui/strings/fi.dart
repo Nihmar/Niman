@@ -1258,6 +1258,18 @@ final class FinnishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 muuttumaton rivi' : '$count muuttumatonta riviä';
   @override
+  String get historyTakeHunk => 'Palauta tähän';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Palauta 1 muutos' : 'Palauta $count muutosta';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valitut muutokset palaavat tämän version tekstiin. Muistiinpano '
+      'nykyisellään säilytetään ensin versiona, joten voit kumota tämän.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Muistiinpano muuttui kun olit täällä — vertailu on päivitetty.';
+  @override
   String get historyVersionsTitle => 'Säilytettävät versiot';
   @override
   String get historyVersionsSubtitle =>
@@ -1271,4 +1283,469 @@ final class FinnishStrings extends Strings {
       'Kirjoittaessa; muokkauksen aloittaminen säilyttää aina yhden version';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Litterointi';
+  @override
+  String get transcriptionModelTitle => 'Malli';
+  @override
+  String get transcriptionModelNone => 'Ei mitään';
+  @override
+  String get transcriptionLanguageTitle => 'Kieli';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kieli, jota tallenteissasi puhutaan. Sen valitseminen on tarkempaa '
+      'kuin tunnistus.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Sama kuin sovelluksessa ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Tunnista automaattisesti';
+  @override
+  String get transcriptionModelsTitle => 'Litterointimallit';
+  @override
+  String transcriptionModelsUsed(String size) => '$size käytössä';
+  @override
+  String get transcriptionModelsInstalled => 'Ladatut';
+  @override
+  String get transcriptionModelsDownloading => 'Ladataan';
+  @override
+  String get transcriptionModelsAvailable => 'Saatavilla';
+  @override
+  String get transcriptionModelsFooter =>
+      'Mallit pysyvät sovelluksen tallennustilassa tällä laitteella. Niitä ei '
+      'kopioida kirjastoon eikä synkronoida.';
+  @override
+  String get transcriptionModelDefault => 'Oletus';
+  @override
+  String get transcriptionModelSlow => 'Hidas';
+  @override
+  String get transcriptionModelHintTiny => 'Nopein, epätarkin';
+  @override
+  String get transcriptionModelHintBase =>
+      'Hyvä tasapaino nopeuden ja tarkkuuden välillä';
+  @override
+  String get transcriptionModelHintSmall => 'Tarkempi, noin 3× hitaampi';
+  @override
+  String get transcriptionModelHintMedium => 'Hyvin tarkka, hidas puhelimessa';
+  @override
+  String get transcriptionModelHintLarge => 'Tarkin, vaatii paljon muistia';
+  @override
+  String get transcriptionModelDownload => 'Lataa';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Poistetaanko malli $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Tämä vapauttaa $size. Voit ladata mallin myöhemmin uudelleen.';
+  @override
+  String get transcriptionModelFailed =>
+      'Lataus epäonnistui. Tarkista yhteys ja yritä uudelleen.';
+  @override
+  String get actionRetry => 'Yritä uudelleen';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Yhteys katkesi, yritetään uudelleen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Keskeytetty: $progress';
+  @override
+  String get actionResume => 'Jatka';
+  @override
+  String get audioTranscribe => 'Litteroi';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Tällä laitteella vain WAV-tallenteet';
+  @override
+  String get transcriptionQueued => 'Jonossa';
+  @override
+  String get transcriptionPreparing => 'Valmistellaan ääntä…';
+  @override
+  String transcriptionRunning(int percent) => 'Litteroidaan… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Ladataan $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Litterointi lisättiin kuvaukseen';
+  @override
+  String get transcriptionNoSpeech => 'Tallenteesta ei tunnistettu puhetta';
+  @override
+  String get transcriptionFailed => 'Litterointi epäonnistui';
+  @override
+  String get transcriptionPickModelTitle => 'Valitse malli';
+  @override
+  String get transcriptionPickModelBody =>
+      'Litterointi tehdään tällä laitteella, eikä tallennetta lähetetä '
+      'minnekään. Malli ladataan vain kerran.';
+  @override
+  String get transcriptionPickModelAction => 'Lataa ja litteroi';
+  @override
+  String get transcriptionModelRecommended => 'Suositeltu';
+  @override
+  String get transcriptionExistingTitle => 'Tallenteella on jo kuvaus';
+  @override
+  String get transcriptionExistingBody =>
+      'Korvataanko se litteroinnilla vai lisätäänkö litterointi sen alle?';
+  @override
+  String get transcriptionAppend => 'Lisää alle';
+  @override
+  String get transcriptionReplace => 'Korvaa';
+  @override
+  String get settingsSectionSync => 'Synkronointi';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ei määritetty tälle kirjastolle';
+  @override
+  String get syncNeverSynced => 'Ei koskaan synkronoitu';
+  @override
+  String syncLastSynced(String when) => 'Synkronoitu: $when';
+  @override
+  String get syncRunning => 'Synkronoidaan…';
+  @override
+  String syncScreenSubtitle(String library) => 'Kirjasto $library';
+  @override
+  String get syncUrlLabel => 'Kansion osoite';
+  @override
+  String get syncUrlHint =>
+      'Kansion on oltava olemassa. Kopioi osoite sellaisena kuin '
+      'palvelin sen näyttää.';
+  @override
+  String get syncHttpWarning =>
+      'Salaamaton yhteys: kelpaa VPN:n kautta tai lähiverkossa.';
+  @override
+  String get syncUserLabel => 'Käyttäjä';
+  @override
+  String get syncUserHint => 'Jätä tyhjäksi, jos palvelin ei pyydä tunnuksia.';
+  @override
+  String get syncPasswordLabel => 'Salasana';
+  @override
+  String get syncPasswordHint =>
+      'Säilytetään tämän laitteen avainnipussa, ei koskaan '
+      'kirjaston tiedostoissa.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Jätä tyhjäksi, niin tallennettu salasana säilyy.';
+  @override
+  String get syncShowPassword => 'Näytä salasana';
+  @override
+  String get syncHidePassword => 'Piilota salasana';
+  @override
+  String get syncTestAction => 'Testaa yhteys';
+  @override
+  String get syncTesting => 'Testataan…';
+  @override
+  String get syncRetargetWarning =>
+      'Uudella osoitteella tai käyttäjällä seuraava synkronointi '
+      'alkaa alusta ensimmäisenä synkronointina.';
+  @override
+  String get syncTestOk => 'Yhteys toimii';
+  @override
+  String get syncModeFull => 'Täysi tila';
+  @override
+  String get syncModeCompatible => 'Yhteensopiva tila';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Luku, kirjoitus ja poisto';
+  @override
+  String get syncCapEtags => 'Tiedostojen sormenjäljet (ETag)';
+  @override
+  String get syncCapNoEtags => 'Ei tiedostojen sormenjälkiä (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Vertaan kokoa ja päivämäärää; epäselvissä tapauksissa '
+      'lataan uudelleen';
+  @override
+  String get syncCapGuarded => 'Suojatut kirjoitukset';
+  @override
+  String get syncCapUnguarded => 'Suojaamattomat kirjoitukset';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Tarkistan palvelimen tiedoston juuri ennen kirjoittamista';
+  @override
+  String get syncCapMove => 'Uudelleennimeäminen ilman uutta lähetystä';
+  @override
+  String get syncCapNoMove => 'Ei uudelleennimeämistä palvelimella';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Uudelleennimeämisestä tulee poisto ja uusi lähetys';
+  @override
+  String get syncCompatibleNote =>
+      'Yhteensopivassa tilassa synkronointi toimii samoin, vain '
+      'muutamalla pyynnöllä enemmän.';
+  @override
+  String get syncTestInvalidUrl => 'Virheellinen osoite';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Anna http://- tai https://-osoite ilman käyttäjää tai '
+      'salasanaa.';
+  @override
+  String get syncTestOffline => 'Palvelimeen ei saada yhteyttä';
+  @override
+  String get syncTestOfflineHint =>
+      'Onko VPN päällä? Osoite 10.x tai 192.168.x toimii vain '
+      'samasta verkosta.';
+  @override
+  String get syncTestAuth => 'Käyttäjä tai salasana hylättiin';
+  @override
+  String get syncTestAuthHint => 'Tarkista ne ja testaa uudelleen.';
+  @override
+  String get syncTestNotFound => 'Kansiota ei ole olemassa';
+  @override
+  String get syncTestNotFoundHint => 'Luo se palvelimelle tai korjaa osoite.';
+  @override
+  String get syncTestUnsupported => 'Ei WebDAV-kansio';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Palvelin vastaa, mutta ei WebDAV-palvelimena.';
+  @override
+  String get syncTestFailed => 'Testi epäonnistui';
+  @override
+  String get syncNowAction => 'Synkronoi nyt';
+  @override
+  String get syncSectionServer => 'Palvelin';
+  @override
+  String get syncServerRow => 'Osoite, käyttäjä ja salasana';
+  @override
+  String get syncRetestTitle => 'Testaa palvelin uudelleen';
+  @override
+  String syncProbedAgo(String when) => 'Viimeisin testi: $when';
+  @override
+  String get syncDisconnectTitle => 'Irrota tämä kirjasto';
+  @override
+  String get syncDisconnectSubtitle => 'Tiedostot jäävät tänne ja palvelimelle';
+  @override
+  String get syncDisconnectConfirmTitle => 'Katkaistaanko synkronointi?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Tämä kirjasto lakkaa synkronoimasta tällä laitteella. '
+      'Mitään tiedostoa ei poisteta, ei täällä eikä '
+      'palvelimella. Jos yhdistät sen uudelleen, ensimmäinen '
+      'synkronointi alkaa alusta.';
+  @override
+  String get syncDisconnectConfirm => 'Katkaise';
+  @override
+  String get syncFirstTitle => 'Ensimmäinen synkronointi';
+  @override
+  String get syncFirstIntro => 'Vertasin kirjastoa palvelimen kansioon:';
+  @override
+  String get syncFirstUpload => 'Lähetettävät';
+  @override
+  String get syncFirstDownload => 'Ladattavat';
+  @override
+  String get syncFirstBoth => 'Molemmilla puolilla';
+  @override
+  String get syncFirstBothHint => 'Samat: ei siirtoa. Erilaiset: ratkaistavana';
+  @override
+  String get syncFirstNoDelete =>
+      'Ensimmäinen synkronointi ei poista mitään, ei täällä eikä '
+      'palvelimella.';
+  @override
+  String get syncStartAction => 'Aloita';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Siirretäänkö $count tiedostoa koriin?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Palvelimelta puuttuu $count tiedostoa $total '
+      'synkronoidusta. Yleensä se tarkoittaa väärää osoitetta, '
+      'liittämätöntä NAS-levyä tai vahingossa tyhjennettyä '
+      'kansiota.';
+  @override
+  String get syncMassTrashHint =>
+      'Jos todella poistit ne toisella laitteella, vahvista: '
+      'täällä ne siirtyvät koriin.';
+  @override
+  String get syncMassTrashConfirm => 'Siirrä koriin';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Poistetaanko $count tiedostoa palvelimelta?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Täältä puuttuu $count tiedostoa $total synkronoidusta. '
+      'Jos et poistanut niitä, peruuta ja tarkista kirjaston '
+      'kansio.';
+  @override
+  String get syncMassDeleteConfirm => 'Poista palvelimelta';
+  @override
+  String get syncTooltip => 'Synkronoi';
+  @override
+  String get syncStageConnecting => 'Yhdistetään palvelimeen…';
+  @override
+  String get syncStageComparing => 'Verrataan palvelimeen…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synkronoidaan · $done/$total';
+  @override
+  String get syncStatusWarnings => 'Synkronoitu varoituksin';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Muutettu täällä ja palvelimella · $count';
+  @override
+  String get syncConflictHint => 'Kumpaankaan versioon ei koskettu';
+  @override
+  String get syncResolveAction => 'Ratkaise';
+  @override
+  String syncFailuresHeader(int count) => 'Ei synkronoitu · $count';
+  @override
+  String get syncFailuresHint =>
+      'Yritetään uudelleen seuraavassa synkronoinnissa';
+  @override
+  String get syncAbortAuth => 'Palvelin hylkäsi salasanan';
+  @override
+  String get syncAbortMissingPassword => 'Salasanaa ei ole tallennettu';
+  @override
+  String get syncAbortOffline => 'Palvelimeen ei saada yhteyttä';
+  @override
+  String get syncAbortRemoteMissing => 'Palvelimen kansiota ei enää ole';
+  @override
+  String get syncAbortUnsupported =>
+      'Palvelin ei enää toimi WebDAV-palvelimena';
+  @override
+  String get syncAbortFailed => 'Synkronointi epäonnistui';
+  @override
+  String get syncAbortNotConfirmed => 'Synkronointi peruttu';
+  @override
+  String get syncAbortNothingTouched =>
+      'Mihinkään tiedostoon ei koskettu. Muutoksesi pysyvät '
+      'täällä seuraavaan onnistuneeseen synkronointiin asti.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Viimeisin onnistunut synkronointi: $when';
+  @override
+  String get syncNoSuccessYet => 'Ei vielä onnistunutta synkronointia';
+  @override
+  String get syncUpdatePasswordAction => 'Päivitä salasana';
+  @override
+  String get syncRetryAction => 'Yritä uudelleen';
+  @override
+  String get syncOpenSettingsAction => 'Asetukset';
+  @override
+  String get syncCloseAction => 'Sulje';
+  @override
+  String get syncDoneSnack => 'Synkronoitu';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Synkronoitu · 1 muualla poistettu tiedosto on korissa'
+      : 'Synkronoitu · $count muualla poistettua tiedostoa on '
+            'korissa';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Synkronoitu · 1 ratkaistava ristiriita'
+      : 'Synkronoitu · $count ratkaistavaa ristiriitaa';
+  @override
+  String get syncShowAction => 'Näytä';
+  @override
+  String get syncConflictTitle => 'Ratkaise ristiriita';
+  @override
+  String get syncConflictLegend =>
+      'Merkillä − merkityt rivit ovat palvelimen, merkillä + '
+      'merkityt tämän laitteen.';
+  @override
+  String get syncConflictBinary =>
+      'Ei tekstitiedosto: valitse, kumpi kopio säilytetään.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopio, jota et säilytä, jää muistiinpanon historiaan.';
+  @override
+  String get syncKeepLocal => 'Säilytä tämän laitteen versio';
+  @override
+  String get syncKeepRemote => 'Säilytä palvelimen versio';
+  @override
+  String get syncConflictIdentical => 'Versiot ovat samat';
+  @override
+  String get syncConflictLoadFailed => 'Molempia versioita ei voitu lukea';
+  @override
+  String get syncResolveFailed => 'Ristiriitaa ei voitu ratkaista';
+  @override
+  String get syncResolved => 'Ristiriita ratkaistu';
+  @override
+  String get syncSectionWhen => 'Milloin synkronoidaan';
+  @override
+  String get syncAutoTitle => 'Automaattisesti';
+  @override
+  String get syncAutoSubtitle =>
+      'Muutosten jälkeen, avattaessa ja säännöllisin väliajoin';
+  @override
+  String get syncIntervalTitle => 'Palvelimen tarkistusväli';
+  @override
+  String get syncIntervalSubtitle => 'Vain kun sovellus on auki';
+  @override
+  String get syncIntervalDialogBody =>
+      'Näet muilla laitteilla tehdyt muutokset, kun sovellus on auki. '
+      'Valinnalla ”Ei koskaan” vain muutosten jälkeen ja avattaessa.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuutti' : '$count minuuttia';
+  @override
+  String get syncIntervalNever => 'Ei koskaan';
+  @override
+  String get syncWifiOnlyTitle => 'Vain Wi-Fi-yhteydellä';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobiilidatalla synkronoidaan vain käsin';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 muutos odottaa' : '$count muutosta odottaa';
+  @override
+  String syncRetryIn(String wait) => 'uusi yritys $wait kuluttua';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Odotetaan Wi-Fi-yhteyttä';
+  @override
+  String get syncWaitingForNetwork => 'Odotetaan yhteyttä';
+  @override
+  String get syncMobileDataHint =>
+      '”Synkronoi nyt” käyttää silti mobiilidataa.';
+  @override
+  String get syncQueueKeptHint =>
+      'Muutokset säilyvät täällä, vaikka suljet sovelluksen, ja lähtevät '
+      'itsestään, kun palvelin vastaa.';
+  @override
+  String get syncAutoPaused => 'Automaattinen synkronointi keskeytetty';
+  @override
+  String get syncPausedAuthHint =>
+      'Se jatkuu, kun päivität salasanan tai synkronoit käsin.';
+  @override
+  String get syncPausedServerHint =>
+      'Se jatkuu, kun korjaat osoitteen tai synkronoit käsin.';
+  @override
+  String get syncPausedConfirmHint =>
+      '”Synkronoi nyt” näyttää, mitä poistettaisiin, ja kysyy ensin.';
+  @override
+  String get syncNeedsConfirmation => 'Odottaa vahvistustasi';
+  @override
+  String get syncMergeIntro =>
+      'Muutokset, jotka eivät mene päällekkäin, on jo yhdistetty; valitse '
+      'päällekkäisistä kohdista, mitä säilytetään.';
+  @override
+  String get syncMergeClean =>
+      'Versiot yhdistyvät itsestään: mikään ei mene päällekkäin.';
+  @override
+  String get syncMergeNoBase =>
+      'Yhteistä versiota ei ole, jonka päälle yhdistää, joten koko tiedosto on '
+      'valittava.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Päällekkäisyys $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Tästä laitteesta';
+  @override
+  String get syncMergeFromRemote => 'Palvelimelta';
+  @override
+  String get syncMergeRemovedLines => 'Poistetut rivit';
+  @override
+  String get syncMergeKeepLocal => 'Omat';
+  @override
+  String get syncMergeKeepRemote => 'Palvelimen';
+  @override
+  String get syncMergeKeepBoth => 'Molemmat';
+  @override
+  String get syncMergeSave => 'Tallenna yhdistelmä';
+  @override
+  String get syncMergeKeepWhole => 'Tai säilytä yksi kokonainen kopio';
 }

@@ -13,7 +13,10 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `core/` | Settings (`settings/library_config.dart`), logging, storage access, theme, language, shortcuts/launch args |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image import |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](sync.md) |
-| `diff/` | Myers line diff and hunk summary, shared by history and (later) sync conflicts |
+| `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
+| `sync/webdav/` | WebDAV client on `dart:io` (streamed GET/PUT, PROPFIND parsing, typed failures) and the capability probe — see [sync.md](sync.md) |
+| `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
+| `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
 | `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); indexer, scan, tree materialization |
 | `editor/` | Source editor (`re_editor` + own incremental tokenizer `highlighting.dart`), WYSIWYG (`flutter_quill` + Markdown codec), toolbar, find panel, folding, outline, word count |
 | `preview/` | Markdown render (`flutter_markdown_plus` + `markdown` AST), KaTeX math, code highlight, scroll sync |
@@ -23,6 +26,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
+| `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](transcription.md) |
 | `ui/` | Shell, tree, settings screens, shared widgets |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 

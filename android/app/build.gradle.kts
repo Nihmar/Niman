@@ -19,7 +19,9 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "dev.niman.niman"
     compileSdk = 37
-    ndkVersion = flutter.ndkVersion
+    // whisper_ggml builds whisper.cpp with NDK 29; NDKs are backward
+    // compatible, so the highest one any plugin asks for wins.
+    ndkVersion = "29.0.13113456"
 
     compileOptions {
         // Required by flutter_local_notifications (Java 8+ APIs in the
@@ -42,6 +44,19 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    packaging {
+        jniLibs {
+            // 64-bit only (arm64-v8a, x86_64). minSdk 35 devices are
+            // practically all 64-bit, and armeabi-v7a was the heaviest ABI
+            // once whisper_ggml and its FFmpeg joined (55 MB of native code,
+            // plain + NEON copies; see docs/dev/transcription.md).
+            // ndk.abiFilters is not enough: the Flutter Gradle plugin adds
+            // its own target platforms, so the ABI is dropped at packaging,
+            // which every build path (scripts, CI, flutter run) goes through.
+            excludes += "**/armeabi-v7a/**"
+        }
     }
 
     signingConfigs {

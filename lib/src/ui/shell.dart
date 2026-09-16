@@ -28,10 +28,13 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/transcription/open_audio_notes.dart';
+import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
+import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -45,6 +48,10 @@ import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
+import 'package:niman/src/ui/sync/sync_flow.dart';
+import 'package:niman/src/ui/sync/sync_settings_screen.dart';
+import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 import 'package:niman/src/ui/title_bar.dart';
@@ -166,6 +173,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(librarySessionProvider);
+    // Started once: writes transcripts into notes no view has open.
+    ref.read(audioTranscriptWriterProvider);
     return StreamBuilder<int>(
       stream: controller.events,
       initialData: controller.revision,
@@ -178,6 +187,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 controller: controller,
                 reminders: ref.read(reminderServiceProvider),
                 spellCheck: ref.read(spellCheckProvider),
+                transcription: ref.read(transcriptionModelsProvider),
+                openNotes: ref.read(openAudioNotesProvider),
                 shortcuts: ref.read(shortcutServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
@@ -211,9 +222,19 @@ final class _LibraryShell extends StatefulWidget {
     required this.widgetHost,
     required this.tray,
     required this.window,
+    this.transcription,
+    this.openNotes,
   });
 
   final LibrarySession controller;
+
+  /// The on-screen notes registry the transcript writer checks; null
+  /// skips the marking.
+  final OpenAudioNotes? openNotes;
+
+  /// The installation's transcription models (settings section); null
+  /// hides it.
+  final TranscriptionModels? transcription;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
@@ -537,6 +558,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// widgets (issue 6).
   StreamSubscription<int>? _libraryEvents;
 
+  /// Paths a sync just changed on disk: the open note among them is
+  /// re-read (its buffer was saved before the sync started).
+  StreamSubscription<Set<String>>? _syncChanges;
+
   /// A widget tap that arrived for another library:
   /// [LibrarySession.switchTo] tears this shell down on its way through,
   /// so the navigation waits for the new shell, which picks this up on
@@ -813,6 +838,27 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
+  /// The note the shell shows, as registered in [_LibraryShell.openNotes].
+  String? _openNote;
+
+  /// Keeps the selected note marked open for the transcript writer, in
+  /// whatever editor shows it: the raw editor has no audio view to take a
+  /// finished transcript, and writing the file under its buffer would
+  /// have the next autosave undo it. The result waits until the note is
+  /// left instead.
+  void _markOpenNote(String? root, String? selected) {
+    final notes = widget.openNotes;
+    if (notes == null) return;
+    final path = root == null || selected == null || _selectedIsDir
+        ? null
+        : p.join(root, selected);
+    if (path == _openNote) return;
+    final previous = _openNote;
+    _openNote = path;
+    if (path != null) notes.open(path);
+    if (previous != null) notes.close(previous);
+  }
+
   /// The editor's write path into the open library: [NoteOperations.saveNote]
   /// with the editor's absolute path turned library-relative. Null while no
   /// library is ready, or for a note outside the library root — the editor
@@ -968,6 +1014,11 @@ final class _LibraryShellState extends State<_LibraryShell>
       (target) => unawaited(_applyWidgetTarget(target)),
     );
     _libraryEvents = widget.controller.events.listen((_) => _pushNoteWidgets());
+    _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
+      final open = _selected;
+      if (!mounted || open == null || _selectedIsDir) return;
+      if (paths.contains(open)) setState(() => _noteReloadToken++);
+    });
     AppThemes.revision.addListener(_pushWidgetsOnTheme);
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
@@ -987,6 +1038,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   @override
   void dispose() {
+    _markOpenNote(null, null);
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
     AppThemes.revision.removeListener(_pushWidgetsOnTheme);
@@ -994,6 +1046,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_shortcutTaps?.cancel());
     unawaited(_widgetTargets?.cancel());
     unawaited(_libraryEvents?.cancel());
+    unawaited(_syncChanges?.cancel());
     _todoController.removeListener(_pushTodoWidgets);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
@@ -1010,6 +1063,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // The queued changes go now: the process may not come back.
+      widget.controller.sync?.appBackgrounded();
+    }
     if (state != AppLifecycleState.resumed) {
       // Leaving the foreground may be the last thing this process does
       // (a swipe away, an OEM battery kill): get the buffered log on
@@ -1018,6 +1075,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       return;
     }
     unawaited(_todoController.resyncReminders());
+    // Changes made on other devices while the app was away.
+    widget.controller.sync?.appResumed();
     // A home-screen widget toggle edits todo.txt / the note file in a
     // background isolate while the app is away (the Android watcher is
     // unreliable, so no session event may arrive): re-read both surfaces
@@ -1841,6 +1900,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    _markOpenNote(controller.root, selectedPath);
 
     if (narrow) {
       // Phone: the selected note opens full-screen (from any tab) over the
@@ -2310,10 +2370,93 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
-  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +
-  /// sort chevrons; the settings gear moved to the Settings tab).
+  // --- sync (mockups S6–S11) --------------------------------------------
+
+  /// The sync icon for the tree's bar; nothing without a sync service
+  /// (the button itself hides while no destination is configured).
+  Widget _syncButton(LibrarySession controller) {
+    final sync = controller.sync;
+    if (sync == null) return const SizedBox.shrink();
+    return SyncStatusButton(
+      sync: sync,
+      onSync: () => unawaited(_runSync(controller)),
+      onOpenPanel: () => unawaited(_openSyncPanel(controller)),
+    );
+  }
+
+  Future<void> _runSync(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await runSyncFromUi(
+      context,
+      sync,
+      unsaved: widget.unsavedTracker,
+      onShowTrash: () => _openTrash(controller),
+      onShowPanel: () => unawaited(_openSyncPanel(controller)),
+    );
+  }
+
+  Future<void> _openSyncPanel(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await showSyncPanel(
+      context,
+      sync: sync,
+      onSyncNow: () => unawaited(_runSync(controller)),
+      onOpenSettings: () => unawaited(_openSyncSettings(controller)),
+      onResolve: (path) => unawaited(_resolveSyncConflict(controller, path)),
+    );
+  }
+
+  Future<void> _openSyncSettings(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => SyncSettingsScreen(
+          sync: sync,
+          libraryName: p.basename(controller.root ?? ''),
+          unsaved: widget.unsavedTracker,
+          onShowTrash: () => _openTrash(controller),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _resolveSyncConflict(
+    LibrarySession controller,
+    String path,
+  ) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    try {
+      await widget.unsavedTracker.saveAll();
+    } on Object catch (e) {
+      const AppLogger(name: 'sync').warning('resolve: saving failed: $e');
+    }
+    if (!mounted) return;
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SyncConflictScreen(sync: sync, path: path),
+      ),
+    );
+  }
+
+  void _openTrash(LibrarySession controller) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => TrashScreen(controller: controller),
+      ),
+    );
+  }
+
+  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
     return [
+      _syncButton(controller),
       IconButton(
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
@@ -2389,7 +2532,16 @@ final class _LibraryShellState extends State<_LibraryShell>
           children: bodies,
         ),
         floatingActionButton: _tabFab(),
-        bottomNavigationBar: _shellTabs(),
+        bottomNavigationBar: switch (controller.sync) {
+          final sync? when tab == ShellTab.files => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SyncProgressStrip(sync: sync),
+              _shellTabs(),
+            ],
+          ),
+          _ => _shellTabs(),
+        },
       ),
     );
   }
@@ -2502,6 +2654,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             child: Column(
               children: [
                 Expanded(child: _treePane(controller)),
+                if (controller.sync case final sync?)
+                  SyncProgressStrip(sync: sync),
                 _treeFooter(controller),
               ],
             ),
@@ -2642,6 +2796,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.settings => SettingsTab(
         controller: controller,
         spellCheck: widget.spellCheck,
+        transcription: widget.transcription,
       ),
     };
   }
@@ -2761,6 +2916,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             ),
           ),
           const Spacer(),
+          _syncButton(controller),
           IconButton(
             key: const Key('open-trash'),
             tooltip: AppStrings.trashTitle,

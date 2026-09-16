@@ -7,6 +7,7 @@ library;
 // ignore_for_file: public_member_api_docs
 
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/ui/strings/base.dart';
 import 'package:niman/src/ui/strings/be.dart';
 import 'package:niman/src/ui/strings/bg.dart';
@@ -790,6 +791,12 @@ final class AppStrings {
       _s.diffLineRange(start, end);
   static String diffLineSingle(int line) => _s.diffLineSingle(line);
   static String diffUnchanged(int count) => _s.diffUnchanged(count);
+  static String get historyTakeHunk => _s.historyTakeHunk;
+  static String historyRestoreSelectedAction(int count) =>
+      _s.historyRestoreSelectedAction(count);
+  static String get historyRestoreSelectedConfirmBody =>
+      _s.historyRestoreSelectedConfirmBody;
+  static String get historyNoteChangedReloaded => _s.historyNoteChangedReloaded;
   static String get historyVersionsTitle => _s.historyVersionsTitle;
   static String get historyVersionsSubtitle => _s.historyVersionsSubtitle;
   static String historyVersionsValue(int count) =>
@@ -798,4 +805,245 @@ final class AppStrings {
   static String get historyIntervalSubtitle => _s.historyIntervalSubtitle;
   static String historyIntervalValue(int minutes) =>
       _s.historyIntervalValue(minutes);
+
+  // Transcription: the settings section and the models page.
+  static String get settingsSectionTranscription =>
+      _s.settingsSectionTranscription;
+  static String get transcriptionModelTitle => _s.transcriptionModelTitle;
+  static String get transcriptionModelNone => _s.transcriptionModelNone;
+  static String get transcriptionLanguageTitle => _s.transcriptionLanguageTitle;
+  static String get transcriptionLanguageSubtitle =>
+      _s.transcriptionLanguageSubtitle;
+  static String transcriptionLanguageApp(String language) =>
+      _s.transcriptionLanguageApp(language);
+  static String get transcriptionLanguageDetect =>
+      _s.transcriptionLanguageDetect;
+  static String get transcriptionModelsTitle => _s.transcriptionModelsTitle;
+  static String transcriptionModelsUsed(String size) =>
+      _s.transcriptionModelsUsed(size);
+  static String get transcriptionModelsInstalled =>
+      _s.transcriptionModelsInstalled;
+  static String get transcriptionModelsDownloading =>
+      _s.transcriptionModelsDownloading;
+  static String get transcriptionModelsAvailable =>
+      _s.transcriptionModelsAvailable;
+  static String get transcriptionModelsFooter => _s.transcriptionModelsFooter;
+  static String get transcriptionModelDefault => _s.transcriptionModelDefault;
+  static String get transcriptionModelSlow => _s.transcriptionModelSlow;
+  static String get transcriptionModelDownload => _s.transcriptionModelDownload;
+  static String transcriptionModelDeleteTitle(String model) =>
+      _s.transcriptionModelDeleteTitle(model);
+  static String transcriptionModelDeleteBody(String size) =>
+      _s.transcriptionModelDeleteBody(size);
+  static String get transcriptionModelFailed => _s.transcriptionModelFailed;
+  static String get actionRetry => _s.actionRetry;
+  static String get transcriptionModelRetrying => _s.transcriptionModelRetrying;
+  static String transcriptionModelInterrupted(String progress) =>
+      _s.transcriptionModelInterrupted(progress);
+  static String get actionResume => _s.actionResume;
+  static String get audioTranscribe => _s.audioTranscribe;
+  static String get audioTranscribeUnsupported => _s.audioTranscribeUnsupported;
+  static String get transcriptionQueued => _s.transcriptionQueued;
+  static String get transcriptionPreparing => _s.transcriptionPreparing;
+  static String transcriptionRunning(int percent) =>
+      _s.transcriptionRunning(percent);
+  static String transcriptionWaitingForModel(String model, int percent) =>
+      _s.transcriptionWaitingForModel(model, percent);
+  static String get transcriptionSaved => _s.transcriptionSaved;
+  static String get transcriptionNoSpeech => _s.transcriptionNoSpeech;
+  static String get transcriptionFailed => _s.transcriptionFailed;
+  static String get transcriptionPickModelTitle =>
+      _s.transcriptionPickModelTitle;
+  static String get transcriptionPickModelBody => _s.transcriptionPickModelBody;
+  static String get transcriptionPickModelAction =>
+      _s.transcriptionPickModelAction;
+  static String get transcriptionModelRecommended =>
+      _s.transcriptionModelRecommended;
+  static String get transcriptionExistingTitle => _s.transcriptionExistingTitle;
+  static String get transcriptionExistingBody => _s.transcriptionExistingBody;
+  static String get transcriptionAppend => _s.transcriptionAppend;
+  static String get transcriptionReplace => _s.transcriptionReplace;
+
+  /// Whisper's own model names, the same in every language.
+  static String transcriptionModelName(TranscriptionModel model) =>
+      switch (model.id) {
+        'tiny' => 'Tiny',
+        'base' => 'Base',
+        'small' => 'Small',
+        'medium' => 'Medium',
+        'large-v3' => 'Large v3',
+        final id => id,
+      };
+
+  /// What choosing [model] trades: speed against accuracy and memory.
+  static String transcriptionModelHint(TranscriptionModel model) =>
+      switch (model.id) {
+        'tiny' => _s.transcriptionModelHintTiny,
+        'base' => _s.transcriptionModelHintBase,
+        'small' => _s.transcriptionModelHintSmall,
+        'medium' => _s.transcriptionModelHintMedium,
+        _ => _s.transcriptionModelHintLarge,
+      };
+
+  /// A file size: whole megabytes below a gigabyte, gigabytes with one
+  /// decimal (in the language's separator) above. Binary units, as the
+  /// model downloads are published.
+  static String byteSize(int bytes) {
+    const mb = 1024 * 1024;
+    const gb = 1024 * mb;
+    if (bytes < gb) return '${(bytes / mb).round()} MB';
+    final value = (bytes / gb).toStringAsFixed(1);
+    return '${value.replaceAll('.', _s.decimalSeparator)} GB';
+  }
+
+  static String get settingsSectionSync => _s.settingsSectionSync;
+  static String get syncWebDavTitle => _s.syncWebDavTitle;
+  static String get syncNotConfigured => _s.syncNotConfigured;
+  static String get syncNeverSynced => _s.syncNeverSynced;
+  static String syncLastSynced(String when) => _s.syncLastSynced(when);
+  static String get syncRunning => _s.syncRunning;
+  static String syncScreenSubtitle(String library) =>
+      _s.syncScreenSubtitle(library);
+  static String get syncUrlLabel => _s.syncUrlLabel;
+  static String get syncUrlHint => _s.syncUrlHint;
+  static String get syncHttpWarning => _s.syncHttpWarning;
+  static String get syncUserLabel => _s.syncUserLabel;
+  static String get syncUserHint => _s.syncUserHint;
+  static String get syncPasswordLabel => _s.syncPasswordLabel;
+  static String get syncPasswordHint => _s.syncPasswordHint;
+  static String get syncPasswordKeepHint => _s.syncPasswordKeepHint;
+  static String get syncShowPassword => _s.syncShowPassword;
+  static String get syncHidePassword => _s.syncHidePassword;
+  static String get syncTestAction => _s.syncTestAction;
+  static String get syncTesting => _s.syncTesting;
+  static String get syncRetargetWarning => _s.syncRetargetWarning;
+  static String get syncTestOk => _s.syncTestOk;
+  static String get syncModeFull => _s.syncModeFull;
+  static String get syncModeCompatible => _s.syncModeCompatible;
+  static String syncTestOkSubtitle(String mode, int ms) =>
+      _s.syncTestOkSubtitle(mode, ms);
+  static String get syncCapBasic => _s.syncCapBasic;
+  static String get syncCapEtags => _s.syncCapEtags;
+  static String get syncCapNoEtags => _s.syncCapNoEtags;
+  static String get syncCapNoEtagsDetail => _s.syncCapNoEtagsDetail;
+  static String get syncCapGuarded => _s.syncCapGuarded;
+  static String get syncCapUnguarded => _s.syncCapUnguarded;
+  static String get syncCapUnguardedDetail => _s.syncCapUnguardedDetail;
+  static String get syncCapMove => _s.syncCapMove;
+  static String get syncCapNoMove => _s.syncCapNoMove;
+  static String get syncCapNoMoveDetail => _s.syncCapNoMoveDetail;
+  static String get syncCompatibleNote => _s.syncCompatibleNote;
+  static String get syncTestInvalidUrl => _s.syncTestInvalidUrl;
+  static String get syncTestInvalidUrlHint => _s.syncTestInvalidUrlHint;
+  static String get syncTestOffline => _s.syncTestOffline;
+  static String get syncTestOfflineHint => _s.syncTestOfflineHint;
+  static String get syncTestAuth => _s.syncTestAuth;
+  static String get syncTestAuthHint => _s.syncTestAuthHint;
+  static String get syncTestNotFound => _s.syncTestNotFound;
+  static String get syncTestNotFoundHint => _s.syncTestNotFoundHint;
+  static String get syncTestUnsupported => _s.syncTestUnsupported;
+  static String get syncTestUnsupportedHint => _s.syncTestUnsupportedHint;
+  static String get syncTestFailed => _s.syncTestFailed;
+  static String get syncNowAction => _s.syncNowAction;
+  static String get syncSectionServer => _s.syncSectionServer;
+  static String get syncServerRow => _s.syncServerRow;
+  static String get syncRetestTitle => _s.syncRetestTitle;
+  static String syncProbedAgo(String when) => _s.syncProbedAgo(when);
+  static String get syncDisconnectTitle => _s.syncDisconnectTitle;
+  static String get syncDisconnectSubtitle => _s.syncDisconnectSubtitle;
+  static String get syncDisconnectConfirmTitle => _s.syncDisconnectConfirmTitle;
+  static String get syncDisconnectConfirmBody => _s.syncDisconnectConfirmBody;
+  static String get syncDisconnectConfirm => _s.syncDisconnectConfirm;
+  static String get syncFirstTitle => _s.syncFirstTitle;
+  static String get syncFirstIntro => _s.syncFirstIntro;
+  static String get syncFirstUpload => _s.syncFirstUpload;
+  static String get syncFirstDownload => _s.syncFirstDownload;
+  static String get syncFirstBoth => _s.syncFirstBoth;
+  static String get syncFirstBothHint => _s.syncFirstBothHint;
+  static String get syncFirstNoDelete => _s.syncFirstNoDelete;
+  static String get syncStartAction => _s.syncStartAction;
+  static String syncMassTrashTitle(int count) => _s.syncMassTrashTitle(count);
+  static String syncMassTrashBody(int count, int total) =>
+      _s.syncMassTrashBody(count, total);
+  static String get syncMassTrashHint => _s.syncMassTrashHint;
+  static String get syncMassTrashConfirm => _s.syncMassTrashConfirm;
+  static String syncMassDeleteTitle(int count) => _s.syncMassDeleteTitle(count);
+  static String syncMassDeleteBody(int count, int total) =>
+      _s.syncMassDeleteBody(count, total);
+  static String get syncMassDeleteConfirm => _s.syncMassDeleteConfirm;
+  static String get syncTooltip => _s.syncTooltip;
+  static String get syncStageConnecting => _s.syncStageConnecting;
+  static String get syncStageComparing => _s.syncStageComparing;
+  static String syncStageApplying(int done, int total) =>
+      _s.syncStageApplying(done, total);
+  static String get syncStatusWarnings => _s.syncStatusWarnings;
+  static String syncConflictsHeader(int count) => _s.syncConflictsHeader(count);
+  static String get syncConflictHint => _s.syncConflictHint;
+  static String get syncResolveAction => _s.syncResolveAction;
+  static String syncFailuresHeader(int count) => _s.syncFailuresHeader(count);
+  static String get syncFailuresHint => _s.syncFailuresHint;
+  static String get syncAbortAuth => _s.syncAbortAuth;
+  static String get syncAbortMissingPassword => _s.syncAbortMissingPassword;
+  static String get syncAbortOffline => _s.syncAbortOffline;
+  static String get syncAbortRemoteMissing => _s.syncAbortRemoteMissing;
+  static String get syncAbortUnsupported => _s.syncAbortUnsupported;
+  static String get syncAbortFailed => _s.syncAbortFailed;
+  static String get syncAbortNotConfirmed => _s.syncAbortNotConfirmed;
+  static String get syncAbortNothingTouched => _s.syncAbortNothingTouched;
+  static String syncLastSuccess(String when) => _s.syncLastSuccess(when);
+  static String get syncNoSuccessYet => _s.syncNoSuccessYet;
+  static String get syncUpdatePasswordAction => _s.syncUpdatePasswordAction;
+  static String get syncRetryAction => _s.syncRetryAction;
+  static String get syncOpenSettingsAction => _s.syncOpenSettingsAction;
+  static String get syncCloseAction => _s.syncCloseAction;
+  static String get syncDoneSnack => _s.syncDoneSnack;
+  static String syncTrashedSnack(int count) => _s.syncTrashedSnack(count);
+  static String syncConflictsSnack(int count) => _s.syncConflictsSnack(count);
+  static String get syncShowAction => _s.syncShowAction;
+  static String get syncConflictTitle => _s.syncConflictTitle;
+  static String get syncConflictLegend => _s.syncConflictLegend;
+  static String get syncConflictBinary => _s.syncConflictBinary;
+  static String get syncConflictKeepNote => _s.syncConflictKeepNote;
+  static String get syncKeepLocal => _s.syncKeepLocal;
+  static String get syncKeepRemote => _s.syncKeepRemote;
+  static String get syncConflictIdentical => _s.syncConflictIdentical;
+  static String get syncConflictLoadFailed => _s.syncConflictLoadFailed;
+  static String get syncResolveFailed => _s.syncResolveFailed;
+  static String get syncResolved => _s.syncResolved;
+  static String get syncSectionWhen => _s.syncSectionWhen;
+  static String get syncAutoTitle => _s.syncAutoTitle;
+  static String get syncAutoSubtitle => _s.syncAutoSubtitle;
+  static String get syncIntervalTitle => _s.syncIntervalTitle;
+  static String get syncIntervalSubtitle => _s.syncIntervalSubtitle;
+  static String get syncIntervalDialogBody => _s.syncIntervalDialogBody;
+  static String syncIntervalMinutes(int count) => _s.syncIntervalMinutes(count);
+  static String get syncIntervalNever => _s.syncIntervalNever;
+  static String get syncWifiOnlyTitle => _s.syncWifiOnlyTitle;
+  static String get syncWifiOnlySubtitle => _s.syncWifiOnlySubtitle;
+  static String syncPendingChanges(int count) => _s.syncPendingChanges(count);
+  static String syncRetryIn(String wait) => _s.syncRetryIn(wait);
+  static String syncWaitSeconds(int seconds) => _s.syncWaitSeconds(seconds);
+  static String syncWaitMinutes(int minutes) => _s.syncWaitMinutes(minutes);
+  static String get syncWaitingForWifi => _s.syncWaitingForWifi;
+  static String get syncWaitingForNetwork => _s.syncWaitingForNetwork;
+  static String get syncMobileDataHint => _s.syncMobileDataHint;
+  static String get syncQueueKeptHint => _s.syncQueueKeptHint;
+  static String get syncAutoPaused => _s.syncAutoPaused;
+  static String get syncPausedAuthHint => _s.syncPausedAuthHint;
+  static String get syncPausedServerHint => _s.syncPausedServerHint;
+  static String get syncPausedConfirmHint => _s.syncPausedConfirmHint;
+  static String get syncNeedsConfirmation => _s.syncNeedsConfirmation;
+  static String get syncMergeIntro => _s.syncMergeIntro;
+  static String get syncMergeClean => _s.syncMergeClean;
+  static String get syncMergeNoBase => _s.syncMergeNoBase;
+  static String syncMergeOverlap(int index, int total) =>
+      _s.syncMergeOverlap(index, total);
+  static String get syncMergeFromLocal => _s.syncMergeFromLocal;
+  static String get syncMergeFromRemote => _s.syncMergeFromRemote;
+  static String get syncMergeRemovedLines => _s.syncMergeRemovedLines;
+  static String get syncMergeKeepLocal => _s.syncMergeKeepLocal;
+  static String get syncMergeKeepRemote => _s.syncMergeKeepRemote;
+  static String get syncMergeKeepBoth => _s.syncMergeKeepBoth;
+  static String get syncMergeSave => _s.syncMergeSave;
+  static String get syncMergeKeepWhole => _s.syncMergeKeepWhole;
 }

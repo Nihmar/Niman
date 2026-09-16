@@ -1266,6 +1266,18 @@ final class PolishStrings extends Strings {
       ? '$count niezmienione linie'
       : '$count niezmienionych linii';
   @override
+  String get historyTakeHunk => 'Przywróć tutaj';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Przywróć 1 zmianę' : 'Przywróć $count zmian';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Wybrane zmiany wracają do tekstu tej wersji. Notatka w obecnej postaci '
+      'jest najpierw zachowywana jako wersja, więc możesz to cofnąć.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Notatka zmieniła się, gdy tu byłeś — porównanie zostało odświeżone.';
+  @override
   String get historyVersionsTitle => 'Liczba wersji do zachowania';
   @override
   String get historyVersionsSubtitle => 'Dla każdej notatki, w .history/';
@@ -1278,4 +1290,483 @@ final class PolishStrings extends Strings {
       'Podczas pisania; rozpoczęcie edycji notatki zawsze zachowuje jedną';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkrypcja';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Brak';
+  @override
+  String get transcriptionLanguageTitle => 'Język';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Język, w którym mówisz na nagraniach. Wskazanie go jest dokładniejsze '
+      'niż wykrywanie.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Jak w aplikacji ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Wykrywaj automatycznie';
+  @override
+  String get transcriptionModelsTitle => 'Modele transkrypcji';
+  @override
+  String transcriptionModelsUsed(String size) => 'Zajęte: $size';
+  @override
+  String get transcriptionModelsInstalled => 'Pobrane';
+  @override
+  String get transcriptionModelsDownloading => 'Pobieranie';
+  @override
+  String get transcriptionModelsAvailable => 'Dostępne';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modele pozostają w pamięci aplikacji na tym urządzeniu. Nie są '
+      'kopiowane do biblioteki ani synchronizowane.';
+  @override
+  String get transcriptionModelDefault => 'Domyślny';
+  @override
+  String get transcriptionModelSlow => 'Wolny';
+  @override
+  String get transcriptionModelHintTiny => 'Najszybszy, najmniej dokładny';
+  @override
+  String get transcriptionModelHintBase =>
+      'Dobry balans szybkości i dokładności';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Dokładniejszy, około 3× wolniejszy';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Bardzo dokładny, wolny na telefonie';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Najdokładniejszy, wymaga dużo pamięci';
+  @override
+  String get transcriptionModelDownload => 'Pobierz';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Usunąć model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Zwolni to $size. Model możesz później pobrać ponownie.';
+  @override
+  String get transcriptionModelFailed =>
+      'Nie udało się pobrać. Sprawdź połączenie i spróbuj ponownie.';
+  @override
+  String get actionRetry => 'Spróbuj ponownie';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Utracono połączenie, ponawianie…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Wstrzymano przy $progress';
+  @override
+  String get actionResume => 'Wznów';
+  @override
+  String get audioTranscribe => 'Transkrybuj';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Na tym urządzeniu tylko nagrania WAV';
+  @override
+  String get transcriptionQueued => 'W kolejce';
+  @override
+  String get transcriptionPreparing => 'Przygotowywanie dźwięku…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkrypcja… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Pobieranie $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkrypcję dodano do opisu';
+  @override
+  String get transcriptionNoSpeech => 'Nie rozpoznano mowy w tym nagraniu';
+  @override
+  String get transcriptionFailed => 'Transkrypcja nie powiodła się';
+  @override
+  String get transcriptionPickModelTitle => 'Wybierz model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkrypcja odbywa się na tym urządzeniu, a nagranie nigdy nie jest '
+      'wysyłane. Model pobierasz tylko raz.';
+  @override
+  String get transcriptionPickModelAction => 'Pobierz i transkrybuj';
+  @override
+  String get transcriptionModelRecommended => 'Zalecany';
+  @override
+  String get transcriptionExistingTitle => 'To nagranie ma już opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Zastąpić go transkrypcją czy dodać transkrypcję pod spodem?';
+  @override
+  String get transcriptionAppend => 'Dodaj pod spodem';
+  @override
+  String get transcriptionReplace => 'Zastąp';
+  @override
+  String get settingsSectionSync => 'Synchronizacja';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Nieskonfigurowana dla tej biblioteki';
+  @override
+  String get syncNeverSynced => 'Jeszcze nie zsynchronizowano';
+  @override
+  String syncLastSynced(String when) => 'Zsynchronizowano $when';
+  @override
+  String get syncRunning => 'Synchronizowanie…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteka $library';
+  @override
+  String get syncUrlLabel => 'Adres katalogu';
+  @override
+  String get syncUrlHint =>
+      'Katalog musi istnieć. Skopiuj adres tak, jak pokazuje go '
+      'serwer.';
+  @override
+  String get syncHttpWarning =>
+      'Połączenie nieszyfrowane: w porządku przez VPN lub w '
+      'sieci lokalnej.';
+  @override
+  String get syncUserLabel => 'Użytkownik';
+  @override
+  String get syncUserHint =>
+      'Zostaw puste, jeśli serwer nie wymaga danych logowania.';
+  @override
+  String get syncPasswordLabel => 'Hasło';
+  @override
+  String get syncPasswordHint =>
+      'Przechowywane w pęku kluczy tego urządzenia, nigdy w '
+      'plikach biblioteki.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Zostaw puste, aby zachować zapisane hasło.';
+  @override
+  String get syncShowPassword => 'Pokaż hasło';
+  @override
+  String get syncHidePassword => 'Ukryj hasło';
+  @override
+  String get syncTestAction => 'Testuj połączenie';
+  @override
+  String get syncTesting => 'Testowanie…';
+  @override
+  String get syncRetargetWarning =>
+      'Po zmianie adresu lub użytkownika następna synchronizacja '
+      'zacznie się od nowa jako pierwsza.';
+  @override
+  String get syncTestOk => 'Połączenie działa';
+  @override
+  String get syncModeFull => 'Tryb pełny';
+  @override
+  String get syncModeCompatible => 'Tryb zgodności';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Odczyt, zapis i usuwanie';
+  @override
+  String get syncCapEtags => 'Odciski plików (ETag)';
+  @override
+  String get syncCapNoEtags => 'Brak odcisków plików (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Porównuje rozmiar i datę; w razie wątpliwości pobiera '
+      'ponownie';
+  @override
+  String get syncCapGuarded => 'Chroniony zapis';
+  @override
+  String get syncCapUnguarded => 'Niechroniony zapis';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Sprawdza plik na serwerze tuż przed zapisem';
+  @override
+  String get syncCapMove => 'Zmiana nazwy bez ponownego wysyłania';
+  @override
+  String get syncCapNoMove => 'Brak zmiany nazw na serwerze';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Zmiana nazwy staje się usunięciem i nowym wysłaniem';
+  @override
+  String get syncCompatibleNote =>
+      'W trybie zgodności synchronizacja działa tak samo, z '
+      'kilkoma dodatkowymi żądaniami.';
+  @override
+  String get syncTestInvalidUrl => 'Nieprawidłowy adres';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Wpisz adres http:// lub https:// bez użytkownika i hasła.';
+  @override
+  String get syncTestOffline => 'Serwer jest nieosiągalny';
+  @override
+  String get syncTestOfflineHint =>
+      'Czy VPN jest włączony? Adres 10.x lub 192.168.x działa '
+      'tylko z tej samej sieci.';
+  @override
+  String get syncTestAuth => 'Użytkownik lub hasło odrzucone';
+  @override
+  String get syncTestAuthHint => 'Sprawdź je i przetestuj ponownie.';
+  @override
+  String get syncTestNotFound => 'Katalog nie istnieje';
+  @override
+  String get syncTestNotFoundHint => 'Utwórz go na serwerze lub popraw adres.';
+  @override
+  String get syncTestUnsupported => 'To nie jest katalog WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Serwer odpowiada, ale nie jako WebDAV.';
+  @override
+  String get syncTestFailed => 'Test się nie powiódł';
+  @override
+  String get syncNowAction => 'Synchronizuj teraz';
+  @override
+  String get syncSectionServer => 'Serwer';
+  @override
+  String get syncServerRow => 'Adres, użytkownik i hasło';
+  @override
+  String get syncRetestTitle => 'Przetestuj serwer ponownie';
+  @override
+  String syncProbedAgo(String when) => 'Ostatni test $when';
+  @override
+  String get syncDisconnectTitle => 'Odłącz tę bibliotekę';
+  @override
+  String get syncDisconnectSubtitle => 'Pliki zostają tutaj i na serwerze';
+  @override
+  String get syncDisconnectConfirmTitle => 'Odłączyć synchronizację?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Ta biblioteka przestanie się synchronizować na tym '
+      'urządzeniu. Żaden plik nie zostanie usunięty ani tutaj, '
+      'ani na serwerze. Jeśli połączysz ją ponownie, pierwsza '
+      'synchronizacja zacznie się od nowa.';
+  @override
+  String get syncDisconnectConfirm => 'Odłącz';
+  @override
+  String get syncFirstTitle => 'Pierwsza synchronizacja';
+  @override
+  String get syncFirstIntro => 'Porównano bibliotekę z katalogiem na serwerze:';
+  @override
+  String get syncFirstUpload => 'Do wysłania';
+  @override
+  String get syncFirstDownload => 'Do pobrania';
+  @override
+  String get syncFirstBoth => 'Po obu stronach';
+  @override
+  String get syncFirstBothHint =>
+      'Identyczne: bez przesyłania. Różne: do rozwiązania';
+  @override
+  String get syncFirstNoDelete =>
+      'Pierwsza synchronizacja niczego nie usuwa ani tutaj, ani '
+      'na serwerze.';
+  @override
+  String get syncStartAction => 'Rozpocznij';
+  @override
+  String syncMassTrashTitle(int count) => 'Przenieść pliki do kosza ($count)?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Na serwerze brakuje $count z $total zsynchronizowanych '
+      'plików. Zwykle oznacza to błędny adres, niezamontowany '
+      'dysk NAS lub katalog opróżniony przez pomyłkę.';
+  @override
+  String get syncMassTrashHint =>
+      'Jeśli naprawdę zostały usunięte na innym urządzeniu, '
+      'potwierdź: tutaj trafią do kosza.';
+  @override
+  String get syncMassTrashConfirm => 'Przenieś do kosza';
+  @override
+  String syncMassDeleteTitle(int count) => 'Usunąć pliki z serwera ($count)?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Tutaj brakuje $count z $total zsynchronizowanych plików. '
+      'Jeśli nie usunięto ich celowo, anuluj i sprawdź katalog '
+      'biblioteki.';
+  @override
+  String get syncMassDeleteConfirm => 'Usuń z serwera';
+  @override
+  String get syncTooltip => 'Synchronizuj';
+  @override
+  String get syncStageConnecting => 'Łączenie z serwerem…';
+  @override
+  String get syncStageComparing => 'Porównywanie z serwerem…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synchronizowanie · $done z $total';
+  @override
+  String get syncStatusWarnings => 'Zsynchronizowano z ostrzeżeniami';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Zmienione tutaj i na serwerze · $count';
+  @override
+  String get syncConflictHint => 'Żadna wersja nie została zmieniona';
+  @override
+  String get syncResolveAction => 'Rozwiąż';
+  @override
+  String syncFailuresHeader(int count) => 'Niezsynchronizowane · $count';
+  @override
+  String get syncFailuresHint => 'Ponowna próba przy następnej synchronizacji';
+  @override
+  String get syncAbortAuth => 'Serwer odrzucił hasło';
+  @override
+  String get syncAbortMissingPassword => 'Brak zapisanego hasła';
+  @override
+  String get syncAbortOffline => 'Serwer jest nieosiągalny';
+  @override
+  String get syncAbortRemoteMissing => 'Katalogu na serwerze już nie ma';
+  @override
+  String get syncAbortUnsupported => 'Serwer nie działa już jako WebDAV';
+  @override
+  String get syncAbortFailed => 'Synchronizacja się nie powiodła';
+  @override
+  String get syncAbortNotConfirmed => 'Synchronizacja anulowana';
+  @override
+  String get syncAbortNothingTouched =>
+      'Żaden plik nie został zmieniony. Twoje zmiany zostają '
+      'tutaj do następnej udanej synchronizacji.';
+  @override
+  String syncLastSuccess(String when) => 'Ostatnia udana synchronizacja $when';
+  @override
+  String get syncNoSuccessYet => 'Jeszcze nie było udanej synchronizacji';
+  @override
+  String get syncUpdatePasswordAction => 'Zaktualizuj hasło';
+  @override
+  String get syncRetryAction => 'Spróbuj ponownie';
+  @override
+  String get syncOpenSettingsAction => 'Ustawienia';
+  @override
+  String get syncCloseAction => 'Zamknij';
+  @override
+  String get syncDoneSnack => 'Zsynchronizowano';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Zsynchronizowano · 1 plik usunięty gdzie indziej jest w '
+            'koszu'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Zsynchronizowano · $count pliki usunięte gdzie indziej są '
+            'w koszu'
+      : 'Zsynchronizowano · $count plików usuniętych gdzie indziej '
+            'jest w koszu';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Zsynchronizowano · 1 konflikt do rozwiązania'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Zsynchronizowano · $count konflikty do rozwiązania'
+      : 'Zsynchronizowano · $count konfliktów do rozwiązania';
+  @override
+  String get syncShowAction => 'Pokaż';
+  @override
+  String get syncConflictTitle => 'Rozwiąż konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Linie z − pochodzą z serwera, linie z + z tego urządzenia.';
+  @override
+  String get syncConflictBinary =>
+      'To nie jest plik tekstowy: wybierz, którą kopię zachować.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopia, której nie zachowasz, zostaje w historii notatki.';
+  @override
+  String get syncKeepLocal => 'Zachowaj z tego urządzenia';
+  @override
+  String get syncKeepRemote => 'Zachowaj z serwera';
+  @override
+  String get syncConflictIdentical => 'Obie wersje są identyczne';
+  @override
+  String get syncConflictLoadFailed => 'Nie udało się odczytać obu wersji';
+  @override
+  String get syncResolveFailed => 'Nie udało się rozwiązać konfliktu';
+  @override
+  String get syncResolved => 'Konflikt rozwiązany';
+  @override
+  String get syncSectionWhen => 'Kiedy synchronizować';
+  @override
+  String get syncAutoTitle => 'Automatycznie';
+  @override
+  String get syncAutoSubtitle => 'Po zmianach, przy otwarciu i co jakiś czas';
+  @override
+  String get syncIntervalTitle => 'Sprawdzaj serwer co';
+  @override
+  String get syncIntervalSubtitle => 'Tylko gdy aplikacja jest otwarta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Aby widzieć zmiany wprowadzone na innych urządzeniach, gdy aplikacja '
+      'jest otwarta. Przy „Nigdy” tylko po zmianach i przy otwarciu.';
+  @override
+  String syncIntervalMinutes(int count) => count == 1
+      ? '1 minuta'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? '$count minuty'
+      : '$count minut';
+  @override
+  String get syncIntervalNever => 'Nigdy';
+  @override
+  String get syncWifiOnlyTitle => 'Tylko Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Przy danych komórkowych synchronizuj tylko ręcznie';
+  @override
+  String syncPendingChanges(int count) => count == 1
+      ? '1 zmiana czeka'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? '$count zmiany czekają'
+      : '$count zmian czeka';
+  @override
+  String syncRetryIn(String wait) => 'ponowna próba za $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Czekanie na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Czekanie na połączenie';
+  @override
+  String get syncMobileDataHint =>
+      '„Synchronizuj teraz” i tak używa danych komórkowych.';
+  @override
+  String get syncQueueKeptHint =>
+      'Zmiany zostają tutaj, nawet gdy zamkniesz aplikację, i wychodzą same, '
+      'gdy serwer odpowie.';
+  @override
+  String get syncAutoPaused => 'Automatyczna synchronizacja wstrzymana';
+  @override
+  String get syncPausedAuthHint =>
+      'Wznowi się, gdy zaktualizujesz hasło lub zsynchronizujesz ręcznie.';
+  @override
+  String get syncPausedServerHint =>
+      'Wznowi się, gdy poprawisz adres lub zsynchronizujesz ręcznie.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Synchronizuj teraz” pokaże, co zostałoby usunięte, i najpierw zapyta.';
+  @override
+  String get syncNeedsConfirmation => 'Czeka na Twoje potwierdzenie';
+  @override
+  String get syncMergeIntro =>
+      'Zmiany, które się nie nakładają, są już scalone; tam, gdzie się '
+      'nakładają, wybierz, co zachować.';
+  @override
+  String get syncMergeClean =>
+      'Obie wersje scalają się same: nic się nie nakłada.';
+  @override
+  String get syncMergeNoBase =>
+      'Brak wspólnej wersji do scalenia, więc trzeba wybrać cały plik.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Nakładanie $index z $total';
+  @override
+  String get syncMergeFromLocal => 'Z tego urządzenia';
+  @override
+  String get syncMergeFromRemote => 'Z serwera';
+  @override
+  String get syncMergeRemovedLines => 'Usunięte linie';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Serwera';
+  @override
+  String get syncMergeKeepBoth => 'Obie';
+  @override
+  String get syncMergeSave => 'Zapisz scalenie';
+  @override
+  String get syncMergeKeepWhole => 'Albo zachowaj jedną całą kopię';
 }
