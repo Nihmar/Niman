@@ -234,6 +234,12 @@ final class BasqueStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Falta dagoen oharrak sortu';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotekaren erroan';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Uneko karpetan';
+  @override
   String get indentWidthTitle => 'Bilketa-zabalera';
   @override
   String get indentWidthSubtitle => 'Erreditoraren bikoiztze-mailako zuriuneak';
@@ -495,6 +501,15 @@ final class BasqueStrings extends Strings {
   String get ambiguousLinkTitle => 'Ohar askok bat etortzen dute';
   @override
   String get openLinkFailed => 'Ezin izan da esteka ireki';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Oharra ez dago';
+  @override
+  String missingNoteDialogBody(String path) => '«$path» sortu?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      '«$folder» karpetak ez dago';
 
   // Task lists (T-TD-04).
   @override

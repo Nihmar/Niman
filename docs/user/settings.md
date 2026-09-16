@@ -20,6 +20,7 @@ device.
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
 | `previewEnabled` | true | Whether the preview exists at all |
 | `linkType` | `wikilink` | What the link button inserts (`wikilink` or `markdown`) |
+| `missingNoteLocation` | `currentFolder` | Where a note created from a dead link lands (`libraryRoot` or `currentFolder`) |
 | `treeSort` | `nameAsc` | Tree order (`nameAsc`, `nameDesc`) |
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |

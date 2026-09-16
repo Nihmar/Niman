@@ -242,6 +242,12 @@ final class CatalanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Crear notes que manquen a';
+  @override
+  String get missingNoteLocationRoot => 'Arrel de la biblioteca';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Carpeta actual';
+  @override
   String get indentWidthTitle => 'Ample del sagnat';
   @override
   String get indentWidthSubtitle =>
@@ -504,6 +510,15 @@ final class CatalanStrings extends Strings {
   String get ambiguousLinkTitle => 'Diverses notes coincideixen';
   @override
   String get openLinkFailed => 'No s’ha pogut obrir l’enllaç';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'La nota no existeix';
+  @override
+  String missingNoteDialogBody(String path) => 'Crear «$path»?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'La carpeta «$folder» no existeix';
 
   // Task lists (T-TD-04).
   @override

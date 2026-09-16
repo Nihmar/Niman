@@ -233,6 +233,12 @@ final class SlovakStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Vytvárať chýbajúce poznámky v';
+  @override
+  String get missingNoteLocationRoot => 'Koreň knižnice';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Aktuálny priečinok';
+  @override
   String get indentWidthTitle => 'Šírka odsadenia';
   @override
   String get indentWidthSubtitle =>
@@ -491,6 +497,15 @@ final class SlovakStrings extends Strings {
   String get ambiguousLinkTitle => 'Viac poznámok zodpovedá';
   @override
   String get openLinkFailed => 'Odkaz sa nedal otvoriť';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Poznámka neexistuje';
+  @override
+  String missingNoteDialogBody(String path) => 'Vytvoriť „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Priečinok „$folder“ neexistuje';
 
   // Task lists (T-TD-04).
   @override

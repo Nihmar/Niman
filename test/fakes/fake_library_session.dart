@@ -16,6 +16,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -395,6 +396,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setLinkType(LinkType type) async {
     _config = _config.copyWith(linkType: type);
+  }
+
+  @override
+  Future<MissingNoteLocation> get missingNoteLocation async =>
+      _config.missingNoteLocation;
+
+  @override
+  Future<void> setMissingNoteLocation(MissingNoteLocation location) async {
+    _config = _config.copyWith(missingNoteLocation: location);
   }
 
   @override

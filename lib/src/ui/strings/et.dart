@@ -231,6 +231,12 @@ final class EstonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Loo puuduvad märkmed kausta';
+  @override
+  String get missingNoteLocationRoot => 'Biblioteka juur';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Praegune kaust';
+  @override
   String get indentWidthTitle => 'Taande laius';
   @override
   String get indentWidthSubtitle =>
@@ -488,6 +494,14 @@ final class EstonianStrings extends Strings {
   String get ambiguousLinkTitle => 'Mitu märgist vastab';
   @override
   String get openLinkFailed => 'Viidet ei õnnestunud avada';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Märkme pole olemas';
+  @override
+  String missingNoteDialogBody(String path) => 'Loo „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) => 'Kaust „$folder“ puudub';
 
   // Task lists (T-TD-04).
   @override

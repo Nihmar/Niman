@@ -234,6 +234,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Креирање недостапни белешки во';
+  @override
+  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Тековна папка';
+  @override
   String get indentWidthTitle => 'Ширина на вовлечување';
   @override
   String get indentWidthSubtitle =>
@@ -497,6 +503,15 @@ final class MacedonianStrings extends Strings {
   String get ambiguousLinkTitle => 'Повеќе белешки совпаѓаат';
   @override
   String get openLinkFailed => 'Не може да се отвори врската';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Белешката не постои';
+  @override
+  String missingNoteDialogBody(String path) => 'Да се креира „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Папката „$folder“ не постои';
 
   // Task lists (T-TD-04).
   @override

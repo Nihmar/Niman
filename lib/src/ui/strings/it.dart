@@ -236,6 +236,12 @@ final class ItalianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Crea le note mancanti in';
+  @override
+  String get missingNoteLocationRoot => 'Radice della libreria';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Cartella attuale';
+  @override
   String get indentWidthTitle => 'Ampiezza del rientro';
   @override
   String get indentWidthSubtitle =>
@@ -495,6 +501,15 @@ final class ItalianStrings extends Strings {
   String get ambiguousLinkTitle => 'Più note corrispondono';
   @override
   String get openLinkFailed => 'Impossibile aprire il link';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'La nota non esiste';
+  @override
+  String missingNoteDialogBody(String path) => 'Creare «$path»?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'La cartella «$folder» non esiste';
 
   // Task lists (T-TD-04).
   @override

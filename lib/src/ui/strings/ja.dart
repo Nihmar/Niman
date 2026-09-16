@@ -217,6 +217,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => '存在しないノートを作成する場所';
+  @override
+  String get missingNoteLocationRoot => 'ライブラリルート';
+  @override
+  String get missingNoteLocationCurrentFolder => '現在のフォルダ';
+  @override
   String get indentWidthTitle => 'インデント幅';
   @override
   String get indentWidthSubtitle => 'エディタでインデント 1 段あたりのスペース数';
@@ -466,6 +472,14 @@ final class JapaneseStrings extends Strings {
   String get ambiguousLinkTitle => '複数のノートが一致します';
   @override
   String get openLinkFailed => 'リンクを開けませんでした';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'ノートが存在しません';
+  @override
+  String missingNoteDialogBody(String path) => '"$path" を作成しますか？';
+  @override
+  String missingNoteFolderMissing(String folder) => 'フォルダ "$folder" は存在しません';
 
   // Task lists (T-TD-04).
   @override

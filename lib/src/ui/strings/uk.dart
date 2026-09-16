@@ -231,6 +231,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Створити відсутні нотатки в';
+  @override
+  String get missingNoteLocationRoot => 'Корень бібліотеки';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Поточна папка';
+  @override
   String get indentWidthTitle => 'Ширина відступу';
   @override
   String get indentWidthSubtitle =>
@@ -489,6 +495,14 @@ final class UkrainianStrings extends Strings {
   String get ambiguousLinkTitle => 'Кілька нотаток відповідають';
   @override
   String get openLinkFailed => 'Не вдалося відкрити посилання';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Нотатка не існує';
+  @override
+  String missingNoteDialogBody(String path) => 'Створити «$path»?';
+  @override
+  String missingNoteFolderMissing(String folder) => 'Папка «$folder» не існує';
 
   // Task lists (T-TD-04).
   @override

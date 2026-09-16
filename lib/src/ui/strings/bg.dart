@@ -237,6 +237,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Създаване на липсващи бележки в';
+  @override
+  String get missingNoteLocationRoot => 'Корен на библиотеката';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Текуща папка';
+  @override
   String get indentWidthTitle => 'Ширина на отстъпа';
   @override
   String get indentWidthSubtitle =>
@@ -496,6 +502,15 @@ final class BulgarianStrings extends Strings {
   String get ambiguousLinkTitle => 'Няколко бележки съответстват';
   @override
   String get openLinkFailed => 'Не може да се отвори връзката';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Бележката не съществува';
+  @override
+  String missingNoteDialogBody(String path) => 'Да се създаде „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Папката „$folder“ не съществува';
 
   // Task lists (T-TD-04).
   @override
