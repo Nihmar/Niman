@@ -226,6 +226,12 @@ final class HindiStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'ग़ायब नोट्स बनाएँ';
+  @override
+  String get missingNoteLocationRoot => 'लाइब्रेरी रूट';
+  @override
+  String get missingNoteLocationCurrentFolder => 'वर्तमान फ़ोल्डर';
+  @override
   String get indentWidthTitle => 'इंडेंट की चौड़ाई';
   @override
   String get indentWidthSubtitle =>
@@ -483,6 +489,15 @@ final class HindiStrings extends Strings {
   String get ambiguousLinkTitle => 'कई नोट्स मेल खाते हैं';
   @override
   String get openLinkFailed => 'लिंक नहीं खोला जा सका';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'नोट मौजूद नहीं है';
+  @override
+  String missingNoteDialogBody(String path) => 'क्या "$path" बनाना है?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'फ़ोल्डर "$folder" मौजूद नहीं है';
 
   // Task lists (T-TD-04).
   @override

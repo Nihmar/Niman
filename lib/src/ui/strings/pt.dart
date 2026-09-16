@@ -234,6 +234,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Criar notas em falta em';
+  @override
+  String get missingNoteLocationRoot => 'Raiz da biblioteca';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Pasta atual';
+  @override
   String get indentWidthTitle => 'Largura da indentação';
   @override
   String get indentWidthSubtitle =>
@@ -494,6 +500,15 @@ final class PortugueseStrings extends Strings {
   String get ambiguousLinkTitle => 'Várias notas correspondem';
   @override
   String get openLinkFailed => 'Não foi possível abrir o link';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'A nota não existe';
+  @override
+  String missingNoteDialogBody(String path) => 'Criar «$path»?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'A pasta «$folder» não existe';
 
   // Task lists (T-TD-04).
   @override

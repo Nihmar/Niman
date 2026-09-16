@@ -232,6 +232,12 @@ final class CroatianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Kreiranje nedostajućih napomena u';
+  @override
+  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Trenutni direktorij';
+  @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override
   String get indentWidthSubtitle =>
@@ -490,6 +496,15 @@ final class CroatianStrings extends Strings {
   String get ambiguousLinkTitle => 'Više napomena odgovara';
   @override
   String get openLinkFailed => 'Veza se nije mogla otvoriti';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Napomena ne postoji';
+  @override
+  String missingNoteDialogBody(String path) => 'Kreirati „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Direktorij „$folder“ ne postoji';
 
   // Task lists (T-TD-04).
   @override

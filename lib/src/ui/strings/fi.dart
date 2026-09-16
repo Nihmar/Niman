@@ -232,6 +232,12 @@ final class FinnishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Luo puuttuvat muistiinpanot';
+  @override
+  String get missingNoteLocationRoot => 'Kirjaston juureen';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Nykyiseen kansioon';
+  @override
   String get indentWidthTitle => 'Sisäännyrjäyksen leveys';
   @override
   String get indentWidthSubtitle =>
@@ -494,6 +500,15 @@ final class FinnishStrings extends Strings {
   String get ambiguousLinkTitle => 'Useat muistiinpanot täsmäävät';
   @override
   String get openLinkFailed => 'Linkkiä ei voitu avata';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Muistiinpanoa ei ole olemassa';
+  @override
+  String missingNoteDialogBody(String path) => 'Luotako „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Kansiota „$folder“ ei ole olemassa';
 
   // Task lists (T-TD-04).
   @override

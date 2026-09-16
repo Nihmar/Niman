@@ -19,6 +19,7 @@ import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -499,6 +500,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   LinkType _linkType = LinkType.wikilink;
   int _indentWidth = 2;
 
+  /// Where a dead link's new note lands (settings, issue #78).
+  MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
+
   /// The folder new attachments are copied into (settings, issue #56).
   String _attachmentsFolder = defaultAttachmentsFolder;
 
@@ -784,6 +788,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       showLineNumbers: _lineNumbers,
       autofocusEditor: _autofocusEditor,
       linkType: _linkType,
+      missingNoteLocation: _missingNoteLocation,
       attachmentsFolder: _attachmentsFolder,
       indentWidth: _indentWidth,
       toolbarLayout: _toolbarLayout,
@@ -812,7 +817,25 @@ final class _LibraryShellState extends State<_LibraryShell>
       spellCheck: widget.spellCheck,
       reloadToken: _noteReloadToken,
       saveNote: _noteSaver(controller),
+      createMissingNote: _missingNoteCreator(controller),
     );
+  }
+
+  /// The dead-link note-creation path (issue #78): an empty note through
+  /// the library's own creation path; null while no library is ready,
+  /// which keeps the dead-link snackbar instead of the offer.
+  Future<String> Function(String relPath)? _missingNoteCreator(
+    LibrarySession controller,
+  ) {
+    final ops = controller.ops;
+    if (ops == null) return null;
+    return (relPath) async {
+      final note = await ops.createNote(
+        parentPath: parentOf(relPath),
+        name: p.basenameWithoutExtension(relPath),
+      );
+      return note.path;
+    };
   }
 
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
@@ -1196,6 +1219,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
     final linkType = await controller.linkType;
+    final missingNoteLocation = await controller.missingNoteLocation;
     final attachmentsFolder =
         await controller.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
     final indentWidth = await controller.indentWidth;
@@ -1232,6 +1256,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             !setEquals(effectiveEnabled, _editorsEnabled) ||
             previewEnabled != _previewEnabled ||
             linkType != _linkType ||
+            missingNoteLocation != _missingNoteLocation ||
             attachmentsFolder != _attachmentsFolder ||
             indentWidth != _indentWidth ||
             treeSort != _treeSort ||
@@ -1246,6 +1271,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         _editorsEnabled = {...effectiveEnabled};
         _previewEnabled = previewEnabled;
         _linkType = linkType;
+        _missingNoteLocation = missingNoteLocation;
         _attachmentsFolder = attachmentsFolder;
         _indentWidth = indentWidth;
         _treeSort = treeSort;
@@ -2648,6 +2674,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   showLineNumbers: _lineNumbers,
                   autofocusEditor: _autofocusEditor,
                   linkType: _linkType,
+                  missingNoteLocation: _missingNoteLocation,
                   attachmentsFolder: _attachmentsFolder,
                   indentWidth: _indentWidth,
                   toolbarLayout: _toolbarLayout,
@@ -2677,6 +2704,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   spellCheck: widget.spellCheck,
                   reloadToken: _noteReloadToken,
                   saveNote: _noteSaver(controller),
+                  createMissingNote: _missingNoteCreator(controller),
                   statusActions: [
                     // The view controls live in the note's status row on the
                     // desktop (T-PP-22): the header above is about the file,

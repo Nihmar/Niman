@@ -217,6 +217,12 @@ final class ChineseStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => '在以下位置创建缺失的笔记';
+  @override
+  String get missingNoteLocationRoot => '库根目录';
+  @override
+  String get missingNoteLocationCurrentFolder => '当前文件夹';
+  @override
   String get indentWidthTitle => '缩进宽度';
   @override
   String get indentWidthSubtitle => '编辑器每级缩进添加的空格数';
@@ -466,6 +472,14 @@ final class ChineseStrings extends Strings {
   String get ambiguousLinkTitle => '有多篇笔记匹配';
   @override
   String get openLinkFailed => '无法打开链接';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => '笔记不存在';
+  @override
+  String missingNoteDialogBody(String path) => '创建"$path"？';
+  @override
+  String missingNoteFolderMissing(String folder) => '文件夹"$folder"不存在';
 
   // Task lists (T-TD-04).
   @override

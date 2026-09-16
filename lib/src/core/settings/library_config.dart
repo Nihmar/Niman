@@ -11,6 +11,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         defaultAttachmentsFolder,
         defaultListFolder,
         defaultTemplateFolder;
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
 
 /// The number of kept `.history/` versions of a fresh library.
@@ -238,6 +239,7 @@ final class LibraryConfig {
     this.reminderShowTokens = false,
     this.treeSort = TreeSort.nameAsc,
     this.linkType = LinkType.wikilink,
+    this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.indentWidth = defaultIndentWidth,
     this.editorToolbar = '',
     this.uiTextScale = defaultTextScale,
@@ -299,6 +301,10 @@ final class LibraryConfig {
       linkType: switch (json['linkType']) {
         'markdown' => LinkType.markdown,
         _ => LinkType.wikilink,
+      },
+      missingNoteLocation: switch (json['missingNoteLocation']) {
+        'libraryRoot' => MissingNoteLocation.libraryRoot,
+        _ => MissingNoteLocation.currentFolder,
       },
       indentWidth: normalizeIndentWidth(json['indentWidth']),
       editorToolbar: switch (json['editorToolbar']) {
@@ -382,6 +388,10 @@ final class LibraryConfig {
   /// What the editor's link button inserts (default a wikilink).
   final LinkType linkType;
 
+  /// Where a note created from a dead link lands (default the folder of
+  /// the note the link was clicked in, issue #78).
+  final MissingNoteLocation missingNoteLocation;
+
   /// Spaces added per indent level (default 2).
   final int indentWidth;
 
@@ -440,6 +450,7 @@ final class LibraryConfig {
     bool? reminderShowTokens,
     TreeSort? treeSort,
     LinkType? linkType,
+    MissingNoteLocation? missingNoteLocation,
     int? indentWidth,
     String? editorToolbar,
     double? uiTextScale,
@@ -467,6 +478,7 @@ final class LibraryConfig {
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       treeSort: treeSort ?? this.treeSort,
       linkType: linkType ?? this.linkType,
+      missingNoteLocation: missingNoteLocation ?? this.missingNoteLocation,
       indentWidth: indentWidth ?? this.indentWidth,
       editorToolbar: editorToolbar ?? this.editorToolbar,
       uiTextScale: uiTextScale ?? this.uiTextScale,
@@ -494,6 +506,7 @@ final class LibraryConfig {
     'reminderShowTokens',
     'treeSort',
     'linkType',
+    'missingNoteLocation',
     'indentWidth',
     'editorToolbar',
     'uiTextScale',
@@ -530,6 +543,7 @@ final class LibraryConfig {
       'reminderShowTokens': reminderShowTokens,
       'treeSort': treeSort.name,
       'linkType': linkType.name,
+      'missingNoteLocation': missingNoteLocation.name,
       'indentWidth': indentWidth,
       'editorToolbar': editorToolbar,
       'uiTextScale': uiTextScale,
@@ -613,6 +627,7 @@ final class LibraryConfig {
         reminderShowTokens == other.reminderShowTokens &&
         treeSort == other.treeSort &&
         linkType == other.linkType &&
+        missingNoteLocation == other.missingNoteLocation &&
         indentWidth == other.indentWidth &&
         editorToolbar == other.editorToolbar &&
         uiTextScale == other.uiTextScale &&

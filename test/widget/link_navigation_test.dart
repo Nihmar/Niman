@@ -1,10 +1,13 @@
 // T-M3-07 AC: preview wikilink tap, markdown link tap (in-app vs external),
-// editor desktop Ctrl+click, heading anchors, unresolved links → snackbar.
+// editor desktop Ctrl+click, heading anchors, unresolved links → snackbar;
+// issue #78 AC: dead links offer to create the note, per the location
+// setting, declining changes nothing, attachments are not offered.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -19,10 +22,14 @@ NoteView _view({
   CodeLineEditingController? controller,
   String? initialAnchor,
   bool showPreview = false,
+  String path = '/notes/current.md',
+  MissingNoteLocation missingNoteLocation = MissingNoteLocation.currentFolder,
+  Future<String> Function(String path)? createMissingNote,
+  Future<bool> Function(String root, String rel)? folderExists,
 }) => NoteView(
   showLineNumbers: true,
   autofocusEditor: false,
-  path: '/notes/current.md',
+  path: path,
   libraryRoot: '/notes',
   linkSource: source,
   onOpenNote: (path, anchor) => opened?.add('$path|$anchor'),
@@ -31,6 +38,9 @@ NoteView _view({
   readNote: (_) async => content,
   writeNote: (_, _) async {},
   controller: controller,
+  missingNoteLocation: missingNoteLocation,
+  createMissingNote: createMissingNote,
+  folderExists: folderExists,
 );
 
 /// Taps the [RichText] paragraph [paragraph] at the center of the span
@@ -255,6 +265,171 @@ void main() {
 
     await _tapParagraphAt(tester, 'See Missing here.', 4, 11);
     expect(find.text('Link not found'), findsOne);
+  });
+
+  group('dead links offer to create the note (issue #78)', () {
+    testWidgets('a dead link offers its path, and creating opens it', (
+      tester,
+    ) async {
+      final source = FakeLinkSource(notes: ['Notes/current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _view(
+            content: 'See [[Missing]] here.\n',
+            source: source,
+            opened: opened,
+            showPreview: true,
+            path: '/notes/Notes/current.md',
+            createMissingNote: (path) async {
+              created.add(path);
+              return path;
+            },
+            folderExists: (root, rel) async => rel == 'Notes',
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await _tapParagraphAt(tester, 'See Missing here.', 4, 11);
+      await tester.pumpAndSettle();
+      expect(find.text('Note does not exist'), findsOneWidget);
+      expect(find.text("Create 'Notes/Missing.md'?"), findsOneWidget);
+
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+      expect(created, ['Notes/Missing.md']);
+      expect(opened, ['Notes/Missing.md|null']);
+    });
+
+    testWidgets('the library-root setting creates at the root', (tester) async {
+      final source = FakeLinkSource(notes: ['current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _view(
+            content: 'See [[Missing]] here.\n',
+            source: source,
+            opened: opened,
+            showPreview: true,
+            missingNoteLocation: MissingNoteLocation.libraryRoot,
+            createMissingNote: (path) async {
+              created.add(path);
+              return path;
+            },
+            folderExists: (root, rel) async => true,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await _tapParagraphAt(tester, 'See Missing here.', 4, 11);
+      await tester.pumpAndSettle();
+      expect(find.text("Create 'Missing.md'?"), findsOneWidget);
+
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+      expect(created, ['Missing.md']);
+      expect(opened, ['Missing.md|null']);
+    });
+
+    testWidgets('declining changes nothing: no note, no error, no re-prompt', (
+      tester,
+    ) async {
+      final source = FakeLinkSource(notes: ['Notes/current.md']);
+      final opened = <String>[];
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _view(
+            content: 'See [[Missing]] here.\n',
+            source: source,
+            opened: opened,
+            showPreview: true,
+            path: '/notes/Notes/current.md',
+            createMissingNote: (path) async {
+              created.add(path);
+              return path;
+            },
+            folderExists: (root, rel) async => rel == 'Notes',
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await _tapParagraphAt(tester, 'See Missing here.', 4, 11);
+      await tester.pumpAndSettle();
+      expect(find.text('Note does not exist'), findsOneWidget);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(created, isEmpty);
+      expect(opened, isEmpty);
+      expect(find.text('Link not found'), findsNothing);
+      // The offer is not repeated by itself.
+      expect(find.text('Note does not exist'), findsNothing);
+    });
+
+    testWidgets('a missing target folder shows the folder error', (
+      tester,
+    ) async {
+      final source = FakeLinkSource(notes: ['current.md']);
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _view(
+            content: 'See [[Sub/Missing]] here.\n',
+            source: source,
+            showPreview: true,
+            createMissingNote: (path) async {
+              created.add(path);
+              return path;
+            },
+            folderExists: (root, rel) async => false,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await _tapParagraphAt(tester, 'See Sub/Missing here.', 4, 15);
+      await tester.pumpAndSettle();
+      expect(find.text("The folder 'Sub' does not exist"), findsOneWidget);
+      expect(find.text('Note does not exist'), findsNothing);
+      expect(created, isEmpty);
+    });
+
+    testWidgets('a dead-link attachment is not offered', (tester) async {
+      final source = FakeLinkSource(notes: ['current.md']);
+      final created = <String>[];
+      await tester.pumpWidget(
+        _app(
+          _view(
+            content: 'See [[photo.png]] here.\n',
+            source: source,
+            showPreview: true,
+            createMissingNote: (path) async {
+              created.add(path);
+              return path;
+            },
+            folderExists: (root, rel) async => true,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await _tapParagraphAt(tester, 'See photo.png here.', 4, 13);
+      await tester.pumpAndSettle();
+      expect(find.text('Note does not exist'), findsNothing);
+      expect(find.text('Link not found'), findsOneWidget);
+      expect(created, isEmpty);
+    });
   });
 
   testWidgets('editor Ctrl+click on a wikilink opens it', (tester) async {

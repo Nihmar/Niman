@@ -236,6 +236,12 @@ final class HungarianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Hiányzó jegyzetek létrehozása';
+  @override
+  String get missingNoteLocationRoot => 'A könyvtár gyökerében';
+  @override
+  String get missingNoteLocationCurrentFolder => 'A jelenlegi mappában';
+  @override
   String get indentWidthTitle => 'Behúzás szélessége';
   @override
   String get indentWidthSubtitle =>
@@ -495,6 +501,15 @@ final class HungarianStrings extends Strings {
   String get ambiguousLinkTitle => 'Több jegyzet is egyezik';
   @override
   String get openLinkFailed => 'A hivatkozás nem nyitható meg';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'A jegyzet nem létezik';
+  @override
+  String missingNoteDialogBody(String path) => 'Létrehozás: „$path"?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'A „$folder" mappa nem létezik';
 
   // Task lists (T-TD-04).
   @override

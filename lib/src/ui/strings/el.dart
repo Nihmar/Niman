@@ -240,6 +240,12 @@ final class GreekStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Δημιουργία λείποντων σημειώσεων στο';
+  @override
+  String get missingNoteLocationRoot => 'Ρίζα βιβλιοθήκης';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Τρέχων φάκελος';
+  @override
   String get indentWidthTitle => 'Πλάτος εισαγωγής';
   @override
   String get indentWidthSubtitle =>
@@ -505,6 +511,15 @@ final class GreekStrings extends Strings {
   String get ambiguousLinkTitle => 'Πολλές σημειώσεις ταυτίζονται';
   @override
   String get openLinkFailed => 'Δεν ήταν δυνατό το άνοιγμα του συνδέσμου';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Η σημείωση δεν υπάρχει';
+  @override
+  String missingNoteDialogBody(String path) => 'Δημιουργία «$path»;';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Ο φάκελος «$folder» δεν υπάρχει';
 
   // Task lists (T-TD-04).
   @override

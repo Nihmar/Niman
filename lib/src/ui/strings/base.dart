@@ -258,6 +258,14 @@ abstract base class Strings {
   String get ambiguousLinkTitle;
   String get openLinkFailed;
 
+  // Dead-link note creation (issue #78).
+  String get missingNoteLocationTitle;
+  String get missingNoteLocationRoot;
+  String get missingNoteLocationCurrentFolder;
+  String get missingNoteDialogTitle;
+  String missingNoteDialogBody(String path);
+  String missingNoteFolderMissing(String folder);
+
   // Task lists (T-TD-04).
   String get todoOpen;
   String get todoDone;

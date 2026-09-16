@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -22,6 +23,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     required this.linkType,
+    required this.missingNoteLocation,
     required this.attachmentsFolder,
     required this.indentWidth,
     required this.toolbarLayout,
@@ -42,6 +44,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.spellCheck,
     this.reloadToken = 0,
     this.saveNote,
+    this.createMissingNote,
     super.key,
   });
 
@@ -62,6 +65,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// The link format the link button inserts.
   final LinkType linkType;
+
+  /// Where a dead link's new note lands (settings, issue #78).
+  final MissingNoteLocation missingNoteLocation;
 
   /// The folder (library-relative) picked images are copied into.
   final String attachmentsFolder;
@@ -127,6 +133,10 @@ final class ShellDetailPane extends StatelessWidget {
   /// open library) lets the editor write directly.
   final NoteSaver? saveNote;
 
+  /// The dead-link note-creation path (issue #78); null (no open
+  /// library) keeps the dead-link snackbar instead of the offer.
+  final Future<String> Function(String path)? createMissingNote;
+
   @override
   Widget build(BuildContext context) {
     final path = selectedPath;
@@ -155,6 +165,7 @@ final class ShellDetailPane extends StatelessWidget {
                 showLineNumbers: showLineNumbers,
                 autofocusEditor: autofocusEditor,
                 linkType: linkType,
+                missingNoteLocation: missingNoteLocation,
                 attachmentsFolder: attachmentsFolder,
                 indentWidth: indentWidth,
                 toolbarLayout: toolbarLayout,
@@ -180,6 +191,7 @@ final class ShellDetailPane extends StatelessWidget {
                 spellCheck: spellCheck,
                 reloadToken: reloadToken,
                 saveNote: saveNote,
+                createMissingNote: createMissingNote,
               ),
             ),
     );

@@ -230,6 +230,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Стварыць адсутныя заўвагі ў';
+  @override
+  String get missingNoteLocationRoot => 'Карань бібліятэкі';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Поточная папка';
+  @override
   String get indentWidthTitle => 'Шырыня відступу';
   @override
   String get indentWidthSubtitle =>
@@ -488,6 +494,14 @@ final class BelarusianStrings extends Strings {
   String get ambiguousLinkTitle => 'Колькі заўваг адпавядаюць';
   @override
   String get openLinkFailed => 'Не ўдалося адкрыць спасылку';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Заўвага не існуе';
+  @override
+  String missingNoteDialogBody(String path) => "Стварыць '$path'?";
+  @override
+  String missingNoteFolderMissing(String folder) => "Папка '$folder' не існуе";
 
   // Task lists (T-TD-04).
   @override

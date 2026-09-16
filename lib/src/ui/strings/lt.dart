@@ -231,6 +231,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Trūkst pastabų sukūrimas';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotekos šaknyje';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Dabartiniame kataloge';
+  @override
   String get indentWidthTitle => 'Įtraukos plotis';
   @override
   String get indentWidthSubtitle =>
@@ -488,6 +494,15 @@ final class LithuanianStrings extends Strings {
   String get ambiguousLinkTitle => 'Kelioms pastaboms tinka';
   @override
   String get openLinkFailed => 'Nepavyko atidaryti nuorodos';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Pastaba neegzistuoja';
+  @override
+  String missingNoteDialogBody(String path) => 'Sukurti „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Katalogas „$folder“ neegzistuoja';
 
   // Task lists (T-TD-04).
   @override
