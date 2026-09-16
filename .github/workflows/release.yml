@@ -68,12 +68,19 @@ jobs:
       # channel first. Drop this once the plugin moves to a stable NDK.
       - name: Android NDK (beta channel)
         run: |
-          set -o pipefail
           NDK="$(grep -oP 'ndkVersion\s*=\s*"\K[^"]+' android/app/build.gradle.kts)"
           echo "installing ndk;$NDK"
+          # No pipefail here: sdkmanager exits before `yes` does, `yes`
+          # dies of SIGPIPE with 141, and under pipefail that sinks the
+          # step even though the install worked. The directory check
+          # below is what actually says whether it did.
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
             --channel=1 "ndk;$NDK"
-          test -d "$ANDROID_HOME/ndk/$NDK"
+          if [ ! -d "$ANDROID_HOME/ndk/$NDK" ]; then
+            echo "error: ndk;$NDK is not under $ANDROID_HOME/ndk" >&2
+            ls -1 "$ANDROID_HOME/ndk" 2>/dev/null >&2 || true
+            exit 1
+          fi
 
       - run: flutter pub get
       - run: flutter build apk --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
