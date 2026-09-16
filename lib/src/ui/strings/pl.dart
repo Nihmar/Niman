@@ -1276,6 +1276,115 @@ final class PolishStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkrypcja';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Brak';
+  @override
+  String get transcriptionLanguageTitle => 'Język';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Język, w którym mówisz na nagraniach. Wskazanie go jest dokładniejsze '
+      'niż wykrywanie.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Jak w aplikacji ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Wykrywaj automatycznie';
+  @override
+  String get transcriptionModelsTitle => 'Modele transkrypcji';
+  @override
+  String transcriptionModelsUsed(String size) => 'Zajęte: $size';
+  @override
+  String get transcriptionModelsInstalled => 'Pobrane';
+  @override
+  String get transcriptionModelsDownloading => 'Pobieranie';
+  @override
+  String get transcriptionModelsAvailable => 'Dostępne';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modele pozostają w pamięci aplikacji na tym urządzeniu. Nie są '
+      'kopiowane do biblioteki ani synchronizowane.';
+  @override
+  String get transcriptionModelDefault => 'Domyślny';
+  @override
+  String get transcriptionModelSlow => 'Wolny';
+  @override
+  String get transcriptionModelHintTiny => 'Najszybszy, najmniej dokładny';
+  @override
+  String get transcriptionModelHintBase =>
+      'Dobry balans szybkości i dokładności';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Dokładniejszy, około 3× wolniejszy';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Bardzo dokładny, wolny na telefonie';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Najdokładniejszy, wymaga dużo pamięci';
+  @override
+  String get transcriptionModelDownload => 'Pobierz';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Usunąć model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Zwolni to $size. Model możesz później pobrać ponownie.';
+  @override
+  String get transcriptionModelFailed =>
+      'Nie udało się pobrać. Sprawdź połączenie i spróbuj ponownie.';
+  @override
+  String get actionRetry => 'Spróbuj ponownie';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Utracono połączenie, ponawianie…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Wstrzymano przy $progress';
+  @override
+  String get actionResume => 'Wznów';
+  @override
+  String get audioTranscribe => 'Transkrybuj';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Na tym urządzeniu tylko nagrania WAV';
+  @override
+  String get transcriptionQueued => 'W kolejce';
+  @override
+  String get transcriptionPreparing => 'Przygotowywanie dźwięku…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkrypcja… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Pobieranie $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkrypcję dodano do opisu';
+  @override
+  String get transcriptionNoSpeech => 'Nie rozpoznano mowy w tym nagraniu';
+  @override
+  String get transcriptionFailed => 'Transkrypcja nie powiodła się';
+  @override
+  String get transcriptionPickModelTitle => 'Wybierz model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkrypcja odbywa się na tym urządzeniu, a nagranie nigdy nie jest '
+      'wysyłane. Model pobierasz tylko raz.';
+  @override
+  String get transcriptionPickModelAction => 'Pobierz i transkrybuj';
+  @override
+  String get transcriptionModelRecommended => 'Zalecany';
+  @override
+  String get transcriptionExistingTitle => 'To nagranie ma już opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Zastąpić go transkrypcją czy dodać transkrypcję pod spodem?';
+  @override
+  String get transcriptionAppend => 'Dodaj pod spodem';
+  @override
+  String get transcriptionReplace => 'Zastąp';
+  @override
   String get settingsSectionSync => 'Synchronizacja';
   @override
   String get syncWebDavTitle => 'WebDAV';

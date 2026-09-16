@@ -1269,6 +1269,116 @@ final class HungarianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes percenként';
   @override
+  String get settingsSectionTranscription => 'Átirat';
+  @override
+  String get transcriptionModelTitle => 'Modell';
+  @override
+  String get transcriptionModelNone => 'Nincs';
+  @override
+  String get transcriptionLanguageTitle => 'Nyelv';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'A felvételeiden beszélt nyelv. Megadni pontosabb, mint felismertetni.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Mint az alkalmazás ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Automatikus felismerés';
+  @override
+  String get transcriptionModelsTitle => 'Átiratmodellek';
+  @override
+  String transcriptionModelsUsed(String size) => '$size foglalt';
+  @override
+  String get transcriptionModelsInstalled => 'Letöltve';
+  @override
+  String get transcriptionModelsDownloading => 'Letöltés folyamatban';
+  @override
+  String get transcriptionModelsAvailable => 'Elérhető';
+  @override
+  String get transcriptionModelsFooter =>
+      'A modellek az alkalmazás tárhelyén maradnak ezen az eszközön. Nem '
+      'kerülnek a könyvtárba, és nem szinkronizálódnak.';
+  @override
+  String get transcriptionModelDefault => 'Alapértelmezett';
+  @override
+  String get transcriptionModelSlow => 'Lassú';
+  @override
+  String get transcriptionModelHintTiny => 'A leggyorsabb, a legkevésbé pontos';
+  @override
+  String get transcriptionModelHintBase =>
+      'Jó egyensúly a sebesség és a pontosság között';
+  @override
+  String get transcriptionModelHintSmall => 'Pontosabb, nagyjából 3× lassabb';
+  @override
+  String get transcriptionModelHintMedium => 'Nagyon pontos, telefonon lassú';
+  @override
+  String get transcriptionModelHintLarge =>
+      'A legpontosabb, sok memóriát igényel';
+  @override
+  String get transcriptionModelDownload => 'Letöltés';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Törlöd a(z) $model modellt?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Ezzel $size szabadul fel. A modellt később újra letöltheted.';
+  @override
+  String get transcriptionModelFailed =>
+      'A letöltés sikertelen. Ellenőrizd a kapcsolatot, és próbáld újra.';
+  @override
+  String get actionRetry => 'Újra';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Megszakadt a kapcsolat, újrapróbálkozás…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Szüneteltetve: $progress';
+  @override
+  String get actionResume => 'Folytatás';
+  @override
+  String get audioTranscribe => 'Átírás';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Ezen az eszközön csak WAV-felvételek';
+  @override
+  String get transcriptionQueued => 'Sorban áll';
+  @override
+  String get transcriptionPreparing => 'Hang előkészítése…';
+  @override
+  String transcriptionRunning(int percent) => 'Átírás… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model letöltése · $percent%';
+  @override
+  String get transcriptionSaved => 'Az átirat bekerült a leírásba';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ebben a felvételben nem sikerült beszédet felismerni';
+  @override
+  String get transcriptionFailed => 'Az átírás sikertelen';
+  @override
+  String get transcriptionPickModelTitle => 'Válassz modellt';
+  @override
+  String get transcriptionPickModelBody =>
+      'Az átírás ezen az eszközön történik, a felvétel sosem kerül '
+      'feltöltésre. A modellt csak egyszer kell letölteni.';
+  @override
+  String get transcriptionPickModelAction => 'Letöltés és átírás';
+  @override
+  String get transcriptionModelRecommended => 'Ajánlott';
+  @override
+  String get transcriptionExistingTitle =>
+      'Ennek a felvételnek már van leírása';
+  @override
+  String get transcriptionExistingBody =>
+      'Lecseréled az átiratra, vagy alá írod az átiratot?';
+  @override
+  String get transcriptionAppend => 'Hozzáadás alá';
+  @override
+  String get transcriptionReplace => 'Csere';
+  @override
   String get settingsSectionSync => 'Szinkronizálás';
   @override
   String get syncWebDavTitle => 'WebDAV';

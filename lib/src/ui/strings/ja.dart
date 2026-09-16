@@ -1172,6 +1172,103 @@ final class JapaneseStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes 分';
   @override
+  String get settingsSectionTranscription => '文字起こし';
+  @override
+  String get transcriptionModelTitle => 'モデル';
+  @override
+  String get transcriptionModelNone => 'なし';
+  @override
+  String get transcriptionLanguageTitle => '言語';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      '録音で話されている言語です。自動検出より指定したほうが正確です。';
+  @override
+  String transcriptionLanguageApp(String language) => 'アプリと同じ（$language）';
+  @override
+  String get transcriptionLanguageDetect => '自動検出';
+  @override
+  String get transcriptionModelsTitle => '文字起こしモデル';
+  @override
+  String transcriptionModelsUsed(String size) => '$size 使用中';
+  @override
+  String get transcriptionModelsInstalled => 'ダウンロード済み';
+  @override
+  String get transcriptionModelsDownloading => 'ダウンロード中';
+  @override
+  String get transcriptionModelsAvailable => '利用可能';
+  @override
+  String get transcriptionModelsFooter =>
+      'モデルはこのデバイスのアプリ用ストレージに保存されます。ライブラリにはコピーも同期もされません。';
+  @override
+  String get transcriptionModelDefault => 'デフォルト';
+  @override
+  String get transcriptionModelSlow => '低速';
+  @override
+  String get transcriptionModelHintTiny => '最速、精度は最も低い';
+  @override
+  String get transcriptionModelHintBase => '速度と精度のバランスが良い';
+  @override
+  String get transcriptionModelHintSmall => 'より正確、約 3 倍遅い';
+  @override
+  String get transcriptionModelHintMedium => 'とても正確、スマートフォンでは遅い';
+  @override
+  String get transcriptionModelHintLarge => '最も正確、大量のメモリが必要';
+  @override
+  String get transcriptionModelDownload => 'ダウンロード';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '$model モデルを削除しますか？';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      '$size が解放されます。モデルは後でもう一度ダウンロードできます。';
+  @override
+  String get transcriptionModelFailed => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
+  @override
+  String get actionRetry => '再試行';
+  @override
+  String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => '接続が切れました。再試行しています…';
+  @override
+  String transcriptionModelInterrupted(String progress) => '一時停止中：$progress';
+  @override
+  String get actionResume => '再開';
+  @override
+  String get audioTranscribe => '文字起こし';
+  @override
+  String get audioTranscribeUnsupported => 'このデバイスでは WAV 録音のみ対応';
+  @override
+  String get transcriptionQueued => '待機中';
+  @override
+  String get transcriptionPreparing => '音声を準備しています…';
+  @override
+  String transcriptionRunning(int percent) => '文字起こし中… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model をダウンロード中 · $percent%';
+  @override
+  String get transcriptionSaved => '文字起こしを説明に追加しました';
+  @override
+  String get transcriptionNoSpeech => 'この録音では音声が認識されませんでした';
+  @override
+  String get transcriptionFailed => '文字起こしに失敗しました';
+  @override
+  String get transcriptionPickModelTitle => 'モデルを選択';
+  @override
+  String get transcriptionPickModelBody =>
+      '文字起こしはこのデバイス上で行われ、録音がアップロードされることはありません。モデルのダウンロードは一度だけです。';
+  @override
+  String get transcriptionPickModelAction => 'ダウンロードして文字起こし';
+  @override
+  String get transcriptionModelRecommended => 'おすすめ';
+  @override
+  String get transcriptionExistingTitle => 'この録音にはすでに説明があります';
+  @override
+  String get transcriptionExistingBody => '文字起こしで置き換えますか、それとも下に追加しますか？';
+  @override
+  String get transcriptionAppend => '下に追加';
+  @override
+  String get transcriptionReplace => '置き換え';
+  @override
   String get settingsSectionSync => '同期';
   @override
   String get syncWebDavTitle => 'WebDAV';

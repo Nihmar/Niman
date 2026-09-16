@@ -1274,6 +1274,115 @@ final class GalicianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transcrición';
+  @override
+  String get transcriptionModelTitle => 'Modelo';
+  @override
+  String get transcriptionModelNone => 'Ningún';
+  @override
+  String get transcriptionLanguageTitle => 'Idioma';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'O idioma que se fala nas túas gravacións. Indicalo é máis preciso ca '
+      'detectalo.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Como a app ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Detectar automaticamente';
+  @override
+  String get transcriptionModelsTitle => 'Modelos de transcrición';
+  @override
+  String transcriptionModelsUsed(String size) => '$size en uso';
+  @override
+  String get transcriptionModelsInstalled => 'Descargados';
+  @override
+  String get transcriptionModelsDownloading => 'Descargando';
+  @override
+  String get transcriptionModelsAvailable => 'Dispoñibles';
+  @override
+  String get transcriptionModelsFooter =>
+      'Os modelos quedan no almacenamento da app neste dispositivo. Non se '
+      'copian na biblioteca nin se sincronizan.';
+  @override
+  String get transcriptionModelDefault => 'Predeterminado';
+  @override
+  String get transcriptionModelSlow => 'Lento';
+  @override
+  String get transcriptionModelHintTiny => 'O máis rápido, o menos preciso';
+  @override
+  String get transcriptionModelHintBase =>
+      'Bo equilibrio entre velocidade e precisión';
+  @override
+  String get transcriptionModelHintSmall => 'Máis preciso, unhas 3× máis lento';
+  @override
+  String get transcriptionModelHintMedium => 'Moi preciso, lento nun teléfono';
+  @override
+  String get transcriptionModelHintLarge =>
+      'O máis preciso, precisa moita memoria';
+  @override
+  String get transcriptionModelDownload => 'Descargar';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Eliminar o modelo $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Libera $size. Podes volver descargar o modelo máis adiante.';
+  @override
+  String get transcriptionModelFailed =>
+      'Non se puido descargar. Comproba a conexión e téntao de novo.';
+  @override
+  String get actionRetry => 'Tentar de novo';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Perdeuse a conexión, tentando de novo…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa en $progress';
+  @override
+  String get actionResume => 'Retomar';
+  @override
+  String get audioTranscribe => 'Transcribir';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Só gravacións WAV neste dispositivo';
+  @override
+  String get transcriptionQueued => 'Na cola';
+  @override
+  String get transcriptionPreparing => 'Preparando o audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcribindo… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Descargando $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transcrición engadida á descrición';
+  @override
+  String get transcriptionNoSpeech => 'Non se recoñeceu fala nesta gravación';
+  @override
+  String get transcriptionFailed => 'Non se puido transcribir';
+  @override
+  String get transcriptionPickModelTitle => 'Escolle un modelo';
+  @override
+  String get transcriptionPickModelBody =>
+      'A transcrición faise neste dispositivo e a gravación nunca se envía. O '
+      'modelo descárgase unha soa vez.';
+  @override
+  String get transcriptionPickModelAction => 'Descargar e transcribir';
+  @override
+  String get transcriptionModelRecommended => 'Recomendado';
+  @override
+  String get transcriptionExistingTitle =>
+      'Esta gravación xa ten unha descrición';
+  @override
+  String get transcriptionExistingBody =>
+      'Substituíla pola transcrición ou engadir a transcrición debaixo?';
+  @override
+  String get transcriptionAppend => 'Engadir debaixo';
+  @override
+  String get transcriptionReplace => 'Substituír';
+  @override
   String get settingsSectionSync => 'Sincronización';
   @override
   String get syncWebDavTitle => 'WebDAV';

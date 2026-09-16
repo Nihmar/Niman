@@ -1252,6 +1252,113 @@ final class EnglishStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transcription';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'None';
+  @override
+  String get transcriptionLanguageTitle => 'Language';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'The language spoken in your recordings. Naming it is more accurate '
+      'than detecting it.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Same as the app ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Detect automatically';
+  @override
+  String get transcriptionModelsTitle => 'Transcription models';
+  @override
+  String transcriptionModelsUsed(String size) => '$size used';
+  @override
+  String get transcriptionModelsInstalled => 'Downloaded';
+  @override
+  String get transcriptionModelsDownloading => 'Downloading';
+  @override
+  String get transcriptionModelsAvailable => 'Available';
+  @override
+  String get transcriptionModelsFooter =>
+      "Models stay in the app's storage on this device. They are not copied "
+      'into the library or synced.';
+  @override
+  String get transcriptionModelDefault => 'Default';
+  @override
+  String get transcriptionModelSlow => 'Slow';
+  @override
+  String get transcriptionModelHintTiny => 'Fastest, least accurate';
+  @override
+  String get transcriptionModelHintBase => 'Good balance of speed and accuracy';
+  @override
+  String get transcriptionModelHintSmall => 'More accurate, about 3× slower';
+  @override
+  String get transcriptionModelHintMedium => 'Very accurate, slow on a phone';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Most accurate, needs a lot of memory';
+  @override
+  String get transcriptionModelDownload => 'Download';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Delete the $model model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'This frees $size. You can download the model again later.';
+  @override
+  String get transcriptionModelFailed =>
+      'Download failed. Check the connection and try again.';
+  @override
+  String get actionRetry => 'Retry';
+  @override
+  String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => 'Connection lost, trying again…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Paused at $progress';
+  @override
+  String get actionResume => 'Resume';
+  @override
+  String get audioTranscribe => 'Transcribe';
+  @override
+  String get audioTranscribeUnsupported => 'Only WAV recordings on this device';
+  @override
+  String get transcriptionQueued => 'Queued';
+  @override
+  String get transcriptionPreparing => 'Preparing the audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcribing… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Downloading $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transcription added to the description';
+  @override
+  String get transcriptionNoSpeech => 'No speech recognized in this recording';
+  @override
+  String get transcriptionFailed => 'Transcription failed';
+  @override
+  String get transcriptionPickModelTitle => 'Choose a model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transcription runs on this device and the recording is never uploaded. '
+      'The model is downloaded once.';
+  @override
+  String get transcriptionPickModelAction => 'Download and transcribe';
+  @override
+  String get transcriptionModelRecommended => 'Recommended';
+  @override
+  String get transcriptionExistingTitle =>
+      'This recording already has a description';
+  @override
+  String get transcriptionExistingBody =>
+      'Put the transcription in its place, or add it below?';
+  @override
+  String get transcriptionAppend => 'Add below';
+  @override
+  String get transcriptionReplace => 'Replace';
+  @override
   String get settingsSectionSync => 'Sync';
   @override
   String get syncWebDavTitle => 'WebDAV';

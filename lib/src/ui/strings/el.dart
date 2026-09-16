@@ -1308,6 +1308,117 @@ final class GreekStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes λεπ.';
   @override
+  String get settingsSectionTranscription => 'Μεταγραφή';
+  @override
+  String get transcriptionModelTitle => 'Μοντέλο';
+  @override
+  String get transcriptionModelNone => 'Κανένα';
+  @override
+  String get transcriptionLanguageTitle => 'Γλώσσα';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Η γλώσσα που μιλιέται στις ηχογραφήσεις σας. Αν την ορίσετε, η '
+      'μεταγραφή είναι ακριβέστερη από την αυτόματη ανίχνευση.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Όπως η εφαρμογή ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Αυτόματη ανίχνευση';
+  @override
+  String get transcriptionModelsTitle => 'Μοντέλα μεταγραφής';
+  @override
+  String transcriptionModelsUsed(String size) => 'Σε χρήση $size';
+  @override
+  String get transcriptionModelsInstalled => 'Ληφθέντα';
+  @override
+  String get transcriptionModelsDownloading => 'Λήψη σε εξέλιξη';
+  @override
+  String get transcriptionModelsAvailable => 'Διαθέσιμα';
+  @override
+  String get transcriptionModelsFooter =>
+      'Τα μοντέλα μένουν στον χώρο αποθήκευσης της εφαρμογής σε αυτή τη '
+      'συσκευή. Δεν αντιγράφονται στη βιβλιοθήκη ούτε συγχρονίζονται.';
+  @override
+  String get transcriptionModelDefault => 'Προεπιλογή';
+  @override
+  String get transcriptionModelSlow => 'Αργό';
+  @override
+  String get transcriptionModelHintTiny => 'Το ταχύτερο, το λιγότερο ακριβές';
+  @override
+  String get transcriptionModelHintBase =>
+      'Καλή ισορροπία ταχύτητας και ακρίβειας';
+  @override
+  String get transcriptionModelHintSmall => 'Πιο ακριβές, περίπου 3× πιο αργό';
+  @override
+  String get transcriptionModelHintMedium => 'Πολύ ακριβές, αργό σε τηλέφωνο';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Το πιο ακριβές, χρειάζεται πολλή μνήμη';
+  @override
+  String get transcriptionModelDownload => 'Λήψη';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Διαγραφή του μοντέλου $model;';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Θα ελευθερωθούν $size. Μπορείτε να κατεβάσετε ξανά το μοντέλο '
+      'αργότερα.';
+  @override
+  String get transcriptionModelFailed =>
+      'Η λήψη απέτυχε. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά.';
+  @override
+  String get actionRetry => 'Δοκιμή ξανά';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Η σύνδεση χάθηκε, νέα προσπάθεια…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Σε παύση στο $progress';
+  @override
+  String get actionResume => 'Συνέχιση';
+  @override
+  String get audioTranscribe => 'Μεταγραφή';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Μόνο ηχογραφήσεις WAV σε αυτή τη συσκευή';
+  @override
+  String get transcriptionQueued => 'Σε αναμονή';
+  @override
+  String get transcriptionPreparing => 'Προετοιμασία ήχου…';
+  @override
+  String transcriptionRunning(int percent) => 'Μεταγραφή… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Λήψη $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Η μεταγραφή προστέθηκε στην περιγραφή';
+  @override
+  String get transcriptionNoSpeech =>
+      'Δεν αναγνωρίστηκε ομιλία σε αυτή την ηχογράφηση';
+  @override
+  String get transcriptionFailed => 'Η μεταγραφή απέτυχε';
+  @override
+  String get transcriptionPickModelTitle => 'Επιλέξτε μοντέλο';
+  @override
+  String get transcriptionPickModelBody =>
+      'Η μεταγραφή γίνεται σε αυτή τη συσκευή και η ηχογράφηση δεν '
+      'αποστέλλεται ποτέ. Το μοντέλο λαμβάνεται μία φορά.';
+  @override
+  String get transcriptionPickModelAction => 'Λήψη και μεταγραφή';
+  @override
+  String get transcriptionModelRecommended => 'Προτεινόμενο';
+  @override
+  String get transcriptionExistingTitle =>
+      'Αυτή η ηχογράφηση έχει ήδη περιγραφή';
+  @override
+  String get transcriptionExistingBody =>
+      'Να αντικατασταθεί με τη μεταγραφή ή να προστεθεί η μεταγραφή από κάτω;';
+  @override
+  String get transcriptionAppend => 'Προσθήκη από κάτω';
+  @override
+  String get transcriptionReplace => 'Αντικατάσταση';
+  @override
   String get settingsSectionSync => 'Συγχρονισμός';
   @override
   String get syncWebDavTitle => 'WebDAV';

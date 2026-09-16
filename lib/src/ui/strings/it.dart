@@ -1266,6 +1266,117 @@ final class ItalianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Trascrizione';
+  @override
+  String get transcriptionModelTitle => 'Modello';
+  @override
+  String get transcriptionModelNone => 'Nessuno';
+  @override
+  String get transcriptionLanguageTitle => 'Lingua';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'La lingua parlata nelle registrazioni. Indicarla è più preciso che '
+      'rilevarla.';
+  @override
+  String transcriptionLanguageApp(String language) => "Come l'app ($language)";
+  @override
+  String get transcriptionLanguageDetect => 'Rileva automaticamente';
+  @override
+  String get transcriptionModelsTitle => 'Modelli di trascrizione';
+  @override
+  String transcriptionModelsUsed(String size) => '$size usati';
+  @override
+  String get transcriptionModelsInstalled => 'Scaricati';
+  @override
+  String get transcriptionModelsDownloading => 'In download';
+  @override
+  String get transcriptionModelsAvailable => 'Disponibili';
+  @override
+  String get transcriptionModelsFooter =>
+      "I modelli restano nella memoria dell'app su questo dispositivo. Non "
+      'vengono copiati nella libreria né sincronizzati.';
+  @override
+  String get transcriptionModelDefault => 'Predefinito';
+  @override
+  String get transcriptionModelSlow => 'Lento';
+  @override
+  String get transcriptionModelHintTiny => 'Il più veloce, il meno preciso';
+  @override
+  String get transcriptionModelHintBase =>
+      'Buon equilibrio tra velocità e precisione';
+  @override
+  String get transcriptionModelHintSmall => 'Più preciso, circa 3× più lento';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Molto preciso, lento sul telefono';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Il più preciso, richiede molta memoria';
+  @override
+  String get transcriptionModelDownload => 'Scarica';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Eliminare il modello $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Libera $size. Potrai scaricare di nuovo il modello in seguito.';
+  @override
+  String get transcriptionModelFailed =>
+      'Download non riuscito. Controlla la connessione e riprova.';
+  @override
+  String get actionRetry => 'Riprova';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Connessione persa, nuovo tentativo…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'In pausa a $progress';
+  @override
+  String get actionResume => 'Riprendi';
+  @override
+  String get audioTranscribe => 'Trascrivi';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Solo registrazioni WAV su questo dispositivo';
+  @override
+  String get transcriptionQueued => 'In coda';
+  @override
+  String get transcriptionPreparing => "Preparo l'audio…";
+  @override
+  String transcriptionRunning(int percent) => 'Trascrizione… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Scarico $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Trascrizione aggiunta alla descrizione';
+  @override
+  String get transcriptionNoSpeech =>
+      'Nessun parlato riconosciuto in questa registrazione';
+  @override
+  String get transcriptionFailed => 'Trascrizione non riuscita';
+  @override
+  String get transcriptionPickModelTitle => 'Scegli un modello';
+  @override
+  String get transcriptionPickModelBody =>
+      'La trascrizione avviene su questo dispositivo e la registrazione non '
+      'viene mai inviata. Il modello si scarica una volta sola.';
+  @override
+  String get transcriptionPickModelAction => 'Scarica e trascrivi';
+  @override
+  String get transcriptionModelRecommended => 'Consigliato';
+  @override
+  String get transcriptionExistingTitle =>
+      'La registrazione ha già una descrizione';
+  @override
+  String get transcriptionExistingBody =>
+      'Sostituirla con la trascrizione o aggiungere la trascrizione in fondo?';
+  @override
+  String get transcriptionAppend => 'Aggiungi in fondo';
+  @override
+  String get transcriptionReplace => 'Sostituisci';
+  @override
   String get settingsSectionSync => 'Sincronizzazione';
   @override
   String get syncWebDavTitle => 'WebDAV';

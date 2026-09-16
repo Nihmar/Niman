@@ -1257,6 +1257,110 @@ final class IcelandicStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes mín';
   @override
+  String get settingsSectionTranscription => 'Umritun';
+  @override
+  String get transcriptionModelTitle => 'Líkan';
+  @override
+  String get transcriptionModelNone => 'Ekkert';
+  @override
+  String get transcriptionLanguageTitle => 'Tungumál';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Tungumálið sem er talað í upptökunum þínum. Nákvæmara er að velja það '
+      'en að láta greina það.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Eins og forritið ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Greina sjálfkrafa';
+  @override
+  String get transcriptionModelsTitle => 'Umritunarlíkön';
+  @override
+  String transcriptionModelsUsed(String size) => '$size í notkun';
+  @override
+  String get transcriptionModelsInstalled => 'Sótt';
+  @override
+  String get transcriptionModelsDownloading => 'Í niðurhali';
+  @override
+  String get transcriptionModelsAvailable => 'Í boði';
+  @override
+  String get transcriptionModelsFooter =>
+      'Líkönin eru geymd í geymslu forritsins á þessu tæki. Þau eru hvorki '
+      'afrituð í safnið né samstillt.';
+  @override
+  String get transcriptionModelDefault => 'Sjálfgefið';
+  @override
+  String get transcriptionModelSlow => 'Hægt';
+  @override
+  String get transcriptionModelHintTiny => 'Hraðast, minnst nákvæmt';
+  @override
+  String get transcriptionModelHintBase => 'Gott jafnvægi hraða og nákvæmni';
+  @override
+  String get transcriptionModelHintSmall => 'Nákvæmara, um 3× hægara';
+  @override
+  String get transcriptionModelHintMedium => 'Mjög nákvæmt, hægt í síma';
+  @override
+  String get transcriptionModelHintLarge => 'Nákvæmast, þarf mikið minni';
+  @override
+  String get transcriptionModelDownload => 'Sækja';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Eyða líkaninu $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Þetta losar $size. Þú getur sótt líkanið aftur seinna.';
+  @override
+  String get transcriptionModelFailed =>
+      'Niðurhal mistókst. Athugaðu tenginguna og reyndu aftur.';
+  @override
+  String get actionRetry => 'Reyna aftur';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Tengingin rofnaði, reynt aftur…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Í bið við $progress';
+  @override
+  String get actionResume => 'Halda áfram';
+  @override
+  String get audioTranscribe => 'Umrita';
+  @override
+  String get audioTranscribeUnsupported => 'Aðeins WAV-upptökur á þessu tæki';
+  @override
+  String get transcriptionQueued => 'Í biðröð';
+  @override
+  String get transcriptionPreparing => 'Undirbý hljóðið…';
+  @override
+  String transcriptionRunning(int percent) => 'Umritar… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Sæki $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Umrituninni var bætt við lýsinguna';
+  @override
+  String get transcriptionNoSpeech => 'Ekkert tal greindist í þessari upptöku';
+  @override
+  String get transcriptionFailed => 'Umritun mistókst';
+  @override
+  String get transcriptionPickModelTitle => 'Veldu líkan';
+  @override
+  String get transcriptionPickModelBody =>
+      'Umritunin fer fram á þessu tæki og upptakan er aldrei send. Líkanið er '
+      'sótt einu sinni.';
+  @override
+  String get transcriptionPickModelAction => 'Sækja og umrita';
+  @override
+  String get transcriptionModelRecommended => 'Mælt með';
+  @override
+  String get transcriptionExistingTitle => 'Þessi upptaka er þegar með lýsingu';
+  @override
+  String get transcriptionExistingBody =>
+      'Skipta henni út fyrir umritunina eða bæta umrituninni fyrir neðan?';
+  @override
+  String get transcriptionAppend => 'Bæta við fyrir neðan';
+  @override
+  String get transcriptionReplace => 'Skipta út';
+  @override
   String get settingsSectionSync => 'Samstilling';
   @override
   String get syncWebDavTitle => 'WebDAV';

@@ -2,12 +2,16 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart'
     show LinkType, defaultAttachmentsFolder;
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/audio_import.dart';
 import 'package:niman/src/library/wav_duration.dart';
+import 'package:niman/src/transcription/open_audio_notes.dart';
+import 'package:niman/src/transcription/transcription_models.dart';
+import 'package:niman/src/transcription/transcription_queue.dart';
 import 'package:niman/src/ui/kinds/audio_capture.dart';
 import 'package:niman/src/ui/kinds/audio_chat.dart';
 import 'package:niman/src/ui/kinds/audio_chat_list.dart';
@@ -21,6 +25,7 @@ import 'package:niman/src/ui/kinds/audio_player.dart';
 import 'package:niman/src/ui/kinds/audio_prompt_dialog.dart';
 import 'package:niman/src/ui/kinds/audio_recorder.dart';
 import 'package:niman/src/ui/kinds/audio_text_bubble.dart';
+import 'package:niman/src/ui/kinds/audio_transcription_flow.dart';
 import 'package:niman/src/ui/kinds/audioplayers_clip_player.dart';
 import 'package:niman/src/ui/kinds/record_audio_recorder.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -36,6 +41,7 @@ final class AudioKindGui implements NoteKindGUI {
 
   @override
   Widget buildBody(BuildContext context, NoteKindHost host) {
+    final container = _containerOf(context);
     return AudioNoteView(
       text: host.text,
       onChanged: host.applyEdit,
@@ -43,7 +49,23 @@ final class AudioKindGui implements NoteKindGUI {
       notePath: host.notePath,
       attachmentsFolder: host.attachmentsFolder,
       linkType: host.linkType,
+      transcriptionModels: container?.read(transcriptionModelsProvider),
+      transcriptionQueue: container?.read(transcriptionQueueProvider),
+      openAudioNotes: container?.read(openAudioNotesProvider),
     );
+  }
+
+  /// The app's providers, or null where the note is shown without a
+  /// `ProviderScope` (widget tests): the view then has no Transcribe.
+  static ProviderContainer? _containerOf(BuildContext context) {
+    try {
+      return ProviderScope.containerOf(context, listen: false);
+      // Riverpod reports a missing scope only by throwing; its scope
+      // widget is private, so there is nothing to look up first.
+      // ignore: avoid_catching_errors
+    } on StateError {
+      return null;
+    }
   }
 }
 
@@ -71,6 +93,9 @@ class AudioNoteView extends StatefulWidget {
     this.renameAudio,
     this.newRecordPath,
     this.readLengths,
+    this.transcriptionModels,
+    this.transcriptionQueue,
+    this.openAudioNotes,
     super.key,
   });
 
@@ -123,6 +148,17 @@ class AudioNoteView extends StatefulWidget {
   final Future<Map<String, Duration>> Function(List<String> absolutePaths)?
   readLengths;
 
+  /// The installation's transcription models; with [transcriptionQueue],
+  /// enables the clips' Transcribe action (null for both hides it).
+  final TranscriptionModels? transcriptionModels;
+
+  /// The app's transcription queue.
+  final TranscriptionQueue? transcriptionQueue;
+
+  /// The registry this view marks its note open in, so transcripts that
+  /// finish meanwhile come to the view instead of the file.
+  final OpenAudioNotes? openAudioNotes;
+
   @override
   State<AudioNoteView> createState() => _AudioNoteViewState();
 }
@@ -149,10 +185,25 @@ class _AudioNoteViewState extends State<AudioNoteView>
     vsync: this,
     duration: const Duration(milliseconds: 700),
   );
+  AudioTranscriptionFlow? _transcription;
 
   @override
   void initState() {
     super.initState();
+    final models = widget.transcriptionModels;
+    final queue = widget.transcriptionQueue;
+    if (models != null && queue != null) {
+      _transcription = AudioTranscriptionFlow(
+        models: models,
+        queue: queue,
+        notePath: widget.notePath,
+        readText: () => widget.text,
+        applyText: widget.onChanged,
+        absoluteOf: _absoluteOf,
+        contextOf: () => mounted ? context : null,
+        open: widget.openAudioNotes,
+      )..attach();
+    }
     var wasRecording = false;
     _capture.addListener(() {
       // Swell the stop button once when the microphone goes live.
@@ -182,6 +233,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
 
   @override
   void dispose() {
+    _transcription?.detach();
     _pulse.dispose();
     _input.dispose();
     _playback.dispose();
@@ -235,6 +287,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
 
   Future<void> _deleteClip(AudioChatRow row, AudioClip clip) async {
     if (_playback.activeKey == row.key) await _playback.stop();
+    _transcription?.clipDeleted(clip.target);
     widget.onChanged(removeAudioMessage(widget.text, clip));
   }
 
@@ -295,6 +348,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
       final rename = widget.renameAudio ?? _renameInLibrary;
       final next = await rename(clip.target, wanted);
       if (!mounted) return;
+      _transcription?.clipRenamed(from: clip.target, to: next);
       widget.onChanged(renameAudioClipTarget(widget.text, clip, next));
     });
   }
@@ -366,11 +420,15 @@ class _AudioNoteViewState extends State<AudioNoteView>
     }
     final vocal = item as AudioChatMessage;
     final canRename = widget.libraryRoot != null && !_capture.busy;
+    final transcription = _transcription;
     return ListenableBuilder(
       key: ValueKey('audio-clip-${row.suffix}'),
-      listenable: _playback,
+      listenable: transcription == null
+          ? _playback
+          : Listenable.merge([_playback, transcription.listenable]),
       builder: (context, _) {
         final active = _playback.activeKey == row.key;
+        final clip = vocal.clip;
         return AudioClipBubble(
           suffix: row.suffix,
           title: vocal.title,
@@ -387,6 +445,14 @@ class _AudioNoteViewState extends State<AudioNoteView>
           onEditDescription: () => _editDescription(vocal),
           onRename: canRename ? () => _renameClip(vocal.clip) : null,
           onDelete: () => _deleteClip(row, vocal.clip),
+          transcribeHint: transcription?.menuHint(clip),
+          onTranscribe:
+              transcription != null &&
+                  transcription.supports(clip) &&
+                  transcription.stripFor(clip) == null
+              ? () => unawaited(transcription.transcribe(clip))
+              : null,
+          transcription: transcription?.stripFor(clip),
         );
       },
     );

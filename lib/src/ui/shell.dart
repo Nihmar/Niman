@@ -27,10 +27,13 @@ import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/transcription/open_audio_notes.dart';
+import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_note.dart';
+import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
@@ -169,6 +172,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(librarySessionProvider);
+    // Started once: writes transcripts into notes no view has open.
+    ref.read(audioTranscriptWriterProvider);
     return StreamBuilder<int>(
       stream: controller.events,
       initialData: controller.revision,
@@ -181,6 +186,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
                 controller: controller,
                 reminders: ref.read(reminderServiceProvider),
                 spellCheck: ref.read(spellCheckProvider),
+                transcription: ref.read(transcriptionModelsProvider),
+                openNotes: ref.read(openAudioNotesProvider),
                 shortcuts: ref.read(shortcutServiceProvider),
                 todoSourceFactory: ref.read(todoSourceFactoryProvider),
                 unsavedTracker: ref.watch(unsavedTrackerProvider),
@@ -214,9 +221,19 @@ final class _LibraryShell extends StatefulWidget {
     required this.widgetHost,
     required this.tray,
     required this.window,
+    this.transcription,
+    this.openNotes,
   });
 
   final LibrarySession controller;
+
+  /// The on-screen notes registry the transcript writer checks; null
+  /// skips the marking.
+  final OpenAudioNotes? openNotes;
+
+  /// The installation's transcription models (settings section); null
+  /// hides it.
+  final TranscriptionModels? transcription;
 
   /// The OS reminder service (notification taps open the Todo tab).
   final ReminderService reminders;
@@ -798,6 +815,27 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
+  /// The note the shell shows, as registered in [_LibraryShell.openNotes].
+  String? _openNote;
+
+  /// Keeps the selected note marked open for the transcript writer, in
+  /// whatever editor shows it: the raw editor has no audio view to take a
+  /// finished transcript, and writing the file under its buffer would
+  /// have the next autosave undo it. The result waits until the note is
+  /// left instead.
+  void _markOpenNote(String? root, String? selected) {
+    final notes = widget.openNotes;
+    if (notes == null) return;
+    final path = root == null || selected == null || _selectedIsDir
+        ? null
+        : p.join(root, selected);
+    if (path == _openNote) return;
+    final previous = _openNote;
+    _openNote = path;
+    if (path != null) notes.open(path);
+    if (previous != null) notes.close(previous);
+  }
+
   /// The editor's write path into the open library: [NoteOperations.saveNote]
   /// with the editor's absolute path turned library-relative. Null while no
   /// library is ready, or for a note outside the library root — the editor
@@ -977,6 +1015,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   @override
   void dispose() {
+    _markOpenNote(null, null);
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
     AppThemes.revision.removeListener(_pushWidgetsOnTheme);
@@ -1835,6 +1874,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
+    _markOpenNote(controller.root, selectedPath);
 
     if (narrow) {
       // Phone: the selected note opens full-screen (from any tab) over the
@@ -2728,6 +2768,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       ShellTab.settings => SettingsTab(
         controller: controller,
         spellCheck: widget.spellCheck,
+        transcription: widget.transcription,
       ),
     };
   }

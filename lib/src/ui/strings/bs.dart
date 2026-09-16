@@ -1265,6 +1265,112 @@ final class BosnianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkripcija';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Nijedan';
+  @override
+  String get transcriptionLanguageTitle => 'Jezik';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Jezik kojim se govori u tvojim snimcima. Odabrati ga je tačnije nego '
+      'ga prepoznavati.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Kao aplikacija ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Prepoznaj automatski';
+  @override
+  String get transcriptionModelsTitle => 'Modeli za transkripciju';
+  @override
+  String transcriptionModelsUsed(String size) => 'Zauzeto $size';
+  @override
+  String get transcriptionModelsInstalled => 'Preuzeti';
+  @override
+  String get transcriptionModelsDownloading => 'Preuzimanje';
+  @override
+  String get transcriptionModelsAvailable => 'Dostupni';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeli ostaju u pohrani aplikacije na ovom uređaju. Ne kopiraju se u '
+      'biblioteku i ne sinhronizuju se.';
+  @override
+  String get transcriptionModelDefault => 'Zadano';
+  @override
+  String get transcriptionModelSlow => 'Spor';
+  @override
+  String get transcriptionModelHintTiny => 'Najbrži, najmanje tačan';
+  @override
+  String get transcriptionModelHintBase => 'Dobar omjer brzine i tačnosti';
+  @override
+  String get transcriptionModelHintSmall => 'Tačniji, oko 3× sporiji';
+  @override
+  String get transcriptionModelHintMedium => 'Vrlo tačan, spor na telefonu';
+  @override
+  String get transcriptionModelHintLarge => 'Najtačniji, treba mnogo memorije';
+  @override
+  String get transcriptionModelDownload => 'Preuzmi';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Izbrisati model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Oslobodit će se $size. Model možeš kasnije ponovo preuzeti.';
+  @override
+  String get transcriptionModelFailed =>
+      'Preuzimanje nije uspjelo. Provjeri vezu i pokušaj ponovo.';
+  @override
+  String get actionRetry => 'Pokušaj ponovo';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Veza je prekinuta, ponovni pokušaj…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pauzirano na $progress';
+  @override
+  String get actionResume => 'Nastavi';
+  @override
+  String get audioTranscribe => 'Transkribuj';
+  @override
+  String get audioTranscribeUnsupported => 'Na ovom uređaju samo WAV snimci';
+  @override
+  String get transcriptionQueued => 'Na čekanju';
+  @override
+  String get transcriptionPreparing => 'Priprema zvuka…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkripcija… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Preuzimanje modela $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkripcija je dodana u opis';
+  @override
+  String get transcriptionNoSpeech => 'U ovom snimku nije prepoznat govor';
+  @override
+  String get transcriptionFailed => 'Transkripcija nije uspjela';
+  @override
+  String get transcriptionPickModelTitle => 'Odaberi model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripcija se radi na ovom uređaju i snimak se nikad ne šalje. '
+      'Model se preuzima samo jednom.';
+  @override
+  String get transcriptionPickModelAction => 'Preuzmi i transkribuj';
+  @override
+  String get transcriptionModelRecommended => 'Preporučeno';
+  @override
+  String get transcriptionExistingTitle => 'Ovaj snimak već ima opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Zamijeniti ga transkripcijom ili dodati transkripciju ispod?';
+  @override
+  String get transcriptionAppend => 'Dodaj ispod';
+  @override
+  String get transcriptionReplace => 'Zamijeni';
+  @override
   String get settingsSectionSync => 'Sinhronizacija';
   @override
   String get syncWebDavTitle => 'WebDAV';

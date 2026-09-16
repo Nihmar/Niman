@@ -1246,6 +1246,112 @@ final class TurkishStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes dk';
   @override
+  String get settingsSectionTranscription => 'Metne dökme';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Yok';
+  @override
+  String get transcriptionLanguageTitle => 'Dil';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kayıtlarınızda konuşulan dil. Dili belirtmek, otomatik algılamadan '
+      'daha doğru sonuç verir.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Uygulamayla aynı ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Otomatik algıla';
+  @override
+  String get transcriptionModelsTitle => 'Metne dökme modelleri';
+  @override
+  String transcriptionModelsUsed(String size) => '$size kullanılıyor';
+  @override
+  String get transcriptionModelsInstalled => 'İndirilenler';
+  @override
+  String get transcriptionModelsDownloading => 'İndiriliyor';
+  @override
+  String get transcriptionModelsAvailable => 'Kullanılabilir';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeller bu cihazda uygulamanın depolama alanında kalır. Kitaplığa '
+      'kopyalanmaz ve eşitlenmez.';
+  @override
+  String get transcriptionModelDefault => 'Varsayılan';
+  @override
+  String get transcriptionModelSlow => 'Yavaş';
+  @override
+  String get transcriptionModelHintTiny => 'En hızlı, en az doğru';
+  @override
+  String get transcriptionModelHintBase => 'Hız ve doğruluk arasında iyi denge';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Daha doğru, yaklaşık 3× daha yavaş';
+  @override
+  String get transcriptionModelHintMedium => 'Çok doğru, telefonda yavaş';
+  @override
+  String get transcriptionModelHintLarge => 'En doğru, çok bellek gerektirir';
+  @override
+  String get transcriptionModelDownload => 'İndir';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      '$model modeli silinsin mi?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Bu işlem $size yer açar. Modeli daha sonra yeniden indirebilirsiniz.';
+  @override
+  String get transcriptionModelFailed =>
+      'İndirme başarısız oldu. Bağlantınızı kontrol edip yeniden deneyin.';
+  @override
+  String get actionRetry => 'Yeniden dene';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Bağlantı koptu, yeniden deneniyor…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      '$progress noktasında duraklatıldı';
+  @override
+  String get actionResume => 'Devam et';
+  @override
+  String get audioTranscribe => 'Metne dök';
+  @override
+  String get audioTranscribeUnsupported => 'Bu cihazda yalnızca WAV kayıtları';
+  @override
+  String get transcriptionQueued => 'Sırada';
+  @override
+  String get transcriptionPreparing => 'Ses hazırlanıyor…';
+  @override
+  String transcriptionRunning(int percent) => 'Metne dökülüyor… %$percent';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model indiriliyor · %$percent';
+  @override
+  String get transcriptionSaved => 'Metin açıklamaya eklendi';
+  @override
+  String get transcriptionNoSpeech => 'Bu kayıtta konuşma algılanmadı';
+  @override
+  String get transcriptionFailed => 'Metne dökme başarısız oldu';
+  @override
+  String get transcriptionPickModelTitle => 'Bir model seçin';
+  @override
+  String get transcriptionPickModelBody =>
+      'Metne dökme bu cihazda yapılır ve kayıt hiçbir yere gönderilmez. Model '
+      'yalnızca bir kez indirilir.';
+  @override
+  String get transcriptionPickModelAction => 'İndir ve metne dök';
+  @override
+  String get transcriptionModelRecommended => 'Önerilen';
+  @override
+  String get transcriptionExistingTitle => 'Bu kaydın zaten bir açıklaması var';
+  @override
+  String get transcriptionExistingBody =>
+      'Metinle değiştirilsin mi, yoksa metin altına mı eklensin?';
+  @override
+  String get transcriptionAppend => 'Altına ekle';
+  @override
+  String get transcriptionReplace => 'Değiştir';
+  @override
   String get settingsSectionSync => 'Eşitleme';
   @override
   String get syncWebDavTitle => 'WebDAV';

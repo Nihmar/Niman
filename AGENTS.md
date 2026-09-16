@@ -13,9 +13,8 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 
 ## Commits
 - One logical change per commit; never bundle unrelated changes.
-- After each commit, rebuild and report **outcome + artifact path** only (no raw logs):
-  - Linux: `./scripts/niman.sh apk` / `./scripts/niman.sh linux`
-  - Windows: `scripts\niman.bat apk` / `scripts\niman.bat windows`
+- After each commit, **on a Linux host only**, rebuild and report **outcome + artifact path** only (no raw logs): `./scripts/niman.sh apk` / `./scripts/niman.sh linux`.
+- On a Windows host, do **not** rebuild after commits: builds are far too slow there. Build (`scripts\niman.bat apk` / `scripts\niman.bat windows`) only when explicitly asked.
 
 ## Verify
 - **Before analyze and tests**, run `dart fix --apply` then `dart format lib test tool` (both idempotent).

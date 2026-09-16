@@ -1274,6 +1274,117 @@ final class RomanianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transcriere';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Niciunul';
+  @override
+  String get transcriptionLanguageTitle => 'Limbă';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Limba vorbită în înregistrările tale. S-o indici e mai precis decât '
+      's-o lași detectată.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Ca aplicația ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Detectează automat';
+  @override
+  String get transcriptionModelsTitle => 'Modele de transcriere';
+  @override
+  String transcriptionModelsUsed(String size) => '$size folosiți';
+  @override
+  String get transcriptionModelsInstalled => 'Descărcate';
+  @override
+  String get transcriptionModelsDownloading => 'Se descarcă';
+  @override
+  String get transcriptionModelsAvailable => 'Disponibile';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modelele rămân în spațiul de stocare al aplicației pe acest '
+      'dispozitiv. Nu sunt copiate în bibliotecă și nici sincronizate.';
+  @override
+  String get transcriptionModelDefault => 'Implicit';
+  @override
+  String get transcriptionModelSlow => 'Lent';
+  @override
+  String get transcriptionModelHintTiny =>
+      'Cel mai rapid, cel mai puțin precis';
+  @override
+  String get transcriptionModelHintBase =>
+      'Echilibru bun între viteză și precizie';
+  @override
+  String get transcriptionModelHintSmall => 'Mai precis, de circa 3× mai lent';
+  @override
+  String get transcriptionModelHintMedium => 'Foarte precis, lent pe telefon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Cel mai precis, are nevoie de multă memorie';
+  @override
+  String get transcriptionModelDownload => 'Descarcă';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Ștergi modelul $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Se eliberează $size. Poți descărca modelul din nou mai târziu.';
+  @override
+  String get transcriptionModelFailed =>
+      'Descărcarea a eșuat. Verifică conexiunea și încearcă din nou.';
+  @override
+  String get actionRetry => 'Încearcă din nou';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Conexiune pierdută, se reîncearcă…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Întrerupt la $progress';
+  @override
+  String get actionResume => 'Reia';
+  @override
+  String get audioTranscribe => 'Transcrie';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Doar înregistrări WAV pe acest dispozitiv';
+  @override
+  String get transcriptionQueued => 'În așteptare';
+  @override
+  String get transcriptionPreparing => 'Se pregătește sunetul…';
+  @override
+  String transcriptionRunning(int percent) => 'Se transcrie… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Se descarcă $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transcrierea a fost adăugată la descriere';
+  @override
+  String get transcriptionNoSpeech =>
+      'Nu s-a recunoscut vorbire în această înregistrare';
+  @override
+  String get transcriptionFailed => 'Transcrierea a eșuat';
+  @override
+  String get transcriptionPickModelTitle => 'Alege un model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transcrierea se face pe acest dispozitiv, iar înregistrarea nu este '
+      'trimisă nicăieri. Modelul se descarcă o singură dată.';
+  @override
+  String get transcriptionPickModelAction => 'Descarcă și transcrie';
+  @override
+  String get transcriptionModelRecommended => 'Recomandat';
+  @override
+  String get transcriptionExistingTitle =>
+      'Această înregistrare are deja o descriere';
+  @override
+  String get transcriptionExistingBody =>
+      'O înlocuiești cu transcrierea sau adaugi transcrierea dedesubt?';
+  @override
+  String get transcriptionAppend => 'Adaugă dedesubt';
+  @override
+  String get transcriptionReplace => 'Înlocuiește';
+  @override
   String get settingsSectionSync => 'Sincronizare';
   @override
   String get syncWebDavTitle => 'WebDAV';

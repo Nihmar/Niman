@@ -1276,6 +1276,117 @@ final class DutchStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transcriptie';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Geen';
+  @override
+  String get transcriptionLanguageTitle => 'Taal';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'De taal die in je opnames wordt gesproken. Die opgeven is nauwkeuriger '
+      'dan hem laten herkennen.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Zoals de app ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Automatisch herkennen';
+  @override
+  String get transcriptionModelsTitle => 'Transcriptiemodellen';
+  @override
+  String transcriptionModelsUsed(String size) => '$size in gebruik';
+  @override
+  String get transcriptionModelsInstalled => 'Gedownload';
+  @override
+  String get transcriptionModelsDownloading => 'Bezig met downloaden';
+  @override
+  String get transcriptionModelsAvailable => 'Beschikbaar';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modellen blijven in de opslag van de app op dit apparaat. Ze worden '
+      'niet naar de bibliotheek gekopieerd of gesynchroniseerd.';
+  @override
+  String get transcriptionModelDefault => 'Standaard';
+  @override
+  String get transcriptionModelSlow => 'Traag';
+  @override
+  String get transcriptionModelHintTiny => 'Snelst, minst nauwkeurig';
+  @override
+  String get transcriptionModelHintBase =>
+      'Goede balans tussen snelheid en nauwkeurigheid';
+  @override
+  String get transcriptionModelHintSmall => 'Nauwkeuriger, ongeveer 3× trager';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Zeer nauwkeurig, traag op een telefoon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Nauwkeurigst, heeft veel geheugen nodig';
+  @override
+  String get transcriptionModelDownload => 'Downloaden';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Model $model verwijderen?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Dit maakt $size vrij. Je kunt het model later opnieuw downloaden.';
+  @override
+  String get transcriptionModelFailed =>
+      'Downloaden mislukt. Controleer de verbinding en probeer het opnieuw.';
+  @override
+  String get actionRetry => 'Opnieuw proberen';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Verbinding verbroken, nieuwe poging…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Gepauzeerd bij $progress';
+  @override
+  String get actionResume => 'Hervatten';
+  @override
+  String get audioTranscribe => 'Transcriberen';
+  @override
+  String get audioTranscribeUnsupported => 'Alleen WAV-opnames op dit apparaat';
+  @override
+  String get transcriptionQueued => 'In de wachtrij';
+  @override
+  String get transcriptionPreparing => 'Audio voorbereiden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transcriberen… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model downloaden · $percent%';
+  @override
+  String get transcriptionSaved =>
+      'Transcriptie toegevoegd aan de beschrijving';
+  @override
+  String get transcriptionNoSpeech => 'Geen spraak herkend in deze opname';
+  @override
+  String get transcriptionFailed => 'Transcriptie mislukt';
+  @override
+  String get transcriptionPickModelTitle => 'Kies een model';
+  @override
+  String get transcriptionPickModelBody =>
+      'De transcriptie gebeurt op dit apparaat en de opname wordt nooit '
+      'geüpload. Het model wordt één keer gedownload.';
+  @override
+  String get transcriptionPickModelAction => 'Downloaden en transcriberen';
+  @override
+  String get transcriptionModelRecommended => 'Aanbevolen';
+  @override
+  String get transcriptionExistingTitle =>
+      'Deze opname heeft al een beschrijving';
+  @override
+  String get transcriptionExistingBody =>
+      'Vervangen door de transcriptie, of de transcriptie eronder toevoegen?';
+  @override
+  String get transcriptionAppend => 'Eronder toevoegen';
+  @override
+  String get transcriptionReplace => 'Vervangen';
+  @override
   String get settingsSectionSync => 'Synchronisatie';
   @override
   String get syncWebDavTitle => 'WebDAV';
