@@ -287,6 +287,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
 
   Future<void> _deleteClip(AudioChatRow row, AudioClip clip) async {
     if (_playback.activeKey == row.key) await _playback.stop();
+    _transcription?.clipDeleted(clip.target);
     widget.onChanged(removeAudioMessage(widget.text, clip));
   }
 
@@ -347,6 +348,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
       final rename = widget.renameAudio ?? _renameInLibrary;
       final next = await rename(clip.target, wanted);
       if (!mounted) return;
+      _transcription?.clipRenamed(from: clip.target, to: next);
       widget.onChanged(renameAudioClipTarget(widget.text, clip, next));
     });
   }

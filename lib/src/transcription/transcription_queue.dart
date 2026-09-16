@@ -144,6 +144,30 @@ final class TranscriptionQueue extends ChangeNotifier {
     _notify();
   }
 
+  /// Follows a clip renamed in [notePath] from [from] to [to] (file now
+  /// [audioPath]), so its job still finds the clip and its file.
+  void retarget(
+    String notePath, {
+    required String from,
+    required String to,
+    required String audioPath,
+  }) {
+    final job = jobFor(notePath, from);
+    if (job == null) return;
+    job
+      ..clipTarget = to
+      ..audioPath = audioPath;
+    _log.info('$job: clip renamed from $from');
+    _notify();
+  }
+
+  /// Drops the job of the clip [clipTarget] in [notePath], if any: the
+  /// clip left the note.
+  void cancelClip(String notePath, String clipTarget) {
+    final job = jobFor(notePath, clipTarget);
+    if (job != null) cancel(job);
+  }
+
   void _onModels() {
     if (_jobs.any((job) => job.phase == TranscriptionPhase.waitingForModel)) {
       _pump();

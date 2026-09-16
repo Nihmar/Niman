@@ -145,4 +145,25 @@ void main() {
     expect(files[note], '$head![](assets/a.wav)\n> vecchia\n');
   });
 
+  test('a clip renamed while queued still gets its text', () async {
+    final job = enqueue();
+    await until(() => transcriber.pending.length == 1);
+    files[note] = '$head![](assets/b.wav)\n> vecchia\n';
+    queue.retarget(
+      note,
+      from: 'assets/a.wav',
+      to: 'assets/b.wav',
+      audioPath: p.join(dir.path, 'a.wav'),
+    );
+    expect(job.clipTarget, 'assets/b.wav');
+    transcriber.pending.single.complete('nuova');
+    await until(() => files[note]!.contains('nuova'));
+    expect(files[note], '$head![](assets/b.wav)\n> nuova\n');
+  });
+
+  test('a clip deleted while queued cancels its job', () async {
+    enqueue();
+    queue.cancelClip(note, 'assets/a.wav');
+    expect(queue.jobs, isEmpty);
+  });
 }
