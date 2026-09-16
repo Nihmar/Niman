@@ -1228,6 +1228,18 @@ final class SlovakStrings extends Strings {
     _ => '$count nezmenených riadkov',
   };
   @override
+  String get historyTakeHunk => 'Obnoviť tu';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Obnoviť 1 zmenu' : 'Obnoviť $count zmien';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Vybrané zmeny sa vrátia k textu tejto verzie. Poznámka v súčasnej '
+      'podobe sa najprv uchová ako verzia, takže to môžeš vrátiť späť.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Poznámka sa zmenila, kým si tu bol — porovnanie bolo aktualizované.';
+  @override
   String get historyVersionsTitle => 'Počet uchovaných verzií';
   @override
   String get historyVersionsSubtitle => 'Pre každú poznámku, v .history/';

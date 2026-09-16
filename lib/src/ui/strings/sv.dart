@@ -1237,6 +1237,19 @@ final class SwedishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 oförändrad rad' : '$count oförändrade rader';
   @override
+  String get historyTakeHunk => 'Återställ här';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Återställ 1 ändring' : 'Återställ $count ändringar';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De valda ändringarna går tillbaka till den här versionens text. '
+      'Anteckningen som den är nu sparas först som en version, så du kan ångra '
+      'det.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Anteckningen ändrades medan du var här — jämförelsen har uppdaterats.';
+  @override
   String get historyVersionsTitle => 'Versioner att spara';
   @override
   String get historyVersionsSubtitle => 'Per anteckning, i .history/';

@@ -1271,6 +1271,21 @@ final class FrenchStrings extends Strings {
   String diffUnchanged(int count) =>
       count < 2 ? '$count ligne inchangée' : '$count lignes inchangées';
   @override
+  String get historyTakeHunk => 'Restaurer ici';
+  @override
+  String historyRestoreSelectedAction(int count) => count == 1
+      ? 'Restaurer 1 modification'
+      : 'Restaurer $count modifications';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Les modifications choisies reviennent au texte de cette version. La '
+      "note telle qu'elle est maintenant est d'abord conservée comme "
+      'version, vous pouvez donc annuler.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'La note a changé pendant que vous étiez ici — la comparaison a été '
+      'actualisée.';
+  @override
   String get historyVersionsTitle => 'Versions à conserver';
   @override
   String get historyVersionsSubtitle => 'Par note, dans .history/';

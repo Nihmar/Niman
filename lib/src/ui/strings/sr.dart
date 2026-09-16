@@ -1240,6 +1240,18 @@ final class SerbianStrings extends Strings {
     _ => '$count непромењених редова',
   };
   @override
+  String get historyTakeHunk => 'Врати овде';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Врати 1 промену' : 'Врати $count промена';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Изабране промене враћају се на текст ове верзије. Белешка у тренутном '
+      'облику прво се чува као верзија, па ово можеш да опозовеш.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Белешка се променила док си био овде — поређење је освежено.';
+  @override
   String get historyVersionsTitle => 'Број чуваних верзија';
   @override
   String get historyVersionsSubtitle => 'По белешци, у .history/';

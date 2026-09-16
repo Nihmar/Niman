@@ -1282,6 +1282,19 @@ final class GreekStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 αμετάβλητη γραμμή' : '$count αμετάβλητες γραμμές';
   @override
+  String get historyTakeHunk => 'Επαναφορά εδώ';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Επαναφορά 1 αλλαγής' : 'Επαναφορά $count αλλαγών';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Οι επιλεγμένες αλλαγές επιστρέφουν στο κείμενο αυτής της έκδοσης. Η '
+      'σημείωση όπως είναι τώρα διατηρείται πρώτα ως έκδοση, ώστε να μπορείς '
+      'να το αναιρέσεις.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Η σημείωση άλλαξε όσο ήσουν εδώ — η σύγκριση ενημερώθηκε.';
+  @override
   String get historyVersionsTitle => 'Εκδόσεις προς διατήρηση';
   @override
   String get historyVersionsSubtitle => 'Ανά σημείωση, στο .history/';

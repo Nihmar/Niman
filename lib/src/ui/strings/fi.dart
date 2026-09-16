@@ -1243,6 +1243,18 @@ final class FinnishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 muuttumaton rivi' : '$count muuttumatonta riviä';
   @override
+  String get historyTakeHunk => 'Palauta tähän';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Palauta 1 muutos' : 'Palauta $count muutosta';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valitut muutokset palaavat tämän version tekstiin. Muistiinpano '
+      'nykyisellään säilytetään ensin versiona, joten voit kumota tämän.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Muistiinpano muuttui kun olit täällä — vertailu on päivitetty.';
+  @override
   String get historyVersionsTitle => 'Säilytettävät versiot';
   @override
   String get historyVersionsSubtitle =>

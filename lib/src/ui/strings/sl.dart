@@ -1224,6 +1224,19 @@ final class SlovenianStrings extends Strings {
     _ => '$count nespremenjenih vrstic',
   };
   @override
+  String get historyTakeHunk => 'Obnovi tukaj';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Obnovi 1 spremembo' : 'Obnovi $count sprememb';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Izbrane spremembe se vrnejo k besedilu te različice. Zapisek v trenutni '
+      'obliki se najprej ohrani kot različica, zato lahko to razveljaviš.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Zapisek se je spremenil, medtem ko si bil tukaj — primerjava je '
+      'osvežena.';
+  @override
   String get historyVersionsTitle => 'Število shranjenih različic';
   @override
   String get historyVersionsSubtitle => 'Za vsako opombo, v .history/';

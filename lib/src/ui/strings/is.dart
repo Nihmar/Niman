@@ -1229,6 +1229,20 @@ final class IcelandicStrings extends Strings {
       ? '$count óbreytt lína'
       : '$count óbreyttar línur';
   @override
+  String get historyTakeHunk => 'Endurheimta hér';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Endurheimta 1 breytingu' : 'Endurheimta $count breytingar';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valdar breytingar fara aftur í texta þessarar útgáfu. Minnispunkturinn '
+      'eins og hann er núna er fyrst geymdur sem útgáfa, svo þú getur '
+      'afturkallað þetta.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Minnispunkturinn breyttist á meðan þú varst hér — samanburðurinn hefur '
+      'verið uppfærður.';
+  @override
   String get historyVersionsTitle => 'Fjöldi geymdra útgáfna';
   @override
   String get historyVersionsSubtitle => 'Fyrir hvert minnisblað, í .history/';

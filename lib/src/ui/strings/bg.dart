@@ -1245,6 +1245,19 @@ final class BulgarianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 непроменен ред' : '$count непроменени реда';
   @override
+  String get historyTakeHunk => 'Възстанови тук';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Възстанови 1 промяна' : 'Възстанови $count промени';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Избраните промени се връщат към текста на тази версия. Бележката в '
+      'сегашния ѝ вид първо се запазва като версия, така че можеш да отмениш '
+      'това.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Бележката се промени, докато беше тук — сравнението е обновено.';
+  @override
   String get historyVersionsTitle => 'Брой пазени версии';
   @override
   String get historyVersionsSubtitle => 'За всяка бележка, в .history/';

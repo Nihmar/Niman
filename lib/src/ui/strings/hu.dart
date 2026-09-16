@@ -1242,6 +1242,20 @@ final class HungarianStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count változatlan sor';
   @override
+  String get historyTakeHunk => 'Visszaállítás itt';
+  @override
+  String historyRestoreSelectedAction(int count) => count == 1
+      ? '1 változás visszaállítása'
+      : '$count változás visszaállítása';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'A kiválasztott változások visszatérnek ennek a verziónak a szövegéhez. '
+      'A jegyzet mostani állapota előbb verzióként megmarad, így vissza tudod '
+      'vonni.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'A jegyzet megváltozott, amíg itt voltál — az összehasonlítás frissült.';
+  @override
   String get historyVersionsTitle => 'Megőrzendő verziók';
   @override
   String get historyVersionsSubtitle => 'Jegyzetenként, a .history/ mappában';

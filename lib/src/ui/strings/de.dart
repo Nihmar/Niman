@@ -1263,6 +1263,21 @@ final class GermanStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 unveränderte Zeile' : '$count unveränderte Zeilen';
   @override
+  String get historyTakeHunk => 'Hier wiederherstellen';
+  @override
+  String historyRestoreSelectedAction(int count) => count == 1
+      ? '1 Änderung wiederherstellen'
+      : '$count Änderungen wiederherstellen';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Die gewählten Änderungen kehren zum Text dieser Version zurück. Die '
+      'Notiz in ihrem jetzigen Stand wird zuvor als Version behalten, du '
+      'kannst das also rückgängig machen.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Die Notiz hat sich geändert, während du hier warst — der Vergleich '
+      'wurde aktualisiert.';
+  @override
   String get historyVersionsTitle => 'Aufbewahrte Versionen';
   @override
   String get historyVersionsSubtitle => 'Pro Notiz, in .history/';

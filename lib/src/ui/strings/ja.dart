@@ -1150,6 +1150,16 @@ final class JapaneseStrings extends Strings {
   @override
   String diffUnchanged(int count) => '変更のない $count 行';
   @override
+  String get historyTakeHunk => 'ここを復元';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 件の変更を復元' : '$count 件の変更を復元';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      '選んだ変更はこのバージョンの文章に戻ります。現在のノートはまずバージョンとして保存されるので、元に戻せます。';
+  @override
+  String get historyNoteChangedReloaded => 'ここにいる間にノートが変更されました — 比較を更新しました。';
+  @override
   String get historyVersionsTitle => '保持するバージョン数';
   @override
   String get historyVersionsSubtitle => 'ノートごとに .history/ に保存';
