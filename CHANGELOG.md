@@ -6,6 +6,28 @@ This file ships inside the build and feeds the in-app changelog (the
 launch dialog after an update and the screen under Settings → About).
 Update it in the release commit, before the tag.
 
+## [0.0.6] - 2026-09-16
+
+### Added
+- WebDAV sync: point a library at a folder on your server and it keeps in step, by hand or on its own — automatic triggers with backoff, a queue that survives going offline and restarting, per-library credentials in the keychain, and a status panel listing whatever a run could not settle. Servers without ETags or preconditions work in a compatible mode, and one reached through a reverse proxy that mounts it under a path prefix works too. A run that would delete many files asks first, and deletions land in the trash rather than disappearing
+- Note history: every note keeps its recent versions in `.history/` inside the library, grouped by day with the lines added and removed against the note as it is now. A version opens as a diff — side by side on a wide screen, stacked on a phone — and restores whole, or in part by picking single changes, with what it replaces kept as a version so a restore is itself undoable
+- Conflicts merge instead of asking: when both sides changed a note, edits in different places land together, and only real overlaps open a screen where each one is settled by choosing this device's lines, the server's, or both
+- On-device transcription of voice notes: **Transcribe** in a clip's menu runs a Whisper model locally and writes the text into the clip's description, asking first whether it replaces what is written there or goes below it. Models are downloaded and kept per device, never in the library, and nothing leaves the device. Available on Android and on Windows and Linux desktops
+- A personal dictionary per library: right-click a word the spell-checker flagged and add it, and it stops being flagged in that library
+- Clicking a link to a note that does not exist offers to create it, at the folder you choose in Settings → Editor
+
+### Changed
+- **The Android build is 64-bit only.** Devices with a 32-bit-only processor cannot install this version or update to it
+- A todo reminder's notification now wears the app's mark instead of a generic alarm clock
+- Voice recording can be paused and resumed, and saving a clip no longer stutters the interface
+- Opening a library upgrades its database (schema 22). A `.history/` folder appears inside libraries from this version on; it holds the note versions and is never synced
+
+### Fixed
+- Inserting a large image no longer freezes the app while the file is read
+- Wrong words in several older translations (Icelandic, Belarusian, Bulgarian, Greek, Basque, Lithuanian, Slovak, Albanian, Serbian), and strings that had stayed in English in every language
+- The launcher's long-press menu was missing **New voice note**, which the in-app button and `Ctrl+Shift+A` both offered
+- Playing a voice note's clip on Windows, where the file's path was put together with mixed separators and the player could not open it
+
 ## [0.0.5] - 2026-09-15
 
 ### Added
