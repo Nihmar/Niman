@@ -899,4 +899,27 @@ final class AppStrings {
   static String get syncConflictLoadFailed => _s.syncConflictLoadFailed;
   static String get syncResolveFailed => _s.syncResolveFailed;
   static String get syncResolved => _s.syncResolved;
+  static String get syncSectionWhen => _s.syncSectionWhen;
+  static String get syncAutoTitle => _s.syncAutoTitle;
+  static String get syncAutoSubtitle => _s.syncAutoSubtitle;
+  static String get syncIntervalTitle => _s.syncIntervalTitle;
+  static String get syncIntervalSubtitle => _s.syncIntervalSubtitle;
+  static String get syncIntervalDialogBody => _s.syncIntervalDialogBody;
+  static String syncIntervalMinutes(int count) => _s.syncIntervalMinutes(count);
+  static String get syncIntervalNever => _s.syncIntervalNever;
+  static String get syncWifiOnlyTitle => _s.syncWifiOnlyTitle;
+  static String get syncWifiOnlySubtitle => _s.syncWifiOnlySubtitle;
+  static String syncPendingChanges(int count) => _s.syncPendingChanges(count);
+  static String syncRetryIn(String wait) => _s.syncRetryIn(wait);
+  static String syncWaitSeconds(int seconds) => _s.syncWaitSeconds(seconds);
+  static String syncWaitMinutes(int minutes) => _s.syncWaitMinutes(minutes);
+  static String get syncWaitingForWifi => _s.syncWaitingForWifi;
+  static String get syncWaitingForNetwork => _s.syncWaitingForNetwork;
+  static String get syncMobileDataHint => _s.syncMobileDataHint;
+  static String get syncQueueKeptHint => _s.syncQueueKeptHint;
+  static String get syncAutoPaused => _s.syncAutoPaused;
+  static String get syncPausedAuthHint => _s.syncPausedAuthHint;
+  static String get syncPausedServerHint => _s.syncPausedServerHint;
+  static String get syncPausedConfirmHint => _s.syncPausedConfirmHint;
+  static String get syncNeedsConfirmation => _s.syncNeedsConfirmation;
 }

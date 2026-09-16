@@ -35,15 +35,49 @@ library at home can go to the NAS and one at work to the office server.
 
 ### Syncing
 
-For now sync runs when you ask for it (automatic syncing is coming):
+Once the first sync is done, Niman syncs by itself:
 
-- the **sync icon** in the Files bar (phone) or at the bottom of the file
-  tree (desktop) — a tap syncs;
-- **Sync now** in Settings → Sync → WebDAV.
+- **a few seconds after you stop editing**: only the files you changed
+  are sent, one small request each (while you keep typing, at the
+  latest after a minute);
+- **when you leave the app**, if something is still waiting;
+- **when the library opens and when you come back to the app**, and
+  **every minute while it is open**: a full comparison with the server,
+  which brings in what changed on other devices;
+- **as soon as the network comes back** after an outage.
 
-While it runs, a bar under the tree shows the progress; you can keep
-writing. Open notes are saved before it starts, and a note that sync
+You can also sync by hand at any time: the **sync icon** in the Files bar
+(phone) or at the bottom of the file tree (desktop), or **Sync now** in
+Settings → Sync → WebDAV. A manual sync shows a progress bar under the
+tree; an automatic one only turns the icon. You can keep writing either
+way. Open notes are saved before a manual sync, and a note that sync
 updated is reloaded.
+
+#### When to sync
+
+In Settings → Sync → WebDAV:
+
+- **Automatically**: off, Niman syncs only when you ask.
+- **Check the server every** 1, 5, 15 or 30 minutes, or **Never** (then
+  only after edits and when the app opens). Each check lists every
+  folder on the server: on a large library over a slow VPN, 5 minutes is
+  kinder to the battery.
+- **Wi-Fi only** (phones): on mobile data nothing syncs by itself; the
+  changes wait, and go out when you are back on Wi-Fi. **Sync now** still
+  works on mobile data.
+
+#### Offline
+
+Changes made without a connection wait in a queue that survives closing
+the app. Niman tries again after 5 seconds, then 10, 20… up to every 10
+minutes, and right away when the network comes back. The panel shows how
+many changes are waiting and when the next try is; **Try again** goes
+now.
+
+Some problems need you, and automatic syncing pauses until you act: a
+rejected password (update it), a missing folder on the server (fix the
+address), or a sync that would remove many files (tap **Sync now** to
+see what and decide). Syncing by hand lifts the pause.
 
 What travels: every note and attachment, plus the library's
 `.niman/settings.json` and `.niman/counters.json`. What stays on each
@@ -84,9 +118,11 @@ touched when it stops:
 
 | Message | What to do |
 |---|---|
-| Server not reachable | Check the network or the VPN, then **Try again**. |
+| Server not reachable | Check the network or the VPN, then **Try again**. Your changes wait and go out by themselves. |
 | Password rejected by the server | **Update password** in the WebDAV settings. |
 | The folder on the server is gone | Recreate it or fix the address. |
+| Waiting for your confirmation | An automatic sync would have removed many files: **Sync now** shows what, and asks. |
+| Waiting for Wi-Fi | **Wi-Fi only** is on and the phone is on mobile data. |
 | Not synced · N | Those files are tried again at the next sync (a full disk on the server, for example). |
 
 ### Change or disconnect

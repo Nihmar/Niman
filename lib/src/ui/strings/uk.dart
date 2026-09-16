@@ -1528,4 +1528,70 @@ final class UkrainianStrings extends Strings {
   String get syncResolveFailed => 'Не вдалося розв’язати конфлікт';
   @override
   String get syncResolved => 'Конфлікт розв’язано';
+  @override
+  String get syncSectionWhen => 'Коли синхронізувати';
+  @override
+  String get syncAutoTitle => 'Автоматично';
+  @override
+  String get syncAutoSubtitle =>
+      'Після змін, під час відкриття та через проміжки часу';
+  @override
+  String get syncIntervalTitle => 'Перевіряти сервер кожні';
+  @override
+  String get syncIntervalSubtitle => 'Лише поки програма відкрита';
+  @override
+  String get syncIntervalDialogBody =>
+      'Щоб бачити зміни, зроблені на інших пристроях, поки програма відкрита. '
+      'З «Ніколи» — лише після змін і під час відкриття.';
+  @override
+  String syncIntervalMinutes(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 14) => '$count хвилин',
+    (1, _) => '$count хвилина',
+    (>= 2 && <= 4, _) => '$count хвилини',
+    _ => '$count хвилин',
+  };
+  @override
+  String get syncIntervalNever => 'Ніколи';
+  @override
+  String get syncWifiOnlyTitle => 'Лише через Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Через мобільні дані синхронізувати лише вручну';
+  @override
+  String syncPendingChanges(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 14) => '$count змін чекає',
+    (1, _) => '$count зміна чекає',
+    (>= 2 && <= 4, _) => '$count зміни чекають',
+    _ => '$count змін чекає',
+  };
+  @override
+  String syncRetryIn(String wait) => 'наступна спроба через $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds с';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes хв';
+  @override
+  String get syncWaitingForWifi => 'Очікування Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Очікування з’єднання';
+  @override
+  String get syncMobileDataHint =>
+      '«Синхронізувати зараз» усе одно використовує мобільні дані.';
+  @override
+  String get syncQueueKeptHint =>
+      'Зміни залишаються тут, навіть якщо ви закриєте програму, і вирушають '
+      'самі, коли сервер відповість.';
+  @override
+  String get syncAutoPaused => 'Автоматична синхронізація призупинена';
+  @override
+  String get syncPausedAuthHint =>
+      'Вона відновиться, коли ви оновите пароль або синхронізуєте вручну.';
+  @override
+  String get syncPausedServerHint =>
+      'Вона відновиться, коли ви виправите адресу або синхронізуєте вручну.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Синхронізувати зараз» покаже, що буде вилучено, і спершу запитає.';
+  @override
+  String get syncNeedsConfirmation => 'Очікування вашого підтвердження';
 }

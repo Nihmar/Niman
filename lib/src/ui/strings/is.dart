@@ -1515,4 +1515,63 @@ final class IcelandicStrings extends Strings {
   String get syncResolveFailed => 'Gat ekki leyst áreksturinn';
   @override
   String get syncResolved => 'Árekstur leystur';
+  @override
+  String get syncSectionWhen => 'Hvenær á að samstilla';
+  @override
+  String get syncAutoTitle => 'Sjálfvirkt';
+  @override
+  String get syncAutoSubtitle =>
+      'Eftir breytingar, við opnun og með reglulegu millibili';
+  @override
+  String get syncIntervalTitle => 'Tíðni athugana á netþjóni';
+  @override
+  String get syncIntervalSubtitle => 'Aðeins meðan forritið er opið';
+  @override
+  String get syncIntervalDialogBody =>
+      'Til að sjá breytingar sem gerðar eru í öðrum tækjum meðan forritið er '
+      'opið. Með „Aldrei“ aðeins eftir breytingar og við opnun.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count mínúta' : '$count mínútur';
+  @override
+  String get syncIntervalNever => 'Aldrei';
+  @override
+  String get syncWifiOnlyTitle => 'Aðeins á Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Á farsímagögnum er aðeins samstillt handvirkt';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count breyting bíður'
+      : '$count breytingar bíða';
+  @override
+  String syncRetryIn(String wait) => 'reynt aftur eftir $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes mín';
+  @override
+  String get syncWaitingForWifi => 'Bíður eftir Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Bíður eftir tengingu';
+  @override
+  String get syncMobileDataHint => '„Samstilla núna“ notar samt farsímagögn.';
+  @override
+  String get syncQueueKeptHint =>
+      'Breytingarnar verða áfram hér, jafnvel þótt þú lokir forritinu, og '
+      'fara sjálfkrafa af stað þegar netþjónninn svarar.';
+  @override
+  String get syncAutoPaused => 'Sjálfvirk samstilling í bið';
+  @override
+  String get syncPausedAuthHint =>
+      'Hún heldur áfram þegar þú uppfærir lykilorðið eða samstillir '
+      'handvirkt.';
+  @override
+  String get syncPausedServerHint =>
+      'Hún heldur áfram þegar þú lagfærir slóðina eða samstillir handvirkt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Samstilla núna“ sýnir hvað yrði fjarlægt og spyr fyrst.';
+  @override
+  String get syncNeedsConfirmation => 'Bíður eftir staðfestingu þinni';
 }

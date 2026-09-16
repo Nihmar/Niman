@@ -1574,4 +1574,64 @@ final class GreekStrings extends Strings {
   String get syncResolveFailed => 'Δεν ήταν δυνατή η επίλυση της διένεξης';
   @override
   String get syncResolved => 'Η διένεξη επιλύθηκε';
+  @override
+  String get syncSectionWhen => 'Πότε γίνεται συγχρονισμός';
+  @override
+  String get syncAutoTitle => 'Αυτόματα';
+  @override
+  String get syncAutoSubtitle =>
+      'Μετά από αλλαγές, στο άνοιγμα και ανά διαστήματα';
+  @override
+  String get syncIntervalTitle => 'Έλεγχος του διακομιστή κάθε';
+  @override
+  String get syncIntervalSubtitle => 'Μόνο όσο η εφαρμογή είναι ανοιχτή';
+  @override
+  String get syncIntervalDialogBody =>
+      'Για να βλέπετε αλλαγές από άλλες συσκευές όσο η εφαρμογή είναι '
+      'ανοιχτή. Με «Ποτέ», μόνο μετά από αλλαγές και στο άνοιγμα.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 λεπτό' : '$count λεπτά';
+  @override
+  String get syncIntervalNever => 'Ποτέ';
+  @override
+  String get syncWifiOnlyTitle => 'Μόνο με Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Με δεδομένα κινητής, συγχρονισμός μόνο χειροκίνητα';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 αλλαγή σε αναμονή' : '$count αλλαγές σε αναμονή';
+  @override
+  String syncRetryIn(String wait) => 'νέα προσπάθεια σε $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds δευτ.';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes λεπ.';
+  @override
+  String get syncWaitingForWifi => 'Αναμονή για Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Αναμονή για σύνδεση';
+  @override
+  String get syncMobileDataHint =>
+      'Το «Συγχρονισμός τώρα» λειτουργεί και με δεδομένα κινητής.';
+  @override
+  String get syncQueueKeptHint =>
+      'Οι αλλαγές μένουν εδώ, ακόμα κι αν κλείσετε την εφαρμογή, και '
+      'αποστέλλονται μόνες τους όταν απαντήσει ο διακομιστής.';
+  @override
+  String get syncAutoPaused => 'Ο αυτόματος συγχρονισμός είναι σε παύση';
+  @override
+  String get syncPausedAuthHint =>
+      'Συνεχίζεται όταν ενημερώσετε τον κωδικό ή συγχρονίσετε '
+      'χειροκίνητα.';
+  @override
+  String get syncPausedServerHint =>
+      'Συνεχίζεται όταν διορθώσετε τη διεύθυνση ή συγχρονίσετε '
+      'χειροκίνητα.';
+  @override
+  String get syncPausedConfirmHint =>
+      'Το «Συγχρονισμός τώρα» δείχνει τι θα αφαιρεθεί και ρωτά πρώτα.';
+  @override
+  String get syncNeedsConfirmation => 'Αναμονή για την επιβεβαίωσή σας';
 }

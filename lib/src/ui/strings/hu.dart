@@ -1518,4 +1518,61 @@ final class HungarianStrings extends Strings {
   String get syncResolveFailed => 'Nem sikerült feloldani az ütközést';
   @override
   String get syncResolved => 'Ütközés feloldva';
+  @override
+  String get syncSectionWhen => 'Mikor szinkronizáljon';
+  @override
+  String get syncAutoTitle => 'Automatikusan';
+  @override
+  String get syncAutoSubtitle =>
+      'Módosítások után, megnyitáskor és időközönként';
+  @override
+  String get syncIntervalTitle => 'A szerver ellenőrzése';
+  @override
+  String get syncIntervalSubtitle => 'Csak amíg az alkalmazás nyitva van';
+  @override
+  String get syncIntervalDialogBody =>
+      'Hogy lásd a más készülékeken végzett módosításokat, amíg az '
+      'alkalmazás nyitva van. „Soha” esetén csak módosítások után és '
+      'megnyitáskor.';
+  @override
+  String syncIntervalMinutes(int count) => '$count percenként';
+  @override
+  String get syncIntervalNever => 'Soha';
+  @override
+  String get syncWifiOnlyTitle => 'Csak Wi-Fi-n';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobiladaton csak kézi szinkronizálás';
+  @override
+  String syncPendingChanges(int count) => '$count módosítás várakozik';
+  @override
+  String syncRetryIn(String wait) => 'újrapróbálás $wait múlva';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds mp';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes perc';
+  @override
+  String get syncWaitingForWifi => 'Várakozás Wi-Fi-re';
+  @override
+  String get syncWaitingForNetwork => 'Várakozás kapcsolatra';
+  @override
+  String get syncMobileDataHint =>
+      'A „Szinkronizálás most” mobiladaton is működik.';
+  @override
+  String get syncQueueKeptHint =>
+      'A módosítások itt maradnak akkor is, ha bezárod az alkalmazást, és '
+      'maguktól elmennek, amikor a szerver válaszol.';
+  @override
+  String get syncAutoPaused => 'Az automatikus szinkronizálás szünetel';
+  @override
+  String get syncPausedAuthHint =>
+      'Folytatódik, ha frissíted a jelszót, vagy kézzel szinkronizálsz.';
+  @override
+  String get syncPausedServerHint =>
+      'Folytatódik, ha kijavítod a címet, vagy kézzel szinkronizálsz.';
+  @override
+  String get syncPausedConfirmHint =>
+      'A „Szinkronizálás most” megmutatja, mi törlődne, és előbb '
+      'rákérdez.';
+  @override
+  String get syncNeedsConfirmation => 'A megerősítésedre vár';
 }

@@ -1534,4 +1534,64 @@ final class BasqueStrings extends Strings {
   String get syncResolveFailed => 'Ezin izan da gatazka ebatzi';
   @override
   String get syncResolved => 'Gatazka ebatzita';
+  @override
+  String get syncSectionWhen => 'Noiz sinkronizatu';
+  @override
+  String get syncAutoTitle => 'Automatikoki';
+  @override
+  String get syncAutoSubtitle => 'Aldaketen ondoren, irekitzean eta tarteka';
+  @override
+  String get syncIntervalTitle => 'Zerbitzaria egiaztatzeko maiztasuna';
+  @override
+  String get syncIntervalSubtitle =>
+      'Aplikazioa irekita dagoen bitartean bakarrik';
+  @override
+  String get syncIntervalDialogBody =>
+      'Beste gailu batzuetan egindako aldaketak ikusteko, aplikazioa irekita '
+      'dagoen bitartean. “Inoiz ez” aukerarekin, aldaketen ondoren eta '
+      'irekitzean bakarrik.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? 'minutu 1' : '$count minutu';
+  @override
+  String get syncIntervalNever => 'Inoiz ez';
+  @override
+  String get syncWifiOnlyTitle => 'Wi-Fi bidez bakarrik';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Datu mugikorrekin, sinkronizatu eskuz bakarrik';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? 'aldaketa 1 zain' : '$count aldaketa zain';
+  @override
+  String syncRetryIn(String wait) => '$wait barru berriro saiatuko da';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi zain';
+  @override
+  String get syncWaitingForNetwork => 'Konexioaren zain';
+  @override
+  String get syncMobileDataHint =>
+      '“Sinkronizatu orain” aukerak datu mugikorrak erabiltzen ditu hala ere.';
+  @override
+  String get syncQueueKeptHint =>
+      'Aldaketak hemen geratzen dira, aplikazioa ixten baduzu ere, eta berez '
+      'bidaltzen dira zerbitzariak erantzuten duenean.';
+  @override
+  String get syncAutoPaused => 'Sinkronizazio automatikoa pausatuta';
+  @override
+  String get syncPausedAuthHint =>
+      'Pasahitza eguneratzean edo eskuz sinkronizatzean berriro abiatuko da.';
+  @override
+  String get syncPausedServerHint =>
+      'Helbidea zuzentzean edo eskuz sinkronizatzean berriro abiatuko da.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sinkronizatu orain” aukerak zer kenduko litzatekeen erakusten du eta '
+      'aurretik galdetzen du.';
+  @override
+  String get syncNeedsConfirmation => 'Zure berrespenaren zain';
 }

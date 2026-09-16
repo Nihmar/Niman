@@ -1486,4 +1486,62 @@ final class EstonianStrings extends Strings {
   String get syncResolveFailed => 'Konflikti ei õnnestunud lahendada';
   @override
   String get syncResolved => 'Konflikt lahendatud';
+  @override
+  String get syncSectionWhen => 'Millal sünkroonida';
+  @override
+  String get syncAutoTitle => 'Automaatselt';
+  @override
+  String get syncAutoSubtitle =>
+      'Pärast muudatusi, avamisel ja kindla intervalliga';
+  @override
+  String get syncIntervalTitle => 'Serveri kontrollimise intervall';
+  @override
+  String get syncIntervalSubtitle => 'Ainult siis, kui rakendus on avatud';
+  @override
+  String get syncIntervalDialogBody =>
+      'Et näha teistes seadmetes tehtud muudatusi, kui rakendus on avatud. '
+      'Valikuga „Mitte kunagi“ ainult pärast muudatusi ja avamisel.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minutit';
+  @override
+  String get syncIntervalNever => 'Mitte kunagi';
+  @override
+  String get syncWifiOnlyTitle => 'Ainult Wi-Fi kaudu';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Mobiilse andmesidega sünkrooni ainult käsitsi';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 muudatus ootab' : '$count muudatust ootab';
+  @override
+  String syncRetryIn(String wait) => 'uus katse $wait pärast';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Ootab Wi-Fi-ühendust';
+  @override
+  String get syncWaitingForNetwork => 'Ootab ühendust';
+  @override
+  String get syncMobileDataHint =>
+      '„Sünkrooni kohe“ kasutab siiski mobiilset andmesidet.';
+  @override
+  String get syncQueueKeptHint =>
+      'Muudatused jäävad siia ka siis, kui rakenduse sulged, ja saadetakse '
+      'ise ära, kui server vastab.';
+  @override
+  String get syncAutoPaused => 'Automaatne sünkroonimine on peatatud';
+  @override
+  String get syncPausedAuthHint =>
+      'See jätkub, kui uuendad parooli või sünkroonid käsitsi.';
+  @override
+  String get syncPausedServerHint =>
+      'See jätkub, kui parandad aadressi või sünkroonid käsitsi.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sünkrooni kohe“ näitab, mis eemaldataks, ja küsib enne kinnitust.';
+  @override
+  String get syncNeedsConfirmation => 'Ootab sinu kinnitust';
 }

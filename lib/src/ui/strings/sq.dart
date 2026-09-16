@@ -1534,4 +1534,61 @@ final class AlbanianStrings extends Strings {
   String get syncResolveFailed => 'Konflikti nuk u zgjidh dot';
   @override
   String get syncResolved => 'Konflikti u zgjidh';
+  @override
+  String get syncSectionWhen => 'Kur të sinkronizohet';
+  @override
+  String get syncAutoTitle => 'Automatikisht';
+  @override
+  String get syncAutoSubtitle => 'Pas ndryshimeve, në hapje dhe në intervale';
+  @override
+  String get syncIntervalTitle => 'Kontrollo serverin çdo';
+  @override
+  String get syncIntervalSubtitle => 'Vetëm kur aplikacioni është i hapur';
+  @override
+  String get syncIntervalDialogBody =>
+      'Për të parë ndryshimet e bëra në pajisje të tjera kur aplikacioni '
+      'është i hapur. Me „Kurrë", vetëm pas ndryshimeve dhe në hapje.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minutë' : '$count minuta';
+  @override
+  String get syncIntervalNever => 'Kurrë';
+  @override
+  String get syncWifiOnlyTitle => 'Vetëm me Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Me të dhëna celulare, sinkronizoni vetëm me dorë';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 ndryshim në pritje' : '$count ndryshime në pritje';
+  @override
+  String syncRetryIn(String wait) => 'provë e re pas $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Në pritje të Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Në pritje të një lidhjeje';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinkronizo tani" përdor sidoqoftë të dhëna celulare.';
+  @override
+  String get syncQueueKeptHint =>
+      'Ndryshimet mbeten këtu, edhe nëse e mbyllni aplikacionin, dhe nisen '
+      'vetë kur serveri përgjigjet.';
+  @override
+  String get syncAutoPaused => 'Sinkronizimi automatik është në pauzë';
+  @override
+  String get syncPausedAuthHint =>
+      'Rifillon kur përditësoni fjalëkalimin ose sinkronizoni me dorë.';
+  @override
+  String get syncPausedServerHint =>
+      'Rifillon kur korrigjoni adresën ose sinkronizoni me dorë.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinkronizo tani" tregon çfarë do të hiqej dhe pyet më parë.';
+  @override
+  String get syncNeedsConfirmation => 'Në pritje të konfirmimit tuaj';
 }

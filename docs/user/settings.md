@@ -46,7 +46,8 @@ log toggle (default on).
 
 **Sync → WebDAV** holds the open library's sync destination: folder
 address, user, the password (in the device keychain), what the server
-can do, and Disconnect. It is per library *and* per device — not in
+can do, when to sync (automatically, how often to check the server,
+Wi-Fi only on phones), and Disconnect. It is per library *and* per device — not in
 `settings.json`, so a copied folder never starts syncing into the
 original's server. See [sync.md](sync.md).
 

@@ -1504,4 +1504,63 @@ final class LatvianStrings extends Strings {
   String get syncResolveFailed => 'Nevarēja atrisināt konfliktu';
   @override
   String get syncResolved => 'Konflikts atrisināts';
+  @override
+  String get syncSectionWhen => 'Kad sinhronizēt';
+  @override
+  String get syncAutoTitle => 'Automātiski';
+  @override
+  String get syncAutoSubtitle =>
+      'Pēc izmaiņām, atverot un ik pēc noteikta laika';
+  @override
+  String get syncIntervalTitle => 'Servera pārbaudes intervāls';
+  @override
+  String get syncIntervalSubtitle => 'Tikai kamēr lietotne ir atvērta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Lai redzētu citās ierīcēs veiktās izmaiņas, kamēr lietotne ir atvērta. '
+      'Ar „Nekad“ – tikai pēc izmaiņām un atverot.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count minūte' : '$count minūtes';
+  @override
+  String get syncIntervalNever => 'Nekad';
+  @override
+  String get syncWifiOnlyTitle => 'Tikai Wi-Fi tīklā';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Ar mobilajiem datiem sinhronizēt tikai manuāli';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count izmaiņa gaida'
+      : '$count izmaiņas gaida';
+  @override
+  String syncRetryIn(String wait) => 'atkārtots mēģinājums pēc $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Gaida Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Gaida savienojumu';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinhronizēt tagad“ tomēr izmanto mobilos datus.';
+  @override
+  String get syncQueueKeptHint =>
+      'Izmaiņas paliek šeit, pat ja aizverat lietotni, un tiek nosūtītas '
+      'pašas, kad serveris atbild.';
+  @override
+  String get syncAutoPaused => 'Automātiskā sinhronizācija apturēta';
+  @override
+  String get syncPausedAuthHint =>
+      'Tā atsāksies, kad atjaunināsiet paroli vai sinhronizēsiet manuāli.';
+  @override
+  String get syncPausedServerHint =>
+      'Tā atsāksies, kad izlabosiet adresi vai sinhronizēsiet manuāli.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinhronizēt tagad“ parāda, kas tiktu noņemts, un vispirms pajautā.';
+  @override
+  String get syncNeedsConfirmation => 'Gaida jūsu apstiprinājumu';
 }

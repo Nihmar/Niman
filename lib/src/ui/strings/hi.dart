@@ -1487,4 +1487,60 @@ final class HindiStrings extends Strings {
   String get syncResolveFailed => 'टकराव नहीं सुलझाया जा सका';
   @override
   String get syncResolved => 'टकराव सुलझ गया';
+  @override
+  String get syncSectionWhen => 'कब सिंक करें';
+  @override
+  String get syncAutoTitle => 'अपने-आप';
+  @override
+  String get syncAutoSubtitle => 'बदलावों के बाद, खोलने पर और तय अंतराल पर';
+  @override
+  String get syncIntervalTitle => 'सर्वर जाँचने का अंतराल';
+  @override
+  String get syncIntervalSubtitle => 'सिर्फ़ ऐप खुला रहने पर';
+  @override
+  String get syncIntervalDialogBody =>
+      'ऐप खुला रहते हुए दूसरे डिवाइस पर किए गए बदलाव देखने के लिए। '
+      '«कभी नहीं» चुनने पर सिर्फ़ बदलावों के बाद और खोलने पर।';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 मिनट' : '$count मिनट';
+  @override
+  String get syncIntervalNever => 'कभी नहीं';
+  @override
+  String get syncWifiOnlyTitle => 'सिर्फ़ Wi-Fi पर';
+  @override
+  String get syncWifiOnlySubtitle => 'मोबाइल डेटा पर सिर्फ़ हाथ से सिंक करें';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 बदलाव बाकी है' : '$count बदलाव बाकी हैं';
+  @override
+  String syncRetryIn(String wait) => '$wait में फिर कोशिश होगी';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds सेकंड';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes मिनट';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi का इंतज़ार';
+  @override
+  String get syncWaitingForNetwork => 'कनेक्शन का इंतज़ार';
+  @override
+  String get syncMobileDataHint =>
+      '«अभी सिंक करें» फिर भी मोबाइल डेटा इस्तेमाल करता है।';
+  @override
+  String get syncQueueKeptHint =>
+      'बदलाव यहीं रहते हैं, ऐप बंद करने पर भी, और सर्वर के जवाब देते ही '
+      'अपने-आप भेज दिए जाते हैं।';
+  @override
+  String get syncAutoPaused => 'अपने-आप सिंक रुका हुआ है';
+  @override
+  String get syncPausedAuthHint =>
+      'पासवर्ड अपडेट करने या हाथ से सिंक करने पर यह फिर शुरू होगा।';
+  @override
+  String get syncPausedServerHint =>
+      'पता ठीक करने या हाथ से सिंक करने पर यह फिर शुरू होगा।';
+  @override
+  String get syncPausedConfirmHint =>
+      '«अभी सिंक करें» दिखाता है कि क्या हटेगा, और पहले पूछता है।';
+  @override
+  String get syncNeedsConfirmation => 'आपकी पुष्टि का इंतज़ार';
 }

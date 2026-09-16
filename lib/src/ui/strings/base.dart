@@ -698,4 +698,27 @@ abstract base class Strings {
   String get syncConflictLoadFailed;
   String get syncResolveFailed;
   String get syncResolved;
+  String get syncSectionWhen;
+  String get syncAutoTitle;
+  String get syncAutoSubtitle;
+  String get syncIntervalTitle;
+  String get syncIntervalSubtitle;
+  String get syncIntervalDialogBody;
+  String syncIntervalMinutes(int count);
+  String get syncIntervalNever;
+  String get syncWifiOnlyTitle;
+  String get syncWifiOnlySubtitle;
+  String syncPendingChanges(int count);
+  String syncRetryIn(String wait);
+  String syncWaitSeconds(int seconds);
+  String syncWaitMinutes(int minutes);
+  String get syncWaitingForWifi;
+  String get syncWaitingForNetwork;
+  String get syncMobileDataHint;
+  String get syncQueueKeptHint;
+  String get syncAutoPaused;
+  String get syncPausedAuthHint;
+  String get syncPausedServerHint;
+  String get syncPausedConfirmHint;
+  String get syncNeedsConfirmation;
 }

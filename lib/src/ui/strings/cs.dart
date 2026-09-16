@@ -1514,4 +1514,67 @@ final class CzechStrings extends Strings {
   String get syncResolveFailed => 'Konflikt se nepodařilo vyřešit';
   @override
   String get syncResolved => 'Konflikt vyřešen';
+  @override
+  String get syncSectionWhen => 'Kdy synchronizovat';
+  @override
+  String get syncAutoTitle => 'Automaticky';
+  @override
+  String get syncAutoSubtitle => 'Po úpravách, při otevření a v intervalech';
+  @override
+  String get syncIntervalTitle => 'Kontrolovat server každých';
+  @override
+  String get syncIntervalSubtitle => 'Jen když je aplikace otevřená';
+  @override
+  String get syncIntervalDialogBody =>
+      'Abyste viděli změny provedené na jiných zařízeních, dokud je aplikace '
+      'otevřená. S „Nikdy“ jen po úpravách a při otevření.';
+  @override
+  String syncIntervalMinutes(int count) => switch (count) {
+    1 => '1 minuta',
+    >= 2 && <= 4 => '$count minuty',
+    _ => '$count minut',
+  };
+  @override
+  String get syncIntervalNever => 'Nikdy';
+  @override
+  String get syncWifiOnlyTitle => 'Jen přes Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Na mobilních datech synchronizovat jen ručně';
+  @override
+  String syncPendingChanges(int count) => switch (count) {
+    1 => '1 změna čeká',
+    >= 2 && <= 4 => '$count změny čekají',
+    _ => '$count změn čeká',
+  };
+  @override
+  String syncRetryIn(String wait) => 'další pokus za $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čeká se na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čeká se na připojení';
+  @override
+  String get syncMobileDataHint =>
+      '„Synchronizovat nyní“ i tak použije mobilní data.';
+  @override
+  String get syncQueueKeptHint =>
+      'Změny tu zůstanou, i když aplikaci zavřete, a odejdou samy, jakmile '
+      'server odpoví.';
+  @override
+  String get syncAutoPaused => 'Automatická synchronizace pozastavena';
+  @override
+  String get syncPausedAuthHint =>
+      'Pokračuje, jakmile aktualizujete heslo nebo synchronizujete ručně.';
+  @override
+  String get syncPausedServerHint =>
+      'Pokračuje, jakmile opravíte adresu nebo synchronizujete ručně.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Synchronizovat nyní“ ukáže, co by se odstranilo, a nejdřív se zeptá.';
+  @override
+  String get syncNeedsConfirmation => 'Čeká na vaše potvrzení';
 }

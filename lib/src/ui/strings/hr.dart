@@ -1534,4 +1534,68 @@ final class CroatianStrings extends Strings {
   String get syncResolveFailed => 'Sukob nije moguće riješiti';
   @override
   String get syncResolved => 'Sukob riješen';
+  @override
+  String get syncSectionWhen => 'Kada sinkronizirati';
+  @override
+  String get syncAutoTitle => 'Automatski';
+  @override
+  String get syncAutoSubtitle =>
+      'Nakon uređivanja, pri otvaranju i u razmacima';
+  @override
+  String get syncIntervalTitle => 'Provjeri poslužitelj svakih';
+  @override
+  String get syncIntervalSubtitle => 'Samo dok je aplikacija otvorena';
+  @override
+  String get syncIntervalDialogBody =>
+      'Da vidiš promjene napravljene na drugim uređajima dok je aplikacija '
+      'otvorena. Uz „Nikad”, samo nakon uređivanja i pri otvaranju.';
+  @override
+  String syncIntervalMinutes(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count minuta',
+    (2 || 3 || 4, < 12 || > 14) => '$count minute',
+    _ => '$count minuta',
+  };
+  @override
+  String get syncIntervalNever => 'Nikad';
+  @override
+  String get syncWifiOnlyTitle => 'Samo Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Na mobilnim podacima sinkroniziraj samo ručno';
+  @override
+  String syncPendingChanges(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count promjena čeka',
+    (2 || 3 || 4, < 12 || > 14) => '$count promjene čekaju',
+    _ => '$count promjena čeka',
+  };
+  @override
+  String syncRetryIn(String wait) => 'novi pokušaj za $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čeka se Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čeka se veza';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinkroniziraj sada” ipak koristi mobilne podatke.';
+  @override
+  String get syncQueueKeptHint =>
+      'Promjene ostaju ovdje, čak i ako zatvoriš aplikaciju, i same odlaze '
+      'kada poslužitelj odgovori.';
+  @override
+  String get syncAutoPaused => 'Automatska sinkronizacija je pauzirana';
+  @override
+  String get syncPausedAuthHint =>
+      'Nastavlja se kada ažuriraš lozinku ili sinkroniziraš ručno.';
+  @override
+  String get syncPausedServerHint =>
+      'Nastavlja se kada ispraviš adresu ili sinkroniziraš ručno.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinkroniziraj sada” pokazuje što bi bilo uklonjeno i prvo pita.';
+  @override
+  String get syncNeedsConfirmation => 'Čeka tvoju potvrdu';
 }

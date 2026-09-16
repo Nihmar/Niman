@@ -1499,4 +1499,59 @@ final class EnglishStrings extends Strings {
   String get syncResolveFailed => 'Could not resolve the conflict';
   @override
   String get syncResolved => 'Conflict resolved';
+  @override
+  String get syncSectionWhen => 'When to sync';
+  @override
+  String get syncAutoTitle => 'Automatically';
+  @override
+  String get syncAutoSubtitle => 'After edits, on opening and at intervals';
+  @override
+  String get syncIntervalTitle => 'Check the server every';
+  @override
+  String get syncIntervalSubtitle => 'Only while the app is open';
+  @override
+  String get syncIntervalDialogBody =>
+      'To see changes made on other devices while the app is open. '
+      'With “Never”, only after edits and on opening.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minute' : '$count minutes';
+  @override
+  String get syncIntervalNever => 'Never';
+  @override
+  String get syncWifiOnlyTitle => 'Wi-Fi only';
+  @override
+  String get syncWifiOnlySubtitle => 'On mobile data, sync only by hand';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 change waiting' : '$count changes waiting';
+  @override
+  String syncRetryIn(String wait) => 'retrying in $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Waiting for Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Waiting for a connection';
+  @override
+  String get syncMobileDataHint => '“Sync now” still uses mobile data.';
+  @override
+  String get syncQueueKeptHint =>
+      'Changes stay here, even if you close the app, and go out by '
+      'themselves when the server answers.';
+  @override
+  String get syncAutoPaused => 'Automatic sync paused';
+  @override
+  String get syncPausedAuthHint =>
+      'It resumes when you update the password or sync by hand.';
+  @override
+  String get syncPausedServerHint =>
+      'It resumes when you fix the address or sync by hand.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sync now” shows what would be removed and asks first.';
+  @override
+  String get syncNeedsConfirmation => 'Waiting for your confirmation';
 }

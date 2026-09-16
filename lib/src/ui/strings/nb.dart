@@ -1510,4 +1510,62 @@ final class NorwegianStrings extends Strings {
   String get syncResolveFailed => 'Kunne ikke løse konflikten';
   @override
   String get syncResolved => 'Konflikten er løst';
+  @override
+  String get syncSectionWhen => 'Når det skal synkroniseres';
+  @override
+  String get syncAutoTitle => 'Automatisk';
+  @override
+  String get syncAutoSubtitle =>
+      'Etter endringer, ved åpning og med jevne mellomrom';
+  @override
+  String get syncIntervalTitle => 'Intervall for serversjekk';
+  @override
+  String get syncIntervalSubtitle => 'Bare mens appen er åpen';
+  @override
+  String get syncIntervalDialogBody =>
+      'For å se endringer gjort på andre enheter mens appen er åpen. Med '
+      '«Aldri» bare etter endringer og ved åpning.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minutt' : '$count minutter';
+  @override
+  String get syncIntervalNever => 'Aldri';
+  @override
+  String get syncWifiOnlyTitle => 'Bare på Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'På mobildata synkroniseres det bare manuelt';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 endring venter' : '$count endringer venter';
+  @override
+  String syncRetryIn(String wait) => 'nytt forsøk om $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Venter på Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Venter på tilkobling';
+  @override
+  String get syncMobileDataHint => '«Synkroniser nå» bruker likevel mobildata.';
+  @override
+  String get syncQueueKeptHint =>
+      'Endringene blir liggende her, også om du lukker appen, og sendes av '
+      'seg selv når serveren svarer.';
+  @override
+  String get syncAutoPaused => 'Automatisk synk satt på pause';
+  @override
+  String get syncPausedAuthHint =>
+      'Den fortsetter når du oppdaterer passordet eller synkroniserer '
+      'manuelt.';
+  @override
+  String get syncPausedServerHint =>
+      'Den fortsetter når du retter adressen eller synkroniserer manuelt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Synkroniser nå» viser hva som ville blitt fjernet, og spør først.';
+  @override
+  String get syncNeedsConfirmation => 'Venter på bekreftelsen din';
 }

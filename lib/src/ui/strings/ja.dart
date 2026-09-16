@@ -1389,4 +1389,51 @@ final class JapaneseStrings extends Strings {
   String get syncResolveFailed => '競合を解決できませんでした';
   @override
   String get syncResolved => '競合を解決しました';
+  @override
+  String get syncSectionWhen => '同期のタイミング';
+  @override
+  String get syncAutoTitle => '自動';
+  @override
+  String get syncAutoSubtitle => '編集後、起動時、一定の間隔で';
+  @override
+  String get syncIntervalTitle => 'サーバーの確認間隔';
+  @override
+  String get syncIntervalSubtitle => 'アプリを開いている間のみ';
+  @override
+  String get syncIntervalDialogBody =>
+      'アプリを開いている間に、他のデバイスで行われた変更を確認するためのものです。「しない」の場合は、編集後と起動時のみ同期します。';
+  @override
+  String syncIntervalMinutes(int count) => '$count 分';
+  @override
+  String get syncIntervalNever => 'しない';
+  @override
+  String get syncWifiOnlyTitle => 'Wi-Fi のみ';
+  @override
+  String get syncWifiOnlySubtitle => 'モバイルデータ通信では手動でのみ同期';
+  @override
+  String syncPendingChanges(int count) => '$count 件の変更が待機中';
+  @override
+  String syncRetryIn(String wait) => '$wait後に再試行';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds 秒';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes 分';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi を待機中';
+  @override
+  String get syncWaitingForNetwork => '接続を待機中';
+  @override
+  String get syncMobileDataHint => '「今すぐ同期」はモバイルデータ通信でも同期します。';
+  @override
+  String get syncQueueKeptHint => '変更はアプリを閉じてもここに残り、サーバーが応答すると自動的に送信されます。';
+  @override
+  String get syncAutoPaused => '自動同期は一時停止中';
+  @override
+  String get syncPausedAuthHint => 'パスワードを更新するか手動で同期すると再開します。';
+  @override
+  String get syncPausedServerHint => 'アドレスを修正するか手動で同期すると再開します。';
+  @override
+  String get syncPausedConfirmHint => '「今すぐ同期」では、削除される内容が表示され、先に確認を求められます。';
+  @override
+  String get syncNeedsConfirmation => '確認を待っています';
 }

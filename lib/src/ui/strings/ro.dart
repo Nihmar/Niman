@@ -1536,4 +1536,68 @@ final class RomanianStrings extends Strings {
   String get syncResolveFailed => 'Conflictul nu a putut fi rezolvat';
   @override
   String get syncResolved => 'Conflict rezolvat';
+  @override
+  String get syncSectionWhen => 'Când se sincronizează';
+  @override
+  String get syncAutoTitle => 'Automat';
+  @override
+  String get syncAutoSubtitle =>
+      'După modificări, la deschidere și la intervale';
+  @override
+  String get syncIntervalTitle => 'Verifică serverul la fiecare';
+  @override
+  String get syncIntervalSubtitle => 'Doar cât timp aplicația e deschisă';
+  @override
+  String get syncIntervalDialogBody =>
+      'Ca să vezi modificările făcute pe alte dispozitive cât timp aplicația '
+      'e deschisă. Cu „Niciodată”, doar după modificări și la deschidere.';
+  @override
+  String syncIntervalMinutes(int count) => count == 1
+      ? '1 minut'
+      : count % 100 == 0 || count % 100 >= 20
+      ? '$count de minute'
+      : '$count minute';
+  @override
+  String get syncIntervalNever => 'Niciodată';
+  @override
+  String get syncWifiOnlyTitle => 'Doar prin Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Pe date mobile, sincronizează doar manual';
+  @override
+  String syncPendingChanges(int count) => count == 1
+      ? '1 modificare în așteptare'
+      : count % 100 == 0 || count % 100 >= 20
+      ? '$count de modificări în așteptare'
+      : '$count modificări în așteptare';
+  @override
+  String syncRetryIn(String wait) => 'se reîncearcă în $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Se așteaptă Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Se așteaptă o conexiune';
+  @override
+  String get syncMobileDataHint =>
+      '„Sincronizează acum” folosește tot date mobile.';
+  @override
+  String get syncQueueKeptHint =>
+      'Modificările rămân aici, chiar dacă închizi aplicația, și pleacă '
+      'singure când serverul răspunde.';
+  @override
+  String get syncAutoPaused => 'Sincronizarea automată e în pauză';
+  @override
+  String get syncPausedAuthHint =>
+      'Reia când actualizezi parola sau sincronizezi manual.';
+  @override
+  String get syncPausedServerHint =>
+      'Reia când corectezi adresa sau sincronizezi manual.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sincronizează acum” arată ce ar fi șters și întreabă întâi.';
+  @override
+  String get syncNeedsConfirmation => 'Se așteaptă confirmarea ta';
 }
