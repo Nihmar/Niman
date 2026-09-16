@@ -32,11 +32,20 @@ const String todoReminderChannelId = 'niman_reminders';
 /// string does not resolve — it throws `invalid_icon` out of
 /// `initialize`, which took the whole reminder system down with it.
 ///
-/// Shipped as density PNGs (`tool/make_reminder_icon.py`), not as a
-/// vector: a `VectorDrawable` under `res/drawable/` never reached the
-/// resource table on the build machine, even from a clean build, while
-/// the density-qualified buckets resolve.
-const String todoReminderIcon = 'ic_stat_reminder';
+/// Shipped as density PNGs (`tool/make_stat_icon.py`), not as a vector:
+/// a `VectorDrawable` under `res/drawable/` never reached the resource
+/// table on the build machine, even from a clean build, while the
+/// density-qualified buckets resolve.
+///
+/// The app's own mark, so a reminder in the status bar reads as Niman
+/// rather than as any app's alarm. Android masks a small icon to its
+/// alpha and tints it, so what shows is the white silhouette of the
+/// launcher foreground's ink — the blue of the "i" cannot survive.
+const String todoReminderIcon = 'ic_stat_niman';
+
+/// The alarm glyph the reminders used before the app mark
+/// (`tool/make_reminder_icon.py`), kept as the first fallback.
+const String todoReminderIconLegacy = 'ic_stat_reminder';
 
 /// One schedulable reminder: a stable [id] with content + fire time.
 @immutable
