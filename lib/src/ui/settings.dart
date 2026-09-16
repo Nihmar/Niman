@@ -13,6 +13,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
@@ -80,6 +81,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   double _splitRatio = defaultSplitRatio;
   bool _splitLoaded = false;
   LinkType _linkType = LinkType.wikilink;
+  MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
   int _indentWidth = 2;
   int _historyVersions = defaultHistoryVersions;
   int _historyInterval = defaultHistoryIntervalMinutes;
@@ -143,6 +145,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final previewMode = await controller.previewMode;
     final splitRatio = await controller.splitRatio;
     final linkType = await controller.linkType;
+    final missingNoteLocation = await controller.missingNoteLocation;
     final indentWidth = await controller.indentWidth;
     final historyVersions = await controller.historyVersions;
     final historyInterval = await controller.historyIntervalMinutes;
@@ -171,6 +174,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _splitRatio = splitRatio;
         _splitLoaded = true;
         _linkType = linkType;
+        _missingNoteLocation = missingNoteLocation;
         _indentWidth = indentWidth;
         _historyVersions = historyVersions;
         _historyInterval = historyInterval;
@@ -427,6 +431,15 @@ final class _SettingsBodyState extends State<SettingsBody> {
     controller.notify();
     if (mounted) {
       setState(() => _linkType = type);
+    }
+  }
+
+  Future<void> _setMissingNoteLocation(MissingNoteLocation location) async {
+    final controller = widget.controller;
+    await controller.setMissingNoteLocation(location);
+    controller.notify();
+    if (mounted) {
+      setState(() => _missingNoteLocation = location);
     }
   }
 
@@ -690,6 +703,27 @@ final class _SettingsBodyState extends State<SettingsBody> {
       ],
     );
     if (type != null) await _setLinkType(type);
+  }
+
+  /// Asks where a note created from a dead link lands (issue #78).
+  Future<void> _chooseMissingNoteLocation() async {
+    final location = await showSettingsChoice<MissingNoteLocation>(
+      context,
+      dialogKey: const Key('missing-note-location-dialog'),
+      title: AppStrings.missingNoteLocationTitle,
+      current: _missingNoteLocation,
+      options: [
+        SettingsOption(
+          MissingNoteLocation.libraryRoot,
+          AppStrings.missingNoteLocationRoot,
+        ),
+        SettingsOption(
+          MissingNoteLocation.currentFolder,
+          AppStrings.missingNoteLocationCurrentFolder,
+        ),
+      ],
+    );
+    if (location != null) await _setMissingNoteLocation(location);
   }
 
   /// Asks how many versions of each note the history keeps.
@@ -1058,6 +1092,20 @@ final class _SettingsBodyState extends State<SettingsBody> {
             LinkType.markdown => AppStrings.linkTypeMarkdown,
           },
           onTap: () => unawaited(_chooseLinkType()),
+        ),
+        // Next to the link format: both decide what a link does — one
+        // what it inserts, the other what a click on a missing target
+        // becomes (issue #78).
+        SettingsValueRow(
+          key: const Key('missing-note-location'),
+          title: AppStrings.missingNoteLocationTitle,
+          value: switch (_missingNoteLocation) {
+            MissingNoteLocation.libraryRoot =>
+              AppStrings.missingNoteLocationRoot,
+            MissingNoteLocation.currentFolder =>
+              AppStrings.missingNoteLocationCurrentFolder,
+          },
+          onTap: () => unawaited(_chooseMissingNoteLocation()),
         ),
         SettingsValueRow(
           key: const Key('note-text-scale-setting'),

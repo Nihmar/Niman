@@ -235,6 +235,12 @@ final class PolishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Utwórz brakujące notatki w';
+  @override
+  String get missingNoteLocationRoot => 'Korzeń biblioteki';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Bieżący katalog';
+  @override
   String get indentWidthTitle => 'Szerokość wcięcia';
   @override
   String get indentWidthSubtitle =>
@@ -495,6 +501,15 @@ final class PolishStrings extends Strings {
   String get ambiguousLinkTitle => 'Wiele notatek pasuje';
   @override
   String get openLinkFailed => 'Nie udało się otworzyć linku';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Notatka nie istnieje';
+  @override
+  String missingNoteDialogBody(String path) => 'Utworzyć „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Katalog „$folder“ nie istnieje';
 
   // Task lists (T-TD-04).
   @override

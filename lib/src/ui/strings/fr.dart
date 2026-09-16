@@ -237,6 +237,12 @@ final class FrenchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Créer les notes manquantes dans';
+  @override
+  String get missingNoteLocationRoot => 'Racine de la bibliothèque';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Dossier actuel';
+  @override
   String get indentWidthTitle => 'Largeur d’indentation';
   @override
   String get indentWidthSubtitle =>
@@ -500,6 +506,15 @@ final class FrenchStrings extends Strings {
   String get ambiguousLinkTitle => 'Plusieurs notes correspondent';
   @override
   String get openLinkFailed => 'Impossible d’ouvrir le lien';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'La note n’existe pas';
+  @override
+  String missingNoteDialogBody(String path) => 'Créer « $path » ?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Le dossier « $folder » n’existe pas';
 
   // Task lists (T-TD-04).
   @override

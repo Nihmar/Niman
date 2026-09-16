@@ -236,6 +236,12 @@ final class DutchStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Ontbrekende notities maken in';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotheek-wortel';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Huidige map';
+  @override
   String get indentWidthTitle => 'Inspringbreedte';
   @override
   String get indentWidthSubtitle =>
@@ -496,6 +502,15 @@ final class DutchStrings extends Strings {
   String get ambiguousLinkTitle => 'Meerdere notities komen overeen';
   @override
   String get openLinkFailed => 'Kon de link niet openen';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'De notitie bestaat niet';
+  @override
+  String missingNoteDialogBody(String path) => '„$path" maken?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Map „$folder" bestaat niet';
 
   // Task lists (T-TD-04).
   @override

@@ -235,6 +235,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Krijoni shënime të munguara në';
+  @override
+  String get missingNoteLocationRoot => 'Rrënjë e bibliotekës';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Tresë aktuale';
+  @override
   String get indentWidthTitle => 'Gjerësia e indenteve';
   @override
   String get indentWidthSubtitle =>
@@ -496,6 +502,15 @@ final class AlbanianStrings extends Strings {
   String get ambiguousLinkTitle => 'Shënime të shumta përputhen';
   @override
   String get openLinkFailed => "Lidhja s'u hap";
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Shënimi nuk ekziston';
+  @override
+  String missingNoteDialogBody(String path) => 'Krijoj „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Tresja „$folder“ nuk ekziston';
 
   // Task lists (T-TD-04).
   @override

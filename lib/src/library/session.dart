@@ -9,6 +9,7 @@ import 'package:niman/src/frontmatter/fields.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_ops.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -377,6 +378,13 @@ abstract interface class LibrarySession {
 
   /// Sets (and persists) the link format.
   Future<void> setLinkType(LinkType type);
+
+  /// Where a note created from a dead link lands (default the folder of
+  /// the note the link was clicked in, issue #78).
+  Future<MissingNoteLocation> get missingNoteLocation;
+
+  /// Sets (and persists) the dead-link note location.
+  Future<void> setMissingNoteLocation(MissingNoteLocation location);
 
   /// The editor's indent/outdent width in spaces (default 2).
   Future<int> get indentWidth;

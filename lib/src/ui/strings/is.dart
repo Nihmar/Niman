@@ -230,6 +230,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Búa til vanskilin minnisblöð í';
+  @override
+  String get missingNoteLocationRoot => 'Rót bókasafns';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Núverandi mappa';
+  @override
   String get indentWidthTitle => 'Innhengsbreidd';
   @override
   String get indentWidthSubtitle =>
@@ -492,6 +498,15 @@ final class IcelandicStrings extends Strings {
   String get ambiguousLinkTitle => 'Fleiri minnisblöð passa';
   @override
   String get openLinkFailed => 'Það gekk ekki að opna tengilinn';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Minnisblaðið er ekki til';
+  @override
+  String missingNoteDialogBody(String path) => 'Búa til „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Mappan „$folder“ er ekki til';
 
   // Task lists (T-TD-04).
   @override
