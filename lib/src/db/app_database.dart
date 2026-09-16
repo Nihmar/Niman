@@ -134,6 +134,146 @@ class KnownLibraries extends Table {
   Set<Column> get primaryKey => {path};
 }
 
+/// Where a library syncs to: one row per library (M5, docs/dev/sync.md,
+/// "Configuration").
+///
+/// App-side on purpose, like [KnownLibraries]: the same server can have a
+/// different URL on each device, and a copied library folder must not
+/// start syncing into the original's remote. The password is never here —
+/// it lives in the OS secure storage (`SyncSecretStore`).
+class SyncDestinations extends Table {
+  /// Absolute, normalized path of the library root; the primary key.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// The remote folder the library maps to, always ending with `/`.
+  TextColumn get url => text()();
+
+  /// The WebDAV user; empty for no authentication.
+  TextColumn get username => text().withDefault(const Constant(''))();
+
+  /// Off stops every trigger; the state rows stay.
+  BoolColumn get enabled => boolean().withDefault(const Constant(true))();
+
+  /// Whether the automatic triggers (after an edit, on resume, periodic)
+  /// run; manual sync always works.
+  BoolColumn get autoSync =>
+      boolean().named('auto_sync').withDefault(const Constant(true))();
+
+  /// The periodic trigger while the app is open, in seconds; 0 = off.
+  IntColumn get intervalSeconds =>
+      integer().named('interval_seconds').withDefault(const Constant(60))();
+
+  /// Whether the automatic triggers skip mobile data.
+  BoolColumn get wifiOnly =>
+      boolean().named('wifi_only').withDefault(const Constant(false))();
+
+  /// The capability probe's JSON (`WebDavCapabilities`); `{}` = never
+  /// probed.
+  TextColumn get capabilities => text().withDefault(const Constant('{}'))();
+
+  /// The last full sync that ended without errors, ms since epoch.
+  IntColumn get lastSyncAtMs => integer().named('last_sync_at_ms').nullable()();
+
+  /// The last failure, short and user-readable; never a secret.
+  TextColumn get lastError => text().named('last_error').nullable()();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath};
+}
+
+/// What both sides agreed on at the last successful sync of one file
+/// (docs/dev/sync.md, "State: `sync_items`").
+///
+/// This is what tells "deleted here" from "created there", so it cannot
+/// be rebuilt from disk — which is why it lives here and not in the
+/// per-library index, which is dropped on every schema bump.
+class SyncItems extends Table {
+  /// Absolute, normalized library root.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// Library-relative, `/`-separated file path.
+  TextColumn get path => text()();
+
+  /// Hex sha256 of the agreed content.
+  TextColumn get localSha256 => text().named('local_sha256')();
+
+  /// Size of the agreed content in bytes.
+  IntColumn get localSize => integer().named('local_size')();
+
+  /// Disk mtime right after the sync wrote or read the file, ms.
+  IntColumn get localMtimeMs => integer().named('local_mtime_ms')();
+
+  /// The remote ETag as sent; null when the server has none.
+  TextColumn get remoteEtag => text().named('remote_etag').nullable()();
+
+  /// The remote size in bytes.
+  IntColumn get remoteSize => integer().named('remote_size')();
+
+  /// The remote `getlastmodified`, ms (one-second resolution).
+  IntColumn get remoteMtimeMs => integer().named('remote_mtime_ms')();
+
+  /// Whether the listing this row was recorded from could not rule out a
+  /// second write within the same second: a server without ETags whose
+  /// `getlastmodified` was the server's current second. The next
+  /// reconcile hashes the remote instead of trusting size and mtime.
+  BoolColumn get remoteUnverified =>
+      boolean().named('remote_unverified').withDefault(const Constant(false))();
+
+  /// The remote `oc:fileid`, when the server has one.
+  TextColumn get remoteFileId => text().named('remote_file_id').nullable()();
+
+  /// The `.history` version pinned as the merge base; null for
+  /// attachments and when history is off.
+  IntColumn get baseVersion => integer().named('base_version').nullable()();
+
+  /// When this agreement was recorded, ms.
+  IntColumn get syncedAtMs => integer().named('synced_at_ms')();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath, path};
+}
+
+/// A hint that something happened to a path since the last sync
+/// (docs/dev/sync.md, "Queue and triggers"): a persisted, coalescing
+/// queue that survives restarts and carries the retry backoff.
+class SyncOps extends Table {
+  /// Row id.
+  IntColumn get id => integer().autoIncrement()();
+
+  /// Absolute, normalized library root.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// Library-relative, `/`-separated path (a file, or a folder for a
+  /// folder move or delete).
+  TextColumn get path => text()();
+
+  /// `changed`, `deleted` or `moved` (`SyncOpKind`).
+  TextColumn get kind => text()();
+
+  /// Where a `moved` path came from.
+  TextColumn get fromPath => text().named('from_path').nullable()();
+
+  /// Failed runs so far.
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+
+  /// Not retried before this time, ms; 0 = due now.
+  IntColumn get nextAttemptAtMs =>
+      integer().named('next_attempt_at_ms').withDefault(const Constant(0))();
+
+  /// The last failure, short; never a secret.
+  TextColumn get lastError => text().named('last_error').nullable()();
+
+  /// When the hint was last written, ms. Strictly increases on every
+  /// rewrite, so a sync that finishes an older hint can tell it was
+  /// replaced meanwhile and leave the new one alone.
+  IntColumn get createdAtMs => integer().named('created_at_ms')();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {libraryPath, path},
+  ];
+}
+
 /// The app's own database: settings that belong to the installation, not
 /// to any one library.
 ///
@@ -143,13 +283,22 @@ class KnownLibraries extends Table {
 /// which is why the migration chain below starts long before this class
 /// existed. It carries the only rows in the app that are NOT rebuildable
 /// from disk, so it is the one database worth backing up.
-@DriftDatabase(tables: [AppSettings, KnownLibraries, WidgetConfigs])
+@DriftDatabase(
+  tables: [
+    AppSettings,
+    KnownLibraries,
+    WidgetConfigs,
+    SyncDestinations,
+    SyncItems,
+    SyncOps,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   /// Creates the database on top of [e].
   new(super.e);
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -188,7 +337,10 @@ class AppDatabase extends _$AppDatabase {
   /// while a fresh install's null stays what turns the dialog off, and
   /// pre-v21 databases gain the auto-update state (issue #81):
   /// `auto_update_enabled` (off, like a fresh install) and
-  /// `last_update_check_ms` (null until the first check runs).
+  /// `last_update_check_ms` (null until the first check runs), and pre-v22
+  /// databases gain the WebDAV sync state (M5): `sync_destinations`,
+  /// `sync_items` and `sync_ops`, all empty — no library syncs until one
+  /// is configured.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -326,6 +478,11 @@ class AppDatabase extends _$AppDatabase {
           'ALTER TABLE app_settings ADD COLUMN last_update_check_ms '
           'INTEGER',
         );
+      }
+      if (from < 22) {
+        await m.createTable(syncDestinations);
+        await m.createTable(syncItems);
+        await m.createTable(syncOps);
       }
     },
   );

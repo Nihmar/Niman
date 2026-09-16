@@ -13,6 +13,7 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -176,6 +177,11 @@ abstract interface class LibrarySession {
 
   /// CRUD ops for the open library, or null while closed.
   NoteOperations? get ops;
+
+  /// The open library's WebDAV sync (docs/dev/sync.md), or null while
+  /// closed. Present for every open library; its status says whether one
+  /// is configured.
+  SyncService? get sync;
 
   /// Resumes the last opened library (if it still exists).
   ///

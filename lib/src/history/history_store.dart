@@ -220,6 +220,67 @@ List<int> pinHistoryVersion(
   return rotated;
 }
 
+/// Pins, as the sync base of [rel], the version whose content hashes to
+/// [sha] — the content both sides agreed on at a successful sync
+/// (docs/dev/sync.md, "Rotation and the pinned base").
+///
+/// The newest version with that content is pinned. When there is none and
+/// the note on disk still holds that content, it is kept as a new version
+/// (reason `sync`) first. When neither holds it — the note was edited
+/// again before the pin — nothing is pinned and the old pin is released.
+/// Rotation then runs against [limit]; the pin never rotates out.
+///
+/// Returns the pinned version number (null when none), whether a version
+/// was written, and the numbers rotated out.
+({int? pinned, bool wrote, List<int> rotated}) pinSyncBaseVersion(
+  String root,
+  String rel,
+  String sha, {
+  required int limit,
+  required DateTime now,
+}) {
+  var manifest = readHistoryManifest(root, rel);
+  int? number;
+  for (final version in manifest.versions.reversed) {
+    if (version.sha256 == sha) {
+      number = version.number;
+      break;
+    }
+  }
+  var wrote = false;
+  if (number == null) {
+    final note = File(p.join(root, rel));
+    final bytes = note.existsSync() ? note.readAsBytesSync() : null;
+    if (bytes != null && sha256.convert(bytes).toString() == sha) {
+      final version = HistoryVersion(
+        number: manifest.nextNumber,
+        savedAt: now,
+        reason: HistoryReason.sync,
+        size: bytes.length,
+        sha256: sha,
+      );
+      final target = File(historyVersionPath(root, rel, version.number));
+      target.parent.createSync(recursive: true);
+      _writeAtomicallySync(target, bytes);
+      manifest = manifest.adding(version);
+      number = version.number;
+      wrote = true;
+    }
+  }
+  if (number == null && manifest.pins[syncBasePin] == null) {
+    return (pinned: null, wrote: false, rotated: const <int>[]);
+  }
+  var next = manifest.pinning(syncBasePin, number);
+  final rotated = [for (final v in next.overflow(limit)) v.number];
+  for (final n in rotated) {
+    final file = File(historyVersionPath(root, rel, n));
+    if (file.existsSync()) file.deleteSync();
+  }
+  next = next.removing(rotated.toSet());
+  writeHistoryManifest(root, rel, next);
+  return (pinned: number, wrote: wrote, rotated: rotated);
+}
+
 /// Moves the history of the note at [fromRel] to [toRel] (a rename or a
 /// move of the note). When [toRel] already has history — left behind by
 /// a note that used to live there — the moved versions are renumbered
