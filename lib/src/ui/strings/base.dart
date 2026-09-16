@@ -630,6 +630,10 @@ abstract base class Strings {
   String get transcriptionPickModelBody;
   String get transcriptionPickModelAction;
   String get transcriptionModelRecommended;
+  String get transcriptionExistingTitle;
+  String get transcriptionExistingBody;
+  String get transcriptionAppend;
+  String get transcriptionReplace;
 
   /// The decimal separator of the language's numbers (`1.5` / `1,5`).
   String get decimalSeparator;

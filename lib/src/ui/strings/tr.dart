@@ -1328,4 +1328,13 @@ final class TurkishStrings extends Strings {
   String get transcriptionPickModelAction => 'İndir ve metne dök';
   @override
   String get transcriptionModelRecommended => 'Önerilen';
+  @override
+  String get transcriptionExistingTitle => 'Bu kaydın zaten bir açıklaması var';
+  @override
+  String get transcriptionExistingBody =>
+      'Metinle değiştirilsin mi, yoksa metin altına mı eklensin?';
+  @override
+  String get transcriptionAppend => 'Altına ekle';
+  @override
+  String get transcriptionReplace => 'Değiştir';
 }

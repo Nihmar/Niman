@@ -1347,4 +1347,13 @@ final class BosnianStrings extends Strings {
   String get transcriptionPickModelAction => 'Preuzmi i transkribuj';
   @override
   String get transcriptionModelRecommended => 'Preporučeno';
+  @override
+  String get transcriptionExistingTitle => 'Ovaj snimak već ima opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Zamijeniti ga transkripcijom ili dodati transkripciju ispod?';
+  @override
+  String get transcriptionAppend => 'Dodaj ispod';
+  @override
+  String get transcriptionReplace => 'Zamijeni';
 }

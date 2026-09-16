@@ -11,6 +11,8 @@ import 'package:niman/src/transcription/transcription_queue.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/ui/kinds/audio_chat.dart';
 import 'package:niman/src/ui/kinds/audio_clip.dart';
+import 'package:niman/src/ui/kinds/audio_transcript_placement.dart';
+import 'package:niman/src/ui/kinds/audio_transcript_placement_dialog.dart';
 import 'package:niman/src/ui/kinds/audio_transcription_strip.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/model_picker_sheet.dart';
@@ -24,8 +26,9 @@ import 'package:niman/src/ui/transcription/model_picker_sheet.dart';
 /// there until a view of their note takes them.
 ///
 /// The text goes into the description (the `> ` lines after the embed):
-/// an empty description is replaced, an existing one keeps its text with
-/// the transcript as a new paragraph below. The snackbar's Undo puts the
+/// an empty description is filled; over an existing one the user chooses,
+/// before the job is queued, to replace it or add below it
+/// ([placeTranscript] has the rules). The snackbar's Undo puts the
 /// previous description back.
 final class AudioTranscriptionFlow {
   /// The flow of the note at [notePath].
@@ -101,6 +104,16 @@ final class AudioTranscriptionFlow {
   Future<void> transcribe(AudioClip clip) async {
     final audio = absoluteOf(clip.target);
     if (!queue.supports(audio)) return;
+    final description =
+        vocalByTarget(readText(), clip.target)?.description ?? '';
+    var placement = TranscriptPlacement.replace;
+    if (description.trim().isNotEmpty) {
+      final context = contextOf();
+      if (context == null) return;
+      final chosen = await showTranscriptPlacementDialog(context, description);
+      if (chosen == null) return;
+      placement = chosen;
+    }
     final model = await _modelToUse();
     if (model == null) return;
     final job = queue.enqueue(
@@ -109,6 +122,8 @@ final class AudioTranscriptionFlow {
       audioPath: audio,
       model: model,
       language: models.settings.whisperLanguage(AppLanguages.resolved),
+      placement: placement,
+      originalDescription: description,
     );
     _log.info('transcribe ${clip.target}: $job');
   }
@@ -236,18 +251,16 @@ final class AudioTranscriptionFlow {
       );
       return;
     }
-    final current = readText();
-    final vocal = _vocalOf(current, job.clipTarget);
-    if (vocal == null) {
+    final edit = placeTranscript(readText(), job);
+    if (edit == null) {
       _log.warning('$job: the clip is no longer in the note, text dropped');
       return;
     }
-    final previous = vocal.description;
-    final merged = previous.trim().isEmpty ? text : '$previous\n\n$text';
-    applyText(setClipDescription(current, vocal.clip, merged));
+    applyText(edit.text);
     _log.info(
       '$job: ${text.length} chars written to the description '
-      '(${previous.trim().isEmpty ? 'was empty' : 'appended'}) '
+      '(${edit.previous.trim().isEmpty ? 'was empty' : job.placement.name}'
+      '${edit.keptEdits ? ', kept the edits made meanwhile' : ''}) '
       'in ${clock.elapsedMilliseconds} ms',
     );
     messenger?.showSnackBar(
@@ -257,10 +270,10 @@ final class AudioTranscriptionFlow {
           label: AppStrings.actionUndo,
           onPressed: () {
             final now = readText();
-            final again = _vocalOf(now, job.clipTarget);
+            final vocal = vocalByTarget(now, job.clipTarget);
             // Only while the description is still what was written.
-            if (again == null || again.description != merged) return;
-            applyText(setClipDescription(now, again.clip, previous));
+            if (vocal == null || vocal.description != edit.written) return;
+            applyText(setClipDescription(now, vocal.clip, edit.previous));
             _log.info('$job: transcription undone');
           },
         ),
@@ -268,13 +281,6 @@ final class AudioTranscriptionFlow {
     );
   }
 
-  /// The vocal whose clip links [target] in [text].
-  static AudioChatMessage? _vocalOf(String text, String target) {
-    for (final item in parseAudioChat(text)) {
-      if (item is AudioChatMessage && item.clip.target == target) return item;
-    }
-    return null;
-  }
 }
 
 const _log = AppLogger(name: 'transcription');

@@ -1353,4 +1353,14 @@ final class MacedonianStrings extends Strings {
   String get transcriptionPickModelAction => 'Преземи и транскрибирај';
   @override
   String get transcriptionModelRecommended => 'Препорачано';
+  @override
+  String get transcriptionExistingTitle => 'Оваа снимка веќе има опис';
+  @override
+  String get transcriptionExistingBody =>
+      'Да се замени со транскрипцијата или транскрипцијата да се додаде '
+      'подолу?';
+  @override
+  String get transcriptionAppend => 'Додај подолу';
+  @override
+  String get transcriptionReplace => 'Замени';
 }

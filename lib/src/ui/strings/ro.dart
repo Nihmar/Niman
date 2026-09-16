@@ -1360,4 +1360,14 @@ final class RomanianStrings extends Strings {
   String get transcriptionPickModelAction => 'Descarcă și transcrie';
   @override
   String get transcriptionModelRecommended => 'Recomandat';
+  @override
+  String get transcriptionExistingTitle =>
+      'Această înregistrare are deja o descriere';
+  @override
+  String get transcriptionExistingBody =>
+      'O înlocuiești cu transcrierea sau adaugi transcrierea dedesubt?';
+  @override
+  String get transcriptionAppend => 'Adaugă dedesubt';
+  @override
+  String get transcriptionReplace => 'Înlocuiește';
 }

@@ -1361,4 +1361,13 @@ final class PolishStrings extends Strings {
   String get transcriptionPickModelAction => 'Pobierz i transkrybuj';
   @override
   String get transcriptionModelRecommended => 'Zalecany';
+  @override
+  String get transcriptionExistingTitle => 'To nagranie ma już opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Zastąpić go transkrypcją czy dodać transkrypcję pod spodem?';
+  @override
+  String get transcriptionAppend => 'Dodaj pod spodem';
+  @override
+  String get transcriptionReplace => 'Zastąp';
 }

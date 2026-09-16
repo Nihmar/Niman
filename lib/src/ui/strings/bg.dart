@@ -1352,4 +1352,14 @@ final class BulgarianStrings extends Strings {
   String get transcriptionPickModelAction => 'Изтегляне и транскрибиране';
   @override
   String get transcriptionModelRecommended => 'Препоръчан';
+  @override
+  String get transcriptionExistingTitle => 'Този запис вече има описание';
+  @override
+  String get transcriptionExistingBody =>
+      'Да се замени ли с транскрипцията, или транскрипцията да се добави '
+      'отдолу?';
+  @override
+  String get transcriptionAppend => 'Добави отдолу';
+  @override
+  String get transcriptionReplace => 'Замени';
 }

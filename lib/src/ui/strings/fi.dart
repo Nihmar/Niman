@@ -1353,4 +1353,13 @@ final class FinnishStrings extends Strings {
   String get transcriptionPickModelAction => 'Lataa ja litteroi';
   @override
   String get transcriptionModelRecommended => 'Suositeltu';
+  @override
+  String get transcriptionExistingTitle => 'Tallenteella on jo kuvaus';
+  @override
+  String get transcriptionExistingBody =>
+      'Korvataanko se litteroinnilla vai lisätäänkö litterointi sen alle?';
+  @override
+  String get transcriptionAppend => 'Lisää alle';
+  @override
+  String get transcriptionReplace => 'Korvaa';
 }

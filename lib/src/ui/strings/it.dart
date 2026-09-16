@@ -1352,4 +1352,14 @@ final class ItalianStrings extends Strings {
   String get transcriptionPickModelAction => 'Scarica e trascrivi';
   @override
   String get transcriptionModelRecommended => 'Consigliato';
+  @override
+  String get transcriptionExistingTitle =>
+      'La registrazione ha già una descrizione';
+  @override
+  String get transcriptionExistingBody =>
+      'Sostituirla con la trascrizione o aggiungere la trascrizione in fondo?';
+  @override
+  String get transcriptionAppend => 'Aggiungi in fondo';
+  @override
+  String get transcriptionReplace => 'Sostituisci';
 }

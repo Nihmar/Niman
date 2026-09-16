@@ -254,9 +254,9 @@ void main() {
     );
   });
 
-  testWidgets('an existing description keeps its text above the transcript', (
-    tester,
-  ) async {
+  /// Transcribes clip 0 over an existing description, answering the
+  /// dialog with [choice] (null cancels it).
+  Future<void> transcribeOver(WidgetTester tester, Key? choice) async {
     await pump(
       tester,
       '---\ntype: audio\n---\n![](assets/a.wav)\n> scritta a mano\n',
@@ -264,17 +264,49 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('audio-menu-0')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('audio-transcribe-0')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('transcription-placement-dialog')), findsOne);
+    expect(find.text('scritta a mano'), findsWidgets);
+    if (choice == null) {
+      await tester.tap(find.text(AppStrings.actionCancel));
+      await tester.pumpAndSettle();
+      return;
+    }
+    await tester.tap(find.byKey(choice));
     // The strip's bar animates while the audio is prepared: no settling.
     await tester.pump(const Duration(milliseconds: 500));
     await settle(tester, () => transcriber.pending.length == 1);
-
     transcriber.pending.single.complete('dettata');
     await settle(tester, () => key.currentState!.text.contains('dettata'));
+  }
 
+  testWidgets('over a description, Add below keeps it above the transcript', (
+    tester,
+  ) async {
+    await transcribeOver(tester, const Key('transcription-placement-append'));
     expect(
       key.currentState!.text,
       '---\ntype: audio\n---\n![](assets/a.wav)\n'
       '> scritta a mano\n> \n> dettata\n',
+    );
+  });
+
+  testWidgets('over a description, Replace puts the transcript instead', (
+    tester,
+  ) async {
+    await transcribeOver(tester, const Key('transcription-placement-replace'));
+    expect(
+      key.currentState!.text,
+      '---\ntype: audio\n---\n![](assets/a.wav)\n> dettata\n',
+    );
+  });
+
+  testWidgets('cancelling the dialog queues nothing', (tester) async {
+    await transcribeOver(tester, null);
+    expect(queue.jobs, isEmpty);
+    expect(
+      key.currentState!.text,
+      '---\ntype: audio\n---\n![](assets/a.wav)\n> scritta a mano\n',
     );
   });
 

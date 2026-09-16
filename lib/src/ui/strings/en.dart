@@ -1332,4 +1332,14 @@ final class EnglishStrings extends Strings {
   String get transcriptionPickModelAction => 'Download and transcribe';
   @override
   String get transcriptionModelRecommended => 'Recommended';
+  @override
+  String get transcriptionExistingTitle =>
+      'This recording already has a description';
+  @override
+  String get transcriptionExistingBody =>
+      'Put the transcription in its place, or add it below?';
+  @override
+  String get transcriptionAppend => 'Add below';
+  @override
+  String get transcriptionReplace => 'Replace';
 }

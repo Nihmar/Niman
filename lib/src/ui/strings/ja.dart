@@ -1248,4 +1248,12 @@ final class JapaneseStrings extends Strings {
   String get transcriptionPickModelAction => 'ダウンロードして文字起こし';
   @override
   String get transcriptionModelRecommended => 'おすすめ';
+  @override
+  String get transcriptionExistingTitle => 'この録音にはすでに説明があります';
+  @override
+  String get transcriptionExistingBody => '文字起こしで置き換えますか、それとも下に追加しますか？';
+  @override
+  String get transcriptionAppend => '下に追加';
+  @override
+  String get transcriptionReplace => '置き換え';
 }

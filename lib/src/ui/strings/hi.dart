@@ -1320,4 +1320,13 @@ final class HindiStrings extends Strings {
       'डाउनलोड करें और ट्रांसक्राइब करें';
   @override
   String get transcriptionModelRecommended => 'सुझाया गया';
+  @override
+  String get transcriptionExistingTitle => 'इस रिकॉर्डिंग का विवरण पहले से है';
+  @override
+  String get transcriptionExistingBody =>
+      'इसे ट्रांसक्रिप्शन से बदलें या ट्रांसक्रिप्शन नीचे जोड़ें?';
+  @override
+  String get transcriptionAppend => 'नीचे जोड़ें';
+  @override
+  String get transcriptionReplace => 'बदलें';
 }

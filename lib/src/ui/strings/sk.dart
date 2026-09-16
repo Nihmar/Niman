@@ -1337,4 +1337,13 @@ final class SlovakStrings extends Strings {
   String get transcriptionPickModelAction => 'Stiahnuť a prepísať';
   @override
   String get transcriptionModelRecommended => 'Odporúčaný';
+  @override
+  String get transcriptionExistingTitle => 'Táto nahrávka už má popis';
+  @override
+  String get transcriptionExistingBody =>
+      'Nahradiť ho prepisom, alebo prepis pridať pod neho?';
+  @override
+  String get transcriptionAppend => 'Pridať pod';
+  @override
+  String get transcriptionReplace => 'Nahradiť';
 }

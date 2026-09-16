@@ -1339,4 +1339,15 @@ final class NorwegianStrings extends Strings {
   String get transcriptionPickModelAction => 'Last ned og transkriber';
   @override
   String get transcriptionModelRecommended => 'Anbefalt';
+  @override
+  String get transcriptionExistingTitle =>
+      'Opptaket har allerede en beskrivelse';
+  @override
+  String get transcriptionExistingBody =>
+      'Erstatte den med transkripsjonen, eller legge transkripsjonen til '
+      'under?';
+  @override
+  String get transcriptionAppend => 'Legg til under';
+  @override
+  String get transcriptionReplace => 'Erstatt';
 }

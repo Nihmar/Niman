@@ -76,13 +76,16 @@ final class TranscriptionQueue extends ChangeNotifier {
   }
 
   /// Queues the clip [clipTarget] of [notePath] (file [audioPath]); a clip
-  /// already queued or running returns its existing job.
+  /// already queued or running returns its existing job. [placement] and
+  /// [originalDescription] say what the text does to the description.
   TranscriptionJob enqueue({
     required String notePath,
     required String clipTarget,
     required String audioPath,
     required TranscriptionModel model,
     required String language,
+    TranscriptPlacement placement = TranscriptPlacement.replace,
+    String originalDescription = '',
   }) {
     final existing = jobFor(notePath, clipTarget);
     if (existing != null && !existing.finished) return existing;
@@ -94,6 +97,8 @@ final class TranscriptionQueue extends ChangeNotifier {
       audioPath: audioPath,
       model: model,
       language: language,
+      placement: placement,
+      originalDescription: originalDescription,
       phase: models.stateOf(model) is ModelInstalled
           ? TranscriptionPhase.queued
           : TranscriptionPhase.waitingForModel,

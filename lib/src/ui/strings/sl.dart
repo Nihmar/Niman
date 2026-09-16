@@ -1335,4 +1335,13 @@ final class SlovenianStrings extends Strings {
   String get transcriptionPickModelAction => 'Prenesi in prepiši';
   @override
   String get transcriptionModelRecommended => 'Priporočeno';
+  @override
+  String get transcriptionExistingTitle => 'Ta posnetek že ima opis';
+  @override
+  String get transcriptionExistingBody =>
+      'Ga želite zamenjati s prepisom ali prepis dodati pod njim?';
+  @override
+  String get transcriptionAppend => 'Dodaj pod';
+  @override
+  String get transcriptionReplace => 'Zamenjaj';
 }

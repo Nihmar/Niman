@@ -1352,4 +1352,14 @@ final class HungarianStrings extends Strings {
   String get transcriptionPickModelAction => 'Letöltés és átírás';
   @override
   String get transcriptionModelRecommended => 'Ajánlott';
+  @override
+  String get transcriptionExistingTitle =>
+      'Ennek a felvételnek már van leírása';
+  @override
+  String get transcriptionExistingBody =>
+      'Lecseréled az átiratra, vagy alá írod az átiratot?';
+  @override
+  String get transcriptionAppend => 'Hozzáadás alá';
+  @override
+  String get transcriptionReplace => 'Csere';
 }

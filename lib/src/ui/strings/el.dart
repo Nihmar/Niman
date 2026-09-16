@@ -1393,4 +1393,14 @@ final class GreekStrings extends Strings {
   String get transcriptionPickModelAction => 'Λήψη και μεταγραφή';
   @override
   String get transcriptionModelRecommended => 'Προτεινόμενο';
+  @override
+  String get transcriptionExistingTitle =>
+      'Αυτή η ηχογράφηση έχει ήδη περιγραφή';
+  @override
+  String get transcriptionExistingBody =>
+      'Να αντικατασταθεί με τη μεταγραφή ή να προστεθεί η μεταγραφή από κάτω;';
+  @override
+  String get transcriptionAppend => 'Προσθήκη από κάτω';
+  @override
+  String get transcriptionReplace => 'Αντικατάσταση';
 }

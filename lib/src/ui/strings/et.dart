@@ -1321,4 +1321,15 @@ final class EstonianStrings extends Strings {
   String get transcriptionPickModelAction => 'Laadi alla ja transkribeeri';
   @override
   String get transcriptionModelRecommended => 'Soovitatud';
+  @override
+  String get transcriptionExistingTitle =>
+      'Sellel salvestisel on juba kirjeldus';
+  @override
+  String get transcriptionExistingBody =>
+      'Kas asendada see transkriptsiooniga või lisada transkriptsioon selle '
+      'alla?';
+  @override
+  String get transcriptionAppend => 'Lisa alla';
+  @override
+  String get transcriptionReplace => 'Asenda';
 }

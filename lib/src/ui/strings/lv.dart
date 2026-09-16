@@ -1336,4 +1336,13 @@ final class LatvianStrings extends Strings {
   String get transcriptionPickModelAction => 'Lejupielādēt un transkribēt';
   @override
   String get transcriptionModelRecommended => 'Ieteicams';
+  @override
+  String get transcriptionExistingTitle => 'Šim ierakstam jau ir apraksts';
+  @override
+  String get transcriptionExistingBody =>
+      'Aizstāt to ar transkripciju vai pievienot transkripciju zem tā?';
+  @override
+  String get transcriptionAppend => 'Pievienot zem';
+  @override
+  String get transcriptionReplace => 'Aizstāt';
 }

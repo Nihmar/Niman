@@ -1344,4 +1344,13 @@ final class BelarusianStrings extends Strings {
   String get transcriptionPickModelAction => 'Спампаваць і транскрыбаваць';
   @override
   String get transcriptionModelRecommended => 'Рэкамендавана';
+  @override
+  String get transcriptionExistingTitle => 'Гэты запіс ужо мае апісанне';
+  @override
+  String get transcriptionExistingBody =>
+      'Замяніць яго транскрыпцыяй ці дадаць транскрыпцыю пад ім?';
+  @override
+  String get transcriptionAppend => 'Дадаць ніжэй';
+  @override
+  String get transcriptionReplace => 'Замяніць';
 }
