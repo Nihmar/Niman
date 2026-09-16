@@ -985,6 +985,18 @@ final class SlovakStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Vidžety na ploche sú k dispozícii v Androide';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Zobraziť v správcovi súborov';
+  @override
+  String get openInDefaultApp => 'Otvoriť v predvolenej aplikácii';
+  @override
+  String get openFileMissing => 'Súbor tejto poznámky na disku nie je';
+  @override
+  String get openFileFailed =>
+      'Túto poznámku sa nepodarilo otvoriť mimo Nimanu';
+
   @override
   String get movedToTrash => 'Presunuté do koša';
   @override

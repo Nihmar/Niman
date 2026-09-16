@@ -1006,6 +1006,17 @@ final class AlbanianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Widget-et e ekranit kryesor janë të disponueshme në Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Shfaq në menaxherin e skedarëve';
+  @override
+  String get openInDefaultApp => 'Hap me aplikacionin e parazgjedhur';
+  @override
+  String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
+  @override
+  String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';
+
   @override
   String get movedToTrash => 'U zhvendos në kosh';
   @override

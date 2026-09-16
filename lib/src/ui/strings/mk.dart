@@ -1000,6 +1000,18 @@ final class MacedonianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Виджетите на домашниот екран се достапни на Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Прикажи во управувачот на датотеки';
+  @override
+  String get openInDefaultApp => 'Отвори со стандардната апликација';
+  @override
+  String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
+  @override
+  String get openFileFailed =>
+      'Белешката не можеше да се отвори надвор од Niman';
+
   @override
   String get movedToTrash => 'Преместено во корпа';
   @override

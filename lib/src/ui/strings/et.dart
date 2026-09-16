@@ -976,6 +976,18 @@ final class EstonianStrings extends Strings {
       'Kinnitatud: paiguta nüüd Märkuse vidžet avakuvale';
   @override
   String get pinWidgetUnavailable => 'Avakuva vidžetid on Androidis saadaval';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Näita failihalduris';
+  @override
+  String get openInDefaultApp => 'Ava vaikerakenduses';
+  @override
+  String get openFileMissing => 'Selle märkme faili kettal ei ole';
+  @override
+  String get openFileFailed =>
+      'Seda märget ei saanud Nimanist väljaspool avada';
+
   @override
   String get movedToTrash => 'Liigutatud prügikastu';
   @override

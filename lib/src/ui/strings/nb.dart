@@ -988,6 +988,17 @@ final class NorwegianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Startskjermwidgets er tilgjengelige på Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Vis i filbehandler';
+  @override
+  String get openInDefaultApp => 'Åpne i standardappen';
+  @override
+  String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
+  @override
+  String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';
+
   @override
   String get movedToTrash => 'Flyttet til papirkorg';
   @override

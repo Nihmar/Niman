@@ -980,6 +980,17 @@ final class SlovenianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Widgeti domačega zaslona so na voljo na Androidu';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Pokaži v upravitelju datotek';
+  @override
+  String get openInDefaultApp => 'Odpri s privzeto aplikacijo';
+  @override
+  String get openFileMissing => 'Datoteke te opombe ni na disku';
+  @override
+  String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';
+
   @override
   String get movedToTrash => 'Preneseno v koš';
   @override

@@ -927,6 +927,17 @@ final class JapaneseStrings extends Strings {
   String get pinnedForWidget => 'ピン留めしました: ノートウィジェットをホーム画面に配置してください';
   @override
   String get pinWidgetUnavailable => 'ホーム画面のウィジェットはAndroidで利用できます';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'ファイルマネージャーで表示';
+  @override
+  String get openInDefaultApp => '既定のアプリで開く';
+  @override
+  String get openFileMissing => 'このノートのファイルがディスクにありません';
+  @override
+  String get openFileFailed => 'このノートを Niman の外で開けませんでした';
+
   @override
   String get movedToTrash => 'ごみ箱に移動しました';
   @override

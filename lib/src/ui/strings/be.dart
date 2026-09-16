@@ -986,6 +986,17 @@ final class BelarusianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Віджэты галоўнага экрана даступныя ў Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Паказаць у файлавым менеджары';
+  @override
+  String get openInDefaultApp => 'Адкрыць у прадвызначанай праграме';
+  @override
+  String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
+  @override
+  String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';
+
   @override
   String get movedToTrash => 'Перамешчана ў кошык';
   @override

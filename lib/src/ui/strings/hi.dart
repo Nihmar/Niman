@@ -971,6 +971,17 @@ final class HindiStrings extends Strings {
       'पिन हो गया: अब नोट विजेट को होम स्क्रीन पर रखें';
   @override
   String get pinWidgetUnavailable => 'होम-स्क्रीन विजेट Android पर उपलब्ध हैं';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'फ़ाइल प्रबंधक में दिखाएँ';
+  @override
+  String get openInDefaultApp => 'डिफ़ॉल्ट ऐप में खोलें';
+  @override
+  String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
+  @override
+  String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';
+
   @override
   String get movedToTrash => 'ट्रैश में गया';
   @override

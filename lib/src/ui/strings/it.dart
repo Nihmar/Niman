@@ -1000,6 +1000,17 @@ final class ItalianStrings extends Strings {
       'Fissata: ora aggiungi il widget Nota alla schermata home';
   @override
   String get pinWidgetUnavailable => 'I widget sono disponibili su Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Mostra nel file manager';
+  @override
+  String get openInDefaultApp => 'Apri con l’app predefinita';
+  @override
+  String get openFileMissing => 'Il file di questa nota non è sul disco';
+  @override
+  String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';
+
   @override
   String get movedToTrash => 'Spostato nel cestino';
   @override

@@ -51,7 +51,13 @@ void main() {
       expect(inSheet(find.byKey(const Key('menu-rename'))), findsOneWidget);
       expect(inSheet(find.byKey(const Key('menu-delete'))), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('menu-rename')));
+      // The sheet scrolls once its rows outgrow the cap (the desktop
+      // "open outside Niman" entries push it there, issue #76), so reach
+      // the row rather than assuming where it landed.
+      final rename = find.byKey(const Key('menu-rename'));
+      await tester.ensureVisible(rename);
+      await settle(tester);
+      await tester.tap(rename);
       await settle(tester);
       expect(find.byType(AlertDialog), findsOneWidget);
     });

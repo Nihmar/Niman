@@ -389,8 +389,13 @@ void main() {
     expect(find.byKey(const Key('menu-move')), findsOne);
     expect(find.byKey(const Key('menu-delete')), findsOne);
 
-    // Rename through the menu.
-    await tester.tap(find.byKey(const Key('menu-rename')));
+    // Rename through the menu. The sheet scrolls once its rows outgrow
+    // the cap (the desktop "open outside Niman" entries push it there,
+    // issue #76), so reach each row rather than assuming where it landed.
+    final rename = find.byKey(const Key('menu-rename'));
+    await tester.ensureVisible(rename);
+    await settle(tester);
+    await tester.tap(rename);
     await settle(tester);
     await tester.enterText(
       find.descendant(
@@ -406,7 +411,10 @@ void main() {
     // Delete through the menu (trash toggle default on).
     await tester.longPress(noteRow('Renamed.md'));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('menu-delete')));
+    final delete = find.byKey(const Key('menu-delete'));
+    await tester.ensureVisible(delete);
+    await settle(tester);
+    await tester.tap(delete);
     await settle(tester);
     await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await settle(tester);

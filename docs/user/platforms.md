@@ -27,6 +27,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   a per-library personal dictionary (right-click *Add to dictionary*,
   `<library>/.niman/dictionary.txt`).
 - Tray support where the desktop provides one.
+- A tree row's right-click menu can show the note in the file manager
+  (over `org.freedesktop.FileManager1`, falling back to `xdg-open` on
+  the folder) or open it in the default app — see
+  [organization](organization.md#opening-a-note-outside-niman).
 
 ## Windows
 
@@ -35,6 +39,9 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   on a machine needs network to fetch the prebuilt binary.
 - spellcheck via hunspell, same setting as Linux, plus the per-library
   personal dictionary.
+- A tree row's right-click menu can show the note in Explorer (selected)
+  or open it in the default app — see
+  [organization](organization.md#opening-a-note-outside-niman).
 
 ## Not yet
 
