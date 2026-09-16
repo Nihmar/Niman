@@ -92,6 +92,14 @@ abstract interface class NoteOperations {
   /// replaces as a version first — a restore is itself undoable.
   Future<void> restoreNoteVersion(String path, int number);
 
+  /// Writes [text] as the note's text with the same guarantee as
+  /// [restoreNoteVersion]: what it replaces is kept as a version first.
+  ///
+  /// The write path of a restore that takes only part of a version
+  /// (issue #67), where the text is neither the note's nor the version's
+  /// but the two put together.
+  Future<void> restoreNoteText(String path, String text);
+
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
 
