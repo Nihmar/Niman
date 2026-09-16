@@ -578,6 +578,113 @@ void main() {
     },
   );
 
+  group('merge', () {
+    String note(List<String> lines) => '${lines.join('\n')}\n';
+
+    /// Both devices start from the same four-line note.
+    Future<void> shared() async {
+      a.write('note.md', note(['# Title', 'one', 'two', 'three']));
+      final first = await a.sync();
+      expect(first.clean, isTrue, reason: first.summary());
+      final second = await b.sync();
+      expect(second.clean, isTrue, reason: second.summary());
+    }
+
+    test('edits in different places merge without asking', () async {
+      await shared();
+      a.write('note.md', note(['# Title', 'one', 'two', 'three', 'four']));
+      b.write('note.md', note(['# Notes', 'one', 'two', 'three']));
+      await b.sync();
+
+      final report = await a.sync();
+      expect(report.merged, ['note.md'], reason: report.summary());
+      expect(report.conflicts, isEmpty);
+      expect(report.changedLocally, contains('note.md'));
+      final merged = note(['# Notes', 'one', 'two', 'three', 'four']);
+      expect(a.read('note.md'), merged);
+      expect(remoteText('note.md'), merged);
+
+      // The text the merge replaced is in the history, and the base moved
+      // on: the next sync has nothing to do.
+      final manifest = await a.ops.noteHistory('note.md');
+      final texts = [
+        for (final v in manifest.versions)
+          await a.ops.readNoteVersion('note.md', v.number),
+      ];
+      expect(
+        texts,
+        contains(note(['# Title', 'one', 'two', 'three', 'four'])),
+        reason: 'the text the merge replaced here',
+      );
+      final base = manifest.pins[syncBasePin];
+      expect(await a.ops.readNoteVersion('note.md', base!), merged);
+      expect((await a.sync()).summary(), 'nothing to do');
+      expect((await b.sync()).done[SyncActionKind.download], 1);
+      expect(b.read('note.md'), merged);
+    });
+
+    test('a remote-only change still merges, without touching the row '
+        'twice', () async {
+      await shared();
+      b.write('note.md', note(['# Title', 'one', 'TWO', 'three']));
+      await b.sync();
+      a.write('note.md', note(['# Title', 'one', 'two', 'three', 'four']));
+
+      final report = await a.sync();
+      expect(report.merged, ['note.md'], reason: report.summary());
+      expect(
+        a.read('note.md'),
+        note(['# Title', 'one', 'TWO', 'three', 'four']),
+      );
+      expect((await a.store.item(a.path, 'note.md'))!.baseVersion, isNotNull);
+    });
+
+    test(
+      'overlapping edits stay a conflict, with the base to merge on',
+      () async {
+        await shared();
+        a.write('note.md', note(['# Title', 'one', 'mine', 'three']));
+        b.write('note.md', note(['# Title', 'one', 'theirs', 'three']));
+        await b.sync();
+
+        final report = await a.sync();
+        expect(report.merged, isEmpty);
+        expect(report.conflicts.single.path, 'note.md');
+        expect(a.read('note.md'), note(['# Title', 'one', 'mine', 'three']));
+
+        final texts = await a.engine.conflictTexts('note.md');
+        expect(texts.base, note(['# Title', 'one', 'two', 'three']));
+        expect(texts.local, note(['# Title', 'one', 'mine', 'three']));
+        expect(texts.remote, note(['# Title', 'one', 'theirs', 'three']));
+
+        final chosen = note(['# Title', 'one', 'mine', 'theirs', 'three']);
+        await a.engine.resolveMerged('note.md', chosen);
+        await a.ops.writer.indexed;
+        expect(a.read('note.md'), chosen);
+        expect(remoteText('note.md'), chosen);
+        expect((await a.sync()).summary(), 'nothing to do');
+        expect(
+          (await a.store.destination(a.path))!.lastError,
+          isNull,
+          reason: 'the conflict is over',
+        );
+      },
+    );
+
+    test('without a base both sides are left alone', () async {
+      // A file that never had a sync base: both devices created it.
+      a.write('fresh.txt', note(['mine']));
+      b.write('fresh.txt', note(['theirs']));
+      await b.sync();
+      final report = await a.sync();
+      expect(report.merged, isEmpty);
+      expect(report.conflicts.single.path, 'fresh.txt');
+      expect(report.conflicts.single.baseVersion, isNull);
+      expect(a.read('fresh.txt'), note(['mine']));
+      expect(remoteText('fresh.txt'), note(['theirs']));
+    });
+  });
+
   group('quick sync and the queue', () {
     /// PROPFINDs that list a folder's children.
     List<String> listings() => [

@@ -234,11 +234,18 @@ abstract interface class SyncService implements Listenable {
   /// that looks like a mass deletion.
   Future<SyncReport> syncNow({SyncConfirm? confirm});
 
-  /// Both texts of a conflicted [path]; throws [SyncFailure].
-  Future<({String local, String remote})> conflictTexts(String path);
+  /// The texts of a conflicted [path]: both sides and, when history still
+  /// has it, the version they last agreed on. Throws [SyncFailure].
+  Future<({String local, String remote, String? base})> conflictTexts(
+    String path,
+  );
 
   /// Keeps one whole side of a conflicted [path]; throws [SyncFailure].
   Future<void> resolveConflict(String path, {required bool keepLocal});
+
+  /// Resolves a conflicted [path] with the [text] the user merged; throws
+  /// [SyncFailure].
+  Future<void> resolveMerged(String path, String text);
 
   /// Whether the "Wi-Fi only" option means anything on this device.
   bool get offersWifiOnly;
@@ -662,15 +669,28 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
   void appBackgrounded() => scheduler.backgrounded();
 
   @override
-  Future<({String local, String remote})> conflictTexts(String path) =>
-      engine.conflictTexts(path);
+  Future<({String local, String remote, String? base})> conflictTexts(
+    String path,
+  ) => engine.conflictTexts(path);
 
   @override
   Future<void> resolveConflict(String path, {required bool keepLocal}) async {
     await engine.resolveConflict(path, keepLocal: keepLocal);
+    await _resolved(path, changedLocally: !keepLocal);
+  }
+
+  @override
+  Future<void> resolveMerged(String path, String text) async {
+    await engine.resolveMerged(path, text);
+    await _resolved(path, changedLocally: true);
+  }
+
+  /// Drops the resolved [path] from the panel and, when the file on disk
+  /// changed, tells the editor to re-read it.
+  Future<void> _resolved(String path, {required bool changedLocally}) async {
     final report = _status.lastReport;
     report?.conflicts.removeWhere((c) => c.path == path);
-    if (!keepLocal && !_changes.isClosed) _changes.add({path});
+    if (changedLocally && !_changes.isClosed) _changes.add({path});
     await load();
     _set(_status.copyWith());
   }

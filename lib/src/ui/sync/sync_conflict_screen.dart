@@ -38,7 +38,7 @@ final class SyncConflictScreen extends StatefulWidget {
 final class _SyncConflictScreenState extends State<SyncConflictScreen> {
   static const _log = AppLogger(name: 'sync');
 
-  ({String local, String remote})? _texts;
+  ({String local, String remote, String? base})? _texts;
   bool _failed = false;
   bool _resolving = false;
 

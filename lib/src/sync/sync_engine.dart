@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/app_database.dart';
+import 'package:niman/src/diff/three_way.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/sync/reconcile.dart';
 import 'package:niman/src/sync/sync_secrets.dart';
@@ -81,6 +82,9 @@ final class SyncReport {
   /// Paths left for the merge.
   final List<SyncConflict> conflicts = [];
 
+  /// Paths both sides changed that the run merged by itself.
+  final List<String> merged = [];
+
   /// Paths that failed, with the reason; retried on the next run.
   final List<({String path, String error})> failures = [];
 
@@ -125,6 +129,7 @@ final class SyncReport {
     if (aborted != null) return 'aborted: ${aborted!.name} ($abortDetail)';
     final parts = [
       for (final entry in done.entries) '${entry.key.name} ${entry.value}',
+      if (merged.isNotEmpty) '${merged.length} merged',
       if (conflicts.isNotEmpty) '${conflicts.length} conflicts',
       if (skipped.isNotEmpty) '${skipped.length} skipped',
       if (failures.isNotEmpty) '${failures.length} failed',
@@ -632,29 +637,106 @@ final class SyncEngine {
 
   // --- conflicts, one file at a time ---------------------------------
 
-  /// Both texts of a conflicted [path]: the local file and the server's
-  /// copy, decoded as UTF-8 (malformed bytes replaced). Throws
-  /// [SyncFailure].
-  Future<({String local, String remote})> conflictTexts(String path) =>
+  /// The texts of a conflicted [path]: the local file, the server's copy,
+  /// and the version both last agreed on when history still has it — what
+  /// the merge view needs. Decoded as UTF-8 (malformed bytes replaced).
+  /// Throws [SyncFailure].
+  Future<({String local, String remote, String? base})> conflictTexts(
+    String path,
+  ) => _exclusively(() async {
+    final connection = await _connect();
+    try {
+      final localBytes = await File(p.join(root, path)).readAsBytes();
+      final remoteBytes = await connection.client.readBytes(path);
+      final base = await _baseText(path);
+      _log.info(
+        'conflict $path: read ${localBytes.length} b local, '
+        '${remoteBytes.length} b remote, '
+        '${base == null ? 'no base' : '${base.length} chars of base'}',
+      );
+      return (
+        local: utf8.decode(localBytes, allowMalformed: true),
+        remote: utf8.decode(remoteBytes, allowMalformed: true),
+        base: base,
+      );
+    } on WebDavFailure catch (e) {
+      throw SyncFailure.of(e);
+    } on FileSystemException catch (e) {
+      throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
+    } finally {
+      connection.client.close();
+    }
+  });
+
+  /// The text of the history version pinned as the sync base of [path],
+  /// or null when there is none (or it rotated away).
+  Future<String?> _baseText(String path) async {
+    final row = await store.item(root, path);
+    final version = row?.baseVersion;
+    if (version == null || !NoteOps.keepsHistory(path)) return null;
+    try {
+      return await ops.readNoteVersion(path, version);
+    } on Object catch (e) {
+      _log.info('conflict $path: base v$version unreadable ($e)');
+      return null;
+    }
+  }
+
+  /// Resolves a conflicted [path] with the merged [text] the user put
+  /// together: it is written here (the replaced text becomes a `sync`
+  /// history version) and uploaded, and the row records the agreement.
+  /// Throws [SyncFailure].
+  Future<void> resolveMerged(String path, String text) =>
       _exclusively(() async {
+        final clock = Stopwatch()..start();
+        _log.info('resolve $path: merged text (${text.length} chars)');
         final connection = await _connect();
+        final client = connection.client;
         try {
-          final localBytes = await File(p.join(root, path)).readAsBytes();
-          final remoteBytes = await connection.client.readBytes(path);
-          _log.info(
-            'conflict $path: read ${localBytes.length} b local, '
-            '${remoteBytes.length} b remote',
+          final capabilities = await _capabilities(
+            client,
+            connection.destination,
           );
-          return (
-            local: utf8.decode(localBytes, allowMalformed: true),
-            remote: utf8.decode(remoteBytes, allowMalformed: true),
+          final remote = await client.stat(path);
+          final c = _RunContext(
+            client: client,
+            capabilities: capabilities,
+            local: const {},
+            remote: {path: ?remote},
+            rows: const {},
+            localSha: const {},
+            remoteSha: const {},
+            folders: {''},
+            report: SyncReport(),
           );
+          await ops.syncMerge(path, text);
+          final local = await _stat(path);
+          if (local == null) {
+            throw SyncFailure(SyncAbort.failed, '$path is gone here');
+          }
+          final sha = (await _hashLocal(root, [path]))[path]!;
+          await _ensureRemoteParent(c, path);
+          await client.uploadFile(
+            path,
+            File(p.join(root, path)),
+            ifMatch: capabilities.ifMatch ? remote?.etag : null,
+          );
+          final listed = await client.stat(path);
+          if (listed == null) {
+            throw SyncFailure(SyncAbort.failed, '$path uploaded, not listed');
+          }
+          await store.putItems([
+            await _row(c, path, sha: sha, local: local, remote: listed),
+          ]);
+          _log.info('resolve $path: merged (${clock.elapsedMilliseconds} ms)');
         } on WebDavFailure catch (e) {
+          _log.warning('resolve $path failed: ${e.message}');
           throw SyncFailure.of(e);
         } on FileSystemException catch (e) {
+          _log.warning('resolve $path failed: ${e.message}');
           throw SyncFailure(SyncAbort.failed, 'local: ${e.message}');
         } finally {
-          connection.client.close();
+          client.close();
         }
       });
 
@@ -1225,6 +1307,18 @@ final class SyncEngine {
       return _Outcome.done;
     }
 
+    // Both sides changed: with the version they last agreed on, the edits
+    // that do not overlap merge without asking anyone (docs/dev/sync.md,
+    // "Conflicts").
+    final merge = await _tryMerge(c, d, fetched.temp, remote);
+    if (merge != null) {
+      await fetched.temp.delete();
+      c.report
+        ..merged.add(d.path)
+        ..changedLocally.addAll(merge.changedLocally ? [d.path] : const []);
+      return _Outcome.done;
+    }
+
     await fetched.temp.delete();
     final conflict = SyncConflict(
       path: d.path,
@@ -1240,6 +1334,81 @@ final class SyncEngine {
     );
     return _Outcome.conflict;
   });
+
+  /// Merges both sides of [d] over the pinned base and writes the result
+  /// on both, or returns null when there is no base, the file is not
+  /// text, or the edits overlap (then the conflict stays for the user).
+  Future<({bool changedLocally})?> _tryMerge(
+    _RunContext c,
+    SyncDecision d,
+    File remoteCopy,
+    WebDavResource remote,
+  ) async {
+    final base = d.baseVersion;
+    if (base == null || !NoteOps.keepsHistory(d.path)) return null;
+    final String baseText;
+    try {
+      baseText = await ops.readNoteVersion(d.path, base);
+    } on Object catch (e) {
+      _log.info('merge ${d.path}: base v$base unreadable ($e)');
+      return null;
+    }
+    final localText = utf8.decode(
+      await File(p.join(root, d.path)).readAsBytes(),
+      allowMalformed: true,
+    );
+    final remoteText = utf8.decode(
+      await remoteCopy.readAsBytes(),
+      allowMalformed: true,
+    );
+    final merge = await _mergeTexts(baseText, localText, remoteText);
+    if (!merge.clean) {
+      _log.info(
+        'merge ${d.path}: ${merge.conflicts.length} overlapping region(s), '
+        'left for the user (${merge.describe()})',
+      );
+      return null;
+    }
+    final text = merge.text();
+    final changedLocally = text != localText;
+    if (changedLocally) await ops.syncMerge(d.path, text);
+    // The file on disk is the merge now: hash and stat it as written.
+    final local = await _stat(d.path);
+    if (local == null) throw const _StepFailure('merged but not on disk');
+    final sha = (await _hashLocal(root, [d.path]))[d.path];
+    if (sha == null) throw const _StepFailure('merged but not hashed');
+    await _ensureRemoteParent(c, d.path);
+    await c.client.uploadFile(
+      d.path,
+      File(p.join(root, d.path)),
+      ifMatch: c.capabilities.ifMatch ? remote.etag : null,
+      modified: DateTime.fromMillisecondsSinceEpoch(local.mtimeMs),
+    );
+    final listed = await c.client.stat(d.path);
+    if (listed == null) throw const _StepFailure('merged but not listed');
+    await store.putItems([
+      await _row(c, d.path, sha: sha, local: local, remote: listed),
+    ]);
+    _log.info('merge ${d.path}: ${merge.describe()}, both sides now agree');
+    return (changedLocally: changedLocally);
+  }
+
+  /// Merges three texts, off the UI isolate when they are long.
+  static Future<MergeResult> _mergeTexts(
+    String base,
+    String local,
+    String remote,
+  ) {
+    final size = base.length + local.length + remote.length;
+    if (size <= _inlineMergeLimit) {
+      return Future.value(mergeThreeWay(base, local, remote));
+    }
+    return Isolate.run(() => mergeThreeWay(base, local, remote));
+  }
+
+  /// Texts up to this many characters (all three together) are merged on
+  /// the calling isolate; an isolate costs more than the merge itself.
+  static const _inlineMergeLimit = 20000;
 
   Future<_Outcome> _moveRemote(_RunContext c, SyncDecision d) =>
       _guarded(() async {
