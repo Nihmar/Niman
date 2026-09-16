@@ -50,6 +50,7 @@ final class PluginReminderBackend implements ReminderBackend {
   /// drawable: wrong shape for a status bar, but it is always there.
   static const List<String> _iconCandidates = <String>[
     todoReminderIcon,
+    todoReminderIconLegacy,
     'launch_background',
   ];
 
