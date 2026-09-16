@@ -1,0 +1,25 @@
+<!-- Launcher quick action: New voice note (issue #91).
+     108x108 with the glyph inside the central 72x72 safe zone, so the
+     launcher's circular mask never cuts into it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#45475A"
+        android:pathData="M0,54a54,54 0 1,0 108,0a54,54 0 1,0 -108,0Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineJoin="round"
+        android:pathData="M46,36a8,8 0 0,1 16,0L62,52a8,8 0 0,1 -16,0Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M38,50a16,16 0 0,0 32,0M54,66L54,78M44,78L64,78" />
+</vector>
