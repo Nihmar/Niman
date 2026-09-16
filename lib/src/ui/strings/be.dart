@@ -1529,4 +1529,68 @@ final class BelarusianStrings extends Strings {
   String get syncResolveFailed => 'Не ўдалося вырашыць канфлікт';
   @override
   String get syncResolved => 'Канфлікт вырашаны';
+  @override
+  String get syncSectionWhen => 'Калі сінхранізаваць';
+  @override
+  String get syncAutoTitle => 'Аўтаматычна';
+  @override
+  String get syncAutoSubtitle =>
+      'Пасля змен, пры адкрыцці і праз прамежкі часу';
+  @override
+  String get syncIntervalTitle => 'Правяраць сервер кожныя';
+  @override
+  String get syncIntervalSubtitle => 'Толькі пакуль праграма адкрыта';
+  @override
+  String get syncIntervalDialogBody =>
+      'Каб бачыць змены, зробленыя на іншых прыладах, пакуль праграма адкрыта. '
+      'З «Ніколі» — толькі пасля змен і пры адкрыцці.';
+  @override
+  String syncIntervalMinutes(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count хвіліна',
+    (2 || 3 || 4, < 12 || > 14) => '$count хвіліны',
+    _ => '$count хвілін',
+  };
+  @override
+  String get syncIntervalNever => 'Ніколі';
+  @override
+  String get syncWifiOnlyTitle => 'Толькі праз Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Праз мабільныя даныя сінхранізаваць толькі ўручную';
+  @override
+  String syncPendingChanges(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count змена чакае',
+    (2 || 3 || 4, < 12 || > 14) => '$count змены чакаюць',
+    _ => '$count змен чакае',
+  };
+  @override
+  String syncRetryIn(String wait) => 'новая спроба праз $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds с';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes хв';
+  @override
+  String get syncWaitingForWifi => 'Чаканне Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Чаканне злучэння';
+  @override
+  String get syncMobileDataHint =>
+      '«Сінхранізаваць зараз» усё роўна выкарыстоўвае мабільныя даныя.';
+  @override
+  String get syncQueueKeptHint =>
+      'Змены застаюцца тут, нават калі вы закрыеце праграму, і адпраўляюцца '
+      'самі, калі сервер адкажа.';
+  @override
+  String get syncAutoPaused => 'Аўтаматычная сінхранізацыя прыпынена';
+  @override
+  String get syncPausedAuthHint =>
+      'Яна адновіцца, калі вы абновіце пароль або сінхранізуеце ўручную.';
+  @override
+  String get syncPausedServerHint =>
+      'Яна адновіцца, калі вы выправіце адрас або сінхранізуеце ўручную.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Сінхранізаваць зараз» пакажа, што будзе выдалена, і спачатку спытае.';
+  @override
+  String get syncNeedsConfirmation => 'Чаканне вашага пацвярджэння';
 }

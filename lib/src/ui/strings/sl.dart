@@ -1525,4 +1525,69 @@ final class SlovenianStrings extends Strings {
   String get syncResolveFailed => 'Konflikta ni bilo mogoče razrešiti';
   @override
   String get syncResolved => 'Konflikt razrešen';
+  @override
+  String get syncSectionWhen => 'Kdaj sinhronizirati';
+  @override
+  String get syncAutoTitle => 'Samodejno';
+  @override
+  String get syncAutoSubtitle => 'Po urejanju, ob odprtju in v presledkih';
+  @override
+  String get syncIntervalTitle => 'Preveri strežnik vsakih';
+  @override
+  String get syncIntervalSubtitle => 'Samo dokler je aplikacija odprta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Da vidite spremembe z drugih naprav, dokler je aplikacija odprta. Pri '
+      '„Nikoli” samo po urejanju in ob odprtju.';
+  @override
+  String syncIntervalMinutes(int count) => switch (count % 100) {
+    1 => '$count minuta',
+    2 => '$count minuti',
+    3 || 4 => '$count minute',
+    _ => '$count minut',
+  };
+  @override
+  String get syncIntervalNever => 'Nikoli';
+  @override
+  String get syncWifiOnlyTitle => 'Samo Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Pri mobilnih podatkih sinhronizirajte samo ročno';
+  @override
+  String syncPendingChanges(int count) => switch (count % 100) {
+    1 => '$count sprememba čaka',
+    2 => '$count spremembi čakata',
+    3 || 4 => '$count spremembe čakajo',
+    _ => '$count sprememb čaka',
+  };
+  @override
+  String syncRetryIn(String wait) => 'nov poskus čez $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čakanje na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čakanje na povezavo';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinhroniziraj zdaj” kljub temu porabi mobilne podatke.';
+  @override
+  String get syncQueueKeptHint =>
+      'Spremembe ostanejo tukaj, tudi če zaprete aplikacijo, in odidejo same, '
+      'ko strežnik odgovori.';
+  @override
+  String get syncAutoPaused => 'Samodejna sinhronizacija je zaustavljena';
+  @override
+  String get syncPausedAuthHint =>
+      'Nadaljuje se, ko posodobite geslo ali sinhronizirate ročno.';
+  @override
+  String get syncPausedServerHint =>
+      'Nadaljuje se, ko popravite naslov ali sinhronizirate ročno.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinhroniziraj zdaj” pokaže, kaj bi bilo odstranjeno, in prej vpraša.';
+  @override
+  String get syncNeedsConfirmation => 'Čaka na vašo potrditev';
 }

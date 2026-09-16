@@ -1348,4 +1348,51 @@ final class ChineseStrings extends Strings {
   String get syncResolveFailed => '无法解决冲突';
   @override
   String get syncResolved => '冲突已解决';
+  @override
+  String get syncSectionWhen => '何时同步';
+  @override
+  String get syncAutoTitle => '自动';
+  @override
+  String get syncAutoSubtitle => '编辑后、打开时及定期同步';
+  @override
+  String get syncIntervalTitle => '服务器检查间隔';
+  @override
+  String get syncIntervalSubtitle => '仅在应用打开时';
+  @override
+  String get syncIntervalDialogBody =>
+      '用于在应用打开时看到其他设备上的更改。选择「从不」时，仅在编辑后和打开时同步。';
+  @override
+  String syncIntervalMinutes(int count) => '$count 分钟';
+  @override
+  String get syncIntervalNever => '从不';
+  @override
+  String get syncWifiOnlyTitle => '仅限 Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => '使用移动数据时仅手动同步';
+  @override
+  String syncPendingChanges(int count) => '$count 项更改待同步';
+  @override
+  String syncRetryIn(String wait) => '$wait后重试';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds 秒';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes 分钟';
+  @override
+  String get syncWaitingForWifi => '正在等待 Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => '正在等待网络连接';
+  @override
+  String get syncMobileDataHint => '「立即同步」仍会使用移动数据。';
+  @override
+  String get syncQueueKeptHint => '更改会保留在这里，即使关闭应用也不会丢失，服务器响应后会自动发送。';
+  @override
+  String get syncAutoPaused => '自动同步已暂停';
+  @override
+  String get syncPausedAuthHint => '更新密码或手动同步后即可恢复。';
+  @override
+  String get syncPausedServerHint => '修正地址或手动同步后即可恢复。';
+  @override
+  String get syncPausedConfirmHint => '「立即同步」会先显示将被删除的内容，并请求确认。';
+  @override
+  String get syncNeedsConfirmation => '等待你的确认';
 }

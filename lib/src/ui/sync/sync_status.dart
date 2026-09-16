@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
@@ -35,28 +37,34 @@ final class SyncStatusButton extends StatelessWidget {
         if (!status.configured) return const SizedBox.shrink();
         final scheme = Theme.of(context).colorScheme;
         final attention = status.needsAttention && !status.running;
-        return GestureDetector(
-          onLongPress: onOpenPanel,
-          child: IconButton(
-            key: const Key('sync-status-button'),
-            tooltip:
-                '${AppStrings.syncTooltip} · '
-                '${syncStatusLine(status, DateTime.now())}',
-            onPressed: status.running
-                ? onOpenPanel
-                : attention
-                ? onOpenPanel
-                : onSync,
-            icon: Badge(
-              isLabelVisible: attention,
-              backgroundColor: syncStatusColor(status, scheme),
-              smallSize: 8,
-              child: status.running
-                  ? const _SpinningSync()
-                  : Icon(
-                      syncStatusIcon(status),
-                      color: syncStatusColor(status, scheme),
-                    ),
+        return Tooltip(
+          message:
+              '${AppStrings.syncTooltip} · '
+              '${syncStatusLine(status, DateTime.now())}',
+          // The button's own tooltip would take the long press for
+          // itself (its trigger is a long press on touch), and the panel
+          // would never open. Hovering still shows it.
+          triggerMode: TooltipTriggerMode.manual,
+          child: GestureDetector(
+            onLongPress: onOpenPanel,
+            child: IconButton(
+              key: const Key('sync-status-button'),
+              onPressed: status.running
+                  ? onOpenPanel
+                  : attention
+                  ? onOpenPanel
+                  : onSync,
+              icon: Badge(
+                isLabelVisible: attention,
+                backgroundColor: syncStatusColor(status, scheme),
+                smallSize: 8,
+                child: status.running
+                    ? const _SpinningSync()
+                    : Icon(
+                        syncStatusIcon(status),
+                        color: syncStatusColor(status, scheme),
+                      ),
+              ),
             ),
           ),
         );
@@ -118,7 +126,10 @@ final class SyncProgressStrip extends StatelessWidget {
       listenable: sync,
       builder: (context, _) {
         final status = sync.status;
-        if (!status.running) return const SizedBox.shrink();
+        // An automatic sync works quietly: the icon turns, nothing more.
+        if (!status.running || status.background) {
+          return const SizedBox.shrink();
+        }
         final theme = Theme.of(context);
         final applying = status.stage == SyncStage.applying && status.total > 0;
         return Material(
@@ -197,7 +208,7 @@ Future<void> showSyncPanel(
   ),
 );
 
-final class _SyncPanel extends StatelessWidget {
+final class _SyncPanel extends StatefulWidget {
   const new({
     required this.status,
     required this.onSyncNow,
@@ -211,7 +222,48 @@ final class _SyncPanel extends StatelessWidget {
   final void Function(String path) onResolve;
 
   @override
+  State<_SyncPanel> createState() => _SyncPanelState();
+}
+
+final class _SyncPanelState extends State<_SyncPanel> {
+  /// Keeps "retrying in 40 s" counting down while a retry is ahead.
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _armTick();
+  }
+
+  @override
+  void didUpdateWidget(_SyncPanel old) {
+    super.didUpdateWidget(old);
+    _armTick();
+  }
+
+  void _armTick() {
+    final retry = widget.status.nextRetryAt;
+    final ahead = retry != null && retry.isAfter(DateTime.now());
+    if (!ahead) {
+      _tick?.cancel();
+      _tick = null;
+    } else {
+      _tick ??= Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted) return;
+        setState(_armTick);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final status = widget.status;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final now = DateTime.now();
@@ -223,7 +275,10 @@ final class _SyncPanel extends StatelessWidget {
     final last = status.lastSyncAt;
     final needsPassword =
         aborted == SyncAbort.authentication ||
-        aborted == SyncAbort.missingPassword;
+        aborted == SyncAbort.missingPassword ||
+        status.autoPaused == SyncPause.authentication;
+    final queue = syncQueueLine(status, now);
+    final queueHint = syncQueueHint(status);
     Widget header(String text) => Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Text(
@@ -249,7 +304,11 @@ final class _SyncPanel extends StatelessWidget {
                   color: syncStatusColor(status, scheme),
                 ),
                 title: Text(syncStatusLine(status, now)),
-                subtitle: stopped || status.running
+                subtitle:
+                    stopped ||
+                        status.running ||
+                        status.waitingForNetwork ||
+                        status.autoPaused != null
                     ? Text(
                         last == null
                             ? AppStrings.syncNoSuccessYet
@@ -259,7 +318,27 @@ final class _SyncPanel extends StatelessWidget {
                       )
                     : null,
               ),
-              if (stopped)
+              if (queue != null)
+                Card.filled(
+                  key: const Key('sync-queue'),
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                  child: ListTile(
+                    dense: true,
+                    leading: Icon(
+                      status.autoPaused != null
+                          ? Icons.pause_circle_outline
+                          : Icons.schedule,
+                    ),
+                    title: Text(queue),
+                  ),
+                ),
+              if (queueHint != null)
+                Padding(
+                  key: const Key('sync-queue-hint'),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Text(queueHint, style: muted),
+                )
+              else if (stopped)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                   child: Text(AppStrings.syncAbortNothingTouched, style: muted),
@@ -274,7 +353,7 @@ final class _SyncPanel extends StatelessWidget {
                     title: Text(conflict.path),
                     subtitle: Text(AppStrings.syncConflictHint),
                     trailing: TextButton(
-                      onPressed: () => onResolve(conflict.path),
+                      onPressed: () => widget.onResolve(conflict.path),
                       child: Text(AppStrings.syncResolveAction),
                     ),
                   ),
@@ -305,7 +384,7 @@ final class _SyncPanel extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         key: const Key('sync-panel-settings'),
-                        onPressed: onOpenSettings,
+                        onPressed: widget.onOpenSettings,
                         child: Text(
                           needsPassword
                               ? AppStrings.syncUpdatePasswordAction
@@ -317,7 +396,7 @@ final class _SyncPanel extends StatelessWidget {
                     Expanded(
                       child: FilledButton.icon(
                         key: const Key('sync-panel-sync'),
-                        onPressed: status.running ? null : onSyncNow,
+                        onPressed: status.running ? null : widget.onSyncNow,
                         icon: const Icon(Icons.sync),
                         label: Text(
                           stopped

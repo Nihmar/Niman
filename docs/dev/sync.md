@@ -412,10 +412,12 @@ one runs joins it.
    as a `SyncReport`: counts per action, conflicts, failures, skipped
    paths, or why it stopped.
 
+A **quick** run (`run(quick: true)`, step 6) works on the due hints of
+the queue only; see "Queue and triggers". Either kind settles the hints
+it read and keeps the server's longest `Retry-After` on the report.
+
 Not yet: parallel transfers, skipping unchanged folders by collection
-ETag, pruning remote folders left empty, `Retry-After` waits (the
-queue's job, step 6), and telling an open editor that its note was
-replaced (step 5/6).
+ETag, pruning remote folders left empty.
 
 ### UI (`lib/src/ui/sync/`, mockups S1–S11)
 
@@ -453,8 +455,18 @@ re-reads the open note.
   snackbar only when there is something to say (files trashed here,
   conflicts, an abort).
 
-The trigger options (`auto_sync`, `interval_seconds`, `wifi_only`) are
-stored but have no rows yet: they appear with the triggers in step 6.
+- **When to sync** (mockups T1, T2), in the overview above Server:
+  **Automatically** (`auto_sync`), **Check the server every** 1 / 5 /
+  15 / 30 min or Never (`interval_seconds` 60 / 300 / 900 / 1800 / 0),
+  **Wi-Fi only** (`wifi_only`, phones only). `SyncService.setTriggers`
+  stores them and re-arms the scheduler.
+- **Queue** (mockups T4–T6): `SyncStatus` carries `pendingHints`,
+  `nextRetryAt`, `autoPaused`, `waitingForNetwork`, `network` and
+  `background`. The overview card and the panel show "N changes waiting
+  · retrying in 40 s" (the panel counts down), and a hint: how a pause
+  ends, that the queue survives an outage, or that Sync now uses mobile
+  data. An automatic run shows no progress strip; the icon turns, and
+  reads `cloud_queue` while changes wait.
 
 ### Queue and triggers
 
@@ -495,15 +507,77 @@ the network coming back (`retryNow`) does. A sync removes a hint only
 if `created_at_ms` is still the one it read, so a save that lands while
 its path is syncing is never lost.
 
-- **Quick sync** (the 5 s after-edit trigger) handles only the queued
-  paths: a PROPFIND `Depth: 0` per path, then the table above.
-- **Full sync** (manual, resume, periodic) walks the remote tree
-  (skipping folders whose collection ETag is unchanged when the server
-  has them) and the local tree, reconciles every path, then drops the
-  ops it covered.
-- An op is removed when its path reconciles cleanly; a failure bumps
-  `attempts` and `next_attempt_at_ms`. 401/403 stops the run and marks
-  the destination (`last_error`) instead of backing off forever.
+**Where hints come from.** `NoteOps` calls its `syncHints` sink after
+every user operation's disk change: create, save (after the write, so a
+sync that reads the hint sees the new text), append, pin, rename and
+move (`moved`), delete (`deleted`), restore from history or trash, and
+every write of `.niman/settings.json` (through
+`LibraryConfigRepo.onWritten`). The sync's own `syncReplace`,
+`syncTrash` and `syncMove` report nothing and remember their paths for
+10 s. The file watcher adds what changed behind the ops (another app, a
+widget isolate, a hand edit): `LibrarySyncService.watched` queues
+`changed` for a path that exists and `deleted` for one that does not,
+dropping dot folders and the echoes of sync writes. Hints are hints:
+a duplicate costs a PROPFIND, a missed one waits for the next full sync.
+
+- **Quick sync** (`SyncEngine.run(quick: true)`) reads the due hints and
+  reconciles only their paths and move sources: the destination folder
+  is checked first (`PROPFIND Depth: 0` on it: a missing one stops the
+  run instead of reading as "every file is gone"), then one `PROPFIND
+  Depth: 0` per path; a path that is a folder on either side (or has
+  rows under it) is walked, locally and remotely. The mass-deletion
+  guard still measures against every row. A quick sync is never a first
+  sync, and leaves `trashLocal` and `moveLocal` to a full sync
+  (`SyncReport.deferred`): a single 404 is not enough to trash a file.
+- **Full sync** (manual, library opened, resume, periodic, after a quick
+  sync that deferred something) walks both trees and reads every hint,
+  due or backing off.
+- **Settling** (both kinds): a hint is removed (`completeOp`, only if
+  not rewritten meanwhile) when no path it covers — its path, its move
+  source, anything under either — failed or changed during the run; a
+  conflict settles it too (the report carries it). Otherwise `failOp`
+  backs it off. A run that stopped backs every hint off; one that was
+  not confirmed, had no destination or no password leaves them alone.
+
+#### Triggers (`lib/src/sync/sync_scheduler.dart`)
+
+`SyncScheduler`, one per open library, owned by `LibrarySyncService`
+and started by `LibraryController` after `load()`:
+
+| Trigger | Run | When |
+|---|---|---|
+| hint | quick | 5 s after the last one, at most 60 s after the first of a burst |
+| app backgrounded (`paused`) | quick | right away, when something is due |
+| library opened, app resumed | full | right away |
+| periodic | full | every `interval_seconds` (0 = never); on phones only in the foreground |
+| network back (offline → online, mobile → Wi-Fi) | full after a stopped run, else quick | after `retryNow` |
+| quick sync deferred something | full | after it |
+| manual (icon, panel, Sync now) | full | always; clears pause and backoff, `retryNow` |
+
+Automatic runs are skipped (and logged) without a destination, with
+`enabled` or `auto_sync` off, before the first sync, while paused, while
+backing off, on a phone that is offline or on mobile data with
+`wifi_only`, and — for a quick one — with nothing due. One run at a
+time: a trigger during a run is remembered and served after it; hints
+still due after a run arm the debounce again.
+
+After a run: `offline` / `failed` back automatic runs off for
+`syncBackoff(n)` or the server's `Retry-After` if longer, with a retry
+timer; `authentication` / `missingPassword` pause them
+(`SyncPause.authentication`), `remoteMissing` / `unsupported` too
+(`server`), and a refused mass deletion (`confirmation`). A pause ends
+with a manual run or a saved destination. Paths that failed back off
+their hints and arm a quick retry.
+
+The network comes from `NetworkMonitor` (`ConnectivityNetworkMonitor`
+over `connectivity_plus`: Wi-Fi or Ethernet = unmetered, mobile, none =
+offline, a VPN alone or no answer = unknown, which never blocks). Off
+phones the network never blocks a run, since a desktop without a network
+manager can read as offline; it only speeds up the retry.
+
+Closing the library stops the triggers and waits up to 10 s for a run
+going (`LibrarySyncService.close`), since it writes through the index
+about to close.
 
 ### Conflicts
 

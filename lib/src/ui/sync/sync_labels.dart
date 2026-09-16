@@ -14,13 +14,79 @@ String syncStatusLine(SyncStatus status, DateTime now) {
   if (aborted != null && aborted != SyncAbort.notConfirmed) {
     return syncAbortTitle(aborted);
   }
+  if (status.autoPaused == SyncPause.confirmation) {
+    return AppStrings.syncNeedsConfirmation;
+  }
   if (status.conflicts.isNotEmpty || status.failures.isNotEmpty) {
     return AppStrings.syncStatusWarnings;
+  }
+  if (status.waitingForNetwork) {
+    return status.network == SyncNetwork.offline
+        ? AppStrings.syncWaitingForNetwork
+        : AppStrings.syncWaitingForWifi;
   }
   final last = status.lastSyncAt;
   if (last == null) return AppStrings.syncNeverSynced;
   return AppStrings.syncLastSynced(historyWhen(last, now));
 }
+
+/// How long until [at], short: "40 s", "3 min".
+String syncWaitLabel(DateTime at, DateTime now) {
+  final seconds = at.difference(now).inSeconds;
+  if (seconds < 60) {
+    return AppStrings.syncWaitSeconds(seconds < 1 ? 1 : seconds);
+  }
+  return AppStrings.syncWaitMinutes((seconds / 60).ceil());
+}
+
+/// What waits in the queue (mockups T4–T6): "Automatic sync paused",
+/// "3 changes waiting", "retrying in 40 s", joined; null when nothing
+/// waits.
+String? syncQueueLine(SyncStatus status, DateTime now) {
+  final retry = status.nextRetryAt;
+  final parts = [
+    if (status.autoPaused != null) AppStrings.syncAutoPaused,
+    if (status.pendingHints > 0)
+      AppStrings.syncPendingChanges(status.pendingHints),
+    if (status.autoPaused == null &&
+        status.pendingHints > 0 &&
+        retry != null &&
+        retry.isAfter(now))
+      AppStrings.syncRetryIn(syncWaitLabel(retry, now)),
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
+/// The hint under the queue line, or null: why the automatic sync is
+/// paused, that the queue survives an outage, or that a manual sync uses
+/// mobile data.
+String? syncQueueHint(SyncStatus status) {
+  switch (status.autoPaused) {
+    case SyncPause.authentication:
+      return AppStrings.syncPausedAuthHint;
+    case SyncPause.server:
+      return AppStrings.syncPausedServerHint;
+    case SyncPause.confirmation:
+      return AppStrings.syncPausedConfirmHint;
+    case null:
+      break;
+  }
+  if (status.aborted == SyncAbort.offline && status.pendingHints > 0) {
+    return AppStrings.syncQueueKeptHint;
+  }
+  if (status.waitingForNetwork && status.network == SyncNetwork.mobile) {
+    return AppStrings.syncMobileDataHint;
+  }
+  return null;
+}
+
+/// The choices of the periodic sync, in seconds (0 = never).
+const List<int> syncIntervalChoices = [60, 300, 900, 1800, 0];
+
+/// What an interval of [seconds] reads as.
+String syncIntervalLabel(int seconds) => seconds <= 0
+    ? AppStrings.syncIntervalNever
+    : AppStrings.syncIntervalMinutes((seconds / 60).ceil());
 
 /// The progress line of a running sync (mockup S6).
 String syncStageLine(SyncStatus status) => switch (status.stage) {
@@ -54,10 +120,16 @@ IconData syncStatusIcon(SyncStatus status) {
   if (aborted != null && aborted != SyncAbort.notConfirmed) {
     return Icons.error_outline;
   }
-  if (status.conflicts.isNotEmpty || status.failures.isNotEmpty) {
+  if (status.autoPaused != null ||
+      status.conflicts.isNotEmpty ||
+      status.failures.isNotEmpty) {
     return Icons.sync_problem;
   }
-  return status.lastSyncAt == null ? Icons.cloud_queue : Icons.cloud_done;
+  return status.lastSyncAt == null ||
+          status.pendingHints > 0 ||
+          status.waitingForNetwork
+      ? Icons.cloud_queue
+      : Icons.cloud_done;
 }
 
 /// The color of [syncStatusIcon]: neutral when fine, the scheme's error
@@ -69,7 +141,9 @@ Color syncStatusColor(SyncStatus status, ColorScheme scheme) {
   if (aborted != null && aborted != SyncAbort.notConfirmed) {
     return scheme.error;
   }
-  if (status.conflicts.isNotEmpty || status.failures.isNotEmpty) {
+  if (status.autoPaused != null ||
+      status.conflicts.isNotEmpty ||
+      status.failures.isNotEmpty) {
     return scheme.tertiary;
   }
   return scheme.onSurfaceVariant;

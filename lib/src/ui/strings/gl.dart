@@ -1531,4 +1531,60 @@ final class GalicianStrings extends Strings {
   String get syncResolveFailed => 'Non se puido resolver o conflito';
   @override
   String get syncResolved => 'Conflito resolto';
+  @override
+  String get syncSectionWhen => 'Cando sincronizar';
+  @override
+  String get syncAutoTitle => 'Automaticamente';
+  @override
+  String get syncAutoSubtitle => 'Tras os cambios, ao abrir e a intervalos';
+  @override
+  String get syncIntervalTitle => 'Comprobar o servidor cada';
+  @override
+  String get syncIntervalSubtitle => 'Só coa app aberta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Para ver os cambios feitos noutros dispositivos mentres a app está '
+      'aberta. Con “Nunca”, só tras os cambios e ao abrir.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuto' : '$count minutos';
+  @override
+  String get syncIntervalNever => 'Nunca';
+  @override
+  String get syncWifiOnlyTitle => 'Só con Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Con datos móbiles, sincroniza só a man';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 cambio á espera' : '$count cambios á espera';
+  @override
+  String syncRetryIn(String wait) => 'nova tentativa en $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Agardando polo Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Agardando pola conexión';
+  @override
+  String get syncMobileDataHint =>
+      '“Sincronizar agora” usa igual os datos móbiles.';
+  @override
+  String get syncQueueKeptHint =>
+      'Os cambios quedan aquí, aínda que peches a app, e saen sós cando o '
+      'servidor responde.';
+  @override
+  String get syncAutoPaused => 'Sincronización automática en pausa';
+  @override
+  String get syncPausedAuthHint =>
+      'Retómase cando actualizas o contrasinal ou sincronizas a man.';
+  @override
+  String get syncPausedServerHint =>
+      'Retómase cando corrixes o enderezo ou sincronizas a man.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sincronizar agora” mostra o que se borraría e pide confirmación.';
+  @override
+  String get syncNeedsConfirmation => 'Agardando pola túa confirmación';
 }

@@ -1497,4 +1497,61 @@ final class TurkishStrings extends Strings {
   String get syncResolveFailed => 'Çakışma çözülemedi';
   @override
   String get syncResolved => 'Çakışma çözüldü';
+  @override
+  String get syncSectionWhen => 'Ne zaman eşitlensin';
+  @override
+  String get syncAutoTitle => 'Otomatik olarak';
+  @override
+  String get syncAutoSubtitle =>
+      'Düzenlemelerden sonra, açılışta ve belirli aralıklarla';
+  @override
+  String get syncIntervalTitle => 'Sunucuyu denetleme sıklığı';
+  @override
+  String get syncIntervalSubtitle => 'Yalnızca uygulama açıkken';
+  @override
+  String get syncIntervalDialogBody =>
+      'Uygulama açıkken diğer cihazlarda yapılan değişiklikleri görmek '
+      'için. “Hiçbir zaman” seçiliyse yalnızca düzenlemelerden sonra ve '
+      'açılışta.';
+  @override
+  String syncIntervalMinutes(int count) => '$count dakikada bir';
+  @override
+  String get syncIntervalNever => 'Hiçbir zaman';
+  @override
+  String get syncWifiOnlyTitle => 'Yalnızca Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobil veride yalnızca elle eşitle';
+  @override
+  String syncPendingChanges(int count) => '$count değişiklik bekliyor';
+  @override
+  String syncRetryIn(String wait) => '$wait sonra yeniden denenecek';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds sn';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes dk';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi bekleniyor';
+  @override
+  String get syncWaitingForNetwork => 'Bağlantı bekleniyor';
+  @override
+  String get syncMobileDataHint =>
+      '“Şimdi eşitle” yine de mobil veri kullanır.';
+  @override
+  String get syncQueueKeptHint =>
+      'Değişiklikler, uygulamayı kapatsanız bile burada kalır ve sunucu '
+      'yanıt verdiğinde kendiliğinden gönderilir.';
+  @override
+  String get syncAutoPaused => 'Otomatik eşitleme duraklatıldı';
+  @override
+  String get syncPausedAuthHint =>
+      'Parolayı güncellediğinizde veya elle eşitlediğinizde devam eder.';
+  @override
+  String get syncPausedServerHint =>
+      'Adresi düzelttiğinizde veya elle eşitlediğinizde devam eder.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Şimdi eşitle” nelerin kaldırılacağını gösterir ve önce onayınızı '
+      'ister.';
+  @override
+  String get syncNeedsConfirmation => 'Onayınız bekleniyor';
 }

@@ -1523,4 +1523,71 @@ final class LithuanianStrings extends Strings {
   String get syncResolveFailed => 'Nepavyko išspręsti konflikto';
   @override
   String get syncResolved => 'Konfliktas išspręstas';
+  @override
+  String get syncSectionWhen => 'Kada sinchronizuoti';
+  @override
+  String get syncAutoTitle => 'Automatiškai';
+  @override
+  String get syncAutoSubtitle =>
+      'Po pakeitimų, atidarius ir kas tam tikrą laiką';
+  @override
+  String get syncIntervalTitle => 'Serverio tikrinimo intervalas';
+  @override
+  String get syncIntervalSubtitle => 'Tik kol programa atidaryta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Kad matytumėte kituose įrenginiuose atliktus pakeitimus, kol programa '
+      'atidaryta. Pasirinkus „Niekada“ – tik po pakeitimų ir atidarius.';
+  @override
+  String syncIntervalMinutes(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count minutė'
+      : count % 10 >= 2 && (count % 100 < 11 || count % 100 > 19)
+      ? '$count minutės'
+      : '$count minučių';
+  @override
+  String get syncIntervalNever => 'Niekada';
+  @override
+  String get syncWifiOnlyTitle => 'Tik per Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Mobiliuoju ryšiu sinchronizuoti tik rankiniu būdu';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count pakeitimas laukia'
+      : count % 10 >= 2 && (count % 100 < 11 || count % 100 > 19)
+      ? '$count pakeitimai laukia'
+      : '$count pakeitimų laukia';
+  @override
+  String syncRetryIn(String wait) => 'kitas bandymas po $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Laukiama Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Laukiama ryšio';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinchronizuoti dabar“ vis tiek naudoja mobiliuosius duomenis.';
+  @override
+  String get syncQueueKeptHint =>
+      'Pakeitimai lieka čia, net jei uždarysite programą, ir išsiunčiami '
+      'patys, kai serveris atsako.';
+  @override
+  String get syncAutoPaused => 'Automatinis sinchronizavimas pristabdytas';
+  @override
+  String get syncPausedAuthHint =>
+      'Jis bus tęsiamas, kai atnaujinsite slaptažodį arba sinchronizuosite '
+      'rankiniu būdu.';
+  @override
+  String get syncPausedServerHint =>
+      'Jis bus tęsiamas, kai pataisysite adresą arba sinchronizuosite '
+      'rankiniu būdu.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinchronizuoti dabar“ parodo, kas būtų pašalinta, ir pirmiausia '
+      'paklausia.';
+  @override
+  String get syncNeedsConfirmation => 'Laukiama jūsų patvirtinimo';
 }

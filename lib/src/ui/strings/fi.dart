@@ -1524,4 +1524,61 @@ final class FinnishStrings extends Strings {
   String get syncResolveFailed => 'Ristiriitaa ei voitu ratkaista';
   @override
   String get syncResolved => 'Ristiriita ratkaistu';
+  @override
+  String get syncSectionWhen => 'Milloin synkronoidaan';
+  @override
+  String get syncAutoTitle => 'Automaattisesti';
+  @override
+  String get syncAutoSubtitle =>
+      'Muutosten jälkeen, avattaessa ja säännöllisin väliajoin';
+  @override
+  String get syncIntervalTitle => 'Palvelimen tarkistusväli';
+  @override
+  String get syncIntervalSubtitle => 'Vain kun sovellus on auki';
+  @override
+  String get syncIntervalDialogBody =>
+      'Näet muilla laitteilla tehdyt muutokset, kun sovellus on auki. '
+      'Valinnalla ”Ei koskaan” vain muutosten jälkeen ja avattaessa.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuutti' : '$count minuuttia';
+  @override
+  String get syncIntervalNever => 'Ei koskaan';
+  @override
+  String get syncWifiOnlyTitle => 'Vain Wi-Fi-yhteydellä';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobiilidatalla synkronoidaan vain käsin';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 muutos odottaa' : '$count muutosta odottaa';
+  @override
+  String syncRetryIn(String wait) => 'uusi yritys $wait kuluttua';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Odotetaan Wi-Fi-yhteyttä';
+  @override
+  String get syncWaitingForNetwork => 'Odotetaan yhteyttä';
+  @override
+  String get syncMobileDataHint =>
+      '”Synkronoi nyt” käyttää silti mobiilidataa.';
+  @override
+  String get syncQueueKeptHint =>
+      'Muutokset säilyvät täällä, vaikka suljet sovelluksen, ja lähtevät '
+      'itsestään, kun palvelin vastaa.';
+  @override
+  String get syncAutoPaused => 'Automaattinen synkronointi keskeytetty';
+  @override
+  String get syncPausedAuthHint =>
+      'Se jatkuu, kun päivität salasanan tai synkronoit käsin.';
+  @override
+  String get syncPausedServerHint =>
+      'Se jatkuu, kun korjaat osoitteen tai synkronoit käsin.';
+  @override
+  String get syncPausedConfirmHint =>
+      '”Synkronoi nyt” näyttää, mitä poistettaisiin, ja kysyy ensin.';
+  @override
+  String get syncNeedsConfirmation => 'Odottaa vahvistustasi';
 }

@@ -204,6 +204,39 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     }
   }
 
+  Future<void> _setTriggers({
+    bool? autoSync,
+    int? intervalSeconds,
+    bool? wifiOnly,
+  }) async {
+    try {
+      await _sync.setTriggers(
+        autoSync: autoSync,
+        intervalSeconds: intervalSeconds,
+        wifiOnly: wifiOnly,
+      );
+    } on Object catch (e) {
+      _log.error('settings: trigger options not saved: $e');
+    }
+  }
+
+  Future<void> _chooseInterval() async {
+    final destination = _sync.status.destination;
+    if (destination == null) return;
+    final seconds = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('sync-interval-dialog'),
+      title: AppStrings.syncIntervalTitle,
+      subtitle: AppStrings.syncIntervalDialogBody,
+      current: destination.intervalSeconds,
+      options: [
+        for (final choice in syncIntervalChoices)
+          SettingsOption(choice, syncIntervalLabel(choice)),
+      ],
+    );
+    if (seconds != null) await _setTriggers(intervalSeconds: seconds);
+  }
+
   Future<void> _disconnect() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -529,6 +562,16 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                     ),
                   ],
                 ),
+                if (syncQueueLine(status, now) case final queue?) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    queue,
+                    key: const Key('sync-overview-queue'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 if (status.aborted != null &&
                     status.aborted != SyncAbort.notConfirmed) ...[
                   const SizedBox(height: 8),
@@ -554,6 +597,32 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
             ),
           ),
         ),
+        SettingsSection(AppStrings.syncSectionWhen),
+        SwitchListTile(
+          key: const Key('sync-auto'),
+          title: Text(AppStrings.syncAutoTitle),
+          subtitle: Text(AppStrings.syncAutoSubtitle),
+          value: destination.autoSync,
+          onChanged: (on) => _setTriggers(autoSync: on),
+        ),
+        SettingsValueRow(
+          key: const Key('sync-interval'),
+          title: AppStrings.syncIntervalTitle,
+          subtitle: AppStrings.syncIntervalSubtitle,
+          value: syncIntervalLabel(destination.intervalSeconds),
+          enabled: destination.autoSync,
+          onTap: _chooseInterval,
+        ),
+        if (_sync.offersWifiOnly)
+          SwitchListTile(
+            key: const Key('sync-wifi-only'),
+            title: Text(AppStrings.syncWifiOnlyTitle),
+            subtitle: Text(AppStrings.syncWifiOnlySubtitle),
+            value: destination.wifiOnly,
+            onChanged: destination.autoSync
+                ? (on) => _setTriggers(wifiOnly: on)
+                : null,
+          ),
         SettingsSection(AppStrings.syncSectionServer),
         SettingsValueRow(
           key: const Key('sync-edit-server'),

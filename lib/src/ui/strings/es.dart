@@ -1546,4 +1546,61 @@ final class SpanishStrings extends Strings {
   String get syncResolveFailed => 'No se pudo resolver el conflicto';
   @override
   String get syncResolved => 'Conflicto resuelto';
+  @override
+  String get syncSectionWhen => 'Cuándo sincronizar';
+  @override
+  String get syncAutoTitle => 'Automáticamente';
+  @override
+  String get syncAutoSubtitle => 'Tras los cambios, al abrir y a intervalos';
+  @override
+  String get syncIntervalTitle => 'Comprobar el servidor cada';
+  @override
+  String get syncIntervalSubtitle => 'Solo con la app abierta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Para ver los cambios hechos en otros dispositivos mientras la app está '
+      'abierta. Con «Nunca», solo tras los cambios y al abrir.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuto' : '$count minutos';
+  @override
+  String get syncIntervalNever => 'Nunca';
+  @override
+  String get syncWifiOnlyTitle => 'Solo con Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Con datos móviles, sincroniza solo a mano';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 cambio en espera' : '$count cambios en espera';
+  @override
+  String syncRetryIn(String wait) => 'nuevo intento en $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Esperando al Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Esperando la conexión';
+  @override
+  String get syncMobileDataHint =>
+      '«Sincronizar ahora» usa datos móviles igualmente.';
+  @override
+  String get syncQueueKeptHint =>
+      'Los cambios se quedan aquí, aunque cierres la app, y salen solos '
+      'cuando el servidor responde.';
+  @override
+  String get syncAutoPaused => 'Sincronización automática en pausa';
+  @override
+  String get syncPausedAuthHint =>
+      'Se reanuda cuando actualizas la contraseña o sincronizas a mano.';
+  @override
+  String get syncPausedServerHint =>
+      'Se reanuda cuando corriges la dirección o sincronizas a mano.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Sincronizar ahora» muestra qué se eliminaría y pide confirmación.';
+  @override
+  String get syncNeedsConfirmation => 'Esperando tu confirmación';
 }

@@ -15,6 +15,7 @@ import 'package:niman/src/sync/webdav/webdav_failure.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:path/path.dart' as p;
 
+export 'package:niman/src/sync/network_monitor.dart' show SyncNetwork;
 export 'package:niman/src/sync/sync_scheduler.dart' show SyncPause;
 
 /// How a connection test ended (mockups S3, S3b).
@@ -86,6 +87,7 @@ final class SyncStatus {
     this.nextRetryAt,
     this.autoPaused,
     this.waitingForNetwork = false,
+    this.network = SyncNetwork.unknown,
   });
 
   /// The destination, or null when the library does not sync.
@@ -111,6 +113,9 @@ final class SyncStatus {
 
   /// Whether the automatic sync waits for Wi-Fi (or any network).
   final bool waitingForNetwork;
+
+  /// The network last seen (unknown off phones).
+  final SyncNetwork network;
 
   /// The running stage, while [running].
   final SyncStage? stage;
@@ -172,6 +177,7 @@ final class SyncStatus {
     SyncPause? autoPaused,
     bool clearPause = false,
     bool? waitingForNetwork,
+    SyncNetwork? network,
   }) => SyncStatus(
     destination: clearDestination ? null : destination ?? this.destination,
     capabilities: clearCapabilities ? null : capabilities ?? this.capabilities,
@@ -185,6 +191,7 @@ final class SyncStatus {
     nextRetryAt: clearRetry ? null : nextRetryAt ?? this.nextRetryAt,
     autoPaused: clearPause ? null : autoPaused ?? this.autoPaused,
     waitingForNetwork: waitingForNetwork ?? this.waitingForNetwork,
+    network: network ?? this.network,
   );
 }
 
@@ -385,6 +392,7 @@ final class LibrarySyncService extends ChangeNotifier implements SyncService {
         autoPaused: scheduler.paused,
         clearPause: scheduler.paused == null,
         waitingForNetwork: waiting,
+        network: scheduler.networkState,
       ),
     );
   }

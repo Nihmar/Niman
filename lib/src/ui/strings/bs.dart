@@ -1539,4 +1539,67 @@ final class BosnianStrings extends Strings {
   String get syncResolveFailed => 'Konflikt se ne može riješiti';
   @override
   String get syncResolved => 'Konflikt riješen';
+  @override
+  String get syncSectionWhen => 'Kada sinhronizovati';
+  @override
+  String get syncAutoTitle => 'Automatski';
+  @override
+  String get syncAutoSubtitle => 'Nakon izmjena, pri otvaranju i u razmacima';
+  @override
+  String get syncIntervalTitle => 'Provjeri server svakih';
+  @override
+  String get syncIntervalSubtitle => 'Samo dok je aplikacija otvorena';
+  @override
+  String get syncIntervalDialogBody =>
+      'Da vidiš izmjene napravljene na drugim uređajima dok je aplikacija '
+      'otvorena. Uz „Nikad”, samo nakon izmjena i pri otvaranju.';
+  @override
+  String syncIntervalMinutes(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count minuta',
+    (2 || 3 || 4, < 12 || > 14) => '$count minute',
+    _ => '$count minuta',
+  };
+  @override
+  String get syncIntervalNever => 'Nikad';
+  @override
+  String get syncWifiOnlyTitle => 'Samo Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Na mobilnim podacima sinhronizuj samo ručno';
+  @override
+  String syncPendingChanges(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count izmjena čeka',
+    (2 || 3 || 4, < 12 || > 14) => '$count izmjene čekaju',
+    _ => '$count izmjena čeka',
+  };
+  @override
+  String syncRetryIn(String wait) => 'novi pokušaj za $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čeka se Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čeka se veza';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinhronizuj sada” ipak koristi mobilne podatke.';
+  @override
+  String get syncQueueKeptHint =>
+      'Izmjene ostaju ovdje, čak i ako zatvoriš aplikaciju, i same odlaze kada '
+      'server odgovori.';
+  @override
+  String get syncAutoPaused => 'Automatska sinhronizacija je pauzirana';
+  @override
+  String get syncPausedAuthHint =>
+      'Nastavlja se kada ažuriraš lozinku ili sinhronizuješ ručno.';
+  @override
+  String get syncPausedServerHint =>
+      'Nastavlja se kada ispraviš adresu ili sinhronizuješ ručno.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinhronizuj sada” pokazuje šta bi bilo uklonjeno i prvo pita.';
+  @override
+  String get syncNeedsConfirmation => 'Čeka tvoju potvrdu';
 }

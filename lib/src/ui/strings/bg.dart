@@ -1526,4 +1526,60 @@ final class BulgarianStrings extends Strings {
   String get syncResolveFailed => 'Конфликтът не може да се разреши';
   @override
   String get syncResolved => 'Конфликтът е разрешен';
+  @override
+  String get syncSectionWhen => 'Кога да се синхронизира';
+  @override
+  String get syncAutoTitle => 'Автоматично';
+  @override
+  String get syncAutoSubtitle => 'След промени, при отваряне и на интервали';
+  @override
+  String get syncIntervalTitle => 'Проверявай сървъра на всеки';
+  @override
+  String get syncIntervalSubtitle => 'Само докато програмата е отворена';
+  @override
+  String get syncIntervalDialogBody =>
+      'За да виждате промените, направени на други устройства, докато '
+      'програмата е отворена. С „Никога“ — само след промени и при отваряне.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 минута' : '$count минути';
+  @override
+  String get syncIntervalNever => 'Никога';
+  @override
+  String get syncWifiOnlyTitle => 'Само през Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'С мобилни данни синхронизирай само ръчно';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 промяна чака' : '$count промени чакат';
+  @override
+  String syncRetryIn(String wait) => 'нов опит след $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds с';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes мин';
+  @override
+  String get syncWaitingForWifi => 'Изчакване на Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Изчакване на връзка';
+  @override
+  String get syncMobileDataHint =>
+      '„Синхронизирай сега“ пак използва мобилни данни.';
+  @override
+  String get syncQueueKeptHint =>
+      'Промените остават тук, дори ако затворите програмата, и тръгват сами, '
+      'когато сървърът отговори.';
+  @override
+  String get syncAutoPaused => 'Автоматичното синхронизиране е на пауза';
+  @override
+  String get syncPausedAuthHint =>
+      'Възобновява се, когато обновите паролата или синхронизирате ръчно.';
+  @override
+  String get syncPausedServerHint =>
+      'Възобновява се, когато поправите адреса или синхронизирате ръчно.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Синхронизирай сега“ показва какво ще бъде премахнато и първо пита.';
+  @override
+  String get syncNeedsConfirmation => 'Изчаква вашето потвърждение';
 }

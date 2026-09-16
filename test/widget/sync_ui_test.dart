@@ -175,6 +175,59 @@ void main() {
       expect(sync.calls.last, 'disconnect');
       expect(find.byKey(const Key('sync-url')), findsOneWidget);
     });
+
+    testWidgets('the trigger options change from the overview (T1, T2)', (
+      tester,
+    ) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(lastSyncAtMs: 1),
+        pendingHints: 2,
+      );
+      await pumpScreen(tester);
+      expect(find.text('When to sync'), findsOneWidget);
+      expect(find.text('2 changes waiting'), findsOneWidget);
+      expect(find.byKey(const Key('sync-wifi-only')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('sync-interval')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('sync-interval-dialog')), findsOneWidget);
+      await tester.tap(find.text('5 minutes'));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'triggers every 300');
+      expect(find.text('5 minutes'), findsOneWidget, reason: 'the row value');
+
+      await tester.tap(find.byKey(const Key('sync-wifi-only')));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'triggers wifi true');
+
+      await tester.tap(find.byKey(const Key('sync-auto')));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'triggers auto false');
+      final interval = tester.widget<ListTile>(
+        find.descendant(
+          of: find.byKey(const Key('sync-interval')),
+          matching: find.byType(ListTile),
+        ),
+      );
+      expect(interval.enabled, isFalse);
+      expect(
+        tester
+            .widget<SwitchListTile>(find.byKey(const Key('sync-wifi-only')))
+            .onChanged,
+        isNull,
+      );
+    });
+
+    testWidgets('no Wi-Fi option off phones', (tester) async {
+      sync
+        ..phone = false
+        ..status = SyncStatus(
+          destination: FakeSyncService.destination(lastSyncAtMs: 1),
+        );
+      await pumpScreen(tester);
+      expect(find.byKey(const Key('sync-auto')), findsOneWidget);
+      expect(find.byKey(const Key('sync-wifi-only')), findsNothing);
+    });
   });
 
   group('status and panel', () {
@@ -232,6 +285,102 @@ void main() {
       await tester.pump();
       expect(find.byKey(const Key('sync-progress-strip')), findsOneWidget);
       expect(find.text('Syncing · 12 of 38'), findsOneWidget);
+
+      // An automatic one only turns the icon.
+      sync.status = sync.status.copyWith(background: true);
+      await tester.pump();
+      expect(find.byKey(const Key('sync-progress-strip')), findsNothing);
+      expect(find.byKey(const Key('sync-status-button')), findsOneWidget);
+    });
+
+    /// Opens the panel with a long press, which always opens it (a tap
+    /// only does when there is something to look at). It animates in, and
+    /// the retry countdown keeps a timer, so no pumpAndSettle.
+    Future<void> openPanel(WidgetTester tester) async {
+      await tester.longPress(find.byKey(const Key('sync-status-button')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const Key('sync-panel')), findsOneWidget);
+    }
+
+    testWidgets('a server out of reach shows the queue and its retry (T4)', (
+      tester,
+    ) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(lastSyncAtMs: 1),
+        lastReport: SyncReport()
+          ..aborted = SyncAbort.offline
+          ..abortDetail = 'connection refused',
+        pendingHints: 3,
+        nextRetryAt: DateTime.now().add(const Duration(seconds: 90)),
+      );
+      await tester.pumpWidget(harness());
+      await openPanel(tester);
+      expect(find.text('Server not reachable'), findsWidgets);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('sync-queue')),
+          matching: find.textContaining('3 changes waiting · retrying in'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('2 min'), findsOneWidget);
+      expect(
+        find.text(
+          'Changes stay here, even if you close the app, and go out by '
+          'themselves when the server answers.',
+        ),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('mobile data with Wi-Fi only waits quietly (T5)', (
+      tester,
+    ) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(
+          lastSyncAtMs: 1,
+          wifiOnly: true,
+        ),
+        pendingHints: 2,
+        waitingForNetwork: true,
+        network: SyncNetwork.mobile,
+      );
+      await tester.pumpWidget(harness());
+      final icon = tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(const Key('sync-status-button')),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(icon.icon, Icons.cloud_queue);
+      await openPanel(tester);
+      expect(find.text('Waiting for Wi-Fi'), findsOneWidget);
+      expect(find.text('2 changes waiting'), findsOneWidget);
+      expect(find.text('“Sync now” still uses mobile data.'), findsOneWidget);
+    });
+
+    testWidgets('a paused automatic sync says how it resumes (T6)', (
+      tester,
+    ) async {
+      sync.status = SyncStatus(
+        destination: FakeSyncService.destination(lastSyncAtMs: 1),
+        lastReport: SyncReport()
+          ..aborted = SyncAbort.authentication
+          ..abortDetail = '401',
+        pendingHints: 5,
+        autoPaused: SyncPause.authentication,
+      );
+      await tester.pumpWidget(harness());
+      await tester.tap(find.byKey(const Key('sync-status-button')));
+      await tester.pumpAndSettle();
+      expect(find.text('Automatic sync paused · 5 changes waiting'), findsOne);
+      expect(
+        find.text('It resumes when you update the password or sync by hand.'),
+        findsOneWidget,
+      );
+      expect(find.text('Update password'), findsOneWidget);
     });
 
     testWidgets('conflicts open the panel, and one is resolved from there', (
@@ -352,6 +501,17 @@ void main() {
       await tester.tap(find.byKey(const Key('sync-status-button')));
       await settle(tester);
       expect(sync.calls, ['sync']);
+
+      // The app leaving and coming back reaches the sync.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await settle(tester);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await settle(tester);
+      expect(sync.calls, ['sync', 'backgrounded', 'resumed']);
     });
   });
 }

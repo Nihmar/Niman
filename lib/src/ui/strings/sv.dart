@@ -1517,4 +1517,60 @@ final class SwedishStrings extends Strings {
   String get syncResolveFailed => 'Kunde inte lösa konflikten';
   @override
   String get syncResolved => 'Konflikten är löst';
+  @override
+  String get syncSectionWhen => 'När det ska synkas';
+  @override
+  String get syncAutoTitle => 'Automatiskt';
+  @override
+  String get syncAutoSubtitle =>
+      'Efter ändringar, vid öppning och med jämna mellanrum';
+  @override
+  String get syncIntervalTitle => 'Intervall för serverkontroll';
+  @override
+  String get syncIntervalSubtitle => 'Bara medan appen är öppen';
+  @override
+  String get syncIntervalDialogBody =>
+      'För att se ändringar från andra enheter medan appen är öppen. Med '
+      '”Aldrig” bara efter ändringar och vid öppning.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minuter';
+  @override
+  String get syncIntervalNever => 'Aldrig';
+  @override
+  String get syncWifiOnlyTitle => 'Bara via wifi';
+  @override
+  String get syncWifiOnlySubtitle => 'På mobildata synkas det bara manuellt';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 ändring väntar' : '$count ändringar väntar';
+  @override
+  String syncRetryIn(String wait) => 'nytt försök om $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Väntar på wifi';
+  @override
+  String get syncWaitingForNetwork => 'Väntar på anslutning';
+  @override
+  String get syncMobileDataHint => '”Synka nu” använder ändå mobildata.';
+  @override
+  String get syncQueueKeptHint =>
+      'Ändringarna finns kvar här, även om du stänger appen, och skickas av '
+      'sig själva när servern svarar.';
+  @override
+  String get syncAutoPaused => 'Automatisk synk pausad';
+  @override
+  String get syncPausedAuthHint =>
+      'Den återupptas när du uppdaterar lösenordet eller synkar manuellt.';
+  @override
+  String get syncPausedServerHint =>
+      'Den återupptas när du rättar adressen eller synkar manuellt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '”Synka nu” visar vad som skulle tas bort och frågar först.';
+  @override
+  String get syncNeedsConfirmation => 'Väntar på din bekräftelse';
 }

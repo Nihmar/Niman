@@ -1536,4 +1536,71 @@ final class PolishStrings extends Strings {
   String get syncResolveFailed => 'Nie udało się rozwiązać konfliktu';
   @override
   String get syncResolved => 'Konflikt rozwiązany';
+  @override
+  String get syncSectionWhen => 'Kiedy synchronizować';
+  @override
+  String get syncAutoTitle => 'Automatycznie';
+  @override
+  String get syncAutoSubtitle => 'Po zmianach, przy otwarciu i co jakiś czas';
+  @override
+  String get syncIntervalTitle => 'Sprawdzaj serwer co';
+  @override
+  String get syncIntervalSubtitle => 'Tylko gdy aplikacja jest otwarta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Aby widzieć zmiany wprowadzone na innych urządzeniach, gdy aplikacja '
+      'jest otwarta. Przy „Nigdy” tylko po zmianach i przy otwarciu.';
+  @override
+  String syncIntervalMinutes(int count) => count == 1
+      ? '1 minuta'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? '$count minuty'
+      : '$count minut';
+  @override
+  String get syncIntervalNever => 'Nigdy';
+  @override
+  String get syncWifiOnlyTitle => 'Tylko Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Przy danych komórkowych synchronizuj tylko ręcznie';
+  @override
+  String syncPendingChanges(int count) => count == 1
+      ? '1 zmiana czeka'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? '$count zmiany czekają'
+      : '$count zmian czeka';
+  @override
+  String syncRetryIn(String wait) => 'ponowna próba za $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Czekanie na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Czekanie na połączenie';
+  @override
+  String get syncMobileDataHint =>
+      '„Synchronizuj teraz” i tak używa danych komórkowych.';
+  @override
+  String get syncQueueKeptHint =>
+      'Zmiany zostają tutaj, nawet gdy zamkniesz aplikację, i wychodzą same, '
+      'gdy serwer odpowie.';
+  @override
+  String get syncAutoPaused => 'Automatyczna synchronizacja wstrzymana';
+  @override
+  String get syncPausedAuthHint =>
+      'Wznowi się, gdy zaktualizujesz hasło lub zsynchronizujesz ręcznie.';
+  @override
+  String get syncPausedServerHint =>
+      'Wznowi się, gdy poprawisz adres lub zsynchronizujesz ręcznie.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Synchronizuj teraz” pokaże, co zostałoby usunięte, i najpierw zapyta.';
+  @override
+  String get syncNeedsConfirmation => 'Czeka na Twoje potwierdzenie';
 }

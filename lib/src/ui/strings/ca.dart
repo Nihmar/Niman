@@ -1552,4 +1552,60 @@ final class CatalanStrings extends Strings {
   String get syncResolveFailed => 'No s’ha pogut resoldre el conflicte';
   @override
   String get syncResolved => 'Conflicte resolt';
+  @override
+  String get syncSectionWhen => 'Quan sincronitzar';
+  @override
+  String get syncAutoTitle => 'Automàticament';
+  @override
+  String get syncAutoSubtitle => 'Després dels canvis, en obrir i a intervals';
+  @override
+  String get syncIntervalTitle => 'Comprova el servidor cada';
+  @override
+  String get syncIntervalSubtitle => 'Només amb l’app oberta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Per veure els canvis fets en altres dispositius mentre l’app és '
+      'oberta. Amb “Mai”, només després dels canvis i en obrir.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minuts';
+  @override
+  String get syncIntervalNever => 'Mai';
+  @override
+  String get syncWifiOnlyTitle => 'Només amb Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Amb dades mòbils, sincronitza només a mà';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 canvi en espera' : '$count canvis en espera';
+  @override
+  String syncRetryIn(String wait) => 'nou intent d’aquí a $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Esperant el Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Esperant la connexió';
+  @override
+  String get syncMobileDataHint =>
+      '“Sincronitza ara” fa servir igualment les dades mòbils.';
+  @override
+  String get syncQueueKeptHint =>
+      'Els canvis es queden aquí, encara que tanquis l’app, i surten sols '
+      'quan el servidor respon.';
+  @override
+  String get syncAutoPaused => 'Sincronització automàtica en pausa';
+  @override
+  String get syncPausedAuthHint =>
+      'Es reprèn quan actualitzes la contrasenya o sincronitzes a mà.';
+  @override
+  String get syncPausedServerHint =>
+      'Es reprèn quan corregeixes l’adreça o sincronitzes a mà.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sincronitza ara” mostra què s’eliminaria i demana confirmació.';
+  @override
+  String get syncNeedsConfirmation => 'Esperant la teva confirmació';
 }

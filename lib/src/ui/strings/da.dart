@@ -1511,4 +1511,63 @@ final class DanishStrings extends Strings {
   String get syncResolveFailed => 'Kunne ikke løse konflikten';
   @override
   String get syncResolved => 'Konflikt løst';
+  @override
+  String get syncSectionWhen => 'Hvornår der synkroniseres';
+  @override
+  String get syncAutoTitle => 'Automatisk';
+  @override
+  String get syncAutoSubtitle =>
+      'Efter ændringer, ved åbning og med faste mellemrum';
+  @override
+  String get syncIntervalTitle => 'Interval for servertjek';
+  @override
+  String get syncIntervalSubtitle => 'Kun mens appen er åben';
+  @override
+  String get syncIntervalDialogBody =>
+      'For at se ændringer fra andre enheder, mens appen er åben. Med '
+      '»Aldrig« kun efter ændringer og ved åbning.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minutter';
+  @override
+  String get syncIntervalNever => 'Aldrig';
+  @override
+  String get syncWifiOnlyTitle => 'Kun Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'På mobildata synkroniseres der kun manuelt';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 ændring venter' : '$count ændringer venter';
+  @override
+  String syncRetryIn(String wait) => 'nyt forsøg om $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Venter på Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Venter på forbindelse';
+  @override
+  String get syncMobileDataHint => '»Synkronisér nu« bruger stadig mobildata.';
+  @override
+  String get syncQueueKeptHint =>
+      'Ændringerne bliver her, også hvis du lukker appen, og sendes af sig '
+      'selv, når serveren svarer.';
+  @override
+  String get syncAutoPaused => 'Automatisk synkronisering sat på pause';
+  @override
+  String get syncPausedAuthHint =>
+      'Den genoptages, når du opdaterer adgangskoden eller synkroniserer '
+      'manuelt.';
+  @override
+  String get syncPausedServerHint =>
+      'Den genoptages, når du retter adressen eller synkroniserer manuelt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '»Synkronisér nu« viser, hvad der ville blive fjernet, og spørger '
+      'først.';
+  @override
+  String get syncNeedsConfirmation => 'Venter på din bekræftelse';
 }

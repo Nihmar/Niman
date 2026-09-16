@@ -1532,4 +1532,64 @@ final class DutchStrings extends Strings {
   String get syncResolveFailed => 'Kon het conflict niet oplossen';
   @override
   String get syncResolved => 'Conflict opgelost';
+  @override
+  String get syncSectionWhen => 'Wanneer synchroniseren';
+  @override
+  String get syncAutoTitle => 'Automatisch';
+  @override
+  String get syncAutoSubtitle =>
+      'Na wijzigingen, bij openen en met tussenpozen';
+  @override
+  String get syncIntervalTitle => 'Interval voor servercontrole';
+  @override
+  String get syncIntervalSubtitle => 'Alleen terwijl de app open is';
+  @override
+  String get syncIntervalDialogBody =>
+      'Om wijzigingen van andere apparaten te zien terwijl de app open is. '
+      'Met “Nooit” alleen na wijzigingen en bij openen.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuut' : '$count minuten';
+  @override
+  String get syncIntervalNever => 'Nooit';
+  @override
+  String get syncWifiOnlyTitle => 'Alleen via wifi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Via mobiele data alleen handmatig synchroniseren';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 wijziging wacht' : '$count wijzigingen wachten';
+  @override
+  String syncRetryIn(String wait) => 'nieuwe poging over $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Wachten op wifi';
+  @override
+  String get syncWaitingForNetwork => 'Wachten op verbinding';
+  @override
+  String get syncMobileDataHint =>
+      '“Nu synchroniseren” gebruikt toch mobiele data.';
+  @override
+  String get syncQueueKeptHint =>
+      'Wijzigingen blijven hier, ook als je de app sluit, en worden vanzelf '
+      'verstuurd zodra de server reageert.';
+  @override
+  String get syncAutoPaused => 'Automatische sync gepauzeerd';
+  @override
+  String get syncPausedAuthHint =>
+      'Gaat verder zodra je het wachtwoord bijwerkt of handmatig '
+      'synchroniseert.';
+  @override
+  String get syncPausedServerHint =>
+      'Gaat verder zodra je het adres corrigeert of handmatig synchroniseert.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Nu synchroniseren” toont wat er verwijderd zou worden en vraagt '
+      'eerst.';
+  @override
+  String get syncNeedsConfirmation => 'Wacht op je bevestiging';
 }
