@@ -237,6 +237,12 @@ final class SwedishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Skapa saknade anteckningar i';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotekets rotmapp';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Aktuell mapp';
+  @override
   String get indentWidthTitle => 'Indenteringsbredd';
   @override
   String get indentWidthSubtitle =>
@@ -495,6 +501,15 @@ final class SwedishStrings extends Strings {
   String get ambiguousLinkTitle => 'Flera anteckningar matchar';
   @override
   String get openLinkFailed => 'Kunde inte öppna länken';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Anteckningen finns inte';
+  @override
+  String missingNoteDialogBody(String path) => 'Skapa „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Mappen „$folder“ finns inte';
 
   // Task lists (T-TD-04).
   @override

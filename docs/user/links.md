@@ -20,6 +20,28 @@ never links, everywhere.
 Standard `[text](href)` links. `href` may be a relative `.md` path, a
 `#anchor`, or an external URL. `![alt](src)` images are not links.
 
+## Dead links
+
+Clicking a link whose target note does not exist offers to create it:
+a dialog shows the proposed path with **Create** and **Cancel**. Create
+makes an empty note there (no frontmatter) and opens it in the editor;
+Cancel changes nothing — no file, no error, no second prompt.
+
+Where the new note lands is the library setting `missingNoteLocation`
+(Settings → Editor):
+
+- `currentFolder` (default) — the folder of the note where the link was
+  clicked: `[[Foo]]` in `Notes/Current.md` creates `Notes/Foo.md`
+- `libraryRoot` — the library root: `[[Foo]]` creates `Foo.md`
+
+A target that names a folder (`[[Sub/Foo]]`) keeps that folder; Niman
+does not create intermediate folders, so a missing folder shows an
+error. Targets with an extension (`[[photo.png]]`) are attachments,
+not notes: they are never created. External URLs keep their behavior.
+
+Notes opened without a library (editor-only mode) keep the old
+"link not found" outcome.
+
 ## Link button
 
 The editor's link button inserts a wikilink by default; set the

@@ -234,6 +234,12 @@ final class SerbianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Креирање недостајућих белешки у';
+  @override
+  String get missingNoteLocationRoot => 'Корен библиотеке';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Тренутна фасцикла';
+  @override
   String get indentWidthTitle => 'Ширина уступа';
   @override
   String get indentWidthSubtitle =>
@@ -494,6 +500,15 @@ final class SerbianStrings extends Strings {
   String get ambiguousLinkTitle => 'Више белешки поклапа';
   @override
   String get openLinkFailed => 'Веза се не може отворити';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Белешка не постоји';
+  @override
+  String missingNoteDialogBody(String path) => 'Креирај „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Фасцикла „$folder“ не постоји';
 
   // Task lists (T-TD-04).
   @override

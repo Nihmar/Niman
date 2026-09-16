@@ -230,6 +230,12 @@ final class TurkishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Eksik notları oluştur';
+  @override
+  String get missingNoteLocationRoot => 'Kütüphane kökünde';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Mevcut klasörde';
+  @override
   String get indentWidthTitle => 'Girinti genişliği';
   @override
   String get indentWidthSubtitle =>
@@ -491,6 +497,15 @@ final class TurkishStrings extends Strings {
   String get ambiguousLinkTitle => 'Birden çok not eşleşiyor';
   @override
   String get openLinkFailed => 'Bağlantı açılamadı';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Not mevcut değil';
+  @override
+  String missingNoteDialogBody(String path) => '"$path" oluşturulsun mu?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      '"$folder" klasörü mevcut değil';
 
   // Task lists (T-TD-04).
   @override

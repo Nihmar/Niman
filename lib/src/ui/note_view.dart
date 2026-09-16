@@ -27,6 +27,7 @@ import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/library/image_import.dart';
 import 'package:niman/src/links/attachment_embed.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/links/slug.dart';
@@ -40,6 +41,7 @@ import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
+import 'package:niman/src/ui/missing_note_dialog.dart';
 import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -82,6 +84,7 @@ final class NoteView extends StatefulWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     this.linkType = LinkType.wikilink,
+    this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.indentWidth = 2,
     this.toolbarLayout = ToolbarLayout.defaults,
@@ -102,6 +105,8 @@ final class NoteView extends StatefulWidget {
     this.controller,
     this.linkSource,
     this.onOpenNote,
+    this.createMissingNote,
+    this.folderExists,
     this.initialAnchor,
     this.initialCaretOffset,
     this.kindMode = true,
@@ -203,6 +208,21 @@ final class NoteView extends StatefulWidget {
   /// Opens a note by library-relative path, then (optionally) jumps to a
   /// heading; the shell implements it (T-M3-07).
   final void Function(String path, String? anchor)? onOpenNote;
+
+  /// Where a note created from a dead link lands (settings, issue #78);
+  /// the offer itself is disabled when [createMissingNote] is null.
+  final MissingNoteLocation missingNoteLocation;
+
+  /// The note-creation path for dead links (issue #78): creates an empty
+  /// note at library-relative [path] and returns its library-relative
+  /// path; null (no open library) keeps the dead-link snackbar instead of
+  /// the offer.
+  final Future<String> Function(String path)? createMissingNote;
+
+  /// Whether a library-relative folder exists under `[root]` (issue #78);
+  /// defaults to an off-UI-isolate disk check. A test seam: widget tests
+  /// run against a fake library that is not on disk.
+  final Future<bool> Function(String root, String rel)? folderExists;
 
   /// A heading anchor to land on after the note loads (T-M3-07).
   final String? initialAnchor;
@@ -1196,11 +1216,68 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           'picker',
         );
         await _pickAmbiguous(candidates);
-      case UnresolvedNote():
-        log.debug('link outcome: unresolved — snackbar');
-        if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+      case UnresolvedNote(:final target):
+        final outcome = await _handleDeadLink(target);
+        log.debug('link outcome: ${describeOutcome(outcome)}');
+        if (outcome is DeadLinkCreated) {
+          final open = widget.onOpenNote;
+          if (open == null) {
+            if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
+            return;
+          }
+          open(outcome.path, null);
+        } else if (outcome is DeadLinkFolderMissing) {
+          if (mounted) {
+            _linkSnack(AppStrings.missingNoteFolderMissing(outcome.folder));
+          }
+        } else if (outcome is DeadLinkNotOffered && mounted) {
+          _linkSnack(AppStrings.unresolvedLinkTitle);
+        }
+      // DeadLinkDeclined: nothing — no error, no second prompt
+      // (issue #78).
     }
   }
+
+  /// The dead-link offer (issue #78): propose where the missing note
+  /// would be created, ask, create through the library's own path.
+  Future<DeadLinkOutcome> _handleDeadLink(String target) async {
+    final create = widget.createMissingNote;
+    final root = widget.libraryRoot;
+    if (create == null || root == null) return const DeadLinkNotOffered();
+    final linkContext = LinkContext(
+      libraryRoot: root,
+      currentNote: widget.path,
+    );
+    final seam = widget.folderExists;
+    final handler = MissingNoteHandler(
+      location: widget.missingNoteLocation,
+      confirm: (path) async {
+        // The dialog needs a live context; an unmounted note declines,
+        // and a dismiss (outside tap) reads as one.
+        if (!mounted) return false;
+        final confirmed = await showMissingNoteDialog(context, path: path);
+        return confirmed ?? false;
+      },
+      folderExists: seam == null
+          ? (rel) => _folderExists(root, rel)
+          : (rel) => seam(root, rel),
+      createNote: create,
+    );
+    return await handler.handleDeadLink(target, linkContext);
+  }
+
+  /// A folder's disk existence, off the UI isolate (one stat is a FUSE
+  /// round trip on Android).
+  Future<bool> _folderExists(String root, String rel) =>
+      Isolate.run(() => Directory(p.join(root, rel)).existsSync());
+
+  /// A dead-link outcome for the log: `Created: Notes/Foo.md`.
+  String describeOutcome(DeadLinkOutcome outcome) => switch (outcome) {
+    DeadLinkCreated(:final path) => 'created $path',
+    DeadLinkDeclined() => 'creation declined — nothing shown',
+    DeadLinkNotOffered() => 'no offer — snackbar',
+    DeadLinkFolderMissing(:final folder) => 'folder "$folder" missing — error',
+  };
 
   /// Opens [note] via the shell (or jumps locally when it is already the
   /// open note).

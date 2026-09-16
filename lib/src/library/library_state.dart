@@ -26,6 +26,7 @@ import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
@@ -874,6 +875,18 @@ final class LibraryController implements LibrarySession {
   Future<void> setLinkType(LinkType type) async {
     _log.info('link type set to ${type.name}');
     await _editLibrary((c) => c.copyWith(linkType: type));
+  }
+
+  /// Where a note created from a dead link lands.
+  @override
+  Future<MissingNoteLocation> get missingNoteLocation async =>
+      (await _library).missingNoteLocation;
+
+  /// Sets (and persists) the dead-link note location.
+  @override
+  Future<void> setMissingNoteLocation(MissingNoteLocation location) async {
+    _log.info('missing note location set to ${location.name}');
+    await _editLibrary((c) => c.copyWith(missingNoteLocation: location));
   }
 
   /// The editor's indent/outdent width in spaces.

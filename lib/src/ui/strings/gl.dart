@@ -237,6 +237,12 @@ final class GalicianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Crear notas que faltan en';
+  @override
+  String get missingNoteLocationRoot => 'Raíz da biblioteca';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Cartafol actual';
+  @override
   String get indentWidthTitle => 'Ancho da sangría';
   @override
   String get indentWidthSubtitle =>
@@ -497,6 +503,15 @@ final class GalicianStrings extends Strings {
   String get ambiguousLinkTitle => 'Varias notas coinciden';
   @override
   String get openLinkFailed => 'Non se puido abrir o enlace';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'A nota non existe';
+  @override
+  String missingNoteDialogBody(String path) => 'Crear «$path»?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'O cartafol «$folder» non existe';
 
   // Task lists (T-TD-04).
   @override

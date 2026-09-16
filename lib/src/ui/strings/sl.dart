@@ -233,6 +233,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Ustvari manjkajoče opombe v';
+  @override
+  String get missingNoteLocationRoot => 'Koren knjižnice';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  @override
   String get indentWidthTitle => 'Širina zamika';
   @override
   String get indentWidthSubtitle =>
@@ -489,6 +495,14 @@ final class SlovenianStrings extends Strings {
   String get ambiguousLinkTitle => 'Več opomb ustreza';
   @override
   String get openLinkFailed => 'Povezave ni bilo mogoče odpreti';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Opomba ne obstaja';
+  @override
+  String missingNoteDialogBody(String path) => 'Ustvariti „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) => 'Mapa „$folder“ ne obstaja';
 
   // Task lists (T-TD-04).
   @override

@@ -232,6 +232,12 @@ final class CzechStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Vytvořovat chybující poznámky v';
+  @override
+  String get missingNoteLocationRoot => 'Kořen knihovny';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Aktuální složka';
+  @override
   String get indentWidthTitle => 'Šířka odsazení';
   @override
   String get indentWidthSubtitle =>
@@ -491,6 +497,15 @@ final class CzechStrings extends Strings {
   String get ambiguousLinkTitle => 'Více poznámek odpovídá';
   @override
   String get openLinkFailed => 'Odkaz se nepodařilo otevřít';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Poznámka neexistuje';
+  @override
+  String missingNoteDialogBody(String path) => 'Vytvořit „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Složka „$folder“ neexistuje';
 
   // Task lists (T-TD-04).
   @override

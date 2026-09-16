@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
         TreeSort,
         defaultAttachmentsFolder,
         defaultListFolder;
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -71,6 +72,48 @@ void main() {
         expect(normalizeHistoryIntervalMinutes(60), 60);
       },
     );
+
+    test('round trips the dead-link note location; nonsense reads back as '
+        'the current folder (issue #78)', () async {
+      final lib = await makeLibrary();
+      final store = LibraryConfigStore(lib.path);
+      const config = LibraryConfig(
+        trashEnabled: true,
+        historyVersions: 10,
+        quickNotePath: null,
+        listNoteFolder: 'Lists',
+        missingNoteLocation: MissingNoteLocation.libraryRoot,
+      );
+      await store.write(config);
+      expect(
+        (await store.read()).missingNoteLocation,
+        MissingNoteLocation.libraryRoot,
+      );
+    });
+
+    test('the dead-link location defaults to the current folder', () {
+      expect(
+        LibraryConfig.defaults.missingNoteLocation,
+        MissingNoteLocation.currentFolder,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{})
+            .missingNoteLocation,
+        MissingNoteLocation.currentFolder,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'missingNoteLocation': 'libraryRoot',
+        }).missingNoteLocation,
+        MissingNoteLocation.libraryRoot,
+      );
+      expect(
+        LibraryConfig.fromJsonMap(const <String, Object?>{
+          'missingNoteLocation': 'nonsense',
+        }).missingNoteLocation,
+        MissingNoteLocation.currentFolder,
+      );
+    });
 
     test('round trips the spell-check dictionaries', () async {
       final lib = await makeLibrary();

@@ -237,6 +237,12 @@ final class GermanStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Fehlende Notizen erstellen in';
+  @override
+  String get missingNoteLocationRoot => 'Bibliothekswurzel';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Aktueller Ordner';
+  @override
   String get indentWidthTitle => 'Einzugstiefe';
   @override
   String get indentWidthSubtitle => 'Leerzeichen pro Einzugsebene im Editor';
@@ -497,6 +503,15 @@ final class GermanStrings extends Strings {
   String get ambiguousLinkTitle => 'Mehrere Notizen passen';
   @override
   String get openLinkFailed => 'Link konnte nicht geöffnet werden';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Notiz existiert nicht';
+  @override
+  String missingNoteDialogBody(String path) => '„$path" erstellen?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Der Ordner „$folder" existiert nicht';
 
   // Task lists (T-TD-04).
   @override

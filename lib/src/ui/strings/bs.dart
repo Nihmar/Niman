@@ -234,6 +234,12 @@ final class BosnianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Kreiranje nedostajućih bilješki u';
+  @override
+  String get missingNoteLocationRoot => 'Korijen biblioteke';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Trenutna mapa';
+  @override
   String get indentWidthTitle => 'Širina uvlačenja';
   @override
   String get indentWidthSubtitle =>
@@ -494,6 +500,14 @@ final class BosnianStrings extends Strings {
   String get ambiguousLinkTitle => 'Više bilješki se podudara';
   @override
   String get openLinkFailed => 'Veza se ne može otvoriti';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Bilješka ne postoji';
+  @override
+  String missingNoteDialogBody(String path) => 'Kreirati „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) => 'Mapa „$folder“ ne postoji';
 
   // Task lists (T-TD-04).
   @override

@@ -235,6 +235,12 @@ final class DanishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Opret manglende noter i';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotekets rodmappe';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Nuværende mappe';
+  @override
   String get indentWidthTitle => 'Indrykningens bredde';
   @override
   String get indentWidthSubtitle =>
@@ -493,6 +499,15 @@ final class DanishStrings extends Strings {
   String get ambiguousLinkTitle => 'Flere noter matcher';
   @override
   String get openLinkFailed => 'Kunne ikke åbne linket';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Noten findes ikke';
+  @override
+  String missingNoteDialogBody(String path) => 'Opret „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Mappen „$folder“ findes ikke';
 
   // Task lists (T-TD-04).
   @override

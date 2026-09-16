@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -97,6 +98,37 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(await controller.linkType, LinkType.wikilink);
+  });
+
+  testWidgets('the dead-link location row reads and applies its value', (
+    tester,
+  ) async {
+    await pump(tester);
+    final row = find.byKey(const Key('missing-note-location'));
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.missingNoteLocationCurrentFolder),
+      ),
+      findsOne,
+    );
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.missingNoteLocationRoot));
+    await tester.pumpAndSettle();
+
+    expect(
+      await controller.missingNoteLocation,
+      MissingNoteLocation.libraryRoot,
+    );
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.missingNoteLocationRoot),
+      ),
+      findsOne,
+    );
   });
 
   testWidgets('the split width is a row over a slider dialog', (tester) async {

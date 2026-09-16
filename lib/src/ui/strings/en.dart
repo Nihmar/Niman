@@ -235,6 +235,12 @@ final class EnglishStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Create missing notes in';
+  @override
+  String get missingNoteLocationRoot => 'Library root';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Current folder';
+  @override
   String get indentWidthTitle => 'Indent width';
   @override
   String get indentWidthSubtitle =>
@@ -491,6 +497,15 @@ final class EnglishStrings extends Strings {
   String get ambiguousLinkTitle => 'Several notes match';
   @override
   String get openLinkFailed => 'Could not open link';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Note does not exist';
+  @override
+  String missingNoteDialogBody(String path) => "Create '$path'?";
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      "The folder '$folder' does not exist";
 
   // Task lists (T-TD-04).
   @override

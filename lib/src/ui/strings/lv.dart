@@ -231,6 +231,12 @@ final class LatvianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Trūkstošo piezīmju izveide';
+  @override
+  String get missingNoteLocationRoot => 'Bibliotēkes saknē';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Pašreizējā mapē';
+  @override
   String get indentWidthTitle => 'Ielādes platums';
   @override
   String get indentWidthSubtitle =>
@@ -489,6 +495,14 @@ final class LatvianStrings extends Strings {
   String get ambiguousLinkTitle => 'Vairākas piezīmes atbilst';
   @override
   String get openLinkFailed => 'Nevarēja atvērt saiti';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Piezīme neeksistē';
+  @override
+  String missingNoteDialogBody(String path) => 'Izveidot „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) => 'Mape „$folder“ neeksistē';
 
   // Task lists (T-TD-04).
   @override

@@ -236,6 +236,12 @@ final class RomanianStrings extends Strings {
   @override
   String get linkTypeMarkdown => 'Markdown';
   @override
+  String get missingNoteLocationTitle => 'Creează notele lipsă în';
+  @override
+  String get missingNoteLocationRoot => 'Rădăcina bibliotecii';
+  @override
+  String get missingNoteLocationCurrentFolder => 'Dosar curent';
+  @override
   String get indentWidthTitle => 'Lățimea indentării';
   @override
   String get indentWidthSubtitle =>
@@ -497,6 +503,15 @@ final class RomanianStrings extends Strings {
   String get ambiguousLinkTitle => 'Mai multe note se potrivesc';
   @override
   String get openLinkFailed => 'Linkul nu a putut fi deschis';
+
+  // Dead-link note creation (issue #78).
+  @override
+  String get missingNoteDialogTitle => 'Notița nu există';
+  @override
+  String missingNoteDialogBody(String path) => 'Se creează „$path“?';
+  @override
+  String missingNoteFolderMissing(String folder) =>
+      'Dosarul „$folder“ nu există';
 
   // Task lists (T-TD-04).
   @override
