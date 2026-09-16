@@ -11,6 +11,10 @@
   native binary via Dart build hooks — required on Windows, which ships
   no `sqlite3.dll`).
 
+- Android NDK 29.0.13113456 (required by `whisper_ggml`).
+- The APK is 64-bit only (`arm64-v8a`, `x86_64`): `armeabi-v7a` is
+  excluded at packaging in `android/app/build.gradle.kts`.
+
 ## Helper scripts
 
 Terse output; full logs in `/tmp/niman/niman-<cmd>.log`

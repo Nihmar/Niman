@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/ui/kinds/audio_clip_menu.dart';
 import 'package:niman/src/ui/kinds/audio_progress_bar.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// What the menu of a clip bubble can do.
-enum _ClipAction { title, description, rename, delete }
-
 /// A voice clip on the left of the chat: its title, a round play/pause
-/// button with the progress track and times, and its description.
+/// button with the progress track and times, its description, and the
+/// progress of its transcription while one runs.
 ///
-/// The per-clip actions (title, description, rename, delete) live in the
-/// ⋮ menu, which a long press or a right click also opens, so the bubble
+/// The per-clip actions (transcribe, title, description, rename, delete)
+/// live in the ⋮ menu ([AudioClipMenu]), which a long press or a right
+/// click also opens, so the bubble
 /// itself carries only what is read and played. Keys end with [suffix]:
 /// `audio-play-0`, `audio-menu-0`, `audio-delete-0`, …
 class AudioClipBubble extends StatefulWidget {
@@ -30,6 +30,9 @@ class AudioClipBubble extends StatefulWidget {
     required this.onEditDescription,
     required this.onDelete,
     this.onRename,
+    this.onTranscribe,
+    this.transcribeHint,
+    this.transcription,
     super.key,
   });
 
@@ -78,90 +81,21 @@ class AudioClipBubble extends StatefulWidget {
   /// Renames the audio file; null hides the action.
   final VoidCallback? onRename;
 
+  /// Transcribes the clip; see [AudioClipMenu.onTranscribe].
+  final VoidCallback? onTranscribe;
+
+  /// The line under "Transcribe"; null hides the action.
+  final String? transcribeHint;
+
+  /// The transcription's progress strip, while one is on its way.
+  final Widget? transcription;
+
   @override
   State<AudioClipBubble> createState() => _AudioClipBubbleState();
 }
 
 class _AudioClipBubbleState extends State<AudioClipBubble> {
-  final GlobalKey<PopupMenuButtonState<_ClipAction>> _menu = GlobalKey();
-
-  void _run(_ClipAction action) {
-    switch (action) {
-      case _ClipAction.title:
-        widget.onEditTitle();
-      case _ClipAction.description:
-        widget.onEditDescription();
-      case _ClipAction.rename:
-        widget.onRename?.call();
-      case _ClipAction.delete:
-        widget.onDelete();
-    }
-  }
-
-  PopupMenuItem<_ClipAction> _item(
-    _ClipAction action,
-    String key,
-    IconData icon,
-    String label, {
-    Color? color,
-  }) {
-    return PopupMenuItem<_ClipAction>(
-      key: ValueKey('audio-$key-${widget.suffix}'),
-      value: action,
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: color == null ? null : TextStyle(color: color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<PopupMenuEntry<_ClipAction>> _items(BuildContext context) {
-    final theme = Theme.of(context);
-    return [
-      PopupMenuItem<_ClipAction>(
-        enabled: false,
-        height: 32,
-        child: Text(
-          widget.fileName,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-      const PopupMenuDivider(),
-      _item(_ClipAction.title, 'title', Icons.title, AppStrings.audioEditTitle),
-      _item(
-        _ClipAction.description,
-        'description',
-        Icons.notes,
-        AppStrings.audioEditDescription,
-      ),
-      if (widget.onRename != null)
-        _item(
-          _ClipAction.rename,
-          'rename',
-          Icons.drive_file_rename_outline,
-          AppStrings.audioRename,
-        ),
-      _item(
-        _ClipAction.delete,
-        'delete',
-        Icons.delete_outline,
-        AppStrings.audioDelete,
-        color: theme.colorScheme.error,
-      ),
-    ];
-  }
+  final GlobalKey<AudioClipMenuState> _menu = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +116,8 @@ class _AudioClipBubbleState extends State<AudioClipBubble> {
         return Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
-            onLongPress: () => _menu.currentState?.showButtonMenu(),
-            onSecondaryTap: () => _menu.currentState?.showButtonMenu(),
+            onLongPress: () => _menu.currentState?.show(),
+            onSecondaryTap: () => _menu.currentState?.show(),
             child: Container(
               width: width,
               margin: const EdgeInsets.symmetric(vertical: 4),
@@ -216,22 +150,16 @@ class _AudioClipBubbleState extends State<AudioClipBubble> {
                                 ),
                         ),
                       ),
-                      PopupMenuButton<_ClipAction>(
+                      AudioClipMenu(
                         key: _menu,
-                        tooltip: AppStrings.audioMoreActions,
-                        icon: Icon(
-                          Icons.more_vert,
-                          size: 20,
-                          color: colorScheme.onSurfaceVariant,
-                          key: ValueKey('audio-menu-${widget.suffix}'),
-                        ),
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(36, 36),
-                          padding: EdgeInsets.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onSelected: _run,
-                        itemBuilder: _items,
+                        suffix: widget.suffix,
+                        fileName: widget.fileName,
+                        onEditTitle: widget.onEditTitle,
+                        onEditDescription: widget.onEditDescription,
+                        onDelete: widget.onDelete,
+                        onRename: widget.onRename,
+                        onTranscribe: widget.onTranscribe,
+                        transcribeHint: widget.transcribeHint,
                       ),
                     ],
                   ),
@@ -311,6 +239,7 @@ class _AudioClipBubbleState extends State<AudioClipBubble> {
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),
+                  ?widget.transcription,
                 ],
               ),
             ),

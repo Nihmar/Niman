@@ -86,6 +86,11 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 22) {
+    for (final table in ['sync_destinations', 'sync_items', 'sync_ops']) {
+      await db.customStatement('DROP TABLE $table');
+    }
+  }
   if (version < 21) {
     await drop('app_settings', 'auto_update_enabled');
     await drop('app_settings', 'last_update_check_ms');
@@ -761,7 +766,8 @@ void main() {
   });
 
   test(
-    'a fresh database holds the settings, registry and widgets alone',
+    'a fresh database holds the settings, registry, widgets and sync '
+    'state alone',
     () async {
       final db = AppDatabase(NativeDatabase(dbFile));
       final tables = await db
@@ -772,7 +778,14 @@ void main() {
           .get();
       expect(
         tables.map((r) => r.read<String>('name')),
-        unorderedEquals(['app_settings', 'known_libraries', 'widget_configs']),
+        unorderedEquals([
+          'app_settings',
+          'known_libraries',
+          'widget_configs',
+          'sync_destinations',
+          'sync_items',
+          'sync_ops',
+        ]),
       );
       expect(await db.select(db.appSettings).get(), isEmpty);
       expect(await db.select(db.knownLibraries).get(), isEmpty);
@@ -878,5 +891,68 @@ void main() {
       expect(await repo.lastUpdateCheck(), time);
       await db.close();
     });
+  });
+
+  group('v21 → v22: the sync state appears (M5)', () {
+    test('an existing install upgrades with no library syncing', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 21);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+        );
+        await db.customStatement(
+          'INSERT INTO known_libraries (path, name, last_opened) '
+          "VALUES ('/lib/Work', 'Work', 0)",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(await db.select(db.syncDestinations).get(), isEmpty);
+      expect(await db.select(db.syncItems).get(), isEmpty);
+      expect(await db.select(db.syncOps).get(), isEmpty);
+      // The settings and the registry survive the upgrade untouched.
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/Work',
+      );
+      expect(
+        (await db.select(db.knownLibraries).get()).single.path,
+        '/lib/Work',
+      );
+      // The new tables take writes after the upgrade.
+      await db
+          .into(db.syncOps)
+          .insert(
+            SyncOpsCompanion.insert(
+              libraryPath: '/lib/Work',
+              path: 'a.md',
+              kind: 'changed',
+              createdAtMs: 1,
+            ),
+          );
+      expect(await db.select(db.syncOps).get(), hasLength(1));
+      await db.close();
+    });
+
+    test(
+      'a hint per path: a second row for the same path is refused',
+      () async {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        SyncOpsCompanion op() => SyncOpsCompanion.insert(
+          libraryPath: '/lib/Work',
+          path: 'a.md',
+          kind: 'changed',
+          createdAtMs: 1,
+        );
+        await db.into(db.syncOps).insert(op());
+        await expectLater(
+          db.into(db.syncOps).insert(op()),
+          throwsA(isA<SqliteException>()),
+        );
+        await db.close();
+      },
+    );
   });
 }

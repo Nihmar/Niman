@@ -1236,6 +1236,18 @@ final class TurkishStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count değişmemiş satır';
   @override
+  String get historyTakeHunk => 'Burada geri al';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 değişikliği geri al' : '$count değişikliği geri al';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Seçtiğin değişiklikler bu sürümün metnine döner. Notun şu anki hâli '
+      'önce sürüm olarak saklanır, böylece bunu geri alabilirsin.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Sen buradayken not değişti — karşılaştırma yenilendi.';
+  @override
   String get historyVersionsTitle => 'Saklanacak sürüm sayısı';
   @override
   String get historyVersionsSubtitle => 'Not başına, .history/ içinde';
@@ -1248,4 +1260,462 @@ final class TurkishStrings extends Strings {
       'Yazarken; bir notu düzenlemeye başlamak her zaman bir sürüm saklar';
   @override
   String historyIntervalValue(int minutes) => '$minutes dk';
+  @override
+  String get settingsSectionTranscription => 'Metne dökme';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Yok';
+  @override
+  String get transcriptionLanguageTitle => 'Dil';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kayıtlarınızda konuşulan dil. Dili belirtmek, otomatik algılamadan '
+      'daha doğru sonuç verir.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Uygulamayla aynı ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Otomatik algıla';
+  @override
+  String get transcriptionModelsTitle => 'Metne dökme modelleri';
+  @override
+  String transcriptionModelsUsed(String size) => '$size kullanılıyor';
+  @override
+  String get transcriptionModelsInstalled => 'İndirilenler';
+  @override
+  String get transcriptionModelsDownloading => 'İndiriliyor';
+  @override
+  String get transcriptionModelsAvailable => 'Kullanılabilir';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeller bu cihazda uygulamanın depolama alanında kalır. Kitaplığa '
+      'kopyalanmaz ve eşitlenmez.';
+  @override
+  String get transcriptionModelDefault => 'Varsayılan';
+  @override
+  String get transcriptionModelSlow => 'Yavaş';
+  @override
+  String get transcriptionModelHintTiny => 'En hızlı, en az doğru';
+  @override
+  String get transcriptionModelHintBase => 'Hız ve doğruluk arasında iyi denge';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Daha doğru, yaklaşık 3× daha yavaş';
+  @override
+  String get transcriptionModelHintMedium => 'Çok doğru, telefonda yavaş';
+  @override
+  String get transcriptionModelHintLarge => 'En doğru, çok bellek gerektirir';
+  @override
+  String get transcriptionModelDownload => 'İndir';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      '$model modeli silinsin mi?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Bu işlem $size yer açar. Modeli daha sonra yeniden indirebilirsiniz.';
+  @override
+  String get transcriptionModelFailed =>
+      'İndirme başarısız oldu. Bağlantınızı kontrol edip yeniden deneyin.';
+  @override
+  String get actionRetry => 'Yeniden dene';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Bağlantı koptu, yeniden deneniyor…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      '$progress noktasında duraklatıldı';
+  @override
+  String get actionResume => 'Devam et';
+  @override
+  String get audioTranscribe => 'Metne dök';
+  @override
+  String get audioTranscribeUnsupported => 'Bu cihazda yalnızca WAV kayıtları';
+  @override
+  String get transcriptionQueued => 'Sırada';
+  @override
+  String get transcriptionPreparing => 'Ses hazırlanıyor…';
+  @override
+  String transcriptionRunning(int percent) => 'Metne dökülüyor… %$percent';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model indiriliyor · %$percent';
+  @override
+  String get transcriptionSaved => 'Metin açıklamaya eklendi';
+  @override
+  String get transcriptionNoSpeech => 'Bu kayıtta konuşma algılanmadı';
+  @override
+  String get transcriptionFailed => 'Metne dökme başarısız oldu';
+  @override
+  String get transcriptionPickModelTitle => 'Bir model seçin';
+  @override
+  String get transcriptionPickModelBody =>
+      'Metne dökme bu cihazda yapılır ve kayıt hiçbir yere gönderilmez. Model '
+      'yalnızca bir kez indirilir.';
+  @override
+  String get transcriptionPickModelAction => 'İndir ve metne dök';
+  @override
+  String get transcriptionModelRecommended => 'Önerilen';
+  @override
+  String get transcriptionExistingTitle => 'Bu kaydın zaten bir açıklaması var';
+  @override
+  String get transcriptionExistingBody =>
+      'Metinle değiştirilsin mi, yoksa metin altına mı eklensin?';
+  @override
+  String get transcriptionAppend => 'Altına ekle';
+  @override
+  String get transcriptionReplace => 'Değiştir';
+  @override
+  String get settingsSectionSync => 'Eşitleme';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Bu kütüphane için ayarlanmadı';
+  @override
+  String get syncNeverSynced => 'Hiç eşitlenmedi';
+  @override
+  String syncLastSynced(String when) => 'Eşitlendi: $when';
+  @override
+  String get syncRunning => 'Eşitleniyor…';
+  @override
+  String syncScreenSubtitle(String library) => 'Kütüphane: $library';
+  @override
+  String get syncUrlLabel => 'Klasör adresi';
+  @override
+  String get syncUrlHint =>
+      'Klasör mevcut olmalı. Adresi sunucunun gösterdiği gibi '
+      'kopyalayın.';
+  @override
+  String get syncHttpWarning =>
+      'Şifrelenmemiş bağlantı: VPN üzerinden veya yerel ağda '
+      'sorun değil.';
+  @override
+  String get syncUserLabel => 'Kullanıcı';
+  @override
+  String get syncUserHint => 'Sunucu kimlik bilgisi istemiyorsa boş bırakın.';
+  @override
+  String get syncPasswordLabel => 'Parola';
+  @override
+  String get syncPasswordHint =>
+      'Kütüphane dosyalarında değil, bu cihazın anahtar '
+      'zincirinde saklanır.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Kayıtlı parolayı korumak için boş bırakın.';
+  @override
+  String get syncShowPassword => 'Parolayı göster';
+  @override
+  String get syncHidePassword => 'Parolayı gizle';
+  @override
+  String get syncTestAction => 'Bağlantıyı test et';
+  @override
+  String get syncTesting => 'Test ediliyor…';
+  @override
+  String get syncRetargetWarning =>
+      'Yeni bir adres veya kullanıcıyla sonraki eşitleme, ilk '
+      'eşitleme olarak baştan başlar.';
+  @override
+  String get syncTestOk => 'Bağlantı çalışıyor';
+  @override
+  String get syncModeFull => 'Tam mod';
+  @override
+  String get syncModeCompatible => 'Uyumlu mod';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Okuma, yazma ve silme';
+  @override
+  String get syncCapEtags => 'Dosya parmak izleri (ETag)';
+  @override
+  String get syncCapNoEtags => 'Dosya parmak izi yok (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Boyutu ve tarihi karşılaştırır; emin olamazsa yeniden '
+      'indirir';
+  @override
+  String get syncCapGuarded => 'Korumalı yazma';
+  @override
+  String get syncCapUnguarded => 'Korumasız yazma';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Yazmadan hemen önce sunucudaki dosyayı denetler';
+  @override
+  String get syncCapMove => 'Yeniden yüklemeden yeniden adlandırır';
+  @override
+  String get syncCapNoMove => 'Sunucuda yeniden adlandırma yok';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Yeniden adlandırma, silme ve yeni yüklemeye dönüşür';
+  @override
+  String get syncCompatibleNote =>
+      'Uyumlu modda eşitleme aynı şekilde çalışır, yalnızca '
+      'birkaç istek daha gönderilir.';
+  @override
+  String get syncTestInvalidUrl => 'Geçerli bir adres değil';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'İçinde kullanıcı veya parola olmadan bir http:// ya da '
+      'https:// adresi girin.';
+  @override
+  String get syncTestOffline => 'Sunucuya ulaşılamıyor';
+  @override
+  String get syncTestOfflineHint =>
+      'VPN açık mı? 10.x veya 192.168.x adresi yalnızca aynı '
+      'ağdan çalışır.';
+  @override
+  String get syncTestAuth => 'Kullanıcı veya parola reddedildi';
+  @override
+  String get syncTestAuthHint => 'Kontrol edip yeniden test edin.';
+  @override
+  String get syncTestNotFound => 'Klasör mevcut değil';
+  @override
+  String get syncTestNotFoundHint => 'Sunucuda oluşturun veya adresi düzeltin.';
+  @override
+  String get syncTestUnsupported => 'WebDAV klasörü değil';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Sunucu yanıt veriyor, ama WebDAV olarak değil.';
+  @override
+  String get syncTestFailed => 'Test başarısız oldu';
+  @override
+  String get syncNowAction => 'Şimdi eşitle';
+  @override
+  String get syncSectionServer => 'Sunucu';
+  @override
+  String get syncServerRow => 'Adres, kullanıcı ve parola';
+  @override
+  String get syncRetestTitle => 'Sunucuyu yeniden test et';
+  @override
+  String syncProbedAgo(String when) => 'Son test: $when';
+  @override
+  String get syncDisconnectTitle => 'Bu kütüphanenin bağlantısını kes';
+  @override
+  String get syncDisconnectSubtitle => 'Dosyalar burada ve sunucuda kalır';
+  @override
+  String get syncDisconnectConfirmTitle => 'Eşitleme bağlantısı kesilsin mi?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Bu kütüphane bu cihazda artık eşitlenmez. Ne burada ne '
+      'sunucuda hiçbir dosya silinmez. Yeniden bağlarsanız ilk '
+      'eşitleme baştan başlar.';
+  @override
+  String get syncDisconnectConfirm => 'Bağlantıyı kes';
+  @override
+  String get syncFirstTitle => 'İlk eşitleme';
+  @override
+  String get syncFirstIntro =>
+      'Kütüphaneyi sunucudaki klasörle karşılaştırdım:';
+  @override
+  String get syncFirstUpload => 'Yüklenecek';
+  @override
+  String get syncFirstDownload => 'İndirilecek';
+  @override
+  String get syncFirstBoth => 'Her iki tarafta';
+  @override
+  String get syncFirstBothHint =>
+      'Aynı olanlar: aktarım yok. Farklı olanlar: çözülecek';
+  @override
+  String get syncFirstNoDelete =>
+      'İlk eşitleme ne burada ne sunucuda hiçbir şey silmez.';
+  @override
+  String get syncStartAction => 'Başlat';
+  @override
+  String syncMassTrashTitle(int count) =>
+      '$count dosya çöp kutusuna taşınsın mı?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Eşitlenen $total dosyadan $count tanesi sunucuda yok. Bu '
+      'genellikle yanlış bir adres, bağlanmamış bir NAS diski ya '
+      'da yanlışlıkla boşaltılmış bir klasör demektir.';
+  @override
+  String get syncMassTrashHint =>
+      'Bunları gerçekten başka bir cihazda sildiyseniz '
+      'onaylayın: burada çöp kutusuna gidecekler.';
+  @override
+  String get syncMassTrashConfirm => 'Çöp kutusuna taşı';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      '$count dosya sunucudan silinsin mi?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Eşitlenen $total dosyadan $count tanesi burada yok. '
+      'Bunları siz silmediyseniz iptal edin ve kütüphane '
+      'klasörünü kontrol edin.';
+  @override
+  String get syncMassDeleteConfirm => 'Sunucudan sil';
+  @override
+  String get syncTooltip => 'Eşitle';
+  @override
+  String get syncStageConnecting => 'Sunucuya bağlanılıyor…';
+  @override
+  String get syncStageComparing => 'Sunucuyla karşılaştırılıyor…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Eşitleniyor · $done / $total';
+  @override
+  String get syncStatusWarnings => 'Uyarılarla eşitlendi';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Burada ve sunucuda değişti · $count';
+  @override
+  String get syncConflictHint => 'İki sürüme de dokunulmadı';
+  @override
+  String get syncResolveAction => 'Çöz';
+  @override
+  String syncFailuresHeader(int count) => 'Eşitlenmedi · $count';
+  @override
+  String get syncFailuresHint => 'Sonraki eşitlemede yeniden denenecek';
+  @override
+  String get syncAbortAuth => 'Parola sunucu tarafından reddedildi';
+  @override
+  String get syncAbortMissingPassword => 'Kayıtlı parola yok';
+  @override
+  String get syncAbortOffline => 'Sunucuya ulaşılamıyor';
+  @override
+  String get syncAbortRemoteMissing => 'Sunucudaki klasör artık yok';
+  @override
+  String get syncAbortUnsupported => 'Sunucu artık WebDAV olarak çalışmıyor';
+  @override
+  String get syncAbortFailed => 'Eşitleme başarısız oldu';
+  @override
+  String get syncAbortNotConfirmed => 'Eşitleme iptal edildi';
+  @override
+  String get syncAbortNothingTouched =>
+      'Hiçbir dosyaya dokunulmadı. Değişiklikleriniz bir sonraki '
+      'başarılı eşitlemeye kadar burada kalır.';
+  @override
+  String syncLastSuccess(String when) => 'Son başarılı eşitleme: $when';
+  @override
+  String get syncNoSuccessYet => 'Henüz başarılı eşitleme yok';
+  @override
+  String get syncUpdatePasswordAction => 'Parolayı güncelle';
+  @override
+  String get syncRetryAction => 'Yeniden dene';
+  @override
+  String get syncOpenSettingsAction => 'Ayarlar';
+  @override
+  String get syncCloseAction => 'Kapat';
+  @override
+  String get syncDoneSnack => 'Eşitlendi';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Eşitlendi · başka yerde silinen 1 dosya çöp kutusunda'
+      : 'Eşitlendi · başka yerde silinen $count dosya çöp kutusunda';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Eşitlendi · çözülecek 1 çakışma'
+      : 'Eşitlendi · çözülecek $count çakışma';
+  @override
+  String get syncShowAction => 'Göster';
+  @override
+  String get syncConflictTitle => 'Çakışmayı çöz';
+  @override
+  String get syncConflictLegend =>
+      '− ile işaretli satırlar sunucunun, + ile işaretli '
+      'satırlar bu cihazın.';
+  @override
+  String get syncConflictBinary =>
+      'Metin dosyası değil: hangi kopyanın kalacağını seçin.';
+  @override
+  String get syncConflictKeepNote =>
+      'Tutmadığınız kopya notun geçmişinde kalır.';
+  @override
+  String get syncKeepLocal => 'Bu cihazdakini tut';
+  @override
+  String get syncKeepRemote => 'Sunucudakini tut';
+  @override
+  String get syncConflictIdentical => 'İki sürüm aynı';
+  @override
+  String get syncConflictLoadFailed => 'İki sürüm de okunamadı';
+  @override
+  String get syncResolveFailed => 'Çakışma çözülemedi';
+  @override
+  String get syncResolved => 'Çakışma çözüldü';
+  @override
+  String get syncSectionWhen => 'Ne zaman eşitlensin';
+  @override
+  String get syncAutoTitle => 'Otomatik olarak';
+  @override
+  String get syncAutoSubtitle =>
+      'Düzenlemelerden sonra, açılışta ve belirli aralıklarla';
+  @override
+  String get syncIntervalTitle => 'Sunucuyu denetleme sıklığı';
+  @override
+  String get syncIntervalSubtitle => 'Yalnızca uygulama açıkken';
+  @override
+  String get syncIntervalDialogBody =>
+      'Uygulama açıkken diğer cihazlarda yapılan değişiklikleri görmek '
+      'için. “Hiçbir zaman” seçiliyse yalnızca düzenlemelerden sonra ve '
+      'açılışta.';
+  @override
+  String syncIntervalMinutes(int count) => '$count dakikada bir';
+  @override
+  String get syncIntervalNever => 'Hiçbir zaman';
+  @override
+  String get syncWifiOnlyTitle => 'Yalnızca Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobil veride yalnızca elle eşitle';
+  @override
+  String syncPendingChanges(int count) => '$count değişiklik bekliyor';
+  @override
+  String syncRetryIn(String wait) => '$wait sonra yeniden denenecek';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds sn';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes dk';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi bekleniyor';
+  @override
+  String get syncWaitingForNetwork => 'Bağlantı bekleniyor';
+  @override
+  String get syncMobileDataHint =>
+      '“Şimdi eşitle” yine de mobil veri kullanır.';
+  @override
+  String get syncQueueKeptHint =>
+      'Değişiklikler, uygulamayı kapatsanız bile burada kalır ve sunucu '
+      'yanıt verdiğinde kendiliğinden gönderilir.';
+  @override
+  String get syncAutoPaused => 'Otomatik eşitleme duraklatıldı';
+  @override
+  String get syncPausedAuthHint =>
+      'Parolayı güncellediğinizde veya elle eşitlediğinizde devam eder.';
+  @override
+  String get syncPausedServerHint =>
+      'Adresi düzelttiğinizde veya elle eşitlediğinizde devam eder.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Şimdi eşitle” nelerin kaldırılacağını gösterir ve önce onayınızı '
+      'ister.';
+  @override
+  String get syncNeedsConfirmation => 'Onayınız bekleniyor';
+  @override
+  String get syncMergeIntro =>
+      'Örtüşmeyen düzenlemeler zaten birleştirildi; örtüşenlerde '
+      'neyin kalacağını seçin.';
+  @override
+  String get syncMergeClean =>
+      'İki sürüm kendiliğinden birleşiyor: hiçbir yerde örtüşme yok.';
+  @override
+  String get syncMergeNoBase =>
+      'Üzerinde birleştirilecek ortak bir sürüm yok, bu yüzden '
+      'dosyanın tamamı seçilmeli.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Örtüşme $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Bu cihazdan';
+  @override
+  String get syncMergeFromRemote => 'Sunucudan';
+  @override
+  String get syncMergeRemovedLines => 'Kaldırılan satırlar';
+  @override
+  String get syncMergeKeepLocal => 'Benimki';
+  @override
+  String get syncMergeKeepRemote => 'Sunucununki';
+  @override
+  String get syncMergeKeepBoth => 'İkisi de';
+  @override
+  String get syncMergeSave => 'Birleştirmeyi kaydet';
+  @override
+  String get syncMergeKeepWhole => 'Ya da tek bir tam kopya tut';
 }

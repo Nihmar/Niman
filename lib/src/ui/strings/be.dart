@@ -1246,6 +1246,18 @@ final class BelarusianStrings extends Strings {
     _ => '$count нязмененых радкоў',
   };
   @override
+  String get historyTakeHunk => 'Аднавіць тут';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Аднавіць 1 змену' : 'Аднавіць $count змен';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Выбраныя змены вяртаюцца да тэксту гэтай версіі. Нататка ў цяперашнім '
+      'выглядзе спачатку захоўваецца як версія, таму гэта можна адмяніць.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Нататка змянілася, пакуль ты быў тут — параўнанне абноўлена.';
+  @override
   String get historyVersionsTitle => 'Колькі версій захоўваць';
   @override
   String get historyVersionsSubtitle => 'Для кожнай заўвагі, у .history/';
@@ -1258,4 +1270,494 @@ final class BelarusianStrings extends Strings {
       'Падчас пісьма; пачатак рэдагавання заўвагі заўсёды захоўвае адну';
   @override
   String historyIntervalValue(int minutes) => '$minutes хв';
+  @override
+  String get settingsSectionTranscription => 'Транскрыпцыя';
+  @override
+  String get transcriptionModelTitle => 'Мадэль';
+  @override
+  String get transcriptionModelNone => 'Няма';
+  @override
+  String get transcriptionLanguageTitle => 'Мова';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Мова, на якой гавораць у вашых запісах. Указаць яе дакладней, чым '
+      'вызначаць аўтаматычна.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Як у праграме ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Вызначаць аўтаматычна';
+  @override
+  String get transcriptionModelsTitle => 'Мадэлі транскрыпцыі';
+  @override
+  String transcriptionModelsUsed(String size) => 'Занята $size';
+  @override
+  String get transcriptionModelsInstalled => 'Спампаваныя';
+  @override
+  String get transcriptionModelsDownloading => 'Спампоўваюцца';
+  @override
+  String get transcriptionModelsAvailable => 'Даступныя';
+  @override
+  String get transcriptionModelsFooter =>
+      'Мадэлі застаюцца ў сховішчы праграмы на гэтай прыладзе. Яны не '
+      'капіруюцца ў бібліятэку і не сінхранізуюцца.';
+  @override
+  String get transcriptionModelDefault => 'Прадвызначаная';
+  @override
+  String get transcriptionModelSlow => 'Павольная';
+  @override
+  String get transcriptionModelHintTiny => 'Найхутчэйшая, найменш дакладная';
+  @override
+  String get transcriptionModelHintBase =>
+      'Добры баланс хуткасці і дакладнасці';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Больш дакладная, прыблізна ў 3× павольнейшая';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Вельмі дакладная, павольная на тэлефоне';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Найдакладнейшая, патрабуе шмат памяці';
+  @override
+  String get transcriptionModelDownload => 'Спампаваць';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Выдаліць мадэль $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Вызваліцца $size. Вы зможаце спампаваць мадэль зноў пазней.';
+  @override
+  String get transcriptionModelFailed =>
+      'Не ўдалося спампаваць. Праверце злучэнне і паспрабуйце яшчэ раз.';
+  @override
+  String get actionRetry => 'Паспрабаваць яшчэ раз';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Злучэнне страчана, паўторная спроба…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Прыпынена на $progress';
+  @override
+  String get actionResume => 'Працягнуць';
+  @override
+  String get audioTranscribe => 'Транскрыбаваць';
+  @override
+  String get audioTranscribeUnsupported =>
+      'На гэтай прыладзе толькі запісы WAV';
+  @override
+  String get transcriptionQueued => 'У чарзе';
+  @override
+  String get transcriptionPreparing => 'Падрыхтоўка аўдыя…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрыбаванне… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Спампоўка $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрыпцыя дададзена да апісання';
+  @override
+  String get transcriptionNoSpeech => 'У гэтым запісе маўленне не распазнана';
+  @override
+  String get transcriptionFailed => 'Не ўдалося транскрыбаваць';
+  @override
+  String get transcriptionPickModelTitle => 'Выберыце мадэль';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрыбаванне адбываецца на гэтай прыладзе, запіс ніколі не '
+      'адпраўляецца. Мадэль спампоўваецца толькі адзін раз.';
+  @override
+  String get transcriptionPickModelAction => 'Спампаваць і транскрыбаваць';
+  @override
+  String get transcriptionModelRecommended => 'Рэкамендавана';
+  @override
+  String get transcriptionExistingTitle => 'Гэты запіс ужо мае апісанне';
+  @override
+  String get transcriptionExistingBody =>
+      'Замяніць яго транскрыпцыяй ці дадаць транскрыпцыю пад ім?';
+  @override
+  String get transcriptionAppend => 'Дадаць ніжэй';
+  @override
+  String get transcriptionReplace => 'Замяніць';
+  @override
+  String get settingsSectionSync => 'Сінхранізацыя';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Не наладжана для гэтай бібліятэкі';
+  @override
+  String get syncNeverSynced => 'Яшчэ не сінхранізавалася';
+  @override
+  String syncLastSynced(String when) => 'Сінхранізавана $when';
+  @override
+  String get syncRunning => 'Сінхранізацыя…';
+  @override
+  String syncScreenSubtitle(String library) => 'Бібліятэка $library';
+  @override
+  String get syncUrlLabel => 'Адрас папкі';
+  @override
+  String get syncUrlHint =>
+      'Папка павінна існаваць. Скапіруйце адрас так, як яго '
+      'паказвае сервер.';
+  @override
+  String get syncHttpWarning =>
+      'Незашыфраванае злучэнне: падыходзіць праз VPN або ў '
+      'лакальнай сетцы.';
+  @override
+  String get syncUserLabel => 'Карыстальнік';
+  @override
+  String get syncUserHint =>
+      'Пакіньце пустым, калі сервер не патрабуе ўліковых даных.';
+  @override
+  String get syncPasswordLabel => 'Пароль';
+  @override
+  String get syncPasswordHint =>
+      'Захоўваецца ў сховішчы ключоў гэтай прылады, ніколі ў '
+      'файлах бібліятэкі.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Пакіньце пустым, каб пакінуць захаваны пароль.';
+  @override
+  String get syncShowPassword => 'Паказаць пароль';
+  @override
+  String get syncHidePassword => 'Схаваць пароль';
+  @override
+  String get syncTestAction => 'Праверыць злучэнне';
+  @override
+  String get syncTesting => 'Праверка…';
+  @override
+  String get syncRetargetWarning =>
+      'З новым адрасам або карыстальнікам наступная '
+      'сінхранізацыя пачнецца нанова, як першая.';
+  @override
+  String get syncTestOk => 'Злучэнне працуе';
+  @override
+  String get syncModeFull => 'Поўны рэжым';
+  @override
+  String get syncModeCompatible => 'Сумяшчальны рэжым';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Чытанне, запіс і выдаленне';
+  @override
+  String get syncCapEtags => 'Адбіткі файлаў (ETag)';
+  @override
+  String get syncCapNoEtags => 'Без адбіткаў файлаў (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Параўноўвае памер і дату; пры сумненні спампоўвае зноў';
+  @override
+  String get syncCapGuarded => 'Абароненыя запісы';
+  @override
+  String get syncCapUnguarded => 'Неабароненыя запісы';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Правярае файл на серверы непасрэдна перад запісам';
+  @override
+  String get syncCapMove => 'Перайменаванне без паўторнага запампоўвання';
+  @override
+  String get syncCapNoMove => 'Без перайменавання на серверы';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Перайменаванне становіцца выдаленнем і новым '
+      'запампоўваннем';
+  @override
+  String get syncCompatibleNote =>
+      'У сумяшчальным рэжыме сінхранізацыя працуе гэтак жа, '
+      'толькі з некалькімі дадатковымі запытамі.';
+  @override
+  String get syncTestInvalidUrl => 'Няправільны адрас';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Увядзіце адрас http:// або https:// без імя карыстальніка '
+      'і пароля.';
+  @override
+  String get syncTestOffline => 'Сервер недаступны';
+  @override
+  String get syncTestOfflineHint =>
+      'VPN уключаны? Адрас 10.x або 192.168.x працуе толькі з '
+      'той жа сеткі.';
+  @override
+  String get syncTestAuth => 'Карыстальнік або пароль адхілены';
+  @override
+  String get syncTestAuthHint => 'Праверце іх і паспрабуйце зноў.';
+  @override
+  String get syncTestNotFound => 'Папка не існуе';
+  @override
+  String get syncTestNotFoundHint =>
+      'Стварыце яе на серверы або выпраўце адрас.';
+  @override
+  String get syncTestUnsupported => 'Гэта не папка WebDAV';
+  @override
+  String get syncTestUnsupportedHint => 'Сервер адказвае, але не як WebDAV.';
+  @override
+  String get syncTestFailed => 'Праверка не ўдалася';
+  @override
+  String get syncNowAction => 'Сінхранізаваць зараз';
+  @override
+  String get syncSectionServer => 'Сервер';
+  @override
+  String get syncServerRow => 'Адрас, карыстальнік і пароль';
+  @override
+  String get syncRetestTitle => 'Праверыць сервер зноў';
+  @override
+  String syncProbedAgo(String when) => 'Апошняя праверка: $when';
+  @override
+  String get syncDisconnectTitle => 'Адлучыць гэту бібліятэку';
+  @override
+  String get syncDisconnectSubtitle => 'Файлы застаюцца тут і на серверы';
+  @override
+  String get syncDisconnectConfirmTitle => 'Адлучыць сінхранізацыю?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Гэта бібліятэка перастане сінхранізавацца на гэтай '
+      'прыладзе. Ніводзін файл не выдаляецца ні тут, ні на '
+      'серверы. Калі вы падключыце яе зноў, першая сінхранізацыя '
+      'пачнецца нанова.';
+  @override
+  String get syncDisconnectConfirm => 'Адлучыць';
+  @override
+  String get syncFirstTitle => 'Першая сінхранізацыя';
+  @override
+  String get syncFirstIntro => 'Бібліятэка параўнана з папкай на серверы:';
+  @override
+  String get syncFirstUpload => 'Запампаваць';
+  @override
+  String get syncFirstDownload => 'Спампаваць';
+  @override
+  String get syncFirstBoth => 'На абодвух баках';
+  @override
+  String get syncFirstBothHint =>
+      'Аднолькавыя: без перадачы. Розныя: трэба вырашыць';
+  @override
+  String get syncFirstNoDelete =>
+      'Першая сінхранізацыя нічога не выдаляе ні тут, ні на '
+      'серверы.';
+  @override
+  String get syncStartAction => 'Пачаць';
+  @override
+  String syncMassTrashTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Перамясціць $count файл у смус?'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Перамясціць $count файлы ў смус?'
+      : 'Перамясціць $count файлаў у смус?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'На серверы няма $count з $total сінхранізаваных файлаў. '
+      'Звычайна гэта азначае памылковы адрас, непадключаны дыск '
+      'NAS або выпадкова ачышчаную папку.';
+  @override
+  String get syncMassTrashHint =>
+      'Калі вы сапраўды выдалілі іх на іншай прыладзе, '
+      'пацвердзіце: тут яны трапяць у смус.';
+  @override
+  String get syncMassTrashConfirm => 'Перамясціць у смус';
+  @override
+  String syncMassDeleteTitle(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Выдаліць $count файл з сервера?'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Выдаліць $count файлы з сервера?'
+      : 'Выдаліць $count файлаў з сервера?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Тут няма $count з $total сінхранізаваных файлаў. Калі вы '
+      'іх не выдалялі, адмяніце і праверце папку бібліятэкі.';
+  @override
+  String get syncMassDeleteConfirm => 'Выдаліць з сервера';
+  @override
+  String get syncTooltip => 'Сінхранізаваць';
+  @override
+  String get syncStageConnecting => 'Злучэнне з серверам…';
+  @override
+  String get syncStageComparing => 'Параўнанне з серверам…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Сінхранізацыя · $done з $total';
+  @override
+  String get syncStatusWarnings => 'Сінхранізавана з папярэджаннямі';
+  @override
+  String syncConflictsHeader(int count) => 'Зменена тут і на серверы · $count';
+  @override
+  String get syncConflictHint => 'Ніводная з версій не кранутая';
+  @override
+  String get syncResolveAction => 'Вырашыць';
+  @override
+  String syncFailuresHeader(int count) => 'Не сінхранізавана · $count';
+  @override
+  String get syncFailuresHint => 'Паўторная спроба пры наступнай сінхранізацыі';
+  @override
+  String get syncAbortAuth => 'Сервер адхіліў пароль';
+  @override
+  String get syncAbortMissingPassword => 'Няма захаванага пароля';
+  @override
+  String get syncAbortOffline => 'Сервер недаступны';
+  @override
+  String get syncAbortRemoteMissing => 'Папкі на серверы больш няма';
+  @override
+  String get syncAbortUnsupported => 'Сервер больш не працуе як WebDAV';
+  @override
+  String get syncAbortFailed => 'Сінхранізацыя не ўдалася';
+  @override
+  String get syncAbortNotConfirmed => 'Сінхранізацыя скасаваная';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ніводзін файл не крануты. Вашы змены застаюцца тут да '
+      'наступнай паспяховай сінхранізацыі.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Апошняя паспяховая сінхранізацыя: $when';
+  @override
+  String get syncNoSuccessYet => 'Паспяховай сінхранізацыі яшчэ не было';
+  @override
+  String get syncUpdatePasswordAction => 'Абнавіць пароль';
+  @override
+  String get syncRetryAction => 'Паспрабаваць зноў';
+  @override
+  String get syncOpenSettingsAction => 'Налады';
+  @override
+  String get syncCloseAction => 'Зачыніць';
+  @override
+  String get syncDoneSnack => 'Сінхранізавана';
+  @override
+  String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Сінхранізавана · $count файл, выдалены ў іншым месцы, у '
+            'смусе'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Сінхранізавана · $count файлы, выдаленыя ў іншым месцы, у '
+            'смусе'
+      : 'Сінхранізавана · $count файлаў, выдаленых у іншым месцы, '
+            'у смусе';
+  @override
+  String syncConflictsSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Сінхранізавана · $count канфлікт трэба вырашыць'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            (count % 100 < 12 || count % 100 > 14)
+      ? 'Сінхранізавана · $count канфлікты трэба вырашыць'
+      : 'Сінхранізавана · $count канфліктаў трэба вырашыць';
+  @override
+  String get syncShowAction => 'Паказаць';
+  @override
+  String get syncConflictTitle => 'Вырашыць канфлікт';
+  @override
+  String get syncConflictLegend =>
+      'Радкі з − з сервера, радкі з + з гэтай прылады.';
+  @override
+  String get syncConflictBinary =>
+      'Гэта не тэкставы файл: выберыце, якую копію пакінуць.';
+  @override
+  String get syncConflictKeepNote =>
+      'Копія, якую вы не пакінеце, застанецца ў гісторыі заўвагі.';
+  @override
+  String get syncKeepLocal => 'Пакінуць версію з гэтай прылады';
+  @override
+  String get syncKeepRemote => 'Пакінуць версію з сервера';
+  @override
+  String get syncConflictIdentical => 'Абедзве версіі аднолькавыя';
+  @override
+  String get syncConflictLoadFailed => 'Не ўдалося прачытаць абедзве версіі';
+  @override
+  String get syncResolveFailed => 'Не ўдалося вырашыць канфлікт';
+  @override
+  String get syncResolved => 'Канфлікт вырашаны';
+  @override
+  String get syncSectionWhen => 'Калі сінхранізаваць';
+  @override
+  String get syncAutoTitle => 'Аўтаматычна';
+  @override
+  String get syncAutoSubtitle =>
+      'Пасля змен, пры адкрыцці і праз прамежкі часу';
+  @override
+  String get syncIntervalTitle => 'Правяраць сервер кожныя';
+  @override
+  String get syncIntervalSubtitle => 'Толькі пакуль праграма адкрыта';
+  @override
+  String get syncIntervalDialogBody =>
+      'Каб бачыць змены, зробленыя на іншых прыладах, пакуль праграма адкрыта. '
+      'З «Ніколі» — толькі пасля змен і пры адкрыцці.';
+  @override
+  String syncIntervalMinutes(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count хвіліна',
+    (2 || 3 || 4, < 12 || > 14) => '$count хвіліны',
+    _ => '$count хвілін',
+  };
+  @override
+  String get syncIntervalNever => 'Ніколі';
+  @override
+  String get syncWifiOnlyTitle => 'Толькі праз Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Праз мабільныя даныя сінхранізаваць толькі ўручную';
+  @override
+  String syncPendingChanges(int count) => switch ((count % 10, count % 100)) {
+    (1, != 11) => '$count змена чакае',
+    (2 || 3 || 4, < 12 || > 14) => '$count змены чакаюць',
+    _ => '$count змен чакае',
+  };
+  @override
+  String syncRetryIn(String wait) => 'новая спроба праз $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds с';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes хв';
+  @override
+  String get syncWaitingForWifi => 'Чаканне Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Чаканне злучэння';
+  @override
+  String get syncMobileDataHint =>
+      '«Сінхранізаваць зараз» усё роўна выкарыстоўвае мабільныя даныя.';
+  @override
+  String get syncQueueKeptHint =>
+      'Змены застаюцца тут, нават калі вы закрыеце праграму, і адпраўляюцца '
+      'самі, калі сервер адкажа.';
+  @override
+  String get syncAutoPaused => 'Аўтаматычная сінхранізацыя прыпынена';
+  @override
+  String get syncPausedAuthHint =>
+      'Яна адновіцца, калі вы абновіце пароль або сінхранізуеце ўручную.';
+  @override
+  String get syncPausedServerHint =>
+      'Яна адновіцца, калі вы выправіце адрас або сінхранізуеце ўручную.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Сінхранізаваць зараз» пакажа, што будзе выдалена, і спачатку спытае.';
+  @override
+  String get syncNeedsConfirmation => 'Чаканне вашага пацвярджэння';
+  @override
+  String get syncMergeIntro =>
+      'Змены, якія не перакрываюцца, ужо аб’яднаны; там, дзе перакрываюцца, '
+      'выберыце, што пакінуць.';
+  @override
+  String get syncMergeClean =>
+      'Дзве версіі аб’ядноўваюцца самі: нічога не перакрываецца.';
+  @override
+  String get syncMergeNoBase =>
+      'Няма агульнай версіі для аб’яднання, таму трэба выбраць увесь файл.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Перакрыццё $index з $total';
+  @override
+  String get syncMergeFromLocal => 'З гэтай прылады';
+  @override
+  String get syncMergeFromRemote => 'З сервера';
+  @override
+  String get syncMergeRemovedLines => 'Радкі выдалены';
+  @override
+  String get syncMergeKeepLocal => 'Мае';
+  @override
+  String get syncMergeKeepRemote => 'Сервера';
+  @override
+  String get syncMergeKeepBoth => 'Абодва';
+  @override
+  String get syncMergeSave => 'Захаваць аб’яднанне';
+  @override
+  String get syncMergeKeepWhole => 'Або пакінуць адну цэлую копію';
 }

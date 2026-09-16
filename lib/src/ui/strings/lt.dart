@@ -1246,6 +1246,18 @@ final class LithuanianStrings extends Strings {
     _ => '$count nepakeistos eilutės',
   };
   @override
+  String get historyTakeHunk => 'Atkurti čia';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Atkurti 1 pakeitimą' : 'Atkurti $count pakeitimus';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Pasirinkti pakeitimai grįžta į šios versijos tekstą. Užrašas toks, koks '
+      'yra dabar, pirma išsaugomas kaip versija, todėl gali tai atšaukti.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Užrašas pasikeitė, kol buvai čia — palyginimas atnaujintas.';
+  @override
   String get historyVersionsTitle => 'Kiek versijų saugoti';
   @override
   String get historyVersionsSubtitle =>
@@ -1259,4 +1271,489 @@ final class LithuanianStrings extends Strings {
       'Rašant; pradėjus redaguoti pastabą, versija išsaugoma visada';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkripcija';
+  @override
+  String get transcriptionModelTitle => 'Modelis';
+  @override
+  String get transcriptionModelNone => 'Nėra';
+  @override
+  String get transcriptionLanguageTitle => 'Kalba';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Kalba, kuria kalbama jūsų įrašuose. Ją nurodyti tiksliau nei leisti '
+      'atpažinti.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Kaip programoje ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Atpažinti automatiškai';
+  @override
+  String get transcriptionModelsTitle => 'Transkripcijos modeliai';
+  @override
+  String transcriptionModelsUsed(String size) => 'Užimta $size';
+  @override
+  String get transcriptionModelsInstalled => 'Atsisiųsti';
+  @override
+  String get transcriptionModelsDownloading => 'Siunčiama';
+  @override
+  String get transcriptionModelsAvailable => 'Galimi';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeliai lieka programos saugykloje šiame įrenginyje. Jie '
+      'nekopijuojami į biblioteką ir nesinchronizuojami.';
+  @override
+  String get transcriptionModelDefault => 'Numatytasis';
+  @override
+  String get transcriptionModelSlow => 'Lėtas';
+  @override
+  String get transcriptionModelHintTiny => 'Greičiausias, mažiausiai tikslus';
+  @override
+  String get transcriptionModelHintBase =>
+      'Gera greičio ir tikslumo pusiausvyra';
+  @override
+  String get transcriptionModelHintSmall => 'Tikslesnis, maždaug 3× lėtesnis';
+  @override
+  String get transcriptionModelHintMedium => 'Labai tikslus, telefone lėtas';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Tiksliausias, reikia daug atminties';
+  @override
+  String get transcriptionModelDownload => 'Atsisiųsti';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Ištrinti modelį $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Bus atlaisvinta $size. Modelį vėliau galėsite atsisiųsti iš naujo.';
+  @override
+  String get transcriptionModelFailed =>
+      'Atsisiųsti nepavyko. Patikrinkite ryšį ir bandykite dar kartą.';
+  @override
+  String get actionRetry => 'Bandyti dar kartą';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying => 'Ryšys nutrūko, bandoma dar kartą…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pristabdyta: $progress';
+  @override
+  String get actionResume => 'Tęsti';
+  @override
+  String get audioTranscribe => 'Transkribuoti';
+  @override
+  String get audioTranscribeUnsupported => 'Šiame įrenginyje tik WAV įrašai';
+  @override
+  String get transcriptionQueued => 'Eilėje';
+  @override
+  String get transcriptionPreparing => 'Ruošiamas garsas…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribuojama… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Siunčiamas $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transkripcija pridėta prie aprašo';
+  @override
+  String get transcriptionNoSpeech => 'Šiame įraše kalba neatpažinta';
+  @override
+  String get transcriptionFailed => 'Transkribuoti nepavyko';
+  @override
+  String get transcriptionPickModelTitle => 'Pasirinkite modelį';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkribuojama šiame įrenginyje, įrašas niekur nesiunčiamas. Modelis '
+      'atsisiunčiamas tik kartą.';
+  @override
+  String get transcriptionPickModelAction => 'Atsisiųsti ir transkribuoti';
+  @override
+  String get transcriptionModelRecommended => 'Rekomenduojama';
+  @override
+  String get transcriptionExistingTitle => 'Šis įrašas jau turi aprašą';
+  @override
+  String get transcriptionExistingBody =>
+      'Pakeisti jį transkripcija ar pridėti transkripciją po juo?';
+  @override
+  String get transcriptionAppend => 'Pridėti apačioje';
+  @override
+  String get transcriptionReplace => 'Pakeisti';
+  @override
+  String get settingsSectionSync => 'Sinchronizavimas';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Šiai bibliotekai nenustatyta';
+  @override
+  String get syncNeverSynced => 'Dar nesinchronizuota';
+  @override
+  String syncLastSynced(String when) => 'Sinchronizuota $when';
+  @override
+  String get syncRunning => 'Sinchronizuojama…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteka $library';
+  @override
+  String get syncUrlLabel => 'Katalogo adresas';
+  @override
+  String get syncUrlHint =>
+      'Katalogas turi egzistuoti. Nukopijuokite adresą taip, '
+      'kaip jį rodo serveris.';
+  @override
+  String get syncHttpWarning =>
+      'Nešifruotas ryšys: tinka per VPN arba vietiniame tinkle.';
+  @override
+  String get syncUserLabel => 'Naudotojas';
+  @override
+  String get syncUserHint =>
+      'Palikite tuščią, jei serveris neprašo prisijungimo '
+      'duomenų.';
+  @override
+  String get syncPasswordLabel => 'Slaptažodis';
+  @override
+  String get syncPasswordHint =>
+      'Saugomas šio įrenginio raktų saugykloje, niekada ne '
+      'bibliotekos failuose.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Palikite tuščią, kad liktų išsaugotas slaptažodis.';
+  @override
+  String get syncShowPassword => 'Rodyti slaptažodį';
+  @override
+  String get syncHidePassword => 'Slėpti slaptažodį';
+  @override
+  String get syncTestAction => 'Tikrinti ryšį';
+  @override
+  String get syncTesting => 'Tikrinama…';
+  @override
+  String get syncRetargetWarning =>
+      'Pakeitus adresą ar naudotoją, kitas sinchronizavimas '
+      'prasidės iš naujo kaip pirmasis.';
+  @override
+  String get syncTestOk => 'Ryšys veikia';
+  @override
+  String get syncModeFull => 'Visas režimas';
+  @override
+  String get syncModeCompatible => 'Suderinamumo režimas';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Skaitymas, rašymas ir trynimas';
+  @override
+  String get syncCapEtags => 'Failų atspaudai (ETag)';
+  @override
+  String get syncCapNoEtags => 'Nėra failų atspaudų (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Lyginamas dydis ir data; abejojant atsisiunčiama iš naujo';
+  @override
+  String get syncCapGuarded => 'Apsaugotas rašymas';
+  @override
+  String get syncCapUnguarded => 'Neapsaugotas rašymas';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Failas serveryje patikrinamas prieš pat rašant';
+  @override
+  String get syncCapMove => 'Pervadinama neįkeliant iš naujo';
+  @override
+  String get syncCapNoMove => 'Serveryje pervadinti negalima';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Pervadinimas tampa trynimu ir nauju įkėlimu';
+  @override
+  String get syncCompatibleNote =>
+      'Suderinamumo režimu sinchronizavimas veikia taip pat, tik '
+      'su keliomis papildomomis užklausomis.';
+  @override
+  String get syncTestInvalidUrl => 'Netinkamas adresas';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Įveskite http:// arba https:// adresą be naudotojo ir '
+      'slaptažodžio.';
+  @override
+  String get syncTestOffline => 'Serveris nepasiekiamas';
+  @override
+  String get syncTestOfflineHint =>
+      'Ar įjungtas VPN? 10.x arba 192.168.x adresas veikia tik '
+      'iš to paties tinklo.';
+  @override
+  String get syncTestAuth => 'Naudotojas arba slaptažodis atmestas';
+  @override
+  String get syncTestAuthHint => 'Patikrinkite juos ir bandykite dar kartą.';
+  @override
+  String get syncTestNotFound => 'Katalogas neegzistuoja';
+  @override
+  String get syncTestNotFoundHint =>
+      'Sukurkite jį serveryje arba pataisykite adresą.';
+  @override
+  String get syncTestUnsupported => 'Tai ne WebDAV katalogas';
+  @override
+  String get syncTestUnsupportedHint => 'Serveris atsako, bet ne kaip WebDAV.';
+  @override
+  String get syncTestFailed => 'Patikrinti nepavyko';
+  @override
+  String get syncNowAction => 'Sinchronizuoti dabar';
+  @override
+  String get syncSectionServer => 'Serveris';
+  @override
+  String get syncServerRow => 'Adresas, naudotojas ir slaptažodis';
+  @override
+  String get syncRetestTitle => 'Dar kartą patikrinti serverį';
+  @override
+  String syncProbedAgo(String when) => 'Paskutinis patikrinimas $when';
+  @override
+  String get syncDisconnectTitle => 'Atjungti šią biblioteką';
+  @override
+  String get syncDisconnectSubtitle => 'Failai lieka čia ir serveryje';
+  @override
+  String get syncDisconnectConfirmTitle => 'Atjungti sinchronizavimą?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Ši biblioteka šiame įrenginyje nebebus sinchronizuojama. '
+      'Joks failas neištrinamas nei čia, nei serveryje. Vėl '
+      'prijungus, pirmasis sinchronizavimas prasidės iš naujo.';
+  @override
+  String get syncDisconnectConfirm => 'Atjungti';
+  @override
+  String get syncFirstTitle => 'Pirmasis sinchronizavimas';
+  @override
+  String get syncFirstIntro => 'Biblioteka palyginta su katalogu serveryje:';
+  @override
+  String get syncFirstUpload => 'Bus įkelta';
+  @override
+  String get syncFirstDownload => 'Bus atsisiųsta';
+  @override
+  String get syncFirstBoth => 'Abiejose pusėse';
+  @override
+  String get syncFirstBothHint =>
+      'Vienodi: neperduodama. Skirtingi: reikia išspręsti';
+  @override
+  String get syncFirstNoDelete =>
+      'Pirmasis sinchronizavimas nieko neištrina nei čia, nei '
+      'serveryje.';
+  @override
+  String get syncStartAction => 'Pradėti';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Perkelti failus į šiukšlinę ($count)?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Serveryje trūksta $count iš $total sinchronizuotų failų. '
+      'Dažniausiai tai reiškia neteisingą adresą, neprijungtą '
+      'NAS diską arba per klaidą ištuštintą katalogą.';
+  @override
+  String get syncMassTrashHint =>
+      'Jei tikrai juos ištrynėte kitame įrenginyje, '
+      'patvirtinkite: čia jie bus perkelti į šiukšlinę.';
+  @override
+  String get syncMassTrashConfirm => 'Perkelti į šiukšlinę';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Ištrinti failus iš serverio ($count)?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Čia trūksta $count iš $total sinchronizuotų failų. Jei jų '
+      'neištrynėte, atšaukite ir patikrinkite bibliotekos '
+      'katalogą.';
+  @override
+  String get syncMassDeleteConfirm => 'Ištrinti iš serverio';
+  @override
+  String get syncTooltip => 'Sinchronizuoti';
+  @override
+  String get syncStageConnecting => 'Jungiamasi prie serverio…';
+  @override
+  String get syncStageComparing => 'Lyginama su serveriu…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sinchronizuojama · $done iš $total';
+  @override
+  String get syncStatusWarnings => 'Sinchronizuota su įspėjimais';
+  @override
+  String syncConflictsHeader(int count) => 'Pakeista čia ir serveryje · $count';
+  @override
+  String get syncConflictHint => 'Nė viena versija nepaliesta';
+  @override
+  String get syncResolveAction => 'Išspręsti';
+  @override
+  String syncFailuresHeader(int count) => 'Nesinchronizuota · $count';
+  @override
+  String get syncFailuresHint => 'Bus bandoma per kitą sinchronizavimą';
+  @override
+  String get syncAbortAuth => 'Serveris atmetė slaptažodį';
+  @override
+  String get syncAbortMissingPassword => 'Slaptažodis neišsaugotas';
+  @override
+  String get syncAbortOffline => 'Serveris nepasiekiamas';
+  @override
+  String get syncAbortRemoteMissing => 'Katalogo serveryje nebėra';
+  @override
+  String get syncAbortUnsupported => 'Serveris nebeveikia kaip WebDAV';
+  @override
+  String get syncAbortFailed => 'Sinchronizuoti nepavyko';
+  @override
+  String get syncAbortNotConfirmed => 'Sinchronizavimas atšauktas';
+  @override
+  String get syncAbortNothingTouched =>
+      'Nė vienas failas nepaliestas. Jūsų pakeitimai lieka čia '
+      'iki kito sėkmingo sinchronizavimo.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Paskutinis sėkmingas sinchronizavimas $when';
+  @override
+  String get syncNoSuccessYet => 'Dar nė vieno sėkmingo sinchronizavimo';
+  @override
+  String get syncUpdatePasswordAction => 'Atnaujinti slaptažodį';
+  @override
+  String get syncRetryAction => 'Bandyti dar kartą';
+  @override
+  String get syncOpenSettingsAction => 'Nustatymai';
+  @override
+  String get syncCloseAction => 'Uždaryti';
+  @override
+  String get syncDoneSnack => 'Sinchronizuota';
+  @override
+  String syncTrashedSnack(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 19) =>
+      'Sinchronizuota · $count kitur ištrintų failų yra '
+          'šiukšlinėje',
+    (1, _) =>
+      'Sinchronizuota · $count kitur ištrintas failas yra '
+          'šiukšlinėje',
+    (0, _) =>
+      'Sinchronizuota · $count kitur ištrintų failų yra '
+          'šiukšlinėje',
+    _ =>
+      'Sinchronizuota · $count kitur ištrinti failai yra '
+          'šiukšlinėje',
+  };
+  @override
+  String syncConflictsSnack(int count) => switch ((count % 10, count % 100)) {
+    (_, >= 11 && <= 19) => 'Sinchronizuota · $count konfliktų laukia sprendimo',
+    (1, _) => 'Sinchronizuota · $count konfliktas laukia sprendimo',
+    (0, _) => 'Sinchronizuota · $count konfliktų laukia sprendimo',
+    _ => 'Sinchronizuota · $count konfliktai laukia sprendimo',
+  };
+  @override
+  String get syncShowAction => 'Rodyti';
+  @override
+  String get syncConflictTitle => 'Išspręsti konfliktą';
+  @override
+  String get syncConflictLegend =>
+      'Eilutės su − yra iš serverio, eilutės su + – iš šio '
+      'įrenginio.';
+  @override
+  String get syncConflictBinary =>
+      'Tai ne tekstinis failas: pasirinkite, kurią kopiją '
+      'palikti.';
+  @override
+  String get syncConflictKeepNote =>
+      'Nepalikta kopija lieka pastabos istorijoje.';
+  @override
+  String get syncKeepLocal => 'Palikti šio įrenginio';
+  @override
+  String get syncKeepRemote => 'Palikti serverio';
+  @override
+  String get syncConflictIdentical => 'Abi versijos vienodos';
+  @override
+  String get syncConflictLoadFailed => 'Nepavyko perskaityti abiejų versijų';
+  @override
+  String get syncResolveFailed => 'Nepavyko išspręsti konflikto';
+  @override
+  String get syncResolved => 'Konfliktas išspręstas';
+  @override
+  String get syncSectionWhen => 'Kada sinchronizuoti';
+  @override
+  String get syncAutoTitle => 'Automatiškai';
+  @override
+  String get syncAutoSubtitle =>
+      'Po pakeitimų, atidarius ir kas tam tikrą laiką';
+  @override
+  String get syncIntervalTitle => 'Serverio tikrinimo intervalas';
+  @override
+  String get syncIntervalSubtitle => 'Tik kol programa atidaryta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Kad matytumėte kituose įrenginiuose atliktus pakeitimus, kol programa '
+      'atidaryta. Pasirinkus „Niekada“ – tik po pakeitimų ir atidarius.';
+  @override
+  String syncIntervalMinutes(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count minutė'
+      : count % 10 >= 2 && (count % 100 < 11 || count % 100 > 19)
+      ? '$count minutės'
+      : '$count minučių';
+  @override
+  String get syncIntervalNever => 'Niekada';
+  @override
+  String get syncWifiOnlyTitle => 'Tik per Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Mobiliuoju ryšiu sinchronizuoti tik rankiniu būdu';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count pakeitimas laukia'
+      : count % 10 >= 2 && (count % 100 < 11 || count % 100 > 19)
+      ? '$count pakeitimai laukia'
+      : '$count pakeitimų laukia';
+  @override
+  String syncRetryIn(String wait) => 'kitas bandymas po $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Laukiama Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Laukiama ryšio';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinchronizuoti dabar“ vis tiek naudoja mobiliuosius duomenis.';
+  @override
+  String get syncQueueKeptHint =>
+      'Pakeitimai lieka čia, net jei uždarysite programą, ir išsiunčiami '
+      'patys, kai serveris atsako.';
+  @override
+  String get syncAutoPaused => 'Automatinis sinchronizavimas pristabdytas';
+  @override
+  String get syncPausedAuthHint =>
+      'Jis bus tęsiamas, kai atnaujinsite slaptažodį arba sinchronizuosite '
+      'rankiniu būdu.';
+  @override
+  String get syncPausedServerHint =>
+      'Jis bus tęsiamas, kai pataisysite adresą arba sinchronizuosite '
+      'rankiniu būdu.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinchronizuoti dabar“ parodo, kas būtų pašalinta, ir pirmiausia '
+      'paklausia.';
+  @override
+  String get syncNeedsConfirmation => 'Laukiama jūsų patvirtinimo';
+  @override
+  String get syncMergeIntro =>
+      'Pakeitimai, kurie nepersidengia, jau sulieti; ten, kur persidengia, '
+      'pasirinkite, ką palikti.';
+  @override
+  String get syncMergeClean =>
+      'Abi versijos susilieja pačios: niekas nepersidengia.';
+  @override
+  String get syncMergeNoBase =>
+      'Nėra bendros versijos, ant kurios būtų galima sulieti, todėl reikia '
+      'pasirinkti visą failą.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Persidengimas $index iš $total';
+  @override
+  String get syncMergeFromLocal => 'Iš šio įrenginio';
+  @override
+  String get syncMergeFromRemote => 'Iš serverio';
+  @override
+  String get syncMergeRemovedLines => 'Pašalintos eilutės';
+  @override
+  String get syncMergeKeepLocal => 'Mano';
+  @override
+  String get syncMergeKeepRemote => 'Serverio';
+  @override
+  String get syncMergeKeepBoth => 'Abi';
+  @override
+  String get syncMergeSave => 'Išsaugoti suliejimą';
+  @override
+  String get syncMergeKeepWhole => 'Arba palikti vieną visą kopiją';
 }

@@ -1282,6 +1282,18 @@ final class CatalanStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 línia sense canvis' : '$count línies sense canvis';
   @override
+  String get historyTakeHunk => 'Restaura-ho aquí';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaura 1 canvi' : 'Restaura $count canvis';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      "Els canvis triats tornen al text d'aquesta versió. La nota tal com és "
+      'ara es conserva abans com a versió, així que ho pots desfer.';
+  @override
+  String get historyNoteChangedReloaded =>
+      "La nota ha canviat mentre eres aquí: la comparació s'ha actualitzat.";
+  @override
   String get historyVersionsTitle => 'Versions que es conserven';
   @override
   String get historyVersionsSubtitle => 'Per nota, a .history/';
@@ -1294,4 +1306,476 @@ final class CatalanStrings extends Strings {
       'Mentre escrius; començar a editar una nota sempre en guarda una';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transcripció';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Cap';
+  @override
+  String get transcriptionLanguageTitle => 'Idioma';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      "L'idioma que es parla als teus enregistraments. Indicar-lo és més "
+      'precís que detectar-lo.';
+  @override
+  String transcriptionLanguageApp(String language) => "Com l'app ($language)";
+  @override
+  String get transcriptionLanguageDetect => 'Detecta automàticament';
+  @override
+  String get transcriptionModelsTitle => 'Models de transcripció';
+  @override
+  String transcriptionModelsUsed(String size) => '$size en ús';
+  @override
+  String get transcriptionModelsInstalled => 'Baixats';
+  @override
+  String get transcriptionModelsDownloading => "S'estan baixant";
+  @override
+  String get transcriptionModelsAvailable => 'Disponibles';
+  @override
+  String get transcriptionModelsFooter =>
+      "Els models es queden a l'emmagatzematge de l'app en aquest dispositiu. "
+      'No es copien a la biblioteca ni es sincronitzen.';
+  @override
+  String get transcriptionModelDefault => 'Per defecte';
+  @override
+  String get transcriptionModelSlow => 'Lent';
+  @override
+  String get transcriptionModelHintTiny => 'El més ràpid, el menys precís';
+  @override
+  String get transcriptionModelHintBase =>
+      'Bon equilibri entre velocitat i precisió';
+  @override
+  String get transcriptionModelHintSmall => 'Més precís, unes 3× més lent';
+  @override
+  String get transcriptionModelHintMedium => 'Molt precís, lent en un telèfon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'El més precís, necessita molta memòria';
+  @override
+  String get transcriptionModelDownload => 'Baixa';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Vols suprimir el model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Allibera $size. Pots tornar a baixar el model més endavant.';
+  @override
+  String get transcriptionModelFailed =>
+      "No s'ha pogut baixar. Comprova la connexió i torna-ho a provar.";
+  @override
+  String get actionRetry => 'Torna-ho a provar';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      "S'ha perdut la connexió, s'està tornant a provar…";
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa a $progress';
+  @override
+  String get actionResume => 'Reprèn';
+  @override
+  String get audioTranscribe => 'Transcriu';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Només enregistraments WAV en aquest dispositiu';
+  @override
+  String get transcriptionQueued => 'A la cua';
+  @override
+  String get transcriptionPreparing => "S'està preparant l'àudio…";
+  @override
+  String transcriptionRunning(int percent) => "S'està transcrivint… $percent %";
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      "S'està baixant $model · $percent %";
+  @override
+  String get transcriptionSaved => 'Transcripció afegida a la descripció';
+  @override
+  String get transcriptionNoSpeech =>
+      "No s'ha reconegut cap veu en aquest enregistrament";
+  @override
+  String get transcriptionFailed => "No s'ha pogut transcriure";
+  @override
+  String get transcriptionPickModelTitle => 'Tria un model';
+  @override
+  String get transcriptionPickModelBody =>
+      "La transcripció es fa en aquest dispositiu i l'enregistrament no "
+      "s'envia mai. El model es baixa una sola vegada.";
+  @override
+  String get transcriptionPickModelAction => 'Baixa i transcriu';
+  @override
+  String get transcriptionModelRecommended => 'Recomanat';
+  @override
+  String get transcriptionExistingTitle =>
+      'Aquest enregistrament ja té una descripció';
+  @override
+  String get transcriptionExistingBody =>
+      'Vols substituir-la per la transcripció o afegir la transcripció a '
+      'sota?';
+  @override
+  String get transcriptionAppend => 'Afegeix a sota';
+  @override
+  String get transcriptionReplace => 'Substitueix';
+  @override
+  String get settingsSectionSync => 'Sincronització';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Sense configurar per a aquesta biblioteca';
+  @override
+  String get syncNeverSynced => 'Mai sincronitzada';
+  @override
+  String syncLastSynced(String when) => 'Sincronitzada $when';
+  @override
+  String get syncRunning => 'Sincronitzant…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteca $library';
+  @override
+  String get syncUrlLabel => 'Adreça de la carpeta';
+  @override
+  String get syncUrlHint =>
+      'La carpeta ha d’existir. Copia l’adreça tal com la mostra '
+      'el servidor.';
+  @override
+  String get syncHttpWarning =>
+      'Connexió sense xifrar: és correcte en una VPN o a la teva '
+      'xarxa local.';
+  @override
+  String get syncUserLabel => 'Usuari';
+  @override
+  String get syncUserHint =>
+      'Deixa-ho buit si el servidor no demana credencials.';
+  @override
+  String get syncPasswordLabel => 'Contrasenya';
+  @override
+  String get syncPasswordHint =>
+      'Es guarda al clauer d’aquest dispositiu, mai als fitxers '
+      'de la biblioteca.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Deixa-ho buit per mantenir la contrasenya guardada.';
+  @override
+  String get syncShowPassword => 'Mostra la contrasenya';
+  @override
+  String get syncHidePassword => 'Amaga la contrasenya';
+  @override
+  String get syncTestAction => 'Prova la connexió';
+  @override
+  String get syncTesting => 'Provant…';
+  @override
+  String get syncRetargetWarning =>
+      'Amb una altra adreça o un altre usuari, la propera '
+      'sincronització torna a començar com la primera.';
+  @override
+  String get syncTestOk => 'La connexió funciona';
+  @override
+  String get syncModeFull => 'Mode complet';
+  @override
+  String get syncModeCompatible => 'Mode compatible';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lectura, escriptura i esborrament';
+  @override
+  String get syncCapEtags => 'Empremtes dels fitxers (ETags)';
+  @override
+  String get syncCapNoEtags => 'Sense empremtes dels fitxers (ETags)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Compara la mida i la data; si hi ha dubtes, torna a baixar';
+  @override
+  String get syncCapGuarded => 'Escriptures protegides';
+  @override
+  String get syncCapUnguarded => 'Escriptures no protegides';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Comprova el fitxer al servidor just abans d’escriure';
+  @override
+  String get syncCapMove => 'Canvia el nom sense tornar a pujar';
+  @override
+  String get syncCapNoMove => 'Sense canvis de nom al servidor';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Un canvi de nom esdevé un esborrament i una pujada nova';
+  @override
+  String get syncCompatibleNote =>
+      'En mode compatible la sincronització funciona igual, amb '
+      'unes quantes peticions més.';
+  @override
+  String get syncTestInvalidUrl => 'No és una adreça vàlida';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Escriu una adreça http:// o https://, sense usuari ni '
+      'contrasenya a dins.';
+  @override
+  String get syncTestOffline => 'Servidor inaccessible';
+  @override
+  String get syncTestOfflineHint =>
+      'La VPN està activa? Una adreça 10.x o 192.168.x només '
+      'funciona des de la mateixa xarxa.';
+  @override
+  String get syncTestAuth => 'Usuari o contrasenya rebutjats';
+  @override
+  String get syncTestAuthHint => 'Revisa’ls i torna a provar.';
+  @override
+  String get syncTestNotFound => 'La carpeta no existeix';
+  @override
+  String get syncTestNotFoundHint =>
+      'Crea-la al servidor o corregeix l’adreça.';
+  @override
+  String get syncTestUnsupported => 'No és una carpeta WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'El servidor respon, però no com a WebDAV.';
+  @override
+  String get syncTestFailed => 'La prova no ha funcionat';
+  @override
+  String get syncNowAction => 'Sincronitza ara';
+  @override
+  String get syncSectionServer => 'Servidor';
+  @override
+  String get syncServerRow => 'Adreça, usuari i contrasenya';
+  @override
+  String get syncRetestTitle => 'Torna a provar el servidor';
+  @override
+  String syncProbedAgo(String when) => 'Última prova: $when';
+  @override
+  String get syncDisconnectTitle => 'Desconnecta aquesta biblioteca';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Els fitxers es queden aquí i al servidor';
+  @override
+  String get syncDisconnectConfirmTitle => 'Desconnectar la sincronització?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Aquesta biblioteca deixa de sincronitzar-se en aquest '
+      'dispositiu. No s’esborra cap fitxer, ni aquí ni al '
+      'servidor. Si la tornes a connectar, la primera '
+      'sincronització torna a començar.';
+  @override
+  String get syncDisconnectConfirm => 'Desconnecta';
+  @override
+  String get syncFirstTitle => 'Primera sincronització';
+  @override
+  String get syncFirstIntro =>
+      'He comparat la biblioteca amb la carpeta del servidor:';
+  @override
+  String get syncFirstUpload => 'Per pujar';
+  @override
+  String get syncFirstDownload => 'Per baixar';
+  @override
+  String get syncFirstBoth => 'A tots dos costats';
+  @override
+  String get syncFirstBothHint =>
+      'Iguals: sense transferència. Diferents: per resoldre';
+  @override
+  String get syncFirstNoDelete =>
+      'La primera sincronització no esborra res, ni aquí ni al '
+      'servidor.';
+  @override
+  String get syncStartAction => 'Comença';
+  @override
+  String syncMassTrashTitle(int count) => 'Moure $count fitxers a la paperera?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Al servidor falten $count dels $total fitxers '
+      'sincronitzats. Normalment vol dir una adreça errònia, un '
+      'disc del NAS sense muntar o una carpeta buidada per error.';
+  @override
+  String get syncMassTrashHint =>
+      'Si de debò els has esborrat en un altre dispositiu, '
+      'confirma-ho: aquí van a la paperera.';
+  @override
+  String get syncMassTrashConfirm => 'Mou a la paperera';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Esborrar $count fitxers del servidor?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Aquí falten $count dels $total fitxers sincronitzats. Si '
+      'no els has esborrat tu, cancel·la i revisa la carpeta de '
+      'la biblioteca.';
+  @override
+  String get syncMassDeleteConfirm => 'Esborra del servidor';
+  @override
+  String get syncTooltip => 'Sincronitza';
+  @override
+  String get syncStageConnecting => 'Connectant amb el servidor…';
+  @override
+  String get syncStageComparing => 'Comparant amb el servidor…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sincronitzant · $done de $total';
+  @override
+  String get syncStatusWarnings => 'Sincronitzada amb avisos';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Modificats aquí i al servidor · $count';
+  @override
+  String get syncConflictHint => 'No s’ha tocat cap de les dues versions';
+  @override
+  String get syncResolveAction => 'Resol';
+  @override
+  String syncFailuresHeader(int count) => 'Sense sincronitzar · $count';
+  @override
+  String get syncFailuresHint =>
+      'Es tornaran a provar a la propera sincronització';
+  @override
+  String get syncAbortAuth => 'El servidor ha rebutjat la contrasenya';
+  @override
+  String get syncAbortMissingPassword => 'No hi ha cap contrasenya guardada';
+  @override
+  String get syncAbortOffline => 'Servidor inaccessible';
+  @override
+  String get syncAbortRemoteMissing => 'La carpeta del servidor ja no hi és';
+  @override
+  String get syncAbortUnsupported => 'El servidor ja no funciona com a WebDAV';
+  @override
+  String get syncAbortFailed => 'La sincronització no ha funcionat';
+  @override
+  String get syncAbortNotConfirmed => 'Sincronització cancel·lada';
+  @override
+  String get syncAbortNothingTouched =>
+      'No s’ha tocat cap fitxer. Els teus canvis es queden aquí '
+      'fins a la propera sincronització correcta.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Última sincronització correcta: $when';
+  @override
+  String get syncNoSuccessYet => 'Encara no hi ha cap sincronització correcta';
+  @override
+  String get syncUpdatePasswordAction => 'Actualitza la contrasenya';
+  @override
+  String get syncRetryAction => 'Torna-ho a provar';
+  @override
+  String get syncOpenSettingsAction => 'Configuració';
+  @override
+  String get syncCloseAction => 'Tanca';
+  @override
+  String get syncDoneSnack => 'Sincronitzada';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sincronitzada · 1 fitxer esborrat en un altre lloc és a '
+            'la paperera'
+      : 'Sincronitzada · $count fitxers esborrats en un altre lloc '
+            'són a la paperera';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sincronitzada · 1 conflicte per resoldre'
+      : 'Sincronitzada · $count conflictes per resoldre';
+  @override
+  String get syncShowAction => 'Mostra';
+  @override
+  String get syncConflictTitle => 'Resol el conflicte';
+  @override
+  String get syncConflictLegend =>
+      'Les línies amb − són del servidor; les línies amb + són '
+      'd’aquest dispositiu.';
+  @override
+  String get syncConflictBinary =>
+      'No és un fitxer de text: tria quina còpia vols conservar.';
+  @override
+  String get syncConflictKeepNote =>
+      'La còpia que no conservis es queda a l’historial de la '
+      'nota.';
+  @override
+  String get syncKeepLocal => 'Conserva la d’aquest dispositiu';
+  @override
+  String get syncKeepRemote => 'Conserva la del servidor';
+  @override
+  String get syncConflictIdentical => 'Les dues versions són idèntiques';
+  @override
+  String get syncConflictLoadFailed =>
+      'No s’han pogut llegir les dues versions';
+  @override
+  String get syncResolveFailed => 'No s’ha pogut resoldre el conflicte';
+  @override
+  String get syncResolved => 'Conflicte resolt';
+  @override
+  String get syncSectionWhen => 'Quan sincronitzar';
+  @override
+  String get syncAutoTitle => 'Automàticament';
+  @override
+  String get syncAutoSubtitle => 'Després dels canvis, en obrir i a intervals';
+  @override
+  String get syncIntervalTitle => 'Comprova el servidor cada';
+  @override
+  String get syncIntervalSubtitle => 'Només amb l’app oberta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Per veure els canvis fets en altres dispositius mentre l’app és '
+      'oberta. Amb “Mai”, només després dels canvis i en obrir.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minuts';
+  @override
+  String get syncIntervalNever => 'Mai';
+  @override
+  String get syncWifiOnlyTitle => 'Només amb Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Amb dades mòbils, sincronitza només a mà';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 canvi en espera' : '$count canvis en espera';
+  @override
+  String syncRetryIn(String wait) => 'nou intent d’aquí a $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Esperant el Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Esperant la connexió';
+  @override
+  String get syncMobileDataHint =>
+      '“Sincronitza ara” fa servir igualment les dades mòbils.';
+  @override
+  String get syncQueueKeptHint =>
+      'Els canvis es queden aquí, encara que tanquis l’app, i surten sols '
+      'quan el servidor respon.';
+  @override
+  String get syncAutoPaused => 'Sincronització automàtica en pausa';
+  @override
+  String get syncPausedAuthHint =>
+      'Es reprèn quan actualitzes la contrasenya o sincronitzes a mà.';
+  @override
+  String get syncPausedServerHint =>
+      'Es reprèn quan corregeixes l’adreça o sincronitzes a mà.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sincronitza ara” mostra què s’eliminaria i demana confirmació.';
+  @override
+  String get syncNeedsConfirmation => 'Esperant la teva confirmació';
+  @override
+  String get syncMergeIntro =>
+      'Les modificacions que no se superposen ja estan unides; tria què '
+      'conservar on sí que se superposen.';
+  @override
+  String get syncMergeClean =>
+      'Les dues versions s’uneixen soles: no hi ha res que se superposi.';
+  @override
+  String get syncMergeNoBase =>
+      'No hi ha cap versió comuna sobre la qual unir, així que cal triar el '
+      'fitxer sencer.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Superposició $index de $total';
+  @override
+  String get syncMergeFromLocal => 'D’aquest dispositiu';
+  @override
+  String get syncMergeFromRemote => 'Del servidor';
+  @override
+  String get syncMergeRemovedLines => 'Línies eliminades';
+  @override
+  String get syncMergeKeepLocal => 'Les meves';
+  @override
+  String get syncMergeKeepRemote => 'Del servidor';
+  @override
+  String get syncMergeKeepBoth => 'Totes dues';
+  @override
+  String get syncMergeSave => 'Desa la unió';
+  @override
+  String get syncMergeKeepWhole => 'O conserva una còpia sencera';
 }

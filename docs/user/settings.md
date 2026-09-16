@@ -43,6 +43,15 @@ preview layout (`auto` = split at ≥ 600 dp, or `fullScreen`), split
 ratio (0.2–0.8, default 0.55), UI language, last opened library, debug
 log toggle (default on).
 
+### Sync
+
+**Sync → WebDAV** holds the open library's sync destination: folder
+address, user, the password (in the device keychain), what the server
+can do, when to sync (automatically, how often to check the server,
+Wi-Fi only on phones), and Disconnect. It is per library *and* per device — not in
+`settings.json`, so a copied folder never starts syncing into the
+original's server. See [sync.md](sync.md).
+
 ### Updates
 
 `Automatic updates` (default off) checks GitHub Releases shortly after

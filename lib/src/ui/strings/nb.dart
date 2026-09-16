@@ -1245,6 +1245,18 @@ final class NorwegianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 uendret linje' : '$count uendrede linjer';
   @override
+  String get historyTakeHunk => 'Gjenopprett her';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Gjenopprett 1 endring' : 'Gjenopprett $count endringer';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De valgte endringene går tilbake til teksten i denne versjonen. Notatet '
+      'slik det er nå beholdes først som en versjon, så du kan angre.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Notatet ble endret mens du var her — sammenligningen er oppdatert.';
+  @override
   String get historyVersionsTitle => 'Versjoner som beholdes';
   @override
   String get historyVersionsSubtitle => 'Per notat, i .history/';
@@ -1257,4 +1269,470 @@ final class NorwegianStrings extends Strings {
       'Mens du skriver; når du begynner å redigere et notat, lagres alltid én';
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
+  @override
+  String get settingsSectionTranscription => 'Transkribering';
+  @override
+  String get transcriptionModelTitle => 'Modell';
+  @override
+  String get transcriptionModelNone => 'Ingen';
+  @override
+  String get transcriptionLanguageTitle => 'Språk';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Språket som snakkes i opptakene dine. Å oppgi det er mer nøyaktig enn '
+      'å la det gjenkjennes.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Som appen ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Gjenkjenn automatisk';
+  @override
+  String get transcriptionModelsTitle => 'Transkriberingsmodeller';
+  @override
+  String transcriptionModelsUsed(String size) => '$size brukt';
+  @override
+  String get transcriptionModelsInstalled => 'Lastet ned';
+  @override
+  String get transcriptionModelsDownloading => 'Lastes ned';
+  @override
+  String get transcriptionModelsAvailable => 'Tilgjengelige';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modellene ligger i appens lagring på denne enheten. De kopieres ikke '
+      'til biblioteket og synkroniseres ikke.';
+  @override
+  String get transcriptionModelDefault => 'Standard';
+  @override
+  String get transcriptionModelSlow => 'Treg';
+  @override
+  String get transcriptionModelHintTiny => 'Raskest, minst nøyaktig';
+  @override
+  String get transcriptionModelHintBase =>
+      'God balanse mellom fart og nøyaktighet';
+  @override
+  String get transcriptionModelHintSmall => 'Mer nøyaktig, omtrent 3× tregere';
+  @override
+  String get transcriptionModelHintMedium => 'Svært nøyaktig, treg på telefon';
+  @override
+  String get transcriptionModelHintLarge => 'Mest nøyaktig, trenger mye minne';
+  @override
+  String get transcriptionModelDownload => 'Last ned';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Slette modellen $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Dette frigjør $size. Du kan laste ned modellen igjen senere.';
+  @override
+  String get transcriptionModelFailed =>
+      'Nedlastingen mislyktes. Sjekk tilkoblingen og prøv igjen.';
+  @override
+  String get actionRetry => 'Prøv igjen';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Tilkoblingen ble brutt, prøver igjen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Satt på pause ved $progress';
+  @override
+  String get actionResume => 'Fortsett';
+  @override
+  String get audioTranscribe => 'Transkriber';
+  @override
+  String get audioTranscribeUnsupported => 'Bare WAV-opptak på denne enheten';
+  @override
+  String get transcriptionQueued => 'I kø';
+  @override
+  String get transcriptionPreparing => 'Klargjør lyden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkriberer… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Laster ned $model · $percent %';
+  @override
+  String get transcriptionSaved =>
+      'Transkripsjonen ble lagt til i beskrivelsen';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ingen tale ble gjenkjent i dette opptaket';
+  @override
+  String get transcriptionFailed => 'Transkriberingen mislyktes';
+  @override
+  String get transcriptionPickModelTitle => 'Velg en modell';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkriberingen skjer på denne enheten, og opptaket lastes aldri opp. '
+      'Modellen lastes ned én gang.';
+  @override
+  String get transcriptionPickModelAction => 'Last ned og transkriber';
+  @override
+  String get transcriptionModelRecommended => 'Anbefalt';
+  @override
+  String get transcriptionExistingTitle =>
+      'Opptaket har allerede en beskrivelse';
+  @override
+  String get transcriptionExistingBody =>
+      'Erstatte den med transkripsjonen, eller legge transkripsjonen til '
+      'under?';
+  @override
+  String get transcriptionAppend => 'Legg til under';
+  @override
+  String get transcriptionReplace => 'Erstatt';
+  @override
+  String get settingsSectionSync => 'Synkronisering';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ikke satt opp for dette biblioteket';
+  @override
+  String get syncNeverSynced => 'Aldri synkronisert';
+  @override
+  String syncLastSynced(String when) => 'Synkronisert $when';
+  @override
+  String get syncRunning => 'Synkroniserer…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bibliotek $library';
+  @override
+  String get syncUrlLabel => 'Mappeadresse';
+  @override
+  String get syncUrlHint =>
+      'Mappen må finnes. Kopier adressen slik serveren viser den.';
+  @override
+  String get syncHttpWarning =>
+      'Ukryptert tilkobling: greit over VPN eller på det lokale '
+      'nettverket.';
+  @override
+  String get syncUserLabel => 'Bruker';
+  @override
+  String get syncUserHint =>
+      'La stå tomt hvis serveren ikke ber om '
+      'påloggingsinformasjon.';
+  @override
+  String get syncPasswordLabel => 'Passord';
+  @override
+  String get syncPasswordHint =>
+      'Lagres i nøkkelringen på denne enheten, aldri i '
+      'bibliotekfilene.';
+  @override
+  String get syncPasswordKeepHint =>
+      'La stå tomt for å beholde det lagrede passordet.';
+  @override
+  String get syncShowPassword => 'Vis passord';
+  @override
+  String get syncHidePassword => 'Skjul passord';
+  @override
+  String get syncTestAction => 'Test tilkoblingen';
+  @override
+  String get syncTesting => 'Tester…';
+  @override
+  String get syncRetargetWarning =>
+      'Med ny adresse eller bruker starter neste synk på nytt '
+      'som en første synk.';
+  @override
+  String get syncTestOk => 'Tilkoblingen virker';
+  @override
+  String get syncModeFull => 'Full modus';
+  @override
+  String get syncModeCompatible => 'Kompatibel modus';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lese, skrive og slette';
+  @override
+  String get syncCapEtags => 'Filfingeravtrykk (ETag)';
+  @override
+  String get syncCapNoEtags => 'Ingen filfingeravtrykk (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Sammenligner størrelse og dato; laster ned på nytt ved '
+      'tvil';
+  @override
+  String get syncCapGuarded => 'Beskyttet skriving';
+  @override
+  String get syncCapUnguarded => 'Ubeskyttet skriving';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Sjekker filen på serveren rett før skriving';
+  @override
+  String get syncCapMove => 'Endrer navn uten ny opplasting';
+  @override
+  String get syncCapNoMove => 'Ingen navneendring på serveren';
+  @override
+  String get syncCapNoMoveDetail =>
+      'En navneendring blir en sletting og en ny opplasting';
+  @override
+  String get syncCompatibleNote =>
+      'I kompatibel modus fungerer synk likt, med noen flere '
+      'forespørsler.';
+  @override
+  String get syncTestInvalidUrl => 'Ikke en gyldig adresse';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Skriv inn en adresse med http:// eller https://, uten '
+      'bruker eller passord i den.';
+  @override
+  String get syncTestOffline => 'Serveren kan ikke nås';
+  @override
+  String get syncTestOfflineHint =>
+      'Er VPN på? En adresse på 10.x eller 192.168.x virker bare '
+      'fra samme nettverk.';
+  @override
+  String get syncTestAuth => 'Bruker eller passord avvist';
+  @override
+  String get syncTestAuthHint => 'Sjekk dem, og test igjen.';
+  @override
+  String get syncTestNotFound => 'Mappen finnes ikke';
+  @override
+  String get syncTestNotFoundHint =>
+      'Opprett den på serveren eller rett adressen.';
+  @override
+  String get syncTestUnsupported => 'Ikke en WebDAV-mappe';
+  @override
+  String get syncTestUnsupportedHint => 'Serveren svarer, men ikke som WebDAV.';
+  @override
+  String get syncTestFailed => 'Testen mislyktes';
+  @override
+  String get syncNowAction => 'Synkroniser nå';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Adresse, bruker og passord';
+  @override
+  String get syncRetestTitle => 'Test serveren igjen';
+  @override
+  String syncProbedAgo(String when) => 'Siste test $when';
+  @override
+  String get syncDisconnectTitle => 'Koble fra dette biblioteket';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Filene blir liggende her og på serveren';
+  @override
+  String get syncDisconnectConfirmTitle => 'Koble fra synk?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Dette biblioteket slutter å synkronisere på denne '
+      'enheten. Ingen filer slettes, verken her eller på '
+      'serveren. Kobler du det til igjen, starter første synk på '
+      'nytt.';
+  @override
+  String get syncDisconnectConfirm => 'Koble fra';
+  @override
+  String get syncFirstTitle => 'Første synk';
+  @override
+  String get syncFirstIntro =>
+      'Biblioteket er sammenlignet med mappen på serveren:';
+  @override
+  String get syncFirstUpload => 'Skal lastes opp';
+  @override
+  String get syncFirstDownload => 'Skal lastes ned';
+  @override
+  String get syncFirstBoth => 'På begge sider';
+  @override
+  String get syncFirstBothHint => 'Like: ingen overføring. Ulike: må løses';
+  @override
+  String get syncFirstNoDelete =>
+      'Første synk sletter ingenting, verken her eller på '
+      'serveren.';
+  @override
+  String get syncStartAction => 'Start';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Flytte $count filer til papirkorgen?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '$count av de $total synkroniserte filene mangler på '
+      'serveren. Det betyr som regel feil adresse, en NAS-disk '
+      'som ikke er montert, eller en mappe som er tømt ved en '
+      'feil.';
+  @override
+  String get syncMassTrashHint =>
+      'Hvis du virkelig slettet dem på en annen enhet, bekreft: '
+      'her havner de i papirkorgen.';
+  @override
+  String get syncMassTrashConfirm => 'Flytt til papirkorgen';
+  @override
+  String syncMassDeleteTitle(int count) => 'Slette $count filer fra serveren?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '$count av de $total synkroniserte filene mangler her. '
+      'Hvis du ikke slettet dem, avbryt og sjekk bibliotekmappen.';
+  @override
+  String get syncMassDeleteConfirm => 'Slett fra serveren';
+  @override
+  String get syncTooltip => 'Synkroniser';
+  @override
+  String get syncStageConnecting => 'Kobler til serveren…';
+  @override
+  String get syncStageComparing => 'Sammenligner med serveren…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synkroniserer · $done av $total';
+  @override
+  String get syncStatusWarnings => 'Synkronisert med advarsler';
+  @override
+  String syncConflictsHeader(int count) => 'Endret her og på serveren · $count';
+  @override
+  String get syncConflictHint => 'Ingen av versjonene ble rørt';
+  @override
+  String get syncResolveAction => 'Løs';
+  @override
+  String syncFailuresHeader(int count) => 'Ikke synkronisert · $count';
+  @override
+  String get syncFailuresHint => 'Prøves igjen ved neste synk';
+  @override
+  String get syncAbortAuth => 'Passordet ble avvist av serveren';
+  @override
+  String get syncAbortMissingPassword => 'Ingen passord lagret';
+  @override
+  String get syncAbortOffline => 'Serveren kan ikke nås';
+  @override
+  String get syncAbortRemoteMissing => 'Mappen på serveren er borte';
+  @override
+  String get syncAbortUnsupported => 'Serveren virker ikke lenger som WebDAV';
+  @override
+  String get syncAbortFailed => 'Synk mislyktes';
+  @override
+  String get syncAbortNotConfirmed => 'Synk avbrutt';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ingen filer ble rørt. Endringene dine blir liggende her '
+      'til neste vellykkede synk.';
+  @override
+  String syncLastSuccess(String when) => 'Siste vellykkede synk $when';
+  @override
+  String get syncNoSuccessYet => 'Ingen vellykket synk ennå';
+  @override
+  String get syncUpdatePasswordAction => 'Oppdater passord';
+  @override
+  String get syncRetryAction => 'Prøv igjen';
+  @override
+  String get syncOpenSettingsAction => 'Innstillinger';
+  @override
+  String get syncCloseAction => 'Lukk';
+  @override
+  String get syncDoneSnack => 'Synkronisert';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Synkronisert · 1 fil slettet et annet sted ligger i '
+            'papirkorgen'
+      : 'Synkronisert · $count filer slettet et annet sted ligger '
+            'i papirkorgen';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Synkronisert · 1 konflikt å løse'
+      : 'Synkronisert · $count konflikter å løse';
+  @override
+  String get syncShowAction => 'Vis';
+  @override
+  String get syncConflictTitle => 'Løs konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Linjer merket − er fra serveren, linjer merket + er fra '
+      'denne enheten.';
+  @override
+  String get syncConflictBinary =>
+      'Ikke en tekstfil: velg hvilken kopi du vil beholde.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopien du ikke beholder, blir liggende i historikken til '
+      'notatet.';
+  @override
+  String get syncKeepLocal => 'Behold denne enhetens';
+  @override
+  String get syncKeepRemote => 'Behold serverens';
+  @override
+  String get syncConflictIdentical => 'De to versjonene er identiske';
+  @override
+  String get syncConflictLoadFailed => 'Kunne ikke lese begge versjonene';
+  @override
+  String get syncResolveFailed => 'Kunne ikke løse konflikten';
+  @override
+  String get syncResolved => 'Konflikten er løst';
+  @override
+  String get syncSectionWhen => 'Når det skal synkroniseres';
+  @override
+  String get syncAutoTitle => 'Automatisk';
+  @override
+  String get syncAutoSubtitle =>
+      'Etter endringer, ved åpning og med jevne mellomrom';
+  @override
+  String get syncIntervalTitle => 'Intervall for serversjekk';
+  @override
+  String get syncIntervalSubtitle => 'Bare mens appen er åpen';
+  @override
+  String get syncIntervalDialogBody =>
+      'For å se endringer gjort på andre enheter mens appen er åpen. Med '
+      '«Aldri» bare etter endringer og ved åpning.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minutt' : '$count minutter';
+  @override
+  String get syncIntervalNever => 'Aldri';
+  @override
+  String get syncWifiOnlyTitle => 'Bare på Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'På mobildata synkroniseres det bare manuelt';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 endring venter' : '$count endringer venter';
+  @override
+  String syncRetryIn(String wait) => 'nytt forsøk om $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Venter på Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Venter på tilkobling';
+  @override
+  String get syncMobileDataHint => '«Synkroniser nå» bruker likevel mobildata.';
+  @override
+  String get syncQueueKeptHint =>
+      'Endringene blir liggende her, også om du lukker appen, og sendes av '
+      'seg selv når serveren svarer.';
+  @override
+  String get syncAutoPaused => 'Automatisk synk satt på pause';
+  @override
+  String get syncPausedAuthHint =>
+      'Den fortsetter når du oppdaterer passordet eller synkroniserer '
+      'manuelt.';
+  @override
+  String get syncPausedServerHint =>
+      'Den fortsetter når du retter adressen eller synkroniserer manuelt.';
+  @override
+  String get syncPausedConfirmHint =>
+      '«Synkroniser nå» viser hva som ville blitt fjernet, og spør først.';
+  @override
+  String get syncNeedsConfirmation => 'Venter på bekreftelsen din';
+  @override
+  String get syncMergeIntro =>
+      'Endringer som ikke overlapper, er allerede flettet; velg hva du vil '
+      'beholde der de overlapper.';
+  @override
+  String get syncMergeClean =>
+      'De to versjonene flettes av seg selv: ingenting overlapper.';
+  @override
+  String get syncMergeNoBase =>
+      'Ingen felles versjon å flette på, så hele filen må velges.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlapp $index av $total';
+  @override
+  String get syncMergeFromLocal => 'Fra denne enheten';
+  @override
+  String get syncMergeFromRemote => 'Fra serveren';
+  @override
+  String get syncMergeRemovedLines => 'Linjer fjernet';
+  @override
+  String get syncMergeKeepLocal => 'Mine';
+  @override
+  String get syncMergeKeepRemote => 'Serverens';
+  @override
+  String get syncMergeKeepBoth => 'Begge';
+  @override
+  String get syncMergeSave => 'Lagre flettingen';
+  @override
+  String get syncMergeKeepWhole => 'Eller behold én hel kopi';
 }

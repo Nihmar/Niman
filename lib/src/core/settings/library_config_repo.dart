@@ -22,9 +22,23 @@ final class LibraryConfigRepo {
   Future<LibraryConfig>? _config;
   Future<void> _chain = Future<void>.value();
 
+  /// Called after every write that changed the file (the sync queues the
+  /// file for upload).
+  void Function()? onWritten;
+
   /// The library's settings; the first call reads the file, later ones
   /// return the cached value.
   Future<LibraryConfig> get config => _config ??= _store.read();
+
+  /// Drops the cached settings, so the next read comes from the file —
+  /// after something other than this repo replaced it (a sync download).
+  /// Waits for a write in progress, which would otherwise put its own
+  /// copy back into the cache.
+  Future<void> reload() {
+    final next = _chain.then((_) => _config = null);
+    _chain = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
 
   /// Applies [change] to the current settings and persists the result.
   ///
@@ -36,6 +50,7 @@ final class LibraryConfigRepo {
       if (updated == current) return;
       await _store.write(updated);
       _config = Future<LibraryConfig>.value(updated);
+      onWritten?.call();
     });
     _chain = next.then<void>((_) {}, onError: (Object _) {});
     return next;

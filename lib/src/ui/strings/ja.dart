@@ -1164,6 +1164,16 @@ final class JapaneseStrings extends Strings {
   @override
   String diffUnchanged(int count) => '変更のない $count 行';
   @override
+  String get historyTakeHunk => 'ここを復元';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 件の変更を復元' : '$count 件の変更を復元';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      '選んだ変更はこのバージョンの文章に戻ります。現在のノートはまずバージョンとして保存されるので、元に戻せます。';
+  @override
+  String get historyNoteChangedReloaded => 'ここにいる間にノートが変更されました — 比較を更新しました。';
+  @override
   String get historyVersionsTitle => '保持するバージョン数';
   @override
   String get historyVersionsSubtitle => 'ノートごとに .history/ に保存';
@@ -1175,4 +1185,402 @@ final class JapaneseStrings extends Strings {
   String get historyIntervalSubtitle => '入力中に適用。ノートの編集を始めたときは必ず 1 つ保存されます';
   @override
   String historyIntervalValue(int minutes) => '$minutes 分';
+  @override
+  String get settingsSectionTranscription => '文字起こし';
+  @override
+  String get transcriptionModelTitle => 'モデル';
+  @override
+  String get transcriptionModelNone => 'なし';
+  @override
+  String get transcriptionLanguageTitle => '言語';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      '録音で話されている言語です。自動検出より指定したほうが正確です。';
+  @override
+  String transcriptionLanguageApp(String language) => 'アプリと同じ（$language）';
+  @override
+  String get transcriptionLanguageDetect => '自動検出';
+  @override
+  String get transcriptionModelsTitle => '文字起こしモデル';
+  @override
+  String transcriptionModelsUsed(String size) => '$size 使用中';
+  @override
+  String get transcriptionModelsInstalled => 'ダウンロード済み';
+  @override
+  String get transcriptionModelsDownloading => 'ダウンロード中';
+  @override
+  String get transcriptionModelsAvailable => '利用可能';
+  @override
+  String get transcriptionModelsFooter =>
+      'モデルはこのデバイスのアプリ用ストレージに保存されます。ライブラリにはコピーも同期もされません。';
+  @override
+  String get transcriptionModelDefault => 'デフォルト';
+  @override
+  String get transcriptionModelSlow => '低速';
+  @override
+  String get transcriptionModelHintTiny => '最速、精度は最も低い';
+  @override
+  String get transcriptionModelHintBase => '速度と精度のバランスが良い';
+  @override
+  String get transcriptionModelHintSmall => 'より正確、約 3 倍遅い';
+  @override
+  String get transcriptionModelHintMedium => 'とても正確、スマートフォンでは遅い';
+  @override
+  String get transcriptionModelHintLarge => '最も正確、大量のメモリが必要';
+  @override
+  String get transcriptionModelDownload => 'ダウンロード';
+  @override
+  String transcriptionModelDeleteTitle(String model) => '$model モデルを削除しますか？';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      '$size が解放されます。モデルは後でもう一度ダウンロードできます。';
+  @override
+  String get transcriptionModelFailed => 'ダウンロードに失敗しました。接続を確認してもう一度お試しください。';
+  @override
+  String get actionRetry => '再試行';
+  @override
+  String get decimalSeparator => '.';
+  @override
+  String get transcriptionModelRetrying => '接続が切れました。再試行しています…';
+  @override
+  String transcriptionModelInterrupted(String progress) => '一時停止中：$progress';
+  @override
+  String get actionResume => '再開';
+  @override
+  String get audioTranscribe => '文字起こし';
+  @override
+  String get audioTranscribeUnsupported => 'このデバイスでは WAV 録音のみ対応';
+  @override
+  String get transcriptionQueued => '待機中';
+  @override
+  String get transcriptionPreparing => '音声を準備しています…';
+  @override
+  String transcriptionRunning(int percent) => '文字起こし中… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model をダウンロード中 · $percent%';
+  @override
+  String get transcriptionSaved => '文字起こしを説明に追加しました';
+  @override
+  String get transcriptionNoSpeech => 'この録音では音声が認識されませんでした';
+  @override
+  String get transcriptionFailed => '文字起こしに失敗しました';
+  @override
+  String get transcriptionPickModelTitle => 'モデルを選択';
+  @override
+  String get transcriptionPickModelBody =>
+      '文字起こしはこのデバイス上で行われ、録音がアップロードされることはありません。モデルのダウンロードは一度だけです。';
+  @override
+  String get transcriptionPickModelAction => 'ダウンロードして文字起こし';
+  @override
+  String get transcriptionModelRecommended => 'おすすめ';
+  @override
+  String get transcriptionExistingTitle => 'この録音にはすでに説明があります';
+  @override
+  String get transcriptionExistingBody => '文字起こしで置き換えますか、それとも下に追加しますか？';
+  @override
+  String get transcriptionAppend => '下に追加';
+  @override
+  String get transcriptionReplace => '置き換え';
+  @override
+  String get settingsSectionSync => '同期';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'このライブラリでは未設定';
+  @override
+  String get syncNeverSynced => 'まだ同期していません';
+  @override
+  String syncLastSynced(String when) => '$when に同期';
+  @override
+  String get syncRunning => '同期中…';
+  @override
+  String syncScreenSubtitle(String library) => 'ライブラリ $library';
+  @override
+  String get syncUrlLabel => 'フォルダのアドレス';
+  @override
+  String get syncUrlHint => 'フォルダは作成済みである必要があります。サーバーに表示されるとおりにアドレスをコピーしてください。';
+  @override
+  String get syncHttpWarning => '暗号化されていない接続です。VPN 経由またはローカルネットワーク内なら問題ありません。';
+  @override
+  String get syncUserLabel => 'ユーザー';
+  @override
+  String get syncUserHint => 'サーバーが認証情報を求めない場合は空欄のままにします。';
+  @override
+  String get syncPasswordLabel => 'パスワード';
+  @override
+  String get syncPasswordHint => 'このデバイスのキーチェーンに保存され、ライブラリのファイルには保存されません。';
+  @override
+  String get syncPasswordKeepHint => '保存済みのパスワードを使う場合は空欄のままにします。';
+  @override
+  String get syncShowPassword => 'パスワードを表示';
+  @override
+  String get syncHidePassword => 'パスワードを隠す';
+  @override
+  String get syncTestAction => '接続をテスト';
+  @override
+  String get syncTesting => 'テスト中…';
+  @override
+  String get syncRetargetWarning => 'アドレスまたはユーザーを変えると、次回の同期は初回同期としてやり直しになります。';
+  @override
+  String get syncTestOk => '接続できました';
+  @override
+  String get syncModeFull => 'フルモード';
+  @override
+  String get syncModeCompatible => '互換モード';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => '読み取り、書き込み、削除';
+  @override
+  String get syncCapEtags => 'ファイルの指紋（ETag）';
+  @override
+  String get syncCapNoEtags => 'ファイルの指紋（ETag）なし';
+  @override
+  String get syncCapNoEtagsDetail => 'サイズと日付で比較し、不確かなときは再ダウンロードします';
+  @override
+  String get syncCapGuarded => '保護された書き込み';
+  @override
+  String get syncCapUnguarded => '保護されない書き込み';
+  @override
+  String get syncCapUnguardedDetail => '書き込む直前にサーバー上のファイルを確認します';
+  @override
+  String get syncCapMove => '再アップロードせずに名前変更';
+  @override
+  String get syncCapNoMove => 'サーバー上での名前変更なし';
+  @override
+  String get syncCapNoMoveDetail => '名前変更は削除と新規アップロードになります';
+  @override
+  String get syncCompatibleNote => '互換モードでも同期は同じように動作し、リクエストが少し増えるだけです。';
+  @override
+  String get syncTestInvalidUrl => '無効なアドレスです';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'http:// または https:// のアドレスを、ユーザーやパスワードを含めずに入力してください。';
+  @override
+  String get syncTestOffline => 'サーバーに接続できません';
+  @override
+  String get syncTestOfflineHint =>
+      'VPN はオンですか？ 10.x や 192.168.x のアドレスは同じネットワークからしか使えません。';
+  @override
+  String get syncTestAuth => 'ユーザーまたはパスワードが拒否されました';
+  @override
+  String get syncTestAuthHint => '確認してから、もう一度テストしてください。';
+  @override
+  String get syncTestNotFound => 'フォルダが存在しません';
+  @override
+  String get syncTestNotFoundHint => 'サーバー上で作成するか、アドレスを修正してください。';
+  @override
+  String get syncTestUnsupported => 'WebDAV フォルダではありません';
+  @override
+  String get syncTestUnsupportedHint => 'サーバーは応答していますが、WebDAV としてではありません。';
+  @override
+  String get syncTestFailed => 'テストに失敗しました';
+  @override
+  String get syncNowAction => '今すぐ同期';
+  @override
+  String get syncSectionServer => 'サーバー';
+  @override
+  String get syncServerRow => 'アドレス、ユーザー、パスワード';
+  @override
+  String get syncRetestTitle => 'サーバーを再テスト';
+  @override
+  String syncProbedAgo(String when) => '最終テスト: $when';
+  @override
+  String get syncDisconnectTitle => 'このライブラリの接続を解除';
+  @override
+  String get syncDisconnectSubtitle => 'ファイルはここにもサーバーにも残ります';
+  @override
+  String get syncDisconnectConfirmTitle => '同期の接続を解除しますか？';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'このデバイスでのこのライブラリの同期を停止します。'
+      'ファイルはここでもサーバーでも削除されません。'
+      '再度接続すると、初回同期からやり直しになります。';
+  @override
+  String get syncDisconnectConfirm => '接続を解除';
+  @override
+  String get syncFirstTitle => '初回同期';
+  @override
+  String get syncFirstIntro => 'ライブラリとサーバー上のフォルダを比較しました：';
+  @override
+  String get syncFirstUpload => 'アップロード';
+  @override
+  String get syncFirstDownload => 'ダウンロード';
+  @override
+  String get syncFirstBoth => '両方にある';
+  @override
+  String get syncFirstBothHint => '同一なら転送なし。異なる場合は解決が必要';
+  @override
+  String get syncFirstNoDelete => '初回同期では、ここでもサーバーでも何も削除しません。';
+  @override
+  String get syncStartAction => '開始';
+  @override
+  String syncMassTrashTitle(int count) => 'ファイル $count 件をごみ箱に移動しますか？';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '同期済みの $total 件のファイルのうち $count '
+      '件がサーバーにありません。通常は、アドレスの誤り、NAS '
+      'ディスクの未マウント、または誤って空にされたフォルダが原因です。';
+  @override
+  String get syncMassTrashHint => '別のデバイスで本当に削除した場合は確定してください。ここではごみ箱に移動されます。';
+  @override
+  String get syncMassTrashConfirm => 'ごみ箱に移動';
+  @override
+  String syncMassDeleteTitle(int count) => 'サーバーからファイル $count 件を削除しますか？';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '同期済みの $total 件のファイルのうち $count '
+      '件がここにありません。削除していない場合は、キャンセルしてライブラリのフォルダを確認してください。';
+  @override
+  String get syncMassDeleteConfirm => 'サーバーから削除';
+  @override
+  String get syncTooltip => '同期';
+  @override
+  String get syncStageConnecting => 'サーバーに接続中…';
+  @override
+  String get syncStageComparing => 'サーバーと比較中…';
+  @override
+  String syncStageApplying(int done, int total) => '同期中 · $done / $total';
+  @override
+  String get syncStatusWarnings => '同期完了（警告あり）';
+  @override
+  String syncConflictsHeader(int count) => 'ここでもサーバーでも変更 · $count';
+  @override
+  String get syncConflictHint => 'どちらのバージョンも変更していません';
+  @override
+  String get syncResolveAction => '解決';
+  @override
+  String syncFailuresHeader(int count) => '未同期 · $count';
+  @override
+  String get syncFailuresHint => '次回の同期で再試行します';
+  @override
+  String get syncAbortAuth => 'サーバーがパスワードを拒否しました';
+  @override
+  String get syncAbortMissingPassword => 'パスワードが保存されていません';
+  @override
+  String get syncAbortOffline => 'サーバーに接続できません';
+  @override
+  String get syncAbortRemoteMissing => 'サーバー上のフォルダがなくなりました';
+  @override
+  String get syncAbortUnsupported => 'サーバーが WebDAV として動作しなくなりました';
+  @override
+  String get syncAbortFailed => '同期に失敗しました';
+  @override
+  String get syncAbortNotConfirmed => '同期をキャンセルしました';
+  @override
+  String get syncAbortNothingTouched =>
+      'ファイルは一切変更していません。変更内容は次回の同期が成功するまでここに残ります。';
+  @override
+  String syncLastSuccess(String when) => '最後に成功した同期: $when';
+  @override
+  String get syncNoSuccessYet => '成功した同期はまだありません';
+  @override
+  String get syncUpdatePasswordAction => 'パスワードを更新';
+  @override
+  String get syncRetryAction => '再試行';
+  @override
+  String get syncOpenSettingsAction => '設定';
+  @override
+  String get syncCloseAction => '閉じる';
+  @override
+  String get syncDoneSnack => '同期しました';
+  @override
+  String syncTrashedSnack(int count) =>
+      '同期しました · 他の場所で削除されたファイル $count 件がごみ箱にあります';
+  @override
+  String syncConflictsSnack(int count) => '同期しました · 解決が必要な競合が $count 件あります';
+  @override
+  String get syncShowAction => '表示';
+  @override
+  String get syncConflictTitle => '競合を解決';
+  @override
+  String get syncConflictLegend => '− の行はサーバーの内容、+ の行はこのデバイスの内容です。';
+  @override
+  String get syncConflictBinary => 'テキストファイルではありません。残すコピーを選んでください。';
+  @override
+  String get syncConflictKeepNote => '残さなかったコピーはノートの履歴に保存されます。';
+  @override
+  String get syncKeepLocal => 'このデバイスの内容を残す';
+  @override
+  String get syncKeepRemote => 'サーバーの内容を残す';
+  @override
+  String get syncConflictIdentical => '2 つのバージョンは同一です';
+  @override
+  String get syncConflictLoadFailed => '両方のバージョンを読み込めませんでした';
+  @override
+  String get syncResolveFailed => '競合を解決できませんでした';
+  @override
+  String get syncResolved => '競合を解決しました';
+  @override
+  String get syncSectionWhen => '同期のタイミング';
+  @override
+  String get syncAutoTitle => '自動';
+  @override
+  String get syncAutoSubtitle => '編集後、起動時、一定の間隔で';
+  @override
+  String get syncIntervalTitle => 'サーバーの確認間隔';
+  @override
+  String get syncIntervalSubtitle => 'アプリを開いている間のみ';
+  @override
+  String get syncIntervalDialogBody =>
+      'アプリを開いている間に、他のデバイスで行われた変更を確認するためのものです。「しない」の場合は、編集後と起動時のみ同期します。';
+  @override
+  String syncIntervalMinutes(int count) => '$count 分';
+  @override
+  String get syncIntervalNever => 'しない';
+  @override
+  String get syncWifiOnlyTitle => 'Wi-Fi のみ';
+  @override
+  String get syncWifiOnlySubtitle => 'モバイルデータ通信では手動でのみ同期';
+  @override
+  String syncPendingChanges(int count) => '$count 件の変更が待機中';
+  @override
+  String syncRetryIn(String wait) => '$wait後に再試行';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds 秒';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes 分';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi を待機中';
+  @override
+  String get syncWaitingForNetwork => '接続を待機中';
+  @override
+  String get syncMobileDataHint => '「今すぐ同期」はモバイルデータ通信でも同期します。';
+  @override
+  String get syncQueueKeptHint => '変更はアプリを閉じてもここに残り、サーバーが応答すると自動的に送信されます。';
+  @override
+  String get syncAutoPaused => '自動同期は一時停止中';
+  @override
+  String get syncPausedAuthHint => 'パスワードを更新するか手動で同期すると再開します。';
+  @override
+  String get syncPausedServerHint => 'アドレスを修正するか手動で同期すると再開します。';
+  @override
+  String get syncPausedConfirmHint => '「今すぐ同期」では、削除される内容が表示され、先に確認を求められます。';
+  @override
+  String get syncNeedsConfirmation => '確認を待っています';
+  @override
+  String get syncMergeIntro => '重ならない編集はすでに統合されています。重なっている箇所は、どちらを残すか選んでください。';
+  @override
+  String get syncMergeClean => '2 つのバージョンはそのまま統合できます。重なりはありません。';
+  @override
+  String get syncMergeNoBase => '統合の元になる共通のバージョンがないため、ファイル全体を選ぶ必要があります。';
+  @override
+  String syncMergeOverlap(int index, int total) => '重なり $index / $total';
+  @override
+  String get syncMergeFromLocal => 'このデバイスから';
+  @override
+  String get syncMergeFromRemote => 'サーバーから';
+  @override
+  String get syncMergeRemovedLines => '削除された行';
+  @override
+  String get syncMergeKeepLocal => 'このデバイス';
+  @override
+  String get syncMergeKeepRemote => 'サーバー';
+  @override
+  String get syncMergeKeepBoth => '両方';
+  @override
+  String get syncMergeSave => '統合を保存';
+  @override
+  String get syncMergeKeepWhole => 'または、どちらか一方をまるごと残す';
 }
