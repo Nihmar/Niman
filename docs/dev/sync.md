@@ -119,19 +119,49 @@ top-level entry points).
   Delete) open **History**: versions grouped by day, with time, reason
   label, `+added −removed` lines against the previous version, the
   pinned sync base marked.
-- A version opens in `DiffView` (`rollback` mode) against the current
-  note, with a toggle to read the version's full text.
+- A version opens in `DiffView` against the current note, with a toggle
+  to read the version's full text.
 - Restore asks once, snapshots the current text (`restore`), writes the
   version through `NoteOps`, and offers Undo.
+- Restore can also take part of a version: each hunk of the diff carries
+  a control, and picking some turns the action into "Restore N changes".
+  `DiffSummary.compose` builds the text — the current note everywhere
+  but the hunks picked, which come back from the version — and
+  `NoteOps.restoreNoteText` writes it with the same snapshot-first
+  guarantee, so a partial restore is as undoable as a whole one. Before
+  writing, the screen re-reads the note: one that moved meanwhile (a
+  sync run, another window) refreshes the comparison instead of being
+  written over from a stale read.
 - Settings → Library gains the two rows above.
 
 ### DiffView (#67)
 
-One widget, three modes: `readonly`, `rollback` (history), `merge`
-(sync conflicts, later). Input is full texts — `left`, `right`,
-optional `base`. The line diff is Myers O(ND) in pure Dart, computed in
-an isolate; unchanged runs fold. Desktop renders side by side, mobile
-inline.
+Two widgets rather than the single moded one first sketched here. The
+mode turned out to be the caller's business, not the view's, and
+folding three of them into one widget only moved that decision inside:
+
+- `DiffView` shows two texts — `oldText`, `newText`. History compares a
+  version against the note, the sync conflict screen compares the two
+  copies, and neither is told which it is.
+- `MergeView` shows a `MergeResult` from `lib/src/diff/three_way.dart`,
+  with a choice per conflicting region.
+
+Both are presentation only: what the actions mean, and what they write,
+stays with the caller. `DiffView` takes a `hunkAction` builder for a
+control on a hunk's header and reports the diff it computed through
+`onSummary`, which is all a caller acting on hunks needs.
+
+The line diff is Myers O(ND) in pure Dart, run in an isolate past 20k
+characters; unchanged runs fold, and rows build lazily, so a long note
+scrolls without laying every line out. Given at least
+`diffSideBySideMinWidth` (720) the two texts read in columns, otherwise
+inline — measured on the width the view is given, since it can sit in a
+pane narrower than the window.
+
+A three-way merge does not apply to a rollback: history is linear, so a
+version is an ancestor of the note and not a second branch from a
+common base. Taking part of a version is a per-hunk choice over the
+two-way diff, which is what `compose` does.
 
 ## WebDAV sync (after history)
 
@@ -636,7 +666,7 @@ conflict:
 1. History: `NoteOps.saveNote` + per-path lock, callers moved over.
 2. History store: snapshot policy, manifest, rotation, pins, following
    renames/moves/trash; settings key.
-3. Line diff + `DiffView` (readonly, rollback).
+3. Line diff + `DiffView`.
 4. History UI (H1–H7), strings in every locale, user docs.
 5. Sync, one PR per step:
    1. WebDAV client + fake server + probe (#10, part of #20).
@@ -650,6 +680,6 @@ conflict:
    5. Configuration UI + Test connection + status (#11, part of #28),
       strings in every locale, user docs.
    6. Queue hints from `NoteOps`, triggers, backoff (#18, #19).
-   7. Conflicts: automatic non-overlapping merge + `DiffView` merge mode
+   7. Conflicts: automatic non-overlapping merge + `MergeView`
       (#17, #67).
    8. End-to-end tests (#20).
