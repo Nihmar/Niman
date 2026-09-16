@@ -95,6 +95,64 @@ void main() {
     expect(skipped, ['/other/x.md', '/webdav/My%zzNotes/y.md']);
   });
 
+  group('a server mounted under a reverse proxy prefix', () {
+    // What the client asks through, and what the server behind /omv
+    // answers about: its own paths, which never carry the prefix.
+    final proxied = Uri.parse(
+      'https://nas.example/omv/webdav/Alessandro/Libraries/Notes/',
+    );
+
+    test('resolves hrefs that leave the prefix off', () {
+      const body = '''
+<d:multistatus xmlns:d="DAV:">
+<d:response><d:href>/webdav/Alessandro/Libraries/Notes/</d:href>
+<d:propstat><d:prop><d:resourcetype><d:collection/></d:resourcetype></d:prop>
+<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+<d:response><d:href>/webdav/Alessandro/Libraries/Notes/Plan.md</d:href>
+<d:propstat><d:prop><d:getcontentlength>42</d:getcontentlength></d:prop>
+<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+</d:multistatus>''';
+      final skipped = <String>[];
+      final items = parseMultistatus(body, proxied, onSkipped: skipped.add);
+      expect(items.map((i) => i.path), ['', 'Plan.md']);
+      expect(items.first.isCollection, isTrue);
+      expect(skipped, isEmpty);
+    });
+
+    test('an href still outside the destination is skipped', () {
+      const body = '''
+<d:multistatus xmlns:d="DAV:">
+<d:response><d:href>/webdav/Alessandro/Libraries/Notes/Plan.md</d:href>
+<d:propstat><d:prop/><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+</d:response>
+<d:response><d:href>/elsewhere/secrets.md</d:href></d:response>
+</d:multistatus>''';
+      final skipped = <String>[];
+      final items = parseMultistatus(body, proxied, onSkipped: skipped.add);
+      expect(items.map((i) => i.path), ['Plan.md']);
+      expect(skipped, ['/elsewhere/secrets.md']);
+    });
+  });
+
+  test('one stray href cannot move the mapping for the rest', () {
+    // `/My%20Notes/x.md` would resolve if the prefix were dropped down
+    // to the last segment; the three exact hrefs must outvote it.
+    const body = '''
+<d:multistatus xmlns:d="DAV:">
+<d:response><d:href>/My%20Notes/x.md</d:href></d:response>
+<d:response><d:href>/webdav/My%20Notes/a.md</d:href><d:propstat><d:prop/>
+<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+<d:response><d:href>/webdav/My%20Notes/b.md</d:href><d:propstat><d:prop/>
+<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+<d:response><d:href>/webdav/My%20Notes/c.md</d:href><d:propstat><d:prop/>
+<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+</d:multistatus>''';
+    final skipped = <String>[];
+    final items = parseMultistatus(body, base, onSkipped: skipped.add);
+    expect(items.map((i) => i.path), ['a.md', 'b.md', 'c.md']);
+    expect(skipped, ['/My%20Notes/x.md']);
+  });
+
   test('an unparsable body or a non-multistatus root is a protocol '
       'failure', () {
     expect(

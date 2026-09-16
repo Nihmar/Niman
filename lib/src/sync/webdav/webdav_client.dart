@@ -243,7 +243,7 @@ final class WebDavClient {
       baseUrl,
       onSkipped: (href) => _log.warning(
         'PROPFIND ${_show(path)}: skipped an item outside the destination '
-        '(${href.length} chars)',
+        '($href)',
       ),
     );
     _done(
