@@ -50,7 +50,14 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   bool? confirmed;
 
   /// The texts [conflictTexts] answers.
-  ({String local, String remote}) texts = (local: 'mine', remote: 'theirs');
+  ({String local, String remote, String? base}) texts = (
+    local: 'mine',
+    remote: 'theirs',
+    base: null,
+  );
+
+  /// The text of the last [resolveMerged].
+  String? mergedText;
 
   /// Calls, in order: `test <url>`, `save <url>`, `sync`, `disconnect`,
   /// `resolve <path> local|remote`, `texts <path>`.
@@ -110,9 +117,19 @@ final class FakeSyncService extends ChangeNotifier implements SyncService {
   }
 
   @override
-  Future<({String local, String remote})> conflictTexts(String path) async {
+  Future<({String local, String remote, String? base})> conflictTexts(
+    String path,
+  ) async {
     calls.add('texts $path');
     return texts;
+  }
+
+  @override
+  Future<void> resolveMerged(String path, String text) async {
+    calls.add('merge $path');
+    mergedText = text;
+    _status.lastReport?.conflicts.removeWhere((c) => c.path == path);
+    notifyListeners();
   }
 
   @override

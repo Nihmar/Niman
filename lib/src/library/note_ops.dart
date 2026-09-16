@@ -517,6 +517,14 @@ final class NoteOps implements NoteOperations {
     if (path == settingsFilePath) await config.reload();
   }
 
+  /// Writes [text] at [path] because the sync merged both sides of it:
+  /// the text being replaced becomes a `sync` history version, and the
+  /// write goes through the note's save order like any other.
+  Future<void> syncMerge(String path, String text) async {
+    _markSyncWrite(path);
+    await writer.save(path, text, forced: HistoryReason.sync);
+  }
+
   /// Moves [path] into `.trash/` because the remote deleted it — always
   /// the trash, whatever the trash toggle: a deletion that arrives from
   /// another device must stay recoverable here.
