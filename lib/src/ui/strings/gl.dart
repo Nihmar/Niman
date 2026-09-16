@@ -172,6 +172,8 @@ final class GalicianStrings extends Strings {
   String spellCheckCount(int count) => '$count por revisar';
   @override
   String spellCheckLine(int line) => 'liña $line';
+  @override
+  String get addWordToDictionary => 'Engade ao diccionario';
 
   @override
   String indentWidthValue(int spaces) => '$spaces espazos';
@@ -1247,6 +1249,18 @@ final class GalicianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 liña sen cambios' : '$count liñas sen cambios';
   @override
+  String get historyTakeHunk => 'Restaurar aquí';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaurar 1 cambio' : 'Restaurar $count cambios';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Os cambios escollidos volven ao texto desta versión. A nota tal como '
+      'está agora consérvase antes como versión, así que podes desfacelo.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'A nota cambiou mentres estabas aquí: a comparación actualizouse.';
+  @override
   String get historyVersionsTitle => 'Versións que conservar';
   @override
   String get historyVersionsSubtitle => 'Por nota, en .history/';
@@ -1368,4 +1382,362 @@ final class GalicianStrings extends Strings {
   String get transcriptionAppend => 'Engadir debaixo';
   @override
   String get transcriptionReplace => 'Substituír';
+  @override
+  String get settingsSectionSync => 'Sincronización';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Non configurada para esta biblioteca';
+  @override
+  String get syncNeverSynced => 'Nunca sincronizada';
+  @override
+  String syncLastSynced(String when) => 'Sincronizada: $when';
+  @override
+  String get syncRunning => 'Sincronizando…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteca $library';
+  @override
+  String get syncUrlLabel => 'Enderezo do cartafol';
+  @override
+  String get syncUrlHint =>
+      'O cartafol debe existir. Copia o enderezo tal como o '
+      'mostra o servidor.';
+  @override
+  String get syncHttpWarning =>
+      'Conexión sen cifrar: vale nunha VPN ou na túa rede local.';
+  @override
+  String get syncUserLabel => 'Usuario';
+  @override
+  String get syncUserHint =>
+      'Déixao baleiro se o servidor non pide credenciais.';
+  @override
+  String get syncPasswordLabel => 'Contrasinal';
+  @override
+  String get syncPasswordHint =>
+      'Gárdase no chaveiro deste dispositivo, nunca nos '
+      'ficheiros da biblioteca.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Déixao baleiro para manter o contrasinal gardado.';
+  @override
+  String get syncShowPassword => 'Mostrar o contrasinal';
+  @override
+  String get syncHidePassword => 'Ocultar o contrasinal';
+  @override
+  String get syncTestAction => 'Probar a conexión';
+  @override
+  String get syncTesting => 'Probando…';
+  @override
+  String get syncRetargetWarning =>
+      'Cun enderezo ou usuario novo, a próxima sincronización '
+      'comeza de novo como primeira sincronización.';
+  @override
+  String get syncTestOk => 'A conexión funciona';
+  @override
+  String get syncModeFull => 'Modo completo';
+  @override
+  String get syncModeCompatible => 'Modo compatible';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lectura, escritura e borrado';
+  @override
+  String get syncCapEtags => 'Pegadas dos ficheiros (ETag)';
+  @override
+  String get syncCapNoEtags => 'Sen pegadas dos ficheiros (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Comparo tamaño e data; se hai dúbida, descargo de novo';
+  @override
+  String get syncCapGuarded => 'Escrituras protexidas';
+  @override
+  String get syncCapUnguarded => 'Escrituras sen protección';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Comprobo o ficheiro no servidor xusto antes de escribir';
+  @override
+  String get syncCapMove => 'Cambios de nome sen volver subir';
+  @override
+  String get syncCapNoMove => 'Sen cambios de nome no servidor';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Un cambio de nome convértese nun borrado e nunha nova '
+      'subida';
+  @override
+  String get syncCompatibleNote =>
+      'No modo compatible a sincronización funciona igual, con '
+      'algunhas peticións máis.';
+  @override
+  String get syncTestInvalidUrl => 'Non é un enderezo válido';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Escribe un enderezo http:// ou https://, sen usuario nin '
+      'contrasinal dentro.';
+  @override
+  String get syncTestOffline => 'Non se pode acceder ao servidor';
+  @override
+  String get syncTestOfflineHint =>
+      'Está activa a VPN? Un enderezo 10.x ou 192.168.x só '
+      'funciona desde a mesma rede.';
+  @override
+  String get syncTestAuth => 'Usuario ou contrasinal rexeitados';
+  @override
+  String get syncTestAuthHint => 'Revísaos e proba de novo.';
+  @override
+  String get syncTestNotFound => 'O cartafol non existe';
+  @override
+  String get syncTestNotFoundHint => 'Créao no servidor ou corrixe o enderezo.';
+  @override
+  String get syncTestUnsupported => 'Non é un cartafol WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'O servidor responde, pero non como WebDAV.';
+  @override
+  String get syncTestFailed => 'A proba non funcionou';
+  @override
+  String get syncNowAction => 'Sincronizar agora';
+  @override
+  String get syncSectionServer => 'Servidor';
+  @override
+  String get syncServerRow => 'Enderezo, usuario e contrasinal';
+  @override
+  String get syncRetestTitle => 'Probar de novo o servidor';
+  @override
+  String syncProbedAgo(String when) => 'Última proba: $when';
+  @override
+  String get syncDisconnectTitle => 'Desconectar esta biblioteca';
+  @override
+  String get syncDisconnectSubtitle => 'Os ficheiros quedan aquí e no servidor';
+  @override
+  String get syncDisconnectConfirmTitle => 'Desconectar a sincronización?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Esta biblioteca deixa de sincronizarse neste dispositivo. '
+      'Non se borra ningún ficheiro, nin aquí nin no servidor. '
+      'Se a volves conectar, a primeira sincronización comeza de '
+      'novo.';
+  @override
+  String get syncDisconnectConfirm => 'Desconectar';
+  @override
+  String get syncFirstTitle => 'Primeira sincronización';
+  @override
+  String get syncFirstIntro => 'Comparei a biblioteca co cartafol do servidor:';
+  @override
+  String get syncFirstUpload => 'Para subir';
+  @override
+  String get syncFirstDownload => 'Para descargar';
+  @override
+  String get syncFirstBoth => 'Nos dous lados';
+  @override
+  String get syncFirstBothHint =>
+      'Idénticos: sen transferencia. Diferentes: para resolver';
+  @override
+  String get syncFirstNoDelete =>
+      'A primeira sincronización non borra nada, nin aquí nin no '
+      'servidor.';
+  @override
+  String get syncStartAction => 'Comezar';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Mover $count ficheiros ao paperilleiro?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Faltan no servidor $count dos $total ficheiros '
+      'sincronizados. Adoita significar un enderezo incorrecto, '
+      'un disco do NAS sen montar ou un cartafol baleirado por '
+      'erro.';
+  @override
+  String get syncMassTrashHint =>
+      'Se de verdade os borraches noutro dispositivo, confirma: '
+      'aquí van ao paperilleiro.';
+  @override
+  String get syncMassTrashConfirm => 'Mover ao paperilleiro';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Borrar $count ficheiros do servidor?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Faltan aquí $count dos $total ficheiros sincronizados. Se '
+      'non os borraches ti, cancela e revisa o cartafol da '
+      'biblioteca.';
+  @override
+  String get syncMassDeleteConfirm => 'Borrar do servidor';
+  @override
+  String get syncTooltip => 'Sincronizar';
+  @override
+  String get syncStageConnecting => 'Conectando co servidor…';
+  @override
+  String get syncStageComparing => 'Comparando co servidor…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sincronizando · $done de $total';
+  @override
+  String get syncStatusWarnings => 'Sincronizada con avisos';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Modificados aquí e no servidor · $count';
+  @override
+  String get syncConflictHint => 'Non se tocou ningunha das dúas versións';
+  @override
+  String get syncResolveAction => 'Resolver';
+  @override
+  String syncFailuresHeader(int count) => 'Sen sincronizar · $count';
+  @override
+  String get syncFailuresHint => 'Tentaranse de novo na próxima sincronización';
+  @override
+  String get syncAbortAuth => 'O servidor rexeitou o contrasinal';
+  @override
+  String get syncAbortMissingPassword => 'Non hai ningún contrasinal gardado';
+  @override
+  String get syncAbortOffline => 'Non se pode acceder ao servidor';
+  @override
+  String get syncAbortRemoteMissing => 'O cartafol do servidor xa non está';
+  @override
+  String get syncAbortUnsupported => 'O servidor xa non funciona como WebDAV';
+  @override
+  String get syncAbortFailed => 'A sincronización non funcionou';
+  @override
+  String get syncAbortNotConfirmed => 'Sincronización cancelada';
+  @override
+  String get syncAbortNothingTouched =>
+      'Non se tocou ningún ficheiro. Os teus cambios quedan aquí '
+      'ata a próxima sincronización correcta.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Última sincronización correcta: $when';
+  @override
+  String get syncNoSuccessYet =>
+      'Aínda non hai ningunha sincronización correcta';
+  @override
+  String get syncUpdatePasswordAction => 'Actualizar o contrasinal';
+  @override
+  String get syncRetryAction => 'Tentar de novo';
+  @override
+  String get syncOpenSettingsAction => 'Configuración';
+  @override
+  String get syncCloseAction => 'Pechar';
+  @override
+  String get syncDoneSnack => 'Sincronizada';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sincronizada · 1 ficheiro borrado noutro lugar está no '
+            'paperilleiro'
+      : 'Sincronizada · $count ficheiros borrados noutro lugar '
+            'están no paperilleiro';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sincronizada · 1 conflito por resolver'
+      : 'Sincronizada · $count conflitos por resolver';
+  @override
+  String get syncShowAction => 'Mostrar';
+  @override
+  String get syncConflictTitle => 'Resolver o conflito';
+  @override
+  String get syncConflictLegend =>
+      'As liñas marcadas con − son do servidor; as marcadas con '
+      '+ son deste dispositivo.';
+  @override
+  String get syncConflictBinary =>
+      'Non é un ficheiro de texto: escolle que copia conservar.';
+  @override
+  String get syncConflictKeepNote =>
+      'A copia que non conserves queda no historial da nota.';
+  @override
+  String get syncKeepLocal => 'Conservar a deste dispositivo';
+  @override
+  String get syncKeepRemote => 'Conservar a do servidor';
+  @override
+  String get syncConflictIdentical => 'As dúas versións son idénticas';
+  @override
+  String get syncConflictLoadFailed => 'Non se puideron ler as dúas versións';
+  @override
+  String get syncResolveFailed => 'Non se puido resolver o conflito';
+  @override
+  String get syncResolved => 'Conflito resolto';
+  @override
+  String get syncSectionWhen => 'Cando sincronizar';
+  @override
+  String get syncAutoTitle => 'Automaticamente';
+  @override
+  String get syncAutoSubtitle => 'Tras os cambios, ao abrir e a intervalos';
+  @override
+  String get syncIntervalTitle => 'Comprobar o servidor cada';
+  @override
+  String get syncIntervalSubtitle => 'Só coa app aberta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Para ver os cambios feitos noutros dispositivos mentres a app está '
+      'aberta. Con “Nunca”, só tras os cambios e ao abrir.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuto' : '$count minutos';
+  @override
+  String get syncIntervalNever => 'Nunca';
+  @override
+  String get syncWifiOnlyTitle => 'Só con Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'Con datos móbiles, sincroniza só a man';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 cambio á espera' : '$count cambios á espera';
+  @override
+  String syncRetryIn(String wait) => 'nova tentativa en $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Agardando polo Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Agardando pola conexión';
+  @override
+  String get syncMobileDataHint =>
+      '“Sincronizar agora” usa igual os datos móbiles.';
+  @override
+  String get syncQueueKeptHint =>
+      'Os cambios quedan aquí, aínda que peches a app, e saen sós cando o '
+      'servidor responde.';
+  @override
+  String get syncAutoPaused => 'Sincronización automática en pausa';
+  @override
+  String get syncPausedAuthHint =>
+      'Retómase cando actualizas o contrasinal ou sincronizas a man.';
+  @override
+  String get syncPausedServerHint =>
+      'Retómase cando corrixes o enderezo ou sincronizas a man.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sincronizar agora” mostra o que se borraría e pide confirmación.';
+  @override
+  String get syncNeedsConfirmation => 'Agardando pola túa confirmación';
+  @override
+  String get syncMergeIntro =>
+      'Os cambios que non se superpoñen xa están unidos; escolle que conservar '
+      'onde si se superpoñen.';
+  @override
+  String get syncMergeClean =>
+      'As dúas versións únense soas: non hai nada que se superpoña.';
+  @override
+  String get syncMergeNoBase =>
+      'Non hai unha versión común sobre a que unir, así que hai que escoller o '
+      'ficheiro enteiro.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Superposición $index de $total';
+  @override
+  String get syncMergeFromLocal => 'Deste dispositivo';
+  @override
+  String get syncMergeFromRemote => 'Do servidor';
+  @override
+  String get syncMergeRemovedLines => 'Liñas eliminadas';
+  @override
+  String get syncMergeKeepLocal => 'As miñas';
+  @override
+  String get syncMergeKeepRemote => 'Do servidor';
+  @override
+  String get syncMergeKeepBoth => 'Ambas';
+  @override
+  String get syncMergeSave => 'Gardar a unión';
+  @override
+  String get syncMergeKeepWhole => 'Ou conserva unha copia enteira';
 }

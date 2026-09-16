@@ -170,6 +170,8 @@ final class EstonianStrings extends Strings {
   String spellCheckCount(int count) => '$count kontrollimiseks';
   @override
   String spellCheckLine(int line) => 'rida $line';
+  @override
+  String get addWordToDictionary => 'Lisa sõnaraamatusse';
 
   @override
   String indentWidthValue(int spaces) => '$spaces tühikut';
@@ -1210,6 +1212,19 @@ final class EstonianStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count muutmata rida';
   @override
+  String get historyTakeHunk => 'Taasta siin';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Taasta 1 muudatus' : 'Taasta $count muudatust';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valitud muudatused pöörduvad tagasi selle versiooni teksti juurde. '
+      'Märkme praegune kuju säilitatakse enne versioonina, nii et saad selle '
+      'tagasi võtta.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Märge muutus, kui sa siin olid — võrdlus on värskendatud.';
+  @override
   String get historyVersionsTitle => 'Säilitatavad versioonid';
   @override
   String get historyVersionsSubtitle => 'Iga märkme kohta, kaustas .history/';
@@ -1332,4 +1347,354 @@ final class EstonianStrings extends Strings {
   String get transcriptionAppend => 'Lisa alla';
   @override
   String get transcriptionReplace => 'Asenda';
+  @override
+  String get settingsSectionSync => 'Sünkroonimine';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Selle kogu jaoks pole seadistatud';
+  @override
+  String get syncNeverSynced => 'Pole kunagi sünkroonitud';
+  @override
+  String syncLastSynced(String when) => 'Sünkroonitud: $when';
+  @override
+  String get syncRunning => 'Sünkroonimine…';
+  @override
+  String syncScreenSubtitle(String library) => 'Kogu $library';
+  @override
+  String get syncUrlLabel => 'Kausta aadress';
+  @override
+  String get syncUrlHint =>
+      'Kaust peab olemas olema. Kopeeri aadress nii, nagu server '
+      'seda näitab.';
+  @override
+  String get syncHttpWarning =>
+      'Krüptimata ühendus: sobib VPN-i kaudu või kohtvõrgus.';
+  @override
+  String get syncUserLabel => 'Kasutaja';
+  @override
+  String get syncUserHint =>
+      'Jäta tühjaks, kui server kasutajatunnuseid ei küsi.';
+  @override
+  String get syncPasswordLabel => 'Parool';
+  @override
+  String get syncPasswordHint =>
+      'Hoitakse selle seadme võtmehoidjas, mitte kunagi kogu '
+      'failides.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Jäta tühjaks, et salvestatud parool alles jääks.';
+  @override
+  String get syncShowPassword => 'Kuva parool';
+  @override
+  String get syncHidePassword => 'Peida parool';
+  @override
+  String get syncTestAction => 'Testi ühendust';
+  @override
+  String get syncTesting => 'Testimine…';
+  @override
+  String get syncRetargetWarning =>
+      'Uue aadressi või kasutajaga algab järgmine sünkroonimine '
+      'otsast peale, nagu esimene sünkroonimine.';
+  @override
+  String get syncTestOk => 'Ühendus töötab';
+  @override
+  String get syncModeFull => 'Täisrežiim';
+  @override
+  String get syncModeCompatible => 'Ühilduvusrežiim';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lugemine, kirjutamine ja kustutamine';
+  @override
+  String get syncCapEtags => 'Failide sõrmejäljed (ETag)';
+  @override
+  String get syncCapNoEtags => 'Failide sõrmejälgi pole (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Võrdlen suurust ja kuupäeva; kahtluse korral laadin '
+      'uuesti alla';
+  @override
+  String get syncCapGuarded => 'Kaitstud kirjutamine';
+  @override
+  String get syncCapUnguarded => 'Kaitseta kirjutamine';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Kontrollin faili serveris vahetult enne kirjutamist';
+  @override
+  String get syncCapMove => 'Ümbernimetamine ilma uuesti üles laadimata';
+  @override
+  String get syncCapNoMove => 'Serveris ümbernimetamist pole';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Ümbernimetamisest saab kustutamine ja uus üleslaadimine';
+  @override
+  String get syncCompatibleNote =>
+      'Ühilduvusrežiimis töötab sünkroonimine samamoodi, '
+      'lihtsalt mõne päringu võrra rohkem.';
+  @override
+  String get syncTestInvalidUrl => 'Sobimatu aadress';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Sisesta http:// või https:// aadress, ilma kasutaja ja '
+      'paroolita.';
+  @override
+  String get syncTestOffline => 'Server pole kättesaadav';
+  @override
+  String get syncTestOfflineHint =>
+      'Kas VPN on sees? Aadress 10.x või 192.168.x töötab ainult '
+      'samast võrgust.';
+  @override
+  String get syncTestAuth => 'Kasutaja või parool lükati tagasi';
+  @override
+  String get syncTestAuthHint => 'Kontrolli neid ja testi uuesti.';
+  @override
+  String get syncTestNotFound => 'Kausta pole olemas';
+  @override
+  String get syncTestNotFoundHint => 'Loo see serveris või paranda aadress.';
+  @override
+  String get syncTestUnsupported => 'See pole WebDAV-kaust';
+  @override
+  String get syncTestUnsupportedHint => 'Server vastab, aga mitte WebDAV-ina.';
+  @override
+  String get syncTestFailed => 'Test ei õnnestunud';
+  @override
+  String get syncNowAction => 'Sünkrooni kohe';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Aadress, kasutaja ja parool';
+  @override
+  String get syncRetestTitle => 'Testi serverit uuesti';
+  @override
+  String syncProbedAgo(String when) => 'Viimane test: $when';
+  @override
+  String get syncDisconnectTitle => 'Katkesta selle kogu ühendus';
+  @override
+  String get syncDisconnectSubtitle => 'Failid jäävad siia ja serverisse';
+  @override
+  String get syncDisconnectConfirmTitle => 'Kas katkestada sünkroonimine?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'See kogu ei sünkrooni enam selles seadmes. Ühtegi faili '
+      'ei kustutata, ei siin ega serveris. Kui ühendad selle '
+      'uuesti, algab esimene sünkroonimine otsast peale.';
+  @override
+  String get syncDisconnectConfirm => 'Katkesta ühendus';
+  @override
+  String get syncFirstTitle => 'Esimene sünkroonimine';
+  @override
+  String get syncFirstIntro => 'Võrdlesin kogu serveris oleva kaustaga:';
+  @override
+  String get syncFirstUpload => 'Üles laadida';
+  @override
+  String get syncFirstDownload => 'Alla laadida';
+  @override
+  String get syncFirstBoth => 'Mõlemal pool';
+  @override
+  String get syncFirstBothHint =>
+      'Samad: ülekannet pole. Erinevad: vaja lahendada';
+  @override
+  String get syncFirstNoDelete =>
+      'Esimene sünkroonimine ei kustuta midagi, ei siin ega '
+      'serveris.';
+  @override
+  String get syncStartAction => 'Alusta';
+  @override
+  String syncMassTrashTitle(int count) => 'Kas viia $count faili prügikasti?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Serverist puudub $total sünkroonitud failist $count. '
+      'Tavaliselt tähendab see valet aadressi, ühendamata NAS-i '
+      'ketast või kogemata tühjendatud kausta.';
+  @override
+  String get syncMassTrashHint =>
+      'Kui kustutasid need tõesti mõnes teises seadmes, kinnita: '
+      'siin lähevad need prügikasti.';
+  @override
+  String get syncMassTrashConfirm => 'Vii prügikasti';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      'Kas kustutada serverist $count faili?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Siin puudub $total sünkroonitud failist $count. Kui sa '
+      'neid ei kustutanud, tühista ja kontrolli kogu kausta.';
+  @override
+  String get syncMassDeleteConfirm => 'Kustuta serverist';
+  @override
+  String get syncTooltip => 'Sünkrooni';
+  @override
+  String get syncStageConnecting => 'Serveriga ühendamine…';
+  @override
+  String get syncStageComparing => 'Serveriga võrdlemine…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sünkroonimine · $done/$total';
+  @override
+  String get syncStatusWarnings => 'Sünkroonitud hoiatustega';
+  @override
+  String syncConflictsHeader(int count) => 'Muudetud siin ja serveris · $count';
+  @override
+  String get syncConflictHint => 'Kumbagi versiooni ei puudutatud';
+  @override
+  String get syncResolveAction => 'Lahenda';
+  @override
+  String syncFailuresHeader(int count) => 'Sünkroonimata · $count';
+  @override
+  String get syncFailuresHint => 'Proovitakse uuesti järgmisel sünkroonimisel';
+  @override
+  String get syncAbortAuth => 'Server lükkas parooli tagasi';
+  @override
+  String get syncAbortMissingPassword => 'Parooli pole salvestatud';
+  @override
+  String get syncAbortOffline => 'Server pole kättesaadav';
+  @override
+  String get syncAbortRemoteMissing => 'Serveris olevat kausta enam pole';
+  @override
+  String get syncAbortUnsupported => 'Server ei tööta enam WebDAV-ina';
+  @override
+  String get syncAbortFailed => 'Sünkroonimine ei õnnestunud';
+  @override
+  String get syncAbortNotConfirmed => 'Sünkroonimine tühistati';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ühtegi faili ei puudutatud. Sinu muudatused jäävad siia '
+      'kuni järgmise õnnestunud sünkroonimiseni.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Viimane õnnestunud sünkroonimine: $when';
+  @override
+  String get syncNoSuccessYet => 'Õnnestunud sünkroonimist veel pole';
+  @override
+  String get syncUpdatePasswordAction => 'Uuenda parooli';
+  @override
+  String get syncRetryAction => 'Proovi uuesti';
+  @override
+  String get syncOpenSettingsAction => 'Seaded';
+  @override
+  String get syncCloseAction => 'Sulge';
+  @override
+  String get syncDoneSnack => 'Sünkroonitud';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sünkroonitud · 1 mujal kustutatud fail on prügikastis'
+      : 'Sünkroonitud · $count mujal kustutatud faili on '
+            'prügikastis';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sünkroonitud · 1 lahendamata konflikt'
+      : 'Sünkroonitud · $count lahendamata konflikti';
+  @override
+  String get syncShowAction => 'Kuva';
+  @override
+  String get syncConflictTitle => 'Lahenda konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Märgiga − read on serveri omad, märgiga + read selle '
+      'seadme omad.';
+  @override
+  String get syncConflictBinary =>
+      'See pole tekstifail: vali, milline koopia alles jätta.';
+  @override
+  String get syncConflictKeepNote =>
+      'Koopia, mida alles ei jäta, jääb märkme ajalukku.';
+  @override
+  String get syncKeepLocal => 'Jäta selle seadme oma';
+  @override
+  String get syncKeepRemote => 'Jäta serveri oma';
+  @override
+  String get syncConflictIdentical => 'Mõlemad versioonid on samad';
+  @override
+  String get syncConflictLoadFailed => 'Mõlemat versiooni ei õnnestunud lugeda';
+  @override
+  String get syncResolveFailed => 'Konflikti ei õnnestunud lahendada';
+  @override
+  String get syncResolved => 'Konflikt lahendatud';
+  @override
+  String get syncSectionWhen => 'Millal sünkroonida';
+  @override
+  String get syncAutoTitle => 'Automaatselt';
+  @override
+  String get syncAutoSubtitle =>
+      'Pärast muudatusi, avamisel ja kindla intervalliga';
+  @override
+  String get syncIntervalTitle => 'Serveri kontrollimise intervall';
+  @override
+  String get syncIntervalSubtitle => 'Ainult siis, kui rakendus on avatud';
+  @override
+  String get syncIntervalDialogBody =>
+      'Et näha teistes seadmetes tehtud muudatusi, kui rakendus on avatud. '
+      'Valikuga „Mitte kunagi“ ainult pärast muudatusi ja avamisel.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minut' : '$count minutit';
+  @override
+  String get syncIntervalNever => 'Mitte kunagi';
+  @override
+  String get syncWifiOnlyTitle => 'Ainult Wi-Fi kaudu';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Mobiilse andmesidega sünkrooni ainult käsitsi';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 muudatus ootab' : '$count muudatust ootab';
+  @override
+  String syncRetryIn(String wait) => 'uus katse $wait pärast';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Ootab Wi-Fi-ühendust';
+  @override
+  String get syncWaitingForNetwork => 'Ootab ühendust';
+  @override
+  String get syncMobileDataHint =>
+      '„Sünkrooni kohe“ kasutab siiski mobiilset andmesidet.';
+  @override
+  String get syncQueueKeptHint =>
+      'Muudatused jäävad siia ka siis, kui rakenduse sulged, ja saadetakse '
+      'ise ära, kui server vastab.';
+  @override
+  String get syncAutoPaused => 'Automaatne sünkroonimine on peatatud';
+  @override
+  String get syncPausedAuthHint =>
+      'See jätkub, kui uuendad parooli või sünkroonid käsitsi.';
+  @override
+  String get syncPausedServerHint =>
+      'See jätkub, kui parandad aadressi või sünkroonid käsitsi.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sünkrooni kohe“ näitab, mis eemaldataks, ja küsib enne kinnitust.';
+  @override
+  String get syncNeedsConfirmation => 'Ootab sinu kinnitust';
+  @override
+  String get syncMergeIntro =>
+      'Muudatused, mis ei kattu, on juba ühendatud; seal, kus need kattuvad, '
+      'vali, mis alles jätta.';
+  @override
+  String get syncMergeClean => 'Kaks versiooni ühinevad ise: miski ei kattu.';
+  @override
+  String get syncMergeNoBase =>
+      'Ühist versiooni, mille peal ühendada, pole, seega tuleb valida kogu '
+      'fail.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Kattuvus $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Sellest seadmest';
+  @override
+  String get syncMergeFromRemote => 'Serverist';
+  @override
+  String get syncMergeRemovedLines => 'Eemaldatud read';
+  @override
+  String get syncMergeKeepLocal => 'Minu';
+  @override
+  String get syncMergeKeepRemote => 'Serveri';
+  @override
+  String get syncMergeKeepBoth => 'Mõlemad';
+  @override
+  String get syncMergeSave => 'Salvesta ühendamine';
+  @override
+  String get syncMergeKeepWhole => 'Või jäta alles üks terve koopia';
 }

@@ -116,6 +116,41 @@ final class NoteHistory {
     );
   }
 
+  /// Pins as [path]'s sync base the version holding the content that
+  /// hashes to [sha], keeping the note's current text as a `sync` version
+  /// first when no version holds it (docs/dev/sync.md). Returns the pinned
+  /// version, or null when the content is gone from both the note and its
+  /// history.
+  Future<int?> pinSyncBase(String path, String sha) async {
+    final clock = Stopwatch()..start();
+    final settings = await config.config;
+    final now = _now();
+    final result = await _pinSyncBase(
+      root,
+      path,
+      sha,
+      settings.historyVersions,
+      now,
+    );
+    final pinned = result.pinned;
+    final shortSha = sha.length > 8 ? sha.substring(0, 8) : sha;
+    final rotated = result.rotated.map((n) => 'v$n').join(', ');
+    if (pinned == null) {
+      _log.warning(
+        'sync base "$path": no version holds $shortSha any more, '
+        'no base pinned (${clock.elapsedMilliseconds} ms)',
+      );
+    } else {
+      _log.info(
+        'sync base "$path" -> v$pinned ($shortSha'
+        '${result.wrote ? ', kept as a new sync version' : ''}'
+        '${rotated.isEmpty ? '' : ', rotated out $rotated'}'
+        ', ${clock.elapsedMilliseconds} ms)',
+      );
+    }
+    return pinned;
+  }
+
   /// Carries the history of [from] to [to] after a rename or a move;
   /// [isDir] for a folder (every note under it follows).
   Future<void> moved(String from, String to, {required bool isDir}) async {
@@ -171,6 +206,16 @@ final class NoteHistory {
     int limit,
   ) => Isolate.run(
     () => pinHistoryVersion(root, path, pin, number, limit: limit),
+  );
+
+  static Future<({int? pinned, bool wrote, List<int> rotated})> _pinSyncBase(
+    String root,
+    String path,
+    String sha,
+    int limit,
+    DateTime now,
+  ) => Isolate.run(
+    () => pinSyncBaseVersion(root, path, sha, limit: limit, now: now),
   );
 
   static Future<int> _move(String root, String from, String to, bool isDir) =>

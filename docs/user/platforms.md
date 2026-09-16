@@ -23,7 +23,9 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 - Wayland supported; window owns close-request handling (dirty-check on
   close rides it).
-- Spellcheck via hunspell (`spellDictionaries` in library settings).
+- Spellcheck via hunspell (`spellDictionaries` in library settings), plus
+  a per-library personal dictionary (right-click *Add to dictionary*,
+  `<library>/.niman/dictionary.txt`).
 - Tray support where the desktop provides one.
 
 ## Windows
@@ -31,7 +33,8 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - Ships its own SQLite (`sqlite3` package bundles the native library via
   Dart build hooks — Windows has no system `sqlite3.dll`). First build
   on a machine needs network to fetch the prebuilt binary.
-- spellcheck via hunspell, same setting as Linux.
+- spellcheck via hunspell, same setting as Linux, plus the per-library
+  personal dictionary.
 
 ## Not yet
 

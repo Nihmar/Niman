@@ -21,6 +21,7 @@ import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
+import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_check_provider.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
@@ -46,6 +47,10 @@ import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
+import 'package:niman/src/ui/sync/sync_flow.dart';
+import 'package:niman/src/ui/sync/sync_settings_screen.dart';
+import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 import 'package:niman/src/ui/title_bar.dart';
@@ -348,6 +353,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
+  /// The open library's personal dictionary (issue #60), attached to the
+  /// spell state: loaded once per root, the old one disposed and swapped
+  /// when the library changes, detached on close.
+  PersonalDictionary? _personalDictionary;
+
+  /// The root a personal-dictionary open is in flight for: the repeated
+  /// [_refreshEditorSettings] calls must not open the same file again.
+  String? _personalDictionaryOpening;
+
   /// Shows the todo list, wherever this layout keeps it.
   ///
   /// The narrow bottom bar and the wide rail both own a Todo tab, so this
@@ -539,6 +553,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// pinned notes follow the files, so each one refreshes the note
   /// widgets (issue 6).
   StreamSubscription<int>? _libraryEvents;
+
+  /// Paths a sync just changed on disk: the open note among them is
+  /// re-read (its buffer was saved before the sync started).
+  StreamSubscription<Set<String>>? _syncChanges;
 
   /// A widget tap that arrived for another library:
   /// [LibrarySession.switchTo] tears this shell down on its way through,
@@ -973,6 +991,11 @@ final class _LibraryShellState extends State<_LibraryShell>
       (target) => unawaited(_applyWidgetTarget(target)),
     );
     _libraryEvents = widget.controller.events.listen((_) => _pushNoteWidgets());
+    _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
+      final open = _selected;
+      if (!mounted || open == null || _selectedIsDir) return;
+      if (paths.contains(open)) setState(() => _noteReloadToken++);
+    });
     AppThemes.revision.addListener(_pushWidgetsOnTheme);
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
@@ -1000,10 +1023,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_shortcutTaps?.cancel());
     unawaited(_widgetTargets?.cancel());
     unawaited(_libraryEvents?.cancel());
+    unawaited(_syncChanges?.cancel());
     _todoController.removeListener(_pushTodoWidgets);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
     _todoController.dispose();
+    _personalDictionary?.dispose();
     _shellFocus.dispose();
     _tabListenable.dispose();
     super.dispose();
@@ -1015,6 +1040,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // The queued changes go now: the process may not come back.
+      widget.controller.sync?.appBackgrounded();
+    }
     if (state != AppLifecycleState.resumed) {
       // Leaving the foreground may be the last thing this process does
       // (a swipe away, an OEM battery kill): get the buffered log on
@@ -1023,6 +1052,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       return;
     }
     unawaited(_todoController.resyncReminders());
+    // Changes made on other devices while the app was away.
+    widget.controller.sync?.appResumed();
     // A home-screen widget toggle edits todo.txt / the note file in a
     // background isolate while the app is away (the Android watcher is
     // unreliable, so no session event may arrive): re-read both surfaces
@@ -1159,6 +1190,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   Future<void> _refreshEditorSettings() async {
     final controller = widget.controller;
+    _syncPersonalDictionary(controller);
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
     final previewMode = await controller.previewMode;
@@ -1221,6 +1253,45 @@ final class _LibraryShellState extends State<_LibraryShell>
         _toolbarLayout = ToolbarLayout.parse(toolbar);
       });
     }
+  }
+
+  /// Attaches the open library's personal dictionary to the spell state
+  /// (issue #60): loaded once per root; a library switch disposes the old
+  /// one and loads the new root's words; a closed library detaches.
+  void _syncPersonalDictionary(LibrarySession controller) {
+    final root = controller.root;
+    final expected = root == null
+        ? null
+        : p.join(root, '.niman', 'dictionary.txt');
+    if (_personalDictionary?.path == expected) return;
+    if (root == null) {
+      _personalDictionaryOpening = null;
+      _personalDictionary?.dispose();
+      _personalDictionary = null;
+      widget.spellCheck.setPersonalDictionary(null);
+      return;
+    }
+    if (_personalDictionaryOpening == root) return;
+    _personalDictionaryOpening = root;
+    unawaited(_openPersonalDictionary(controller, root));
+  }
+
+  /// Opens [root]'s dictionary file; on completion the words attach, the
+  /// old dictionary disposes, and the spell state re-scans the open note.
+  /// A library switched away before completion disposes the words instead.
+  Future<void> _openPersonalDictionary(
+    LibrarySession controller,
+    String root,
+  ) async {
+    final dictionary = await PersonalDictionary.open(root);
+    if (!mounted || controller.root != root) {
+      dictionary.dispose();
+      return;
+    }
+    _personalDictionaryOpening = null;
+    _personalDictionary?.dispose();
+    _personalDictionary = dictionary;
+    widget.spellCheck.setPersonalDictionary(dictionary);
   }
 
   /// Flips the tree sort direction and persists it (T-UI-03).
@@ -2273,10 +2344,93 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
-  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +
-  /// sort chevrons; the settings gear moved to the Settings tab).
+  // --- sync (mockups S6–S11) --------------------------------------------
+
+  /// The sync icon for the tree's bar; nothing without a sync service
+  /// (the button itself hides while no destination is configured).
+  Widget _syncButton(LibrarySession controller) {
+    final sync = controller.sync;
+    if (sync == null) return const SizedBox.shrink();
+    return SyncStatusButton(
+      sync: sync,
+      onSync: () => unawaited(_runSync(controller)),
+      onOpenPanel: () => unawaited(_openSyncPanel(controller)),
+    );
+  }
+
+  Future<void> _runSync(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await runSyncFromUi(
+      context,
+      sync,
+      unsaved: widget.unsavedTracker,
+      onShowTrash: () => _openTrash(controller),
+      onShowPanel: () => unawaited(_openSyncPanel(controller)),
+    );
+  }
+
+  Future<void> _openSyncPanel(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await showSyncPanel(
+      context,
+      sync: sync,
+      onSyncNow: () => unawaited(_runSync(controller)),
+      onOpenSettings: () => unawaited(_openSyncSettings(controller)),
+      onResolve: (path) => unawaited(_resolveSyncConflict(controller, path)),
+    );
+  }
+
+  Future<void> _openSyncSettings(LibrarySession controller) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => SyncSettingsScreen(
+          sync: sync,
+          libraryName: p.basename(controller.root ?? ''),
+          unsaved: widget.unsavedTracker,
+          onShowTrash: () => _openTrash(controller),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _resolveSyncConflict(
+    LibrarySession controller,
+    String path,
+  ) async {
+    final sync = controller.sync;
+    if (sync == null) return;
+    try {
+      await widget.unsavedTracker.saveAll();
+    } on Object catch (e) {
+      const AppLogger(name: 'sync').warning('resolve: saving failed: $e');
+    }
+    if (!mounted) return;
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SyncConflictScreen(sync: sync, path: path),
+      ),
+    );
+  }
+
+  void _openTrash(LibrarySession controller) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => TrashScreen(controller: controller),
+      ),
+    );
+  }
+
+  /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
     return [
+      _syncButton(controller),
       IconButton(
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
@@ -2352,7 +2506,16 @@ final class _LibraryShellState extends State<_LibraryShell>
           children: bodies,
         ),
         floatingActionButton: _tabFab(),
-        bottomNavigationBar: _shellTabs(),
+        bottomNavigationBar: switch (controller.sync) {
+          final sync? when tab == ShellTab.files => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SyncProgressStrip(sync: sync),
+              _shellTabs(),
+            ],
+          ),
+          _ => _shellTabs(),
+        },
       ),
     );
   }
@@ -2465,6 +2628,8 @@ final class _LibraryShellState extends State<_LibraryShell>
             child: Column(
               children: [
                 Expanded(child: _treePane(controller)),
+                if (controller.sync case final sync?)
+                  SyncProgressStrip(sync: sync),
                 _treeFooter(controller),
               ],
             ),
@@ -2723,6 +2888,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             ),
           ),
           const Spacer(),
+          _syncButton(controller),
           IconButton(
             key: const Key('open-trash'),
             tooltip: AppStrings.trashTitle,

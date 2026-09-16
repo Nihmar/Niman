@@ -7,13 +7,17 @@
 /// once, so re-scrolling and a repeated word cost nothing.
 library;
 
-import 'dart:ui' show TextRange;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/spellcheck/personal_dictionary.dart';
+import 'package:niman/src/spellcheck/personal_dictionary_spell_checker.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
+import 'package:niman/src/ui/strings.dart';
 
 /// Ranges in [tokens] the checker must not look at.
 ///
@@ -60,14 +64,21 @@ final class EditorSpellCheck extends ChangeNotifier {
   ///
   /// [dictionaries] are the user's chosen dictionary names; an empty list
   /// means the machine's locale. [setDictionaries] changes them later.
+  /// [dictionary] is the library's personal words (issue #60); the shell
+  /// attaches it when a library opens, via [setPersonalDictionary].
   new({
     List<String> dictionaries = const <String>[],
     SpellChecker Function(String? dictionary)? createChecker,
+    PersonalDictionary? dictionary,
   }) : _dictionaries = _normalize(dictionaries),
-       _override = createChecker;
+       _override = createChecker,
+       _dictionary = dictionary {
+    dictionary?.addListener(_onDictionaryChanged);
+  }
 
   final SpellChecker Function(String? dictionary)? _override;
   List<String> _dictionaries;
+  PersonalDictionary? _dictionary;
 
   /// The active dictionary names, in selection order (empty = the
   /// machine's locale).
@@ -99,6 +110,9 @@ final class EditorSpellCheck extends ChangeNotifier {
   }
 
   /// One engine per selected dictionary; the locale's when none is chosen.
+  ///
+  /// The personal dictionary, when attached, is checked before any engine
+  /// (issue #60): its words are always correct.
   SpellChecker _newChecker() {
     final override = _override;
     final checkers = _dictionaries.isEmpty
@@ -107,7 +121,13 @@ final class EditorSpellCheck extends ChangeNotifier {
             for (final name in _dictionaries)
               override?.call(name) ?? createSpellChecker(dictionary: name),
           ];
-    return checkers.length == 1 ? checkers.single : MultiSpellChecker(checkers);
+    final base = checkers.length == 1
+        ? checkers.single
+        : MultiSpellChecker(checkers);
+    final dictionary = _dictionary;
+    return dictionary == null
+        ? base
+        : PersonalDictionarySpellChecker(dictionary, base);
   }
 
   /// Prose words: a letter run, apostrophes and inner hyphens allowed.
@@ -127,6 +147,34 @@ final class EditorSpellCheck extends ChangeNotifier {
     return (_checker ??= _newChecker()).available;
   }
 
+  /// The library's personal dictionary (issue #60), or null while none is
+  /// attached (before a library opens, or on a closed session).
+  PersonalDictionary? get personalDictionary => _dictionary;
+
+  /// Swaps the personal dictionary: the word and line caches are forgotten
+  /// — a word's verdict can change either way — and listeners are told so
+  /// the editor re-scans.
+  void setPersonalDictionary(PersonalDictionary? dictionary) {
+    if (identical(_dictionary, dictionary)) return;
+    _dictionary?.removeListener(_onDictionaryChanged);
+    _dictionary = dictionary;
+    dictionary?.addListener(_onDictionaryChanged);
+    _checker?.dispose();
+    _checker = null;
+    _lines.clear();
+    _words.clear();
+    notifyListeners();
+  }
+
+  /// A word was added to the personal dictionary: forget the verdicts it
+  /// may have cached (the line ranges too — they hold the old underline)
+  /// and tell the editor to re-scan.
+  void _onDictionaryChanged() {
+    _lines.clear();
+    _words.clear();
+    notifyListeners();
+  }
+
   /// Turns underlining on/off (a settings toggle).
   void setEnabled({required bool enabled}) {
     if (_enabled == enabled) return;
@@ -140,6 +188,30 @@ final class EditorSpellCheck extends ChangeNotifier {
     if (_lines.isEmpty) return;
     _lines.clear();
     notifyListeners();
+  }
+
+  /// Whether the checker flags [word] as a misspelling — the underline's
+  /// verdict, with the underline's gates: the checker on, an engine
+  /// loaded, and a checkable word. The context menu's "Add to dictionary"
+  /// entry offers itself only when this is true and a dictionary is
+  /// attached.
+  bool isMisspelled(String word) {
+    if (!_enabled) return false;
+    final checker = _checker ??= _newChecker();
+    if (!checker.available) return false;
+    if (!_checkable(word)) return false;
+    return !(_words[word] ??= checker.isCorrect(word));
+  }
+
+  /// Adds [word] to the library's personal dictionary (issue #60); the
+  /// word's verdict and the underlines follow the disk write.
+  ///
+  /// Completes immediately when no dictionary is attached (Android, or
+  /// before a library opens).
+  Future<void> addToDictionary(String word) async {
+    final dictionary = _dictionary;
+    if (dictionary == null) return;
+    await dictionary.add(word);
   }
 
   /// The misspelled ranges of [line], within [line]'s own coordinates.
@@ -245,4 +317,57 @@ final class EditorSpellCheck extends ChangeNotifier {
     _checker = null;
     super.dispose();
   }
+}
+
+/// The word containing [position] in [text] — the word under a collapsed
+/// caret — or null when the position sits in whitespace or outside the
+/// text. A caret at a word's edge still names that word: that is where the
+/// writer leaves it after clicking on the word.
+String? spellWordAt(String text, int position) {
+  if (position < 0 || position > text.length) return null;
+  for (final match in EditorSpellCheck._word.allMatches(text)) {
+    if (match.start > position) break;
+    if (position <= match.end) return match.group(0);
+  }
+  return null;
+}
+
+/// The word a selection names for the menu (issue #60): the caret's word
+/// when collapsed, else the word the selection sits in — a partial-word
+/// selection names the whole word, a multi-word selection nothing (there
+/// is no single word to add).
+String? spellWordForSelection(String text, int start, int end) {
+  if (start < 0 || end < start || end > text.length) return null;
+  if (start == end) return spellWordAt(text, start);
+  for (final match in EditorSpellCheck._word.allMatches(text)) {
+    if (match.start > end) break;
+    if (match.start <= start && end <= match.end) return match.group(0);
+  }
+  return null;
+}
+
+/// The context-menu entry that adds the word under the caret/selection to
+/// the library's personal dictionary (issue #60).
+///
+/// Null when the menu has nothing to offer: no dictionary attached, the
+/// checker off or unavailable, the position in whitespace, or the word
+/// already correct. [start]/[end] select in [text]; [onDismiss] closes the
+/// caller's menu once the word is added.
+ContextMenuButtonItem? addToDictionaryItem({
+  required EditorSpellCheck spell,
+  required String text,
+  required int start,
+  required int end,
+  required VoidCallback onDismiss,
+}) {
+  if (spell.personalDictionary == null) return null;
+  final word = spellWordForSelection(text, start, end);
+  if (word == null || !spell.isMisspelled(word)) return null;
+  return ContextMenuButtonItem(
+    label: AppStrings.addWordToDictionary,
+    onPressed: () {
+      unawaited(spell.addToDictionary(word));
+      onDismiss();
+    },
+  );
 }

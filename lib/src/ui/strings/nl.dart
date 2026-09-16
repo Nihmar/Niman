@@ -171,6 +171,8 @@ final class DutchStrings extends Strings {
   String spellCheckCount(int count) => '$count te controleren';
   @override
   String spellCheckLine(int line) => 'regel $line';
+  @override
+  String get addWordToDictionary => 'Toevoegen aan woordenlijst';
 
   @override
   String indentWidthValue(int spaces) => '$spaces spaties';
@@ -1247,6 +1249,20 @@ final class DutchStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 ongewijzigde regel' : '$count ongewijzigde regels';
   @override
+  String get historyTakeHunk => 'Hier herstellen';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 wijziging herstellen' : '$count wijzigingen herstellen';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De gekozen wijzigingen keren terug naar de tekst van deze versie. De '
+      'notitie zoals die nu is wordt eerst als versie bewaard, dus je kunt dit '
+      'ongedaan maken.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'De notitie is veranderd terwijl je hier was — de vergelijking is '
+      'bijgewerkt.';
+  @override
   String get historyVersionsTitle => 'Te bewaren versies';
   @override
   String get historyVersionsSubtitle => 'Per notitie, in .history/';
@@ -1370,4 +1386,366 @@ final class DutchStrings extends Strings {
   String get transcriptionAppend => 'Eronder toevoegen';
   @override
   String get transcriptionReplace => 'Vervangen';
+  @override
+  String get settingsSectionSync => 'Synchronisatie';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Niet ingesteld voor deze bibliotheek';
+  @override
+  String get syncNeverSynced => 'Nog nooit gesynchroniseerd';
+  @override
+  String syncLastSynced(String when) => 'Gesynchroniseerd $when';
+  @override
+  String get syncRunning => 'Synchroniseren…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bibliotheek $library';
+  @override
+  String get syncUrlLabel => 'Mapadres';
+  @override
+  String get syncUrlHint =>
+      'De map moet al bestaan. Kopieer het adres zoals de server '
+      'het toont.';
+  @override
+  String get syncHttpWarning =>
+      'Onversleutelde verbinding: prima via een VPN of op je '
+      'lokale netwerk.';
+  @override
+  String get syncUserLabel => 'Gebruiker';
+  @override
+  String get syncUserHint =>
+      'Laat leeg als de server geen inloggegevens vraagt.';
+  @override
+  String get syncPasswordLabel => 'Wachtwoord';
+  @override
+  String get syncPasswordHint =>
+      'Bewaard in de sleutelhanger van dit apparaat, nooit in de '
+      'bestanden van de bibliotheek.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Laat leeg om het opgeslagen wachtwoord te houden.';
+  @override
+  String get syncShowPassword => 'Wachtwoord tonen';
+  @override
+  String get syncHidePassword => 'Wachtwoord verbergen';
+  @override
+  String get syncTestAction => 'Verbinding testen';
+  @override
+  String get syncTesting => 'Testen…';
+  @override
+  String get syncRetargetWarning =>
+      'Met een nieuw adres of een andere gebruiker begint de '
+      'volgende sync opnieuw als eerste sync.';
+  @override
+  String get syncTestOk => 'Verbinding werkt';
+  @override
+  String get syncModeFull => 'Volledige modus';
+  @override
+  String get syncModeCompatible => 'Compatibele modus';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lezen, schrijven en verwijderen';
+  @override
+  String get syncCapEtags => 'Bestandsvingerafdrukken (ETags)';
+  @override
+  String get syncCapNoEtags => 'Geen bestandsvingerafdrukken (ETags)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Vergelijkt grootte en datum; downloadt opnieuw bij twijfel';
+  @override
+  String get syncCapGuarded => 'Beveiligde schrijfacties';
+  @override
+  String get syncCapUnguarded => 'Onbeveiligde schrijfacties';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Controleert het bestand op de server vlak voor het '
+      'schrijven';
+  @override
+  String get syncCapMove => 'Hernoemt zonder opnieuw te uploaden';
+  @override
+  String get syncCapNoMove => 'Geen hernoemen op de server';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Hernoemen wordt verwijderen plus een nieuwe upload';
+  @override
+  String get syncCompatibleNote =>
+      'In compatibele modus werkt sync hetzelfde, met iets meer '
+      'verzoeken.';
+  @override
+  String get syncTestInvalidUrl => 'Geen geldig adres';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Voer een adres in dat met http:// of https:// begint, '
+      'zonder gebruiker of wachtwoord erin.';
+  @override
+  String get syncTestOffline => 'Server niet bereikbaar';
+  @override
+  String get syncTestOfflineHint =>
+      'Staat de VPN aan? Een adres als 10.x of 192.168.x werkt '
+      'alleen vanaf hetzelfde netwerk.';
+  @override
+  String get syncTestAuth => 'Gebruiker of wachtwoord geweigerd';
+  @override
+  String get syncTestAuthHint => 'Controleer ze en test opnieuw.';
+  @override
+  String get syncTestNotFound => 'De map bestaat niet';
+  @override
+  String get syncTestNotFoundHint =>
+      'Maak hem aan op de server of corrigeer het adres.';
+  @override
+  String get syncTestUnsupported => 'Geen WebDAV-map';
+  @override
+  String get syncTestUnsupportedHint =>
+      'De server antwoordt, maar niet als WebDAV.';
+  @override
+  String get syncTestFailed => 'De test is mislukt';
+  @override
+  String get syncNowAction => 'Nu synchroniseren';
+  @override
+  String get syncSectionServer => 'Server';
+  @override
+  String get syncServerRow => 'Adres, gebruiker en wachtwoord';
+  @override
+  String get syncRetestTitle => 'Server opnieuw testen';
+  @override
+  String syncProbedAgo(String when) => 'Laatste test $when';
+  @override
+  String get syncDisconnectTitle => 'Deze bibliotheek ontkoppelen';
+  @override
+  String get syncDisconnectSubtitle => 'Bestanden blijven hier en op de server';
+  @override
+  String get syncDisconnectConfirmTitle => 'Sync ontkoppelen?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Deze bibliotheek wordt op dit apparaat niet meer '
+      'gesynchroniseerd. Er wordt geen bestand verwijderd, hier '
+      'noch op de server. Koppel je hem opnieuw, dan begint de '
+      'eerste sync opnieuw.';
+  @override
+  String get syncDisconnectConfirm => 'Ontkoppelen';
+  @override
+  String get syncFirstTitle => 'Eerste sync';
+  @override
+  String get syncFirstIntro =>
+      'De bibliotheek is vergeleken met de map op de server:';
+  @override
+  String get syncFirstUpload => 'Te uploaden';
+  @override
+  String get syncFirstDownload => 'Te downloaden';
+  @override
+  String get syncFirstBoth => 'Aan beide kanten';
+  @override
+  String get syncFirstBothHint =>
+      'Gelijk: geen overdracht. Verschillend: op te lossen';
+  @override
+  String get syncFirstNoDelete =>
+      'De eerste sync verwijdert niets, hier noch op de server.';
+  @override
+  String get syncStartAction => 'Starten';
+  @override
+  String syncMassTrashTitle(int count) =>
+      '$count bestanden naar de prullenbak verplaatsen?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '$count van de $total gesynchroniseerde bestanden '
+      'ontbreken op de server. Meestal betekent dat een verkeerd '
+      'adres, een niet-gekoppelde NAS-schijf of een per ongeluk '
+      'geleegde map.';
+  @override
+  String get syncMassTrashHint =>
+      'Heb je ze echt op een ander apparaat verwijderd, bevestig '
+      'dan: hier gaan ze naar de prullenbak.';
+  @override
+  String get syncMassTrashConfirm => 'Naar de prullenbak';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      '$count bestanden van de server verwijderen?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '$count van de $total gesynchroniseerde bestanden '
+      'ontbreken hier. Heb je ze niet verwijderd, annuleer dan '
+      'en controleer de bibliotheekmap.';
+  @override
+  String get syncMassDeleteConfirm => 'Van server verwijderen';
+  @override
+  String get syncTooltip => 'Synchroniseren';
+  @override
+  String get syncStageConnecting => 'Verbinden met de server…';
+  @override
+  String get syncStageComparing => 'Vergelijken met de server…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Synchroniseren · $done van $total';
+  @override
+  String get syncStatusWarnings => 'Gesynchroniseerd met waarschuwingen';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Hier en op de server gewijzigd · $count';
+  @override
+  String get syncConflictHint => 'Geen van beide versies is aangeraakt';
+  @override
+  String get syncResolveAction => 'Oplossen';
+  @override
+  String syncFailuresHeader(int count) => 'Niet gesynchroniseerd · $count';
+  @override
+  String get syncFailuresHint => 'Bij de volgende sync opnieuw geprobeerd';
+  @override
+  String get syncAbortAuth => 'Wachtwoord geweigerd door de server';
+  @override
+  String get syncAbortMissingPassword => 'Geen wachtwoord opgeslagen';
+  @override
+  String get syncAbortOffline => 'Server niet bereikbaar';
+  @override
+  String get syncAbortRemoteMissing => 'De map op de server is weg';
+  @override
+  String get syncAbortUnsupported => 'De server werkt niet meer als WebDAV';
+  @override
+  String get syncAbortFailed => 'Sync is mislukt';
+  @override
+  String get syncAbortNotConfirmed => 'Sync geannuleerd';
+  @override
+  String get syncAbortNothingTouched =>
+      'Er is geen bestand aangeraakt. Je wijzigingen blijven '
+      'hier tot de volgende geslaagde sync.';
+  @override
+  String syncLastSuccess(String when) => 'Laatste geslaagde sync $when';
+  @override
+  String get syncNoSuccessYet => 'Nog geen geslaagde sync';
+  @override
+  String get syncUpdatePasswordAction => 'Wachtwoord bijwerken';
+  @override
+  String get syncRetryAction => 'Opnieuw proberen';
+  @override
+  String get syncOpenSettingsAction => 'Instellingen';
+  @override
+  String get syncCloseAction => 'Sluiten';
+  @override
+  String get syncDoneSnack => 'Gesynchroniseerd';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Gesynchroniseerd · 1 elders verwijderd bestand staat in '
+            'de prullenbak'
+      : 'Gesynchroniseerd · $count elders verwijderde bestanden '
+            'staan in de prullenbak';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Gesynchroniseerd · 1 conflict op te lossen'
+      : 'Gesynchroniseerd · $count conflicten op te lossen';
+  @override
+  String get syncShowAction => 'Tonen';
+  @override
+  String get syncConflictTitle => 'Conflict oplossen';
+  @override
+  String get syncConflictLegend =>
+      'Regels met − zijn van de server, regels met + van dit '
+      'apparaat.';
+  @override
+  String get syncConflictBinary =>
+      'Geen tekstbestand: kies welke kopie je houdt.';
+  @override
+  String get syncConflictKeepNote =>
+      'De kopie die je niet houdt, blijft in de geschiedenis van '
+      'de notitie.';
+  @override
+  String get syncKeepLocal => 'Versie van dit apparaat houden';
+  @override
+  String get syncKeepRemote => 'Versie van de server houden';
+  @override
+  String get syncConflictIdentical => 'De twee versies zijn identiek';
+  @override
+  String get syncConflictLoadFailed => 'Kon de twee versies niet lezen';
+  @override
+  String get syncResolveFailed => 'Kon het conflict niet oplossen';
+  @override
+  String get syncResolved => 'Conflict opgelost';
+  @override
+  String get syncSectionWhen => 'Wanneer synchroniseren';
+  @override
+  String get syncAutoTitle => 'Automatisch';
+  @override
+  String get syncAutoSubtitle =>
+      'Na wijzigingen, bij openen en met tussenpozen';
+  @override
+  String get syncIntervalTitle => 'Interval voor servercontrole';
+  @override
+  String get syncIntervalSubtitle => 'Alleen terwijl de app open is';
+  @override
+  String get syncIntervalDialogBody =>
+      'Om wijzigingen van andere apparaten te zien terwijl de app open is. '
+      'Met “Nooit” alleen na wijzigingen en bij openen.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minuut' : '$count minuten';
+  @override
+  String get syncIntervalNever => 'Nooit';
+  @override
+  String get syncWifiOnlyTitle => 'Alleen via wifi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Via mobiele data alleen handmatig synchroniseren';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 wijziging wacht' : '$count wijzigingen wachten';
+  @override
+  String syncRetryIn(String wait) => 'nieuwe poging over $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Wachten op wifi';
+  @override
+  String get syncWaitingForNetwork => 'Wachten op verbinding';
+  @override
+  String get syncMobileDataHint =>
+      '“Nu synchroniseren” gebruikt toch mobiele data.';
+  @override
+  String get syncQueueKeptHint =>
+      'Wijzigingen blijven hier, ook als je de app sluit, en worden vanzelf '
+      'verstuurd zodra de server reageert.';
+  @override
+  String get syncAutoPaused => 'Automatische sync gepauzeerd';
+  @override
+  String get syncPausedAuthHint =>
+      'Gaat verder zodra je het wachtwoord bijwerkt of handmatig '
+      'synchroniseert.';
+  @override
+  String get syncPausedServerHint =>
+      'Gaat verder zodra je het adres corrigeert of handmatig synchroniseert.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Nu synchroniseren” toont wat er verwijderd zou worden en vraagt '
+      'eerst.';
+  @override
+  String get syncNeedsConfirmation => 'Wacht op je bevestiging';
+  @override
+  String get syncMergeIntro =>
+      'Wijzigingen die elkaar niet overlappen, zijn al samengevoegd; kies wat '
+      'je houdt waar ze elkaar wel overlappen.';
+  @override
+  String get syncMergeClean =>
+      'De twee versies voegen zichzelf samen: niets overlapt.';
+  @override
+  String get syncMergeNoBase =>
+      'Er is geen gedeelde versie om op samen te voegen, dus het hele bestand '
+      'moet gekozen worden.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlap $index van $total';
+  @override
+  String get syncMergeFromLocal => 'Van dit apparaat';
+  @override
+  String get syncMergeFromRemote => 'Van de server';
+  @override
+  String get syncMergeRemovedLines => 'Verwijderde regels';
+  @override
+  String get syncMergeKeepLocal => 'Van mij';
+  @override
+  String get syncMergeKeepRemote => 'Van de server';
+  @override
+  String get syncMergeKeepBoth => 'Beide';
+  @override
+  String get syncMergeSave => 'Samenvoeging opslaan';
+  @override
+  String get syncMergeKeepWhole => 'Of houd één hele kopie';
 }
