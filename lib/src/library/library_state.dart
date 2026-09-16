@@ -7,6 +7,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/legacy_library_settings.dart';
@@ -732,6 +733,9 @@ final class LibraryController implements LibrarySession {
   /// The scheduler only reads the settings store and GitHub; drift writes
   /// stay on the main isolate, in its callbacks.
   void _startUpdateChecks(AppDatabase appDb) {
+    // Testing builds check no release channel (issue #106): the stored
+    // toggle is irrelevant, nothing polls and no banner can appear.
+    if (isTestingBuild) return;
     if (_updateScheduler != null) return;
     final repo = AppSettingsRepo(appDb);
     _updateScheduler = UpdateScheduler(
