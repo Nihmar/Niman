@@ -142,6 +142,13 @@ final class FakeWebDavServer {
   }
 
   /// The next GET sends half its body, then drops the connection.
+  /// Forgets the failures [failNext] queued and not used yet: the server
+  /// is back.
+  void clearFailures() {
+    _failures.clear();
+    _skipBeforeFailures = 0;
+  }
+
   void dropNextGet() => _dropGets++;
 
   final Map<String, int> _failPuts = {};

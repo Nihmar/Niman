@@ -611,6 +611,26 @@ conflict:
   one tap away, and is the only option without a base, where the screen
   falls back to the read-only `DiffView`.
 
+### Tests (#20)
+
+- **Units** over the fake server (`test/fakes/fake_webdav_server.dart`,
+  an `HttpServer` on loopback with a switch per capability, per failure
+  and per refusal): the client, the probe, the store and its queue, the
+  pure reconcile, the pure merge, the engine (full and quick), the
+  scheduler on fake time, and the service.
+- **Scenarios** (`test/unit/sync_e2e_test.dart`): two devices with their
+  own libraries and databases over one server, driven the way the app
+  drives them — `NoteOps` writes, hints, triggers, engine, service. A
+  day of edits (create, edit, rename, delete, trash on the other side),
+  a merge and a conflict resolved by hand, a queue written offline that
+  survives a restart, a server without ETags or preconditions, and a
+  write the server refuses with 412.
+- **On a device** (`integration_test/sync_e2e_test.dart`): the real app
+  against a server in its own process — set the destination up from the
+  settings screen, first sync, an edit that leaves by itself, then a
+  conflict resolved in the merge screen. It needs a device: opening a
+  real library uses isolates the headless runner does not give.
+
 ## Order of work
 
 1. History: `NoteOps.saveNote` + per-path lock, callers moved over.
