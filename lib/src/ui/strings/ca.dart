@@ -1265,6 +1265,18 @@ final class CatalanStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 línia sense canvis' : '$count línies sense canvis';
   @override
+  String get historyTakeHunk => 'Restaura-ho aquí';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaura 1 canvi' : 'Restaura $count canvis';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      "Els canvis triats tornen al text d'aquesta versió. La nota tal com és "
+      'ara es conserva abans com a versió, així que ho pots desfer.';
+  @override
+  String get historyNoteChangedReloaded =>
+      "La nota ha canviat mentre eres aquí: la comparació s'ha actualitzat.";
+  @override
   String get historyVersionsTitle => 'Versions que es conserven';
   @override
   String get historyVersionsSubtitle => 'Per nota, a .history/';

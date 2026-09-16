@@ -1247,6 +1247,18 @@ final class GalicianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 liña sen cambios' : '$count liñas sen cambios';
   @override
+  String get historyTakeHunk => 'Restaurar aquí';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaurar 1 cambio' : 'Restaurar $count cambios';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Os cambios escollidos volven ao texto desta versión. A nota tal como '
+      'está agora consérvase antes como versión, así que podes desfacelo.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'A nota cambiou mentres estabas aquí: a comparación actualizouse.';
+  @override
   String get historyVersionsTitle => 'Versións que conservar';
   @override
   String get historyVersionsSubtitle => 'Por nota, en .history/';

@@ -1249,6 +1249,18 @@ final class PolishStrings extends Strings {
       ? '$count niezmienione linie'
       : '$count niezmienionych linii';
   @override
+  String get historyTakeHunk => 'Przywróć tutaj';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Przywróć 1 zmianę' : 'Przywróć $count zmian';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Wybrane zmiany wracają do tekstu tej wersji. Notatka w obecnej postaci '
+      'jest najpierw zachowywana jako wersja, więc możesz to cofnąć.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Notatka zmieniła się, gdy tu byłeś — porównanie zostało odświeżone.';
+  @override
   String get historyVersionsTitle => 'Liczba wersji do zachowania';
   @override
   String get historyVersionsSubtitle => 'Dla każdej notatki, w .history/';

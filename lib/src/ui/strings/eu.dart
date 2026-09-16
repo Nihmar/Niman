@@ -1244,6 +1244,20 @@ final class BasqueStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? 'lerro 1 aldatu gabe' : '$count lerro aldatu gabe';
   @override
+  String get historyTakeHunk => 'Berrezarri hemen';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Berrezarri aldaketa 1' : 'Berrezarri $count aldaketa';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Aukeratutako aldaketak bertsio honen testura itzultzen dira. Oharra '
+      'dagoen moduan bertsio gisa gordetzen da lehenik, beraz desegin '
+      'dezakezu.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Oharra aldatu egin da hemen zeunden bitartean — konparazioa eguneratu '
+      'da.';
+  @override
   String get historyVersionsTitle => 'Gorde beharreko bertsioak';
   @override
   String get historyVersionsSubtitle => 'Ohar bakoitzeko, .history/ karpetan';

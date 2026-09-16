@@ -1229,6 +1229,18 @@ final class DanishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 uændret linje' : '$count uændrede linjer';
   @override
+  String get historyTakeHunk => 'Gendan her';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Gendan 1 ændring' : 'Gendan $count ændringer';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De valgte ændringer vender tilbage til denne versions tekst. Noten som '
+      'den er nu gemmes først som en version, så du kan fortryde det.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Noten blev ændret, mens du var her — sammenligningen er opdateret.';
+  @override
   String get historyVersionsTitle => 'Versioner, der gemmes';
   @override
   String get historyVersionsSubtitle => 'Pr. note, i .history/';

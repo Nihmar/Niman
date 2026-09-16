@@ -1238,6 +1238,18 @@ final class BosnianStrings extends Strings {
     _ => '$count nepromijenjenih redova',
   };
   @override
+  String get historyTakeHunk => 'Vrati ovdje';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Vrati 1 promjenu' : 'Vrati $count promjena';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Odabrane promjene vraćaju se na tekst ove verzije. Bilješka u trenutnom '
+      'obliku prvo se čuva kao verzija, pa ovo možeš poništiti.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Bilješka se promijenila dok si bio ovdje — poređenje je osvježeno.';
+  @override
   String get historyVersionsTitle => 'Broj čuvanih verzija';
   @override
   String get historyVersionsSubtitle => 'Po bilješci, u .history/';

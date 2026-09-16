@@ -1219,6 +1219,18 @@ final class TurkishStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count değişmemiş satır';
   @override
+  String get historyTakeHunk => 'Burada geri al';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 değişikliği geri al' : '$count değişikliği geri al';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Seçtiğin değişiklikler bu sürümün metnine döner. Notun şu anki hâli '
+      'önce sürüm olarak saklanır, böylece bunu geri alabilirsin.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Sen buradayken not değişti — karşılaştırma yenilendi.';
+  @override
   String get historyVersionsTitle => 'Saklanacak sürüm sayısı';
   @override
   String get historyVersionsSubtitle => 'Not başına, .history/ içinde';

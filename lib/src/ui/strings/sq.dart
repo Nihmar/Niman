@@ -1251,6 +1251,19 @@ final class AlbanianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 rresht i pandryshuar' : '$count rreshta të pandryshuar';
   @override
+  String get historyTakeHunk => 'Rikthe këtu';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Rikthe 1 ndryshim' : 'Rikthe $count ndryshime';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Ndryshimet e zgjedhura kthehen te teksti i këtij versioni. Shënimi '
+      'ashtu siç është tani ruhet më parë si version, kështu që mund ta '
+      'zhbësh.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Shënimi ndryshoi ndërsa ishe këtu — krahasimi u rifreskua.';
+  @override
   String get historyVersionsTitle => 'Versionet që ruhen';
   @override
   String get historyVersionsSubtitle => 'Për çdo shënim, në .history/';

@@ -1226,6 +1226,18 @@ final class CzechStrings extends Strings {
     _ => '$count nezměněných řádků',
   };
   @override
+  String get historyTakeHunk => 'Obnovit zde';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Obnovit 1 změnu' : 'Obnovit $count změn';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Vybrané změny se vrátí k textu této verze. Poznámka v současné podobě '
+      'se nejdřív uchová jako verze, takže to můžeš vzít zpět.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Poznámka se změnila, zatímco jsi tu byl — porovnání bylo aktualizováno.';
+  @override
   String get historyVersionsTitle => 'Počet uchovávaných verzí';
   @override
   String get historyVersionsSubtitle => 'Pro každou poznámku, v .history/';
