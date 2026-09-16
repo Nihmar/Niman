@@ -16,11 +16,16 @@ void main() {
   final now = DateTime(2026, 9, 15, 9);
 
   group('DiffView', () {
-    Widget app(String oldText, String newText) => MaterialApp(
-      home: Scaffold(
-        body: DiffView(oldText: oldText, newText: newText),
-      ),
-    );
+    Widget app(String oldText, String newText, {bool sideBySide = false}) =>
+        MaterialApp(
+          home: Scaffold(
+            body: DiffView(
+              oldText: oldText,
+              newText: newText,
+              sideBySide: sideBySide,
+            ),
+          ),
+        );
 
     testWidgets('marks removed and added lines and folds the rest', (
       tester,
@@ -47,6 +52,57 @@ void main() {
       await tester.pumpWidget(app('same\n', 'same'));
       await tester.pump();
       expect(find.byKey(const Key('diff-identical')), findsOneWidget);
+    });
+
+    testWidgets('pairs the two texts into columns when asked', (tester) async {
+      await tester.pumpWidget(
+        app('keep\nold line\n', 'keep\nnew line\n', sideBySide: true),
+      );
+      await tester.pump();
+
+      // The replaced line reads old against new on one row.
+      expect(find.byKey(const ValueKey('diff-pair-2-2')), findsOneWidget);
+      expect(find.text('old line'), findsOneWidget);
+      expect(find.text('new line'), findsOneWidget);
+      // An unchanged line stands in both columns.
+      expect(find.text('keep'), findsNWidgets(2));
+    });
+
+    testWidgets('leaves a cell empty where only one side has a line', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app('keep\n', 'keep\nadded\n', sideBySide: true),
+      );
+      await tester.pump();
+
+      // Nothing was removed, so the old side has no counterpart.
+      expect(find.byKey(const ValueKey('diff-pair-null-2')), findsOneWidget);
+      expect(find.text('added'), findsOneWidget);
+    });
+
+    testWidgets('picks columns from the width it is given', (tester) async {
+      Widget sized(double width) => MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: width,
+              child: const DiffView(
+                oldText: 'keep\nold\n',
+                newText: 'keep\nnew\n',
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(sized(diffSideBySideMinWidth + 10));
+      await tester.pump();
+      expect(find.text('keep'), findsNWidgets(2));
+
+      await tester.pumpWidget(sized(diffSideBySideMinWidth - 10));
+      await tester.pump();
+      expect(find.text('keep'), findsOneWidget);
     });
   });
 
