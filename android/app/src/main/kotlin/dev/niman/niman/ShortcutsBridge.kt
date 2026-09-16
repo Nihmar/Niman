@@ -131,6 +131,7 @@ class ShortcutsBridge(private val activity: Activity) :
         "new_todo" -> R.drawable.ic_shortcut_new_todo
         "new_note" -> R.drawable.ic_shortcut_new_note
         "new_list" -> R.drawable.ic_shortcut_new_list
+        "new_voice" -> R.drawable.ic_shortcut_new_voice
         else -> null
     }
 }
