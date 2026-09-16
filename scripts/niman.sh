@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Niman dev helper: terse output, full logs in /tmp/niman/niman-<cmd>.log.
-#   analyze | test | check | apk | linux
+#   analyze | test | check | apk [testing] | linux
 set -u
 
 # Flutter fallback when not on PATH (AGENTS.md: Env).
@@ -32,11 +32,21 @@ test_all() {
 }
 
 apk() {
-  flutter build apk --release >"$log" 2>&1
+  local flavor="${1:-}"
+  if [ -n "$flavor" ]; then
+    # The testing build (issue #106): the release pipeline plus the
+    # flavor's separate application ID; APP_CHANNEL marks the Dart
+    # side, which hides and skips update management.
+    flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" >"$log" 2>&1
+  else
+    flutter build apk --release >"$log" 2>&1
+  fi
   local status=$?
   tail -n 3 "$log"
   if [ $status -eq 0 ]; then
-    echo "artifact: build/app/outputs/flutter-apk/app-release.apk"
+    local name="app-release"
+    [ -n "$flavor" ] && name="app-$flavor-release"
+    echo "artifact: build/app/outputs/flutter-apk/$name.apk"
   fi
   return $status
 }
@@ -57,7 +67,8 @@ usage: ./scripts/niman.sh <analyze|test|check|apk|linux>
   analyze  flutter analyze --fatal-infos (issue lines + summary only)
   test     flutter test (tail only)
   check    analyze + test; use before committing
-  apk      flutter build apk --release
+  apk [beta]      flutter build apk --release
+                  (beta: the testing build, app ID dev.niman.niman.beta)
   linux    flutter build linux --release
 Full logs: /tmp/niman/niman-<cmd>.log
 EOF
@@ -67,7 +78,7 @@ case "$cmd" in
   analyze) analyze ;;
   test) test_all ;;
   check) analyze && test_all ;;
-  apk) apk ;;
+  apk) apk "${2:-}" ;;
   linux) linux_build ;;
   *) usage; exit 1 ;;
 esac

@@ -90,6 +90,14 @@ jobs:
           mkdir -p dist
           cp build/app/outputs/flutter-apk/app-release.apk "dist/niman-$VERSION-android.apk"
 
+      # The testing build (issue #106): the release pipeline with the
+      # beta flavor's separate application ID (dev.niman.niman.beta),
+      # installable side by side with the official APK.
+      - run: flutter build apk --release --flavor beta --dart-define=APP_CHANNEL=testing --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+
+      - name: Stage testing artifact
+        run: cp build/app/outputs/flutter-apk/app-beta-release.apk "dist/niman-$VERSION-android-testing.apk"
+
       - uses: actions/upload-artifact@v4
         with:
           name: apk
