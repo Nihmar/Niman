@@ -420,6 +420,15 @@ one runs joins it.
      save order, the replaced text becomes a `sync` version, the temp
      file is renamed over, the index follows. Replacing
      `.niman/settings.json` reloads the settings.
+     A **note** takes the snapshot and the rename together on a short-lived
+     isolate, because the snapshot is synchronous work. An **attachment**
+     keeps no version, so it is swapped in by `swapFileIn` on the calling
+     isolate: stat, mkdir and rename are async I/O the event loop does not
+     wait on, and wrapping them in an isolate is what
+     [#103](https://github.com/Nihmar/Niman/issues/103) was — on Windows
+     that rename stopped returning every third attachment of a first sync
+     and never came back, leaking the isolate. Do not move async-only work
+     to an isolate.
    - *deleteRemote*: `DELETE` with `If-Match`. *trashLocal*:
      `NoteOps.syncTrash`, which uses `.trash/` whatever the trash toggle.
    - *moveRemote*: `MOVE`, then the row moves; a server that turns out
