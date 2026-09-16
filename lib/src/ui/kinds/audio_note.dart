@@ -9,6 +9,7 @@ import 'package:niman/src/core/settings/library_settings.dart'
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/audio_import.dart';
 import 'package:niman/src/library/wav_duration.dart';
+import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_queue.dart';
 import 'package:niman/src/ui/kinds/audio_capture.dart';
@@ -50,6 +51,7 @@ final class AudioKindGui implements NoteKindGUI {
       linkType: host.linkType,
       transcriptionModels: container?.read(transcriptionModelsProvider),
       transcriptionQueue: container?.read(transcriptionQueueProvider),
+      openAudioNotes: container?.read(openAudioNotesProvider),
     );
   }
 
@@ -93,6 +95,7 @@ class AudioNoteView extends StatefulWidget {
     this.readLengths,
     this.transcriptionModels,
     this.transcriptionQueue,
+    this.openAudioNotes,
     super.key,
   });
 
@@ -152,6 +155,10 @@ class AudioNoteView extends StatefulWidget {
   /// The app's transcription queue.
   final TranscriptionQueue? transcriptionQueue;
 
+  /// The registry this view marks its note open in, so transcripts that
+  /// finish meanwhile come to the view instead of the file.
+  final OpenAudioNotes? openAudioNotes;
+
   @override
   State<AudioNoteView> createState() => _AudioNoteViewState();
 }
@@ -194,6 +201,7 @@ class _AudioNoteViewState extends State<AudioNoteView>
         applyText: widget.onChanged,
         absoluteOf: _absoluteOf,
         contextOf: () => mounted ? context : null,
+        open: widget.openAudioNotes,
       )..attach();
     }
     var wasRecording = false;

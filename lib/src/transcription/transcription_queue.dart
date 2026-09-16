@@ -123,16 +123,25 @@ final class TranscriptionQueue extends ChangeNotifier {
     _pump();
   }
 
-  /// Removes and returns [notePath]'s finished jobs, for the note to apply.
-  List<TranscriptionJob> takeFinished(String notePath) {
+  /// Removes and returns the finished jobs of [notePath] (every note when
+  /// null), for their text to be written.
+  List<TranscriptionJob> takeFinished([String? notePath]) {
     final taken = [
       for (final job in _jobs)
-        if (job.notePath == notePath && job.finished) job,
+        if ((notePath == null || job.notePath == notePath) && job.finished) job,
     ];
     if (taken.isEmpty) return taken;
     _jobs.removeWhere(taken.contains);
     _notify();
     return taken;
+  }
+
+  /// Returns a finished [job] that could not be written yet, so a later
+  /// taker gets it.
+  void putBack(TranscriptionJob job) {
+    if (_jobs.contains(job)) return;
+    _jobs.add(job);
+    _notify();
   }
 
   void _onModels() {

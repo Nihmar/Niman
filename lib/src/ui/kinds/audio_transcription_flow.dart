@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/transcription/model_state.dart';
+import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_job.dart';
 import 'package:niman/src/transcription/transcription_model.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
@@ -29,7 +30,9 @@ import 'package:niman/src/ui/transcription/model_picker_sheet.dart';
 /// an empty description is filled; over an existing one the user chooses,
 /// before the job is queued, to replace it or add below it
 /// ([placeTranscript] has the rules). The snackbar's Undo puts the
-/// previous description back.
+/// previous description back. While the view is mounted the note is in
+/// [open], which keeps `AudioTranscriptWriter` from writing its file
+/// behind the view's back.
 final class AudioTranscriptionFlow {
   /// The flow of the note at [notePath].
   new({
@@ -40,6 +43,7 @@ final class AudioTranscriptionFlow {
     required this.applyText,
     required this.absoluteOf,
     required this.contextOf,
+    this.open,
   });
 
   /// The installation's models.
@@ -47,6 +51,9 @@ final class AudioTranscriptionFlow {
 
   /// The app's transcription queue.
   final TranscriptionQueue queue;
+
+  /// The registry of on-screen audio notes, when the app has one.
+  final OpenAudioNotes? open;
 
   /// The note's absolute path, the key of its jobs.
   final String notePath;
@@ -71,12 +78,17 @@ final class AudioTranscriptionFlow {
   /// Starts taking this note's finished jobs, including those that
   /// finished while it was closed.
   void attach() {
+    open?.open(notePath);
     queue.addListener(_scheduleCollect);
     _scheduleCollect();
   }
 
-  /// Stops taking results; running jobs go on in the queue.
-  void detach() => queue.removeListener(_scheduleCollect);
+  /// Stops taking results; running jobs go on in the queue, and their
+  /// text is written into the file once no view has the note.
+  void detach() {
+    queue.removeListener(_scheduleCollect);
+    open?.close(notePath);
+  }
 
   /// The line under "Transcribe" for [clip]: model and language, the
   /// model to choose, or why the format cannot be read.
