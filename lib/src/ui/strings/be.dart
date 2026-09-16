@@ -1230,6 +1230,18 @@ final class BelarusianStrings extends Strings {
     _ => '$count нязмененых радкоў',
   };
   @override
+  String get historyTakeHunk => 'Аднавіць тут';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Аднавіць 1 змену' : 'Аднавіць $count змен';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Выбраныя змены вяртаюцца да тэксту гэтай версіі. Нататка ў цяперашнім '
+      'выглядзе спачатку захоўваецца як версія, таму гэта можна адмяніць.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Нататка змянілася, пакуль ты быў тут — параўнанне абноўлена.';
+  @override
   String get historyVersionsTitle => 'Колькі версій захоўваць';
   @override
   String get historyVersionsSubtitle => 'Для кожнай заўвагі, у .history/';

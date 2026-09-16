@@ -1231,6 +1231,19 @@ final class UkrainianStrings extends Strings {
     _ => '$count незмінених рядків',
   };
   @override
+  String get historyTakeHunk => 'Відновити тут';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Відновити 1 зміну' : 'Відновити $count змін';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Вибрані зміни повертаються до тексту цієї версії. Нотатку в її '
+      'теперішньому вигляді спершу збережено як версію, тож це можна '
+      'скасувати.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Нотатка змінилася, поки ти був тут — порівняння оновлено.';
+  @override
   String get historyVersionsTitle => 'Скільки версій зберігати';
   @override
   String get historyVersionsSubtitle => 'Для кожної нотатки, у .history/';

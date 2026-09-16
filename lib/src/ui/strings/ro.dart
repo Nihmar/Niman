@@ -1247,6 +1247,18 @@ final class RomanianStrings extends Strings {
       ? '$count de linii nemodificate'
       : '$count linii nemodificate';
   @override
+  String get historyTakeHunk => 'Restaurează aici';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaurează 1 modificare' : 'Restaurează $count modificări';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Modificările alese revin la textul acestei versiuni. Nota așa cum este '
+      'acum este păstrată mai întâi ca versiune, așa că poți anula.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Nota s-a schimbat cât ai fost aici — comparația a fost actualizată.';
+  @override
   String get historyVersionsTitle => 'Versiuni de păstrat';
   @override
   String get historyVersionsSubtitle => 'Pentru fiecare notă, în .history/';

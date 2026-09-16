@@ -1227,6 +1227,19 @@ final class LatvianStrings extends Strings {
       ? '$count nemainīta rinda'
       : '$count nemainītas rindas';
   @override
+  String get historyTakeHunk => 'Atjaunot šeit';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Atjaunot 1 izmaiņu' : 'Atjaunot $count izmaiņas';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Izvēlētās izmaiņas atgriežas pie šīs versijas teksta. Piezīme tās '
+      'pašreizējā veidā vispirms tiek saglabāta kā versija, tāpēc vari to '
+      'atsaukt.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Piezīme mainījās, kamēr biji šeit — salīdzinājums ir atjaunināts.';
+  @override
   String get historyVersionsTitle => 'Cik versiju glabāt';
   @override
   String get historyVersionsSubtitle => 'Katrai piezīmei, katalogā .history/';

@@ -1210,6 +1210,19 @@ final class HindiStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 अपरिवर्तित पंक्ति' : '$count अपरिवर्तित पंक्तियाँ';
   @override
+  String get historyTakeHunk => 'यहाँ पुनर्स्थापित करें';
+  @override
+  String historyRestoreSelectedAction(int count) => count == 1
+      ? '1 बदलाव पुनर्स्थापित करें'
+      : '$count बदलाव पुनर्स्थापित करें';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'चुने गए बदलाव इस संस्करण के पाठ पर लौट जाते हैं। नोट जैसा अभी है, पहले '
+      'एक संस्करण के रूप में रखा जाता है, इसलिए आप इसे पूर्ववत कर सकते हैं।';
+  @override
+  String get historyNoteChangedReloaded =>
+      'आप यहाँ थे तब नोट बदल गया — तुलना ताज़ा कर दी गई है।';
+  @override
   String get historyVersionsTitle => 'कितने संस्करण रखें';
   @override
   String get historyVersionsSubtitle => 'प्रति नोट, .history/ में';

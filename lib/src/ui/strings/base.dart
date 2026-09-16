@@ -583,6 +583,10 @@ abstract base class Strings {
   String diffLineRange(int start, int end);
   String diffLineSingle(int line);
   String diffUnchanged(int count);
+  String get historyTakeHunk;
+  String historyRestoreSelectedAction(int count);
+  String get historyRestoreSelectedConfirmBody;
+  String get historyNoteChangedReloaded;
   String get historyVersionsTitle;
   String get historyVersionsSubtitle;
   String historyVersionsValue(int count);

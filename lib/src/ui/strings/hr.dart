@@ -1231,6 +1231,18 @@ final class CroatianStrings extends Strings {
     _ => '$count nepromijenjenih redaka',
   };
   @override
+  String get historyTakeHunk => 'Vrati ovdje';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Vrati 1 promjenu' : 'Vrati $count promjena';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Odabrane promjene vraćaju se na tekst ove verzije. Bilješka u trenutnom '
+      'obliku prvo se čuva kao verzija, pa ovo možeš poništiti.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Bilješka se promijenila dok si bio ovdje — usporedba je osvježena.';
+  @override
   String get historyVersionsTitle => 'Broj čuvanih verzija';
   @override
   String get historyVersionsSubtitle => 'Po napomeni, u .history/';

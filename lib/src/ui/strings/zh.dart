@@ -1114,6 +1114,16 @@ final class ChineseStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count 行未更改';
   @override
+  String get historyTakeHunk => '恢复此处';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '恢复 1 处更改' : '恢复 $count 处更改';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      '所选更改将回到此版本的文本。笔记的当前内容会先保存为一个版本，因此可以撤销。';
+  @override
+  String get historyNoteChangedReloaded => '你在此期间笔记发生了变化 — 比较已刷新。';
+  @override
   String get historyVersionsTitle => '保留版本数';
   @override
   String get historyVersionsSubtitle => '每篇笔记，存于 .history/';
