@@ -1241,6 +1241,18 @@ final class ItalianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 riga invariata' : '$count righe invariate';
   @override
+  String get historyTakeHunk => 'Ripristina qui';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Ripristina 1 modifica' : 'Ripristina $count modifiche';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      "Le modifiche scelte tornano al testo di questa versione. La nota com'è "
+      'ora viene prima conservata come versione, così puoi annullare.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'La nota è cambiata mentre eri qui: il confronto è stato aggiornato.';
+  @override
   String get historyVersionsTitle => 'Versioni da conservare';
   @override
   String get historyVersionsSubtitle => 'Per ogni nota, in .history/';

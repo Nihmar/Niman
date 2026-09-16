@@ -1231,6 +1231,18 @@ final class LithuanianStrings extends Strings {
     _ => '$count nepakeistos eilutės',
   };
   @override
+  String get historyTakeHunk => 'Atkurti čia';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Atkurti 1 pakeitimą' : 'Atkurti $count pakeitimus';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Pasirinkti pakeitimai grįžta į šios versijos tekstą. Užrašas toks, koks '
+      'yra dabar, pirma išsaugomas kaip versija, todėl gali tai atšaukti.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Užrašas pasikeitė, kol buvai čia — palyginimas atnaujintas.';
+  @override
   String get historyVersionsTitle => 'Kiek versijų saugoti';
   @override
   String get historyVersionsSubtitle =>

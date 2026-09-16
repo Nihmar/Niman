@@ -1249,6 +1249,20 @@ final class DutchStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 ongewijzigde regel' : '$count ongewijzigde regels';
   @override
+  String get historyTakeHunk => 'Hier herstellen';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? '1 wijziging herstellen' : '$count wijzigingen herstellen';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De gekozen wijzigingen keren terug naar de tekst van deze versie. De '
+      'notitie zoals die nu is wordt eerst als versie bewaard, dus je kunt dit '
+      'ongedaan maken.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'De notitie is veranderd terwijl je hier was — de vergelijking is '
+      'bijgewerkt.';
+  @override
   String get historyVersionsTitle => 'Te bewaren versies';
   @override
   String get historyVersionsSubtitle => 'Per notitie, in .history/';

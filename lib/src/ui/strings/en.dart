@@ -1226,6 +1226,19 @@ final class EnglishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 unchanged line' : '$count unchanged lines';
   @override
+  String get historyTakeHunk => 'Restore this';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restore 1 change' : 'Restore $count changes';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      "The changes you picked go back to this version's text. The note as it "
+      'is now is kept as a version first, so you can undo this.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'The note changed while you were here — the comparison has been '
+      'refreshed.';
+  @override
   String get historyVersionsTitle => 'Versions to keep';
   @override
   String get historyVersionsSubtitle => 'Per note, in .history/';

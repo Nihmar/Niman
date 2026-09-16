@@ -1260,6 +1260,18 @@ final class SpanishStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 línea sin cambios' : '$count líneas sin cambios';
   @override
+  String get historyTakeHunk => 'Restaurar aquí';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaurar 1 cambio' : 'Restaurar $count cambios';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Los cambios elegidos vuelven al texto de esta versión. La nota tal como '
+      'está ahora se conserva antes como versión, así que puedes deshacerlo.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'La nota cambió mientras estabas aquí: la comparación se ha actualizado.';
+  @override
   String get historyVersionsTitle => 'Versiones que conservar';
   @override
   String get historyVersionsSubtitle => 'Por nota, en .history/';

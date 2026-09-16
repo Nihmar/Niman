@@ -1245,6 +1245,18 @@ final class MacedonianStrings extends Strings {
       ? '$count непроменет ред'
       : '$count непроменети редови';
   @override
+  String get historyTakeHunk => 'Врати овде';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Врати 1 промена' : 'Врати $count промени';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Избраните промени се враќаат на текстот на оваа верзија. Белешката во '
+      'сегашната форма прво се чува како верзија, па ова можеш да го поништиш.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Белешката се смени додека беше тука — споредбата е освежена.';
+  @override
   String get historyVersionsTitle => 'Број на зачувани верзии';
   @override
   String get historyVersionsSubtitle => 'За секоја белешка, во .history/';

@@ -1230,6 +1230,18 @@ final class NorwegianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 uendret linje' : '$count uendrede linjer';
   @override
+  String get historyTakeHunk => 'Gjenopprett her';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Gjenopprett 1 endring' : 'Gjenopprett $count endringer';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'De valgte endringene går tilbake til teksten i denne versjonen. Notatet '
+      'slik det er nå beholdes først som en versjon, så du kan angre.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Notatet ble endret mens du var her — sammenligningen er oppdatert.';
+  @override
   String get historyVersionsTitle => 'Versjoner som beholdes';
   @override
   String get historyVersionsSubtitle => 'Per notat, i .history/';

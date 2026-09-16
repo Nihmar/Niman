@@ -1212,6 +1212,19 @@ final class EstonianStrings extends Strings {
   @override
   String diffUnchanged(int count) => '$count muutmata rida';
   @override
+  String get historyTakeHunk => 'Taasta siin';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Taasta 1 muudatus' : 'Taasta $count muudatust';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Valitud muudatused pöörduvad tagasi selle versiooni teksti juurde. '
+      'Märkme praegune kuju säilitatakse enne versioonina, nii et saad selle '
+      'tagasi võtta.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Märge muutus, kui sa siin olid — võrdlus on värskendatud.';
+  @override
   String get historyVersionsTitle => 'Säilitatavad versioonid';
   @override
   String get historyVersionsSubtitle => 'Iga märkme kohta, kaustas .history/';

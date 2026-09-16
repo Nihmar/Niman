@@ -1244,6 +1244,18 @@ final class PortugueseStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 linha sem alterações' : '$count linhas sem alterações';
   @override
+  String get historyTakeHunk => 'Restaurar aqui';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Restaurar 1 alteração' : 'Restaurar $count alterações';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'As alterações escolhidas voltam ao texto desta versão. A nota como está '
+      'agora é guardada antes como versão, por isso podes desfazer.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'A nota mudou enquanto estavas aqui — a comparação foi atualizada.';
+  @override
   String get historyVersionsTitle => 'Versões a manter';
   @override
   String get historyVersionsSubtitle => 'Por nota, em .history/';
