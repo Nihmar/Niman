@@ -1592,4 +1592,33 @@ final class DutchStrings extends Strings {
       'eerst.';
   @override
   String get syncNeedsConfirmation => 'Wacht op je bevestiging';
+  @override
+  String get syncMergeIntro =>
+      'Wijzigingen die elkaar niet overlappen, zijn al samengevoegd; kies wat '
+      'je houdt waar ze elkaar wel overlappen.';
+  @override
+  String get syncMergeClean =>
+      'De twee versies voegen zichzelf samen: niets overlapt.';
+  @override
+  String get syncMergeNoBase =>
+      'Er is geen gedeelde versie om op samen te voegen, dus het hele bestand '
+      'moet gekozen worden.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlap $index van $total';
+  @override
+  String get syncMergeFromLocal => 'Van dit apparaat';
+  @override
+  String get syncMergeFromRemote => 'Van de server';
+  @override
+  String get syncMergeRemovedLines => 'Verwijderde regels';
+  @override
+  String get syncMergeKeepLocal => 'Van mij';
+  @override
+  String get syncMergeKeepRemote => 'Van de server';
+  @override
+  String get syncMergeKeepBoth => 'Beide';
+  @override
+  String get syncMergeSave => 'Samenvoeging opslaan';
+  @override
+  String get syncMergeKeepWhole => 'Of houd één hele kopie';
 }

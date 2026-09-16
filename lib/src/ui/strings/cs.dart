@@ -1577,4 +1577,31 @@ final class CzechStrings extends Strings {
       '„Synchronizovat nyní“ ukáže, co by se odstranilo, a nejdřív se zeptá.';
   @override
   String get syncNeedsConfirmation => 'Čeká na vaše potvrzení';
+  @override
+  String get syncMergeIntro =>
+      'Úpravy, které se nepřekrývají, jsou už sloučené; tam, kde se '
+      'překrývají, vyberte, co ponechat.';
+  @override
+  String get syncMergeClean => 'Obě verze se sloučí samy: nic se nepřekrývá.';
+  @override
+  String get syncMergeNoBase =>
+      'Není společná verze, na které sloučit, takže se vybírá celý soubor.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Překryv $index z $total';
+  @override
+  String get syncMergeFromLocal => 'Z tohoto zařízení';
+  @override
+  String get syncMergeFromRemote => 'Ze serveru';
+  @override
+  String get syncMergeRemovedLines => 'Odebrané řádky';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Serveru';
+  @override
+  String get syncMergeKeepBoth => 'Obojí';
+  @override
+  String get syncMergeSave => 'Uložit sloučení';
+  @override
+  String get syncMergeKeepWhole => 'Nebo ponechat jednu celou kopii';
 }

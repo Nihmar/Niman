@@ -1573,4 +1573,33 @@ final class SwedishStrings extends Strings {
       '”Synka nu” visar vad som skulle tas bort och frågar först.';
   @override
   String get syncNeedsConfirmation => 'Väntar på din bekräftelse';
+  @override
+  String get syncMergeIntro =>
+      'Ändringar som inte överlappar är redan sammanfogade; välj vad du vill '
+      'behålla där de överlappar.';
+  @override
+  String get syncMergeClean =>
+      'De två versionerna sammanfogas av sig själva: inget överlappar.';
+  @override
+  String get syncMergeNoBase =>
+      'Det finns ingen gemensam version att sammanfoga på, så hela filen måste '
+      'väljas.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Överlapp $index av $total';
+  @override
+  String get syncMergeFromLocal => 'Från den här enheten';
+  @override
+  String get syncMergeFromRemote => 'Från servern';
+  @override
+  String get syncMergeRemovedLines => 'Rader borttagna';
+  @override
+  String get syncMergeKeepLocal => 'Mina';
+  @override
+  String get syncMergeKeepRemote => 'Serverns';
+  @override
+  String get syncMergeKeepBoth => 'Båda';
+  @override
+  String get syncMergeSave => 'Spara sammanfogningen';
+  @override
+  String get syncMergeKeepWhole => 'Eller behåll en hel kopia';
 }

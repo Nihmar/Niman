@@ -1600,4 +1600,34 @@ final class RomanianStrings extends Strings {
       '„Sincronizează acum” arată ce ar fi șters și întreabă întâi.';
   @override
   String get syncNeedsConfirmation => 'Se așteaptă confirmarea ta';
+  @override
+  String get syncMergeIntro =>
+      'Modificările care nu se suprapun sunt deja îmbinate; alege ce păstrezi '
+      'acolo unde se suprapun.';
+  @override
+  String get syncMergeClean =>
+      'Cele două versiuni se îmbină singure: nimic nu se suprapune.';
+  @override
+  String get syncMergeNoBase =>
+      'Nu există o versiune comună pe care să se îmbine, așa că trebuie ales '
+      'fișierul întreg.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Suprapunerea $index din $total';
+  @override
+  String get syncMergeFromLocal => 'De pe acest dispozitiv';
+  @override
+  String get syncMergeFromRemote => 'De pe server';
+  @override
+  String get syncMergeRemovedLines => 'Linii eliminate';
+  @override
+  String get syncMergeKeepLocal => 'Ale mele';
+  @override
+  String get syncMergeKeepRemote => 'De pe server';
+  @override
+  String get syncMergeKeepBoth => 'Ambele';
+  @override
+  String get syncMergeSave => 'Salvează îmbinarea';
+  @override
+  String get syncMergeKeepWhole => 'Sau păstrează o copie întreagă';
 }

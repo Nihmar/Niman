@@ -1591,4 +1591,34 @@ final class AlbanianStrings extends Strings {
       '„Sinkronizo tani" tregon çfarë do të hiqej dhe pyet më parë.';
   @override
   String get syncNeedsConfirmation => 'Në pritje të konfirmimit tuaj';
+  @override
+  String get syncMergeIntro =>
+      'Ndryshimet që nuk mbivendosen janë bashkuar tashmë; zgjidhni çfarë të '
+      'mbani aty ku mbivendosen.';
+  @override
+  String get syncMergeClean =>
+      'Dy versionet bashkohen vetë: asgjë nuk mbivendoset.';
+  @override
+  String get syncMergeNoBase =>
+      'Nuk ka një version të përbashkët për t’u bashkuar, prandaj duhet '
+      'zgjedhur i gjithë skedari.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Mbivendosja $index nga $total';
+  @override
+  String get syncMergeFromLocal => 'Nga kjo pajisje';
+  @override
+  String get syncMergeFromRemote => 'Nga serveri';
+  @override
+  String get syncMergeRemovedLines => 'Rreshta të hequr';
+  @override
+  String get syncMergeKeepLocal => 'Të miat';
+  @override
+  String get syncMergeKeepRemote => 'Të serverit';
+  @override
+  String get syncMergeKeepBoth => 'Të dyja';
+  @override
+  String get syncMergeSave => 'Ruaj bashkimin';
+  @override
+  String get syncMergeKeepWhole => 'Ose mbaj një kopje të plotë';
 }

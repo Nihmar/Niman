@@ -1624,4 +1624,34 @@ final class FrenchStrings extends Strings {
       'd’abord.';
   @override
   String get syncNeedsConfirmation => 'En attente de votre confirmation';
+  @override
+  String get syncMergeIntro =>
+      'Les modifications qui ne se chevauchent pas sont déjà fusionnées ; '
+      'choisissez quoi garder là où elles se chevauchent.';
+  @override
+  String get syncMergeClean =>
+      'Les deux versions fusionnent d’elles-mêmes : rien ne se chevauche.';
+  @override
+  String get syncMergeNoBase =>
+      'Aucune version commune sur laquelle fusionner : il faut choisir le '
+      'fichier entier.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Chevauchement $index sur $total';
+  @override
+  String get syncMergeFromLocal => 'De cet appareil';
+  @override
+  String get syncMergeFromRemote => 'Du serveur';
+  @override
+  String get syncMergeRemovedLines => 'Lignes supprimées';
+  @override
+  String get syncMergeKeepLocal => 'Les miennes';
+  @override
+  String get syncMergeKeepRemote => 'Du serveur';
+  @override
+  String get syncMergeKeepBoth => 'Les deux';
+  @override
+  String get syncMergeSave => 'Enregistrer la fusion';
+  @override
+  String get syncMergeKeepWhole => 'Ou garder une copie entière';
 }

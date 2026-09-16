@@ -922,4 +922,17 @@ final class AppStrings {
   static String get syncPausedServerHint => _s.syncPausedServerHint;
   static String get syncPausedConfirmHint => _s.syncPausedConfirmHint;
   static String get syncNeedsConfirmation => _s.syncNeedsConfirmation;
+  static String get syncMergeIntro => _s.syncMergeIntro;
+  static String get syncMergeClean => _s.syncMergeClean;
+  static String get syncMergeNoBase => _s.syncMergeNoBase;
+  static String syncMergeOverlap(int index, int total) =>
+      _s.syncMergeOverlap(index, total);
+  static String get syncMergeFromLocal => _s.syncMergeFromLocal;
+  static String get syncMergeFromRemote => _s.syncMergeFromRemote;
+  static String get syncMergeRemovedLines => _s.syncMergeRemovedLines;
+  static String get syncMergeKeepLocal => _s.syncMergeKeepLocal;
+  static String get syncMergeKeepRemote => _s.syncMergeKeepRemote;
+  static String get syncMergeKeepBoth => _s.syncMergeKeepBoth;
+  static String get syncMergeSave => _s.syncMergeSave;
+  static String get syncMergeKeepWhole => _s.syncMergeKeepWhole;
 }

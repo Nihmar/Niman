@@ -1579,4 +1579,31 @@ final class SlovakStrings extends Strings {
       '„Synchronizovať teraz” ukáže, čo by sa odstránilo, a najprv sa spýta.';
   @override
   String get syncNeedsConfirmation => 'Čaká sa na vaše potvrdenie';
+  @override
+  String get syncMergeIntro =>
+      'Úpravy, ktoré sa neprekrývajú, sú už zlúčené; tam, kde sa prekrývajú, '
+      'vyberte, čo ponechať.';
+  @override
+  String get syncMergeClean => 'Obe verzie sa zlúčia samy: nič sa neprekrýva.';
+  @override
+  String get syncMergeNoBase =>
+      'Nie je spoločná verzia, na ktorej zlúčiť, takže sa vyberá celý súbor.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Prekryv $index z $total';
+  @override
+  String get syncMergeFromLocal => 'Z tohto zariadenia';
+  @override
+  String get syncMergeFromRemote => 'Zo servera';
+  @override
+  String get syncMergeRemovedLines => 'Odstránené riadky';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Servera';
+  @override
+  String get syncMergeKeepBoth => 'Oboje';
+  @override
+  String get syncMergeSave => 'Uložiť zlúčenie';
+  @override
+  String get syncMergeKeepWhole => 'Alebo ponechať jednu celú kópiu';
 }

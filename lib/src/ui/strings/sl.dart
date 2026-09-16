@@ -1590,4 +1590,34 @@ final class SlovenianStrings extends Strings {
       '„Sinhroniziraj zdaj” pokaže, kaj bi bilo odstranjeno, in prej vpraša.';
   @override
   String get syncNeedsConfirmation => 'Čaka na vašo potrditev';
+  @override
+  String get syncMergeIntro =>
+      'Spremembe, ki se ne prekrivajo, so že združene; kjer se prekrivajo, '
+      'izberite, kaj obdržati.';
+  @override
+  String get syncMergeClean =>
+      'Različici se združita sami: nič se ne prekriva.';
+  @override
+  String get syncMergeNoBase =>
+      'Ni skupne različice za združitev, zato je treba izbrati celotno '
+      'datoteko.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Prekrivanje $index od $total';
+  @override
+  String get syncMergeFromLocal => 'S te naprave';
+  @override
+  String get syncMergeFromRemote => 'S strežnika';
+  @override
+  String get syncMergeRemovedLines => 'Odstranjene vrstice';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Strežnikove';
+  @override
+  String get syncMergeKeepBoth => 'Obe';
+  @override
+  String get syncMergeSave => 'Shrani združitev';
+  @override
+  String get syncMergeKeepWhole => 'Ali obdržite eno celo kopijo';
 }

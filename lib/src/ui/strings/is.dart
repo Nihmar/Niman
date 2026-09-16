@@ -1574,4 +1574,33 @@ final class IcelandicStrings extends Strings {
       '„Samstilla núna“ sýnir hvað yrði fjarlægt og spyr fyrst.';
   @override
   String get syncNeedsConfirmation => 'Bíður eftir staðfestingu þinni';
+  @override
+  String get syncMergeIntro =>
+      'Breytingar sem skarast ekki eru þegar sameinaðar; veldu hverju á að '
+      'halda þar sem þær skarast.';
+  @override
+  String get syncMergeClean =>
+      'Útgáfurnar tvær sameinast af sjálfu sér: ekkert skarast.';
+  @override
+  String get syncMergeNoBase =>
+      'Engin sameiginleg útgáfa til að sameina á, svo velja verður alla '
+      'skrána.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Skörun $index af $total';
+  @override
+  String get syncMergeFromLocal => 'Úr þessu tæki';
+  @override
+  String get syncMergeFromRemote => 'Frá netþjóninum';
+  @override
+  String get syncMergeRemovedLines => 'Línur fjarlægðar';
+  @override
+  String get syncMergeKeepLocal => 'Mínar';
+  @override
+  String get syncMergeKeepRemote => 'Netþjónsins';
+  @override
+  String get syncMergeKeepBoth => 'Báðar';
+  @override
+  String get syncMergeSave => 'Vista sameininguna';
+  @override
+  String get syncMergeKeepWhole => 'Eða halda einu heilu eintaki';
 }

@@ -98,15 +98,27 @@ example), and the files the operating system drops into folders
 
 ### Conflicts
 
-A file changed both here and on the server since the last sync is a
-**conflict**: neither copy is touched. The sync icon gets a dot; tap it
-to see the list, then **Resolve** a file:
+A note changed both here and on the server since the last sync is merged
+when the edits are in different places: your new line at the end and the
+title someone fixed on another device both survive, and you are not
+asked anything. The note's [history](organization.md#history) keeps the
+text the merge replaced.
 
-- the two versions appear as a diff — lines marked − are the server's,
-  lines marked + are this device's;
-- **Keep this device's** uploads your copy over the server's;
-- **Keep the server's** replaces your copy, which stays in the note's
-  [history](organization.md#history), so nothing is lost.
+Only edits to the **same lines** need you. Those files stay untouched on
+both sides, the sync icon gets a dot, and **Resolve** opens the merge:
+
+- everything that merged by itself is already there, marked with where it
+  came from;
+- each overlap shows both versions with a choice — **Mine**, **Theirs**
+  or **Both**;
+- **Save the merge** writes the result here and on the server;
+- or keep one whole copy: **Keep this device's** uploads yours, **Keep
+  the server's** replaces yours (which stays in the history).
+
+Files with no version in common — created on both devices, or an
+attachment — cannot be merged: there the two whole copies are shown as a
+diff (lines marked − are the server's, + are this device's) and you keep
+one.
 
 Library settings (`.niman/settings.json`) never conflict: the newer copy
 wins.

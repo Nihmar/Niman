@@ -1436,4 +1436,28 @@ final class JapaneseStrings extends Strings {
   String get syncPausedConfirmHint => '「今すぐ同期」では、削除される内容が表示され、先に確認を求められます。';
   @override
   String get syncNeedsConfirmation => '確認を待っています';
+  @override
+  String get syncMergeIntro => '重ならない編集はすでに統合されています。重なっている箇所は、どちらを残すか選んでください。';
+  @override
+  String get syncMergeClean => '2 つのバージョンはそのまま統合できます。重なりはありません。';
+  @override
+  String get syncMergeNoBase => '統合の元になる共通のバージョンがないため、ファイル全体を選ぶ必要があります。';
+  @override
+  String syncMergeOverlap(int index, int total) => '重なり $index / $total';
+  @override
+  String get syncMergeFromLocal => 'このデバイスから';
+  @override
+  String get syncMergeFromRemote => 'サーバーから';
+  @override
+  String get syncMergeRemovedLines => '削除された行';
+  @override
+  String get syncMergeKeepLocal => 'このデバイス';
+  @override
+  String get syncMergeKeepRemote => 'サーバー';
+  @override
+  String get syncMergeKeepBoth => '両方';
+  @override
+  String get syncMergeSave => '統合を保存';
+  @override
+  String get syncMergeKeepWhole => 'または、どちらか一方をまるごと残す';
 }

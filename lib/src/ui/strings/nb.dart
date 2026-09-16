@@ -1568,4 +1568,32 @@ final class NorwegianStrings extends Strings {
       '«Synkroniser nå» viser hva som ville blitt fjernet, og spør først.';
   @override
   String get syncNeedsConfirmation => 'Venter på bekreftelsen din';
+  @override
+  String get syncMergeIntro =>
+      'Endringer som ikke overlapper, er allerede flettet; velg hva du vil '
+      'beholde der de overlapper.';
+  @override
+  String get syncMergeClean =>
+      'De to versjonene flettes av seg selv: ingenting overlapper.';
+  @override
+  String get syncMergeNoBase =>
+      'Ingen felles versjon å flette på, så hele filen må velges.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlapp $index av $total';
+  @override
+  String get syncMergeFromLocal => 'Fra denne enheten';
+  @override
+  String get syncMergeFromRemote => 'Fra serveren';
+  @override
+  String get syncMergeRemovedLines => 'Linjer fjernet';
+  @override
+  String get syncMergeKeepLocal => 'Mine';
+  @override
+  String get syncMergeKeepRemote => 'Serverens';
+  @override
+  String get syncMergeKeepBoth => 'Begge';
+  @override
+  String get syncMergeSave => 'Lagre flettingen';
+  @override
+  String get syncMergeKeepWhole => 'Eller behold én hel kopi';
 }

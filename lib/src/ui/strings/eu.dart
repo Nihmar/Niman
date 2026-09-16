@@ -1594,4 +1594,34 @@ final class BasqueStrings extends Strings {
       'aurretik galdetzen du.';
   @override
   String get syncNeedsConfirmation => 'Zure berrespenaren zain';
+  @override
+  String get syncMergeIntro =>
+      'Gainjartzen ez diren aldaketak jada batuta daude; gainjartzen direnetan '
+      'aukeratu zer gorde.';
+  @override
+  String get syncMergeClean =>
+      'Bi bertsioak berez batzen dira: ez da ezer gainjartzen.';
+  @override
+  String get syncMergeNoBase =>
+      'Ez dago bertsio komunik batzeko, beraz fitxategi osoa aukeratu behar '
+      'da.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Gainjartzea $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Gailu honetakoa';
+  @override
+  String get syncMergeFromRemote => 'Zerbitzarikoa';
+  @override
+  String get syncMergeRemovedLines => 'Kendutako lerroak';
+  @override
+  String get syncMergeKeepLocal => 'Nireak';
+  @override
+  String get syncMergeKeepRemote => 'Zerbitzarikoak';
+  @override
+  String get syncMergeKeepBoth => 'Biak';
+  @override
+  String get syncMergeSave => 'Gorde bateratzea';
+  @override
+  String get syncMergeKeepWhole => 'Edo gorde kopia oso bat';
 }

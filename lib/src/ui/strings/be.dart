@@ -1593,4 +1593,32 @@ final class BelarusianStrings extends Strings {
       '«Сінхранізаваць зараз» пакажа, што будзе выдалена, і спачатку спытае.';
   @override
   String get syncNeedsConfirmation => 'Чаканне вашага пацвярджэння';
+  @override
+  String get syncMergeIntro =>
+      'Змены, якія не перакрываюцца, ужо аб’яднаны; там, дзе перакрываюцца, '
+      'выберыце, што пакінуць.';
+  @override
+  String get syncMergeClean =>
+      'Дзве версіі аб’ядноўваюцца самі: нічога не перакрываецца.';
+  @override
+  String get syncMergeNoBase =>
+      'Няма агульнай версіі для аб’яднання, таму трэба выбраць увесь файл.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Перакрыццё $index з $total';
+  @override
+  String get syncMergeFromLocal => 'З гэтай прылады';
+  @override
+  String get syncMergeFromRemote => 'З сервера';
+  @override
+  String get syncMergeRemovedLines => 'Радкі выдалены';
+  @override
+  String get syncMergeKeepLocal => 'Мае';
+  @override
+  String get syncMergeKeepRemote => 'Сервера';
+  @override
+  String get syncMergeKeepBoth => 'Абодва';
+  @override
+  String get syncMergeSave => 'Захаваць аб’яднанне';
+  @override
+  String get syncMergeKeepWhole => 'Або пакінуць адну цэлую копію';
 }

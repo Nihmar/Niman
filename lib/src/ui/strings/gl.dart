@@ -1587,4 +1587,34 @@ final class GalicianStrings extends Strings {
       '“Sincronizar agora” mostra o que se borraría e pide confirmación.';
   @override
   String get syncNeedsConfirmation => 'Agardando pola túa confirmación';
+  @override
+  String get syncMergeIntro =>
+      'Os cambios que non se superpoñen xa están unidos; escolle que conservar '
+      'onde si se superpoñen.';
+  @override
+  String get syncMergeClean =>
+      'As dúas versións únense soas: non hai nada que se superpoña.';
+  @override
+  String get syncMergeNoBase =>
+      'Non hai unha versión común sobre a que unir, así que hai que escoller o '
+      'ficheiro enteiro.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Superposición $index de $total';
+  @override
+  String get syncMergeFromLocal => 'Deste dispositivo';
+  @override
+  String get syncMergeFromRemote => 'Do servidor';
+  @override
+  String get syncMergeRemovedLines => 'Liñas eliminadas';
+  @override
+  String get syncMergeKeepLocal => 'As miñas';
+  @override
+  String get syncMergeKeepRemote => 'Do servidor';
+  @override
+  String get syncMergeKeepBoth => 'Ambas';
+  @override
+  String get syncMergeSave => 'Gardar a unión';
+  @override
+  String get syncMergeKeepWhole => 'Ou conserva unha copia enteira';
 }

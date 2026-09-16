@@ -1590,4 +1590,34 @@ final class LithuanianStrings extends Strings {
       'paklausia.';
   @override
   String get syncNeedsConfirmation => 'Laukiama jūsų patvirtinimo';
+  @override
+  String get syncMergeIntro =>
+      'Pakeitimai, kurie nepersidengia, jau sulieti; ten, kur persidengia, '
+      'pasirinkite, ką palikti.';
+  @override
+  String get syncMergeClean =>
+      'Abi versijos susilieja pačios: niekas nepersidengia.';
+  @override
+  String get syncMergeNoBase =>
+      'Nėra bendros versijos, ant kurios būtų galima sulieti, todėl reikia '
+      'pasirinkti visą failą.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Persidengimas $index iš $total';
+  @override
+  String get syncMergeFromLocal => 'Iš šio įrenginio';
+  @override
+  String get syncMergeFromRemote => 'Iš serverio';
+  @override
+  String get syncMergeRemovedLines => 'Pašalintos eilutės';
+  @override
+  String get syncMergeKeepLocal => 'Mano';
+  @override
+  String get syncMergeKeepRemote => 'Serverio';
+  @override
+  String get syncMergeKeepBoth => 'Abi';
+  @override
+  String get syncMergeSave => 'Išsaugoti suliejimą';
+  @override
+  String get syncMergeKeepWhole => 'Arba palikti vieną visą kopiją';
 }

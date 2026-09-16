@@ -1596,4 +1596,33 @@ final class SerbianStrings extends Strings {
       '„Синхронизуј сада“ показује шта би било уклоњено и прво пита.';
   @override
   String get syncNeedsConfirmation => 'Чека вашу потврду';
+  @override
+  String get syncMergeIntro =>
+      'Измене које се не преклапају већ су спојене; тамо где се преклапају, '
+      'изаберите шта да задржите.';
+  @override
+  String get syncMergeClean =>
+      'Две верзије се спајају саме: ништа се не преклапа.';
+  @override
+  String get syncMergeNoBase =>
+      'Нема заједничке верзије за спајање, па се бира цео фајл.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Преклапање $index од $total';
+  @override
+  String get syncMergeFromLocal => 'Са овог уређаја';
+  @override
+  String get syncMergeFromRemote => 'Са сервера';
+  @override
+  String get syncMergeRemovedLines => 'Уклоњени редови';
+  @override
+  String get syncMergeKeepLocal => 'Моји';
+  @override
+  String get syncMergeKeepRemote => 'Серверови';
+  @override
+  String get syncMergeKeepBoth => 'Оба';
+  @override
+  String get syncMergeSave => 'Сачувај спајање';
+  @override
+  String get syncMergeKeepWhole => 'Или задржите једну целу копију';
 }

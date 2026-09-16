@@ -1612,4 +1612,35 @@ final class GermanStrings extends Strings {
       'nach.';
   @override
   String get syncNeedsConfirmation => 'Wartet auf deine Bestätigung';
+  @override
+  String get syncMergeIntro =>
+      'Änderungen, die sich nicht überschneiden, sind schon zusammengeführt; '
+      'wähle bei Überschneidungen, was bleibt.';
+  @override
+  String get syncMergeClean =>
+      'Die beiden Versionen lassen sich von selbst zusammenführen: nichts '
+      'überschneidet sich.';
+  @override
+  String get syncMergeNoBase =>
+      'Es gibt keine gemeinsame Version zum Zusammenführen, also muss die '
+      'ganze Datei gewählt werden.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Überschneidung $index von $total';
+  @override
+  String get syncMergeFromLocal => 'Von diesem Gerät';
+  @override
+  String get syncMergeFromRemote => 'Vom Server';
+  @override
+  String get syncMergeRemovedLines => 'Entfernte Zeilen';
+  @override
+  String get syncMergeKeepLocal => 'Meine';
+  @override
+  String get syncMergeKeepRemote => 'Vom Server';
+  @override
+  String get syncMergeKeepBoth => 'Beide';
+  @override
+  String get syncMergeSave => 'Zusammenführung speichern';
+  @override
+  String get syncMergeKeepWhole => 'Oder eine ganze Kopie behalten';
 }

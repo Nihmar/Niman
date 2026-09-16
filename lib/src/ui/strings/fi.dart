@@ -1581,4 +1581,34 @@ final class FinnishStrings extends Strings {
       '”Synkronoi nyt” näyttää, mitä poistettaisiin, ja kysyy ensin.';
   @override
   String get syncNeedsConfirmation => 'Odottaa vahvistustasi';
+  @override
+  String get syncMergeIntro =>
+      'Muutokset, jotka eivät mene päällekkäin, on jo yhdistetty; valitse '
+      'päällekkäisistä kohdista, mitä säilytetään.';
+  @override
+  String get syncMergeClean =>
+      'Versiot yhdistyvät itsestään: mikään ei mene päällekkäin.';
+  @override
+  String get syncMergeNoBase =>
+      'Yhteistä versiota ei ole, jonka päälle yhdistää, joten koko tiedosto on '
+      'valittava.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Päällekkäisyys $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Tästä laitteesta';
+  @override
+  String get syncMergeFromRemote => 'Palvelimelta';
+  @override
+  String get syncMergeRemovedLines => 'Poistetut rivit';
+  @override
+  String get syncMergeKeepLocal => 'Omat';
+  @override
+  String get syncMergeKeepRemote => 'Palvelimen';
+  @override
+  String get syncMergeKeepBoth => 'Molemmat';
+  @override
+  String get syncMergeSave => 'Tallenna yhdistelmä';
+  @override
+  String get syncMergeKeepWhole => 'Tai säilytä yksi kokonainen kopio';
 }

@@ -1594,4 +1594,33 @@ final class UkrainianStrings extends Strings {
       '«Синхронізувати зараз» покаже, що буде вилучено, і спершу запитає.';
   @override
   String get syncNeedsConfirmation => 'Очікування вашого підтвердження';
+  @override
+  String get syncMergeIntro =>
+      'Зміни, які не перекриваються, уже об’єднано; там, де перекриваються, '
+      'виберіть, що залишити.';
+  @override
+  String get syncMergeClean =>
+      'Дві версії об’єднуються самі: ніщо не перекривається.';
+  @override
+  String get syncMergeNoBase =>
+      'Немає спільної версії для об’єднання, тому доводиться вибирати весь '
+      'файл.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Перекриття $index з $total';
+  @override
+  String get syncMergeFromLocal => 'Із цього пристрою';
+  @override
+  String get syncMergeFromRemote => 'Із сервера';
+  @override
+  String get syncMergeRemovedLines => 'Вилучені рядки';
+  @override
+  String get syncMergeKeepLocal => 'Мої';
+  @override
+  String get syncMergeKeepRemote => 'Сервера';
+  @override
+  String get syncMergeKeepBoth => 'Обидва';
+  @override
+  String get syncMergeSave => 'Зберегти об’єднання';
+  @override
+  String get syncMergeKeepWhole => 'Або залишити одну цілу копію';
 }

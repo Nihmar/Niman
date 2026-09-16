@@ -1572,4 +1572,34 @@ final class ItalianStrings extends Strings {
       '«Sincronizza ora» mostra cosa verrebbe eliminato e chiede conferma.';
   @override
   String get syncNeedsConfirmation => 'Serve una conferma';
+  @override
+  String get syncMergeIntro =>
+      'Le modifiche che non si sovrappongono sono già unite; scegli cosa '
+      'tenere dove si sovrappongono.';
+  @override
+  String get syncMergeClean =>
+      "Le due versioni si uniscono da sole: non c'è nulla che si sovrappone.";
+  @override
+  String get syncMergeNoBase =>
+      "Non c'è una versione comune su cui unire, quindi si sceglie il file "
+      'intero.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Sovrapposizione $index di $total';
+  @override
+  String get syncMergeFromLocal => 'Da questo dispositivo';
+  @override
+  String get syncMergeFromRemote => 'Dal server';
+  @override
+  String get syncMergeRemovedLines => 'Righe rimosse';
+  @override
+  String get syncMergeKeepLocal => 'Le mie';
+  @override
+  String get syncMergeKeepRemote => 'Del server';
+  @override
+  String get syncMergeKeepBoth => 'Entrambe';
+  @override
+  String get syncMergeSave => "Salva l'unione";
+  @override
+  String get syncMergeKeepWhole => 'Oppure tieni una copia intera';
 }

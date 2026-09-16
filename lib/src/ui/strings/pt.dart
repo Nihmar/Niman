@@ -1584,4 +1584,34 @@ final class PortugueseStrings extends Strings {
       '“Sincronizar agora” mostra o que seria removido e pergunta antes.';
   @override
   String get syncNeedsConfirmation => 'Esperando sua confirmação';
+  @override
+  String get syncMergeIntro =>
+      'As alterações que não se sobrepõem já estão unidas; escolha o que '
+      'manter onde elas se sobrepõem.';
+  @override
+  String get syncMergeClean =>
+      'As duas versões se unem sozinhas: nada se sobrepõe.';
+  @override
+  String get syncMergeNoBase =>
+      'Não há uma versão comum para unir, então é preciso escolher o arquivo '
+      'inteiro.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Sobreposição $index de $total';
+  @override
+  String get syncMergeFromLocal => 'Deste dispositivo';
+  @override
+  String get syncMergeFromRemote => 'Do servidor';
+  @override
+  String get syncMergeRemovedLines => 'Linhas removidas';
+  @override
+  String get syncMergeKeepLocal => 'As minhas';
+  @override
+  String get syncMergeKeepRemote => 'Do servidor';
+  @override
+  String get syncMergeKeepBoth => 'Ambas';
+  @override
+  String get syncMergeSave => 'Salvar a união';
+  @override
+  String get syncMergeKeepWhole => 'Ou mantenha uma cópia inteira';
 }

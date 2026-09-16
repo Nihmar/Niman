@@ -1554,4 +1554,33 @@ final class TurkishStrings extends Strings {
       'ister.';
   @override
   String get syncNeedsConfirmation => 'Onayınız bekleniyor';
+  @override
+  String get syncMergeIntro =>
+      'Örtüşmeyen düzenlemeler zaten birleştirildi; örtüşenlerde '
+      'neyin kalacağını seçin.';
+  @override
+  String get syncMergeClean =>
+      'İki sürüm kendiliğinden birleşiyor: hiçbir yerde örtüşme yok.';
+  @override
+  String get syncMergeNoBase =>
+      'Üzerinde birleştirilecek ortak bir sürüm yok, bu yüzden '
+      'dosyanın tamamı seçilmeli.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Örtüşme $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Bu cihazdan';
+  @override
+  String get syncMergeFromRemote => 'Sunucudan';
+  @override
+  String get syncMergeRemovedLines => 'Kaldırılan satırlar';
+  @override
+  String get syncMergeKeepLocal => 'Benimki';
+  @override
+  String get syncMergeKeepRemote => 'Sunucununki';
+  @override
+  String get syncMergeKeepBoth => 'İkisi de';
+  @override
+  String get syncMergeSave => 'Birleştirmeyi kaydet';
+  @override
+  String get syncMergeKeepWhole => 'Ya da tek bir tam kopya tut';
 }

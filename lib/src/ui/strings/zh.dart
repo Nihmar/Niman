@@ -1395,4 +1395,28 @@ final class ChineseStrings extends Strings {
   String get syncPausedConfirmHint => '「立即同步」会先显示将被删除的内容，并请求确认。';
   @override
   String get syncNeedsConfirmation => '等待你的确认';
+  @override
+  String get syncMergeIntro => '不重叠的更改已自动合并；重叠的部分请选择保留哪一边。';
+  @override
+  String get syncMergeClean => '两个版本可以自动合并：没有重叠。';
+  @override
+  String get syncMergeNoBase => '没有可供合并的共同版本，因此需要选择整个文件。';
+  @override
+  String syncMergeOverlap(int index, int total) => '第 $index 处重叠，共 $total 处';
+  @override
+  String get syncMergeFromLocal => '来自此设备';
+  @override
+  String get syncMergeFromRemote => '来自服务器';
+  @override
+  String get syncMergeRemovedLines => '已删除的行';
+  @override
+  String get syncMergeKeepLocal => '我的';
+  @override
+  String get syncMergeKeepRemote => '服务器的';
+  @override
+  String get syncMergeKeepBoth => '两者';
+  @override
+  String get syncMergeSave => '保存合并结果';
+  @override
+  String get syncMergeKeepWhole => '或保留其中一个完整副本';
 }
