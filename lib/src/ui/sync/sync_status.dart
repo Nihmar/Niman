@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
@@ -184,29 +185,37 @@ Future<void> showSyncPanel(
   required VoidCallback onSyncNow,
   required VoidCallback onOpenSettings,
   required void Function(String path) onResolve,
-}) => showModalBottomSheet<void>(
-  context: context,
-  showDragHandle: true,
-  isScrollControlled: true,
-  builder: (context) => ListenableBuilder(
-    listenable: sync,
-    builder: (context, _) => _SyncPanel(
-      status: sync.status,
-      onSyncNow: () {
-        Navigator.pop(context);
-        onSyncNow();
-      },
-      onOpenSettings: () {
-        Navigator.pop(context);
-        onOpenSettings();
-      },
-      onResolve: (path) {
-        Navigator.pop(context);
-        onResolve(path);
-      },
+}) {
+  const AppLogger(name: 'sync').info(
+    'ui: status panel opened (${sync.status.pendingHints} queued, '
+    '${sync.status.conflicts.length} conflicts, '
+    '${sync.status.failures.length} failed, '
+    'paused ${sync.status.autoPaused?.name ?? 'no'})',
+  );
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (context) => ListenableBuilder(
+      listenable: sync,
+      builder: (context, _) => _SyncPanel(
+        status: sync.status,
+        onSyncNow: () {
+          Navigator.pop(context);
+          onSyncNow();
+        },
+        onOpenSettings: () {
+          Navigator.pop(context);
+          onOpenSettings();
+        },
+        onResolve: (path) {
+          Navigator.pop(context);
+          onResolve(path);
+        },
+      ),
     ),
-  ),
-);
+  );
+}
 
 final class _SyncPanel extends StatefulWidget {
   const new({

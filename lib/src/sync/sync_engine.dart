@@ -556,6 +556,9 @@ final class SyncEngine {
       'plan: ${plan.summary()} (${plan.destructiveCount} destructive of '
       '${plan.rowCount} rows)',
     );
+    for (final decision in plan.decisions) {
+      _log.debug('plan: $decision');
+    }
 
     if (plan.looksLikeMassDeletion ||
         (firstSync && plan.decisions.isNotEmpty)) {
@@ -609,6 +612,10 @@ final class SyncEngine {
             _log.info('apply: $decision (${clock.elapsedMilliseconds} ms)');
           case _Outcome.skipped:
             report.skipped.add(decision.path);
+            _log.info(
+              'apply: skipped ${decision.kind.name} "${decision.path}": '
+              'a side changed during the run, decided again next time',
+            );
           case _Outcome.conflict:
             break;
         }
