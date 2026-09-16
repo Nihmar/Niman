@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/diff/line_diff.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
@@ -11,6 +12,10 @@ import 'package:niman/src/ui/strings.dart';
 /// One history version of a note against the note as it is now (mockups
 /// H4–H5): the changes as a diff, or the version's whole text, and the
 /// restore action.
+///
+/// The whole version goes back by default. Picking single changes turns
+/// the action into a restore of those alone (issue #67): the note keeps
+/// everything written since, except where the version was chosen.
 ///
 /// Pops with `true` once the version has been restored.
 final class NoteVersionScreen extends StatefulWidget {
@@ -52,6 +57,12 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
   bool _showText = false;
   bool _restoring = false;
 
+  /// The diff on screen, once computed.
+  DiffSummary? _summary;
+
+  /// The hunks the version wins, by position in [_summary].
+  final Set<int> _taken = {};
+
   String get _when => historyWhen(widget.version.savedAt, widget.now());
 
   @override
@@ -78,13 +89,41 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
     }
   }
 
+  /// Re-reads the note and, when it no longer matches what the diff was
+  /// made from, refreshes the screen instead of writing over it.
+  ///
+  /// The note can move while the screen is open — a sync run, the editor
+  /// in another window. A selective restore composes its text out of the
+  /// note as it was read, so writing that text afterwards would quietly
+  /// undo whatever landed meanwhile.
+  Future<bool> _stillCurrent() async {
+    final current = await widget.ops.readNote(widget.path);
+    if (current == _currentText) return true;
+    if (!mounted) return false;
+    _log.info('"${widget.path}" changed under the version screen');
+    setState(() {
+      _currentText = current;
+      _summary = null;
+      _taken.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppStrings.historyNoteChangedReloaded)),
+    );
+    return false;
+  }
+
   Future<void> _restore() async {
+    final selected = _taken.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         key: const Key('history-restore-dialog'),
         title: Text(AppStrings.historyRestoreConfirmTitle(_when)),
-        content: Text(AppStrings.historyRestoreConfirmBody),
+        content: Text(
+          selected == 0
+              ? AppStrings.historyRestoreConfirmBody
+              : AppStrings.historyRestoreSelectedConfirmBody,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -100,9 +139,30 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
     );
     if (confirmed != true || !mounted) return;
     setState(() => _restoring = true);
-    _log.info('restore "${widget.path}" v${widget.version.number} (ui)');
     try {
-      await widget.ops.restoreNoteVersion(widget.path, widget.version.number);
+      if (!await _stillCurrent()) {
+        if (mounted) setState(() => _restoring = false);
+        return;
+      }
+      final summary = _summary;
+      final current = _currentText;
+      if (selected == 0 || summary == null || current == null) {
+        _log.info('restore "${widget.path}" v${widget.version.number} (ui)');
+        await widget.ops.restoreNoteVersion(widget.path, widget.version.number);
+      } else {
+        _log.info(
+          'restore $selected of ${summary.hunks.length} change(s) from '
+          '"${widget.path}" v${widget.version.number} (ui)',
+        );
+        await widget.ops.restoreNoteText(
+          widget.path,
+          summary.compose(
+            _taken,
+            lineEnding: current.contains('\r\n') ? '\r\n' : '\n',
+            trailingNewline: current.isEmpty || current.endsWith('\n'),
+          ),
+        );
+      }
       if (mounted) Navigator.pop(context, true);
     } on Object catch (e) {
       _log.error('restore "${widget.path}" v${widget.version.number}: $e');
@@ -180,6 +240,24 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
                           newText: currentText,
                           compute: widget.compute,
                           padding: const EdgeInsets.only(bottom: 16),
+                          onSummary: (summary) {
+                            if (mounted) setState(() => _summary = summary);
+                          },
+                          hunkAction: (context, hunk) => FilterChip(
+                            key: ValueKey('history-take-$hunk'),
+                            label: Text(AppStrings.historyTakeHunk),
+                            selected: _taken.contains(hunk),
+                            visualDensity: VisualDensity.compact,
+                            onSelected: _restoring
+                                ? null
+                                : (on) => setState(() {
+                                    if (on) {
+                                      _taken.add(hunk);
+                                    } else {
+                                      _taken.remove(hunk);
+                                    }
+                                  }),
+                          ),
                         ),
                 ),
               ],
@@ -195,7 +273,13 @@ final class _NoteVersionScreenState extends State<NoteVersionScreen> {
                       ? null
                       : _restore,
                   icon: const Icon(Icons.restore),
-                  label: Text(AppStrings.historyRestoreAction),
+                  label: Text(
+                    _taken.isEmpty
+                        ? AppStrings.historyRestoreAction
+                        : AppStrings.historyRestoreSelectedAction(
+                            _taken.length,
+                          ),
+                  ),
                 ),
               ),
             ),

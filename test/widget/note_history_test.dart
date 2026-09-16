@@ -8,6 +8,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/diff/diff_view.dart';
 import 'package:niman/src/ui/history/note_history_screen.dart';
+import 'package:niman/src/ui/history/note_version_screen.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/shell_harness.dart';
@@ -71,9 +72,7 @@ void main() {
     testWidgets('leaves a cell empty where only one side has a line', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        app('keep\n', 'keep\nadded\n', sideBySide: true),
-      );
+      await tester.pumpWidget(app('keep\n', 'keep\nadded\n', sideBySide: true));
       await tester.pump();
 
       // Nothing was removed, so the old side has no counterpart.
@@ -249,6 +248,87 @@ void main() {
       expect(session.contentOf('Plan.md'), 'old\ntext\n');
       expect(restored?.number, 3);
       expect(find.text('open'), findsOneWidget);
+    });
+
+    /// A note whose version differs from it in two places far enough
+    /// apart to be separate hunks, and the version screen open on it.
+    Future<void> pumpTwoHunks(WidgetTester tester) async {
+      final old = [for (var i = 1; i <= 30; i++) 'line $i'];
+      final current = [...old]
+        ..[0] = 'line 1 edited'
+        ..[24] = 'line 25 edited';
+      await session.seedFile('Long.md', content: '${current.join('\n')}\n');
+      session.seedVersion(
+        'Long.md',
+        number: 1,
+        savedAt: DateTime(2026, 9, 15, 8),
+        text: '${old.join('\n')}\n',
+      );
+      final manifest = await session.noteHistory('Long.md');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NoteVersionScreen(
+            ops: session,
+            path: 'Long.md',
+            version: manifest.versions.single,
+            now: () => now,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('restores only the changes that were picked', (tester) async {
+      await pumpTwoHunks(tester);
+
+      // One control per hunk, and the whole version until one is picked.
+      expect(find.byKey(const ValueKey('history-take-0')), findsOneWidget);
+      expect(find.byKey(const ValueKey('history-take-1')), findsOneWidget);
+      expect(find.text('Restore this version'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('history-take-0')));
+      await tester.pumpAndSettle();
+      expect(find.text('Restore 1 change'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('history-restore')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('history-restore-confirm')));
+      await tester.pumpAndSettle();
+
+      final text = session.contentOf('Long.md');
+      // The picked change went back; the other stayed as it is now.
+      expect(text, contains('line 1\n'));
+      expect(text, isNot(contains('line 1 edited')));
+      expect(text, contains('line 25 edited'));
+      // A composed text, not a whole-version restore.
+      expect(session.restores, isEmpty);
+      expect(session.restoredTexts, hasLength(1));
+    });
+
+    testWidgets('a note changed under the screen is reloaded, not written '
+        'over', (tester) async {
+      await pumpTwoHunks(tester);
+      await tester.tap(find.byKey(const ValueKey('history-take-0')));
+      await tester.pumpAndSettle();
+
+      // A sync run, or another window, writes the note meanwhile.
+      await session.saveNote('Long.md', 'rewritten elsewhere\n');
+
+      await tester.tap(find.byKey(const Key('history-restore')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('history-restore-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(session.restoredTexts, isEmpty);
+      expect(session.contentOf('Long.md'), 'rewritten elsewhere\n');
+      expect(
+        find.textContaining('The note changed while you were here'),
+        findsOneWidget,
+      );
+      // Still open, with the picks dropped so they cannot mean the old
+      // hunks any more.
+      expect(find.byKey(const Key('history-restore')), findsOneWidget);
+      expect(find.text('Restore this version'), findsOneWidget);
     });
 
     testWidgets('an empty history explains when versions appear', (

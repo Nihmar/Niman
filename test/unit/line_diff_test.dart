@@ -99,4 +99,58 @@ void main() {
       expect(summary.hunks, hasLength(1));
     });
   });
+
+  group('compose', () {
+    // Two changes far enough apart to be separate hunks: line 1 and
+    // line 25 of a 30-line note.
+    DiffSummary twoHunks() {
+      final old = [for (var i = 1; i <= 30; i++) 'line $i'];
+      final changed = [...old]
+        ..[0] = 'line 1 now'
+        ..[24] = 'line 25 now';
+      return DiffSummary.of(diffLines(old.join('\n'), changed.join('\n')));
+    }
+
+    test('takes the new text when nothing is picked', () {
+      final summary = twoHunks();
+      expect(summary.hunks, hasLength(2));
+      expect(summary.compose(const {}), contains('line 1 now'));
+      expect(summary.compose(const {}), contains('line 25 now'));
+      expect(summary.compose(const {}), isNot(contains('line 1\n')));
+    });
+
+    test('takes the old text in the hunks picked, and only those', () {
+      final summary = twoHunks();
+      final text = summary.compose(const {0});
+      expect(text, contains('line 1\n'));
+      expect(text, isNot(contains('line 1 now')));
+      // The other hunk is untouched.
+      expect(text, contains('line 25 now'));
+      expect(text, isNot(contains('line 25\n')));
+    });
+
+    test('every hunk picked rebuilds the old text', () {
+      final old = [for (var i = 1; i <= 30; i++) 'line $i'].join('\n');
+      final summary = twoHunks();
+      expect(summary.compose(const {0, 1}), '$old\n');
+    });
+
+    test('keeps the line ending and the trailing break it is given', () {
+      final summary = DiffSummary.of(diffLines('a\nb', 'A\nb'));
+      expect(summary.compose(const {}, lineEnding: '\r\n'), 'A\r\nb\r\n');
+      expect(summary.compose(const {}, trailingNewline: false), 'A\nb');
+    });
+
+    test('an added-only hunk drops the addition when the old side wins', () {
+      final summary = DiffSummary.of(diffLines('a\n', 'a\nnew\n'));
+      expect(summary.compose(const {}), 'a\nnew\n');
+      expect(summary.compose(const {0}), 'a\n');
+    });
+
+    test('a removed-only hunk brings the line back', () {
+      final summary = DiffSummary.of(diffLines('a\ngone\n', 'a\n'));
+      expect(summary.compose(const {}), 'a\n');
+      expect(summary.compose(const {0}), 'a\ngone\n');
+    });
+  });
 }
