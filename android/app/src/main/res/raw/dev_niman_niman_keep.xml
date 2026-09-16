@@ -6,6 +6,12 @@
      reference to the drawable exists. R8's resource shrinking, on by
      default in Flutter release builds, classifies the drawable as unused
      and strips it from the APK, and the plugin falls back to a plain
-     white block in the status bar. tools:keep pins it. -->
+     white block in the status bar. tools:keep pins it.
+
+     Both the app mark the reminders wear and the alarm glyph they fall
+     back to are pinned: the fallback is there so a missing icon never
+     costs the reminders themselves, which is exactly what would hide a
+     stripped mark — the notification would keep working, wearing the
+     wrong icon. -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/ic_stat_reminder" />
+    tools:keep="@drawable/ic_stat_niman,@drawable/ic_stat_reminder" />
