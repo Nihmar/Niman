@@ -30,6 +30,11 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/network_monitor.dart';
+import 'package:niman/src/sync/sync_engine.dart';
+import 'package:niman/src/sync/sync_secrets.dart';
+import 'package:niman/src/sync/sync_service.dart';
+import 'package:niman/src/sync/sync_store.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/update/update_scheduler.dart';
@@ -77,7 +82,10 @@ final class LibraryController implements LibrarySession {
     this.rescanInterval = defaultRescanInterval,
     this.resumeReconcileDelay = defaultResumeReconcileDelay,
     this.watcherDebounce = FileWatcher.defaultDebounce,
-  }) : _searchDbFactory = searchDbFactory ?? indexDbFactory;
+    SyncSecretStore? syncSecrets,
+    this.syncNetwork,
+  }) : _searchDbFactory = searchDbFactory ?? indexDbFactory,
+       syncSecrets = syncSecrets ?? SecureSyncSecretStore();
 
   /// Full-rescan fallback cadence: the watcher covers live changes, so the
   /// full walk is the safety net (a missed event, a network mount). One
@@ -126,6 +134,15 @@ final class LibraryController implements LibrarySession {
   /// Debounce window for the file watcher.
   final Duration watcherDebounce;
 
+  /// Where each library's WebDAV password lives (M5); the OS secure
+  /// storage unless a test injects another.
+  final SyncSecretStore syncSecrets;
+
+  /// Builds the network monitor the sync's automatic triggers read (the
+  /// app passes `connectivity_plus`); null, as in tests, counts the
+  /// network as always usable.
+  final NetworkMonitor Function()? syncNetwork;
+
   final StreamController<int> _events = StreamController<int>.broadcast();
   final AppLogger _log = const AppLogger(name: 'session');
   int _revision = 0;
@@ -144,6 +161,7 @@ final class LibraryController implements LibrarySession {
   LibraryConfigRepo? _configRepo;
   Indexer? _indexer;
   NoteOps? _ops;
+  LibrarySyncService? _sync;
   FileWatcher? _watcher;
   Timer? _rescanTimer;
 
@@ -214,6 +232,10 @@ final class LibraryController implements LibrarySession {
   /// CRUD ops for the open library, or null while closed.
   @override
   NoteOps? get ops => _ops;
+
+  /// The open library's WebDAV sync, or null while closed.
+  @override
+  SyncService? get sync => _sync;
 
   /// Children of the row with id [parentId] (0 = library root),
   /// directories first, then by name.
@@ -421,6 +443,28 @@ final class LibraryController implements LibrarySession {
       _indexer = indexer;
       _ops = ops;
       _root = abs;
+      // The library's WebDAV sync (M5): idle until configured; the state and
+      // the password are per device, keyed by this root.
+      final syncStore = SyncStore(appDb);
+      final sync = LibrarySyncService(
+        root: abs,
+        engine: SyncEngine(
+          root: abs,
+          ops: ops,
+          store: syncStore,
+          secrets: syncSecrets,
+        ),
+        store: syncStore,
+        secrets: syncSecrets,
+        network: syncNetwork?.call(),
+        phone: Platform.isAndroid || Platform.isIOS,
+      );
+      _sync = sync;
+      ops.syncHints = sync.hint;
+      // Loads the status, then the automatic triggers take over (the
+      // "library opened" full sync among them) — idle without a
+      // destination.
+      unawaited(sync.start());
       // The library's own text sizes, on screen with it (T-M6-12) and
       // before the ready bump, so nothing paints at the wrong size first.
       final settings = await config.config;
@@ -563,6 +607,16 @@ final class LibraryController implements LibrarySession {
     // Widgets pointing at it would open a library the home screen no
     // longer lists; their rows go with the entry (issue 6).
     await WidgetConfigStore(db).removeForLibrary(libraryPath);
+    // Its sync state describes a library the app no longer knows; opened
+    // again, it starts unconfigured (docs/dev/sync.md, "Configuration").
+    await SyncStore(db).removeLibrary(libraryPath);
+    try {
+      await syncSecrets.delete(libraryPath);
+    } on Exception catch (e) {
+      // A missing keychain must not block forgetting; the entry is inert
+      // without its destination row.
+      _log.warning('forget library: sync password not deleted: $e');
+    }
     // The mirror would otherwise keep offering a forgotten library.
     unawaited(_saveWidgetLibraryMirror(db));
     // The index is derived data and the entry that named it is gone, so
@@ -1034,6 +1088,11 @@ final class LibraryController implements LibrarySession {
     _indexer = null;
     _ops = null;
     _configRepo = null;
+    final sync = _sync;
+    _sync = null;
+    // A sync going now writes through the index about to close: its
+    // triggers stop, and it gets a moment to finish.
+    await sync?.close();
     // The text sizes belonged to the library that just went away; the
     // home screen is nobody's library and reads at the shipped sizes.
     AppTextScales.reset();
@@ -1065,6 +1124,9 @@ final class LibraryController implements LibrarySession {
       if (batch.paths.isNotEmpty) {
         await indexer.applyEvents(root, batch.paths);
       }
+      // What changed behind the ops' back (another app, a background
+      // isolate, a hand edit) reaches the sync queue this way.
+      _sync?.watched(batch.paths, batch.resyncDirs);
     } on Object catch (error) {
       // Transient watcher errors are covered by the periodic rescan.
       _log.warning('watch batch failed: $error');
@@ -1176,6 +1238,7 @@ final librarySessionProvider = Provider<LibrarySession>((ref) {
     indexDbFactory: defaultIndexDatabase,
     indexFileOf: libraryIndexFile,
     searchDbFactory: defaultSearchDatabase,
+    syncNetwork: ConnectivityNetworkMonitor.new,
   );
   ref.onDispose(controller.dispose);
   return controller;

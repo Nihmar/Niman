@@ -1254,4 +1254,356 @@ final class HungarianStrings extends Strings {
       'Írás közben; a szerkesztés megkezdésekor mindig készül egy';
   @override
   String historyIntervalValue(int minutes) => '$minutes percenként';
+  @override
+  String get settingsSectionSync => 'Szinkronizálás';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ehhez a könyvtárhoz nincs beállítva';
+  @override
+  String get syncNeverSynced => 'Még sosem szinkronizált';
+  @override
+  String syncLastSynced(String when) => 'Szinkronizálva: $when';
+  @override
+  String get syncRunning => 'Szinkronizálás…';
+  @override
+  String syncScreenSubtitle(String library) => 'Könyvtár: $library';
+  @override
+  String get syncUrlLabel => 'Mappa címe';
+  @override
+  String get syncUrlHint =>
+      'A mappának léteznie kell. Másold ki a címet úgy, ahogy a '
+      'szerver mutatja.';
+  @override
+  String get syncHttpWarning =>
+      'Titkosítatlan kapcsolat: VPN-en vagy helyi hálózaton '
+      'rendben van.';
+  @override
+  String get syncUserLabel => 'Felhasználó';
+  @override
+  String get syncUserHint =>
+      'Hagyd üresen, ha a szerver nem kér hitelesítő adatokat.';
+  @override
+  String get syncPasswordLabel => 'Jelszó';
+  @override
+  String get syncPasswordHint =>
+      'A készülék kulcstartójában tárolódik, sosem a könyvtár '
+      'fájljaiban.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Hagyd üresen a mentett jelszó megtartásához.';
+  @override
+  String get syncShowPassword => 'Jelszó megjelenítése';
+  @override
+  String get syncHidePassword => 'Jelszó elrejtése';
+  @override
+  String get syncTestAction => 'Kapcsolat tesztelése';
+  @override
+  String get syncTesting => 'Tesztelés…';
+  @override
+  String get syncRetargetWarning =>
+      'Új címmel vagy felhasználóval a következő szinkronizálás '
+      'elölről indul, első szinkronizálásként.';
+  @override
+  String get syncTestOk => 'A kapcsolat működik';
+  @override
+  String get syncModeFull => 'Teljes mód';
+  @override
+  String get syncModeCompatible => 'Kompatibilis mód';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Olvasás, írás és törlés';
+  @override
+  String get syncCapEtags => 'Fájlujjlenyomatok (ETag)';
+  @override
+  String get syncCapNoEtags => 'Nincsenek fájlujjlenyomatok (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Méretet és dátumot hasonlítok össze; kétség esetén újra '
+      'letöltöm';
+  @override
+  String get syncCapGuarded => 'Védett írás';
+  @override
+  String get syncCapUnguarded => 'Védtelen írás';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Közvetlenül írás előtt ellenőrzöm a fájlt a szerveren';
+  @override
+  String get syncCapMove => 'Átnevezés újrafeltöltés nélkül';
+  @override
+  String get syncCapNoMove => 'Nincs átnevezés a szerveren';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Az átnevezésből törlés és új feltöltés lesz';
+  @override
+  String get syncCompatibleNote =>
+      'Kompatibilis módban a szinkronizálás ugyanúgy működik, '
+      'csak néhány kéréssel többel.';
+  @override
+  String get syncTestInvalidUrl => 'Érvénytelen cím';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Adj meg egy http:// vagy https:// címet, felhasználó és '
+      'jelszó nélkül.';
+  @override
+  String get syncTestOffline => 'A szerver nem érhető el';
+  @override
+  String get syncTestOfflineHint =>
+      'Be van kapcsolva a VPN? Egy 10.x vagy 192.168.x cím csak '
+      'ugyanarról a hálózatról működik.';
+  @override
+  String get syncTestAuth => 'Elutasított felhasználó vagy jelszó';
+  @override
+  String get syncTestAuthHint => 'Ellenőrizd őket, majd teszteld újra.';
+  @override
+  String get syncTestNotFound => 'A mappa nem létezik';
+  @override
+  String get syncTestNotFoundHint =>
+      'Hozd létre a szerveren, vagy javítsd a címet.';
+  @override
+  String get syncTestUnsupported => 'Nem WebDAV-mappa';
+  @override
+  String get syncTestUnsupportedHint =>
+      'A szerver válaszol, de nem WebDAV-ként.';
+  @override
+  String get syncTestFailed => 'A teszt nem sikerült';
+  @override
+  String get syncNowAction => 'Szinkronizálás most';
+  @override
+  String get syncSectionServer => 'Szerver';
+  @override
+  String get syncServerRow => 'Cím, felhasználó és jelszó';
+  @override
+  String get syncRetestTitle => 'Szerver újratesztelése';
+  @override
+  String syncProbedAgo(String when) => 'Utolsó teszt: $when';
+  @override
+  String get syncDisconnectTitle => 'Könyvtár leválasztása';
+  @override
+  String get syncDisconnectSubtitle =>
+      'A fájlok itt és a szerveren is megmaradnak';
+  @override
+  String get syncDisconnectConfirmTitle => 'Leválasztod a szinkronizálást?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Ez a könyvtár nem szinkronizál többé ezen a készüléken. '
+      'Egyetlen fájl sem törlődik, sem itt, sem a szerveren. Ha '
+      'újra összekapcsolod, az első szinkronizálás elölről '
+      'kezdődik.';
+  @override
+  String get syncDisconnectConfirm => 'Leválasztás';
+  @override
+  String get syncFirstTitle => 'Első szinkronizálás';
+  @override
+  String get syncFirstIntro =>
+      'Összehasonlítottam a könyvtárat a szerveren lévő mappával:';
+  @override
+  String get syncFirstUpload => 'Feltöltendő';
+  @override
+  String get syncFirstDownload => 'Letöltendő';
+  @override
+  String get syncFirstBoth => 'Mindkét oldalon';
+  @override
+  String get syncFirstBothHint =>
+      'Azonosak: nincs átvitel. Eltérők: feloldandó';
+  @override
+  String get syncFirstNoDelete =>
+      'Az első szinkronizálás semmit sem töröl, sem itt, sem a '
+      'szerveren.';
+  @override
+  String get syncStartAction => 'Indítás';
+  @override
+  String syncMassTrashTitle(int count) => 'Áthelyezel $count fájlt a kukába?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      '$total szinkronizált fájlból $count hiányzik a '
+      'szerverről. Ez általában hibás címet, csatolatlan '
+      'NAS-lemezt vagy véletlenül kiürített mappát jelent.';
+  @override
+  String get syncMassTrashHint =>
+      'Ha tényleg törölted őket egy másik készüléken, erősítsd '
+      'meg: itt a kukába kerülnek.';
+  @override
+  String get syncMassTrashConfirm => 'Áthelyezés a kukába';
+  @override
+  String syncMassDeleteTitle(int count) => 'Törölsz $count fájlt a szerverről?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      '$total szinkronizált fájlból $count itt hiányzik. Ha nem '
+      'te törölted őket, válaszd a Mégse gombot, és ellenőrizd a '
+      'könyvtár mappáját.';
+  @override
+  String get syncMassDeleteConfirm => 'Törlés a szerverről';
+  @override
+  String get syncTooltip => 'Szinkronizálás';
+  @override
+  String get syncStageConnecting => 'Csatlakozás a szerverhez…';
+  @override
+  String get syncStageComparing => 'Összehasonlítás a szerverrel…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Szinkronizálás · $done/$total';
+  @override
+  String get syncStatusWarnings => 'Szinkronizálva, figyelmeztetésekkel';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Itt és a szerveren is módosult · $count';
+  @override
+  String get syncConflictHint => 'Egyik verzió sem változott';
+  @override
+  String get syncResolveAction => 'Feloldás';
+  @override
+  String syncFailuresHeader(int count) => 'Nem szinkronizált · $count';
+  @override
+  String get syncFailuresHint => 'Újrapróbálás a következő szinkronizáláskor';
+  @override
+  String get syncAbortAuth => 'A szerver elutasította a jelszót';
+  @override
+  String get syncAbortMissingPassword => 'Nincs mentett jelszó';
+  @override
+  String get syncAbortOffline => 'A szerver nem érhető el';
+  @override
+  String get syncAbortRemoteMissing => 'A mappa már nincs meg a szerveren';
+  @override
+  String get syncAbortUnsupported => 'A szerver már nem működik WebDAV-ként';
+  @override
+  String get syncAbortFailed => 'A szinkronizálás nem sikerült';
+  @override
+  String get syncAbortNotConfirmed => 'Szinkronizálás megszakítva';
+  @override
+  String get syncAbortNothingTouched =>
+      'Egyetlen fájl sem változott. A módosításaid itt maradnak '
+      'a következő sikeres szinkronizálásig.';
+  @override
+  String syncLastSuccess(String when) => 'Utolsó sikeres szinkronizálás: $when';
+  @override
+  String get syncNoSuccessYet => 'Még nem volt sikeres szinkronizálás';
+  @override
+  String get syncUpdatePasswordAction => 'Jelszó frissítése';
+  @override
+  String get syncRetryAction => 'Próbáld újra';
+  @override
+  String get syncOpenSettingsAction => 'Beállítások';
+  @override
+  String get syncCloseAction => 'Bezárás';
+  @override
+  String get syncDoneSnack => 'Szinkronizálva';
+  @override
+  String syncTrashedSnack(int count) =>
+      'Szinkronizálva · $count máshol törölt fájl a kukába került';
+  @override
+  String syncConflictsSnack(int count) =>
+      'Szinkronizálva · $count feloldandó ütközés';
+  @override
+  String get syncShowAction => 'Megjelenítés';
+  @override
+  String get syncConflictTitle => 'Ütközés feloldása';
+  @override
+  String get syncConflictLegend =>
+      'A − jelű sorok a szerveréi, a + jelűek ezé a készüléké.';
+  @override
+  String get syncConflictBinary =>
+      'Nem szövegfájl: válaszd ki, melyik példányt tartod meg.';
+  @override
+  String get syncConflictKeepNote =>
+      'A meg nem tartott példány a jegyzet előzményeiben marad.';
+  @override
+  String get syncKeepLocal => 'A készülék változatának megtartása';
+  @override
+  String get syncKeepRemote => 'A szerver változatának megtartása';
+  @override
+  String get syncConflictIdentical => 'A két verzió azonos';
+  @override
+  String get syncConflictLoadFailed => 'Nem sikerült mindkét verziót beolvasni';
+  @override
+  String get syncResolveFailed => 'Nem sikerült feloldani az ütközést';
+  @override
+  String get syncResolved => 'Ütközés feloldva';
+  @override
+  String get syncSectionWhen => 'Mikor szinkronizáljon';
+  @override
+  String get syncAutoTitle => 'Automatikusan';
+  @override
+  String get syncAutoSubtitle =>
+      'Módosítások után, megnyitáskor és időközönként';
+  @override
+  String get syncIntervalTitle => 'A szerver ellenőrzése';
+  @override
+  String get syncIntervalSubtitle => 'Csak amíg az alkalmazás nyitva van';
+  @override
+  String get syncIntervalDialogBody =>
+      'Hogy lásd a más készülékeken végzett módosításokat, amíg az '
+      'alkalmazás nyitva van. „Soha” esetén csak módosítások után és '
+      'megnyitáskor.';
+  @override
+  String syncIntervalMinutes(int count) => '$count percenként';
+  @override
+  String get syncIntervalNever => 'Soha';
+  @override
+  String get syncWifiOnlyTitle => 'Csak Wi-Fi-n';
+  @override
+  String get syncWifiOnlySubtitle => 'Mobiladaton csak kézi szinkronizálás';
+  @override
+  String syncPendingChanges(int count) => '$count módosítás várakozik';
+  @override
+  String syncRetryIn(String wait) => 'újrapróbálás $wait múlva';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds mp';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes perc';
+  @override
+  String get syncWaitingForWifi => 'Várakozás Wi-Fi-re';
+  @override
+  String get syncWaitingForNetwork => 'Várakozás kapcsolatra';
+  @override
+  String get syncMobileDataHint =>
+      'A „Szinkronizálás most” mobiladaton is működik.';
+  @override
+  String get syncQueueKeptHint =>
+      'A módosítások itt maradnak akkor is, ha bezárod az alkalmazást, és '
+      'maguktól elmennek, amikor a szerver válaszol.';
+  @override
+  String get syncAutoPaused => 'Az automatikus szinkronizálás szünetel';
+  @override
+  String get syncPausedAuthHint =>
+      'Folytatódik, ha frissíted a jelszót, vagy kézzel szinkronizálsz.';
+  @override
+  String get syncPausedServerHint =>
+      'Folytatódik, ha kijavítod a címet, vagy kézzel szinkronizálsz.';
+  @override
+  String get syncPausedConfirmHint =>
+      'A „Szinkronizálás most” megmutatja, mi törlődne, és előbb '
+      'rákérdez.';
+  @override
+  String get syncNeedsConfirmation => 'A megerősítésedre vár';
+  @override
+  String get syncMergeIntro =>
+      'Az egymást nem átfedő módosítások már össze vannak fésülve; '
+      'ahol átfedik egymást, válaszd ki, mi maradjon.';
+  @override
+  String get syncMergeClean =>
+      'A két verzió magától összeáll: semmi sem fedi egymást.';
+  @override
+  String get syncMergeNoBase =>
+      'Nincs közös verzió, amelyre össze lehetne fésülni, ezért a '
+      'teljes fájlt kell választani.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Átfedés $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Erről a készülékről';
+  @override
+  String get syncMergeFromRemote => 'A szerverről';
+  @override
+  String get syncMergeRemovedLines => 'Törölt sorok';
+  @override
+  String get syncMergeKeepLocal => 'Enyém';
+  @override
+  String get syncMergeKeepRemote => 'Szerveré';
+  @override
+  String get syncMergeKeepBoth => 'Mindkettő';
+  @override
+  String get syncMergeSave => 'Összefésülés mentése';
+  @override
+  String get syncMergeKeepWhole => 'Vagy tarts meg egy teljes példányt';
 }

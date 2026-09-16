@@ -1257,4 +1257,360 @@ final class BulgarianStrings extends Strings {
       'Докато пишете; започването на редакция винаги запазва една';
   @override
   String historyIntervalValue(int minutes) => '$minutes мин';
+  @override
+  String get settingsSectionSync => 'Синхронизация';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Не е настроена за тази библиотека';
+  @override
+  String get syncNeverSynced => 'Никога не е синхронизирана';
+  @override
+  String syncLastSynced(String when) => 'Синхронизирана $when';
+  @override
+  String get syncRunning => 'Синхронизиране…';
+  @override
+  String syncScreenSubtitle(String library) => 'Библиотека $library';
+  @override
+  String get syncUrlLabel => 'Адрес на папката';
+  @override
+  String get syncUrlHint =>
+      'Папката трябва да съществува. Копирайте адреса така, '
+      'както го показва сървърът.';
+  @override
+  String get syncHttpWarning =>
+      'Нешифрована връзка: подходяща през VPN или в локалната ви '
+      'мрежа.';
+  @override
+  String get syncUserLabel => 'Потребител';
+  @override
+  String get syncUserHint =>
+      'Оставете празно, ако сървърът не иска данни за вход.';
+  @override
+  String get syncPasswordLabel => 'Парола';
+  @override
+  String get syncPasswordHint =>
+      'Пази се в ключодържателя на това устройство, никога във '
+      'файловете на библиотеката.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Оставете празно, за да запазите записаната парола.';
+  @override
+  String get syncShowPassword => 'Покажи паролата';
+  @override
+  String get syncHidePassword => 'Скрий паролата';
+  @override
+  String get syncTestAction => 'Тествай връзката';
+  @override
+  String get syncTesting => 'Тестване…';
+  @override
+  String get syncRetargetWarning =>
+      'С нов адрес или потребител следващата синхронизация '
+      'започва отначало като първа.';
+  @override
+  String get syncTestOk => 'Връзката работи';
+  @override
+  String get syncModeFull => 'Пълен режим';
+  @override
+  String get syncModeCompatible => 'Съвместим режим';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Четене, запис и изтриване';
+  @override
+  String get syncCapEtags => 'Отпечатъци на файловете (ETag)';
+  @override
+  String get syncCapNoEtags => 'Без отпечатъци на файловете (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Сравнява размер и дата; при съмнение изтегля отново';
+  @override
+  String get syncCapGuarded => 'Защитени записи';
+  @override
+  String get syncCapUnguarded => 'Незащитени записи';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Проверява файла на сървъра точно преди запис';
+  @override
+  String get syncCapMove => 'Преименува без повторно качване';
+  @override
+  String get syncCapNoMove => 'Без преименуване на сървъра';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Преименуването става изтриване и ново качване';
+  @override
+  String get syncCompatibleNote =>
+      'В съвместим режим синхронизацията работи по същия начин, '
+      'с малко повече заявки.';
+  @override
+  String get syncTestInvalidUrl => 'Невалиден адрес';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Въведете адрес с http:// или https://, без потребител и '
+      'парола в него.';
+  @override
+  String get syncTestOffline => 'Сървърът е недостъпен';
+  @override
+  String get syncTestOfflineHint =>
+      'Включена ли е VPN връзката? Адрес 10.x или 192.168.x '
+      'работи само от същата мрежа.';
+  @override
+  String get syncTestAuth => 'Потребителят или паролата са отхвърлени';
+  @override
+  String get syncTestAuthHint => 'Проверете ги и тествайте отново.';
+  @override
+  String get syncTestNotFound => 'Папката не съществува';
+  @override
+  String get syncTestNotFoundHint =>
+      'Създайте я на сървъра или поправете адреса.';
+  @override
+  String get syncTestUnsupported => 'Не е WebDAV папка';
+  @override
+  String get syncTestUnsupportedHint => 'Сървърът отговаря, но не като WebDAV.';
+  @override
+  String get syncTestFailed => 'Тестът не успя';
+  @override
+  String get syncNowAction => 'Синхронизирай сега';
+  @override
+  String get syncSectionServer => 'Сървър';
+  @override
+  String get syncServerRow => 'Адрес, потребител и парола';
+  @override
+  String get syncRetestTitle => 'Тествай сървъра отново';
+  @override
+  String syncProbedAgo(String when) => 'Последен тест: $when';
+  @override
+  String get syncDisconnectTitle => 'Разкачи тази библиотека';
+  @override
+  String get syncDisconnectSubtitle => 'Файловете остават тук и на сървъра';
+  @override
+  String get syncDisconnectConfirmTitle => 'Да се разкачи ли синхронизацията?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Тази библиотека спира да се синхронизира на това '
+      'устройство. Не се изтрива нито един файл, нито тук, нито '
+      'на сървъра. Ако я свържете отново, първата синхронизация '
+      'започва отначало.';
+  @override
+  String get syncDisconnectConfirm => 'Разкачи';
+  @override
+  String get syncFirstTitle => 'Първа синхронизация';
+  @override
+  String get syncFirstIntro => 'Библиотеката е сравнена с папката на сървъра:';
+  @override
+  String get syncFirstUpload => 'За качване';
+  @override
+  String get syncFirstDownload => 'За изтегляне';
+  @override
+  String get syncFirstBoth => 'И от двете страни';
+  @override
+  String get syncFirstBothHint =>
+      'Еднакви: без прехвърляне. Различни: за разрешаване';
+  @override
+  String get syncFirstNoDelete =>
+      'Първата синхронизация не изтрива нищо, нито тук, нито на '
+      'сървъра.';
+  @override
+  String get syncStartAction => 'Започни';
+  @override
+  String syncMassTrashTitle(int count) => count == 1
+      ? 'Да се премести ли 1 файл в коша?'
+      : 'Да се преместят ли $count файла в коша?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Липсващи на сървъра: $count от $total синхронизирани '
+      'файла. Обикновено това означава грешен адрес, немонтиран '
+      'диск на NAS или папка, изпразнена по грешка.';
+  @override
+  String get syncMassTrashHint =>
+      'Ако наистина сте ги изтрили на друго устройство, '
+      'потвърдете: тук те отиват в коша.';
+  @override
+  String get syncMassTrashConfirm => 'Премести в коша';
+  @override
+  String syncMassDeleteTitle(int count) => count == 1
+      ? 'Да се изтрие ли 1 файл от сървъра?'
+      : 'Да се изтрият ли $count файла от сървъра?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Липсващи тук: $count от $total синхронизирани файла. Ако '
+      'не сте ги изтрили вие, откажете и проверете папката на '
+      'библиотеката.';
+  @override
+  String get syncMassDeleteConfirm => 'Изтрий от сървъра';
+  @override
+  String get syncTooltip => 'Синхронизирай';
+  @override
+  String get syncStageConnecting => 'Свързване със сървъра…';
+  @override
+  String get syncStageComparing => 'Сравняване със сървъра…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Синхронизиране · $done от $total';
+  @override
+  String get syncStatusWarnings => 'Синхронизирана с предупреждения';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Променени тук и на сървъра · $count';
+  @override
+  String get syncConflictHint => 'Нито една от двете версии не е пипана';
+  @override
+  String get syncResolveAction => 'Разреши';
+  @override
+  String syncFailuresHeader(int count) => 'Несинхронизирани · $count';
+  @override
+  String get syncFailuresHint => 'Нов опит при следващата синхронизация';
+  @override
+  String get syncAbortAuth => 'Сървърът отхвърли паролата';
+  @override
+  String get syncAbortMissingPassword => 'Няма записана парола';
+  @override
+  String get syncAbortOffline => 'Сървърът е недостъпен';
+  @override
+  String get syncAbortRemoteMissing => 'Папката на сървъра вече я няма';
+  @override
+  String get syncAbortUnsupported => 'Сървърът вече не работи като WebDAV';
+  @override
+  String get syncAbortFailed => 'Синхронизацията не успя';
+  @override
+  String get syncAbortNotConfirmed => 'Синхронизацията е отказана';
+  @override
+  String get syncAbortNothingTouched =>
+      'Нито един файл не е пипан. Промените ви остават тук до '
+      'следващата успешна синхронизация.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Последна успешна синхронизация: $when';
+  @override
+  String get syncNoSuccessYet => 'Все още няма успешна синхронизация';
+  @override
+  String get syncUpdatePasswordAction => 'Обнови паролата';
+  @override
+  String get syncRetryAction => 'Опитай отново';
+  @override
+  String get syncOpenSettingsAction => 'Настройки';
+  @override
+  String get syncCloseAction => 'Затвори';
+  @override
+  String get syncDoneSnack => 'Синхронизирана';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Синхронизирана · 1 файл, изтрит другаде, е в коша'
+      : 'Синхронизирана · $count файла, изтрити другаде, са в коша';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Синхронизирана · 1 конфликт за разрешаване'
+      : 'Синхронизирана · $count конфликта за разрешаване';
+  @override
+  String get syncShowAction => 'Покажи';
+  @override
+  String get syncConflictTitle => 'Разреши конфликта';
+  @override
+  String get syncConflictLegend =>
+      'Редовете с − са от сървъра, редовете с + са от това '
+      'устройство.';
+  @override
+  String get syncConflictBinary =>
+      'Не е текстов файл: изберете кое копие да запазите.';
+  @override
+  String get syncConflictKeepNote =>
+      'Копието, което не запазите, остава в историята на '
+      'бележката.';
+  @override
+  String get syncKeepLocal => 'Запази версията от това устройство';
+  @override
+  String get syncKeepRemote => 'Запази версията от сървъра';
+  @override
+  String get syncConflictIdentical => 'Двете версии са еднакви';
+  @override
+  String get syncConflictLoadFailed => 'Двете версии не могат да се прочетат';
+  @override
+  String get syncResolveFailed => 'Конфликтът не може да се разреши';
+  @override
+  String get syncResolved => 'Конфликтът е разрешен';
+  @override
+  String get syncSectionWhen => 'Кога да се синхронизира';
+  @override
+  String get syncAutoTitle => 'Автоматично';
+  @override
+  String get syncAutoSubtitle => 'След промени, при отваряне и на интервали';
+  @override
+  String get syncIntervalTitle => 'Проверявай сървъра на всеки';
+  @override
+  String get syncIntervalSubtitle => 'Само докато програмата е отворена';
+  @override
+  String get syncIntervalDialogBody =>
+      'За да виждате промените, направени на други устройства, докато '
+      'програмата е отворена. С „Никога“ — само след промени и при отваряне.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 минута' : '$count минути';
+  @override
+  String get syncIntervalNever => 'Никога';
+  @override
+  String get syncWifiOnlyTitle => 'Само през Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle => 'С мобилни данни синхронизирай само ръчно';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 промяна чака' : '$count промени чакат';
+  @override
+  String syncRetryIn(String wait) => 'нов опит след $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds с';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes мин';
+  @override
+  String get syncWaitingForWifi => 'Изчакване на Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Изчакване на връзка';
+  @override
+  String get syncMobileDataHint =>
+      '„Синхронизирай сега“ пак използва мобилни данни.';
+  @override
+  String get syncQueueKeptHint =>
+      'Промените остават тук, дори ако затворите програмата, и тръгват сами, '
+      'когато сървърът отговори.';
+  @override
+  String get syncAutoPaused => 'Автоматичното синхронизиране е на пауза';
+  @override
+  String get syncPausedAuthHint =>
+      'Възобновява се, когато обновите паролата или синхронизирате ръчно.';
+  @override
+  String get syncPausedServerHint =>
+      'Възобновява се, когато поправите адреса или синхронизирате ръчно.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Синхронизирай сега“ показва какво ще бъде премахнато и първо пита.';
+  @override
+  String get syncNeedsConfirmation => 'Изчаква вашето потвърждение';
+  @override
+  String get syncMergeIntro =>
+      'Промените, които не се припокриват, вече са слети; там, където се '
+      'припокриват, изберете какво да запазите.';
+  @override
+  String get syncMergeClean =>
+      'Двете версии се сливат сами: нищо не се припокрива.';
+  @override
+  String get syncMergeNoBase =>
+      'Няма обща версия, върху която да се слее, затова се избира целият файл.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Припокриване $index от $total';
+  @override
+  String get syncMergeFromLocal => 'От това устройство';
+  @override
+  String get syncMergeFromRemote => 'От сървъра';
+  @override
+  String get syncMergeRemovedLines => 'Премахнати редове';
+  @override
+  String get syncMergeKeepLocal => 'Моите';
+  @override
+  String get syncMergeKeepRemote => 'На сървъра';
+  @override
+  String get syncMergeKeepBoth => 'И двете';
+  @override
+  String get syncMergeSave => 'Запази сливането';
+  @override
+  String get syncMergeKeepWhole => 'Или запазете едно цяло копие';
 }

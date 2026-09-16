@@ -13,7 +13,17 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/sync/sync_store.dart';
 import 'package:path/path.dart' as p;
+
+/// Hears what a user operation did to a library-relative path, for the
+/// sync queue (docs/dev/sync.md, "Queue and triggers"). A hint, not a
+/// command: the reconcile decides what to do.
+typedef SyncHintSink = void Function(
+  String path,
+  SyncOpKind kind, {
+  String? fromPath,
+});
 
 /// One item in `.trash/`, mapped back to its library-relative origin.
 final class TrashItem {
@@ -54,7 +64,11 @@ final class NoteOps implements NoteOperations {
   }) : _dao = NoteDao(db),
        history = NoteHistory(root: root, config: config) {
     writer = NoteWriter(root: root, indexer: indexer, history: history);
+    config.onWritten = () => _hint(settingsFilePath, SyncOpKind.changed);
   }
+
+  /// The library settings file, library-relative.
+  static const settingsFilePath = '.niman/settings.json';
 
   /// Absolute path of the library root.
   final String root;
@@ -75,6 +89,36 @@ final class NoteOps implements NoteOperations {
   final NoteHistory history;
 
   final NoteDao _dao;
+
+  /// Where user operations report the paths they changed; null (the
+  /// default, and every library without sync) reports nothing. The sync's
+  /// own operations never report: what they write already agrees with the
+  /// server.
+  SyncHintSink? syncHints;
+
+  /// When each path was last written by a sync operation.
+  final Map<String, DateTime> _syncWrites = {};
+
+  /// How long a sync write keeps the file watcher's echo of it out of
+  /// the queue.
+  static const syncEchoWindow = Duration(seconds: 10);
+
+  void _hint(String path, SyncOpKind kind, {String? fromPath}) =>
+      syncHints?.call(path, kind, fromPath: fromPath);
+
+  void _markSyncWrite(String path) {
+    final now = DateTime.now();
+    _syncWrites
+      ..removeWhere((_, at) => now.difference(at) > syncEchoWindow)
+      ..[path] = now;
+  }
+
+  /// Whether a sync operation wrote, trashed or moved [path] within
+  /// [syncEchoWindow]: the file watcher's event for it is an echo.
+  bool changedBySync(String path) {
+    final at = _syncWrites[path];
+    return at != null && DateTime.now().difference(at) <= syncEchoWindow;
+  }
 
   /// The name of the trash manifest inside `.trash/`.
   static const manifestFileName = '.niman-trash.json';
@@ -170,6 +214,7 @@ final class NoteOps implements NoteOperations {
       final unique = await uniqueFileName(dir, clean, '.md');
       final file = File(_abs(resolvePath(parentPath, unique)));
       await writeFileAtomically(file, utf8.encode(content));
+      _hint(resolvePath(parentPath, unique), SyncOpKind.changed);
       await indexer.applyEvents(root, [file.path]);
       return await _mustFind(resolvePath(parentPath, unique));
     });
@@ -214,6 +259,7 @@ final class NoteOps implements NoteOperations {
           ? content
           : '${_endingInABlankLine(existing)}$content';
       await writeFileAtomically(file, utf8.encode(joined));
+      _hint(path, SyncOpKind.changed);
       await indexer.applyEvents(root, [file.path]);
       return await _mustFind(path);
     });
@@ -278,6 +324,7 @@ final class NoteOps implements NoteOperations {
       } else {
         await File(oldAbs).rename(_abs(newRel));
       }
+      _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
@@ -315,6 +362,7 @@ final class NoteOps implements NoteOperations {
       } else {
         await File(oldAbs).rename(_abs(newRel));
       }
+      _hint(newRel, SyncOpKind.moved, fromPath: path);
       await history.moved(path, newRel, isDir: row.isDir);
       await indexer.applyEvents(root, [oldAbs, _abs(newRel)]);
       return await _mustFind(newRel);
@@ -362,14 +410,19 @@ final class NoteOps implements NoteOperations {
           : removeFrontmatterKey(text, 'pinned');
       if (updated == text) return row;
       await writeFileAtomically(file, utf8.encode(updated));
+      _hint(path, SyncOpKind.changed);
       await indexer.rescanFiles(root, [file.path]);
       return await _mustFind(path);
     });
   }
 
   @override
-  Future<void> saveNote(String path, String content, {int? editSession}) =>
-      writer.save(path, content, editSession: editSession);
+  Future<void> saveNote(String path, String content, {int? editSession}) async {
+    await writer.save(path, content, editSession: editSession);
+    // After the write: a sync that read the hint before the text landed
+    // could otherwise upload the old text and drop the hint.
+    _hint(path, SyncOpKind.changed);
+  }
 
   @override
   Future<HistoryManifest> noteHistory(String path) => history.manifestOf(path);
@@ -385,6 +438,7 @@ final class NoteOps implements NoteOperations {
   Future<void> restoreNoteVersion(String path, int number) async {
     final text = await history.readVersion(path, number);
     await writer.save(path, text, forced: HistoryReason.restore);
+    _hint(path, SyncOpKind.changed);
   }
 
   /// Deletes [path]: into `.trash/` when the trash toggle is on, hard
@@ -397,25 +451,7 @@ final class NoteOps implements NoteOperations {
       final trash = await trashEnabled;
       String? trashAbs;
       if (trash) {
-        final trashDir = Directory(_abs('.trash'));
-        if (!trashDir.existsSync()) {
-          await trashDir.create(recursive: true);
-        }
-        final name = p.basename(path);
-        String target;
-        if (row.isDir) {
-          target = await trashDirName(trashDir, name);
-        } else {
-          final parts = splitFileName(name);
-          target = await trashFileName(trashDir, parts.base, parts.ext);
-        }
-        trashAbs = _abs('.trash/$target');
-        if (row.isDir) {
-          await Directory(oldAbs).rename(trashAbs);
-        } else {
-          await File(oldAbs).rename(trashAbs);
-        }
-        await _manifestAdd(trashDir, target, path);
+        trashAbs = await _moveIntoTrash(path, isDir: row.isDir);
       } else {
         if (row.isDir) {
           await Directory(oldAbs).delete(recursive: true);
@@ -425,10 +461,111 @@ final class NoteOps implements NoteOperations {
         // No trash to come back from: the history goes with the note.
         await history.deleted(path, isDir: row.isDir);
       }
+      _hint(path, SyncOpKind.deleted);
       final events = <String>[oldAbs];
       if (trashAbs != null) events.add(trashAbs);
       await indexer.applyEvents(root, events);
     });
+  }
+
+  /// Moves [path] into `.trash/` under a collision-safe name and records
+  /// it in the manifest; returns the absolute trash path. The history
+  /// stays at [path] (a restore brings it back).
+  Future<String> _moveIntoTrash(String path, {required bool isDir}) async {
+    final trashDir = Directory(_abs('.trash'));
+    if (!trashDir.existsSync()) {
+      await trashDir.create(recursive: true);
+    }
+    final name = p.basename(path);
+    String target;
+    if (isDir) {
+      target = await trashDirName(trashDir, name);
+    } else {
+      final parts = splitFileName(name);
+      target = await trashFileName(trashDir, parts.base, parts.ext);
+    }
+    final trashAbs = _abs('.trash/$target');
+    if (isDir) {
+      await Directory(_abs(path)).rename(trashAbs);
+    } else {
+      await File(_abs(path)).rename(trashAbs);
+    }
+    await _manifestAdd(trashDir, target, path);
+    return trashAbs;
+  }
+
+  // -- sync (docs/dev/sync.md) -------------------------------------------
+
+  /// Whether [path] keeps history: the text notes the editor saves.
+  static bool keepsHistory(String path) {
+    final lower = path.toLowerCase();
+    return lower.endsWith('.md') || lower.endsWith('.txt');
+  }
+
+  /// Swaps the verified sync download at [tempAbs] in for the file at
+  /// [path] (new or existing): a note's replaced text becomes a `sync`
+  /// version first, and it runs in the note's save order so an editor
+  /// save never interleaves. Replacing `.niman/settings.json` drops the
+  /// cached settings.
+  Future<void> syncReplace(String path, String tempAbs) async {
+    _markSyncWrite(path);
+    await writer.replaceFromFile(
+      path,
+      tempAbs,
+      forced: keepsHistory(path) ? HistoryReason.sync : null,
+    );
+    if (path == settingsFilePath) await config.reload();
+  }
+
+  /// Writes [text] at [path] because the sync merged both sides of it:
+  /// the text being replaced becomes a `sync` history version, and the
+  /// write goes through the note's save order like any other.
+  Future<void> syncMerge(String path, String text) async {
+    _markSyncWrite(path);
+    await writer.save(path, text, forced: HistoryReason.sync);
+  }
+
+  /// Moves [path] into `.trash/` because the remote deleted it — always
+  /// the trash, whatever the trash toggle: a deletion that arrives from
+  /// another device must stay recoverable here.
+  Future<void> syncTrash(String path) {
+    return _synchronized(() async {
+      final abs = _abs(path);
+      final isDir = Directory(abs).existsSync();
+      if (!isDir && !File(abs).existsSync()) return;
+      _markSyncWrite(path);
+      final trashAbs = await _moveIntoTrash(path, isDir: isDir);
+      await indexer.applyEvents(root, [abs, trashAbs]);
+    });
+  }
+
+  /// Renames the file at [from] to [to] (any folder, created on demand)
+  /// because the remote renamed it; the history follows. Throws
+  /// [StateError] when [from] is gone or [to] is taken.
+  Future<void> syncMove(String from, String to) {
+    return _synchronized(() async {
+      final fromAbs = _abs(from);
+      final toAbs = _abs(to);
+      if (!File(fromAbs).existsSync()) {
+        throw FileSystemException('Nothing to move', fromAbs);
+      }
+      if (File(toAbs).existsSync() || Directory(toAbs).existsSync()) {
+        throw FileSystemException('Already taken', toAbs);
+      }
+      await Directory(p.dirname(toAbs)).create(recursive: true);
+      _markSyncWrite(from);
+      _markSyncWrite(to);
+      await File(fromAbs).rename(toAbs);
+      await history.moved(from, to, isDir: false);
+      await indexer.applyEvents(root, [fromAbs, toAbs]);
+    });
+  }
+
+  /// Pins the sync base of [path] to the version holding content [sha];
+  /// null for files without history, or when the content is gone.
+  Future<int?> pinSyncBase(String path, String sha) async {
+    if (!keepsHistory(path)) return null;
+    return await history.pinSyncBase(path, sha);
   }
 
   /// Lists the managed trash items (manifest-backed), in deletion order.
@@ -485,6 +622,7 @@ final class NoteOps implements NoteOperations {
       }
       manifest.remove(trashName);
       await _writeManifest(manifest);
+      _hint(newRel, SyncOpKind.changed);
       // The history stayed at the original path while the item was in the
       // trash; it follows only when the item came back somewhere else.
       await history.moved(entry.originalPath, newRel, isDir: isDir);

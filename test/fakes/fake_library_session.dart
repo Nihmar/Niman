@@ -20,6 +20,7 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -96,6 +97,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   NoteOperations? get ops => _phase == LibraryPhase.ready ? this : null;
+
+  /// The sync the shell and settings see while open; null = none wired.
+  SyncService? syncService;
+
+  @override
+  SyncService? get sync => _phase == LibraryPhase.ready ? syncService : null;
 
   @override
   Future<void> resume() {
