@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The testing build (issue #106): Gradle merges this per-flavor
+     manifest into src/main's; tools:replace lets the label override the
+     official app's, separating the testing install from it. The
+     application ID itself comes from the flavor's applicationIdSuffix
+     in build.gradle.kts (dev.niman.niman.beta). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application
+        android:label="Niman (Testing)"
+        tools:replace="android:label" />
+</manifest>
