@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
@@ -27,9 +28,20 @@ Future<DiffSummary> computeDiff(String oldText, String newText) {
   return Isolate.run(() => DiffSummary.of(diffLines(oldText, newText)));
 }
 
+/// Below this width the diff reads better stacked: two monospace columns
+/// need more room than the shell's split does, so this is not
+/// `splitBreakpoint`.
+const double diffSideBySideMinWidth = 720;
+
 /// A read-only line diff (issue #67): removed lines red, added lines
 /// green, unchanged runs between the changes folded into a row that
 /// unfolds on tap.
+///
+/// Wide enough (desktop, a tablet turned sideways) it lays the two texts
+/// out in columns, the old on the left and the new on the right;
+/// narrower than [diffSideBySideMinWidth] it stacks them inline, one
+/// line per row. The measure is the width the view is given, not the
+/// window's: the diff can sit in a pane narrower than the screen.
 ///
 /// Presentation only — it knows nothing about history or sync. The
 /// caller supplies the texts and puts its own actions (restore, keep
@@ -43,6 +55,7 @@ final class DiffView extends StatefulWidget {
     this.identicalMessage,
     this.compute = computeDiff,
     this.padding = EdgeInsets.zero,
+    this.sideBySide,
     super.key,
   });
 
@@ -60,6 +73,9 @@ final class DiffView extends StatefulWidget {
 
   /// Padding around the list.
   final EdgeInsets padding;
+
+  /// Columns (true) or inline (false); null picks by the width given.
+  final bool? sideBySide;
 
   @override
   State<DiffView> createState() => _DiffViewState();
@@ -135,25 +151,40 @@ final class _DiffViewState extends State<DiffView> {
         ),
       );
     }
-    final rows = _rows(summary);
-    return ListView.builder(
-      key: const Key('diff-view'),
-      padding: widget.padding,
-      itemCount: rows.length,
-      itemBuilder: (context, index) => rows[index].build(context),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            widget.sideBySide ??
+            constraints.maxWidth >= diffSideBySideMinWidth;
+        final rows = _rows(summary, columns);
+        return ListView.builder(
+          key: const Key('diff-view'),
+          padding: widget.padding,
+          itemCount: rows.length,
+          itemBuilder: (context, index) => rows[index].build(context),
+        );
+      },
     );
   }
 
   /// The rows on screen: for each hunk a header and its lines, with the
-  /// unchanged runs around them folded (or unfolded) in between.
-  List<_Row> _rows(DiffSummary summary) {
+  /// unchanged runs around them folded (or unfolded) in between. In
+  /// [columns] the lines pair up old against new, otherwise each takes a
+  /// row of its own.
+  List<_Row> _rows(DiffSummary summary, bool columns) {
     final rows = <_Row>[];
+    void emit(Iterable<DiffLine> lines) {
+      if (columns) {
+        rows.addAll(_paired(lines));
+      } else {
+        rows.addAll(lines.map(_LineRow.new));
+      }
+    }
+
     void gap(int index, int from, int to) {
       if (to <= from) return;
       if (_open.contains(index)) {
-        for (var i = from; i < to; i++) {
-          rows.add(_LineRow(summary.lines[i]));
-        }
+        emit(summary.lines.getRange(from, to));
       } else {
         rows.add(
           _GapRow(
@@ -170,15 +201,72 @@ final class _DiffViewState extends State<DiffView> {
       final (start, end) = summary.ranges[h];
       gap(h, previousEnd, start);
       rows.add(_HeaderRow(summary.hunks[h]));
-      for (final line in summary.hunks[h].lines) {
-        rows.add(_LineRow(line));
-      }
+      emit(summary.hunks[h].lines);
       previousEnd = end;
     }
     gap(summary.hunks.length, previousEnd, summary.lines.length);
     return rows;
   }
 }
+
+/// Pairs a run of lines into two-column rows: a replaced block reads its
+/// removals on the left against the additions on the right, a side that
+/// runs out leaves its cell empty, and an unchanged line stands on both.
+///
+/// [diffLines] already puts a change's removals before its additions, so
+/// the two sides line up by taking them in order.
+List<_PairRow> _paired(Iterable<DiffLine> lines) {
+  final rows = <_PairRow>[];
+  final removed = <DiffLine>[];
+  final added = <DiffLine>[];
+  void flush() {
+    final count = math.max(removed.length, added.length);
+    for (var i = 0; i < count; i++) {
+      rows.add(
+        _PairRow(
+          left: i < removed.length ? removed[i] : null,
+          right: i < added.length ? added[i] : null,
+        ),
+      );
+    }
+    removed.clear();
+    added.clear();
+  }
+
+  for (final line in lines) {
+    switch (line.kind) {
+      case DiffKind.removed:
+        removed.add(line);
+      case DiffKind.added:
+        added.add(line);
+      case DiffKind.same:
+        flush();
+        rows.add(_PairRow(left: line, right: line));
+    }
+  }
+  flush();
+  return rows;
+}
+
+/// The mark and fill colours a line of [kind] carries, both null when it
+/// is unchanged.
+(Color?, Color?) _tint(BuildContext context, DiffKind kind) {
+  final scheme = Theme.of(context).colorScheme;
+  final added = SyntaxColors.of(context).task;
+  return switch (kind) {
+    DiffKind.same => (null, null),
+    DiffKind.removed => (scheme.error, scheme.error.withValues(alpha: 0.13)),
+    DiffKind.added => (added, added.withValues(alpha: 0.13)),
+  };
+}
+
+/// The monospace style the diff's text is set in.
+TextStyle _lineStyle(BuildContext context) => TextStyle(
+  fontFamily: 'monospace',
+  fontSize: 12.5,
+  height: 1.5,
+  color: Theme.of(context).colorScheme.onSurface,
+);
 
 sealed class _Row {
   const new();
@@ -219,24 +307,14 @@ final class _LineRow extends _Row {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final added = SyntaxColors.of(context).task;
-    final (Color? mark, Color? fill, String sign) = switch (line.kind) {
-      DiffKind.same => (null, null, ' '),
-      DiffKind.removed => (
-        scheme.error,
-        scheme.error.withValues(alpha: 0.13),
-        '−',
-      ),
-      DiffKind.added => (added, added.withValues(alpha: 0.13), '+'),
+    final scheme = Theme.of(context).colorScheme;
+    final (mark, fill) = _tint(context, line.kind);
+    final sign = switch (line.kind) {
+      DiffKind.same => ' ',
+      DiffKind.removed => '−',
+      DiffKind.added => '+',
     };
-    final style = TextStyle(
-      fontFamily: 'monospace',
-      fontSize: 12.5,
-      height: 1.5,
-      color: scheme.onSurface,
-    );
+    final style = _lineStyle(context);
     return Container(
       key: ValueKey(
         'diff-line-${line.kind.name}-${line.oldLine}-${line.newLine}',
@@ -261,6 +339,58 @@ final class _LineRow extends _Row {
           Expanded(child: Text(line.text, style: style)),
         ],
       ),
+    );
+  }
+}
+
+final class _PairRow extends _Row {
+  const new({required this.left, required this.right});
+
+  /// The old text's line here, or null where the new text only adds.
+  final DiffLine? left;
+
+  /// The new text's line here, or null where the old text's went.
+  final DiffLine? right;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return IntrinsicHeight(
+      key: ValueKey('diff-pair-${left?.oldLine}-${right?.newLine}'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: _cell(context, left)),
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: scheme.outlineVariant,
+          ),
+          Expanded(child: _cell(context, right)),
+        ],
+      ),
+    );
+  }
+
+  /// One column's cell: the line, or the muted blank standing in for the
+  /// counterpart the other side does not have.
+  Widget _cell(BuildContext context, DiffLine? line) {
+    final scheme = Theme.of(context).colorScheme;
+    if (line == null) {
+      return ColoredBox(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+      );
+    }
+    final (mark, fill) = _tint(context, line.kind);
+    return Container(
+      decoration: BoxDecoration(
+        color: fill,
+        border: Border(
+          left: BorderSide(color: mark ?? Colors.transparent, width: 3),
+        ),
+      ),
+      padding: const EdgeInsets.only(left: 9, right: 12),
+      child: Text(line.text, style: _lineStyle(context)),
     );
   }
 }
