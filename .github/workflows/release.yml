@@ -61,6 +61,20 @@ jobs:
             echo "No signing secrets: APK is debug-signed (see plan T-M7-02)."
           fi
 
+      # whisper_ggml builds whisper.cpp with NDK 29, which is still
+      # r29-beta1: sdkmanager only offers the stable channel by default,
+      # so the Gradle plugin's own install of it fails with "sdkmanager
+      # did not install NDK 29.0.13113456". Fetch it from the beta
+      # channel first. Drop this once the plugin moves to a stable NDK.
+      - name: Android NDK (beta channel)
+        run: |
+          set -o pipefail
+          NDK="$(grep -oP 'ndkVersion\s*=\s*"\K[^"]+' android/app/build.gradle.kts)"
+          echo "installing ndk;$NDK"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            --channel=1 "ndk;$NDK"
+          test -d "$ANDROID_HOME/ndk/$NDK"
+
       - run: flutter pub get
       - run: flutter build apk --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
 
