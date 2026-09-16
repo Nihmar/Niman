@@ -1608,4 +1608,34 @@ final class CatalanStrings extends Strings {
       '“Sincronitza ara” mostra què s’eliminaria i demana confirmació.';
   @override
   String get syncNeedsConfirmation => 'Esperant la teva confirmació';
+  @override
+  String get syncMergeIntro =>
+      'Les modificacions que no se superposen ja estan unides; tria què '
+      'conservar on sí que se superposen.';
+  @override
+  String get syncMergeClean =>
+      'Les dues versions s’uneixen soles: no hi ha res que se superposi.';
+  @override
+  String get syncMergeNoBase =>
+      'No hi ha cap versió comuna sobre la qual unir, així que cal triar el '
+      'fitxer sencer.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Superposició $index de $total';
+  @override
+  String get syncMergeFromLocal => 'D’aquest dispositiu';
+  @override
+  String get syncMergeFromRemote => 'Del servidor';
+  @override
+  String get syncMergeRemovedLines => 'Línies eliminades';
+  @override
+  String get syncMergeKeepLocal => 'Les meves';
+  @override
+  String get syncMergeKeepRemote => 'Del servidor';
+  @override
+  String get syncMergeKeepBoth => 'Totes dues';
+  @override
+  String get syncMergeSave => 'Desa la unió';
+  @override
+  String get syncMergeKeepWhole => 'O conserva una còpia sencera';
 }

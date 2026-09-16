@@ -1570,4 +1570,32 @@ final class DanishStrings extends Strings {
       'først.';
   @override
   String get syncNeedsConfirmation => 'Venter på din bekræftelse';
+  @override
+  String get syncMergeIntro =>
+      'Ændringer, der ikke overlapper, er allerede flettet; vælg, hvad du vil '
+      'beholde, hvor de overlapper.';
+  @override
+  String get syncMergeClean =>
+      'De to versioner flettes af sig selv: intet overlapper.';
+  @override
+  String get syncMergeNoBase =>
+      'Der er ingen fælles version at flette på, så hele filen skal vælges.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlap $index af $total';
+  @override
+  String get syncMergeFromLocal => 'Fra denne enhed';
+  @override
+  String get syncMergeFromRemote => 'Fra serveren';
+  @override
+  String get syncMergeRemovedLines => 'Linjer fjernet';
+  @override
+  String get syncMergeKeepLocal => 'Mine';
+  @override
+  String get syncMergeKeepRemote => 'Serverens';
+  @override
+  String get syncMergeKeepBoth => 'Begge';
+  @override
+  String get syncMergeSave => 'Gem fletningen';
+  @override
+  String get syncMergeKeepWhole => 'Eller behold én hel kopi';
 }

@@ -1554,4 +1554,32 @@ final class EnglishStrings extends Strings {
       '“Sync now” shows what would be removed and asks first.';
   @override
   String get syncNeedsConfirmation => 'Waiting for your confirmation';
+  @override
+  String get syncMergeIntro =>
+      'Edits that do not overlap are already merged; choose what to keep '
+      'where they do.';
+  @override
+  String get syncMergeClean =>
+      'The two versions merge on their own: nothing overlaps.';
+  @override
+  String get syncMergeNoBase =>
+      'No shared version to merge on, so the whole file has to be chosen.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Overlap $index of $total';
+  @override
+  String get syncMergeFromLocal => 'From this device';
+  @override
+  String get syncMergeFromRemote => 'From the server';
+  @override
+  String get syncMergeRemovedLines => 'Lines removed';
+  @override
+  String get syncMergeKeepLocal => 'Mine';
+  @override
+  String get syncMergeKeepRemote => 'Theirs';
+  @override
+  String get syncMergeKeepBoth => 'Both';
+  @override
+  String get syncMergeSave => 'Save the merge';
+  @override
+  String get syncMergeKeepWhole => 'Or keep one whole copy';
 }

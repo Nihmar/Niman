@@ -1598,4 +1598,33 @@ final class CroatianStrings extends Strings {
       '„Sinkroniziraj sada” pokazuje što bi bilo uklonjeno i prvo pita.';
   @override
   String get syncNeedsConfirmation => 'Čeka tvoju potvrdu';
+  @override
+  String get syncMergeIntro =>
+      'Izmjene koje se ne preklapaju već su spojene; gdje se preklapaju, '
+      'odaberi što zadržati.';
+  @override
+  String get syncMergeClean =>
+      'Dvije se verzije spajaju same: ništa se ne preklapa.';
+  @override
+  String get syncMergeNoBase =>
+      'Nema zajedničke verzije za spajanje, pa se bira cijela datoteka.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Preklapanje $index od $total';
+  @override
+  String get syncMergeFromLocal => 'S ovog uređaja';
+  @override
+  String get syncMergeFromRemote => 'S poslužitelja';
+  @override
+  String get syncMergeRemovedLines => 'Uklonjeni retci';
+  @override
+  String get syncMergeKeepLocal => 'Moji';
+  @override
+  String get syncMergeKeepRemote => 'Poslužitelj';
+  @override
+  String get syncMergeKeepBoth => 'Oba';
+  @override
+  String get syncMergeSave => 'Spremi spajanje';
+  @override
+  String get syncMergeKeepWhole => 'Ili zadrži jednu cijelu kopiju';
 }

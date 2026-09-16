@@ -1575,4 +1575,33 @@ final class HungarianStrings extends Strings {
       'rákérdez.';
   @override
   String get syncNeedsConfirmation => 'A megerősítésedre vár';
+  @override
+  String get syncMergeIntro =>
+      'Az egymást nem átfedő módosítások már össze vannak fésülve; '
+      'ahol átfedik egymást, válaszd ki, mi maradjon.';
+  @override
+  String get syncMergeClean =>
+      'A két verzió magától összeáll: semmi sem fedi egymást.';
+  @override
+  String get syncMergeNoBase =>
+      'Nincs közös verzió, amelyre össze lehetne fésülni, ezért a '
+      'teljes fájlt kell választani.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Átfedés $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Erről a készülékről';
+  @override
+  String get syncMergeFromRemote => 'A szerverről';
+  @override
+  String get syncMergeRemovedLines => 'Törölt sorok';
+  @override
+  String get syncMergeKeepLocal => 'Enyém';
+  @override
+  String get syncMergeKeepRemote => 'Szerveré';
+  @override
+  String get syncMergeKeepBoth => 'Mindkettő';
+  @override
+  String get syncMergeSave => 'Összefésülés mentése';
+  @override
+  String get syncMergeKeepWhole => 'Vagy tarts meg egy teljes példányt';
 }

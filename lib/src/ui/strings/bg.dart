@@ -1582,4 +1582,33 @@ final class BulgarianStrings extends Strings {
       '„Синхронизирай сега“ показва какво ще бъде премахнато и първо пита.';
   @override
   String get syncNeedsConfirmation => 'Изчаква вашето потвърждение';
+  @override
+  String get syncMergeIntro =>
+      'Промените, които не се припокриват, вече са слети; там, където се '
+      'припокриват, изберете какво да запазите.';
+  @override
+  String get syncMergeClean =>
+      'Двете версии се сливат сами: нищо не се припокрива.';
+  @override
+  String get syncMergeNoBase =>
+      'Няма обща версия, върху която да се слее, затова се избира целият файл.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Припокриване $index от $total';
+  @override
+  String get syncMergeFromLocal => 'От това устройство';
+  @override
+  String get syncMergeFromRemote => 'От сървъра';
+  @override
+  String get syncMergeRemovedLines => 'Премахнати редове';
+  @override
+  String get syncMergeKeepLocal => 'Моите';
+  @override
+  String get syncMergeKeepRemote => 'На сървъра';
+  @override
+  String get syncMergeKeepBoth => 'И двете';
+  @override
+  String get syncMergeSave => 'Запази сливането';
+  @override
+  String get syncMergeKeepWhole => 'Или запазете едно цяло копие';
 }

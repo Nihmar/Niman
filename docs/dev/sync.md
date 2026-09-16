@@ -581,10 +581,35 @@ about to close.
 
 ### Conflicts
 
-`PUT` answering 412 (or the pre-write check finding a newer remote)
-re-fetches, merges non-overlapping hunks automatically and opens
-`DiffView` in `merge` mode for the rest: per hunk mine / theirs / both,
-or keep a whole side. The result is saved through `NoteOps` and queued.
+A path both sides changed differently goes through the three-way merge
+(`lib/src/diff/three_way.dart`, issues #17 and #67) before it is called a
+conflict:
+
+- **The base** is the history version pinned as `syncBase` (the content
+  of the last agreement). Without one — a file created on both devices,
+  an attachment, a base that rotated away — nothing merges and the whole
+  copies are the only choice.
+- **`mergeThreeWay(base, local, remote)`** aligns each side with the base
+  through `diffLines` and walks the base once, cutting it into regions:
+  untouched, changed by one side, changed the same way by both (taken
+  once), or **conflict**, which keeps all three sides. `MergeResult.text`
+  builds the merged text with one `MergeChoice` per conflict (mine,
+  theirs, both; mine by default) and keeps the local line endings and
+  trailing break. It merges lines, not words: two edits on one line
+  overlap.
+- **The engine** merges during a run (`_tryMerge`, inside the `conflict`
+  action): a clean merge is written with `NoteOps.syncMerge` (the
+  replaced text becomes a `sync` version), uploaded with `If-Match`, and
+  recorded — `SyncReport.merged` lists those paths and the editor
+  re-reads them. A merge with overlaps changes nothing and reports the
+  conflict, base included.
+- **The screen** (`SyncConflictScreen` + `MergeView`) shows the merge
+  region by region: what each side contributed is already in, and every
+  overlap has a three-way segmented choice. **Save the merge** calls
+  `SyncService.resolveMerged`, which writes the text here (again a `sync`
+  version) and uploads it with `If-Match`. Keeping one whole copy stays
+  one tap away, and is the only option without a base, where the screen
+  falls back to the read-only `DiffView`.
 
 ## Order of work
 

@@ -53,8 +53,8 @@ Full guides live in [`docs/`](docs/):
   folder, `http://` over a VPN included: automatic syncing after edits,
   on opening and every few minutes (Wi-Fi only if you like), an offline
   queue that retries by itself, a first sync that deletes nothing, remote
-  deletions landing in the trash, and conflicts resolved by comparing
-  both copies.
+  deletions landing in the trash, and edits from two devices merged when
+  they are in different places — the rest decided line by line.
 
 ### Organization
 
@@ -99,8 +99,6 @@ delivery and other background behavior.
 These are tracked as GitHub issues — see the
 [issue tracker](https://github.com/Nihmar/Niman/issues) for details.
 
-- **WebDAV sync, the rest** ([#9](https://github.com/Nihmar/Niman/issues/9)) —
-  a hunk-level merge for conflicts.
 - **Multi-tab editing** ([#23](https://github.com/Nihmar/Niman/issues/23)) —
   open several notes at once.
 - **Export** ([#24](https://github.com/Nihmar/Niman/issues/24)) —

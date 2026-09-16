@@ -1544,4 +1544,32 @@ final class EstonianStrings extends Strings {
       '„Sünkrooni kohe“ näitab, mis eemaldataks, ja küsib enne kinnitust.';
   @override
   String get syncNeedsConfirmation => 'Ootab sinu kinnitust';
+  @override
+  String get syncMergeIntro =>
+      'Muudatused, mis ei kattu, on juba ühendatud; seal, kus need kattuvad, '
+      'vali, mis alles jätta.';
+  @override
+  String get syncMergeClean => 'Kaks versiooni ühinevad ise: miski ei kattu.';
+  @override
+  String get syncMergeNoBase =>
+      'Ühist versiooni, mille peal ühendada, pole, seega tuleb valida kogu '
+      'fail.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Kattuvus $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Sellest seadmest';
+  @override
+  String get syncMergeFromRemote => 'Serverist';
+  @override
+  String get syncMergeRemovedLines => 'Eemaldatud read';
+  @override
+  String get syncMergeKeepLocal => 'Minu';
+  @override
+  String get syncMergeKeepRemote => 'Serveri';
+  @override
+  String get syncMergeKeepBoth => 'Mõlemad';
+  @override
+  String get syncMergeSave => 'Salvesta ühendamine';
+  @override
+  String get syncMergeKeepWhole => 'Või jäta alles üks terve koopia';
 }

@@ -1587,4 +1587,34 @@ final class MacedonianStrings extends Strings {
       '„Синхронизирај сега“ покажува што би било отстрането и прво прашува.';
   @override
   String get syncNeedsConfirmation => 'Се чека вашата потврда';
+  @override
+  String get syncMergeIntro =>
+      'Измените што не се преклопуваат се веќе споени; таму каде што се '
+      'преклопуваат, изберете што да задржите.';
+  @override
+  String get syncMergeClean =>
+      'Двете верзии се спојуваат сами: ништо не се преклопува.';
+  @override
+  String get syncMergeNoBase =>
+      'Нема заедничка верзија врз која да се спои, па се избира целата '
+      'датотека.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Преклопување $index од $total';
+  @override
+  String get syncMergeFromLocal => 'Од овој уред';
+  @override
+  String get syncMergeFromRemote => 'Од серверот';
+  @override
+  String get syncMergeRemovedLines => 'Отстранети редови';
+  @override
+  String get syncMergeKeepLocal => 'Моите';
+  @override
+  String get syncMergeKeepRemote => 'На серверот';
+  @override
+  String get syncMergeKeepBoth => 'И двете';
+  @override
+  String get syncMergeSave => 'Зачувај го спојувањето';
+  @override
+  String get syncMergeKeepWhole => 'Или задржете една цела копија';
 }

@@ -1563,4 +1563,33 @@ final class LatvianStrings extends Strings {
       '„Sinhronizēt tagad“ parāda, kas tiktu noņemts, un vispirms pajautā.';
   @override
   String get syncNeedsConfirmation => 'Gaida jūsu apstiprinājumu';
+  @override
+  String get syncMergeIntro =>
+      'Izmaiņas, kas nepārklājas, jau ir sapludinātas; tur, kur tās pārklājas, '
+      'izvēlieties, ko paturēt.';
+  @override
+  String get syncMergeClean =>
+      'Abas versijas sapludinās pašas: nekas nepārklājas.';
+  @override
+  String get syncMergeNoBase =>
+      'Nav kopīgas versijas, uz kuras sapludināt, tāpēc jāizvēlas viss fails.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Pārklājums $index no $total';
+  @override
+  String get syncMergeFromLocal => 'No šīs ierīces';
+  @override
+  String get syncMergeFromRemote => 'No servera';
+  @override
+  String get syncMergeRemovedLines => 'Noņemtās rindas';
+  @override
+  String get syncMergeKeepLocal => 'Manas';
+  @override
+  String get syncMergeKeepRemote => 'Servera';
+  @override
+  String get syncMergeKeepBoth => 'Abas';
+  @override
+  String get syncMergeSave => 'Saglabāt sapludinājumu';
+  @override
+  String get syncMergeKeepWhole => 'Vai paturiet vienu veselu kopiju';
 }

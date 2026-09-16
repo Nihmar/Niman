@@ -1634,4 +1634,34 @@ final class GreekStrings extends Strings {
       'Το «Συγχρονισμός τώρα» δείχνει τι θα αφαιρεθεί και ρωτά πρώτα.';
   @override
   String get syncNeedsConfirmation => 'Αναμονή για την επιβεβαίωσή σας';
+  @override
+  String get syncMergeIntro =>
+      'Οι αλλαγές που δεν επικαλύπτονται είναι ήδη ενωμένες· '
+      'επιλέξτε τι θα κρατήσετε εκεί που επικαλύπτονται.';
+  @override
+  String get syncMergeClean =>
+      'Οι δύο εκδόσεις ενώνονται μόνες τους: τίποτα δεν επικαλύπτεται.';
+  @override
+  String get syncMergeNoBase =>
+      'Δεν υπάρχει κοινή έκδοση για την ένωση, οπότε πρέπει να '
+      'επιλεγεί ολόκληρο το αρχείο.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Επικάλυψη $index από $total';
+  @override
+  String get syncMergeFromLocal => 'Από αυτή τη συσκευή';
+  @override
+  String get syncMergeFromRemote => 'Από τον διακομιστή';
+  @override
+  String get syncMergeRemovedLines => 'Γραμμές που αφαιρέθηκαν';
+  @override
+  String get syncMergeKeepLocal => 'Δικές μου';
+  @override
+  String get syncMergeKeepRemote => 'Του διακομιστή';
+  @override
+  String get syncMergeKeepBoth => 'Και τα δύο';
+  @override
+  String get syncMergeSave => 'Αποθήκευση της ένωσης';
+  @override
+  String get syncMergeKeepWhole => 'Ή κρατήστε ένα ολόκληρο αντίγραφο';
 }

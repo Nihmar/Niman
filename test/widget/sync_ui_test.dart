@@ -443,6 +443,80 @@ void main() {
     });
   });
 
+  group('conflict screen', () {
+    String note(List<String> lines) => '${lines.join('\n')}\n';
+
+    Future<void> pumpConflict(WidgetTester tester) async {
+      setSurfaceSize(tester, const Size(500, 1400));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SyncConflictScreen(sync: sync, path: 'note.md'),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('with a base, the overlaps are the only question (W7)', (
+      tester,
+    ) async {
+      sync.texts = (
+        base: note(['# Title', 'one', 'two', 'three']),
+        local: note(['# Title', 'one', 'mine', 'three', 'four']),
+        remote: note(['# Notes', 'one', 'theirs', 'three']),
+      );
+      await pumpConflict(tester);
+      expect(find.byKey(const Key('sync-conflict-merge')), findsOneWidget);
+      expect(
+        find.text(
+          'Edits that do not overlap are already merged; choose what to '
+          'keep where they do.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Overlap 1 of 1'), findsOneWidget);
+      expect(find.text('# Notes'), findsOneWidget, reason: 'already merged');
+      expect(find.text('four'), findsOneWidget, reason: 'already merged');
+
+      // The local side is kept until another is picked.
+      await tester.tap(find.text('Theirs'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('sync-save-merge')));
+      await tester.pumpAndSettle();
+      expect(sync.calls, ['texts note.md', 'merge note.md']);
+      expect(
+        sync.mergedText,
+        note(['# Notes', 'one', 'theirs', 'three', 'four']),
+      );
+    });
+
+    testWidgets('both whole copies stay one tap away', (tester) async {
+      sync.texts = (
+        base: note(['a', 'b']),
+        local: note(['a', 'mine']),
+        remote: note(['a', 'theirs']),
+      );
+      await pumpConflict(tester);
+      await tester.tap(find.byKey(const Key('sync-keep-remote')));
+      await tester.pumpAndSettle();
+      expect(sync.calls.last, 'resolve note.md remote');
+    });
+
+    testWidgets('without a base it is the two whole copies', (tester) async {
+      sync.texts = (local: 'mine', remote: 'theirs', base: null);
+      await pumpConflict(tester);
+      expect(find.byKey(const Key('sync-conflict-merge')), findsNothing);
+      expect(find.byKey(const Key('sync-conflict-diff')), findsOneWidget);
+      expect(
+        find.text(
+          'No shared version to merge on, so the whole file has to be '
+          'chosen.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('sync-save-merge')), findsNothing);
+    });
+  });
+
   group('entry points', () {
     late FakeLibrarySession controller;
 

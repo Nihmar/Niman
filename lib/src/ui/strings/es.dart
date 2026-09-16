@@ -1603,4 +1603,34 @@ final class SpanishStrings extends Strings {
       '«Sincronizar ahora» muestra qué se eliminaría y pide confirmación.';
   @override
   String get syncNeedsConfirmation => 'Esperando tu confirmación';
+  @override
+  String get syncMergeIntro =>
+      'Los cambios que no se superponen ya están unidos; elige qué conservar '
+      'donde sí se superponen.';
+  @override
+  String get syncMergeClean =>
+      'Las dos versiones se unen solas: no hay nada que se superponga.';
+  @override
+  String get syncMergeNoBase =>
+      'No hay una versión común sobre la que unir, así que hay que elegir el '
+      'archivo entero.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Superposición $index de $total';
+  @override
+  String get syncMergeFromLocal => 'De este dispositivo';
+  @override
+  String get syncMergeFromRemote => 'Del servidor';
+  @override
+  String get syncMergeRemovedLines => 'Líneas eliminadas';
+  @override
+  String get syncMergeKeepLocal => 'Las mías';
+  @override
+  String get syncMergeKeepRemote => 'Del servidor';
+  @override
+  String get syncMergeKeepBoth => 'Ambas';
+  @override
+  String get syncMergeSave => 'Guardar la unión';
+  @override
+  String get syncMergeKeepWhole => 'O conserva una copia entera';
 }

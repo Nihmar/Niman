@@ -721,4 +721,16 @@ abstract base class Strings {
   String get syncPausedServerHint;
   String get syncPausedConfirmHint;
   String get syncNeedsConfirmation;
+  String get syncMergeIntro;
+  String get syncMergeClean;
+  String get syncMergeNoBase;
+  String syncMergeOverlap(int index, int total);
+  String get syncMergeFromLocal;
+  String get syncMergeFromRemote;
+  String get syncMergeRemovedLines;
+  String get syncMergeKeepLocal;
+  String get syncMergeKeepRemote;
+  String get syncMergeKeepBoth;
+  String get syncMergeSave;
+  String get syncMergeKeepWhole;
 }

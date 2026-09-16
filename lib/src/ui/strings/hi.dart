@@ -1543,4 +1543,33 @@ final class HindiStrings extends Strings {
       '«अभी सिंक करें» दिखाता है कि क्या हटेगा, और पहले पूछता है।';
   @override
   String get syncNeedsConfirmation => 'आपकी पुष्टि का इंतज़ार';
+  @override
+  String get syncMergeIntro =>
+      'जो बदलाव ओवरलैप नहीं होते वे पहले ही मिला दिए गए हैं; '
+      'जहाँ होते हैं वहाँ चुनें कि क्या रखना है।';
+  @override
+  String get syncMergeClean =>
+      'दोनों संस्करण अपने-आप मिल जाते हैं: कुछ भी ओवरलैप नहीं होता।';
+  @override
+  String get syncMergeNoBase =>
+      'मिलाने के लिए कोई साझा संस्करण नहीं है, इसलिए पूरी फ़ाइल '
+      'चुननी होगी।';
+  @override
+  String syncMergeOverlap(int index, int total) => 'ओवरलैप $index / $total';
+  @override
+  String get syncMergeFromLocal => 'इस डिवाइस से';
+  @override
+  String get syncMergeFromRemote => 'सर्वर से';
+  @override
+  String get syncMergeRemovedLines => 'हटाई गई पंक्तियाँ';
+  @override
+  String get syncMergeKeepLocal => 'मेरी';
+  @override
+  String get syncMergeKeepRemote => 'सर्वर की';
+  @override
+  String get syncMergeKeepBoth => 'दोनों';
+  @override
+  String get syncMergeSave => 'मिलान सहेजें';
+  @override
+  String get syncMergeKeepWhole => 'या पूरी एक कॉपी रखें';
 }

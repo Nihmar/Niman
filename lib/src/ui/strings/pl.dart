@@ -1603,4 +1603,32 @@ final class PolishStrings extends Strings {
       '„Synchronizuj teraz” pokaże, co zostałoby usunięte, i najpierw zapyta.';
   @override
   String get syncNeedsConfirmation => 'Czeka na Twoje potwierdzenie';
+  @override
+  String get syncMergeIntro =>
+      'Zmiany, które się nie nakładają, są już scalone; tam, gdzie się '
+      'nakładają, wybierz, co zachować.';
+  @override
+  String get syncMergeClean =>
+      'Obie wersje scalają się same: nic się nie nakłada.';
+  @override
+  String get syncMergeNoBase =>
+      'Brak wspólnej wersji do scalenia, więc trzeba wybrać cały plik.';
+  @override
+  String syncMergeOverlap(int index, int total) => 'Nakładanie $index z $total';
+  @override
+  String get syncMergeFromLocal => 'Z tego urządzenia';
+  @override
+  String get syncMergeFromRemote => 'Z serwera';
+  @override
+  String get syncMergeRemovedLines => 'Usunięte linie';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Serwera';
+  @override
+  String get syncMergeKeepBoth => 'Obie';
+  @override
+  String get syncMergeSave => 'Zapisz scalenie';
+  @override
+  String get syncMergeKeepWhole => 'Albo zachowaj jedną całą kopię';
 }
