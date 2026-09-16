@@ -102,6 +102,12 @@ bool _sameMap(Map<String, String> a, Map<String, String> b) =>
 /// Only `200` propstats count. A response whose href lies outside [base]
 /// is reported through [onSkipped] and left out; an unparsable document
 /// throws [WebDavProtocolFailure].
+///
+/// A server behind a reverse proxy that mounts it under a path prefix
+/// answers with the hrefs it knows — its own, without the prefix the
+/// client asked through. [_prefixDrop] works out how many leading
+/// segments of [base] the answer leaves off, so those hrefs still
+/// resolve; see its doc for what keeps that from accepting anything.
 List<WebDavResource> parseMultistatus(
   String body,
   Uri base, {
@@ -120,11 +126,20 @@ List<WebDavResource> parseMultistatus(
     );
   }
   final baseSegments = _segments(base);
+  final responses = _children(root, 'response').toList();
+  final hrefs = <String?>[
+    for (final response in responses)
+      _children(response, 'href').firstOrNull?.innerText.trim(),
+  ];
+  final expected = baseSegments.sublist(
+    _prefixDrop(hrefs, base, baseSegments),
+  );
   final resources = <WebDavResource>[];
-  for (final response in _children(root, 'response')) {
-    final href = _children(response, 'href').firstOrNull?.innerText.trim();
+  for (var i = 0; i < responses.length; i++) {
+    final response = responses[i];
+    final href = hrefs[i];
     if (href == null || href.isEmpty) continue;
-    final relative = _relativePath(href, base, baseSegments);
+    final relative = _relativePath(href, base, expected);
     if (relative == null) {
       onSkipped?.call(href);
       continue;
@@ -216,7 +231,37 @@ List<String> _segments(Uri uri) => [
 /// A `%` not followed by two hex digits, which decoding would reject.
 final _badEscape = RegExp('%(?![0-9a-fA-F]{2})');
 
-String? _relativePath(String href, Uri base, List<String> baseSegments) {
+/// How many leading segments of [baseSegments] the server's hrefs leave
+/// off, which is what a reverse proxy mounting it under a path prefix
+/// costs: the client asks through `/omv/webdav/…`, the server answers
+/// about `/webdav/…` because that is the only path it knows.
+///
+/// Chosen as the drop that places the most hrefs inside the
+/// destination, ties going to the smallest — so a server that needs no
+/// allowance keeps the exact match, and one href cannot move the
+/// mapping for the rest. The last segment of [base] is never dropped:
+/// the destination folder's own name always has to appear, so this
+/// widens what counts as inside the destination by a known prefix
+/// rather than accepting anything the server cares to name.
+int _prefixDrop(List<String?> hrefs, Uri base, List<String> baseSegments) {
+  var best = 0;
+  var bestMatches = -1;
+  for (var drop = 0; drop < baseSegments.length; drop++) {
+    final expected = baseSegments.sublist(drop);
+    var matches = 0;
+    for (final href in hrefs) {
+      if (href == null || href.isEmpty) continue;
+      if (_relativePath(href, base, expected) != null) matches++;
+    }
+    if (matches > bestMatches) {
+      bestMatches = matches;
+      best = drop;
+    }
+  }
+  return best;
+}
+
+String? _relativePath(String href, Uri base, List<String> expected) {
   if (_badEscape.hasMatch(href)) return null;
   final Uri resolved;
   try {
@@ -225,9 +270,9 @@ String? _relativePath(String href, Uri base, List<String> baseSegments) {
     return null;
   }
   final segments = _segments(resolved);
-  if (segments.length < baseSegments.length) return null;
-  for (var i = 0; i < baseSegments.length; i++) {
-    if (segments[i] != baseSegments[i]) return null;
+  if (segments.length < expected.length) return null;
+  for (var i = 0; i < expected.length; i++) {
+    if (segments[i] != expected[i]) return null;
   }
-  return segments.sublist(baseSegments.length).join('/');
+  return segments.sublist(expected.length).join('/');
 }
