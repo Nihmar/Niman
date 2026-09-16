@@ -685,7 +685,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> restoreNoteVersion(String path, int number) async {
     restores.add((path, number));
-    final text = await readNoteVersion(path, number);
+    await restoreNoteText(path, await readNoteVersion(path, number));
+  }
+
+  /// Every [restoreNoteText] call, in order: `(path, text)`.
+  final List<(String, String)> restoredTexts = [];
+
+  @override
+  Future<void> restoreNoteText(String path, String text) async {
+    restoredTexts.add((path, text));
     final row = _requireRow(path);
     final kept = _history[path] ??= [];
     final next = kept.fold<int>(0, (m, e) => e.$1.number > m ? e.$1.number : m);

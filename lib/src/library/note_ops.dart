@@ -437,6 +437,14 @@ final class NoteOps implements NoteOperations {
   @override
   Future<void> restoreNoteVersion(String path, int number) async {
     final text = await history.readVersion(path, number);
+    await restoreNoteText(path, text);
+  }
+
+  /// Keeps the current text as a [HistoryReason.restore] version, then
+  /// writes [text] through the writer — the part of a restore that does
+  /// not care where the text came from.
+  @override
+  Future<void> restoreNoteText(String path, String text) async {
     await writer.save(path, text, forced: HistoryReason.restore);
     _hint(path, SyncOpKind.changed);
   }
