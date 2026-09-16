@@ -41,3 +41,12 @@ Every platform spellchecks: system/IME on Android, hunspell on desktop.
 Desktop dictionaries are chosen per library (`spellDictionaries`, a list
 of hunspell names in selection order; empty = locale default). A word
 passes when any selected dictionary knows it.
+
+Desktop additionally has a per-library personal dictionary: right-clicking
+a flagged word in either editor offers *Add to dictionary*, which writes
+the word to `<library>/.niman/dictionary.txt` (one word per line, next
+to `settings.json`). A personal word always passes, whatever the hunspell
+engines say, and its underline clears on the next scan. Words are read
+case-insensitively but stored as first typed. The file travels with the
+library, so different libraries can carry different vocabularies; it
+survives app restarts.

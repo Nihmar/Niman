@@ -63,7 +63,7 @@ final class AlbanianStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Hundë';
+  String get trashTitle => 'Koshi';
   @override
   String get trashSubtitle =>
       'Elementët e fshirë shkojnë në .trash/ (jo aktiv = fshirje '
@@ -172,6 +172,8 @@ final class AlbanianStrings extends Strings {
   String spellCheckCount(int count) => '$count për shqyrtim';
   @override
   String spellCheckLine(int line) => 'rreshti $line';
+  @override
+  String get addWordToDictionary => 'Shto në fjalor';
 
   @override
   String indentWidthValue(int spaces) => '$spaces hapësira';
@@ -990,7 +992,7 @@ final class AlbanianStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Widget-et e ekranit kryesor janë të disponueshme në Android';
   @override
-  String get movedToTrash => 'Lëvizur te hundë';
+  String get movedToTrash => 'U zhvendos në kosh';
   @override
   String get deletedMessage => 'U fshi';
   @override
@@ -1034,12 +1036,12 @@ final class AlbanianStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Hundë është bosh';
+  String get trashEmpty => 'Koshi është bosh';
   @override
-  String get trashEmptyAction => 'Boshtëso hundën';
+  String get trashEmptyAction => 'Boshatis koshin';
   @override
   String get trashEmptyConfirm =>
-      'Kjo i fshin përfundimisht të gjitha gjërat në tresën e hundës, '
+      'Kjo i fshin përfundimisht të gjitha gjërat në kosh, '
       "përfshirë objekte që Niman s'i vendosi aty.";
   @override
   String trashDeleteConfirm(String name) =>
@@ -1251,6 +1253,19 @@ final class AlbanianStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? '1 rresht i pandryshuar' : '$count rreshta të pandryshuar';
   @override
+  String get historyTakeHunk => 'Rikthe këtu';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Rikthe 1 ndryshim' : 'Rikthe $count ndryshime';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Ndryshimet e zgjedhura kthehen te teksti i këtij versioni. Shënimi '
+      'ashtu siç është tani ruhet më parë si version, kështu që mund ta '
+      'zhbësh.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Shënimi ndryshoi ndërsa ishe këtu — krahasimi u rifreskua.';
+  @override
   String get historyVersionsTitle => 'Versionet që ruhen';
   @override
   String get historyVersionsSubtitle => 'Për çdo shënim, në .history/';
@@ -1375,4 +1390,361 @@ final class AlbanianStrings extends Strings {
   String get transcriptionAppend => 'Shto poshtë';
   @override
   String get transcriptionReplace => 'Zëvendëso';
+  @override
+  String get settingsSectionSync => 'Sinkronizimi';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Nuk është konfiguruar për këtë bibliotekë';
+  @override
+  String get syncNeverSynced => 'Ende e pasinkronizuar';
+  @override
+  String syncLastSynced(String when) => 'Sinkronizuar $when';
+  @override
+  String get syncRunning => 'Po sinkronizohet…';
+  @override
+  String syncScreenSubtitle(String library) => 'Biblioteka $library';
+  @override
+  String get syncUrlLabel => 'Adresa e tresës';
+  @override
+  String get syncUrlHint =>
+      'Tresa duhet të ekzistojë. Kopjojeni adresën ashtu siç e '
+      'shfaq serveri.';
+  @override
+  String get syncHttpWarning =>
+      'Lidhje e pakriptuar: në rregull përmes një VPN ose në '
+      'rrjetin lokal.';
+  @override
+  String get syncUserLabel => 'Përdoruesi';
+  @override
+  String get syncUserHint => 'Lëreni bosh nëse serveri nuk kërkon kredenciale.';
+  @override
+  String get syncPasswordLabel => 'Fjalëkalimi';
+  @override
+  String get syncPasswordHint =>
+      'Ruhet në zinxhirin e çelësave të kësaj pajisjeje, kurrë '
+      'në skedarët e bibliotekës.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Lëreni bosh për të mbajtur fjalëkalimin e ruajtur.';
+  @override
+  String get syncShowPassword => 'Shfaq fjalëkalimin';
+  @override
+  String get syncHidePassword => 'Fshih fjalëkalimin';
+  @override
+  String get syncTestAction => 'Testo lidhjen';
+  @override
+  String get syncTesting => 'Po testohet…';
+  @override
+  String get syncRetargetWarning =>
+      'Me një adresë ose përdorues të ri, sinkronizimi i '
+      'ardhshëm nis nga e para si sinkronizim i parë.';
+  @override
+  String get syncTestOk => 'Lidhja funksionon';
+  @override
+  String get syncModeFull => 'Modaliteti i plotë';
+  @override
+  String get syncModeCompatible => 'Modaliteti i përputhshëm';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lexim, shkrim dhe fshirje';
+  @override
+  String get syncCapEtags => 'Gjurmët e skedarëve (ETag)';
+  @override
+  String get syncCapNoEtags => 'Pa gjurmë skedarësh (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Krahason madhësinë dhe datën; në rast dyshimi shkarkon '
+      'përsëri';
+  @override
+  String get syncCapGuarded => 'Shkrime të mbrojtura';
+  @override
+  String get syncCapUnguarded => 'Shkrime të pambrojtura';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Kontrollon skedarin në server pak para shkrimit';
+  @override
+  String get syncCapMove => 'Riemërton pa ngarkuar përsëri';
+  @override
+  String get syncCapNoMove => 'Pa riemërtime në server';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Një riemërtim bëhet fshirje dhe ngarkim i ri';
+  @override
+  String get syncCompatibleNote =>
+      'Në modalitetin e përputhshëm sinkronizimi funksionon '
+      'njësoj, me pak më shumë kërkesa.';
+  @override
+  String get syncTestInvalidUrl => 'Adresë e pavlefshme';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Shkruani një adresë http:// ose https://, pa përdorues '
+      'apo fjalëkalim brenda saj.';
+  @override
+  String get syncTestOffline => 'Serveri nuk arrihet';
+  @override
+  String get syncTestOfflineHint =>
+      'A është aktiv VPN? Një adresë 10.x ose 192.168.x '
+      'funksionon vetëm nga i njëjti rrjet.';
+  @override
+  String get syncTestAuth => 'Përdoruesi ose fjalëkalimi u refuzua';
+  @override
+  String get syncTestAuthHint => 'Kontrollojini dhe testoni përsëri.';
+  @override
+  String get syncTestNotFound => 'Tresa nuk ekziston';
+  @override
+  String get syncTestNotFoundHint =>
+      'Krijojeni në server ose korrigjoni adresën.';
+  @override
+  String get syncTestUnsupported => 'Nuk është tresë WebDAV';
+  @override
+  String get syncTestUnsupportedHint => 'Serveri përgjigjet, por jo si WebDAV.';
+  @override
+  String get syncTestFailed => 'Testi nuk funksionoi';
+  @override
+  String get syncNowAction => 'Sinkronizo tani';
+  @override
+  String get syncSectionServer => 'Serveri';
+  @override
+  String get syncServerRow => 'Adresa, përdoruesi dhe fjalëkalimi';
+  @override
+  String get syncRetestTitle => 'Testo përsëri serverin';
+  @override
+  String syncProbedAgo(String when) => 'Testi i fundit $when';
+  @override
+  String get syncDisconnectTitle => 'Shkëput këtë bibliotekë';
+  @override
+  String get syncDisconnectSubtitle => 'Skedarët mbeten këtu dhe në server';
+  @override
+  String get syncDisconnectConfirmTitle => 'Të shkëputet sinkronizimi?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Kjo bibliotekë nuk sinkronizohet më në këtë pajisje. '
+      'Asnjë skedar nuk fshihet, as këtu as në server. Nëse e '
+      'lidhni përsëri, sinkronizimi i parë nis nga e para.';
+  @override
+  String get syncDisconnectConfirm => 'Shkëput';
+  @override
+  String get syncFirstTitle => 'Sinkronizimi i parë';
+  @override
+  String get syncFirstIntro => 'Krahasova bibliotekën me tresën në server:';
+  @override
+  String get syncFirstUpload => "Për t'u ngarkuar";
+  @override
+  String get syncFirstDownload => "Për t'u shkarkuar";
+  @override
+  String get syncFirstBoth => 'Në të dyja anët';
+  @override
+  String get syncFirstBothHint =>
+      "Të njëjtë: pa transferim. Të ndryshëm: për t'u zgjidhur";
+  @override
+  String get syncFirstNoDelete =>
+      'Sinkronizimi i parë nuk fshin asgjë, as këtu as në server.';
+  @override
+  String get syncStartAction => 'Nis';
+  @override
+  String syncMassTrashTitle(int count) => count == 1
+      ? 'Të zhvendoset 1 skedar në kosh?'
+      : 'Të zhvendosen $count skedarë në kosh?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Në server mungojnë $count nga $total skedarët e '
+      'sinkronizuar. Zakonisht kjo do të thotë adresë e gabuar, '
+      'disk NAS i pamontuar ose tresë e zbrazur gabimisht.';
+  @override
+  String get syncMassTrashHint =>
+      'Nëse vërtet i fshitë në një pajisje tjetër, konfirmoni: '
+      'këtu shkojnë në kosh.';
+  @override
+  String get syncMassTrashConfirm => 'Zhvendos në kosh';
+  @override
+  String syncMassDeleteTitle(int count) => count == 1
+      ? 'Të fshihet 1 skedar nga serveri?'
+      : 'Të fshihen $count skedarë nga serveri?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Këtu mungojnë $count nga $total skedarët e sinkronizuar. '
+      'Nëse nuk i fshitë ju, anuloni dhe kontrolloni tresën e '
+      'bibliotekës.';
+  @override
+  String get syncMassDeleteConfirm => 'Fshi nga serveri';
+  @override
+  String get syncTooltip => 'Sinkronizo';
+  @override
+  String get syncStageConnecting => 'Po lidhet me serverin…';
+  @override
+  String get syncStageComparing => 'Po krahasohet me serverin…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Po sinkronizohet · $done nga $total';
+  @override
+  String get syncStatusWarnings => 'Sinkronizuar me paralajmërime';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Ndryshuar këtu dhe në server · $count';
+  @override
+  String get syncConflictHint => 'Asnjë version nuk u prek';
+  @override
+  String get syncResolveAction => 'Zgjidh';
+  @override
+  String syncFailuresHeader(int count) => 'Të pasinkronizuar · $count';
+  @override
+  String get syncFailuresHint =>
+      'Do të provohen përsëri në sinkronizimin e ardhshëm';
+  @override
+  String get syncAbortAuth => 'Serveri e refuzoi fjalëkalimin';
+  @override
+  String get syncAbortMissingPassword => 'Nuk ka fjalëkalim të ruajtur';
+  @override
+  String get syncAbortOffline => 'Serveri nuk arrihet';
+  @override
+  String get syncAbortRemoteMissing => 'Tresa në server nuk ekziston më';
+  @override
+  String get syncAbortUnsupported => 'Serveri nuk funksionon më si WebDAV';
+  @override
+  String get syncAbortFailed => 'Sinkronizimi nuk funksionoi';
+  @override
+  String get syncAbortNotConfirmed => 'Sinkronizimi u anulua';
+  @override
+  String get syncAbortNothingTouched =>
+      'Asnjë skedar nuk u prek. Ndryshimet tuaja mbeten këtu '
+      'deri në sinkronizimin e ardhshëm të suksesshëm.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Sinkronizimi i fundit i suksesshëm $when';
+  @override
+  String get syncNoSuccessYet => 'Ende asnjë sinkronizim i suksesshëm';
+  @override
+  String get syncUpdatePasswordAction => 'Përditëso fjalëkalimin';
+  @override
+  String get syncRetryAction => 'Provo përsëri';
+  @override
+  String get syncOpenSettingsAction => 'Vendosjet';
+  @override
+  String get syncCloseAction => 'Mbyll';
+  @override
+  String get syncDoneSnack => 'Sinkronizuar';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sinkronizuar · 1 skedar i fshirë diku tjetër është në kosh'
+      : 'Sinkronizuar · $count skedarë të fshirë diku tjetër janë '
+            'në kosh';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? "Sinkronizuar · 1 konflikt për t'u zgjidhur"
+      : "Sinkronizuar · $count konflikte për t'u zgjidhur";
+  @override
+  String get syncShowAction => 'Shfaq';
+  @override
+  String get syncConflictTitle => 'Zgjidh konfliktin';
+  @override
+  String get syncConflictLegend =>
+      'Rreshtat me − janë të serverit, rreshtat me + të kësaj '
+      'pajisjeje.';
+  @override
+  String get syncConflictBinary =>
+      'Nuk është skedar teksti: zgjidhni cilën kopje të mbani.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopja që nuk mbani mbetet në historikun e shënimit.';
+  @override
+  String get syncKeepLocal => 'Mbaj versionin e kësaj pajisjeje';
+  @override
+  String get syncKeepRemote => 'Mbaj versionin e serverit';
+  @override
+  String get syncConflictIdentical => 'Dy versionet janë identike';
+  @override
+  String get syncConflictLoadFailed => 'Nuk u lexuan dot të dy versionet';
+  @override
+  String get syncResolveFailed => 'Konflikti nuk u zgjidh dot';
+  @override
+  String get syncResolved => 'Konflikti u zgjidh';
+  @override
+  String get syncSectionWhen => 'Kur të sinkronizohet';
+  @override
+  String get syncAutoTitle => 'Automatikisht';
+  @override
+  String get syncAutoSubtitle => 'Pas ndryshimeve, në hapje dhe në intervale';
+  @override
+  String get syncIntervalTitle => 'Kontrollo serverin çdo';
+  @override
+  String get syncIntervalSubtitle => 'Vetëm kur aplikacioni është i hapur';
+  @override
+  String get syncIntervalDialogBody =>
+      'Për të parë ndryshimet e bëra në pajisje të tjera kur aplikacioni '
+      'është i hapur. Me „Kurrë", vetëm pas ndryshimeve dhe në hapje.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? '1 minutë' : '$count minuta';
+  @override
+  String get syncIntervalNever => 'Kurrë';
+  @override
+  String get syncWifiOnlyTitle => 'Vetëm me Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Me të dhëna celulare, sinkronizoni vetëm me dorë';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? '1 ndryshim në pritje' : '$count ndryshime në pritje';
+  @override
+  String syncRetryIn(String wait) => 'provë e re pas $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Në pritje të Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Në pritje të një lidhjeje';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinkronizo tani" përdor sidoqoftë të dhëna celulare.';
+  @override
+  String get syncQueueKeptHint =>
+      'Ndryshimet mbeten këtu, edhe nëse e mbyllni aplikacionin, dhe nisen '
+      'vetë kur serveri përgjigjet.';
+  @override
+  String get syncAutoPaused => 'Sinkronizimi automatik është në pauzë';
+  @override
+  String get syncPausedAuthHint =>
+      'Rifillon kur përditësoni fjalëkalimin ose sinkronizoni me dorë.';
+  @override
+  String get syncPausedServerHint =>
+      'Rifillon kur korrigjoni adresën ose sinkronizoni me dorë.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinkronizo tani" tregon çfarë do të hiqej dhe pyet më parë.';
+  @override
+  String get syncNeedsConfirmation => 'Në pritje të konfirmimit tuaj';
+  @override
+  String get syncMergeIntro =>
+      'Ndryshimet që nuk mbivendosen janë bashkuar tashmë; zgjidhni çfarë të '
+      'mbani aty ku mbivendosen.';
+  @override
+  String get syncMergeClean =>
+      'Dy versionet bashkohen vetë: asgjë nuk mbivendoset.';
+  @override
+  String get syncMergeNoBase =>
+      'Nuk ka një version të përbashkët për t’u bashkuar, prandaj duhet '
+      'zgjedhur i gjithë skedari.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Mbivendosja $index nga $total';
+  @override
+  String get syncMergeFromLocal => 'Nga kjo pajisje';
+  @override
+  String get syncMergeFromRemote => 'Nga serveri';
+  @override
+  String get syncMergeRemovedLines => 'Rreshta të hequr';
+  @override
+  String get syncMergeKeepLocal => 'Të miat';
+  @override
+  String get syncMergeKeepRemote => 'Të serverit';
+  @override
+  String get syncMergeKeepBoth => 'Të dyja';
+  @override
+  String get syncMergeSave => 'Ruaj bashkimin';
+  @override
+  String get syncMergeKeepWhole => 'Ose mbaj një kopje të plotë';
 }

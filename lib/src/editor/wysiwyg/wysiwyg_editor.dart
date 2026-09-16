@@ -340,6 +340,35 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         parent.style.attributes.containsKey(quill.Attribute.codeBlock.key);
   }
 
+  /// The Quill editor's context menu (issue #60): the package's default
+  /// cut/copy/paste items, plus Add-to-dictionary when the checker flags
+  /// the word under the caret/selection. A right click only positions the
+  /// menu: the entry acts on the word where the caret/selection already
+  /// is, and the menu closes once the word is added (the copy/cut
+  /// path's rule).
+  Widget _contextMenu(BuildContext context, quill.QuillRawEditorState state) {
+    final value = state.textEditingValue;
+    final selection = value.selection;
+    final items = <ContextMenuButtonItem>[...state.contextMenuButtonItems];
+    final spell = widget.spellCheck;
+    if (spell != null) {
+      final item = addToDictionaryItem(
+        spell: spell,
+        text: value.text,
+        start: selection.start,
+        end: selection.end,
+        onDismiss: state.hideToolbar,
+      );
+      if (item != null) items.add(item);
+    }
+    return TextFieldTapRegion(
+      child: AdaptiveTextSelectionToolbar.buttonItems(
+        anchors: state.contextMenuAnchors,
+        buttonItems: items,
+      ),
+    );
+  }
+
   /// Quill's default code-block style is a near-white box with dark blue
   /// text: in the app's dark theme it read as a white rectangle (device
   /// report, 2026-09-11). The app's own surface and text replace it; every
@@ -399,6 +428,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
                 padding: const EdgeInsets.all(16),
                 embedBuilders: const [OpaqueEmbedBuilder()],
                 textSpanBuilder: _spellSpan,
+                contextMenuBuilder: _contextMenu,
                 customStyles: _customStyles(Theme.of(context)),
               ),
             ),

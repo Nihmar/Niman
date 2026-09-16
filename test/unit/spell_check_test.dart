@@ -9,6 +9,7 @@ import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
+import 'package:niman/src/spellcheck/personal_dictionary.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:path/path.dart' as p;
@@ -230,6 +231,198 @@ void main() {
     });
   });
 
+  group('personal dictionary (issue #60)', () {
+    Future<PersonalDictionary> open() {
+      final dir = Directory.systemTemp.createTempSync('niman-spell-dict');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      return PersonalDictionary.open(dir.path);
+    }
+
+    test('the personal words pass whatever the engine says', () async {
+      final dictionary = await open();
+      await dictionary.add('helo');
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'helo', 'wrold'}),
+        dictionary: dictionary,
+      );
+      // The engine flags 'helo', the dictionary vetoes it.
+      expect(check.isMisspelled('helo'), isFalse);
+      expect(check.rangesFor(0, 'helo wrold', skip: const []), [
+        const TextRange(start: 5, end: 10),
+      ]);
+    });
+
+    test('adding a word from the menu clears its underline', () async {
+      final dictionary = await open();
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+        dictionary: dictionary,
+      );
+      expect(check.isMisspelled('wrold'), isTrue);
+      await check.addToDictionary('wrold');
+      expect(dictionary.contains('wrold'), isTrue);
+      expect(check.isMisspelled('wrold'), isFalse);
+      expect(check.rangesFor(0, 'wrold', skip: const []), isEmpty);
+    });
+
+    test(
+      'with no dictionary the verdict is unchanged and add is a no-op',
+      () async {
+        final check = EditorSpellCheck(
+          createChecker: (_) => _FakeChecker({'wrold'}),
+        );
+        expect(check.isMisspelled('wrold'), isTrue);
+        await check.addToDictionary('wrold');
+        expect(check.isMisspelled('wrold'), isTrue);
+      },
+    );
+
+    test('isMisspelled follows the underline gates', () async {
+      final dictionary = await open();
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+        dictionary: dictionary,
+      );
+      expect(check.isMisspelled('wrold'), isTrue);
+      // A dictionary word is not a misspelling.
+      await check.addToDictionary('wrold');
+      expect(check.isMisspelled('wrold'), isFalse);
+      // A one-letter run and a camel-case word are not checkable.
+      expect(check.isMisspelled('a'), isFalse);
+      expect(check.isMisspelled('fooBar'), isFalse);
+      // A disabled checker flags nothing.
+      check.setEnabled(enabled: false);
+      expect(check.isMisspelled('wrold'), isFalse);
+      // An unavailable engine flags nothing.
+      final unavailable = EditorSpellCheck(
+        createChecker: (_) => const NoopSpellChecker(),
+        dictionary: dictionary,
+      );
+      expect(unavailable.isMisspelled('wrold'), isFalse);
+    });
+
+    test('setPersonalDictionary swaps the words and notifies', () async {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'alpha'}),
+      );
+      var notified = 0;
+      check.addListener(() => notified++);
+      final first = await open();
+      await first.add('alpha');
+      check.setPersonalDictionary(first);
+      expect(notified, 1);
+      expect(check.personalDictionary, first);
+      expect(check.isMisspelled('alpha'), isFalse);
+      // The same dictionary is a no-op.
+      check.setPersonalDictionary(first);
+      expect(notified, 1);
+      final second = await open();
+      check.setPersonalDictionary(second);
+      expect(notified, 2);
+      expect(check.personalDictionary, second);
+      // 'alpha' is no longer a personal word.
+      expect(check.isMisspelled('alpha'), isTrue);
+    });
+
+    test('spellWordAt finds the word under the caret', () {
+      const text = 'the quick zebra';
+      expect(spellWordAt(text, 0), 'the');
+      expect(spellWordAt(text, 2), 'the');
+      expect(spellWordAt(text, 3), 'the', reason: 'the caret at the end');
+      expect(spellWordAt(text, 4), 'quick', reason: 'the caret at the start');
+      expect(spellWordAt(text, text.length), 'zebra');
+      expect(spellWordAt(text, -1), isNull);
+      expect(spellWordAt(text, text.length + 1), isNull);
+    });
+
+    test('spellWordForSelection names the word the selection sits in', () {
+      const text = 'the quick zebra';
+      expect(spellWordForSelection(text, 2, 2), 'the', reason: 'caret');
+      expect(spellWordForSelection(text, 0, 3), 'the', reason: 'whole word');
+      expect(spellWordForSelection(text, 1, 3), 'the', reason: 'partial');
+      expect(spellWordForSelection(text, 4, 9), 'quick');
+      expect(spellWordForSelection(text, 0, 9), isNull, reason: 'two words');
+      expect(spellWordForSelection(text, -1, 0), isNull);
+      expect(spellWordForSelection(text, 0, text.length + 1), isNull);
+    });
+
+    test(
+      'the menu item appears only for a flagged word and acts on it',
+      () async {
+        final dictionary = await open();
+        final check = EditorSpellCheck(
+          createChecker: (_) => _FakeChecker({'wrold'}),
+          dictionary: dictionary,
+        );
+        var dismissed = 0;
+        final item = addToDictionaryItem(
+          spell: check,
+          text: 'hello wrold',
+          start: 6,
+          end: 11,
+          onDismiss: () => dismissed++,
+        );
+        expect(item, isNotNull);
+        final entry = item!;
+        // A caret in whitespace offers nothing.
+        expect(
+          addToDictionaryItem(
+            spell: check,
+            text: 'hello wrold',
+            start: 5,
+            end: 5,
+            onDismiss: () => dismissed++,
+          ),
+          isNull,
+        );
+        // A correct word offers nothing.
+        expect(
+          addToDictionaryItem(
+            spell: check,
+            text: 'hello wrold',
+            start: 2,
+            end: 2,
+            onDismiss: () => dismissed++,
+          ),
+          isNull,
+        );
+        // Two words selected offer nothing.
+        expect(
+          addToDictionaryItem(
+            spell: check,
+            text: 'hello wrold',
+            start: 0,
+            end: 11,
+            onDismiss: () => dismissed++,
+          ),
+          isNull,
+        );
+        // The entry adds the word and closes the menu.
+        entry.onPressed?.call();
+        expect(dismissed, 1);
+        await _settle();
+        expect(dictionary.contains('wrold'), isTrue);
+        expect(check.isMisspelled('wrold'), isFalse);
+      },
+    );
+
+    test('without a dictionary the menu offers nothing', () {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      expect(
+        addToDictionaryItem(
+          spell: check,
+          text: 'wrold',
+          start: 0,
+          end: 5,
+          onDismiss: () {},
+        ),
+        isNull,
+      );
+    });
+  });
+
   test('the system hunspell checks and suggests', () {
     final checker = HunspellSpellChecker.open();
     addTearDown(checker!.dispose);
@@ -289,6 +482,13 @@ void main() {
     expect(checker.isCorrect('anything'), isTrue);
     expect(checker.suggest('anything'), isEmpty);
   });
+}
+
+/// Pumps the event loop: the dictionary write is real disk I/O.
+Future<void> _settle() async {
+  for (var i = 0; i < 10; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
 }
 
 /// A checker whose misspellings are the words in [wrong].

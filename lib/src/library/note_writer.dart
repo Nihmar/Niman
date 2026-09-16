@@ -71,6 +71,59 @@ final class NoteWriter {
     return run;
   }
 
+  /// Replaces the file at library-relative [path] with the finished file
+  /// at [tempAbs] (a verified sync download next to it), in the same
+  /// per-path order as [save] — so a download never interleaves with an
+  /// editor save of the same note.
+  ///
+  /// With [forced], the text being replaced is first kept as a history
+  /// version (a note); without, the file is swapped in as is (an
+  /// attachment). The temp file is gone afterwards, also on failure.
+  Future<void> replaceFromFile(
+    String path,
+    String tempAbs, {
+    HistoryReason? forced,
+  }) {
+    final previous = _tails[path] ?? Future<void>.value();
+    final run = previous
+        .then<void>((_) {}, onError: (Object _) {})
+        .then((_) => _replace(path, tempAbs, forced));
+    final tail = run.then<void>((_) {}, onError: (Object _) {});
+    _tails[path] = tail;
+    unawaited(
+      tail.whenComplete(() {
+        if (identical(_tails[path], tail)) _tails.remove(path)?.ignore();
+      }),
+    );
+    return run;
+  }
+
+  Future<void> _replace(
+    String path,
+    String tempAbs,
+    HistoryReason? forced,
+  ) async {
+    final clock = Stopwatch()..start();
+    final abs = p.join(root, path);
+    final request = forced == null
+        ? null
+        : await history?.requestFor(path, forced: forced);
+    final ({bool created, SnapshotOutcome? snapshot, String? snapshotError})
+    result;
+    try {
+      result = await _replaceOffIsolate(root, path, tempAbs, request);
+    } catch (e) {
+      _log.error('replace failed: "$path": $e');
+      rethrow;
+    }
+    history?.report(path, result.snapshot, result.snapshotError);
+    _log.info(
+      'replaced from download: "$path" (${result.created ? 'new file, ' : ''}'
+      '${clock.elapsedMilliseconds} ms)',
+    );
+    _reindex(path, abs, created: result.created);
+  }
+
   /// Completes when every re-index started by a save so far has finished.
   Future<void> get indexed async {
     while (_indexing.isNotEmpty) {
@@ -134,6 +187,26 @@ final class NoteWriter {
     ),
   );
 
+  /// Runs [replaceFileFrom] on a short-lived isolate; static for the same
+  /// reason as [_writeOffIsolate].
+  static Future<
+    ({bool created, SnapshotOutcome? snapshot, String? snapshotError})
+  >
+  _replaceOffIsolate(
+    String root,
+    String rel,
+    String tempAbs,
+    SnapshotRequest? request,
+  ) => Isolate.run(
+    () => replaceFileFrom(
+      p.join(root, rel),
+      tempAbs,
+      root: root,
+      rel: rel,
+      snapshot: request,
+    ),
+  );
+
   /// Re-reads the saved note into the index, after the save completed.
   ///
   /// An existing note is rescanned, not passed through the (size, mtime)
@@ -178,6 +251,41 @@ typedef NoteWriteResult = ({
 /// caller's state (a future chain cannot cross an isolate boundary).
 Future<NoteWriteResult> writeNoteOffIsolate(String abs, String content) =>
     Isolate.run(() => writeNoteFile(abs, content));
+
+/// Renames the finished file [tempAbs] over [abs] (creating missing
+/// folders), after keeping the replaced content as a history version when
+/// [snapshot] says so. The temp file is deleted when the rename fails.
+///
+/// Top-level so [Isolate.run] can take it.
+Future<({bool created, SnapshotOutcome? snapshot, String? snapshotError})>
+replaceFileFrom(
+  String abs,
+  String tempAbs, {
+  String? root,
+  String? rel,
+  SnapshotRequest? snapshot,
+}) async {
+  SnapshotOutcome? outcome;
+  String? snapshotError;
+  if (snapshot != null && root != null && rel != null) {
+    try {
+      outcome = snapshotBeforeWrite(root, rel, snapshot);
+    } on Object catch (e) {
+      snapshotError = '$e';
+    }
+  }
+  final file = File(abs);
+  final created = !file.existsSync();
+  try {
+    if (created) await file.parent.create(recursive: true);
+    await File(tempAbs).rename(abs);
+  } on Object {
+    final temp = File(tempAbs);
+    if (temp.existsSync()) await temp.delete();
+    rethrow;
+  }
+  return (created: created, snapshot: outcome, snapshotError: snapshotError);
+}
 
 /// Encodes [content] and writes it atomically to [abs], creating missing
 /// folders. With [snapshot] (and the note's [root] and library-relative

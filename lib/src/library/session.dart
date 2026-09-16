@@ -13,6 +13,7 @@ import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
 import 'package:niman/src/search/tag_repo.dart';
+import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
@@ -90,6 +91,14 @@ abstract interface class NoteOperations {
   /// Writes version [number] back as the note's text, keeping the text it
   /// replaces as a version first — a restore is itself undoable.
   Future<void> restoreNoteVersion(String path, int number);
+
+  /// Writes [text] as the note's text with the same guarantee as
+  /// [restoreNoteVersion]: what it replaces is kept as a version first.
+  ///
+  /// The write path of a restore that takes only part of a version
+  /// (issue #67), where the text is neither the note's nor the version's
+  /// but the two put together.
+  Future<void> restoreNoteText(String path, String text);
 
   /// Deletes [path] (into `.trash/` while the trash toggle is on).
   Future<void> delete(String path);
@@ -176,6 +185,11 @@ abstract interface class LibrarySession {
 
   /// CRUD ops for the open library, or null while closed.
   NoteOperations? get ops;
+
+  /// The open library's WebDAV sync (docs/dev/sync.md), or null while
+  /// closed. Present for every open library; its status says whether one
+  /// is configured.
+  SyncService? get sync;
 
   /// Resumes the last opened library (if it still exists).
   ///

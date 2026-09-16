@@ -355,4 +355,44 @@ final class DiffSummary {
 
   /// Whether the texts are the same.
   bool get identical => hunks.isEmpty;
+
+  /// The new text, except in the hunks named by [fromOld], which come
+  /// back as the old text had them (issue #67).
+  ///
+  /// An empty [fromOld] gives the new text back unchanged, every hunk
+  /// gives the old one, and anything between is a restore that takes
+  /// part of a version. [lineEnding] and [trailingNewline] shape the
+  /// result the way the text being written into does.
+  String compose(
+    Set<int> fromOld, {
+    String lineEnding = '\n',
+    bool trailingNewline = true,
+  }) {
+    final out = <String>[];
+    void copy(int from, int to) {
+      for (var i = from; i < to; i++) {
+        out.add(lines[i].text);
+      }
+    }
+
+    var previousEnd = 0;
+    for (var h = 0; h < hunks.length; h++) {
+      final (start, end) = ranges[h];
+      copy(previousEnd, start);
+      final old = fromOld.contains(h);
+      for (var i = start; i < end; i++) {
+        final line = lines[i];
+        final keep = switch (line.kind) {
+          DiffKind.same => true,
+          DiffKind.removed => old,
+          DiffKind.added => !old,
+        };
+        if (keep) out.add(line.text);
+      }
+      previousEnd = end;
+    }
+    copy(previousEnd, lines.length);
+    if (out.isEmpty) return '';
+    return out.join(lineEnding) + (trailingNewline ? lineEnding : '');
+  }
 }

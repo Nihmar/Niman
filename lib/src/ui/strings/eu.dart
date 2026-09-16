@@ -63,7 +63,7 @@ final class BasqueStrings extends Strings {
 
   // Settings: editor toggles.
   @override
-  String get trashTitle => 'Zaborrontza';
+  String get trashTitle => 'Zakarrontzia';
   @override
   String get trashSubtitle =>
       'Ezabatzeak .trash/-ra joaten dira (desaktibatuta = betirako ezabatzea)';
@@ -171,6 +171,8 @@ final class BasqueStrings extends Strings {
   String spellCheckCount(int count) => '$count begiratzeko';
   @override
   String spellCheckLine(int line) => 'lerroa $line';
+  @override
+  String get addWordToDictionary => 'Gehitu hiztehirian';
 
   @override
   String indentWidthValue(int spaces) => '$spaces zuriune';
@@ -780,11 +782,11 @@ final class BasqueStrings extends Strings {
   @override
   String get newNoteTitle => 'Ohar berria';
   @override
-  String get newFolderTitle => 'Fitxategi-biltegi berria';
+  String get newFolderTitle => 'Karpeta berria';
   @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
-  String get newFolderHere => 'Fitxategi-biltegi berria hemen';
+  String get newFolderHere => 'Karpeta berria hemen';
   @override
   String get newListNoteTitle => 'Ohar zerrenda berria';
   @override
@@ -983,7 +985,7 @@ final class BasqueStrings extends Strings {
   String get pinWidgetUnavailable =>
       'Hasierako pantailako widgetak Android-en daude eskuragarri';
   @override
-  String get movedToTrash => 'Zaborrontzara mugitua';
+  String get movedToTrash => 'Zakarrontzira mugitua';
   @override
   String get deletedMessage => 'Ezabatua';
   @override
@@ -1015,9 +1017,9 @@ final class BasqueStrings extends Strings {
 
   // Folder picker (T-TK-07).
   @override
-  String get folderPickerNewFolder => 'Fitxategi-biltegi berria';
+  String get folderPickerNewFolder => 'Karpeta berria';
   @override
-  String get folderPickerEmpty => 'Oraindik ez dago fitxategi-biltegirik';
+  String get folderPickerEmpty => 'Oraindik ez dago karpetarik';
   @override
   String get listFolderTitle => 'Zerrenda-biltegia';
   @override
@@ -1025,12 +1027,12 @@ final class BasqueStrings extends Strings {
 
   // Trash (M1).
   @override
-  String get trashEmpty => 'Zaborrontza hutsik dago';
+  String get trashEmpty => 'Zakarrontzia hutsik dago';
   @override
-  String get trashEmptyAction => 'Huts zaborrontza';
+  String get trashEmptyAction => 'Hustu zakarrontzia';
   @override
   String get trashEmptyConfirm =>
-      'Honek zaborrontzako guztia betirako ezabatuko du, Niman ez zuen '
+      'Honek zakarrontziko guztia betirako ezabatuko du, Niman ez zuen '
       'bertan jarriko elementuak ere.';
   @override
   String trashDeleteConfirm(String name) =>
@@ -1041,7 +1043,7 @@ final class BasqueStrings extends Strings {
   // The open/create library screen.
   @override
   String get openLibraryIntro =>
-      'Ireki ohar Markdownen fitxategi-biltegi bat biblioteka gisa';
+      'Ireki ohar Markdownen karpeta bat biblioteka gisa';
   @override
   String get openLibraryExisting => 'Ireki dagoena';
   @override
@@ -1051,14 +1053,12 @@ final class BasqueStrings extends Strings {
   @override
   String get openLibraryFolderName => 'Biltegiko izena';
   @override
-  String get openLibraryChooseFolder =>
-      'Hautatu bibliotekararen fitxategi-biltegia';
+  String get openLibraryChooseFolder => 'Hautatu bibliotekaren karpeta';
   @override
-  String get openLibraryChooseParent =>
-      'Hautatu fitxategi-biltegia non sortuko den';
+  String get openLibraryChooseParent => 'Hautatu karpeta non sortuko den';
   @override
   String get openLibraryUnsupported =>
-      'Fitxategi-biltegi hau ez da onartzen. Hautatu gailuaren gordailuko '
+      'Karpeta hau ez da onartzen. Hautatu gailuaren gordailuko '
       'biltegia.';
   @override
   String indexingCount(int done, int total) => '$total oharretako $done';
@@ -1091,7 +1091,7 @@ final class BasqueStrings extends Strings {
   String libraryForgetTitle(String name) => '“$name” ahaztu?';
   @override
   String get libraryForgetExplained =>
-      'Zerrenda honetatik desagertuko da. Fitxategi-biltegia, ohar eta '
+      'Zerrenda honetatik desagertuko da. Karpeta, oharrak eta '
       'bibliotekararen ezarpenak ez dira ukitzen, berriro irekitzean '
       'itzuliko da.';
 
@@ -1110,10 +1110,10 @@ final class BasqueStrings extends Strings {
       'irakurtzen da.';
   @override
   String folderAccessDenied(Object error) =>
-      'Sistemak ez du fitxategi-biltegiako sarbiderik eman: $error';
+      'Sistemak ez du karpetarako sarbiderik eman: $error';
   @override
   String folderPickFailed(Object error) =>
-      'Ezin izan da fitxategi-biltegi bat hautatu: $error';
+      'Ezin izan da karpeta bat hautatu: $error';
 
   // Settings screen rows and messages.
   @override
@@ -1244,6 +1244,20 @@ final class BasqueStrings extends Strings {
   String diffUnchanged(int count) =>
       count == 1 ? 'lerro 1 aldatu gabe' : '$count lerro aldatu gabe';
   @override
+  String get historyTakeHunk => 'Berrezarri hemen';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Berrezarri aldaketa 1' : 'Berrezarri $count aldaketa';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Aukeratutako aldaketak bertsio honen testura itzultzen dira. Oharra '
+      'dagoen moduan bertsio gisa gordetzen da lehenik, beraz desegin '
+      'dezakezu.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Oharra aldatu egin da hemen zeunden bitartean — konparazioa eguneratu '
+      'da.';
+  @override
   String get historyVersionsTitle => 'Gorde beharreko bertsioak';
   @override
   String get historyVersionsSubtitle => 'Ohar bakoitzeko, .history/ karpetan';
@@ -1367,4 +1381,370 @@ final class BasqueStrings extends Strings {
   String get transcriptionAppend => 'Gehitu azpian';
   @override
   String get transcriptionReplace => 'Ordeztu';
+  @override
+  String get settingsSectionSync => 'Sinkronizazioa';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Ez dago konfiguratuta biblioteka honetarako';
+  @override
+  String get syncNeverSynced => 'Inoiz ez da sinkronizatu';
+  @override
+  String syncLastSynced(String when) => 'Sinkronizatuta: $when';
+  @override
+  String get syncRunning => 'Sinkronizatzen…';
+  @override
+  String syncScreenSubtitle(String library) => '$library biblioteka';
+  @override
+  String get syncUrlLabel => 'Karpetaren helbidea';
+  @override
+  String get syncUrlHint =>
+      'Karpetak existitu behar du. Kopiatu helbidea zerbitzariak '
+      'erakusten duen bezala.';
+  @override
+  String get syncHttpWarning =>
+      'Zifratu gabeko konexioa: ondo dago VPN baten bidez edo '
+      'sare lokalean.';
+  @override
+  String get syncUserLabel => 'Erabiltzailea';
+  @override
+  String get syncUserHint =>
+      'Utzi hutsik zerbitzariak kredentzialik eskatzen ez badu.';
+  @override
+  String get syncPasswordLabel => 'Pasahitza';
+  @override
+  String get syncPasswordHint =>
+      'Gailu honen giltzatakoan gordetzen da, inoiz ez '
+      'bibliotekako fitxategietan.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Utzi hutsik gordetako pasahitza mantentzeko.';
+  @override
+  String get syncShowPassword => 'Erakutsi pasahitza';
+  @override
+  String get syncHidePassword => 'Ezkutatu pasahitza';
+  @override
+  String get syncTestAction => 'Probatu konexioa';
+  @override
+  String get syncTesting => 'Probatzen…';
+  @override
+  String get syncRetargetWarning =>
+      'Beste helbide edo erabiltzaile batekin, hurrengo '
+      'sinkronizazioa lehen sinkronizazio gisa hasiko da berriro.';
+  @override
+  String get syncTestOk => 'Konexioak funtzionatzen du';
+  @override
+  String get syncModeFull => 'Modu osoa';
+  @override
+  String get syncModeCompatible => 'Modu bateragarria';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Irakurri, idatzi eta ezabatu';
+  @override
+  String get syncCapEtags => 'Fitxategien hatz-markak (ETag)';
+  @override
+  String get syncCapNoEtags => 'Fitxategien hatz-markarik ez (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Tamaina eta data alderatzen ditut; zalantzarik badago, '
+      'berriro deskargatzen dut';
+  @override
+  String get syncCapGuarded => 'Idazketa babestuak';
+  @override
+  String get syncCapUnguarded => 'Babesik gabeko idazketak';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Zerbitzariko fitxategia egiaztatzen dut idatzi baino lehen';
+  @override
+  String get syncCapMove => 'Izena aldatzen du berriro igo gabe';
+  @override
+  String get syncCapNoMove => 'Ez da izenik aldatzen zerbitzarian';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Izen-aldaketa bat ezabatze eta igoera berri bihurtzen da';
+  @override
+  String get syncCompatibleNote =>
+      'Modu bateragarrian sinkronizazioak berdin funtzionatzen '
+      'du, eskaera batzuk gehiagorekin.';
+  @override
+  String get syncTestInvalidUrl => 'Helbidea ez da baliozkoa';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Idatzi http:// edo https:// helbide bat, erabiltzailerik '
+      'eta pasahitzik gabe.';
+  @override
+  String get syncTestOffline => 'Ezin da zerbitzarira iritsi';
+  @override
+  String get syncTestOfflineHint =>
+      'VPNa aktibatuta dago? 10.x edo 192.168.x helbide batek '
+      'sare beretik bakarrik funtzionatzen du.';
+  @override
+  String get syncTestAuth => 'Erabiltzailea edo pasahitza baztertu da';
+  @override
+  String get syncTestAuthHint => 'Egiaztatu, eta probatu berriro.';
+  @override
+  String get syncTestNotFound => 'Karpeta ez da existitzen';
+  @override
+  String get syncTestNotFoundHint => 'Sortu zerbitzarian edo zuzendu helbidea.';
+  @override
+  String get syncTestUnsupported => 'Ez da WebDAV karpeta bat';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Zerbitzariak erantzuten du, baina ez WebDAV gisa.';
+  @override
+  String get syncTestFailed => 'Probak ez du funtzionatu';
+  @override
+  String get syncNowAction => 'Sinkronizatu orain';
+  @override
+  String get syncSectionServer => 'Zerbitzaria';
+  @override
+  String get syncServerRow => 'Helbidea, erabiltzailea eta pasahitza';
+  @override
+  String get syncRetestTitle => 'Probatu zerbitzaria berriro';
+  @override
+  String syncProbedAgo(String when) => 'Azken proba: $when';
+  @override
+  String get syncDisconnectTitle => 'Deskonektatu biblioteka hau';
+  @override
+  String get syncDisconnectSubtitle =>
+      'Fitxategiak hemen eta zerbitzarian geratzen dira';
+  @override
+  String get syncDisconnectConfirmTitle => 'Sinkronizazioa deskonektatu?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Biblioteka hau ez da gehiago sinkronizatuko gailu '
+      'honetan. Ez da fitxategirik ezabatzen, ez hemen ez '
+      'zerbitzarian. Berriro konektatzen baduzu, lehen '
+      'sinkronizazioa hasieratik hasiko da.';
+  @override
+  String get syncDisconnectConfirm => 'Deskonektatu';
+  @override
+  String get syncFirstTitle => 'Lehen sinkronizazioa';
+  @override
+  String get syncFirstIntro =>
+      'Biblioteka zerbitzariko karpetarekin alderatu dut:';
+  @override
+  String get syncFirstUpload => 'Igotzeko';
+  @override
+  String get syncFirstDownload => 'Deskargatzeko';
+  @override
+  String get syncFirstBoth => 'Bi aldeetan';
+  @override
+  String get syncFirstBothHint =>
+      'Berdinak: transferentziarik ez. Desberdinak: ebazteko';
+  @override
+  String get syncFirstNoDelete =>
+      'Lehen sinkronizazioak ez du ezer ezabatzen, ez hemen ez '
+      'zerbitzarian.';
+  @override
+  String get syncStartAction => 'Hasi';
+  @override
+  String syncMassTrashTitle(int count) =>
+      '$count fitxategi zaborrontzara mugitu?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Sinkronizatutako $total fitxategietatik $count falta dira '
+      'zerbitzarian. Normalean helbide okerra, muntatu gabeko '
+      'NAS diskoa edo nahi gabe hustutako karpeta bat esan nahi '
+      'du.';
+  @override
+  String get syncMassTrashHint =>
+      'Beste gailu batean benetan ezabatu badituzu, berretsi: '
+      'hemen zaborrontzara joango dira.';
+  @override
+  String get syncMassTrashConfirm => 'Mugitu zaborrontzara';
+  @override
+  String syncMassDeleteTitle(int count) =>
+      '$count fitxategi zerbitzaritik ezabatu?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Sinkronizatutako $total fitxategietatik $count falta dira '
+      'hemen. Zuk ezabatu ez badituzu, utzi eta egiaztatu '
+      'bibliotekaren karpeta.';
+  @override
+  String get syncMassDeleteConfirm => 'Ezabatu zerbitzaritik';
+  @override
+  String get syncTooltip => 'Sinkronizatu';
+  @override
+  String get syncStageConnecting => 'Zerbitzarira konektatzen…';
+  @override
+  String get syncStageComparing => 'Zerbitzariarekin alderatzen…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sinkronizatzen · $done / $total';
+  @override
+  String get syncStatusWarnings => 'Abisuekin sinkronizatuta';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Hemen eta zerbitzarian aldatuak · $count';
+  @override
+  String get syncConflictHint => 'Bi bertsioetako bat ere ez da ukitu';
+  @override
+  String get syncResolveAction => 'Ebatzi';
+  @override
+  String syncFailuresHeader(int count) => 'Sinkronizatu gabeak · $count';
+  @override
+  String get syncFailuresHint => 'Hurrengo sinkronizazioan saiatuko da berriro';
+  @override
+  String get syncAbortAuth => 'Zerbitzariak pasahitza baztertu du';
+  @override
+  String get syncAbortMissingPassword => 'Ez dago pasahitzik gordeta';
+  @override
+  String get syncAbortOffline => 'Ezin da zerbitzarira iritsi';
+  @override
+  String get syncAbortRemoteMissing => 'Zerbitzariko karpeta ez dago jada';
+  @override
+  String get syncAbortUnsupported =>
+      'Zerbitzariak ez du jada WebDAV gisa funtzionatzen';
+  @override
+  String get syncAbortFailed => 'Sinkronizazioak ez du funtzionatu';
+  @override
+  String get syncAbortNotConfirmed => 'Sinkronizazioa bertan behera utzi da';
+  @override
+  String get syncAbortNothingTouched =>
+      'Ez da fitxategirik ukitu. Zure aldaketak hemen geratzen '
+      'dira hurrengo sinkronizazio arrakastatsura arte.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Azken sinkronizazio arrakastatsua: $when';
+  @override
+  String get syncNoSuccessYet =>
+      'Oraindik ez da sinkronizazio arrakastatsurik egon';
+  @override
+  String get syncUpdatePasswordAction => 'Eguneratu pasahitza';
+  @override
+  String get syncRetryAction => 'Saiatu berriro';
+  @override
+  String get syncOpenSettingsAction => 'Ezarpenak';
+  @override
+  String get syncCloseAction => 'Itxi';
+  @override
+  String get syncDoneSnack => 'Sinkronizatuta';
+  @override
+  String syncTrashedSnack(int count) => count == 1
+      ? 'Sinkronizatuta · beste nonbait ezabatutako fitxategi 1 '
+            'zaborrontzan dago'
+      : 'Sinkronizatuta · beste nonbait ezabatutako $count '
+            'fitxategi zaborrontzan daude';
+  @override
+  String syncConflictsSnack(int count) => count == 1
+      ? 'Sinkronizatuta · gatazka 1 ebazteko'
+      : 'Sinkronizatuta · $count gatazka ebazteko';
+  @override
+  String get syncShowAction => 'Erakutsi';
+  @override
+  String get syncConflictTitle => 'Ebatzi gatazka';
+  @override
+  String get syncConflictLegend =>
+      '− markadun lerroak zerbitzarikoak dira, eta + markadunak '
+      'gailu honetakoak.';
+  @override
+  String get syncConflictBinary =>
+      'Ez da testu-fitxategi bat: aukeratu zein kopia gorde.';
+  @override
+  String get syncConflictKeepNote =>
+      'Gordetzen ez duzun kopia oharraren historian geratzen da.';
+  @override
+  String get syncKeepLocal => 'Gorde gailu honetakoa';
+  @override
+  String get syncKeepRemote => 'Gorde zerbitzarikoa';
+  @override
+  String get syncConflictIdentical => 'Bi bertsioak berdinak dira';
+  @override
+  String get syncConflictLoadFailed => 'Ezin izan dira bi bertsioak irakurri';
+  @override
+  String get syncResolveFailed => 'Ezin izan da gatazka ebatzi';
+  @override
+  String get syncResolved => 'Gatazka ebatzita';
+  @override
+  String get syncSectionWhen => 'Noiz sinkronizatu';
+  @override
+  String get syncAutoTitle => 'Automatikoki';
+  @override
+  String get syncAutoSubtitle => 'Aldaketen ondoren, irekitzean eta tarteka';
+  @override
+  String get syncIntervalTitle => 'Zerbitzaria egiaztatzeko maiztasuna';
+  @override
+  String get syncIntervalSubtitle =>
+      'Aplikazioa irekita dagoen bitartean bakarrik';
+  @override
+  String get syncIntervalDialogBody =>
+      'Beste gailu batzuetan egindako aldaketak ikusteko, aplikazioa irekita '
+      'dagoen bitartean. “Inoiz ez” aukerarekin, aldaketen ondoren eta '
+      'irekitzean bakarrik.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count == 1 ? 'minutu 1' : '$count minutu';
+  @override
+  String get syncIntervalNever => 'Inoiz ez';
+  @override
+  String get syncWifiOnlyTitle => 'Wi-Fi bidez bakarrik';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Datu mugikorrekin, sinkronizatu eskuz bakarrik';
+  @override
+  String syncPendingChanges(int count) =>
+      count == 1 ? 'aldaketa 1 zain' : '$count aldaketa zain';
+  @override
+  String syncRetryIn(String wait) => '$wait barru berriro saiatuko da';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Wi-Fi zain';
+  @override
+  String get syncWaitingForNetwork => 'Konexioaren zain';
+  @override
+  String get syncMobileDataHint =>
+      '“Sinkronizatu orain” aukerak datu mugikorrak erabiltzen ditu hala ere.';
+  @override
+  String get syncQueueKeptHint =>
+      'Aldaketak hemen geratzen dira, aplikazioa ixten baduzu ere, eta berez '
+      'bidaltzen dira zerbitzariak erantzuten duenean.';
+  @override
+  String get syncAutoPaused => 'Sinkronizazio automatikoa pausatuta';
+  @override
+  String get syncPausedAuthHint =>
+      'Pasahitza eguneratzean edo eskuz sinkronizatzean berriro abiatuko da.';
+  @override
+  String get syncPausedServerHint =>
+      'Helbidea zuzentzean edo eskuz sinkronizatzean berriro abiatuko da.';
+  @override
+  String get syncPausedConfirmHint =>
+      '“Sinkronizatu orain” aukerak zer kenduko litzatekeen erakusten du eta '
+      'aurretik galdetzen du.';
+  @override
+  String get syncNeedsConfirmation => 'Zure berrespenaren zain';
+  @override
+  String get syncMergeIntro =>
+      'Gainjartzen ez diren aldaketak jada batuta daude; gainjartzen direnetan '
+      'aukeratu zer gorde.';
+  @override
+  String get syncMergeClean =>
+      'Bi bertsioak berez batzen dira: ez da ezer gainjartzen.';
+  @override
+  String get syncMergeNoBase =>
+      'Ez dago bertsio komunik batzeko, beraz fitxategi osoa aukeratu behar '
+      'da.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Gainjartzea $index / $total';
+  @override
+  String get syncMergeFromLocal => 'Gailu honetakoa';
+  @override
+  String get syncMergeFromRemote => 'Zerbitzarikoa';
+  @override
+  String get syncMergeRemovedLines => 'Kendutako lerroak';
+  @override
+  String get syncMergeKeepLocal => 'Nireak';
+  @override
+  String get syncMergeKeepRemote => 'Zerbitzarikoak';
+  @override
+  String get syncMergeKeepBoth => 'Biak';
+  @override
+  String get syncMergeSave => 'Gorde bateratzea';
+  @override
+  String get syncMergeKeepWhole => 'Edo gorde kopia oso bat';
 }

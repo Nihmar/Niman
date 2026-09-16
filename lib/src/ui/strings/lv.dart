@@ -169,6 +169,8 @@ final class LatvianStrings extends Strings {
   String spellCheckCount(int count) => '$count pārbaudei';
   @override
   String spellCheckLine(int line) => 'rinda $line';
+  @override
+  String get addWordToDictionary => 'Pievienot vārdnīcai';
 
   @override
   String indentWidthValue(int spaces) => '$spaces atstarpes';
@@ -1227,6 +1229,19 @@ final class LatvianStrings extends Strings {
       ? '$count nemainīta rinda'
       : '$count nemainītas rindas';
   @override
+  String get historyTakeHunk => 'Atjaunot šeit';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Atjaunot 1 izmaiņu' : 'Atjaunot $count izmaiņas';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Izvēlētās izmaiņas atgriežas pie šīs versijas teksta. Piezīme tās '
+      'pašreizējā veidā vispirms tiek saglabāta kā versija, tāpēc vari to '
+      'atsaukt.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Piezīme mainījās, kamēr biji šeit — salīdzinājums ir atjaunināts.';
+  @override
   String get historyVersionsTitle => 'Cik versiju glabāt';
   @override
   String get historyVersionsSubtitle => 'Katrai piezīmei, katalogā .history/';
@@ -1345,4 +1360,357 @@ final class LatvianStrings extends Strings {
   String get transcriptionAppend => 'Pievienot zem';
   @override
   String get transcriptionReplace => 'Aizstāt';
+  @override
+  String get settingsSectionSync => 'Sinhronizācija';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Šai bibliotēkai nav iestatīta';
+  @override
+  String get syncNeverSynced => 'Vēl nav sinhronizēta';
+  @override
+  String syncLastSynced(String when) => 'Sinhronizēta $when';
+  @override
+  String get syncRunning => 'Notiek sinhronizācija…';
+  @override
+  String syncScreenSubtitle(String library) => 'Bibliotēka $library';
+  @override
+  String get syncUrlLabel => 'Kataloga adrese';
+  @override
+  String get syncUrlHint =>
+      'Katalogam jau jābūt izveidotam. Nokopējiet adresi tā, kā '
+      'to rāda serveris.';
+  @override
+  String get syncHttpWarning =>
+      'Nešifrēts savienojums: der caur VPN vai lokālajā tīklā.';
+  @override
+  String get syncUserLabel => 'Lietotājs';
+  @override
+  String get syncUserHint =>
+      'Atstājiet tukšu, ja serveris neprasa pieteikšanās datus.';
+  @override
+  String get syncPasswordLabel => 'Parole';
+  @override
+  String get syncPasswordHint =>
+      'Tiek glabāta šīs ierīces atslēgu glabātuvē, nekad '
+      'bibliotēkas failos.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Atstājiet tukšu, lai paturētu saglabāto paroli.';
+  @override
+  String get syncShowPassword => 'Rādīt paroli';
+  @override
+  String get syncHidePassword => 'Slēpt paroli';
+  @override
+  String get syncTestAction => 'Pārbaudīt savienojumu';
+  @override
+  String get syncTesting => 'Notiek pārbaude…';
+  @override
+  String get syncRetargetWarning =>
+      'Mainot adresi vai lietotāju, nākamā sinhronizācija '
+      'sāksies no jauna kā pirmā.';
+  @override
+  String get syncTestOk => 'Savienojums darbojas';
+  @override
+  String get syncModeFull => 'Pilnais režīms';
+  @override
+  String get syncModeCompatible => 'Saderības režīms';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Lasīšana, rakstīšana un dzēšana';
+  @override
+  String get syncCapEtags => 'Failu nospiedumi (ETag)';
+  @override
+  String get syncCapNoEtags => 'Nav failu nospiedumu (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Salīdzina izmēru un datumu; šaubu gadījumā lejupielādē '
+      'vēlreiz';
+  @override
+  String get syncCapGuarded => 'Aizsargāta rakstīšana';
+  @override
+  String get syncCapUnguarded => 'Neaizsargāta rakstīšana';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Tieši pirms rakstīšanas pārbauda failu serverī';
+  @override
+  String get syncCapMove => 'Pārsauc bez atkārtotas augšupielādes';
+  @override
+  String get syncCapNoMove => 'Serverī nevar pārsaukt';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Pārsaukšana kļūst par dzēšanu un jaunu augšupielādi';
+  @override
+  String get syncCompatibleNote =>
+      'Saderības režīmā sinhronizācija darbojas tāpat, tikai ar '
+      'dažiem papildu pieprasījumiem.';
+  @override
+  String get syncTestInvalidUrl => 'Nederīga adrese';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Ievadiet http:// vai https:// adresi bez lietotāja un '
+      'paroles.';
+  @override
+  String get syncTestOffline => 'Serveris nav sasniedzams';
+  @override
+  String get syncTestOfflineHint =>
+      'Vai VPN ir ieslēgts? 10.x vai 192.168.x adrese darbojas '
+      'tikai no tā paša tīkla.';
+  @override
+  String get syncTestAuth => 'Lietotājs vai parole noraidīta';
+  @override
+  String get syncTestAuthHint => 'Pārbaudiet tos un mēģiniet vēlreiz.';
+  @override
+  String get syncTestNotFound => 'Katalogs neeksistē';
+  @override
+  String get syncTestNotFoundHint =>
+      'Izveidojiet to serverī vai izlabojiet adresi.';
+  @override
+  String get syncTestUnsupported => 'Tas nav WebDAV katalogs';
+  @override
+  String get syncTestUnsupportedHint => 'Serveris atbild, bet ne kā WebDAV.';
+  @override
+  String get syncTestFailed => 'Pārbaude neizdevās';
+  @override
+  String get syncNowAction => 'Sinhronizēt tagad';
+  @override
+  String get syncSectionServer => 'Serveris';
+  @override
+  String get syncServerRow => 'Adrese, lietotājs un parole';
+  @override
+  String get syncRetestTitle => 'Vēlreiz pārbaudīt serveri';
+  @override
+  String syncProbedAgo(String when) => 'Pēdējā pārbaude $when';
+  @override
+  String get syncDisconnectTitle => 'Atvienot šo bibliotēku';
+  @override
+  String get syncDisconnectSubtitle => 'Faili paliek šeit un serverī';
+  @override
+  String get syncDisconnectConfirmTitle => 'Atvienot sinhronizāciju?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Šī bibliotēka šajā ierīcē vairs netiks sinhronizēta. '
+      'Neviens fails netiek dzēsts ne šeit, ne serverī. Ja to '
+      'pievienosiet atkārtoti, pirmā sinhronizācija sāksies no '
+      'jauna.';
+  @override
+  String get syncDisconnectConfirm => 'Atvienot';
+  @override
+  String get syncFirstTitle => 'Pirmā sinhronizācija';
+  @override
+  String get syncFirstIntro => 'Bibliotēka salīdzināta ar katalogu serverī:';
+  @override
+  String get syncFirstUpload => 'Augšupielādēt';
+  @override
+  String get syncFirstDownload => 'Lejupielādēt';
+  @override
+  String get syncFirstBoth => 'Abās pusēs';
+  @override
+  String get syncFirstBothHint =>
+      'Vienādi: bez pārsūtīšanas. Atšķirīgi: jāatrisina';
+  @override
+  String get syncFirstNoDelete =>
+      'Pirmā sinhronizācija neko nedzēš ne šeit, ne serverī.';
+  @override
+  String get syncStartAction => 'Sākt';
+  @override
+  String syncMassTrashTitle(int count) =>
+      'Pārvietot failus uz konteineru ($count)?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Serverī trūkst $count no $total sinhronizētajiem failiem. '
+      'Parasti tas nozīmē nepareizu adresi, nepievienotu NAS '
+      'disku vai kļūdas pēc iztukšotu katalogu.';
+  @override
+  String get syncMassTrashHint =>
+      'Ja tiešām tos izdzēsāt citā ierīcē, apstipriniet: šeit '
+      'tie tiks pārvietoti uz konteineru.';
+  @override
+  String get syncMassTrashConfirm => 'Pārvietot uz konteineru';
+  @override
+  String syncMassDeleteTitle(int count) => 'Dzēst failus no servera ($count)?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Šeit trūkst $count no $total sinhronizētajiem failiem. Ja '
+      'neesat tos dzēsis, atceliet un pārbaudiet bibliotēkas '
+      'katalogu.';
+  @override
+  String get syncMassDeleteConfirm => 'Dzēst no servera';
+  @override
+  String get syncTooltip => 'Sinhronizēt';
+  @override
+  String get syncStageConnecting => 'Savienojas ar serveri…';
+  @override
+  String get syncStageComparing => 'Salīdzina ar serveri…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sinhronizē · $done no $total';
+  @override
+  String get syncStatusWarnings => 'Sinhronizēta ar brīdinājumiem';
+  @override
+  String syncConflictsHeader(int count) => 'Mainīti šeit un serverī · $count';
+  @override
+  String get syncConflictHint => 'Neviena versija netika aizskarta';
+  @override
+  String get syncResolveAction => 'Atrisināt';
+  @override
+  String syncFailuresHeader(int count) => 'Nav sinhronizēti · $count';
+  @override
+  String get syncFailuresHint =>
+      'Tiks mēģināts vēlreiz nākamajā sinhronizācijā';
+  @override
+  String get syncAbortAuth => 'Serveris noraidīja paroli';
+  @override
+  String get syncAbortMissingPassword => 'Parole nav saglabāta';
+  @override
+  String get syncAbortOffline => 'Serveris nav sasniedzams';
+  @override
+  String get syncAbortRemoteMissing => 'Katalogs serverī vairs nepastāv';
+  @override
+  String get syncAbortUnsupported => 'Serveris vairs nedarbojas kā WebDAV';
+  @override
+  String get syncAbortFailed => 'Sinhronizācija neizdevās';
+  @override
+  String get syncAbortNotConfirmed => 'Sinhronizācija atcelta';
+  @override
+  String get syncAbortNothingTouched =>
+      'Neviens fails netika aizskarts. Jūsu izmaiņas paliek šeit '
+      'līdz nākamajai veiksmīgajai sinhronizācijai.';
+  @override
+  String syncLastSuccess(String when) =>
+      'Pēdējā veiksmīgā sinhronizācija $when';
+  @override
+  String get syncNoSuccessYet => 'Vēl nav nevienas veiksmīgas sinhronizācijas';
+  @override
+  String get syncUpdatePasswordAction => 'Atjaunināt paroli';
+  @override
+  String get syncRetryAction => 'Mēģināt vēlreiz';
+  @override
+  String get syncOpenSettingsAction => 'Iestatījumi';
+  @override
+  String get syncCloseAction => 'Aizvērt';
+  @override
+  String get syncDoneSnack => 'Sinhronizēta';
+  @override
+  String syncTrashedSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Sinhronizēta · $count citur izdzēsts fails ir konteinerā'
+      : 'Sinhronizēta · $count citur izdzēsti faili ir konteinerā';
+  @override
+  String syncConflictsSnack(int count) => count % 10 == 1 && count % 100 != 11
+      ? 'Sinhronizēta · $count konflikts jāatrisina'
+      : 'Sinhronizēta · $count konflikti jāatrisina';
+  @override
+  String get syncShowAction => 'Rādīt';
+  @override
+  String get syncConflictTitle => 'Atrisināt konfliktu';
+  @override
+  String get syncConflictLegend =>
+      'Rindas ar − ir no servera, rindas ar + ir no šīs ierīces.';
+  @override
+  String get syncConflictBinary =>
+      'Tas nav teksta fails: izvēlieties, kuru kopiju paturēt.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopija, ko nepaturat, paliek piezīmes vēsturē.';
+  @override
+  String get syncKeepLocal => 'Paturēt šīs ierīces versiju';
+  @override
+  String get syncKeepRemote => 'Paturēt servera versiju';
+  @override
+  String get syncConflictIdentical => 'Abas versijas ir vienādas';
+  @override
+  String get syncConflictLoadFailed => 'Nevarēja nolasīt abas versijas';
+  @override
+  String get syncResolveFailed => 'Nevarēja atrisināt konfliktu';
+  @override
+  String get syncResolved => 'Konflikts atrisināts';
+  @override
+  String get syncSectionWhen => 'Kad sinhronizēt';
+  @override
+  String get syncAutoTitle => 'Automātiski';
+  @override
+  String get syncAutoSubtitle =>
+      'Pēc izmaiņām, atverot un ik pēc noteikta laika';
+  @override
+  String get syncIntervalTitle => 'Servera pārbaudes intervāls';
+  @override
+  String get syncIntervalSubtitle => 'Tikai kamēr lietotne ir atvērta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Lai redzētu citās ierīcēs veiktās izmaiņas, kamēr lietotne ir atvērta. '
+      'Ar „Nekad“ – tikai pēc izmaiņām un atverot.';
+  @override
+  String syncIntervalMinutes(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count minūte' : '$count minūtes';
+  @override
+  String get syncIntervalNever => 'Nekad';
+  @override
+  String get syncWifiOnlyTitle => 'Tikai Wi-Fi tīklā';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Ar mobilajiem datiem sinhronizēt tikai manuāli';
+  @override
+  String syncPendingChanges(int count) => count % 10 == 1 && count % 100 != 11
+      ? '$count izmaiņa gaida'
+      : '$count izmaiņas gaida';
+  @override
+  String syncRetryIn(String wait) => 'atkārtots mēģinājums pēc $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Gaida Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Gaida savienojumu';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinhronizēt tagad“ tomēr izmanto mobilos datus.';
+  @override
+  String get syncQueueKeptHint =>
+      'Izmaiņas paliek šeit, pat ja aizverat lietotni, un tiek nosūtītas '
+      'pašas, kad serveris atbild.';
+  @override
+  String get syncAutoPaused => 'Automātiskā sinhronizācija apturēta';
+  @override
+  String get syncPausedAuthHint =>
+      'Tā atsāksies, kad atjaunināsiet paroli vai sinhronizēsiet manuāli.';
+  @override
+  String get syncPausedServerHint =>
+      'Tā atsāksies, kad izlabosiet adresi vai sinhronizēsiet manuāli.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinhronizēt tagad“ parāda, kas tiktu noņemts, un vispirms pajautā.';
+  @override
+  String get syncNeedsConfirmation => 'Gaida jūsu apstiprinājumu';
+  @override
+  String get syncMergeIntro =>
+      'Izmaiņas, kas nepārklājas, jau ir sapludinātas; tur, kur tās pārklājas, '
+      'izvēlieties, ko paturēt.';
+  @override
+  String get syncMergeClean =>
+      'Abas versijas sapludinās pašas: nekas nepārklājas.';
+  @override
+  String get syncMergeNoBase =>
+      'Nav kopīgas versijas, uz kuras sapludināt, tāpēc jāizvēlas viss fails.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Pārklājums $index no $total';
+  @override
+  String get syncMergeFromLocal => 'No šīs ierīces';
+  @override
+  String get syncMergeFromRemote => 'No servera';
+  @override
+  String get syncMergeRemovedLines => 'Noņemtās rindas';
+  @override
+  String get syncMergeKeepLocal => 'Manas';
+  @override
+  String get syncMergeKeepRemote => 'Servera';
+  @override
+  String get syncMergeKeepBoth => 'Abas';
+  @override
+  String get syncMergeSave => 'Saglabāt sapludinājumu';
+  @override
+  String get syncMergeKeepWhole => 'Vai paturiet vienu veselu kopiju';
 }

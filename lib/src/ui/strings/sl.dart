@@ -171,6 +171,8 @@ final class SlovenianStrings extends Strings {
   String spellCheckCount(int count) => '$count za preverjanje';
   @override
   String spellCheckLine(int line) => 'vrstica $line';
+  @override
+  String get addWordToDictionary => 'Dodaj v slovník';
 
   @override
   String indentWidthValue(int spaces) => '$spaces presledkov';
@@ -1222,6 +1224,19 @@ final class SlovenianStrings extends Strings {
     _ => '$count nespremenjenih vrstic',
   };
   @override
+  String get historyTakeHunk => 'Obnovi tukaj';
+  @override
+  String historyRestoreSelectedAction(int count) =>
+      count == 1 ? 'Obnovi 1 spremembo' : 'Obnovi $count sprememb';
+  @override
+  String get historyRestoreSelectedConfirmBody =>
+      'Izbrane spremembe se vrnejo k besedilu te različice. Zapisek v trenutni '
+      'obliki se najprej ohrani kot različica, zato lahko to razveljaviš.';
+  @override
+  String get historyNoteChangedReloaded =>
+      'Zapisek se je spremenil, medtem ko si bil tukaj — primerjava je '
+      'osvežena.';
+  @override
   String get historyVersionsTitle => 'Število shranjenih različic';
   @override
   String get historyVersionsSubtitle => 'Za vsako opombo, v .history/';
@@ -1344,4 +1359,390 @@ final class SlovenianStrings extends Strings {
   String get transcriptionAppend => 'Dodaj pod';
   @override
   String get transcriptionReplace => 'Zamenjaj';
+  @override
+  String get settingsSectionSync => 'Sinhronizacija';
+  @override
+  String get syncWebDavTitle => 'WebDAV';
+  @override
+  String get syncNotConfigured => 'Za to knjižnico ni nastavljena';
+  @override
+  String get syncNeverSynced => 'Še ni sinhronizirana';
+  @override
+  String syncLastSynced(String when) => 'Sinhronizirana $when';
+  @override
+  String get syncRunning => 'Sinhronizacija poteka…';
+  @override
+  String syncScreenSubtitle(String library) => 'Knjižnica $library';
+  @override
+  String get syncUrlLabel => 'Naslov mape';
+  @override
+  String get syncUrlHint =>
+      'Mapa mora obstajati. Naslov kopirajte tako, kot ga '
+      'prikazuje strežnik.';
+  @override
+  String get syncHttpWarning =>
+      'Nešifrirana povezava: v redu prek VPN ali v lokalnem '
+      'omrežju.';
+  @override
+  String get syncUserLabel => 'Uporabnik';
+  @override
+  String get syncUserHint =>
+      'Pustite prazno, če strežnik ne zahteva poverilnic.';
+  @override
+  String get syncPasswordLabel => 'Geslo';
+  @override
+  String get syncPasswordHint =>
+      'Shranjeno v shrambi ključev te naprave, nikoli v '
+      'datotekah knjižnice.';
+  @override
+  String get syncPasswordKeepHint =>
+      'Pustite prazno, da ohranite shranjeno geslo.';
+  @override
+  String get syncShowPassword => 'Prikaži geslo';
+  @override
+  String get syncHidePassword => 'Skrij geslo';
+  @override
+  String get syncTestAction => 'Preizkusi povezavo';
+  @override
+  String get syncTesting => 'Preizkušanje…';
+  @override
+  String get syncRetargetWarning =>
+      'Z drugim naslovom ali uporabnikom se naslednja '
+      'sinhronizacija začne znova kot prva.';
+  @override
+  String get syncTestOk => 'Povezava deluje';
+  @override
+  String get syncModeFull => 'Polni način';
+  @override
+  String get syncModeCompatible => 'Združljivi način';
+  @override
+  String syncTestOkSubtitle(String mode, int ms) => '$mode · $ms ms';
+  @override
+  String get syncCapBasic => 'Branje, pisanje in brisanje';
+  @override
+  String get syncCapEtags => 'Prstni odtisi datotek (ETag)';
+  @override
+  String get syncCapNoEtags => 'Brez prstnih odtisov datotek (ETag)';
+  @override
+  String get syncCapNoEtagsDetail =>
+      'Primerja velikost in datum; ob dvomu znova prenese';
+  @override
+  String get syncCapGuarded => 'Zaščiteni zapisi';
+  @override
+  String get syncCapUnguarded => 'Nezaščiteni zapisi';
+  @override
+  String get syncCapUnguardedDetail =>
+      'Tik pred pisanjem preveri datoteko na strežniku';
+  @override
+  String get syncCapMove => 'Preimenuje brez ponovnega nalaganja';
+  @override
+  String get syncCapNoMove => 'Brez preimenovanja na strežniku';
+  @override
+  String get syncCapNoMoveDetail =>
+      'Preimenovanje postane brisanje in novo nalaganje';
+  @override
+  String get syncCompatibleNote =>
+      'V združljivem načinu sinhronizacija deluje enako, le z '
+      'nekaj več zahtevami.';
+  @override
+  String get syncTestInvalidUrl => 'Neveljaven naslov';
+  @override
+  String get syncTestInvalidUrlHint =>
+      'Vnesite naslov http:// ali https:// brez uporabnika in '
+      'gesla.';
+  @override
+  String get syncTestOffline => 'Strežnik ni dosegljiv';
+  @override
+  String get syncTestOfflineHint =>
+      'Je VPN vklopljen? Naslov 10.x ali 192.168.x deluje le iz '
+      'istega omrežja.';
+  @override
+  String get syncTestAuth => 'Strežnik je zavrnil uporabnika ali geslo';
+  @override
+  String get syncTestAuthHint => 'Preverite ju in preizkusite znova.';
+  @override
+  String get syncTestNotFound => 'Mapa ne obstaja';
+  @override
+  String get syncTestNotFoundHint =>
+      'Ustvarite jo na strežniku ali popravite naslov.';
+  @override
+  String get syncTestUnsupported => 'To ni mapa WebDAV';
+  @override
+  String get syncTestUnsupportedHint =>
+      'Strežnik odgovarja, vendar ne kot WebDAV.';
+  @override
+  String get syncTestFailed => 'Preizkus ni uspel';
+  @override
+  String get syncNowAction => 'Sinhroniziraj zdaj';
+  @override
+  String get syncSectionServer => 'Strežnik';
+  @override
+  String get syncServerRow => 'Naslov, uporabnik in geslo';
+  @override
+  String get syncRetestTitle => 'Znova preizkusi strežnik';
+  @override
+  String syncProbedAgo(String when) => 'Zadnji preizkus $when';
+  @override
+  String get syncDisconnectTitle => 'Odklopi to knjižnico';
+  @override
+  String get syncDisconnectSubtitle => 'Datoteke ostanejo tu in na strežniku';
+  @override
+  String get syncDisconnectConfirmTitle => 'Želite odklopiti sinhronizacijo?';
+  @override
+  String get syncDisconnectConfirmBody =>
+      'Ta knjižnica se na tej napravi preneha sinhronizirati. '
+      'Nobena datoteka se ne izbriše, ne tu ne na strežniku. Če '
+      'jo znova povežete, se prva sinhronizacija začne od '
+      'začetka.';
+  @override
+  String get syncDisconnectConfirm => 'Odklopi';
+  @override
+  String get syncFirstTitle => 'Prva sinhronizacija';
+  @override
+  String get syncFirstIntro => 'Knjižnica, primerjana z mapo na strežniku:';
+  @override
+  String get syncFirstUpload => 'Za nalaganje';
+  @override
+  String get syncFirstDownload => 'Za prenos';
+  @override
+  String get syncFirstBoth => 'Na obeh straneh';
+  @override
+  String get syncFirstBothHint =>
+      'Enake: brez prenosa. Različne: za razrešitev';
+  @override
+  String get syncFirstNoDelete =>
+      'Prva sinhronizacija ne izbriše ničesar, ne tu ne na '
+      'strežniku.';
+  @override
+  String get syncStartAction => 'Začni';
+  @override
+  String syncMassTrashTitle(int count) => count % 100 == 1
+      ? 'Premakniti $count datoteko v koš?'
+      : count % 100 == 2
+      ? 'Premakniti $count datoteki v koš?'
+      : count % 100 == 3 || count % 100 == 4
+      ? 'Premakniti $count datoteke v koš?'
+      : 'Premakniti $count datotek v koš?';
+  @override
+  String syncMassTrashBody(int count, int total) =>
+      'Na strežniku manjka $count od $total sinhroniziranih '
+      'datotek. To navadno pomeni napačen naslov, nepriklopljen '
+      'disk NAS ali pomotoma izpraznjeno mapo.';
+  @override
+  String get syncMassTrashHint =>
+      'Če ste jih res izbrisali na drugi napravi, potrdite: tu '
+      'se premaknejo v koš.';
+  @override
+  String get syncMassTrashConfirm => 'Premakni v koš';
+  @override
+  String syncMassDeleteTitle(int count) => count % 100 == 1
+      ? 'Izbrisati $count datoteko s strežnika?'
+      : count % 100 == 2
+      ? 'Izbrisati $count datoteki s strežnika?'
+      : count % 100 == 3 || count % 100 == 4
+      ? 'Izbrisati $count datoteke s strežnika?'
+      : 'Izbrisati $count datotek s strežnika?';
+  @override
+  String syncMassDeleteBody(int count, int total) =>
+      'Tu manjka $count od $total sinhroniziranih datotek. Če '
+      'jih niste izbrisali vi, prekličite in preverite mapo '
+      'knjižnice.';
+  @override
+  String get syncMassDeleteConfirm => 'Izbriši s strežnika';
+  @override
+  String get syncTooltip => 'Sinhronizacija';
+  @override
+  String get syncStageConnecting => 'Povezovanje s strežnikom…';
+  @override
+  String get syncStageComparing => 'Primerjanje s strežnikom…';
+  @override
+  String syncStageApplying(int done, int total) =>
+      'Sinhronizacija · $done od $total';
+  @override
+  String get syncStatusWarnings => 'Sinhronizirana z opozorili';
+  @override
+  String syncConflictsHeader(int count) =>
+      'Spremenjeno tu in na strežniku · $count';
+  @override
+  String get syncConflictHint => 'Nobena različica ni bila spremenjena';
+  @override
+  String get syncResolveAction => 'Razreši';
+  @override
+  String syncFailuresHeader(int count) => 'Ni sinhronizirano · $count';
+  @override
+  String get syncFailuresHint => 'Nov poskus ob naslednji sinhronizaciji';
+  @override
+  String get syncAbortAuth => 'Strežnik je zavrnil geslo';
+  @override
+  String get syncAbortMissingPassword => 'Ni shranjenega gesla';
+  @override
+  String get syncAbortOffline => 'Strežnik ni dosegljiv';
+  @override
+  String get syncAbortRemoteMissing => 'Mape na strežniku ni več';
+  @override
+  String get syncAbortUnsupported => 'Strežnik ne deluje več kot WebDAV';
+  @override
+  String get syncAbortFailed => 'Sinhronizacija ni uspela';
+  @override
+  String get syncAbortNotConfirmed => 'Sinhronizacija preklicana';
+  @override
+  String get syncAbortNothingTouched =>
+      'Nobena datoteka ni bila spremenjena. Vaše spremembe '
+      'ostanejo tu do naslednje uspešne sinhronizacije.';
+  @override
+  String syncLastSuccess(String when) => 'Zadnja uspešna sinhronizacija $when';
+  @override
+  String get syncNoSuccessYet => 'Še ni bilo uspešne sinhronizacije';
+  @override
+  String get syncUpdatePasswordAction => 'Posodobi geslo';
+  @override
+  String get syncRetryAction => 'Poskusi znova';
+  @override
+  String get syncOpenSettingsAction => 'Nastavitve';
+  @override
+  String get syncCloseAction => 'Zapri';
+  @override
+  String get syncDoneSnack => 'Sinhronizirano';
+  @override
+  String syncTrashedSnack(int count) => count % 100 == 1
+      ? 'Sinhronizirano · $count datoteka, izbrisana drugje, je v '
+            'košu'
+      : count % 100 == 2
+      ? 'Sinhronizirano · $count datoteki, izbrisani drugje, sta v '
+            'košu'
+      : count % 100 == 3 || count % 100 == 4
+      ? 'Sinhronizirano · $count datoteke, izbrisane drugje, so v '
+            'košu'
+      : 'Sinhronizirano · $count datotek, izbrisanih drugje, je v '
+            'košu';
+  @override
+  String syncConflictsSnack(int count) => count % 100 == 1
+      ? 'Sinhronizirano · $count konflikt za razrešitev'
+      : count % 100 == 2
+      ? 'Sinhronizirano · $count konflikta za razrešitev'
+      : count % 100 == 3 || count % 100 == 4
+      ? 'Sinhronizirano · $count konflikti za razrešitev'
+      : 'Sinhronizirano · $count konfliktov za razrešitev';
+  @override
+  String get syncShowAction => 'Prikaži';
+  @override
+  String get syncConflictTitle => 'Razreši konflikt';
+  @override
+  String get syncConflictLegend =>
+      'Vrstice z oznako − so s strežnika, vrstice z oznako + s '
+      'te naprave.';
+  @override
+  String get syncConflictBinary =>
+      'To ni besedilna datoteka: izberite, katero kopijo želite '
+      'obdržati.';
+  @override
+  String get syncConflictKeepNote =>
+      'Kopija, ki je ne obdržite, ostane v zgodovini opombe.';
+  @override
+  String get syncKeepLocal => 'Obdrži različico te naprave';
+  @override
+  String get syncKeepRemote => 'Obdrži različico strežnika';
+  @override
+  String get syncConflictIdentical => 'Različici sta enaki';
+  @override
+  String get syncConflictLoadFailed => 'Obeh različic ni bilo mogoče prebrati';
+  @override
+  String get syncResolveFailed => 'Konflikta ni bilo mogoče razrešiti';
+  @override
+  String get syncResolved => 'Konflikt razrešen';
+  @override
+  String get syncSectionWhen => 'Kdaj sinhronizirati';
+  @override
+  String get syncAutoTitle => 'Samodejno';
+  @override
+  String get syncAutoSubtitle => 'Po urejanju, ob odprtju in v presledkih';
+  @override
+  String get syncIntervalTitle => 'Preveri strežnik vsakih';
+  @override
+  String get syncIntervalSubtitle => 'Samo dokler je aplikacija odprta';
+  @override
+  String get syncIntervalDialogBody =>
+      'Da vidite spremembe z drugih naprav, dokler je aplikacija odprta. Pri '
+      '„Nikoli” samo po urejanju in ob odprtju.';
+  @override
+  String syncIntervalMinutes(int count) => switch (count % 100) {
+    1 => '$count minuta',
+    2 => '$count minuti',
+    3 || 4 => '$count minute',
+    _ => '$count minut',
+  };
+  @override
+  String get syncIntervalNever => 'Nikoli';
+  @override
+  String get syncWifiOnlyTitle => 'Samo Wi-Fi';
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Pri mobilnih podatkih sinhronizirajte samo ročno';
+  @override
+  String syncPendingChanges(int count) => switch (count % 100) {
+    1 => '$count sprememba čaka',
+    2 => '$count spremembi čakata',
+    3 || 4 => '$count spremembe čakajo',
+    _ => '$count sprememb čaka',
+  };
+  @override
+  String syncRetryIn(String wait) => 'nov poskus čez $wait';
+  @override
+  String syncWaitSeconds(int seconds) => '$seconds s';
+  @override
+  String syncWaitMinutes(int minutes) => '$minutes min';
+  @override
+  String get syncWaitingForWifi => 'Čakanje na Wi-Fi';
+  @override
+  String get syncWaitingForNetwork => 'Čakanje na povezavo';
+  @override
+  String get syncMobileDataHint =>
+      '„Sinhroniziraj zdaj” kljub temu porabi mobilne podatke.';
+  @override
+  String get syncQueueKeptHint =>
+      'Spremembe ostanejo tukaj, tudi če zaprete aplikacijo, in odidejo same, '
+      'ko strežnik odgovori.';
+  @override
+  String get syncAutoPaused => 'Samodejna sinhronizacija je zaustavljena';
+  @override
+  String get syncPausedAuthHint =>
+      'Nadaljuje se, ko posodobite geslo ali sinhronizirate ročno.';
+  @override
+  String get syncPausedServerHint =>
+      'Nadaljuje se, ko popravite naslov ali sinhronizirate ročno.';
+  @override
+  String get syncPausedConfirmHint =>
+      '„Sinhroniziraj zdaj” pokaže, kaj bi bilo odstranjeno, in prej vpraša.';
+  @override
+  String get syncNeedsConfirmation => 'Čaka na vašo potrditev';
+  @override
+  String get syncMergeIntro =>
+      'Spremembe, ki se ne prekrivajo, so že združene; kjer se prekrivajo, '
+      'izberite, kaj obdržati.';
+  @override
+  String get syncMergeClean =>
+      'Različici se združita sami: nič se ne prekriva.';
+  @override
+  String get syncMergeNoBase =>
+      'Ni skupne različice za združitev, zato je treba izbrati celotno '
+      'datoteko.';
+  @override
+  String syncMergeOverlap(int index, int total) =>
+      'Prekrivanje $index od $total';
+  @override
+  String get syncMergeFromLocal => 'S te naprave';
+  @override
+  String get syncMergeFromRemote => 'S strežnika';
+  @override
+  String get syncMergeRemovedLines => 'Odstranjene vrstice';
+  @override
+  String get syncMergeKeepLocal => 'Moje';
+  @override
+  String get syncMergeKeepRemote => 'Strežnikove';
+  @override
+  String get syncMergeKeepBoth => 'Obe';
+  @override
+  String get syncMergeSave => 'Shrani združitev';
+  @override
+  String get syncMergeKeepWhole => 'Ali obdržite eno celo kopijo';
 }
