@@ -1253,6 +1253,113 @@ final class CzechStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Přepis';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Žádný';
+  @override
+  String get transcriptionLanguageTitle => 'Jazyk';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Jazyk, kterým se ve vašich nahrávkách mluví. Zadat ho je přesnější než '
+      'ho nechat rozpoznat.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Jako aplikace ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Rozpoznat automaticky';
+  @override
+  String get transcriptionModelsTitle => 'Modely přepisu';
+  @override
+  String transcriptionModelsUsed(String size) => 'Využito $size';
+  @override
+  String get transcriptionModelsInstalled => 'Stažené';
+  @override
+  String get transcriptionModelsDownloading => 'Stahuje se';
+  @override
+  String get transcriptionModelsAvailable => 'Dostupné';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modely zůstávají v úložišti aplikace v tomto zařízení. Nekopírují se '
+      'do knihovny ani se nesynchronizují.';
+  @override
+  String get transcriptionModelDefault => 'Výchozí';
+  @override
+  String get transcriptionModelSlow => 'Pomalý';
+  @override
+  String get transcriptionModelHintTiny => 'Nejrychlejší, nejméně přesný';
+  @override
+  String get transcriptionModelHintBase => 'Dobrý poměr rychlosti a přesnosti';
+  @override
+  String get transcriptionModelHintSmall => 'Přesnější, zhruba 3× pomalejší';
+  @override
+  String get transcriptionModelHintMedium => 'Velmi přesný, v telefonu pomalý';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Nejpřesnější, potřebuje hodně paměti';
+  @override
+  String get transcriptionModelDownload => 'Stáhnout';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Smazat model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Uvolní se $size. Model si můžete později stáhnout znovu.';
+  @override
+  String get transcriptionModelFailed =>
+      'Stažení se nezdařilo. Zkontrolujte připojení a zkuste to znovu.';
+  @override
+  String get actionRetry => 'Zkusit znovu';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Připojení se přerušilo, zkouší se znovu…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pozastaveno na $progress';
+  @override
+  String get actionResume => 'Pokračovat';
+  @override
+  String get audioTranscribe => 'Přepsat';
+  @override
+  String get audioTranscribeUnsupported => 'V tomto zařízení jen nahrávky WAV';
+  @override
+  String get transcriptionQueued => 'Ve frontě';
+  @override
+  String get transcriptionPreparing => 'Připravuje se zvuk…';
+  @override
+  String transcriptionRunning(int percent) => 'Přepisuje se… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Stahuje se $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Přepis byl přidán do popisu';
+  @override
+  String get transcriptionNoSpeech =>
+      'V této nahrávce nebyla rozpoznána žádná řeč';
+  @override
+  String get transcriptionFailed => 'Přepis se nezdařil';
+  @override
+  String get transcriptionPickModelTitle => 'Vyberte model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Přepis probíhá v tomto zařízení a nahrávka se nikam neodesílá. Model '
+      'se stahuje jen jednou.';
+  @override
+  String get transcriptionPickModelAction => 'Stáhnout a přepsat';
+  @override
+  String get transcriptionModelRecommended => 'Doporučený';
+  @override
+  String get transcriptionExistingTitle => 'Tato nahrávka už má popis';
+  @override
+  String get transcriptionExistingBody =>
+      'Nahradit ho přepisem, nebo přepis přidat pod něj?';
+  @override
+  String get transcriptionAppend => 'Přidat pod';
+  @override
+  String get transcriptionReplace => 'Nahradit';
+  @override
   String get settingsSectionSync => 'Synchronizace';
   @override
   String get syncWebDavTitle => 'WebDAV';

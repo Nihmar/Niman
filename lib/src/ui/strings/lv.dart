@@ -1255,6 +1255,112 @@ final class LatvianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkripcija';
+  @override
+  String get transcriptionModelTitle => 'Modelis';
+  @override
+  String get transcriptionModelNone => 'Nav';
+  @override
+  String get transcriptionLanguageTitle => 'Valoda';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Valoda, kurā runā jūsu ierakstos. Norādīt to ir precīzāk nekā ļaut to '
+      'noteikt.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Kā lietotnē ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Noteikt automātiski';
+  @override
+  String get transcriptionModelsTitle => 'Transkripcijas modeļi';
+  @override
+  String transcriptionModelsUsed(String size) => 'Aizņemti $size';
+  @override
+  String get transcriptionModelsInstalled => 'Lejupielādēti';
+  @override
+  String get transcriptionModelsDownloading => 'Notiek lejupielāde';
+  @override
+  String get transcriptionModelsAvailable => 'Pieejami';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modeļi paliek lietotnes krātuvē šajā ierīcē. Tie netiek kopēti '
+      'bibliotēkā un netiek sinhronizēti.';
+  @override
+  String get transcriptionModelDefault => 'Noklusējums';
+  @override
+  String get transcriptionModelSlow => 'Lēns';
+  @override
+  String get transcriptionModelHintTiny => 'Ātrākais, vismazāk precīzs';
+  @override
+  String get transcriptionModelHintBase =>
+      'Labs ātruma un precizitātes līdzsvars';
+  @override
+  String get transcriptionModelHintSmall => 'Precīzāks, apmēram 3× lēnāks';
+  @override
+  String get transcriptionModelHintMedium => 'Ļoti precīzs, tālrunī lēns';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Visprecīzākais, vajag daudz atmiņas';
+  @override
+  String get transcriptionModelDownload => 'Lejupielādēt';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Vai dzēst modeli $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Tiks atbrīvoti $size. Modeli vēlāk varēsiet lejupielādēt atkārtoti.';
+  @override
+  String get transcriptionModelFailed =>
+      'Lejupielāde neizdevās. Pārbaudiet savienojumu un mēģiniet vēlreiz.';
+  @override
+  String get actionRetry => 'Mēģināt vēlreiz';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Savienojums pārtrūka, notiek atkārtots mēģinājums…';
+  @override
+  String transcriptionModelInterrupted(String progress) => 'Pauzēts: $progress';
+  @override
+  String get actionResume => 'Turpināt';
+  @override
+  String get audioTranscribe => 'Transkribēt';
+  @override
+  String get audioTranscribeUnsupported => 'Šajā ierīcē tikai WAV ieraksti';
+  @override
+  String get transcriptionQueued => 'Rindā';
+  @override
+  String get transcriptionPreparing => 'Sagatavo audio…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribē… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Lejupielādē $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkripcija pievienota aprakstam';
+  @override
+  String get transcriptionNoSpeech => 'Šajā ierakstā runa netika atpazīta';
+  @override
+  String get transcriptionFailed => 'Transkripcija neizdevās';
+  @override
+  String get transcriptionPickModelTitle => 'Izvēlieties modeli';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripcija notiek šajā ierīcē, un ieraksts netiek nekur sūtīts. '
+      'Modelis tiek lejupielādēts tikai vienreiz.';
+  @override
+  String get transcriptionPickModelAction => 'Lejupielādēt un transkribēt';
+  @override
+  String get transcriptionModelRecommended => 'Ieteicams';
+  @override
+  String get transcriptionExistingTitle => 'Šim ierakstam jau ir apraksts';
+  @override
+  String get transcriptionExistingBody =>
+      'Aizstāt to ar transkripciju vai pievienot transkripciju zem tā?';
+  @override
+  String get transcriptionAppend => 'Pievienot zem';
+  @override
+  String get transcriptionReplace => 'Aizstāt';
+  @override
   String get settingsSectionSync => 'Sinhronizācija';
   @override
   String get syncWebDavTitle => 'WebDAV';

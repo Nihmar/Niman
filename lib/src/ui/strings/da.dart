@@ -1257,6 +1257,116 @@ final class DanishStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transskription';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Ingen';
+  @override
+  String get transcriptionLanguageTitle => 'Sprog';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Sproget, der tales i dine optagelser. Det er mere præcist at angive '
+      'det end at lade det genkende.';
+  @override
+  String transcriptionLanguageApp(String language) => 'Som appen ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Genkend automatisk';
+  @override
+  String get transcriptionModelsTitle => 'Transskriptionsmodeller';
+  @override
+  String transcriptionModelsUsed(String size) => '$size brugt';
+  @override
+  String get transcriptionModelsInstalled => 'Downloadet';
+  @override
+  String get transcriptionModelsDownloading => 'Downloader';
+  @override
+  String get transcriptionModelsAvailable => 'Tilgængelige';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modellerne ligger i appens lager på denne enhed. De kopieres ikke til '
+      'biblioteket og synkroniseres ikke.';
+  @override
+  String get transcriptionModelDefault => 'Standard';
+  @override
+  String get transcriptionModelSlow => 'Langsom';
+  @override
+  String get transcriptionModelHintTiny => 'Hurtigst, mindst præcis';
+  @override
+  String get transcriptionModelHintBase =>
+      'God balance mellem hastighed og præcision';
+  @override
+  String get transcriptionModelHintSmall => 'Mere præcis, cirka 3× langsommere';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Meget præcis, langsom på en telefon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'Mest præcis, kræver meget hukommelse';
+  @override
+  String get transcriptionModelDownload => 'Download';
+  @override
+  String transcriptionModelDeleteTitle(String model) => 'Slet modellen $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Det frigør $size. Du kan downloade modellen igen senere.';
+  @override
+  String get transcriptionModelFailed =>
+      'Download mislykkedes. Tjek forbindelsen, og prøv igen.';
+  @override
+  String get actionRetry => 'Prøv igen';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Forbindelsen blev afbrudt, prøver igen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Sat på pause ved $progress';
+  @override
+  String get actionResume => 'Genoptag';
+  @override
+  String get audioTranscribe => 'Transskriber';
+  @override
+  String get audioTranscribeUnsupported => 'Kun WAV-optagelser på denne enhed';
+  @override
+  String get transcriptionQueued => 'I kø';
+  @override
+  String get transcriptionPreparing => 'Forbereder lyden…';
+  @override
+  String transcriptionRunning(int percent) => 'Transskriberer… $percent %';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Downloader $model · $percent %';
+  @override
+  String get transcriptionSaved => 'Transskriptionen er føjet til beskrivelsen';
+  @override
+  String get transcriptionNoSpeech =>
+      'Der blev ikke genkendt tale i denne optagelse';
+  @override
+  String get transcriptionFailed => 'Transskriptionen mislykkedes';
+  @override
+  String get transcriptionPickModelTitle => 'Vælg en model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transskriptionen sker på denne enhed, og optagelsen uploades aldrig. '
+      'Modellen downloades kun én gang.';
+  @override
+  String get transcriptionPickModelAction => 'Download og transskriber';
+  @override
+  String get transcriptionModelRecommended => 'Anbefalet';
+  @override
+  String get transcriptionExistingTitle =>
+      'Optagelsen har allerede en beskrivelse';
+  @override
+  String get transcriptionExistingBody =>
+      'Erstat den med transskriptionen, eller tilføj transskriptionen '
+      'nedenunder?';
+  @override
+  String get transcriptionAppend => 'Tilføj nedenunder';
+  @override
+  String get transcriptionReplace => 'Erstat';
+  @override
   String get settingsSectionSync => 'Synkronisering';
   @override
   String get syncWebDavTitle => 'WebDAV';

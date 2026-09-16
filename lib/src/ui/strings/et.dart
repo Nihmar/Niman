@@ -1238,6 +1238,116 @@ final class EstonianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkriptsioon';
+  @override
+  String get transcriptionModelTitle => 'Mudel';
+  @override
+  String get transcriptionModelNone => 'Puudub';
+  @override
+  String get transcriptionLanguageTitle => 'Keel';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Keel, mida su salvestistes räägitakse. Selle määramine on täpsem kui '
+      'tuvastamine.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Nagu rakendus ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Tuvasta automaatselt';
+  @override
+  String get transcriptionModelsTitle => 'Transkriptsioonimudelid';
+  @override
+  String transcriptionModelsUsed(String size) => 'Kasutusel $size';
+  @override
+  String get transcriptionModelsInstalled => 'Allalaaditud';
+  @override
+  String get transcriptionModelsDownloading => 'Allalaadimisel';
+  @override
+  String get transcriptionModelsAvailable => 'Saadaval';
+  @override
+  String get transcriptionModelsFooter =>
+      'Mudelid jäävad selle seadme rakenduse salvestusruumi. Neid ei '
+      'kopeerita teeki ega sünkroonita.';
+  @override
+  String get transcriptionModelDefault => 'Vaikimisi';
+  @override
+  String get transcriptionModelSlow => 'Aeglane';
+  @override
+  String get transcriptionModelHintTiny => 'Kiireim, kõige ebatäpsem';
+  @override
+  String get transcriptionModelHintBase =>
+      'Hea tasakaal kiiruse ja täpsuse vahel';
+  @override
+  String get transcriptionModelHintSmall => 'Täpsem, umbes 3× aeglasem';
+  @override
+  String get transcriptionModelHintMedium => 'Väga täpne, telefonis aeglane';
+  @override
+  String get transcriptionModelHintLarge => 'Kõige täpsem, vajab palju mälu';
+  @override
+  String get transcriptionModelDownload => 'Laadi alla';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Kas kustutada mudel $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'See vabastab $size. Saad mudeli hiljem uuesti alla laadida.';
+  @override
+  String get transcriptionModelFailed =>
+      'Allalaadimine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.';
+  @override
+  String get actionRetry => 'Proovi uuesti';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Ühendus katkes, proovitakse uuesti…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Peatatud: $progress';
+  @override
+  String get actionResume => 'Jätka';
+  @override
+  String get audioTranscribe => 'Transkribeeri';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Selles seadmes ainult WAV-salvestised';
+  @override
+  String get transcriptionQueued => 'Järjekorras';
+  @override
+  String get transcriptionPreparing => 'Heli ettevalmistamine…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribeerimine… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Mudeli $model allalaadimine · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkriptsioon lisati kirjeldusse';
+  @override
+  String get transcriptionNoSpeech => 'Selles salvestises kõnet ei tuvastatud';
+  @override
+  String get transcriptionFailed => 'Transkribeerimine ebaõnnestus';
+  @override
+  String get transcriptionPickModelTitle => 'Vali mudel';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkribeerimine toimub selles seadmes ja salvestist ei saadeta '
+      'kuhugi. Mudel laaditakse alla vaid korra.';
+  @override
+  String get transcriptionPickModelAction => 'Laadi alla ja transkribeeri';
+  @override
+  String get transcriptionModelRecommended => 'Soovitatud';
+  @override
+  String get transcriptionExistingTitle =>
+      'Sellel salvestisel on juba kirjeldus';
+  @override
+  String get transcriptionExistingBody =>
+      'Kas asendada see transkriptsiooniga või lisada transkriptsioon selle '
+      'alla?';
+  @override
+  String get transcriptionAppend => 'Lisa alla';
+  @override
+  String get transcriptionReplace => 'Asenda';
+  @override
   String get settingsSectionSync => 'Sünkroonimine';
   @override
   String get syncWebDavTitle => 'WebDAV';

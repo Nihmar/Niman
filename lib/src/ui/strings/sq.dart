@@ -1280,6 +1280,117 @@ final class AlbanianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkriptimi';
+  @override
+  String get transcriptionModelTitle => 'Modeli';
+  @override
+  String get transcriptionModelNone => 'Asnjë';
+  @override
+  String get transcriptionLanguageTitle => 'Gjuha';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Gjuha që flitet në regjistrimet tuaja. Ta tregoni është më e saktë se '
+      'ta zbuloni automatikisht.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Si aplikacioni ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Zbuloje automatikisht';
+  @override
+  String get transcriptionModelsTitle => 'Modelet e transkriptimit';
+  @override
+  String transcriptionModelsUsed(String size) => '$size në përdorim';
+  @override
+  String get transcriptionModelsInstalled => 'Të shkarkuara';
+  @override
+  String get transcriptionModelsDownloading => 'Po shkarkohen';
+  @override
+  String get transcriptionModelsAvailable => 'Të disponueshme';
+  @override
+  String get transcriptionModelsFooter =>
+      'Modelet mbeten në hapësirën e aplikacionit në këtë pajisje. Nuk '
+      'kopjohen në bibliotekë dhe nuk sinkronizohen.';
+  @override
+  String get transcriptionModelDefault => 'Parazgjedhje';
+  @override
+  String get transcriptionModelSlow => 'I ngadaltë';
+  @override
+  String get transcriptionModelHintTiny => 'Më i shpejti, më pak i saktë';
+  @override
+  String get transcriptionModelHintBase =>
+      'Ekuilibër i mirë mes shpejtësisë dhe saktësisë';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Më i saktë, rreth 3× më i ngadaltë';
+  @override
+  String get transcriptionModelHintMedium =>
+      'Shumë i saktë, i ngadaltë në telefon';
+  @override
+  String get transcriptionModelHintLarge => 'Më i sakti, kërkon shumë memorie';
+  @override
+  String get transcriptionModelDownload => 'Shkarko';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Të fshihet modeli $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Lirohen $size. Modelin mund ta shkarkoni sërish më vonë.';
+  @override
+  String get transcriptionModelFailed =>
+      'Shkarkimi dështoi. Kontrolloni lidhjen dhe provoni sërish.';
+  @override
+  String get actionRetry => 'Provo sërish';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Lidhja u ndërpre, po provohet sërish…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Në pauzë te $progress';
+  @override
+  String get actionResume => 'Vazhdo';
+  @override
+  String get audioTranscribe => 'Transkripto';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Vetëm regjistrime WAV në këtë pajisje';
+  @override
+  String get transcriptionQueued => 'Në radhë';
+  @override
+  String get transcriptionPreparing => 'Po përgatitet audioja…';
+  @override
+  String transcriptionRunning(int percent) => 'Po transkriptohet… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Po shkarkohet $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Transkriptimi u shtua te përshkrimi';
+  @override
+  String get transcriptionNoSpeech => 'Nuk u njoh e folur në këtë regjistrim';
+  @override
+  String get transcriptionFailed => 'Transkriptimi dështoi';
+  @override
+  String get transcriptionPickModelTitle => 'Zgjidhni një model';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkriptimi bëhet në këtë pajisje dhe regjistrimi nuk dërgohet '
+      'kurrë. Modeli shkarkohet vetëm një herë.';
+  @override
+  String get transcriptionPickModelAction => 'Shkarko dhe transkripto';
+  @override
+  String get transcriptionModelRecommended => 'I rekomanduar';
+  @override
+  String get transcriptionExistingTitle =>
+      'Ky regjistrim ka tashmë një përshkrim';
+  @override
+  String get transcriptionExistingBody =>
+      'Ta zëvendësoni me transkriptimin apo ta shtoni transkriptimin poshtë?';
+  @override
+  String get transcriptionAppend => 'Shto poshtë';
+  @override
+  String get transcriptionReplace => 'Zëvendëso';
+  @override
   String get settingsSectionSync => 'Sinkronizimi';
   @override
   String get syncWebDavTitle => 'WebDAV';

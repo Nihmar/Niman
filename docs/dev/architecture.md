@@ -26,6 +26,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
 | `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
 | `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
+| `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](transcription.md) |
 | `ui/` | Shell, tree, settings screens, shared widgets |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
 

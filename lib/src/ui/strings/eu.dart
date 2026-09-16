@@ -1273,6 +1273,115 @@ final class BasqueStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transkripzioa';
+  @override
+  String get transcriptionModelTitle => 'Eredua';
+  @override
+  String get transcriptionModelNone => 'Bat ere ez';
+  @override
+  String get transcriptionLanguageTitle => 'Hizkuntza';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Grabazioetan hitz egiten den hizkuntza. Zehaztea automatikoki '
+      'hautematea baino zehatzagoa da.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Aplikazioaren berdina ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Hauteman automatikoki';
+  @override
+  String get transcriptionModelsTitle => 'Transkripzio-ereduak';
+  @override
+  String transcriptionModelsUsed(String size) => '$size erabilita';
+  @override
+  String get transcriptionModelsInstalled => 'Deskargatuak';
+  @override
+  String get transcriptionModelsDownloading => 'Deskargatzen';
+  @override
+  String get transcriptionModelsAvailable => 'Erabilgarri';
+  @override
+  String get transcriptionModelsFooter =>
+      'Ereduak gailu honetako aplikazioaren biltegian geratzen dira. Ez dira '
+      'liburutegira kopiatzen, ezta sinkronizatzen ere.';
+  @override
+  String get transcriptionModelDefault => 'Lehenetsia';
+  @override
+  String get transcriptionModelSlow => 'Motela';
+  @override
+  String get transcriptionModelHintTiny => 'Azkarrena, zehaztasun txikienekoa';
+  @override
+  String get transcriptionModelHintBase =>
+      'Abiaduraren eta zehaztasunaren arteko oreka ona';
+  @override
+  String get transcriptionModelHintSmall => 'Zehatzagoa, 3× inguru motelagoa';
+  @override
+  String get transcriptionModelHintMedium => 'Oso zehatza, motela telefonoan';
+  @override
+  String get transcriptionModelHintLarge => 'Zehatzena, memoria asko behar du';
+  @override
+  String get transcriptionModelDownload => 'Deskargatu';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      '$model eredua ezabatu?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      '$size askatuko dira. Eredua geroago berriro deskarga dezakezu.';
+  @override
+  String get transcriptionModelFailed =>
+      'Ezin izan da deskargatu. Egiaztatu konexioa eta saiatu berriro.';
+  @override
+  String get actionRetry => 'Saiatu berriro';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      'Konexioa galdu da, berriro saiatzen…';
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Pausatuta: $progress';
+  @override
+  String get actionResume => 'Jarraitu';
+  @override
+  String get audioTranscribe => 'Transkribatu';
+  @override
+  String get audioTranscribeUnsupported =>
+      'WAV grabazioak soilik gailu honetan';
+  @override
+  String get transcriptionQueued => 'Ilaran';
+  @override
+  String get transcriptionPreparing => 'Audioa prestatzen…';
+  @override
+  String transcriptionRunning(int percent) => 'Transkribatzen… % $percent';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      '$model deskargatzen · % $percent';
+  @override
+  String get transcriptionSaved => 'Transkripzioa deskribapenari gehitu zaio';
+  @override
+  String get transcriptionNoSpeech =>
+      'Ez da hizketarik hauteman grabazio honetan';
+  @override
+  String get transcriptionFailed => 'Ezin izan da transkribatu';
+  @override
+  String get transcriptionPickModelTitle => 'Aukeratu eredu bat';
+  @override
+  String get transcriptionPickModelBody =>
+      'Transkripzioa gailu honetan egiten da eta grabazioa ez da inoiz '
+      'igotzen. Eredua behin bakarrik deskargatzen da.';
+  @override
+  String get transcriptionPickModelAction => 'Deskargatu eta transkribatu';
+  @override
+  String get transcriptionModelRecommended => 'Gomendatua';
+  @override
+  String get transcriptionExistingTitle => 'Grabazio honek badu deskribapena';
+  @override
+  String get transcriptionExistingBody =>
+      'Transkripzioarekin ordeztu, edo transkripzioa azpian gehitu?';
+  @override
+  String get transcriptionAppend => 'Gehitu azpian';
+  @override
+  String get transcriptionReplace => 'Ordeztu';
+  @override
   String get settingsSectionSync => 'Sinkronizazioa';
   @override
   String get syncWebDavTitle => 'WebDAV';

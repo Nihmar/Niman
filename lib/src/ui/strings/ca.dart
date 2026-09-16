@@ -1292,6 +1292,117 @@ final class CatalanStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes min';
   @override
+  String get settingsSectionTranscription => 'Transcripció';
+  @override
+  String get transcriptionModelTitle => 'Model';
+  @override
+  String get transcriptionModelNone => 'Cap';
+  @override
+  String get transcriptionLanguageTitle => 'Idioma';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      "L'idioma que es parla als teus enregistraments. Indicar-lo és més "
+      'precís que detectar-lo.';
+  @override
+  String transcriptionLanguageApp(String language) => "Com l'app ($language)";
+  @override
+  String get transcriptionLanguageDetect => 'Detecta automàticament';
+  @override
+  String get transcriptionModelsTitle => 'Models de transcripció';
+  @override
+  String transcriptionModelsUsed(String size) => '$size en ús';
+  @override
+  String get transcriptionModelsInstalled => 'Baixats';
+  @override
+  String get transcriptionModelsDownloading => "S'estan baixant";
+  @override
+  String get transcriptionModelsAvailable => 'Disponibles';
+  @override
+  String get transcriptionModelsFooter =>
+      "Els models es queden a l'emmagatzematge de l'app en aquest dispositiu. "
+      'No es copien a la biblioteca ni es sincronitzen.';
+  @override
+  String get transcriptionModelDefault => 'Per defecte';
+  @override
+  String get transcriptionModelSlow => 'Lent';
+  @override
+  String get transcriptionModelHintTiny => 'El més ràpid, el menys precís';
+  @override
+  String get transcriptionModelHintBase =>
+      'Bon equilibri entre velocitat i precisió';
+  @override
+  String get transcriptionModelHintSmall => 'Més precís, unes 3× més lent';
+  @override
+  String get transcriptionModelHintMedium => 'Molt precís, lent en un telèfon';
+  @override
+  String get transcriptionModelHintLarge =>
+      'El més precís, necessita molta memòria';
+  @override
+  String get transcriptionModelDownload => 'Baixa';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Vols suprimir el model $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Allibera $size. Pots tornar a baixar el model més endavant.';
+  @override
+  String get transcriptionModelFailed =>
+      "No s'ha pogut baixar. Comprova la connexió i torna-ho a provar.";
+  @override
+  String get actionRetry => 'Torna-ho a provar';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      "S'ha perdut la connexió, s'està tornant a provar…";
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'En pausa a $progress';
+  @override
+  String get actionResume => 'Reprèn';
+  @override
+  String get audioTranscribe => 'Transcriu';
+  @override
+  String get audioTranscribeUnsupported =>
+      'Només enregistraments WAV en aquest dispositiu';
+  @override
+  String get transcriptionQueued => 'A la cua';
+  @override
+  String get transcriptionPreparing => "S'està preparant l'àudio…";
+  @override
+  String transcriptionRunning(int percent) => "S'està transcrivint… $percent %";
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      "S'està baixant $model · $percent %";
+  @override
+  String get transcriptionSaved => 'Transcripció afegida a la descripció';
+  @override
+  String get transcriptionNoSpeech =>
+      "No s'ha reconegut cap veu en aquest enregistrament";
+  @override
+  String get transcriptionFailed => "No s'ha pogut transcriure";
+  @override
+  String get transcriptionPickModelTitle => 'Tria un model';
+  @override
+  String get transcriptionPickModelBody =>
+      "La transcripció es fa en aquest dispositiu i l'enregistrament no "
+      "s'envia mai. El model es baixa una sola vegada.";
+  @override
+  String get transcriptionPickModelAction => 'Baixa i transcriu';
+  @override
+  String get transcriptionModelRecommended => 'Recomanat';
+  @override
+  String get transcriptionExistingTitle =>
+      'Aquest enregistrament ja té una descripció';
+  @override
+  String get transcriptionExistingBody =>
+      'Vols substituir-la per la transcripció o afegir la transcripció a '
+      'sota?';
+  @override
+  String get transcriptionAppend => 'Afegeix a sota';
+  @override
+  String get transcriptionReplace => 'Substitueix';
+  @override
   String get settingsSectionSync => 'Sincronització';
   @override
   String get syncWebDavTitle => 'WebDAV';

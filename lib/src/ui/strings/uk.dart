@@ -1260,6 +1260,114 @@ final class UkrainianStrings extends Strings {
   @override
   String historyIntervalValue(int minutes) => '$minutes хв';
   @override
+  String get settingsSectionTranscription => 'Транскрипція';
+  @override
+  String get transcriptionModelTitle => 'Модель';
+  @override
+  String get transcriptionModelNone => 'Немає';
+  @override
+  String get transcriptionLanguageTitle => 'Мова';
+  @override
+  String get transcriptionLanguageSubtitle =>
+      'Мова, якою говорять у ваших записах. Вказати її точніше, ніж визначати '
+      'автоматично.';
+  @override
+  String transcriptionLanguageApp(String language) =>
+      'Як у застосунку ($language)';
+  @override
+  String get transcriptionLanguageDetect => 'Визначати автоматично';
+  @override
+  String get transcriptionModelsTitle => 'Моделі транскрипції';
+  @override
+  String transcriptionModelsUsed(String size) => 'Зайнято $size';
+  @override
+  String get transcriptionModelsInstalled => 'Завантажені';
+  @override
+  String get transcriptionModelsDownloading => 'Завантажуються';
+  @override
+  String get transcriptionModelsAvailable => 'Доступні';
+  @override
+  String get transcriptionModelsFooter =>
+      'Моделі залишаються в сховищі застосунку на цьому пристрої. Вони не '
+      'копіюються до бібліотеки і не синхронізуються.';
+  @override
+  String get transcriptionModelDefault => 'Типова';
+  @override
+  String get transcriptionModelSlow => 'Повільна';
+  @override
+  String get transcriptionModelHintTiny => 'Найшвидша, найменш точна';
+  @override
+  String get transcriptionModelHintBase => 'Добрий баланс швидкості й точності';
+  @override
+  String get transcriptionModelHintSmall =>
+      'Точніша, приблизно в 3× повільніша';
+  @override
+  String get transcriptionModelHintMedium => 'Дуже точна, повільна на телефоні';
+  @override
+  String get transcriptionModelHintLarge =>
+      "Найточніша, потребує багато пам'яті";
+  @override
+  String get transcriptionModelDownload => 'Завантажити';
+  @override
+  String transcriptionModelDeleteTitle(String model) =>
+      'Видалити модель $model?';
+  @override
+  String transcriptionModelDeleteBody(String size) =>
+      'Звільниться $size. Ви зможете завантажити модель знову пізніше.';
+  @override
+  String get transcriptionModelFailed =>
+      "Не вдалося завантажити. Перевірте з'єднання і спробуйте ще раз.";
+  @override
+  String get actionRetry => 'Спробувати ще раз';
+  @override
+  String get decimalSeparator => ',';
+  @override
+  String get transcriptionModelRetrying =>
+      "З'єднання втрачено, повторна спроба…";
+  @override
+  String transcriptionModelInterrupted(String progress) =>
+      'Призупинено на $progress';
+  @override
+  String get actionResume => 'Продовжити';
+  @override
+  String get audioTranscribe => 'Транскрибувати';
+  @override
+  String get audioTranscribeUnsupported => 'На цьому пристрої лише записи WAV';
+  @override
+  String get transcriptionQueued => 'У черзі';
+  @override
+  String get transcriptionPreparing => 'Підготовка аудіо…';
+  @override
+  String transcriptionRunning(int percent) => 'Транскрибування… $percent%';
+  @override
+  String transcriptionWaitingForModel(String model, int percent) =>
+      'Завантаження $model · $percent%';
+  @override
+  String get transcriptionSaved => 'Транскрипцію додано до опису';
+  @override
+  String get transcriptionNoSpeech => 'У цьому записі мовлення не розпізнано';
+  @override
+  String get transcriptionFailed => 'Не вдалося транскрибувати';
+  @override
+  String get transcriptionPickModelTitle => 'Виберіть модель';
+  @override
+  String get transcriptionPickModelBody =>
+      'Транскрибування відбувається на цьому пристрої, запис ніколи не '
+      'надсилається. Модель завантажується лише один раз.';
+  @override
+  String get transcriptionPickModelAction => 'Завантажити й транскрибувати';
+  @override
+  String get transcriptionModelRecommended => 'Рекомендовано';
+  @override
+  String get transcriptionExistingTitle => 'Цей запис уже має опис';
+  @override
+  String get transcriptionExistingBody =>
+      'Замінити його транскрипцією чи додати транскрипцію під ним?';
+  @override
+  String get transcriptionAppend => 'Додати нижче';
+  @override
+  String get transcriptionReplace => 'Замінити';
+  @override
   String get settingsSectionSync => 'Синхронізація';
   @override
   String get syncWebDavTitle => 'WebDAV';
