@@ -55,11 +55,11 @@ final class TranscriptionJob {
   /// The note the clip belongs to (absolute path).
   final String notePath;
 
-  /// The clip's embed target, as written in the note.
-  final String clipTarget;
+  /// The clip's embed target, as written in the note; follows a rename.
+  String clipTarget;
 
-  /// The clip's absolute file path.
-  final String audioPath;
+  /// The clip's absolute file path; follows a rename.
+  String audioPath;
 
   /// The model to transcribe with.
   final TranscriptionModel model;

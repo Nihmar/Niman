@@ -293,6 +293,13 @@ final class AudioTranscriptionFlow {
     );
   }
 
+  /// Follows a clip renamed from [from] to [to], so a waiting or running
+  /// transcription still lands on it.
+  void clipRenamed({required String from, required String to}) =>
+      queue.retarget(notePath, from: from, to: to, audioPath: absoluteOf(to));
+
+  /// Drops the transcription of a clip removed from the note.
+  void clipDeleted(String target) => queue.cancelClip(notePath, target);
 }
 
 const _log = AppLogger(name: 'transcription');
