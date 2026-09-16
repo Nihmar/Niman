@@ -25,10 +25,38 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 ./scripts/niman.sh test      # flutter test (unit + widget)
 ./scripts/niman.sh check     # analyze + test; run before every commit
 ./scripts/niman.sh apk       # Android release APK
+./scripts/niman.sh apk beta  # Android testing build (issue #106)
 ./scripts/niman.sh linux     # Linux release bundle
 scripts\niman.bat check      # Windows equivalent
 scripts\niman.bat windows    # Windows build (on a Windows host)
 ```
+
+## Testing build (Android)
+
+`./scripts/niman.sh apk beta` builds the testing build (issue #106):
+the release pipeline plus the `beta` product flavor, so the official
+app and the testing install side by side on the same device.
+
+- Application ID `dev.niman.niman.beta` (the flavor's
+  `applicationIdSuffix` in `android/app/build.gradle.kts`), launcher
+  label "Niman (Testing)" (per-flavor manifest
+  `android/app/src/beta/AndroidManifest.xml`).
+- Release-equivalent: same build type, signing, SDK, R8 and
+  desugaring — only the ID and the label differ.
+- The flavor passes `--dart-define=APP_CHANNEL=testing`; the Dart side
+  (`lib/src/core/app_channel.dart`) hides the Updates settings section
+  and never starts the update scheduler, whatever the stored
+  auto-update toggle says. A build that forgets the define reads as
+  `release` and keeps full update behavior.
+- The two installs are fully independent by design: separate storage,
+  separate SQLite indexes, separate `MANAGE_EXTERNAL_STORAGE` grant
+  (the permission is per application ID, so grant it to the testing
+  install too).
+- AGP forbids flavor names starting with `test` (reserved for test
+  variants), hence `beta`.
+
+CI (`.github/workflows/release.yml`) publishes the testing APK from
+every release tag as `niman-<version>-android-testing.apk`.
 
 ## Checks before every commit
 

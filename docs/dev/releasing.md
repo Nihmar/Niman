@@ -22,7 +22,7 @@ fix, tag again.
 
 | Platform | Files |
 |----------|-------|
-| Android | `.apk` |
+| Android | `.apk`, testing `.apk` (issue #106) |
 | Linux | `.tar.gz`, `.AppImage`, `.pkg.tar.zst` (Arch) |
 | Windows | Inno Setup installer (`.exe`), portable `.zip` |
 
@@ -33,6 +33,17 @@ See `packaging/` for AppImage, Arch pkg, and Inno Setup details.
 - **Android:** debug-signed until release keys are added as Actions
   secrets (the workflow picks them up automatically).
 - **Linux / Windows:** unsigned, as planned for v1.
+
+## Testing build (Android)
+
+Every Android build is also produced as a testing build: the release
+pipeline plus the `beta` product flavor, whose separate application ID
+(`dev.niman.niman.beta`) and launcher label ("Niman (Testing)") let it
+install side by side with the official app. The testing build is
+release-equivalent (same build type, signing, SDK, optimizations); its
+update management is disabled in full — no Updates settings section,
+no scheduler, no polling — since it is sideloaded and never on the
+release channel. See "Testing build" in `docs/dev/building.md`.
 
 ## After each commit (local rebuild)
 

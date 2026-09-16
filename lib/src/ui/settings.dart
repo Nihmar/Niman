@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/core/logging.dart';
@@ -1287,27 +1288,32 @@ final class _SettingsBodyState extends State<SettingsBody> {
           onChanged: _toggleReminderTokens,
         ),
 
-        SettingsSection(AppStrings.settingsSectionUpdates),
-        SwitchListTile(
-          key: const Key('auto-update-setting'),
-          title: Text(AppStrings.autoUpdateTitle),
-          subtitle: Text(AppStrings.autoUpdateSubtitle),
-          value: _autoUpdate ?? false,
-          onChanged: _toggleAutoUpdate,
-        ),
-        ListTile(
-          key: const Key('check-updates-setting'),
-          leading: _checkingUpdates
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.system_update),
-          title: Text(AppStrings.checkForUpdatesTitle),
-          subtitle: _updateStatus == null ? null : Text(_updateStatus!),
-          onTap: _checkUpdatesManually,
-        ),
+        // Update management exists only on the release channel
+        // (issue #106): testing builds check no release channel, so the
+        // whole section is out, not just its toggles.
+        if (!isTestingBuild) ...[
+          SettingsSection(AppStrings.settingsSectionUpdates),
+          SwitchListTile(
+            key: const Key('auto-update-setting'),
+            title: Text(AppStrings.autoUpdateTitle),
+            subtitle: Text(AppStrings.autoUpdateSubtitle),
+            value: _autoUpdate ?? false,
+            onChanged: _toggleAutoUpdate,
+          ),
+          ListTile(
+            key: const Key('check-updates-setting'),
+            leading: _checkingUpdates
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.system_update),
+            title: Text(AppStrings.checkForUpdatesTitle),
+            subtitle: _updateStatus == null ? null : Text(_updateStatus!),
+            onTap: _checkUpdatesManually,
+          ),
+        ],
 
         SettingsSection(AppStrings.settingsSectionDiagnostics),
         SwitchListTile(
