@@ -56,6 +56,8 @@ final class DiffView extends StatefulWidget {
     this.compute = computeDiff,
     this.padding = EdgeInsets.zero,
     this.sideBySide,
+    this.hunkAction,
+    this.onSummary,
     super.key,
   });
 
@@ -76,6 +78,17 @@ final class DiffView extends StatefulWidget {
 
   /// Columns (true) or inline (false); null picks by the width given.
   final bool? sideBySide;
+
+  /// Built at the trailing edge of each hunk's header, given the hunk's
+  /// position. Null leaves the headers bare — the read-only diff.
+  ///
+  /// The view stays presentation only: what the control does, and what it
+  /// means, belong to the caller.
+  final Widget Function(BuildContext context, int hunk)? hunkAction;
+
+  /// Called with each diff once it is computed, so a caller that acts on
+  /// the hunks reads the same ones the view is showing.
+  final void Function(DiffSummary summary)? onSummary;
 
   @override
   State<DiffView> createState() => _DiffViewState();
@@ -124,6 +137,7 @@ final class _DiffViewState extends State<DiffView> {
         _summary = summary;
         _error = null;
       });
+      widget.onSummary?.call(summary);
     } on Object catch (e) {
       _log.error('diff failed: $e');
       if (mounted) setState(() => _error = e);
@@ -200,7 +214,7 @@ final class _DiffViewState extends State<DiffView> {
     for (var h = 0; h < summary.hunks.length; h++) {
       final (start, end) = summary.ranges[h];
       gap(h, previousEnd, start);
-      rows.add(_HeaderRow(summary.hunks[h]));
+      rows.add(_HeaderRow(summary.hunks[h], h, widget.hunkAction));
       emit(summary.hunks[h].lines);
       previousEnd = end;
     }
@@ -275,9 +289,15 @@ sealed class _Row {
 }
 
 final class _HeaderRow extends _Row {
-  const new(this.hunk);
+  const new(this.hunk, this.index, this.action);
 
   final DiffHunk hunk;
+
+  /// The hunk's position, handed to [action].
+  final int index;
+
+  /// Builds the control at the header's trailing edge, if any.
+  final Widget Function(BuildContext context, int hunk)? action;
 
   @override
   Widget build(BuildContext context) {
@@ -286,16 +306,25 @@ final class _HeaderRow extends _Row {
     // (a hunk that only removes).
     final start = hunk.newStart == 0 ? hunk.oldStart : hunk.newStart;
     final end = hunk.newStart == 0 ? hunk.oldEnd : hunk.newEnd;
+    final label = Text(
+      start == end
+          ? AppStrings.diffLineSingle(start)
+          : AppStrings.diffLineRange(start, end),
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+    final control = action?.call(context, index);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-      child: Text(
-        start == end
-            ? AppStrings.diffLineSingle(start)
-            : AppStrings.diffLineRange(start, end),
-        style: theme.textTheme.labelMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
+      child: control == null
+          ? label
+          : Row(
+              children: [
+                Expanded(child: label),
+                control,
+              ],
+            ),
     );
   }
 }

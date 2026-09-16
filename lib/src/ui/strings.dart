@@ -777,6 +777,12 @@ final class AppStrings {
       _s.diffLineRange(start, end);
   static String diffLineSingle(int line) => _s.diffLineSingle(line);
   static String diffUnchanged(int count) => _s.diffUnchanged(count);
+  static String get historyTakeHunk => _s.historyTakeHunk;
+  static String historyRestoreSelectedAction(int count) =>
+      _s.historyRestoreSelectedAction(count);
+  static String get historyRestoreSelectedConfirmBody =>
+      _s.historyRestoreSelectedConfirmBody;
+  static String get historyNoteChangedReloaded => _s.historyNoteChangedReloaded;
   static String get historyVersionsTitle => _s.historyVersionsTitle;
   static String get historyVersionsSubtitle => _s.historyVersionsSubtitle;
   static String historyVersionsValue(int count) =>
