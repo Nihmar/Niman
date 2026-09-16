@@ -111,7 +111,19 @@ final class NoteWriter {
     final ({bool created, SnapshotOutcome? snapshot, String? snapshotError})
     result;
     try {
-      result = await _replaceOffIsolate(root, path, tempAbs, request);
+      // No snapshot to take means no synchronous work to move anywhere:
+      // what is left is a stat, a mkdir and a rename, all async I/O that
+      // leaves the event loop free. The isolate bought nothing on that
+      // path and was the whole of issue #103 — a rename inside
+      // `Isolate.run` stopped returning on Windows, and stayed stuck even
+      // after the file it was renaming had been moved away underneath it.
+      result = request == null
+          ? (
+              created: await swapFileIn(abs, tempAbs),
+              snapshot: null,
+              snapshotError: null,
+            )
+          : await _replaceOffIsolate(root, path, tempAbs, request);
     } catch (e) {
       _log.error('replace failed: "$path": $e');
       rethrow;
@@ -252,11 +264,46 @@ typedef NoteWriteResult = ({
 Future<NoteWriteResult> writeNoteOffIsolate(String abs, String content) =>
     Isolate.run(() => writeNoteFile(abs, content));
 
+/// Renames the finished file [tempAbs] over [abs], creating missing
+/// folders. Returns whether [abs] is a new file. The temp file is gone
+/// afterwards, also when the rename fails.
+///
+/// The attachment half of [replaceFileFrom], on the calling isolate: an
+/// attachment keeps no history version, so nothing here is synchronous
+/// work that has to be moved off the event loop — a stat, a mkdir and a
+/// rename, each of them async I/O the loop does not wait on.
+///
+/// It ran on a short-lived isolate until issue #103, where the rename
+/// inside `Isolate.run` stopped returning on Windows every third
+/// attachment of a sync, leaking the isolate with it. The giveaway was
+/// that it stayed stuck for as long as the app lived, including after
+/// another isolate had renamed the temp away — a rename whose source no
+/// longer exists cannot block on the filesystem, so the isolate was
+/// never waiting on the file.
+Future<bool> swapFileIn(String abs, String tempAbs) async {
+  final before = await FileStat.stat(abs);
+  final created = before.type == FileSystemEntityType.notFound;
+  try {
+    if (created) await Directory(p.dirname(abs)).create(recursive: true);
+    await File(tempAbs).rename(abs);
+  } on Object {
+    try {
+      await File(tempAbs).delete();
+    } on FileSystemException {
+      // Already gone — the rename may have got half-way. Nothing to tidy.
+    }
+    rethrow;
+  }
+  return created;
+}
+
 /// Renames the finished file [tempAbs] over [abs] (creating missing
 /// folders), after keeping the replaced content as a history version when
 /// [snapshot] says so. The temp file is deleted when the rename fails.
 ///
-/// Top-level so [Isolate.run] can take it.
+/// Top-level so [Isolate.run] can take it. The isolate is here for
+/// [snapshotBeforeWrite], which reads and copies the note being replaced;
+/// an attachment has no snapshot and takes [swapFileIn] instead.
 Future<({bool created, SnapshotOutcome? snapshot, String? snapshotError})>
 replaceFileFrom(
   String abs,
