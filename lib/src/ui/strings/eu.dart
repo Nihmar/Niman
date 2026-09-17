@@ -120,6 +120,27 @@ final class BasqueStrings extends Strings {
   String get settingsSectionShortcuts => 'Teklategia';
   @override
   String get keyboardShortcutsTitle => 'Teklatu-lasterdarrak';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'soilik honi balio du';
+  @override
+  String get settingsGroupMaintenance => 'Mantentze';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Biltegiak eta bideak';
+  @override
+  String get settingsAreaTrashHistory => 'Zakarrontzia eta kronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika eta info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Konektatutako teklatu fisiko bat behar du';
   @override
   String get settingsSectionUpdates => 'Eguneratzeak';
   @override

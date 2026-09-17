@@ -127,6 +127,27 @@ final class GreekStrings extends Strings {
   String get settingsSectionShortcuts => 'Πληκτρολόγιο';
   @override
   String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Βιβλιοθήκη $name';
+  @override
+  String get settingsGroupLibraryHint => 'ισχύει μόνο για αυτή τη βιβλιοθήκη';
+  @override
+  String get settingsGroupMaintenance => 'Συντήρηση';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Φάκελοι και διαδρομές';
+  @override
+  String get settingsAreaTrashHistory => 'Σκουπιδιέρα και χρονολόγιο';
+  @override
+  String get settingsAreaDiagnostics => 'Διάγνωση και πληροφορίες';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Χρειέται συνδεδεμένο φυσικό πληκτρολόγιο';
   @override
   String get settingsSectionUpdates => 'Ενημερώσεις';
   @override

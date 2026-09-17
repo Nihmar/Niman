@@ -113,6 +113,26 @@ final class ChineseStrings extends Strings {
   String get settingsSectionShortcuts => '键盘';
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => '文库 $name';
+  @override
+  String get settingsGroupLibraryHint => '仅适用于此文库';
+  @override
+  String get settingsGroupMaintenance => '维护';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => '文件夹和路径';
+  @override
+  String get settingsAreaTrashHistory => '回收站和版本';
+  @override
+  String get settingsAreaDiagnostics => '诊断和信息';
+  @override
+  String get settingsAreaKeyboardDisabled => '需要连接的物理键盘';
   @override
   String get settingsSectionUpdates => '更新';
   @override

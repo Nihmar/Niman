@@ -128,6 +128,27 @@ final class RomanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatură';
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotecă $name';
+  @override
+  String get settingsGroupLibraryHint => 'se aplică numai acestei biblioteci';
+  @override
+  String get settingsGroupMaintenance => 'Mentenanță';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Dosare și căi';
+  @override
+  String get settingsAreaTrashHistory => 'Coș și cronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostic și info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesită o tastatură fizică conectată';
   @override
   String get settingsSectionUpdates => 'Actualizări';
   @override

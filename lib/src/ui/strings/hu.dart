@@ -122,6 +122,27 @@ final class HungarianStrings extends Strings {
   String get settingsSectionShortcuts => 'Billentyűzet';
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Könyvtár $name';
+  @override
+  String get settingsGroupLibraryHint => 'csak ehhez a könyvtárhoz van';
+  @override
+  String get settingsGroupMaintenance => 'Karbantartás';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappák és útvonalak';
+  @override
+  String get settingsAreaTrashHistory => 'Kuka és kronológia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnosztika és infó';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Csatlakoztatott fizikai billentyűzet szükséges';
   @override
   String get settingsSectionUpdates => 'Frissítések';
   @override

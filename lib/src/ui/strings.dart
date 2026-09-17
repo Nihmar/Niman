@@ -144,6 +144,21 @@ final class AppStrings {
   static String get settingsSectionReminders => _s.settingsSectionReminders;
   static String get settingsSectionShortcuts => _s.settingsSectionShortcuts;
   static String get keyboardShortcutsTitle => _s.keyboardShortcutsTitle;
+
+  // Settings home (issue #104): the groups the areas sit under.
+  static String get settingsGroupApp => _s.settingsGroupApp;
+  static String settingsGroupLibrary(String name) =>
+      _s.settingsGroupLibrary(name);
+  static String get settingsGroupLibraryHint => _s.settingsGroupLibraryHint;
+  static String get settingsGroupMaintenance => _s.settingsGroupMaintenance;
+
+  // Settings home rows.
+  static String get settingsAreaFolders => _s.settingsAreaFolders;
+  static String get settingsAreaTrashHistory => _s.settingsAreaTrashHistory;
+  static String get settingsAreaDiagnostics => _s.settingsAreaDiagnostics;
+  static String get settingsAreaKeyboardDisabled =>
+      _s.settingsAreaKeyboardDisabled;
+
   static String get settingsSectionUpdates => _s.settingsSectionUpdates;
   static String get autoUpdateTitle => _s.autoUpdateTitle;
   static String get autoUpdateSubtitle => _s.autoUpdateSubtitle;

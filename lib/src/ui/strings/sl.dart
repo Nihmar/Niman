@@ -129,6 +129,27 @@ final class SlovenianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tipkovnica';
   @override
   String get keyboardShortcutsTitle => 'Bližnjice';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knjižnica $name';
+  @override
+  String get settingsGroupLibraryHint => 'veli samo za to knjižnico';
+  @override
+  String get settingsGroupMaintenance => 'Vzdrževanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mape in poti';
+  @override
+  String get settingsAreaTrashHistory => 'Koš in kronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika in info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je priključena fizična tipkovnica';
   @override
   String get settingsSectionUpdates => 'Posodobitve';
   @override

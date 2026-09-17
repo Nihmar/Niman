@@ -121,6 +121,26 @@ final class AlbanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'vlen vetëm për këtë bibliotekë';
+  @override
+  String get settingsGroupMaintenance => 'Mirëmbajtja';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Tresët dhe rrugët';
+  @override
+  String get settingsAreaTrashHistory => 'Koshi e kronologjia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikë e info';
+  @override
+  String get settingsAreaKeyboardDisabled => 'Kërkon tastierë fizike të lidhur';
   @override
   String get settingsSectionUpdates => 'Përditësime';
   @override

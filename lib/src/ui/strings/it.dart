@@ -125,6 +125,27 @@ final class ItalianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastiera';
   @override
   String get keyboardShortcutsTitle => 'Scorciatoie da tastiera';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Libreria $name';
+  @override
+  String get settingsGroupLibraryHint => 'vale solo per questa libreria';
+  @override
+  String get settingsGroupMaintenance => 'Manutenzione';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Cartelle e percorsi';
+  @override
+  String get settingsAreaTrashHistory => 'Cestino e cronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostica e info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Serve una tastiera fisica collegata';
   @override
   String get settingsSectionUpdates => 'Aggiornamenti';
   @override

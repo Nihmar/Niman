@@ -123,6 +123,27 @@ final class NorwegianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturforkortelser';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gjelder bare for dette biblioteket';
+  @override
+  String get settingsGroupMaintenance => 'Vedlikehold';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapper og stier';
+  @override
+  String get settingsAreaTrashHistory => 'Papirkorg og historikk';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikk og info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Krever et tilkoblet fysisk tastatur';
   @override
   String get settingsSectionUpdates => 'Oppdateringer';
   @override

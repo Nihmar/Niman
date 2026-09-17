@@ -124,6 +124,27 @@ final class DutchStrings extends Strings {
   String get settingsSectionShortcuts => 'Toetsenbord';
   @override
   String get keyboardShortcutsTitle => 'Sneltoetsen';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotheek $name';
+  @override
+  String get settingsGroupLibraryHint => 'geldt alleen voor deze bibliotheek';
+  @override
+  String get settingsGroupMaintenance => 'Onderhoud';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappen en paden';
+  @override
+  String get settingsAreaTrashHistory => 'Prullenbak en chronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostiek en info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vereist een aangesloten fysiek toetsenbord';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override

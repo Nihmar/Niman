@@ -126,6 +126,27 @@ final class MacedonianStrings extends Strings {
   String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Тастатурски прецици';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за оваа библиотека';
+  @override
+  String get settingsGroupMaintenance => 'Одржување';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки и патеши';
+  @override
+  String get settingsAreaTrashHistory => 'Корпа и хронологија';
+  @override
+  String get settingsAreaDiagnostics => 'Дијагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потребна е поврзана физичка тастатура';
   @override
   String get settingsSectionUpdates => 'Ажурирања';
   @override

@@ -128,6 +128,27 @@ final class BulgarianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавиатура';
   @override
   String get keyboardShortcutsTitle => 'Клавишни комбинации';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за тази библиотека';
+  @override
+  String get settingsGroupMaintenance => 'Поддръжка';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки и пътища';
+  @override
+  String get settingsAreaTrashHistory => 'Кош и история';
+  @override
+  String get settingsAreaDiagnostics => 'Диагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Нужна е свързана физическа клавиатура';
   @override
   String get settingsSectionUpdates => 'Актуализации';
   @override

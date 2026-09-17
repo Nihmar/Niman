@@ -127,6 +127,27 @@ final class BosnianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Prečice na tastaturi';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'važi samo za ovu biblioteku';
+  @override
+  String get settingsGroupMaintenance => 'Održavanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mape i putanje';
+  @override
+  String get settingsAreaTrashHistory => 'Korpa i hronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Dijagnostika i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je povezana fizička tastatura';
   @override
   String get settingsSectionUpdates => 'Ažuriranja';
   @override

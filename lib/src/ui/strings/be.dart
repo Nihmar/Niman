@@ -126,6 +126,28 @@ final class BelarusianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавіятура';
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Бібліятэка $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      'дзейнічае толькі для гэтай бібліятэкі';
+  @override
+  String get settingsGroupMaintenance => 'Тэхнаабслугоўванне';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папкі і шляхі';
+  @override
+  String get settingsAreaTrashHistory => 'Кошык і гісторыя';
+  @override
+  String get settingsAreaDiagnostics => 'Дыягностыка і інфармацыя';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Патрэбная падлучаная фізічная клавіятура';
   @override
   String get settingsSectionUpdates => 'Абнаўленні';
   @override

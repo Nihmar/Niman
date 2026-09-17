@@ -128,6 +128,27 @@ final class LithuanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Klaviatūra';
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'taiko tik šiai bibliotekai';
+  @override
+  String get settingsGroupMaintenance => 'Priežiūra';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Katalogai ir keliai';
+  @override
+  String get settingsAreaTrashHistory => 'Šiukšlinė ir istorija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika ir info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Reikia prijungtos fizinės klaviatūros';
   @override
   String get settingsSectionUpdates => 'Atnaujinimai';
   @override

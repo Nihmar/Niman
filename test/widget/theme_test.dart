@@ -43,6 +43,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens [area]'s screen from the settings home (issue #104): the
+  /// rows the tests drive live in the pushed area screen.
+  Future<void> openArea(WidgetTester tester, Key area) async {
+    await tester.tap(find.byKey(area));
+    await tester.pumpAndSettle();
+  }
+
   /// Opens [row]'s dialog and takes the option for [value].
   Future<void> choose(
     WidgetTester tester, {
@@ -75,6 +82,7 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
 
       expect(find.byKey(const Key('theme-brightness-setting')), findsOneWidget);
       expect(find.byKey(const Key('theme-palette-setting')), findsOneWidget);
@@ -88,6 +96,7 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
       await choose(
         tester,
         row: const Key('theme-palette-setting'),
@@ -106,6 +115,7 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
       await choose(
         tester,
         row: const Key('theme-brightness-setting'),
@@ -120,6 +130,7 @@ void main() {
 
     testWidgets('every palette the app ships is offered', (tester) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
       await tester.tap(find.byKey(const Key('theme-palette-setting')));
       await tester.pumpAndSettle();
 

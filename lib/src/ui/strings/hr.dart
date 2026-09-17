@@ -127,6 +127,27 @@ final class CroatianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tipkovnica';
   @override
   String get keyboardShortcutsTitle => 'Tipkovnički prečaci';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'važi samo za ovu biblioteku';
+  @override
+  String get settingsGroupMaintenance => 'Održavanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Direktorijs i putanje';
+  @override
+  String get settingsAreaTrashHistory => 'Korpa i hronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Dijagnostika i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je povezana fizička tipkovnica';
   @override
   String get settingsSectionUpdates => 'Ažuriranja';
   @override

@@ -303,20 +303,12 @@ void main() {
     await settle(tester);
 
     // Choose "Scratch.md" in Settings: the tile shows it after the pick.
+    // The row sits in the pushed Folders area (issue #104).
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('quick-note-setting')),
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Not set yet'), findsOne);
-    // Scrolled to a known place and tapped by key rather than by its
-    // subtitle: the rows above it come and go with the width (the
-    // preview layout ones are hidden on a phone), so any fixed nudge is
-    // wrong on some layout.
-    await tester.ensureVisible(find.byKey(const Key('quick-note-setting')));
+    await tester.tap(find.byKey(const Key('settings-area-folders')));
     await settle(tester);
+    expect(find.text('Not set yet'), findsOne);
     await tester.tap(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
     await tester.tap(
@@ -329,6 +321,11 @@ void main() {
 
     expect(find.text('Scratch.md'), findsOne);
     expect(await controller.ops!.quickNotePath, 'Scratch.md');
+
+    // Back on the settings home: the area screen covered the bottom
+    // nav, and the tile lives there.
+    await tester.tap(find.backButton());
+    await settle(tester);
 
     // The bottom-nav tile now opens the chosen note directly (no detour
     // through the tab body).

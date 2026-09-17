@@ -227,7 +227,8 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
-    // Switch the trash toggle off in settings (the rail tab, inline).
+    // Switch the trash toggle off in settings (the rail tab). The
+    // toggle sits in the pushed Trash area (issue #104).
     await tester.tap(
       find.descendant(
         of: find.byKey(const Key('shell-rail')),
@@ -235,14 +236,15 @@ void main() {
       ),
     );
     await settle(tester);
-    // The settings list is grouped and lazy, and the trash toggle sits
-    // under Library, so it may be below the fold.
-    final trashRow = find.byKey(const Key('trash-setting'));
-    await tester.scrollUntilVisible(trashRow, 200);
+    await tester.tap(find.byKey(const Key('settings-area-trash-history')));
     await settle(tester);
+    final trashRow = find.byKey(const Key('trash-setting'));
     await tester.tap(
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
+    await settle(tester);
+    // Back on the settings home: the area screen covered the rail.
+    await tester.tap(find.backButton());
     await settle(tester);
     await tester.tap(
       find.descendant(

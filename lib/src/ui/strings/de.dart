@@ -125,6 +125,27 @@ final class GermanStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturkürzel';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliothek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gilt nur für diese Bibliothek';
+  @override
+  String get settingsGroupMaintenance => 'Wartung';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Ordner und Pfade';
+  @override
+  String get settingsAreaTrashHistory => 'Papierkorb und Verlauf';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnose und Info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Benötigt eine angeschlossene physische Tastatur';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override

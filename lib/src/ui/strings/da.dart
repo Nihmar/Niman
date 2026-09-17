@@ -124,6 +124,27 @@ final class DanishStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Genveje';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gælder kun for dette bibliotek';
+  @override
+  String get settingsGroupMaintenance => 'Vedligeholdelse';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapper og stier';
+  @override
+  String get settingsAreaTrashHistory => 'Affald og historik';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostik og info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Kræver et tilsluttet fysisk tastatur';
   @override
   String get settingsSectionUpdates => 'Opdateringer';
   @override
