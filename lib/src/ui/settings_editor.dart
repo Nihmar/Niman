@@ -18,10 +18,18 @@ import 'package:niman/src/ui/toolbar_settings.dart';
 /// behaviour — line numbers, links, text size, indentation, spelling.
 final class SettingsEditorScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, required this.spellCheck, super.key});
+  const new({
+    required this.controller,
+    required this.spellCheck,
+    this.highlight,
+    super.key,
+  });
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
   final EditorSpellCheck? spellCheck;
@@ -311,65 +319,78 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     return SettingsAreaShell(
       title: AppStrings.settingsSectionEditor,
       controller: widget.controller,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           // The toolbar is an editor setting, not an appearance one: it
           // decides what the editor can do, not how the app looks.
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('toolbar-setting'),
-            title: AppStrings.toolbarSettingsTitle,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) =>
-                    ToolbarSettingsScreen(controller: widget.controller),
+            child: SettingsValueRow(
+              title: AppStrings.toolbarSettingsTitle,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) =>
+                      ToolbarSettingsScreen(controller: widget.controller),
+                ),
               ),
             ),
           ),
           // Which editors the library offers: both, or one alone. The
           // last one on cannot be switched off (its switch disables
           // itself), so the choice never resolves to no editor.
-          SwitchListTile(
+          HighlightRow(
             key: const Key('editor-source-setting'),
-            title: Text(AppStrings.editorKindSource),
-            subtitle: Text(AppStrings.editorKindSourceSubtitle),
-            value: _enabledEditors.contains(EditorKind.source),
-            onChanged:
-                _enabledEditors.length < 2 &&
-                    _enabledEditors.contains(EditorKind.source)
-                ? null
-                : (value) =>
-                      unawaited(_toggleEditorEnabled(EditorKind.source, value)),
+            child: SwitchListTile(
+              title: Text(AppStrings.editorKindSource),
+              subtitle: Text(AppStrings.editorKindSourceSubtitle),
+              value: _enabledEditors.contains(EditorKind.source),
+              onChanged:
+                  _enabledEditors.length < 2 &&
+                      _enabledEditors.contains(EditorKind.source)
+                  ? null
+                  : (value) => unawaited(
+                      _toggleEditorEnabled(EditorKind.source, value),
+                    ),
+            ),
           ),
-          SwitchListTile(
+          HighlightRow(
             key: const Key('editor-wysiwyg-setting'),
-            title: Text(AppStrings.editorKindWysiwyg),
-            subtitle: Text(AppStrings.editorKindWysiwygSubtitle),
-            value: _enabledEditors.contains(EditorKind.wysiwyg),
-            onChanged:
-                _enabledEditors.length < 2 &&
-                    _enabledEditors.contains(EditorKind.wysiwyg)
-                ? null
-                : (value) => unawaited(
-                    _toggleEditorEnabled(EditorKind.wysiwyg, value),
-                  ),
+            child: SwitchListTile(
+              title: Text(AppStrings.editorKindWysiwyg),
+              subtitle: Text(AppStrings.editorKindWysiwygSubtitle),
+              value: _enabledEditors.contains(EditorKind.wysiwyg),
+              onChanged:
+                  _enabledEditors.length < 2 &&
+                      _enabledEditors.contains(EditorKind.wysiwyg)
+                  ? null
+                  : (value) => unawaited(
+                      _toggleEditorEnabled(EditorKind.wysiwyg, value),
+                    ),
+            ),
           ),
-          SwitchListTile(
+          HighlightRow(
             key: const Key('preview-enabled-setting'),
-            title: Text(AppStrings.settingsPreviewEnabledTitle),
-            subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
-            value: _previewEnabled,
-            onChanged: _togglePreviewEnabled,
+            child: SwitchListTile(
+              title: Text(AppStrings.settingsPreviewEnabledTitle),
+              subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
+              value: _previewEnabled,
+              onChanged: _togglePreviewEnabled,
+            ),
           ),
           // Switches keep their subtitle: a switch has no dialog to move
           // the explanation into, and "off = on first tap" is exactly
           // what someone reads the row for.
-          SwitchListTile(
-            title: Text(AppStrings.lineNumbersTitle),
-            subtitle: Text(AppStrings.lineNumbersSubtitle),
-            value: _lineNumbers ?? true,
-            onChanged: _toggleLineNumbers,
+          HighlightRow(
+            key: const Key('line-numbers-setting'),
+            child: SwitchListTile(
+              title: Text(AppStrings.lineNumbersTitle),
+              subtitle: Text(AppStrings.lineNumbersSubtitle),
+              value: _lineNumbers ?? true,
+              onChanged: _toggleLineNumbers,
+            ),
           ),
           // Phones and tablets only: there is no on-screen keyboard to
           // show on desktop, so the row would toggle a no-op (user,
@@ -381,40 +402,48 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               value: _autofocusEditor ?? false,
               onChanged: _toggleAutofocusEditor,
             ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('link-type'),
-            title: AppStrings.linkTypeTitle,
-            value: switch (_linkType) {
-              LinkType.wikilink => AppStrings.linkTypeWikilink,
-              LinkType.markdown => AppStrings.linkTypeMarkdown,
-            },
-            onTap: () => unawaited(_chooseLinkType()),
+            child: SettingsValueRow(
+              title: AppStrings.linkTypeTitle,
+              value: switch (_linkType) {
+                LinkType.wikilink => AppStrings.linkTypeWikilink,
+                LinkType.markdown => AppStrings.linkTypeMarkdown,
+              },
+              onTap: () => unawaited(_chooseLinkType()),
+            ),
           ),
           // Next to the link format: both decide what a link does — one
           // what it inserts, the other what a click on a missing target
           // becomes (issue #78).
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('missing-note-location'),
-            title: AppStrings.missingNoteLocationTitle,
-            value: switch (_missingNoteLocation) {
-              MissingNoteLocation.libraryRoot =>
-                AppStrings.missingNoteLocationRoot,
-              MissingNoteLocation.currentFolder =>
-                AppStrings.missingNoteLocationCurrentFolder,
-            },
-            onTap: () => unawaited(_chooseMissingNoteLocation()),
+            child: SettingsValueRow(
+              title: AppStrings.missingNoteLocationTitle,
+              value: switch (_missingNoteLocation) {
+                MissingNoteLocation.libraryRoot =>
+                  AppStrings.missingNoteLocationRoot,
+                MissingNoteLocation.currentFolder =>
+                  AppStrings.missingNoteLocationCurrentFolder,
+              },
+              onTap: () => unawaited(_chooseMissingNoteLocation()),
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('note-text-scale-setting'),
-            title: AppStrings.noteTextScaleTitle,
-            value: AppStrings.textScaleValue(_noteTextScale),
-            onTap: () => unawaited(_chooseNoteTextScale()),
+            child: SettingsValueRow(
+              title: AppStrings.noteTextScaleTitle,
+              value: AppStrings.textScaleValue(_noteTextScale),
+              onTap: () => unawaited(_chooseNoteTextScale()),
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('indent-width'),
-            title: AppStrings.indentWidthTitle,
-            value: AppStrings.indentWidthValue(_indentWidth),
-            onTap: () => unawaited(_chooseIndentWidth()),
+            child: SettingsValueRow(
+              title: AppStrings.indentWidthTitle,
+              value: AppStrings.indentWidthValue(_indentWidth),
+              onTap: () => unawaited(_chooseIndentWidth()),
+            ),
           ),
           if (spell != null && spell.available) ...[
             SwitchListTile(

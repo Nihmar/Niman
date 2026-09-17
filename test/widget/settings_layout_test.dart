@@ -41,6 +41,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// The switch inside the [HighlightRow] wrapper (issue #104): the
+  /// row's key sits on the wrapper, so the tile is a descendant of it.
+  SwitchListTile switchOf(WidgetTester tester, Finder row) =>
+      tester.widget<SwitchListTile>(
+        find.descendant(of: row, matching: find.byType(SwitchListTile)),
+      );
+
   testWidgets('the home groups the settings under its areas', (tester) async {
     await pump(tester);
     for (final heading in [
@@ -252,11 +259,11 @@ void main() {
     await pump(tester);
     await openArea(tester, const Key('settings-area-reminders'));
     final row = find.byKey(const Key('reminder-show-tokens'));
-    expect(tester.widget<SwitchListTile>(row).value, isFalse);
+    expect(switchOf(tester, row).value, isFalse);
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(await controller.reminderShowTokens, isTrue);
-    expect(tester.widget<SwitchListTile>(row).value, isTrue);
+    expect(switchOf(tester, row).value, isTrue);
   });
 
   testWidgets('maintenance holds the actions, not settings', (tester) async {
@@ -301,8 +308,8 @@ void main() {
     testWidgets('both editors are on by default', (tester) async {
       await pump(tester);
       await openArea(tester, const Key('settings-area-editor'));
-      expect(tester.widget<SwitchListTile>(source).value, isTrue);
-      expect(tester.widget<SwitchListTile>(wysiwyg).value, isTrue);
+      expect(switchOf(tester, source).value, isTrue);
+      expect(switchOf(tester, wysiwyg).value, isTrue);
     });
 
     testWidgets('one editor switches off, never the last', (tester) async {
@@ -313,7 +320,7 @@ void main() {
       expect(await controller.enabledEditors, {EditorKind.source});
       // The last one on disables its own switch rather than offering a
       // library with no editor.
-      expect(tester.widget<SwitchListTile>(source).onChanged, isNull);
+      expect(switchOf(tester, source).onChanged, isNull);
       await tester.tap(source);
       await tester.pumpAndSettle();
       expect(await controller.enabledEditors, {EditorKind.source});
@@ -428,6 +435,66 @@ void main() {
       await pumpAt(tester, 400);
       expect(row, findsNothing);
       expect(await controller.splitRatio, 0.7);
+    });
+  });
+
+  group('the settings search', () {
+    /// Types [query] into the home's search field and lets the debounce
+    /// and the value loads settle (issue #104).
+    Future<void> search(WidgetTester tester, String query) async {
+      await pump(tester);
+      await tester.enterText(
+        find.byKey(const Key('settings-search-field')),
+        query,
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a result carries its area and opens its screen', (
+      tester,
+    ) async {
+      await search(tester, 'indent');
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsOne);
+      final result = find.byKey(const Key('settings-search-indent-width'));
+      expect(
+        find.descendant(
+          of: result,
+          matching: find.text(AppStrings.settingsSectionEditor),
+        ),
+        findsOne,
+      );
+      expect(
+        find.descendant(
+          of: result,
+          matching: find.text(AppStrings.indentWidthValue(2)),
+        ),
+        findsOne,
+      );
+      await tester.tap(result);
+      await tester.pumpAndSettle();
+      // The editor screen opened on the row.
+      expect(find.byKey(const Key('indent-width')), findsOneWidget);
+    });
+
+    testWidgets('a maintenance result flashes the home row in place', (
+      tester,
+    ) async {
+      // Maintenance actions sit on the home itself: opening one clears
+      // the search instead of pushing a screen.
+      await search(tester, 're-index');
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsOne);
+      await tester.tap(
+        find.byKey(const Key('settings-search-reindex-setting')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsNothing);
+      expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    });
+
+    testWidgets('nothing matching reads as zero', (tester) async {
+      await search(tester, 'zzz-no-such-setting');
+      expect(find.text(AppStrings.settingsSearchResults(0)), findsOne);
     });
   });
 }

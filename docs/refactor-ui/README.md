@@ -31,7 +31,7 @@ Two rules came out of it and are written down in
 
 ## 1. Settings: a home, sub-screens and a search field
 
-Issue #104.
+Issue #104. Landed, except the last dot.
 
 ![Settings home](04-settings-home.png)
 ![Searching the settings](05-settings-search.png)
@@ -42,7 +42,8 @@ scrolling.
 
 - A home of areas, each opening its own screen, with a search field on
   top. A result carries the area it came from, so nothing is changed by
-  accident in the wrong place.
+  accident in the wrong place. Tapping one opens the area's screen and
+  flashes the row.
 - App-wide settings separated from the library's own, with the library
   named — the current screen mixes them with nothing to tell them apart.
 - *Reindex*, *Switch library* and *Close library* are actions, not
@@ -56,6 +57,8 @@ scrolling.
 - Switch subtitles are uneven — *Preview* and *Line numbers* carry one,
   *Markdown source* and *WYSIWYG* do not, and those two are precisely the
   pair whose combination is not obvious.
+- Still open: the folder rows' description lines (*Le nuove liste…*),
+  and the installed version riding on the *Updates* row.
 
 ## 2. The trash rejoins the family
 

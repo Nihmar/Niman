@@ -108,6 +108,15 @@ final class RomanianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'de creat';
   @override
+  String get settingsSearchHint => 'Caută în setări';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 setare găsită' : '$count setări găsite';
+  @override
+  String get settingsToggleOn => 'Activat';
+  @override
+  String get settingsToggleOff => 'Dezactivat';
+  @override
   String get settingsPreviewEnabledTitle => 'Previzualizare';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -12,7 +12,12 @@ import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 /// that is where the voice notes it transcribes live.
 final class SettingsTranscriptionScreen extends StatelessWidget {
   /// Creates the screen over the installation's [models].
-  const new({required this.controller, required this.models, super.key});
+  const new({
+    required this.controller,
+    required this.models,
+    this.highlight,
+    super.key,
+  });
 
   /// The session the screen's library name comes from.
   final LibrarySession controller;
@@ -20,12 +25,16 @@ final class SettingsTranscriptionScreen extends StatelessWidget {
   /// The installation's transcription models and settings.
   final TranscriptionModels models;
 
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
+
   @override
   Widget build(BuildContext context) {
     return SettingsAreaShell(
       title: AppStrings.settingsSectionTranscription,
       controller: controller,
       library: true,
+      highlight: highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [TranscriptionSettingsSection(models: models)],

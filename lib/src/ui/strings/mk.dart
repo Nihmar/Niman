@@ -107,6 +107,15 @@ final class MacedonianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'за создавање';
   @override
+  String get settingsSearchHint => 'Пребарај поставки';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 пронајдена поставка' : '$count пронајдени поставки';
+  @override
+  String get settingsToggleOn => 'Вклучено';
+  @override
+  String get settingsToggleOff => 'Исклучено';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

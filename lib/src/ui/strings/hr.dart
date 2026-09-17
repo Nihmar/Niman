@@ -108,6 +108,15 @@ final class CroatianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'za stvoriti';
   @override
+  String get settingsSearchHint => 'Pretraži postavke';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 pronađena postavka' : '$count pronađenih postavki';
+  @override
+  String get settingsToggleOn => 'Uključeno';
+  @override
+  String get settingsToggleOff => 'Isključeno';
+  @override
   String get settingsPreviewEnabledTitle => 'Pregled';
   @override
   String get settingsPreviewEnabledSubtitle =>

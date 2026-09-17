@@ -14,10 +14,13 @@ import 'package:niman/src/update/update_service.dart';
 /// channel, so the whole area is out, not just its toggles.
 final class SettingsUpdatesScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   @override
   State<SettingsUpdatesScreen> createState() => _SettingsUpdatesScreenState();
@@ -94,29 +97,34 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
     return SettingsAreaShell(
       title: AppStrings.settingsSectionUpdates,
       controller: widget.controller,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           if (!isTestingBuild) ...[
-            SwitchListTile(
+            HighlightRow(
               key: const Key('auto-update-setting'),
-              title: Text(AppStrings.autoUpdateTitle),
-              subtitle: Text(AppStrings.autoUpdateSubtitle),
-              value: _autoUpdate ?? false,
-              onChanged: _toggleAutoUpdate,
+              child: SwitchListTile(
+                title: Text(AppStrings.autoUpdateTitle),
+                subtitle: Text(AppStrings.autoUpdateSubtitle),
+                value: _autoUpdate ?? false,
+                onChanged: _toggleAutoUpdate,
+              ),
             ),
-            ListTile(
+            HighlightRow(
               key: const Key('check-updates-setting'),
-              leading: _checkingUpdates
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.system_update),
-              title: Text(AppStrings.checkForUpdatesTitle),
-              subtitle: _updateStatus == null ? null : Text(_updateStatus!),
-              onTap: _checkUpdatesManually,
+              child: ListTile(
+                leading: _checkingUpdates
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.system_update),
+                title: Text(AppStrings.checkForUpdatesTitle),
+                subtitle: _updateStatus == null ? null : Text(_updateStatus!),
+                onTap: _checkUpdatesManually,
+              ),
             ),
           ],
         ],

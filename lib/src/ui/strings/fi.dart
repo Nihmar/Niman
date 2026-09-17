@@ -104,6 +104,15 @@ final class FinnishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'luotava';
   @override
+  String get settingsSearchHint => 'Hae asetuksista';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 asetus löydetty' : '$count asetusta löydetty';
+  @override
+  String get settingsToggleOn => 'Päällä';
+  @override
+  String get settingsToggleOff => 'Pois';
+  @override
   String get settingsPreviewEnabledTitle => 'Esikatselu';
   @override
   String get settingsPreviewEnabledSubtitle =>

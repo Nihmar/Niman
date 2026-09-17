@@ -106,6 +106,15 @@ final class GermanStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'zu erstellen';
   @override
+  String get settingsSearchHint => 'Einstellungen durchsuchen';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 Einstellung gefunden' : '$count Einstellungen gefunden';
+  @override
+  String get settingsToggleOn => 'An';
+  @override
+  String get settingsToggleOff => 'Aus';
+  @override
   String get settingsPreviewEnabledTitle => 'Vorschau';
   @override
   String get settingsPreviewEnabledSubtitle =>

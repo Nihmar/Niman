@@ -104,6 +104,15 @@ final class IcelandicStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'búa til';
   @override
+  String get settingsSearchHint => 'Leita í stillingum';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 stilling fannst' : '$count stillingar fundust';
+  @override
+  String get settingsToggleOn => 'Kveikt';
+  @override
+  String get settingsToggleOff => 'Slökkt';
+  @override
   String get settingsPreviewEnabledTitle => 'Forsýning';
   @override
   String get settingsPreviewEnabledSubtitle =>

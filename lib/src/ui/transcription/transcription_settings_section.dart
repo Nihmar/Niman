@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
+import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/transcription_models_screen.dart';
@@ -28,26 +29,30 @@ final class TranscriptionSettingsSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SettingsValueRow(
+            HighlightRow(
               key: const Key('transcription-model-setting'),
-              title: AppStrings.transcriptionModelTitle,
-              value: model == null
-                  ? AppStrings.transcriptionModelNone
-                  : AppStrings.transcriptionModelName(model),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) =>
-                      TranscriptionModelsScreen(models: models),
+              child: SettingsValueRow(
+                title: AppStrings.transcriptionModelTitle,
+                value: model == null
+                    ? AppStrings.transcriptionModelNone
+                    : AppStrings.transcriptionModelName(model),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) =>
+                        TranscriptionModelsScreen(models: models),
+                  ),
                 ),
               ),
             ),
-            SettingsValueRow(
+            HighlightRow(
               key: const Key('transcription-language-setting'),
-              title: AppStrings.transcriptionLanguageTitle,
-              value: languageLabel(models.settings.language),
-              onTap: () =>
-                  unawaited(chooseTranscriptionLanguage(context, models)),
+              child: SettingsValueRow(
+                title: AppStrings.transcriptionLanguageTitle,
+                value: languageLabel(models.settings.language),
+                onTap: () =>
+                    unawaited(chooseTranscriptionLanguage(context, models)),
+              ),
             ),
           ],
         );

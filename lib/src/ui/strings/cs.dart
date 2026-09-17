@@ -107,6 +107,15 @@ final class CzechStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'k vytvoření';
   @override
+  String get settingsSearchHint => 'Hledat v nastavení';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nalezené nastavení' : '$count nalezená nastavení';
+  @override
+  String get settingsToggleOn => 'Zapnuto';
+  @override
+  String get settingsToggleOff => 'Vypnuto';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhled';
   @override
   String get settingsPreviewEnabledSubtitle =>

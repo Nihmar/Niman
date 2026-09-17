@@ -15,10 +15,13 @@ import 'package:niman/src/ui/template_help.dart';
 /// itself.
 final class SettingsFoldersPathsScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   @override
   State<SettingsFoldersPathsScreen> createState() =>
@@ -172,53 +175,64 @@ final class _SettingsFoldersPathsScreenState
       title: AppStrings.settingsAreaFolders,
       controller: controller,
       library: true,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('list-folder-setting'),
-            title: AppStrings.listFolderTitle,
-            value: listFolder,
-            badge: _exists(listFolder)
-                ? null
-                : AppStrings.settingsFolderToCreate,
-            onTap: _pickListFolder,
+            child: SettingsValueRow(
+              title: AppStrings.listFolderTitle,
+              value: listFolder,
+              badge: _exists(listFolder)
+                  ? null
+                  : AppStrings.settingsFolderToCreate,
+              onTap: _pickListFolder,
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('template-folder-setting'),
-            title: AppStrings.templateFolderTitle,
-            value: templateFolder,
-            badge: _exists(templateFolder)
-                ? null
-                : AppStrings.settingsFolderToCreate,
-            onTap: _pickTemplateFolder,
+            child: SettingsValueRow(
+              title: AppStrings.templateFolderTitle,
+              value: templateFolder,
+              badge: _exists(templateFolder)
+                  ? null
+                  : AppStrings.settingsFolderToCreate,
+              onTap: _pickTemplateFolder,
+            ),
           ),
           // Next to the folder, because that is where someone setting
           // templates up is already standing (T-TPL-08).
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('template-help-setting'),
-            title: AppStrings.templateHelpTitle,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const TemplateHelpScreen(),
+            child: SettingsValueRow(
+              title: AppStrings.templateHelpTitle,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const TemplateHelpScreen(),
+                ),
               ),
             ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('attachments-folder-setting'),
-            title: AppStrings.attachmentsFolderTitle,
-            value: attachmentsFolder,
-            badge: _exists(attachmentsFolder)
-                ? null
-                : AppStrings.settingsFolderToCreate,
-            onTap: _pickAttachmentsFolder,
+            child: SettingsValueRow(
+              title: AppStrings.attachmentsFolderTitle,
+              value: attachmentsFolder,
+              badge: _exists(attachmentsFolder)
+                  ? null
+                  : AppStrings.settingsFolderToCreate,
+              onTap: _pickAttachmentsFolder,
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('quick-note-setting'),
-            title: AppStrings.quickNoteTitle,
-            value: _quickNotePath ?? AppStrings.quickNoteUnset,
-            onTap: _pickQuickNote,
+            child: SettingsValueRow(
+              title: AppStrings.quickNoteTitle,
+              value: _quickNotePath ?? AppStrings.quickNoteUnset,
+              onTap: _pickQuickNote,
+            ),
           ),
           // The library's path is a fact, not a setting: nobody chooses
           // it, it is where the library is (T-ML-07).

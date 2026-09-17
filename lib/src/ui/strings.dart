@@ -132,6 +132,11 @@ final class AppStrings {
   static String get editorKindSourceSubtitle => _s.editorKindSourceSubtitle;
   static String get editorKindWysiwygSubtitle => _s.editorKindWysiwygSubtitle;
   static String get settingsFolderToCreate => _s.settingsFolderToCreate;
+  static String get settingsSearchHint => _s.settingsSearchHint;
+  static String settingsSearchResults(int count) =>
+      _s.settingsSearchResults(count);
+  static String get settingsToggleOn => _s.settingsToggleOn;
+  static String get settingsToggleOff => _s.settingsToggleOff;
   static String get settingsPreviewEnabledTitle =>
       _s.settingsPreviewEnabledTitle;
   static String get settingsPreviewEnabledSubtitle =>

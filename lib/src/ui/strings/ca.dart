@@ -106,6 +106,15 @@ final class CatalanStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'per crear';
   @override
+  String get settingsSearchHint => 'Cerca la configuració';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 paràmetre trobat' : '$count paràmetres trobats';
+  @override
+  String get settingsToggleOn => 'Activat';
+  @override
+  String get settingsToggleOff => 'Desactivat';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualització';
   @override
   String get settingsPreviewEnabledSubtitle =>

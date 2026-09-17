@@ -104,6 +104,15 @@ final class DutchStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'aan te maken';
   @override
+  String get settingsSearchHint => 'Zoeken in instellingen';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 instelling gevonden' : '$count instellingen gevonden';
+  @override
+  String get settingsToggleOn => 'Aan';
+  @override
+  String get settingsToggleOff => 'Uit';
+  @override
   String get settingsPreviewEnabledTitle => 'Voorbeeld';
   @override
   String get settingsPreviewEnabledSubtitle =>

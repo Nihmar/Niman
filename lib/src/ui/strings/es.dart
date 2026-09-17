@@ -107,6 +107,15 @@ final class SpanishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'por crear';
   @override
+  String get settingsSearchHint => 'Buscar ajustes';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ajuste encontrado' : '$count ajustes encontrados';
+  @override
+  String get settingsToggleOn => 'Activado';
+  @override
+  String get settingsToggleOff => 'Desactivado';
+  @override
   String get settingsPreviewEnabledTitle => 'Vista previa';
   @override
   String get settingsPreviewEnabledSubtitle =>

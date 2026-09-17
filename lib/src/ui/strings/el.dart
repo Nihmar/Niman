@@ -107,6 +107,15 @@ final class GreekStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'για δημιουργία';
   @override
+  String get settingsSearchHint => 'Αναζήτηση ρυθμίσεων';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ρύθμιση βρέθηκε' : '$count ρυθμίσεις βρέθηκαν';
+  @override
+  String get settingsToggleOn => 'Ενεργό';
+  @override
+  String get settingsToggleOff => 'Ανενεργό';
+  @override
   String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
   @override
   String get settingsPreviewEnabledSubtitle =>

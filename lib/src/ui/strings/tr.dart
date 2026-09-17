@@ -101,6 +101,15 @@ final class TurkishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'oluşturulacak';
   @override
+  String get settingsSearchHint => 'Ayarlarda ara';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ayar bulundu' : '$count ayar bulundu';
+  @override
+  String get settingsToggleOn => 'Açık';
+  @override
+  String get settingsToggleOff => 'Kapalı';
+  @override
   String get settingsPreviewEnabledTitle => 'Önizleme';
   @override
   String get settingsPreviewEnabledSubtitle =>

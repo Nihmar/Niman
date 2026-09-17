@@ -103,6 +103,15 @@ final class AlbanianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'për t\u2019u krijuar';
   @override
+  String get settingsSearchHint => 'Kërko në cilësimet';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 cilësim u gjet' : '$count cilësime u gjetën';
+  @override
+  String get settingsToggleOn => 'Aktiv';
+  @override
+  String get settingsToggleOff => 'Joaktiv';
+  @override
   String get settingsPreviewEnabledTitle => 'Parapamja';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -104,6 +104,15 @@ final class EstonianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'luua';
   @override
+  String get settingsSearchHint => 'Otsi seadetest';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 seade leitud' : '$count seadet leitud';
+  @override
+  String get settingsToggleOn => 'Sees';
+  @override
+  String get settingsToggleOff => 'Väljas';
+  @override
   String get settingsPreviewEnabledTitle => 'Eelvaade';
   @override
   String get settingsPreviewEnabledSubtitle =>

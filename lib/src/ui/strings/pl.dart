@@ -107,6 +107,15 @@ final class PolishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'do utworzenia';
   @override
+  String get settingsSearchHint => 'Szukaj w ustawieniach';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 znalezione ustawienie' : '$count znalezionych ustawień';
+  @override
+  String get settingsToggleOn => 'Włączone';
+  @override
+  String get settingsToggleOff => 'Wyłączone';
+  @override
   String get settingsPreviewEnabledTitle => 'Podgląd';
   @override
   String get settingsPreviewEnabledSubtitle =>

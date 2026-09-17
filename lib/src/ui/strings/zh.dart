@@ -96,6 +96,15 @@ final class ChineseStrings extends Strings {
   @override
   String get settingsFolderToCreate => '待创建';
   @override
+  String get settingsSearchHint => '搜索设置';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '找到 1 个设置' : '找到 $count 个设置';
+  @override
+  String get settingsToggleOn => '开';
+  @override
+  String get settingsToggleOff => '关';
+  @override
   String get settingsPreviewEnabledTitle => '预览';
   @override
   String get settingsPreviewEnabledSubtitle => '在源码编辑器旁边显示渲染后的笔记';

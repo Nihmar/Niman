@@ -15,10 +15,23 @@ import 'package:niman/src/ui/strings.dart';
 /// the split width where the panes split.
 final class SettingsAppearanceScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
+
+  /// What a palette reads as, in the dialog, on the row, and in the
+  /// settings search.
+  static String paletteName(AppPalette palette) => switch (palette) {
+    AppPalette.system => AppStrings.themePaletteSystem,
+    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
+    AppPalette.solarized => AppStrings.themePaletteSolarized,
+    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
+    AppPalette.niman => AppStrings.themePaletteNiman,
+  };
 
   @override
   State<SettingsAppearanceScreen> createState() =>
@@ -148,20 +161,14 @@ final class _SettingsAppearanceScreenState
       current: _themePalette,
       options: [
         for (final palette in AppPalette.values)
-          SettingsOption(palette, _paletteName(palette)),
+          SettingsOption(
+            palette,
+            SettingsAppearanceScreen.paletteName(palette),
+          ),
       ],
     );
     if (palette != null) await _setThemePalette(palette);
   }
-
-  /// What a palette reads as, in the dialog and on the row.
-  static String _paletteName(AppPalette palette) => switch (palette) {
-    AppPalette.system => AppStrings.themePaletteSystem,
-    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
-    AppPalette.solarized => AppStrings.themePaletteSolarized,
-    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
-    AppPalette.niman => AppStrings.themePaletteNiman,
-  };
 
   /// Asks how large the interface text should be.
   Future<void> _chooseUiTextScale() async {
@@ -211,36 +218,45 @@ final class _SettingsAppearanceScreenState
     return SettingsAreaShell(
       title: AppStrings.settingsSectionAppearance,
       controller: widget.controller,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('language-choice'),
-            title: AppStrings.languageTitle,
-            value: AppStrings.languageName(_language),
-            onTap: () => unawaited(_chooseLanguage()),
+            child: SettingsValueRow(
+              title: AppStrings.languageTitle,
+              value: AppStrings.languageName(_language),
+              onTap: () => unawaited(_chooseLanguage()),
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('theme-brightness-setting'),
-            title: AppStrings.themeBrightnessTitle,
-            value: switch (_themeBrightness) {
-              AppBrightness.system => AppStrings.themeBrightnessSystem,
-              AppBrightness.day => AppStrings.themeBrightnessDay,
-              AppBrightness.night => AppStrings.themeBrightnessNight,
-            },
-            onTap: () => unawaited(_chooseThemeBrightness()),
+            child: SettingsValueRow(
+              title: AppStrings.themeBrightnessTitle,
+              value: switch (_themeBrightness) {
+                AppBrightness.system => AppStrings.themeBrightnessSystem,
+                AppBrightness.day => AppStrings.themeBrightnessDay,
+                AppBrightness.night => AppStrings.themeBrightnessNight,
+              },
+              onTap: () => unawaited(_chooseThemeBrightness()),
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('theme-palette-setting'),
-            title: AppStrings.themePaletteTitle,
-            value: _paletteName(_themePalette),
-            onTap: () => unawaited(_chooseThemePalette()),
+            child: SettingsValueRow(
+              title: AppStrings.themePaletteTitle,
+              value: SettingsAppearanceScreen.paletteName(_themePalette),
+              onTap: () => unawaited(_chooseThemePalette()),
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('ui-text-scale-setting'),
-            title: AppStrings.uiTextScaleTitle,
-            value: AppStrings.textScaleValue(_uiTextScale),
-            onTap: () => unawaited(_chooseUiTextScale()),
+            child: SettingsValueRow(
+              title: AppStrings.uiTextScaleTitle,
+              value: AppStrings.textScaleValue(_uiTextScale),
+              onTap: () => unawaited(_chooseUiTextScale()),
+            ),
           ),
           // The split ratio stays here; the split/switch choice itself
           // lives in the editor's app bar (user, 2026-09-09): a layout a
@@ -252,11 +268,13 @@ final class _SettingsAppearanceScreenState
                 editor: _editorKind,
                 previewEnabled: _previewEnabled,
               ))
-            SettingsValueRow(
+            HighlightRow(
               key: const Key('split-ratio-setting'),
-              title: AppStrings.splitRatioTitle,
-              value: AppStrings.splitRatioValue(_splitRatio),
-              onTap: () => unawaited(_chooseSplitRatio()),
+              child: SettingsValueRow(
+                title: AppStrings.splitRatioTitle,
+                value: AppStrings.splitRatioValue(_splitRatio),
+                onTap: () => unawaited(_chooseSplitRatio()),
+              ),
             ),
         ],
       ),

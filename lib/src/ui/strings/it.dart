@@ -107,6 +107,15 @@ final class ItalianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'da creare';
   @override
+  String get settingsSearchHint => 'Cerca nelle impostazioni';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 impostazione trovata' : '$count impostazioni trovate';
+  @override
+  String get settingsToggleOn => 'Attivo';
+  @override
+  String get settingsToggleOff => 'Non attivo';
+  @override
   String get settingsPreviewEnabledTitle => 'Anteprima';
   @override
   String get settingsPreviewEnabledSubtitle =>

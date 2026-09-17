@@ -105,6 +105,15 @@ final class LatvianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'jāizveido';
   @override
+  String get settingsSearchHint => 'Meklēt iestatījumos';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 iestatījums atrasts' : '$count iestatījumi atrasti';
+  @override
+  String get settingsToggleOn => 'Ieslēgts';
+  @override
+  String get settingsToggleOff => 'Izslēgts';
+  @override
   String get settingsPreviewEnabledTitle => 'Priekšskatījums';
   @override
   String get settingsPreviewEnabledSubtitle =>

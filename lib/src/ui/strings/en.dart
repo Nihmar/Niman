@@ -102,6 +102,15 @@ final class EnglishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'to create';
   @override
+  String get settingsSearchHint => 'Search settings';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 setting found' : '$count settings found';
+  @override
+  String get settingsToggleOn => 'On';
+  @override
+  String get settingsToggleOff => 'Off';
+  @override
   String get settingsPreviewEnabledTitle => 'Preview';
   @override
   String get settingsPreviewEnabledSubtitle =>
