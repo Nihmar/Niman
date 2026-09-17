@@ -56,29 +56,42 @@ final class TodoFilterBar extends StatelessWidget {
     final countText = showDone
         ? '$count ${AppStrings.todoCountDone}'
         : '$count ${AppStrings.todoCountOpen}';
-    final pill = OutlinedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      foregroundColor: scheme.onSurface,
-      textStyle: theme.textTheme.bodySmall,
-    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
           if (leading case final lead?) ...[lead, const SizedBox(width: 12)],
-          _DueRangeMenu(range: filter.dueRange, onDueRange: onDueRange),
+          // Flexible with an ellipsized label: two icon-label-chevron
+          // pills plus the count must fit a 360 dp row in every
+          // language, so the pills shrink before anything clips.
+          Flexible(
+            child: _PillButton(
+              key: const Key('todo-due-menu'),
+              icon: Icons.calendar_today_outlined,
+              label: _DueRangeMenu.label(filter.dueRange),
+              onPressed: (buttonContext) => _DueRangeMenu.open(
+                buttonContext,
+                filter.dueRange,
+                onDueRange,
+              ),
+            ),
+          ),
           const SizedBox(width: 8),
-          OutlinedButton.icon(
-            key: const Key('todo-filter-button'),
-            onPressed: () {
-              _log.debug('todo filter sheet: open');
-              onOpenFilter();
-            },
-            style: pill,
-            icon: const Icon(Icons.filter_alt_outlined, size: 16),
-            label: Text(AppStrings.todoFilter),
+          Flexible(
+            child: _PillButton(
+              key: const Key('todo-filter-button'),
+              icon: Icons.filter_alt_outlined,
+              label: AppStrings.todoFilter,
+              onPressed: (_) {
+                _log.debug('todo filter sheet: open');
+                onOpenFilter();
+              },
+            ),
           ),
           const Spacer(),
+          // On the pills' line: the same text style, centered in the
+          // row, so the count shares the chips' baseline instead of
+          // sitting on its own (issue #131).
           Text(
             key: const Key('todo-count'),
             countText,
@@ -93,21 +106,34 @@ final class TodoFilterBar extends StatelessWidget {
   }
 }
 
-/// The due-range dropdown pill ("All dates ⌄"): an outlined button
-/// opening the five-range popup menu (checked = the current range).
-final class _DueRangeMenu extends StatelessWidget {
-  const new({required this.range, required this.onDueRange});
+/// One pill of the filter row (issue #131): a leading icon, a label
+/// and a trailing chevron, in the same shape for the due range and the
+/// filter — the row used to mix a chevron pill with an icon pill.
+final class _PillButton extends StatelessWidget {
+  /// Creates the pill with [icon], [label] and [onPressed].
+  const new({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    super.key,
+  });
 
-  final TodoDueRange range;
-  final ValueChanged<TodoDueRange> onDueRange;
+  /// The pill's leading icon.
+  final IconData icon;
+
+  /// The pill's label.
+  final String label;
+
+  /// Opens whatever the pill picks, with the pill's own context (the
+  /// due-range menu positions itself under the pill).
+  final void Function(BuildContext context) onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return OutlinedButton(
-      key: const Key('todo-due-menu'),
-      onPressed: () => _openMenu(context),
+      onPressed: () => onPressed(context),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         foregroundColor: scheme.onSurface,
@@ -116,15 +142,26 @@ final class _DueRangeMenu extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(_label(range)),
+          Icon(icon, size: 16, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
           const SizedBox(width: 4),
           Icon(Icons.expand_more, size: 16, color: scheme.onSurfaceVariant),
         ],
       ),
     );
   }
+}
 
-  Future<void> _openMenu(BuildContext context) async {
+/// The due-range popup behind the date pill: the five ranges, checked
+/// at the current one, opening under the pill.
+final class _DueRangeMenu {
+  /// Opens the five-range menu under the pill.
+  static Future<void> open(
+    BuildContext context,
+    TodoDueRange range,
+    ValueChanged<TodoDueRange> onDueRange,
+  ) async {
     final button = context.findRenderObject()! as RenderBox;
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
@@ -148,7 +185,7 @@ final class _DueRangeMenu extends StatelessWidget {
             value: r,
             child: Row(
               children: [
-                Expanded(child: Text(_label(r))),
+                Expanded(child: Text(label(r))),
                 if (r == range) const Icon(Icons.check, size: 16),
               ],
             ),
@@ -160,7 +197,7 @@ final class _DueRangeMenu extends StatelessWidget {
     }
   }
 
-  String _label(TodoDueRange range) {
+  static String label(TodoDueRange range) {
     return switch (range) {
       TodoDueRange.all => AppStrings.todoAllDates,
       TodoDueRange.overdue => AppStrings.todoDueOverdue,

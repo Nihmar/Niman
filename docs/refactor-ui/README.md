@@ -80,16 +80,20 @@ Settings and the toolbar screen are flat rows.
 
 ## 3. Tasks: a project is not a context
 
+Landed.
+
 ![Tasks](08-tasks.png)
 
-`+Niman` and `@Android` are drawn in the same purple, so the two things
-`todo.txt` deliberately separates look alike at a glance. Give them two
-colours from the palette (the accent and the syntax teal), and a third
-for tags.
+`+Niman` and `@Android` were drawn in the same purple, so the two things
+`todo.txt` deliberately separates looked alike at a glance.
 
-The filter row also mixes two chip shapes — one with a trailing chevron,
-one with a leading icon — and the "6 to do" count sits on a different
-baseline from the chips beside it.
+- Token chips are colored by kind, not by name: projects wear the
+  accent, contexts the syntax tag teal, tags the tertiary — the
+  per-name hash colors are gone, with them `tag_color.dart`.
+- The filter row holds two pills of one shape — leading icon, label,
+  trailing chevron — that shrink with an ellipsized label instead of
+  clipping a 360 dp row in long languages. The count keeps their text
+  style on their line.
 
 ## 4. Smaller things, without a picture
 
