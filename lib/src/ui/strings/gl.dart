@@ -810,6 +810,10 @@ final class GalicianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nota nova';
   @override
+  String get newItemTooltip => 'Novo';
+  @override
+  String get closeMenuTooltip => 'Pechar';
+  @override
   String get newFolderTitle => 'Cartafol novo';
   @override
   String get newNoteHere => 'Nota nova aquí';

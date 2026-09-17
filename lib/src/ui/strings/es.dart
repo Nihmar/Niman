@@ -816,6 +816,10 @@ final class SpanishStrings extends Strings {
   @override
   String get newNoteTitle => 'Nueva nota';
   @override
+  String get newItemTooltip => 'Nuevo';
+  @override
+  String get closeMenuTooltip => 'Cerrar';
+  @override
   String get newFolderTitle => 'Nueva carpeta';
   @override
   String get newNoteHere => 'Nueva nota aquí';

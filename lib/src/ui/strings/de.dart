@@ -817,6 +817,10 @@ final class GermanStrings extends Strings {
   @override
   String get newNoteTitle => 'Neue Notiz';
   @override
+  String get newItemTooltip => 'Neu';
+  @override
+  String get closeMenuTooltip => 'Schließen';
+  @override
   String get newFolderTitle => 'Neuer Ordner';
   @override
   String get newNoteHere => 'Neue Notiz hier';

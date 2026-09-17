@@ -805,6 +805,10 @@ final class SerbianStrings extends Strings {
   @override
   String get newNoteTitle => 'Нова белешка';
   @override
+  String get newItemTooltip => 'Ново';
+  @override
+  String get closeMenuTooltip => 'Затвори';
+  @override
   String get newFolderTitle => 'Нова фасцикла';
   @override
   String get newNoteHere => 'Нова белешка овде';

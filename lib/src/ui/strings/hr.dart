@@ -799,6 +799,10 @@ final class CroatianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nova napomena';
   @override
+  String get newItemTooltip => 'Novo';
+  @override
+  String get closeMenuTooltip => 'Zatvori';
+  @override
   String get newFolderTitle => 'Novi direktorij';
   @override
   String get newNoteHere => 'Nova napomena ovdje';

@@ -801,6 +801,10 @@ final class SlovakStrings extends Strings {
   @override
   String get newNoteTitle => 'Nová poznámka';
   @override
+  String get newItemTooltip => 'Nový';
+  @override
+  String get closeMenuTooltip => 'Zavrieť';
+  @override
   String get newFolderTitle => 'Nový priečinok';
   @override
   String get newNoteHere => 'Nová poznámka sem';

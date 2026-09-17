@@ -741,6 +741,10 @@ final class ChineseStrings extends Strings {
   @override
   String get newNoteTitle => '新建笔记';
   @override
+  String get newItemTooltip => '新建';
+  @override
+  String get closeMenuTooltip => '关闭';
+  @override
   String get newFolderTitle => '新建文件夹';
   @override
   String get newNoteHere => '在此新建笔记';

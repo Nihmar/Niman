@@ -798,6 +798,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nova opomba';
   @override
+  String get newItemTooltip => 'Novo';
+  @override
+  String get closeMenuTooltip => 'Zapri';
+  @override
   String get newFolderTitle => 'Nova mapa';
   @override
   String get newNoteHere => 'Nova opomba sem';

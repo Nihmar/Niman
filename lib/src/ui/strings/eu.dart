@@ -804,6 +804,10 @@ final class BasqueStrings extends Strings {
   @override
   String get newNoteTitle => 'Ohar berria';
   @override
+  String get newItemTooltip => 'Berria';
+  @override
+  String get closeMenuTooltip => 'Itxi';
+  @override
   String get newFolderTitle => 'Karpeta berria';
   @override
   String get newNoteHere => 'Ohar berria hemen';

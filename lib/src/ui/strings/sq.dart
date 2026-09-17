@@ -806,6 +806,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get newNoteTitle => 'Shënim i ri';
   @override
+  String get newItemTooltip => 'I ri';
+  @override
+  String get closeMenuTooltip => 'Mbyll';
+  @override
   String get newFolderTitle => 'Tresë e re';
   @override
   String get newNoteHere => 'Shënim i ri këtu';

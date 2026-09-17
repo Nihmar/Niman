@@ -808,6 +808,10 @@ final class PolishStrings extends Strings {
   @override
   String get newNoteTitle => 'Nowa notatka';
   @override
+  String get newItemTooltip => 'Nowy';
+  @override
+  String get closeMenuTooltip => 'Zamknij';
+  @override
   String get newFolderTitle => 'Nowy katalog';
   @override
   String get newNoteHere => 'Nowa notatka tutaj';

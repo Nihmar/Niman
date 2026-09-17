@@ -783,6 +783,10 @@ final class HindiStrings extends Strings {
   @override
   String get newNoteTitle => 'नया नोट';
   @override
+  String get newItemTooltip => 'नया';
+  @override
+  String get closeMenuTooltip => 'बंद करें';
+  @override
   String get newFolderTitle => 'नया फ़ोल्डर';
   @override
   String get newNoteHere => 'यहाँ नया नोट';
