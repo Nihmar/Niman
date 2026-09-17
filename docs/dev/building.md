@@ -28,14 +28,16 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 ./scripts/niman.sh apk beta  # Android testing build (issue #106)
 ./scripts/niman.sh linux     # Linux release bundle
 scripts\niman.bat check      # Windows equivalent
+scripts\niman.bat apk beta   # Android testing build, from Windows
 scripts\niman.bat windows    # Windows build (on a Windows host)
 ```
 
 ## Testing build (Android)
 
-`./scripts/niman.sh apk beta` builds the testing build (issue #106):
-the release pipeline plus the `beta` product flavor, so the official
-app and the testing install side by side on the same device.
+`./scripts/niman.sh apk beta` (or `scripts\niman.bat apk beta` on a
+Windows host) builds the testing build (issue #106): the release
+pipeline plus the `beta` product flavor, so the official app and the
+testing install side by side on the same device.
 
 - Application ID `dev.niman.niman.beta` (the flavor's
   `applicationIdSuffix` in `android/app/build.gradle.kts`), launcher
