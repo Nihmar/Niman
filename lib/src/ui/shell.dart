@@ -28,10 +28,8 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
-import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
-import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -44,9 +42,9 @@ import 'package:niman/src/ui/shell_editor_header.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_layout.dart';
-import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
+import 'package:niman/src/ui/shell_row_actions.dart';
 import 'package:niman/src/ui/shell_row_menu.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
@@ -63,7 +61,6 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
-import 'package:niman/src/widget/widget_pin.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
@@ -489,6 +486,23 @@ final class _LibraryShellState extends State<_LibraryShell>
       }
     });
   }
+
+  /// What a tree row's menu choice does: rename, move, delete, pin, open
+  /// outside the app (issue #100 moved them into [ShellRowActions]).
+  late final ShellRowActions _rowActions = ShellRowActions(
+    controller: widget.controller,
+    guard: _guard,
+    creates: _createFlow,
+    templates: _templateFlow,
+    selectedPath: () => _selected,
+    onMoved: (path) => setState(() => _selected = path),
+    onDeleted: () => setState(() {
+      _selected = null;
+      // Deleting the open note closes it: the tabs show at once.
+      _noteClosed();
+    }),
+    onHistory: _openHistory,
+  );
 
   /// Note creation from the library's templates (#51, T-M4-07): the flow
   /// owns the picker, the questions, the directives, the render and the
@@ -1289,93 +1303,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
   }
 
-  Future<void> _rename([String? path]) async {
-    final sel = path ?? _selected;
-    if (sel == null) return;
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.actionRename,
-      initial: p.basename(sel),
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final row = await widget.controller.ops!.rename(sel, name);
-      setState(() => _selected = row.path);
-    });
-  }
-
-  Future<void> _move([String? path]) async {
-    final sel = path ?? _selected;
-    if (sel == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    // A folder cannot move into itself or its own subtree, so those
-    // targets are not offered.
-    final candidates = [
-      for (final folder in folders)
-        if (folder.path != sel && !isUnder(sel, folder.path)) folder,
-    ];
-    final target = await showMoveDialog(
-      context,
-      name: p.basename(sel),
-      folders: candidates,
-    );
-    if (target == null) return;
-    await _guard(() async {
-      final row = await widget.controller.ops!.move(sel, target);
-      setState(() => _selected = row.path);
-    });
-  }
-
-  Future<void> _delete([String? path]) async {
-    final sel = path ?? _selected;
-    if (sel == null) return;
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final trash = await ops.trashEnabled;
-    if (!mounted) return;
-    final name = p.basename(sel);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppStrings.actionDelete),
-        content: Text(
-          trash
-              ? AppStrings.deleteToTrashConfirm(name)
-              : AppStrings.deleteForeverConfirm(name),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppStrings.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppStrings.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    await _guard(() async {
-      await ops.delete(sel);
-      setState(() {
-        _selected = null;
-        // Deleting the open note closes it: the tabs show at once.
-        _noteClosed();
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              trash ? AppStrings.movedToTrash : AppStrings.deletedMessage,
-            ),
-          ),
-        );
-      }
-    });
-  }
-
   /// Adds a task from the Todo tab's add FAB (T-TD-04).
   Future<void> _addTodo() async {
     const AppLogger(name: 'todo').debug('todo add pressed');
@@ -1405,7 +1332,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       note: note,
       isQuickNote: isQuickNote,
     );
-    await _runRowAction(action, note, here);
+    if (!mounted) return;
+    await _rowActions.run(context, action, note, here);
   }
 
   /// Right-click context menu on a tree row (T-PP-20): the same actions
@@ -1420,78 +1348,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       isQuickNote: isQuickNote,
       position: position,
     );
-    await _runRowAction(action, note, here);
-  }
-
-  Future<void> _runRowAction(String? action, Note note, String here) async {
-    if (action == null) return;
-    switch (action) {
-      case 'note':
-        await _createFlow.createNote(context, parent: here);
-      case 'template':
-        await _templateFlow.createFromTemplate(context, parent: here);
-      case 'folder':
-        await _createFlow.createFolder(context, parent: here);
-      case 'quicknote':
-        await _guard(() async {
-          await widget.controller.ops!.setQuickNotePath(path: note.path);
-          widget.controller.notify();
-        });
-      case 'pin':
-        await _guard(() async {
-          await widget.controller.ops!.setPinned(
-            note.path,
-            pinned: !note.pinned,
-          );
-        });
-      case 'pinwidget':
-        final root = widget.controller.root;
-        if (root == null || !mounted) return;
-        final pinned = await saveWidgetPin(
-          libraryPath: root,
-          notePath: note.path,
-        );
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              pinned
-                  ? AppStrings.pinnedForWidget
-                  : AppStrings.pinWidgetUnavailable,
-            ),
-          ),
-        );
-      case 'history':
-        await _openHistory(note.path);
-      case 'reveal':
-        await _openOutside(note, TreeContextAction.openInFileManager);
-      case 'openexternal':
-        await _openOutside(note, TreeContextAction.openInDefaultApp);
-      case 'rename':
-        await _rename(note.path);
-      case 'move':
-        await _move(note.path);
-      case 'delete':
-        await _delete(note.path);
-    }
-  }
-
-  /// Hands [note]'s file to the OS (issue #76): the file manager, or the
-  /// default application for its type.
-  ///
-  /// Nothing in the library moves, so a failure is a snackbar and not an
-  /// error the caller has to undo.
-  Future<void> _openOutside(Note note, TreeContextAction action) async {
-    final root = widget.controller.root;
-    if (root == null) return;
-    final outcome = await runTreeContextAction(p.join(root, note.path), action);
-    if (!mounted || outcome == TreeContextOutcome.opened) return;
-    final message = switch (outcome) {
-      TreeContextOutcome.missing => AppStrings.openFileMissing,
-      _ => AppStrings.openFileFailed,
-    };
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    if (!mounted) return;
+    await _rowActions.run(context, action, note, here);
   }
 
   /// Opens the history of the note at [path]; a restore reloads the open
@@ -1515,9 +1373,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (path == null) return;
       unawaited(switch (action) {
         NoteMenuAction.history => _openHistory(path),
-        NoteMenuAction.rename => _rename(path),
-        NoteMenuAction.move => _move(path),
-        NoteMenuAction.delete => _delete(path),
+        NoteMenuAction.rename => _rowActions.rename(context, path),
+        NoteMenuAction.move => _rowActions.move(context, path),
+        NoteMenuAction.delete => _rowActions.delete(context, path),
       });
     },
   );
