@@ -46,9 +46,11 @@ Future<T?> showActionSheet<T>(
 
 /// The heading of an action sheet: what the rows below it are for.
 ///
-/// The tree menu has none — its rows say what they do, and the row it was
-/// opened from is the subject. A sheet whose rows are values rather than
-/// verbs needs one.
+/// For a sheet whose rows are values rather than verbs. A sheet of verbs
+/// says instead what it acts on, which is a different thing and a
+/// heavier one — see `RowMenuHeader`, which the tree menu opens with:
+/// the sheet covers the tree, so the row that was pressed has to be
+/// named or the verbs have no subject.
 final class ActionSheetTitle extends StatelessWidget {
   /// Creates a sheet heading reading [text].
   const new(this.text, {super.key});
