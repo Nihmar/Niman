@@ -8,6 +8,7 @@ import 'dart:isolate';
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_content_store.dart';
@@ -71,7 +72,10 @@ final class IndexTree {
 
   /// Walks [start] on a background isolate and replays its log lines.
   Future<List<DiskEntry>> walk(String root, String start) async {
-    final scan = await Isolate.run(() => scanTree(root, start));
+    final scan = await IsolateGauge.run(
+      () => scanTree(root, start),
+      'walk "$start"',
+    );
     scan.logs.forEach(_log.debug);
     return scan.entries;
   }
@@ -83,7 +87,10 @@ final class IndexTree {
   /// indexer itself holds an unsendable future chain.
   Future<List<DiskProbe>> probeAll(List<String> absPaths) {
     final paths = List<String>.of(absPaths);
-    return Isolate.run(() => probePaths(paths));
+    return IsolateGauge.run(
+      () => probePaths(paths),
+      'probe ${paths.length} path(s)',
+    );
   }
 
   /// Reads [rels] in batches of [_contentBatch] on the index isolate.
@@ -477,8 +484,9 @@ final class IndexTree {
     }
     final probes = missing.isEmpty
         ? const <DiskProbe>[]
-        : await Isolate.run(
+        : await IsolateGauge.run(
             () => probePaths([for (final m in missing) p.join(root, m)]),
+            'probe ${missing.length} missing parent(s)',
           );
     var probeIndex = 0;
     var currentId = 0;

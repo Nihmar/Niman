@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/indexer.dart';
 import 'package:niman/src/history/history_manifest.dart';
@@ -111,7 +112,19 @@ final class NoteWriter {
     final ({bool created, SnapshotOutcome? snapshot, String? snapshotError})
     result;
     try {
-      result = await _replaceOffIsolate(root, path, tempAbs, request);
+      // No snapshot to take means no synchronous work to move anywhere:
+      // what is left is a stat, a mkdir and a rename, all async I/O that
+      // leaves the event loop free. The isolate bought nothing on that
+      // path and was the whole of issue #103 — a rename inside
+      // `Isolate.run` stopped returning on Windows, and stayed stuck even
+      // after the file it was renaming had been moved away underneath it.
+      result = request == null
+          ? (
+              created: await swapFileIn(abs, tempAbs),
+              snapshot: null,
+              snapshotError: null,
+            )
+          : await _replaceOffIsolate(root, path, tempAbs, request);
     } catch (e) {
       _log.error('replace failed: "$path": $e');
       rethrow;
@@ -177,7 +190,7 @@ final class NoteWriter {
     String rel,
     String content,
     SnapshotRequest? request,
-  ) => Isolate.run(
+  ) => IsolateGauge.run(
     () => writeNoteFile(
       p.join(root, rel),
       content,
@@ -185,6 +198,7 @@ final class NoteWriter {
       rel: rel,
       snapshot: request,
     ),
+    'write "$rel"',
   );
 
   /// Runs [replaceFileFrom] on a short-lived isolate; static for the same
@@ -197,7 +211,7 @@ final class NoteWriter {
     String rel,
     String tempAbs,
     SnapshotRequest? request,
-  ) => Isolate.run(
+  ) => IsolateGauge.run(
     () => replaceFileFrom(
       p.join(root, rel),
       tempAbs,
@@ -205,6 +219,7 @@ final class NoteWriter {
       rel: rel,
       snapshot: request,
     ),
+    'replace "$rel"',
   );
 
   /// Re-reads the saved note into the index, after the save completed.
@@ -252,11 +267,114 @@ typedef NoteWriteResult = ({
 Future<NoteWriteResult> writeNoteOffIsolate(String abs, String content) =>
     Isolate.run(() => writeNoteFile(abs, content));
 
+/// Renames the finished file [tempAbs] over [abs], creating missing
+/// folders. Returns whether [abs] is a new file. The temp file is gone
+/// afterwards, also when the rename fails.
+///
+/// The attachment half of [replaceFileFrom], on the calling isolate: an
+/// attachment keeps no history version, so nothing here is synchronous
+/// work that has to be moved off the event loop — a stat, a mkdir and a
+/// rename, each of them async I/O the loop does not wait on.
+///
+/// It ran on a short-lived isolate until issue #103, where the rename
+/// inside `Isolate.run` stopped returning on Windows every third
+/// attachment of a sync, leaking the isolate with it. The giveaway was
+/// that it stayed stuck for as long as the app lived, including after
+/// another isolate had renamed the temp away — a rename whose source no
+/// longer exists cannot block on the filesystem, so the isolate was
+/// never waiting on the file.
+Future<bool> swapFileIn(String abs, String tempAbs) async {
+  final before = await FileStat.stat(abs);
+  final created = before.type == FileSystemEntityType.notFound;
+  try {
+    if (created) await Directory(p.dirname(abs)).create(recursive: true);
+    await _renameOrCopy(abs, tempAbs);
+  } on Object {
+    try {
+      await File(tempAbs).delete();
+    } on FileSystemException {
+      // Already gone — the rename may have got half-way. Nothing to tidy.
+    }
+    rethrow;
+  }
+  return created;
+}
+
+/// How long the rename gets before the copy takes over. The ones that
+/// work land in single-digit milliseconds.
+const Duration _renameGrace = Duration(seconds: 3);
+
+/// Moves [tempAbs] onto [abs], by copy when the rename will not return.
+///
+/// **A workaround, not a fix** (issue #103). On Windows the third
+/// attachment of a sync run goes into `File.rename` and never comes out:
+/// not the first, not the second, the third, every run, whichever file
+/// happens to be third. The event loop keeps beating, every other call on
+/// the same folder — stat, directory walk, read — answers in under a
+/// millisecond throughout, and the same code on Linux never pauses.
+/// Moving the call off its isolate did not change it, and neither did
+/// owning and closing the download's sink first.
+///
+/// What is left is to stop waiting on it. The rename is given
+/// [_renameGrace] and, if it has not returned, the bytes are copied to
+/// the target instead and the temp dropped. The copy is verified by size
+/// before the temp goes, because a copy — unlike a rename — is not
+/// atomic, and half a file recorded as whole would be worse than a slow
+/// sync.
+///
+/// The abandoned rename is left running. It has never been seen to
+/// finish; if it ever did, it would put the same bytes at the same path.
+Future<void> _renameOrCopy(String abs, String tempAbs) async {
+  const log = AppLogger(name: 'swap');
+  final temp = File(tempAbs);
+  try {
+    await temp.rename(abs).timeout(_renameGrace);
+    return;
+  } on TimeoutException {
+    log.warning(
+      '"${p.basename(abs)}": the rename has not returned in '
+      '${_renameGrace.inSeconds}s (issue #103) — copying instead',
+    );
+  }
+  await copyFileOver(abs, tempAbs);
+}
+
+/// Copies [tempAbs] onto [abs] and drops the temp — the slow half of the
+/// swap, kept apart so it can be tested without a rename that hangs
+/// (issue #103).
+///
+/// The copy is checked by size before the temp goes: a copy is not
+/// atomic, unlike the rename it stands in for, and half a file recorded
+/// as a whole one would outlive the sync that wrote it.
+///
+/// A temp that will not delete is left where it is. The abandoned rename
+/// may still hold it; it is hidden, the indexer skips it, and the bytes
+/// are already in place, so failing a finished download over it would
+/// help nobody.
+Future<void> copyFileOver(String abs, String tempAbs) async {
+  const log = AppLogger(name: 'swap');
+  final name = p.basename(abs);
+  final expected = (await FileStat.stat(tempAbs)).size;
+  await File(tempAbs).copy(abs);
+  final copied = (await FileStat.stat(abs)).size;
+  if (copied != expected) {
+    throw FileSystemException('copied $copied of $expected bytes', abs);
+  }
+  log.warning('"$name": copied $copied bytes in place');
+  try {
+    await File(tempAbs).delete().timeout(_renameGrace);
+  } on Object catch (error) {
+    log.warning('"$name": the temp could not be removed: $error');
+  }
+}
+
 /// Renames the finished file [tempAbs] over [abs] (creating missing
 /// folders), after keeping the replaced content as a history version when
 /// [snapshot] says so. The temp file is deleted when the rename fails.
 ///
-/// Top-level so [Isolate.run] can take it.
+/// Top-level so [Isolate.run] can take it. The isolate is here for
+/// [snapshotBeforeWrite], which reads and copies the note being replaced;
+/// an attachment has no snapshot and takes [swapFileIn] instead.
 Future<({bool created, SnapshotOutcome? snapshot, String? snapshotError})>
 replaceFileFrom(
   String abs,

@@ -1168,7 +1168,24 @@ final class SyncEngine {
       ),
     );
     try {
-      final download = await c.client.download(path, temp.openWrite());
+      // The sink is ours, not the client's (issue #103). Handing
+      // `temp.openWrite()` straight in left its closing to whatever the
+      // consumer did with it, and the file the download had just written
+      // then went into a rename that never returned on Windows — where,
+      // unlike POSIX, a file with a handle still on it cannot be
+      // renamed. A note never hit it because its temp is written by
+      // `writeAsBytes`, which closes on its own.
+      final sink = temp.openWrite();
+      final WebDavDownload download;
+      try {
+        download = await c.client.download(path, sink);
+      } finally {
+        // The consumer closes the sink; closing a closed sink is a no-op
+        // that hands back the same `done`. Awaiting it is what says the
+        // bytes are on disk and the handle is gone before anyone renames.
+        await sink.close().catchError((Object _) {});
+        await sink.done.catchError((Object _) {});
+      }
       // The client already checked Content-Length. A chunked answer has none,
       // so compare with the listing too — unless the ETag says the file was
       // rewritten since, which makes a different size legitimate.

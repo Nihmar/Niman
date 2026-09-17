@@ -2,10 +2,10 @@
 library;
 
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:drift/drift.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/dao.dart';
 import 'package:niman/src/db/index_content_store.dart';
@@ -348,7 +348,10 @@ final class Indexer {
   ) async {
     // One background-isolate probe (a FUSE stat on Android is a round trip
     // that can take seconds cold, so it must not run on the UI isolate).
-    final probe = await Isolate.run(() => probePaths(<String>[abs]).single);
+    final probe = await IsolateGauge.run(
+      () => probePaths(<String>[abs]).single,
+      '$tag probe "$rel"',
+    );
     if (probe.isDir) {
       _log.debug('$tag: "$abs" -> resync dir "$rel"');
       return await _tree.syncDirSubtree(root, abs);
