@@ -69,6 +69,17 @@ final class ItalianStrings extends Strings {
       'Gli elementi eliminati vanno in .trash/ (off = eliminazione '
       'definitiva)';
   @override
+  String get trashAutoEmptyTitle => 'Svuotamento automatico del cestino';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Le eliminazioni più vecchie spariscono all’apertura';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Mai'
+      : days == 1
+      ? '1 giorno'
+      : '$days giorni';
+  @override
   String get debugLogsTitle => 'Log di debug';
   @override
   String get debugLogsSubtitle =>

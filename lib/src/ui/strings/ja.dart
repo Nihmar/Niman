@@ -68,6 +68,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get trashSubtitle => '削除したものを .trash/ に移動（オフ = 完全に削除）';
   @override
+  String get trashAutoEmptyTitle => 'ごみ箱の自動削除';
+  @override
+  String get trashAutoEmptySubtitle => 'ライブラリを開くと、古い削除は完全に消えます';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? 'しない' : '$days 日';
+  @override
   String get debugLogsTitle => 'デバッグログ';
   @override
   String get debugLogsSubtitle => 'アプリのイベントをメモリ上のバッファに記録する';

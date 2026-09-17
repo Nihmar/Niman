@@ -68,6 +68,13 @@ final class HindiStrings extends Strings {
   String get trashSubtitle =>
       'हटाए गए चीज़ें .trash/ में जाती हैं (बंद = हमेशा के लिए हटाएँ)';
   @override
+  String get trashAutoEmptyTitle => 'ट्रैश अपने आप खाली करें';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'लाइब्रेरी खुलने पर पुरानी हटाई गई चीज़ें हमेशा के लिए मिट जाती हैं';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? 'कभी नहीं' : '$days दिन';
+  @override
   String get debugLogsTitle => 'डिबग लॉग';
   @override
   String get debugLogsSubtitle => 'ऐप के घटनाक्रम को मेमोरी बफ़र में दर्ज रखें';

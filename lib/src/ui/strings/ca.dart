@@ -69,6 +69,17 @@ final class CatalanStrings extends Strings {
       'Les eliminacions es mouen a .trash/ (desactivat = esborrament '
       'permanent)';
   @override
+  String get trashAutoEmptyTitle => 'Buidatge automàtic de la paperera';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Les supressions antigues desapareixen per sempre en obrir la biblioteca';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Mai'
+      : days == 1
+      ? '1 dia'
+      : '$days dies';
+  @override
   String get debugLogsTitle => 'Registres de depuració';
   @override
   String get debugLogsSubtitle =>

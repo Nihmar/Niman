@@ -68,6 +68,17 @@ final class NorwegianStrings extends Strings {
   String get trashSubtitle =>
       'Slettinger flyttes til .trash/ (av = permanent sletting)';
   @override
+  String get trashAutoEmptyTitle => 'Tøm papirkorgen automatisk';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Eldre slettinger forsvinner for godt når biblioteket åpnes';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Aldri'
+      : days == 1
+      ? '1 dag'
+      : '$days dager';
+  @override
   String get debugLogsTitle => 'Feilsøksingslogger';
   @override
   String get debugLogsSubtitle => 'Registrer appens hendelser i en minnebuffer';

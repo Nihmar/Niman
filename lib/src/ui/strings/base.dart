@@ -29,6 +29,10 @@ abstract base class Strings {
   // Settings: editor toggles.
   String get trashTitle;
   String get trashSubtitle;
+  String get trashAutoEmptyTitle;
+  String get trashAutoEmptySubtitle;
+  // Zero days = never, the way `historyVersionsValue(0)` is "none".
+  String trashAutoEmptyValue(int days);
   String get debugLogsTitle;
   String get debugLogsSubtitle;
   String get lineNumbersTitle;

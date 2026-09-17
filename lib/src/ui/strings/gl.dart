@@ -68,6 +68,17 @@ final class GalicianStrings extends Strings {
   String get trashSubtitle =>
       'Os borrados móvense a .trash/ (desactivado = borrado permanente)';
   @override
+  String get trashAutoEmptyTitle => 'Baleirado automático do paperilleiro';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'As eliminacións antigas pérdense ao abrir a biblioteca';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nunca'
+      : days == 1
+      ? '1 día'
+      : '$days días';
+  @override
   String get debugLogsTitle => 'Rexistros de depuración';
   @override
   String get debugLogsSubtitle =>

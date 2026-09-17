@@ -68,6 +68,12 @@ final class ChineseStrings extends Strings {
   @override
   String get trashSubtitle => '删除的内容移入 .trash/（关闭 = 永久删除）';
   @override
+  String get trashAutoEmptyTitle => '自动清空回收站';
+  @override
+  String get trashAutoEmptySubtitle => '打开文库时，较早删除的内容将被永久清除';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? '从不' : '$days 天';
+  @override
   String get debugLogsTitle => '调试日志';
   @override
   String get debugLogsSubtitle => '将应用事件记录到内存缓冲区';

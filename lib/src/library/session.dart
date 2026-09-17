@@ -392,6 +392,14 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the indent/outdent width.
   Future<void> setIndentWidth(int width);
 
+  /// How many days an item waits in `.trash/` before the automatic empty
+  /// deletes it for good (default 0 = never).
+  Future<int> get trashAutoEmptyDays;
+
+  /// Sets (and persists) the automatic-empty wait; anything outside
+  /// 1..3650 reads back as never.
+  Future<void> setTrashAutoEmptyDays(int days);
+
   /// How many versions of each note `.history/` keeps (default 10, 0 =
   /// none).
   Future<int> get historyVersions;

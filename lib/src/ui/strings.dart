@@ -118,6 +118,9 @@ final class AppStrings {
   // Settings: editor toggles.
   static String get trashTitle => _s.trashTitle;
   static String get trashSubtitle => _s.trashSubtitle;
+  static String get trashAutoEmptyTitle => _s.trashAutoEmptyTitle;
+  static String get trashAutoEmptySubtitle => _s.trashAutoEmptySubtitle;
+  static String trashAutoEmptyValue(int days) => _s.trashAutoEmptyValue(days);
   static String get debugLogsTitle => _s.debugLogsTitle;
   static String get debugLogsSubtitle => _s.debugLogsSubtitle;
   static String get lineNumbersTitle => _s.lineNumbersTitle;

@@ -68,6 +68,19 @@ final class CzechStrings extends Strings {
   String get trashSubtitle =>
       'Smazané položky se přesouvají do .trash/ (vypnuto = trvalé smazání)';
   @override
+  String get trashAutoEmptyTitle => 'Automatické vyprázdnění koše';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Starší smazané položky zmizí natrvalo při otevření knihovny';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nikdy'
+      : switch (days) {
+          1 => '1 den',
+          >= 2 && <= 4 => '$days dny',
+          _ => '$days dní',
+        };
+  @override
   String get debugLogsTitle => 'Ladící protokoly';
   @override
   String get debugLogsSubtitle =>

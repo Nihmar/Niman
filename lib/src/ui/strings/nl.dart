@@ -68,6 +68,17 @@ final class DutchStrings extends Strings {
   String get trashSubtitle =>
       'Verwijderingen gaan naar .trash/ (uit = definitief verwijderen)';
   @override
+  String get trashAutoEmptyTitle => 'Prullenbak automatisch legen';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Oudere verwijderingen verdwijnen bij het openen';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nooit'
+      : days == 1
+      ? '1 dag'
+      : '$days dagen';
+  @override
   String get debugLogsTitle => 'Debuglogs';
   @override
   String get debugLogsSubtitle =>

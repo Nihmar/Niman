@@ -3,6 +3,7 @@
 // choices is a row showing its current value, changed in a dialog.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
@@ -85,6 +86,39 @@ void main() {
       find.descendant(
         of: find.byKey(const Key('indent-width')),
         matching: find.text(AppStrings.indentWidthValue(6)),
+      ),
+      findsOne,
+    );
+  });
+
+  // Issue #79: the row is there, it starts at never, and it is what
+  // turns the automatic empty on — nothing else does.
+  testWidgets('the trash empties itself only once the row asks it to', (
+    tester,
+  ) async {
+    await pump(tester);
+    final row = find.byKey(const Key('trash-auto-empty-setting'));
+    await tester.scrollUntilVisible(row, 200);
+    await tester.pumpAndSettle();
+    expect(await controller.trashAutoEmptyDays, trashAutoEmptyOff);
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.trashAutoEmptyValue(trashAutoEmptyOff)),
+      ),
+      findsOne,
+    );
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('settings-choice-30')));
+    await tester.pumpAndSettle();
+
+    expect(await controller.trashAutoEmptyDays, 30);
+    expect(
+      find.descendant(
+        of: row,
+        matching: find.text(AppStrings.trashAutoEmptyValue(30)),
       ),
       findsOne,
     );

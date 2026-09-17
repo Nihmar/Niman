@@ -68,6 +68,13 @@ final class BasqueStrings extends Strings {
   String get trashSubtitle =>
       'Ezabatzeak .trash/-ra joaten dira (desaktibatuta = betirako ezabatzea)';
   @override
+  String get trashAutoEmptyTitle => 'Zakarrontzia automatikoki hustu';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Ezabaketa zaharrenak betiko desagertzen dira biblioteka irekitzean';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? 'Inoiz ez' : '$days egun';
+  @override
   String get debugLogsTitle => 'Arazte-erregistroak';
   @override
   String get debugLogsSubtitle =>

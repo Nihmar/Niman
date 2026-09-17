@@ -69,6 +69,20 @@ final class UkrainianStrings extends Strings {
       'Вилучені елементи переміщуються в .trash/ (вимкнено = остаточно '
       'видалення)';
   @override
+  String get trashAutoEmptyTitle => 'Автоочищення кошика';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Старіші видалення зникають назавжди під час відкриття бібліотеки';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Ніколи'
+      : switch ((days % 10, days % 100)) {
+          (_, >= 11 && <= 14) => '$days днів',
+          (1, _) => '$days день',
+          (>= 2 && <= 4, _) => '$days дні',
+          _ => '$days днів',
+        };
+  @override
   String get debugLogsTitle => 'Журнали налагодження';
   @override
   String get debugLogsSubtitle => 'Фіксує події програми в буфері пам’яті';
