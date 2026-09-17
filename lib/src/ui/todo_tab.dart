@@ -357,7 +357,7 @@ final class _TodoTabState extends State<TodoTab> {
           children: [
             ListTile(
               key: const Key('todo-menu-edit'),
-              leading: const Icon(Icons.edit),
+              leading: const Icon(Icons.edit_outlined),
               title: Text(AppStrings.todoEditAction),
               onTap: () => Navigator.pop(context, 'edit'),
             ),

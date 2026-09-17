@@ -317,6 +317,31 @@ void main() {
       expect(afterFind, 9);
     });
 
+    testWidgets('the status icons keep their places across a preview switch', (
+      tester,
+    ) async {
+      // Find has nothing to search once the preview has the pane to
+      // itself, but dropping it out of the row slid everything after it
+      // leftwards — under the thumb that had just tapped the eye.
+      Widget view({required bool preview}) => _app(
+        _view(
+          path: '/notes/a.md',
+          readNote: (_) async => 'one two three',
+          showPreview: preview,
+        ),
+      );
+      await tester.pumpWidget(view(preview: false));
+      await tester.pump();
+      await tester.pump();
+      final words = find.text('3 words');
+      expect(words, findsOneWidget);
+      final editing = tester.getTopLeft(words);
+
+      await tester.pumpWidget(view(preview: true));
+      await tester.pump();
+      expect(tester.getTopLeft(words), editing);
+    });
+
     testWidgets('the preview keeps its scroll offset across the switch', (
       tester,
     ) async {
