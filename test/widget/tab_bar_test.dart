@@ -13,6 +13,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart';
 
@@ -308,6 +309,22 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('settings-area-folders')));
     await settle(tester);
+    // The folders list builds lazily and subtitles made the rows
+    // tall: drag the area screen's own list (not the home's behind
+    // it) until the row is on screen.
+    final foldersList = find.descendant(
+      of: find.byType(SettingsFoldersPathsScreen),
+      matching: find.byType(Scrollable),
+    );
+    final quickNoteRow = find.byKey(const Key('quick-note-setting'));
+    for (var i = 0; i < 5; i++) {
+      if (quickNoteRow.evaluate().isNotEmpty &&
+          tester.getCenter(quickNoteRow).dy < 800) {
+        break;
+      }
+      await tester.drag(foldersList, const Offset(0, -300));
+      await settle(tester);
+    }
     expect(find.text('Not set yet'), findsOne);
     await tester.tap(find.byKey(const Key('quick-note-setting')));
     await settle(tester);

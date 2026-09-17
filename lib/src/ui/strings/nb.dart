@@ -899,6 +899,17 @@ final class NorwegianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Mal-plassholdere';
   @override
+  String get templateHelpSubtitle =>
+      'Dato, tittel og de øvrige verdiene å fylle ut';
+  @override
+  String get quickNoteSubtitle => 'Notatet Hurtiglapp-fanen åpner';
+  @override
+  String get listFolderSubtitle => 'De nye oppgavelistene';
+  @override
+  String get templateFolderSubtitle => 'Kilden til „Ny fra mal“';
+  @override
+  String get attachmentsFolderSubtitle => 'Bilder og lyd satt inn i et notat';
+  @override
   String get templateHelpIntro =>
       'En mal er et vanlig notat med hull i. Å opprette et notat fra den '
       'kopierer teksten og fyller hullene.';

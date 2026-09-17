@@ -912,6 +912,18 @@ final class RomanianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Markeri de șablon';
   @override
+  String get templateHelpSubtitle =>
+      'Data, titlul și celelalte valori de completat';
+  @override
+  String get quickNoteSubtitle => 'Nota pe care o deschide fila Notă rapidă';
+  @override
+  String get listFolderSubtitle => 'Noile liste de sarcini';
+  @override
+  String get templateFolderSubtitle => 'Sursa pentru „Nou din șablon“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imagini și sunet inserate într-o notă';
+  @override
   String get templateHelpIntro =>
       'Un șablon este o notă obișnuită cu găuri. Crearea unei note din ea '
       'copiază textul și completează găurile.';

@@ -907,6 +907,19 @@ final class UkrainianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Плейсхолдери шаблону';
   @override
+  String get templateHelpSubtitle =>
+      'Дата, назва й інші значення для заповнення';
+  @override
+  String get quickNoteSubtitle =>
+      'Нотатка, яку відкриває вкладка Швидка нотатка';
+  @override
+  String get listFolderSubtitle => 'Нові списки справ';
+  @override
+  String get templateFolderSubtitle => 'Джерело для „Нової з шаблону“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Зображення й аудіо, вставлені в нотатку';
+  @override
   String get templateHelpIntro =>
       'Шаблон — звичайна нотатка з отворами. При створенні нотатки з нього '
       'текст копіюється, а отвори заповнюються.';

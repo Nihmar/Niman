@@ -903,6 +903,17 @@ final class SlovenianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Mestni znaki predlog';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov in druge vrednosti za izpolnitev';
+  @override
+  String get quickNoteSubtitle => 'Zapis, ki ga odpre zavihek Hitri zapis';
+  @override
+  String get listFolderSubtitle => 'Novi seznami opravil';
+  @override
+  String get templateFolderSubtitle => 'Vir za „Novo iz predloge“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike in zvok, vstavljeni v zapis';
+  @override
   String get templateHelpIntro =>
       'Predloga je navadna opomba s prazninami. Ustvarjanje opombe iz nje '
       'kopira besedilo in izpolni praznine.';

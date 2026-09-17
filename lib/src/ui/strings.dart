@@ -632,6 +632,11 @@ final class AppStrings {
 
   // The template placeholder reference (T-TPL-08).
   static String get templateHelpTitle => _s.templateHelpTitle;
+  static String get templateHelpSubtitle => _s.templateHelpSubtitle;
+  static String get quickNoteSubtitle => _s.quickNoteSubtitle;
+  static String get listFolderSubtitle => _s.listFolderSubtitle;
+  static String get templateFolderSubtitle => _s.templateFolderSubtitle;
+  static String get attachmentsFolderSubtitle => _s.attachmentsFolderSubtitle;
   static String get templateHelpIntro => _s.templateHelpIntro;
   static String get templateHelpUnknown => _s.templateHelpUnknown;
 

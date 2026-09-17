@@ -923,6 +923,19 @@ final class FrenchStrings extends Strings {
   @override
   String get templateHelpTitle => 'Emplacements réservés des modèles';
   @override
+  String get templateHelpSubtitle =>
+      'Date, titre et les autres valeurs à renseigner';
+  @override
+  String get quickNoteSubtitle => 'La note qu’ouvre l’onglet Note rapide';
+  @override
+  String get listFolderSubtitle => 'Les nouvelles listes de tâches';
+  @override
+  String get templateFolderSubtitle =>
+      'La source de « Nouveau depuis un modèle »';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Images et audio insérés dans une note';
+  @override
   String get templateHelpIntro =>
       'Un modèle est une note ordinaire avec des trous. Créer une note '
       'depuis un modèle copie son texte et remplit les trous.';

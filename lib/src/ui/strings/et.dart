@@ -893,6 +893,17 @@ final class EstonianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Šablooni asendused';
   @override
+  String get templateHelpSubtitle =>
+      'Kuupäev, pealkiri ja muud täidetavad väärtused';
+  @override
+  String get quickNoteSubtitle => 'Märkus, mille avab kiirmenüü kaart';
+  @override
+  String get listFolderSubtitle => 'Uued ülesandeloendid';
+  @override
+  String get templateFolderSubtitle => 'Mallist uue allikas';
+  @override
+  String get attachmentsFolderSubtitle => 'Märkusesse lisatud pildid ja heli';
+  @override
   String get templateHelpIntro =>
       'Šabloon on tavaline märge, millel on augud. Märgise loomine sellest '
       'kopioneerib teksti ja täidab augud.';

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/app_channel.dart';
+import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
@@ -60,6 +61,7 @@ final class SettingsBody extends StatefulWidget {
 
 final class _SettingsBodyState extends State<SettingsBody> {
   String? _libraryName;
+  String? _version;
   late final KeyboardPresence _keyboard;
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
@@ -97,6 +99,23 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final root = widget.controller.root;
     if (!mounted || root == null) return;
     setState(() => _libraryName = p.basename(root));
+    // Kept out of the load above: the platform channel behind
+    // [appVersion] has no answer in the test environment and would hold
+    // the home's first build hostage.
+    unawaited(_loadVersion());
+  }
+
+  /// Loads the installed version for the Updates row (issue #104).
+  Future<void> _loadVersion() async {
+    String? version;
+    try {
+      version = await appVersion();
+    } on Exception catch (_) {
+      // Display-only: no answer just leaves the row bare.
+    }
+    if (mounted && version != null) {
+      setState(() => _version = version);
+    }
   }
 
   /// Re-runs the search 200 ms after the last keystroke: every keystroke
@@ -345,6 +364,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
             key: const Key('settings-area-updates'),
             icon: Icons.system_update,
             title: AppStrings.settingsSectionUpdates,
+            subtitle: _version,
             onTap: () => _pushArea(
               context,
               SettingsUpdatesScreen(controller: controller),

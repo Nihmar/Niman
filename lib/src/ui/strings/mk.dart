@@ -910,6 +910,18 @@ final class MacedonianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Места за замена во шаблон';
   @override
+  String get templateHelpSubtitle =>
+      'Датум, наслов и другите вредности за пополнување';
+  @override
+  String get quickNoteSubtitle =>
+      'Белешката што ја отвора картичката за брза белешка';
+  @override
+  String get listFolderSubtitle => 'Новите листи на задачи';
+  @override
+  String get templateFolderSubtitle => 'Изворот на „Ново од шаблон“';
+  @override
+  String get attachmentsFolderSubtitle => 'Слики и аудио вметнати во белешка';
+  @override
   String get templateHelpIntro =>
       'Шаблон е обична белешка со дупки. Креирање белешка од него ја '
       'копира неговата текстуа и ги пополнува дупките.';

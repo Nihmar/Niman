@@ -908,6 +908,19 @@ final class BulgarianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Замятащи знаци на шаблона';
   @override
+  String get templateHelpSubtitle =>
+      'Дата, заглавие и останалите стойности за попълване';
+  @override
+  String get quickNoteSubtitle =>
+      'Бележката, която отваря разделът за бърза бележка';
+  @override
+  String get listFolderSubtitle => 'Новите списъци със задачи';
+  @override
+  String get templateFolderSubtitle => 'Източникът на „Нова от шаблон“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Изображения и звук, вмъкнати в бележка';
+  @override
   String get templateHelpIntro =>
       'Шаблонът е обикновена бележка с отвори. При създаване на бележка '
       'от него текстът се копира, а отворите се попълват.';

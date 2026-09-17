@@ -902,6 +902,17 @@ final class LithuanianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Šablonų vietos';
   @override
+  String get templateHelpSubtitle =>
+      'Data, pavadinimas ir kitos pildytinos reikšmės';
+  @override
+  String get quickNoteSubtitle => 'Užrašas, kurį atidaro greito užrašo kortelė';
+  @override
+  String get listFolderSubtitle => 'Nauji užduočių sąrašai';
+  @override
+  String get templateFolderSubtitle => 'Šaltinis „Naujas iš šablono“';
+  @override
+  String get attachmentsFolderSubtitle => 'Į užrašą įterpti vaizdai ir garsas';
+  @override
   String get templateHelpIntro =>
       'Šablonas – įprasta pastaba su vietomis. Sukūrus pastabą iš jo, '
       'tekstas nukopijuojamas, o vietos užpildomos.';

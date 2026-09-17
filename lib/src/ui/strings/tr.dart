@@ -897,6 +897,17 @@ final class TurkishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Şablondaki yer tutucular';
   @override
+  String get templateHelpSubtitle =>
+      'Tarih, başlık ve doldurulacak diğer değerler';
+  @override
+  String get quickNoteSubtitle => 'Hızlı not sekmesinin açtığı not';
+  @override
+  String get listFolderSubtitle => 'Yeni görev listeleri';
+  @override
+  String get templateFolderSubtitle => 'Şablondan yeni kaynağı';
+  @override
+  String get attachmentsFolderSubtitle => 'Nota eklenen resimler ve ses';
+  @override
   String get templateHelpIntro =>
       'Şablon, boşlukları olan düz bir nottur. Ondan not oluşturmak '
       'metnini kopyalar ve boşlukları doldurur.';

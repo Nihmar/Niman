@@ -904,6 +904,17 @@ final class BosnianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Mjesta zamjene u predlošku';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov i ostale vrijednosti za popuniti';
+  @override
+  String get quickNoteSubtitle => 'Bilješka koju otvara kartica brze bilješke';
+  @override
+  String get listFolderSubtitle => 'Nove liste zadataka';
+  @override
+  String get templateFolderSubtitle => 'Izvor za „Novo iz šablona“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike i zvuk umetnuti u bilješku';
+  @override
   String get templateHelpIntro =>
       'Predložak je obična bilješka s rupama. Kreiranje bilješke iz njega '
       'kopira njegov tekst i ispunjava rupe.';

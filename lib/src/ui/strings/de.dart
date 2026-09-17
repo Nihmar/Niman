@@ -917,6 +917,17 @@ final class GermanStrings extends Strings {
   @override
   String get templateHelpTitle => 'Vorlagen-Platzhalter';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, Titel und die übrigen auszufüllenden Werte';
+  @override
+  String get quickNoteSubtitle => 'Die Notiz, die der Reiter Kurznotiz öffnet';
+  @override
+  String get listFolderSubtitle => 'Die neuen Aufgabenlisten';
+  @override
+  String get templateFolderSubtitle => 'Die Quelle für „Neu aus Vorlage“';
+  @override
+  String get attachmentsFolderSubtitle => 'Bilder und Audio in einer Notiz';
+  @override
   String get templateHelpIntro =>
       'Eine Vorlage ist eine gewöhnliche Notiz mit Löchern. Eine Notiz '
       'aus ihr zu erstellen kopiert ihren Text und füllt die Löcher.';

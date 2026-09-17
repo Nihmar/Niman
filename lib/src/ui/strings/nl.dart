@@ -904,6 +904,19 @@ final class DutchStrings extends Strings {
   @override
   String get templateHelpTitle => 'Sjabloon-placeholders';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, titel en de overige in te vullen waarden';
+  @override
+  String get quickNoteSubtitle =>
+      'De notitie die het tabblad Snelle notitie opent';
+  @override
+  String get listFolderSubtitle => 'De nieuwe takenlijsten';
+  @override
+  String get templateFolderSubtitle => 'De bron van „Nieuw uit sjabloon“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Afbeeldingen en audio in een notitie';
+  @override
   String get templateHelpIntro =>
       'Een sjabloon is een gewone notitie met gaten. Een notitie uit een '
       'sjabloon maken kopieert de tekst en vult de gaten in.';

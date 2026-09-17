@@ -903,6 +903,17 @@ final class PortugueseStrings extends Strings {
   @override
   String get templateHelpTitle => 'Locais reservados dos modelos';
   @override
+  String get templateHelpSubtitle =>
+      'Data, título e os restantes valores por preencher';
+  @override
+  String get quickNoteSubtitle => 'A nota que o separador Nota rápida abre';
+  @override
+  String get listFolderSubtitle => 'As novas listas de tarefas';
+  @override
+  String get templateFolderSubtitle => 'A origem de «Nova a partir de modelo»';
+  @override
+  String get attachmentsFolderSubtitle => 'Imagens e áudio inseridos numa nota';
+  @override
   String get templateHelpIntro =>
       'Um modelo é uma nota comum com buracos. Criar uma nota a partir de '
       'um copia seu texto e preenche os buracos.';

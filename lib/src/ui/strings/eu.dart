@@ -904,6 +904,18 @@ final class BasqueStrings extends Strings {
   @override
   String get templateHelpTitle => 'Txantiloi leku-ordainleak';
   @override
+  String get templateHelpSubtitle =>
+      'Data, izenburua eta bete beharreko gainerako balioak';
+  @override
+  String get quickNoteSubtitle => 'Ohar azkar fitxak irekitzen duen oharra';
+  @override
+  String get listFolderSubtitle => 'Eginkizun-zerrenda berriak';
+  @override
+  String get templateFolderSubtitle => '«Txantiloitik berria»-ren iturria';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Oharrean txertatutako irudiak eta audioa';
+  @override
   String get templateHelpIntro =>
       'Txantiloi bat ohar arruntena da zuloekin. Txantiloi batetik oharra '
       'sortzean testua kopiatzen eta zuloak betetzen dira.';

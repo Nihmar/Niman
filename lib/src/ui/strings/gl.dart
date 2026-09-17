@@ -911,6 +911,17 @@ final class GalicianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Marcapases da plantilla';
   @override
+  String get templateHelpSubtitle =>
+      'Data, título e os demais valores por cubrir';
+  @override
+  String get quickNoteSubtitle => 'A nota que abre a pestana Nota rápida';
+  @override
+  String get listFolderSubtitle => 'As listas novas de tarefas';
+  @override
+  String get templateFolderSubtitle => 'A orixe de «Nova desde modelo»';
+  @override
+  String get attachmentsFolderSubtitle => 'Imaxes e audio inseridos nunha nota';
+  @override
   String get templateHelpIntro =>
       'Unha plantilla é unha nota normal con furados. Crear unha nota '
       'desde ela copia o texto e enche os furados.';

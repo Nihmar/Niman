@@ -904,6 +904,19 @@ final class FinnishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Mallipohjan väliaikaiset symbolit';
   @override
+  String get templateHelpSubtitle =>
+      'Päivämäärä, otsikko ja muut täytettävät arvot';
+  @override
+  String get quickNoteSubtitle =>
+      'Muistiinpano, jonka Pikamuistiinpano-välilehti avaa';
+  @override
+  String get listFolderSubtitle => 'Uudet tehtävälistat';
+  @override
+  String get templateFolderSubtitle => 'Mallista uuden lähde';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Muistiinpanoon lisätyt kuvat ja ääni';
+  @override
   String get templateHelpIntro =>
       'Mallipohja on tavallinen muistiinpano, jolla on reikät. '
       'Muistiinpanon luonti siitä kopioi tekstin ja täyttää reikät.';

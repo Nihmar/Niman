@@ -839,6 +839,16 @@ final class ChineseStrings extends Strings {
   @override
   String get templateHelpTitle => '模板占位符';
   @override
+  String get templateHelpSubtitle => '日期、标题和其他待填值';
+  @override
+  String get quickNoteSubtitle => '快捷笔记选项卡打开的笔记';
+  @override
+  String get listFolderSubtitle => '新的任务列表';
+  @override
+  String get templateFolderSubtitle => '从模板新建的来源';
+  @override
+  String get attachmentsFolderSubtitle => '插入到笔记中的图片和音频';
+  @override
   String get templateHelpIntro => '模板就是一篇带洞的普通笔记。从模板创建笔记会复制它的文字并填上洞。';
   @override
   String get templateHelpUnknown =>

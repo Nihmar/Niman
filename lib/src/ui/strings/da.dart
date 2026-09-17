@@ -901,6 +901,17 @@ final class DanishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Skabelon-pladsholdere';
   @override
+  String get templateHelpSubtitle =>
+      'Dato, titel og de øvrige værdier at udfylde';
+  @override
+  String get quickNoteSubtitle => 'Den note fanen Hurtig note åbner';
+  @override
+  String get listFolderSubtitle => 'De nye opgavelister';
+  @override
+  String get templateFolderSubtitle => 'Kilden til „Ny fra skabelon“';
+  @override
+  String get attachmentsFolderSubtitle => 'Billeder og lyd indsat i en note';
+  @override
   String get templateHelpIntro =>
       'En skabelon er en almindelig note med huller i. At oprette en note '
       'fra den kopierer teksten og fylder hullerne.';
