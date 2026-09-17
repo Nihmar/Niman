@@ -10,7 +10,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 
 | Module | Contents |
 |--------|----------|
-| `core/` | Settings (`settings/library_config.dart`), logging, storage access, theme, language, shortcuts/launch args |
+| `core/` | Settings (`settings/library_config.dart`), logging, the in-flight isolate gauge (`isolate_gauge.dart`), storage access, theme, language, shortcuts/launch args |
 | `library/` | Library open/session state, note file ops, the note write path (`NoteWriter`), watcher, image import |
 | `history/` | `.history/` versions: manifest, snapshot policy, disk store (off-isolate), `NoteHistory` service — see [sync.md](sync.md) |
 | `diff/` | Myers line diff with its hunk summary, and the three-way merge over them, shared by history rollback and sync conflicts |
@@ -42,6 +42,21 @@ lines or when responsibilities mix.
 - **Edit:** `NoteOps.saveNote` → history snapshot and atomic write
   (temp + rename) in one isolate pass → the note is rescanned into the
   index. Preview and editor share one tokenizer for links.
+- **Sync download:** a note lands the same way (snapshot + rename on an
+  isolate). An **attachment** has no snapshot, so it lands through
+  `swapFileIn` on the calling isolate instead — a stat, a mkdir and a
+  rename are async I/O that never block the loop, and an isolate around
+  async-only work buys nothing. On Windows that rename hangs on the third
+  attachment of every run, so it is given three seconds and then the
+  bytes are copied instead: a workaround for
+  [#103](https://github.com/Nihmar/Niman/issues/103). See
+  [sync.md](sync.md) for what has been ruled out.
+- **Isolate jobs:** the scan, probe and write passes above go through
+  `IsolateGauge.run` (`core/isolate_gauge.dart`) instead of `Isolate.run`
+  directly, which logs each job's start and finish with how many are in
+  flight, and warns when one outlives 10 s. A job that hangs otherwise
+  logs nothing at all — an exported log then shows a gap and no reason,
+  which is what made #103 unreadable until the gauge went in.
 - **Search:** `search/query.dart` builds a safe FTS5 MATCH (tokens quoted,
   prefix `*` on last token only); `key = value` and `#tag` take the field
   and tag paths instead.
