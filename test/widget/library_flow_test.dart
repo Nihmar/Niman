@@ -115,11 +115,9 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('menu-move')));
     await settle(tester);
-    await tester.tap(find.byType(DropdownButton<String>));
-    await tester.pump();
     await tester.tap(find.text('Library root'));
     await tester.pump();
-    await tester.tap(find.text('Move'));
+    await tester.tap(find.byKey(const Key('folder-picker-choose')));
     await settle(tester);
     expect(noteRow('Nested.md', offstage: true), findsOne);
     expect(noteRow('Books/Nested.md', offstage: true), findsNothing);
@@ -380,11 +378,14 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('menu-move')));
     await tester.pump();
-    await tester.tap(find.byType(DropdownButton<String>));
-    await tester.pump();
-    expect(find.byType(DropdownMenuItem<String>), findsOne);
-    expect(find.text('Library root'), findsOne);
-    expect(find.text('Outer/Inner'), findsNothing);
+    // Scoped to the dialog: the tree behind it still names the folder.
+    Finder inPicker(String label) => find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text(label),
+    );
+    expect(inPicker('Library root'), findsOne);
+    expect(inPicker('Outer'), findsNothing);
+    expect(inPicker('Outer/Inner'), findsNothing);
     await tester.tap(find.text('Cancel'));
     await settle(tester);
 

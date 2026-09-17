@@ -9,6 +9,14 @@ import 'package:niman/src/ui/strings.dart';
 /// Picks one of the library's folders; resolves to its library-relative
 /// path, or null when dismissed.
 ///
+/// The one place in the app where the question "which folder?" is asked:
+/// the folder settings ask it, and so does moving a note ([allowRoot]
+/// adds the library root as a target, which is what a move needs and a
+/// folder setting does not). Before, a move asked it with a bare
+/// dropdown that could not create a folder, so the same question wore
+/// two faces and only one of them could answer "a folder I have not
+/// made yet".
+///
 /// The list is the indexed folders, flat and sorted by path; a folder
 /// that does not exist yet is created from the dialog itself, so the
 /// caller never has to accept a typed path. [current] starts out
@@ -21,6 +29,9 @@ Future<String?> showFolderPicker(
   required List<Note> folders,
   required NoteOperations ops,
   String? current,
+  String? subtitle,
+  String? confirmLabel,
+  bool allowRoot = false,
 }) {
   return showDialog<String>(
     context: context,
@@ -29,6 +40,9 @@ Future<String?> showFolderPicker(
       folders: folders,
       ops: ops,
       current: current,
+      subtitle: subtitle,
+      confirmLabel: confirmLabel,
+      allowRoot: allowRoot,
     ),
   );
 }
@@ -41,6 +55,9 @@ final class FolderPicker extends StatefulWidget {
     required this.folders,
     required this.ops,
     required this.current,
+    this.subtitle,
+    this.confirmLabel,
+    this.allowRoot = false,
     super.key,
   });
 
@@ -57,6 +74,16 @@ final class FolderPicker extends StatefulWidget {
   /// when [folders] holds it; otherwise it merely names what *New
   /// folder* offers to create.
   final String? current;
+
+  /// A line under the title, for the caller whose title does not say on
+  /// its own what the choice is for.
+  final String? subtitle;
+
+  /// What the confirming button reads; *Choose* when left out.
+  final String? confirmLabel;
+
+  /// Whether the library root is offered as a target (`''`).
+  final bool allowRoot;
 
   @override
   State<FolderPicker> createState() => _FolderPickerState();
@@ -79,6 +106,9 @@ final class _FolderPickerState extends State<FolderPicker> {
     // (issue #94).
     _selected = _paths.contains(widget.current) ? widget.current : null;
   }
+
+  /// The rows, the library root first where it is offered.
+  List<String> get _targets => [if (widget.allowRoot) '', ..._paths];
 
   /// The name *New folder* opens with: the folder the setting points at
   /// while the library has none, so the library that never created its
@@ -114,29 +144,66 @@ final class _FolderPickerState extends State<FolderPicker> {
     });
   }
 
+  /// One target row: the same radio the settings dialogs mark a choice
+  /// with, so picking a folder and picking a theme read alike.
+  Widget _row(String path) {
+    final theme = Theme.of(context);
+    final selected = path == _selected;
+    final root = path.isEmpty;
+    return ListTile(
+      key: Key('folder-picker-row-${root ? '.' : path}'),
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            selected
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked,
+            color: selected ? theme.colorScheme.primary : null,
+          ),
+          const SizedBox(width: 10),
+          Icon(root ? Icons.home_outlined : Icons.folder_outlined),
+        ],
+      ),
+      title: Text(root ? AppStrings.libraryRoot : path),
+      selected: selected,
+      onTap: () => setState(() => _selected = path),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtitle = widget.subtitle;
+    final targets = _targets;
     return AlertDialog(
       title: Text(widget.title),
       content: SizedBox(
         width: 320,
         height: 400,
-        child: _paths.isEmpty
-            ? Center(child: Text(AppStrings.folderPickerEmpty))
-            : ListView.builder(
-                itemCount: _paths.length,
-                itemBuilder: (context, index) {
-                  final path = _paths[index];
-                  final selected = path == _selected;
-                  return ListTile(
-                    leading: const Icon(Icons.folder_outlined),
-                    title: Text(path),
-                    selected: selected,
-                    trailing: selected ? const Icon(Icons.check) : null,
-                    onTap: () => setState(() => _selected = path),
-                  );
-                },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  subtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
+            Expanded(
+              child: targets.isEmpty
+                  ? Center(child: Text(AppStrings.folderPickerEmpty))
+                  : ListView.builder(
+                      itemCount: targets.length,
+                      itemBuilder: (context, index) => _row(targets[index]),
+                    ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -152,7 +219,7 @@ final class _FolderPickerState extends State<FolderPicker> {
           onPressed: _selected == null
               ? null
               : () => Navigator.pop(context, _selected),
-          child: Text(AppStrings.actionChoose),
+          child: Text(widget.confirmLabel ?? AppStrings.actionChoose),
         ),
       ],
     );

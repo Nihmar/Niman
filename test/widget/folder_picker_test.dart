@@ -14,6 +14,7 @@ Future<String?> _pick(
   FakeLibrarySession session, {
   required List<String> names,
   String? current,
+  bool allowRoot = false,
   Future<void> Function(WidgetTester tester)? act,
 }) async {
   await session.open('/fake/library', create: true);
@@ -36,6 +37,7 @@ Future<String?> _pick(
                 folders: folders,
                 ops: ops,
                 current: current,
+                allowRoot: allowRoot,
               );
             },
             child: const Text('open'),
@@ -118,7 +120,7 @@ void main() {
       current: 'assets',
       act: (tester) async {
         // Nothing is selected, so there is nothing to choose yet.
-        expect(find.byIcon(Icons.check), findsNothing);
+        expect(find.byIcon(Icons.radio_button_checked), findsNothing);
         final choose = tester.widget<FilledButton>(
           find.byKey(const Key('folder-picker-choose')),
         );
@@ -173,6 +175,53 @@ void main() {
       },
     );
     expect(chosen, 'assets/clips');
+    await session.close();
+    await session.dispose();
+  });
+
+  // Moving a note used to ask "which folder?" through a bare dropdown of
+  // its own, which could not create one. It asks this dialog now, and
+  // this dialog had no way to say "the library root".
+  testWidgets('the library root is a target where the caller allows it', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    final chosen = await _pick(
+      tester,
+      session,
+      names: ['Books'],
+      allowRoot: true,
+      act: (tester) async {
+        expect(find.text('Library root'), findsOneWidget);
+        expect(find.text('Books'), findsOneWidget);
+        // The move gets what the settings had: a folder it has not made
+        // yet is one tap away.
+        expect(find.text('New folder'), findsOneWidget);
+        await tester.tap(find.text('Library root'));
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('folder-picker-choose')));
+        await tester.pumpAndSettle();
+      },
+    );
+    expect(chosen, '');
+    await session.close();
+    await session.dispose();
+  });
+
+  testWidgets('the library root stays out where it is not allowed', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    await _pick(
+      tester,
+      session,
+      names: ['Books'],
+      act: (tester) async {
+        expect(find.text('Library root'), findsNothing);
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+      },
+    );
     await session.close();
     await session.dispose();
   });
