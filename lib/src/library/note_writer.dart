@@ -285,7 +285,7 @@ Future<bool> swapFileIn(String abs, String tempAbs) async {
   final created = before.type == FileSystemEntityType.notFound;
   try {
     if (created) await Directory(p.dirname(abs)).create(recursive: true);
-    await File(tempAbs).rename(abs);
+    await _renameOrCopy(abs, tempAbs);
   } on Object {
     try {
       await File(tempAbs).delete();
@@ -295,6 +295,74 @@ Future<bool> swapFileIn(String abs, String tempAbs) async {
     rethrow;
   }
   return created;
+}
+
+/// How long the rename gets before the copy takes over. The ones that
+/// work land in single-digit milliseconds.
+const Duration _renameGrace = Duration(seconds: 3);
+
+/// Moves [tempAbs] onto [abs], by copy when the rename will not return.
+///
+/// **A workaround, not a fix** (issue #103). On Windows the third
+/// attachment of a sync run goes into `File.rename` and never comes out:
+/// not the first, not the second, the third, every run, whichever file
+/// happens to be third. The event loop keeps beating, every other call on
+/// the same folder — stat, directory walk, read — answers in under a
+/// millisecond throughout, and the same code on Linux never pauses.
+/// Moving the call off its isolate did not change it, and neither did
+/// owning and closing the download's sink first.
+///
+/// What is left is to stop waiting on it. The rename is given
+/// [_renameGrace] and, if it has not returned, the bytes are copied to
+/// the target instead and the temp dropped. The copy is verified by size
+/// before the temp goes, because a copy — unlike a rename — is not
+/// atomic, and half a file recorded as whole would be worse than a slow
+/// sync.
+///
+/// The abandoned rename is left running. It has never been seen to
+/// finish; if it ever did, it would put the same bytes at the same path.
+Future<void> _renameOrCopy(String abs, String tempAbs) async {
+  const log = AppLogger(name: 'swap');
+  final temp = File(tempAbs);
+  try {
+    await temp.rename(abs).timeout(_renameGrace);
+    return;
+  } on TimeoutException {
+    log.warning(
+      '"${p.basename(abs)}": the rename has not returned in '
+      '${_renameGrace.inSeconds}s (issue #103) — copying instead',
+    );
+  }
+  await copyFileOver(abs, tempAbs);
+}
+
+/// Copies [tempAbs] onto [abs] and drops the temp — the slow half of the
+/// swap, kept apart so it can be tested without a rename that hangs
+/// (issue #103).
+///
+/// The copy is checked by size before the temp goes: a copy is not
+/// atomic, unlike the rename it stands in for, and half a file recorded
+/// as a whole one would outlive the sync that wrote it.
+///
+/// A temp that will not delete is left where it is. The abandoned rename
+/// may still hold it; it is hidden, the indexer skips it, and the bytes
+/// are already in place, so failing a finished download over it would
+/// help nobody.
+Future<void> copyFileOver(String abs, String tempAbs) async {
+  const log = AppLogger(name: 'swap');
+  final name = p.basename(abs);
+  final expected = (await FileStat.stat(tempAbs)).size;
+  await File(tempAbs).copy(abs);
+  final copied = (await FileStat.stat(abs)).size;
+  if (copied != expected) {
+    throw FileSystemException('copied $copied of $expected bytes', abs);
+  }
+  log.warning('"$name": copied $copied bytes in place');
+  try {
+    await File(tempAbs).delete().timeout(_renameGrace);
+  } on Object catch (error) {
+    log.warning('"$name": the temp could not be removed: $error');
+  }
 }
 
 /// Renames the finished file [tempAbs] over [abs] (creating missing

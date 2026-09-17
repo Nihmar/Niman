@@ -25,6 +25,43 @@ void main() {
     return file.path;
   }
 
+  group('the copy that stands in for a rename that hangs (issue #103)', () {
+    test('puts the bytes in place and takes the temp with it', () async {
+      final target = p.join(root.path, 'clip.wav');
+      final source = await temp('.clip.wav.niman-tmp-copy-1', 'audio bytes');
+
+      await copyFileOver(target, source);
+
+      expect(File(target).readAsStringSync(), 'audio bytes');
+      expect(File(source).existsSync(), isFalse);
+    });
+
+    test('overwrites an existing file', () async {
+      final target = p.join(root.path, 'clip.wav');
+      await File(target).writeAsString('old');
+      final source = await temp('.clip.wav.niman-tmp-copy-2', 'new');
+
+      await copyFileOver(target, source);
+
+      expect(File(target).readAsStringSync(), 'new');
+    });
+
+    test(
+      'a temp that is gone fails instead of writing an empty file',
+      () async {
+        final target = p.join(root.path, 'clip.wav');
+        final source = p.join(root.path, '.clip.wav.niman-tmp-copy-3');
+
+        await expectLater(
+          copyFileOver(target, source),
+          throwsA(isA<FileSystemException>()),
+        );
+
+        expect(File(target).existsSync(), isFalse);
+      },
+    );
+  });
+
   test('a new file is created and reported as new', () async {
     final target = p.join(root.path, 'Attachments', 'clip.wav');
     final source = await temp('.clip.wav.niman-tmp-sync-1', 'audio');
