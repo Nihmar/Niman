@@ -32,21 +32,23 @@ test_all() {
 }
 
 apk() {
-  local flavor="${1:-}"
-  if [ -n "$flavor" ]; then
+  # The official APK by default; "beta" builds the testing build.
+  local flavor="${1:-official}"
+  if [ "$flavor" = "beta" ]; then
     # The testing build (issue #106): the release pipeline plus the
     # flavor's separate application ID; APP_CHANNEL marks the Dart
     # side, which hides and skips update management.
     flutter build apk --release --flavor "$flavor" --dart-define="APP_CHANNEL=testing" >"$log" 2>&1
   else
-    flutter build apk --release >"$log" 2>&1
+    # The official APK (issue #106): AGP drops the no-flavor variant
+    # once the channel dimension has a flavor, so the official build
+    # is the explicit "official" flavor (no application ID suffix).
+    flutter build apk --release --flavor official >"$log" 2>&1
   fi
   local status=$?
   tail -n 3 "$log"
   if [ $status -eq 0 ]; then
-    local name="app-release"
-    [ -n "$flavor" ] && name="app-$flavor-release"
-    echo "artifact: build/app/outputs/flutter-apk/$name.apk"
+    echo "artifact: build/app/outputs/flutter-apk/app-$flavor-release.apk"
   fi
   return $status
 }
