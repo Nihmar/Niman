@@ -45,6 +45,7 @@ import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_header.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
+import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
@@ -55,7 +56,6 @@ import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
-import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/trash.dart';
@@ -793,14 +793,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         editSession: editSession,
       );
     };
-  }
-
-  /// The way back out of the full-screen preview (issue #100 moved the
-  /// button itself into [ExitFullScreenButton]).
-  Widget _exitFullScreenButton() {
-    return ExitFullScreenButton(
-      onExit: () => setState(() => _previewFullScreen = false),
-    );
   }
 
   /// The app-bar eye action: flips the editor/preview pane.
@@ -1687,174 +1679,64 @@ final class _LibraryShellState extends State<_LibraryShell>
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     _markOpenNote(controller.root, selectedPath);
-
-    if (narrow) {
-      // Phone: the selected note opens full-screen (from any tab) over the
-      // tab shell, which stays mounted underneath (T-TS-08): swapping it
-      // out used to dispose all five kept-alive bodies at once, and going
-      // back remounted them mid-animation. The note fades in and out with
-      // the same fade as before.
-      final fullNote = selectedPath != null && !_selectedIsDir && !_treeVisible;
-      // The preview may show without its chrome; only a note that is
-      // actually previewing (not split, not a kind GUI) can get there, so
-      // the flag alone never decides it.
-      final immersive =
-          fullNote &&
-          _previewFullScreen &&
-          _previewVisible &&
-          _previewToggleVisible &&
-          !previewSplits(
-            _editorSettings.previewMode,
-            narrow: true,
-            editor: _editorSettings.editorKind,
-            previewEnabled: _editorSettings.previewEnabled,
-          );
-      // The same accelerators on the phone layout, but without the
-      // focus claim: a field keeps the software keyboard (T-PP-10).
-      return CallbackShortcuts(
-        bindings: _appShortcutBindings(),
-        child: PopScope(
-          canPop: !fullNote,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            // Back leaves fullscreen before it leaves the note: one gesture,
-            // one layer of chrome, the way every other fullscreen behaves.
-            if (immersive) {
-              setState(() => _previewFullScreen = false);
-              return;
-            }
-            _closeFullScreenNote();
-          },
-          child: ColoredBox(
-            // Opaque surface behind every phone transition (issue #4): the
-            // full-note fade starts from transparent, and without this the
-            // first frames expose the black Android window instead.
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // The tab shell never unmounts: hidden it skips layout, paint,
-                // and tickers, and the fullscreen note above is opaque. The
-                // hiding waits out the open fade (issue #4): the note fades
-                // in over the tabs instead of over the window background.
-                Offstage(
-                  key: const ValueKey('tab-shell-offstage'),
-                  offstage: fullNote && _noteHidingTabs,
-                  child: TickerMode(
-                    enabled: !fullNote,
-                    child: KeyedSubtree(
-                      key: const ValueKey('tab-shell'),
-                      child: _tabShell(
-                        controller: controller,
-                        bodies: _tabBodyChildren(controller),
-                      ),
-                    ),
-                  ),
-                ),
-                AnimatedSwitcher(
-                  duration: _fullNoteFade,
-                  switchInCurve: Curves.easeOutCubic,
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: fullNote
-                      ? KeyedSubtree(
-                          key: const ValueKey('full-note'),
-                          child: Scaffold(
-                            appBar: immersive
-                                ? null
-                                : AppBar(
-                                    leading: BackButton(
-                                      onPressed: _closeFullScreenNote,
-                                    ),
-                                    title: Text(p.basename(selectedPath)),
-                                    actions: [
-                                      ..._kindActions,
-                                      if (!previewSplits(
-                                            _editorSettings.previewMode,
-                                            narrow: true,
-                                            editor: _editorSettings.editorKind,
-                                            previewEnabled:
-                                                _editorSettings.previewEnabled,
-                                          ) &&
-                                          _previewToggleVisible) ...[
-                                        _previewToggleAction(),
-                                        if (_previewVisible)
-                                          _previewFullScreenAction(),
-                                      ],
-                                      _noteMenu(),
-                                    ],
-                                  ),
-                            body: Stack(
-                              children: [
-                                // Stable subtree across the immersive toggle:
-                                // only the top inset flips, so entering or
-                                // leaving fullscreen never reparents (and
-                                // disposes) the open note's state, focus and
-                                // scroll. The all-false SafeArea is a layout
-                                // no-op.
-                                Positioned.fill(
-                                  child: SafeArea(
-                                    top: immersive,
-                                    bottom: false,
-                                    left: false,
-                                    right: false,
-                                    child: _fullNoteView(
-                                      controller,
-                                      selectedPath,
-                                    ),
-                                  ),
-                                ),
-                                if (immersive) _exitFullScreenButton(),
-                              ],
-                            ),
-                            bottomNavigationBar: immersive
-                                ? null
-                                : _shellTabs(),
-                          ),
-                        )
-                      : null,
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    // The desktop has no window app bar (T-PP-22): the rail names the
-    // app, the tree carries its own controls at the base, and an open
-    // note carries its controls in the detail pane's header. On Linux the
-    // window is frameless and the app draws its own title bar instead.
-    return Scaffold(
-      body: CallbackShortcuts(
-        bindings: _appShortcutBindings(),
-        // The shell has to be an ancestor of the primary focus for key
-        // events to bubble to the bindings; a fresh window focuses nothing
-        // (T-PP-10), so the body claims it until the tree or the editor
-        // takes over.
-        child: Focus(
-          focusNode: _shellFocus,
-          autofocus: true,
-          child: Column(
-            children: [
-              if (widget.window.customTitleBar)
-                AppTitleBar(
-                  title: _windowTitle,
-                  sidebarVisible: _sidebarVisible,
-                  onToggleSidebar: _toggleSidebar,
-                  window: widget.window,
-                ),
-              Expanded(child: _wideContent(controller)),
-            ],
-          ),
-        ),
-      ),
+    final splitsPreview = previewSplits(
+      _editorSettings.previewMode,
+      narrow: narrow,
+      editor: _editorSettings.editorKind,
+      previewEnabled: _editorSettings.previewEnabled,
     );
+    final props = ShellLayoutProps(
+      controller: controller,
+      selectedPath: selectedPath,
+      selectedIsDir: _selectedIsDir,
+      treeVisible: _treeVisible,
+      previewFullScreen: _previewFullScreen,
+      previewSplitsHere: splitsPreview,
+      previewVisible: _previewVisible,
+      previewToggleVisible: _previewToggleVisible,
+      noteHidingTabs: _noteHidingTabs,
+      noteFade: _fullNoteFade,
+      shortcutBindings: _appShortcutBindings(),
+      onCloseFullScreenNote: _closeFullScreenNote,
+      onLeaveFullScreenPreview: () =>
+          setState(() => _previewFullScreen = false),
+      noteBarActions: _noteBarActions(splitsPreview: splitsPreview),
+      buildTabShell: () => _tabShell(
+        controller: controller,
+        bodies: _tabBodyChildren(controller),
+      ),
+      buildFullNote: (path) => _fullNoteView(controller, path),
+      window: widget.window,
+      windowTitle: _windowTitle,
+      sidebarVisible: _sidebarVisible,
+      onToggleSidebar: _toggleSidebar,
+      shellFocus: _shellFocus,
+      tabIndex: _tab.index,
+      onDestinationSelected: _onDestinationSelected,
+      buildWideSlots: () => _wideSlots(controller),
+    );
+    return narrow
+        ? NarrowShellLayout(props: props)
+        : WideShellLayout(props: props);
   }
 
-  /// The wide-layout content: the tree + detail split for Files (and for
-  /// an open quick note, which lives in the detail pane — its tab body is
-  /// empty by design), the tab body itself otherwise.
+  /// The open note's actions on the phone's note bar: the kind toggles,
+  /// the preview controls where a preview can be toggled at all, and the
+  /// ⋮ menu.
+  List<Widget> _noteBarActions({required bool splitsPreview}) {
+    return [
+      ..._kindActions,
+      if (!splitsPreview && _previewToggleVisible) ...[
+        _previewToggleAction(),
+        if (_previewVisible) _previewFullScreenAction(),
+      ],
+      _noteMenu(),
+    ];
+  }
+
+  /// The wide layout's tab slots: the tree + detail split for Files (and
+  /// for an open quick note, which lives in the detail pane — its tab
+  /// body is empty by design), then one slot per remaining tab.
   ///
   /// Bodies are kept mounted exactly like the narrow stack
   /// ([TabBodyStack]): the tree/detail pair shares ONE slot across Files
@@ -1862,40 +1744,29 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// per-level queries or re-inflates the open editor. The 2026-09-10
   /// desktop log showed the cost of the old swap-in/swap-out: 6-9 ms tree
   /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
-  Widget _wideContent(LibrarySession controller) {
+  List<Widget> _wideSlots(LibrarySession controller) {
     final filesVisible =
         _tab == ShellTab.files ||
         (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
-    return Row(
-      children: [
-        _shellRail(),
-        const VerticalDivider(width: 1),
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _wideSlot(visible: filesVisible, child: _wideBody(controller)),
-              // One slot per remaining tab, in tab order so a slot's
-              // identity never moves. Unvisited tabs build the empty
-              // placeholder `_tabBodyFor` returns.
-              for (final tab in ShellTab.values)
-                if (tab != ShellTab.files && tab != ShellTab.quickNote)
-                  _wideSlot(
-                    visible: _tab == tab,
-                    retainLayout: tab == ShellTab.search,
-                    child: _tabBodyFor(tab, controller),
-                  ),
-              // The quick-note chooser: empty while its note is open in
-              // the slot above, the choose/create screen otherwise.
-              _wideSlot(
-                visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
-                child: _tabBodyFor(ShellTab.quickNote, controller),
-              ),
-            ],
+    return [
+      _wideSlot(visible: filesVisible, child: _wideBody(controller)),
+      // One slot per remaining tab, in tab order so a slot's identity
+      // never moves. Unvisited tabs build the empty placeholder
+      // `_tabBodyFor` returns.
+      for (final tab in ShellTab.values)
+        if (tab != ShellTab.files && tab != ShellTab.quickNote)
+          _wideSlot(
+            visible: _tab == tab,
+            retainLayout: tab == ShellTab.search,
+            child: _tabBodyFor(tab, controller),
           ),
-        ),
-      ],
-    );
+      // The quick-note chooser: empty while its note is open in the slot
+      // above, the choose/create screen otherwise.
+      _wideSlot(
+        visible: _tab == ShellTab.quickNote && _showQuickNoteChooser,
+        child: _tabBodyFor(ShellTab.quickNote, controller),
+      ),
+    ];
   }
 
   /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
@@ -1917,16 +1788,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       );
     }
     return Offstage(offstage: !visible, child: slot);
-  }
-
-  /// The fixed left rail (T-PP-14): the wide layout's always-visible twin
-  /// of the narrow bottom bar — same tabs, same order, same routing, so a
-  /// tab switch does the same thing on both layouts.
-  Widget _shellRail() {
-    return ShellRail(
-      selectedIndex: _tab.index,
-      onDestinationSelected: _onDestinationSelected,
-    );
   }
 
   /// The current tab's FAB, or null for the tabs that have none.
