@@ -765,34 +765,31 @@ void main() {
     await db.close();
   });
 
-  test(
-    'a fresh database holds the settings, registry, widgets and sync '
-    'state alone',
-    () async {
-      final db = AppDatabase(NativeDatabase(dbFile));
-      final tables = await db
-          .customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table' "
-            "AND name NOT LIKE 'sqlite_%'",
-          )
-          .get();
-      expect(
-        tables.map((r) => r.read<String>('name')),
-        unorderedEquals([
-          'app_settings',
-          'known_libraries',
-          'widget_configs',
-          'sync_destinations',
-          'sync_items',
-          'sync_ops',
-        ]),
-      );
-      expect(await db.select(db.appSettings).get(), isEmpty);
-      expect(await db.select(db.knownLibraries).get(), isEmpty);
-      expect(await db.select(db.widgetConfigs).get(), isEmpty);
-      await db.close();
-    },
-  );
+  test('a fresh database holds the settings, registry, widgets and sync '
+      'state alone', () async {
+    final db = AppDatabase(NativeDatabase(dbFile));
+    final tables = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name NOT LIKE 'sqlite_%'",
+        )
+        .get();
+    expect(
+      tables.map((r) => r.read<String>('name')),
+      unorderedEquals([
+        'app_settings',
+        'known_libraries',
+        'widget_configs',
+        'sync_destinations',
+        'sync_items',
+        'sync_ops',
+      ]),
+    );
+    expect(await db.select(db.appSettings).get(), isEmpty);
+    expect(await db.select(db.knownLibraries).get(), isEmpty);
+    expect(await db.select(db.widgetConfigs).get(), isEmpty);
+    await db.close();
+  });
 
   group('v18 → v19: the widget configs appear', () {
     test('an existing install upgrades with an empty widget table', () async {

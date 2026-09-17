@@ -460,9 +460,7 @@ void main() {
     test('a remote rename found by file id becomes a local move', () {
       final plan = planSync(
         local: {'a.md': disk()},
-        remote: {
-          'Renamed.md': dav(path: 'Renamed.md', fileId: '42'),
-        },
+        remote: {'Renamed.md': dav(path: 'Renamed.md', fileId: '42')},
         rows: {'a.md': row(fileId: '42')},
         capabilities: full,
       );
