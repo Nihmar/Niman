@@ -68,6 +68,14 @@ final class TurkishStrings extends Strings {
   String get trashSubtitle =>
       'Silinen öğeler .trash/ klasörüne gider (kapalı = kalıcı silme)';
   @override
+  String get trashAutoEmptyTitle => 'Çöp kutusunu otomatik boşalt';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Kütüphane açıldığında daha eski silmeler kalıcı olarak gider';
+  @override
+  String trashAutoEmptyValue(int days) =>
+      days == 0 ? 'Hiçbir zaman' : '$days gün';
+  @override
   String get debugLogsTitle => 'Hata ayıklama kayıtları';
   @override
   String get debugLogsSubtitle => 'Uygulama olaylarını bellek tamponuna yazar';

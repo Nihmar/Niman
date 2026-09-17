@@ -69,6 +69,17 @@ final class FrenchStrings extends Strings {
       'Les éléments supprimés vont dans .trash/ (off = suppression '
       'définitive)';
   @override
+  String get trashAutoEmptyTitle => 'Vidage automatique de la corbeille';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Les suppressions anciennes disparaissent à l’ouverture';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Jamais'
+      : days == 1
+      ? '1 jour'
+      : '$days jours';
+  @override
   String get debugLogsTitle => 'Journaux de débogage';
   @override
   String get debugLogsSubtitle =>

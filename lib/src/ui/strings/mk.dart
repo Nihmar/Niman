@@ -69,6 +69,17 @@ final class MacedonianStrings extends Strings {
       'Избришаните елементи се преместуваат во .trash/ (исклучено = '
       'трајно брисање)';
   @override
+  String get trashAutoEmptyTitle => 'Автоматско празнење на корпата';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Постарите бришења исчезнуваат засекогаш при отворање на библиотеката';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Никогаш'
+      : days == 1
+      ? '1 ден'
+      : '$days дена';
+  @override
   String get debugLogsTitle => 'Дневници за откланување грешки';
   @override
   String get debugLogsSubtitle =>

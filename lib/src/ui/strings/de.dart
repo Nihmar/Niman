@@ -68,6 +68,17 @@ final class GermanStrings extends Strings {
   String get trashSubtitle =>
       'Gelöschtes wird nach .trash/ verschoben (aus = endgültig löschen)';
   @override
+  String get trashAutoEmptyTitle => 'Papierkorb automatisch leeren';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Ältere Löschungen verschwinden beim Öffnen endgültig';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nie'
+      : days == 1
+      ? '1 Tag'
+      : '$days Tage';
+  @override
   String get debugLogsTitle => 'Debug-Protokoll';
   @override
   String get debugLogsSubtitle =>

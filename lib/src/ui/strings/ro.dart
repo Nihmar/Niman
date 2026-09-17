@@ -69,6 +69,19 @@ final class RomanianStrings extends Strings {
       'Elementele șterse se mută în .trash/ (dezactivat = ștergere '
       'permanentă)';
   @override
+  String get trashAutoEmptyTitle => 'Golire automată a coșului';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Ștergerile mai vechi dispar definitiv la deschiderea bibliotecii';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Niciodată'
+      : days == 1
+      ? '1 zi'
+      : days % 100 == 0 || days % 100 >= 20
+      ? '$days de zile'
+      : '$days zile';
+  @override
   String get debugLogsTitle => 'Jurnale de depanare';
   @override
   String get debugLogsSubtitle =>

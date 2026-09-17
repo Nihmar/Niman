@@ -69,6 +69,17 @@ final class GreekStrings extends Strings {
       'Τα διαγραμμένα στοιχεία πάνε στο .trash/ (ανενεργό = μόνιμη '
       'διαγραφή)';
   @override
+  String get trashAutoEmptyTitle => 'Αυτόματη εκκένωση σκουπιδιέρας';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Οι παλαιότερες διαγραφές χάνονται οριστικά μόλις ανοίξει η βιβλιοθήκη';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Ποτέ'
+      : days == 1
+      ? '1 ημέρα'
+      : '$days ημέρες';
+  @override
   String get debugLogsTitle => 'Καταγραφές αποσφαλμάτωσης';
   @override
   String get debugLogsSubtitle =>

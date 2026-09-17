@@ -69,6 +69,13 @@ final class HungarianStrings extends Strings {
       'A törölt elemek a .trash/ mappába kerülnek (kikapcsolva = végleges '
       'törlés)';
   @override
+  String get trashAutoEmptyTitle => 'Kuka automatikus ürítése';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'A régebbi törlések véglegesen eltűnnek a könyvtár megnyitásakor';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? 'Soha' : '$days nap';
+  @override
   String get debugLogsTitle => 'Hibakeresési naplók';
   @override
   String get debugLogsSubtitle =>

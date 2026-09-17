@@ -69,6 +69,17 @@ final class EstonianStrings extends Strings {
       'Kustutatud elemendid liigutatakse .trash/-i (välja lülitatud = püsiv '
       'kustutamine)';
   @override
+  String get trashAutoEmptyTitle => 'Prügikasti automaatne tühjendamine';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Vanemad kustutamised kaovad jäädavalt kogu avamisel';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Mitte kunagi'
+      : days == 1
+      ? '1 päev'
+      : '$days päeva';
+  @override
   String get debugLogsTitle => 'Silumise logid';
   @override
   String get debugLogsSubtitle => 'Logib rakenduse sündmused mälupufferis';

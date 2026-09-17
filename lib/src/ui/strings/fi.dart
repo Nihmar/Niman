@@ -68,6 +68,17 @@ final class FinnishStrings extends Strings {
   String get trashSubtitle =>
       'Poistetut siirtyvät kansioon .trash/ (pois päältä = pysyvä poisto)';
   @override
+  String get trashAutoEmptyTitle => 'Tyhjennä kori automaattisesti';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Vanhemmat poistot katoavat lopullisesti kirjastoa avattaessa';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Ei koskaan'
+      : days == 1
+      ? '1 päivä'
+      : '$days päivää';
+  @override
   String get debugLogsTitle => 'Vianetsintälokit';
   @override
   String get debugLogsSubtitle =>
