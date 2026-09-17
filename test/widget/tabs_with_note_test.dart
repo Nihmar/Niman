@@ -193,6 +193,22 @@ void main() {
       await controller.dispose();
     });
 
+    // The point of switching back and forth is that it is one tap in one
+    // place: the fullscreen button appearing must not slide the toggle
+    // out from under the thumb already on it (user, 2026-09-17).
+    testWidgets('leaves the preview toggle where it was', (tester) async {
+      await pumpWithNote(tester);
+      final toggle = find.byKey(const Key('editor-preview-toggle'));
+      final editing = tester.getCenter(toggle);
+
+      await tester.tap(toggle);
+      await settle(tester);
+      expect(tester.getCenter(toggle), editing);
+
+      await controller.close();
+      await controller.dispose();
+    });
+
     testWidgets('hides the app bar and the tab bar', (tester) async {
       await pumpPreviewing(tester);
       await tester.tap(find.byKey(const Key('preview-fullscreen')));
