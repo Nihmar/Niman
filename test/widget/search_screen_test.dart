@@ -12,6 +12,7 @@ import 'package:niman/src/ui/search_screen.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_replace_source.dart';
 import '../fakes/fake_search_source.dart';
+import '../fakes/shell_harness.dart';
 
 SearchHit _hit(String path, {String? title, String? snippet}) => SearchHit(
   noteId: 0,
@@ -242,6 +243,36 @@ void main() {
     await tester.pump();
     expect(find.text('No matches'), findsOne);
     expect(find.byKey(const Key('search-replace')), findsNothing);
+  });
+
+  testWidgets('phone width: the mode row keeps both buttons inside', (
+    tester,
+  ) async {
+    // Regression: at standard icon-button density the row overflowed a
+    // 390 px surface by a few pixels with the replace and the tags
+    // button both showing — a rendering error on a phone. Compact
+    // density keeps it inside.
+    setSurfaceSize(tester, const Size(390, 844));
+    source.hits = [_hit('Note.md', title: 'Note')];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchScreen(
+            controller: session,
+            onOpenNote: opened.add,
+            source: source,
+            onOpenTags: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byKey(const Key('search-query')), 'no');
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+    expect(find.byKey(const Key('search-replace')), findsOneWidget);
+    expect(find.byKey(const Key('open-tags')), findsOneWidget);
   });
 
   testWidgets('replace: whole-library flow previews inline and reports', (
