@@ -1599,17 +1599,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The sort-direction toggle (T-UI-03): the mockup's `unfold_more`
   /// chevrons; the icon reflects the current direction.
   Widget _sortToggle() {
-    return IconButton(
-      key: const Key('toggle-sort'),
-      tooltip: _editorSettings.treeSort == TreeSort.nameAsc
-          ? AppStrings.sortDescTooltip
-          : AppStrings.sortAscTooltip,
-      icon: AnimatedRotation(
-        turns: _editorSettings.treeSort == TreeSort.nameAsc ? 0 : 0.5,
-        duration: const Duration(milliseconds: 180),
-        child: const Icon(Icons.unfold_more),
-      ),
-      onPressed: _toggleTreeSort,
+    return TreeSortToggle(
+      ascending: _editorSettings.treeSort == TreeSort.nameAsc,
+      onToggle: () => unawaited(_toggleTreeSort()),
     );
   }
 
