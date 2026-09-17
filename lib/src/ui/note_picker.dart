@@ -44,6 +44,10 @@ Future<bool> showQuickNotePicker(
   final ops = controller.ops;
   if (ops == null) return false;
   await ops.setQuickNotePath(path: path);
+  // Announce it: a settings file write hints the sync but bumps no
+  // revision, so every surface showing the quick note — the settings
+  // row above all — would otherwise keep the old one.
+  controller.notify();
   return true;
 }
 
