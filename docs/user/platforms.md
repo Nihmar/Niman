@@ -23,6 +23,11 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 - Wayland supported; window owns close-request handling (dirty-check on
   close rides it).
+- Closing the window ends the process there and then, skipping the
+  library teardown libc runs on the way out: on NVIDIA that teardown
+  segfaults inside the EGL driver and left a core dump behind every
+  close. Nothing of ours is skipped — the dirty-check ran, the notes are
+  written and the engine is down before the window goes.
 - Spellcheck via hunspell (`spellDictionaries` in library settings), plus
   a per-library personal dictionary (right-click *Add to dictionary*,
   `<library>/.niman/dictionary.txt`).
