@@ -67,7 +67,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-note-action'),
           icon: Icons.note_add_outlined,
-          tooltip: AppStrings.newNoteTitle,
+          label: AppStrings.newNoteTitle,
           open: expanded,
           onTap: onNewNote,
         ),
@@ -75,7 +75,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-from-template-action'),
           icon: Icons.file_copy_outlined,
-          tooltip: AppStrings.newFromTemplateTitle,
+          label: AppStrings.newFromTemplateTitle,
           open: expanded,
           onTap: onNewFromTemplate,
         ),
@@ -83,7 +83,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-list-note-action'),
           icon: Icons.checklist_outlined,
-          tooltip: AppStrings.newListNoteTitle,
+          label: AppStrings.newListNoteTitle,
           open: expanded,
           onTap: onNewListNote,
         ),
@@ -91,7 +91,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-audio-note-action'),
           icon: Icons.mic_outlined,
-          tooltip: AppStrings.newAudioNoteTitle,
+          label: AppStrings.newAudioNoteTitle,
           open: expanded,
           onTap: onNewAudioNote,
         ),
@@ -99,7 +99,7 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-folder-action'),
           icon: Icons.create_new_folder_outlined,
-          tooltip: AppStrings.newFolderTitle,
+          label: AppStrings.newFolderTitle,
           open: expanded,
           onTap: onNewFolder,
         ),
@@ -108,7 +108,9 @@ final class NewItemFab extends StatelessWidget {
           onAnchor: onAnchor,
           child: FloatingActionButton(
             key: const Key('new-note-fab'),
-            tooltip: expanded ? 'Close' : 'New',
+            tooltip: expanded
+                ? AppStrings.closeMenuTooltip
+                : AppStrings.newItemTooltip,
             onPressed: onToggle,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),
@@ -124,20 +126,29 @@ final class NewItemFab extends StatelessWidget {
   }
 }
 
-/// A small FAB that scales/fades in when [open]; taps invoke [onTap].
+/// One action of the open menu: an icon with its name beside it, that
+/// scales/fades in when [open] and invokes [onTap] when tapped.
+///
+/// The name is written on the button rather than left to the tooltip
+/// (user, 2026-09-17): five bare icons asked the reader to guess which
+/// of them was "from a template" and which was "a list", and on Android
+/// a tooltip only ever appears after a long press — which nobody makes
+/// on a button they are already unsure about.
+///
 /// Kept in the tree while closed (IgnorePointer + scale 0) so expanding
-/// is a simple animation with no layout jump.
+/// is a simple animation with no layout jump; it grows out of its right
+/// edge, where the button the menu came from is.
 final class _MiniFab extends StatelessWidget {
   const new({
     required this.icon,
-    required this.tooltip,
+    required this.label,
     required this.open,
     required this.onTap,
     super.key,
   });
 
   final IconData icon;
-  final String tooltip;
+  final String label;
   final bool open;
   final VoidCallback onTap;
 
@@ -147,6 +158,7 @@ final class _MiniFab extends StatelessWidget {
       ignoring: !open,
       child: AnimatedScale(
         scale: open ? 1 : 0,
+        alignment: Alignment.centerRight,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
         child: AnimatedOpacity(
@@ -154,11 +166,11 @@ final class _MiniFab extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           // No hero: three FABs share the widget's default hero tag when
           // this route participates in a transition.
-          child: FloatingActionButton.small(
+          child: FloatingActionButton.extended(
             heroTag: null,
-            tooltip: tooltip,
             onPressed: onTap,
-            child: Icon(icon),
+            icon: Icon(icon),
+            label: Text(label),
           ),
         ),
       ),

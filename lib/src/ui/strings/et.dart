@@ -794,6 +794,10 @@ final class EstonianStrings extends Strings {
   @override
   String get newNoteTitle => 'Uus märge';
   @override
+  String get newItemTooltip => 'Uus';
+  @override
+  String get closeMenuTooltip => 'Sulge';
+  @override
   String get newFolderTitle => 'Uus kaust';
   @override
   String get newNoteHere => 'Uus märge siia';

@@ -804,6 +804,10 @@ final class BosnianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nova bilješka';
   @override
+  String get newItemTooltip => 'Novo';
+  @override
+  String get closeMenuTooltip => 'Zatvori';
+  @override
   String get newFolderTitle => 'Nova mapa';
   @override
   String get newNoteHere => 'Nova bilješka ovdje';

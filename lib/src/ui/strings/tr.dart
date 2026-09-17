@@ -796,6 +796,10 @@ final class TurkishStrings extends Strings {
   @override
   String get newNoteTitle => 'Yeni not';
   @override
+  String get newItemTooltip => 'Yeni';
+  @override
+  String get closeMenuTooltip => 'Kapat';
+  @override
   String get newFolderTitle => 'Yeni klasör';
   @override
   String get newNoteHere => 'Buraya yeni not';

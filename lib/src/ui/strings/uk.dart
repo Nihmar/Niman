@@ -800,6 +800,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get newNoteTitle => 'Нова нотатка';
   @override
+  String get newItemTooltip => 'Нове';
+  @override
+  String get closeMenuTooltip => 'Закрити';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteHere => 'Нова нотатка тут';

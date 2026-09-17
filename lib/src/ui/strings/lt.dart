@@ -794,6 +794,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nauja pastaba';
   @override
+  String get newItemTooltip => 'Naujas';
+  @override
+  String get closeMenuTooltip => 'Uždaryti';
+  @override
   String get newFolderTitle => 'Naujas katalogas';
   @override
   String get newNoteHere => 'Nauja pastaba čia';

@@ -798,6 +798,10 @@ final class EnglishStrings extends Strings {
   @override
   String get newNoteTitle => 'New note';
   @override
+  String get newItemTooltip => 'New';
+  @override
+  String get closeMenuTooltip => 'Close';
+  @override
   String get newFolderTitle => 'New folder';
   @override
   String get newNoteHere => 'New note here';

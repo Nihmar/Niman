@@ -805,6 +805,10 @@ final class SwedishStrings extends Strings {
   @override
   String get newNoteTitle => 'Ny anteckning';
   @override
+  String get newItemTooltip => 'Ny';
+  @override
+  String get closeMenuTooltip => 'Stäng';
+  @override
   String get newFolderTitle => 'Ny mapp';
   @override
   String get newNoteHere => 'Ny anteckning här';

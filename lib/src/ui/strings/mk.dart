@@ -808,6 +808,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get newNoteTitle => 'Нова белешка';
   @override
+  String get newItemTooltip => 'Ново';
+  @override
+  String get closeMenuTooltip => 'Затвори';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteHere => 'Нова белешка овде';

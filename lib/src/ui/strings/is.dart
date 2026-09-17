@@ -801,6 +801,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get newNoteTitle => 'Nýtt minnisblað';
   @override
+  String get newItemTooltip => 'Nýtt';
+  @override
+  String get closeMenuTooltip => 'Loka';
+  @override
   String get newFolderTitle => 'Ný mappa';
   @override
   String get newNoteHere => 'Nýtt minnisblað hér';
