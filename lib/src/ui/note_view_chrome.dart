@@ -140,9 +140,14 @@ final class NoteStatusRow extends StatelessWidget {
                 onPressed: () => unawaited(onOutline()),
               ),
             ),
-          // Find & replace lives in the editor pane (hidden in
-          // preview-only mode).
-          if (!loading && (splitPreview || !showPreview))
+          // Find & replace lives in the editor pane, so preview-only mode
+          // has nothing to search — but the button keeps its slot and
+          // goes grey rather than dropping out of the row. This row is
+          // laid out from the left, so a button that comes and goes
+          // drags every icon after it sideways, and the eye is tapped
+          // often enough that the icons would move under a thumb already
+          // on them (the app bar had the same fault, #122).
+          if (!loading)
             Padding(
               padding: iconPadding,
               child: IconButton(
@@ -152,7 +157,7 @@ final class NoteStatusRow extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: onFind,
+                onPressed: splitPreview || !showPreview ? onFind : null,
               ),
             ),
           if (!loading && spellCheckAvailable)
