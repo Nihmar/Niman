@@ -1,0 +1,204 @@
+/// The library settings the shell paints with (issue #100, split out of
+/// `shell.dart`): fourteen loose fields and the eighty-line read that
+/// filled them, now one value the shell holds and swaps.
+///
+/// They are per library and refresh on session events — the settings
+/// screen calls `notify()` after a change — so an open editor picks a
+/// change up without the note being reopened. Holding them as one value
+/// is what makes that cheap to check: the shell rebuilds only when the
+/// value it holds is not the value it just read.
+library;
+
+import 'package:flutter/foundation.dart';
+import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/library/session.dart';
+import 'package:niman/src/links/missing_note_handler.dart';
+
+/// What the shell needs to know about the open library to draw it.
+@immutable
+final class ShellEditorSettings {
+  /// Creates a settings value; every field defaults to what a library
+  /// that has never been configured reads back as.
+  const new({
+    this.lineNumbers = true,
+    this.autofocusEditor = false,
+    this.previewMode = PreviewLayoutMode.auto,
+    this.splitRatio = defaultSplitRatio,
+    this.editorKind = EditorKind.source,
+    this.editorsEnabled = const {EditorKind.source, EditorKind.wysiwyg},
+    this.previewEnabled = true,
+    this.linkType = LinkType.wikilink,
+    this.missingNoteLocation = MissingNoteLocation.currentFolder,
+    this.attachmentsFolder = defaultAttachmentsFolder,
+    this.indentWidth = 2,
+    this.treeSort = TreeSort.nameAsc,
+    this.treeWidth = defaultTreeWidth,
+    this.toolbarLayout = ToolbarLayout.defaults,
+  });
+
+  /// What the shell shows before the first read lands.
+  static const ShellEditorSettings defaults = ShellEditorSettings();
+
+  /// Whether the editor shows the row-number column.
+  final bool lineNumbers;
+
+  /// Whether opening a note raises the keyboard.
+  final bool autofocusEditor;
+
+  /// The preview layout override (T-M2-08); the effective mode is
+  /// resolved at build, width × override.
+  final PreviewLayoutMode previewMode;
+
+  /// The editor's share of the split, persisted per library.
+  final double splitRatio;
+
+  /// Which editor the library writes in (T-WYS-05).
+  final EditorKind editorKind;
+
+  /// Which editors the library offers (T-WYS-03): both, or one alone.
+  /// The note's status row switches editors only when both are on.
+  final Set<EditorKind> editorsEnabled;
+
+  /// Whether the preview exists at all.
+  final bool previewEnabled;
+
+  /// What the editor's link button inserts.
+  final LinkType linkType;
+
+  /// Where a dead link's new note lands (issue #78).
+  final MissingNoteLocation missingNoteLocation;
+
+  /// The folder new attachments are copied into (issue #56).
+  final String attachmentsFolder;
+
+  /// Spaces added per indent level.
+  final int indentWidth;
+
+  /// The library tree's sort order (T-UI-03).
+  final TreeSort treeSort;
+
+  /// The tree pane's width in the wide layout, dragged and persisted per
+  /// library (T-PP-21).
+  final double treeWidth;
+
+  /// The editor toolbar the user arranged (T-TB-04).
+  final ToolbarLayout toolbarLayout;
+
+  /// Reads the open library's settings.
+  ///
+  /// Two of them are answered rather than reported: an `editorsEnabled`
+  /// a hand-edited file left empty reads back as both editors, the way
+  /// the store reads it, and an `editorKind` the settings screen has
+  /// since switched off falls back to an editor the library still
+  /// offers — better than stranding the note on a surface that is gone.
+  static Future<ShellEditorSettings> read(LibrarySession session) async {
+    final lineNumbers = await session.lineNumbersEnabled;
+    final autofocus = await session.editorAutofocusEnabled;
+    final previewMode = await session.previewMode;
+    final splitRatio = await session.splitRatio;
+    final linkType = await session.linkType;
+    final missingNoteLocation = await session.missingNoteLocation;
+    final attachmentsFolder =
+        await session.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
+    final indentWidth = await session.indentWidth;
+    final treeSort = await session.treeSort;
+    final treeWidth = await session.treeWidth;
+    final toolbar = await session.editorToolbar;
+    final editorKind = await session.editorKind;
+    final editorsEnabled = await session.enabledEditors;
+    final previewEnabled = await session.previewEnabled;
+    final enabled = editorsEnabled.isEmpty
+        ? const {EditorKind.source, EditorKind.wysiwyg}
+        : editorsEnabled;
+    return ShellEditorSettings(
+      lineNumbers: lineNumbers,
+      autofocusEditor: autofocus,
+      previewMode: previewMode,
+      splitRatio: splitRatio,
+      editorKind: enabled.contains(editorKind)
+          ? editorKind
+          : enabled.contains(EditorKind.source)
+          ? EditorKind.source
+          : EditorKind.wysiwyg,
+      editorsEnabled: {...enabled},
+      previewEnabled: previewEnabled,
+      linkType: linkType,
+      missingNoteLocation: missingNoteLocation,
+      attachmentsFolder: attachmentsFolder,
+      indentWidth: indentWidth,
+      treeSort: treeSort,
+      treeWidth: treeWidth,
+      toolbarLayout: ToolbarLayout.parse(toolbar),
+    );
+  }
+
+  /// A copy with the given fields replaced: what the controls that change
+  /// one setting on the spot (the split drag, the tree sort, the preview
+  /// mode, the editor switch) hand back to the shell.
+  ShellEditorSettings copyWith({
+    PreviewLayoutMode? previewMode,
+    double? splitRatio,
+    EditorKind? editorKind,
+    TreeSort? treeSort,
+    double? treeWidth,
+  }) {
+    return ShellEditorSettings(
+      lineNumbers: lineNumbers,
+      autofocusEditor: autofocusEditor,
+      previewMode: previewMode ?? this.previewMode,
+      splitRatio: splitRatio ?? this.splitRatio,
+      editorKind: editorKind ?? this.editorKind,
+      editorsEnabled: editorsEnabled,
+      previewEnabled: previewEnabled,
+      linkType: linkType,
+      missingNoteLocation: missingNoteLocation,
+      attachmentsFolder: attachmentsFolder,
+      indentWidth: indentWidth,
+      treeSort: treeSort ?? this.treeSort,
+      treeWidth: treeWidth ?? this.treeWidth,
+      toolbarLayout: toolbarLayout,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ShellEditorSettings &&
+        lineNumbers == other.lineNumbers &&
+        autofocusEditor == other.autofocusEditor &&
+        previewMode == other.previewMode &&
+        splitRatio == other.splitRatio &&
+        editorKind == other.editorKind &&
+        setEquals(editorsEnabled, other.editorsEnabled) &&
+        previewEnabled == other.previewEnabled &&
+        linkType == other.linkType &&
+        missingNoteLocation == other.missingNoteLocation &&
+        attachmentsFolder == other.attachmentsFolder &&
+        indentWidth == other.indentWidth &&
+        treeSort == other.treeSort &&
+        treeWidth == other.treeWidth &&
+        // The layout compares by what it is written as: two parses of the
+        // same string are two objects.
+        toolbarLayout.encode() == other.toolbarLayout.encode();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    lineNumbers,
+    autofocusEditor,
+    previewMode,
+    splitRatio,
+    editorKind,
+    Object.hashAllUnordered(editorsEnabled),
+    previewEnabled,
+    linkType,
+    missingNoteLocation,
+    attachmentsFolder,
+    indentWidth,
+    treeSort,
+    treeWidth,
+    toolbarLayout.encode(),
+  );
+}
