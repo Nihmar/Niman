@@ -54,6 +54,7 @@ final class _QuickNoteTabState extends State<QuickNoteTab> {
     if (name == null || name.isEmpty || !mounted) return;
     final row = await ops.createNote(parentPath: '', name: name);
     await ops.setQuickNotePath(path: row.path);
+    widget.controller.notify();
     if (!mounted) return;
     widget.onOpen(row.path);
   }

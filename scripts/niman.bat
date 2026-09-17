@@ -2,7 +2,7 @@
 rem Niman dev helper for Windows hosts: terse output, full logs under
 rem %TEMP%\niman. Mirrors scripts/niman.sh and adds the windows build,
 rem which cannot be cross-built from Linux.
-rem Commands: analyze, test, check, apk, windows.
+rem Commands: analyze, test, check, apk [beta], windows.
 setlocal enabledelayedexpansion
 
 where flutter >nul 2>&1
@@ -12,6 +12,8 @@ if errorlevel 1 (
 )
 
 set "cmd=%~1"
+rem The apk command's optional product flavor (beta = the testing build).
+set "flavor=%~2"
 set "logdir=%TEMP%\niman"
 if not exist "%logdir%" mkdir "%logdir%"
 set "log=%logdir%\niman-%cmd%.log"
@@ -51,10 +53,19 @@ rem before compiling anything. Moving those sockets under the profile
 rem fixes it and is inert where nothing blocks them.
 if not exist "%USERPROFILE%\.javasock" mkdir "%USERPROFILE%\.javasock"
 if not defined JAVA_TOOL_OPTIONS set "JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=%USERPROFILE%\.javasock"
-call flutter build apk --release >"%log%" 2>&1
+if not "%flavor%"=="" (
+  rem The testing build (issue #106): the release pipeline plus the
+  rem flavor's separate application ID; APP_CHANNEL marks the Dart side,
+  rem which hides and skips update management.
+  call flutter build apk --release --flavor %flavor% --dart-define=APP_CHANNEL=testing >"%log%" 2>&1
+) else (
+  call flutter build apk --release >"%log%" 2>&1
+)
 set "status=%errorlevel%"
 powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"
-if "%status%"=="0" echo artifact: build\app\outputs\flutter-apk\app-release.apk
+set "name=app-release"
+if not "%flavor%"=="" set "name=app-%flavor%-release"
+if "%status%"=="0" echo artifact: build\app\outputs\flutter-apk\%name%.apk
 exit /b %status%
 
 :linux
@@ -69,11 +80,12 @@ if "%status%"=="0" echo artifact: build\windows\x64\runner\Release\niman.exe
 exit /b %status%
 
 :usage
-echo usage: scripts\niman.bat ^<analyze^|test^|check^|apk^|windows^>
+echo usage: scripts\niman.bat ^<analyze^|test^|check^|apk [beta]^|windows^>
 echo   analyze  flutter analyze --fatal-infos (issue lines + summary only)
 echo   test     flutter test (tail only)
 echo   check    analyze + test; use before committing
 echo   apk      flutter build apk --release
+echo            (beta: the testing build, app ID dev.niman.niman.beta)
 echo   windows  flutter build windows --release
 echo Full logs: %%TEMP%%\niman\niman-^<cmd^>.log
 exit /b 1
