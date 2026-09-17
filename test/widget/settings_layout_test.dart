@@ -124,6 +124,32 @@ void main() {
     );
   });
 
+  // User, 2026-09-17: the quick note was set from its own tab and the
+  // settings row went on showing the old one. This body is mounted once
+  // and kept alive, so it has to re-read when the session says a setting
+  // moved.
+  testWidgets('a setting changed elsewhere reaches the row', (tester) async {
+    await pump(tester);
+    final row = find.byKey(const Key('quick-note-setting'));
+    await tester.scrollUntilVisible(row, 200);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: row, matching: find.text(AppStrings.quickNoteUnset)),
+      findsOne,
+    );
+
+    // What the quick-note tab and the tree row menu do: write it, then
+    // say so.
+    await controller.setQuickNotePath(path: 'Notes/Quick.md');
+    controller.notify();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: row, matching: find.text('Notes/Quick.md')),
+      findsOne,
+    );
+  });
+
   testWidgets('cancelling a choice changes nothing', (tester) async {
     await pump(tester);
     await tester.tap(find.byKey(const Key('link-type')));

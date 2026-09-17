@@ -110,11 +110,23 @@ final class _SettingsBodyState extends State<SettingsBody> {
   };
   bool _previewEnabled = true;
 
+  /// Session events: a library setting changed somewhere else.
+  StreamSubscription<int>? _sessionEvents;
+
   @override
   void initState() {
     super.initState();
     unawaited(_load());
     unawaited(_loadVersion());
+    _sessionEvents = widget.controller.events.listen(
+      (_) => unawaited(_loadLibrary()),
+    );
+  }
+
+  @override
+  void dispose() {
+    unawaited(_sessionEvents?.cancel());
+    super.dispose();
   }
 
   /// Loads the app's own version for the About row (issue #80).
@@ -135,12 +147,23 @@ final class _SettingsBodyState extends State<SettingsBody> {
   }
 
   Future<void> _load() async {
+    await _loadLibrary();
+    await _loadApp();
+  }
+
+  /// The open library's own settings, re-read whenever the session says
+  /// something changed.
+  ///
+  /// This body is mounted once and kept alive, so a setting changed on
+  /// another surface — the quick note picked from its own tab, a note
+  /// made the quick note from a tree row — would otherwise sit here at
+  /// the value it had when the screen was first built (user,
+  /// 2026-09-17).
+  Future<void> _loadLibrary() async {
     final controller = widget.controller;
     final ops = controller.ops;
     if (ops == null) return;
     final enabled = await ops.trashEnabled;
-    final debug = await controller.debugLogsEnabled;
-    final autoUpdate = await controller.autoUpdateEnabled;
     final lineNumbers = await controller.lineNumbersEnabled;
     final autofocus = await controller.editorAutofocusEnabled;
     final reminderTokens = await controller.reminderShowTokens;
@@ -156,47 +179,58 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
     final attachmentsFolder = await ops.attachmentsFolder;
-    final language = await controller.language;
-    final themeBrightness = await controller.themeBrightness;
-    final themePalette = await controller.themePalette;
     final uiTextScale = await controller.uiTextScale;
     final noteTextScale = await controller.noteTextScale;
     final spellDictionaries = await controller.spellDictionaries;
     final editorKind = await controller.editorKind;
     final enabledEditors = await controller.enabledEditors;
     final previewEnabled = await controller.previewEnabled;
-    if (mounted) {
-      setState(() {
-        _trash = enabled;
-        _debugLogs = debug;
-        _autoUpdate = autoUpdate;
-        _lineNumbers = lineNumbers;
-        _autofocusEditor = autofocus;
-        _reminderShowTokens = reminderTokens;
-        _previewMode = previewMode;
-        _splitRatio = splitRatio;
-        _splitLoaded = true;
-        _linkType = linkType;
-        _missingNoteLocation = missingNoteLocation;
-        _indentWidth = indentWidth;
-        _historyVersions = historyVersions;
-        _historyInterval = historyInterval;
-        _trashAutoEmptyDays = trashAutoEmptyDays;
-        _quickNotePath = quickNotePath;
-        _listFolder = listFolder;
-        _templateFolder = templateFolder;
-        _attachmentsFolder = attachmentsFolder;
-        _language = language;
-        _themeBrightness = themeBrightness;
-        _themePalette = themePalette;
-        _uiTextScale = uiTextScale;
-        _noteTextScale = noteTextScale;
-        _spellDictionaries = spellDictionaries;
-        _editorKind = editorKind;
-        _enabledEditors = {...enabledEditors};
-        _previewEnabled = previewEnabled;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      _trash = enabled;
+      _lineNumbers = lineNumbers;
+      _autofocusEditor = autofocus;
+      _reminderShowTokens = reminderTokens;
+      _previewMode = previewMode;
+      _splitRatio = splitRatio;
+      _splitLoaded = true;
+      _linkType = linkType;
+      _missingNoteLocation = missingNoteLocation;
+      _indentWidth = indentWidth;
+      _historyVersions = historyVersions;
+      _historyInterval = historyInterval;
+      _trashAutoEmptyDays = trashAutoEmptyDays;
+      _quickNotePath = quickNotePath;
+      _listFolder = listFolder;
+      _templateFolder = templateFolder;
+      _attachmentsFolder = attachmentsFolder;
+      _uiTextScale = uiTextScale;
+      _noteTextScale = noteTextScale;
+      _spellDictionaries = spellDictionaries;
+      _editorKind = editorKind;
+      _enabledEditors = {...enabledEditors};
+      _previewEnabled = previewEnabled;
+    });
+  }
+
+  /// The app's own settings (language, theme, the debug switch, the
+  /// update toggle): this screen is the only place that changes them, so
+  /// they are read once.
+  Future<void> _loadApp() async {
+    final controller = widget.controller;
+    final debug = await controller.debugLogsEnabled;
+    final autoUpdate = await controller.autoUpdateEnabled;
+    final language = await controller.language;
+    final themeBrightness = await controller.themeBrightness;
+    final themePalette = await controller.themePalette;
+    if (!mounted) return;
+    setState(() {
+      _debugLogs = debug;
+      _autoUpdate = autoUpdate;
+      _language = language;
+      _themeBrightness = themeBrightness;
+      _themePalette = themePalette;
+    });
   }
 
   /// Persists the UI language and applies it immediately (T-L10N-04):
@@ -311,7 +345,6 @@ final class _SettingsBodyState extends State<SettingsBody> {
     );
     if (!changed || !mounted) return;
     final path = await widget.controller.ops?.quickNotePath;
-    widget.controller.notify();
     if (mounted) {
       setState(() => _quickNotePath = path);
     }
