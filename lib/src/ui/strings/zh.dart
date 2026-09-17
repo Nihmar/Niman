@@ -90,6 +90,12 @@ final class ChineseStrings extends Strings {
   @override
   String get editorKindWysiwyg => '所见即所得';
   @override
+  String get editorKindSourceSubtitle => '按原样显示的 Markdown 源码';
+  @override
+  String get editorKindWysiwygSubtitle => '就地编辑的格式化文本';
+  @override
+  String get settingsFolderToCreate => '待创建';
+  @override
   String get settingsPreviewEnabledTitle => '预览';
   @override
   String get settingsPreviewEnabledSubtitle => '在源码编辑器旁边显示渲染后的笔记';

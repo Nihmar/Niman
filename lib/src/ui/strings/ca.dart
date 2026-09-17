@@ -100,6 +100,12 @@ final class CatalanStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Font Markdown, tal com està escrita';
+  @override
+  String get editorKindWysiwygSubtitle => 'Text amb format, editat directament';
+  @override
+  String get settingsFolderToCreate => 'per crear';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualització';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -98,6 +98,13 @@ final class LatvianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown avots, kā uzrakstīts';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatēts teksts, rediģēts uz vietas';
+  @override
+  String get settingsFolderToCreate => 'jāizveido';
+  @override
   String get settingsPreviewEnabledTitle => 'Priekšskatījums';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -98,6 +98,12 @@ final class FinnishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-lähde, kirjoitettuna';
+  @override
+  String get editorKindWysiwygSubtitle => 'Muotoiltu teksti, muokataan suoraan';
+  @override
+  String get settingsFolderToCreate => 'luotava';
+  @override
   String get settingsPreviewEnabledTitle => 'Esikatselu';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -101,6 +101,13 @@ final class CroatianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown izvor, kako je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatirani tekst, uređuje se izravno';
+  @override
+  String get settingsFolderToCreate => 'za stvoriti';
+  @override
   String get settingsPreviewEnabledTitle => 'Pregled';
   @override
   String get settingsPreviewEnabledSubtitle =>

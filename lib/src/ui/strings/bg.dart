@@ -100,6 +100,13 @@ final class BulgarianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown изходник, както е написан';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматиран текст, редактира се директно';
+  @override
+  String get settingsFolderToCreate => 'за създаване';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

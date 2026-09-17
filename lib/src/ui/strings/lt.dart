@@ -102,6 +102,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown pirminis tekstas, kaip parašyta';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Suformatuotas tekstas, redaguojamas vietoje';
+  @override
+  String get settingsFolderToCreate => 'sukurti';
+  @override
   String get settingsPreviewEnabledTitle => 'Peržiūra';
   @override
   String get settingsPreviewEnabledSubtitle =>

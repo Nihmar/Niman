@@ -105,16 +105,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    /// The switch-library row sits in the pushed Folders area (issue
-    /// #104): open it from the home first.
-    Future<void> openFolders(WidgetTester tester) async {
-      await tester.tap(find.byKey(const Key('settings-area-folders')));
-      await tester.pumpAndSettle();
-    }
-
     testWidgets('opens the same list', (tester) async {
       await pumpSettings(tester);
-      await openFolders(tester);
+      // The row sits in the home's Maintenance group (issue #104).
       await tester.tap(find.byKey(const Key('switch-library-setting')));
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.switchLibraryTitle), findsWidgets);
@@ -125,7 +118,6 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
-      await openFolders(tester);
       await tester.tap(find.byKey(const Key('switch-library-setting')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(Key('known-library-$personal')));

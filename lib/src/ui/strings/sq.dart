@@ -95,6 +95,14 @@ final class AlbanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Burimi Markdown, ashtu siç është shkruar';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Tekst i formatuar, redaktohet në vend';
+  @override
+  String get settingsFolderToCreate => 'për t\u2019u krijuar';
+  @override
   String get settingsPreviewEnabledTitle => 'Parapamja';
   @override
   String get settingsPreviewEnabledSubtitle =>

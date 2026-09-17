@@ -98,6 +98,12 @@ final class DanishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-kilde, som skrevet';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formateret tekst, redigeres direkte';
+  @override
+  String get settingsFolderToCreate => 'oprettes';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>

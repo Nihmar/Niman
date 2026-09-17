@@ -95,6 +95,13 @@ final class BasqueStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown jatorria, idatzita dagoen bezala';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatodun testua, bertan editatua';
+  @override
+  String get settingsFolderToCreate => 'sortzeke';
+  @override
   String get settingsPreviewEnabledTitle => 'Aurrebista';
   @override
   String get settingsPreviewEnabledSubtitle =>

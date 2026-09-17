@@ -96,6 +96,13 @@ final class HungarianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-forrás, ahogy írva van';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formázott szöveg, helyben szerkesztve';
+  @override
+  String get settingsFolderToCreate => 'létrehozandó';
+  @override
   String get settingsPreviewEnabledTitle => 'Előnézet';
   @override
   String get settingsPreviewEnabledSubtitle =>

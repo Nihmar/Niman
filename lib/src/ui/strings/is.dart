@@ -97,6 +97,13 @@ final class IcelandicStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown-kóði, eins og hann er skrifaður';
+  @override
+  String get editorKindWysiwygSubtitle => 'Forsniðinn texti, breytt á staðnum';
+  @override
+  String get settingsFolderToCreate => 'búa til';
+  @override
   String get settingsPreviewEnabledTitle => 'Forsýning';
   @override
   String get settingsPreviewEnabledSubtitle =>

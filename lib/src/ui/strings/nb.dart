@@ -97,6 +97,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-kilde, som skrevet';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatert tekst, redigeres direkte';
+  @override
+  String get settingsFolderToCreate => 'opprettes';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvising';
   @override
   String get settingsPreviewEnabledSubtitle =>

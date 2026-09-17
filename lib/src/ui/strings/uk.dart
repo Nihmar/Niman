@@ -102,6 +102,13 @@ final class UkrainianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Джерело Markdown, як написано';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматований текст, редагується на місці';
+  @override
+  String get settingsFolderToCreate => 'створити';
+  @override
   String get settingsPreviewEnabledTitle => 'Перегляд';
   @override
   String get settingsPreviewEnabledSubtitle =>

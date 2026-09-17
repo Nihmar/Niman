@@ -103,6 +103,13 @@ final class SlovenianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Izvor Markdown, kot je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Oblikovano besedilo, urejeno na mestu';
+  @override
+  String get settingsFolderToCreate => 'za ustvariti';
+  @override
   String get settingsPreviewEnabledTitle => 'Predogled';
   @override
   String get settingsPreviewEnabledSubtitle =>

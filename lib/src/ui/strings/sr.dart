@@ -101,6 +101,13 @@ final class SerbianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown извор, како је написано';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматирани текст, уређује се директно';
+  @override
+  String get settingsFolderToCreate => 'за прављење';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

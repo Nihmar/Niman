@@ -98,6 +98,12 @@ final class DutchStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-bron, zoals geschreven';
+  @override
+  String get editorKindWysiwygSubtitle => 'Opgemaakte tekst, direct bewerkt';
+  @override
+  String get settingsFolderToCreate => 'aan te maken';
+  @override
   String get settingsPreviewEnabledTitle => 'Voorbeeld';
   @override
   String get settingsPreviewEnabledSubtitle =>

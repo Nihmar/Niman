@@ -48,7 +48,9 @@ void main() {
       AppStrings.settingsSectionEditor,
       AppStrings.settingsAreaFolders,
       AppStrings.settingsAreaTrashHistory,
+      AppStrings.settingsSectionReminders,
       AppStrings.settingsAreaDiagnostics,
+      AppStrings.settingsGroupMaintenance,
     ]) {
       expect(find.text(heading), findsOne, reason: heading);
     }
@@ -242,6 +244,45 @@ void main() {
     await pump(tester);
     await openArea(tester, const Key('settings-area-trash-history'));
     expect(find.text(AppStrings.trashSubtitle), findsOne);
+  });
+
+  testWidgets('the reminders toggle flips and persists', (tester) async {
+    // Restored from the single-column settings: the split dropped the
+    // section with no UI at all (issue #104).
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-reminders'));
+    final row = find.byKey(const Key('reminder-show-tokens'));
+    expect(tester.widget<SwitchListTile>(row).value, isFalse);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(await controller.reminderShowTokens, isTrue);
+    expect(tester.widget<SwitchListTile>(row).value, isTrue);
+  });
+
+  testWidgets('maintenance holds the actions, not settings', (tester) async {
+    // Reindex, switch and close sit under their own heading on the
+    // home (issue #104), not scattered among the settings.
+    await pump(tester);
+    expect(find.text(AppStrings.settingsGroupMaintenance), findsOne);
+    expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    expect(find.byKey(const Key('switch-library-setting')), findsOneWidget);
+    expect(find.byKey(const Key('close-library-setting')), findsOneWidget);
+    // And they are out of the areas they used to hide in.
+    await openArea(tester, const Key('settings-area-trash-history'));
+    expect(find.byKey(const Key('reindex-setting')), findsNothing);
+    await tester.tap(find.backButton());
+    await tester.pumpAndSettle();
+    await openArea(tester, const Key('settings-area-folders'));
+    expect(find.byKey(const Key('switch-library-setting')), findsNothing);
+    expect(find.byKey(const Key('close-library-setting')), findsNothing);
+  });
+
+  testWidgets('a folder the library does not hold says so', (tester) async {
+    // A fresh library holds no folders: every configured folder wears
+    // the "to create" badge rather than a confident value (issue #104).
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-folders'));
+    expect(find.text(AppStrings.settingsFolderToCreate), findsNWidgets(3));
   });
 
   testWidgets('the keyboard row shows on phones only, hidden on desktop', (

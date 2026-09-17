@@ -101,6 +101,12 @@ final class CzechStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Zdroj Markdown, tak jak je napsán';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formátovaný text, upravovaný přímo';
+  @override
+  String get settingsFolderToCreate => 'k vytvoření';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhled';
   @override
   String get settingsPreviewEnabledSubtitle =>

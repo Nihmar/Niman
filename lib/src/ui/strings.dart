@@ -129,6 +129,9 @@ final class AppStrings {
   static String get keyboardOnOpenSubtitle => _s.keyboardOnOpenSubtitle;
   static String get editorKindSource => _s.editorKindSource;
   static String get editorKindWysiwyg => _s.editorKindWysiwyg;
+  static String get editorKindSourceSubtitle => _s.editorKindSourceSubtitle;
+  static String get editorKindWysiwygSubtitle => _s.editorKindWysiwygSubtitle;
+  static String get settingsFolderToCreate => _s.settingsFolderToCreate;
   static String get settingsPreviewEnabledTitle =>
       _s.settingsPreviewEnabledTitle;
   static String get settingsPreviewEnabledSubtitle =>

@@ -99,6 +99,14 @@ final class GalicianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Fonte Markdown, tal como está escrita';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texto con formato, editado directamente';
+  @override
+  String get settingsFolderToCreate => 'por crear';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualización';
   @override
   String get settingsPreviewEnabledSubtitle =>

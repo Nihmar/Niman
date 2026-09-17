@@ -100,6 +100,13 @@ final class PolishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Źródło Markdown, tak jak napisane';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Tekst sformatowany, edytowany w miejscu';
+  @override
+  String get settingsFolderToCreate => 'do utworzenia';
+  @override
   String get settingsPreviewEnabledTitle => 'Podgląd';
   @override
   String get settingsPreviewEnabledSubtitle =>

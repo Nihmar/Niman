@@ -6,6 +6,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/trash.dart';
 
 /// The Trash and history area of the settings home (issue #104): what
 /// sits in the trash, what the history keeps, and the reindex.
@@ -116,21 +117,6 @@ final class _SettingsTrashHistoryScreenState
     if (mounted) setState(() => _historyInterval = minutes);
   }
 
-  Future<void> _rescan() async {
-    try {
-      await widget.controller.rescanNow();
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
-      }
-    } on Object catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SettingsAreaShell(
@@ -172,11 +158,20 @@ final class _SettingsTrashHistoryScreenState
             enabled: _historyVersions > 0,
             onTap: _chooseHistoryInterval,
           ),
+          // The trash itself opens from here too: the setting and what
+          // it governs sit on the same screen.
           ListTile(
-            key: const Key('reindex-setting'),
-            leading: const Icon(Icons.refresh),
-            title: Text(AppStrings.reindexTitle),
-            onTap: _rescan,
+            key: const Key('open-trash-setting'),
+            leading: const Icon(Icons.delete_outlined),
+            title: Text(AppStrings.trashTitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) =>
+                    TrashScreen(controller: widget.controller),
+              ),
+            ),
           ),
         ],
       ),
