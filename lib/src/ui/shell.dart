@@ -46,6 +46,7 @@ import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -65,8 +66,6 @@ import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_pin.dart';
-import 'package:niman/src/widget/widget_placement.dart';
-import 'package:niman/src/widget/widget_refresh.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:path/path.dart' as p;
@@ -373,44 +372,18 @@ final class _LibraryShellState extends State<_LibraryShell>
     _selectShellTab(ShellTab.todo);
   }
 
-  /// Pushes the pinned notes to the home-screen widgets reading this
-  /// library (issue 6). Listener on the session events: every note op
-  /// bumps the revision.
-  void _pushNoteWidgets() {
-    if (!mounted) return;
-    unawaited(
-      refreshNoteWidgets(
-        session: widget.controller,
-        updater: widget.widgetUpdater,
-        host: widget.widgetHost,
-        pinStore: const PlatformWidgetPinStore(),
-        placement: const PlatformWidgetPlacementStore(),
-      ),
-    );
-  }
-
-  /// Pushes the latest todo snapshot to the home-screen widgets reading
-  /// this library (issue 6). Listener on the todo controller: every
-  /// mutation and the initial open notify.
-  void _pushTodoWidgets() {
-    unawaited(
-      refreshTodoWidgets(
-        session: widget.controller,
-        snapshot: _todoController.snapshot,
-        updater: widget.widgetUpdater,
-        host: widget.widgetHost,
-        placement: const PlatformWidgetPlacementStore(),
-      ),
-    );
-  }
-
-  /// Re-pushes both widget kinds when the app theme changes (brightness
-  /// or palette): the payloads wear the resolved colors, so the widgets
-  /// follow the app instead of the system night mode.
-  void _pushWidgetsOnTheme() {
-    _pushNoteWidgets();
-    _pushTodoWidgets();
-  }
+  /// The home-screen widgets of this library: pushes out, taps back in
+  /// (issue #100 moved the how of it into [ShellHomeWidgets]).
+  late final ShellHomeWidgets _homeWidgets = ShellHomeWidgets(
+    controller: widget.controller,
+    targets: widget.targets,
+    updater: widget.widgetUpdater,
+    host: widget.widgetHost,
+    todoSnapshot: () => _todoController.snapshot,
+    openTodo: _openTodo,
+    openNote: _openNoteFromLink,
+    mounted: () => mounted,
+  );
 
   /// Selects [tab]; a full-screen note closes to its tree (the selected
   /// note stays highlighted).
@@ -552,7 +525,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   StreamSubscription<ShortcutAction>? _shortcutTaps;
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
-  StreamSubscription<WidgetTarget>? _widgetTargets;
 
   /// Library session events (every note op bumps the revision): the
   /// pinned notes follow the files, so each one refreshes the note
@@ -562,12 +534,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Paths a sync just changed on disk: the open note among them is
   /// re-read (its buffer was saved before the sync started).
   StreamSubscription<Set<String>>? _syncChanges;
-
-  /// A widget tap that arrived for another library:
-  /// [LibrarySession.switchTo] tears this shell down on its way through,
-  /// so the navigation waits for the new shell, which picks this up on
-  /// mount (issue 6).
-  static WidgetTarget? _pendingWidgetTarget;
 
   /// A heading anchor to land on after the next note opens (T-M3-07).
   String? _pendingAnchor;
@@ -986,7 +952,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
     // The todo widgets follow the snapshot: every mutation notifies, and
     // the initial open notifies too, so one listener covers both.
-    _todoController.addListener(_pushTodoWidgets);
+    _todoController.addListener(_homeWidgets.pushTodos);
     _templateFlow = ShellTemplateFlow(
       controller: widget.controller,
       origin: () => (
@@ -1011,16 +977,15 @@ final class _LibraryShellState extends State<_LibraryShell>
         _openTodo();
       }
     });
-    _widgetTargets = widget.targets.targets.listen(
-      (target) => unawaited(_applyWidgetTarget(target)),
+    _homeWidgets.start();
+    _libraryEvents = widget.controller.events.listen(
+      (_) => _homeWidgets.pushNotes(),
     );
-    _libraryEvents = widget.controller.events.listen((_) => _pushNoteWidgets());
     _syncChanges = widget.controller.sync?.localChanges.listen((paths) {
       final open = _selected;
       if (!mounted || open == null || _selectedIsDir) return;
       if (paths.contains(open)) setState(() => _noteReloadToken++);
     });
-    AppThemes.revision.addListener(_pushWidgetsOnTheme);
     _shortcutTaps = widget.shortcuts.actions.listen(
       (action) => unawaited(_runShortcut(action)),
     );
@@ -1032,7 +997,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
     unawaited(_applyReminderLaunch());
     unawaited(_applyShortcutLaunch());
-    unawaited(_applyWidgetTargetLaunch());
+    unawaited(_homeWidgets.applyLaunchTarget());
     unawaited(_refreshEditorSettings());
     unawaited(_loadLinkSource());
   }
@@ -1042,13 +1007,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     _markOpenNote(null, null);
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
-    AppThemes.revision.removeListener(_pushWidgetsOnTheme);
+    unawaited(_homeWidgets.dispose());
     unawaited(_reminderTaps?.cancel());
     unawaited(_shortcutTaps?.cancel());
-    unawaited(_widgetTargets?.cancel());
     unawaited(_libraryEvents?.cancel());
     unawaited(_syncChanges?.cancel());
-    _todoController.removeListener(_pushTodoWidgets);
+    _todoController.removeListener(_homeWidgets.pushTodos);
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
     _todoController.dispose();
@@ -1086,13 +1050,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (_selected != null && !_selectedIsDir) {
       setState(() => _noteReloadToken++);
     }
-    // Pushes the home-screen widgets. A widget placed while the app was
-    // away has no other trigger: the placement happens in the launcher,
-    // with no Dart engine to hear about it, and the todo resync above
-    // skips its notification when the files did not move. Both refreshes
-    // are cheap no-ops when nothing is placed.
-    _pushNoteWidgets();
-    _pushTodoWidgets();
+    // Pushes the home-screen widgets: the todo resync above skips its
+    // notification when the files did not move, and a widget placed
+    // while the app was away has no trigger of its own at all.
+    _homeWidgets.pushAll();
   }
 
   /// A notification tap that started the app lands on the Todo tab.
@@ -1112,78 +1073,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     final action = await widget.shortcuts.consumeLaunchAction();
     if (action == null) return;
     await _runShortcut(action);
-  }
-
-  /// A home-screen widget tap that started the app (issue 6, cold start).
-  ///
-  /// Like the shortcut launch above: the target needs an open library, so
-  /// it waits for the shell. A tap pended across a library switch is
-  /// applied by the shell the switch opened — and dropped when the open
-  /// failed, so a dead target never haunts the next mount.
-  Future<void> _applyWidgetTargetLaunch() async {
-    final pending = _pendingWidgetTarget;
-    _pendingWidgetTarget = null;
-    if (pending != null) {
-      final current = widget.controller.root;
-      if (current != null &&
-          p.normalize(pending.libraryPath) == p.normalize(current)) {
-        _openWidgetTarget(pending);
-      } else {
-        const AppLogger(name: 'widgets')
-            .debug('dropping widget target for a library that did not open');
-      }
-      return;
-    }
-    final target = await widget.targets.consumeLaunchTarget();
-    if (target == null) return;
-    await _applyWidgetTarget(target);
-  }
-
-  /// Opens [target]'s tab or note, switching libraries first when the
-  /// widget points elsewhere (a widget never assumes the last-opened
-  /// library).
-  Future<void> _applyWidgetTarget(WidgetTarget target) async {
-    if (!mounted) return;
-    const AppLogger(name: 'widgets').debug(
-      'target: ${target.kind.name} lib=${target.libraryPath} '
-      'note=${target.notePath}',
-    );
-    final current = widget.controller.root;
-    if (current == null ||
-        p.normalize(target.libraryPath) != p.normalize(current)) {
-      // Another library. A slow switch tears this shell down mid-way, so
-      // the navigation waits for the new shell — but a fast one completes
-      // before any frame lands, and this shell survives. `mounted` tells
-      // the two apart: a replacing frame would have disposed this state
-      // already, so a still-mounted shell owns the navigation.
-      _pendingWidgetTarget = target;
-      await widget.controller.switchTo(target.libraryPath);
-      if (!mounted) return;
-      _pendingWidgetTarget = null;
-      final now = widget.controller.root;
-      // A failed open lands on the home screen with the error instead —
-      // the target dies with it rather than haunting the next mount.
-      if (now != null && p.normalize(target.libraryPath) == p.normalize(now)) {
-        _openWidgetTarget(target);
-      }
-      return;
-    }
-    _openWidgetTarget(target);
-  }
-
-  /// Runs [target]'s in-app open on the already-open library: the same
-  /// tab/note the equivalent in-app control opens.
-  void _openWidgetTarget(WidgetTarget target) {
-    if (!mounted) return;
-    switch (target.kind) {
-      case WidgetTargetKind.todo:
-        _openTodo();
-      case WidgetTargetKind.note:
-        final note = target.notePath;
-        if (note != null) {
-          _openNoteFromLink(note, target.anchor);
-        }
-    }
   }
 
   /// Runs [action]'s in-app flow: the same one the equivalent control
