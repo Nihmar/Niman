@@ -15,7 +15,7 @@ device.
 | `quickNotePath` | null (= `Quick note.md` at root) | Quick-note target, library-relative |
 | `listNoteFolder` | `Lists` | Where new list notes go |
 | `templateFolder` | `Templates` | Where note templates live |
-| `attachmentsFolder` | `assets` | Where copied-in images and voice clips live |
+| `attachmentsFolder` | `assets` | Where copied-in images and voice clips live, under the library root |
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
 | `previewEnabled` | true | Whether the preview exists at all |
@@ -32,6 +32,14 @@ device.
 | `treeWidth` | 340 | Tree pane width, px (200–600) |
 | `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
+
+The three folder keys — `listNoteFolder`, `templateFolder`,
+`attachmentsFolder` — are paths under the library root, created the
+first time something is written there. Their picker lists the folders
+the library actually holds, so a default naming one it has never had
+(`assets`, until an image or a voice clip is copied in) starts out
+unselected: *New folder* then builds it at the library root, and only
+nests it inside a folder you selected yourself.
 
 A missing, unreadable, or malformed file reads as defaults — it never
 takes the app down. Writes are atomic (temp file + rename).
