@@ -48,11 +48,9 @@ import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
+import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
-import 'package:niman/src/ui/sync/sync_flow.dart';
-import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/tags_screen.dart';
@@ -371,6 +369,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _openTodo() {
     _selectShellTab(ShellTab.todo);
   }
+
+  /// The sync surfaces: the status button and the screens behind it
+  /// (issue #100 moved the how of them into [ShellSyncActions]).
+  late final ShellSyncActions _syncActions = ShellSyncActions(
+    unsaved: widget.unsavedTracker,
+    onShowTrash: _openTrash,
+  );
 
   /// The home-screen widgets of this library: pushes out, taps back in
   /// (issue #100 moved the how of it into [ShellHomeWidgets]).
@@ -2299,80 +2304,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
-  // --- sync (mockups S6–S11) --------------------------------------------
-
-  /// The sync icon for the tree's bar; nothing without a sync service
-  /// (the button itself hides while no destination is configured).
-  Widget _syncButton(LibrarySession controller) {
-    final sync = controller.sync;
-    if (sync == null) return const SizedBox.shrink();
-    return SyncStatusButton(
-      sync: sync,
-      onSync: () => unawaited(_runSync(controller)),
-      onOpenPanel: () => unawaited(_openSyncPanel(controller)),
-    );
-  }
-
-  Future<void> _runSync(LibrarySession controller) async {
-    final sync = controller.sync;
-    if (sync == null) return;
-    await runSyncFromUi(
-      context,
-      sync,
-      unsaved: widget.unsavedTracker,
-      onShowTrash: () => _openTrash(controller),
-      onShowPanel: () => unawaited(_openSyncPanel(controller)),
-    );
-  }
-
-  Future<void> _openSyncPanel(LibrarySession controller) async {
-    final sync = controller.sync;
-    if (sync == null) return;
-    await showSyncPanel(
-      context,
-      sync: sync,
-      onSyncNow: () => unawaited(_runSync(controller)),
-      onOpenSettings: () => unawaited(_openSyncSettings(controller)),
-      onResolve: (path) => unawaited(_resolveSyncConflict(controller, path)),
-    );
-  }
-
-  Future<void> _openSyncSettings(LibrarySession controller) async {
-    final sync = controller.sync;
-    if (sync == null) return;
-    await Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => SyncSettingsScreen(
-          sync: sync,
-          libraryName: p.basename(controller.root ?? ''),
-          unsaved: widget.unsavedTracker,
-          onShowTrash: () => _openTrash(controller),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _resolveSyncConflict(
-    LibrarySession controller,
-    String path,
-  ) async {
-    final sync = controller.sync;
-    if (sync == null) return;
-    try {
-      await widget.unsavedTracker.saveAll();
-    } on Object catch (e) {
-      const AppLogger(name: 'sync').warning('resolve: saving failed: $e');
-    }
-    if (!mounted) return;
-    await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SyncConflictScreen(sync: sync, path: path),
-      ),
-    );
-  }
-
   void _openTrash(LibrarySession controller) {
     Navigator.push(
       context,
@@ -2385,7 +2316,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
     return [
-      _syncButton(controller),
+      _syncActions.button(context, controller),
       IconButton(
         key: const Key('open-trash'),
         tooltip: AppStrings.trashTitle,
@@ -2845,7 +2776,7 @@ final class _LibraryShellState extends State<_LibraryShell>
             ),
           ),
           const Spacer(),
-          _syncButton(controller),
+          _syncActions.button(context, controller),
           IconButton(
             key: const Key('open-trash'),
             tooltip: AppStrings.trashTitle,
