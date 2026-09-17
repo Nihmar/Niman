@@ -79,6 +79,15 @@ void main() {
     expect(miniOpacity(tester, const Key('new-folder-action')), 1);
     expect(miniIgnored(tester, const Key('new-folder-action')), isFalse);
 
+    // Each action is named on the button. Five bare icons asked which
+    // one was "from a template" and which was "a list", and the tooltip
+    // that answered it only appears after a long press on Android.
+    expect(find.text('New note'), findsOneWidget);
+    expect(find.text('New from template'), findsOneWidget);
+    expect(find.text('New list note'), findsOneWidget);
+    expect(find.text('New voice note'), findsOneWidget);
+    expect(find.text('New folder'), findsOneWidget);
+
     // The New note mini opens the name dialog; the menu collapses.
     await tester.tap(find.byKey(const Key('new-note-action')));
     await settle(tester);
