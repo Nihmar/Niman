@@ -30,9 +30,7 @@ import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
-import 'package:niman/src/ui/kinds/audio_note.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
-import 'package:niman/src/ui/kinds/list_note.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -40,6 +38,7 @@ import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
+import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_header.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
@@ -460,6 +459,36 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The todo state (T-TD-04): owned here so the tab body and the tab's
   /// app-bar add action share one controller.
   late final TodoController _todoController;
+
+  /// Making new things in the library: the FAB, the tree footer's menu
+  /// and the row menu all run these (issue #100 moved the how of them
+  /// into [ShellCreateFlow]).
+  late final ShellCreateFlow _createFlow = ShellCreateFlow(
+    controller: widget.controller,
+    createParent: () => _createParent,
+    guard: _guard,
+    onCreated: _onItemCreated,
+  );
+
+  /// Opens what a create just made: a note takes the screen, a folder
+  /// only takes the selection.
+  void _onItemCreated(CreatedItem item) {
+    if (!mounted) return;
+    if (!item.isDir && _opensPreviewOnly()) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    setState(() {
+      _selected = item.path;
+      _selectedIsDir = item.isDir;
+      _pendingAnchor = null;
+      _pendingCaretOffset = null;
+      if (item.hasKind) _resetNoteKind();
+      if (!item.isDir) {
+        _treeVisible = false;
+        _noteOpened();
+      }
+    });
+  }
 
   /// Note creation from the library's templates (#51, T-M4-07): the flow
   /// owns the picker, the questions, the directives, the render and the
@@ -990,11 +1019,11 @@ final class _LibraryShellState extends State<_LibraryShell>
         _openTodo();
         await _addTodo();
       case ShortcutAction.newNote:
-        await _createNote();
+        await _createFlow.createNote(context);
       case ShortcutAction.newList:
-        await _createListNote();
+        await _createFlow.createListNote(context);
       case ShortcutAction.newVoice:
-        await _createAudioNote();
+        await _createFlow.createAudioNote(context);
     }
   }
 
@@ -1240,33 +1269,6 @@ final class _LibraryShellState extends State<_LibraryShell>
     }
   }
 
-  /// Creates a note in [parent] (default: the FAB target). Used by the
-  /// FAB and the context menu.
-  Future<void> _createNote({String? parent}) async {
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.newNoteTitle,
-      initial: AppStrings.newNoteTitle,
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final row = await widget.controller.ops!.createNote(
-        parentPath: parent ?? _createParent,
-        name: name,
-      );
-      if (!mounted) return;
-      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
-      setState(() {
-        _selected = row.path;
-        _selectedIsDir = false;
-        _treeVisible = false;
-        _pendingAnchor = null;
-        _pendingCaretOffset = null;
-        _noteOpened();
-      });
-    });
-  }
-
   /// Opens a note the template flow just filed (#51): preview per its
   /// `open` directive, caret per its `{{cursor}}`. The state the flow
   /// cannot know is set here, not in the flow.
@@ -1284,28 +1286,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       _pendingCaretOffset = caret;
       _resetNoteKind();
       _noteOpened();
-    });
-  }
-
-  /// Creates a folder in [parent] (default: the FAB target).
-  Future<void> _createFolder({String? parent}) async {
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.newFolderTitle,
-      initial: AppStrings.newFolderTitle,
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final row = await widget.controller.ops!.createFolder(
-        parentPath: parent ?? _createParent,
-        name: name,
-      );
-      setState(() {
-        _selected = row.path;
-        _selectedIsDir = true;
-        _pendingAnchor = null;
-        _pendingCaretOffset = null;
-      });
     });
   }
 
@@ -1447,11 +1427,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (action == null) return;
     switch (action) {
       case 'note':
-        await _createNote(parent: here);
+        await _createFlow.createNote(context, parent: here);
       case 'template':
         await _templateFlow.createFromTemplate(context, parent: here);
       case 'folder':
-        await _createFolder(parent: here);
+        await _createFlow.createFolder(context, parent: here);
       case 'quicknote':
         await _guard(() async {
           await widget.controller.ops!.setQuickNotePath(path: note.path);
@@ -1703,15 +1683,15 @@ final class _LibraryShellState extends State<_LibraryShell>
       onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
       onNewNote: () {
         _closeFab();
-        unawaited(_createNote());
+        unawaited(_createFlow.createNote(context));
       },
       onNewListNote: () {
         _closeFab();
-        unawaited(_createListNote());
+        unawaited(_createFlow.createListNote(context));
       },
       onNewAudioNote: () {
         _closeFab();
-        unawaited(_createAudioNote());
+        unawaited(_createFlow.createAudioNote(context));
       },
       onNewFromTemplate: () {
         _closeFab();
@@ -1719,93 +1699,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       },
       onNewFolder: () {
         _closeFab();
-        unawaited(_createFolder());
+        unawaited(_createFlow.createFolder(context));
       },
     );
-  }
-
-  /// Creates a list note (T-TK-06): a note file with `type: list`
-  /// frontmatter in the configured list folder (default `Lists`),
-  /// regardless of the selected folder.
-  Future<void> _createListNote() async {
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.newListNoteTitle,
-      initial: AppStrings.newListNoteDefault,
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final ops = widget.controller.ops!;
-      final folder = await _ensureListFolder(ops);
-      final row = await ops.createNote(
-        parentPath: folder,
-        name: name,
-        content: listNoteContent(),
-      );
-      if (!mounted) return;
-      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
-      setState(() {
-        _selected = row.path;
-        _selectedIsDir = false;
-        _treeVisible = false;
-        _pendingAnchor = null;
-        _pendingCaretOffset = null;
-        _resetNoteKind();
-        _noteOpened();
-      });
-    });
-  }
-
-  /// Creates a voice note (issue #56): a note file with `type: audio`
-  /// frontmatter in the FAB target folder (the selected folder, root if
-  /// none) — like a plain note, since clips live in the shared `assets/`
-  /// and need no dedicated folder.
-  Future<void> _createAudioNote() async {
-    final name = await showNameDialog(
-      context,
-      title: AppStrings.newAudioNoteTitle,
-      initial: AppStrings.newAudioNoteDefault,
-    );
-    if (name == null) return;
-    await _guard(() async {
-      final row = await widget.controller.ops!.createNote(
-        parentPath: _createParent,
-        name: name,
-        content: audioNoteContent(),
-      );
-      if (!mounted) return;
-      if (_opensPreviewOnly()) FocusManager.instance.primaryFocus?.unfocus();
-      setState(() {
-        _selected = row.path;
-        _selectedIsDir = false;
-        _treeVisible = false;
-        _pendingAnchor = null;
-        _pendingCaretOffset = null;
-        _resetNoteKind();
-        _noteOpened();
-      });
-    });
-  }
-
-  /// The configured list-note folder, creating it (and any missing
-  /// ancestors) when absent.
-  ///
-  /// The folder is written back to the settings, so a library where none
-  /// was ever chosen ends up with the default one (`Lists`) created on
-  /// disk and shown in the settings, not just implied.
-  Future<String> _ensureListFolder(NoteOperations ops) async {
-    final folder = await ops.listNoteFolder;
-    var prefix = '';
-    for (final part in folder.split('/')) {
-      if (part.isEmpty) continue;
-      prefix = prefix.isEmpty ? part : '$prefix/$part';
-      final existing = await ops.find(prefix);
-      if (existing == null || !existing.isDir) {
-        await ops.createFolder(parentPath: parentOf(prefix), name: part);
-      }
-    }
-    await ops.setListNoteFolder(folder: folder);
-    return folder;
   }
 
   /// Collapses the expanded FAB menu.
@@ -2005,9 +1901,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// installed keys and the in-app reference cannot drift.
   Map<ShortcutActivator, VoidCallback> _appShortcutBindings() {
     return appShortcutBindings({
-      AppCommand.newNote: () => unawaited(_createNote()),
-      AppCommand.newListNote: () => unawaited(_createListNote()),
-      AppCommand.newAudioNote: () => unawaited(_createAudioNote()),
+      AppCommand.newNote: () => unawaited(_createFlow.createNote(context)),
+      AppCommand.newListNote: () =>
+          unawaited(_createFlow.createListNote(context)),
+      AppCommand.newAudioNote: () =>
+          unawaited(_createFlow.createAudioNote(context)),
       AppCommand.newTodo: () {
         _openTodo();
         unawaited(_addTodo());
@@ -2213,15 +2111,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   void _onNewItem(NewShellItem item) {
     switch (item) {
       case NewShellItem.note:
-        unawaited(_createNote());
+        unawaited(_createFlow.createNote(context));
       case NewShellItem.listNote:
-        unawaited(_createListNote());
+        unawaited(_createFlow.createListNote(context));
       case NewShellItem.audioNote:
-        unawaited(_createAudioNote());
+        unawaited(_createFlow.createAudioNote(context));
       case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
       case NewShellItem.folder:
-        unawaited(_createFolder());
+        unawaited(_createFlow.createFolder(context));
     }
   }
 
