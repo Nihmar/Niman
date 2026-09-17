@@ -48,6 +48,7 @@ import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
+import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -289,24 +290,6 @@ enum ShellTab {
 
   /// The library settings (the pushed SettingsScreen on wide screens).
   settings,
-}
-
-/// The desktop tree footer's create menu entries (T-PP-22).
-enum _NewItem {
-  /// A plain Markdown note.
-  note,
-
-  /// A list note (frontmatter type: list) in the list folder.
-  listNote,
-
-  /// A voice note (frontmatter type: audio) in the current folder.
-  audioNote,
-
-  /// A note copied from a template.
-  template,
-
-  /// A folder.
-  folder,
 }
 
 final class _LibraryShellState extends State<_LibraryShell>
@@ -2628,128 +2611,29 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The desktop tree's controls at the base of its column (T-PP-22):
   /// creation, the trash and the sort order — the app-bar actions the wide
   /// layout used to carry, where the tree is the thing they act on.
+  /// The bar under the tree: **New**, then the shell's own sync, trash
+  /// and sort (issue #100 moved the bar itself into [TreeFooterBar]).
   Widget _treeFooter(LibrarySession controller) {
-    final theme = Theme.of(context);
-    return Container(
-      key: const Key('tree-footer'),
-      height: 44,
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: theme.dividerColor)),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 4),
-          PopupMenuButton<_NewItem>(
-            key: const Key('new-item-menu'),
-            tooltip: AppStrings.actionNew,
-            onSelected: _onNewItem,
-            position: PopupMenuPosition.over,
-            // A desktop menu should appear, not perform (T-PP-22): the
-            // default 300 ms scale reads as skipped frames on this
-            // compositor, and 120 ms is a menu that is simply there.
-            popUpAnimationStyle: const AnimationStyle(
-              duration: Duration(milliseconds: 120),
-              curve: Curves.easeOut,
-            ),
-            itemBuilder: (context) => [
-              _newItemMenuItem(
-                _NewItem.note,
-                Icons.note_add_outlined,
-                AppStrings.newNoteTitle,
-                key: const Key('new-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.listNote,
-                Icons.checklist_outlined,
-                AppStrings.newListNoteTitle,
-                key: const Key('new-list-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.audioNote,
-                Icons.mic_outlined,
-                AppStrings.newAudioNoteTitle,
-                key: const Key('new-audio-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.template,
-                Icons.file_copy_outlined,
-                AppStrings.newFromTemplateTitle,
-                key: const Key('new-from-template-action'),
-              ),
-              const PopupMenuDivider(),
-              _newItemMenuItem(
-                _NewItem.folder,
-                Icons.create_new_folder_outlined,
-                AppStrings.newFolderTitle,
-                key: const Key('new-folder-action'),
-              ),
-            ],
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.add, size: 18),
-                  const SizedBox(width: 4),
-                  Text(AppStrings.actionNew, style: theme.textTheme.labelLarge),
-                  const Icon(Icons.arrow_drop_down, size: 18),
-                ],
-              ),
-            ),
-          ),
-          const Spacer(),
-          _syncActions.button(context, controller),
-          IconButton(
-            key: const Key('open-trash'),
-            tooltip: AppStrings.trashTitle,
-            icon: const Icon(Icons.delete),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => TrashScreen(controller: controller),
-              ),
-            ),
-          ),
-          _sortToggle(),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-
-  /// One entry of the tree footer's create menu.
-  PopupMenuItem<_NewItem> _newItemMenuItem(
-    _NewItem item,
-    IconData icon,
-    String label, {
-    Key? key,
-  }) {
-    return PopupMenuItem<_NewItem>(
-      key: key,
-      value: item,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 12),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+    return TreeFooterBar(
+      controller: controller,
+      onNewItem: _onNewItem,
+      syncButton: _syncActions.button(context, controller),
+      sortToggle: _sortToggle(),
     );
   }
 
   /// Runs the create flow behind a tree-footer menu entry.
-  void _onNewItem(_NewItem item) {
+  void _onNewItem(NewShellItem item) {
     switch (item) {
-      case _NewItem.note:
+      case NewShellItem.note:
         unawaited(_createNote());
-      case _NewItem.listNote:
+      case NewShellItem.listNote:
         unawaited(_createListNote());
-      case _NewItem.audioNote:
+      case NewShellItem.audioNote:
         unawaited(_createAudioNote());
-      case _NewItem.template:
+      case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
-      case _NewItem.folder:
+      case NewShellItem.folder:
         unawaited(_createFolder());
     }
   }
