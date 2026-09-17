@@ -354,6 +354,18 @@ final class BasqueStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Kargatzen…';
+  @override
+  String get noteStatusSaving => 'Gordetzen…';
+  @override
+  String get noteStatusUnsaved => 'Gorde gabe';
+  @override
+  String get noteStatusSaved => 'Gordeta';
+  @override
+  String get noteStatusError => 'Errorea';
+  @override
+  String wordCount(int count) => '$count hitz';
+  @override
   String get outlineTooltip => 'Egitura';
   @override
   String get outlineNoHeadings => 'Ez dago izenbururik';
@@ -809,6 +821,12 @@ final class BasqueStrings extends Strings {
   String get closeMenuTooltip => 'Itxi';
   @override
   String get newFolderTitle => 'Karpeta berria';
+  @override
+  String get newNoteSameFolder => 'Ohar berria karpeta berean';
+  @override
+  String get newFromTemplateSameFolder => 'Txantiloitik berria karpeta berean';
+  @override
+  String trashOriginalPath(String path) => 'hemen zegoen: $path';
   @override
   String get newNoteHere => 'Ohar berria hemen';
   @override

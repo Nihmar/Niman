@@ -359,6 +359,18 @@ final class DanishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Indlæser…';
+  @override
+  String get noteStatusSaving => 'Gemmer…';
+  @override
+  String get noteStatusUnsaved => 'Ikke gemt';
+  @override
+  String get noteStatusSaved => 'Gemt';
+  @override
+  String get noteStatusError => 'Fejl';
+  @override
+  String wordCount(int count) => '$count ord';
+  @override
   String get outlineTooltip => 'Oversigt';
   @override
   String get outlineNoHeadings => 'Ingen overskrifter';
@@ -807,6 +819,12 @@ final class DanishStrings extends Strings {
   String get closeMenuTooltip => 'Luk';
   @override
   String get newFolderTitle => 'Ny mappe';
+  @override
+  String get newNoteSameFolder => 'Ny note i samme mappe';
+  @override
+  String get newFromTemplateSameFolder => 'Ny fra skabelon i samme mappe';
+  @override
+  String trashOriginalPath(String path) => 'lå i $path';
   @override
   String get newNoteHere => 'Ny note her';
   @override

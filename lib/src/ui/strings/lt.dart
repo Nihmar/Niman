@@ -356,6 +356,24 @@ final class LithuanianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Įkeliama…';
+  @override
+  String get noteStatusSaving => 'Įrašoma…';
+  @override
+  String get noteStatusUnsaved => 'Neįrašyta';
+  @override
+  String get noteStatusSaved => 'Įrašyta';
+  @override
+  String get noteStatusError => 'Klaida';
+  @override
+  String wordCount(int count) => count % 100 >= 11 && count % 100 <= 19
+      ? '$count žodžių'
+      : switch (count % 10) {
+          1 => '$count žodis',
+          0 => '$count žodžių',
+          _ => '$count žodžiai',
+        };
+  @override
   String get outlineTooltip => 'Struktūra';
   @override
   String get outlineNoHeadings => 'Antraščių nėra';
@@ -799,6 +817,13 @@ final class LithuanianStrings extends Strings {
   String get closeMenuTooltip => 'Uždaryti';
   @override
   String get newFolderTitle => 'Naujas katalogas';
+  @override
+  String get newNoteSameFolder => 'Nauja pastaba tame pačiame aplanke';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nauja iš šablono tame pačiame aplanke';
+  @override
+  String trashOriginalPath(String path) => 'buvo: $path';
   @override
   String get newNoteHere => 'Nauja pastaba čia';
   @override

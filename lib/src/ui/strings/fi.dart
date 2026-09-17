@@ -358,6 +358,18 @@ final class FinnishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Ladataan…';
+  @override
+  String get noteStatusSaving => 'Tallennetaan…';
+  @override
+  String get noteStatusUnsaved => 'Tallentamaton';
+  @override
+  String get noteStatusSaved => 'Tallennettu';
+  @override
+  String get noteStatusError => 'Virhe';
+  @override
+  String wordCount(int count) => count == 1 ? '1 sana' : '$count sanaa';
+  @override
   String get outlineTooltip => 'Rakenne';
   @override
   String get outlineNoHeadings => 'Ei otsikoita';
@@ -810,6 +822,12 @@ final class FinnishStrings extends Strings {
   String get closeMenuTooltip => 'Sulje';
   @override
   String get newFolderTitle => 'Uusi kansio';
+  @override
+  String get newNoteSameFolder => 'Uusi muistiinpano samaan kansioon';
+  @override
+  String get newFromTemplateSameFolder => 'Uusi mallista samaan kansioon';
+  @override
+  String trashOriginalPath(String path) => 'sijainti: $path';
   @override
   String get newNoteHere => 'Uusi muistiinpano tähän';
   @override

@@ -355,6 +355,18 @@ final class AlbanianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Po ngarkohet…';
+  @override
+  String get noteStatusSaving => 'Po ruhet…';
+  @override
+  String get noteStatusUnsaved => 'E paruajtur';
+  @override
+  String get noteStatusSaved => 'E ruajtur';
+  @override
+  String get noteStatusError => 'Gabim';
+  @override
+  String wordCount(int count) => '$count fjalë';
+  @override
   String get outlineTooltip => 'Përmbajtja';
   @override
   String get outlineNoHeadings => 'Nuk ka tituj';
@@ -811,6 +823,13 @@ final class AlbanianStrings extends Strings {
   String get closeMenuTooltip => 'Mbyll';
   @override
   String get newFolderTitle => 'Tresë e re';
+  @override
+  String get newNoteSameFolder => 'Shënim i ri në të njëjtën dosje';
+  @override
+  String get newFromTemplateSameFolder =>
+      'I ri nga shablloni në të njëjtën dosje';
+  @override
+  String trashOriginalPath(String path) => 'ishte në $path';
   @override
   String get newNoteHere => 'Shënim i ri këtu';
   @override

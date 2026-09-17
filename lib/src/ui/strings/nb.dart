@@ -359,6 +359,18 @@ final class NorwegianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Laster…';
+  @override
+  String get noteStatusSaving => 'Lagrer…';
+  @override
+  String get noteStatusUnsaved => 'Ikke lagret';
+  @override
+  String get noteStatusSaved => 'Lagret';
+  @override
+  String get noteStatusError => 'Feil';
+  @override
+  String wordCount(int count) => '$count ord';
+  @override
   String get outlineTooltip => 'Struktur';
   @override
   String get outlineNoHeadings => 'Ingen overskrifter';
@@ -805,6 +817,12 @@ final class NorwegianStrings extends Strings {
   String get closeMenuTooltip => 'Lukk';
   @override
   String get newFolderTitle => 'Ny mappe';
+  @override
+  String get newNoteSameFolder => 'Nytt notat i samme mappe';
+  @override
+  String get newFromTemplateSameFolder => 'Nytt fra mal i samme mappe';
+  @override
+  String trashOriginalPath(String path) => 'lå i $path';
   @override
   String get newNoteHere => 'Nytt notat her';
   @override

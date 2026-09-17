@@ -346,6 +346,18 @@ final class HindiStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'लोड हो रहा है…';
+  @override
+  String get noteStatusSaving => 'सहेजा जा रहा है…';
+  @override
+  String get noteStatusUnsaved => 'सहेजा नहीं गया';
+  @override
+  String get noteStatusSaved => 'सहेजा गया';
+  @override
+  String get noteStatusError => 'त्रुटि';
+  @override
+  String wordCount(int count) => '$count शब्द';
+  @override
   String get outlineTooltip => 'आउटलाइन';
   @override
   String get outlineNoHeadings => 'कोई हेडिंग नहीं';
@@ -788,6 +800,12 @@ final class HindiStrings extends Strings {
   String get closeMenuTooltip => 'बंद करें';
   @override
   String get newFolderTitle => 'नया फ़ोल्डर';
+  @override
+  String get newNoteSameFolder => 'उसी फ़ोल्डर में नया नोट';
+  @override
+  String get newFromTemplateSameFolder => 'उसी फ़ोल्डर में टेम्पलेट से नया';
+  @override
+  String trashOriginalPath(String path) => 'यहाँ था: $path';
   @override
   String get newNoteHere => 'यहाँ नया नोट';
   @override

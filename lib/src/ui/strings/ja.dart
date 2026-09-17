@@ -333,6 +333,18 @@ final class JapaneseStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => '読み込み中…';
+  @override
+  String get noteStatusSaving => '保存中…';
+  @override
+  String get noteStatusUnsaved => '未保存';
+  @override
+  String get noteStatusSaved => '保存済み';
+  @override
+  String get noteStatusError => 'エラー';
+  @override
+  String wordCount(int count) => '$count 語';
+  @override
   String get outlineTooltip => 'アウトライン';
   @override
   String get outlineNoHeadings => '見出しなし';
@@ -756,6 +768,12 @@ final class JapaneseStrings extends Strings {
   String get closeMenuTooltip => '閉じる';
   @override
   String get newFolderTitle => '新しいフォルダ';
+  @override
+  String get newNoteSameFolder => '同じフォルダーに新規ノート';
+  @override
+  String get newFromTemplateSameFolder => '同じフォルダーにテンプレートから作成';
+  @override
+  String trashOriginalPath(String path) => '元の場所: $path';
   @override
   String get newNoteHere => 'ここに新しいノート';
   @override

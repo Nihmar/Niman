@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Lists trash items and supports restoring / permanent deletion.
@@ -131,14 +132,17 @@ final class _TrashScreenState extends State<TrashScreen> {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                final deletedOn = item.deletedAt.toIso8601String().substring(
-                  0,
-                  10,
-                );
+                // The day, written the way the history screen writes it
+                // (today, yesterday, "12 Sep") rather than the ISO date
+                // the string happened to start with.
+                final deletedOn = historyDay(item.deletedAt, DateTime.now());
                 return Card(
                   child: ListTile(
                     title: Text(item.name),
-                    subtitle: Text('was: ${item.originalPath}\n$deletedOn'),
+                    subtitle: Text(
+                      '${AppStrings.trashOriginalPath(item.originalPath)}\n'
+                      '$deletedOn',
+                    ),
                     isThreeLine: true,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

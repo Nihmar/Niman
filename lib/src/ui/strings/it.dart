@@ -361,6 +361,18 @@ final class ItalianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Caricamento…';
+  @override
+  String get noteStatusSaving => 'Salvataggio…';
+  @override
+  String get noteStatusUnsaved => 'Non salvato';
+  @override
+  String get noteStatusSaved => 'Salvato';
+  @override
+  String get noteStatusError => 'Errore';
+  @override
+  String wordCount(int count) => count == 1 ? '1 parola' : '$count parole';
+  @override
   String get outlineTooltip => 'Struttura';
   @override
   String get outlineNoHeadings => 'Nessun titolo';
@@ -809,6 +821,13 @@ final class ItalianStrings extends Strings {
   String get closeMenuTooltip => 'Chiudi';
   @override
   String get newFolderTitle => 'Nuova cartella';
+  @override
+  String get newNoteSameFolder => 'Nuova nota nella stessa cartella';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nuova da modello nella stessa cartella';
+  @override
+  String trashOriginalPath(String path) => 'era in $path';
   @override
   String get newNoteHere => 'Nuova nota qui';
   @override

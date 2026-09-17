@@ -359,6 +359,18 @@ final class EnglishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Loading…';
+  @override
+  String get noteStatusSaving => 'Saving…';
+  @override
+  String get noteStatusUnsaved => 'Unsaved';
+  @override
+  String get noteStatusSaved => 'Saved';
+  @override
+  String get noteStatusError => 'Error';
+  @override
+  String wordCount(int count) => count == 1 ? '1 word' : '$count words';
+  @override
   String get outlineTooltip => 'Outline';
   @override
   String get outlineNoHeadings => 'No headings';
@@ -803,6 +815,13 @@ final class EnglishStrings extends Strings {
   String get closeMenuTooltip => 'Close';
   @override
   String get newFolderTitle => 'New folder';
+  @override
+  String get newNoteSameFolder => 'New note in the same folder';
+  @override
+  String get newFromTemplateSameFolder =>
+      'New from template in the same folder';
+  @override
+  String trashOriginalPath(String path) => 'was at $path';
   @override
   String get newNoteHere => 'New note here';
   @override

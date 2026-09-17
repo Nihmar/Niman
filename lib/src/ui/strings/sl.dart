@@ -358,6 +358,23 @@ final class SlovenianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Nalaganje…';
+  @override
+  String get noteStatusSaving => 'Shranjevanje…';
+  @override
+  String get noteStatusUnsaved => 'Neshranjeno';
+  @override
+  String get noteStatusSaved => 'Shranjeno';
+  @override
+  String get noteStatusError => 'Napaka';
+  @override
+  String wordCount(int count) => switch (count % 100) {
+    1 => '$count beseda',
+    2 => '$count besedi',
+    3 || 4 => '$count besede',
+    _ => '$count besed',
+  };
+  @override
   String get outlineTooltip => 'Struktura';
   @override
   String get outlineNoHeadings => 'Ni naslovov';
@@ -803,6 +820,12 @@ final class SlovenianStrings extends Strings {
   String get closeMenuTooltip => 'Zapri';
   @override
   String get newFolderTitle => 'Nova mapa';
+  @override
+  String get newNoteSameFolder => 'Nov zapisek v isti mapi';
+  @override
+  String get newFromTemplateSameFolder => 'Nov iz predloge v isti mapi';
+  @override
+  String trashOriginalPath(String path) => 'bil je v $path';
   @override
   String get newNoteHere => 'Nova opomba sem';
   @override

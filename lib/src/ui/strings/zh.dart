@@ -333,6 +333,18 @@ final class ChineseStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => '加载中…';
+  @override
+  String get noteStatusSaving => '保存中…';
+  @override
+  String get noteStatusUnsaved => '未保存';
+  @override
+  String get noteStatusSaved => '已保存';
+  @override
+  String get noteStatusError => '错误';
+  @override
+  String wordCount(int count) => '$count 词';
+  @override
   String get outlineTooltip => '大纲';
   @override
   String get outlineNoHeadings => '没有标题';
@@ -746,6 +758,12 @@ final class ChineseStrings extends Strings {
   String get closeMenuTooltip => '关闭';
   @override
   String get newFolderTitle => '新建文件夹';
+  @override
+  String get newNoteSameFolder => '在同一文件夹中新建笔记';
+  @override
+  String get newFromTemplateSameFolder => '在同一文件夹中从模板新建';
+  @override
+  String trashOriginalPath(String path) => '原位置：$path';
   @override
   String get newNoteHere => '在此新建笔记';
   @override

@@ -352,6 +352,18 @@ final class TurkishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Yükleniyor…';
+  @override
+  String get noteStatusSaving => 'Kaydediliyor…';
+  @override
+  String get noteStatusUnsaved => 'Kaydedilmedi';
+  @override
+  String get noteStatusSaved => 'Kaydedildi';
+  @override
+  String get noteStatusError => 'Hata';
+  @override
+  String wordCount(int count) => '$count kelime';
+  @override
   String get outlineTooltip => 'İçerik';
   @override
   String get outlineNoHeadings => 'Başlık yok';
@@ -801,6 +813,12 @@ final class TurkishStrings extends Strings {
   String get closeMenuTooltip => 'Kapat';
   @override
   String get newFolderTitle => 'Yeni klasör';
+  @override
+  String get newNoteSameFolder => 'Aynı klasörde yeni not';
+  @override
+  String get newFromTemplateSameFolder => 'Aynı klasörde şablondan yeni';
+  @override
+  String trashOriginalPath(String path) => 'buradaydı: $path';
   @override
   String get newNoteHere => 'Buraya yeni not';
   @override

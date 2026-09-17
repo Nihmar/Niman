@@ -362,6 +362,18 @@ final class GalicianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Cargando…';
+  @override
+  String get noteStatusSaving => 'Gardando…';
+  @override
+  String get noteStatusUnsaved => 'Sen gardar';
+  @override
+  String get noteStatusSaved => 'Gardado';
+  @override
+  String get noteStatusError => 'Erro';
+  @override
+  String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
+  @override
   String get outlineTooltip => 'Estrutura';
   @override
   String get outlineNoHeadings => 'Non hai títulos';
@@ -815,6 +827,12 @@ final class GalicianStrings extends Strings {
   String get closeMenuTooltip => 'Pechar';
   @override
   String get newFolderTitle => 'Cartafol novo';
+  @override
+  String get newNoteSameFolder => 'Nova nota no mesmo cartafol';
+  @override
+  String get newFromTemplateSameFolder => 'Nova desde modelo no mesmo cartafol';
+  @override
+  String trashOriginalPath(String path) => 'estaba en $path';
   @override
   String get newNoteHere => 'Nota nova aquí';
   @override
