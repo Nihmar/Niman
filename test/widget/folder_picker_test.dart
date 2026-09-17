@@ -103,4 +103,77 @@ void main() {
     await session.close();
     await session.dispose();
   });
+
+  // Issue #94: the attachments setting says `assets` from the first run,
+  // in libraries that never held such a folder. It must not be selected,
+  // or New folder builds the wanted folder inside it.
+  testWidgets('a current folder the library does not hold is not selected', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    final chosen = await _pick(
+      tester,
+      session,
+      names: ['Notes'],
+      current: 'assets',
+      act: (tester) async {
+        // Nothing is selected, so there is nothing to choose yet.
+        expect(find.byIcon(Icons.check), findsNothing);
+        final choose = tester.widget<FilledButton>(
+          find.byKey(const Key('folder-picker-choose')),
+        );
+        expect(choose.onPressed, isNull);
+        // New folder opens on the missing folder's name...
+        await tester.tap(find.text('New folder'));
+        await tester.pumpAndSettle();
+        final field = find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        );
+        expect(tester.widget<TextField>(field).controller?.text, 'assets');
+        // ...and whatever it is renamed to lands at the library root.
+        await tester.enterText(field, 'attachments');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('folder-picker-choose')));
+        await tester.pumpAndSettle();
+      },
+    );
+    expect(chosen, 'attachments');
+    expect(await session.ops!.find('attachments'), isNotNull);
+    expect(await session.ops!.find('assets'), isNull);
+    expect(await session.ops!.find('assets/attachments'), isNull);
+    await session.close();
+    await session.dispose();
+  });
+
+  testWidgets('a folder the library holds stays selected, and is a parent', (
+    tester,
+  ) async {
+    final session = FakeLibrarySession();
+    final chosen = await _pick(
+      tester,
+      session,
+      names: ['assets', 'Notes'],
+      current: 'assets',
+      act: (tester) async {
+        // Selected, so New folder has a parent and nothing to suggest.
+        await tester.tap(find.text('New folder'));
+        await tester.pumpAndSettle();
+        final field = find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        );
+        expect(tester.widget<TextField>(field).controller?.text, isEmpty);
+        await tester.enterText(field, 'clips');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('folder-picker-choose')));
+        await tester.pumpAndSettle();
+      },
+    );
+    expect(chosen, 'assets/clips');
+    await session.close();
+    await session.dispose();
+  });
 }

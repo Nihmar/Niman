@@ -11,7 +11,10 @@ import 'package:niman/src/ui/strings.dart';
 ///
 /// The list is the indexed folders, flat and sorted by path; a folder
 /// that does not exist yet is created from the dialog itself, so the
-/// caller never has to accept a typed path.
+/// caller never has to accept a typed path. [current] starts out
+/// selected only if the library holds it, so the new folder lands where
+/// the user put it and not inside a setting's default that was never
+/// created (issue #94).
 Future<String?> showFolderPicker(
   BuildContext context, {
   required String title,
@@ -50,7 +53,9 @@ final class FolderPicker extends StatefulWidget {
   /// Used to create a folder from within the dialog.
   final NoteOperations ops;
 
-  /// The folder selected when the dialog opens, if any.
+  /// The setting's folder, selected when the dialog opens — but only
+  /// when [folders] holds it; otherwise it merely names what *New
+  /// folder* offers to create.
   final String? current;
 
   @override
@@ -65,7 +70,24 @@ final class _FolderPickerState extends State<FolderPicker> {
   void initState() {
     super.initState();
     _paths = [for (final folder in widget.folders) folder.path]..sort();
-    _selected = widget.current;
+    // Only a folder the library actually holds can start out selected.
+    // A setting carries its default whether or not that folder was ever
+    // created — `assets` for the attachments, `Lists` for the lists — and
+    // selecting one that is not there both offered it as a choice and
+    // made *New folder* nest inside it: `assets/attachments` instead of
+    // `attachments`, with `assets/` brought into being on the way
+    // (issue #94).
+    _selected = _paths.contains(widget.current) ? widget.current : null;
+  }
+
+  /// The name *New folder* opens with: the folder the setting points at
+  /// while the library has none, so the library that never created its
+  /// `assets` is one tap from having it. Nothing to offer once a real
+  /// folder is selected — that one is a parent, not a name.
+  String get _suggestedName {
+    final current = widget.current;
+    if (current == null || _selected != null) return '';
+    return current.split('/').last;
   }
 
   /// Creates a folder inside the selected one (or at the library root)
@@ -76,7 +98,7 @@ final class _FolderPickerState extends State<FolderPicker> {
     final name = await showNameDialog(
       context,
       title: AppStrings.folderPickerNewFolder,
-      initial: 'Lists',
+      initial: _suggestedName,
     );
     if (name == null) return;
     final created = await widget.ops.createFolder(
