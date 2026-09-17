@@ -78,7 +78,7 @@ List<RowMenuEntry> rowMenuEntries(Note note, {required bool isQuickNote}) {
   return [
     (
       key: const Key('menu-new-note'),
-      icon: Icons.note_add,
+      icon: Icons.note_add_outlined,
       label: AppStrings.newNoteHere,
       value: 'note',
     ),
@@ -91,7 +91,7 @@ List<RowMenuEntry> rowMenuEntries(Note note, {required bool isQuickNote}) {
     if (note.isDir)
       (
         key: const Key('menu-new-folder'),
-        icon: Icons.create_new_folder,
+        icon: Icons.create_new_folder_outlined,
         label: AppStrings.newFolderHere,
         value: 'folder',
       ),
@@ -138,7 +138,7 @@ List<RowMenuEntry> rowMenuEntries(Note note, {required bool isQuickNote}) {
     if (!note.isDir && supportsTreeContextActions) ...[
       (
         key: const Key('menu-open-file-manager'),
-        icon: Icons.folder_open,
+        icon: Icons.folder_open_outlined,
         label: AppStrings.openInFileManager,
         value: 'reveal',
       ),
@@ -151,13 +151,13 @@ List<RowMenuEntry> rowMenuEntries(Note note, {required bool isQuickNote}) {
     ],
     (
       key: const Key('menu-rename'),
-      icon: Icons.edit,
+      icon: Icons.edit_outlined,
       label: AppStrings.actionRename,
       value: 'rename',
     ),
     (
       key: const Key('menu-move'),
-      icon: Icons.drive_folder_upload,
+      icon: Icons.drive_folder_upload_outlined,
       label: AppStrings.actionMove,
       value: 'move',
     ),
