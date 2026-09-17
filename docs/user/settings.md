@@ -10,6 +10,7 @@ device.
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `trashEnabled` | true | Deletes move to `.trash/`; false = hard delete |
+| `trashAutoEmptyDays` | 0 (= never) | Days an item waits in `.trash/` before the library opening deletes it for good (1–3650; anything else reads as never) |
 | `historyVersions` | 10 | Kept `.history/` versions per note (0–100, 0 = none) |
 | `historyIntervalMinutes` | 5 | Least minutes between two versions kept while editing (1–60) |
 | `quickNotePath` | null (= `Quick note.md` at root) | Quick-note target, library-relative |

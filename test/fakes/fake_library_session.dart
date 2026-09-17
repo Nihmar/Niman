@@ -423,6 +423,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<int> get trashAutoEmptyDays async => _config.trashAutoEmptyDays;
+
+  @override
+  Future<void> setTrashAutoEmptyDays(int days) async {
+    _config = _config.copyWith(
+      trashAutoEmptyDays: normalizeTrashAutoEmptyDays(days),
+    );
+  }
+
+  @override
   Future<int> get historyVersions async => _config.historyVersions;
 
   @override

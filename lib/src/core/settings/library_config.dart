@@ -40,6 +40,45 @@ int normalizeHistoryVersions(Object? raw) {
   return count;
 }
 
+/// The `trashAutoEmptyDays` that empties nothing: what a fresh library
+/// gets, and what an unreadable value falls back to (issue #79).
+const int trashAutoEmptyOff = 0;
+
+/// The shortest an item can be asked to wait in `.trash/` before the
+/// automatic empty takes it.
+const int minTrashAutoEmptyDays = 1;
+
+/// The longest wait the setting accepts (ten years — past it, someone is
+/// not asking for an automatic empty at all).
+const int maxTrashAutoEmptyDays = 3650;
+
+/// The waits the settings screen offers, in days; a hand-edited file may
+/// hold any whole number in [minTrashAutoEmptyDays] ..
+/// [maxTrashAutoEmptyDays].
+const List<int> trashAutoEmptyChoices = [
+  trashAutoEmptyOff,
+  7,
+  30,
+  90,
+  180,
+  365,
+];
+
+/// Reads a `trashAutoEmptyDays` value out of the settings file (issue
+/// #79).
+///
+/// Defaulted to [trashAutoEmptyOff] rather than clamped, unlike every
+/// other number here: this one is permission to delete notes for good,
+/// and a value nobody can make sense of is not permission. A file whose
+/// key says `-1`, `"30"` or `30.5` empties nothing at all.
+int normalizeTrashAutoEmptyDays(Object? raw) {
+  if (raw is! int) return trashAutoEmptyOff;
+  if (raw < minTrashAutoEmptyDays || raw > maxTrashAutoEmptyDays) {
+    return trashAutoEmptyOff;
+  }
+  return raw;
+}
+
 /// The least minutes between two history versions taken while editing,
 /// in a fresh library.
 const int defaultHistoryIntervalMinutes = 5;
@@ -230,6 +269,7 @@ final class LibraryConfig {
     required this.historyVersions,
     required this.quickNotePath,
     required this.listNoteFolder,
+    this.trashAutoEmptyDays = trashAutoEmptyOff,
     this.historyIntervalMinutes = defaultHistoryIntervalMinutes,
     this.templateFolder = defaultTemplateFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -276,6 +316,9 @@ final class LibraryConfig {
         final bool enabled => enabled,
         _ => true,
       },
+      trashAutoEmptyDays: normalizeTrashAutoEmptyDays(
+        json['trashAutoEmptyDays'],
+      ),
       historyVersions: normalizeHistoryVersions(versions),
       historyIntervalMinutes: normalizeHistoryIntervalMinutes(
         json['historyIntervalMinutes'],
@@ -344,6 +387,11 @@ final class LibraryConfig {
 
   /// Whether deletes move notes into `.trash/` (default true).
   final bool trashEnabled;
+
+  /// How many days an item may sit in `.trash/` before the automatic
+  /// empty deletes it for good; [trashAutoEmptyOff] (the default) never
+  /// deletes anything (issue #79).
+  final int trashAutoEmptyDays;
 
   /// The number of kept `.history/` versions (default 10), in
   /// [minHistoryVersions] .. [maxHistoryVersions] when it came from the
@@ -437,6 +485,7 @@ final class LibraryConfig {
   /// A copy with the given fields replaced.
   LibraryConfig copyWith({
     bool? trashEnabled,
+    int? trashAutoEmptyDays,
     int? historyVersions,
     int? historyIntervalMinutes,
     String? quickNotePath,
@@ -463,6 +512,7 @@ final class LibraryConfig {
   }) {
     return LibraryConfig(
       trashEnabled: trashEnabled ?? this.trashEnabled,
+      trashAutoEmptyDays: trashAutoEmptyDays ?? this.trashAutoEmptyDays,
       historyVersions: historyVersions ?? this.historyVersions,
       historyIntervalMinutes:
           historyIntervalMinutes ?? this.historyIntervalMinutes,
@@ -494,6 +544,7 @@ final class LibraryConfig {
 
   static const _knownKeys = {
     'trashEnabled',
+    'trashAutoEmptyDays',
     'historyVersions',
     'historyIntervalMinutes',
     'quickNotePath',
@@ -532,6 +583,7 @@ final class LibraryConfig {
   Map<String, Object?> toJsonMap() {
     final json = <String, Object?>{
       'trashEnabled': trashEnabled,
+      'trashAutoEmptyDays': trashAutoEmptyDays,
       'historyVersions': historyVersions,
       'historyIntervalMinutes': historyIntervalMinutes,
       'listNoteFolder': listNoteFolder,
@@ -615,6 +667,7 @@ final class LibraryConfig {
     if (identical(this, other)) return true;
     if (other is! LibraryConfig) return false;
     return trashEnabled == other.trashEnabled &&
+        trashAutoEmptyDays == other.trashAutoEmptyDays &&
         historyVersions == other.historyVersions &&
         historyIntervalMinutes == other.historyIntervalMinutes &&
         quickNotePath == other.quickNotePath &&

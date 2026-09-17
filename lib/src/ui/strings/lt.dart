@@ -69,6 +69,19 @@ final class LithuanianStrings extends Strings {
       'Ištrinti elementai perkeliama į .trash/ (išjungta = nevildinamas '
       'ištrininimas)';
   @override
+  String get trashAutoEmptyTitle => 'Automatiškai ištuštinti šiukšlinę';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Senesni ištrynimai dingsta visam laikui atveriant biblioteką';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Niekada'
+      : days % 10 == 1 && days % 100 != 11
+      ? '$days diena'
+      : days % 10 >= 2 && (days % 100 < 11 || days % 100 > 19)
+      ? '$days dienos'
+      : '$days dienų';
+  @override
   String get debugLogsTitle => 'Derinimo žurnalai';
   @override
   String get debugLogsSubtitle =>

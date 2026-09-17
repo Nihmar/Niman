@@ -69,6 +69,17 @@ final class PolishStrings extends Strings {
       'Usunięte elementy trafiają do .trash/ (wyłączone = trwałe '
       'usunięcie)';
   @override
+  String get trashAutoEmptyTitle => 'Automatyczne opróżnianie kosza';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Starsze usunięcia znikają na zawsze przy otwarciu biblioteki';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nigdy'
+      : days == 1
+      ? '1 dzień'
+      : '$days dni';
+  @override
   String get debugLogsTitle => 'Logi debugowania';
   @override
   String get debugLogsSubtitle =>

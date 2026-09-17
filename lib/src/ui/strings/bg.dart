@@ -69,6 +69,17 @@ final class BulgarianStrings extends Strings {
       'Изтритите елементи се преместват в .trash/ (изключено = окончателно '
       'изтриване)';
   @override
+  String get trashAutoEmptyTitle => 'Автоматично изпразване на коша';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Старите изтривания изчезват завинаги при отваряне на библиотеката';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Никога'
+      : days == 1
+      ? '1 ден'
+      : '$days дни';
+  @override
   String get debugLogsTitle => 'Джурнали за отключване';
   @override
   String get debugLogsSubtitle =>

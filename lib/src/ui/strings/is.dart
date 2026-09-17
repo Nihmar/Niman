@@ -68,6 +68,17 @@ final class IcelandicStrings extends Strings {
   String get trashSubtitle =>
       'Eyddir hlutir fara í .trash/ (óvirkt = varanleg eyðing)';
   @override
+  String get trashAutoEmptyTitle => 'Tæma korpu sjálfkrafa';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Eldri eyðingar hverfa endanlega þegar safnið er opnað';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Aldrei'
+      : days == 1
+      ? '1 dagur'
+      : '$days dagar';
+  @override
   String get debugLogsTitle => 'Aflausningarskrá';
   @override
   String get debugLogsSubtitle => 'Skrar atburði forritins í minnisbuffer';

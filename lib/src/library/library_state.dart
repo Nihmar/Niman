@@ -27,6 +27,7 @@ import 'package:niman/src/library/file_watcher.dart';
 import 'package:niman/src/library/library_registry.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/library/trash_cleaner.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/search/replace.dart';
@@ -489,6 +490,10 @@ final class LibraryController implements LibrarySession {
       // The native widget config activity cannot read the registry (no
       // Dart engine at placement), so it reads this mirror instead.
       unawaited(_saveWidgetLibraryMirror(appDb));
+      // Opening is when the trash empties itself, if the library asked
+      // it to (issue #79) — behind the ready bump, because a folder full
+      // of old deletions must not hold the library shut.
+      unawaited(_autoEmptyTrash(ops, settings.trashAutoEmptyDays));
       _bump();
       if (!blockingScan) {
         _reconcileTimer = Timer(resumeReconcileDelay, () => _safeRescan(abs));
@@ -961,6 +966,18 @@ final class LibraryController implements LibrarySession {
   }
 
   @override
+  Future<int> get trashAutoEmptyDays async =>
+      (await _library).trashAutoEmptyDays;
+
+  @override
+  Future<void> setTrashAutoEmptyDays(int days) async {
+    _log.info('trash auto-empty set to $days day(s)');
+    await _editLibrary(
+      (c) => c.copyWith(trashAutoEmptyDays: normalizeTrashAutoEmptyDays(days)),
+    );
+  }
+
+  @override
   Future<int> get historyVersions async => (await _library).historyVersions;
 
   @override
@@ -1156,6 +1173,19 @@ final class LibraryController implements LibrarySession {
       await dao.tree(const <String>[]);
     } on Object catch (error) {
       _log.debug('tree warm-up failed ($error)');
+    }
+  }
+
+  /// Runs the automatic trash empty for a library that asked for one,
+  /// and swallows whatever it runs into: the library is open and usable
+  /// either way, and a trash that could not be emptied is not a reason to
+  /// fail the open behind the user's back.
+  Future<void> _autoEmptyTrash(NoteOperations ops, int days) async {
+    if (days <= 0) return;
+    try {
+      await autoEmptyTrash(ops, maxAgeDays: days);
+    } on Object catch (error) {
+      _log.error('auto-empty failed: $error');
     }
   }
 

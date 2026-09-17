@@ -69,6 +69,18 @@ final class CroatianStrings extends Strings {
       'Izbrisani elementi se premještaju u .trash/ (isključeno = trajno '
       'brisanje)';
   @override
+  String get trashAutoEmptyTitle => 'Automatsko pražnjenje korpe';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Starija brisanja nestaju zauvijek pri otvaranju biblioteke';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nikad'
+      : switch ((days % 10, days % 100)) {
+          (1, != 11) => '$days dan',
+          _ => '$days dana',
+        };
+  @override
   String get debugLogsTitle => 'Dijagnostički dnevnik';
   @override
   String get debugLogsSubtitle =>

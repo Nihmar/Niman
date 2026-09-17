@@ -68,6 +68,19 @@ final class SlovakStrings extends Strings {
   String get trashSubtitle =>
       'Smazané prvky sa presunú do .trash/ (vypnuté = trvalé vymazanie)';
   @override
+  String get trashAutoEmptyTitle => 'Automatické vyprázdnenie koša';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Staršie zmazané položky zmiznú natrvalo pri otvorení knižnice';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nikdy'
+      : switch (days) {
+          1 => '1 deň',
+          >= 2 && <= 4 => '$days dni',
+          _ => '$days dní',
+        };
+  @override
   String get debugLogsTitle => 'Diagnostické záznamy';
   @override
   String get debugLogsSubtitle =>
