@@ -808,6 +808,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get newNoteTitle => 'Нова бележка';
   @override
+  String get newItemTooltip => 'Ново';
+  @override
+  String get closeMenuTooltip => 'Затваряне';
+  @override
   String get newFolderTitle => 'Нова папка';
   @override
   String get newNoteHere => 'Нова бележка тук';

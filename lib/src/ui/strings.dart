@@ -577,6 +577,8 @@ final class AppStrings {
   static String get sortAscTooltip => _s.sortAscTooltip;
   static String get sortDescTooltip => _s.sortDescTooltip;
   static String get newNoteTitle => _s.newNoteTitle;
+  static String get newItemTooltip => _s.newItemTooltip;
+  static String get closeMenuTooltip => _s.closeMenuTooltip;
   static String get newFolderTitle => _s.newFolderTitle;
   static String get newNoteHere => _s.newNoteHere;
   static String get newFolderHere => _s.newFolderHere;

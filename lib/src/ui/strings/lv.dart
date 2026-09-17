@@ -797,6 +797,10 @@ final class LatvianStrings extends Strings {
   @override
   String get newNoteTitle => 'Jauna piezīme';
   @override
+  String get newItemTooltip => 'Jauns';
+  @override
+  String get closeMenuTooltip => 'Aizvērt';
+  @override
   String get newFolderTitle => 'Jauns katalogs';
   @override
   String get newNoteHere => 'Jauna piezīme šeit';

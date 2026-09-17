@@ -398,6 +398,8 @@ abstract base class Strings {
   String get sortAscTooltip;
   String get sortDescTooltip;
   String get newNoteTitle;
+  String get newItemTooltip;
+  String get closeMenuTooltip;
   String get newFolderTitle;
   String get newNoteHere;
   String get newFolderHere;

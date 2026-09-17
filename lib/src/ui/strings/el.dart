@@ -826,6 +826,10 @@ final class GreekStrings extends Strings {
   @override
   String get newNoteTitle => 'Νέα σημείωση';
   @override
+  String get newItemTooltip => 'Νέο';
+  @override
+  String get closeMenuTooltip => 'Κλείσιμο';
+  @override
   String get newFolderTitle => 'Νέος φάκελος';
   @override
   String get newNoteHere => 'Νέα σημείωση εδώ';

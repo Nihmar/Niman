@@ -805,6 +805,10 @@ final class FinnishStrings extends Strings {
   @override
   String get newNoteTitle => 'Uusi muistiinpano';
   @override
+  String get newItemTooltip => 'Uusi';
+  @override
+  String get closeMenuTooltip => 'Sulje';
+  @override
   String get newFolderTitle => 'Uusi kansio';
   @override
   String get newNoteHere => 'Uusi muistiinpano tähän';

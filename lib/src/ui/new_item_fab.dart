@@ -108,7 +108,9 @@ final class NewItemFab extends StatelessWidget {
           onAnchor: onAnchor,
           child: FloatingActionButton(
             key: const Key('new-note-fab'),
-            tooltip: expanded ? 'Close' : 'New',
+            tooltip: expanded
+                ? AppStrings.closeMenuTooltip
+                : AppStrings.newItemTooltip,
             onPressed: onToggle,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),

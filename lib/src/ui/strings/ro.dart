@@ -809,6 +809,10 @@ final class RomanianStrings extends Strings {
   @override
   String get newNoteTitle => 'Notă nouă';
   @override
+  String get newItemTooltip => 'Nou';
+  @override
+  String get closeMenuTooltip => 'Închide';
+  @override
   String get newFolderTitle => 'Dosar nou';
   @override
   String get newNoteHere => 'Notă nouă aici';

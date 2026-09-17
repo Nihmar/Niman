@@ -804,6 +804,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get newNoteTitle => 'Nova nota';
   @override
+  String get newItemTooltip => 'Novo';
+  @override
+  String get closeMenuTooltip => 'Fechar';
+  @override
   String get newFolderTitle => 'Nova pasta';
   @override
   String get newNoteHere => 'Nova nota aqui';
