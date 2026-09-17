@@ -103,6 +103,15 @@ final class HungarianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'létrehozandó';
   @override
+  String get settingsSearchHint => 'Keresés a beállításokban';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 beállítás található' : '$count beállítás található';
+  @override
+  String get settingsToggleOn => 'Be';
+  @override
+  String get settingsToggleOff => 'Ki';
+  @override
   String get settingsPreviewEnabledTitle => 'Előnézet';
   @override
   String get settingsPreviewEnabledSubtitle =>

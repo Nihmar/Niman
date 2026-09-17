@@ -110,6 +110,15 @@ final class SlovenianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'za ustvariti';
   @override
+  String get settingsSearchHint => 'Išči v nastavitvah';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 najdena nastavitev' : '$count najdenih nastavitev';
+  @override
+  String get settingsToggleOn => 'Vklopljeno';
+  @override
+  String get settingsToggleOff => 'Izklopljeno';
+  @override
   String get settingsPreviewEnabledTitle => 'Predogled';
   @override
   String get settingsPreviewEnabledSubtitle =>

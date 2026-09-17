@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 
@@ -68,29 +69,35 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
             ),
           ),
         ),
-        ListTile(
+        HighlightRow(
           key: const Key('reindex-setting'),
-          leading: const Icon(Icons.refresh_outlined),
-          title: Text(AppStrings.reindexTitle),
-          onTap: () => _rescan(context),
+          child: ListTile(
+            leading: const Icon(Icons.refresh_outlined),
+            title: Text(AppStrings.reindexTitle),
+            onTap: () => _rescan(context),
+          ),
         ),
         // Above "Close library" on purpose: switching is the common
         // move and closing is the way out of every library at once.
-        ListTile(
+        HighlightRow(
           key: const Key('switch-library-setting'),
-          leading: const Icon(Icons.swap_horiz_outlined),
-          title: Text(AppStrings.switchLibraryTitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _switchLibrary(context),
+          child: ListTile(
+            leading: const Icon(Icons.swap_horiz_outlined),
+            title: Text(AppStrings.switchLibraryTitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _switchLibrary(context),
+          ),
         ),
-        ListTile(
+        HighlightRow(
           key: const Key('close-library-setting'),
-          leading: const Icon(Icons.link_off_outlined),
-          title: Text(AppStrings.closeLibraryTitle),
-          onTap: () async {
-            await controller.close();
-            onClosed?.call();
-          },
+          child: ListTile(
+            leading: const Icon(Icons.link_off_outlined),
+            title: Text(AppStrings.closeLibraryTitle),
+            onTap: () async {
+              await controller.close();
+              onClosed?.call();
+            },
+          ),
         ),
       ],
     );

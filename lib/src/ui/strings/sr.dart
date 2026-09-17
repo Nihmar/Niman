@@ -108,6 +108,15 @@ final class SerbianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'за прављење';
   @override
+  String get settingsSearchHint => 'Претражи поставке';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 пронађена поставка' : '$count пронађених поставки';
+  @override
+  String get settingsToggleOn => 'Укључено';
+  @override
+  String get settingsToggleOff => 'Искључено';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

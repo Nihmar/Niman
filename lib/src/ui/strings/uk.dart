@@ -109,6 +109,15 @@ final class UkrainianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'створити';
   @override
+  String get settingsSearchHint => 'Пошук налаштувань';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 налаштування знайдено' : '$count налаштувань знайдено';
+  @override
+  String get settingsToggleOn => 'Увімк.';
+  @override
+  String get settingsToggleOff => 'Вимк.';
+  @override
   String get settingsPreviewEnabledTitle => 'Перегляд';
   @override
   String get settingsPreviewEnabledSubtitle =>

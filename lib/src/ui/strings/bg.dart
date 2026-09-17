@@ -107,6 +107,15 @@ final class BulgarianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'за създаване';
   @override
+  String get settingsSearchHint => 'Търсене в настройките';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 намерена настройка' : '$count намерени настройки';
+  @override
+  String get settingsToggleOn => 'Вкл.';
+  @override
+  String get settingsToggleOff => 'Изкл.';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

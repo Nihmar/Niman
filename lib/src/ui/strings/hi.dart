@@ -98,6 +98,15 @@ final class HindiStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'बनाना है';
   @override
+  String get settingsSearchHint => 'सेटिंग खोजें';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 सेटिंग मिली' : '$count सेटिंग मिलीं';
+  @override
+  String get settingsToggleOn => 'चालू';
+  @override
+  String get settingsToggleOff => 'बंद';
+  @override
   String get settingsPreviewEnabledTitle => 'पूर्वावलोकन';
   @override
   String get settingsPreviewEnabledSubtitle =>

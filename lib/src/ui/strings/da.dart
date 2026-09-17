@@ -104,6 +104,15 @@ final class DanishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'oprettes';
   @override
+  String get settingsSearchHint => 'Søg i indstillinger';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 indstilling fundet' : '$count indstillinger fundet';
+  @override
+  String get settingsToggleOn => 'Til';
+  @override
+  String get settingsToggleOff => 'Fra';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>

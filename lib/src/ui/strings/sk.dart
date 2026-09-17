@@ -107,6 +107,15 @@ final class SlovakStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'na vytvorenie';
   @override
+  String get settingsSearchHint => 'Hľadať v nastaveniach';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nájdené nastavenie' : '$count nájdených nastavení';
+  @override
+  String get settingsToggleOn => 'Zapnuté';
+  @override
+  String get settingsToggleOff => 'Vypnuté';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhľad';
   @override
   String get settingsPreviewEnabledSubtitle =>

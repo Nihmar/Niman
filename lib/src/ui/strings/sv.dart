@@ -105,6 +105,15 @@ final class SwedishStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'skapas';
   @override
+  String get settingsSearchHint => 'Sök i inställningar';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 inställning hittades' : '$count inställningar hittades';
+  @override
+  String get settingsToggleOn => 'På';
+  @override
+  String get settingsToggleOff => 'Av';
+  @override
   String get settingsPreviewEnabledTitle => 'Förhandsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>

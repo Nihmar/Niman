@@ -44,6 +44,10 @@ abstract base class Strings {
   String get editorKindSourceSubtitle;
   String get editorKindWysiwygSubtitle;
   String get settingsFolderToCreate;
+  String get settingsSearchHint;
+  String settingsSearchResults(int count);
+  String get settingsToggleOn;
+  String get settingsToggleOff;
   String get settingsPreviewEnabledTitle;
   String get settingsPreviewEnabledSubtitle;
   String get switchToWysiwygTooltip;

@@ -110,6 +110,15 @@ final class LithuanianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'sukurti';
   @override
+  String get settingsSearchHint => 'Ieškoti nustatymuose';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nustatymas rastas' : '$count nustatymai rasti';
+  @override
+  String get settingsToggleOn => 'Įjungta';
+  @override
+  String get settingsToggleOff => 'Išjungta';
+  @override
   String get settingsPreviewEnabledTitle => 'Peržiūra';
   @override
   String get settingsPreviewEnabledSubtitle =>

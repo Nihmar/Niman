@@ -104,6 +104,15 @@ final class PortugueseStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'por criar';
   @override
+  String get settingsSearchHint => 'Pesquisar definições';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 definição encontrada' : '$count definições encontradas';
+  @override
+  String get settingsToggleOn => 'Ativado';
+  @override
+  String get settingsToggleOff => 'Desativado';
+  @override
   String get settingsPreviewEnabledTitle => 'Pré-visualização';
   @override
   String get settingsPreviewEnabledSubtitle =>

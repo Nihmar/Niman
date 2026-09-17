@@ -12,10 +12,13 @@ import 'package:niman/src/ui/trash.dart';
 /// sits in the trash, what the history keeps, and the reindex.
 final class SettingsTrashHistoryScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   @override
   State<SettingsTrashHistoryScreen> createState() =>
@@ -123,53 +126,64 @@ final class _SettingsTrashHistoryScreenState
       title: AppStrings.settingsAreaTrashHistory,
       controller: widget.controller,
       library: true,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          SwitchListTile(
+          HighlightRow(
             key: const Key('trash-setting'),
-            title: Text(AppStrings.trashTitle),
-            subtitle: Text(AppStrings.trashSubtitle),
-            value: _trash ?? true,
-            onChanged: _toggleTrash,
+            child: SwitchListTile(
+              title: Text(AppStrings.trashTitle),
+              subtitle: Text(AppStrings.trashSubtitle),
+              value: _trash ?? true,
+              onChanged: _toggleTrash,
+            ),
           ),
           // Under the toggle it depends on: with the trash off there is
           // nothing waiting in it to empty.
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('trash-auto-empty-setting'),
-            title: AppStrings.trashAutoEmptyTitle,
-            subtitle: AppStrings.trashAutoEmptySubtitle,
-            value: AppStrings.trashAutoEmptyValue(_trashAutoEmptyDays),
-            enabled: _trash ?? true,
-            onTap: _chooseTrashAutoEmpty,
+            child: SettingsValueRow(
+              title: AppStrings.trashAutoEmptyTitle,
+              subtitle: AppStrings.trashAutoEmptySubtitle,
+              value: AppStrings.trashAutoEmptyValue(_trashAutoEmptyDays),
+              enabled: _trash ?? true,
+              onTap: _chooseTrashAutoEmpty,
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('history-versions-setting'),
-            title: AppStrings.historyVersionsTitle,
-            subtitle: AppStrings.historyVersionsSubtitle,
-            value: AppStrings.historyVersionsValue(_historyVersions),
-            onTap: _chooseHistoryVersions,
+            child: SettingsValueRow(
+              title: AppStrings.historyVersionsTitle,
+              subtitle: AppStrings.historyVersionsSubtitle,
+              value: AppStrings.historyVersionsValue(_historyVersions),
+              onTap: _chooseHistoryVersions,
+            ),
           ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('history-interval-setting'),
-            title: AppStrings.historyIntervalTitle,
-            subtitle: AppStrings.historyIntervalSubtitle,
-            value: AppStrings.historyIntervalValue(_historyInterval),
-            enabled: _historyVersions > 0,
-            onTap: _chooseHistoryInterval,
+            child: SettingsValueRow(
+              title: AppStrings.historyIntervalTitle,
+              subtitle: AppStrings.historyIntervalSubtitle,
+              value: AppStrings.historyIntervalValue(_historyInterval),
+              enabled: _historyVersions > 0,
+              onTap: _chooseHistoryInterval,
+            ),
           ),
           // The trash itself opens from here too: the setting and what
           // it governs sit on the same screen.
-          ListTile(
+          HighlightRow(
             key: const Key('open-trash-setting'),
-            leading: const Icon(Icons.delete_outlined),
-            title: Text(AppStrings.trashTitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) =>
-                    TrashScreen(controller: widget.controller),
+            child: ListTile(
+              leading: const Icon(Icons.delete_outlined),
+              title: Text(AppStrings.trashTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) =>
+                      TrashScreen(controller: widget.controller),
+                ),
               ),
             ),
           ),

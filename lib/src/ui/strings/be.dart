@@ -107,6 +107,15 @@ final class BelarusianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'стварыць';
   @override
+  String get settingsSearchHint => 'Пошук налад';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 наладу знойдзена' : '$count наладаў знойдзена';
+  @override
+  String get settingsToggleOn => 'Укл.';
+  @override
+  String get settingsToggleOff => 'Выкл.';
+  @override
   String get settingsPreviewEnabledTitle => 'Прагляд';
   @override
   String get settingsPreviewEnabledSubtitle =>

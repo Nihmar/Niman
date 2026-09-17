@@ -13,10 +13,13 @@ import 'package:niman/src/ui/strings.dart';
 /// setting that cannot be changed.
 final class SettingsRemindersScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   @override
   State<SettingsRemindersScreen> createState() =>
@@ -69,15 +72,18 @@ final class _SettingsRemindersScreenState
       title: AppStrings.settingsSectionReminders,
       controller: widget.controller,
       library: true,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          SwitchListTile(
+          HighlightRow(
             key: const Key('reminder-show-tokens'),
-            title: Text(AppStrings.reminderShowTokensTitle),
-            subtitle: Text(AppStrings.reminderShowTokensSubtitle),
-            value: _showTokens ?? false,
-            onChanged: _toggleShowTokens,
+            child: SwitchListTile(
+              title: Text(AppStrings.reminderShowTokensTitle),
+              subtitle: Text(AppStrings.reminderShowTokensSubtitle),
+              value: _showTokens ?? false,
+              onChanged: _toggleShowTokens,
+            ),
           ),
         ],
       ),

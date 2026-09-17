@@ -18,10 +18,13 @@ import 'package:niman/src/ui/strings.dart';
 /// debug switch and the log export, plus what the installation is.
 final class SettingsDiagnosticsScreen extends StatefulWidget {
   /// Creates the screen for [controller]'s library session.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.highlight, super.key});
 
   /// The session holding the settings.
   final LibrarySession controller;
+
+  /// The row the settings search landed on, flashed once.
+  final Key? highlight;
 
   @override
   State<SettingsDiagnosticsScreen> createState() =>
@@ -245,21 +248,27 @@ final class _SettingsDiagnosticsScreenState
     return SettingsAreaShell(
       title: AppStrings.settingsAreaDiagnostics,
       controller: widget.controller,
+      highlight: widget.highlight,
       body: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          SwitchListTile(
-            title: Text(AppStrings.debugLogsTitle),
-            subtitle: Text(AppStrings.debugLogsSubtitle),
-            value: _debugLogs ?? true,
-            onChanged: _toggleDebugLogs,
+          HighlightRow(
+            key: const Key('debug-logs-setting'),
+            child: SwitchListTile(
+              title: Text(AppStrings.debugLogsTitle),
+              subtitle: Text(AppStrings.debugLogsSubtitle),
+              value: _debugLogs ?? true,
+              onChanged: _toggleDebugLogs,
+            ),
           ),
-          ListTile(
+          HighlightRow(
             key: const Key('export-log-setting'),
-            leading: const Icon(Icons.save_alt),
-            title: Text(AppStrings.exportLogTitle),
-            subtitle: Text(AppStrings.exportLogSubtitle),
-            onTap: _exportLog,
+            child: ListTile(
+              leading: const Icon(Icons.save_alt),
+              title: Text(AppStrings.exportLogTitle),
+              subtitle: Text(AppStrings.exportLogSubtitle),
+              onTap: _exportLog,
+            ),
           ),
           // A fact about the installation, like the library path:
           // nothing to change, only to know (issue #80).
@@ -274,13 +283,15 @@ final class _SettingsDiagnosticsScreenState
                 ),
               ),
             ),
-          SettingsValueRow(
+          HighlightRow(
             key: const Key('changelog-setting'),
-            title: AppStrings.changelogTitle,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const ChangelogScreen(),
+            child: SettingsValueRow(
+              title: AppStrings.changelogTitle,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const ChangelogScreen(),
+                ),
               ),
             ),
           ),

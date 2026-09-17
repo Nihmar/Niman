@@ -103,6 +103,15 @@ final class NorwegianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'opprettes';
   @override
+  String get settingsSearchHint => 'Søk i innstillinger';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 innstilling funnet' : '$count innstillinger funnet';
+  @override
+  String get settingsToggleOn => 'På';
+  @override
+  String get settingsToggleOff => 'Av';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvising';
   @override
   String get settingsPreviewEnabledSubtitle =>

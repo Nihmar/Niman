@@ -107,6 +107,15 @@ final class GalicianStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'por crear';
   @override
+  String get settingsSearchHint => 'Buscar nos axustes';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 axuste atopado' : '$count axustes atopados';
+  @override
+  String get settingsToggleOn => 'Activado';
+  @override
+  String get settingsToggleOff => 'Desactivado';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualización';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -96,6 +96,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get settingsFolderToCreate => '未作成';
   @override
+  String get settingsSearchHint => '設定を検索';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1件の設定が見つかりました' : '$count件の設定が見つかりました';
+  @override
+  String get settingsToggleOn => 'オン';
+  @override
+  String get settingsToggleOff => 'オフ';
+  @override
   String get settingsPreviewEnabledTitle => 'プレビュー';
   @override
   String get settingsPreviewEnabledSubtitle => 'ソースエディタの横にレンダリング済みノートを表示する';

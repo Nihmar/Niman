@@ -107,6 +107,15 @@ final class FrenchStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'à créer';
   @override
+  String get settingsSearchHint => 'Rechercher dans les réglages';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 réglage trouvé' : '$count réglages trouvés';
+  @override
+  String get settingsToggleOn => 'Activé';
+  @override
+  String get settingsToggleOff => 'Désactivé';
+  @override
   String get settingsPreviewEnabledTitle => 'Aperçu';
   @override
   String get settingsPreviewEnabledSubtitle =>

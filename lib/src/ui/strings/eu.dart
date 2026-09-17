@@ -102,6 +102,15 @@ final class BasqueStrings extends Strings {
   @override
   String get settingsFolderToCreate => 'sortzeke';
   @override
+  String get settingsSearchHint => 'Bilatu ezarpenetan';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ezarpen aurkituta' : '$count ezarpen aurkituta';
+  @override
+  String get settingsToggleOn => 'Aktibatuta';
+  @override
+  String get settingsToggleOff => 'Desaktibatuta';
+  @override
   String get settingsPreviewEnabledTitle => 'Aurrebista';
   @override
   String get settingsPreviewEnabledSubtitle =>
