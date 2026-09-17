@@ -81,6 +81,26 @@ Two places, both searchable:
 
 Search a single tag with `#tag` (see [search](search.md)).
 
+## Opening a note outside Niman
+
+A note is also a file, and sometimes you want it where Niman is not: to
+attach it to a mail, to drag it somewhere, to open it in another editor.
+Long-press a note in the tree (right-click on desktop) and pick:
+
+- **Show in file manager** — opens the note's folder with the note
+  itself selected. On Windows that is Explorer; on Linux it is whichever
+  file manager answers the freedesktop interface (Nautilus, Dolphin,
+  Nemo, Thunar, …), falling back to just opening the folder when none
+  does.
+- **Open in default app** — hands the `.md` to whatever application the
+  system opens Markdown with, or to the default text editor when
+  nothing claims `.md`.
+
+Both entries are desktop only (Linux and Windows) and appear on notes,
+not on folders. Neither changes the note or moves anything: if the file
+is not on disk, or the system refuses to open it, Niman says so and the
+note stays exactly as it was.
+
 ## Folders, quick note, list notes, voice notes
 
 - Notes live in plain folders inside the library.

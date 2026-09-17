@@ -1031,6 +1031,19 @@ final class GreekStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Τα widgets της αρχικής οθόνης είναι διαθέσιμα στο Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Εμφάνιση στη διαχείριση αρχείων';
+  @override
+  String get openInDefaultApp => 'Άνοιγμα με την προεπιλεγμένη εφαρμογή';
+  @override
+  String get openFileMissing =>
+      'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
+  @override
+  String get openFileFailed =>
+      'Δεν ήταν δυνατό το άνοιγμα της σημείωσης εκτός του Niman';
+
   @override
   String get movedToTrash => 'Μετακινήθηκε στη σκουπιδιέρα';
   @override

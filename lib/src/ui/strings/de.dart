@@ -1014,6 +1014,19 @@ final class GermanStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Home-Bildschirm-Widgets sind auf Android verfügbar';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Im Dateimanager anzeigen';
+  @override
+  String get openInDefaultApp => 'Mit Standard-App öffnen';
+  @override
+  String get openFileMissing =>
+      'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
+  @override
+  String get openFileFailed =>
+      'Diese Notiz konnte außerhalb von Niman nicht geöffnet werden';
+
   @override
   String get movedToTrash => 'In den Papierkorb verschoben';
   @override

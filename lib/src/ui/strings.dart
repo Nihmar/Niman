@@ -660,6 +660,12 @@ final class AppStrings {
   static String get pinToWidget => _s.pinToWidget;
   static String get pinnedForWidget => _s.pinnedForWidget;
   static String get pinWidgetUnavailable => _s.pinWidgetUnavailable;
+
+  /// Handing a note's file to the OS (issue #76).
+  static String get openInFileManager => _s.openInFileManager;
+  static String get openInDefaultApp => _s.openInDefaultApp;
+  static String get openFileMissing => _s.openFileMissing;
+  static String get openFileFailed => _s.openFileFailed;
   static String get movedToTrash => _s.movedToTrash;
   static String get deletedMessage => _s.deletedMessage;
   static String deleteToTrashConfirm(String name) =>

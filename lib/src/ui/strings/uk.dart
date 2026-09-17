@@ -987,6 +987,17 @@ final class UkrainianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Віджети головного екрана доступні в Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Показати у файловому менеджері';
+  @override
+  String get openInDefaultApp => 'Відкрити у типовій програмі';
+  @override
+  String get openFileMissing => 'Файлу цієї нотатки немає на диску';
+  @override
+  String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';
+
   @override
   String get movedToTrash => 'Переміщено в кошик';
   @override
