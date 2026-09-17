@@ -6,6 +6,14 @@ Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
 (default true). Restore by moving the file back out of `.trash/`.
 
+**Emptying it on its own.** *Settings → Auto-empty trash* is **Never**
+until you set it: pick a wait (a week, a month, a year) and every
+deletion that has sat in `.trash/` longer than that is deleted for good
+the next time the library opens. It happens quietly and there is no
+undo, which is why nothing is deleted until you choose a wait. Only what
+Niman put in the trash is counted — a file you moved into `.trash/`
+yourself carries no deletion date and is left where it is.
+
 ## History
 
 Niman keeps past versions of every note under `.history/`, so an edit
