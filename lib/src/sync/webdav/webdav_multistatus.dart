@@ -131,9 +131,7 @@ List<WebDavResource> parseMultistatus(
     for (final response in responses)
       _children(response, 'href').firstOrNull?.innerText.trim(),
   ];
-  final expected = baseSegments.sublist(
-    _prefixDrop(hrefs, base, baseSegments),
-  );
+  final expected = baseSegments.sublist(_prefixDrop(hrefs, base, baseSegments));
   final resources = <WebDavResource>[];
   for (var i = 0; i < responses.length; i++) {
     final response = responses[i];

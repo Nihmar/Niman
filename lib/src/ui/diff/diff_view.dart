@@ -168,8 +168,7 @@ final class _DiffViewState extends State<DiffView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns =
-            widget.sideBySide ??
-            constraints.maxWidth >= diffSideBySideMinWidth;
+            widget.sideBySide ?? constraints.maxWidth >= diffSideBySideMinWidth;
         final rows = _rows(summary, columns);
         return ListView.builder(
           key: const Key('diff-view'),
@@ -390,11 +389,7 @@ final class _PairRow extends _Row {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(child: _cell(context, left)),
-          VerticalDivider(
-            width: 1,
-            thickness: 1,
-            color: scheme.outlineVariant,
-          ),
+          VerticalDivider(width: 1, thickness: 1, color: scheme.outlineVariant),
           Expanded(child: _cell(context, right)),
         ],
       ),

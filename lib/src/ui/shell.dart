@@ -3028,32 +3028,41 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.description_outlined,
-            size: 17,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              p.basename(path),
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall,
-            ),
-          ),
-          if (folder.isNotEmpty && folder != '.') ...[
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                folder,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
+          // The title takes the whole free width so the actions sit at
+          // the right edge. A `Spacer` beside the flexible texts used to
+          // split that width with them, which left the ⋮ stranded in the
+          // middle of the header whenever the name was short.
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.description_outlined,
+                  size: 17,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    p.basename(path),
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+                if (folder.isNotEmpty && folder != '.') ...[
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      folder,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-          const Spacer(),
+          ),
           ..._kindActions,
           _noteMenu(),
         ],
