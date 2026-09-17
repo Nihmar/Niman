@@ -99,6 +99,14 @@ final class ItalianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Sorgente Markdown, così com\u2019è scritta';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Testo formattato, modificato sul posto';
+  @override
+  String get settingsFolderToCreate => 'da creare';
+  @override
   String get settingsPreviewEnabledTitle => 'Anteprima';
   @override
   String get settingsPreviewEnabledSubtitle =>

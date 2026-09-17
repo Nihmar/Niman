@@ -98,6 +98,12 @@ final class EstonianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdowni lähtekood, nagu kirjutatud';
+  @override
+  String get editorKindWysiwygSubtitle => 'Vormindatud tekst, muudetakse otse';
+  @override
+  String get settingsFolderToCreate => 'luua';
+  @override
   String get settingsPreviewEnabledTitle => 'Eelvaade';
   @override
   String get settingsPreviewEnabledSubtitle =>

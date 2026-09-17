@@ -100,6 +100,13 @@ final class MacedonianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown извор, како што е напишан';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматиран текст, се уредува директно';
+  @override
+  String get settingsFolderToCreate => 'за создавање';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>

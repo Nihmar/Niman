@@ -98,6 +98,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Fonte Markdown, tal como escrita';
+  @override
+  String get editorKindWysiwygSubtitle => 'Texto formatado, editado no local';
+  @override
+  String get settingsFolderToCreate => 'por criar';
+  @override
   String get settingsPreviewEnabledTitle => 'Pré-visualização';
   @override
   String get settingsPreviewEnabledSubtitle =>

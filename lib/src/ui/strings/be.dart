@@ -100,6 +100,13 @@ final class BelarusianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Зыходнік Markdown, як напісана';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Адфарматаваны тэкст, рэдагуецца на месцы';
+  @override
+  String get settingsFolderToCreate => 'стварыць';
+  @override
   String get settingsPreviewEnabledTitle => 'Прагляд';
   @override
   String get settingsPreviewEnabledSubtitle =>

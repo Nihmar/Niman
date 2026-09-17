@@ -102,6 +102,12 @@ final class RomanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Sursă Markdown, așa cum e scrisă';
+  @override
+  String get editorKindWysiwygSubtitle => 'Text formatat, editat pe loc';
+  @override
+  String get settingsFolderToCreate => 'de creat';
+  @override
   String get settingsPreviewEnabledTitle => 'Previzualizare';
   @override
   String get settingsPreviewEnabledSubtitle =>

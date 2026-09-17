@@ -92,6 +92,12 @@ final class HindiStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown स्रोत, जैसा लिखा है';
+  @override
+  String get editorKindWysiwygSubtitle => 'फ़ॉर्मेटेड टेक्स्ट, सीधे संपादित';
+  @override
+  String get settingsFolderToCreate => 'बनाना है';
+  @override
   String get settingsPreviewEnabledTitle => 'पूर्वावलोकन';
   @override
   String get settingsPreviewEnabledSubtitle =>

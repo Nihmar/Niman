@@ -101,6 +101,12 @@ final class SlovakStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Zdroj Markdown, tak ako je napísaný';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formátovaný text, upravovaný priamo';
+  @override
+  String get settingsFolderToCreate => 'na vytvorenie';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhľad';
   @override
   String get settingsPreviewEnabledSubtitle =>

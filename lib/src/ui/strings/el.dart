@@ -100,6 +100,13 @@ final class GreekStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Πηγή Markdown, όπως γράφτηκε';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Μορφοποιημένο κείμενο, επεξεργασία επιτόπου';
+  @override
+  String get settingsFolderToCreate => 'για δημιουργία';
+  @override
   String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
   @override
   String get settingsPreviewEnabledSubtitle =>

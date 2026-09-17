@@ -99,6 +99,13 @@ final class GermanStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-Quelle, wie geschrieben';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatierter Text, direkt bearbeitet';
+  @override
+  String get settingsFolderToCreate => 'zu erstellen';
+  @override
   String get settingsPreviewEnabledTitle => 'Vorschau';
   @override
   String get settingsPreviewEnabledSubtitle =>

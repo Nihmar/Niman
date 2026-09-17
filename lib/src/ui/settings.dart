@@ -11,7 +11,10 @@ import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_maintenance.dart';
+import 'package:niman/src/ui/settings_reminders.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_transcription.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -120,6 +123,37 @@ final class _SettingsBodyState extends State<SettingsBody> {
                 ),
               ),
             ),
+            // The keyboard shortcut reference is useless without a
+            // keyboard to press: with none seen the row says so instead
+            // of opening a dead end.
+            ListTile(
+              key: const Key('keyboard-shortcuts'),
+              leading: Icon(
+                Icons.keyboard_alt_outlined,
+                color: keyboardAttached
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+              title: Text(
+                AppStrings.keyboardShortcutsTitle,
+                style: keyboardAttached
+                    ? null
+                    : theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+              ),
+              trailing: keyboardAttached
+                  ? const Icon(Icons.chevron_right)
+                  : Text(
+                      AppStrings.settingsAreaKeyboardDisabled,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+              onTap: keyboardAttached
+                  ? () => _pushArea(context, const KeyboardShortcutsScreen())
+                  : null,
+            ),
             // Update management exists only on the release channel
             // (issue #106): testing builds check no release channel, so
             // the whole area is out, not just its toggles.
@@ -133,6 +167,15 @@ final class _SettingsBodyState extends State<SettingsBody> {
                   SettingsUpdatesScreen(controller: controller),
                 ),
               ),
+            SettingsAreaRow(
+              key: const Key('settings-area-diagnostics'),
+              icon: Icons.health_and_safety,
+              title: AppStrings.settingsAreaDiagnostics,
+              onTap: () => _pushArea(
+                context,
+                SettingsDiagnosticsScreen(controller: controller),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
               // A Wrap, not a Row: a long library name next to its hint
@@ -161,11 +204,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
               title: AppStrings.settingsAreaFolders,
               onTap: () => _pushArea(
                 context,
-                SettingsFoldersPathsScreen(
-                  controller: controller,
-                  transcription: widget.transcription,
-                  onClosed: widget.onClosed,
-                ),
+                SettingsFoldersPathsScreen(controller: controller),
+              ),
+            ),
+            SettingsAreaRow(
+              key: const Key('settings-area-trash-history'),
+              icon: Icons.restore,
+              title: AppStrings.settingsAreaTrashHistory,
+              onTap: () => _pushArea(
+                context,
+                SettingsTrashHistoryScreen(controller: controller),
               ),
             ),
             // The status rides on the row, the way the mockup draws it
@@ -194,55 +242,43 @@ final class _SettingsBodyState extends State<SettingsBody> {
                   );
                 },
               ),
-            SettingsAreaRow(
-              key: const Key('settings-area-trash-history'),
-              icon: Icons.restore,
-              title: AppStrings.settingsAreaTrashHistory,
-              onTap: () => _pushArea(
-                context,
-                SettingsTrashHistoryScreen(controller: controller),
-              ),
-            ),
-            SettingsSection(AppStrings.settingsGroupApp),
-            SettingsAreaRow(
-              key: const Key('settings-area-diagnostics'),
-              icon: Icons.health_and_safety,
-              title: AppStrings.settingsAreaDiagnostics,
-              onTap: () => _pushArea(
-                context,
-                SettingsDiagnosticsScreen(controller: controller),
-              ),
-            ),
-            // The keyboard shortcut reference is useless without a
-            // keyboard to press: with none seen the row says so instead
-            // of opening a dead end.
-            ListTile(
-              key: const Key('keyboard-shortcuts'),
-              leading: Icon(
-                Icons.keyboard_alt,
-                color: keyboardAttached
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-              title: Text(
-                AppStrings.keyboardShortcutsTitle,
-                style: keyboardAttached
-                    ? null
-                    : theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-              ),
-              trailing: keyboardAttached
-                  ? const Icon(Icons.chevron_right)
-                  : Text(
-                      AppStrings.settingsAreaKeyboardDisabled,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+            // App-wide, like the models it points at, but under the
+            // library group: that is where the voice notes it
+            // transcribes live. The current model rides on the row.
+            if (widget.transcription case final transcription?)
+              ListenableBuilder(
+                listenable: transcription,
+                builder: (context, _) {
+                  final model = transcription.defaultModel;
+                  return SettingsAreaRow(
+                    key: const Key('settings-area-transcription'),
+                    icon: Icons.mic_outlined,
+                    title: AppStrings.settingsSectionTranscription,
+                    subtitle: model == null
+                        ? AppStrings.transcriptionModelNone
+                        : AppStrings.transcriptionModelName(model),
+                    onTap: () => _pushArea(
+                      context,
+                      SettingsTranscriptionScreen(
+                        controller: controller,
+                        models: transcription,
                       ),
                     ),
-              onTap: keyboardAttached
-                  ? () => _pushArea(context, const KeyboardShortcutsScreen())
-                  : null,
+                  );
+                },
+              ),
+            SettingsAreaRow(
+              key: const Key('settings-area-reminders'),
+              icon: Icons.notifications_outlined,
+              title: AppStrings.settingsSectionReminders,
+              onTap: () => _pushArea(
+                context,
+                SettingsRemindersScreen(controller: controller),
+              ),
+            ),
+            SettingsMaintenanceGroup(
+              controller: controller,
+              onClosed: widget.onClosed,
             ),
           ],
         );

@@ -101,6 +101,13 @@ final class BosnianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown izvor, kako je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatirani tekst, uređuje se direktno';
+  @override
+  String get settingsFolderToCreate => 'za napraviti';
+  @override
   String get settingsPreviewEnabledTitle => 'Pregled';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -69,6 +69,7 @@ final class SettingsValueRow extends StatelessWidget {
     required this.onTap,
     this.value,
     this.subtitle,
+    this.badge,
     this.enabled = true,
     super.key,
   });
@@ -83,6 +84,11 @@ final class SettingsValueRow extends StatelessWidget {
   /// self-explanatory (the library path, which is a path).
   final String? subtitle;
 
+  /// A warning pill between the value and the chevron: the folders rows
+  /// wear one naming a folder the library does not have yet (issue
+  /// #104), so the row no longer claims it exists.
+  final String? badge;
+
   /// Whether the row can be tapped; false renders it disabled.
   final bool enabled;
 
@@ -93,6 +99,7 @@ final class SettingsValueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final current = value;
+    final badge = this.badge;
     return ListTile(
       enabled: enabled,
       title: Text(title),
@@ -100,6 +107,32 @@ final class SettingsValueRow extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (badge != null)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning_amber_outlined,
+                    size: 16,
+                    color: theme.colorScheme.tertiary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    badge,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (current != null)
             ConstrainedBox(
               // A long value (a note path) truncates rather than pushing

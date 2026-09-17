@@ -96,6 +96,12 @@ final class EnglishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown source, as written';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatted text, edited in place';
+  @override
+  String get settingsFolderToCreate => 'to create';
+  @override
   String get settingsPreviewEnabledTitle => 'Preview';
   @override
   String get settingsPreviewEnabledSubtitle =>

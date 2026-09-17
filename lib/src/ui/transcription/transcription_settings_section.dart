@@ -8,8 +8,10 @@ import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/transcription_models_screen.dart';
 
-/// The "Transcription" group of the settings list: the default model
+/// The "Transcription" rows of the settings: the default model
 /// (opening the models page) and the recordings' language.
+///
+/// The area screen carries the title; this is just the rows.
 final class TranscriptionSettingsSection extends StatelessWidget {
   /// Creates the section over the installation's [models].
   const new({required this.models, super.key});
@@ -26,7 +28,6 @@ final class TranscriptionSettingsSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SettingsSection(AppStrings.settingsSectionTranscription),
             SettingsValueRow(
               key: const Key('transcription-model-setting'),
               title: AppStrings.transcriptionModelTitle,

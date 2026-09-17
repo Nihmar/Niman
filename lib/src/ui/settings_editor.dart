@@ -333,6 +333,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           SwitchListTile(
             key: const Key('editor-source-setting'),
             title: Text(AppStrings.editorKindSource),
+            subtitle: Text(AppStrings.editorKindSourceSubtitle),
             value: _enabledEditors.contains(EditorKind.source),
             onChanged:
                 _enabledEditors.length < 2 &&
@@ -344,6 +345,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           SwitchListTile(
             key: const Key('editor-wysiwyg-setting'),
             title: Text(AppStrings.editorKindWysiwyg),
+            subtitle: Text(AppStrings.editorKindWysiwygSubtitle),
             value: _enabledEditors.contains(EditorKind.wysiwyg),
             onChanged:
                 _enabledEditors.length < 2 &&

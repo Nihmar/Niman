@@ -90,6 +90,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => '書いたままのMarkdownソース';
+  @override
+  String get editorKindWysiwygSubtitle => 'その場で編集する整形済みテキスト';
+  @override
+  String get settingsFolderToCreate => '未作成';
+  @override
   String get settingsPreviewEnabledTitle => 'プレビュー';
   @override
   String get settingsPreviewEnabledSubtitle => 'ソースエディタの横にレンダリング済みノートを表示する';

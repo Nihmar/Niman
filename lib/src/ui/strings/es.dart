@@ -99,6 +99,14 @@ final class SpanishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Fuente Markdown, tal como está escrita';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texto con formato, editado directamente';
+  @override
+  String get settingsFolderToCreate => 'por crear';
+  @override
   String get settingsPreviewEnabledTitle => 'Vista previa';
   @override
   String get settingsPreviewEnabledSubtitle =>

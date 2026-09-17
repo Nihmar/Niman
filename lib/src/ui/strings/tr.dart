@@ -94,6 +94,13 @@ final class TurkishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Yazıldığı gibi Markdown kaynağı';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Biçimlendirilmiş metin, yerinde düzenlenir';
+  @override
+  String get settingsFolderToCreate => 'oluşturulacak';
+  @override
   String get settingsPreviewEnabledTitle => 'Önizleme';
   @override
   String get settingsPreviewEnabledSubtitle =>

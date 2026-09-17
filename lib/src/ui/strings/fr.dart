@@ -99,6 +99,14 @@ final class FrenchStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Source Markdown, telle qu\u2019écrite';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texte mis en forme, modifié sur place';
+  @override
+  String get settingsFolderToCreate => 'à créer';
+  @override
   String get settingsPreviewEnabledTitle => 'Aperçu';
   @override
   String get settingsPreviewEnabledSubtitle =>

@@ -99,6 +99,12 @@ final class SwedishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-källa, som skriven';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formaterad text, redigeras direkt';
+  @override
+  String get settingsFolderToCreate => 'skapas';
+  @override
   String get settingsPreviewEnabledTitle => 'Förhandsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>
