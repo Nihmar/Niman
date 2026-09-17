@@ -27,7 +27,6 @@ import 'package:niman/src/todo/todo_filter.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
-import 'package:niman/src/ui/action_sheet.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
@@ -49,6 +48,7 @@ import 'package:niman/src/ui/shell_layout.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
+import 'package:niman/src/ui/shell_row_menu.dart';
 import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
@@ -1414,166 +1414,35 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   /// Long-press context menu on a tree row (T-UI-05): the note actions,
-  /// scoped to the pressed row. New note/folder target the row's folder.
+  /// scoped to the pressed row. New note/folder target the row's folder
+  /// (issue #100 moved the menu itself into `shell_row_menu.dart`).
   Future<void> _showRowMenu(Note note) async {
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
-    final action = await showActionSheet<String>(
+    final action = await showRowMenuSheet(
       context,
-      items: (context) => [
-        for (final entry in _rowMenuEntries(note, isQuickNote))
-          ListTile(
-            key: entry.key,
-            leading: Icon(entry.icon),
-            title: Text(entry.label),
-            onTap: () => Navigator.pop(context, entry.value),
-          ),
-      ],
+      note: note,
+      isQuickNote: isQuickNote,
     );
     await _runRowAction(action, note, here);
   }
 
   /// Right-click context menu on a tree row (T-PP-20): the same actions
-  /// as [_showRowMenu], in a menu at the cursor instead of the phone's
-  /// bottom sheet.
+  /// at the cursor instead of in the phone's bottom sheet.
   Future<void> _showRowMenuAt(Note note, Offset position) async {
     final here = note.isDir ? note.path : parentOf(note.path);
     final isQuickNote = await widget.controller.ops?.quickNotePath == note.path;
     if (!mounted) return;
-    final overlay =
-        Overlay.of(context).context.findRenderObject()! as RenderBox;
-    final action = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromRect(
-        position & const Size(1, 1),
-        Offset.zero & overlay.size,
-      ),
-      items: [
-        for (final entry in _rowMenuEntries(note, isQuickNote))
-          PopupMenuItem(
-            key: entry.key,
-            value: entry.value,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(entry.icon, size: 20),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(entry.label, overflow: TextOverflow.ellipsis),
-                ),
-              ],
-            ),
-          ),
-      ],
+    final action = await showRowMenuAt(
+      context,
+      note: note,
+      isQuickNote: isQuickNote,
+      position: position,
     );
     await _runRowAction(action, note, here);
   }
 
-  /// One tree-row menu entry, shared by the sheet and the cursor menu so
-  /// the two presentations cannot drift apart.
-  List<({Key key, IconData icon, String label, String value})> _rowMenuEntries(
-    Note note,
-    bool isQuickNote,
-  ) {
-    return [
-      (
-        key: const Key('menu-new-note'),
-        icon: Icons.note_add,
-        label: AppStrings.newNoteHere,
-        value: 'note',
-      ),
-      (
-        key: const Key('menu-new-from-template'),
-        icon: Icons.file_copy_outlined,
-        label: AppStrings.newFromTemplateHere,
-        value: 'template',
-      ),
-      if (note.isDir)
-        (
-          key: const Key('menu-new-folder'),
-          icon: Icons.create_new_folder,
-          label: AppStrings.newFolderHere,
-          value: 'folder',
-        ),
-      if (!note.isDir)
-        (
-          key: const Key('menu-quick-note'),
-          icon: isQuickNote
-              ? Icons.sticky_note_2
-              : Icons.sticky_note_2_outlined,
-          label: isQuickNote
-              ? AppStrings.currentQuickNote
-              : AppStrings.setAsQuickNote,
-          value: 'quicknote',
-        ),
-      // Any note, folders excluded: the next placed note widget adopts
-      // the pin (issue 6). Shown everywhere; off Android the pin just
-      // reports itself unavailable.
-      if (!note.isDir)
-        (
-          key: const Key('menu-pin-widget'),
-          icon: Icons.widgets_outlined,
-          label: AppStrings.pinToWidget,
-          value: 'pinwidget',
-        ),
-      // Markdown only: the pin is a frontmatter key, and a
-      // `todo.txt` has no frontmatter to put it in. An already
-      // pinned row keeps the entry whatever it is, so a pin
-      // written before this rule can still be taken back off.
-      if (!note.isDir && (isMarkdownNote(note.name) || note.pinned))
-        (
-          key: const Key('menu-pin'),
-          icon: note.pinned ? Icons.push_pin : Icons.push_pin_outlined,
-          label: note.pinned ? AppStrings.actionUnpin : AppStrings.actionPin,
-          value: 'pin',
-        ),
-      if (!note.isDir)
-        (
-          key: const Key('menu-history'),
-          icon: Icons.history,
-          label: AppStrings.noteHistoryTitle,
-          value: 'history',
-        ),
-      // A note is also a file (issue #76). Desktop only: Android has no
-      // file manager to select a path in, so the entries stay off there
-      // rather than being shown and then failing.
-      if (!note.isDir && supportsTreeContextActions) ...[
-        (
-          key: const Key('menu-open-file-manager'),
-          icon: Icons.folder_open,
-          label: AppStrings.openInFileManager,
-          value: 'reveal',
-        ),
-        (
-          key: const Key('menu-open-default-app'),
-          icon: Icons.open_in_new,
-          label: AppStrings.openInDefaultApp,
-          value: 'openexternal',
-        ),
-      ],
-      (
-        key: const Key('menu-rename'),
-        icon: Icons.edit,
-        label: AppStrings.actionRename,
-        value: 'rename',
-      ),
-      (
-        key: const Key('menu-move'),
-        icon: Icons.drive_folder_upload,
-        label: AppStrings.actionMove,
-        value: 'move',
-      ),
-      (
-        key: const Key('menu-delete'),
-        icon: Icons.delete_outline,
-        label: AppStrings.actionDelete,
-        value: 'delete',
-      ),
-    ];
-  }
-
-  /// Runs the tree-row menu action both presentations return.
   Future<void> _runRowAction(String? action, Note note, String here) async {
     if (action == null) return;
     switch (action) {
