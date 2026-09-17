@@ -812,6 +812,12 @@ final class EstonianStrings extends Strings {
   @override
   String get newFolderTitle => 'Uus kaust';
   @override
+  String get newNoteSameFolder => 'Uus märkmik samas kaustas';
+  @override
+  String get newFromTemplateSameFolder => 'Uus mallist samas kaustas';
+  @override
+  String trashOriginalPath(String path) => 'asus siin: $path';
+  @override
   String get newNoteHere => 'Uus märge siia';
   @override
   String get newFolderHere => 'Uus kaust siia';

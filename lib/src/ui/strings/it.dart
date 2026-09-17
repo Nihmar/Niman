@@ -822,6 +822,13 @@ final class ItalianStrings extends Strings {
   @override
   String get newFolderTitle => 'Nuova cartella';
   @override
+  String get newNoteSameFolder => 'Nuova nota nella stessa cartella';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nuova da modello nella stessa cartella';
+  @override
+  String trashOriginalPath(String path) => 'era in $path';
+  @override
   String get newNoteHere => 'Nuova nota qui';
   @override
   String get newFolderHere => 'Nuova cartella qui';

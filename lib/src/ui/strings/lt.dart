@@ -818,6 +818,13 @@ final class LithuanianStrings extends Strings {
   @override
   String get newFolderTitle => 'Naujas katalogas';
   @override
+  String get newNoteSameFolder => 'Nauja pastaba tame pačiame aplanke';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nauja iš šablono tame pačiame aplanke';
+  @override
+  String trashOriginalPath(String path) => 'buvo: $path';
+  @override
   String get newNoteHere => 'Nauja pastaba čia';
   @override
   String get newFolderHere => 'Naujas katalogas čia';

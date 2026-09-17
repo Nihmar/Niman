@@ -835,6 +835,12 @@ final class GermanStrings extends Strings {
   @override
   String get newFolderTitle => 'Neuer Ordner';
   @override
+  String get newNoteSameFolder => 'Neue Notiz im selben Ordner';
+  @override
+  String get newFromTemplateSameFolder => 'Neu aus Vorlage im selben Ordner';
+  @override
+  String trashOriginalPath(String path) => 'war in $path';
+  @override
   String get newNoteHere => 'Neue Notiz hier';
   @override
   String get newFolderHere => 'Neuer Ordner hier';

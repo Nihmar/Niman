@@ -832,6 +832,13 @@ final class PolishStrings extends Strings {
   @override
   String get newFolderTitle => 'Nowy katalog';
   @override
+  String get newNoteSameFolder => 'Nowa notatka w tym samym folderze';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nowa z szablonu w tym samym folderze';
+  @override
+  String trashOriginalPath(String path) => 'była w $path';
+  @override
   String get newNoteHere => 'Nowa notatka tutaj';
   @override
   String get newFolderHere => 'Nowy katalog tutaj';

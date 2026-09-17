@@ -820,6 +820,12 @@ final class LatvianStrings extends Strings {
   @override
   String get newFolderTitle => 'Jauns katalogs';
   @override
+  String get newNoteSameFolder => 'Jauna piezīme tajā pašā mapē';
+  @override
+  String get newFromTemplateSameFolder => 'Jauna no veidnes tajā pašā mapē';
+  @override
+  String trashOriginalPath(String path) => 'atradās: $path';
+  @override
   String get newNoteHere => 'Jauna piezīme šeit';
   @override
   String get newFolderHere => 'Jauns katalogs šeit';

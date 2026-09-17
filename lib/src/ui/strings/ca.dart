@@ -841,6 +841,13 @@ final class CatalanStrings extends Strings {
   @override
   String get newFolderTitle => 'Carpeta nova';
   @override
+  String get newNoteSameFolder => 'Nova nota a la mateixa carpeta';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nova des de plantilla a la mateixa carpeta';
+  @override
+  String trashOriginalPath(String path) => 'era a $path';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Carpeta nova aquí';

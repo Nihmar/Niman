@@ -818,6 +818,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get newFolderTitle => 'Ny mappe';
   @override
+  String get newNoteSameFolder => 'Nytt notat i samme mappe';
+  @override
+  String get newFromTemplateSameFolder => 'Nytt fra mal i samme mappe';
+  @override
+  String trashOriginalPath(String path) => 'lå i $path';
+  @override
   String get newNoteHere => 'Nytt notat her';
   @override
   String get newFolderHere => 'Ny mappe her';

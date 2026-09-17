@@ -824,6 +824,12 @@ final class DutchStrings extends Strings {
   @override
   String get newFolderTitle => 'Nieuwe map';
   @override
+  String get newNoteSameFolder => 'Nieuwe notitie in dezelfde map';
+  @override
+  String get newFromTemplateSameFolder => 'Nieuw uit sjabloon in dezelfde map';
+  @override
+  String trashOriginalPath(String path) => 'stond in $path';
+  @override
   String get newNoteHere => 'Nieuwe notitie hier';
   @override
   String get newFolderHere => 'Nieuwe map hier';

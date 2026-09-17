@@ -816,6 +816,13 @@ final class EnglishStrings extends Strings {
   @override
   String get newFolderTitle => 'New folder';
   @override
+  String get newNoteSameFolder => 'New note in the same folder';
+  @override
+  String get newFromTemplateSameFolder =>
+      'New from template in the same folder';
+  @override
+  String trashOriginalPath(String path) => 'was at $path';
+  @override
   String get newNoteHere => 'New note here';
   @override
   String get newFolderHere => 'New folder here';

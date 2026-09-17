@@ -823,6 +823,12 @@ final class BosnianStrings extends Strings {
   @override
   String get newFolderTitle => 'Nova mapa';
   @override
+  String get newNoteSameFolder => 'Nova bilješka u istoj mapi';
+  @override
+  String get newFromTemplateSameFolder => 'Nova iz predloška u istoj mapi';
+  @override
+  String trashOriginalPath(String path) => 'bilo u $path';
+  @override
   String get newNoteHere => 'Nova bilješka ovdje';
   @override
   String get newFolderHere => 'Nova mapa ovdje';

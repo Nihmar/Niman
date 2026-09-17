@@ -801,6 +801,12 @@ final class HindiStrings extends Strings {
   @override
   String get newFolderTitle => 'नया फ़ोल्डर';
   @override
+  String get newNoteSameFolder => 'उसी फ़ोल्डर में नया नोट';
+  @override
+  String get newFromTemplateSameFolder => 'उसी फ़ोल्डर में टेम्पलेट से नया';
+  @override
+  String trashOriginalPath(String path) => 'यहाँ था: $path';
+  @override
   String get newNoteHere => 'यहाँ नया नोट';
   @override
   String get newFolderHere => 'यहाँ नया फ़ोल्डर';

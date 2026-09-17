@@ -821,6 +821,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get newFolderTitle => 'Nova mapa';
   @override
+  String get newNoteSameFolder => 'Nov zapisek v isti mapi';
+  @override
+  String get newFromTemplateSameFolder => 'Nov iz predloge v isti mapi';
+  @override
+  String trashOriginalPath(String path) => 'bil je v $path';
+  @override
   String get newNoteHere => 'Nova opomba sem';
   @override
   String get newFolderHere => 'Nova mapa sem';

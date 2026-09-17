@@ -759,6 +759,12 @@ final class ChineseStrings extends Strings {
   @override
   String get newFolderTitle => '新建文件夹';
   @override
+  String get newNoteSameFolder => '在同一文件夹中新建笔记';
+  @override
+  String get newFromTemplateSameFolder => '在同一文件夹中从模板新建';
+  @override
+  String trashOriginalPath(String path) => '原位置：$path';
+  @override
   String get newNoteHere => '在此新建笔记';
   @override
   String get newFolderHere => '在此新建文件夹';

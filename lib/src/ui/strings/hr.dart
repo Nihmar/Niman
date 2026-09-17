@@ -818,6 +818,12 @@ final class CroatianStrings extends Strings {
   @override
   String get newFolderTitle => 'Novi direktorij';
   @override
+  String get newNoteSameFolder => 'Nova bilješka u istoj mapi';
+  @override
+  String get newFromTemplateSameFolder => 'Nova iz predloška u istoj mapi';
+  @override
+  String trashOriginalPath(String path) => 'bilo u $path';
+  @override
   String get newNoteHere => 'Nova napomena ovdje';
   @override
   String get newFolderHere => 'Novi direktorij ovdje';

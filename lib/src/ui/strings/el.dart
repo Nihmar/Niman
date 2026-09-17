@@ -844,6 +844,12 @@ final class GreekStrings extends Strings {
   @override
   String get newFolderTitle => 'Νέος φάκελος';
   @override
+  String get newNoteSameFolder => 'Νέα σημείωση στον ίδιο φάκελο';
+  @override
+  String get newFromTemplateSameFolder => 'Νέα από πρότυπο στον ίδιο φάκελο';
+  @override
+  String trashOriginalPath(String path) => 'ήταν στο $path';
+  @override
   String get newNoteHere => 'Νέα σημείωση εδώ';
   @override
   String get newFolderHere => 'Νέος φάκελος εδώ';

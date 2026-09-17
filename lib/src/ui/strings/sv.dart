@@ -823,6 +823,12 @@ final class SwedishStrings extends Strings {
   @override
   String get newFolderTitle => 'Ny mapp';
   @override
+  String get newNoteSameFolder => 'Ny anteckning i samma mapp';
+  @override
+  String get newFromTemplateSameFolder => 'Ny från mall i samma mapp';
+  @override
+  String trashOriginalPath(String path) => 'låg i $path';
+  @override
   String get newNoteHere => 'Ny anteckning här';
   @override
   String get newFolderHere => 'Ny mapp här';

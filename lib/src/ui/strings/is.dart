@@ -819,6 +819,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get newFolderTitle => 'Ný mappa';
   @override
+  String get newNoteSameFolder => 'Nýtt minnisblað í sömu möppu';
+  @override
+  String get newFromTemplateSameFolder => 'Nýtt úr sniðmáti í sömu möppu';
+  @override
+  String trashOriginalPath(String path) => 'var í $path';
+  @override
   String get newNoteHere => 'Nýtt minnisblað hér';
   @override
   String get newFolderHere => 'Ný mappa hér';

@@ -587,6 +587,9 @@ final class AppStrings {
   static String get closeMenuTooltip => _s.closeMenuTooltip;
   static String get newFolderTitle => _s.newFolderTitle;
   static String get newNoteHere => _s.newNoteHere;
+  static String get newNoteSameFolder => _s.newNoteSameFolder;
+  static String get newFromTemplateSameFolder => _s.newFromTemplateSameFolder;
+  static String trashOriginalPath(String path) => _s.trashOriginalPath(path);
   static String get newFolderHere => _s.newFolderHere;
   static String get newListNoteTitle => _s.newListNoteTitle;
   static String get newListNoteDefault => _s.newListNoteDefault;

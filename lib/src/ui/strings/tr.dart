@@ -814,6 +814,12 @@ final class TurkishStrings extends Strings {
   @override
   String get newFolderTitle => 'Yeni klasör';
   @override
+  String get newNoteSameFolder => 'Aynı klasörde yeni not';
+  @override
+  String get newFromTemplateSameFolder => 'Aynı klasörde şablondan yeni';
+  @override
+  String trashOriginalPath(String path) => 'buradaydı: $path';
+  @override
   String get newNoteHere => 'Buraya yeni not';
   @override
   String get newFolderHere => 'Buraya yeni klasör';
