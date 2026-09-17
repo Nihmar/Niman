@@ -32,12 +32,25 @@ scripts\niman.bat apk beta   # Android testing build, from Windows
 scripts\niman.bat windows    # Windows build (on a Windows host)
 ```
 
-## Testing build (Android)
+## The two Android builds (issue #106)
+
+The app ships in two flavors of the `channel` dimension, so the
+official app and the testing build install side by side on the same
+device. Once a flavor dimension has a flavor, AGP drops the no-flavor
+variant, so the official app is the explicit `official` flavor — no
+application ID suffix, no per-flavor manifest, the ID stays
+`dev.niman.niman`:
+
+- `./scripts/niman.sh apk` (or `scripts\niman.bat apk` on a Windows
+  host) builds the official APK:
+  `flutter build apk --release --flavor official`, artifact
+  `build/app/outputs/flutter-apk/app-official-release.apk`.
+- `flutter run` on an Android device needs the flavor too:
+  `flutter run --flavor official`.
 
 `./scripts/niman.sh apk beta` (or `scripts\niman.bat apk beta` on a
-Windows host) builds the testing build (issue #106): the release
-pipeline plus the `beta` product flavor, so the official app and the
-testing install side by side on the same device.
+Windows host) builds the testing build: the release pipeline plus
+the `beta` product flavor.
 
 - Application ID `dev.niman.niman.beta` (the flavor's
   `applicationIdSuffix` in `android/app/build.gradle.kts`), launcher
