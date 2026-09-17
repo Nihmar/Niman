@@ -12,7 +12,6 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
-import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/find_panel.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
@@ -30,7 +29,6 @@ import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/resolver.dart';
-import 'package:niman/src/links/slug.dart';
 import 'package:niman/src/preview/editor_lines.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
@@ -41,17 +39,15 @@ import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
-import 'package:niman/src/ui/missing_note_dialog.dart';
+import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/outline_panel.dart';
-import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Saves [content] as the note at absolute [path]; [editSession] is the
 /// editor session the save belongs to (one opening of the note).
@@ -631,7 +627,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         if (mounted) _refreshPreview();
       });
       final anchor = widget.initialAnchor;
-      if (anchor != null) _jumpToAnchor(anchor);
+      if (anchor != null && mounted) {
+        jumpToAnchor(context, anchor, _linkTargets);
+      }
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',
@@ -882,8 +880,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       scrollMap: _previewMap,
       mathCache: _mathCache,
       imageDirectory: widget.libraryRoot,
-      onTapLink: (text, href, title) => unawaited(_openHref(href ?? '')),
-      onWikiLink: (ref, display) => unawaited(_openWiki(ref)),
+      onTapLink: (text, href, title) =>
+          unawaited(openHref(context, href ?? '', _linkTargets)),
+      onWikiLink: (ref, display) =>
+          unawaited(openWiki(context, ref, _linkTargets)),
       embedResolver: _resolveEmbed,
     ),
   );
@@ -943,11 +943,15 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final text = _controller.codeLines[line].text;
     final raw = text.substring(token.start, token.end);
     if (token.kind == TokenKind.wikilink) {
-      await _openWiki(parseWikiRef(raw.substring(2, raw.length - 2)));
+      await openWiki(
+        context,
+        parseWikiRef(raw.substring(2, raw.length - 2)),
+        _linkTargets,
+      );
     } else {
       final close = raw.indexOf(']');
       final href = close < 0 ? '' : raw.substring(close + 2, raw.length - 1);
-      await _openHref(href);
+      await openHref(context, href, _linkTargets);
     }
   }
 
@@ -1114,257 +1118,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     WidgetsBinding.instance.scheduleFrame();
   }
 
-  /// The preview's link handler (T-M3-07): `.md` relative links navigate
-  /// in-app, http(s) launch the browser, `#anchor` stays local.
-  Future<void> _openHref(String href) async {
-    const log = AppLogger(name: 'links');
-    final source = widget.linkSource;
-    log.debug(
-      'md link tap in ${p.basename(widget.path)}: href="$href" '
-      '(source ${source == null ? 'not loaded' : 'ready'})',
-    );
-    if (source == null) return;
-    final resolved = await source.resolveMarkdown(href);
-    log.debug('md link "$href" -> ${describeResolved(resolved)}');
-    await _applyResolved(resolved);
-  }
-
-  /// The preview's wikilink handler: `[[x]]` targets resolve and open;
-  /// empty-target forms (`[[#h]]`, `[[|a]]`) stay local.
-  Future<void> _openWiki(WikiRef ref) async {
-    const log = AppLogger(name: 'links');
-    final source = widget.linkSource;
-    final alias = ref.alias == null ? '-' : '"${ref.alias}"';
-    final heading = ref.heading == null ? '-' : '"${ref.heading}"';
-    final src = source == null ? 'not loaded' : 'ready';
-    log.debug(
-      'wikilink tap in ${p.basename(widget.path)}: '
-      'target="${ref.target}" alias=$alias heading=$heading (source $src)',
-    );
-    if (ref.target.isEmpty) {
-      final heading = ref.heading;
-      if (heading == null) {
-        log.debug('wikilink: empty target and no heading — snackbar');
-        return _linkSnack(AppStrings.unresolvedLinkTitle);
-      }
-      log.debug('wikilink: local anchor — jump to heading "$heading"');
-      _jumpToAnchor(heading);
-      return;
-    }
-    if (source == null) return;
-    // The documented form: `[[target]]`, `[[target#heading]]`,
-    // `[[target|alias]]` — the first part is the target.
-    var resolved = await source.resolveWiki(ref.target);
-    final outcome = describeResolved(resolved);
-    log.debug('wikilink target "${ref.target}" -> $outcome');
-    var anchor = ref.heading;
-    if (resolved is! ResolvedNote && ref.alias != null) {
-      // Label-first links — `[[a label|filename]]`, the display text
-      // first — parse with the target and alias swapped, so when the
-      // target-first interpretation finds nothing, the aliased part is
-      // tried as the target (an optional `#heading` rides on it) before
-      // the link is declared dead. A link whose first part resolves
-      // never reaches this fallback.
-      final alias = ref.alias!;
-      final hash = alias.indexOf('#');
-      final aliasTarget = hash == -1 ? alias : alias.substring(0, hash);
-      final aliasHeading = hash == -1 || hash == alias.length - 1
-          ? null
-          : alias.substring(hash + 1);
-      if (aliasTarget.trim().isNotEmpty) {
-        log.debug(
-          'wikilink: target-first unresolved — retrying the aliased '
-          'part "$aliasTarget" as the target',
-        );
-        final swapped = await source.resolveWiki(aliasTarget.trim());
-        final swappedOutcome = describeResolved(swapped);
-        log.debug('wikilink alias "$aliasTarget" -> $swappedOutcome');
-        if (swapped is ResolvedNote || swapped is AmbiguousNote) {
-          resolved = swapped;
-          anchor = aliasHeading;
-        }
-      }
-    }
-    if (resolved is ResolvedNote) {
-      // The parser splits `[[x#H]]` off before the resolver sees it, so
-      // the anchor is carried from the ref (or from a label-first
-      // `#heading` on the aliased target).
-      await _openNoteResult(resolved.note, anchor ?? resolved.heading);
-      return;
-    }
-    await _applyResolved(resolved);
-  }
-
-  Future<void> _applyResolved(ResolveResult resolved) async {
-    const log = AppLogger(name: 'links');
-    switch (resolved) {
-      case ExternalLink(:final url):
-        log.debug('link outcome: launching url $url');
-        try {
-          await launchUrl(Uri.parse(url));
-        } on Object {
-          if (mounted) _linkSnack(AppStrings.openLinkFailed);
-        }
-      case LocalAnchor(:final heading):
-        log.debug('link outcome: jump to local heading "$heading"');
-        _jumpToAnchor(heading);
-      case ResolvedNote(:final note, :final heading):
-        await _openNoteResult(note, heading);
-      case AmbiguousNote(:final candidates):
-        log.debug(
-          'link outcome: ${candidates.length} ambiguous candidates — '
-          'picker',
-        );
-        await _pickAmbiguous(candidates);
-      case UnresolvedNote(:final target):
-        final outcome = await _handleDeadLink(target);
-        log.debug('link outcome: ${describeOutcome(outcome)}');
-        if (outcome is DeadLinkCreated) {
-          final open = widget.onOpenNote;
-          if (open == null) {
-            if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
-            return;
-          }
-          open(outcome.path, null);
-        } else if (outcome is DeadLinkFolderMissing) {
-          if (mounted) {
-            _linkSnack(AppStrings.missingNoteFolderMissing(outcome.folder));
-          }
-        } else if (outcome is DeadLinkNotOffered && mounted) {
-          _linkSnack(AppStrings.unresolvedLinkTitle);
-        }
-      // DeadLinkDeclined: nothing — no error, no second prompt
-      // (issue #78).
-    }
-  }
-
-  /// The dead-link offer (issue #78): propose where the missing note
-  /// would be created, ask, create through the library's own path.
-  Future<DeadLinkOutcome> _handleDeadLink(String target) async {
-    final create = widget.createMissingNote;
-    final root = widget.libraryRoot;
-    if (create == null || root == null) return const DeadLinkNotOffered();
-    final linkContext = LinkContext(
-      libraryRoot: root,
-      currentNote: widget.path,
-    );
-    final seam = widget.folderExists;
-    final handler = MissingNoteHandler(
-      location: widget.missingNoteLocation,
-      confirm: (path) async {
-        // The dialog needs a live context; an unmounted note declines,
-        // and a dismiss (outside tap) reads as one.
-        if (!mounted) return false;
-        final confirmed = await showMissingNoteDialog(context, path: path);
-        return confirmed ?? false;
-      },
-      folderExists: seam == null
-          ? (rel) => _folderExists(root, rel)
-          : (rel) => seam(root, rel),
-      createNote: create,
-    );
-    return await handler.handleDeadLink(target, linkContext);
-  }
-
-  /// A folder's disk existence, off the UI isolate (one stat is a FUSE
-  /// round trip on Android).
-  Future<bool> _folderExists(String root, String rel) =>
-      Isolate.run(() => Directory(p.join(root, rel)).existsSync());
-
-  /// A dead-link outcome for the log: `Created: Notes/Foo.md`.
-  String describeOutcome(DeadLinkOutcome outcome) => switch (outcome) {
-    DeadLinkCreated(:final path) => 'created $path',
-    DeadLinkDeclined() => 'creation declined — nothing shown',
-    DeadLinkNotOffered() => 'no offer — snackbar',
-    DeadLinkFolderMissing(:final folder) => 'folder "$folder" missing — error',
-  };
-
-  /// Opens [note] via the shell (or jumps locally when it is already the
-  /// open note).
-  Future<void> _openNoteResult(Note note, String? anchor) async {
-    const log = AppLogger(name: 'links');
-    final root = widget.libraryRoot;
-    final currentRel = root == null
-        ? null
-        : p.relative(widget.path, from: root);
-    if (currentRel != null && note.path == currentRel) {
-      // Same note: stay and jump (or nothing when there is no anchor).
-      log.debug(
-        'link outcome: target is the current note — '
-        '${anchor == null ? 'no-op' : 'local jump to "$anchor"'}',
-      );
-      if (anchor != null) _jumpToAnchor(anchor);
-      return;
-    }
-    final open = widget.onOpenNote;
-    if (open == null) {
-      log.debug(
-        'link outcome: resolved ${note.path} but no onOpenNote — '
-        'snackbar',
-      );
-      if (mounted) _linkSnack(AppStrings.unresolvedLinkTitle);
-      return;
-    }
-    log.debug(
-      'link outcome: open ${note.path} '
-      'anchor=${anchor == null ? '-' : '"$anchor"'}',
-    );
-    open(note.path, anchor);
-  }
-
-  /// The minimal ambiguous-link picker (M3 list + select; polish M6).
-  Future<void> _pickAmbiguous(List<Note> candidates) async {
-    if (!mounted) return;
-    final chosen = await showDialog<Note>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(AppStrings.ambiguousLinkTitle),
-        children: [
-          for (final note in candidates)
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, note),
-              child: Text(note.path),
-            ),
-        ],
-      ),
-    );
-    if (chosen != null) await _openNoteResult(chosen, null);
-  }
-
-  /// Jumps to the heading whose slug matches [heading] (the shared slug,
-  /// so `[[x#My Heading]]` and `## My Heading` agree).
-  void _jumpToAnchor(String heading) {
-    final slug = headingSlug(heading);
-    OutlineEntry? entry;
-    for (final e in _outline) {
-      if (headingSlug(e.text) == slug) {
-        entry = e;
-        break;
-      }
-    }
-    if (entry == null) {
-      // Trace the outline so a dead anchor is diagnosable from the log:
-      // is the heading missing, or does its text differ from the link's?
-      final entries = _outline;
-      final shown = entries.length <= 40
-          ? entries
-          : [...entries.take(20), ...entries.skip(entries.length - 20)];
-      const AppLogger(name: 'links').debug(
-        'heading "$heading" (slug "$slug") not found among '
-        '${entries.length} outline entr(ies): '
-        '${shown.map((e) => '${e.line}:"${e.text}"').join(', ')}',
-      );
-      _linkSnack(AppStrings.headingNotFoundTitle);
-      return;
-    }
-    _jumpToHeading(entry.line);
-  }
-
-  void _linkSnack(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
+  /// What following a link from this note needs (issue #100 moved the
+  /// following itself into `note_links.dart`).
+  NoteLinkTargets get _linkTargets => NoteLinkTargets(
+    source: widget.linkSource,
+    notePath: widget.path,
+    libraryRoot: widget.libraryRoot,
+    missingNoteLocation: widget.missingNoteLocation,
+    outline: _outline,
+    jumpToHeading: _jumpToHeading,
+    onOpenNote: widget.onOpenNote,
+    createMissingNote: widget.createMissingNote,
+    folderExists: widget.folderExists,
+  );
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) unawaited(_save());
