@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/files.dart';
@@ -14,12 +13,10 @@ import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/core/tray.dart';
 import 'package:niman/src/db/index_database.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/personal_dictionary.dart';
@@ -46,6 +43,7 @@ import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
@@ -457,36 +455,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// without reopening the note. The shell rebuilds on every session event
   /// (the LibraryHome StreamBuilder), so a refetch happens there — no
   /// subscription needed.
-  bool _lineNumbers = true;
-  bool _autofocusEditor = false;
-
-  /// Preview layout (T-M2-08): the mode override and the split ratio the
-  /// shell persists; the effective mode is resolved at build (width ×
-  /// override).
-  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
-  double _splitRatio = defaultSplitRatio;
-
-  /// Which editor the library writes in and whether the preview exists
-  /// (T-WYS-05); both are per library and refresh with the editor settings.
-  EditorKind _editorKind = EditorKind.source;
-  bool _previewEnabled = true;
-
-  /// Which editors the library offers (settings, T-WYS-03): both, or one
-  /// alone. The note's status row switches editors only when both are on.
-  Set<EditorKind> _editorsEnabled = {EditorKind.source, EditorKind.wysiwyg};
-
-  /// The editor's link format and indent width (settings).
-  LinkType _linkType = LinkType.wikilink;
-  int _indentWidth = 2;
-
-  /// Where a dead link's new note lands (settings, issue #78).
-  MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
-
-  /// The folder new attachments are copied into (settings, issue #56).
-  String _attachmentsFolder = defaultAttachmentsFolder;
-
-  /// The editor toolbar the user arranged (settings, T-TB-04).
-  ToolbarLayout _toolbarLayout = ToolbarLayout.defaults;
+  ShellEditorSettings _editorSettings = ShellEditorSettings.defaults;
 
   /// Whether the wide layout's tree pane shows (the title bar's toggle;
   /// the rail always stays, T-PP-22).
@@ -496,13 +465,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// wants it, so a keyboard-only tab switch is followed by a working next
   /// one: [FocusManager] would otherwise leave nothing focused.
   final FocusNode _shellFocus = FocusNode(debugLabel: 'app shortcuts');
-
-  /// The library tree sort order (T-UI-03).
-  TreeSort _treeSort = TreeSort.nameAsc;
-
-  /// The tree pane's width (wide layout), dragged and persisted per
-  /// library (T-PP-21).
-  double _treeWidth = defaultTreeWidth;
 
   /// Phone (< [splitBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
@@ -572,7 +534,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// kind mode (the note is a list, not a document) unless the user is
   /// in raw-edit mode.
   bool get _previewToggleVisible =>
-      _previewEnabled && (_kindGui == null || _kindRawMode);
+      _editorSettings.previewEnabled && (_kindGui == null || _kindRawMode);
 
   /// The kind toggle actions (T-TK-05): a note whose kind has a GUI offers
   /// the raw editor (pencil); in raw mode the kind GUI is offered back.
@@ -675,10 +637,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (!_previewVisible) return false;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     return !previewSplits(
-      _previewMode,
+      _editorSettings.previewMode,
       narrow: narrow,
-      editor: _editorKind,
-      previewEnabled: _previewEnabled,
+      editor: _editorSettings.editorKind,
+      previewEnabled: _editorSettings.previewEnabled,
     );
   }
 
@@ -757,25 +719,27 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
       path: p.join(controller.root ?? '', selectedPath),
-      showLineNumbers: _lineNumbers,
-      autofocusEditor: _autofocusEditor,
-      linkType: _linkType,
-      missingNoteLocation: _missingNoteLocation,
-      attachmentsFolder: _attachmentsFolder,
-      indentWidth: _indentWidth,
-      toolbarLayout: _toolbarLayout,
+      showLineNumbers: _editorSettings.lineNumbers,
+      autofocusEditor: _editorSettings.autofocusEditor,
+      linkType: _editorSettings.linkType,
+      missingNoteLocation: _editorSettings.missingNoteLocation,
+      attachmentsFolder: _editorSettings.attachmentsFolder,
+      indentWidth: _editorSettings.indentWidth,
+      toolbarLayout: _editorSettings.toolbarLayout,
       splitPreview: previewSplits(
-        _previewMode,
+        _editorSettings.previewMode,
         narrow: true,
-        editor: _editorKind,
-        previewEnabled: _previewEnabled,
+        editor: _editorSettings.editorKind,
+        previewEnabled: _editorSettings.previewEnabled,
       ),
-      showPreview: _previewEnabled && _previewVisible,
-      showWysiwyg: _editorKind == EditorKind.wysiwyg,
+      showPreview: _editorSettings.previewEnabled && _previewVisible,
+      showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
       // A single enabled editor has nowhere to switch to: the note hides
       // its switch instead of offering a dead toggle.
-      onEditorKindChanged: _editorsEnabled.length > 1 ? _setEditorKind : null,
-      splitFraction: _splitRatio,
+      onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+          ? _setEditorKind
+          : null,
+      splitFraction: _editorSettings.splitRatio,
       onSplitFractionChanged: _onSplitFractionChanged,
       onSplitDragEnd: _onSplitDragEnd,
       libraryRoot: controller.root,
@@ -912,12 +876,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       itemBuilder: (context) => [
         CheckedPopupMenuItem(
           value: PreviewLayoutMode.auto,
-          checked: _previewMode == PreviewLayoutMode.auto,
+          checked: _editorSettings.previewMode == PreviewLayoutMode.auto,
           child: Text(AppStrings.previewModeAuto),
         ),
         CheckedPopupMenuItem(
           value: PreviewLayoutMode.fullScreen,
-          checked: _previewMode == PreviewLayoutMode.fullScreen,
+          checked: _editorSettings.previewMode == PreviewLayoutMode.fullScreen,
           child: Text(AppStrings.previewModeSwitch),
         ),
       ],
@@ -928,22 +892,30 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// value is shared with the settings ratio row, and the session event
   /// refreshes every NoteView through [_refreshEditorSettings].
   Future<void> _setPreviewMode(PreviewLayoutMode mode) async {
-    if (mode == _previewMode) return;
+    if (mode == _editorSettings.previewMode) return;
     final controller = widget.controller;
     await controller.setPreviewMode(mode);
     controller.notify();
-    if (mounted) setState(() => _previewMode = mode);
+    if (mounted) {
+      setState(
+        () => _editorSettings = _editorSettings.copyWith(previewMode: mode),
+      );
+    }
   }
 
   /// Switches the library's current editor from the note's status row
   /// (T-WYS-12): persisted, then the shell re-reads it. Only offered when
   /// the library enables both editors.
   Future<void> _setEditorKind(EditorKind kind) async {
-    if (kind == _editorKind) return;
+    if (kind == _editorSettings.editorKind) return;
     final controller = widget.controller;
     await controller.setEditorKind(kind);
     controller.notify();
-    if (mounted) setState(() => _editorKind = kind);
+    if (mounted) {
+      setState(
+        () => _editorSettings = _editorSettings.copyWith(editorKind: kind),
+      );
+    }
   }
 
   @override
@@ -1109,70 +1081,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   Future<void> _refreshEditorSettings() async {
     final controller = widget.controller;
     _syncPersonalDictionary(controller);
-    final lineNumbers = await controller.lineNumbersEnabled;
-    final autofocus = await controller.editorAutofocusEnabled;
-    final previewMode = await controller.previewMode;
-    final splitRatio = await controller.splitRatio;
-    final linkType = await controller.linkType;
-    final missingNoteLocation = await controller.missingNoteLocation;
-    final attachmentsFolder =
-        await controller.ops?.attachmentsFolder ?? defaultAttachmentsFolder;
-    final indentWidth = await controller.indentWidth;
-    final treeSort = await controller.treeSort;
-    final treeWidth = await controller.treeWidth;
-    final toolbar = await controller.editorToolbar;
+    final settings = await ShellEditorSettings.read(controller);
     // The spell checker follows the library's dictionaries (T-PP-09,
-    // revised); it notifies the open editor itself, so no setState is
-    // needed here.
+    // revised); it notifies the open editor itself, so it stays out of
+    // the settings value and needs no setState of its own.
     final spellDictionaries = await controller.spellDictionaries;
-    final editorKind = await controller.editorKind;
-    final editorsEnabled = await controller.enabledEditors;
-    final previewEnabled = await controller.previewEnabled;
-    // A hand-edited file resolves an empty set to both editors, the way
-    // the store reads it; the session never persists one.
-    final effectiveEnabled = editorsEnabled.isEmpty
-        ? const {EditorKind.source, EditorKind.wysiwyg}
-        : editorsEnabled;
-    // The current editor may have been switched off in the settings: fall
-    // back to an enabled one rather than stranding the note on a surface
-    // the library no longer offers.
-    final effectiveKind = effectiveEnabled.contains(editorKind)
-        ? editorKind
-        : effectiveEnabled.contains(EditorKind.source)
-        ? EditorKind.source
-        : EditorKind.wysiwyg;
-    if (mounted) widget.spellCheck.setDictionaries(spellDictionaries);
-    if (mounted &&
-        (lineNumbers != _lineNumbers ||
-            autofocus != _autofocusEditor ||
-            previewMode != _previewMode ||
-            splitRatio != _splitRatio ||
-            effectiveKind != _editorKind ||
-            !setEquals(effectiveEnabled, _editorsEnabled) ||
-            previewEnabled != _previewEnabled ||
-            linkType != _linkType ||
-            missingNoteLocation != _missingNoteLocation ||
-            attachmentsFolder != _attachmentsFolder ||
-            indentWidth != _indentWidth ||
-            treeSort != _treeSort ||
-            treeWidth != _treeWidth ||
-            toolbar != _toolbarLayout.encode())) {
-      setState(() {
-        _lineNumbers = lineNumbers;
-        _autofocusEditor = autofocus;
-        _previewMode = previewMode;
-        _splitRatio = splitRatio;
-        _editorKind = effectiveKind;
-        _editorsEnabled = {...effectiveEnabled};
-        _previewEnabled = previewEnabled;
-        _linkType = linkType;
-        _missingNoteLocation = missingNoteLocation;
-        _attachmentsFolder = attachmentsFolder;
-        _indentWidth = indentWidth;
-        _treeSort = treeSort;
-        _treeWidth = treeWidth;
-        _toolbarLayout = ToolbarLayout.parse(toolbar);
-      });
+    if (!mounted) return;
+    widget.spellCheck.setDictionaries(spellDictionaries);
+    if (settings != _editorSettings) {
+      setState(() => _editorSettings = settings);
     }
   }
 
@@ -1217,20 +1134,21 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Flips the tree sort direction and persists it (T-UI-03).
   Future<void> _toggleTreeSort() async {
-    final next = _treeSort == TreeSort.nameAsc
+    final next = _editorSettings.treeSort == TreeSort.nameAsc
         ? TreeSort.nameDesc
         : TreeSort.nameAsc;
-    setState(() => _treeSort = next);
+    setState(() => _editorSettings = _editorSettings.copyWith(treeSort: next));
     await widget.controller.setTreeSort(next);
     widget.controller.notify();
   }
 
-  /// Live divider moves mirror into [_splitRatio]; the lift persists.
-  //ignore: use_setters_to_change_properties
-  void _onSplitFractionChanged(double value) => _splitRatio = value;
+  /// Live divider moves mirror into the settings value's split ratio;
+  /// the lift persists it.
+  void _onSplitFractionChanged(double value) =>
+      _editorSettings = _editorSettings.copyWith(splitRatio: value);
 
   Future<void> _onSplitDragEnd() async {
-    await widget.controller.setSplitRatio(_splitRatio);
+    await widget.controller.setSplitRatio(_editorSettings.splitRatio);
     widget.controller.notify();
   }
 
@@ -1852,10 +1770,10 @@ final class _LibraryShellState extends State<_LibraryShell>
           _previewVisible &&
           _previewToggleVisible &&
           !previewSplits(
-            _previewMode,
+            _editorSettings.previewMode,
             narrow: true,
-            editor: _editorKind,
-            previewEnabled: _previewEnabled,
+            editor: _editorSettings.editorKind,
+            previewEnabled: _editorSettings.previewEnabled,
           );
       // The same accelerators on the phone layout, but without the
       // focus claim: a field keeps the software keyboard (T-PP-10).
@@ -1918,10 +1836,11 @@ final class _LibraryShellState extends State<_LibraryShell>
                                     actions: [
                                       ..._kindActions,
                                       if (!previewSplits(
-                                            _previewMode,
+                                            _editorSettings.previewMode,
                                             narrow: true,
-                                            editor: _editorKind,
-                                            previewEnabled: _previewEnabled,
+                                            editor: _editorSettings.editorKind,
+                                            previewEnabled:
+                                                _editorSettings.previewEnabled,
                                           ) &&
                                           _previewToggleVisible) ...[
                                         _previewToggleAction(),
@@ -2292,11 +2211,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _sortToggle() {
     return IconButton(
       key: const Key('toggle-sort'),
-      tooltip: _treeSort == TreeSort.nameAsc
+      tooltip: _editorSettings.treeSort == TreeSort.nameAsc
           ? AppStrings.sortDescTooltip
           : AppStrings.sortAscTooltip,
       icon: AnimatedRotation(
-        turns: _treeSort == TreeSort.nameAsc ? 0 : 0.5,
+        turns: _editorSettings.treeSort == TreeSort.nameAsc ? 0 : 0.5,
         duration: const Duration(milliseconds: 180),
         child: const Icon(Icons.unfold_more),
       ),
@@ -2510,7 +2429,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       children: [
         if (_sidebarVisible) ...[
           SizedBox(
-            width: _treeWidth,
+            width: _editorSettings.treeWidth,
             child: Column(
               children: [
                 Expanded(child: _treePane(controller)),
@@ -2531,28 +2450,29 @@ final class _LibraryShellState extends State<_LibraryShell>
                   root: controller.root,
                   selectedPath: _selected,
                   selectedIsDir: _selectedIsDir,
-                  showLineNumbers: _lineNumbers,
-                  autofocusEditor: _autofocusEditor,
-                  linkType: _linkType,
-                  missingNoteLocation: _missingNoteLocation,
-                  attachmentsFolder: _attachmentsFolder,
-                  indentWidth: _indentWidth,
-                  toolbarLayout: _toolbarLayout,
+                  showLineNumbers: _editorSettings.lineNumbers,
+                  autofocusEditor: _editorSettings.autofocusEditor,
+                  linkType: _editorSettings.linkType,
+                  missingNoteLocation: _editorSettings.missingNoteLocation,
+                  attachmentsFolder: _editorSettings.attachmentsFolder,
+                  indentWidth: _editorSettings.indentWidth,
+                  toolbarLayout: _editorSettings.toolbarLayout,
                   splitPreview: previewSplits(
-                    _previewMode,
+                    _editorSettings.previewMode,
                     narrow: false,
-                    editor: _editorKind,
-                    previewEnabled: _previewEnabled,
+                    editor: _editorSettings.editorKind,
+                    previewEnabled: _editorSettings.previewEnabled,
                   ),
-                  showPreview: _previewEnabled && _previewVisible,
-                  showWysiwyg: _editorKind == EditorKind.wysiwyg,
+                  showPreview:
+                      _editorSettings.previewEnabled && _previewVisible,
+                  showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
                   // A single enabled editor has nowhere to switch to:
                   // the note hides its switch instead of offering a
                   // dead toggle.
-                  onEditorKindChanged: _editorsEnabled.length > 1
+                  onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
                       ? _setEditorKind
                       : null,
-                  splitFraction: _splitRatio,
+                  splitFraction: _editorSettings.splitRatio,
                   onSplitFractionChanged: _onSplitFractionChanged,
                   onSplitDragEnd: _onSplitDragEnd,
                   linkSource: _linkSource,
@@ -2570,13 +2490,13 @@ final class _LibraryShellState extends State<_LibraryShell>
                     // desktop (T-PP-22): the header above is about the file,
                     // the footer about how it is shown.
                     if (_previewToggleVisible) ...[
-                      if (_editorKind == EditorKind.source)
+                      if (_editorSettings.editorKind == EditorKind.source)
                         _layoutModeAction(compact: true),
                       if (!previewSplits(
-                        _previewMode,
+                        _editorSettings.previewMode,
                         narrow: false,
-                        editor: _editorKind,
-                        previewEnabled: _previewEnabled,
+                        editor: _editorSettings.editorKind,
+                        previewEnabled: _editorSettings.previewEnabled,
                       ))
                         _previewToggleAction(compact: true),
                     ],
@@ -2598,9 +2518,11 @@ final class _LibraryShellState extends State<_LibraryShell>
       key: const Key('tree-divider'),
       behavior: HitTestBehavior.translucent,
       onHorizontalDragUpdate: (details) => setState(() {
-        _treeWidth = (_treeWidth + details.delta.dx).clamp(
-          minTreeWidth,
-          maxTreeWidth,
+        _editorSettings = _editorSettings.copyWith(
+          treeWidth: (_editorSettings.treeWidth + details.delta.dx).clamp(
+            minTreeWidth,
+            maxTreeWidth,
+          ),
         );
       }),
       onHorizontalDragEnd: (_) => unawaited(_persistTreeWidth()),
@@ -2616,7 +2538,7 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Persists the dragged tree width to the library settings.
   Future<void> _persistTreeWidth() async {
-    await widget.controller.setTreeWidth(_treeWidth);
+    await widget.controller.setTreeWidth(_editorSettings.treeWidth);
     widget.controller.notify();
   }
 
@@ -2895,7 +2817,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _treePane(LibrarySession controller) {
     return NoteTree(
       controller: controller,
-      nameDesc: _treeSort == TreeSort.nameDesc,
+      nameDesc: _editorSettings.treeSort == TreeSort.nameDesc,
       selectedPath: _selected,
       expanded: _expanded,
       onToggle: _toggle,
