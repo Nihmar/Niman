@@ -371,13 +371,17 @@ final class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const Spacer(),
-                  // Replace rewrites the query term inside the notes; a
-                  // filter has no term, so it has nothing to offer.
+                  // Compact so the row stays inside a phone's width with
+                  // the replace button showing: at standard density it
+                  // overflows by a few pixels at 390 px.
                   if (!_contains && !_inFieldMode && _hits.isNotEmpty)
                     IconButton(
                       key: const Key('search-replace'),
                       tooltip: AppStrings.replaceTooltip,
                       icon: const Icon(Icons.find_replace),
+                      style: const ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                      ),
                       onPressed: _openReplaceAll,
                     ),
                   if (widget.onOpenTags != null)
@@ -385,6 +389,9 @@ final class _SearchScreenState extends State<SearchScreen> {
                       key: const Key('open-tags'),
                       tooltip: AppStrings.openTagsTooltip,
                       icon: const Icon(Icons.sell_outlined),
+                      style: const ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                      ),
                       onPressed: widget.onOpenTags,
                     ),
                 ],
