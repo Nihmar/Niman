@@ -67,7 +67,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
   });
 
-  testWidgets('the find action is absent in preview-only mode', (tester) async {
+  testWidgets('the find action greys out in preview-only mode', (tester) async {
     await tester.pumpWidget(
       _app(
         NoteView(
@@ -82,6 +82,11 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(find.byKey(const Key('editor-find-open')), findsNothing);
+    // Present but dead: it holds its place in the row so switching back
+    // and forth leaves the other icons where the thumb left them.
+    final button = tester.widget<IconButton>(
+      find.byKey(const Key('editor-find-open')),
+    );
+    expect(button.onPressed, isNull);
   });
 }
