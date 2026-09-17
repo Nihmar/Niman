@@ -867,6 +867,12 @@ final class SerbianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'било у $path';
   @override
+  String get trashOriginalRoot => 'било је у корену библиотеке';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0441\u0442\u0430\u0432\u043a\u0430'
+      : '$count \u0441\u0442\u0430\u0432\u043a\u0438';
+  @override
   String get newNoteHere => 'Нова белешка овде';
   @override
   String get newFolderHere => 'Нова фасцикла овде';

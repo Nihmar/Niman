@@ -862,6 +862,11 @@ final class DanishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'lå i $path';
   @override
+  String get trashOriginalRoot => 'var i bibliotekets rod';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementer';
+  @override
   String get newNoteHere => 'Ny note her';
   @override
   String get newFolderHere => 'Ny mappe her';

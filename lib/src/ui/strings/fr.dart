@@ -883,6 +883,12 @@ final class FrenchStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'était dans $path';
   @override
+  String get trashOriginalRoot =>
+      '\u00e9tait \u00e0 la racine de la biblioth\u00e8que';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00e9l\u00e9ment' : '$count \u00e9l\u00e9ments';
+  @override
   String get newNoteHere => 'Nouvelle note ici';
   @override
   String get newFolderHere => 'Nouveau dossier ici';

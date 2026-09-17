@@ -864,6 +864,11 @@ final class CzechStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bylo v $path';
   @override
+  String get trashOriginalRoot => 'bylo v ko\u0159enu knihovny';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 polo\u017eka' : '$count polo\u017eek';
+  @override
   String get newNoteHere => 'Nová poznámka zde';
   @override
   String get newFolderHere => 'Nová složka zde';

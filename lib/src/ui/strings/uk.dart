@@ -867,6 +867,12 @@ final class UkrainianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'була в $path';
   @override
+  String get trashOriginalRoot => 'було в корені бібліотеки';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0435\u043b\u0435\u043c\u0435\u043d\u0442'
+      : '$count \u0435\u043b\u0435\u043c\u0435\u043d\u0442\u0456\u0432';
+  @override
   String get newNoteHere => 'Нова нотатка тут';
   @override
   String get newFolderHere => 'Нова папка тут';

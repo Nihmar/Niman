@@ -887,6 +887,12 @@ final class GreekStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'ήταν στο $path';
   @override
+  String get trashOriginalRoot => 'ήταν στη ρίζα της βιβλιοθήκης';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u03c3\u03c4\u03bf\u03b9\u03c7\u03b5\u03af\u03bf'
+      : '$count \u03c3\u03c4\u03bf\u03b9\u03c7\u03b5\u03af\u03b1';
+  @override
   String get newNoteHere => 'Νέα σημείωση εδώ';
   @override
   String get newFolderHere => 'Νέος φάκελος εδώ';

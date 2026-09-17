@@ -883,6 +883,11 @@ final class CatalanStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'era a $path';
   @override
+  String get trashOriginalRoot => 'era a l\u2019arrel de la biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elements';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Carpeta nova aquí';

@@ -613,6 +613,8 @@ final class AppStrings {
   static String get newNoteSameFolder => _s.newNoteSameFolder;
   static String get newFromTemplateSameFolder => _s.newFromTemplateSameFolder;
   static String trashOriginalPath(String path) => _s.trashOriginalPath(path);
+  static String get trashOriginalRoot => _s.trashOriginalRoot;
+  static String trashItemCount(int count) => _s.trashItemCount(count);
   static String get newFolderHere => _s.newFolderHere;
   static String get newListNoteTitle => _s.newListNoteTitle;
   static String get newListNoteDefault => _s.newListNoteDefault;

@@ -62,18 +62,21 @@ scrolling.
 
 ## 2. The trash rejoins the family
 
+Landed.
+
 ![The trash](07-trash.png)
 
-It is the only list in the app built out of `Card`s, while File, Settings
-and the toolbar screen are flat rows.
+It was the only list in the app built out of `Card`s, while File,
+Settings and the toolbar screen are flat rows.
 
-- Flat rows, and dates written out rather than the first ten characters
-  of an ISO timestamp (#129 did the date and the "was at" line; the
-  layout is still `Card` + `ListTile` in
-  [`trash.dart`](../../lib/src/ui/trash.dart)).
-- **Empty** moves to the app bar. Today it is a FAB in the bottom-right
-  corner — exactly where every other screen puts *create*.
-- The auto-empty setting is reachable from the screen it is about.
+- Flat rows, with the count and the library under the title, and the
+  parent folder written out (`was in the library root` for a
+  top-level note).
+- **Empty** moved to the app bar as a text action, disabled — not
+  gone — when there is nothing to empty. The corner it owned is where
+  every other screen puts *create*.
+- The auto-empty setting rides at the bottom of the screen it
+  governs, showing its value and opening it highlighted.
 
 ## 3. Tasks: a project is not a context
 

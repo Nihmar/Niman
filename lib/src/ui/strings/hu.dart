@@ -865,6 +865,11 @@ final class HungarianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'itt volt: $path';
   @override
+  String get trashOriginalRoot =>
+      'a k\u00f6nyvt\u00e1r gy\u00f6ker\u00e9ben volt';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 elem' : '$count elem';
+  @override
   String get newNoteHere => 'Új jegyzet ide';
   @override
   String get newFolderHere => 'Új mappa ide';

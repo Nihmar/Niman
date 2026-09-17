@@ -864,6 +864,11 @@ final class SlovenianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bil je v $path';
   @override
+  String get trashOriginalRoot => 'je bilo v korenu knji\u017enice';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementov';
+  @override
   String get newNoteHere => 'Nova opomba sem';
   @override
   String get newFolderHere => 'Nova mapa sem';

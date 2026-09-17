@@ -336,7 +336,13 @@ void main() {
       ),
       findsOne,
     );
-    await tester.tap(find.widgetWithText(TextButton, 'Empty'));
+    // The dialog's confirmation, not the app bar row behind it.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(TextButton, 'Empty'),
+      ),
+    );
     await settle(tester);
     expect(find.text('Trash is empty'), findsOne);
 

@@ -865,6 +865,11 @@ final class BasqueStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'hemen zegoen: $path';
   @override
+  String get trashOriginalRoot => 'liburutegiaren erroan zegoen';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? 'elementu 1' : '$count elementu';
+  @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
   String get newFolderHere => 'Karpeta berria hemen';

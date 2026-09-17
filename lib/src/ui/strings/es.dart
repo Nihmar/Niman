@@ -879,6 +879,11 @@ final class SpanishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'estaba en $path';
   @override
+  String get trashOriginalRoot => 'estaba en la ra\u00edz de la biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elemento' : '$count elementos';
+  @override
   String get newNoteHere => 'Nueva nota aquí';
   @override
   String get newFolderHere => 'Nueva carpeta aquí';

@@ -868,6 +868,12 @@ final class AlbanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'ishte në $path';
   @override
+  String get trashOriginalRoot =>
+      'ishte n\u00eb rr\u00ebnj\u00ebn e bibliotek\u00ebs';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count element\u00eb';
+  @override
   String get newNoteHere => 'Shënim i ri këtu';
   @override
   String get newFolderHere => 'Tresë e re këtu';

@@ -865,6 +865,10 @@ final class PortugueseStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'estava em $path';
   @override
+  String get trashOriginalRoot => 'estava na raiz da biblioteca';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 item' : '$count itens';
+  @override
   String get newNoteHere => 'Nova nota aqui';
   @override
   String get newFolderHere => 'Nova pasta aqui';

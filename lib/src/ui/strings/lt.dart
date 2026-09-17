@@ -863,6 +863,11 @@ final class LithuanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'buvo: $path';
   @override
+  String get trashOriginalRoot => 'buvo bibliotekos \u0161aknyje';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elementas' : '$count elementai';
+  @override
   String get newNoteHere => 'Nauja pastaba čia';
   @override
   String get newFolderHere => 'Naujas katalogas čia';
