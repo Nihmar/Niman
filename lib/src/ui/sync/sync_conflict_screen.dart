@@ -73,10 +73,7 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
       setState(() {
         _texts = texts;
         _merge = merge;
-        _choices = List.filled(
-          merge?.conflicts.length ?? 0,
-          MergeChoice.local,
-        );
+        _choices = List.filled(merge?.conflicts.length ?? 0, MergeChoice.local);
       });
     } on SyncFailure catch (e) {
       _log.warning('conflict screen ${widget.path}: $e');
@@ -222,9 +219,7 @@ final class _SyncConflictScreenState extends State<SyncConflictScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         key: const Key('sync-keep-local'),
-                        onPressed: _resolving
-                            ? null
-                            : () => _keep(local: true),
+                        onPressed: _resolving ? null : () => _keep(local: true),
                         icon: const Icon(Icons.smartphone),
                         label: Text(AppStrings.syncKeepLocal),
                       ),

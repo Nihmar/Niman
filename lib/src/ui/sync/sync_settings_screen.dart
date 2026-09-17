@@ -7,6 +7,7 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/sync/spinning_sync_icon.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -535,10 +536,16 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      syncStatusIcon(status),
-                      color: syncStatusColor(status, scheme),
-                    ),
+                    // A run in flight turns, here as everywhere else: a
+                    // still glyph over "comparing with the server…" reads
+                    // as a sync that stopped.
+                    if (status.running)
+                      SpinningSyncIcon(color: syncStatusColor(status, scheme))
+                    else
+                      Icon(
+                        syncStatusIcon(status),
+                        color: syncStatusColor(status, scheme),
+                      ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -586,7 +593,11 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                 FilledButton.icon(
                   key: const Key('sync-now'),
                   onPressed: status.running ? null : _syncNow,
-                  icon: const Icon(Icons.sync),
+                  icon: status.running
+                      ? SpinningSyncIcon(
+                          color: scheme.onSurface.withValues(alpha: 0.38),
+                        )
+                      : const Icon(Icons.sync),
                   label: Text(
                     status.running
                         ? AppStrings.syncRunning
