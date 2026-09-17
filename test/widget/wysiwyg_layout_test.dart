@@ -41,7 +41,7 @@ NoteView _view({
 }) => NoteView(
   path: '/notes/a.md',
   showLineNumbers: true,
-  autofocusEditor: false,
+  autofocusEditor: true,
   showWysiwyg: showWysiwyg,
   showPreview: showPreview,
   splitPreview: splitPreview,
@@ -50,8 +50,10 @@ NoteView _view({
 
 Future<void> _open(WidgetTester tester, Widget view) async {
   await tester.pumpWidget(_app(view));
-  await tester.pump();
-  await tester.pump();
+  // The autofocus lands after the first frame (the WYSIWYG surface
+  // requests its focus through a zero-duration timer), and the toolbar
+  // slides in with the keyboard it represents: settle both.
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -86,7 +88,7 @@ void main() {
             body: NoteView(
               path: '/notes/a.md',
               showLineNumbers: true,
-              autofocusEditor: false,
+              autofocusEditor: true,
               showWysiwyg: true,
               showPreview: preview,
               readNote: (_) async => '# Head\n\nbody text',
@@ -95,8 +97,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(WysiwygEditor), findsOneWidget);
     await tester.tap(find.byKey(const Key('editor-preview-toggle')));
     await tester.pump();
@@ -130,7 +131,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         spellCheck: spell,
         readNote: (_) async => 'hello wrold\n',
@@ -171,7 +172,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         onEditorKindChanged: (kind) => chosen = kind,
         readNote: (_) async => '# Head\n\nbody text',
       ),
@@ -191,7 +192,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '# Head\n\nbody text',
       ),
@@ -208,7 +209,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         onEditorKindChanged: (kind) => chosen = kind,
         readNote: (_) async => '# Head\n\nbody text',
@@ -238,7 +239,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
       ),
@@ -278,7 +279,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
       ),

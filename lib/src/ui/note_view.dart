@@ -271,6 +271,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   late final FocusNode _focus;
 
+  /// The WYSIWYG surface's focus node: the phone's formatting toolbar
+  /// rides the editor's focus either way (it shows only while the
+  /// keyboard is up), so the surface is given this node instead of its
+  /// own, and NoteView owns its disposal.
+  final FocusNode _wysiwygFocus = FocusNode();
+
   /// The editor's controller: owned here so the save path can read the text
   /// without a full string crossing the widget tree per keystroke — the
   /// editor edits it, the save reads it. Created with a spanBuilder that
@@ -409,6 +415,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    _wysiwygFocus.addListener(_onWysiwygFocusChanged);
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
     _scroll = CodeScrollController();
@@ -478,8 +485,12 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // remounted either, so focus stays untouched there.
     final splitNow = widget.splitPreview && !widget.showWysiwyg;
     if (!splitNow && oldWidget.showPreview && !widget.showPreview) {
-      if (widget.autofocusEditor && !widget.showWysiwyg) {
-        _focus.requestFocus();
+      if (widget.autofocusEditor) {
+        if (widget.showWysiwyg) {
+          _wysiwygFocus.requestFocus();
+        } else {
+          _focus.requestFocus();
+        }
       }
     }
     // The preview has no editable: a note opening in it, or the switch
@@ -513,6 +524,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _findController.dispose();
     _wysiwygActive.dispose();
     _focus.dispose();
+    _wysiwygFocus.dispose();
     _scroll.verticalScroller.dispose();
     _scroll.horizontalScroller.dispose();
     _previewScroll.dispose();
@@ -863,6 +875,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           autoFocus: widget.autofocusEditor,
           spellCheck: widget.spellCheck,
           activeItems: _wysiwygActive,
+          focusNode: _wysiwygFocus,
         )
       : _sourcePane();
 
@@ -1135,6 +1148,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   void _onFocusChanged() {
     if (!_focus.hasFocus) unawaited(_save());
+    _onToolbarFocusChanged();
+  }
+
+  /// The WYSIWYG surface's focus moved: the phone's toolbar rides it the
+  /// same way.
+  void _onWysiwygFocusChanged() {
+    _onToolbarFocusChanged();
+  }
+
+  /// The phone's formatting toolbar shows only while the keyboard is up,
+  /// so a focus change repaints it; the desktop's top toolbar never rides
+  /// the keyboard and does not repaint for it.
+  void _onToolbarFocusChanged() {
+    if (mounted && !widget.toolbarTop) setState(() {});
   }
 
   @override
@@ -1327,6 +1354,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     unawaited(_save());
   }
 
+  /// Whether the editor on screen holds the focus — the phone's proxy for
+  /// "the keyboard is up": the formatting toolbar shows only while the
+  /// keyboard is up (it is the keyboard's row, and in preview there is
+  /// nothing to format), so it rides this focus.
+  bool get _keyboardUp =>
+      widget.showWysiwyg ? _wysiwygFocus.hasFocus : _focus.hasFocus;
+
   @override
   Widget build(BuildContext context) {
     final error = _error;
@@ -1334,11 +1368,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // shell's previewSplits agrees — this is the belt to its braces.
     final split = widget.splitPreview && !widget.showWysiwyg;
     // The toolbar formats the editor: it stays in split mode (the editor
-    // is on screen) and hides in full-screen preview mode.
+    // is on screen) and hides in full-screen preview mode. On the phone
+    // it also rides the keyboard (it shows only while the keyboard is
+    // up); on desktop it never does.
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
     final showToolbar =
         (split || !widget.showPreview) &&
+        (widget.toolbarTop || _keyboardUp) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
     // and hides the editor chrome (outline, status row, toolbar) — the

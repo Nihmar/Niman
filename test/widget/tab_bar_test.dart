@@ -342,11 +342,12 @@ void main() {
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
 
-    // Back from the note goes to Files, not back to the Quick note tab.
+    // Back from the note lands on Settings, the tab the tile was tapped
+    // from — not back to a Quick note tab (there is none).
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
-    expect(noteRow('Scratch.md'), findsOne);
+    expect(find.byType(NoteTree), findsNothing);
   });
 
   testWidgets('FAB creates in the selected folder, menu offers all actions '

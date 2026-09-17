@@ -56,6 +56,13 @@ final class FrontmatterWarningBanner extends StatelessWidget {
 
 /// The status row (T-UI-07): outline toggle + word count left, saved/
 /// unsaved right.
+///
+/// The phone's row used to keep a tight hand (34×26 touch targets,
+/// below the 48 dp guideline, left alone on purpose: a tight phone
+/// row was asked for on 2026-09-11, and the space to loosen it
+/// honestly only existed while the tab bar sat under the note).
+/// The tab bar is gone from the note page (issue #73, item 1), so
+/// the freed height funds the guideline-sized targets.
 final class NoteStatusRow extends StatelessWidget {
   /// Creates the row; every tap leaves through a callback.
   const new({
@@ -136,7 +143,7 @@ final class NoteStatusRow extends StatelessWidget {
                 icon: const Icon(Icons.toc),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: () => unawaited(onOutline()),
               ),
             ),
@@ -156,7 +163,7 @@ final class NoteStatusRow extends StatelessWidget {
                 icon: const Icon(Icons.search),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: splitPreview || !showPreview ? onFind : null,
               ),
             ),
@@ -169,7 +176,7 @@ final class NoteStatusRow extends StatelessWidget {
                 icon: const Icon(Icons.spellcheck),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: () => unawaited(onSpellCheck()),
               ),
             ),
@@ -189,7 +196,7 @@ final class NoteStatusRow extends StatelessWidget {
                 ),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: onToggleEditorKind,
               ),
             ),

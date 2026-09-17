@@ -12,9 +12,10 @@ import 'package:niman/src/ui/strings.dart';
 
 /// The bottom tab bar.
 ///
-/// Shown by the tab shell *and* by an open note: the tabs are how the
-/// app is navigated, so having them vanish behind a note meant going
-/// back before going anywhere.
+/// Shown by the tab shell only: an open note is a page, not a tab
+/// (issue #73, item 1), so the bar no longer sits under it — going
+/// anywhere else is back, and back lands where the note was opened
+/// from.
 final class ShellTabBar extends StatelessWidget {
   /// Creates the bar with [selectedIndex] current.
   const new({

@@ -13,6 +13,7 @@ palette, so they can be compared with a device screenshot directly.
 
 | | |
 |---|---|
+| #73 | A note opens as a page, not a tab: the tab bar is gone from the note page, back lands on the tab it was opened from (the quick note included), the app bar carries the folder under the title, the formatting toolbar follows the keyboard and stays out of preview, and the freed height funds the status row's 48 dp targets |
 | #122 | The preview toggle keeps its place when the fullscreen button appears |
 | #124 | The find button keeps its slot in preview-only mode; one icon weight per list |
 | #125 | One dialog for "which folder?" — `MovePicker` gone, the move can create a folder |
@@ -28,33 +29,7 @@ Two rules came out of it and are written down in
   or put it on the side the row grows from, so nothing already on screen
   moves under a thumb that is already on it.
 
-## 1. A note opens as a page, not as a tab
-
-Issue #73.
-
-![The editor, full page](01-editor-full-page.png)
-![The editor with the keyboard open](02-editor-keyboard-open.png)
-![The quick note, in preview](03-quick-note-preview.png)
-
-Today the bottom of an open note carries three bars: the status row, the
-formatting toolbar and the tab bar — around 150 px of permanent chrome on
-a phone, with *Quick note* lit as though the editor were a tab.
-
-- Opening a note hides the tab bar; back returns to the tab it was opened
-  from. **This has to hold for the quick note too**: its tab opens the
-  note, the bars go, and back lands where you came from.
-- The formatting toolbar appears only while the keyboard is up, and only
-  in an editor — in preview there is nothing to format, and today it
-  stays.
-- The freed height pays for the status row's touch targets, which are
-  `minWidth: 34, minHeight: 26` in
-  [`note_view_chrome.dart`](../../lib/src/ui/note_view_chrome.dart)
-  against the 48 dp guideline. Left alone so far on purpose: a tight
-  phone row was asked for on 2026-09-11, and the space to loosen it
-  honestly only exists once the tab bar is gone.
-- The app bar keeps the title and gains the note's folder under it.
-
-## 2. Settings: a home, sub-screens and a search field
+## 1. Settings: a home, sub-screens and a search field
 
 Issue #104.
 
@@ -82,7 +57,7 @@ scrolling.
   *Markdown source* and *WYSIWYG* do not, and those two are precisely the
   pair whose combination is not obvious.
 
-## 3. The trash rejoins the family
+## 2. The trash rejoins the family
 
 ![The trash](07-trash.png)
 
@@ -97,7 +72,7 @@ and the toolbar screen are flat rows.
   corner — exactly where every other screen puts *create*.
 - The auto-empty setting is reachable from the screen it is about.
 
-## 4. Tasks: a project is not a context
+## 3. Tasks: a project is not a context
 
 ![Tasks](08-tasks.png)
 
@@ -110,7 +85,7 @@ The filter row also mixes two chip shapes — one with a trailing chevron,
 one with a leading icon — and the "6 to do" count sits on a different
 baseline from the chips beside it.
 
-## 5. Smaller things, without a picture
+## 4. Smaller things, without a picture
 
 - **No undo after a delete.** `SnackBarAction` exists only in history,
   sync and transcription. Deleting a note says what happened but offers

@@ -438,6 +438,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the rail always stays, T-PP-22).
   bool _sidebarVisible = true;
 
+  /// The library's quick note (library-relative path, or none): the
+  /// note page's app bar labels it, now that the tabs no longer do
+  /// (issue #73, item 1). Refreshed with the editor settings.
+  String? _quickNotePath;
+
   /// Carries focus for the app accelerators (T-PP-10) when nothing else
   /// wants it, so a keyboard-only tab switch is followed by a working next
   /// one: [FocusManager] would otherwise leave nothing focused.
@@ -1056,10 +1061,15 @@ final class _LibraryShellState extends State<_LibraryShell>
     // revised); it notifies the open editor itself, so it stays out of
     // the settings value and needs no setState of its own.
     final spellDictionaries = await controller.spellDictionaries;
+    final ops = controller.ops;
+    final quickNote = ops == null ? null : await ops.quickNotePath;
     if (!mounted) return;
     widget.spellCheck.setDictionaries(spellDictionaries);
     if (settings != _editorSettings) {
       setState(() => _editorSettings = settings);
+    }
+    if (quickNote != _quickNotePath) {
+      setState(() => _quickNotePath = quickNote);
     }
   }
 
@@ -1171,9 +1181,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     logNextFrame('shell', 'search result open first frame');
   }
 
-  /// Opens the quick note at [path]; back returns to the Files tab.
-  /// A stale setting (the note was moved, renamed, or deleted) is cleared
-  /// so the tab returns to its empty state.
+  /// Opens the quick note at [path]; back returns to the tab it was
+  /// opened from: the tile sits in every tab, not in Files (issue #73,
+  /// item 1). The chooser flow arrives here from the quick note tab
+  /// itself, and Files is its home. A stale setting (the note was moved,
+  /// renamed, or deleted) is cleared so the tab returns to its empty
+  /// state.
   Future<void> _openQuickNote(String path) async {
     // Closes the keyboard before the transition (issue #4): opening the
     // overlay over a live IME rips focus mid-fade while adjustResize
@@ -1193,11 +1206,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         return;
       }
       if (!mounted) return;
+      // Read the origin before the switch below: the chooser flow arrives
+      // here from the quick note tab itself, and Files is its home.
+      final fromTab = _tab == ShellTab.quickNote ? ShellTab.files : _tab;
       setState(() {
         _tab = ShellTab.quickNote;
         _visitedTabs.add(ShellTab.quickNote);
         _showQuickNoteChooser = false;
-        _noteFromTab = ShellTab.files;
+        _noteFromTab = fromTab;
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
@@ -1408,6 +1424,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       onCloseFullScreenNote: _closeFullScreenNote,
       onLeaveFullScreenPreview: () =>
           setState(() => _previewFullScreen = false),
+      isQuickNote: _selected != null && _selected == _quickNotePath,
       noteBarActions: _noteBarActions(splitsPreview: splitsPreview),
       buildTabShell: () => _tabShell(
         controller: controller,
