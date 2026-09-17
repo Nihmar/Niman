@@ -214,8 +214,7 @@ void main() {
       final outcome = await handler.handleDeadLink('Sub/Foo', context());
       expect(
         outcome,
-        isA<DeadLinkFolderMissing>()
-            .having((o) => o.folder, 'folder', 'Sub'),
+        isA<DeadLinkFolderMissing>().having((o) => o.folder, 'folder', 'Sub'),
       );
       expect(recording.confirmCalls, isEmpty);
       expect(recording.createCalls, isEmpty);
