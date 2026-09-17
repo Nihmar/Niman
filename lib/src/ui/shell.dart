@@ -40,18 +40,21 @@ import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
-import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
+import 'package:niman/src/ui/shell_editor_header.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_preview_actions.dart';
+import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
+import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
-import 'package:niman/src/ui/tags_screen.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
@@ -291,24 +294,6 @@ enum ShellTab {
   settings,
 }
 
-/// The desktop tree footer's create menu entries (T-PP-22).
-enum _NewItem {
-  /// A plain Markdown note.
-  note,
-
-  /// A list note (frontmatter type: list) in the list folder.
-  listNote,
-
-  /// A voice note (frontmatter type: audio) in the current folder.
-  audioNote,
-
-  /// A note copied from a template.
-  template,
-
-  /// A folder.
-  folder,
-}
-
 final class _LibraryShellState extends State<_LibraryShell>
     with WidgetsBindingObserver {
   String? _selected;
@@ -342,10 +327,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// 2026-09-08 device log put that inflate at 14-17 ms of frame build).
   /// Query, results, and scroll therefore survive a switch, by choice.
   final Set<ShellTab> _visitedTabs = <ShellTab>{ShellTab.files};
-
-  /// Whether the Tags screen has ever been opened: like the tabs, it
-  /// mounts once and stays alive so the search query survives the flip.
-  bool _tagsVisited = false;
 
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
@@ -472,7 +453,6 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Whether the Search tab shows the Tags screen (T-M3-06) instead of
   /// the search box; the tabs button flips it and back.
-  bool _showTags = false;
 
   /// The link-resolution source (T-M3-07), resolved from the session.
   LinkSource? _linkSource;
@@ -815,76 +795,30 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
-  /// The way back out of [_previewFullScreen], floating over the preview.
-  ///
-  /// The chrome that would normally carry this action is exactly what is
-  /// hidden, so the button rides above the content instead — inside the
-  /// safe area, so a notch or a rounded corner never eats it.
+  /// The way back out of the full-screen preview (issue #100 moved the
+  /// button itself into [ExitFullScreenButton]).
   Widget _exitFullScreenButton() {
-    return SafeArea(
-      child: Align(
-        alignment: Alignment.topRight,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Material(
-            type: MaterialType.circle,
-            color: Theme.of(context).colorScheme.surface
-                .withValues(alpha: 0.85),
-            elevation: 2,
-            child: IconButton(
-              key: const Key('preview-fullscreen-exit'),
-              tooltip: AppStrings.exitFullScreenTooltip,
-              icon: const Icon(Icons.fullscreen_exit),
-              onPressed: () => setState(() => _previewFullScreen = false),
-            ),
-          ),
-        ),
-      ),
+    return ExitFullScreenButton(
+      onExit: () => setState(() => _previewFullScreen = false),
     );
   }
 
-  /// The app-bar eye action: flips the editor/preview pane (phone
-  /// full-screen note and the wide switch override).
+  /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
-    return IconButton(
-      key: const Key('editor-preview-toggle'),
-      tooltip: _previewVisible
-          ? AppStrings.showEditorTooltip
-          : AppStrings.showPreviewTooltip,
-      icon: Icon(_previewVisible ? Icons.edit : Icons.visibility),
-      iconSize: compact ? 18 : null,
-      visualDensity: compact ? VisualDensity.compact : null,
-      padding: compact ? EdgeInsets.zero : null,
-      constraints: compact
-          ? const BoxConstraints(minWidth: 34, minHeight: 26)
-          : null,
-      onPressed: _togglePreview,
+    return PreviewToggleAction(
+      previewVisible: _previewVisible,
+      onToggle: _togglePreview,
+      compact: compact,
     );
   }
 
-  /// The split/switch picker (user, 2026-09-09): how the preview shares
-  /// the window is an editor control, not a settings-screen row. Wide
-  /// only — below 600 dp the panes cannot share the screen, so there is
-  /// nothing to choose.
+  /// The split/switch picker: how the preview shares the window. Wide
+  /// only — below 600 dp the panes cannot share the screen.
   Widget _layoutModeAction({bool compact = false}) {
-    return PopupMenuButton<PreviewLayoutMode>(
-      key: const Key('layout-mode'),
-      tooltip: AppStrings.previewModeTitle,
-      icon: Icon(Icons.splitscreen, size: compact ? 18 : null),
-      padding: compact ? EdgeInsets.zero : const EdgeInsets.all(8),
+    return PreviewLayoutModeAction(
+      mode: _editorSettings.previewMode,
       onSelected: (mode) => unawaited(_setPreviewMode(mode)),
-      itemBuilder: (context) => [
-        CheckedPopupMenuItem(
-          value: PreviewLayoutMode.auto,
-          checked: _editorSettings.previewMode == PreviewLayoutMode.auto,
-          child: Text(AppStrings.previewModeAuto),
-        ),
-        CheckedPopupMenuItem(
-          value: PreviewLayoutMode.fullScreen,
-          checked: _editorSettings.previewMode == PreviewLayoutMode.fullScreen,
-          child: Text(AppStrings.previewModeSwitch),
-        ),
-      ],
+      compact: compact,
     );
   }
 
@@ -1989,37 +1923,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// of the narrow bottom bar — same tabs, same order, same routing, so a
   /// tab switch does the same thing on both layouts.
   Widget _shellRail() {
-    return NavigationRail(
-      key: const Key('shell-rail'),
+    return ShellRail(
       selectedIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
-      labelType: NavigationRailLabelType.all,
-      destinations: [
-        NavigationRailDestination(
-          icon: const Icon(Icons.folder_outlined),
-          selectedIcon: const Icon(Icons.folder),
-          label: Text(AppStrings.tabFiles),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.check_box_outlined),
-          selectedIcon: const Icon(Icons.check_box),
-          label: Text(AppStrings.todoTitle),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.search),
-          label: Text(AppStrings.tabSearch),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.edit_outlined),
-          selectedIcon: const Icon(Icons.edit),
-          label: Text(AppStrings.quickNoteTitle),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          label: Text(AppStrings.tabSettings),
-        ),
-      ],
     );
   }
 
@@ -2331,38 +2237,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// app is navigated, so having them vanish behind a note meant going
   /// back before going anywhere.
   Widget _shellTabs() {
-    return NavigationBar(
-      key: const Key('shell-tabs'),
+    return ShellTabBar(
       selectedIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
-      destinations: [
-        NavigationDestination(
-          key: const Key('tab-files'),
-          icon: const Icon(Icons.folder_outlined),
-          selectedIcon: const Icon(Icons.folder),
-          label: AppStrings.tabFiles,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.check_box_outlined),
-          selectedIcon: const Icon(Icons.check_box),
-          label: AppStrings.todoTitle,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.search),
-          label: AppStrings.tabSearch,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.edit_outlined),
-          selectedIcon: const Icon(Icons.edit),
-          label: AppStrings.quickNoteTitle,
-        ),
-        NavigationDestination(
-          key: const Key('tab-settings'),
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          label: AppStrings.tabSettings,
-        ),
-      ],
     );
   }
 
@@ -2583,232 +2460,47 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
-  /// The search tab: Search and Tags side by side, Tags mounting once.
-  /// The flip stays instant (as before — same tab, no transition); the
-  /// outer fade already covered entering the tab. Search retains layout
-  /// while Tags shows (T-TS-10): flipping back is then paint-only,
-  /// matching the tab-level switch into Search.
+  /// The Search tab's body; the slot owns which of the two shows
+  /// (issue #100 moved it into [SearchSlot]).
   Widget _searchSlot(LibrarySession controller) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Visibility(
-          visible: !_showTags,
-          maintainState: true,
-          maintainAnimation: true,
-          maintainSize: true,
-          child: TickerMode(
-            enabled: !_showTags,
-            child: SearchScreen(
-              controller: controller,
-              onOpenNote: _openSearchNote,
-              onOpenTags: () => setState(() {
-                _showTags = true;
-                _tagsVisited = true;
-              }),
-            ),
-          ),
-        ),
-        if (_tagsVisited)
-          Offstage(
-            offstage: !_showTags,
-            child: TickerMode(
-              enabled: _showTags,
-              child: TagsScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onBack: () => setState(() => _showTags = false),
-              ),
-            ),
-          ),
-      ],
-    );
+    return SearchSlot(controller: controller, onOpenNote: _openSearchNote);
   }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):
-  /// creation, the trash and the sort order — the app-bar actions the wide
-  /// layout used to carry, where the tree is the thing they act on.
+  /// creation, the trash and the sort order — the app-bar actions the
+  /// wide layout used to carry, where the tree is the thing they act on
+  /// (issue #100 moved the bar itself into [TreeFooterBar]).
   Widget _treeFooter(LibrarySession controller) {
-    final theme = Theme.of(context);
-    return Container(
-      key: const Key('tree-footer'),
-      height: 44,
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: theme.dividerColor)),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 4),
-          PopupMenuButton<_NewItem>(
-            key: const Key('new-item-menu'),
-            tooltip: AppStrings.actionNew,
-            onSelected: _onNewItem,
-            position: PopupMenuPosition.over,
-            // A desktop menu should appear, not perform (T-PP-22): the
-            // default 300 ms scale reads as skipped frames on this
-            // compositor, and 120 ms is a menu that is simply there.
-            popUpAnimationStyle: const AnimationStyle(
-              duration: Duration(milliseconds: 120),
-              curve: Curves.easeOut,
-            ),
-            itemBuilder: (context) => [
-              _newItemMenuItem(
-                _NewItem.note,
-                Icons.note_add_outlined,
-                AppStrings.newNoteTitle,
-                key: const Key('new-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.listNote,
-                Icons.checklist_outlined,
-                AppStrings.newListNoteTitle,
-                key: const Key('new-list-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.audioNote,
-                Icons.mic_outlined,
-                AppStrings.newAudioNoteTitle,
-                key: const Key('new-audio-note-action'),
-              ),
-              _newItemMenuItem(
-                _NewItem.template,
-                Icons.file_copy_outlined,
-                AppStrings.newFromTemplateTitle,
-                key: const Key('new-from-template-action'),
-              ),
-              const PopupMenuDivider(),
-              _newItemMenuItem(
-                _NewItem.folder,
-                Icons.create_new_folder_outlined,
-                AppStrings.newFolderTitle,
-                key: const Key('new-folder-action'),
-              ),
-            ],
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.add, size: 18),
-                  const SizedBox(width: 4),
-                  Text(AppStrings.actionNew, style: theme.textTheme.labelLarge),
-                  const Icon(Icons.arrow_drop_down, size: 18),
-                ],
-              ),
-            ),
-          ),
-          const Spacer(),
-          _syncActions.button(context, controller),
-          IconButton(
-            key: const Key('open-trash'),
-            tooltip: AppStrings.trashTitle,
-            icon: const Icon(Icons.delete),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => TrashScreen(controller: controller),
-              ),
-            ),
-          ),
-          _sortToggle(),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-
-  /// One entry of the tree footer's create menu.
-  PopupMenuItem<_NewItem> _newItemMenuItem(
-    _NewItem item,
-    IconData icon,
-    String label, {
-    Key? key,
-  }) {
-    return PopupMenuItem<_NewItem>(
-      key: key,
-      value: item,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 12),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
+    return TreeFooterBar(
+      controller: controller,
+      onNewItem: _onNewItem,
+      syncButton: _syncActions.button(context, controller),
+      sortToggle: _sortToggle(),
     );
   }
 
   /// Runs the create flow behind a tree-footer menu entry.
-  void _onNewItem(_NewItem item) {
+  void _onNewItem(NewShellItem item) {
     switch (item) {
-      case _NewItem.note:
+      case NewShellItem.note:
         unawaited(_createNote());
-      case _NewItem.listNote:
+      case NewShellItem.listNote:
         unawaited(_createListNote());
-      case _NewItem.audioNote:
+      case NewShellItem.audioNote:
         unawaited(_createAudioNote());
-      case _NewItem.template:
+      case NewShellItem.template:
         unawaited(_templateFlow.createFromTemplate(context));
-      case _NewItem.folder:
+      case NewShellItem.folder:
         unawaited(_createFolder());
     }
   }
 
-  /// The open note's header inside the detail pane (T-PP-22): the file
-  /// name and its folder, then the note controls that used to sit in the
-  /// wide app bar. Only mounted while a note is open.
+  /// The open note's header in the detail pane (issue #100 moved the bar
+  /// itself into [EditorHeaderBar]).
   Widget _editorHeader() {
-    final path = _selected!;
-    final folder = p.dirname(path);
-    final theme = Theme.of(context);
-    return Container(
-      key: const Key('editor-header'),
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: theme.dividerColor)),
-      ),
-      child: Row(
-        children: [
-          // The title takes the whole free width so the actions sit at
-          // the right edge. A `Spacer` beside the flexible texts used to
-          // split that width with them, which left the ⋮ stranded in the
-          // middle of the header whenever the name was short.
-          Expanded(
-            child: Row(
-              children: [
-                Icon(
-                  Icons.description_outlined,
-                  size: 17,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    p.basename(path),
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                ),
-                if (folder.isNotEmpty && folder != '.') ...[
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      folder,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          ..._kindActions,
-          _noteMenu(),
-        ],
-      ),
+    return EditorHeaderBar(
+      path: _selected!,
+      actions: [..._kindActions, _noteMenu()],
     );
   }
 
