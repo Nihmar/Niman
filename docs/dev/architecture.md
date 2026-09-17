@@ -45,11 +45,13 @@ lines or when responsibilities mix.
 - **Sync download:** a note lands the same way (snapshot + rename on an
   isolate). An **attachment** has no snapshot, so it lands through
   `swapFileIn` on the calling isolate instead — a stat, a mkdir and a
-  rename are async I/O that never block the loop, and the isolate that
-  used to wrap them was the whole of
-  [#103](https://github.com/Nihmar/Niman/issues/103): on Windows its
-  rename stopped returning every third attachment and leaked the isolate.
-  Only move work to an isolate when it is *synchronous* work.
+  rename are async I/O that never block the loop, and an isolate around
+  async-only work buys nothing. On Windows that rename hangs on the third
+  attachment of every run, so it is given three seconds and then the
+  bytes are copied instead: a workaround for
+  [#103](https://github.com/Nihmar/Niman/issues/103), which is open
+  because the cause is still unknown. See [sync.md](sync.md) for what has
+  been ruled out.
 - **Search:** `search/query.dart` builds a safe FTS5 MATCH (tokens quoted,
   prefix `*` on last token only); `key = value` and `#tag` take the field
   and tag paths instead.
