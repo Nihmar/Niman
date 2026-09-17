@@ -52,7 +52,7 @@ void main() {
       expect(find.byType(NoteEditor), findsOneWidget);
       // CRLF is normalized to LF on load.
       expect(_editorText(tester), '# Hello\nworld');
-      expect(find.text('saved'), findsOneWidget);
+      expect(find.text('Saved'), findsOneWidget);
     });
 
     testWidgets('autosaves ~500 ms after the last edit', (tester) async {
@@ -74,7 +74,7 @@ void main() {
       expect(writes, isEmpty);
       await tester.pump(const Duration(milliseconds: 600));
       expect(writes, ['start!']);
-      expect(find.text('saved'), findsOneWidget);
+      expect(find.text('Saved'), findsOneWidget);
       controller.dispose();
     });
 
@@ -310,7 +310,7 @@ void main() {
       final between =
           tester.getTopLeft(findButton).dx - tester.getTopRight(outline).dx;
       expect(between, 6);
-      final words = find.text('1 words');
+      final words = find.text('1 word');
       expect(words, findsOneWidget);
       final afterFind =
           tester.getTopLeft(words).dx - tester.getTopRight(findButton).dx;

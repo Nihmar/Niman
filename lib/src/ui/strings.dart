@@ -327,6 +327,12 @@ final class AppStrings {
   static String get shortcutSavingNote => _s.shortcutSavingNote;
 
   // Editor status bar.
+  static String get noteStatusLoading => _s.noteStatusLoading;
+  static String get noteStatusSaving => _s.noteStatusSaving;
+  static String get noteStatusUnsaved => _s.noteStatusUnsaved;
+  static String get noteStatusSaved => _s.noteStatusSaved;
+  static String get noteStatusError => _s.noteStatusError;
+  static String wordCount(int count) => _s.wordCount(count);
   static String get outlineTooltip => _s.outlineTooltip;
   static String get outlineNoHeadings => _s.outlineNoHeadings;
   static String get outlineNoTitle => _s.outlineNoTitle;

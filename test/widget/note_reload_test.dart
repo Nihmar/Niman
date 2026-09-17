@@ -135,7 +135,7 @@ void main() {
       await tester.pump();
       expect(reads, 2);
       expect(_editorText(tester), 'same');
-      expect(find.text('saved'), findsOneWidget);
+      expect(find.text('Saved'), findsOneWidget);
     });
   });
 }

@@ -197,7 +197,7 @@ final class NoteStatusRow extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: desktop ? 6 : 0),
               child: Text(
-                '$wordCount words',
+                AppStrings.wordCount(wordCount),
                 style: labelStyle?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

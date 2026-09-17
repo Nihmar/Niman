@@ -367,6 +367,18 @@ final class CatalanStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Carregant…';
+  @override
+  String get noteStatusSaving => 'Desant…';
+  @override
+  String get noteStatusUnsaved => 'Sense desar';
+  @override
+  String get noteStatusSaved => 'Desat';
+  @override
+  String get noteStatusError => 'Error';
+  @override
+  String wordCount(int count) => count == 1 ? '1 paraula' : '$count paraules';
+  @override
   String get outlineTooltip => 'Estructura';
   @override
   String get outlineNoHeadings => 'Cap títol';

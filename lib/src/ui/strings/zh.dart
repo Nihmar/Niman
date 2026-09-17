@@ -333,6 +333,18 @@ final class ChineseStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => '加载中…';
+  @override
+  String get noteStatusSaving => '保存中…';
+  @override
+  String get noteStatusUnsaved => '未保存';
+  @override
+  String get noteStatusSaved => '已保存';
+  @override
+  String get noteStatusError => '错误';
+  @override
+  String wordCount(int count) => '$count 词';
+  @override
   String get outlineTooltip => '大纲';
   @override
   String get outlineNoHeadings => '没有标题';

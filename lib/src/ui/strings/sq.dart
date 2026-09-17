@@ -355,6 +355,18 @@ final class AlbanianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Po ngarkohet…';
+  @override
+  String get noteStatusSaving => 'Po ruhet…';
+  @override
+  String get noteStatusUnsaved => 'E paruajtur';
+  @override
+  String get noteStatusSaved => 'E ruajtur';
+  @override
+  String get noteStatusError => 'Gabim';
+  @override
+  String wordCount(int count) => '$count fjalë';
+  @override
   String get outlineTooltip => 'Përmbajtja';
   @override
   String get outlineNoHeadings => 'Nuk ka tituj';

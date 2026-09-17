@@ -358,6 +358,23 @@ final class SlovenianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Nalaganje…';
+  @override
+  String get noteStatusSaving => 'Shranjevanje…';
+  @override
+  String get noteStatusUnsaved => 'Neshranjeno';
+  @override
+  String get noteStatusSaved => 'Shranjeno';
+  @override
+  String get noteStatusError => 'Napaka';
+  @override
+  String wordCount(int count) => switch (count % 100) {
+    1 => '$count beseda',
+    2 => '$count besedi',
+    3 || 4 => '$count besede',
+    _ => '$count besed',
+  };
+  @override
   String get outlineTooltip => 'Struktura';
   @override
   String get outlineNoHeadings => 'Ni naslovov';

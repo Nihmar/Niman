@@ -359,6 +359,22 @@ final class CzechStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Načítání…';
+  @override
+  String get noteStatusSaving => 'Ukládání…';
+  @override
+  String get noteStatusUnsaved => 'Neuloženo';
+  @override
+  String get noteStatusSaved => 'Uloženo';
+  @override
+  String get noteStatusError => 'Chyba';
+  @override
+  String wordCount(int count) => switch (count) {
+    1 => '1 slovo',
+    >= 2 && <= 4 => '$count slova',
+    _ => '$count slov',
+  };
+  @override
   String get outlineTooltip => 'Struktura';
   @override
   String get outlineNoHeadings => 'Žádné nadpisy';

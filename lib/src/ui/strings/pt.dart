@@ -358,6 +358,18 @@ final class PortugueseStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'A carregar…';
+  @override
+  String get noteStatusSaving => 'A guardar…';
+  @override
+  String get noteStatusUnsaved => 'Não guardado';
+  @override
+  String get noteStatusSaved => 'Guardado';
+  @override
+  String get noteStatusError => 'Erro';
+  @override
+  String wordCount(int count) => count == 1 ? '1 palavra' : '$count palavras';
+  @override
   String get outlineTooltip => 'Estrutura';
   @override
   String get outlineNoHeadings => 'Sem títulos';

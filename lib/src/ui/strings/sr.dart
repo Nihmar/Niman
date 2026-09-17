@@ -359,6 +359,19 @@ final class SerbianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Учитавање…';
+  @override
+  String get noteStatusSaving => 'Чување…';
+  @override
+  String get noteStatusUnsaved => 'Несачувано';
+  @override
+  String get noteStatusSaved => 'Сачувано';
+  @override
+  String get noteStatusError => 'Грешка';
+  @override
+  String wordCount(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count реч' : '$count речи';
+  @override
   String get outlineTooltip => 'Садржај';
   @override
   String get outlineNoHeadings => 'Нема наслова';
