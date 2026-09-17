@@ -412,6 +412,34 @@ void main() {
       );
     });
 
+    test('the automatic trash empty is off until it is asked for', () {
+      // Issue #79: the setting is permission to delete notes for good,
+      // so a fresh library, a file without the key and a value nobody
+      // can read all mean the same thing — empty nothing.
+      int daysOf(Object? raw) =>
+          LibraryConfig.fromJsonMap({'trashAutoEmptyDays': raw})
+              .trashAutoEmptyDays;
+      expect(LibraryConfig.defaults.trashAutoEmptyDays, trashAutoEmptyOff);
+      expect(LibraryConfig.fromJsonMap(const {}).trashAutoEmptyDays, 0);
+      expect(daysOf(30), 30);
+      expect(daysOf(minTrashAutoEmptyDays), minTrashAutoEmptyDays);
+      expect(daysOf(maxTrashAutoEmptyDays), maxTrashAutoEmptyDays);
+      expect(daysOf(0), trashAutoEmptyOff);
+      expect(daysOf(-1), trashAutoEmptyOff);
+      expect(daysOf(maxTrashAutoEmptyDays + 1), trashAutoEmptyOff);
+      expect(daysOf('30'), trashAutoEmptyOff);
+      expect(daysOf(30.5), trashAutoEmptyOff);
+      expect(daysOf(null), trashAutoEmptyOff);
+    });
+
+    test('the automatic trash empty survives a write and a read', () {
+      final written = LibraryConfig.defaults
+          .copyWith(trashAutoEmptyDays: 90)
+          .toJsonMap();
+      expect(written['trashAutoEmptyDays'], 90);
+      expect(LibraryConfig.fromJsonMap(written).trashAutoEmptyDays, 90);
+    });
+
     test('a hand-written listNoteFolder is sanitized on read', () {
       String folderOf(String raw) =>
           LibraryConfig.fromJsonMap({'listNoteFolder': raw}).listNoteFolder;
