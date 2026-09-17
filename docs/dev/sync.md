@@ -424,11 +424,28 @@ one runs joins it.
      isolate, because the snapshot is synchronous work. An **attachment**
      keeps no version, so it is swapped in by `swapFileIn` on the calling
      isolate: stat, mkdir and rename are async I/O the event loop does not
-     wait on, and wrapping them in an isolate is what
-     [#103](https://github.com/Nihmar/Niman/issues/103) was — on Windows
-     that rename stopped returning every third attachment of a first sync
-     and never came back, leaking the isolate. Do not move async-only work
-     to an isolate.
+     wait on, and an isolate around async-only work buys nothing.
+
+     **The Windows workaround**
+     ([#103](https://github.com/Nihmar/Niman/issues/103), open). On
+     Windows the third attachment of a run goes into `File.rename` and
+     never comes out — not the first, not the second, the third, every
+     run, whichever file happens to be third. So the rename gets three
+     seconds (the ones that work take two milliseconds) and then
+     `copyFileOver` copies the bytes to the target instead, checking the
+     size before dropping the temp: a copy is not atomic the way the
+     rename it replaces is. A temp that will not delete is left alone —
+     hidden, skipped by the indexer, and the bytes are already in place.
+
+     Ruled out, each by a run that still stalled: the worker isolate (the
+     call was moved to the calling isolate and still hung), the event loop
+     (the heartbeat never missed a beat through any stall), the filesystem
+     being busy (stat, walk and note reload all answered in under a
+     millisecond on that same folder throughout), and a handle left by the
+     download's sink (owning and closing it first changed nothing). Linux
+     runs the same code through without pausing. **Why it is always
+     exactly two is still unknown**, which is why the issue is open and
+     this is a workaround rather than a fix.
    - *deleteRemote*: `DELETE` with `If-Match`. *trashLocal*:
      `NoteOps.syncTrash`, which uses `.trash/` whatever the trash toggle.
    - *moveRemote*: `MOVE`, then the row moves; a server that turns out
