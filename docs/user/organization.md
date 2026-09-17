@@ -89,6 +89,15 @@ Two places, both searchable:
 
 Search a single tag with `#tag` (see [search](search.md)).
 
+## Moving a note or a folder
+
+Long-press a row in the tree (right-click on desktop) and pick **Move**.
+The dialog lists the library root and every folder, one radio each, the
+same way the folder settings ask for a folder — and, like them, it has a
+**New folder** button, so a note can be moved somewhere that does not
+exist yet without leaving the dialog. A folder is never offered itself
+or anything inside it as a target.
+
 ## Opening a note outside Niman
 
 A note is also a file, and sometimes you want it where Niman is not: to
