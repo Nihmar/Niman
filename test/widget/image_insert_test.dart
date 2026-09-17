@@ -141,7 +141,9 @@ void main() {
             body: NoteView(
               path: p.join(dir.path, 'note.md'),
               showLineNumbers: true,
-              autofocusEditor: false,
+              // The phone's toolbar rides the keyboard: the editor opens
+              // focused, so the image button is on screen.
+              autofocusEditor: true,
               libraryRoot: dir.path,
               controller: controller,
               readNote: (_) async => 'hello',
@@ -161,6 +163,9 @@ void main() {
         ),
       );
       await tester.pump(); // load lands; caret at 0.
+      // The autofocus lands and the toolbar slides in with the keyboard
+      // it represents: settle both before the tap.
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('insert-image')));
       await tester.pump(); // pick + copy futures complete.
       await tester.pump(); // snippet lands in the editor.
@@ -194,7 +199,9 @@ void main() {
             body: NoteView(
               path: p.join(dir.path, 'note.md'),
               showLineNumbers: true,
-              autofocusEditor: false,
+              // The phone's toolbar rides the keyboard: the editor opens
+              // focused, so the image button is on screen.
+              autofocusEditor: true,
               libraryRoot: dir.path,
               linkType: LinkType.markdown,
               controller: controller,
@@ -207,6 +214,9 @@ void main() {
         ),
       );
       await tester.pump(); // load lands; caret at 0.
+      // The autofocus lands and the toolbar slides in with the keyboard
+      // it represents: settle both before the tap.
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('insert-image')));
       await tester.pump(); // pick + copy futures complete.
       await tester.pump(); // snippet lands in the editor.

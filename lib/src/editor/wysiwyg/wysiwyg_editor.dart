@@ -28,6 +28,7 @@ final class WysiwygEditor extends StatefulWidget {
     this.autoFocus = false,
     this.spellCheck,
     this.activeItems,
+    this.focusNode,
     super.key,
   });
 
@@ -48,6 +49,11 @@ final class WysiwygEditor extends StatefulWidget {
   /// state (T-WYS-06). Null in tests that do not show a toolbar.
   final ValueNotifier<Set<ToolbarItem>>? activeItems;
 
+  /// A focus node owned by the caller, for the owner's keyboard tracking
+  /// (the phone's toolbar rides the editor's focus); null keeps the
+  /// surface's own node.
+  final FocusNode? focusNode;
+
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
 }
@@ -62,7 +68,8 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// unlike the preview.
   static const int _maxWysiwygBytes = 200 * 1024;
 
-  final FocusNode _focus = FocusNode();
+  final FocusNode _internalFocus = FocusNode();
+  FocusNode get _focus => widget.focusNode ?? _internalFocus;
   final ScrollController _scroll = ScrollController();
   late quill.QuillController _controller;
   late DecodedNote _decoded;
@@ -87,6 +94,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// The document's lines, for the spell review panel (T-WYS-08).
   List<String> get plainTextLines =>
       _controller.document.toPlainText().split(String.fromCharCode(10));
+
+  /// Whether the surface holds the focus (the keyboard is up over it).
+  bool get hasFocus => _focus.hasFocus;
 
   /// Returns focus to the surface, keeping the caret where it was.
   ///
@@ -275,7 +285,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _controller
       ..removeListener(_publishActive)
       ..dispose();
-    _focus.dispose();
+    // The caller's node is theirs to dispose; only the internal one dies
+    // with the surface.
+    _internalFocus.dispose();
     _scroll.dispose();
     super.dispose();
   }

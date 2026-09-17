@@ -15,21 +15,24 @@ NoteView _view(CodeLineEditingController controller) {
   return NoteView(
     path: '/notes/a.md',
     showLineNumbers: true,
-    autofocusEditor: false,
+    // The phone's toolbar rides the keyboard: the editor opens focused,
+    // so the bar is on screen for the taps.
+    autofocusEditor: true,
     controller: controller,
     readNote: (_) async => _doc,
     writeNote: (path, content) async {},
   );
 }
 
-/// Pumps a fresh NoteView over a new controller for the [_doc].
+/// Pumps a fresh NoteView over a new controller for the [_doc]. The
+/// autofocus lands after the first frame and the toolbar slides in with
+/// the keyboard it represents: settle both before any tap.
 Future<CodeLineEditingController> _pumpFresh(WidgetTester tester) async {
   final controller = CodeLineEditingController.fromText(_doc);
   addTearDown(controller.dispose);
   await tester.pumpWidget(const SizedBox());
   await tester.pumpWidget(_app(_view(controller)));
-  await tester.pump();
-  await tester.pump();
+  await tester.pumpAndSettle();
   return controller;
 }
 
