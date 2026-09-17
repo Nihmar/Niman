@@ -367,6 +367,18 @@ final class CatalanStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Carregant…';
+  @override
+  String get noteStatusSaving => 'Desant…';
+  @override
+  String get noteStatusUnsaved => 'Sense desar';
+  @override
+  String get noteStatusSaved => 'Desat';
+  @override
+  String get noteStatusError => 'Error';
+  @override
+  String wordCount(int count) => count == 1 ? '1 paraula' : '$count paraules';
+  @override
   String get outlineTooltip => 'Estructura';
   @override
   String get outlineNoHeadings => 'Cap títol';
@@ -828,6 +840,13 @@ final class CatalanStrings extends Strings {
   String get closeMenuTooltip => 'Tanca';
   @override
   String get newFolderTitle => 'Carpeta nova';
+  @override
+  String get newNoteSameFolder => 'Nova nota a la mateixa carpeta';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nova des de plantilla a la mateixa carpeta';
+  @override
+  String trashOriginalPath(String path) => 'era a $path';
   @override
   String get newNoteHere => 'Nota nova aquí';
   @override

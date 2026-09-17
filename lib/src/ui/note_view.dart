@@ -44,6 +44,7 @@ import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/outline_panel.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
@@ -1309,11 +1310,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   }
 
   String get _status {
-    if (_error != null) return 'error';
-    if (_loading) return 'loading…';
-    if (_saving) return 'saving…';
-    if (_revision != _lastSavedRevision) return 'unsaved';
-    return 'saved';
+    if (_error != null) return AppStrings.noteStatusError;
+    if (_loading) return AppStrings.noteStatusLoading;
+    if (_saving) return AppStrings.noteStatusSaving;
+    if (_revision != _lastSavedRevision) return AppStrings.noteStatusUnsaved;
+    return AppStrings.noteStatusSaved;
   }
 
   /// A kind GUI's byte-stable edit: the buffer takes the new text (the

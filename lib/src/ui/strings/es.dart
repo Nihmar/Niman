@@ -362,6 +362,18 @@ final class SpanishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Cargando…';
+  @override
+  String get noteStatusSaving => 'Guardando…';
+  @override
+  String get noteStatusUnsaved => 'Sin guardar';
+  @override
+  String get noteStatusSaved => 'Guardado';
+  @override
+  String get noteStatusError => 'Error';
+  @override
+  String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
+  @override
   String get outlineTooltip => 'Esquema';
   @override
   String get outlineNoHeadings => 'Sin títulos';
@@ -821,6 +833,13 @@ final class SpanishStrings extends Strings {
   String get closeMenuTooltip => 'Cerrar';
   @override
   String get newFolderTitle => 'Nueva carpeta';
+  @override
+  String get newNoteSameFolder => 'Nueva nota en la misma carpeta';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nueva desde plantilla en la misma carpeta';
+  @override
+  String trashOriginalPath(String path) => 'estaba en $path';
   @override
   String get newNoteHere => 'Nueva nota aquí';
   @override

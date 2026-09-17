@@ -174,6 +174,12 @@ abstract base class Strings {
   String get shortcutSavingNote;
 
   // Editor status bar.
+  String get noteStatusLoading;
+  String get noteStatusSaving;
+  String get noteStatusUnsaved;
+  String get noteStatusSaved;
+  String get noteStatusError;
+  String wordCount(int count);
   String get outlineTooltip;
   String get outlineNoHeadings;
   String get outlineNoTitle;
@@ -401,6 +407,9 @@ abstract base class Strings {
   String get newItemTooltip;
   String get closeMenuTooltip;
   String get newFolderTitle;
+  String get newNoteSameFolder;
+  String get newFromTemplateSameFolder;
+  String trashOriginalPath(String path);
   String get newNoteHere;
   String get newFolderHere;
   String get newListNoteTitle;

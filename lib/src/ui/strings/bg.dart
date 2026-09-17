@@ -360,6 +360,18 @@ final class BulgarianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Зареждане…';
+  @override
+  String get noteStatusSaving => 'Запазване…';
+  @override
+  String get noteStatusUnsaved => 'Незапазено';
+  @override
+  String get noteStatusSaved => 'Запазено';
+  @override
+  String get noteStatusError => 'Грешка';
+  @override
+  String wordCount(int count) => count == 1 ? '1 дума' : '$count думи';
+  @override
   String get outlineTooltip => 'Структура';
   @override
   String get outlineNoHeadings => 'Няма заглавия';
@@ -813,6 +825,12 @@ final class BulgarianStrings extends Strings {
   String get closeMenuTooltip => 'Затваряне';
   @override
   String get newFolderTitle => 'Нова папка';
+  @override
+  String get newNoteSameFolder => 'Нова бележка в същата папка';
+  @override
+  String get newFromTemplateSameFolder => 'Нова от шаблон в същата папка';
+  @override
+  String trashOriginalPath(String path) => 'беше в $path';
   @override
   String get newNoteHere => 'Нова бележка тук';
   @override

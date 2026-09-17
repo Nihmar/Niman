@@ -361,6 +361,18 @@ final class DutchStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Laden…';
+  @override
+  String get noteStatusSaving => 'Opslaan…';
+  @override
+  String get noteStatusUnsaved => 'Niet opgeslagen';
+  @override
+  String get noteStatusSaved => 'Opgeslagen';
+  @override
+  String get noteStatusError => 'Fout';
+  @override
+  String wordCount(int count) => count == 1 ? '1 woord' : '$count woorden';
+  @override
   String get outlineTooltip => 'Structuur';
   @override
   String get outlineNoHeadings => 'Geen koppen';
@@ -811,6 +823,12 @@ final class DutchStrings extends Strings {
   String get closeMenuTooltip => 'Sluiten';
   @override
   String get newFolderTitle => 'Nieuwe map';
+  @override
+  String get newNoteSameFolder => 'Nieuwe notitie in dezelfde map';
+  @override
+  String get newFromTemplateSameFolder => 'Nieuw uit sjabloon in dezelfde map';
+  @override
+  String trashOriginalPath(String path) => 'stond in $path';
   @override
   String get newNoteHere => 'Nieuwe notitie hier';
   @override

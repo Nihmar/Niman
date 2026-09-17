@@ -112,6 +112,66 @@ void main() {
       }
     });
 
+    // The editor's word count used to read "1 words", in English, in
+    // every language. A count carries a plural, and a plural is not a
+    // letter added to the end of a noun.
+    test('the word count follows each language plural rule', () {
+      AppLanguages.choice = AppLanguage.english;
+      expect(AppStrings.wordCount(0), '0 words');
+      expect(AppStrings.wordCount(1), '1 word');
+      expect(AppStrings.wordCount(2), '2 words');
+
+      AppLanguages.choice = AppLanguage.italian;
+      expect(AppStrings.wordCount(1), '1 parola');
+      expect(AppStrings.wordCount(3), '3 parole');
+
+      // Three forms, and the teens are their own case.
+      AppLanguages.choice = AppLanguage.polish;
+      expect(AppStrings.wordCount(1), '1 słowo');
+      expect(AppStrings.wordCount(3), '3 słowa');
+      expect(AppStrings.wordCount(5), '5 słów');
+      expect(AppStrings.wordCount(13), '13 słów');
+      expect(AppStrings.wordCount(22), '22 słowa');
+
+      AppLanguages.choice = AppLanguage.czech;
+      expect(AppStrings.wordCount(1), '1 slovo');
+      expect(AppStrings.wordCount(4), '4 slova');
+      expect(AppStrings.wordCount(5), '5 slov');
+
+      AppLanguages.choice = AppLanguage.ukrainian;
+      expect(AppStrings.wordCount(1), '1 слово');
+      expect(AppStrings.wordCount(2), '2 слова');
+      expect(AppStrings.wordCount(11), '11 слів');
+      expect(AppStrings.wordCount(21), '21 слово');
+
+      // Romanian puts "de" in front of the noun from twenty up.
+      AppLanguages.choice = AppLanguage.romanian;
+      expect(AppStrings.wordCount(1), '1 cuvânt');
+      expect(AppStrings.wordCount(19), '19 cuvinte');
+      expect(AppStrings.wordCount(20), '20 de cuvinte');
+    });
+
+    test('every language answers the note statuses', () {
+      for (final language in AppLanguages.supported) {
+        AppLanguages.choice = language;
+        for (final status in [
+          AppStrings.noteStatusLoading,
+          AppStrings.noteStatusSaving,
+          AppStrings.noteStatusUnsaved,
+          AppStrings.noteStatusSaved,
+          AppStrings.noteStatusError,
+        ]) {
+          expect(status, isNotEmpty, reason: language.name);
+        }
+        // Saved and unsaved are the pair the eye checks at a glance.
+        expect(
+          AppStrings.noteStatusSaved,
+          isNot(AppStrings.noteStatusUnsaved),
+          reason: language.name,
+        );
+      }
+    });
+
     test('month and weekday names are translated and complete', () {
       AppLanguages.choice = AppLanguage.english;
       expect(AppStrings.monthNamesShort.length, 12);

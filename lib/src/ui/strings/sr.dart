@@ -359,6 +359,19 @@ final class SerbianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Учитавање…';
+  @override
+  String get noteStatusSaving => 'Чување…';
+  @override
+  String get noteStatusUnsaved => 'Несачувано';
+  @override
+  String get noteStatusSaved => 'Сачувано';
+  @override
+  String get noteStatusError => 'Грешка';
+  @override
+  String wordCount(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count реч' : '$count речи';
+  @override
   String get outlineTooltip => 'Садржај';
   @override
   String get outlineNoHeadings => 'Нема наслова';
@@ -810,6 +823,12 @@ final class SerbianStrings extends Strings {
   String get closeMenuTooltip => 'Затвори';
   @override
   String get newFolderTitle => 'Нова фасцикла';
+  @override
+  String get newNoteSameFolder => 'Нова белешка у истој фасцикли';
+  @override
+  String get newFromTemplateSameFolder => 'Нова из шаблона у истој фасцикли';
+  @override
+  String trashOriginalPath(String path) => 'било у $path';
   @override
   String get newNoteHere => 'Нова белешка овде';
   @override

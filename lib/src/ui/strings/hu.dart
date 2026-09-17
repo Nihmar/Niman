@@ -356,6 +356,18 @@ final class HungarianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Betöltés…';
+  @override
+  String get noteStatusSaving => 'Mentés…';
+  @override
+  String get noteStatusUnsaved => 'Nincs mentve';
+  @override
+  String get noteStatusSaved => 'Mentve';
+  @override
+  String get noteStatusError => 'Hiba';
+  @override
+  String wordCount(int count) => '$count szó';
+  @override
   String get outlineTooltip => 'Struktúra';
   @override
   String get outlineNoHeadings => 'Nincs címsor';
@@ -809,6 +821,12 @@ final class HungarianStrings extends Strings {
   String get closeMenuTooltip => 'Bezárás';
   @override
   String get newFolderTitle => 'Új mappa';
+  @override
+  String get newNoteSameFolder => 'Új jegyzet ugyanabban a mappában';
+  @override
+  String get newFromTemplateSameFolder => 'Új sablonból ugyanabban a mappában';
+  @override
+  String trashOriginalPath(String path) => 'itt volt: $path';
   @override
   String get newNoteHere => 'Új jegyzet ide';
   @override

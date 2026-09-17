@@ -362,6 +362,18 @@ final class SwedishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Läser in…';
+  @override
+  String get noteStatusSaving => 'Sparar…';
+  @override
+  String get noteStatusUnsaved => 'Osparat';
+  @override
+  String get noteStatusSaved => 'Sparat';
+  @override
+  String get noteStatusError => 'Fel';
+  @override
+  String wordCount(int count) => '$count ord';
+  @override
   String get outlineTooltip => 'Struktur';
   @override
   String get outlineNoHeadings => 'Inga rubriker';
@@ -810,6 +822,12 @@ final class SwedishStrings extends Strings {
   String get closeMenuTooltip => 'Stäng';
   @override
   String get newFolderTitle => 'Ny mapp';
+  @override
+  String get newNoteSameFolder => 'Ny anteckning i samma mapp';
+  @override
+  String get newFromTemplateSameFolder => 'Ny från mall i samma mapp';
+  @override
+  String trashOriginalPath(String path) => 'låg i $path';
   @override
   String get newNoteHere => 'Ny anteckning här';
   @override

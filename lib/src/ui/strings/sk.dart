@@ -359,6 +359,22 @@ final class SlovakStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Načítava sa…';
+  @override
+  String get noteStatusSaving => 'Ukladá sa…';
+  @override
+  String get noteStatusUnsaved => 'Neuložené';
+  @override
+  String get noteStatusSaved => 'Uložené';
+  @override
+  String get noteStatusError => 'Chyba';
+  @override
+  String wordCount(int count) => switch (count) {
+    1 => '1 slovo',
+    >= 2 && <= 4 => '$count slová',
+    _ => '$count slov',
+  };
+  @override
   String get outlineTooltip => 'Štruktúra';
   @override
   String get outlineNoHeadings => 'Žiadne nadpisy';
@@ -806,6 +822,13 @@ final class SlovakStrings extends Strings {
   String get closeMenuTooltip => 'Zavrieť';
   @override
   String get newFolderTitle => 'Nový priečinok';
+  @override
+  String get newNoteSameFolder => 'Nová poznámka v rovnakom priečinku';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nová zo šablóny v rovnakom priečinku';
+  @override
+  String trashOriginalPath(String path) => 'bola v $path';
   @override
   String get newNoteHere => 'Nová poznámka sem';
   @override
