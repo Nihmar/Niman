@@ -355,6 +355,23 @@ final class LatvianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Ielādē…';
+  @override
+  String get noteStatusSaving => 'Saglabā…';
+  @override
+  String get noteStatusUnsaved => 'Nesaglabāts';
+  @override
+  String get noteStatusSaved => 'Saglabāts';
+  @override
+  String get noteStatusError => 'Kļūda';
+  @override
+  String wordCount(int count) =>
+      count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
+      ? '$count vārdu'
+      : count % 10 == 1 && count % 100 != 11
+      ? '$count vārds'
+      : '$count vārdi';
+  @override
   String get outlineTooltip => 'Struktūra';
   @override
   String get outlineNoHeadings => 'Nav virsrakstu';

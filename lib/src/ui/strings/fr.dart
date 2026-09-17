@@ -363,6 +363,18 @@ final class FrenchStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Chargement…';
+  @override
+  String get noteStatusSaving => 'Enregistrement…';
+  @override
+  String get noteStatusUnsaved => 'Non enregistré';
+  @override
+  String get noteStatusSaved => 'Enregistré';
+  @override
+  String get noteStatusError => 'Erreur';
+  @override
+  String wordCount(int count) => count == 1 ? '1 mot' : '$count mots';
+  @override
   String get outlineTooltip => 'Plan';
   @override
   String get outlineNoHeadings => 'Aucun titre';

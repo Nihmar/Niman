@@ -364,6 +364,22 @@ final class RomanianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Se încarcă…';
+  @override
+  String get noteStatusSaving => 'Se salvează…';
+  @override
+  String get noteStatusUnsaved => 'Nesalvat';
+  @override
+  String get noteStatusSaved => 'Salvat';
+  @override
+  String get noteStatusError => 'Eroare';
+  @override
+  String wordCount(int count) => count == 1
+      ? '1 cuvânt'
+      : count % 100 >= 20 || count == 0
+      ? '$count de cuvinte'
+      : '$count cuvinte';
+  @override
   String get outlineTooltip => 'Structură';
   @override
   String get outlineNoHeadings => 'Niciun titlu';

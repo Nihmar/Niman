@@ -333,6 +333,18 @@ final class JapaneseStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => '読み込み中…';
+  @override
+  String get noteStatusSaving => '保存中…';
+  @override
+  String get noteStatusUnsaved => '未保存';
+  @override
+  String get noteStatusSaved => '保存済み';
+  @override
+  String get noteStatusError => 'エラー';
+  @override
+  String wordCount(int count) => '$count 語';
+  @override
   String get outlineTooltip => 'アウトライン';
   @override
   String get outlineNoHeadings => '見出しなし';

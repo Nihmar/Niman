@@ -360,6 +360,19 @@ final class MacedonianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Вчитување…';
+  @override
+  String get noteStatusSaving => 'Зачувување…';
+  @override
+  String get noteStatusUnsaved => 'Незачувано';
+  @override
+  String get noteStatusSaved => 'Зачувано';
+  @override
+  String get noteStatusError => 'Грешка';
+  @override
+  String wordCount(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count збор' : '$count зборови';
+  @override
   String get outlineTooltip => 'Содржина';
   @override
   String get outlineNoHeadings => 'Нема наслови';

@@ -361,6 +361,18 @@ final class GermanStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Wird geladen…';
+  @override
+  String get noteStatusSaving => 'Wird gespeichert…';
+  @override
+  String get noteStatusUnsaved => 'Nicht gespeichert';
+  @override
+  String get noteStatusSaved => 'Gespeichert';
+  @override
+  String get noteStatusError => 'Fehler';
+  @override
+  String wordCount(int count) => count == 1 ? '1 Wort' : '$count Wörter';
+  @override
   String get outlineTooltip => 'Übersicht';
   @override
   String get outlineNoHeadings => 'Keine Überschriften';

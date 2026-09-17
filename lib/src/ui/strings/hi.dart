@@ -346,6 +346,18 @@ final class HindiStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'लोड हो रहा है…';
+  @override
+  String get noteStatusSaving => 'सहेजा जा रहा है…';
+  @override
+  String get noteStatusUnsaved => 'सहेजा नहीं गया';
+  @override
+  String get noteStatusSaved => 'सहेजा गया';
+  @override
+  String get noteStatusError => 'त्रुटि';
+  @override
+  String wordCount(int count) => '$count शब्द';
+  @override
   String get outlineTooltip => 'आउटलाइन';
   @override
   String get outlineNoHeadings => 'कोई हेडिंग नहीं';

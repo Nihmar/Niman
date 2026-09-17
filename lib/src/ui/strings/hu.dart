@@ -356,6 +356,18 @@ final class HungarianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Betöltés…';
+  @override
+  String get noteStatusSaving => 'Mentés…';
+  @override
+  String get noteStatusUnsaved => 'Nincs mentve';
+  @override
+  String get noteStatusSaved => 'Mentve';
+  @override
+  String get noteStatusError => 'Hiba';
+  @override
+  String wordCount(int count) => '$count szó';
+  @override
   String get outlineTooltip => 'Struktúra';
   @override
   String get outlineNoHeadings => 'Nincs címsor';

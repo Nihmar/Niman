@@ -359,6 +359,18 @@ final class EnglishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Loading…';
+  @override
+  String get noteStatusSaving => 'Saving…';
+  @override
+  String get noteStatusUnsaved => 'Unsaved';
+  @override
+  String get noteStatusSaved => 'Saved';
+  @override
+  String get noteStatusError => 'Error';
+  @override
+  String wordCount(int count) => count == 1 ? '1 word' : '$count words';
+  @override
   String get outlineTooltip => 'Outline';
   @override
   String get outlineNoHeadings => 'No headings';

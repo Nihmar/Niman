@@ -361,6 +361,18 @@ final class ItalianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Caricamento…';
+  @override
+  String get noteStatusSaving => 'Salvataggio…';
+  @override
+  String get noteStatusUnsaved => 'Non salvato';
+  @override
+  String get noteStatusSaved => 'Salvato';
+  @override
+  String get noteStatusError => 'Errore';
+  @override
+  String wordCount(int count) => count == 1 ? '1 parola' : '$count parole';
+  @override
   String get outlineTooltip => 'Struttura';
   @override
   String get outlineNoHeadings => 'Nessun titolo';

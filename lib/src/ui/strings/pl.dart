@@ -360,6 +360,24 @@ final class PolishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Wczytywanie…';
+  @override
+  String get noteStatusSaving => 'Zapisywanie…';
+  @override
+  String get noteStatusUnsaved => 'Niezapisane';
+  @override
+  String get noteStatusSaved => 'Zapisano';
+  @override
+  String get noteStatusError => 'Błąd';
+  @override
+  String wordCount(int count) => count == 1
+      ? '1 słowo'
+      : count % 10 >= 2 &&
+            count % 10 <= 4 &&
+            !(count % 100 >= 12 && count % 100 <= 14)
+      ? '$count słowa'
+      : '$count słów';
+  @override
   String get outlineTooltip => 'Struktura';
   @override
   String get outlineNoHeadings => 'Brak nagłówków';

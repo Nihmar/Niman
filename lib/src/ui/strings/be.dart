@@ -356,6 +356,23 @@ final class BelarusianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Загрузка…';
+  @override
+  String get noteStatusSaving => 'Захаванне…';
+  @override
+  String get noteStatusUnsaved => 'Не захавана';
+  @override
+  String get noteStatusSaved => 'Захавана';
+  @override
+  String get noteStatusError => 'Памылка';
+  @override
+  String wordCount(int count) =>
+      switch (count % 100 >= 11 && count % 100 <= 14 ? 0 : count % 10) {
+        1 => '$count слова',
+        >= 2 && <= 4 => '$count словы',
+        _ => '$count слоў',
+      };
+  @override
   String get outlineTooltip => 'Структура';
   @override
   String get outlineNoHeadings => 'Загаловакаў няма';

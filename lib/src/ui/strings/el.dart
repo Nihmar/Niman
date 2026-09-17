@@ -365,6 +365,18 @@ final class GreekStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Φόρτωση…';
+  @override
+  String get noteStatusSaving => 'Αποθήκευση…';
+  @override
+  String get noteStatusUnsaved => 'Μη αποθηκευμένο';
+  @override
+  String get noteStatusSaved => 'Αποθηκεύτηκε';
+  @override
+  String get noteStatusError => 'Σφάλμα';
+  @override
+  String wordCount(int count) => count == 1 ? '1 λέξη' : '$count λέξεις';
+  @override
   String get outlineTooltip => 'Περιεχόμενο';
   @override
   String get outlineNoHeadings => 'Δεν υπάρχουν τίτλοι';

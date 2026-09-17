@@ -354,6 +354,18 @@ final class EstonianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Laadimine…';
+  @override
+  String get noteStatusSaving => 'Salvestamine…';
+  @override
+  String get noteStatusUnsaved => 'Salvestamata';
+  @override
+  String get noteStatusSaved => 'Salvestatud';
+  @override
+  String get noteStatusError => 'Viga';
+  @override
+  String wordCount(int count) => '$count sõna';
+  @override
   String get outlineTooltip => 'Struktuur';
   @override
   String get outlineNoHeadings => 'Pealkirju pole';

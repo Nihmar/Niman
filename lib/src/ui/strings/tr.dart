@@ -352,6 +352,18 @@ final class TurkishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Yükleniyor…';
+  @override
+  String get noteStatusSaving => 'Kaydediliyor…';
+  @override
+  String get noteStatusUnsaved => 'Kaydedilmedi';
+  @override
+  String get noteStatusSaved => 'Kaydedildi';
+  @override
+  String get noteStatusError => 'Hata';
+  @override
+  String wordCount(int count) => '$count kelime';
+  @override
   String get outlineTooltip => 'İçerik';
   @override
   String get outlineNoHeadings => 'Başlık yok';

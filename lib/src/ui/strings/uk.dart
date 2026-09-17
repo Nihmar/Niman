@@ -358,6 +358,23 @@ final class UkrainianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Завантаження…';
+  @override
+  String get noteStatusSaving => 'Збереження…';
+  @override
+  String get noteStatusUnsaved => 'Не збережено';
+  @override
+  String get noteStatusSaved => 'Збережено';
+  @override
+  String get noteStatusError => 'Помилка';
+  @override
+  String wordCount(int count) =>
+      switch (count % 100 >= 11 && count % 100 <= 14 ? 0 : count % 10) {
+        1 => '$count слово',
+        >= 2 && <= 4 => '$count слова',
+        _ => '$count слів',
+      };
+  @override
   String get outlineTooltip => 'Структура';
   @override
   String get outlineNoHeadings => 'Заголовків немає';

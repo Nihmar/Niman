@@ -360,6 +360,18 @@ final class BulgarianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Зареждане…';
+  @override
+  String get noteStatusSaving => 'Запазване…';
+  @override
+  String get noteStatusUnsaved => 'Незапазено';
+  @override
+  String get noteStatusSaved => 'Запазено';
+  @override
+  String get noteStatusError => 'Грешка';
+  @override
+  String wordCount(int count) => count == 1 ? '1 дума' : '$count думи';
+  @override
   String get outlineTooltip => 'Структура';
   @override
   String get outlineNoHeadings => 'Няма заглавия';

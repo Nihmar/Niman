@@ -359,6 +359,18 @@ final class DanishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Indlæser…';
+  @override
+  String get noteStatusSaving => 'Gemmer…';
+  @override
+  String get noteStatusUnsaved => 'Ikke gemt';
+  @override
+  String get noteStatusSaved => 'Gemt';
+  @override
+  String get noteStatusError => 'Fejl';
+  @override
+  String wordCount(int count) => '$count ord';
+  @override
   String get outlineTooltip => 'Oversigt';
   @override
   String get outlineNoHeadings => 'Ingen overskrifter';

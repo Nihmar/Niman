@@ -362,6 +362,18 @@ final class SwedishStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Läser in…';
+  @override
+  String get noteStatusSaving => 'Sparar…';
+  @override
+  String get noteStatusUnsaved => 'Osparat';
+  @override
+  String get noteStatusSaved => 'Sparat';
+  @override
+  String get noteStatusError => 'Fel';
+  @override
+  String wordCount(int count) => '$count ord';
+  @override
   String get outlineTooltip => 'Struktur';
   @override
   String get outlineNoHeadings => 'Inga rubriker';

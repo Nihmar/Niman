@@ -359,6 +359,19 @@ final class BosnianStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Učitavanje…';
+  @override
+  String get noteStatusSaving => 'Spremanje…';
+  @override
+  String get noteStatusUnsaved => 'Nespremljeno';
+  @override
+  String get noteStatusSaved => 'Spremljeno';
+  @override
+  String get noteStatusError => 'Greška';
+  @override
+  String wordCount(int count) =>
+      count % 10 == 1 && count % 100 != 11 ? '$count riječ' : '$count riječi';
+  @override
   String get outlineTooltip => 'Sadržaj';
   @override
   String get outlineNoHeadings => 'Nema naslova';

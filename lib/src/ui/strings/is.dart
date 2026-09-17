@@ -355,6 +355,18 @@ final class IcelandicStrings extends Strings {
 
   // Editor status bar.
   @override
+  String get noteStatusLoading => 'Hleð…';
+  @override
+  String get noteStatusSaving => 'Vista…';
+  @override
+  String get noteStatusUnsaved => 'Óvistað';
+  @override
+  String get noteStatusSaved => 'Vistað';
+  @override
+  String get noteStatusError => 'Villa';
+  @override
+  String wordCount(int count) => '$count orð';
+  @override
   String get outlineTooltip => 'Efni';
   @override
   String get outlineNoHeadings => 'Engar titlar';
