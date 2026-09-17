@@ -907,6 +907,17 @@ final class SerbianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Заменска места шаблона';
   @override
+  String get templateHelpSubtitle =>
+      'Датум, наслов и остале вредности за попуну';
+  @override
+  String get quickNoteSubtitle => 'Белешка коју отвара картица брзе белешке';
+  @override
+  String get listFolderSubtitle => 'Нове листе задатака';
+  @override
+  String get templateFolderSubtitle => 'Извор за „Ново из шаблона“';
+  @override
+  String get attachmentsFolderSubtitle => 'Слике и звук уметнути у белешку';
+  @override
   String get templateHelpIntro =>
       'Шаблон је обична белешка са рупама. Креирање белешке из њега '
       'копира њен текст и испуњује рупе.';

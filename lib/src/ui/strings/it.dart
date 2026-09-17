@@ -906,6 +906,18 @@ final class ItalianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Segnaposto dei modelli';
   @override
+  String get templateHelpSubtitle =>
+      'Data, titolo e gli altri valori da sostituire';
+  @override
+  String get quickNoteSubtitle => 'La nota che apre la scheda Nota rapida';
+  @override
+  String get listFolderSubtitle => 'Le nuove liste di cose da fare';
+  @override
+  String get templateFolderSubtitle => 'Da cui pesca «Nuova da modello»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Immagini e audio inseriti in una nota';
+  @override
   String get templateHelpIntro =>
       'Un modello è una nota come le altre, con dei buchi dentro. Creare '
       'una nota da un modello ne copia il testo e riempie i buchi.';

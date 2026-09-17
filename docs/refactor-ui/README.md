@@ -31,7 +31,7 @@ Two rules came out of it and are written down in
 
 ## 1. Settings: a home, sub-screens and a search field
 
-Issue #104. Landed, except the last dot.
+Issue #104. Landed.
 
 ![Settings home](04-settings-home.png)
 ![Searching the settings](05-settings-search.png)
@@ -57,8 +57,8 @@ scrolling.
 - Switch subtitles are uneven — *Preview* and *Line numbers* carry one,
   *Markdown source* and *WYSIWYG* do not, and those two are precisely the
   pair whose combination is not obvious.
-- Still open: the folder rows' description lines (*Le nuove liste…*),
-  and the installed version riding on the *Updates* row.
+- The folder rows explain themselves, and the installed version rides
+  on the *Updates* row.
 
 ## 2. The trash rejoins the family
 

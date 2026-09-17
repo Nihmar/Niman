@@ -183,6 +183,7 @@ final class _SettingsFoldersPathsScreenState
             key: const Key('list-folder-setting'),
             child: SettingsValueRow(
               title: AppStrings.listFolderTitle,
+              subtitle: AppStrings.listFolderSubtitle,
               value: listFolder,
               badge: _exists(listFolder)
                   ? null
@@ -194,6 +195,7 @@ final class _SettingsFoldersPathsScreenState
             key: const Key('template-folder-setting'),
             child: SettingsValueRow(
               title: AppStrings.templateFolderTitle,
+              subtitle: AppStrings.templateFolderSubtitle,
               value: templateFolder,
               badge: _exists(templateFolder)
                   ? null
@@ -207,6 +209,7 @@ final class _SettingsFoldersPathsScreenState
             key: const Key('template-help-setting'),
             child: SettingsValueRow(
               title: AppStrings.templateHelpTitle,
+              subtitle: AppStrings.templateHelpSubtitle,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute<void>(
@@ -219,6 +222,7 @@ final class _SettingsFoldersPathsScreenState
             key: const Key('attachments-folder-setting'),
             child: SettingsValueRow(
               title: AppStrings.attachmentsFolderTitle,
+              subtitle: AppStrings.attachmentsFolderSubtitle,
               value: attachmentsFolder,
               badge: _exists(attachmentsFolder)
                   ? null
@@ -230,6 +234,7 @@ final class _SettingsFoldersPathsScreenState
             key: const Key('quick-note-setting'),
             child: SettingsValueRow(
               title: AppStrings.quickNoteTitle,
+              subtitle: AppStrings.quickNoteSubtitle,
               value: _quickNotePath ?? AppStrings.quickNoteUnset,
               onTap: _pickQuickNote,
             ),

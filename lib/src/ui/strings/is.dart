@@ -901,6 +901,18 @@ final class IcelandicStrings extends Strings {
   @override
   String get templateHelpTitle => 'Stafsetningar staðir í smíð';
   @override
+  String get templateHelpSubtitle =>
+      'Dagsetning, titill og önnur gildi til að fylla út';
+  @override
+  String get quickNoteSubtitle => 'Minnisblaðið sem flipinn Flýtiglós opnar';
+  @override
+  String get listFolderSubtitle => 'Nýju verkefnalistarnir';
+  @override
+  String get templateFolderSubtitle => 'Uppspretta „Nýtt úr sniðmáti“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Myndir og hljóð sett inn í minnisblað';
+  @override
   String get templateHelpIntro =>
       'Smíð er venjulegt minnisblað með holum. Nýtt minnisblað úr '
       'henni fær textann og holurnar eru fylltar.';

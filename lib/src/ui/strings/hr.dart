@@ -899,6 +899,17 @@ final class CroatianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Zamjenski znaci predloška';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov i ostale vrijednosti za popuniti';
+  @override
+  String get quickNoteSubtitle => 'Bilješka koju otvara kartica brze bilješke';
+  @override
+  String get listFolderSubtitle => 'Novi popisi zadataka';
+  @override
+  String get templateFolderSubtitle => 'Izvor za „Novo iz predloška“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike i zvuk umetnuti u bilješku';
+  @override
   String get templateHelpIntro =>
       'Predložak je obična napomena s rupama. Kreiranjem napomene iz njega '
       'kopira se tekst i popunjavaju rupe.';

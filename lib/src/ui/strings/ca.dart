@@ -922,6 +922,18 @@ final class CatalanStrings extends Strings {
   @override
   String get templateHelpTitle => 'Espais reservats de la plantilla';
   @override
+  String get templateHelpSubtitle =>
+      'Data, títol i els altres valors per omplir';
+  @override
+  String get quickNoteSubtitle => 'La nota que obre la pestanya de nota ràpida';
+  @override
+  String get listFolderSubtitle => 'Les llistes noves de tasques';
+  @override
+  String get templateFolderSubtitle => 'L’origen de «Nova des de plantilla»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imatges i àudio inserits en una nota';
+  @override
   String get templateHelpIntro =>
       'Una plantilla és una nota normal amb forats. Crear una nota '
       'des d’ella copia el text i omple els forats.';

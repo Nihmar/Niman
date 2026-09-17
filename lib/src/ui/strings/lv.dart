@@ -902,6 +902,17 @@ final class LatvianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Šablona aizstājējzīmes';
   @override
+  String get templateHelpSubtitle =>
+      'Datums, nosaukums un pārējās aizpildāmās vērtības';
+  @override
+  String get quickNoteSubtitle => 'Piezīme, ko atver ātrās piezīmes cilne';
+  @override
+  String get listFolderSubtitle => 'Jaunie uzdevumu saraksti';
+  @override
+  String get templateFolderSubtitle => 'Avots „Jauns no veidnes“';
+  @override
+  String get attachmentsFolderSubtitle => 'Piezīmē ievietoti attēli un audio';
+  @override
   String get templateHelpIntro =>
       'Šablons ir parasta piezīme ar atverēm. Izveidojot piezīmi no tā, '
       'teksts tiek kopēts un atveres tiek aizpildītas.';

@@ -897,6 +897,17 @@ final class EnglishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Template placeholders';
   @override
+  String get templateHelpSubtitle =>
+      'Date, title and the other values to fill in';
+  @override
+  String get quickNoteSubtitle => 'The note the Quick note tab opens';
+  @override
+  String get listFolderSubtitle => 'The new task lists';
+  @override
+  String get templateFolderSubtitle => 'The source of New from template';
+  @override
+  String get attachmentsFolderSubtitle => 'Images and audio placed in a note';
+  @override
   String get templateHelpIntro =>
       'A template is an ordinary note with holes in it. Creating a note '
       'from one copies its text and fills the holes in.';

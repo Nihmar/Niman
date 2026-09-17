@@ -883,6 +883,16 @@ final class HindiStrings extends Strings {
   @override
   String get templateHelpTitle => 'टेम्पलेट प्लेसहोल्डर';
   @override
+  String get templateHelpSubtitle => 'दिनांक, शीर्षक और भरने वाले अन्य मान';
+  @override
+  String get quickNoteSubtitle => 'वह नोट जिसे त्वरित नोट टैब खोलता है';
+  @override
+  String get listFolderSubtitle => 'नई कार्य सूचियाँ';
+  @override
+  String get templateFolderSubtitle => 'टेम्पलेट से नया का स्रोत';
+  @override
+  String get attachmentsFolderSubtitle => 'नोट में डाली गई छवियाँ और ऑडियो';
+  @override
   String get templateHelpIntro =>
       'टेम्पलेट एक सादा नोट है जिसमें छेद हैं। टेम्पलेट से नोट बनाना '
       'उसका टेक्स्ट कॉपी करता है और छेद भर देता है।';

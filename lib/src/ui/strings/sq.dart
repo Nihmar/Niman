@@ -908,6 +908,18 @@ final class AlbanianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Vendëzëvendësuesit në shabllon';
   @override
+  String get templateHelpSubtitle =>
+      'Data, titulli dhe vlerat e tjera për të plotësuar';
+  @override
+  String get quickNoteSubtitle => 'Shënimi që hap skeda Shënim i shpejtë';
+  @override
+  String get listFolderSubtitle => 'Listat e reja të detyrave';
+  @override
+  String get templateFolderSubtitle => 'Burimi i „E re nga shablloni“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imazhe dhe audio të futura në një shënim';
+  @override
   String get templateHelpIntro =>
       'Një shabllon është një shënim i thjeshtë me boshnira. Krijimi i '
       'një shënimi nga ai kopjon tekstin e tij dhe i plotëson '

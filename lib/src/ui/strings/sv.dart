@@ -903,6 +903,19 @@ final class SwedishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Mallplatshållare';
   @override
+  String get templateHelpSubtitle =>
+      'Datum, titel och övriga värden att fylla i';
+  @override
+  String get quickNoteSubtitle =>
+      'Anteckningen som fliken Snabbanteckning öppnar';
+  @override
+  String get listFolderSubtitle => 'De nya uppgiftslistorna';
+  @override
+  String get templateFolderSubtitle => 'Källan till „Ny från mall“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Bilder och ljud infogade i en anteckning';
+  @override
   String get templateHelpIntro =>
       'En mall är en vanlig anteckning med hål i. Att skapa en anteckning '
       'ur en kopierar texten och fyller hålen.';

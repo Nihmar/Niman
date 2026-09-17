@@ -918,6 +918,18 @@ final class SpanishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Marcadores de posición de las plantillas';
   @override
+  String get templateHelpSubtitle =>
+      'Fecha, título y los demás valores por rellenar';
+  @override
+  String get quickNoteSubtitle => 'La nota que abre la pestaña Nota rápida';
+  @override
+  String get listFolderSubtitle => 'Las listas nuevas de tareas';
+  @override
+  String get templateFolderSubtitle => 'El origen de «Nueva desde plantilla»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imágenes y audio insertados en una nota';
+  @override
   String get templateHelpIntro =>
       'Una plantilla es una nota ordinaria con huecos. Crear una nota '
       'desde una copia su texto y rellena los huecos.';

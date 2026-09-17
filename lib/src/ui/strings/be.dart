@@ -905,6 +905,19 @@ final class BelarusianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Плейсхолдеры шаблона';
   @override
+  String get templateHelpSubtitle =>
+      'Дата, назва і іншыя значэнні для запаўнення';
+  @override
+  String get quickNoteSubtitle =>
+      'Нататка, якую адкрывае ўкладка хуткай нататкі';
+  @override
+  String get listFolderSubtitle => 'Новыя спісы спраў';
+  @override
+  String get templateFolderSubtitle => 'Крыніца для «Новай з шаблону»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Малюнкі і аўдыё, устаўленыя ў нататку';
+  @override
   String get templateHelpIntro =>
       'Шаблон — звычайная заўвага з адтулінамі. Пры стварэнні заўвагі з '
       'яго тэкст капіюецца, а адтуліны запаўняюцца.';

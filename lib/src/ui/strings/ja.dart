@@ -845,6 +845,16 @@ final class JapaneseStrings extends Strings {
   String get templateFormPickNote => 'ノートを選ぶ';
   @override
   String get templateHelpTitle => 'テンプレートのプレースホルダー';
+  @override
+  String get templateHelpSubtitle => '日付、タイトル、その他の入力値';
+  @override
+  String get quickNoteSubtitle => 'クイックノートタブが開くノート';
+  @override
+  String get listFolderSubtitle => '新しいタスクリスト';
+  @override
+  String get templateFolderSubtitle => 'テンプレートから新規の供給元';
+  @override
+  String get attachmentsFolderSubtitle => 'ノートに挿入された画像と音声';
 
   // The template placeholder reference (T-TPL-08).
   @override

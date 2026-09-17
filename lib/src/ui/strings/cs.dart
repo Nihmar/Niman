@@ -903,6 +903,17 @@ final class CzechStrings extends Strings {
   @override
   String get templateHelpTitle => 'Placeholderové značky šablony';
   @override
+  String get templateHelpSubtitle => 'Datum, název a další hodnoty k vyplnění';
+  @override
+  String get quickNoteSubtitle =>
+      'Poznámka, kterou otevírá karta Rychlá poznámka';
+  @override
+  String get listFolderSubtitle => 'Nové seznamy úkolů';
+  @override
+  String get templateFolderSubtitle => 'Zdroj pro „Nový ze šablony“';
+  @override
+  String get attachmentsFolderSubtitle => 'Obrázky a zvuk vložené do poznámky';
+  @override
   String get templateHelpIntro =>
       'Šablona je obyčejná poznámka se dírami. Vytvoření poznámky z ní '
       'kopíruje text a vyplní díry.';

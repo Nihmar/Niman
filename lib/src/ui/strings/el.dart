@@ -927,6 +927,18 @@ final class GreekStrings extends Strings {
   @override
   String get templateHelpTitle => 'Στοιχεία αντικατάστασης στο πρότυπο';
   @override
+  String get templateHelpSubtitle =>
+      'Ημερομηνία, τίτλος και οι υπόλοιπες τιμές προς συμπλήρωση';
+  @override
+  String get quickNoteSubtitle =>
+      'Η σημείωση που ανοίγει η καρτέλα Γρήγορη σημείωση';
+  @override
+  String get listFolderSubtitle => 'Οι νέες λίστες εργασιών';
+  @override
+  String get templateFolderSubtitle => 'Η πηγή του „Νέο από πρότυπο“';
+  @override
+  String get attachmentsFolderSubtitle => 'Εικόνες και ήχος σε μια σημείωση';
+  @override
   String get templateHelpIntro =>
       'Μια πρότυπο είναι μια απλή σημείωση με κενά. Η δημιουργία '
       'σημείωσης από αυτήν αντιγράφει το κείμενο της και γεμίζει τα '

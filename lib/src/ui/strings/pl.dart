@@ -916,6 +916,18 @@ final class PolishStrings extends Strings {
   @override
   String get templateHelpTitle => 'Placeholdery szablonu';
   @override
+  String get templateHelpSubtitle =>
+      'Data, tytuł i pozostałe wartości do wypełnienia';
+  @override
+  String get quickNoteSubtitle => 'Notatka, którą otwiera karta Szybka notatka';
+  @override
+  String get listFolderSubtitle => 'Nowe listy zadań';
+  @override
+  String get templateFolderSubtitle => 'Źródło „Nowa z szablonu“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Obrazy i dźwięk wstawione do notatki';
+  @override
   String get templateHelpIntro =>
       'Szablon to zwykła notatka z dziurami. Utworzenie notatki z niego '
       'kopiuje tekst i wypełnia dziury.';

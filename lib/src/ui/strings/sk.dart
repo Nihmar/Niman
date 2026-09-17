@@ -905,6 +905,18 @@ final class SlovakStrings extends Strings {
   @override
   String get templateHelpTitle => 'Zástupné znaky šablóny';
   @override
+  String get templateHelpSubtitle =>
+      'Dátum, názov a ďalšie hodnoty na vyplnenie';
+  @override
+  String get quickNoteSubtitle =>
+      'Poznámka, ktorú otvára karta Rýchla poznámka';
+  @override
+  String get listFolderSubtitle => 'Nové zoznamy úloh';
+  @override
+  String get templateFolderSubtitle => 'Zdroj pre „Nový zo šablóny“';
+  @override
+  String get attachmentsFolderSubtitle => 'Obrázky a zvuk vložené do poznámky';
+  @override
   String get templateHelpIntro =>
       'Šablóna je obyčajná poznámka s dierami. Vytvorením poznámky z nej sa '
       'skopíruje text a vyplnia sa diery.';

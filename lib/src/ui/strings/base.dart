@@ -452,6 +452,11 @@ abstract base class Strings {
 
   // The template placeholder reference (T-TPL-08).
   String get templateHelpTitle;
+  String get templateHelpSubtitle;
+  String get quickNoteSubtitle;
+  String get listFolderSubtitle;
+  String get templateFolderSubtitle;
+  String get attachmentsFolderSubtitle;
   String get templateHelpIntro;
   String get templateHelpUnknown;
   String get templateHelpValuesTitle;

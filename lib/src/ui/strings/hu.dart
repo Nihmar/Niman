@@ -904,6 +904,17 @@ final class HungarianStrings extends Strings {
   @override
   String get templateHelpTitle => 'Sablon helyőrzők';
   @override
+  String get templateHelpSubtitle => 'Dátum, cím és a többi kitöltendő érték';
+  @override
+  String get quickNoteSubtitle =>
+      'A jegyzet, amelyet a Gyorsjegyzet lap megnyit';
+  @override
+  String get listFolderSubtitle => 'Az új feladatlisták';
+  @override
+  String get templateFolderSubtitle => 'A „Új sablonból” forrása';
+  @override
+  String get attachmentsFolderSubtitle => 'Jegyzetbe illesztett képek és hang';
+  @override
   String get templateHelpIntro =>
       'A sablon egy sima jegyzet lyukakkal. A jegyzet onnan való létrehozása '
       'a szöveget másolja, és kitölti a lyukakat.';
