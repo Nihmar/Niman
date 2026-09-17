@@ -14,9 +14,9 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/file_tree_context.dart';
+import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/name_dialog.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
-import 'package:niman/src/ui/shell_move_dialog.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/widget/widget_pin.dart';
@@ -147,10 +147,14 @@ final class ShellRowActions {
       for (final folder in folders)
         if (folder.path != sel && !isUnder(sel, folder.path)) folder,
     ];
-    final target = await showMoveDialog(
+    final target = await showFolderPicker(
       context,
-      name: p.basename(sel),
+      title: AppStrings.moveTitle(p.basename(sel)),
+      subtitle: AppStrings.chooseDestination,
+      confirmLabel: AppStrings.actionMove,
+      allowRoot: true,
       folders: candidates,
+      ops: controller.ops!,
     );
     if (target == null) return;
     await guard(() async {
