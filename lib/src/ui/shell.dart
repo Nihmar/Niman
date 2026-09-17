@@ -727,7 +727,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Guards the pending hide against a rapid close/reopen.
   int _noteHideRevision = 0;
 
-  /// The app-bar fullscreen action, next to the editor/preview eye.
+  /// The app-bar fullscreen action, left of the editor/preview eye —
+  /// which stays where it is (see [_noteBarActions]).
   Widget _previewFullScreenAction() {
     return IconButton(
       key: const Key('preview-fullscreen'),
@@ -1434,8 +1435,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     return [
       ..._kindActions,
       if (!splitsPreview && _previewToggleVisible) ...[
-        _previewToggleAction(),
+        // Fullscreen goes before the toggle, not after it (user,
+        // 2026-09-17). App-bar actions are laid out from the right, so an
+        // action that only appears in one state has to be inserted on the
+        // left: added after, the fullscreen button took the eye's place
+        // and pushed the toggle along, moving the one button the user
+        // alternates on out from under the thumb that was already there.
         if (_previewVisible) _previewFullScreenAction(),
+        _previewToggleAction(),
       ],
       _noteMenu(),
     ];
