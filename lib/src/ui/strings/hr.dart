@@ -1483,6 +1483,8 @@ final class CroatianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa direktorija';
   @override
+  String get syncUrlRequired => 'Unesite adresu poslužitelja';
+  @override
   String get syncUrlHint =>
       'Direktorij mora postojati. Kopiraj adresu kako je '
       'prikazuje poslužitelj.';

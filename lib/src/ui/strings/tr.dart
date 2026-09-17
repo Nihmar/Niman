@@ -1467,6 +1467,8 @@ final class TurkishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Klasör adresi';
   @override
+  String get syncUrlRequired => 'Sunucu adresini girin';
+  @override
   String get syncUrlHint =>
       'Klasör mevcut olmalı. Adresi sunucunun gösterdiği gibi '
       'kopyalayın.';

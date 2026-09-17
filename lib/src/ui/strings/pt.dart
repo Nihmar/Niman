@@ -1495,6 +1495,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get syncUrlLabel => 'Endereço da pasta';
   @override
+  String get syncUrlRequired => 'Introduza o endereço do servidor';
+  @override
   String get syncUrlHint =>
       'A pasta precisa existir. Copie o endereço como o servidor '
       'o mostra.';

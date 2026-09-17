@@ -1496,6 +1496,8 @@ final class ItalianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Indirizzo della cartella';
   @override
+  String get syncUrlRequired => 'Inserisci l’indirizzo del server';
+  @override
   String get syncUrlHint =>
       "La cartella deve esistere. Copia l'indirizzo come lo "
       'mostra il server.';

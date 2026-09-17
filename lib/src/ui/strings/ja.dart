@@ -1377,6 +1377,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get syncUrlLabel => 'フォルダのアドレス';
   @override
+  String get syncUrlRequired => 'サーバーのアドレスを入力';
+  @override
   String get syncUrlHint => 'フォルダは作成済みである必要があります。サーバーに表示されるとおりにアドレスをコピーしてください。';
   @override
   String get syncHttpWarning => '暗号化されていない接続です。VPN 経由またはローカルネットワーク内なら問題ありません。';

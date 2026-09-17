@@ -1482,6 +1482,8 @@ final class CzechStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa složky';
   @override
+  String get syncUrlRequired => 'Zadejte adresu serveru';
+  @override
   String get syncUrlHint =>
       'Složka musí existovat. Zkopírujte adresu tak, jak ji '
       'zobrazuje server.';

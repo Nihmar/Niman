@@ -703,6 +703,7 @@ abstract base class Strings {
   String get syncRunning;
   String syncScreenSubtitle(String library);
   String get syncUrlLabel;
+  String get syncUrlRequired;
   String get syncUrlHint;
   String get syncHttpWarning;
   String get syncUserLabel;

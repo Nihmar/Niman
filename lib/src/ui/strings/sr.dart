@@ -1492,6 +1492,8 @@ final class SerbianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Адреса фасцикле';
   @override
+  String get syncUrlRequired => 'Унесите адресу сервера';
+  @override
   String get syncUrlHint =>
       'Фасцикла мора да постоји. Копирајте адресу онако како је '
       'приказује сервер.';

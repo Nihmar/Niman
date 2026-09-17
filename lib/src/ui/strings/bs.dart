@@ -1489,6 +1489,8 @@ final class BosnianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa mape';
   @override
+  String get syncUrlRequired => 'Unesite adresu servera';
+  @override
   String get syncUrlHint =>
       'Mapa mora postojati. Kopiraj adresu onako kako je server '
       'prikazuje.';

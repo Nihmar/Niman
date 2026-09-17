@@ -204,10 +204,39 @@ final class ShellRowActions {
             content: Text(
               trash ? AppStrings.movedToTrash : AppStrings.deletedMessage,
             ),
+            // The file sits in the trash: the notice offers the way
+            // back (issue #131). A hard delete has nothing to restore.
+            action: trash
+                ? SnackBarAction(
+                    label: AppStrings.actionUndo,
+                    onPressed: () async {
+                      await guard(() async {
+                        final name = await _justDeleted(ops, sel);
+                        if (name == null) return;
+                        await ops.restoreTrash(name);
+                        onDeleted();
+                      });
+                    },
+                  )
+                : null,
           ),
         );
       }
     });
+  }
+
+  /// The trash name of [sel]'s freshest deletion: what Undo restores.
+  ///
+  /// Deleting twice in a row stacks two entries for the same original
+  /// path, so the newest deletion wins.
+  Future<String?> _justDeleted(NoteOperations ops, String sel) async {
+    final matches = [
+      for (final item in await ops.trashItems())
+        if (item.originalPath == sel) item,
+    ];
+    if (matches.isEmpty) return null;
+    matches.sort((a, b) => b.deletedAt.compareTo(a.deletedAt));
+    return matches.first.name;
   }
 
   /// Shows the note in the file manager, or opens it in its default app

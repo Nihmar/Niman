@@ -1475,6 +1475,8 @@ final class EnglishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Folder address';
   @override
+  String get syncUrlRequired => 'Enter the server address';
+  @override
   String get syncUrlHint =>
       'The folder must exist. Copy the address as the server '
       'shows it.';

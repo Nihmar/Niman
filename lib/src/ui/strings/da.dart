@@ -1483,6 +1483,8 @@ final class DanishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Mappens adresse';
   @override
+  String get syncUrlRequired => 'Indtast serverens adresse';
+  @override
   String get syncUrlHint =>
       'Mappen skal findes. Kopiér adressen, som serveren viser '
       'den.';

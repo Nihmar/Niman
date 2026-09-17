@@ -1511,6 +1511,8 @@ final class PolishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adres katalogu';
   @override
+  String get syncUrlRequired => 'Wpisz adres serwera';
+  @override
   String get syncUrlHint =>
       'Katalog musi istnieć. Skopiuj adres tak, jak pokazuje go '
       'serwer.';

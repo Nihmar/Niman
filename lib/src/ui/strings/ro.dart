@@ -1507,6 +1507,8 @@ final class RomanianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa dosarului';
   @override
+  String get syncUrlRequired => 'Introduceți adresa serverului';
+  @override
   String get syncUrlHint =>
       'Dosarul trebuie să existe. Copiază adresa așa cum o arată '
       'serverul.';

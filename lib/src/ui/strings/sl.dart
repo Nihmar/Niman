@@ -1484,6 +1484,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Naslov mape';
   @override
+  String get syncUrlRequired => 'Vnesite naslov strežnika';
+  @override
   String get syncUrlHint =>
       'Mapa mora obstajati. Naslov kopirajte tako, kot ga '
       'prikazuje strežnik.';

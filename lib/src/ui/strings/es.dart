@@ -1513,6 +1513,8 @@ final class SpanishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Dirección de la carpeta';
   @override
+  String get syncUrlRequired => 'Introduce la dirección del servidor';
+  @override
   String get syncUrlHint =>
       'La carpeta debe existir. Copia la dirección tal como la '
       'muestra el servidor.';

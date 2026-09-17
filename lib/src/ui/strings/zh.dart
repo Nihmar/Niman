@@ -1340,6 +1340,8 @@ final class ChineseStrings extends Strings {
   @override
   String get syncUrlLabel => '文件夹地址';
   @override
+  String get syncUrlRequired => '输入服务器地址';
+  @override
   String get syncUrlHint => '文件夹必须已存在。请按服务器显示的样子复制地址。';
   @override
   String get syncHttpWarning => '未加密的连接：在 VPN 或本地网络中使用没有问题。';

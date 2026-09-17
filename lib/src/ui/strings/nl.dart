@@ -1503,6 +1503,8 @@ final class DutchStrings extends Strings {
   @override
   String get syncUrlLabel => 'Mapadres';
   @override
+  String get syncUrlRequired => 'Voer het serveradres in';
+  @override
   String get syncUrlHint =>
       'De map moet al bestaan. Kopieer het adres zoals de server '
       'het toont.';

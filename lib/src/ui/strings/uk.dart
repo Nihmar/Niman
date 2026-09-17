@@ -1494,6 +1494,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Адреса папки';
   @override
+  String get syncUrlRequired => 'Введіть адресу сервера';
+  @override
   String get syncUrlHint =>
       'Папка має існувати. Скопіюйте адресу так, як її показує '
       'сервер.';

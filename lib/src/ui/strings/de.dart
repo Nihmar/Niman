@@ -1521,6 +1521,8 @@ final class GermanStrings extends Strings {
   @override
   String get syncUrlLabel => 'Ordneradresse';
   @override
+  String get syncUrlRequired => 'Serveradresse eingeben';
+  @override
   String get syncUrlHint =>
       'Der Ordner muss existieren. Kopiere die Adresse so, wie '
       'der Server sie anzeigt.';

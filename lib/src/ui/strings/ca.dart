@@ -1520,6 +1520,8 @@ final class CatalanStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adreça de la carpeta';
   @override
+  String get syncUrlRequired => 'Introduïu l’adreça del servidor';
+  @override
   String get syncUrlHint =>
       'La carpeta ha d’existir. Copia l’adreça tal com la mostra '
       'el servidor.';

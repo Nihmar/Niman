@@ -1492,6 +1492,8 @@ final class SwedishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Mappens adress';
   @override
+  String get syncUrlRequired => 'Ange serverns adress';
+  @override
   String get syncUrlHint =>
       'Mappen måste finnas. Kopiera adressen så som servern '
       'visar den.';
