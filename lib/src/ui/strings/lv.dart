@@ -1482,6 +1482,8 @@ final class LatvianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Kataloga adrese';
   @override
+  String get syncUrlRequired => 'Ievadiet servera adresi';
+  @override
   String get syncUrlHint =>
       'Katalogam jau jābūt izveidotam. Nokopējiet adresi tā, kā '
       'to rāda serveris.';

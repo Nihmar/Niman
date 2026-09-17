@@ -1485,6 +1485,8 @@ final class SlovakStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa priečinka';
   @override
+  String get syncUrlRequired => 'Zadajte adresu servera';
+  @override
   String get syncUrlHint =>
       'Priečinok musí existovať. Skopírujte adresu tak, ako ju '
       'zobrazuje server.';

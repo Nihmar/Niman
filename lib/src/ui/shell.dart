@@ -633,6 +633,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the shell owns it so the body can be scrimmed while it is open.
   bool _fabExpanded = false;
 
+  /// The configured list folder, naming where the FAB's *New list
+  /// note* lands (issue #131): loaded when the menu opens, so the
+  /// label is honest without a session read on every build.
+  String? _fabListFolder;
+
   /// Where the main FAB is, so [FabScrim]'s reveal circle is centered on
   /// its icon (the shell owns it: the FAB slot and the scrim are
   /// siblings). Written from the FAB's paint, read when the scrim builds.
@@ -1562,7 +1567,13 @@ final class _LibraryShellState extends State<_LibraryShell>
     return NewItemFab(
       onAnchor: (center) => _fabAnchor = center,
       expanded: _fabExpanded,
-      onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
+      listFolder: _fabListFolder,
+      onToggle: () {
+        // Opening the menu loads the list folder for the label; the
+        // setting is read once per opening, not once per build.
+        if (!_fabExpanded) unawaited(_loadFabListFolder());
+        setState(() => _fabExpanded = !_fabExpanded);
+      },
       onNewNote: () {
         _closeFab();
         unawaited(_createFlow.createNote(context));
@@ -1588,6 +1599,14 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Collapses the expanded FAB menu.
   void _closeFab() => setState(() => _fabExpanded = false);
+
+  /// Reads the configured list folder for the FAB's *New list note*
+  /// label (issue #131).
+  Future<void> _loadFabListFolder() async {
+    final folder =
+        await widget.controller.ops?.listNoteFolder ?? defaultListFolder;
+    if (mounted) setState(() => _fabListFolder = folder);
+  }
 
   /// Covers [child] with the FAB-menu scrim: a circle that grows out of
   /// the main FAB icon, dims the body, and closes the menu on any tap

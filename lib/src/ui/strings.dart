@@ -950,6 +950,7 @@ final class AppStrings {
   static String syncScreenSubtitle(String library) =>
       _s.syncScreenSubtitle(library);
   static String get syncUrlLabel => _s.syncUrlLabel;
+  static String get syncUrlRequired => _s.syncUrlRequired;
   static String get syncUrlHint => _s.syncUrlHint;
   static String get syncHttpWarning => _s.syncHttpWarning;
   static String get syncUserLabel => _s.syncUserLabel;

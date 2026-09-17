@@ -1492,6 +1492,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Адрас папкі';
   @override
+  String get syncUrlRequired => 'Увядзіце адрас сервера';
+  @override
   String get syncUrlHint =>
       'Папка павінна існаваць. Скапіруйце адрас так, як яго '
       'паказвае сервер.';

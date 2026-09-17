@@ -1536,6 +1536,8 @@ final class FrenchStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresse du dossier';
   @override
+  String get syncUrlRequired => 'Saisissez l’adresse du serveur';
+  @override
   String get syncUrlHint =>
       'Le dossier doit exister. Copiez l’adresse telle que le '
       'serveur l’affiche.';

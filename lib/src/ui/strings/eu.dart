@@ -1495,6 +1495,8 @@ final class BasqueStrings extends Strings {
   @override
   String get syncUrlLabel => 'Karpetaren helbidea';
   @override
+  String get syncUrlRequired => 'Sartu zerbitzariaren helbidea';
+  @override
   String get syncUrlHint =>
       'Karpetak existitu behar du. Kopiatu helbidea zerbitzariak '
       'erakusten duen bezala.';

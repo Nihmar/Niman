@@ -1506,6 +1506,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Adresa e tresës';
   @override
+  String get syncUrlRequired => 'Jep adresën e serverit';
+  @override
   String get syncUrlHint =>
       'Tresa duhet të ekzistojë. Kopjojeni adresën ashtu siç e '
       'shfaq serveri.';

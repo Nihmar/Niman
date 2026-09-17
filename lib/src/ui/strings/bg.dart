@@ -1495,6 +1495,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Адрес на папката';
   @override
+  String get syncUrlRequired => 'Въведете адреса на сървъра';
+  @override
   String get syncUrlHint =>
       'Папката трябва да съществува. Копирайте адреса така, '
       'както го показва сървърът.';

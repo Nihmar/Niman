@@ -1539,6 +1539,8 @@ final class GreekStrings extends Strings {
   @override
   String get syncUrlLabel => 'Διεύθυνση φακέλου';
   @override
+  String get syncUrlRequired => 'Εισαγάγετε τη διεύθυνση διακομιστή';
+  @override
   String get syncUrlHint =>
       'Ο φάκελος πρέπει να υπάρχει. Αντιγράψτε τη διεύθυνση όπως '
       'τη δείχνει ο διακομιστής.';

@@ -1478,6 +1478,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get syncUrlLabel => 'Slóð möppu';
   @override
+  String get syncUrlRequired => 'Sláðu inn vistfang þjónsins';
+  @override
   String get syncUrlHint =>
       'Mappan verður að vera til. Afritaðu slóðina eins og '
       'netþjónninn sýnir hana.';

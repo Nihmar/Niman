@@ -1501,6 +1501,8 @@ final class GalicianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Enderezo do cartafol';
   @override
+  String get syncUrlRequired => 'Introduza o enderezo do servidor';
+  @override
   String get syncUrlHint =>
       'O cartafol debe existir. Copia o enderezo tal como o '
       'mostra o servidor.';

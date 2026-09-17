@@ -1491,6 +1491,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Katalogo adresas';
   @override
+  String get syncUrlRequired => 'Įveskite serverio adresą';
+  @override
   String get syncUrlHint =>
       'Katalogas turi egzistuoti. Nukopijuokite adresą taip, '
       'kaip jį rodo serveris.';

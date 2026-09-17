@@ -1493,6 +1493,8 @@ final class HungarianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Mappa címe';
   @override
+  String get syncUrlRequired => 'Adja meg a kiszolgáló címét';
+  @override
   String get syncUrlHint =>
       'A mappának léteznie kell. Másold ki a címet úgy, ahogy a '
       'szerver mutatja.';

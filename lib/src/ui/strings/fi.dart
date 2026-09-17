@@ -1494,6 +1494,8 @@ final class FinnishStrings extends Strings {
   @override
   String get syncUrlLabel => 'Kansion osoite';
   @override
+  String get syncUrlRequired => 'Anna palvelimen osoite';
+  @override
   String get syncUrlHint =>
       'Kansion on oltava olemassa. Kopioi osoite sellaisena kuin '
       'palvelin sen näyttää.';

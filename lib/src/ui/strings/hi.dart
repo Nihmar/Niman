@@ -1458,6 +1458,8 @@ final class HindiStrings extends Strings {
   @override
   String get syncUrlLabel => 'फ़ोल्डर का पता';
   @override
+  String get syncUrlRequired => 'सर्वर का पता दर्ज करें';
+  @override
   String get syncUrlHint =>
       'फ़ोल्डर पहले से मौजूद होना चाहिए। पता वैसे ही कॉपी करें '
       'जैसे सर्वर उसे दिखाता है।';

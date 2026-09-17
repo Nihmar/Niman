@@ -84,7 +84,9 @@ void main() {
     // that answered it only appears after a long press on Android.
     expect(find.text('New note'), findsOneWidget);
     expect(find.text('New from template'), findsOneWidget);
-    expect(find.text('New list note'), findsOneWidget);
+    // The list note names its folder: the only action that does not
+    // land in the FAB target folder (issue #131).
+    expect(find.text('New list note · Lists'), findsOneWidget);
     expect(find.text('New voice note'), findsOneWidget);
     expect(find.text('New folder'), findsOneWidget);
 

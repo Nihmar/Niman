@@ -1464,6 +1464,8 @@ final class EstonianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Kausta aadress';
   @override
+  String get syncUrlRequired => 'Sisestage serveri aadress';
+  @override
   String get syncUrlHint =>
       'Kaust peab olemas olema. Kopeeri aadress nii, nagu server '
       'seda näitab.';

@@ -1498,6 +1498,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Адреса на папката';
   @override
+  String get syncUrlRequired => 'Внесете ја адресата на серверот';
+  @override
   String get syncUrlHint =>
       'Папката мора да постои. Копирајте ја адресата како што ја '
       'прикажува серверот.';

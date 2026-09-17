@@ -1481,6 +1481,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get syncUrlLabel => 'Mappeadresse';
   @override
+  String get syncUrlRequired => 'Skriv inn serveradressen';
+  @override
   String get syncUrlHint =>
       'Mappen må finnes. Kopier adressen slik serveren viser den.';
   @override

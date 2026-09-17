@@ -97,17 +97,19 @@ Landed.
 
 ## 4. Smaller things, without a picture
 
-- **No undo after a delete.** `SnackBarAction` exists only in history,
-  sync and transcription. Deleting a note says what happened but offers
-  no way back, even though the file is in the trash.
-- **The WebDAV screen** opens with both of its buttons greyed, which
-  reads as broken, and its **Save** is a full-width button at the bottom
-  — a shape that exists nowhere else in the app.
-- **Where a new item lands.** The FAB menu could say which folder it
-  creates in, but four of its five actions use the FAB's target folder
-  while *New list note* always goes to the configured list folder. One
-  label over all five would be wrong about one of them; saying it per
-  action needs that setting in hand at build time.
+Landed, all three.
+
+- **No undo after a delete.** The notice now offers *Undo* while the
+  trash toggle is on, restoring the freshest deletion of that path.
+  A hard delete still has nothing to offer.
+- **The WebDAV screen.** *Test* and *Save* ride side by side in the
+  form instead of a full-width bottom bar. *Test* stays enabled and
+  complains at the address field; *Save* unlocks for the tested
+  address, next to the result card that says why.
+- **Where a new item lands.** Four actions use the FAB target folder
+  they open over; *New list note* names its folder on the button
+  (`New list note · Lists`), read from the setting at menu-open
+  time.
 
 ## Regenerating the pictures
 
