@@ -165,3 +165,35 @@ final class TreeFooterBar extends StatelessWidget {
     );
   }
 }
+
+/// The tree's sort chevron: name ascending, or name descending, with the
+/// arrow turning to say which.
+///
+/// It sits in the footer and, on a phone, in the Files app bar; both show
+/// the same control over the same setting.
+final class TreeSortToggle extends StatelessWidget {
+  /// Creates the toggle; [ascending] is the order in force.
+  const new({required this.ascending, required this.onToggle, super.key});
+
+  /// Whether the tree is sorted by name ascending.
+  final bool ascending;
+
+  /// Flips the order; the shell persists it.
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: const Key('toggle-sort'),
+      tooltip: ascending
+          ? AppStrings.sortDescTooltip
+          : AppStrings.sortAscTooltip,
+      icon: AnimatedRotation(
+        turns: ascending ? 0 : 0.5,
+        duration: const Duration(milliseconds: 180),
+        child: const Icon(Icons.unfold_more),
+      ),
+      onPressed: onToggle,
+    );
+  }
+}
