@@ -114,6 +114,26 @@ final class JapaneseStrings extends Strings {
   String get settingsSectionShortcuts => 'キーボード';
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'ライブラリ $name';
+  @override
+  String get settingsGroupLibraryHint => 'このライブラリにのみ適用';
+  @override
+  String get settingsGroupMaintenance => 'メンテナンス';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'フォルダとパス';
+  @override
+  String get settingsAreaTrashHistory => 'ごみ箱と履歴';
+  @override
+  String get settingsAreaDiagnostics => '診断と情報';
+  @override
+  String get settingsAreaKeyboardDisabled => '接続された物理キーボードが必要です';
   @override
   String get settingsSectionUpdates => 'アップデート';
   @override

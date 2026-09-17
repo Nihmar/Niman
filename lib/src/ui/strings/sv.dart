@@ -125,6 +125,27 @@ final class SwedishStrings extends Strings {
   String get settingsSectionShortcuts => 'Tangentbord';
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gäller bara för det här biblioteket';
+  @override
+  String get settingsGroupMaintenance => 'Underhåll';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappar och sökvägar';
+  @override
+  String get settingsAreaTrashHistory => 'Papperskorgen och kronologi';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostik och info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Kräver ett anslutet fysiskt tangentbord';
   @override
   String get settingsSectionUpdates => 'Uppdateringar';
   @override

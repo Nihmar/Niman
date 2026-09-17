@@ -123,6 +123,27 @@ final class IcelandicStrings extends Strings {
   String get settingsSectionShortcuts => 'Lyklaborð';
   @override
   String get keyboardShortcutsTitle => 'Lyklaborðssnarstæður';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bókasafn $name';
+  @override
+  String get settingsGroupLibraryHint => 'gildir eingöngu fyrir þetta bókasafn';
+  @override
+  String get settingsGroupMaintenance => 'Úthald';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapar og slóðir';
+  @override
+  String get settingsAreaTrashHistory => 'Korpur og tímará';
+  @override
+  String get settingsAreaDiagnostics => 'Greining og upplýsingar';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Þarf eðlilegt lyklaborð sem er tengt';
   @override
   String get settingsSectionUpdates => 'Uppfærslur';
   @override

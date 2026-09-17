@@ -124,6 +124,27 @@ final class PortugueseStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atalhos de teclado';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => 'aplica apenas a esta biblioteca';
+  @override
+  String get settingsGroupMaintenance => 'Manutenção';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Pastas e caminhos';
+  @override
+  String get settingsAreaTrashHistory => 'Lixeira e cronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnóstico e informações';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necessita de um teclado físico conectado';
   @override
   String get settingsSectionUpdates => 'Atualizações';
   @override

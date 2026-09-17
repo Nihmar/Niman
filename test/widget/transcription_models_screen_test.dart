@@ -110,6 +110,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // The transcription section sits in the pushed Folders area
+    // (issue #104).
+    await tester.tap(find.byKey(const Key('settings-area-folders')));
+    await tester.pumpAndSettle();
+
     expect(find.text(AppStrings.settingsSectionTranscription), findsOne);
     final modelRow = find.byKey(const Key('transcription-model-setting'));
     expect(

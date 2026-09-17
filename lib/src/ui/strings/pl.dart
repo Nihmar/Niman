@@ -126,6 +126,27 @@ final class PolishStrings extends Strings {
   String get settingsSectionShortcuts => 'Klawiatura';
   @override
   String get keyboardShortcutsTitle => 'Skróty klawiszowe';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'dotyczy tylko tej biblioteki';
+  @override
+  String get settingsGroupMaintenance => 'Konserwacja';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Foldery i ścieżki';
+  @override
+  String get settingsAreaTrashHistory => 'Kosz i historia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostyka i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Wymaga podłączonej fizycznej klawiatury';
   @override
   String get settingsSectionUpdates => 'Aktualizacje';
   @override

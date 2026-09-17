@@ -120,6 +120,27 @@ final class TurkishStrings extends Strings {
   String get settingsSectionShortcuts => 'Klavye';
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kütüphane $name';
+  @override
+  String get settingsGroupLibraryHint => 'yalnızca bu kütüphaneye uygulanır';
+  @override
+  String get settingsGroupMaintenance => 'Bakım';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Klasörler ve yollar';
+  @override
+  String get settingsAreaTrashHistory => 'Çöp kutusu ve kronoloji';
+  @override
+  String get settingsAreaDiagnostics => 'Teşhis ve bilgi';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Bağlı fiziksel bir klavye gerekli';
   @override
   String get settingsSectionUpdates => 'Güncellemeler';
   @override

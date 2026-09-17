@@ -127,6 +127,27 @@ final class SlovakStrings extends Strings {
   String get settingsSectionShortcuts => 'Klávesnica';
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knižnica $name';
+  @override
+  String get settingsGroupLibraryHint => 'platí len pre túto knižnicu';
+  @override
+  String get settingsGroupMaintenance => 'Údržba';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Priečinky a cesty';
+  @override
+  String get settingsAreaTrashHistory => 'Kôš a kronológia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika a info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vyžaduje pripojenú fyzickú klávesnicu';
   @override
   String get settingsSectionUpdates => 'Aktualizácie';
   @override

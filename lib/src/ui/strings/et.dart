@@ -124,6 +124,27 @@ final class EstonianStrings extends Strings {
   String get settingsSectionShortcuts => 'Klaviatuur';
   @override
   String get keyboardShortcutsTitle => 'Klaviatuuri lühendid';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kogu $name';
+  @override
+  String get settingsGroupLibraryHint => 'kehtib ainult selle kogu puhul';
+  @override
+  String get settingsGroupMaintenance => 'Hooldamine';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Kaustad ja aadressid';
+  @override
+  String get settingsAreaTrashHistory => 'Prügikast ja ajalugu';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika ja info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vajab ühendatud füüsilist klaviatuuri';
   @override
   String get settingsSectionUpdates => 'Uuendused';
   @override

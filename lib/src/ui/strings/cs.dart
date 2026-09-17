@@ -127,6 +127,27 @@ final class CzechStrings extends Strings {
   String get settingsSectionShortcuts => 'Klávesové zkratky';
   @override
   String get keyboardShortcutsTitle => 'Klávesové zkratky';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knihovna $name';
+  @override
+  String get settingsGroupLibraryHint => 'platí jen pro tuto knihovnu';
+  @override
+  String get settingsGroupMaintenance => 'Údržba';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Složky a cesty';
+  @override
+  String get settingsAreaTrashHistory => 'Koš a historie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika a info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Je potřeba připojená fyzická klávesnice';
   @override
   String get settingsSectionUpdates => 'Aktualizace';
   @override

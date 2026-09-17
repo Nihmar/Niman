@@ -124,6 +124,27 @@ final class LatvianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatūra';
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotēka $name';
+  @override
+  String get settingsGroupLibraryHint => 'piemērojams tikai šai bibliotēkai';
+  @override
+  String get settingsGroupMaintenance => 'Apkope';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Katalogi un ceļi';
+  @override
+  String get settingsAreaTrashHistory => 'Konteiners un hronoloģija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika un info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Nepieciešams pieslēgts fizisks tastatūrs';
   @override
   String get settingsSectionUpdates => 'Atjauninājumi';
   @override

@@ -125,6 +125,27 @@ final class SpanishStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atajos de teclado';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => 'aplica solo a esta biblioteca';
+  @override
+  String get settingsGroupMaintenance => 'Mantenimiento';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Carpetas y rutas';
+  @override
+  String get settingsAreaTrashHistory => 'Papelera y cronología';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnóstico e información';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesita un teclado físico conectado';
   @override
   String get settingsSectionUpdates => 'Actualizaciones';
   @override

@@ -54,6 +54,18 @@ abstract base class Strings {
   String get settingsSectionReminders;
   String get settingsSectionShortcuts;
   String get keyboardShortcutsTitle;
+
+  // Settings home (issue #104): the groups the areas sit under.
+  String get settingsGroupApp;
+  String settingsGroupLibrary(String name);
+  String get settingsGroupLibraryHint;
+  String get settingsGroupMaintenance;
+
+  // Settings home rows.
+  String get settingsAreaFolders;
+  String get settingsAreaTrashHistory;
+  String get settingsAreaDiagnostics;
+  String get settingsAreaKeyboardDisabled;
   String get settingsSectionUpdates;
   String get autoUpdateTitle;
   String get autoUpdateSubtitle;

@@ -122,6 +122,27 @@ final class EnglishStrings extends Strings {
   String get settingsSectionShortcuts => 'Keyboard';
   @override
   String get keyboardShortcutsTitle => 'Keyboard shortcuts';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Library $name';
+  @override
+  String get settingsGroupLibraryHint => 'applies only to this library';
+  @override
+  String get settingsGroupMaintenance => 'Maintenance';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Folders and paths';
+  @override
+  String get settingsAreaTrashHistory => 'Trash and history';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostics and info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Needs a connected physical keyboard';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override

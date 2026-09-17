@@ -117,6 +117,27 @@ final class HindiStrings extends Strings {
   String get settingsSectionShortcuts => 'कीबोर्ड';
   @override
   String get keyboardShortcutsTitle => 'कीबोर्ड शॉर्टकट';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'लाइब्रेरी $name';
+  @override
+  String get settingsGroupLibraryHint => 'केवल इस लाइब्रेरी के लिए';
+  @override
+  String get settingsGroupMaintenance => 'रखरखाव';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'फ़ोल्डर और पथ';
+  @override
+  String get settingsAreaTrashHistory => 'ट्रैश और क्रोनोलॉजी';
+  @override
+  String get settingsAreaDiagnostics => 'निदान और जानकारी';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'कनेक्टेड फिज़िकल कीबोर्ड ज़रूरी है';
   @override
   String get settingsSectionUpdates => 'अपडेट';
   @override

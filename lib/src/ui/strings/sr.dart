@@ -127,6 +127,27 @@ final class SerbianStrings extends Strings {
   String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Пречице на тастатури';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за ову библиотеку';
+  @override
+  String get settingsGroupMaintenance => 'Одржавање';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Фасцикле и путање';
+  @override
+  String get settingsAreaTrashHistory => 'Кош и хронологија';
+  @override
+  String get settingsAreaDiagnostics => 'Дијагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потребна је повезана физичка тастатура';
   @override
   String get settingsSectionUpdates => 'Ажурирања';
   @override

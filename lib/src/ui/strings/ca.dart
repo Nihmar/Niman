@@ -126,6 +126,26 @@ final class CatalanStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclat';
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => "només s'aplica a aquesta biblioteca";
+  @override
+  String get settingsGroupMaintenance => 'Manteniment';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Carpetes i camins';
+  @override
+  String get settingsAreaTrashHistory => 'Paperera i cronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnòstic i informació';
+  @override
+  String get settingsAreaKeyboardDisabled => 'Cal un teclat físic connectat';
   @override
   String get settingsSectionUpdates => 'Actualitzacions';
   @override

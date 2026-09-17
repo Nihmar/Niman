@@ -128,6 +128,28 @@ final class UkrainianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавіатура';
   @override
   String get keyboardShortcutsTitle => 'Комбінації клавіш';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Бібліотека $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      'застосовується лише до цієї бібліотеки';
+  @override
+  String get settingsGroupMaintenance => 'Обслуговування';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки та шляхи';
+  @override
+  String get settingsAreaTrashHistory => 'Кошик і хронологія';
+  @override
+  String get settingsAreaDiagnostics => 'Діагностика та інфа';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потрібна підключена фізична клавіатура';
   @override
   String get settingsSectionUpdates => 'Оновлення';
   @override

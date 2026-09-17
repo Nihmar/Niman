@@ -124,6 +124,27 @@ final class FinnishStrings extends Strings {
   String get settingsSectionShortcuts => 'Näppäimistö';
   @override
   String get keyboardShortcutsTitle => 'Näppäimistön oikotiet';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kirjasto $name';
+  @override
+  String get settingsGroupLibraryHint => 'pätee vain tähän kirjastoon';
+  @override
+  String get settingsGroupMaintenance => 'Ylläpito';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Kansiot ja polut';
+  @override
+  String get settingsAreaTrashHistory => 'Roskakori ja kronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikka ja tiedot';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vaatii yhdistetyn fyysisen näppäimiston';
   @override
   String get settingsSectionUpdates => 'Päivitykset';
   @override

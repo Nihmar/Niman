@@ -125,6 +125,28 @@ final class FrenchStrings extends Strings {
   String get settingsSectionShortcuts => 'Clavier';
   @override
   String get keyboardShortcutsTitle => 'Raccourcis clavier';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliothèque $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      "s'applique uniquement à cette bibliothèque";
+  @override
+  String get settingsGroupMaintenance => 'Maintenance';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Dossiers et chemins';
+  @override
+  String get settingsAreaTrashHistory => 'Corbeille et chronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostic et infos';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Nécessite un clavier physique connecté';
   @override
   String get settingsSectionUpdates => 'Mises à jour';
   @override

@@ -125,6 +125,27 @@ final class GalicianStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atallos de teclado';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => 'aplícase só a esta biblioteca';
+  @override
+  String get settingsGroupMaintenance => 'Mantemento';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Cartafols e camiños';
+  @override
+  String get settingsAreaTrashHistory => 'Paperilleiro e cronoloxía';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnóstico e información';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesita un teclado físico conectado';
   @override
   String get settingsSectionUpdates => 'Actualizacións';
   @override
