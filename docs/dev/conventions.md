@@ -21,6 +21,15 @@
   - R8 strips the reminder icon unless pinned via `tools:keep` in
     `android/app/src/main/res/raw/dev_niman_niman_keep.xml` — update the
     keep file when renaming the drawable.
+- **Interface rules:**
+  - Icons are outline. A filled icon says a state is on: the selected
+    tab, a pinned note, the current library, the note in use as the
+    quick note. Two weights in one list with no state behind them is a
+    bug.
+  - A control that shows in only some states keeps its place. Disable
+    it instead of dropping it, or put it on the side the row grows
+    from, so nothing already on screen slides under a thumb that is
+    already on it.
 - **Portability:** new tests must be portable — `p.join` for paths
   (never literal `/`), no `chmod`.
 - **Output discipline:** never dump large output into context. Redirect

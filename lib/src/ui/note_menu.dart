@@ -38,10 +38,14 @@ final class NoteMenuButton extends StatelessWidget {
           Icons.history,
           AppStrings.noteHistoryTitle,
         ),
-        _item(NoteMenuAction.rename, Icons.edit, AppStrings.actionRename),
+        _item(
+          NoteMenuAction.rename,
+          Icons.edit_outlined,
+          AppStrings.actionRename,
+        ),
         _item(
           NoteMenuAction.move,
-          Icons.drive_folder_upload,
+          Icons.drive_folder_upload_outlined,
           AppStrings.actionMove,
         ),
         _item(
