@@ -804,6 +804,10 @@ final class ItalianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nuova nota';
   @override
+  String get newItemTooltip => 'Nuovo';
+  @override
+  String get closeMenuTooltip => 'Chiudi';
+  @override
   String get newFolderTitle => 'Nuova cartella';
   @override
   String get newNoteHere => 'Nuova nota qui';

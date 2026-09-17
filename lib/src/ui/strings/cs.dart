@@ -800,6 +800,10 @@ final class CzechStrings extends Strings {
   @override
   String get newNoteTitle => 'Nová poznámka';
   @override
+  String get newItemTooltip => 'Nový';
+  @override
+  String get closeMenuTooltip => 'Zavřít';
+  @override
   String get newFolderTitle => 'Nová složka';
   @override
   String get newNoteHere => 'Nová poznámka zde';

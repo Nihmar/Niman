@@ -806,6 +806,10 @@ final class DutchStrings extends Strings {
   @override
   String get newNoteTitle => 'Nieuwe notitie';
   @override
+  String get newItemTooltip => 'Nieuw';
+  @override
+  String get closeMenuTooltip => 'Sluiten';
+  @override
   String get newFolderTitle => 'Nieuwe map';
   @override
   String get newNoteHere => 'Nieuwe notitie hier';

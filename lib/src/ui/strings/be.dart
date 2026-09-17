@@ -799,6 +799,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get newNoteTitle => 'Новая заўвага';
   @override
+  String get newItemTooltip => 'Новае';
+  @override
+  String get closeMenuTooltip => 'Закрыць';
+  @override
   String get newFolderTitle => 'Новая папка';
   @override
   String get newNoteHere => 'Новая заўвага тут';

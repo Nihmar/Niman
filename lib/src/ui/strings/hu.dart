@@ -804,6 +804,10 @@ final class HungarianStrings extends Strings {
   @override
   String get newNoteTitle => 'Új jegyzet';
   @override
+  String get newItemTooltip => 'Új';
+  @override
+  String get closeMenuTooltip => 'Bezárás';
+  @override
   String get newFolderTitle => 'Új mappa';
   @override
   String get newNoteHere => 'Új jegyzet ide';

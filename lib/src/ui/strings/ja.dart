@@ -751,6 +751,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get newNoteTitle => '新しいノート';
   @override
+  String get newItemTooltip => '新規';
+  @override
+  String get closeMenuTooltip => '閉じる';
+  @override
   String get newFolderTitle => '新しいフォルダ';
   @override
   String get newNoteHere => 'ここに新しいノート';

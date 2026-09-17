@@ -819,6 +819,10 @@ final class FrenchStrings extends Strings {
   @override
   String get newNoteTitle => 'Nouvelle note';
   @override
+  String get newItemTooltip => 'Nouveau';
+  @override
+  String get closeMenuTooltip => 'Fermer';
+  @override
   String get newFolderTitle => 'Nouveau dossier';
   @override
   String get newNoteHere => 'Nouvelle note ici';

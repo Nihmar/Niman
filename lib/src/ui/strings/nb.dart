@@ -800,6 +800,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get newNoteTitle => 'Nytt notat';
   @override
+  String get newItemTooltip => 'Ny';
+  @override
+  String get closeMenuTooltip => 'Lukk';
+  @override
   String get newFolderTitle => 'Ny mappe';
   @override
   String get newNoteHere => 'Nytt notat her';

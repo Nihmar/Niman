@@ -823,6 +823,10 @@ final class CatalanStrings extends Strings {
   @override
   String get newNoteTitle => 'Nota nova';
   @override
+  String get newItemTooltip => 'Nou';
+  @override
+  String get closeMenuTooltip => 'Tanca';
+  @override
   String get newFolderTitle => 'Carpeta nova';
   @override
   String get newNoteHere => 'Nota nova aquí';

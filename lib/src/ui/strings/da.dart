@@ -802,6 +802,10 @@ final class DanishStrings extends Strings {
   @override
   String get newNoteTitle => 'Ny note';
   @override
+  String get newItemTooltip => 'Ny';
+  @override
+  String get closeMenuTooltip => 'Luk';
+  @override
   String get newFolderTitle => 'Ny mappe';
   @override
   String get newNoteHere => 'Ny note her';
