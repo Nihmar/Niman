@@ -83,12 +83,15 @@ jobs:
           fi
 
       - run: flutter pub get
-      - run: flutter build apk --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
+      # The official flavor (issue #106): AGP drops the no-flavor
+      # variant once the channel dimension has a flavor, so the
+      # official APK is built from the explicit flavor.
+      - run: flutter build apk --release --flavor official --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
 
       - name: Stage artifact
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/niman-$VERSION-android.apk"
+          cp build/app/outputs/flutter-apk/app-official-release.apk "dist/niman-$VERSION-android.apk"
 
       # The testing build (issue #106): the release pipeline with the
       # beta flavor's separate application ID (dev.niman.niman.beta),

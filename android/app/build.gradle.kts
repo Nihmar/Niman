@@ -63,14 +63,20 @@ android {
         }
     }
 
-    // The testing build (issue #106): the release pipeline with a
-    // separate application ID, so the official app and the testing
-    // build install side by side. AGP forbids flavor names starting
-    // with "test" (reserved for test variants), hence "beta". Build
-    // it with `flutter build apk --release --flavor beta
-    // --dart-define=APP_CHANNEL=testing` — the define gates the Dart
-    // side (update management hidden and skipped); keep both in step.
+    // The two installs of issue #106, side by side on one device.
+    // Once a flavor dimension has a flavor, AGP drops the no-flavor
+    // variant, so the official app gets an explicit flavor of its
+    // own: no suffix, no per-flavor manifest — the application ID
+    // stays dev.niman.niman. Build it with
+    // `flutter build apk --release --flavor official`; the testing
+    // build is `--flavor beta --dart-define=APP_CHANNEL=testing`
+    // (the define gates the Dart side: update management hidden and
+    // skipped); keep both in step. AGP forbids flavor names starting
+    // with "test" (reserved for test variants), hence "beta".
     productFlavors {
+        create("official") {
+            dimension = "channel"
+        }
         create("beta") {
             dimension = "channel"
             applicationIdSuffix = ".beta"
