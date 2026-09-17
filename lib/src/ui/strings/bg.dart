@@ -1000,6 +1000,17 @@ final class BulgarianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Виджетите на домашния екран са достъпни в Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Показване във файловия мениджър';
+  @override
+  String get openInDefaultApp => 'Отваряне с приложението по подразбиране';
+  @override
+  String get openFileMissing => 'Файлът на тази бележка не е на диска';
+  @override
+  String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';
+
   @override
   String get movedToTrash => 'Преместен в коша';
   @override

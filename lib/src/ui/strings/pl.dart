@@ -1002,6 +1002,18 @@ final class PolishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Widgety ekranu głównego są dostępne w Androidzie';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Pokaż w menedżerze plików';
+  @override
+  String get openInDefaultApp => 'Otwórz w domyślnej aplikacji';
+  @override
+  String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
+  @override
+  String get openFileFailed =>
+      'Nie udało się otworzyć tej notatki poza Nimanem';
+
   @override
   String get movedToTrash => 'Przeniesiono do kosza';
   @override

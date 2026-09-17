@@ -996,6 +996,17 @@ final class RomanianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Widgeturile de pe ecranul de start sunt disponibile pe Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Arată în managerul de fișiere';
+  @override
+  String get openInDefaultApp => 'Deschide cu aplicația implicită';
+  @override
+  String get openFileMissing => 'Fișierul acestei note nu este pe disc';
+  @override
+  String get openFileFailed => 'Nota nu a putut fi deschisă în afara Niman';
+
   @override
   String get movedToTrash => 'Mutat în coș';
   @override

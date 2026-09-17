@@ -983,6 +983,17 @@ final class TurkishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Ana ekran widget’ları Android’da kullanılabilir';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Dosya yöneticisinde göster';
+  @override
+  String get openInDefaultApp => 'Varsayılan uygulamada aç';
+  @override
+  String get openFileMissing => 'Bu notun dosyası diskte yok';
+  @override
+  String get openFileFailed => 'Bu not Niman dışında açılamadı';
+
   @override
   String get movedToTrash => 'Çöp kutusuna taşındı';
   @override

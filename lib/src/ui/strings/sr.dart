@@ -993,6 +993,18 @@ final class SerbianStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Виџети почетног екрана доступни су на Андроиду';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Прикажи у управљачу датотека';
+  @override
+  String get openInDefaultApp => 'Отвори подразумеваном апликацијом';
+  @override
+  String get openFileMissing => 'Датотека ове белешке није на диску';
+  @override
+  String get openFileFailed =>
+      'Није било могуће отворити ову белешку изван Нимана';
+
   @override
   String get movedToTrash => 'Премештено у кош';
   @override

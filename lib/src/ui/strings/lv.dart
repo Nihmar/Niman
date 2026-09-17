@@ -984,6 +984,17 @@ final class LatvianStrings extends Strings {
       'Piestiprināts: tagad novietojiet Notis vidžetu sākumekrānā';
   @override
   String get pinWidgetUnavailable => 'Sākumekrāna vidžeti ir pieejami Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Rādīt failu pārvaldniekā';
+  @override
+  String get openInDefaultApp => 'Atvērt noklusējuma lietotnē';
+  @override
+  String get openFileMissing => 'Šīs piezīmes faila diskā nav';
+  @override
+  String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';
+
   @override
   String get movedToTrash => 'Pārvietots konteinerā';
   @override

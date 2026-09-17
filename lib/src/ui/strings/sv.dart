@@ -996,6 +996,19 @@ final class SwedishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Startskärmswidgets är tillgängliga på Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Visa i filhanteraren';
+  @override
+  String get openInDefaultApp => 'Öppna i standardappen';
+  @override
+  String get openFileMissing =>
+      'Den här anteckningens fil finns inte på disken';
+  @override
+  String get openFileFailed =>
+      'Det gick inte att öppna anteckningen utanför Niman';
+
   @override
   String get movedToTrash => 'Flyttad till papperskorgen';
   @override

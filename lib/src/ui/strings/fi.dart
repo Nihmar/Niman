@@ -1002,6 +1002,18 @@ final class FinnishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Aloitusnäytön widgetit ovat Androidilla käytettävissä';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Näytä tiedostonhallinnassa';
+  @override
+  String get openInDefaultApp => 'Avaa oletussovelluksessa';
+  @override
+  String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
+  @override
+  String get openFileFailed =>
+      'Muistiinpanoa ei voitu avata Nimanin ulkopuolella';
+
   @override
   String get movedToTrash => 'Siirretty koriin';
   @override

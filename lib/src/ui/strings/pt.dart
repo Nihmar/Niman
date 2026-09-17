@@ -998,6 +998,17 @@ final class PortugueseStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Os widgets da tela inicial estão disponíveis no Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Mostrar no gerenciador de arquivos';
+  @override
+  String get openInDefaultApp => 'Abrir no app padrão';
+  @override
+  String get openFileMissing => 'O arquivo desta nota não está no disco';
+  @override
+  String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';
+
   @override
   String get movedToTrash => 'Movido para a lixeira';
   @override

@@ -992,6 +992,17 @@ final class DanishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Startskærmswidgets er tilgængelige på Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Vis i filhåndtering';
+  @override
+  String get openInDefaultApp => 'Åbn i standardappen';
+  @override
+  String get openFileMissing => 'Denne notes fil findes ikke på disken';
+  @override
+  String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';
+
   @override
   String get movedToTrash => 'Flyttet til affald';
   @override

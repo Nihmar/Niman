@@ -474,6 +474,12 @@ abstract base class Strings {
   String get pinToWidget;
   String get pinnedForWidget;
   String get pinWidgetUnavailable;
+
+  // Handing a note's file to the OS (issue #76).
+  String get openInFileManager;
+  String get openInDefaultApp;
+  String get openFileMissing;
+  String get openFileFailed;
   String get movedToTrash;
   String get deletedMessage;
   String deleteToTrashConfirm(String name);

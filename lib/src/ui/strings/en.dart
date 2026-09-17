@@ -987,6 +987,17 @@ final class EnglishStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Home-screen widgets are available on Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Show in file manager';
+  @override
+  String get openInDefaultApp => 'Open in default app';
+  @override
+  String get openFileMissing => 'This note’s file is not on disk';
+  @override
+  String get openFileFailed => 'Could not open this note outside Niman';
+
   @override
   String get movedToTrash => 'Moved to trash';
   @override

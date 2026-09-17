@@ -999,6 +999,17 @@ final class BasqueStrings extends Strings {
   @override
   String get pinWidgetUnavailable =>
       'Hasierako pantailako widgetak Android-en daude eskuragarri';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Erakutsi fitxategi-kudeatzailean';
+  @override
+  String get openInDefaultApp => 'Ireki aplikazio lehenetsian';
+  @override
+  String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
+  @override
+  String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';
+
   @override
   String get movedToTrash => 'Zakarrontzira mugitua';
   @override

@@ -899,6 +899,17 @@ final class ChineseStrings extends Strings {
   String get pinnedForWidget => '已固定：现在请将笔记组件放到主屏幕';
   @override
   String get pinWidgetUnavailable => '主屏幕组件可在 Android 上使用';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => '在文件管理器中显示';
+  @override
+  String get openInDefaultApp => '用默认应用打开';
+  @override
+  String get openFileMissing => '这篇笔记的文件不在磁盘上';
+  @override
+  String get openFileFailed => '无法在 Niman 之外打开这篇笔记';
+
   @override
   String get movedToTrash => '已移入回收站';
   @override

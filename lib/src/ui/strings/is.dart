@@ -989,6 +989,17 @@ final class IcelandicStrings extends Strings {
   String get pinnedForWidget => 'Fest: settu núna vísíð Nota á forsíðuna';
   @override
   String get pinWidgetUnavailable => 'Forsíðu-vísí eru til fáan á Android';
+
+  // Handing a note's file to the OS (issue #76).
+  @override
+  String get openInFileManager => 'Sýna í skráastjóra';
+  @override
+  String get openInDefaultApp => 'Opna í sjálfgefnu forriti';
+  @override
+  String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
+  @override
+  String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';
+
   @override
   String get movedToTrash => 'Fært í korpu';
   @override
