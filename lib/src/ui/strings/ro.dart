@@ -831,6 +831,12 @@ final class RomanianStrings extends Strings {
   @override
   String get newFolderTitle => 'Dosar nou';
   @override
+  String get newNoteSameFolder => 'Notă nouă în același dosar';
+  @override
+  String get newFromTemplateSameFolder => 'Nouă din șablon în același dosar';
+  @override
+  String trashOriginalPath(String path) => 'era în $path';
+  @override
   String get newNoteHere => 'Notă nouă aici';
   @override
   String get newFolderHere => 'Dosar nou aici';

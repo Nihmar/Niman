@@ -100,6 +100,10 @@ void main() {
     );
     expect(top(tester, 'menu-rename'), lessThan(top(tester, 'menu-new-note')));
     expect(top(tester, 'menu-new-note'), lessThan(top(tester, 'menu-delete')));
+
+    // And it says which folder it means.
+    expect(find.text('New note in the same folder'), findsOneWidget);
+    expect(find.text('New note here'), findsNothing);
   });
 
   testWidgets('on a folder, creating comes first', (tester) async {
@@ -114,6 +118,8 @@ void main() {
     // menu is opened at all.
     expect(top(tester, 'menu-new-note'), lessThan(top(tester, 'menu-rename')));
     expect(top(tester, 'menu-rename'), lessThan(top(tester, 'menu-delete')));
+    // Here "here" is the folder itself, and says so.
+    expect(find.text('New note here'), findsOneWidget);
     // A folder has no quick note, no widget pin and no history.
     expect(find.byKey(const Key('menu-quick-note')), findsNothing);
     expect(find.byKey(const Key('menu-history')), findsNothing);

@@ -824,6 +824,13 @@ final class AlbanianStrings extends Strings {
   @override
   String get newFolderTitle => 'Tresë e re';
   @override
+  String get newNoteSameFolder => 'Shënim i ri në të njëjtën dosje';
+  @override
+  String get newFromTemplateSameFolder =>
+      'I ri nga shablloni në të njëjtën dosje';
+  @override
+  String trashOriginalPath(String path) => 'ishte në $path';
+  @override
   String get newNoteHere => 'Shënim i ri këtu';
   @override
   String get newFolderHere => 'Tresë e re këtu';

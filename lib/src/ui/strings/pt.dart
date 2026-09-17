@@ -822,6 +822,13 @@ final class PortugueseStrings extends Strings {
   @override
   String get newFolderTitle => 'Nova pasta';
   @override
+  String get newNoteSameFolder => 'Nova nota na mesma pasta';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nova a partir de modelo na mesma pasta';
+  @override
+  String trashOriginalPath(String path) => 'estava em $path';
+  @override
   String get newNoteHere => 'Nova nota aqui';
   @override
   String get newFolderHere => 'Nova pasta aqui';

@@ -823,6 +823,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get newFolderTitle => 'Нова папка';
   @override
+  String get newNoteSameFolder => 'Нова нотатка в тій самій теці';
+  @override
+  String get newFromTemplateSameFolder => 'Нова із шаблону в тій самій теці';
+  @override
+  String trashOriginalPath(String path) => 'була в $path';
+  @override
   String get newNoteHere => 'Нова нотатка тут';
   @override
   String get newFolderHere => 'Нова папка тут';

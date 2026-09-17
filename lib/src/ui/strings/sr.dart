@@ -824,6 +824,12 @@ final class SerbianStrings extends Strings {
   @override
   String get newFolderTitle => 'Нова фасцикла';
   @override
+  String get newNoteSameFolder => 'Нова белешка у истој фасцикли';
+  @override
+  String get newFromTemplateSameFolder => 'Нова из шаблона у истој фасцикли';
+  @override
+  String trashOriginalPath(String path) => 'било у $path';
+  @override
   String get newNoteHere => 'Нова белешка овде';
   @override
   String get newFolderHere => 'Нова фасцикла овде';

@@ -822,6 +822,12 @@ final class HungarianStrings extends Strings {
   @override
   String get newFolderTitle => 'Új mappa';
   @override
+  String get newNoteSameFolder => 'Új jegyzet ugyanabban a mappában';
+  @override
+  String get newFromTemplateSameFolder => 'Új sablonból ugyanabban a mappában';
+  @override
+  String trashOriginalPath(String path) => 'itt volt: $path';
+  @override
   String get newNoteHere => 'Új jegyzet ide';
   @override
   String get newFolderHere => 'Új mappa ide';

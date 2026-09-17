@@ -827,6 +827,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get newFolderTitle => 'Нова папка';
   @override
+  String get newNoteSameFolder => 'Нова белешка во истата папка';
+  @override
+  String get newFromTemplateSameFolder => 'Нова од шаблон во истата папка';
+  @override
+  String trashOriginalPath(String path) => 'беше во $path';
+  @override
   String get newNoteHere => 'Нова белешка овде';
   @override
   String get newFolderHere => 'Нова папка овде';

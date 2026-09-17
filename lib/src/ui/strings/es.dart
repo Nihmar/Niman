@@ -834,6 +834,13 @@ final class SpanishStrings extends Strings {
   @override
   String get newFolderTitle => 'Nueva carpeta';
   @override
+  String get newNoteSameFolder => 'Nueva nota en la misma carpeta';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nueva desde plantilla en la misma carpeta';
+  @override
+  String trashOriginalPath(String path) => 'estaba en $path';
+  @override
   String get newNoteHere => 'Nueva nota aquí';
   @override
   String get newFolderHere => 'Nueva carpeta aquí';

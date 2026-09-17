@@ -837,6 +837,13 @@ final class FrenchStrings extends Strings {
   @override
   String get newFolderTitle => 'Nouveau dossier';
   @override
+  String get newNoteSameFolder => 'Nouvelle note dans le même dossier';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nouvelle depuis un modèle dans le même dossier';
+  @override
+  String trashOriginalPath(String path) => 'était dans $path';
+  @override
   String get newNoteHere => 'Nouvelle note ici';
   @override
   String get newFolderHere => 'Nouveau dossier ici';

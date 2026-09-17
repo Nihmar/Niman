@@ -823,6 +823,12 @@ final class FinnishStrings extends Strings {
   @override
   String get newFolderTitle => 'Uusi kansio';
   @override
+  String get newNoteSameFolder => 'Uusi muistiinpano samaan kansioon';
+  @override
+  String get newFromTemplateSameFolder => 'Uusi mallista samaan kansioon';
+  @override
+  String trashOriginalPath(String path) => 'sijainti: $path';
+  @override
   String get newNoteHere => 'Uusi muistiinpano tähän';
   @override
   String get newFolderHere => 'Uusi kansio tähän';

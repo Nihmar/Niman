@@ -828,6 +828,12 @@ final class GalicianStrings extends Strings {
   @override
   String get newFolderTitle => 'Cartafol novo';
   @override
+  String get newNoteSameFolder => 'Nova nota no mesmo cartafol';
+  @override
+  String get newFromTemplateSameFolder => 'Nova desde modelo no mesmo cartafol';
+  @override
+  String trashOriginalPath(String path) => 'estaba en $path';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Cartafol novo aquí';

@@ -377,7 +377,8 @@ void main() {
     await settle(tester);
     expect(await controller.ops!.find('Docs/In root.md'), isNotNull);
 
-    // Long-press the note: New note here is offered; New folder is not
+    // Long-press the note: creating in its folder is offered; New folder
+    // is not
     // (file row); Rename/Move/Delete are.
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);

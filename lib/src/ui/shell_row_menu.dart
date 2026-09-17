@@ -181,18 +181,23 @@ final class RowMenuHeader extends StatelessWidget {
 /// its menu is opened at all, or merely beside the note, which is the
 /// afterthought it looks like.
 List<List<RowMenuEntry>> rowMenuGroups(Note note, {required bool isQuickNote}) {
+  // "Here" is the folder the row is, or the folder the note sits in —
+  // two different places, and on a note the word was doing the reader no
+  // favours. The note's entries say which folder they mean.
   final create = <RowMenuEntry>[
     (
       key: const Key('menu-new-note'),
       icon: Icons.note_add_outlined,
-      label: AppStrings.newNoteHere,
+      label: note.isDir ? AppStrings.newNoteHere : AppStrings.newNoteSameFolder,
       value: 'note',
       destructive: false,
     ),
     (
       key: const Key('menu-new-from-template'),
       icon: Icons.file_copy_outlined,
-      label: AppStrings.newFromTemplateHere,
+      label: note.isDir
+          ? AppStrings.newFromTemplateHere
+          : AppStrings.newFromTemplateSameFolder,
       value: 'template',
       destructive: false,
     ),

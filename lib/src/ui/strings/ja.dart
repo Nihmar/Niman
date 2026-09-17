@@ -769,6 +769,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get newFolderTitle => '新しいフォルダ';
   @override
+  String get newNoteSameFolder => '同じフォルダーに新規ノート';
+  @override
+  String get newFromTemplateSameFolder => '同じフォルダーにテンプレートから作成';
+  @override
+  String trashOriginalPath(String path) => '元の場所: $path';
+  @override
   String get newNoteHere => 'ここに新しいノート';
   @override
   String get newFolderHere => 'ここに新しいフォルダ';

@@ -820,6 +820,12 @@ final class DanishStrings extends Strings {
   @override
   String get newFolderTitle => 'Ny mappe';
   @override
+  String get newNoteSameFolder => 'Ny note i samme mappe';
+  @override
+  String get newFromTemplateSameFolder => 'Ny fra skabelon i samme mappe';
+  @override
+  String trashOriginalPath(String path) => 'lå i $path';
+  @override
   String get newNoteHere => 'Ny note her';
   @override
   String get newFolderHere => 'Ny mappe her';

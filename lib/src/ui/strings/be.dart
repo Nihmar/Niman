@@ -822,6 +822,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get newFolderTitle => 'Новая папка';
   @override
+  String get newNoteSameFolder => 'Новая нататка ў той жа папцы';
+  @override
+  String get newFromTemplateSameFolder => 'Новая з шаблону ў той жа папцы';
+  @override
+  String trashOriginalPath(String path) => 'было ў $path';
+  @override
   String get newNoteHere => 'Новая заўвага тут';
   @override
   String get newFolderHere => 'Новая папка тут';

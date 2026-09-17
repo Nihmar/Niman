@@ -826,6 +826,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get newFolderTitle => 'Нова папка';
   @override
+  String get newNoteSameFolder => 'Нова бележка в същата папка';
+  @override
+  String get newFromTemplateSameFolder => 'Нова от шаблон в същата папка';
+  @override
+  String trashOriginalPath(String path) => 'беше в $path';
+  @override
   String get newNoteHere => 'Нова бележка тук';
   @override
   String get newFolderHere => 'Нова папка тук';

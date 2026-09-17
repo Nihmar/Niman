@@ -822,6 +822,12 @@ final class CzechStrings extends Strings {
   @override
   String get newFolderTitle => 'Nová složka';
   @override
+  String get newNoteSameFolder => 'Nová poznámka ve stejné složce';
+  @override
+  String get newFromTemplateSameFolder => 'Nová ze šablony ve stejné složce';
+  @override
+  String trashOriginalPath(String path) => 'bylo v $path';
+  @override
   String get newNoteHere => 'Nová poznámka zde';
   @override
   String get newFolderHere => 'Nová složka zde';

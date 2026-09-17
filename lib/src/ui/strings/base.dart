@@ -407,6 +407,9 @@ abstract base class Strings {
   String get newItemTooltip;
   String get closeMenuTooltip;
   String get newFolderTitle;
+  String get newNoteSameFolder;
+  String get newFromTemplateSameFolder;
+  String trashOriginalPath(String path);
   String get newNoteHere;
   String get newFolderHere;
   String get newListNoteTitle;

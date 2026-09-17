@@ -823,6 +823,13 @@ final class SlovakStrings extends Strings {
   @override
   String get newFolderTitle => 'Nový priečinok';
   @override
+  String get newNoteSameFolder => 'Nová poznámka v rovnakom priečinku';
+  @override
+  String get newFromTemplateSameFolder =>
+      'Nová zo šablóny v rovnakom priečinku';
+  @override
+  String trashOriginalPath(String path) => 'bola v $path';
+  @override
   String get newNoteHere => 'Nová poznámka sem';
   @override
   String get newFolderHere => 'Nový priečinok sem';

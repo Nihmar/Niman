@@ -822,6 +822,12 @@ final class BasqueStrings extends Strings {
   @override
   String get newFolderTitle => 'Karpeta berria';
   @override
+  String get newNoteSameFolder => 'Ohar berria karpeta berean';
+  @override
+  String get newFromTemplateSameFolder => 'Txantiloitik berria karpeta berean';
+  @override
+  String trashOriginalPath(String path) => 'hemen zegoen: $path';
+  @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
   String get newFolderHere => 'Karpeta berria hemen';
