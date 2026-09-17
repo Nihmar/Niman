@@ -867,6 +867,11 @@ final class ItalianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'era in $path';
   @override
+  String get trashOriginalRoot => 'era in radice della libreria';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elemento' : '$count elementi';
+  @override
   String get newNoteHere => 'Nuova nota qui';
   @override
   String get newFolderHere => 'Nuova cartella qui';

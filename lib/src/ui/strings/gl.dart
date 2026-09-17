@@ -872,6 +872,11 @@ final class GalicianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'estaba en $path';
   @override
+  String get trashOriginalRoot => 'estaba na ra\u00edz da biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elemento' : '$count elementos';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Cartafol novo aquí';

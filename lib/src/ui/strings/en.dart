@@ -859,6 +859,10 @@ final class EnglishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'was at $path';
   @override
+  String get trashOriginalRoot => 'was in the library root';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 item' : '$count items';
+  @override
   String get newNoteHere => 'New note here';
   @override
   String get newFolderHere => 'New folder here';

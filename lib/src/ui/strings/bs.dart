@@ -866,6 +866,10 @@ final class BosnianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bilo u $path';
   @override
+  String get trashOriginalRoot => 'bilo je u korijenu biblioteke';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 stavka' : '$count stavki';
+  @override
   String get newNoteHere => 'Nova bilješka ovdje';
   @override
   String get newFolderHere => 'Nova mapa ovdje';

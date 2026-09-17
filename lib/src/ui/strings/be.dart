@@ -866,6 +866,11 @@ final class BelarusianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'было ў $path';
   @override
+  String get trashOriginalRoot => 'было ў корані бібліятэкі';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 элемент' : '$count элементаў';
+  @override
   String get newNoteHere => 'Новая заўвага тут';
   @override
   String get newFolderHere => 'Новая папка тут';

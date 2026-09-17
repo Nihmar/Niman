@@ -862,6 +862,11 @@ final class IcelandicStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'var í $path';
   @override
+  String get trashOriginalRoot => 'var \u00ed r\u00f3t b\u00f3kasafnsins';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 atri\u00f0i' : '$count atri\u00f0i';
+  @override
   String get newNoteHere => 'Nýtt minnisblað hér';
   @override
   String get newFolderHere => 'Ný mappa hér';

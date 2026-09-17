@@ -866,6 +866,11 @@ final class SlovakStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bola v $path';
   @override
+  String get trashOriginalRoot => 'bolo v koreni kni\u017enice';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 polo\u017eka' : '$count polo\u017eiek';
+  @override
   String get newNoteHere => 'Nová poznámka sem';
   @override
   String get newFolderHere => 'Nový priečinok sem';

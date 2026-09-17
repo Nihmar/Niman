@@ -869,6 +869,11 @@ final class BulgarianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'беше в $path';
   @override
+  String get trashOriginalRoot => 'беше в корена на библиотеката';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 елемент' : '$count елемента';
+  @override
   String get newNoteHere => 'Нова бележка тук';
   @override
   String get newFolderHere => 'Нова папка тук';

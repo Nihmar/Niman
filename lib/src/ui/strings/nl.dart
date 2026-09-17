@@ -866,6 +866,10 @@ final class DutchStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'stond in $path';
   @override
+  String get trashOriginalRoot => 'stond in de hoofdmap van de bibliotheek';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 item' : '$count items';
+  @override
   String get newNoteHere => 'Nieuwe notitie hier';
   @override
   String get newFolderHere => 'Nieuwe map hier';

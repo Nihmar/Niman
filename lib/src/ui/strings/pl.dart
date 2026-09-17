@@ -876,6 +876,12 @@ final class PolishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'była w $path';
   @override
+  String get trashOriginalRoot =>
+      'by\u0142o w katalogu g\u0142\u00f3wnym biblioteki';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count element\u00f3w';
+  @override
   String get newNoteHere => 'Nowa notatka tutaj';
   @override
   String get newFolderHere => 'Nowy katalog tutaj';

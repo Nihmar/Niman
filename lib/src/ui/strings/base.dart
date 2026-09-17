@@ -429,6 +429,8 @@ abstract base class Strings {
   String get newNoteSameFolder;
   String get newFromTemplateSameFolder;
   String trashOriginalPath(String path);
+  String get trashOriginalRoot;
+  String trashItemCount(int count);
   String get newNoteHere;
   String get newFolderHere;
   String get newListNoteTitle;

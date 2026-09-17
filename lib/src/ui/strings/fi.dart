@@ -865,6 +865,11 @@ final class FinnishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'sijainti: $path';
   @override
+  String get trashOriginalRoot => 'oli kirjaston juuressa';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 kohde' : '$count kohdetta';
+  @override
   String get newNoteHere => 'Uusi muistiinpano tähän';
   @override
   String get newFolderHere => 'Uusi kansio tähän';

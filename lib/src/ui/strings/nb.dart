@@ -860,6 +860,11 @@ final class NorwegianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'lå i $path';
   @override
+  String get trashOriginalRoot => 'var i roten av biblioteket';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementer';
+  @override
   String get newNoteHere => 'Nytt notat her';
   @override
   String get newFolderHere => 'Ny mappe her';

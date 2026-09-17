@@ -810,6 +810,10 @@ final class JapaneseStrings extends Strings {
   @override
   String trashOriginalPath(String path) => '元の場所: $path';
   @override
+  String get trashOriginalRoot => 'ライブラリのルートにあった';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1\u4ef6' : '$count\u4ef6';
+  @override
   String get newNoteHere => 'ここに新しいノート';
   @override
   String get newFolderHere => 'ここに新しいフォルダ';

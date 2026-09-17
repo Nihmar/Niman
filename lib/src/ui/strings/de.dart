@@ -878,6 +878,11 @@ final class GermanStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'war in $path';
   @override
+  String get trashOriginalRoot => 'war im Hauptordner der Bibliothek';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 Element' : '$count Elemente';
+  @override
   String get newNoteHere => 'Neue Notiz hier';
   @override
   String get newFolderHere => 'Neuer Ordner hier';

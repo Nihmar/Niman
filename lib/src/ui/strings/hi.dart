@@ -843,6 +843,12 @@ final class HindiStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'यहाँ था: $path';
   @override
+  String get trashOriginalRoot => 'लाइब्रेरी के रूट में था';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0906\u0907\u091f\u092e'
+      : '$count \u0906\u0907\u091f\u092e';
+  @override
   String get newNoteHere => 'यहाँ नया नोट';
   @override
   String get newFolderHere => 'यहाँ नया फ़ोल्डर';

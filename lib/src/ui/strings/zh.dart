@@ -800,6 +800,11 @@ final class ChineseStrings extends Strings {
   @override
   String trashOriginalPath(String path) => '原位置：$path';
   @override
+  String get trashOriginalRoot => '\u4f4d\u4e8e\u6587\u5e93\u6839\u76ee\u5f55';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u4e2a\u9879\u76ee' : '$count \u4e2a\u9879\u76ee';
+  @override
   String get newNoteHere => '在此新建笔记';
   @override
   String get newFolderHere => '在此新建文件夹';

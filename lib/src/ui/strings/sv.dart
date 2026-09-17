@@ -865,6 +865,10 @@ final class SwedishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'låg i $path';
   @override
+  String get trashOriginalRoot => 'var i bibliotekets rot';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 objekt' : '$count objekt';
+  @override
   String get newNoteHere => 'Ny anteckning här';
   @override
   String get newFolderHere => 'Ny mapp här';

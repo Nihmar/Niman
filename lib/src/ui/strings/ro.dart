@@ -873,6 +873,11 @@ final class RomanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'era în $path';
   @override
+  String get trashOriginalRoot => 'era \u00een r\u0103d\u0103cina bibliotecii';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elemente';
+  @override
   String get newNoteHere => 'Notă nouă aici';
   @override
   String get newFolderHere => 'Dosar nou aici';

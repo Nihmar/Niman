@@ -863,6 +863,11 @@ final class LatvianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'atradās: $path';
   @override
+  String get trashOriginalRoot => 'bija bibliot\u0113kas sakn\u0113';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 vienums' : '$count vienumi';
+  @override
   String get newNoteHere => 'Jauna piezīme šeit';
   @override
   String get newFolderHere => 'Jauns katalogs šeit';

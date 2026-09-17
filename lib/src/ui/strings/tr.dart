@@ -857,6 +857,12 @@ final class TurkishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'buradaydı: $path';
   @override
+  String get trashOriginalRoot =>
+      'kitapl\u0131\u011f\u0131n k\u00f6k\u00fcndeydi';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00f6\u011fe' : '$count \u00f6\u011fe';
+  @override
   String get newNoteHere => 'Buraya yeni not';
   @override
   String get newFolderHere => 'Buraya yeni klasör';

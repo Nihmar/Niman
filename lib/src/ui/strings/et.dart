@@ -854,6 +854,11 @@ final class EstonianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'asus siin: $path';
   @override
+  String get trashOriginalRoot => 'oli kogu juurkataloogis';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00fcksus' : '$count \u00fcksust';
+  @override
   String get newNoteHere => 'Uus märge siia';
   @override
   String get newFolderHere => 'Uus kaust siia';
