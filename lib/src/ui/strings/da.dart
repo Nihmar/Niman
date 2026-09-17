@@ -68,6 +68,17 @@ final class DanishStrings extends Strings {
   String get trashSubtitle =>
       'Sletninger flyttes til .trash/ (fra = permanent sletning)';
   @override
+  String get trashAutoEmptyTitle => 'Tøm affald automatisk';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Ældre sletninger forsvinder for altid, når biblioteket åbnes';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Aldrig'
+      : days == 1
+      ? '1 dag'
+      : '$days dage';
+  @override
   String get debugLogsTitle => 'Fejlfinding-logs';
   @override
   String get debugLogsSubtitle =>

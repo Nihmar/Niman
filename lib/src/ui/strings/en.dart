@@ -67,6 +67,17 @@ final class EnglishStrings extends Strings {
   @override
   String get trashSubtitle => 'Deletions move to .trash/ (off = hard delete)';
   @override
+  String get trashAutoEmptyTitle => 'Auto-empty trash';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Older deletions go for good when the library opens';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Never'
+      : days == 1
+      ? '1 day'
+      : '$days days';
+  @override
   String get debugLogsTitle => 'Debug logs';
   @override
   String get debugLogsSubtitle => 'Record app events in an in-memory buffer';

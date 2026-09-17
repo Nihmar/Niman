@@ -69,6 +69,13 @@ final class AlbanianStrings extends Strings {
       'Elementët e fshirë shkojnë në .trash/ (jo aktiv = fshirje '
       'përfundimtare)';
   @override
+  String get trashAutoEmptyTitle => 'Zbrazje automatike e koshit';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Fshirjet më të vjetra zhduken përgjithmonë kur hapet biblioteka';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0 ? 'Kurrë' : '$days ditë';
+  @override
   String get debugLogsTitle => 'Ditëzatat e diagnostikimit';
   @override
   String get debugLogsSubtitle =>

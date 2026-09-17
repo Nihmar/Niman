@@ -69,6 +69,19 @@ final class BelarusianStrings extends Strings {
       'Выдаленыя элементы перамяшчаюцца ў .trash/ (адключана = канчатковае '
       'выдаленне)';
   @override
+  String get trashAutoEmptyTitle => 'Аўтаачыстка кошыка';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Старыя выдаленні знікаюць назаўжды пры адкрыцці бібліятэкі';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Ніколі'
+      : switch ((days % 10, days % 100)) {
+          (1, != 11) => '$days дзень',
+          (2 || 3 || 4, < 12 || > 14) => '$days дні',
+          _ => '$days дзён',
+        };
+  @override
   String get debugLogsTitle => 'Журналы адлагоджвання';
   @override
   String get debugLogsSubtitle => 'Фіксуе падзеі праграмы ў буферы памяці';

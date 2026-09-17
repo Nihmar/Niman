@@ -68,6 +68,17 @@ final class SwedishStrings extends Strings {
   String get trashSubtitle =>
       'Borttagningar flyttas till .trash/ (av = permanent radering)';
   @override
+  String get trashAutoEmptyTitle => 'Töm papperskorgen automatiskt';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Äldre raderingar försvinner för gott när biblioteket öppnas';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Aldrig'
+      : days == 1
+      ? '1 dag'
+      : '$days dagar';
+  @override
   String get debugLogsTitle => 'Felsökningsloggar';
   @override
   String get debugLogsSubtitle =>

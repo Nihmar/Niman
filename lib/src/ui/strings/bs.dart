@@ -69,6 +69,18 @@ final class BosnianStrings extends Strings {
       'Brisani elementi se premještaju u .trash/ (isključeno = trajno '
       'brisanje)';
   @override
+  String get trashAutoEmptyTitle => 'Automatsko pražnjenje korpe';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Starija brisanja nestaju zauvijek pri otvaranju biblioteke';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nikad'
+      : switch ((days % 10, days % 100)) {
+          (1, != 11) => '$days dan',
+          _ => '$days dana',
+        };
+  @override
   String get debugLogsTitle => 'Dnevnik za otklanjanje grešaka';
   @override
   String get debugLogsSubtitle =>

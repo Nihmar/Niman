@@ -68,6 +68,17 @@ final class SpanishStrings extends Strings {
   String get trashSubtitle =>
       'Los elementos eliminados van a .trash/ (off = borrado definitivo)';
   @override
+  String get trashAutoEmptyTitle => 'Vaciado automático de la papelera';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Las eliminaciones antiguas se pierden al abrir la biblioteca';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nunca'
+      : days == 1
+      ? '1 día'
+      : '$days días';
+  @override
   String get debugLogsTitle => 'Registros de depuración';
   @override
   String get debugLogsSubtitle =>

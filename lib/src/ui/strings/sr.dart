@@ -69,6 +69,18 @@ final class SerbianStrings extends Strings {
       'Обрисани елементи се премештају у .trash/ (искључено = трајно '
       'брисање)';
   @override
+  String get trashAutoEmptyTitle => 'Аутоматско пражњење коша';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Старија брисања нестају заувек при отварању библиотеке';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Никад'
+      : switch ((days % 10, days % 100)) {
+          (1, != 11) => '$days дан',
+          _ => '$days дана',
+        };
+  @override
   String get debugLogsTitle => 'Дневници за отклањање грешака';
   @override
   String get debugLogsSubtitle =>

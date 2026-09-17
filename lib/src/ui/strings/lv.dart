@@ -69,6 +69,17 @@ final class LatvianStrings extends Strings {
       'Dzēstie elementi tiek pārvietoti uz .trash/ (izslēgts = neatgriezeniska '
       'dzēšana)';
   @override
+  String get trashAutoEmptyTitle => 'Automātiski iztukšot konteineru';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Vecāki dzēsumi pazūd neatgriezeniski, atverot bibliotēku';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nekad'
+      : days % 10 == 1 && days % 100 != 11
+      ? '$days diena'
+      : '$days dienas';
+  @override
   String get debugLogsTitle => 'Atkļūdošanas žurnāls';
   @override
   String get debugLogsSubtitle => 'Fiksē programmas notikumus atmiņas buferī';

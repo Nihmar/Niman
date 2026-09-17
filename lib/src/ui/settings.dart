@@ -86,6 +86,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
   int _indentWidth = 2;
   int _historyVersions = defaultHistoryVersions;
   int _historyInterval = defaultHistoryIntervalMinutes;
+  int _trashAutoEmptyDays = trashAutoEmptyOff;
   String? _quickNotePath;
   String? _listFolder;
   String? _templateFolder;
@@ -150,6 +151,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
     final indentWidth = await controller.indentWidth;
     final historyVersions = await controller.historyVersions;
     final historyInterval = await controller.historyIntervalMinutes;
+    final trashAutoEmptyDays = await controller.trashAutoEmptyDays;
     final quickNotePath = await ops.quickNotePath;
     final listFolder = await ops.listNoteFolder;
     final templateFolder = await ops.templateFolder;
@@ -179,6 +181,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         _indentWidth = indentWidth;
         _historyVersions = historyVersions;
         _historyInterval = historyInterval;
+        _trashAutoEmptyDays = trashAutoEmptyDays;
         _quickNotePath = quickNotePath;
         _listFolder = listFolder;
         _templateFolder = templateFolder;
@@ -727,6 +730,25 @@ final class _SettingsBodyState extends State<SettingsBody> {
     if (location != null) await _setMissingNoteLocation(location);
   }
 
+  /// Asks how long a deletion may sit in the trash before the library
+  /// empties it on its own (issue #79).
+  Future<void> _chooseTrashAutoEmpty() async {
+    final days = await showSettingsChoice<int>(
+      context,
+      dialogKey: const Key('trash-auto-empty-dialog'),
+      title: AppStrings.trashAutoEmptyTitle,
+      subtitle: AppStrings.trashAutoEmptySubtitle,
+      current: _trashAutoEmptyDays,
+      options: [
+        for (final choice in trashAutoEmptyChoices)
+          SettingsOption(choice, AppStrings.trashAutoEmptyValue(choice)),
+      ],
+    );
+    if (days == null) return;
+    await widget.controller.setTrashAutoEmptyDays(days);
+    if (mounted) setState(() => _trashAutoEmptyDays = days);
+  }
+
   /// Asks how many versions of each note the history keeps.
   Future<void> _chooseHistoryVersions() async {
     final versions = await showSettingsChoice<int>(
@@ -1206,6 +1228,16 @@ final class _SettingsBodyState extends State<SettingsBody> {
           subtitle: Text(AppStrings.trashSubtitle),
           value: _trash ?? true,
           onChanged: _toggleTrash,
+        ),
+        // Under the toggle it depends on: with the trash off there is
+        // nothing waiting in it to empty.
+        SettingsValueRow(
+          key: const Key('trash-auto-empty-setting'),
+          title: AppStrings.trashAutoEmptyTitle,
+          subtitle: AppStrings.trashAutoEmptySubtitle,
+          value: AppStrings.trashAutoEmptyValue(_trashAutoEmptyDays),
+          enabled: _trash ?? true,
+          onTap: _chooseTrashAutoEmpty,
         ),
         SettingsValueRow(
           key: const Key('history-versions-setting'),

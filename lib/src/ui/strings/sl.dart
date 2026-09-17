@@ -69,6 +69,20 @@ final class SlovenianStrings extends Strings {
       'Izbrisani elementi se prenesejo v .trash/ (izklopljeno = trajno '
       'brisanje)';
   @override
+  String get trashAutoEmptyTitle => 'Samodejno praznjenje koša';
+  @override
+  String get trashAutoEmptySubtitle =>
+      'Starejši izbrisi za vedno izginejo ob odprtju knjižnice';
+  @override
+  String trashAutoEmptyValue(int days) => days == 0
+      ? 'Nikoli'
+      : switch (days % 100) {
+          1 => '$days dan',
+          2 => '$days dneva',
+          3 || 4 => '$days dnevi',
+          _ => '$days dni',
+        };
+  @override
   String get debugLogsTitle => 'Razhroščevalni dnevnik';
   @override
   String get debugLogsSubtitle =>
