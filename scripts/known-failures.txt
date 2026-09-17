@@ -38,3 +38,4 @@
 ~test/unit/search_replace_test.dart: ReplaceRunner case-sensitive run touches only the exact case [E]
 ~test/unit/note_ops_test.dart: trash management deleteTrashPermanently removes the manifest item and disk [E]
 ~test/unit/settings_resolver_test.dart: every overridable setting round trips booleans [E]
+~test/widget/transcription_models_screen_test.dart: the settings section reads the model and the language [E]
