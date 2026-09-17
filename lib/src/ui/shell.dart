@@ -40,19 +40,19 @@ import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
-import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_move_dialog.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
+import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
-import 'package:niman/src/ui/tags_screen.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
@@ -326,10 +326,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Query, results, and scroll therefore survive a switch, by choice.
   final Set<ShellTab> _visitedTabs = <ShellTab>{ShellTab.files};
 
-  /// Whether the Tags screen has ever been opened: like the tabs, it
-  /// mounts once and stays alive so the search query survives the flip.
-  bool _tagsVisited = false;
-
   /// The tab active when the full-screen note opened (back returns there).
   ShellTab _noteFromTab = ShellTab.files;
 
@@ -455,7 +451,6 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Whether the Search tab shows the Tags screen (T-M3-06) instead of
   /// the search box; the tabs button flips it and back.
-  bool _showTags = false;
 
   /// The link-resolution source (T-M3-07), resolved from the session.
   LinkSource? _linkSource;
@@ -1972,37 +1967,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// of the narrow bottom bar — same tabs, same order, same routing, so a
   /// tab switch does the same thing on both layouts.
   Widget _shellRail() {
-    return NavigationRail(
-      key: const Key('shell-rail'),
+    return ShellRail(
       selectedIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
-      labelType: NavigationRailLabelType.all,
-      destinations: [
-        NavigationRailDestination(
-          icon: const Icon(Icons.folder_outlined),
-          selectedIcon: const Icon(Icons.folder),
-          label: Text(AppStrings.tabFiles),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.check_box_outlined),
-          selectedIcon: const Icon(Icons.check_box),
-          label: Text(AppStrings.todoTitle),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.search),
-          label: Text(AppStrings.tabSearch),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.edit_outlined),
-          selectedIcon: const Icon(Icons.edit),
-          label: Text(AppStrings.quickNoteTitle),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          label: Text(AppStrings.tabSettings),
-        ),
-      ],
     );
   }
 
@@ -2314,38 +2281,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// app is navigated, so having them vanish behind a note meant going
   /// back before going anywhere.
   Widget _shellTabs() {
-    return NavigationBar(
-      key: const Key('shell-tabs'),
+    return ShellTabBar(
       selectedIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
-      destinations: [
-        NavigationDestination(
-          key: const Key('tab-files'),
-          icon: const Icon(Icons.folder_outlined),
-          selectedIcon: const Icon(Icons.folder),
-          label: AppStrings.tabFiles,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.check_box_outlined),
-          selectedIcon: const Icon(Icons.check_box),
-          label: AppStrings.todoTitle,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.search),
-          label: AppStrings.tabSearch,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.edit_outlined),
-          selectedIcon: const Icon(Icons.edit),
-          label: AppStrings.quickNoteTitle,
-        ),
-        NavigationDestination(
-          key: const Key('tab-settings'),
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          label: AppStrings.tabSettings,
-        ),
-      ],
     );
   }
 
@@ -2566,53 +2504,16 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
-  /// The search tab: Search and Tags side by side, Tags mounting once.
-  /// The flip stays instant (as before — same tab, no transition); the
-  /// outer fade already covered entering the tab. Search retains layout
-  /// while Tags shows (T-TS-10): flipping back is then paint-only,
-  /// matching the tab-level switch into Search.
+  /// The Search tab's body; the slot owns which of the two shows
+  /// (issue #100 moved it into [SearchSlot]).
   Widget _searchSlot(LibrarySession controller) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Visibility(
-          visible: !_showTags,
-          maintainState: true,
-          maintainAnimation: true,
-          maintainSize: true,
-          child: TickerMode(
-            enabled: !_showTags,
-            child: SearchScreen(
-              controller: controller,
-              onOpenNote: _openSearchNote,
-              onOpenTags: () => setState(() {
-                _showTags = true;
-                _tagsVisited = true;
-              }),
-            ),
-          ),
-        ),
-        if (_tagsVisited)
-          Offstage(
-            offstage: !_showTags,
-            child: TickerMode(
-              enabled: _showTags,
-              child: TagsScreen(
-                controller: controller,
-                onOpenNote: _openSearchNote,
-                onBack: () => setState(() => _showTags = false),
-              ),
-            ),
-          ),
-      ],
-    );
+    return SearchSlot(controller: controller, onOpenNote: _openSearchNote);
   }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):
-  /// creation, the trash and the sort order — the app-bar actions the wide
-  /// layout used to carry, where the tree is the thing they act on.
-  /// The bar under the tree: **New**, then the shell's own sync, trash
-  /// and sort (issue #100 moved the bar itself into [TreeFooterBar]).
+  /// creation, the trash and the sort order — the app-bar actions the
+  /// wide layout used to carry, where the tree is the thing they act on
+  /// (issue #100 moved the bar itself into [TreeFooterBar]).
   Widget _treeFooter(LibrarySession controller) {
     return TreeFooterBar(
       controller: controller,
