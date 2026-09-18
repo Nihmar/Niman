@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -344,7 +345,14 @@ void main() {
     await pump(tester);
     final row = find.byKey(const Key('keyboard-shortcuts'));
     expect(row, findsOneWidget);
-    expect(tester.widget<ListTile>(row).enabled, isTrue);
+    expect(
+      tester
+          .widget<ListTile>(
+            find.descendant(of: row, matching: find.byType(ListTile)),
+          )
+          .enabled,
+      isTrue,
+    );
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(find.byType(KeyboardShortcutsScreen), findsOneWidget);
@@ -532,6 +540,17 @@ void main() {
         libraryName: 'Notes',
         context: context,
         flashHome: (_) {},
+        // The phone's way in: the area's own screen, pushed.
+        openArea: (area, row) => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => settingsAreas(
+              controller: controller,
+              spellCheck: null,
+              transcription: null,
+              keyboardAttached: true,
+            ).firstWhere((a) => a.id == area).build(row),
+          ),
+        ),
       );
       expect(entries, isNotEmpty);
 

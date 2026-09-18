@@ -229,7 +229,8 @@ void main() {
     await settle(tester);
 
     // Switch the trash toggle off in settings (the rail tab). The
-    // toggle sits in the pushed Trash area (issue #104).
+    // window is wide, so the Trash area shows beside the list rather
+    // than over it (#172): nothing to go back from.
     await tester.tap(find.byKey(const Key('rail-settings')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('settings-area-trash-history')));
@@ -239,9 +240,7 @@ void main() {
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
     await settle(tester);
-    // Back on the settings home: the area screen covered the rail.
-    await tester.tap(find.backButton());
-    await settle(tester);
+    expect(find.backButton(), findsNothing);
     await tester.tap(find.byKey(const Key('rail-files')));
     await settle(tester);
 
