@@ -43,11 +43,10 @@ void main() {
   }
 
   /// The switch inside the [HighlightRow] wrapper (issue #104): the
-  /// row's key sits on the wrapper, so the tile is a descendant of it.
-  SwitchListTile switchOf(WidgetTester tester, Finder row) =>
-      tester.widget<SwitchListTile>(
-        find.descendant(of: row, matching: find.byType(SwitchListTile)),
-      );
+  /// row's key sits on the wrapper, so the switch is a descendant of it.
+  Switch switchOf(WidgetTester tester, Finder row) => tester.widget<Switch>(
+    find.descendant(of: row, matching: find.byType(Switch)),
+  );
 
   testWidgets('the home groups the settings under its areas', (tester) async {
     await pump(tester);
@@ -98,8 +97,9 @@ void main() {
     await tester.tap(find.byKey(const Key('indent-width')));
     await tester.pumpAndSettle();
 
-    // The explanation the list no longer prints is here instead.
-    expect(find.text(AppStrings.indentWidthSubtitle), findsOne);
+    // The explanation is under the row's label (#172) and in the dialog,
+    // where the choice is made.
+    expect(find.text(AppStrings.indentWidthSubtitle), findsNWidgets(2));
     await tester.tap(find.byKey(const Key('settings-choice-6')));
     await tester.pumpAndSettle();
 
@@ -366,9 +366,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final tile = find.byType(ListTile);
-    expect(tester.widget<ListTile>(tile).enabled, isFalse);
-    await tester.tap(tile);
+    final tile = find.text('Shortcuts');
+    await tester.tap(tile, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tapped, isFalse);
   });

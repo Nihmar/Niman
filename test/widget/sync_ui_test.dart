@@ -11,6 +11,7 @@ import 'package:niman/src/sync/sync_engine.dart';
 import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/sync/webdav/webdav_probe.dart';
 import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/sync/sync_conflict_screen.dart';
 import 'package:niman/src/ui/sync/sync_flow.dart';
 import 'package:niman/src/ui/sync/sync_settings_screen.dart';
@@ -203,16 +204,13 @@ void main() {
       await tester.tap(find.byKey(const Key('sync-auto')));
       await tester.pumpAndSettle();
       expect(sync.calls.last, 'triggers auto false');
-      final interval = tester.widget<ListTile>(
-        find.descendant(
-          of: find.byKey(const Key('sync-interval')),
-          matching: find.byType(ListTile),
-        ),
+      final interval = tester.widget<SettingsValueRow>(
+        find.byKey(const Key('sync-interval')),
       );
       expect(interval.enabled, isFalse);
       expect(
         tester
-            .widget<SwitchListTile>(find.byKey(const Key('sync-wifi-only')))
+            .widget<SettingsSwitchRow>(find.byKey(const Key('sync-wifi-only')))
             .onChanged,
         isNull,
       );

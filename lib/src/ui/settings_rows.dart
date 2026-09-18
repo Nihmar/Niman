@@ -1,22 +1,31 @@
-/// The building blocks of the settings list (2026-09-08 user feedback:
-/// the screen read as one undifferentiated wall).
+/// The building blocks of the settings list.
 ///
-/// Two shapes, and the whole reorganisation follows from them. A section
-/// header groups what belongs together, and every setting is one row of
-/// the same height: a switch flips in place, anything with more than two
-/// choices shows its current value on the right and opens a dialog.
+/// Every setting is one shape (issue #172, replacing the 2026-09-08 rows):
+/// its **label**, the **description** under it, and the **control** under
+/// that, stacked in a column capped at [settingsRowMaxWidth]. The
+/// description is read before the control is touched rather than after,
+/// and on a wide window the control sits under its label instead of lost
+/// at the far edge. The phone and the desktop share the shape — a setting
+/// reads the same on both — and there is one row widget per kind of
+/// control, not one per platform:
 ///
-/// What that buys is a screen you can read without reading it. The old
-/// layout gave a switch one line and a `SegmentedButton` three — title,
-/// subtitle, then the buttons — so four of them in a row built a block
-/// with no rhythm to scan. Here the names run down the left and the
-/// values down the right, and the subtitle moves into the dialog, where
-/// it is read at the moment it is needed rather than every time the
-/// screen is opened.
+/// * [SettingsSwitchRow]: a switch, flipped in place;
+/// * [SettingsValueRow]: a field showing the current value, opening the
+///   dialog that changes it — or, with no value, a way to another screen;
+/// * [SettingsActionRow]: something that happens now (export the log);
+/// * [SettingsRowFrame]: the shape itself, and a fact with nothing to
+///   change (the library's path).
+///
+/// The dialogs the value rows open are in `settings_dialogs.dart`.
 library;
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/ui/strings.dart';
+
+export 'package:niman/src/ui/settings_dialogs.dart';
+
+/// How wide a settings row's text and control may run: a readable line,
+/// the same measure the note column keeps (#171).
+const double settingsRowMaxWidth = 620;
 
 /// A settings section heading.
 final class SettingsSection extends StatelessWidget {
@@ -41,27 +50,143 @@ final class SettingsSection extends StatelessWidget {
   }
 }
 
-/// One option in a [showSettingsChoice] dialog.
-final class SettingsOption<T> {
-  /// Creates an option labelled [label] for the value [value].
-  const new(this.value, this.label);
+/// The shape every settings row shares: [title], [description] under it,
+/// [control] under that, in a column capped at [settingsRowMaxWidth].
+///
+/// [trailing] sits at the end of the title's line (a navigation row's
+/// chevron). [onTap] makes the whole row a target; [enabled] false greys
+/// it out and drops the tap.
+final class SettingsRowFrame extends StatelessWidget {
+  /// Creates the row for [title].
+  const new({
+    required this.title,
+    this.description,
+    this.control,
+    this.trailing,
+    this.onTap,
+    this.enabled = true,
+    this.destructive = false,
+    super.key,
+  });
 
-  /// The value chosen by this option.
-  final T value;
+  /// The setting's name.
+  final String title;
 
-  /// What the option reads as, in the list and as the row's value.
-  final String label;
+  /// Whether [title] reads in the error colour.
+  final bool destructive;
+
+  /// What the setting does, or — for a fact — what it is.
+  final String? description;
+
+  /// What changes the setting, under the text.
+  final Widget? control;
+
+  /// At the end of the title's line.
+  final Widget? trailing;
+
+  /// A tap anywhere on the row.
+  final VoidCallback? onTap;
+
+  /// Whether the row can be used.
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final description = this.description;
+    final trailing = this.trailing;
+    final control = this.control;
+    Widget row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: settingsRowMaxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: destructive
+                          ? theme.textTheme.titleSmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            )
+                          : theme.textTheme.titleSmall,
+                    ),
+                  ),
+                  ?trailing,
+                ],
+              ),
+              if (description != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              if (control != null) ...[const SizedBox(height: 8), control],
+            ],
+          ),
+        ),
+      ),
+    );
+    if (onTap != null) {
+      row = InkWell(onTap: enabled ? onTap : null, child: row);
+    }
+    if (!enabled) row = Opacity(opacity: 0.45, child: row);
+    return MergeSemantics(child: row);
+  }
 }
 
-/// A settings row showing its current value, tapped to change it.
+/// A setting that is on or off: the switch sits under the description,
+/// and a tap anywhere on the row flips it.
+final class SettingsSwitchRow extends StatelessWidget {
+  /// Creates the row for [title], currently [value].
+  const new({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.description,
+    super.key,
+  });
+
+  /// The setting's name.
+  final String title;
+
+  /// What turning it on does.
+  final String? description;
+
+  /// Whether it is on.
+  final bool value;
+
+  /// Flips it; null disables the row (the last editor left on).
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final onChanged = this.onChanged;
+    return SettingsRowFrame(
+      title: title,
+      description: description,
+      enabled: onChanged != null,
+      onTap: onChanged == null ? null : () => onChanged(!value),
+      control: Switch(value: value, onChanged: onChanged),
+    );
+  }
+}
+
+/// A setting with a current value, tapped to change it.
 ///
-/// [value] is what the row reads on the right. A null [value] makes it a
-/// plain navigation row (a chevron and nothing else), which is what the
-/// rows that open a screen of their own want.
-///
-/// [enabled] greys the row out and drops its tap (a `ListTile` with no
-/// `onTap`): for rows whose destination makes no sense on the device —
-/// the keyboard reference on a phone with no physical keyboard.
+/// [value] is shown in a field under the description, the way a drop-down
+/// reads; the tap opens the dialog that changes it. A null [value] makes
+/// it a way to another screen instead: a chevron on the title's line and
+/// no field.
 final class SettingsValueRow extends StatelessWidget {
   /// Creates a row for [title] currently reading [value].
   const new({
@@ -77,19 +202,17 @@ final class SettingsValueRow extends StatelessWidget {
   /// The setting's name.
   final String title;
 
-  /// The current value, shown on the right; null for a navigation row.
+  /// The current value; null for a way to another screen.
   final String? value;
 
-  /// Shown under the title, for the rare row whose value is not
-  /// self-explanatory (the library path, which is a path).
+  /// What the setting does, under the title.
   final String? subtitle;
 
-  /// A warning pill between the value and the chevron: the folders rows
-  /// wear one naming a folder the library does not have yet (issue
-  /// #104), so the row no longer claims it exists.
+  /// A warning pill inside the field: the folders rows wear one naming a
+  /// folder the library does not have yet (issue #104).
   final String? badge;
 
-  /// Whether the row can be tapped; false renders it disabled.
+  /// Whether the row can be used; false greys it out.
   final bool enabled;
 
   /// Opens whatever changes the setting.
@@ -97,183 +220,133 @@ final class SettingsValueRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final current = value;
-    final badge = this.badge;
-    return ListTile(
+    final value = this.value;
+    return SettingsRowFrame(
+      title: title,
+      description: subtitle,
       enabled: enabled,
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (badge != null)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.warning_amber_outlined,
-                    size: 16,
-                    color: theme.colorScheme.tertiary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    badge,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+      onTap: onTap,
+      trailing: value == null ? const Icon(Icons.chevron_right) : null,
+      control: value == null
+          ? null
+          : _ValueField(
+              value: value,
+              badge: badge,
+              onTap: enabled ? onTap : null,
             ),
-          if (current != null)
-            ConstrainedBox(
-              // A long value (a note path) truncates rather than pushing
-              // the chevron off the row or wrapping the whole tile.
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).width * 0.4,
-              ),
-              child: Text(
-                current,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          const Icon(Icons.chevron_right),
-        ],
-      ),
-      onTap: enabled ? onTap : null,
     );
   }
 }
 
-/// Asks for one of [options], returning the chosen value or null.
-///
-/// [subtitle] is the explanation the old inline layout printed under
-/// every title. It belongs here: this is the moment the user is deciding,
-/// and the list behind is quieter without it.
-Future<T?> showSettingsChoice<T>(
-  BuildContext context, {
-  required String title,
-  required List<SettingsOption<T>> options,
-  required T current,
-  String? subtitle,
-  Key? dialogKey,
-}) {
-  return showDialog<T>(
-    context: context,
-    builder: (context) => SimpleDialog(
-      key: dialogKey,
-      title: Text(title),
-      children: [
-        if (subtitle != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-            child: Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        for (final option in options)
-          ListTile(
-            key: Key('settings-choice-${option.value}'),
-            leading: Icon(
-              option.value == current
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: option.value == current
-                  ? Theme.of(context).colorScheme.primary
-                  : null,
-            ),
-            title: Text(option.label),
-            onTap: () => Navigator.of(context).pop(option.value),
-          ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 16, 4),
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppStrings.actionCancel),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
+/// Something that happens now — export the log, check for updates — with
+/// what it last did as its description.
+final class SettingsActionRow extends StatelessWidget {
+  /// Creates the row for [title], run by [onTap].
+  const new({
+    required this.title,
+    required this.onTap,
+    this.description,
+    this.busy = false,
+    this.enabled = true,
+    this.destructive = false,
+    super.key,
+  });
+
+  /// What the action does.
+  final String title;
+
+  /// More about it, or its last outcome.
+  final String? description;
+
+  /// Whether it is running now: a spinner, and no second tap.
+  final bool busy;
+
+  /// Whether it can run now; false greys the row out.
+  final bool enabled;
+
+  /// Whether it undoes something that is hard to get back (disconnecting
+  /// a library from its server): the title reads in the error colour.
+  final bool destructive;
+
+  /// Runs it.
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsRowFrame(
+      title: title,
+      description: description,
+      enabled: enabled,
+      destructive: destructive,
+      onTap: busy ? null : onTap,
+      trailing: busy
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.chevron_right),
+    );
+  }
 }
 
-/// Asks for a value on a continuous scale, returning it or null.
-///
-/// The settings that are not a choice among a handful — the split width
-/// and the two text sizes — given the same row treatment so they do not
-/// become the only inline controls left on the screen. [divisions] snaps
-/// the slider to steps; null leaves it continuous.
-Future<double?> showSettingsSlider(
-  BuildContext context, {
-  required String title,
-  required double current,
-  required double min,
-  required double max,
-  required String Function(double value) format,
-  String? subtitle,
-  Key? dialogKey,
-  Key sliderKey = const Key('split-ratio'),
-  int? divisions,
-}) {
-  var value = current;
-  return showDialog<double>(
-    context: context,
-    builder: (context) => AlertDialog(
-      key: dialogKey,
-      title: Text(title),
-      content: StatefulBuilder(
-        builder: (context, setInner) => Column(
+/// The current value in a bordered field, as a drop-down reads.
+final class _ValueField extends StatelessWidget {
+  const new({required this.value, required this.onTap, this.badge});
+
+  final String value;
+  final String? badge;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final badge = this.badge;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 240),
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+          minimumSize: const Size(0, 40),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          foregroundColor: theme.colorScheme.onSurface,
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (subtitle != null)
+            Flexible(
+              child: Text(
+                value,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 8),
+              Icon(
+                Icons.warning_amber_outlined,
+                size: 16,
+                color: theme.colorScheme.tertiary,
+              ),
+              const SizedBox(width: 4),
               Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                badge,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-            const SizedBox(height: 8),
-            Text(format(value), style: Theme.of(context).textTheme.titleMedium),
-            Slider(
-              key: sliderKey,
-              min: min,
-              max: max,
-              value: value,
-              divisions: divisions,
-              onChanged: (v) => setInner(() => value = v),
+            ],
+            const SizedBox(width: 8),
+            Icon(
+              Icons.expand_more,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppStrings.actionCancel),
-        ),
-        TextButton(
-          key: const Key('settings-slider-save'),
-          onPressed: () => Navigator.of(context).pop(value),
-          child: Text(AppStrings.actionSave),
-        ),
-      ],
-    ),
-  );
+    );
+  }
 }
