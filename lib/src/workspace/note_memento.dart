@@ -51,6 +51,15 @@ final class NoteMemento {
   /// Whether the preview was showing.
   final bool? preview;
 
+  /// A copy with the given fields replaced.
+  NoteMemento copyWith({String? editorKind, bool? preview}) => NoteMemento(
+    selectionBase: selectionBase,
+    selectionExtent: selectionExtent,
+    scrollOffset: scrollOffset,
+    editorKind: editorKind ?? this.editorKind,
+    preview: preview ?? this.preview,
+  );
+
   /// Whether it remembers nothing.
   bool get isEmpty =>
       selectionBase == null &&

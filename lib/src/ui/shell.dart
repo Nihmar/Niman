@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
@@ -28,11 +29,14 @@ import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/deferred_listenable.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
+import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -63,6 +67,7 @@ import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
+import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 
 /// Root screen: the open/create screen until a library is ready, then the
@@ -514,12 +519,24 @@ final class _LibraryShellState extends State<_LibraryShell>
     },
     onDeleted: (path) {
       _workspace.deleted(path);
+      if (_wide) {
+        // The workspace moved the showing tab on already; the tree only
+        // lets go of a selected folder that went with it.
+        final selected = _selected;
+        if (selected != null &&
+            _selectedIsDir &&
+            (selected == path || selected.startsWith('$path/'))) {
+          setState(() => _selected = null);
+        }
+        return;
+      }
       setState(() {
         _selected = null;
         // Deleting the open note closes it: the tabs show at once.
         _noteClosed();
       });
     },
+    onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
     onHistory: _openHistory,
   );
 
@@ -659,12 +676,61 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Editor/preview switch for the non-split layouts (T-UI-06): the eye
   /// action lives in the shared app bar, so the shell owns the state.
+  /// The phone's; on a wide window each tab has its own (#23).
   bool _previewVisible = false;
+
+  /// Whether the window is wide: the tabs' layout (#23).
+  bool get _wide => MediaQuery.sizeOf(context).width >= splitBreakpoint;
+
+  /// The note on screen: on a wide window the showing tab, whatever the
+  /// tree has selected (a folder leaves the tabs alone); on a phone the
+  /// selection.
+  String? get _shownNote =>
+      _wide ? _workspace.value.activePath : (_selectedIsDir ? null : _selected);
+
+  /// Which editor [memento]'s tab shows: its own, while the library
+  /// still offers it; otherwise the library's.
+  EditorKind _editorOf(NoteMemento memento) {
+    final kind = switch (memento.editorKind) {
+      wysiwygEditorKind => EditorKind.wysiwyg,
+      sourceEditorKind => EditorKind.source,
+      _ => null,
+    };
+    return kind != null && _editorSettings.editorsEnabled.contains(kind)
+        ? kind
+        : _editorSettings.editorKind;
+  }
+
+  /// The memento of the tab showing, or an empty one.
+  NoteMemento get _shownMemento =>
+      _workspace.value.focusedPane.activeTab?.memento ?? const NoteMemento();
+
+  /// The editor the note on screen shows.
+  EditorKind get _noteEditorKind =>
+      _wide ? _editorOf(_shownMemento) : _editorSettings.editorKind;
+
+  /// Whether the note on screen shows its preview.
+  bool get _notePreview =>
+      _wide ? _shownMemento.preview ?? false : _previewVisible;
+
+  /// Changes the showing tab's own way of showing its note (#23).
+  void _updateShownTab(NoteMemento Function(NoteMemento memento) change) {
+    final path = _workspace.value.activePath;
+    if (path == null) return;
+    _workspace.controller.update(
+      (w) => w.withMemento(path, change(_shownMemento)),
+    );
+  }
 
   void _togglePreview() {
     // The preview has no editable: flipping to it dismisses the keyboard
     // instead of leaving the IME up over a read-only pane.
-    if (!_previewVisible) FocusManager.instance.primaryFocus?.unfocus();
+    if (!_notePreview) FocusManager.instance.primaryFocus?.unfocus();
+    if (_wide) {
+      final show = !_notePreview;
+      _updateShownTab((m) => m.copyWith(preview: show));
+      return;
+    }
     setState(() {
       _previewVisible = !_previewVisible;
       // Fullscreen belongs to the preview: switching back to the editor
@@ -681,12 +747,12 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// editor hidden): the IME has no target and must go before the
   /// transition, or its resize lands mid-fade.
   bool _opensPreviewOnly() {
-    if (!_previewVisible) return false;
+    if (!_notePreview) return false;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     return !previewSplits(
       _editorSettings.previewMode,
       narrow: narrow,
-      editor: _editorSettings.editorKind,
+      editor: _noteEditorKind,
       previewEnabled: _editorSettings.previewEnabled,
     );
   }
@@ -827,6 +893,76 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the one the shell shows, kept current and kept for the next launch.
   late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
 
+  /// The library's name: what the title bar reads over the tree, once the
+  /// notes' names are on their tabs (#23).
+  String get _libraryName {
+    final root = widget.controller.root;
+    return root == null ? AppStrings.appTitle : p.basename(root);
+  }
+
+  /// The tabs in the title bar (#23), with the unsaved dot of every note
+  /// whose editor holds edits the disk does not have yet.
+  Widget _buildTabs(Widget dragArea) => ListenableBuilder(
+    listenable: _tabsListenable,
+    builder: (context, _) {
+      final root = widget.controller.root;
+      final pane = _workspace.value.focusedPane;
+      return NoteTabBar(
+        tabs: pane.tabs,
+        active: pane.active,
+        unsaved: {
+          if (root != null)
+            for (final path in widget.unsavedTracker.unsavedPaths)
+              if (p.isWithin(root, path)) relPath(path, root),
+        },
+        onActivate: _activateTab,
+        onClose: _workspace.close,
+        onNew: () {
+          _workspace.openNextInNewTab();
+          unawaited(_createFlow.createNote(context));
+        },
+        filler: dragArea,
+      );
+    },
+  );
+
+  /// What the tabs redraw on: the workspace, and — moved out of any build
+  /// it lands in — the unsaved tracker.
+  late final DeferredListenable _tabsListenable = DeferredListenable(
+    Listenable.merge([_workspace.controller, widget.unsavedTracker]),
+  );
+
+  /// The showing tab when [_onWorkspaceChanged] last looked.
+  String? _lastShown;
+
+  /// The workspace moved (#23): a tab shown, closed, renamed. On a wide
+  /// window the tree follows the showing tab, and a newly shown note is
+  /// asked its kind afresh.
+  void _onWorkspaceChanged() {
+    if (!mounted) return;
+    final shown = _workspace.value.activePath;
+    final changed = shown != _lastShown;
+    _lastShown = shown;
+    setState(() {
+      if (!_wide) return;
+      if (changed) _resetNoteKind();
+      if (shown != null) {
+        if (_selected != shown || _selectedIsDir) {
+          _selected = shown;
+          _selectedIsDir = false;
+        }
+      } else if (!_selectedIsDir) {
+        _selected = null;
+      }
+    });
+  }
+
+  /// Shows the tab at [index], and the Files tab it lives in.
+  void _activateTab(int index) {
+    if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files.index);
+    _workspace.activate(index);
+  }
+
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
   String? _openNote;
 
@@ -871,7 +1007,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The app-bar eye action: flips the editor/preview pane.
   Widget _previewToggleAction({bool compact = false}) {
     return PreviewToggleAction(
-      previewVisible: _previewVisible,
+      previewVisible: _notePreview,
       onToggle: _togglePreview,
       compact: compact,
     );
@@ -906,6 +1042,15 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// (T-WYS-12): persisted, then the shell re-reads it. Only offered when
   /// the library enables both editors.
   Future<void> _setEditorKind(EditorKind kind) async {
+    // A tab switches its own editor (#23): the library's setting is only
+    // the one a note opens in.
+    if (_wide) {
+      final name = kind == EditorKind.wysiwyg
+          ? wysiwygEditorKind
+          : sourceEditorKind;
+      _updateShownTab((m) => m.copyWith(editorKind: name));
+      return;
+    }
     if (kind == _editorSettings.editorKind) return;
     final controller = widget.controller;
     await controller.setEditorKind(kind);
@@ -954,6 +1099,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       }
     });
     _homeWidgets.start();
+    _workspace.controller.addListener(_onWorkspaceChanged);
     unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
@@ -982,6 +1128,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void dispose() {
     _markOpenNote(null, null);
+    _workspace.controller.removeListener(_onWorkspaceChanged);
+    _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
@@ -1168,6 +1316,23 @@ final class _LibraryShellState extends State<_LibraryShell>
     // A note opening in preview-only has no editable for the IME.
     final previewOnly = !note.isDir && _opensPreviewOnly();
     if (previewOnly) FocusManager.instance.primaryFocus?.unfocus();
+    if (_wide) {
+      if (note.isDir) {
+        // A folder leaves the tabs alone: the note stays on screen.
+        setState(() {
+          _selected = note.path;
+          _selectedIsDir = true;
+          _expanded.add(note.path);
+        });
+        return;
+      }
+      // Ctrl+click opens alongside (#23); a click shows it in place.
+      final keys = HardwareKeyboard.instance;
+      _workspace.show(
+        note.path,
+        newTab: keys.isControlPressed || keys.isMetaPressed,
+      );
+    }
     setState(() {
       _selected = note.path;
       _selectedIsDir = note.isDir;
@@ -1390,6 +1555,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       note: note,
       isQuickNote: isQuickNote,
       position: position,
+      offersNewTab: _wide,
     );
     if (!mounted) return;
     await _rowActions.run(context, action, note, here);
@@ -1428,8 +1594,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     final controller = widget.controller;
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
-    _markOpenNote(controller.root, selectedPath);
-    _workspace.follow(_selectedIsDir ? null : selectedPath);
+    _markOpenNote(controller.root, _shownNote);
+    _workspace.follow(_selectedIsDir ? null : selectedPath, keepOnNone: _wide);
     final splitsPreview = previewSplits(
       _editorSettings.previewMode,
       narrow: narrow,
@@ -1459,7 +1625,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
       buildFullNote: (path) => _fullNoteView(controller, path),
       window: widget.window,
-      windowTitle: _windowTitle,
+      windowTitle: narrow ? _windowTitle : _libraryName,
+      buildTabs: narrow ? null : _buildTabs,
+      tabsStart:
+          ShellRail.width +
+          1 +
+          (_sidebarVisible ? _editorSettings.treeWidth + _treeDividerWidth : 0),
       sidebarVisible: _sidebarVisible,
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,
@@ -1827,6 +1998,16 @@ final class _LibraryShellState extends State<_LibraryShell>
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
       AppCommand.toggleSidebar: _toggleSidebar,
+      // The tabs are the wide layout's (#23); a phone has one note.
+      AppCommand.closeTab: () {
+        if (_wide) _workspace.closeActive();
+      },
+      AppCommand.nextTab: () {
+        if (_wide) _workspace.cycle(1);
+      },
+      AppCommand.previousTab: () {
+        if (_wide) _workspace.cycle(-1);
+      },
       AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
       AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
       AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
@@ -1866,8 +2047,9 @@ final class _LibraryShellState extends State<_LibraryShell>
               Expanded(
                 child: ShellDetailPane(
                   root: controller.root,
-                  selectedPath: _selected,
-                  selectedIsDir: _selectedIsDir,
+                  tabs: _deck(),
+                  onMemento: _workspace.remember,
+                  onLoaded: _workspace.noteLoaded,
                   showLineNumbers: _editorSettings.lineNumbers,
                   noteColumn: _editorSettings.noteColumn,
                   // The kind toggles and ⋮ sit at the end of the note's
@@ -1879,15 +2061,6 @@ final class _LibraryShellState extends State<_LibraryShell>
                   attachmentsFolder: _editorSettings.attachmentsFolder,
                   indentWidth: _editorSettings.indentWidth,
                   toolbarLayout: _editorSettings.toolbarLayout,
-                  splitPreview: previewSplits(
-                    _editorSettings.previewMode,
-                    narrow: false,
-                    editor: _editorSettings.editorKind,
-                    previewEnabled: _editorSettings.previewEnabled,
-                  ),
-                  showPreview:
-                      _editorSettings.previewEnabled && _previewVisible,
-                  showWysiwyg: _editorSettings.editorKind == EditorKind.wysiwyg,
                   // A single enabled editor has nowhere to switch to:
                   // the note hides its switch instead of offering a
                   // dead toggle.
@@ -1899,7 +2072,6 @@ final class _LibraryShellState extends State<_LibraryShell>
                   onSplitDragEnd: _onSplitDragEnd,
                   linkSource: _linkSource,
                   onOpenNote: _openNoteFromLink,
-                  initialAnchor: _pendingAnchor,
                   kindMode: !_kindRawMode,
                   onNoteKindChanged: _onNoteKindChanged,
                   unsavedTracker: widget.unsavedTracker,
@@ -1912,12 +2084,12 @@ final class _LibraryShellState extends State<_LibraryShell>
                     // desktop (T-PP-22): the header above is about the file,
                     // the footer about how it is shown.
                     if (_previewToggleVisible) ...[
-                      if (_editorSettings.editorKind == EditorKind.source)
+                      if (_noteEditorKind == EditorKind.source)
                         _layoutModeAction(compact: true),
                       if (!previewSplits(
                         _editorSettings.previewMode,
                         narrow: false,
-                        editor: _editorSettings.editorKind,
+                        editor: _noteEditorKind,
                         previewEnabled: _editorSettings.previewEnabled,
                       ))
                         _previewToggleAction(compact: true),
@@ -1931,6 +2103,40 @@ final class _LibraryShellState extends State<_LibraryShell>
       ],
     );
   }
+
+  /// The notes whose editor is mounted (#23): the showing tab and the
+  /// ones kept alive behind it, each shown its own way.
+  List<DetailTab> _deck() {
+    final w = _workspace.value;
+    final mounted = _workspace.mounted();
+    final active = w.activePath;
+    return [
+      for (final tab in w.focusedPane.tabs)
+        if (mounted.contains(tab.path))
+          () {
+            final editor = _editorOf(tab.memento);
+            return DetailTab(
+              path: tab.path,
+              active: tab.path == active,
+              memento: tab.memento,
+              showWysiwyg: editor == EditorKind.wysiwyg,
+              showPreview:
+                  _editorSettings.previewEnabled &&
+                  (tab.memento.preview ?? false),
+              splitPreview: previewSplits(
+                _editorSettings.previewMode,
+                narrow: false,
+                editor: editor,
+                previewEnabled: _editorSettings.previewEnabled,
+              ),
+              anchor: tab.path == active ? _pendingAnchor : null,
+            );
+          }(),
+    ];
+  }
+
+  /// The tree divider's grab width.
+  static const double _treeDividerWidth = 13;
 
   /// The draggable tree/detail divider (T-PP-21): a 1 px visual with a
   /// wider grab box and the resize cursor, mirroring the editor split.
@@ -1951,7 +2157,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       child: const MouseRegion(
         cursor: SystemMouseCursors.resizeColumn,
         child: SizedBox(
-          width: 13,
+          width: _treeDividerWidth,
           child: Center(child: VerticalDivider(width: 1)),
         ),
       ),
