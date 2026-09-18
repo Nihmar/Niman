@@ -9,6 +9,7 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -492,9 +493,61 @@ void main() {
       expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
     });
 
+    // A query matches a row's area as well as its title, so one word can
+    // bring a whole area back — and every one of those rows is a tile in
+    // one list, which Flutter will not have sharing a key.
+    testWidgets('a word that matches a whole area lists its rows', (
+      tester,
+    ) async {
+      await search(tester, 'trash');
+      expect(tester.takeException(), isNull);
+      final keys = tester
+          .widgetList<ListTile>(find.byType(ListTile))
+          .map((tile) => tile.key)
+          .whereType<Key>()
+          .toList();
+      expect(keys, isNotEmpty);
+      expect(keys.toSet().length, keys.length, reason: '$keys');
+    });
+
     testWidgets('nothing matching reads as zero', (tester) async {
       await search(tester, 'zzz-no-such-setting');
       expect(find.text(AppStrings.settingsSearchResults(0)), findsOne);
+    });
+
+    // The index and the screens name each row through `SettingsKeys`, so
+    // they cannot spell it differently. They can still disagree about
+    // whether the row exists at all: a row deleted from its screen
+    // leaves an entry that opens the screen and highlights nothing.
+    testWidgets('every entry points at a row that is really there', (
+      tester,
+    ) async {
+      await pump(tester);
+      final context = tester.element(
+        find.byKey(const Key('settings-search-field')),
+      );
+      final entries = settingsSearchEntries(
+        controller: controller,
+        transcription: null,
+        spellCheck: null,
+        libraryName: 'Notes',
+        context: context,
+        flashHome: (_) {},
+      );
+      expect(entries, isNotEmpty);
+
+      for (final entry in entries) {
+        if (entry.onHome) {
+          // Maintenance actions sit on the home itself.
+          expect(find.byKey(entry.rowKey), findsOneWidget, reason: entry.title);
+          continue;
+        }
+        entry.open();
+        await tester.pumpAndSettle();
+        expect(find.byKey(entry.rowKey), findsOneWidget, reason: entry.title);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+      }
     });
   });
 }

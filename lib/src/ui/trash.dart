@@ -185,7 +185,7 @@ final class _TrashScreenState extends State<TrashScreen> {
           Tooltip(
             message: AppStrings.trashEmptyAction,
             child: TextButton(
-              key: const Key('empty-trash-action'),
+              key: SettingsKeys.trashEmptyAction,
               onPressed: canEmpty ? _confirmEmptyTrash : null,
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.error,
