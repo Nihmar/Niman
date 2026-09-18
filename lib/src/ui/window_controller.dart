@@ -32,10 +32,11 @@ abstract interface class WindowController {
   Future<void> show();
 
   /// Whether this platform gets the app's own title bar instead of the
-  /// system one. Linux first (T-PP-22); Windows after its pass.
+  /// system one. Both desktops (T-PP-22); Android has no window to own.
   bool get customTitleBar;
 
-  /// Hands the title bar to Flutter: frameless window, system bar hidden.
+  /// Hands the title bar to Flutter: the system bar goes, the app draws
+  /// its own. What that takes differs per desktop, see the implementation.
   Future<void> applyCustomTitleBar();
 
   /// Minimizes the window (the title bar's button).
@@ -70,7 +71,7 @@ final class WindowManagerController implements WindowController {
   final ValueNotifier<bool> _maximized = ValueNotifier<bool>(false);
 
   @override
-  bool get customTitleBar => Platform.isLinux;
+  bool get customTitleBar => Platform.isLinux || Platform.isWindows;
 
   @override
   ValueListenable<bool> get maximized => _maximized;
@@ -85,7 +86,24 @@ final class WindowManagerController implements WindowController {
 
   @override
   Future<void> applyCustomTitleBar() async {
-    await _manager.setAsFrameless();
+    // The two desktops need different calls, and on Windows the
+    // difference is not cosmetic.
+    //
+    // Linux (GTK): `setAsFrameless` undecorates the window and
+    // `setTitleBarStyle` hides the header bar the runner installs
+    // (`linux/runner/my_application.cc`). Both, in this order.
+    //
+    // Windows (Win32): the hidden style only. The plugin treats
+    // "frameless" and "hidden title bar" as two exclusive modes — the
+    // second call clears the first's flag — and only the hidden one
+    // adjusts `WM_NCCALCSIZE`. That adjustment is what keeps the resize
+    // margins at the window's edges and what trims the borders when the
+    // window is maximized, so it fills the work area instead of
+    // overhanging it by the frame width. The frameless mode does
+    // neither. Keeping the window's real frame styles is also what
+    // leaves Aero Snap and Win+Arrow working, since both hang off the
+    // system caption the app is only painting over.
+    if (Platform.isLinux) await _manager.setAsFrameless();
     await _manager.setTitleBarStyle(TitleBarStyle.hidden);
     _log.info('custom title bar applied');
   }
