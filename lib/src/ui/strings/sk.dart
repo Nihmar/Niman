@@ -450,6 +450,47 @@ final class SlovakStrings extends Strings {
   String get toolbarIndent => 'Odsadenie';
   @override
   String get toolbarOutdent => 'Zrušiť odsadenie';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Nástroje';
+  @override
+  String get editorToolsTitle => 'Nástroje editora';
+  @override
+  String get toolCountListTitle => 'Spočítať zoznam';
+  @override
+  String get toolCountListSubtitle =>
+      'Sčíta, čo riadky vymenúvajú, ako zaškrtávací zoznam';
+  @override
+  String get toolCountListNeedsList =>
+      'Táto poznámka nemá zoznam na spočítanie';
+  @override
+  String get tallySourceLabel => 'Zoznam';
+  @override
+  String get tallyCutLabel => 'Čítať každý riadok ako';
+  @override
+  String get tallyCutDash => 'Meno - hodnoty';
+  @override
+  String get tallyCutColon => 'Meno: hodnoty';
+  @override
+  String get tallyCutCommas => 'Hodnoty oddelené čiarkou';
+  @override
+  String get tallyCutWhole => 'Celý riadok ako jedna hodnota';
+  @override
+  String get tallySortLabel => 'Poradie';
+  @override
+  String get tallySortCount => 'Najčastejšie prvé';
+  @override
+  String get tallySortAlphabetical => 'Abecedne';
+  @override
+  String get tallySortFirstSeen => 'Ako sú uvedené';
+  @override
+  String get tallyInsert => 'Vložiť';
+  @override
+  String get tallyUpdate => 'Aktualizovať';
+  @override
+  String get tallyNothingToCount => 'Tu nie je čo počítať';
   @override
   String get headingDialogTitle => 'Úroveň nadpisu';
 

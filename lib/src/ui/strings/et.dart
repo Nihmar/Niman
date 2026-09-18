@@ -441,6 +441,47 @@ final class EstonianStrings extends Strings {
   String get toolbarIndent => 'Taande';
   @override
   String get toolbarOutdent => 'Tühista taande';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Tööriistad';
+  @override
+  String get editorToolsTitle => 'Redaktori tööriistad';
+  @override
+  String get toolCountListTitle => 'Loenda loend';
+  @override
+  String get toolCountListSubtitle =>
+      'Liidab kokku selle, mida read loetlevad, märkeloendina';
+  @override
+  String get toolCountListNeedsList =>
+      'Selles märkmes pole loendit, mida loendada';
+  @override
+  String get tallySourceLabel => 'Loend';
+  @override
+  String get tallyCutLabel => 'Loe iga rida kui';
+  @override
+  String get tallyCutDash => 'Nimi - väärtused';
+  @override
+  String get tallyCutColon => 'Nimi: väärtused';
+  @override
+  String get tallyCutCommas => 'Komadega eraldatud väärtused';
+  @override
+  String get tallyCutWhole => 'Terve rida ühe väärtusena';
+  @override
+  String get tallySortLabel => 'Järjestus';
+  @override
+  String get tallySortCount => 'Kõige rohkem esimesena';
+  @override
+  String get tallySortAlphabetical => 'Tähestikuliselt';
+  @override
+  String get tallySortFirstSeen => 'Loendi järjekorras';
+  @override
+  String get tallyInsert => 'Lisa';
+  @override
+  String get tallyUpdate => 'Uuenda';
+  @override
+  String get tallyNothingToCount => 'Siin pole midagi loendada';
   @override
   String get headingDialogTitle => 'Pealkirja tase';
 

@@ -442,6 +442,47 @@ final class BasqueStrings extends Strings {
   String get toolbarIndent => 'Bilkatu';
   @override
   String get toolbarOutdent => 'Desbilkatu';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Tresnak';
+  @override
+  String get editorToolsTitle => 'Editorearen tresnak';
+  @override
+  String get toolCountListTitle => 'Zerrenda zenbatu';
+  @override
+  String get toolCountListSubtitle =>
+      'Errenkadek zerrendatzen dutena batzen du, egiaztapen-zerrenda gisa';
+  @override
+  String get toolCountListNeedsList =>
+      'Ohar honek ez du zerrendarik zenbatzeko';
+  @override
+  String get tallySourceLabel => 'Zerrenda';
+  @override
+  String get tallyCutLabel => 'Irakurri errenkada bakoitza honela';
+  @override
+  String get tallyCutDash => 'Izena - balioak';
+  @override
+  String get tallyCutColon => 'Izena: balioak';
+  @override
+  String get tallyCutCommas => 'Komaz bereizitako balioak';
+  @override
+  String get tallyCutWhole => 'Errenkada osoa, balio bakar gisa';
+  @override
+  String get tallySortLabel => 'Ordena';
+  @override
+  String get tallySortCount => 'Gehien lehenik';
+  @override
+  String get tallySortAlphabetical => 'Alfabetikoki';
+  @override
+  String get tallySortFirstSeen => 'Zerrendan bezala';
+  @override
+  String get tallyInsert => 'Txertatu';
+  @override
+  String get tallyUpdate => 'Eguneratu';
+  @override
+  String get tallyNothingToCount => 'Hemen ez dago ezer zenbatzeko';
   @override
   String get headingDialogTitle => 'Izenburu-maila';
 

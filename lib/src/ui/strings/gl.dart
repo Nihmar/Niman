@@ -451,6 +451,47 @@ final class GalicianStrings extends Strings {
   String get toolbarIndent => 'Sangrar';
   @override
   String get toolbarOutdent => 'Desfacer sangría';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Ferramentas';
+  @override
+  String get editorToolsTitle => 'Ferramentas do editor';
+  @override
+  String get toolCountListTitle => 'Contar unha lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Suma o que enumeran as filas, como lista de verificación';
+  @override
+  String get toolCountListNeedsList =>
+      'Esta nota non ten ningunha lista que contar';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Ler cada fila como';
+  @override
+  String get tallyCutDash => 'Nome - valores';
+  @override
+  String get tallyCutColon => 'Nome: valores';
+  @override
+  String get tallyCutCommas => 'Valores separados por comas';
+  @override
+  String get tallyCutWhole => 'Toda a fila, como un só valor';
+  @override
+  String get tallySortLabel => 'Orde';
+  @override
+  String get tallySortCount => 'Primeiro os máis frecuentes';
+  @override
+  String get tallySortAlphabetical => 'Alfabético';
+  @override
+  String get tallySortFirstSeen => 'Segundo a lista';
+  @override
+  String get tallyInsert => 'Inserir';
+  @override
+  String get tallyUpdate => 'Actualizar';
+  @override
+  String get tallyNothingToCount => 'Aquí non hai nada que contar';
   @override
   String get headingDialogTitle => 'Nivel do título';
 

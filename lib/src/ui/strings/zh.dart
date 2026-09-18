@@ -419,6 +419,45 @@ final class ChineseStrings extends Strings {
   String get toolbarIndent => '增加缩进';
   @override
   String get toolbarOutdent => '减少缩进';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => '工具';
+  @override
+  String get editorToolsTitle => '编辑器工具';
+  @override
+  String get toolCountListTitle => '统计列表';
+  @override
+  String get toolCountListSubtitle => '把各行列出的内容汇总成清单';
+  @override
+  String get toolCountListNeedsList => '这条笔记里没有可统计的列表';
+  @override
+  String get tallySourceLabel => '列表';
+  @override
+  String get tallyCutLabel => '每行读作';
+  @override
+  String get tallyCutDash => '名称 - 值';
+  @override
+  String get tallyCutColon => '名称: 值';
+  @override
+  String get tallyCutCommas => '逗号分隔的值';
+  @override
+  String get tallyCutWhole => '整行作为一个值';
+  @override
+  String get tallySortLabel => '排序';
+  @override
+  String get tallySortCount => '最多的在前';
+  @override
+  String get tallySortAlphabetical => '按字母顺序';
+  @override
+  String get tallySortFirstSeen => '按列表顺序';
+  @override
+  String get tallyInsert => '插入';
+  @override
+  String get tallyUpdate => '更新';
+  @override
+  String get tallyNothingToCount => '这里没有可统计的内容';
   @override
   String get headingDialogTitle => '标题级别';
 

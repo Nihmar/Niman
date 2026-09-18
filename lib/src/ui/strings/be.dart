@@ -450,6 +450,46 @@ final class BelarusianStrings extends Strings {
   String get toolbarIndent => 'Відступ';
   @override
   String get toolbarOutdent => 'Прыбраць відступ';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Інструменты';
+  @override
+  String get editorToolsTitle => 'Інструменты рэдактара';
+  @override
+  String get toolCountListTitle => 'Падлічыць спіс';
+  @override
+  String get toolCountListSubtitle =>
+      'Падсумаваць тое, што пералічана ў радках, як спіс з галачкамі';
+  @override
+  String get toolCountListNeedsList => 'У гэтай нататцы няма спісу для падліку';
+  @override
+  String get tallySourceLabel => 'Спіс';
+  @override
+  String get tallyCutLabel => 'Чытаць кожны радок як';
+  @override
+  String get tallyCutDash => 'Імя - значэнні';
+  @override
+  String get tallyCutColon => 'Імя: значэнні';
+  @override
+  String get tallyCutCommas => 'Значэнні праз коску';
+  @override
+  String get tallyCutWhole => 'Увесь радок як адно значэнне';
+  @override
+  String get tallySortLabel => 'Парадак';
+  @override
+  String get tallySortCount => 'Спачатку найбольшыя';
+  @override
+  String get tallySortAlphabetical => 'Па алфавіце';
+  @override
+  String get tallySortFirstSeen => 'Як у спісе';
+  @override
+  String get tallyInsert => 'Уставіць';
+  @override
+  String get tallyUpdate => 'Абнавіць';
+  @override
+  String get tallyNothingToCount => 'Тут няма чаго лічыць';
   @override
   String get headingDialogTitle => 'Узровень загаловка';
 

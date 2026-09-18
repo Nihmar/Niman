@@ -444,6 +444,47 @@ final class IcelandicStrings extends Strings {
   String get toolbarIndent => 'Innhengja';
   @override
   String get toolbarOutdent => 'Minnka innheng';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Verkfæri';
+  @override
+  String get editorToolsTitle => 'Verkfæri ritils';
+  @override
+  String get toolCountListTitle => 'Telja lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Leggur saman það sem línurnar telja upp, sem gátlista';
+  @override
+  String get toolCountListNeedsList =>
+      'Þessi minnispunktur hefur engan lista til að telja';
+  @override
+  String get tallySourceLabel => 'Listi';
+  @override
+  String get tallyCutLabel => 'Lesa hverja línu sem';
+  @override
+  String get tallyCutDash => 'Nafn - gildi';
+  @override
+  String get tallyCutColon => 'Nafn: gildi';
+  @override
+  String get tallyCutCommas => 'Gildi aðgreind með kommu';
+  @override
+  String get tallyCutWhole => 'Öll línan sem eitt gildi';
+  @override
+  String get tallySortLabel => 'Röð';
+  @override
+  String get tallySortCount => 'Flest fyrst';
+  @override
+  String get tallySortAlphabetical => 'Í stafrófsröð';
+  @override
+  String get tallySortFirstSeen => 'Eins og í listanum';
+  @override
+  String get tallyInsert => 'Setja inn';
+  @override
+  String get tallyUpdate => 'Uppfæra';
+  @override
+  String get tallyNothingToCount => 'Hér er ekkert að telja';
   @override
   String get headingDialogTitle => 'Titilstig';
 

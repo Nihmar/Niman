@@ -446,6 +446,46 @@ final class EnglishStrings extends Strings {
   String get toolbarIndent => 'Indent';
   @override
   String get toolbarOutdent => 'Outdent';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Tools';
+  @override
+  String get editorToolsTitle => 'Editor tools';
+  @override
+  String get toolCountListTitle => 'Count a list';
+  @override
+  String get toolCountListSubtitle =>
+      'Total up what the rows list, as a checklist';
+  @override
+  String get toolCountListNeedsList => 'This note has no list to count';
+  @override
+  String get tallySourceLabel => 'List';
+  @override
+  String get tallyCutLabel => 'Read each row as';
+  @override
+  String get tallyCutDash => 'Name - values';
+  @override
+  String get tallyCutColon => 'Name: values';
+  @override
+  String get tallyCutCommas => 'Values, comma separated';
+  @override
+  String get tallyCutWhole => 'The whole row, as one value';
+  @override
+  String get tallySortLabel => 'Order';
+  @override
+  String get tallySortCount => 'Most first';
+  @override
+  String get tallySortAlphabetical => 'Alphabetical';
+  @override
+  String get tallySortFirstSeen => 'As listed';
+  @override
+  String get tallyInsert => 'Insert';
+  @override
+  String get tallyUpdate => 'Update';
+  @override
+  String get tallyNothingToCount => 'Nothing to count here';
   @override
   String get headingDialogTitle => 'Heading level';
 

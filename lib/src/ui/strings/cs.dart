@@ -450,6 +450,46 @@ final class CzechStrings extends Strings {
   String get toolbarIndent => 'Odsadit';
   @override
   String get toolbarOutdent => 'Zmenšit odsazení';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Nástroje';
+  @override
+  String get editorToolsTitle => 'Nástroje editoru';
+  @override
+  String get toolCountListTitle => 'Spočítat seznam';
+  @override
+  String get toolCountListSubtitle =>
+      'Sečte, co řádky vyjmenovávají, jako zaškrtávací seznam';
+  @override
+  String get toolCountListNeedsList => 'Tato poznámka nemá seznam ke spočítání';
+  @override
+  String get tallySourceLabel => 'Seznam';
+  @override
+  String get tallyCutLabel => 'Číst každý řádek jako';
+  @override
+  String get tallyCutDash => 'Jméno - hodnoty';
+  @override
+  String get tallyCutColon => 'Jméno: hodnoty';
+  @override
+  String get tallyCutCommas => 'Hodnoty oddělené čárkou';
+  @override
+  String get tallyCutWhole => 'Celý řádek jako jedna hodnota';
+  @override
+  String get tallySortLabel => 'Pořadí';
+  @override
+  String get tallySortCount => 'Nejčastější první';
+  @override
+  String get tallySortAlphabetical => 'Abecedně';
+  @override
+  String get tallySortFirstSeen => 'Jak jsou uvedeny';
+  @override
+  String get tallyInsert => 'Vložit';
+  @override
+  String get tallyUpdate => 'Aktualizovat';
+  @override
+  String get tallyNothingToCount => 'Tady není co počítat';
   @override
   String get headingDialogTitle => 'Úroveň nadpisu';
 
