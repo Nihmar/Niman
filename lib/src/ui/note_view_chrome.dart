@@ -133,131 +133,151 @@ final class NoteStatusRow extends StatelessWidget {
     return Padding(
       key: const Key('status-row'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: Row(
-        children: [
-          if (!loading)
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('outline-toggle'),
-                tooltip: AppStrings.outlineTooltip,
-                icon: const Icon(Icons.toc),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: () => unawaited(onOutline()),
-              ),
-            ),
-          // Find & replace lives in the editor pane, so preview-only mode
-          // has nothing to search — but the button keeps its slot and
-          // goes grey rather than dropping out of the row. This row is
-          // laid out from the left, so a button that comes and goes
-          // drags every icon after it sideways, and the eye is tapped
-          // often enough that the icons would move under a thumb already
-          // on them (the app bar had the same fault, #122).
-          if (!loading)
-            Padding(
-              padding: iconPadding,
-              // In the editor's tap region like the formatting toolbar:
-              // re_editor unfocuses the editor on any tap outside it, so
-              // an unwrapped find button closes the keyboard on tap-down
-              // and the find field reopens it a frame later. Wrapped,
-              // focus moves straight to the find field and the keyboard
-              // never leaves.
-              child: CodeEditorTapRegion(
+      // The row stands as tall as the editor switch whenever there is a
+      // switch to show, so going to the preview and back does not change
+      // its height (user, 2026-09-18). The switch is 48 and the icon
+      // buttons beside it are 40 — `VisualDensity.compact` takes 8 off
+      // their 48 constraint — so the row used to shrink with it.
+      //
+      // A floor rather than a fixed height, and only where the button
+      // can appear at all: a library with one editor enabled never sees
+      // it, and has no reason to pay 8 dp of note for it.
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: canSwitchEditorKind ? 48 : 0),
+        child: Row(
+          children: [
+            if (!loading)
+              Padding(
+                padding: iconPadding,
                 child: IconButton(
-                  key: const Key('editor-find-open'),
-                  tooltip: AppStrings.findInNoteTooltip,
-                  icon: const Icon(Icons.search),
+                  key: const Key('outline-toggle'),
+                  tooltip: AppStrings.outlineTooltip,
+                  icon: const Icon(Icons.toc),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
                     minWidth: 48,
                     minHeight: 48,
                   ),
-                  onPressed: splitPreview || !showPreview ? onFind : null,
+                  onPressed: () => unawaited(onOutline()),
                 ),
               ),
-            ),
-          if (!loading && spellCheckAvailable)
-            Padding(
-              padding: iconPadding,
-              child: IconButton(
-                key: const Key('spell-check-open'),
-                tooltip: AppStrings.spellCheckTooltip,
-                icon: const Icon(Icons.spellcheck),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: () => unawaited(onSpellCheck()),
-              ),
-            ),
-          // The quick way between the two editors (T-WYS-12): the setting
-          // stays per library, the button just flips it. Icon and word
-          // together — the tooltip that named the surface only appears
-          // after a long press on Android, and a bare noun does not say
-          // whether it is where you are or where you would land, which
-          // the icon answers.
-          //
-          // Written in the muted colour the rest of the row wears: a
-          // button in the accent was the only coloured thing here and
-          // read as a link.
-          //
-          // Preview-only mode has no editor on screen, so there are not
-          // two of them to be between: the button goes (device report,
-          // 2026-09-18). It is dropped rather than disabled — the
-          // keep-its-place rule is about controls sliding under a thumb
-          // that is already on them, and this one is the last thing
-          // before the Spacer, so nothing to its left moves and what is
-          // to its right is anchored to the other edge.
-          if (!loading && canSwitchEditorKind && (splitPreview || !showPreview))
-            Padding(
-              padding: iconPadding,
-              child: Tooltip(
-                message: showWysiwyg
-                    ? AppStrings.switchToSourceTooltip
-                    : AppStrings.switchToWysiwygTooltip,
-                child: TextButton.icon(
-                  key: const Key('editor-kind-toggle'),
-                  onPressed: onToggleEditorKind,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    textStyle: labelStyle,
-                    foregroundColor: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  icon: Icon(
-                    showWysiwyg ? Icons.code : Icons.edit_note,
-                    size: 18,
-                  ),
-                  label: Text(
-                    showWysiwyg
-                        ? AppStrings.switchToSourceLabel
-                        : AppStrings.switchToWysiwygLabel,
+            // Find & replace lives in the editor pane, so preview-only mode
+            // has nothing to search — but the button keeps its slot and
+            // goes grey rather than dropping out of the row. This row is
+            // laid out from the left, so a button that comes and goes
+            // drags every icon after it sideways, and the eye is tapped
+            // often enough that the icons would move under a thumb already
+            // on them (the app bar had the same fault, #122).
+            if (!loading)
+              Padding(
+                padding: iconPadding,
+                // In the editor's tap region like the formatting toolbar:
+                // re_editor unfocuses the editor on any tap outside it, so
+                // an unwrapped find button closes the keyboard on tap-down
+                // and the find field reopens it a frame later. Wrapped,
+                // focus moves straight to the find field and the keyboard
+                // never leaves.
+                child: CodeEditorTapRegion(
+                  child: IconButton(
+                    key: const Key('editor-find-open'),
+                    tooltip: AppStrings.findInNoteTooltip,
+                    icon: const Icon(Icons.search),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    onPressed: splitPreview || !showPreview ? onFind : null,
                   ),
                 ),
               ),
-            ),
-          const Spacer(),
-          // Both readings of the note sit together on the right, after
-          // the controls: the switch is the only control whose width
-          // changes with its label, and nothing follows it now, so
-          // flipping the editor no longer slides the count sideways.
-          if (!loading) ...[
-            Text(
-              AppStrings.wordCount(wordCount),
-              style: labelStyle?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            if (!loading && spellCheckAvailable)
+              Padding(
+                padding: iconPadding,
+                child: IconButton(
+                  key: const Key('spell-check-open'),
+                  tooltip: AppStrings.spellCheckTooltip,
+                  icon: const Icon(Icons.spellcheck),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  onPressed: () => unawaited(onSpellCheck()),
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
+            // The quick way between the two editors (T-WYS-12): the setting
+            // stays per library, the button just flips it. Icon and word
+            // together — the tooltip that named the surface only appears
+            // after a long press on Android, and a bare noun does not say
+            // whether it is where you are or where you would land, which
+            // the icon answers.
+            //
+            // Written in the muted colour the rest of the row wears: a
+            // button in the accent was the only coloured thing here and
+            // read as a link.
+            //
+            // Preview-only mode has no editor on screen, so there are not
+            // two of them to be between: the button goes (device report,
+            // 2026-09-18). It is dropped rather than disabled — the
+            // keep-its-place rule is about controls sliding under a thumb
+            // that is already on them, and this one is the last thing
+            // before the Spacer, so nothing to its left moves and what is
+            // to its right is anchored to the other edge.
+            if (!loading &&
+                canSwitchEditorKind &&
+                (splitPreview || !showPreview))
+              Padding(
+                padding: iconPadding,
+                child: Tooltip(
+                  message: showWysiwyg
+                      ? AppStrings.switchToSourceTooltip
+                      : AppStrings.switchToWysiwygTooltip,
+                  child: TextButton.icon(
+                    key: const Key('editor-kind-toggle'),
+                    onPressed: onToggleEditorKind,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      textStyle: labelStyle,
+                      foregroundColor: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    icon: Icon(
+                      showWysiwyg ? Icons.code : Icons.edit_note,
+                      size: 18,
+                    ),
+                    label: Text(
+                      showWysiwyg
+                          ? AppStrings.switchToSourceLabel
+                          : AppStrings.switchToWysiwygLabel,
+                    ),
+                  ),
+                ),
+              ),
+            const Spacer(),
+            // Both readings of the note sit together on the right, after
+            // the controls: the switch is the only control whose width
+            // changes with its label, and nothing follows it now, so
+            // flipping the editor no longer slides the count sideways.
+            if (!loading) ...[
+              Text(
+                AppStrings.wordCount(wordCount),
+                style: labelStyle?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Text(statusText, style: labelStyle),
+            for (final action in statusActions) ...[
+              const SizedBox(width: 6),
+              action,
+            ],
           ],
-          Text(statusText, style: labelStyle),
-          for (final action in statusActions) ...[
-            const SizedBox(width: 6),
-            action,
-          ],
-        ],
+        ),
       ),
     );
   }
