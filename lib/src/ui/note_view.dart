@@ -18,6 +18,7 @@ import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
+import 'package:niman/src/editor/markdown_editing_controller.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/outline.dart';
@@ -425,9 +426,15 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
     _scroll = CodeScrollController();
-    _controller = widget.controller == null
-        ? CodeLineEditingController(spanBuilder: _buildHighlightSpan)
-        : widget.controller!;
+    // Wrapped so Enter carries a list on (#141). The wrapper forwards
+    // everything else, and disposing it disposes what it wraps — so it
+    // is disposed exactly when the controller inside it is ours.
+    _controller = MarkdownEditingController(
+      delegate:
+          widget.controller ??
+          CodeLineEditingController(spanBuilder: _buildHighlightSpan),
+      isPlain: _isPlainLine,
+    );
     _findController = CodeFindController(_controller);
     _kindHost = NoteKindHostAdapter(
       noteText: () => _currentText,
@@ -936,6 +943,23 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       if (viaIndex.existsSync()) return viaIndex.path;
     }
     return null;
+  }
+
+  /// Whether line [index] is ordinary Markdown rather than fenced code,
+  /// display math or the frontmatter — where a dash starts nothing, so
+  /// Enter has no list to carry on (#141).
+  ///
+  /// Answered from the highlighter the editor already keeps, so the two
+  /// cannot disagree about what a list is.
+  bool _isPlainLine(int index) {
+    for (final token in _highlight.tokensOf(index)) {
+      if (token.kind == TokenKind.codeFence ||
+          token.kind == TokenKind.mathBlock ||
+          token.kind == TokenKind.frontmatter) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Editor side of link navigation: the caret sits on a wikilink or MD
