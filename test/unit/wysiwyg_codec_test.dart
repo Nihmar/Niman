@@ -256,11 +256,47 @@ A [[wikilink]].
       expect(edited('- a\n- b\n'), '- a\n- b\n');
     });
 
+    test('an ordered one keeps its numbers across the blank lines', () {
+      expect(edited('1. a\n\n2. b\n\n3. c\n'), '1. a\n\n2. b\n\n3. c\n');
+    });
+
     test('an item whose content looks like a marker claims nothing', () {
       // The markers found have to be the items parsed, or a blank line
       // would land in the wrong gap: the old behaviour is the fallback.
       const note = '- a\n\n  ~~~\n  - not an item\n  ~~~\n\n- b\n';
       expect(edited(note), isNot(contains('- not an item\n\n')));
+    });
+  });
+
+  group('an ordered list keeps its numbers', () {
+    String edited(String source) => codec.encode(codec.decode(source).document);
+
+    test('counting, instead of writing 1. down every item', () {
+      // Device report, 2026-09-18: a numbered list came back all 1s.
+      expect(edited('1. a\n2. b\n3. c\n'), '1. a\n2. b\n3. c\n');
+    });
+
+    test('including the number it starts at', () {
+      // This one was not cosmetic: 3. 4. came back as 1. 1. and then
+      // rendered 1. 2., two numbers lower than it was written.
+      expect(edited('3. a\n4. b\n'), '3. a\n4. b\n');
+      expect(edited('10. a\n11. b\n'), '10. a\n11. b\n');
+    });
+
+    test('a list of its own after prose starts over', () {
+      expect(edited('1. a\n\nprose\n\n1. b\n'), '1. a\n\nprose\n\n1. b\n');
+    });
+
+    test('a bulleted list before it does not feed it a number', () {
+      expect(edited('- x\n\n1. a\n2. b\n'), '- x\n\n1. a\n2. b\n');
+    });
+
+    test('a list written all 1s is counted instead', () {
+      // The one style this changes. Both render the same - CommonMark
+      // numbers from the first marker and ignores the rest - and the
+      // Delta has room for where a list starts, not for each item's
+      // own number. Counting is what the report asked for.
+      expect(edited('1. a\n1. b\n1. c\n'), '1. a\n2. b\n3. c\n');
     });
   });
 }
