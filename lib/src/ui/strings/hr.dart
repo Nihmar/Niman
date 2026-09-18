@@ -400,6 +400,12 @@ final class CroatianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Prikaži ili sakrij filter';
   @override
+  String get shortcutCloseTab => 'Zatvori trenutačnu bilješku';
+  @override
+  String get shortcutNextTab => 'Sljedeća otvorena bilješka';
+  @override
+  String get shortcutPreviousTab => 'Prethodna otvorena bilješka';
+  @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
   String get shortcutFind => 'Traži';
@@ -1143,6 +1149,14 @@ final class CroatianStrings extends Strings {
   String get openInFileManager => 'Prikaži u upravitelju datoteka';
   @override
   String get openInDefaultApp => 'Otvori u zadanoj aplikaciji';
+  @override
+  String get newNoteTabTooltip => 'Nova bilješka u novoj kartici';
+  @override
+  String get openNotesTooltip => 'Otvorene bilješke';
+  @override
+  String get closeTabTooltip => 'Zatvori';
+  @override
+  String get openInNewTab => 'Otvori u novoj kartici';
   @override
   String get openFileMissing => 'Datoteka ove napomene nije na disku';
   @override

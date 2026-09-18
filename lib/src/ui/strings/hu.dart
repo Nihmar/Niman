@@ -399,6 +399,12 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Szűrő megjelenítése vagy elrejtése';
   @override
+  String get shortcutCloseTab => 'Az aktuális jegyzet bezárása';
+  @override
+  String get shortcutNextTab => 'Következő megnyitott jegyzet';
+  @override
+  String get shortcutPreviousTab => 'Előző megnyitott jegyzet';
+  @override
   String get shortcutEditorSection => 'A szerkesztőben';
   @override
   String get shortcutFind => 'Keresés';
@@ -1153,6 +1159,14 @@ final class HungarianStrings extends Strings {
   String get openInFileManager => 'Megjelenítés a fájlkezelőben';
   @override
   String get openInDefaultApp => 'Megnyitás az alapértelmezett alkalmazással';
+  @override
+  String get newNoteTabTooltip => 'Új jegyzet új lapon';
+  @override
+  String get openNotesTooltip => 'Megnyitott jegyzetek';
+  @override
+  String get closeTabTooltip => 'Bezárás';
+  @override
+  String get openInNewTab => 'Megnyitás új lapon';
   @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override

@@ -396,6 +396,12 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Ezkutatu edo erakutsi iragazkia';
   @override
+  String get shortcutCloseTab => 'Itxi uneko oharra';
+  @override
+  String get shortcutNextTab => 'Hurrengo ohar irekia';
+  @override
+  String get shortcutPreviousTab => 'Aurreko ohar irekia';
+  @override
   String get shortcutEditorSection => 'Erreditoran';
   @override
   String get shortcutFind => 'Bilatu';
@@ -1152,6 +1158,14 @@ final class BasqueStrings extends Strings {
   String get openInFileManager => 'Erakutsi fitxategi-kudeatzailean';
   @override
   String get openInDefaultApp => 'Ireki aplikazio lehenetsian';
+  @override
+  String get newNoteTabTooltip => 'Ohar berria fitxa berrian';
+  @override
+  String get openNotesTooltip => 'Ohar irekiak';
+  @override
+  String get closeTabTooltip => 'Itxi';
+  @override
+  String get openInNewTab => 'Ireki fitxa berrian';
   @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override

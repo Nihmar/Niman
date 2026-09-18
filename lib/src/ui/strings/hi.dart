@@ -387,6 +387,12 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'फ़ाइल ट्री दिखाएँ/छिपाएँ';
   @override
+  String get shortcutCloseTab => 'मौजूदा नोट बंद करें';
+  @override
+  String get shortcutNextTab => 'अगला खुला नोट';
+  @override
+  String get shortcutPreviousTab => 'पिछला खुला नोट';
+  @override
   String get shortcutEditorSection => 'एडिटर में';
   @override
   String get shortcutFind => 'ढूँढें';
@@ -1120,6 +1126,14 @@ final class HindiStrings extends Strings {
   String get openInFileManager => 'फ़ाइल प्रबंधक में दिखाएँ';
   @override
   String get openInDefaultApp => 'डिफ़ॉल्ट ऐप में खोलें';
+  @override
+  String get newNoteTabTooltip => 'नए टैब में नया नोट';
+  @override
+  String get openNotesTooltip => 'खुले नोट';
+  @override
+  String get closeTabTooltip => 'बंद करें';
+  @override
+  String get openInNewTab => 'नए टैब में खोलें';
   @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override

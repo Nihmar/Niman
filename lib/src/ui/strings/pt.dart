@@ -400,6 +400,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Mostrar ou ocultar a árvore de arquivos';
   @override
+  String get shortcutCloseTab => 'Fechar a nota atual';
+  @override
+  String get shortcutNextTab => 'Nota aberta seguinte';
+  @override
+  String get shortcutPreviousTab => 'Nota aberta anterior';
+  @override
   String get shortcutEditorSection => 'No editor';
   @override
   String get shortcutFind => 'Localizar';
@@ -1153,6 +1159,14 @@ final class PortugueseStrings extends Strings {
   String get openInFileManager => 'Mostrar no gerenciador de arquivos';
   @override
   String get openInDefaultApp => 'Abrir no app padrão';
+  @override
+  String get newNoteTabTooltip => 'Nova nota num novo separador';
+  @override
+  String get openNotesTooltip => 'Notas abertas';
+  @override
+  String get closeTabTooltip => 'Fechar';
+  @override
+  String get openInNewTab => 'Abrir num novo separador';
   @override
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override

@@ -401,6 +401,12 @@ final class EnglishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Show or hide the file tree';
   @override
+  String get shortcutCloseTab => 'Close the current note';
+  @override
+  String get shortcutNextTab => 'Next open note';
+  @override
+  String get shortcutPreviousTab => 'Previous open note';
+  @override
   String get shortcutEditorSection => 'In the editor';
   @override
   String get shortcutFind => 'Find';
@@ -1140,6 +1146,14 @@ final class EnglishStrings extends Strings {
   String get openInFileManager => 'Show in file manager';
   @override
   String get openInDefaultApp => 'Open in default app';
+  @override
+  String get newNoteTabTooltip => 'New note in a new tab';
+  @override
+  String get openNotesTooltip => 'Open notes';
+  @override
+  String get closeTabTooltip => 'Close';
+  @override
+  String get openInNewTab => 'Open in new tab';
   @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override

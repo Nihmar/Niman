@@ -404,6 +404,12 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Mostra o nascondi l’albero dei file';
   @override
+  String get shortcutCloseTab => 'Chiudi la nota corrente';
+  @override
+  String get shortcutNextTab => 'Nota aperta successiva';
+  @override
+  String get shortcutPreviousTab => 'Nota aperta precedente';
+  @override
   String get shortcutEditorSection => 'Nell’editor';
   @override
   String get shortcutFind => 'Trova';
@@ -1159,6 +1165,14 @@ final class ItalianStrings extends Strings {
   String get openInFileManager => 'Mostra nel file manager';
   @override
   String get openInDefaultApp => 'Apri con l’app predefinita';
+  @override
+  String get newNoteTabTooltip => 'Nuova nota in una nuova scheda';
+  @override
+  String get openNotesTooltip => 'Note aperte';
+  @override
+  String get closeTabTooltip => 'Chiudi';
+  @override
+  String get openInNewTab => 'Apri in una nuova scheda';
   @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override

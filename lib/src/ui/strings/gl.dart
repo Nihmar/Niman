@@ -405,6 +405,12 @@ final class GalicianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Mostrar ou ocultar o filtro';
   @override
+  String get shortcutCloseTab => 'Pechar a nota actual';
+  @override
+  String get shortcutNextTab => 'Seguinte nota aberta';
+  @override
+  String get shortcutPreviousTab => 'Nota aberta anterior';
+  @override
   String get shortcutEditorSection => 'No editor';
   @override
   String get shortcutFind => 'Buscar';
@@ -1160,6 +1166,14 @@ final class GalicianStrings extends Strings {
   String get openInFileManager => 'Amosar no xestor de ficheiros';
   @override
   String get openInDefaultApp => 'Abrir coa aplicación predeterminada';
+  @override
+  String get newNoteTabTooltip => 'Nota nova nunha lapela nova';
+  @override
+  String get openNotesTooltip => 'Notas abertas';
+  @override
+  String get closeTabTooltip => 'Pechar';
+  @override
+  String get openInNewTab => 'Abrir nunha lapela nova';
   @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override

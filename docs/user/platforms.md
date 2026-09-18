@@ -55,6 +55,15 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
 
+## Open notes
+
+On Linux and Windows the open notes are **tabs** in the title bar, and
+the ones you were working in come back when you open the library again
+— see [editing](editing.md#open-notes-and-tabs). The phone still shows
+one note at a time; its switcher for the notes left open is the next
+step of [#23](https://github.com/Nihmar/Niman/issues/23). Splitting the
+window into two panes follows on the desktop.
+
 ## Not yet
 
 Share-in on Android, file association on desktop, single-instance guard

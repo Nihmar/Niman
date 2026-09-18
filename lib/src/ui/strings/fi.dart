@@ -399,6 +399,12 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Näytä tai piilota suodatin';
   @override
+  String get shortcutCloseTab => 'Sulje nykyinen muistiinpano';
+  @override
+  String get shortcutNextTab => 'Seuraava avoin muistiinpano';
+  @override
+  String get shortcutPreviousTab => 'Edellinen avoin muistiinpano';
+  @override
   String get shortcutEditorSection => 'Muokkainnissa';
   @override
   String get shortcutFind => 'Etsi';
@@ -1159,6 +1165,14 @@ final class FinnishStrings extends Strings {
   String get openInFileManager => 'Näytä tiedostonhallinnassa';
   @override
   String get openInDefaultApp => 'Avaa oletussovelluksessa';
+  @override
+  String get newNoteTabTooltip => 'Uusi muistiinpano uuteen välilehteen';
+  @override
+  String get openNotesTooltip => 'Avoimet muistiinpanot';
+  @override
+  String get closeTabTooltip => 'Sulje';
+  @override
+  String get openInNewTab => 'Avaa uudessa välilehdessä';
   @override
   String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
   @override

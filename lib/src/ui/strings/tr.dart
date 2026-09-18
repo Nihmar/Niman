@@ -394,6 +394,12 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Dosya ağacını göster veya gizle';
   @override
+  String get shortcutCloseTab => 'Geçerli notu kapat';
+  @override
+  String get shortcutNextTab => 'Sonraki açık not';
+  @override
+  String get shortcutPreviousTab => 'Önceki açık not';
+  @override
   String get shortcutEditorSection => 'Düzenleyicide';
   @override
   String get shortcutFind => 'Bul';
@@ -1135,6 +1141,14 @@ final class TurkishStrings extends Strings {
   String get openInFileManager => 'Dosya yöneticisinde göster';
   @override
   String get openInDefaultApp => 'Varsayılan uygulamada aç';
+  @override
+  String get newNoteTabTooltip => 'Yeni sekmede yeni not';
+  @override
+  String get openNotesTooltip => 'Açık notlar';
+  @override
+  String get closeTabTooltip => 'Kapat';
+  @override
+  String get openInNewTab => 'Yeni sekmede aç';
   @override
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override

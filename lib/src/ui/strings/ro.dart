@@ -405,6 +405,12 @@ final class RomanianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Afișează sau ascunde filtrul';
   @override
+  String get shortcutCloseTab => 'Închide nota curentă';
+  @override
+  String get shortcutNextTab => 'Nota deschisă următoare';
+  @override
+  String get shortcutPreviousTab => 'Nota deschisă anterioară';
+  @override
   String get shortcutEditorSection => 'În editor';
   @override
   String get shortcutFind => 'Caută';
@@ -1157,6 +1163,14 @@ final class RomanianStrings extends Strings {
   String get openInFileManager => 'Arată în managerul de fișiere';
   @override
   String get openInDefaultApp => 'Deschide cu aplicația implicită';
+  @override
+  String get newNoteTabTooltip => 'Notă nouă într-o filă nouă';
+  @override
+  String get openNotesTooltip => 'Note deschise';
+  @override
+  String get closeTabTooltip => 'Închide';
+  @override
+  String get openInNewTab => 'Deschide într-o filă nouă';
   @override
   String get openFileMissing => 'Fișierul acestei note nu este pe disc';
   @override
