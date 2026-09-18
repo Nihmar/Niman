@@ -11,7 +11,12 @@ import 'package:niman/src/ui/switch_library_screen.dart';
 /// scattered among the settings as though they were ones.
 final class SettingsMaintenanceGroup extends StatelessWidget {
   /// Creates the group for [controller]'s library session.
-  const new({required this.controller, this.onClosed, super.key});
+  const new({
+    required this.controller,
+    this.onClosed,
+    this.compact = false,
+    super.key,
+  });
 
   /// The session the actions act on.
   final LibrarySession controller;
@@ -19,6 +24,10 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
   /// Fired when the library closes or switches; the shell leaves the
   /// settings behind with it.
   final VoidCallback? onClosed;
+
+  /// Whether the rows sit in the desktop's narrow left column (#172),
+  /// sized like the areas above them rather than like a phone's list.
+  final bool compact;
 
   /// Re-reads every note from disk into the index.
   Future<void> _rescan(BuildContext context) async {
@@ -73,6 +82,8 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         HighlightRow(
           key: SettingsKeys.reindex,
           child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
             leading: const Icon(Icons.refresh_outlined),
             title: Text(AppStrings.reindexTitle),
             onTap: () => _rescan(context),
@@ -83,6 +94,8 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         HighlightRow(
           key: SettingsKeys.switchLibrary,
           child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
             leading: const Icon(Icons.swap_horiz_outlined),
             title: Text(AppStrings.switchLibraryTitle),
             trailing: const Icon(Icons.chevron_right),
@@ -92,6 +105,8 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         HighlightRow(
           key: SettingsKeys.closeLibrary,
           child: ListTile(
+            dense: compact,
+            visualDensity: compact ? VisualDensity.compact : null,
             leading: const Icon(Icons.link_off_outlined),
             title: Text(AppStrings.closeLibraryTitle),
             onTap: () async {

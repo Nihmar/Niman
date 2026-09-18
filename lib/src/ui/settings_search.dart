@@ -7,20 +7,12 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
-import 'package:niman/src/ui/settings_diagnostics.dart';
-import 'package:niman/src/ui/settings_editor.dart';
-import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_keys.dart';
-import 'package:niman/src/ui/settings_reminders.dart';
-import 'package:niman/src/ui/settings_transcription.dart';
-import 'package:niman/src/ui/settings_trash_history.dart';
-import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
-import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
 import 'package:niman/src/ui/trash.dart';
-import 'package:path/path.dart' as p;
 
 /// One searchable settings row (issue #104): its title, where it lives,
 /// its current value, and how to open it.
@@ -67,27 +59,17 @@ List<SettingsSearchEntry> settingsSearchEntries({
   required String libraryName,
   required BuildContext context,
   required void Function(Key rowKey) flashHome,
+  required void Function(SettingsAreaId area, Key rowKey) openArea,
 }) {
   void push(Widget screen) =>
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (context) => screen));
-  void pushAppearance(Key row) =>
-      push(SettingsAppearanceScreen(controller: controller, highlight: row));
-  void pushEditor(Key row) => push(
-    SettingsEditorScreen(
-      controller: controller,
-      spellCheck: spellCheck,
-      highlight: row,
-    ),
-  );
-  void pushFolders(Key row) =>
-      push(SettingsFoldersPathsScreen(controller: controller, highlight: row));
-  void pushTrash(Key row) =>
-      push(SettingsTrashHistoryScreen(controller: controller, highlight: row));
-  void pushUpdates(Key row) =>
-      push(SettingsUpdatesScreen(controller: controller, highlight: row));
-  void pushDiagnostics(Key row) =>
-      push(SettingsDiagnosticsScreen(controller: controller, highlight: row));
+  void pushAppearance(Key row) => openArea(SettingsAreaId.appearance, row);
+  void pushEditor(Key row) => openArea(SettingsAreaId.editor, row);
+  void pushFolders(Key row) => openArea(SettingsAreaId.folders, row);
+  void pushTrash(Key row) => openArea(SettingsAreaId.trashHistory, row);
+  void pushUpdates(Key row) => openArea(SettingsAreaId.updates, row);
+  void pushDiagnostics(Key row) => openArea(SettingsAreaId.diagnostics, row);
 
   String libraryArea(String area) =>
       '${AppStrings.settingsGroupLibrary(libraryName)} › $area';
@@ -358,12 +340,8 @@ List<SettingsSearchEntry> settingsSearchEntries({
       area: libraryArea(AppStrings.settingsSectionReminders),
       rowKey: SettingsKeys.reminderShowTokens,
       value: () async => onOff(on: await controller.reminderShowTokens),
-      open: () => push(
-        SettingsRemindersScreen(
-          controller: controller,
-          highlight: SettingsKeys.reminderShowTokens,
-        ),
-      ),
+      open: () =>
+          openArea(SettingsAreaId.reminders, SettingsKeys.reminderShowTokens),
     ),
     if (transcription case final models?) ...[
       SettingsSearchEntry(
@@ -376,12 +354,9 @@ List<SettingsSearchEntry> settingsSearchEntries({
               ? AppStrings.transcriptionModelNone
               : AppStrings.transcriptionModelName(model);
         },
-        open: () => push(
-          SettingsTranscriptionScreen(
-            controller: controller,
-            models: models,
-            highlight: SettingsKeys.transcriptionModel,
-          ),
+        open: () => openArea(
+          SettingsAreaId.transcription,
+          SettingsKeys.transcriptionModel,
         ),
       ),
       SettingsSearchEntry(
@@ -391,12 +366,9 @@ List<SettingsSearchEntry> settingsSearchEntries({
         value: () async => TranscriptionSettingsSection.languageLabel(
           models.settings.language,
         ),
-        open: () => push(
-          SettingsTranscriptionScreen(
-            controller: controller,
-            models: models,
-            highlight: SettingsKeys.transcriptionLanguage,
-          ),
+        open: () => openArea(
+          SettingsAreaId.transcription,
+          SettingsKeys.transcriptionLanguage,
         ),
       ),
     ],
@@ -406,12 +378,8 @@ List<SettingsSearchEntry> settingsSearchEntries({
         area: libraryArea(AppStrings.settingsSectionSync),
         rowKey: const Key('settings-area-sync'),
         value: () async => syncStatusLine(sync.status, DateTime.now()),
-        open: () => push(
-          SyncSettingsScreen(
-            sync: sync,
-            libraryName: p.basename(controller.root ?? ''),
-          ),
-        ),
+        open: () =>
+            openArea(SettingsAreaId.sync, const Key('settings-area-sync')),
       ),
     // Maintenance lives on the home itself: opening one means clearing
     // the search and flashing the row in place.
