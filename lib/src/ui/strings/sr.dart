@@ -1180,6 +1180,30 @@ final class SerbianStrings extends Strings {
   @override
   String get historyAllVersions => 'Све верзије';
   @override
+  String get commandPaletteTitle => 'Палета команди';
+  @override
+  String get goToNoteTitle => 'Иди на белешку';
+  @override
+  String get paletteGroupNote => 'Белешка';
+  @override
+  String get paletteGroupEditor => 'Уређивач';
+  @override
+  String get paletteGroupView => 'Приказ';
+  @override
+  String get paletteGroupLibrary => 'Библиотека';
+  @override
+  String get paletteGroupGoTo => 'Иди на';
+  @override
+  String get paletteHint => 'Тражи команде и белешке';
+  @override
+  String get paletteNoResults => 'Нема резултата';
+  @override
+  String get paletteCommands => 'Команде';
+  @override
+  String get paletteNotes => 'Белешке';
+  @override
+  String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
+  @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override
   String get openFileFailed =>

@@ -1181,6 +1181,30 @@ final class BasqueStrings extends Strings {
   @override
   String get historyAllVersions => 'Bertsio guztiak';
   @override
+  String get commandPaletteTitle => 'Komando-paleta';
+  @override
+  String get goToNoteTitle => 'Joan oharrera';
+  @override
+  String get paletteGroupNote => 'Oharra';
+  @override
+  String get paletteGroupEditor => 'Editorea';
+  @override
+  String get paletteGroupView => 'Ikuspegia';
+  @override
+  String get paletteGroupLibrary => 'Liburutegia';
+  @override
+  String get paletteGroupGoTo => 'Joan';
+  @override
+  String get paletteHint => 'Bilatu komandoak eta oharrak';
+  @override
+  String get paletteNoResults => 'Ez dago bat datorrenik';
+  @override
+  String get paletteCommands => 'Komandoak';
+  @override
+  String get paletteNotes => 'Oharrak';
+  @override
+  String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
+  @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';

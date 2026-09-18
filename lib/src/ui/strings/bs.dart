@@ -1178,6 +1178,31 @@ final class BosnianStrings extends Strings {
   @override
   String get historyAllVersions => 'Sve verzije';
   @override
+  String get commandPaletteTitle => 'Paleta naredbi';
+  @override
+  String get goToNoteTitle => 'Idi na bilješku';
+  @override
+  String get paletteGroupNote => 'Bilješka';
+  @override
+  String get paletteGroupEditor => 'Uređivač';
+  @override
+  String get paletteGroupView => 'Prikaz';
+  @override
+  String get paletteGroupLibrary => 'Biblioteka';
+  @override
+  String get paletteGroupGoTo => 'Idi na';
+  @override
+  String get paletteHint => 'Traži naredbe i bilješke';
+  @override
+  String get paletteNoResults => 'Nema rezultata';
+  @override
+  String get paletteCommands => 'Naredbe';
+  @override
+  String get paletteNotes => 'Bilješke';
+  @override
+  String get paletteFooter =>
+      '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
+  @override
   String get openFileMissing => 'Datoteka ove bilješke nije na disku';
   @override
   String get openFileFailed =>

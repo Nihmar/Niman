@@ -1149,6 +1149,31 @@ final class HindiStrings extends Strings {
   @override
   String get historyAllVersions => 'सभी संस्करण';
   @override
+  String get commandPaletteTitle => 'कमांड पैलेट';
+  @override
+  String get goToNoteTitle => 'नोट पर जाएँ';
+  @override
+  String get paletteGroupNote => 'नोट';
+  @override
+  String get paletteGroupEditor => 'एडिटर';
+  @override
+  String get paletteGroupView => 'दृश्य';
+  @override
+  String get paletteGroupLibrary => 'लाइब्रेरी';
+  @override
+  String get paletteGroupGoTo => 'जाएँ';
+  @override
+  String get paletteHint => 'कमांड और नोट खोजें';
+  @override
+  String get paletteNoResults => 'कुछ नहीं मिला';
+  @override
+  String get paletteCommands => 'कमांड';
+  @override
+  String get paletteNotes => 'नोट';
+  @override
+  String get paletteFooter =>
+      '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
+  @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';

@@ -1188,6 +1188,31 @@ final class AlbanianStrings extends Strings {
   @override
   String get historyAllVersions => 'Të gjitha versionet';
   @override
+  String get commandPaletteTitle => 'Paleta e komandave';
+  @override
+  String get goToNoteTitle => 'Shko te shënimi';
+  @override
+  String get paletteGroupNote => 'Shënim';
+  @override
+  String get paletteGroupEditor => 'Redaktori';
+  @override
+  String get paletteGroupView => 'Pamja';
+  @override
+  String get paletteGroupLibrary => 'Biblioteka';
+  @override
+  String get paletteGroupGoTo => 'Shko te';
+  @override
+  String get paletteHint => 'Kërko komanda dhe shënime';
+  @override
+  String get paletteNoResults => 'Asnjë përputhje';
+  @override
+  String get paletteCommands => 'Komandat';
+  @override
+  String get paletteNotes => 'Shënimet';
+  @override
+  String get paletteFooter =>
+      '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
+  @override
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override
   String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';

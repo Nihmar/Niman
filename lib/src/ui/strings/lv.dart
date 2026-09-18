@@ -1172,6 +1172,30 @@ final class LatvianStrings extends Strings {
   @override
   String get historyAllVersions => 'Visas versijas';
   @override
+  String get commandPaletteTitle => 'Komandu palete';
+  @override
+  String get goToNoteTitle => 'Doties uz piezīmi';
+  @override
+  String get paletteGroupNote => 'Piezīme';
+  @override
+  String get paletteGroupEditor => 'Redaktors';
+  @override
+  String get paletteGroupView => 'Skats';
+  @override
+  String get paletteGroupLibrary => 'Bibliotēka';
+  @override
+  String get paletteGroupGoTo => 'Doties uz';
+  @override
+  String get paletteHint => 'Meklēt komandas un piezīmes';
+  @override
+  String get paletteNoResults => 'Nekas neatbilst';
+  @override
+  String get paletteCommands => 'Komandas';
+  @override
+  String get paletteNotes => 'Piezīmes';
+  @override
+  String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
+  @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';

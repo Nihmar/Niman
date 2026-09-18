@@ -1189,6 +1189,30 @@ final class GalicianStrings extends Strings {
   @override
   String get historyAllVersions => 'Todas as versións';
   @override
+  String get commandPaletteTitle => 'Paleta de ordes';
+  @override
+  String get goToNoteTitle => 'Ir á nota';
+  @override
+  String get paletteGroupNote => 'Nota';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Vista';
+  @override
+  String get paletteGroupLibrary => 'Biblioteca';
+  @override
+  String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get paletteHint => 'Buscar ordes e notas';
+  @override
+  String get paletteNoResults => 'Sen coincidencias';
+  @override
+  String get paletteCommands => 'Ordes';
+  @override
+  String get paletteNotes => 'Notas';
+  @override
+  String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
+  @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';

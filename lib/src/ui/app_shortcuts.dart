@@ -48,6 +48,39 @@ enum AppCommand {
   /// Show or hide the right dock (#175).
   toggleDock,
 
+  /// Split the window down with the note on screen (#23).
+  splitDown,
+
+  /// The command palette (#155): commands and notes in one search.
+  openPalette,
+
+  /// The palette, on notes alone.
+  goToNote,
+
+  /// Show the note's preview, or back its editor.
+  togglePreview,
+
+  /// Switch the note between the source editor and the WYSIWYG.
+  switchEditor,
+
+  /// Rename the note on screen.
+  renameNote,
+
+  /// Move the note on screen to another folder.
+  moveNote,
+
+  /// Delete the note on screen.
+  deleteNote,
+
+  /// The note's kept versions.
+  noteHistory,
+
+  /// Re-read the library from disk into its index.
+  reindexLibrary,
+
+  /// Switch to another library.
+  switchLibrary,
+
   /// Select the Files tab.
   tabFiles,
 
@@ -127,6 +160,14 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
     ),
     AppShortcut(
+      AppCommand.openPalette,
+      SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
+    ),
+    AppShortcut(
+      AppCommand.goToNote,
+      SingleActivator(LogicalKeyboardKey.keyO, control: true),
+    ),
+    AppShortcut(
       AppCommand.tabFiles,
       SingleActivator(LogicalKeyboardKey.digit1, control: true),
     ),
@@ -162,6 +203,17 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.previousTab => AppStrings.shortcutPreviousTab,
   AppCommand.splitRight => AppStrings.splitRight,
   AppCommand.toggleDock => AppStrings.sidePanelTooltip,
+  AppCommand.splitDown => AppStrings.splitDown,
+  AppCommand.openPalette => AppStrings.commandPaletteTitle,
+  AppCommand.goToNote => AppStrings.goToNoteTitle,
+  AppCommand.togglePreview => AppStrings.showPreviewTooltip,
+  AppCommand.switchEditor => AppStrings.switchToWysiwygTooltip,
+  AppCommand.renameNote => AppStrings.actionRename,
+  AppCommand.moveNote => AppStrings.actionMove,
+  AppCommand.deleteNote => AppStrings.actionDelete,
+  AppCommand.noteHistory => AppStrings.noteHistoryTitle,
+  AppCommand.reindexLibrary => AppStrings.reindexTitle,
+  AppCommand.switchLibrary => AppStrings.switchLibraryTitle,
   AppCommand.tabFiles => AppStrings.tabFiles,
   AppCommand.tabTodo => AppStrings.todoTitle,
   AppCommand.tabSearch => AppStrings.tabSearch,
