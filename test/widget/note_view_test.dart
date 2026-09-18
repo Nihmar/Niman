@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
@@ -18,11 +19,15 @@ NoteView _view({
   bool showLineNumbers = true,
   bool autofocusEditor = false,
   bool showPreview = false,
+  bool splitPreview = false,
+  ValueChanged<EditorKind>? onEditorKindChanged,
   int? initialCaretOffset,
 }) => NoteView(
   showLineNumbers: showLineNumbers,
   autofocusEditor: autofocusEditor,
   showPreview: showPreview,
+  splitPreview: splitPreview,
+  onEditorKindChanged: onEditorKindChanged,
   path: path,
   readNote: readNote,
   writeNote: writeNote,
@@ -369,6 +374,47 @@ void main() {
       if (spellAt != null) {
         expect(tester.getTopLeft(spellCheck), spellAt);
       }
+    });
+
+    testWidgets('the editor switch goes when there is no editor on screen', (
+      tester,
+    ) async {
+      // Preview-only has no editor showing, so there are not two of
+      // them to be between (device report, 2026-09-18).
+      Widget view({required bool preview, bool split = false}) => _app(
+        _view(
+          path: '/notes/a.md',
+          readNote: (_) async => 'one two three',
+          showPreview: preview,
+          splitPreview: split,
+          onEditorKindChanged: (_) {},
+        ),
+      );
+      final toggle = find.byKey(const Key('editor-kind-toggle'));
+
+      await tester.pumpWidget(view(preview: false));
+      await tester.pump();
+      await tester.pump();
+      expect(toggle, findsOneWidget);
+      // Nothing slides sideways when it goes: it is the last thing
+      // before the Spacer, and what follows is anchored to the far
+      // edge. (The row is 8 dp shorter without it, which is the whole
+      // pane changing at once and nowhere near the thumb that tapped
+      // the eye up in the app bar.)
+      final findButton = find.byKey(const Key('editor-find-open'));
+      final findAt = tester.getTopLeft(findButton).dx;
+      final words = tester.getTopRight(find.text('3 words')).dx;
+
+      await tester.pumpWidget(view(preview: true));
+      await tester.pump();
+      expect(toggle, findsNothing);
+      expect(tester.getTopLeft(findButton).dx, findAt);
+      expect(tester.getTopRight(find.text('3 words')).dx, words);
+
+      // Side by side, the editor is on screen and so is the switch.
+      await tester.pumpWidget(view(preview: true, split: true));
+      await tester.pump();
+      expect(toggle, findsOneWidget);
     });
 
     testWidgets('the preview keeps its scroll offset across the switch', (
