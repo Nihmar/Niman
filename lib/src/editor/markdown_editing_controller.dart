@@ -1,4 +1,4 @@
-/// Enter carries a list on in the source editor (#141).
+/// Enter carries a list on in the source editor (#142).
 ///
 /// Every Markdown editor does this and ours did not: pressing Enter in
 /// `- milk` left the writer on a blank line to type `- ` themselves,
