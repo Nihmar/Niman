@@ -399,6 +399,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Показати або приховати фільтр';
   @override
+  String get shortcutCloseTab => 'Закрити поточну нотатку';
+  @override
+  String get shortcutNextTab => 'Наступна відкрита нотатка';
+  @override
+  String get shortcutPreviousTab => 'Попередня відкрита нотатка';
+  @override
   String get shortcutEditorSection => 'У редакторі';
   @override
   String get shortcutFind => 'Шукати';
@@ -1152,6 +1158,14 @@ final class UkrainianStrings extends Strings {
   String get openInFileManager => 'Показати у файловому менеджері';
   @override
   String get openInDefaultApp => 'Відкрити у типовій програмі';
+  @override
+  String get newNoteTabTooltip => 'Нова нотатка в новій вкладці';
+  @override
+  String get openNotesTooltip => 'Відкриті нотатки';
+  @override
+  String get closeTabTooltip => 'Закрити';
+  @override
+  String get openInNewTab => 'Відкрити в новій вкладці';
   @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override

@@ -401,6 +401,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Prikaži ali skrij filter';
   @override
+  String get shortcutCloseTab => 'Zapri trenutni zapisek';
+  @override
+  String get shortcutNextTab => 'Naslednji odprti zapisek';
+  @override
+  String get shortcutPreviousTab => 'Prejšnji odprti zapisek';
+  @override
   String get shortcutEditorSection => 'V urejevalniku';
   @override
   String get shortcutFind => 'Iskanje';
@@ -1142,6 +1148,14 @@ final class SlovenianStrings extends Strings {
   String get openInFileManager => 'Pokaži v upravitelju datotek';
   @override
   String get openInDefaultApp => 'Odpri s privzeto aplikacijo';
+  @override
+  String get newNoteTabTooltip => 'Nov zapisek v novem zavihku';
+  @override
+  String get openNotesTooltip => 'Odprti zapiski';
+  @override
+  String get closeTabTooltip => 'Zapri';
+  @override
+  String get openInNewTab => 'Odpri v novem zavihku';
   @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override

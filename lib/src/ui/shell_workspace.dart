@@ -1,16 +1,18 @@
 /// The shell's side of the workspace (issue #23): reads what was left
-/// open when a library opens, follows the note the shell shows, and
-/// follows the library when a note or a folder under an open note is
-/// renamed, moved or deleted.
+/// open when a library opens, opens notes into it the way the tree was
+/// clicked, runs the tab bar's actions, decides which tabs keep their
+/// editor alive behind the one showing, and follows the library when a
+/// note or a folder under an open note is renamed, moved or deleted.
 ///
-/// One note at a time for now — the shell's note replaces the workspace's
-/// showing tab — so nothing on screen changes yet; what this lays down is
-/// the model the tabs will stand on, kept current and kept on disk.
+/// On a phone it still holds one note at a time: the shown note replaces
+/// the showing tab. The open-notes switcher is a later step of #23.
 library;
 
 import 'dart:async';
 
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_controller.dart';
 
 /// The open library's workspace, as the shell drives it.
@@ -25,38 +27,144 @@ final class ShellWorkspace {
   /// The workspace itself.
   final WorkspaceController controller;
 
+  /// How many tabs besides the showing one keep their editor mounted —
+  /// and with it undo, find and folds (decision 4 of the plan on #23).
+  static const int keptAlive = 4;
+
+  /// Past this many characters a note keeps its editor only while it
+  /// shows: novel-length notes are what the app is built to open, and
+  /// five of them mounted at once is not.
+  static const int largeNote = 200000;
+
   /// The note last followed, so an unchanged build changes nothing.
   String? _following;
   bool _followed = false;
+
+  /// The next note opened goes into a new tab (Ctrl+click, the row menu,
+  /// the tab bar's +) instead of the showing one.
+  bool _nextInNewTab = false;
+
+  /// Open notes, most recently shown first.
+  final List<String> _recent = [];
+
+  /// Loaded notes' lengths, for [largeNote].
+  final Map<String, int> _lengths = {};
+
+  /// What is open now.
+  Workspace get value => controller.value;
 
   /// Reads back what was left open in the library on this device.
   Future<void> load() async {
     controller.adopt(await _session.savedWorkspace);
   }
 
+  /// Opens [notePath] now: in a new tab when [newTab] (or when one was
+  /// asked for with [openNextInNewTab]), in place of the showing one
+  /// otherwise. Already open, it is shown where it is.
+  void show(String notePath, {bool newTab = false}) {
+    final fresh = newTab || _nextInNewTab;
+    _nextInNewTab = false;
+    _following = notePath;
+    _followed = true;
+    controller.update(
+      (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
+    );
+  }
+
+  /// The next note the shell opens, however it opens it, goes into a new
+  /// tab: for the flows that pick their note later (a new note's name).
+  void openNextInNewTab() => _nextInNewTab = true;
+
   /// The shell now shows [notePath] (library-relative), or no note.
   ///
-  /// Called from the shell's build, so the change lands after the frame
-  /// instead of notifying in the middle of one.
-  void follow(String? notePath) {
+  /// Called from the shell's build, for the ways in that set the shell's
+  /// note without going through [show] (a link, a template, a quick
+  /// note), so the change lands after the frame instead of notifying in
+  /// the middle of one. With [keepOnNone] — the wide layout, where
+  /// selecting a folder leaves the tabs alone — no note closes nothing.
+  void follow(String? notePath, {bool keepOnNone = false}) {
     if (_followed && notePath == _following) return;
     final previous = _following;
     _following = notePath;
     _followed = true;
     scheduleMicrotask(() {
       if (notePath != null) {
-        controller.update((w) => w.replaceActive(notePath));
-      } else if (previous != null) {
+        final fresh = _nextInNewTab;
+        _nextInNewTab = false;
+        controller.update(
+          (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),
+        );
+      } else if (previous != null && !keepOnNone) {
         controller.update((w) => w.closePath(previous));
       }
     });
   }
 
+  /// Shows the focused pane's tab at [index].
+  void activate(int index) =>
+      controller.update((w) => w.activate(w.focused, index));
+
+  /// Closes the focused pane's tab at [index].
+  void close(int index) => controller.update((w) => w.close(w.focused, index));
+
+  /// Closes the tab showing, if any.
+  void closeActive() => controller.update((w) {
+    final pane = w.focusedPane;
+    return pane.active < 0 ? w : w.close(w.focused, pane.active);
+  });
+
+  /// Shows the tab [step] away from the showing one, wrapping around.
+  void cycle(int step) => controller.update((w) {
+    final pane = w.focusedPane;
+    if (pane.tabs.length < 2) return w;
+    final next = (pane.active + step) % pane.tabs.length;
+    return w.activate(w.focused, next);
+  });
+
+  /// Remembers where [path] was left. Deferred: it arrives while an
+  /// editor is being taken down, when nothing may be rebuilt.
+  void remember(String path, NoteMemento memento) {
+    scheduleMicrotask(
+      () => controller.update((w) => w.withMemento(path, memento)),
+    );
+  }
+
+  /// Records a loaded note's [length], for [largeNote].
+  void noteLoaded(String path, int length) => _lengths[path] = length;
+
+  /// The tabs whose editor stays mounted: the showing one, then the most
+  /// recently shown others up to [keptAlive], passing over large notes.
+  Set<String> mounted() {
+    final w = value;
+    final active = w.activePath;
+    final open = {for (final tab in w.tabs) tab.path};
+    _recent.removeWhere((path) => !open.contains(path));
+    if (active != null) {
+      _recent
+        ..remove(active)
+        ..insert(0, active);
+    }
+    final alive = <String>{?active};
+    for (final path in _recent) {
+      if (alive.length > keptAlive) break;
+      if (path == active || (_lengths[path] ?? 0) > largeNote) continue;
+      alive.add(path);
+    }
+    return alive;
+  }
+
   /// [from] is now at [to]: a note, or a folder with notes under it.
   void moved(String from, String to) {
-    if (_following case final open?
-        when open == from || open.startsWith('$from/')) {
-      _following = to + open.substring(from.length);
+    String remap(String path) => path == from || path.startsWith('$from/')
+        ? to + path.substring(from.length)
+        : path;
+    if (_following case final open?) _following = remap(open);
+    for (var i = 0; i < _recent.length; i++) {
+      _recent[i] = remap(_recent[i]);
+    }
+    for (final path in [..._lengths.keys]) {
+      final moved = remap(path);
+      if (moved != path) _lengths[moved] = _lengths.remove(path)!;
     }
     controller.update((w) => w.renamed(from, to));
   }

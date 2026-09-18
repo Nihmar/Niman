@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
@@ -55,10 +56,12 @@ import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
+import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/theme/tokens.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
+import 'package:niman/src/workspace/note_memento.dart';
 import 'package:path/path.dart' as p;
 import 'package:re_editor/re_editor.dart';
 
@@ -120,6 +123,10 @@ final class NoteView extends StatefulWidget {
     this.folderExists,
     this.initialAnchor,
     this.initialCaretOffset,
+    this.active = true,
+    this.initialMemento,
+    this.onMemento,
+    this.onLoaded,
     this.kindMode = true,
     this.onNoteKindChanged,
     this.toolbarTop = false,
@@ -250,6 +257,23 @@ final class NoteView extends StatefulWidget {
   /// A template `{{cursor}}` offset to land the caret on after the note
   /// loads (#53), measured in the created text. Clamped into the text.
   final int? initialCaretOffset;
+
+  /// Whether this is the tab on screen (#23). A tab kept alive behind it
+  /// keeps its buffer, undo and view, and hands in a memento as it goes.
+  final bool active;
+
+  /// Where the note was left, put back once it loads (#23): its
+  /// selection when it was left in the editor that shows now, and its
+  /// scroll. A caret landing or an anchor wins over it.
+  final NoteMemento? initialMemento;
+
+  /// Receives where the note is left: when its tab goes behind another,
+  /// and when the view goes away.
+  final void Function(String path, NoteMemento memento)? onMemento;
+
+  /// Told the note's length once it is loaded: the tabs keep a note this
+  /// large alive behind others only up to a point (#23).
+  final void Function(String path, int length)? onLoaded;
 
   /// Whether the note-kind GUIs are shown (T-TK-02): a note whose
   /// frontmatter declares a known `type` opens in its kind GUI instead of
@@ -504,7 +528,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         'chars=${_previewText.length} scroll=$scroll',
       );
     }
+    if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
+    if (!oldWidget.active && widget.active && _ready) {
+      // Back on screen: the shell asks the showing note what kind it is.
+      widget.onNoteKindChanged?.call(_noteKind);
+      _dismissKeyboardForPreview();
+    }
     if (oldWidget.path != widget.path) {
+      _handMemento(oldWidget.path);
       _saveTimer?.cancel();
       _savePending = false;
       // Persist the outgoing note under its own path before the buffer is
@@ -560,6 +591,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _handMemento(widget.path);
     _saveTimer?.cancel();
     _statsTimer?.cancel();
     _previewTimer?.cancel();
@@ -579,6 +611,66 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _mathCache.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
+  }
+
+  /// Hands where the note at [path] was left to [NoteView.onMemento]:
+  /// only a loaded note has a place to have been left at.
+  void _handMemento(String path) {
+    final receive = widget.onMemento;
+    if (receive == null || !_ready) return;
+    if (widget.showWysiwyg) {
+      final state = _wysiwygKey.currentState;
+      if (state == null) return;
+      final selection = state.controller.selection;
+      receive(
+        path,
+        NoteMemento(
+          selectionBase: selection.baseOffset,
+          selectionExtent: selection.extentOffset,
+          scrollOffset: state.scrollOffset,
+          editorKind: wysiwygEditorKind,
+          preview: widget.showPreview,
+        ),
+      );
+      return;
+    }
+    receive(
+      path,
+      sourceMemento(_controller, _scroll, preview: widget.showPreview),
+    );
+  }
+
+  /// Puts the note back where [NoteView.initialMemento] left it: the
+  /// selection only in the editor it was taken in (their offsets count
+  /// different things), the scroll either way.
+  void _restoreMemento() {
+    final memento = widget.initialMemento;
+    if (memento == null || memento.isEmpty) return;
+    final wysiwyg = widget.showWysiwyg;
+    final sameEditor =
+        memento.editorKind == (wysiwyg ? wysiwygEditorKind : sourceEditorKind);
+    if (!wysiwyg) {
+      if (sameEditor) restoreSourceSelection(_controller, memento);
+      restoreScroll(_scroll.verticalScroller, memento.scrollOffset);
+      return;
+    }
+    // The surface is built from the text on the next frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = _wysiwygKey.currentState;
+      if (!mounted || state == null) return;
+      final extent = memento.selectionExtent;
+      if (sameEditor && extent != null) {
+        final length = state.controller.document.length - 1;
+        state.controller.updateSelection(
+          TextSelection(
+            baseOffset: (memento.selectionBase ?? extent).clamp(0, length),
+            extentOffset: extent.clamp(0, length),
+          ),
+          quill.ChangeSource.local,
+        );
+      }
+      restoreScroll(state.scrollController, memento.scrollOffset);
+    });
   }
 
   Future<void> _write(String path, String content, int editSession) async {
@@ -665,6 +757,8 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           index: pos.line,
           offset: pos.offset,
         );
+      } else if (widget.initialAnchor == null) {
+        _restoreMemento();
       }
       // The spell cache is keyed by line index + text; a different note can
       // reuse the same indices, so forget the previous file's answers.
@@ -697,6 +791,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       if (anchor != null && mounted) {
         jumpToAnchor(context, anchor, _linkTargets);
       }
+      widget.onLoaded?.call(path, text.length);
       _log.info(
         'note loaded: $path (${text.length} chars, '
         '${clock.elapsedMilliseconds} ms)',

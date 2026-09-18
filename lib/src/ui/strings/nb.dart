@@ -399,6 +399,12 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Vis eller skjul filtreet';
   @override
+  String get shortcutCloseTab => 'Lukk det gjeldende notatet';
+  @override
+  String get shortcutNextTab => 'Neste åpne notat';
+  @override
+  String get shortcutPreviousTab => 'Forrige åpne notat';
+  @override
   String get shortcutEditorSection => 'I editoren';
   @override
   String get shortcutFind => 'Søk';
@@ -1140,6 +1146,14 @@ final class NorwegianStrings extends Strings {
   String get openInFileManager => 'Vis i filbehandler';
   @override
   String get openInDefaultApp => 'Åpne i standardappen';
+  @override
+  String get newNoteTabTooltip => 'Nytt notat i ny fane';
+  @override
+  String get openNotesTooltip => 'Åpne notater';
+  @override
+  String get closeTabTooltip => 'Lukk';
+  @override
+  String get openInNewTab => 'Åpne i ny fane';
   @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override

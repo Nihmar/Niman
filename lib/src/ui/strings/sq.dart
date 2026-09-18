@@ -398,6 +398,12 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Shfaq ose fsheh pemën e skedarëve';
   @override
+  String get shortcutCloseTab => 'Mbyll shënimin aktual';
+  @override
+  String get shortcutNextTab => 'Shënimi i hapur pasues';
+  @override
+  String get shortcutPreviousTab => 'Shënimi i hapur paraardhës';
+  @override
   String get shortcutEditorSection => 'Në redaktor';
   @override
   String get shortcutFind => 'Kërko';
@@ -1159,6 +1165,14 @@ final class AlbanianStrings extends Strings {
   String get openInFileManager => 'Shfaq në menaxherin e skedarëve';
   @override
   String get openInDefaultApp => 'Hap me aplikacionin e parazgjedhur';
+  @override
+  String get newNoteTabTooltip => 'Shënim i ri në skedë të re';
+  @override
+  String get openNotesTooltip => 'Shënime të hapura';
+  @override
+  String get closeTabTooltip => 'Mbyll';
+  @override
+  String get openInNewTab => 'Hape në skedë të re';
   @override
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override

@@ -352,6 +352,9 @@ final class AppStrings {
   static String get shortcutNewList => _s.shortcutNewList;
   static String get shortcutNewAudio => _s.shortcutNewAudio;
   static String get shortcutToggleSidebar => _s.shortcutToggleSidebar;
+  static String get shortcutCloseTab => _s.shortcutCloseTab;
+  static String get shortcutNextTab => _s.shortcutNextTab;
+  static String get shortcutPreviousTab => _s.shortcutPreviousTab;
   static String get shortcutEditorSection => _s.shortcutEditorSection;
   static String get shortcutFind => _s.shortcutFind;
   static String get shortcutReplace => _s.shortcutReplace;
@@ -738,6 +741,10 @@ final class AppStrings {
   /// Handing a note's file to the OS (issue #76).
   static String get openInFileManager => _s.openInFileManager;
   static String get openInDefaultApp => _s.openInDefaultApp;
+  static String get newNoteTabTooltip => _s.newNoteTabTooltip;
+  static String get openNotesTooltip => _s.openNotesTooltip;
+  static String get closeTabTooltip => _s.closeTabTooltip;
+  static String get openInNewTab => _s.openInNewTab;
   static String get openFileMissing => _s.openFileMissing;
   static String get openFileFailed => _s.openFileFailed;
   static String get movedToTrash => _s.movedToTrash;

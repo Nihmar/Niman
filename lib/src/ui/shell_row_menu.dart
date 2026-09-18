@@ -68,6 +68,7 @@ Future<String?> showRowMenuAt(
   required Note note,
   required bool isQuickNote,
   required Offset position,
+  bool offersNewTab = false,
 }) {
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   final theme = Theme.of(context);
@@ -81,6 +82,7 @@ Future<String?> showRowMenuAt(
       for (final (index, group) in rowMenuGroups(
         note,
         isQuickNote: isQuickNote,
+        offersNewTab: offersNewTab,
       ).indexed) ...[
         if (index > 0) const PopupMenuDivider(),
         for (final entry in group)
@@ -180,7 +182,13 @@ final class RowMenuHeader extends StatelessWidget {
 /// means two different things: inside the folder, which is most of why
 /// its menu is opened at all, or merely beside the note, which is the
 /// afterthought it looks like.
-List<List<RowMenuEntry>> rowMenuGroups(Note note, {required bool isQuickNote}) {
+///
+/// [offersNewTab] adds Open in new tab first, where tabs exist (#23).
+List<List<RowMenuEntry>> rowMenuGroups(
+  Note note, {
+  required bool isQuickNote,
+  bool offersNewTab = false,
+}) {
   // "Here" is the folder the row is, or the folder the note sits in —
   // two different places, and on a note the word was doing the reader no
   // favours. The note's entries say which folder they mean.
@@ -257,8 +265,16 @@ List<List<RowMenuEntry>> rowMenuGroups(Note note, {required bool isQuickNote}) {
   ];
 
   // What the file is: what it is called, where it lives, and — on the
-  // desktop — the ways out of Niman.
+  // desktop — the ways out of Niman, and a tab of its own.
   final file = <RowMenuEntry>[
+    if (!note.isDir && offersNewTab)
+      (
+        key: const Key('menu-open-new-tab'),
+        icon: Icons.tab_outlined,
+        label: AppStrings.openInNewTab,
+        value: 'newtab',
+        destructive: false,
+      ),
     // A note is also a file (issue #76). Desktop only: Android has no
     // file manager to select a path in, so the entries stay off there
     // rather than being shown and then failing.

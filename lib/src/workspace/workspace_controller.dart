@@ -54,16 +54,28 @@ final class WorkspaceController extends ChangeNotifier {
     if (next == _value) return;
     _touched = true;
     _value = next;
+    if (_disposed) {
+      // The last word of views going down with the library (where each
+      // note was left): kept, with nobody left to tell.
+      unawaited(_write());
+      return;
+    }
     notifyListeners();
     _pending?.cancel();
     _pending = Timer(debounce, () => unawaited(flush()));
   }
+
+  bool _disposed = false;
 
   /// Writes a pending change now.
   Future<void> flush() async {
     if (_pending == null) return;
     _pending?.cancel();
     _pending = null;
+    await _write();
+  }
+
+  Future<void> _write() async {
     try {
       await save(_value);
     } on Object catch (error) {
@@ -75,6 +87,7 @@ final class WorkspaceController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     unawaited(flush());
     super.dispose();
   }

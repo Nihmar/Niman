@@ -396,6 +396,12 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Rādīt vai paslēpt filtru';
   @override
+  String get shortcutCloseTab => 'Aizvērt pašreizējo piezīmi';
+  @override
+  String get shortcutNextTab => 'Nākamā atvērtā piezīme';
+  @override
+  String get shortcutPreviousTab => 'Iepriekšējā atvērtā piezīme';
+  @override
   String get shortcutEditorSection => 'Redaktorā';
   @override
   String get shortcutFind => 'Meklēt';
@@ -1143,6 +1149,14 @@ final class LatvianStrings extends Strings {
   String get openInFileManager => 'Rādīt failu pārvaldniekā';
   @override
   String get openInDefaultApp => 'Atvērt noklusējuma lietotnē';
+  @override
+  String get newNoteTabTooltip => 'Jauna piezīme jaunā cilnē';
+  @override
+  String get openNotesTooltip => 'Atvērtās piezīmes';
+  @override
+  String get closeTabTooltip => 'Aizvērt';
+  @override
+  String get openInNewTab => 'Atvērt jaunā cilnē';
   @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override

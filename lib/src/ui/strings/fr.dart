@@ -407,6 +407,12 @@ final class FrenchStrings extends Strings {
   String get shortcutToggleSidebar =>
       'Afficher ou masquer l’arborescence des fichiers';
   @override
+  String get shortcutCloseTab => 'Fermer la note actuelle';
+  @override
+  String get shortcutNextTab => 'Note ouverte suivante';
+  @override
+  String get shortcutPreviousTab => 'Note ouverte précédente';
+  @override
   String get shortcutEditorSection => 'Dans l’éditeur';
   @override
   String get shortcutFind => 'Rechercher';
@@ -1180,6 +1186,14 @@ final class FrenchStrings extends Strings {
   String get openInFileManager => 'Afficher dans le gestionnaire de fichiers';
   @override
   String get openInDefaultApp => 'Ouvrir avec l’application par défaut';
+  @override
+  String get newNoteTabTooltip => 'Nouvelle note dans un nouvel onglet';
+  @override
+  String get openNotesTooltip => 'Notes ouvertes';
+  @override
+  String get closeTabTooltip => 'Fermer';
+  @override
+  String get openInNewTab => 'Ouvrir dans un nouvel onglet';
   @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';

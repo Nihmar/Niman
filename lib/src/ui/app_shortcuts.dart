@@ -33,6 +33,15 @@ enum AppCommand {
   /// Show or hide the wide tree pane.
   toggleSidebar,
 
+  /// Close the note showing, its tab with it (#23).
+  closeTab,
+
+  /// Show the next open note's tab.
+  nextTab,
+
+  /// Show the previous open note's tab.
+  previousTab,
+
   /// Select the Files tab.
   tabFiles,
 
@@ -92,6 +101,18 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.keyB, control: true),
     ),
     AppShortcut(
+      AppCommand.closeTab,
+      SingleActivator(LogicalKeyboardKey.keyW, control: true),
+    ),
+    AppShortcut(
+      AppCommand.nextTab,
+      SingleActivator(LogicalKeyboardKey.tab, control: true),
+    ),
+    AppShortcut(
+      AppCommand.previousTab,
+      SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
+    ),
+    AppShortcut(
       AppCommand.tabFiles,
       SingleActivator(LogicalKeyboardKey.digit1, control: true),
     ),
@@ -122,6 +143,9 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.newTodo => AppStrings.shortcutNewTodo,
   AppCommand.quickNote => AppStrings.shortcutQuickNote,
   AppCommand.toggleSidebar => AppStrings.shortcutToggleSidebar,
+  AppCommand.closeTab => AppStrings.shortcutCloseTab,
+  AppCommand.nextTab => AppStrings.shortcutNextTab,
+  AppCommand.previousTab => AppStrings.shortcutPreviousTab,
   AppCommand.tabFiles => AppStrings.tabFiles,
   AppCommand.tabTodo => AppStrings.todoTitle,
   AppCommand.tabSearch => AppStrings.tabSearch,

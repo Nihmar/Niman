@@ -402,6 +402,12 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Bestandsboom tonen of verbergen';
   @override
+  String get shortcutCloseTab => 'Huidige notitie sluiten';
+  @override
+  String get shortcutNextTab => 'Volgende open notitie';
+  @override
+  String get shortcutPreviousTab => 'Vorige open notitie';
+  @override
   String get shortcutEditorSection => 'In de editor';
   @override
   String get shortcutFind => 'Zoeken';
@@ -1160,6 +1166,14 @@ final class DutchStrings extends Strings {
   String get openInFileManager => 'Tonen in bestandsbeheer';
   @override
   String get openInDefaultApp => 'Openen met standaardapp';
+  @override
+  String get newNoteTabTooltip => 'Nieuwe notitie in een nieuw tabblad';
+  @override
+  String get openNotesTooltip => 'Open notities';
+  @override
+  String get closeTabTooltip => 'Sluiten';
+  @override
+  String get openInNewTab => 'Openen in nieuw tabblad';
   @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';

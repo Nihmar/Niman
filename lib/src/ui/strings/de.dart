@@ -403,6 +403,12 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Dateibaum anzeigen oder ausblenden';
   @override
+  String get shortcutCloseTab => 'Aktuelle Notiz schließen';
+  @override
+  String get shortcutNextTab => 'Nächste offene Notiz';
+  @override
+  String get shortcutPreviousTab => 'Vorherige offene Notiz';
+  @override
   String get shortcutEditorSection => 'Im Editor';
   @override
   String get shortcutFind => 'Suchen';
@@ -1169,6 +1175,14 @@ final class GermanStrings extends Strings {
   String get openInFileManager => 'Im Dateimanager anzeigen';
   @override
   String get openInDefaultApp => 'Mit Standard-App öffnen';
+  @override
+  String get newNoteTabTooltip => 'Neue Notiz in neuem Tab';
+  @override
+  String get openNotesTooltip => 'Offene Notizen';
+  @override
+  String get closeTabTooltip => 'Schließen';
+  @override
+  String get openInNewTab => 'In neuem Tab öffnen';
   @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
