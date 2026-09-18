@@ -1183,6 +1183,8 @@ final class DutchStrings extends Strings {
   @override
   String get openBeside => 'Ernaast openen';
   @override
+  String get closeAllNotes => 'Alles sluiten';
+  @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';
   @override

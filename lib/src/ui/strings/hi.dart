@@ -1143,6 +1143,8 @@ final class HindiStrings extends Strings {
   @override
   String get openBeside => 'बगल में खोलें';
   @override
+  String get closeAllNotes => 'सभी बंद करें';
+  @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';

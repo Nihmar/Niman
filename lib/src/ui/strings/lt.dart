@@ -1171,6 +1171,8 @@ final class LithuanianStrings extends Strings {
   @override
   String get openBeside => 'Atverti šalia';
   @override
+  String get closeAllNotes => 'Uždaryti visus';
+  @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';

@@ -59,10 +59,12 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 On Linux and Windows the open notes are **tabs** in the title bar, and
 the ones you were working in come back when you open the library again
-— see [editing](editing.md#open-notes-and-tabs). The phone still shows
-one note at a time; its switcher for the notes left open is the next
-step of [#23](https://github.com/Nihmar/Niman/issues/23). The desktop
-window also splits into two panes, each with its own tabs.
+— see [editing](editing.md#open-notes-and-tabs). The desktop window
+also splits into two panes, each with its own tabs.
+
+On Android the same open notes are reached from a **switcher** instead
+of tabs: a count on the note bar opens the list. One note is on screen
+at a time, and the phone has no split: a phone's width holds one note.
 
 ## Not yet
 

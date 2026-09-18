@@ -1212,6 +1212,8 @@ final class GreekStrings extends Strings {
   @override
   String get openBeside => 'Άνοιγμα στο πλάι';
   @override
+  String get closeAllNotes => 'Κλείσιμο όλων';
+  @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
   @override

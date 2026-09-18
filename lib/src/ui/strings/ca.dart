@@ -1200,6 +1200,8 @@ final class CatalanStrings extends Strings {
   @override
   String get openBeside => 'Obre al costat';
   @override
+  String get closeAllNotes => 'Tanca-les totes';
+  @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override
   String get openFileFailed =>

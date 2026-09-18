@@ -1181,6 +1181,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get openBeside => 'Отвори странично';
   @override
+  String get closeAllNotes => 'Затвори ги сите';
+  @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override
   String get openFileFailed =>

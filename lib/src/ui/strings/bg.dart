@@ -1180,6 +1180,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get openBeside => 'Отвори отстрани';
   @override
+  String get closeAllNotes => 'Затвори всички';
+  @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';
