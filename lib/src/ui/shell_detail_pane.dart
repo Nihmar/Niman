@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -21,6 +22,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.selectedPath,
     required this.selectedIsDir,
     required this.showLineNumbers,
+    required this.noteColumn,
     required this.autofocusEditor,
     required this.linkType,
     required this.missingNoteLocation,
@@ -59,6 +61,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Editor setting forwards.
   final bool showLineNumbers;
+
+  /// Where the note's text sits across the pane (issue #171).
+  final NoteColumn noteColumn;
 
   /// Whether the editor takes focus on open.
   final bool autofocusEditor;
@@ -163,6 +168,7 @@ final class ShellDetailPane extends StatelessWidget {
               child: NoteView(
                 path: p.join(root!, notePath),
                 showLineNumbers: showLineNumbers,
+                noteColumn: noteColumn,
                 autofocusEditor: autofocusEditor,
                 linkType: linkType,
                 missingNoteLocation: missingNoteLocation,

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/preview/aspect_image.dart';
 import 'package:niman/src/preview/block_parse.dart';
@@ -51,6 +52,7 @@ final class MarkdownPreview extends StatefulWidget {
     this.mathCache,
     this.scrollMap,
     this.imageDirectory,
+    this.column = NoteColumn.off,
     super.key,
   });
 
@@ -79,6 +81,10 @@ final class MarkdownPreview extends StatefulWidget {
 
   /// Inset for the content.
   final EdgeInsets padding;
+
+  /// Where the text sits across the pane (issue #171): its side space is
+  /// added to [padding], inside the scroll view, as the editors do.
+  final NoteColumn column;
 
   /// Scroll controller (scroll-sync, T-M2-06, reuses it).
   final ScrollController? controller;
@@ -424,6 +430,17 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.column.enabled) return _build(widget.padding);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = widget.column.sideSpaceIn(constraints.maxWidth);
+        return _build(widget.padding + EdgeInsets.symmetric(horizontal: side));
+      },
+    );
+  }
+
+  /// The preview with its content inset by [padding].
+  Widget _build(EdgeInsets padding) {
     // The first parse of a big note runs on a background isolate, so the
     // first frames have no blocks yet (issue #58): show placeholder bars
     // instead of a blank pane. Re-parses keep the old blocks (only the
@@ -432,7 +449,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
       return CustomScrollView(
         slivers: <Widget>[
           SliverPadding(
-            padding: widget.padding,
+            padding: padding,
             sliver: SliverList(
               key: const ValueKey<String>('previewSkeleton'),
               delegate: SliverChildBuilderDelegate(
@@ -448,7 +465,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
     }
     final count = _nodes?.length ?? 0;
     final map = widget.scrollMap;
-    map?.contentInset = widget.padding.top;
+    map?.contentInset = padding.top;
     final delegate = map == null
         ? SliverChildBuilderDelegate(
             (context, index) => _blockAt(index),
@@ -470,7 +487,7 @@ final class _MarkdownPreviewState extends State<MarkdownPreview>
           controller: widget.controller,
           slivers: <Widget>[
             SliverPadding(
-              padding: widget.padding,
+              padding: padding,
               // With a scroll map every block has a known (or estimated)
               // extent, so a jump lays out only the blocks it lands on
               // instead of walking every block in between — the difference

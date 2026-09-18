@@ -90,6 +90,19 @@ final class PolishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Pokaż kolumnę numerów linii w edytorze notatek';
   @override
+  String get readableLineLengthTitle => 'Czytelna długość wiersza';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Trzymaj tekst notatki w wyśrodkowanej kolumnie zamiast na całej '
+      'szerokości okna';
+  @override
+  String get noteColumnWidthTitle => 'Szerokość kolumny';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Jak szeroka jest kolumna notatki, w pikselach';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Klawiatura po otwarciu';
   @override
   String get keyboardOnOpenSubtitle =>

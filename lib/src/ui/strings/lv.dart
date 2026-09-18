@@ -89,6 +89,18 @@ final class LatvianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Rāda rindu numuru kolonnu piezīmju redaktorā';
   @override
+  String get readableLineLengthTitle => 'Lasāms rindas garums';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Turēt piezīmes tekstu centrētā kolonnā, nevis visā loga platumā';
+  @override
+  String get noteColumnWidthTitle => 'Kolonnas platums';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Cik plata ir piezīmes kolonna, pikseļos';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatūra atverot';
   @override
   String get keyboardOnOpenSubtitle =>

@@ -89,6 +89,19 @@ final class GalicianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Mostra a columna de numeros de liña no editor de notas';
   @override
+  String get readableLineLengthTitle => 'Lonxitude de liña lexible';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Manter o texto da nota nunha columna centrada en vez de en todo o ancho '
+      'da xanela';
+  @override
+  String get noteColumnWidthTitle => 'Ancho da columna';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Canto mide de ancho a columna da nota, en píxeles';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Teclado ao abrir';
   @override
   String get keyboardOnOpenSubtitle =>

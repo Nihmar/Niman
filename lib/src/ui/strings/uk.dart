@@ -92,6 +92,17 @@ final class UkrainianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Показує стовпчик номерів рядків у редакторі';
   @override
+  String get readableLineLengthTitle => 'Зручна довжина рядка';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Тримати текст нотатки в центрованій колонці замість усієї ширини вікна';
+  @override
+  String get noteColumnWidthTitle => 'Ширина колонки';
+  @override
+  String get noteColumnWidthSubtitle => 'Ширина колонки нотатки в пікселях';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Клавіатура при відкритті';
   @override
   String get keyboardOnOpenSubtitle =>

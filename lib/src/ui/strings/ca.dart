@@ -90,6 +90,19 @@ final class CatalanStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Mostra la columna de numeros de línia a l’editor de notes';
   @override
+  String get readableLineLengthTitle => 'Longitud de línia llegible';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Mantén el text de la nota en una columna centrada en lloc de tota '
+      'l’amplada de la finestra';
+  @override
+  String get noteColumnWidthTitle => 'Amplada de la columna';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'L’amplada de la columna de la nota, en píxels';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Teclat en obrir';
   @override
   String get keyboardOnOpenSubtitle =>

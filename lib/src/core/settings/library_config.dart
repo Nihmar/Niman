@@ -175,6 +175,29 @@ double normalizeTreeWidth(Object? raw) {
   return width;
 }
 
+/// The note column's width in a fresh library, in logical pixels (#171):
+/// about 80 characters of prose at the shipped text size, the measure
+/// the preview already read at.
+const double defaultNoteColumnWidth = 700;
+
+/// The narrowest accepted note column.
+const double minNoteColumnWidth = 480;
+
+/// The widest accepted note column.
+const double maxNoteColumnWidth = 1400;
+
+/// Reads a `noteColumnWidth` out of the settings file, clamped into range
+/// — the bargain [normalizeIndentWidth] makes: a hand-typed number stays
+/// near what was meant, anything else reads back as the default.
+double normalizeNoteColumnWidth(Object? raw) {
+  if (raw is! num) return defaultNoteColumnWidth;
+  final width = raw.toDouble();
+  if (!width.isFinite) return defaultNoteColumnWidth;
+  if (width < minNoteColumnWidth) return minNoteColumnWidth;
+  if (width > maxNoteColumnWidth) return maxNoteColumnWidth;
+  return width;
+}
+
 /// The bool in [raw], or [fallback] when it is anything else.
 bool _boolOr(Object? raw, bool fallback) => raw is bool ? raw : fallback;
 
@@ -275,6 +298,8 @@ final class LibraryConfig {
     this.attachmentsFolder = defaultAttachmentsFolder,
     this.pinnedCollapsed = false,
     this.lineNumbers = true,
+    this.readableLineLength = true,
+    this.noteColumnWidth = defaultNoteColumnWidth,
     this.editorAutofocus = false,
     this.reminderShowTokens = false,
     this.treeSort = TreeSort.nameAsc,
@@ -335,6 +360,8 @@ final class LibraryConfig {
           : defaultAttachmentsFolder,
       pinnedCollapsed: _boolOr(json['pinnedCollapsed'], false),
       lineNumbers: _boolOr(json['lineNumbers'], true),
+      readableLineLength: _boolOr(json['readableLineLength'], true),
+      noteColumnWidth: normalizeNoteColumnWidth(json['noteColumnWidth']),
       editorAutofocus: _boolOr(json['editorAutofocus'], false),
       reminderShowTokens: _boolOr(json['reminderShowTokens'], false),
       treeSort: switch (json['treeSort']) {
@@ -423,6 +450,14 @@ final class LibraryConfig {
   /// Whether the editor shows the row-number column (default true).
   final bool lineNumbers;
 
+  /// Whether a note's text keeps to a centred column instead of the full
+  /// width of its pane (default true, #171).
+  final bool readableLineLength;
+
+  /// The width of that column's text, in logical pixels (default
+  /// [defaultNoteColumnWidth]). A pane narrower than it is the column.
+  final double noteColumnWidth;
+
   /// Whether opening a note raises the keyboard (default false).
   final bool editorAutofocus;
 
@@ -495,6 +530,8 @@ final class LibraryConfig {
     String? attachmentsFolder,
     bool? pinnedCollapsed,
     bool? lineNumbers,
+    bool? readableLineLength,
+    double? noteColumnWidth,
     bool? editorAutofocus,
     bool? reminderShowTokens,
     TreeSort? treeSort,
@@ -524,6 +561,8 @@ final class LibraryConfig {
       attachmentsFolder: attachmentsFolder ?? this.attachmentsFolder,
       pinnedCollapsed: pinnedCollapsed ?? this.pinnedCollapsed,
       lineNumbers: lineNumbers ?? this.lineNumbers,
+      readableLineLength: readableLineLength ?? this.readableLineLength,
+      noteColumnWidth: noteColumnWidth ?? this.noteColumnWidth,
       editorAutofocus: editorAutofocus ?? this.editorAutofocus,
       reminderShowTokens: reminderShowTokens ?? this.reminderShowTokens,
       treeSort: treeSort ?? this.treeSort,
@@ -553,6 +592,8 @@ final class LibraryConfig {
     'attachmentsFolder',
     'pinnedCollapsed',
     'lineNumbers',
+    'readableLineLength',
+    'noteColumnWidth',
     'editorAutofocus',
     'reminderShowTokens',
     'treeSort',
@@ -591,6 +632,8 @@ final class LibraryConfig {
       'attachmentsFolder': attachmentsFolder,
       'pinnedCollapsed': pinnedCollapsed,
       'lineNumbers': lineNumbers,
+      'readableLineLength': readableLineLength,
+      'noteColumnWidth': noteColumnWidth,
       'editorAutofocus': editorAutofocus,
       'reminderShowTokens': reminderShowTokens,
       'treeSort': treeSort.name,
@@ -676,6 +719,8 @@ final class LibraryConfig {
         attachmentsFolder == other.attachmentsFolder &&
         pinnedCollapsed == other.pinnedCollapsed &&
         lineNumbers == other.lineNumbers &&
+        readableLineLength == other.readableLineLength &&
+        noteColumnWidth == other.noteColumnWidth &&
         editorAutofocus == other.editorAutofocus &&
         reminderShowTokens == other.reminderShowTokens &&
         treeSort == other.treeSort &&

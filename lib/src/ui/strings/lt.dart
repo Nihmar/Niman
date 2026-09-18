@@ -92,6 +92,18 @@ final class LithuanianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Rodys eilučių numerių stulpelį pastabų redaktoriaus ekrane';
   @override
+  String get readableLineLengthTitle => 'Patogus eilutės ilgis';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Laikyti užrašo tekstą centruotame stulpelyje, o ne per visą lango plotį';
+  @override
+  String get noteColumnWidthTitle => 'Stulpelio plotis';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Koks platus užrašo stulpelis, pikseliais';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Klaviatūra atidarant';
   @override
   String get keyboardOnOpenSubtitle =>

@@ -90,6 +90,19 @@ final class MacedonianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Го прикажува столбчето со броеви на редови во уредникот';
   @override
+  String get readableLineLengthTitle => 'Читлива должина на ред';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Текстот на белешката да стои во центрирана колона наместо низ целата '
+      'ширина на прозорецот';
+  @override
+  String get noteColumnWidthTitle => 'Ширина на колоната';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Колку е широка колоната на белешката, во пиксели';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Тастатура при отворање';
   @override
   String get keyboardOnOpenSubtitle =>

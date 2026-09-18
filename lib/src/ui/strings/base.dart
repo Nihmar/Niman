@@ -37,6 +37,11 @@ abstract base class Strings {
   String get debugLogsSubtitle;
   String get lineNumbersTitle;
   String get lineNumbersSubtitle;
+  String get readableLineLengthTitle;
+  String get readableLineLengthSubtitle;
+  String get noteColumnWidthTitle;
+  String get noteColumnWidthSubtitle;
+  String noteColumnWidthValue(int pixels);
   String get keyboardOnOpenTitle;
   String get keyboardOnOpenSubtitle;
   String get editorKindSource;

@@ -331,6 +331,8 @@ void main() {
         linkType: LinkType.markdown,
         indentWidth: 4,
         editorToolbar: 'link,-bold',
+        readableLineLength: false,
+        noteColumnWidth: 900,
       );
       await store.write(config);
       expect(await store.read(), config);
@@ -356,6 +358,8 @@ void main() {
         'editorToolbar',
         'enabledEditors',
         'treeWidth',
+        'readableLineLength',
+        'noteColumnWidth',
       ]) {
         expect(content, contains('"$key"'), reason: key);
       }
@@ -473,6 +477,9 @@ void main() {
       expect(config.linkType, LinkType.wikilink);
       expect(config.indentWidth, defaultIndentWidth);
       expect(config.editorToolbar, '');
+      // #171: the note is a centred column unless someone says otherwise.
+      expect(config.readableLineLength, isTrue);
+      expect(config.noteColumnWidth, defaultNoteColumnWidth);
     });
 
     test('an out-of-range indentWidth is brought into range', () {
@@ -482,6 +489,14 @@ void main() {
       expect(normalizeIndentWidth(40), maxIndentWidth);
       expect(normalizeIndentWidth(4), 4);
       expect(normalizeIndentWidth('four'), defaultIndentWidth);
+    });
+
+    test('an out-of-range noteColumnWidth is clamped into range', () {
+      expect(normalizeNoteColumnWidth(100), minNoteColumnWidth);
+      expect(normalizeNoteColumnWidth(9000), maxNoteColumnWidth);
+      expect(normalizeNoteColumnWidth(820), 820);
+      expect(normalizeNoteColumnWidth(double.nan), defaultNoteColumnWidth);
+      expect(normalizeNoteColumnWidth('wide'), defaultNoteColumnWidth);
     });
 
     test('an out-of-range treeWidth is clamped into range', () {

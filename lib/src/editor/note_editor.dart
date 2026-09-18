@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/editor/markdown_chunks.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -31,6 +32,8 @@ import 'package:re_editor/re_editor.dart';
 /// [findController] + [findBuilder] wire the in-editor find & replace
 /// (the owner's [CodeFindController] and its bar); [shortcutsActivators]
 /// extends the package's default editor shortcuts (Ctrl+H = replace).
+///
+/// [column] centres the text (issue #171): see [NoteColumn].
 final class NoteEditor extends StatelessWidget {
   /// Creates the editor over [controller].
   const new({
@@ -45,6 +48,7 @@ final class NoteEditor extends StatelessWidget {
     this.shortcutsActivators,
     this.onIndicator,
     this.spellCheck,
+    this.column = NoteColumn.off,
     super.key,
   });
 
@@ -93,8 +97,32 @@ final class NoteEditor extends StatelessWidget {
   /// offers none.
   final EditorSpellCheck? spellCheck;
 
+  /// Where the text sits across the editor (issue #171).
+  final NoteColumn column;
+
+  /// re_editor's own padding around the text: what the editor had before
+  /// the column, kept wherever there is no side space.
+  static const double _fieldInset = 5;
+
   @override
   Widget build(BuildContext context) {
+    if (!column.enabled) return _editor(0);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _editor(column.sideSpaceIn(constraints.maxWidth)),
+    );
+  }
+
+  /// The editor with [side] logical pixels of column space on each side.
+  ///
+  /// The left side space is the row-number column's to take: the numbers
+  /// sit at its right end, against the text, and the text starts at
+  /// `side + NoteColumn.textInset` like the WYSIWYG's — so switching
+  /// editors does not move the text sideways. Both sides stay inside the
+  /// editor's scroll view, so the scrollbar keeps to the pane's edge and
+  /// the wheel scrolls from the margins too.
+  Widget _editor(double side) {
+    final gutter = side == 0 ? 0.0 : side + NoteColumn.textInset - _fieldInset;
     return CodeEditor(
       controller: controller,
       focusNode: focusNode,
@@ -127,8 +155,9 @@ final class NoteEditor extends StatelessWidget {
       // empty indicator takes no room.
       indicatorBuilder: (context, editing, chunkController, notifier) {
         onIndicator?.call(notifier);
-        if (!showLineNumbers) return const SizedBox.shrink();
-        return Row(
+        if (!showLineNumbers) return SizedBox(width: gutter);
+        final numbers = Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             DefaultCodeLineNumber(controller: editing, notifier: notifier),
             DefaultCodeChunkIndicator(
@@ -138,7 +167,26 @@ final class NoteEditor extends StatelessWidget {
             ),
           ],
         );
+        if (gutter == 0) return numbers;
+        // Never narrower than the numbers: a pane just wide enough for
+        // the column lets them push the text rather than overlap it.
+        return ConstrainedBox(
+          constraints: BoxConstraints(minWidth: gutter),
+          child: Align(
+            alignment: Alignment.topRight,
+            widthFactor: 1,
+            child: numbers,
+          ),
+        );
       },
+      padding: side == 0
+          ? null
+          : EdgeInsets.fromLTRB(
+              _fieldInset,
+              _fieldInset,
+              side + NoteColumn.textInset,
+              _fieldInset,
+            ),
       // Heading-section folds (the tokenizer's outline — fences/math/
       // frontmatter are never anchors), not `{}`/`[]`.
       chunkAnalyzer: const MarkdownChunkAnalyzer(),

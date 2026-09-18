@@ -13,6 +13,26 @@ status row switches only when both are enabled.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk.
 
+### Readable line length
+
+A note's text keeps to a centred column instead of running the full
+width of the window: on a wide screen a line of prose stays a line you
+can read. It is on by default, and **Settings → Editor** turns it off
+(*Readable line length*) or sets how wide the text runs (*Column width*,
+700 px unless changed, anything from 480 to 1400).
+
+The same column holds in both editors and in the preview, so switching
+editors does not move the text sideways. The source editor's row
+numbers sit in the margin, just left of the text. The toolbar, the find
+bar and the status row keep to the column too; their backgrounds still
+span the pane, and so does the scrollbar, and the mouse wheel scrolls
+from the margins as well.
+
+A window narrower than the column simply is the column. That is why a
+phone never shows a margin, and the reason the setting exists on
+Android as well: on a tablet, or a phone in landscape, it starts to
+count.
+
 ### Copy and paste
 
 The clipboard carries Markdown on both editors, so copying the same text
