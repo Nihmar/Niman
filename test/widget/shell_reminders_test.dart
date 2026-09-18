@@ -77,12 +77,8 @@ void main() {
   ) async {
     await pumpShell(tester, const Size(1200, 900));
     expect(find.byKey(const Key('shell-rail')), findsOne);
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('shell-rail')),
-        matching: find.text('Todo'),
-      ),
-    );
+    // Icons only since #170: by key, the label is the tooltip.
+    await tester.tap(find.byKey(const Key('rail-todo')));
     await settle(tester);
     expect(find.byKey(const Key('todo-view-switch')), findsOne);
   });

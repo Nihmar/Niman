@@ -8,6 +8,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/ui/shell.dart';
+import 'package:niman/src/ui/shell_navigation.dart';
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_shortcut_service.dart';
@@ -48,7 +49,7 @@ void main() {
   }
 
   int? railIndex(WidgetTester tester) =>
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex;
+      tester.widget<ShellRail>(find.byType(ShellRail)).selectedIndex;
 
   testWidgets('Ctrl+2 selects the Todo tab and Ctrl+1 returns', (tester) async {
     await tester.pumpWidget(buildApp());

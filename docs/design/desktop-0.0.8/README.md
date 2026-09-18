@@ -23,7 +23,7 @@ laid out, how a command palette is reached. The vocabulary stays Niman's
 The four decisions in one picture:
 
 - **The rail is 48 px and icons only.** Files, tasks, search, scratch at
-  the top; the library switcher and the theme at the foot. No labels —
+  the top; the library switcher and Settings at the foot. No labels —
   the tooltip carries the name.
 - **Tabs live in the title bar**, in the space the app's own title bar
   already owns (#151). The left region ends exactly where the file tree

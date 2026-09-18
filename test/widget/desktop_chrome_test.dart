@@ -38,10 +38,8 @@ void main() {
     );
   }
 
-  Finder railDest(String label) => find.descendant(
-    of: find.byKey(const Key('shell-rail')),
-    matching: find.text(label),
-  );
+  // Icons only since #170: by key, not by the label on screen.
+  Finder railDest(String name) => find.byKey(Key('rail-$name'));
 
   Future<void> pumpShell(WidgetTester tester, Size size) async {
     setSurfaceSize(tester, size);
@@ -132,7 +130,7 @@ void main() {
     tester,
   ) async {
     await pumpShell(tester, const Size(1200, 900));
-    await tester.tap(railDest('Todo'));
+    await tester.tap(railDest('todo'));
     await settle(tester);
 
     // Open/Done leads the filter panel (same row), with Add task and the
