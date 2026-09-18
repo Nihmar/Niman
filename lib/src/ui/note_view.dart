@@ -12,15 +12,19 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/editor/editor_tool.dart';
 import 'package:niman/src/editor/find_panel.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/editor/list_tally.dart';
+import 'package:niman/src/editor/list_tally_edit.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
+import 'package:niman/src/editor/wysiwyg/quill_tally.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/frontmatter/parser.dart';
@@ -38,7 +42,9 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
+import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
+import 'package:niman/src/ui/list_tally_sheet.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
@@ -1561,7 +1567,111 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       ToolbarItem.quote: () => _prefixLines(prefix: '> '),
       ToolbarItem.outdent: () => _indentLines(outdent: true),
       ToolbarItem.indent: () => _indentLines(outdent: false),
+      ToolbarItem.tools: () => unawaited(_openTools()),
     };
+  }
+
+  /// Opens the editor's Tools sheet (#136) and runs whatever was picked.
+  ///
+  /// The availability is worked out here rather than in the sheet: only
+  /// this side knows which surface is showing, and each one finds its
+  /// lists its own way.
+  Future<void> _openTools() async {
+    final tool = await showEditorToolsSheet(
+      context,
+      available: <EditorTool>{if (_hasListToCount) EditorTool.countList},
+    );
+    if (!mounted || tool == null) return;
+    switch (tool) {
+      case EditorTool.countList:
+        await _countList();
+    }
+  }
+
+  /// Whether the note has a list the count could run on.
+  bool get _hasListToCount {
+    if (!widget.showWysiwyg) return tallyTargetsIn(_controller.text).isNotEmpty;
+    final state = _wysiwygKey.currentState;
+    if (state == null) return false;
+    return quillTallyTargets(state.controller.document).isNotEmpty;
+  }
+
+  /// Counts a list into a checklist, on whichever surface is showing.
+  Future<void> _countList() =>
+      widget.showWysiwyg ? _countListWysiwyg() : _countListSource();
+
+  Future<void> _countListSource() async {
+    final text = _controller.text;
+    final targets = tallyTargetsIn(text);
+    if (targets.isEmpty) return;
+    final here = tallyTargetAt(text, _controller.selection.baseIndex);
+    final choice = await showListTallySheet(
+      context,
+      candidates: <TallyCandidate>[
+        for (final target in targets)
+          TallyCandidate(
+            rows: target.rows,
+            checks: tallyChecksAt(text, target),
+            replaces: target.replaces,
+          ),
+      ],
+      initialIndex: here == null
+          ? 0
+          : targets.indexWhere((t) => t.sourceStart == here.sourceStart),
+    );
+    if (!mounted || choice == null) return;
+    final target = targets[choice.index];
+    _applyMarkdownEdit(
+      applyTally(
+        text: text,
+        target: target,
+        rows: tallyList(
+          rows: target.rows,
+          cut: choice.cut,
+          sort: choice.sort,
+          checked: tallyChecksAt(text, target),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _countListWysiwyg() async {
+    final state = _wysiwygKey.currentState;
+    if (state == null) return;
+    final controller = state.controller;
+    final targets = quillTallyTargets(controller.document);
+    if (targets.isEmpty) return;
+    final here = quillTallyTargetAt(
+      controller.document,
+      controller.selection.baseOffset,
+    );
+    final choice = await showListTallySheet(
+      context,
+      candidates: <TallyCandidate>[
+        for (final target in targets)
+          TallyCandidate(
+            rows: target.rows,
+            checks: target.checks,
+            replaces: target.replaces,
+          ),
+      ],
+      initialIndex: here == null
+          ? 0
+          : targets.indexWhere((t) => t.start == here.start),
+    );
+    if (!mounted || choice == null) return;
+    final target = targets[choice.index];
+    applyQuillTally(
+      controller,
+      target,
+      tallyList(
+        rows: target.rows,
+        cut: choice.cut,
+        sort: choice.sort,
+        checked: target.checks,
+      ),
+    );
+    state.requestEditorFocus();
   }
 
   /// The toolbar's commands against the WYSIWYG document (T-WYS-06): the
@@ -1673,7 +1783,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final state = _wysiwygKey.currentState;
     if (state == null) return;
     _quillCommands(state).apply(item);
-    if (item == ToolbarItem.image || item == ToolbarItem.heading) return;
+    if (item == ToolbarItem.image ||
+        item == ToolbarItem.heading ||
+        item == ToolbarItem.tools) {
+      return;
+    }
     state.requestEditorFocus();
   }
 
@@ -1684,6 +1798,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         onLink: _insertQuillLink,
         onImage: _insertQuillImage,
         onHeading: _showQuillHeadingDialog,
+        onTools: () => unawaited(_openTools()),
       );
 
   /// The heading picker, applied to the Quill selection.

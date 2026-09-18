@@ -449,6 +449,46 @@ final class GermanStrings extends Strings {
   String get toolbarIndent => 'Einzug vergrößern';
   @override
   String get toolbarOutdent => 'Einzug verkleinern';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Werkzeuge';
+  @override
+  String get editorToolsTitle => 'Editor-Werkzeuge';
+  @override
+  String get toolCountListTitle => 'Liste zählen';
+  @override
+  String get toolCountListSubtitle =>
+      'Zählt zusammen, was die Zeilen aufführen, als Checkliste';
+  @override
+  String get toolCountListNeedsList => 'Diese Notiz hat keine Liste zum Zählen';
+  @override
+  String get tallySourceLabel => 'Liste';
+  @override
+  String get tallyCutLabel => 'Jede Zeile lesen als';
+  @override
+  String get tallyCutDash => 'Name - Werte';
+  @override
+  String get tallyCutColon => 'Name: Werte';
+  @override
+  String get tallyCutCommas => 'Werte, durch Komma getrennt';
+  @override
+  String get tallyCutWhole => 'Die ganze Zeile als ein Wert';
+  @override
+  String get tallySortLabel => 'Reihenfolge';
+  @override
+  String get tallySortCount => 'Häufigste zuerst';
+  @override
+  String get tallySortAlphabetical => 'Alphabetisch';
+  @override
+  String get tallySortFirstSeen => 'Wie aufgeführt';
+  @override
+  String get tallyInsert => 'Einfügen';
+  @override
+  String get tallyUpdate => 'Aktualisieren';
+  @override
+  String get tallyNothingToCount => 'Hier gibt es nichts zu zählen';
   @override
   String get headingDialogTitle => 'Überschriftsstufe';
 

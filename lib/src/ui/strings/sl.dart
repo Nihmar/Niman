@@ -451,6 +451,46 @@ final class SlovenianStrings extends Strings {
   String get toolbarIndent => 'Zamik';
   @override
   String get toolbarOutdent => 'Prekliči zamik';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Orodja';
+  @override
+  String get editorToolsTitle => 'Orodja urejevalnika';
+  @override
+  String get toolCountListTitle => 'Preštej seznam';
+  @override
+  String get toolCountListSubtitle =>
+      'Sešteje, kar naštevajo vrstice, kot kontrolni seznam';
+  @override
+  String get toolCountListNeedsList => 'Ta zapisek nima seznama za štetje';
+  @override
+  String get tallySourceLabel => 'Seznam';
+  @override
+  String get tallyCutLabel => 'Beri vsako vrstico kot';
+  @override
+  String get tallyCutDash => 'Ime - vrednosti';
+  @override
+  String get tallyCutColon => 'Ime: vrednosti';
+  @override
+  String get tallyCutCommas => 'Z vejico ločene vrednosti';
+  @override
+  String get tallyCutWhole => 'Celotna vrstica kot ena vrednost';
+  @override
+  String get tallySortLabel => 'Vrstni red';
+  @override
+  String get tallySortCount => 'Največ najprej';
+  @override
+  String get tallySortAlphabetical => 'Po abecedi';
+  @override
+  String get tallySortFirstSeen => 'Po vrsti s seznama';
+  @override
+  String get tallyInsert => 'Vstavi';
+  @override
+  String get tallyUpdate => 'Posodobi';
+  @override
+  String get tallyNothingToCount => 'Tu ni česa šteti';
   @override
   String get headingDialogTitle => 'Stopnja naslova';
 

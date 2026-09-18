@@ -433,6 +433,47 @@ final class HindiStrings extends Strings {
   String get toolbarIndent => 'इंडेंट बढ़ाएँ';
   @override
   String get toolbarOutdent => 'इंडेंट घटाएँ';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'उपकरण';
+  @override
+  String get editorToolsTitle => 'संपादक उपकरण';
+  @override
+  String get toolCountListTitle => 'सूची गिनें';
+  @override
+  String get toolCountListSubtitle =>
+      'पंक्तियाँ जो सूचीबद्ध करती हैं उसका योग, चेकलिस्ट के रूप में';
+  @override
+  String get toolCountListNeedsList =>
+      'इस नोट में गिनने के लिए कोई सूची नहीं है';
+  @override
+  String get tallySourceLabel => 'सूची';
+  @override
+  String get tallyCutLabel => 'हर पंक्ति को ऐसे पढ़ें';
+  @override
+  String get tallyCutDash => 'नाम - मान';
+  @override
+  String get tallyCutColon => 'नाम: मान';
+  @override
+  String get tallyCutCommas => 'अल्पविराम से अलग किए मान';
+  @override
+  String get tallyCutWhole => 'पूरी पंक्ति, एक ही मान के रूप में';
+  @override
+  String get tallySortLabel => 'क्रम';
+  @override
+  String get tallySortCount => 'सबसे अधिक पहले';
+  @override
+  String get tallySortAlphabetical => 'वर्णानुक्रम';
+  @override
+  String get tallySortFirstSeen => 'सूची के क्रम में';
+  @override
+  String get tallyInsert => 'डालें';
+  @override
+  String get tallyUpdate => 'अपडेट करें';
+  @override
+  String get tallyNothingToCount => 'यहाँ गिनने के लिए कुछ नहीं है';
   @override
   String get headingDialogTitle => 'हेडिंग स्तर';
 

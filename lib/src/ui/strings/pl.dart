@@ -454,6 +454,46 @@ final class PolishStrings extends Strings {
   String get toolbarIndent => 'Wcinij';
   @override
   String get toolbarOutdent => 'Usuń wcięcie';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Narzędzia';
+  @override
+  String get editorToolsTitle => 'Narzędzia edytora';
+  @override
+  String get toolCountListTitle => 'Policz listę';
+  @override
+  String get toolCountListSubtitle =>
+      'Sumuje to, co wymieniają wiersze, jako listę z polami wyboru';
+  @override
+  String get toolCountListNeedsList => 'Ta notatka nie ma listy do policzenia';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Czytaj każdy wiersz jako';
+  @override
+  String get tallyCutDash => 'Nazwa - wartości';
+  @override
+  String get tallyCutColon => 'Nazwa: wartości';
+  @override
+  String get tallyCutCommas => 'Wartości oddzielone przecinkami';
+  @override
+  String get tallyCutWhole => 'Cały wiersz jako jedna wartość';
+  @override
+  String get tallySortLabel => 'Kolejność';
+  @override
+  String get tallySortCount => 'Najwięcej najpierw';
+  @override
+  String get tallySortAlphabetical => 'Alfabetycznie';
+  @override
+  String get tallySortFirstSeen => 'W kolejności listy';
+  @override
+  String get tallyInsert => 'Wstaw';
+  @override
+  String get tallyUpdate => 'Zaktualizuj';
+  @override
+  String get tallyNothingToCount => 'Tu nie ma czego liczyć';
   @override
   String get headingDialogTitle => 'Poziom nagłówka';
 

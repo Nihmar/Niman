@@ -445,6 +445,47 @@ final class FinnishStrings extends Strings {
   String get toolbarIndent => 'Sisäännyrjäys';
   @override
   String get toolbarOutdent => 'Ulosnyrjäys';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Työkalut';
+  @override
+  String get editorToolsTitle => 'Editorin työkalut';
+  @override
+  String get toolCountListTitle => 'Laske lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Laskee yhteen sen, mitä rivit luettelevat, tarkistuslistaksi';
+  @override
+  String get toolCountListNeedsList =>
+      'Tässä muistiinpanossa ei ole listaa laskettavaksi';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Lue jokainen rivi muodossa';
+  @override
+  String get tallyCutDash => 'Nimi - arvot';
+  @override
+  String get tallyCutColon => 'Nimi: arvot';
+  @override
+  String get tallyCutCommas => 'Pilkuilla erotetut arvot';
+  @override
+  String get tallyCutWhole => 'Koko rivi yhtenä arvona';
+  @override
+  String get tallySortLabel => 'Järjestys';
+  @override
+  String get tallySortCount => 'Yleisimmät ensin';
+  @override
+  String get tallySortAlphabetical => 'Aakkosjärjestys';
+  @override
+  String get tallySortFirstSeen => 'Listan järjestyksessä';
+  @override
+  String get tallyInsert => 'Lisää';
+  @override
+  String get tallyUpdate => 'Päivitä';
+  @override
+  String get tallyNothingToCount => 'Täällä ei ole mitään laskettavaa';
   @override
   String get headingDialogTitle => 'Otsikon taso';
 

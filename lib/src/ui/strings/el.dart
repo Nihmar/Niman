@@ -454,6 +454,47 @@ final class GreekStrings extends Strings {
   String get toolbarIndent => 'Εισαγωγή';
   @override
   String get toolbarOutdent => 'Αφαίρεση εισαγωγής';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Εργαλεία';
+  @override
+  String get editorToolsTitle => 'Εργαλεία επεξεργαστή';
+  @override
+  String get toolCountListTitle => 'Μέτρηση λίστας';
+  @override
+  String get toolCountListSubtitle =>
+      'Αθροίζει όσα απαριθμούν οι γραμμές, ως λίστα ελέγχου';
+  @override
+  String get toolCountListNeedsList =>
+      'Αυτή η σημείωση δεν έχει λίστα για μέτρηση';
+  @override
+  String get tallySourceLabel => 'Λίστα';
+  @override
+  String get tallyCutLabel => 'Ανάγνωση κάθε γραμμής ως';
+  @override
+  String get tallyCutDash => 'Όνομα - τιμές';
+  @override
+  String get tallyCutColon => 'Όνομα: τιμές';
+  @override
+  String get tallyCutCommas => 'Τιμές χωρισμένες με κόμμα';
+  @override
+  String get tallyCutWhole => 'Όλη η γραμμή ως μία τιμή';
+  @override
+  String get tallySortLabel => 'Σειρά';
+  @override
+  String get tallySortCount => 'Πρώτα τα περισσότερα';
+  @override
+  String get tallySortAlphabetical => 'Αλφαβητικά';
+  @override
+  String get tallySortFirstSeen => 'Όπως αναγράφονται';
+  @override
+  String get tallyInsert => 'Εισαγωγή';
+  @override
+  String get tallyUpdate => 'Ενημέρωση';
+  @override
+  String get tallyNothingToCount => 'Δεν υπάρχει τίποτα να μετρηθεί εδώ';
   @override
   String get headingDialogTitle => 'Επίπεδο τίτλου';
 

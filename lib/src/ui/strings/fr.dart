@@ -453,6 +453,46 @@ final class FrenchStrings extends Strings {
   String get toolbarIndent => 'Augmenter l’indentation';
   @override
   String get toolbarOutdent => 'Réduire l’indentation';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Outils';
+  @override
+  String get editorToolsTitle => "Outils de l'éditeur";
+  @override
+  String get toolCountListTitle => 'Compter une liste';
+  @override
+  String get toolCountListSubtitle =>
+      'Additionne ce que les lignes énumèrent, en liste à cocher';
+  @override
+  String get toolCountListNeedsList => "Cette note n'a aucune liste à compter";
+  @override
+  String get tallySourceLabel => 'Liste';
+  @override
+  String get tallyCutLabel => 'Lire chaque ligne comme';
+  @override
+  String get tallyCutDash => 'Nom - valeurs';
+  @override
+  String get tallyCutColon => 'Nom : valeurs';
+  @override
+  String get tallyCutCommas => 'Valeurs séparées par des virgules';
+  @override
+  String get tallyCutWhole => 'Toute la ligne, comme une seule valeur';
+  @override
+  String get tallySortLabel => 'Ordre';
+  @override
+  String get tallySortCount => "Les plus nombreux d'abord";
+  @override
+  String get tallySortAlphabetical => 'Alphabétique';
+  @override
+  String get tallySortFirstSeen => "Dans l'ordre de la liste";
+  @override
+  String get tallyInsert => 'Insérer';
+  @override
+  String get tallyUpdate => 'Mettre à jour';
+  @override
+  String get tallyNothingToCount => 'Rien à compter ici';
   @override
   String get headingDialogTitle => 'Niveau du titre';
 

@@ -452,6 +452,47 @@ final class UkrainianStrings extends Strings {
   String get toolbarIndent => 'Відступ';
   @override
   String get toolbarOutdent => 'Прибрати відступ';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Інструменти';
+  @override
+  String get editorToolsTitle => 'Інструменти редактора';
+  @override
+  String get toolCountListTitle => 'Порахувати список';
+  @override
+  String get toolCountListSubtitle =>
+      'Підсумовує те, що перелічують рядки, як список із позначками';
+  @override
+  String get toolCountListNeedsList =>
+      'У цій нотатці немає списку для підрахунку';
+  @override
+  String get tallySourceLabel => 'Список';
+  @override
+  String get tallyCutLabel => 'Читати кожен рядок як';
+  @override
+  String get tallyCutDash => "Ім'я - значення";
+  @override
+  String get tallyCutColon => "Ім'я: значення";
+  @override
+  String get tallyCutCommas => 'Значення через кому';
+  @override
+  String get tallyCutWhole => 'Увесь рядок як одне значення';
+  @override
+  String get tallySortLabel => 'Порядок';
+  @override
+  String get tallySortCount => 'Спочатку найбільші';
+  @override
+  String get tallySortAlphabetical => 'За абеткою';
+  @override
+  String get tallySortFirstSeen => 'У порядку списку';
+  @override
+  String get tallyInsert => 'Вставити';
+  @override
+  String get tallyUpdate => 'Оновити';
+  @override
+  String get tallyNothingToCount => 'Тут немає чого рахувати';
   @override
   String get headingDialogTitle => 'Рівень заголовка';
 

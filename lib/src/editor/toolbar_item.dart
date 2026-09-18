@@ -57,7 +57,12 @@ enum ToolbarItem {
   outdent('outdent', 'toolbar-outdent', Icons.format_indent_decrease),
 
   /// Indent the selected lines.
-  indent('indent', 'toolbar-indent', Icons.format_indent_increase);
+  indent('indent', 'toolbar-indent', Icons.format_indent_increase),
+
+  /// The editor's extra tools (#136): one button for a list that grows,
+  /// rather than a button per feature. The rest of the catalogue is
+  /// formats; this one opens `EditorTool`'s sheet.
+  tools('tools', 'toolbar-tools', Icons.build_outlined);
 
   new(this.id, this._key, this.icon);
 
@@ -92,6 +97,7 @@ enum ToolbarItem {
     ToolbarItem.quote => AppStrings.toolbarQuote,
     ToolbarItem.outdent => AppStrings.toolbarOutdent,
     ToolbarItem.indent => AppStrings.toolbarIndent,
+    ToolbarItem.tools => AppStrings.toolbarTools,
   };
 
   /// The item with this [id], or null when the build does not know it.
