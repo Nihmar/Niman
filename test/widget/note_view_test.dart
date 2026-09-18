@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
@@ -295,8 +296,8 @@ void main() {
 
     testWidgets('the status icons breathe on desktop', (tester) async {
       // The test host is a desktop platform: each status icon stands off
-      // its neighbours and the word count stands off the icons (user,
-      // 2026-09-11). The phone keeps the row tight.
+      // its neighbours (user, 2026-09-11). The phone keeps the row
+      // tight.
       await tester.pumpWidget(
         _app(_view(path: '/notes/a.md', readNote: (_) async => 'hello')),
       );
@@ -310,11 +311,32 @@ void main() {
       final between =
           tester.getTopLeft(findButton).dx - tester.getTopRight(outline).dx;
       expect(between, 6);
+    });
+
+    // The controls are on the left and what the note reads as is on the
+    // right: the word count sits with the saved status, past the
+    // Spacer, not among the buttons.
+    testWidgets('the word count sits with the status, not with the icons', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(_view(path: '/notes/a.md', readNote: (_) async => 'hello')),
+      );
+      await tester.pump();
+      await tester.pump();
       final words = find.text('1 word');
+      final status = find.text(AppStrings.noteStatusSaved);
+      final findButton = find.byKey(const Key('editor-find-open'));
       expect(words, findsOneWidget);
-      final afterFind =
-          tester.getTopLeft(words).dx - tester.getTopRight(findButton).dx;
-      expect(afterFind, 9);
+      expect(status, findsOneWidget);
+      expect(
+        tester.getTopLeft(words).dx,
+        greaterThan(tester.getTopRight(findButton).dx + 100),
+      );
+      expect(
+        tester.getTopRight(words).dx,
+        lessThanOrEqualTo(tester.getTopLeft(status).dx),
+      );
     });
 
     testWidgets('the status icons keep their places across a preview switch', (
@@ -333,13 +355,20 @@ void main() {
       await tester.pumpWidget(view(preview: false));
       await tester.pump();
       await tester.pump();
+      final spellCheck = find.byKey(const Key('spell-check-open'));
       final words = find.text('3 words');
       expect(words, findsOneWidget);
       final editing = tester.getTopLeft(words);
+      final spellAt = spellCheck.evaluate().isEmpty
+          ? null
+          : tester.getTopLeft(spellCheck);
 
       await tester.pumpWidget(view(preview: true));
       await tester.pump();
       expect(tester.getTopLeft(words), editing);
+      if (spellAt != null) {
+        expect(tester.getTopLeft(spellCheck), spellAt);
+      }
     });
 
     testWidgets('the preview keeps its scroll offset across the switch', (
