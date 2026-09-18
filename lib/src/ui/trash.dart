@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
@@ -150,8 +151,10 @@ final class _TrashScreenState extends State<TrashScreen> {
   /// Where the item was deleted from: the parent folder, or the
   /// library root for a top-level note.
   static String _wasAt(String originalPath) {
-    final parent = p.dirname(originalPath);
-    return parent == '.'
+    // `parentOf`, not `p.dirname`: these are library-relative paths, cut
+    // on '/' whatever the host spells its separator.
+    final parent = parentOf(originalPath);
+    return parent.isEmpty
         ? AppStrings.trashOriginalRoot
         : AppStrings.trashOriginalPath(parent);
   }
