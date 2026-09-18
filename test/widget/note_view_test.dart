@@ -251,6 +251,50 @@ void main() {
       expect(find.textContaining('disk on fire'), findsNothing);
     });
 
+    // The outgoing note's edits leave with its own path; nothing left in
+    // the buffer may land on a file that did not load — here, a picture.
+    testWidgets('edits never land on a file that did not load', (tester) async {
+      final writes = <(String, String)>[];
+      final controller = CodeLineEditingController.fromText('start');
+      Future<String> read(String path) async => path.endsWith('.md')
+          ? 'start'
+          : throw const PreviewWorkFailure('bad utf-8', notText: true);
+      Future<void> write(String path, String content) async =>
+          writes.add((path, content));
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: read,
+            writeNote: write,
+            controller: controller,
+          ),
+        ),
+      );
+      await tester.pump();
+      controller.text = 'start!';
+      await tester.pump();
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/photo.jpg',
+            readNote: read,
+            writeNote: write,
+            controller: controller,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteNotText), findsOneWidget);
+      // Leaving the pane is what used to flush the buffer to widget.path.
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(writes, [('/notes/a.md', 'start!')]);
+      controller.dispose();
+    });
+
     // The preview has no editable: flipping the switch must dismiss the
     // keyboard instead of leaving it up over a read-only pane.
     testWidgets('flipping to preview dismisses the keyboard', (tester) async {

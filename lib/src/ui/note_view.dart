@@ -587,6 +587,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   Future<void> _load() async {
     final path = widget.path;
+    // The buffer stops being any note's text here: the outgoing note's
+    // save already left with its own path and text (didUpdateWidget), and
+    // the incoming one is not read yet. Nothing in it is owed to the disk,
+    // so the close guard has nothing to wait for (#156).
+    _lastSavedRevision = _revision;
     setState(() {
       _loading = true;
       _ready = false;
@@ -1220,6 +1225,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// at that point, so nothing is lost) and returns the write already
   /// running, so an awaiting caller still learns when the disk moved.
   Future<void> _save({String? path}) {
+    // Until the note at widget.path is loaded, the buffer is not its text:
+    // it is the previous note's, or nothing — and when the load failed,
+    // widget.path may be a picture. Only a save with its own path (the
+    // outgoing note's) may write then (#156).
+    if (path == null && !_ready) return Future<void>.value();
     final revision = _revision;
     if (revision == _lastSavedRevision) {
       return Future<void>.value(); // nothing new on disk
