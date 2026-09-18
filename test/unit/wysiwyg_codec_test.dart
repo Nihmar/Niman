@@ -229,4 +229,38 @@ A [[wikilink]].
     expect(out, contains('# Edited Heading'));
     expect(out, contains('A **bold** line'));
   });
+
+  group('a loose list survives an edit', () {
+    /// What [source] comes back as after the document was touched — the
+    /// byte-stability guard is skipped, so this is what a save writes.
+    String edited(String source) => codec.encode(codec.decode(source).document);
+
+    test('its checkboxes are kept', () {
+      // A loose list wraps each item's content in a paragraph and puts
+      // the checkbox inside it, so the box was not found where a tight
+      // list keeps it, and `- [x] done` was written back as `- done`.
+      expect(edited('- a\n\n- [x] done\n'), '- a\n\n- [x] done\n');
+      expect(
+        edited('- [x] done\n\n- [ ] open\n'),
+        '- [x] done\n\n- [ ] open\n',
+      );
+    });
+
+    test('its blank lines are kept, and only where they were', () {
+      // A blank line between two items is what makes the list loose; the
+      // AST says a list is loose but not where, so they are counted in
+      // the source. Tightening them on save both reflowed the list and
+      // glued a list under another one to it.
+      expect(edited('- a\n\n- b\n\n- c\n'), '- a\n\n- b\n\n- c\n');
+      expect(edited('- a\n- b\n\n- c\n'), '- a\n- b\n\n- c\n');
+      expect(edited('- a\n- b\n'), '- a\n- b\n');
+    });
+
+    test('an item whose content looks like a marker claims nothing', () {
+      // The markers found have to be the items parsed, or a blank line
+      // would land in the wrong gap: the old behaviour is the fallback.
+      const note = '- a\n\n  ~~~\n  - not an item\n  ~~~\n\n- b\n';
+      expect(edited(note), isNot(contains('- not an item\n\n')));
+    });
+  });
 }

@@ -441,6 +441,46 @@ final class TurkishStrings extends Strings {
   String get toolbarIndent => 'Girintile';
   @override
   String get toolbarOutdent => 'Girintiyi azalt';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Araçlar';
+  @override
+  String get editorToolsTitle => 'Düzenleyici araçları';
+  @override
+  String get toolCountListTitle => 'Listeyi say';
+  @override
+  String get toolCountListSubtitle =>
+      'Satırların saydığı şeyleri toplar, onay listesi olarak';
+  @override
+  String get toolCountListNeedsList => 'Bu notta sayılacak liste yok';
+  @override
+  String get tallySourceLabel => 'Liste';
+  @override
+  String get tallyCutLabel => 'Her satırı şöyle oku';
+  @override
+  String get tallyCutDash => 'Ad - değerler';
+  @override
+  String get tallyCutColon => 'Ad: değerler';
+  @override
+  String get tallyCutCommas => 'Virgülle ayrılmış değerler';
+  @override
+  String get tallyCutWhole => 'Satırın tamamı, tek değer olarak';
+  @override
+  String get tallySortLabel => 'Sıralama';
+  @override
+  String get tallySortCount => 'Önce en çok olanlar';
+  @override
+  String get tallySortAlphabetical => 'Alfabetik';
+  @override
+  String get tallySortFirstSeen => 'Listedeki sırayla';
+  @override
+  String get tallyInsert => 'Ekle';
+  @override
+  String get tallyUpdate => 'Güncelle';
+  @override
+  String get tallyNothingToCount => 'Burada sayılacak bir şey yok';
   @override
   String get headingDialogTitle => 'Başlık düzeyi';
 

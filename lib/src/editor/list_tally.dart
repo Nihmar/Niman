@@ -114,10 +114,13 @@ final class TallyRow {
 final RegExp _innerSpace = RegExp(r'\s+');
 
 /// A generated row: `- [ ] label: 7`, at any indent.
+final RegExp _tallyLine = RegExp(r'^\s*-\s+\[([ xX])\]\s+(.*)$');
+
+/// What a generated row says, without its box: `label: 7`.
 ///
-/// The count is anchored to the end of the line and the label is greedy,
-/// so a label that itself ends in `something: 3` keeps it.
-final RegExp _tallyLine = RegExp(r'^\s*-\s+\[([ xX])\]\s+(.+):\s*(\d+)\s*$');
+/// The count is anchored to the end and the label is greedy, so a label
+/// that itself ends in `something: 3` keeps it.
+final RegExp _tallyContent = RegExp(r'^(.+):\s*(\d+)\s*$');
 
 /// The key two spellings of the same value share.
 ///
@@ -239,11 +242,23 @@ String tallyLine(TallyRow row, {int indent = 0}) =>
 TallyRow? parseTallyLine(String line) {
   final match = _tallyLine.firstMatch(line);
   if (match == null) return null;
-  final label = match.group(2)!.trim();
+  return parseTallyContent(match.group(2)!, checked: match.group(1) != ' ');
+}
+
+/// The row a checklist item saying [text] is, or null when it is not one
+/// of ours.
+///
+/// The WYSIWYG's way in: a box there is an attribute of the line rather
+/// than characters in it, so the surface knows [checked] already and has
+/// only the words to offer.
+TallyRow? parseTallyContent(String text, {required bool checked}) {
+  final match = _tallyContent.firstMatch(text);
+  if (match == null) return null;
+  final label = match.group(1)!.trim();
   if (label.isEmpty) return null;
-  final count = int.tryParse(match.group(3)!);
+  final count = int.tryParse(match.group(2)!);
   if (count == null) return null;
-  return TallyRow(label: label, count: count, checked: match.group(1) != ' ');
+  return TallyRow(label: label, count: count, checked: checked);
 }
 
 /// The ticks of [lines], keyed by folded label, for [tallyList].

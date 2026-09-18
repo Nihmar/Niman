@@ -450,6 +450,47 @@ final class ItalianStrings extends Strings {
   String get toolbarIndent => 'Aumenta rientro';
   @override
   String get toolbarOutdent => 'Riduci rientro';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Strumenti';
+  @override
+  String get editorToolsTitle => "Strumenti dell'editor";
+  @override
+  String get toolCountListTitle => 'Conta una lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Somma quello che le righe elencano, come lista di spunta';
+  @override
+  String get toolCountListNeedsList =>
+      'Questa nota non ha nessuna lista da contare';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Leggi ogni riga come';
+  @override
+  String get tallyCutDash => 'Nome - valori';
+  @override
+  String get tallyCutColon => 'Nome: valori';
+  @override
+  String get tallyCutCommas => 'Valori separati da virgola';
+  @override
+  String get tallyCutWhole => 'Tutta la riga, come un solo valore';
+  @override
+  String get tallySortLabel => 'Ordine';
+  @override
+  String get tallySortCount => 'Prima i più numerosi';
+  @override
+  String get tallySortAlphabetical => 'Alfabetico';
+  @override
+  String get tallySortFirstSeen => "Nell'ordine della lista";
+  @override
+  String get tallyInsert => 'Inserisci';
+  @override
+  String get tallyUpdate => 'Aggiorna';
+  @override
+  String get tallyNothingToCount => "Qui non c'è niente da contare";
   @override
   String get headingDialogTitle => 'Livello del titolo';
 

@@ -448,6 +448,47 @@ final class LatvianStrings extends Strings {
   String get toolbarIndent => 'Ielāde';
   @override
   String get toolbarOutdent => 'Atcelt ielādi';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Rīki';
+  @override
+  String get editorToolsTitle => 'Redaktora rīki';
+  @override
+  String get toolCountListTitle => 'Saskaitīt sarakstu';
+  @override
+  String get toolCountListSubtitle =>
+      'Saskaita to, ko rindas uzskaita, kā atzīmju sarakstu';
+  @override
+  String get toolCountListNeedsList =>
+      'Šajā piezīmē nav saraksta, ko saskaitīt';
+  @override
+  String get tallySourceLabel => 'Saraksts';
+  @override
+  String get tallyCutLabel => 'Lasīt katru rindu kā';
+  @override
+  String get tallyCutDash => 'Vārds - vērtības';
+  @override
+  String get tallyCutColon => 'Vārds: vērtības';
+  @override
+  String get tallyCutCommas => 'Ar komatu atdalītas vērtības';
+  @override
+  String get tallyCutWhole => 'Visa rinda kā viena vērtība';
+  @override
+  String get tallySortLabel => 'Kārtība';
+  @override
+  String get tallySortCount => 'Vispirms biežākie';
+  @override
+  String get tallySortAlphabetical => 'Alfabēta secībā';
+  @override
+  String get tallySortFirstSeen => 'Saraksta secībā';
+  @override
+  String get tallyInsert => 'Ievietot';
+  @override
+  String get tallyUpdate => 'Atjaunināt';
+  @override
+  String get tallyNothingToCount => 'Šeit nav ko skaitīt';
   @override
   String get headingDialogTitle => 'Virsraksta līmenis';
 

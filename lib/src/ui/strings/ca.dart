@@ -453,6 +453,47 @@ final class CatalanStrings extends Strings {
   String get toolbarIndent => 'Sagna';
   @override
   String get toolbarOutdent => 'Desfà sagnat';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Eines';
+  @override
+  String get editorToolsTitle => "Eines de l'editor";
+  @override
+  String get toolCountListTitle => 'Compta una llista';
+  @override
+  String get toolCountListSubtitle =>
+      'Suma el que enumeren les files, com una llista de verificació';
+  @override
+  String get toolCountListNeedsList =>
+      'Aquesta nota no té cap llista per comptar';
+  @override
+  String get tallySourceLabel => 'Llista';
+  @override
+  String get tallyCutLabel => 'Llegeix cada fila com a';
+  @override
+  String get tallyCutDash => 'Nom - valors';
+  @override
+  String get tallyCutColon => 'Nom: valors';
+  @override
+  String get tallyCutCommas => 'Valors separats per comes';
+  @override
+  String get tallyCutWhole => 'Tota la fila, com un sol valor';
+  @override
+  String get tallySortLabel => 'Ordre';
+  @override
+  String get tallySortCount => 'Primer els més freqüents';
+  @override
+  String get tallySortAlphabetical => 'Alfabètic';
+  @override
+  String get tallySortFirstSeen => 'Tal com són a la llista';
+  @override
+  String get tallyInsert => 'Insereix';
+  @override
+  String get tallyUpdate => 'Actualitza';
+  @override
+  String get tallyNothingToCount => 'Aquí no hi ha res per comptar';
   @override
   String get headingDialogTitle => 'Nivell del títol';
 

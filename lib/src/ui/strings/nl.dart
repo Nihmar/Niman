@@ -448,6 +448,47 @@ final class DutchStrings extends Strings {
   String get toolbarIndent => 'Inspringen';
   @override
   String get toolbarOutdent => 'Uitspringen';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Gereedschap';
+  @override
+  String get editorToolsTitle => 'Editorgereedschap';
+  @override
+  String get toolCountListTitle => 'Lijst tellen';
+  @override
+  String get toolCountListSubtitle =>
+      'Telt op wat de regels opsommen, als afvinklijst';
+  @override
+  String get toolCountListNeedsList =>
+      'Deze notitie heeft geen lijst om te tellen';
+  @override
+  String get tallySourceLabel => 'Lijst';
+  @override
+  String get tallyCutLabel => 'Lees elke regel als';
+  @override
+  String get tallyCutDash => 'Naam - waarden';
+  @override
+  String get tallyCutColon => 'Naam: waarden';
+  @override
+  String get tallyCutCommas => "Waarden, gescheiden door komma's";
+  @override
+  String get tallyCutWhole => 'De hele regel, als één waarde';
+  @override
+  String get tallySortLabel => 'Volgorde';
+  @override
+  String get tallySortCount => 'Meeste eerst';
+  @override
+  String get tallySortAlphabetical => 'Alfabetisch';
+  @override
+  String get tallySortFirstSeen => 'Zoals opgesomd';
+  @override
+  String get tallyInsert => 'Invoegen';
+  @override
+  String get tallyUpdate => 'Bijwerken';
+  @override
+  String get tallyNothingToCount => 'Hier valt niets te tellen';
   @override
   String get headingDialogTitle => 'Kopniveau';
 

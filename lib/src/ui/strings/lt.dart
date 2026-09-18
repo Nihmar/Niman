@@ -451,6 +451,47 @@ final class LithuanianStrings extends Strings {
   String get toolbarIndent => 'Įtrauka';
   @override
   String get toolbarOutdent => 'Atleisti įtrauką';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Įrankiai';
+  @override
+  String get editorToolsTitle => 'Redaktoriaus įrankiai';
+  @override
+  String get toolCountListTitle => 'Suskaičiuoti sąrašą';
+  @override
+  String get toolCountListSubtitle =>
+      'Sudeda tai, ką eilutės išvardija, kaip žymimąjį sąrašą';
+  @override
+  String get toolCountListNeedsList =>
+      'Šiame užraše nėra sąrašo, kurį būtų galima suskaičiuoti';
+  @override
+  String get tallySourceLabel => 'Sąrašas';
+  @override
+  String get tallyCutLabel => 'Kiekvieną eilutę skaityti kaip';
+  @override
+  String get tallyCutDash => 'Vardas - reikšmės';
+  @override
+  String get tallyCutColon => 'Vardas: reikšmės';
+  @override
+  String get tallyCutCommas => 'Kableliais atskirtos reikšmės';
+  @override
+  String get tallyCutWhole => 'Visa eilutė kaip viena reikšmė';
+  @override
+  String get tallySortLabel => 'Tvarka';
+  @override
+  String get tallySortCount => 'Daugiausia pirmiausia';
+  @override
+  String get tallySortAlphabetical => 'Abėcėlės tvarka';
+  @override
+  String get tallySortFirstSeen => 'Sąrašo tvarka';
+  @override
+  String get tallyInsert => 'Įterpti';
+  @override
+  String get tallyUpdate => 'Atnaujinti';
+  @override
+  String get tallyNothingToCount => 'Čia nėra ko skaičiuoti';
   @override
   String get headingDialogTitle => 'Antraštės lygis';
 

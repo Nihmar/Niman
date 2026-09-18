@@ -449,6 +449,47 @@ final class SwedishStrings extends Strings {
   String get toolbarIndent => 'Indentera';
   @override
   String get toolbarOutdent => 'Ta bort indentering';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Verktyg';
+  @override
+  String get editorToolsTitle => 'Redigerarverktyg';
+  @override
+  String get toolCountListTitle => 'Räkna en lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Summerar det raderna räknar upp, som en checklista';
+  @override
+  String get toolCountListNeedsList =>
+      'Den här anteckningen har ingen lista att räkna';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Läs varje rad som';
+  @override
+  String get tallyCutDash => 'Namn - värden';
+  @override
+  String get tallyCutColon => 'Namn: värden';
+  @override
+  String get tallyCutCommas => 'Värden åtskilda med komma';
+  @override
+  String get tallyCutWhole => 'Hela raden, som ett värde';
+  @override
+  String get tallySortLabel => 'Ordning';
+  @override
+  String get tallySortCount => 'Flest först';
+  @override
+  String get tallySortAlphabetical => 'Alfabetisk';
+  @override
+  String get tallySortFirstSeen => 'Som de står';
+  @override
+  String get tallyInsert => 'Infoga';
+  @override
+  String get tallyUpdate => 'Uppdatera';
+  @override
+  String get tallyNothingToCount => 'Här finns inget att räkna';
   @override
   String get headingDialogTitle => 'Rubriknivå';
 

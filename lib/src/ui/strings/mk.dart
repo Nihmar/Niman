@@ -450,6 +450,46 @@ final class MacedonianStrings extends Strings {
   String get toolbarIndent => 'Вовлечи';
   @override
   String get toolbarOutdent => 'Намали вовлечување';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Алатки';
+  @override
+  String get editorToolsTitle => 'Алатки на уредувачот';
+  @override
+  String get toolCountListTitle => 'Изброј список';
+  @override
+  String get toolCountListSubtitle =>
+      'Собира што наведуваат редовите, како список со штиклирање';
+  @override
+  String get toolCountListNeedsList => 'Оваа белешка нема список за броење';
+  @override
+  String get tallySourceLabel => 'Список';
+  @override
+  String get tallyCutLabel => 'Читај го секој ред како';
+  @override
+  String get tallyCutDash => 'Име - вредности';
+  @override
+  String get tallyCutColon => 'Име: вредности';
+  @override
+  String get tallyCutCommas => 'Вредности одделени со запирка';
+  @override
+  String get tallyCutWhole => 'Целиот ред како една вредност';
+  @override
+  String get tallySortLabel => 'Редослед';
+  @override
+  String get tallySortCount => 'Најмногу прво';
+  @override
+  String get tallySortAlphabetical => 'По азбучен ред';
+  @override
+  String get tallySortFirstSeen => 'Како се наведени';
+  @override
+  String get tallyInsert => 'Вметни';
+  @override
+  String get tallyUpdate => 'Ажурирај';
+  @override
+  String get tallyNothingToCount => 'Тука нема што да се брои';
   @override
   String get headingDialogTitle => 'Ниво на наслов';
 

@@ -419,6 +419,45 @@ final class JapaneseStrings extends Strings {
   String get toolbarIndent => 'インデントを拡大';
   @override
   String get toolbarOutdent => 'インデントを縮小';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'ツール';
+  @override
+  String get editorToolsTitle => 'エディタのツール';
+  @override
+  String get toolCountListTitle => 'リストを集計';
+  @override
+  String get toolCountListSubtitle => '各行が挙げているものを合計し、チェックリストにします';
+  @override
+  String get toolCountListNeedsList => 'このノートには集計できるリストがありません';
+  @override
+  String get tallySourceLabel => 'リスト';
+  @override
+  String get tallyCutLabel => '各行の読み方';
+  @override
+  String get tallyCutDash => '名前 - 値';
+  @override
+  String get tallyCutColon => '名前: 値';
+  @override
+  String get tallyCutCommas => 'カンマ区切りの値';
+  @override
+  String get tallyCutWhole => '行全体を1つの値として';
+  @override
+  String get tallySortLabel => '並び順';
+  @override
+  String get tallySortCount => '多い順';
+  @override
+  String get tallySortAlphabetical => '名前順';
+  @override
+  String get tallySortFirstSeen => 'リストの順';
+  @override
+  String get tallyInsert => '挿入';
+  @override
+  String get tallyUpdate => '更新';
+  @override
+  String get tallyNothingToCount => 'ここには集計するものがありません';
   @override
   String get headingDialogTitle => '見出しレベル';
 

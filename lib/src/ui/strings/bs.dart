@@ -449,6 +449,46 @@ final class BosnianStrings extends Strings {
   String get toolbarIndent => 'Uvuci';
   @override
   String get toolbarOutdent => 'Smanji uvlačenje';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Alati';
+  @override
+  String get editorToolsTitle => 'Alati uređivača';
+  @override
+  String get toolCountListTitle => 'Prebroj listu';
+  @override
+  String get toolCountListSubtitle =>
+      'Sabira ono što redovi navode, kao listu sa kvačicama';
+  @override
+  String get toolCountListNeedsList => 'Ova bilješka nema listu za brojanje';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Čitaj svaki red kao';
+  @override
+  String get tallyCutDash => 'Ime - vrijednosti';
+  @override
+  String get tallyCutColon => 'Ime: vrijednosti';
+  @override
+  String get tallyCutCommas => 'Vrijednosti odvojene zarezom';
+  @override
+  String get tallyCutWhole => 'Cijeli red kao jedna vrijednost';
+  @override
+  String get tallySortLabel => 'Redoslijed';
+  @override
+  String get tallySortCount => 'Najviše prvo';
+  @override
+  String get tallySortAlphabetical => 'Abecedno';
+  @override
+  String get tallySortFirstSeen => 'Kako su navedeni';
+  @override
+  String get tallyInsert => 'Umetni';
+  @override
+  String get tallyUpdate => 'Ažuriraj';
+  @override
+  String get tallyNothingToCount => 'Ovdje nema šta brojati';
   @override
   String get headingDialogTitle => 'Razina naslova';
 
