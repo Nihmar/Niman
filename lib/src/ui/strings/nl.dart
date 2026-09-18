@@ -1185,6 +1185,10 @@ final class DutchStrings extends Strings {
   @override
   String get closeAllNotes => 'Alles sluiten';
   @override
+  String get sidePanelTooltip => 'Zijpaneel tonen of verbergen';
+  @override
+  String get historyAllVersions => 'Alle versies';
+  @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';
   @override

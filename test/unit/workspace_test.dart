@@ -228,6 +228,28 @@ void main() {
       expect(roundTrip(w), w);
     });
 
+    test('the dock, open or shut, and its pane come back (#175)', () {
+      final w = _opened(['a.md']).withDock(open: false, pane: DockPane.history);
+      final back = roundTrip(w);
+      expect(back.dockOpen, isFalse);
+      expect(back.dockPane, DockPane.history);
+      // Closing every note leaves the dock as it was.
+      expect(w.closeAll().dockPane, DockPane.history);
+      // A form from before the dock opens it on the outline.
+      final old = Workspace.fromJson(const {
+        'version': 1,
+        'panes': [
+          {
+            'active': 0,
+            'tabs': [
+              {'path': 'a.md'},
+            ],
+          },
+        ],
+      });
+      expect((old.dockOpen, old.dockPane), (true, DockPane.outline));
+    });
+
     test('a missing mark is not stored: it is found again', () {
       final w = _opened(['a.md']).withMissing({'a.md'});
       expect(roundTrip(w).tabs.single.missing, isFalse);

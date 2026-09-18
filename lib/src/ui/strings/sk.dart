@@ -1171,6 +1171,10 @@ final class SlovakStrings extends Strings {
   @override
   String get closeAllNotes => 'Zavrieť všetky';
   @override
+  String get sidePanelTooltip => 'Zobraziť alebo skryť bočný panel';
+  @override
+  String get historyAllVersions => 'Všetky verzie';
+  @override
   String get openFileMissing => 'Súbor tejto poznámky na disku nie je';
   @override
   String get openFileFailed =>

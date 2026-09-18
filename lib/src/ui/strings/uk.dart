@@ -1177,6 +1177,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get closeAllNotes => 'Закрити всі';
   @override
+  String get sidePanelTooltip => 'Показати або сховати бічну панель';
+  @override
+  String get historyAllVersions => 'Усі версії';
+  @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';

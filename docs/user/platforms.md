@@ -66,6 +66,13 @@ On Android the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note.
 
+The **side panel** (outline, tags, history beside the note) shows on
+any window at least 1000 px wide: desktops, tablets, a phone in
+landscape if it is that wide. A phone upright has no room for a note
+and a panel side by side, so this is a decision rather than an
+omission: the note's ⋮ menu opens the same three there, the outline and
+the tags as sheets and the history as its screen.
+
 ## Not yet
 
 Share-in on Android, file association on desktop, single-instance guard

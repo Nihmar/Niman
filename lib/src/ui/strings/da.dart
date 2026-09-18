@@ -1169,6 +1169,10 @@ final class DanishStrings extends Strings {
   @override
   String get closeAllNotes => 'Luk alle';
   @override
+  String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
+  @override
+  String get historyAllVersions => 'Alle versioner';
+  @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';

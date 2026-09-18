@@ -1182,6 +1182,10 @@ final class BulgarianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори всички';
   @override
+  String get sidePanelTooltip => 'Покажи или скрий страничния панел';
+  @override
+  String get historyAllVersions => 'Всички версии';
+  @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';

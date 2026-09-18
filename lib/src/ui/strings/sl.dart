@@ -1167,6 +1167,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get closeAllNotes => 'Zapri vse';
   @override
+  String get sidePanelTooltip => 'Pokaži ali skrij stransko ploščo';
+  @override
+  String get historyAllVersions => 'Vse različice';
+  @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';

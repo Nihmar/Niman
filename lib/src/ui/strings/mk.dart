@@ -1183,6 +1183,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори ги сите';
   @override
+  String get sidePanelTooltip => 'Прикажи или скриј го страничниот панел';
+  @override
+  String get historyAllVersions => 'Сите верзии';
+  @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override
   String get openFileFailed =>

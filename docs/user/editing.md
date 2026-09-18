@@ -49,6 +49,23 @@ tabs.
 - **One place per note.** A note is open in one place only: opening it
   again takes you to the pane and tab it is in.
 
+**The side panel.** On a window wide enough (1000 px and up) a panel on
+the right shows the note's **Outline**, its **Tags** or its **History**,
+one at a time, switched by the icons at its top.
+
+- **Outline** lists the headings, and a click takes the caret to one.
+- **Tags** lists the note's tags; a click lists the other notes with
+  that tag, which open from there.
+- **History** lists the kept versions, newest first, and opens the
+  history screen to compare or restore.
+
+It follows the note in the focused pane, and changes as the note is
+edited. The panel's button in the note's row, its **×**, or
+`Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
+three it shows, is remembered with the tabs. The note's **⋮** menu has
+Outline and Tags too: they open the panel where it fits, and a sheet on
+a phone.
+
 Each tab keeps its own way of showing its note: the source editor or the
 WYSIWYG one, the preview or not. The **Default editor** setting is the
 editor a note opens in. The last few tabs you looked at keep everything
