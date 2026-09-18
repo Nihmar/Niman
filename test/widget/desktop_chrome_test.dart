@@ -59,8 +59,8 @@ void main() {
     expect(find.byKey(const Key('open-trash')), findsOne);
     expect(find.byKey(const Key('toggle-sort')), findsOne);
     expect(find.byKey(const Key('new-note-fab')), findsNothing);
-    // No note is open, so there is no editor header.
-    expect(find.byKey(const Key('editor-header')), findsNothing);
+    // No note is open, so there is no row of note chrome.
+    expect(find.byKey(const Key('note-top-bar')), findsNothing);
   });
 
   testWidgets('wide: the create menu offers and runs all four actions', (
@@ -83,33 +83,29 @@ void main() {
     expect(await controller.ops!.find('from the footer.md'), isNotNull);
   });
 
-  testWidgets('wide: the editor header names the note and its folder', (
+  // #173: one row of chrome above the note — the formatting on the
+  // left, the note's ⋮ at the right end — and no header above it.
+  testWidgets('wide: one row carries the toolbar and the note menu', (
     tester,
   ) async {
     await pumpShell(tester, const Size(1200, 900));
-    await controller.createFolder(parentPath: '', name: 'Notes');
-    await settle(tester);
-    await controller.createNote(parentPath: 'Notes', name: 'beta');
-    await settle(tester);
-
-    // The folder starts collapsed: open it (the only chevron), then
-    // select the note.
-    await tester.tap(find.byIcon(Icons.chevron_right));
+    await controller.createNote(parentPath: '', name: 'beta');
     await settle(tester);
     await tester.tap(noteRow('beta.md'));
     await settle(tester);
 
-    final header = find.byKey(const Key('editor-header'));
-    expect(header, findsOne);
-    expect(
-      find.descendant(of: header, matching: find.text('beta.md')),
-      findsOne,
+    expect(find.byKey(const Key('editor-header')), findsNothing);
+    final bar = find.byKey(const Key('note-top-bar'));
+    expect(bar, findsOne);
+    // The formatting half of the row is covered where a note has text to
+    // format (note_column_test); this harness's notes are not on disk.
+    final menu = find.descendant(
+      of: bar,
+      matching: find.byKey(const Key('note-menu')),
     );
-    expect(find.descendant(of: header, matching: find.text('Notes')), findsOne);
-    // The view controls sit in the note's status row, not in the header
-    // (T-PP-22, user 2026-09-10).
+    expect(menu, findsOne);
+    // The view controls stay in the status row (T-PP-22).
     final statusRow = find.byKey(const Key('status-row'));
-    expect(statusRow, findsOne);
     expect(
       find.descendant(
         of: statusRow,
@@ -118,10 +114,7 @@ void main() {
       findsOne,
     );
     expect(
-      find.descendant(
-        of: header,
-        matching: find.byKey(const Key('layout-mode')),
-      ),
+      find.descendant(of: bar, matching: find.byKey(const Key('layout-mode'))),
       findsNothing,
     );
   });

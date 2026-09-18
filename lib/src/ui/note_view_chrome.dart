@@ -291,8 +291,12 @@ final class NoteToolbarBar extends StatelessWidget {
     required this.actions,
     required this.active,
     required this.layout,
+    this.dense = false,
     super.key,
   });
+
+  /// The desktop's dense bar, divided by kind (#173).
+  final bool dense;
 
   /// What each toolbar button does.
   final Map<ToolbarItem, VoidCallback> actions;
@@ -305,6 +309,7 @@ final class NoteToolbarBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => EditorToolbar(
+    dense: dense,
     buttons: [
       for (final item in layout.visible)
         EditorToolbarButton(
@@ -312,6 +317,7 @@ final class NoteToolbarBar extends StatelessWidget {
           icon: item.icon,
           tooltip: item.label,
           active: active.contains(item),
+          group: item.group,
           onPressed: actions[item]!,
         ),
     ],
