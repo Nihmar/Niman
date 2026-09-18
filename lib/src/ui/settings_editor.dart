@@ -384,9 +384,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // itself), so the choice never resolves to no editor.
           HighlightRow(
             key: SettingsKeys.editorSource,
-            child: SwitchListTile(
-              title: Text(AppStrings.editorKindSource),
-              subtitle: Text(AppStrings.editorKindSourceSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.editorKindSource,
+              description: AppStrings.editorKindSourceSubtitle,
               value: _enabledEditors.contains(EditorKind.source),
               onChanged:
                   _enabledEditors.length < 2 &&
@@ -399,9 +399,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           ),
           HighlightRow(
             key: SettingsKeys.editorWysiwyg,
-            child: SwitchListTile(
-              title: Text(AppStrings.editorKindWysiwyg),
-              subtitle: Text(AppStrings.editorKindWysiwygSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.editorKindWysiwyg,
+              description: AppStrings.editorKindWysiwygSubtitle,
               value: _enabledEditors.contains(EditorKind.wysiwyg),
               onChanged:
                   _enabledEditors.length < 2 &&
@@ -414,9 +414,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           ),
           HighlightRow(
             key: SettingsKeys.previewEnabled,
-            child: SwitchListTile(
-              title: Text(AppStrings.settingsPreviewEnabledTitle),
-              subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.settingsPreviewEnabledTitle,
+              description: AppStrings.settingsPreviewEnabledSubtitle,
               value: _previewEnabled,
               onChanged: _togglePreviewEnabled,
             ),
@@ -426,9 +426,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // what someone reads the row for.
           HighlightRow(
             key: SettingsKeys.lineNumbers,
-            child: SwitchListTile(
-              title: Text(AppStrings.lineNumbersTitle),
-              subtitle: Text(AppStrings.lineNumbersSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.lineNumbersTitle,
+              description: AppStrings.lineNumbersSubtitle,
               value: _lineNumbers ?? true,
               onChanged: _toggleLineNumbers,
             ),
@@ -438,9 +438,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // landscape — which is the reason not to hide it.
           HighlightRow(
             key: SettingsKeys.readableLineLength,
-            child: SwitchListTile(
-              title: Text(AppStrings.readableLineLengthTitle),
-              subtitle: Text(AppStrings.readableLineLengthSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.readableLineLengthTitle,
+              description: AppStrings.readableLineLengthSubtitle,
               value: _readableLineLength,
               onChanged: (value) => unawaited(_toggleReadableLineLength(value)),
             ),
@@ -449,6 +449,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             key: SettingsKeys.noteColumnWidth,
             child: SettingsValueRow(
               title: AppStrings.noteColumnWidthTitle,
+              subtitle: AppStrings.noteColumnWidthSubtitle,
               value: AppStrings.noteColumnWidthValue(_noteColumnWidth.round()),
               enabled: _readableLineLength,
               onTap: () => unawaited(_chooseNoteColumnWidth()),
@@ -458,9 +459,9 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // show on desktop, so the row would toggle a no-op (user,
           // 2026-09-09).
           if (Platform.isAndroid || Platform.isIOS)
-            SwitchListTile(
-              title: Text(AppStrings.keyboardOnOpenTitle),
-              subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
+            SettingsSwitchRow(
+              title: AppStrings.keyboardOnOpenTitle,
+              description: AppStrings.keyboardOnOpenSubtitle,
               value: _autofocusEditor ?? false,
               onChanged: _toggleAutofocusEditor,
             ),
@@ -468,6 +469,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             key: SettingsKeys.linkType,
             child: SettingsValueRow(
               title: AppStrings.linkTypeTitle,
+              subtitle: AppStrings.linkTypeSubtitle,
               value: switch (_linkType) {
                 LinkType.wikilink => AppStrings.linkTypeWikilink,
                 LinkType.markdown => AppStrings.linkTypeMarkdown,
@@ -495,6 +497,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             key: SettingsKeys.noteTextScale,
             child: SettingsValueRow(
               title: AppStrings.noteTextScaleTitle,
+              subtitle: AppStrings.noteTextScaleSubtitle,
               value: AppStrings.textScaleValue(_noteTextScale),
               onTap: () => unawaited(_chooseNoteTextScale()),
             ),
@@ -503,15 +506,16 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             key: SettingsKeys.indentWidth,
             child: SettingsValueRow(
               title: AppStrings.indentWidthTitle,
+              subtitle: AppStrings.indentWidthSubtitle,
               value: AppStrings.indentWidthValue(_indentWidth),
               onTap: () => unawaited(_chooseIndentWidth()),
             ),
           ),
           if (spell != null && spell.available) ...[
-            SwitchListTile(
+            SettingsSwitchRow(
               key: const Key('spell-check-setting'),
-              title: Text(AppStrings.settingsSpellCheckTitle),
-              subtitle: Text(AppStrings.settingsSpellCheckSubtitle),
+              title: AppStrings.settingsSpellCheckTitle,
+              description: AppStrings.settingsSpellCheckSubtitle,
               value: spell.enabled,
               onChanged: (value) =>
                   setState(() => spell.setEnabled(enabled: value)),

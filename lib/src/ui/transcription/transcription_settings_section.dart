@@ -50,6 +50,7 @@ final class TranscriptionSettingsSection extends StatelessWidget {
               key: SettingsKeys.transcriptionLanguage,
               child: SettingsValueRow(
                 title: AppStrings.transcriptionLanguageTitle,
+                subtitle: AppStrings.transcriptionLanguageSubtitle,
                 value: languageLabel(models.settings.language),
                 onTap: () =>
                     unawaited(chooseTranscriptionLanguage(context, models)),

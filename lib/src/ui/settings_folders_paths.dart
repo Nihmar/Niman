@@ -242,10 +242,10 @@ final class _SettingsFoldersPathsScreenState
           ),
           // The library's path is a fact, not a setting: nobody chooses
           // it, it is where the library is (T-ML-07).
-          ListTile(
+          SettingsRowFrame(
             key: const Key('library-path'),
-            title: Text(AppStrings.libraryPathTitle),
-            subtitle: Text(controller.root ?? ''),
+            title: AppStrings.libraryPathTitle,
+            description: controller.root ?? '',
           ),
         ],
       ),
