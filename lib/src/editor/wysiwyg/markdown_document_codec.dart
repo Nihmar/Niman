@@ -38,6 +38,11 @@ final class MarkdownDocumentCodec {
   static String get _nl => String.fromCharCode(10);
   static String get _tick => String.fromCharCode(96);
 
+  /// The number an ordered list starts at, carried on the first item's
+  /// line. Quill has no attribute for it; ours travels with the
+  /// document the way `niman-lang` does for a fence's language.
+  static const String _startKey = 'niman-start';
+
   /// Builds the editor document for [source].
   DecodedNote decode(String source) {
     final blocks = splitMarkdownBlocks(source);
@@ -95,6 +100,9 @@ final class MarkdownDocumentCodec {
     var inCode = false;
     var codeLang = '';
     var codeLines = <String>[];
+    // The number the next item of the ordered list being written takes;
+    // null between lists.
+    int? ordered;
     // An empty fence carries nothing: the code button on an empty line made
     // pairs of stray markers in the note, and the device report asked for
     // them gone (2026-09-11).
@@ -126,7 +134,23 @@ final class MarkdownDocumentCodec {
         return;
       }
       closeCode();
-      buffer.write(_renderLine(text, attrs));
+      // An ordered list counts: the numbers are the writer's, and
+      // writing `1.` down every item renumbered a list on every save
+      // (device report, 2026-09-18). The number a run starts at rides
+      // on its first line as `niman-start`, because the Delta has
+      // nowhere else to keep it; the rest is counting.
+      int? number;
+      if (attrs['list'] == 'ordered') {
+        final start = attrs[_startKey];
+        final at = start is int ? start : (ordered ?? 1);
+        number = at;
+        ordered = at + 1;
+      } else if (text.trim().isNotEmpty) {
+        // A blank line between items is what makes a list loose, not
+        // what ends its numbering.
+        ordered = null;
+      }
+      buffer.write(_renderLine(text, attrs, number: number));
     }
 
     for (final op in json) {
@@ -140,6 +164,7 @@ final class MarkdownDocumentCodec {
         if (source is String) {
           buffer.write(source.endsWith(_nl) ? source : '$source$_nl');
           pendingOpaque = true;
+          ordered = null;
         }
         continue;
       }
@@ -240,6 +265,12 @@ final class MarkdownDocumentCodec {
         if (item is md.Element && item.tag == 'li') item,
     ];
     final blankBefore = _blankLinesBefore(items.length, source);
+    // A list that does not start at 1 says so on its `ol` element, and
+    // nowhere in the Delta unless it is put there: a `3.` list came back
+    // as `1.` and rendered two numbers lower than it was written.
+    final start = tag == 'ol'
+        ? int.tryParse(list.attributes['start'] ?? '')
+        : null;
     for (var index = 0; index < items.length; index++) {
       final item = items[index];
       if (blankBefore[index]) ops.add(<String, dynamic>{'insert': _nl});
@@ -262,6 +293,7 @@ final class MarkdownDocumentCodec {
           'attributes': <String, dynamic>{
             'list': type,
             if (indent > 0) 'indent': indent,
+            if (index == 0 && start != null && start != 1) _startKey: start,
           },
         });
       for (final child in nested) {
@@ -356,7 +388,7 @@ final class MarkdownDocumentCodec {
     return ops;
   }
 
-  String _renderLine(String text, Map<String, dynamic> attrs) {
+  String _renderLine(String text, Map<String, dynamic> attrs, {int? number}) {
     var prefix = '';
     final header = attrs['header'];
     if (header is int) prefix = '${'#' * header} ';
@@ -364,7 +396,7 @@ final class MarkdownDocumentCodec {
       case 'bullet':
         prefix = '- ';
       case 'ordered':
-        prefix = '1. ';
+        prefix = '${number ?? 1}. ';
       case 'checked':
         prefix = '- [x] ';
       case 'unchecked':
