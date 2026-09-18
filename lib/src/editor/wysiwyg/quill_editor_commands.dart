@@ -16,6 +16,7 @@ final class QuillEditorCommands implements EditorCommands {
     required this.onLink,
     required this.onImage,
     required this.onHeading,
+    required this.onTools,
   });
 
   static const AppLogger _log = AppLogger(name: 'wysiwyg');
@@ -31,6 +32,10 @@ final class QuillEditorCommands implements EditorCommands {
 
   /// Opens the heading-level dialog and applies the chosen level.
   final VoidCallback onHeading;
+
+  /// Opens the editor's Tools sheet (#136). Not a format, so it leaves
+  /// through the owner like the dialogs do.
+  final VoidCallback onTools;
 
   @override
   void apply(ToolbarItem item) {
@@ -64,6 +69,8 @@ final class QuillEditorCommands implements EditorCommands {
         _indent(-1);
       case ToolbarItem.indent:
         _indent(1);
+      case ToolbarItem.tools:
+        onTools();
     }
     _log.debug('toolbar ${item.name}: [$before] -> [${_styleKeys()}]');
   }
@@ -142,7 +149,9 @@ final class QuillEditorCommands implements EditorCommands {
       ToolbarItem.orderedList =>
         attributes[quill.Attribute.list.key]?.value == 'ordered',
       ToolbarItem.quote => _isOn(attributes, quill.Attribute.blockQuote),
-      ToolbarItem.outdent || ToolbarItem.indent => false,
+      // Tools opens a sheet; there is no state of the document it could
+      // be the lit lamp for.
+      ToolbarItem.outdent || ToolbarItem.indent || ToolbarItem.tools => false,
     };
   }
 
