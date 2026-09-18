@@ -1161,6 +1161,14 @@ final class IcelandicStrings extends Strings {
   @override
   String get openInNewTab => 'Opna í nýjum flipa';
   @override
+  String get splitRight => 'Skipta til hægri';
+  @override
+  String get splitDown => 'Skipta niður';
+  @override
+  String get moveToOtherPane => 'Færa í hina rúðuna';
+  @override
+  String get openBeside => 'Opna til hliðar';
+  @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';

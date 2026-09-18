@@ -1175,6 +1175,14 @@ final class GalicianStrings extends Strings {
   @override
   String get openInNewTab => 'Abrir nunha lapela nova';
   @override
+  String get splitRight => 'Dividir á dereita';
+  @override
+  String get splitDown => 'Dividir abaixo';
+  @override
+  String get moveToOtherPane => 'Mover ao outro panel';
+  @override
+  String get openBeside => 'Abrir ao lado';
+  @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';

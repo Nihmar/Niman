@@ -1204,6 +1204,14 @@ final class GreekStrings extends Strings {
   @override
   String get openInNewTab => 'Άνοιγμα σε νέα καρτέλα';
   @override
+  String get splitRight => 'Διαίρεση δεξιά';
+  @override
+  String get splitDown => 'Διαίρεση κάτω';
+  @override
+  String get moveToOtherPane => 'Μετακίνηση στο άλλο τμήμα';
+  @override
+  String get openBeside => 'Άνοιγμα στο πλάι';
+  @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
   @override

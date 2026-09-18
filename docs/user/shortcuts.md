@@ -12,6 +12,7 @@ App-level accelerators (listed in-app under Settings → Keyboard):
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+W` — close the note on screen (its tab)
 - `Ctrl/⌘+Tab` / `Ctrl/⌘+Shift+Tab` — next / previous open note
+- `Ctrl/⌘+\` — split the window right with the note on screen
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
 
 Moving and selecting in the source editor, on Windows and Linux:

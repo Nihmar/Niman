@@ -1166,6 +1166,14 @@ final class SerbianStrings extends Strings {
   @override
   String get openInNewTab => 'Отвори у новој картици';
   @override
+  String get splitRight => 'Подели десно';
+  @override
+  String get splitDown => 'Подели доле';
+  @override
+  String get moveToOtherPane => 'Премести у друго окно';
+  @override
+  String get openBeside => 'Отвори са стране';
+  @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override
   String get openFileFailed =>

@@ -154,7 +154,7 @@ final class ShellDetailPane extends StatelessWidget {
       children: [
         for (final tab in tabs)
           Offstage(
-            key: ValueKey('detail-note-${tab.path}'),
+            key: tab.key ?? ValueKey('detail-note-${tab.path}'),
             offstage: !tab.active,
             child: TickerMode(enabled: tab.active, child: _note(root, tab)),
           ),
@@ -197,8 +197,9 @@ final class ShellDetailPane extends StatelessWidget {
     onOpenNote: onOpenNote,
     initialAnchor: tab.anchor,
     kindMode: kindMode,
-    // Only the note showing tells the shell what kind it is.
-    onNoteKindChanged: tab.active ? onNoteKindChanged : null,
+    // Only the note showing in the focused pane tells the shell what
+    // kind it is.
+    onNoteKindChanged: tab.active && tab.focused ? onNoteKindChanged : null,
     unsavedTracker: unsavedTracker,
     statusActions: statusActions,
     spellCheck: spellCheck,
@@ -219,6 +220,8 @@ final class DetailTab {
     required this.showWysiwyg,
     required this.showPreview,
     required this.splitPreview,
+    this.key,
+    this.focused = true,
     this.anchor,
   });
 
@@ -227,6 +230,12 @@ final class DetailTab {
 
   /// Whether it is the one showing.
   final bool active;
+
+  /// Whether its pane has the focus.
+  final bool focused;
+
+  /// Keeps its editor when the tab moves to the other pane (#23).
+  final GlobalKey? key;
 
   /// Where it was left, for when its editor mounts.
   final NoteMemento memento;

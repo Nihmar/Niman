@@ -1155,6 +1155,14 @@ final class NorwegianStrings extends Strings {
   @override
   String get openInNewTab => 'Åpne i ny fane';
   @override
+  String get splitRight => 'Del til høyre';
+  @override
+  String get splitDown => 'Del nedover';
+  @override
+  String get moveToOtherPane => 'Flytt til den andre ruten';
+  @override
+  String get openBeside => 'Åpne ved siden av';
+  @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';

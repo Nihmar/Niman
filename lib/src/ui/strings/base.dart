@@ -556,6 +556,10 @@ abstract base class Strings {
   String get openNotesTooltip;
   String get closeTabTooltip;
   String get openInNewTab;
+  String get splitRight;
+  String get splitDown;
+  String get moveToOtherPane;
+  String get openBeside;
   String get openFileMissing;
   String get openFileFailed;
   String get movedToTrash;

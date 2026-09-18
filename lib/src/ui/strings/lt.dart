@@ -1163,6 +1163,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get openInNewTab => 'Atverti naujoje kortelėje';
   @override
+  String get splitRight => 'Skaidyti į dešinę';
+  @override
+  String get splitDown => 'Skaidyti žemyn';
+  @override
+  String get moveToOtherPane => 'Perkelti į kitą polangį';
+  @override
+  String get openBeside => 'Atverti šalia';
+  @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';

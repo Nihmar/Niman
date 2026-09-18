@@ -1168,6 +1168,14 @@ final class HungarianStrings extends Strings {
   @override
   String get openInNewTab => 'Megnyitás új lapon';
   @override
+  String get splitRight => 'Felosztás jobbra';
+  @override
+  String get splitDown => 'Felosztás lefelé';
+  @override
+  String get moveToOtherPane => 'Áthelyezés a másik ablaktáblába';
+  @override
+  String get openBeside => 'Megnyitás mellette';
+  @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override
   String get openFileFailed =>

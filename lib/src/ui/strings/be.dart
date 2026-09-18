@@ -1163,6 +1163,14 @@ final class BelarusianStrings extends Strings {
   @override
   String get openInNewTab => 'Адкрыць у новай укладцы';
   @override
+  String get splitRight => 'Падзяліць управа';
+  @override
+  String get splitDown => 'Падзяліць уніз';
+  @override
+  String get moveToOtherPane => 'Перамясціць у іншую панэль';
+  @override
+  String get openBeside => 'Адкрыць збоку';
+  @override
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override
   String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';

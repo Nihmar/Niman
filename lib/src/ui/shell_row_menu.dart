@@ -275,6 +275,14 @@ List<List<RowMenuEntry>> rowMenuGroups(
         value: 'newtab',
         destructive: false,
       ),
+    if (!note.isDir && offersNewTab)
+      (
+        key: const Key('menu-open-beside'),
+        icon: Icons.vertical_split_outlined,
+        label: AppStrings.openBeside,
+        value: 'beside',
+        destructive: false,
+      ),
     // A note is also a file (issue #76). Desktop only: Android has no
     // file manager to select a path in, so the entries stay off there
     // rather than being shown and then failing.

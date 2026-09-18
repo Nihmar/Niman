@@ -1155,6 +1155,14 @@ final class EnglishStrings extends Strings {
   @override
   String get openInNewTab => 'Open in new tab';
   @override
+  String get splitRight => 'Split right';
+  @override
+  String get splitDown => 'Split down';
+  @override
+  String get moveToOtherPane => 'Move to the other pane';
+  @override
+  String get openBeside => 'Open to the side';
+  @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';
