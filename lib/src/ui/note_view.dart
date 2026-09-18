@@ -426,7 +426,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
     _scroll = CodeScrollController();
-    // Wrapped so Enter carries a list on (#141). The wrapper forwards
+    // Wrapped so Enter carries a list on (#142). The wrapper forwards
     // everything else, and disposing it disposes what it wraps — so it
     // is disposed exactly when the controller inside it is ours.
     _controller = MarkdownEditingController(
@@ -947,7 +947,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
 
   /// Whether line [index] is ordinary Markdown rather than fenced code,
   /// display math or the frontmatter — where a dash starts nothing, so
-  /// Enter has no list to carry on (#141).
+  /// Enter has no list to carry on (#142).
   ///
   /// Answered from the highlighter the editor already keeps, so the two
   /// cannot disagree about what a list is.
