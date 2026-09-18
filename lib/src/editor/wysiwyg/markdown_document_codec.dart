@@ -100,9 +100,9 @@ final class MarkdownDocumentCodec {
     var inCode = false;
     var codeLang = '';
     var codeLines = <String>[];
-    // The number the next item of the ordered list being written takes;
-    // null between lists.
-    int? ordered;
+    // Where each open level's content starts, and what number the next
+    // ordered item at it takes.
+    final lists = _ListWriter();
     // An empty fence carries nothing: the code button on an empty line made
     // pairs of stray markers in the note, and the device report asked for
     // them gone (2026-09-11).
@@ -134,23 +134,15 @@ final class MarkdownDocumentCodec {
         return;
       }
       closeCode();
-      // An ordered list counts: the numbers are the writer's, and
-      // writing `1.` down every item renumbered a list on every save
-      // (device report, 2026-09-18). The number a run starts at rides
-      // on its first line as `niman-start`, because the Delta has
-      // nowhere else to keep it; the rest is counting.
-      int? number;
-      if (attrs['list'] == 'ordered') {
-        final start = attrs[_startKey];
-        final at = start is int ? start : (ordered ?? 1);
-        number = at;
-        ordered = at + 1;
-      } else if (text.trim().isNotEmpty) {
-        // A blank line between items is what makes a list loose, not
-        // what ends its numbering.
-        ordered = null;
+      final item = lists.line(attrs, text);
+      if (item != null) {
+        buffer.write(item);
+        return;
       }
-      buffer.write(_renderLine(text, attrs, number: number));
+      // A blank line between items is what makes a list loose, not what
+      // ends it; prose does end it.
+      if (text.trim().isNotEmpty) lists.reset();
+      buffer.write(_renderLine(text, attrs));
     }
 
     for (final op in json) {
@@ -164,7 +156,7 @@ final class MarkdownDocumentCodec {
         if (source is String) {
           buffer.write(source.endsWith(_nl) ? source : '$source$_nl');
           pendingOpaque = true;
-          ordered = null;
+          lists.reset();
         }
         continue;
       }
@@ -305,7 +297,7 @@ final class MarkdownDocumentCodec {
 
   /// A top-level item's marker: `-`, `*`, `+`, `1.` or `1)`, indented by
   /// at most the three spaces that still leave it top level.
-  static final RegExp _itemMarker = RegExp(r'^ {0,3}(?:[-*+]|\d{1,9}[.)])\s');
+  static final RegExp _itemMarker = RegExp(r'^([ \t]*)(?:[-*+]|\d{1,9}[.)])\s');
 
   /// Which of a list's [count] items are written a blank line below the
   /// one before them, read off [source].
@@ -324,11 +316,24 @@ final class MarkdownDocumentCodec {
     final none = List<bool>.filled(count, false);
     if (source == null || count == 0) return none;
     final lines = const LineSplitter().convert(source);
-    final out = <bool>[];
+    final marks = <({int indent, bool blankAbove})>[];
     for (var i = 0; i < lines.length; i++) {
-      if (!_itemMarker.hasMatch(lines[i])) continue;
-      out.add(i > 0 && lines[i - 1].trim().isEmpty);
+      final match = _itemMarker.firstMatch(lines[i]);
+      if (match == null) continue;
+      marks.add((
+        indent: match.group(1)!.length,
+        blankAbove: i > 0 && lines[i - 1].trim().isEmpty,
+      ));
     }
+    if (marks.isEmpty) return none;
+    // The list's own items are the ones at the indent it starts at;
+    // anything deeper belongs to a sublist, which is handed its own
+    // slice of nothing when the recursion reaches it.
+    final base = marks.first.indent;
+    final out = <bool>[
+      for (final mark in marks)
+        if (mark.indent == base) mark.blankAbove,
+    ];
     return out.length == count ? out : none;
   }
 
@@ -388,20 +393,12 @@ final class MarkdownDocumentCodec {
     return ops;
   }
 
-  String _renderLine(String text, Map<String, dynamic> attrs, {int? number}) {
+  /// A line that is not a list item — those go through [_ListWriter],
+  /// which is the only thing that knows where a level's content starts.
+  String _renderLine(String text, Map<String, dynamic> attrs) {
     var prefix = '';
     final header = attrs['header'];
     if (header is int) prefix = '${'#' * header} ';
-    switch (attrs['list']) {
-      case 'bullet':
-        prefix = '- ';
-      case 'ordered':
-        prefix = '${number ?? 1}. ';
-      case 'checked':
-        prefix = '- [x] ';
-      case 'unchecked':
-        prefix = '- [ ] ';
-    }
     if (attrs['blockquote'] == true) prefix = '> ';
     return '$prefix$text$_nl';
   }
@@ -421,5 +418,73 @@ final class MarkdownDocumentCodec {
   bool _sameJson(List<Map<String, dynamic>> a, List<Map<String, dynamic>> b) {
     if (a.length != b.length) return false;
     return jsonEncode(a) == jsonEncode(b);
+  }
+}
+
+/// Writes a list's lines: where each open level's content starts, and
+/// what number an ordered item at it takes.
+///
+/// A nested list has to be indented to its parent item's content
+/// column, or it is not nested at all — and that column is the parent's
+/// own indent plus the width of its marker, which is two for `- `,
+/// three for `1. ` and four for `10. `. The Delta records a depth, not a
+/// column, so the columns are rebuilt here from the markers as the
+/// lines are written. Indenting by some fixed width instead would be
+/// wrong under one kind of parent or the other, and this way the
+/// indentation comes back exactly as it was written.
+final class _ListWriter {
+  /// The content column of the last line written at each level.
+  final List<int> _columns = <int>[];
+
+  /// The number the next ordered item takes, per level.
+  final List<int> _counters = <int>[];
+
+  /// The Markdown for a list item, or null when the line is not one.
+  String? line(Map<String, dynamic> attrs, String text) {
+    final list = attrs['list'];
+    if (list is! String) return null;
+    // A depth with no level open above it would not read as nesting
+    // anyway, so it is clamped to one below the deepest level open.
+    final depth = attrs['indent'];
+    final level = (depth is int && depth > 0 ? depth : 0).clamp(
+      0,
+      _columns.length,
+    );
+    final indent = level == 0 ? 0 : _columns[level - 1];
+    final String marker;
+    switch (list) {
+      case 'bullet':
+        marker = '- ';
+      case 'ordered':
+        while (_counters.length <= level) {
+          _counters.add(1);
+        }
+        final start = attrs[MarkdownDocumentCodec._startKey];
+        if (start is int) _counters[level] = start;
+        final number = _counters[level];
+        _counters[level] = number + 1;
+        marker = '$number. ';
+      case 'checked':
+        marker = '- [x] ';
+      case 'unchecked':
+        marker = '- [ ] ';
+      default:
+        return null;
+    }
+    while (_columns.length <= level) {
+      _columns.add(0);
+    }
+    _columns[level] = indent + marker.length;
+    // A line at this level closes everything under it: a sublist that
+    // opens later starts over, at 1 and at its own column.
+    _columns.length = level + 1;
+    if (_counters.length > level + 1) _counters.length = level + 1;
+    return '${' ' * indent}$marker$text\n';
+  }
+
+  /// Ends the list; the next one starts over.
+  void reset() {
+    _columns.clear();
+    _counters.clear();
   }
 }
