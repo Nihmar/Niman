@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,6 +57,7 @@ import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -313,7 +315,9 @@ final class NoteView extends StatefulWidget {
   State<NoteView> createState() => _NoteViewState();
 }
 
-final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
+final class _NoteViewState extends State<NoteView>
+    with WidgetsBindingObserver
+    implements NoteViewHandle {
   static const AppLogger _log = AppLogger(name: 'editor');
 
   late final FocusNode _focus;
@@ -378,6 +382,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   Timer? _statsTimer;
   int _wordCount = 0;
   List<OutlineEntry> _outline = const <OutlineEntry>[];
+
+  /// [_outline], published for the panels beside the note (#175).
+  final ValueNotifier<List<OutlineEntry>> _outlineNotifier = ValueNotifier(
+    const <OutlineEntry>[],
+  );
+
+  @override
+  ValueListenable<List<OutlineEntry>> get outline => _outlineNotifier;
+
+  @override
+  String get currentText => _currentText;
+
+  @override
+  void jumpToHeading(int line) => _jumpToHeading(line);
   String? _lastStatsText;
 
   /// Why the note's frontmatter block does not parse, or null when it
@@ -616,6 +634,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
     _findController.dispose();
+    _outlineNotifier.dispose();
     _wysiwygActive.dispose();
     _focus.dispose();
     _wysiwygFocus.dispose();
@@ -1225,6 +1244,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             .whereType<OutlineEntry>()
             .toList();
       });
+      _outlineNotifier.value = _outline;
     }
 
     // Word count + outline are O(n) pure passes. Notes above the threshold
