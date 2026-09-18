@@ -230,12 +230,7 @@ void main() {
 
     // Switch the trash toggle off in settings (the rail tab). The
     // toggle sits in the pushed Trash area (issue #104).
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('shell-rail')),
-        matching: find.text('Settings'),
-      ),
-    );
+    await tester.tap(find.byKey(const Key('rail-settings')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('settings-area-trash-history')));
     await settle(tester);
@@ -247,12 +242,7 @@ void main() {
     // Back on the settings home: the area screen covered the rail.
     await tester.tap(find.backButton());
     await settle(tester);
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('shell-rail')),
-        matching: find.text('Files'),
-      ),
-    );
+    await tester.tap(find.byKey(const Key('rail-files')));
     await settle(tester);
 
     // Recreate the note, then delete it with the toggle off: hard delete.
