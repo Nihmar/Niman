@@ -1205,6 +1205,10 @@ final class FrenchStrings extends Strings {
   @override
   String get closeAllNotes => 'Tout fermer';
   @override
+  String get sidePanelTooltip => 'Afficher ou masquer le panneau latéral';
+  @override
+  String get historyAllVersions => 'Toutes les versions';
+  @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';
   @override

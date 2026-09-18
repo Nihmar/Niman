@@ -750,6 +750,8 @@ final class AppStrings {
   static String get moveToOtherPane => _s.moveToOtherPane;
   static String get openBeside => _s.openBeside;
   static String get closeAllNotes => _s.closeAllNotes;
+  static String get sidePanelTooltip => _s.sidePanelTooltip;
+  static String get historyAllVersions => _s.historyAllVersions;
   static String get openFileMissing => _s.openFileMissing;
   static String get openFileFailed => _s.openFileFailed;
   static String get movedToTrash => _s.movedToTrash;

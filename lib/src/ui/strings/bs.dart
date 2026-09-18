@@ -1174,6 +1174,10 @@ final class BosnianStrings extends Strings {
   @override
   String get closeAllNotes => 'Zatvori sve';
   @override
+  String get sidePanelTooltip => 'Prikaži ili sakrij bočnu ploču';
+  @override
+  String get historyAllVersions => 'Sve verzije';
+  @override
   String get openFileMissing => 'Datoteka ove bilješke nije na disku';
   @override
   String get openFileFailed =>

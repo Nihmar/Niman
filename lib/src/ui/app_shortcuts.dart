@@ -45,6 +45,9 @@ enum AppCommand {
   /// Split the window right with the note on screen (#23).
   splitRight,
 
+  /// Show or hide the right dock (#175).
+  toggleDock,
+
   /// Select the Files tab.
   tabFiles,
 
@@ -120,6 +123,10 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.backslash, control: true),
     ),
     AppShortcut(
+      AppCommand.toggleDock,
+      SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
+    ),
+    AppShortcut(
       AppCommand.tabFiles,
       SingleActivator(LogicalKeyboardKey.digit1, control: true),
     ),
@@ -154,6 +161,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.nextTab => AppStrings.shortcutNextTab,
   AppCommand.previousTab => AppStrings.shortcutPreviousTab,
   AppCommand.splitRight => AppStrings.splitRight,
+  AppCommand.toggleDock => AppStrings.sidePanelTooltip,
   AppCommand.tabFiles => AppStrings.tabFiles,
   AppCommand.tabTodo => AppStrings.todoTitle,
   AppCommand.tabSearch => AppStrings.tabSearch,

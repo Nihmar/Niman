@@ -1178,6 +1178,10 @@ final class HungarianStrings extends Strings {
   @override
   String get closeAllNotes => 'Összes bezárása';
   @override
+  String get sidePanelTooltip => 'Oldalsó panel megjelenítése vagy elrejtése';
+  @override
+  String get historyAllVersions => 'Összes verzió';
+  @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override
   String get openFileFailed =>

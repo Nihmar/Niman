@@ -3,6 +3,13 @@ import 'package:niman/src/ui/strings.dart';
 
 /// What the open note's ⋮ menu can do.
 enum NoteMenuAction {
+  /// The note's headings (#175): the dock's pane where there is room for
+  /// the dock, a sheet on a phone.
+  outline,
+
+  /// The note's tags, and the notes that share them.
+  tags,
+
   /// Browse and restore past versions.
   history,
 
@@ -33,6 +40,8 @@ final class NoteMenuButton extends StatelessWidget {
       icon: const Icon(Icons.more_vert),
       onSelected: onSelected,
       itemBuilder: (context) => [
+        _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
+        _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
         _item(
           NoteMenuAction.history,
           Icons.history,
