@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 
@@ -70,7 +71,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
           ),
         ),
         HighlightRow(
-          key: const Key('reindex-setting'),
+          key: SettingsKeys.reindex,
           child: ListTile(
             leading: const Icon(Icons.refresh_outlined),
             title: Text(AppStrings.reindexTitle),
@@ -80,7 +81,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         // Above "Close library" on purpose: switching is the common
         // move and closing is the way out of every library at once.
         HighlightRow(
-          key: const Key('switch-library-setting'),
+          key: SettingsKeys.switchLibrary,
           child: ListTile(
             leading: const Icon(Icons.swap_horiz_outlined),
             title: Text(AppStrings.switchLibraryTitle),
@@ -89,7 +90,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
           ),
         ),
         HighlightRow(
-          key: const Key('close-library-setting'),
+          key: SettingsKeys.closeLibrary,
           child: ListTile(
             leading: const Icon(Icons.link_off_outlined),
             title: Text(AppStrings.closeLibraryTitle),

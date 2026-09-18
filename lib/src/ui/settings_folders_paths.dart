@@ -6,6 +6,7 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/folder_picker.dart';
 import 'package:niman/src/ui/note_picker.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/template_help.dart';
@@ -180,7 +181,7 @@ final class _SettingsFoldersPathsScreenState
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           HighlightRow(
-            key: const Key('list-folder-setting'),
+            key: SettingsKeys.listFolder,
             child: SettingsValueRow(
               title: AppStrings.listFolderTitle,
               subtitle: AppStrings.listFolderSubtitle,
@@ -192,7 +193,7 @@ final class _SettingsFoldersPathsScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('template-folder-setting'),
+            key: SettingsKeys.templateFolder,
             child: SettingsValueRow(
               title: AppStrings.templateFolderTitle,
               subtitle: AppStrings.templateFolderSubtitle,
@@ -206,7 +207,7 @@ final class _SettingsFoldersPathsScreenState
           // Next to the folder, because that is where someone setting
           // templates up is already standing (T-TPL-08).
           HighlightRow(
-            key: const Key('template-help-setting'),
+            key: SettingsKeys.templateHelp,
             child: SettingsValueRow(
               title: AppStrings.templateHelpTitle,
               subtitle: AppStrings.templateHelpSubtitle,
@@ -219,7 +220,7 @@ final class _SettingsFoldersPathsScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('attachments-folder-setting'),
+            key: SettingsKeys.attachmentsFolder,
             child: SettingsValueRow(
               title: AppStrings.attachmentsFolderTitle,
               subtitle: AppStrings.attachmentsFolderSubtitle,
@@ -231,7 +232,7 @@ final class _SettingsFoldersPathsScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('quick-note-setting'),
+            key: SettingsKeys.quickNote,
             child: SettingsValueRow(
               title: AppStrings.quickNoteTitle,
               subtitle: AppStrings.quickNoteSubtitle,

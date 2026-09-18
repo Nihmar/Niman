@@ -5,6 +5,7 @@ import 'package:niman/src/core/language.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/transcription_models_screen.dart';
@@ -30,7 +31,7 @@ final class TranscriptionSettingsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             HighlightRow(
-              key: const Key('transcription-model-setting'),
+              key: SettingsKeys.transcriptionModel,
               child: SettingsValueRow(
                 title: AppStrings.transcriptionModelTitle,
                 value: model == null
@@ -46,7 +47,7 @@ final class TranscriptionSettingsSection extends StatelessWidget {
               ),
             ),
             HighlightRow(
-              key: const Key('transcription-language-setting'),
+              key: SettingsKeys.transcriptionLanguage,
               child: SettingsValueRow(
                 title: AppStrings.transcriptionLanguageTitle,
                 value: languageLabel(models.settings.language),

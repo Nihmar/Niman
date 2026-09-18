@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
@@ -131,7 +132,7 @@ final class _SettingsTrashHistoryScreenState
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           HighlightRow(
-            key: const Key('trash-setting'),
+            key: SettingsKeys.trash,
             child: SwitchListTile(
               title: Text(AppStrings.trashTitle),
               subtitle: Text(AppStrings.trashSubtitle),
@@ -142,7 +143,7 @@ final class _SettingsTrashHistoryScreenState
           // Under the toggle it depends on: with the trash off there is
           // nothing waiting in it to empty.
           HighlightRow(
-            key: const Key('trash-auto-empty-setting'),
+            key: SettingsKeys.trashAutoEmpty,
             child: SettingsValueRow(
               title: AppStrings.trashAutoEmptyTitle,
               subtitle: AppStrings.trashAutoEmptySubtitle,
@@ -152,7 +153,7 @@ final class _SettingsTrashHistoryScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('history-versions-setting'),
+            key: SettingsKeys.historyVersions,
             child: SettingsValueRow(
               title: AppStrings.historyVersionsTitle,
               subtitle: AppStrings.historyVersionsSubtitle,
@@ -161,7 +162,7 @@ final class _SettingsTrashHistoryScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('history-interval-setting'),
+            key: SettingsKeys.historyInterval,
             child: SettingsValueRow(
               title: AppStrings.historyIntervalTitle,
               subtitle: AppStrings.historyIntervalSubtitle,

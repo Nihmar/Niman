@@ -9,6 +9,7 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/toolbar_settings.dart';
@@ -326,7 +327,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // The toolbar is an editor setting, not an appearance one: it
           // decides what the editor can do, not how the app looks.
           HighlightRow(
-            key: const Key('toolbar-setting'),
+            key: SettingsKeys.toolbar,
             child: SettingsValueRow(
               title: AppStrings.toolbarSettingsTitle,
               onTap: () => Navigator.push(
@@ -342,7 +343,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // last one on cannot be switched off (its switch disables
           // itself), so the choice never resolves to no editor.
           HighlightRow(
-            key: const Key('editor-source-setting'),
+            key: SettingsKeys.editorSource,
             child: SwitchListTile(
               title: Text(AppStrings.editorKindSource),
               subtitle: Text(AppStrings.editorKindSourceSubtitle),
@@ -357,7 +358,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             ),
           ),
           HighlightRow(
-            key: const Key('editor-wysiwyg-setting'),
+            key: SettingsKeys.editorWysiwyg,
             child: SwitchListTile(
               title: Text(AppStrings.editorKindWysiwyg),
               subtitle: Text(AppStrings.editorKindWysiwygSubtitle),
@@ -372,7 +373,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             ),
           ),
           HighlightRow(
-            key: const Key('preview-enabled-setting'),
+            key: SettingsKeys.previewEnabled,
             child: SwitchListTile(
               title: Text(AppStrings.settingsPreviewEnabledTitle),
               subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
@@ -384,7 +385,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // the explanation into, and "off = on first tap" is exactly
           // what someone reads the row for.
           HighlightRow(
-            key: const Key('line-numbers-setting'),
+            key: SettingsKeys.lineNumbers,
             child: SwitchListTile(
               title: Text(AppStrings.lineNumbersTitle),
               subtitle: Text(AppStrings.lineNumbersSubtitle),
@@ -403,7 +404,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               onChanged: _toggleAutofocusEditor,
             ),
           HighlightRow(
-            key: const Key('link-type'),
+            key: SettingsKeys.linkType,
             child: SettingsValueRow(
               title: AppStrings.linkTypeTitle,
               value: switch (_linkType) {
@@ -417,7 +418,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
           // what it inserts, the other what a click on a missing target
           // becomes (issue #78).
           HighlightRow(
-            key: const Key('missing-note-location'),
+            key: SettingsKeys.missingNoteLocation,
             child: SettingsValueRow(
               title: AppStrings.missingNoteLocationTitle,
               value: switch (_missingNoteLocation) {
@@ -430,7 +431,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             ),
           ),
           HighlightRow(
-            key: const Key('note-text-scale-setting'),
+            key: SettingsKeys.noteTextScale,
             child: SettingsValueRow(
               title: AppStrings.noteTextScaleTitle,
               value: AppStrings.textScaleValue(_noteTextScale),
@@ -438,7 +439,7 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
             ),
           ),
           HighlightRow(
-            key: const Key('indent-width'),
+            key: SettingsKeys.indentWidth,
             child: SettingsValueRow(
               title: AppStrings.indentWidthTitle,
               value: AppStrings.indentWidthValue(_indentWidth),

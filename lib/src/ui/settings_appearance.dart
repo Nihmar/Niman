@@ -7,6 +7,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -223,7 +224,7 @@ final class _SettingsAppearanceScreenState
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           HighlightRow(
-            key: const Key('language-choice'),
+            key: SettingsKeys.language,
             child: SettingsValueRow(
               title: AppStrings.languageTitle,
               value: AppStrings.languageName(_language),
@@ -231,7 +232,7 @@ final class _SettingsAppearanceScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('theme-brightness-setting'),
+            key: SettingsKeys.brightness,
             child: SettingsValueRow(
               title: AppStrings.themeBrightnessTitle,
               value: switch (_themeBrightness) {
@@ -243,7 +244,7 @@ final class _SettingsAppearanceScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('theme-palette-setting'),
+            key: SettingsKeys.palette,
             child: SettingsValueRow(
               title: AppStrings.themePaletteTitle,
               value: SettingsAppearanceScreen.paletteName(_themePalette),
@@ -251,7 +252,7 @@ final class _SettingsAppearanceScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('ui-text-scale-setting'),
+            key: SettingsKeys.uiTextScale,
             child: SettingsValueRow(
               title: AppStrings.uiTextScaleTitle,
               value: AppStrings.textScaleValue(_uiTextScale),
@@ -269,7 +270,7 @@ final class _SettingsAppearanceScreenState
                 previewEnabled: _previewEnabled,
               ))
             HighlightRow(
-              key: const Key('split-ratio-setting'),
+              key: SettingsKeys.splitRatio,
               child: SettingsValueRow(
                 title: AppStrings.splitRatioTitle,
                 value: AppStrings.splitRatioValue(_splitRatio),

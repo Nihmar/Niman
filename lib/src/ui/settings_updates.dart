@@ -5,6 +5,7 @@ import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/update_actions.dart';
 import 'package:niman/src/update/update_service.dart';
@@ -103,7 +104,7 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
         children: [
           if (!isTestingBuild) ...[
             HighlightRow(
-              key: const Key('auto-update-setting'),
+              key: SettingsKeys.autoUpdate,
               child: SwitchListTile(
                 title: Text(AppStrings.autoUpdateTitle),
                 subtitle: Text(AppStrings.autoUpdateSubtitle),
@@ -112,7 +113,7 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
               ),
             ),
             HighlightRow(
-              key: const Key('check-updates-setting'),
+              key: SettingsKeys.checkUpdates,
               child: ListTile(
                 leading: _checkingUpdates
                     ? const SizedBox(

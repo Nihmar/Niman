@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/history/history_labels.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -139,7 +140,7 @@ final class _TrashScreenState extends State<TrashScreen> {
       MaterialPageRoute<void>(
         builder: (context) => SettingsTrashHistoryScreen(
           controller: widget.controller,
-          highlight: const Key('trash-auto-empty-setting'),
+          highlight: SettingsKeys.trashAutoEmpty,
         ),
       ),
     );
