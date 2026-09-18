@@ -202,7 +202,15 @@ final class NoteStatusRow extends StatelessWidget {
           // Written in the muted colour the rest of the row wears: a
           // button in the accent was the only coloured thing here and
           // read as a link.
-          if (!loading && canSwitchEditorKind)
+          //
+          // Preview-only mode has no editor on screen, so there are not
+          // two of them to be between: the button goes (device report,
+          // 2026-09-18). It is dropped rather than disabled — the
+          // keep-its-place rule is about controls sliding under a thumb
+          // that is already on them, and this one is the last thing
+          // before the Spacer, so nothing to its left moves and what is
+          // to its right is anchored to the other edge.
+          if (!loading && canSwitchEditorKind && (splitPreview || !showPreview))
             Padding(
               padding: iconPadding,
               child: Tooltip(
