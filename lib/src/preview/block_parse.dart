@@ -55,9 +55,48 @@ BlockPhase parseBlockPhase(String source) {
     doc,
   ).parseLines();
   return (
-    nodes: _gatherFootnotes(nodes),
+    nodes: hoistTaskCheckboxes(_gatherFootnotes(nodes)),
     linkReferences: Map.of(doc.linkReferences),
   );
+}
+
+/// Moves a task-list checkbox out of the paragraph a loose list wraps
+/// its items in, so that it is the item's first child.
+///
+/// A *loose* list — one with a blank line between its items — keeps each
+/// item's content wrapped in a `p`, and the parser puts the checkbox
+/// inside that wrapper; a tight list has the wrapper stripped and the
+/// checkbox beside the content. The renderer only looks at an item's
+/// first child, so a loose task list drew plain bullets and the boxes
+/// were simply missing (device report, 2026-09-18).
+///
+/// Only the checkbox moves. The paragraph stays where it is, so a loose
+/// list still lays out like one.
+List<md.Node> hoistTaskCheckboxes(List<md.Node> nodes) {
+  for (final node in nodes) {
+    if (node is! md.Element) continue;
+    final children = node.children;
+    if (children == null) continue;
+    if (node.tag == 'li') _hoistInto(node, children);
+    hoistTaskCheckboxes(children);
+  }
+  return nodes;
+}
+
+void _hoistInto(md.Element item, List<md.Node> children) {
+  if (children.isEmpty) return;
+  final first = children.first;
+  if (first is md.Element && first.tag == 'input') return;
+  for (final child in children) {
+    if (child is! md.Element || child.tag != 'p') continue;
+    final inner = child.children;
+    if (inner == null || inner.isEmpty) continue;
+    final box = inner.first;
+    if (box is! md.Element || box.tag != 'input') continue;
+    inner.removeAt(0);
+    children.insert(0, box);
+    return;
+  }
 }
 
 /// The top-level blocks of [source], with the inlines left raw
