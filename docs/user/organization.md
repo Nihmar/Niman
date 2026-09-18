@@ -118,6 +118,15 @@ not on folders. Neither changes the note or moves anything: if the file
 is not on disk, or the system refuses to open it, Niman says so and the
 note stays exactly as it was.
 
+### Files that are not notes
+
+The tree also shows the files that are not text — the images and audio
+clips in the attachments folder, a PDF dropped into the library. Opening
+one does not put it in the editor: the pane says the file is not a text
+note, and on desktop offers **Open in default app** right there. Nothing
+is written to such a file, ever — it is never reported as saved,
+because there is nothing of it in the editor to save.
+
 ## Folders, quick note, list notes, voice notes
 
 - Notes live in plain folders inside the library.

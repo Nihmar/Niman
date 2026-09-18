@@ -407,6 +407,12 @@ final class HungarianStrings extends Strings {
   @override
   String get noteStatusError => 'Hiba';
   @override
+  String get noteNotText =>
+      'Ez a fájl nem szöveges jegyzet, ezért a '
+      'Niman itt nem tudja megjeleníteni.';
+  @override
+  String get noteLoadFailed => 'Ezt a jegyzetet nem sikerült megnyitni.';
+  @override
   String wordCount(int count) => '$count szó';
   @override
   String get outlineTooltip => 'Struktúra';

@@ -414,6 +414,12 @@ final class GalicianStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteNotText =>
+      'Este ficheiro non é unha nota de texto, así '
+      'que Niman non pode amosalo aquí.';
+  @override
+  String get noteLoadFailed => 'Non se puido abrir esta nota.';
+  @override
   String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
   @override
   String get outlineTooltip => 'Estrutura';

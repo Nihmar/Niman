@@ -411,6 +411,11 @@ final class DutchStrings extends Strings {
   @override
   String get noteStatusError => 'Fout';
   @override
+  String get noteNotText =>
+      'Dit bestand is geen tekstnotitie, dus Niman kan het hier niet tonen.';
+  @override
+  String get noteLoadFailed => 'Deze notitie kon niet worden geopend.';
+  @override
   String wordCount(int count) => count == 1 ? '1 woord' : '$count woorden';
   @override
   String get outlineTooltip => 'Structuur';

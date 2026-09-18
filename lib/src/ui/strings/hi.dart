@@ -396,6 +396,11 @@ final class HindiStrings extends Strings {
   @override
   String get noteStatusError => 'त्रुटि';
   @override
+  String get noteNotText =>
+      'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
+  @override
+  String get noteLoadFailed => 'यह नोट खोला नहीं जा सका।';
+  @override
   String wordCount(int count) => '$count शब्द';
   @override
   String get outlineTooltip => 'आउटलाइन';

@@ -409,6 +409,11 @@ final class EnglishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteNotText =>
+      'This file is not a text note, so Niman cannot show it here.';
+  @override
+  String get noteLoadFailed => 'This note could not be opened.';
+  @override
   String wordCount(int count) => count == 1 ? '1 word' : '$count words';
   @override
   String get outlineTooltip => 'Outline';
