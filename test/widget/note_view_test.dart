@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/preview_work_failure.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:re_editor/re_editor.dart';
@@ -210,6 +211,87 @@ void main() {
       );
       await tester.pump();
       expect(writes, ['start!']);
+      controller.dispose();
+    });
+
+    // Issue #156: an attachment opened from the tree used to show the
+    // worker's exception as the note's text, and report it saved.
+    testWidgets('a file that is not text says so, and is never saved', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/photo.jpg',
+            readNote: (_) async =>
+                throw const PreviewWorkFailure('bad utf-8', notText: true),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteNotText), findsOneWidget);
+      expect(find.textContaining('bad utf-8'), findsNothing);
+      expect(find.byType(NoteEditor), findsNothing);
+      expect(find.text(AppStrings.noteStatusSaved), findsNothing);
+    });
+
+    testWidgets('any other load failure is a message, not the exception', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => throw StateError('disk on fire'),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteLoadFailed), findsOneWidget);
+      expect(find.textContaining('disk on fire'), findsNothing);
+    });
+
+    // The outgoing note's edits leave with its own path; nothing left in
+    // the buffer may land on a file that did not load — here, a picture.
+    testWidgets('edits never land on a file that did not load', (tester) async {
+      final writes = <(String, String)>[];
+      final controller = CodeLineEditingController.fromText('start');
+      Future<String> read(String path) async => path.endsWith('.md')
+          ? 'start'
+          : throw const PreviewWorkFailure('bad utf-8', notText: true);
+      Future<void> write(String path, String content) async =>
+          writes.add((path, content));
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: read,
+            writeNote: write,
+            controller: controller,
+          ),
+        ),
+      );
+      await tester.pump();
+      controller.text = 'start!';
+      await tester.pump();
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/photo.jpg',
+            readNote: read,
+            writeNote: write,
+            controller: controller,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteNotText), findsOneWidget);
+      // Leaving the pane is what used to flush the buffer to widget.path.
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(writes, [('/notes/a.md', 'start!')]);
       controller.dispose();
     });
 

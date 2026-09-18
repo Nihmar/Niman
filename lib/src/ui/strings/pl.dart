@@ -411,6 +411,11 @@ final class PolishStrings extends Strings {
   @override
   String get noteStatusError => 'Błąd';
   @override
+  String get noteNotText =>
+      'Ten plik nie jest notatką tekstową, więc Niman nie może go tu pokazać.';
+  @override
+  String get noteLoadFailed => 'Nie udało się otworzyć tej notatki.';
+  @override
   String wordCount(int count) => count == 1
       ? '1 słowo'
       : count % 10 >= 2 &&

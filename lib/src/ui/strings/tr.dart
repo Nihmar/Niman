@@ -403,6 +403,11 @@ final class TurkishStrings extends Strings {
   @override
   String get noteStatusError => 'Hata';
   @override
+  String get noteNotText =>
+      'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
+  @override
+  String get noteLoadFailed => 'Bu not açılamadı.';
+  @override
   String wordCount(int count) => '$count kelime';
   @override
   String get outlineTooltip => 'İçerik';

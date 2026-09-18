@@ -416,6 +416,12 @@ final class FrenchStrings extends Strings {
   @override
   String get noteStatusError => 'Erreur';
   @override
+  String get noteNotText =>
+      'Ce fichier n’est pas une note texte, Niman '
+      'ne peut donc pas l’afficher ici.';
+  @override
+  String get noteLoadFailed => 'Impossible d’ouvrir cette note.';
+  @override
   String wordCount(int count) => count == 1 ? '1 mot' : '$count mots';
   @override
   String get outlineTooltip => 'Plan';

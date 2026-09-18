@@ -413,6 +413,12 @@ final class ItalianStrings extends Strings {
   @override
   String get noteStatusError => 'Errore';
   @override
+  String get noteNotText =>
+      'Questo file non è una nota di testo, quindi '
+      'Niman non può mostrarlo qui.';
+  @override
+  String get noteLoadFailed => 'Impossibile aprire questa nota.';
+  @override
   String wordCount(int count) => count == 1 ? '1 parola' : '$count parole';
   @override
   String get outlineTooltip => 'Struttura';

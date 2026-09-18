@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count.dart';
 import 'package:niman/src/preview/block_parse.dart';
+import 'package:niman/src/preview/preview_work_failure.dart';
 
 /// Off-isolate work for the preview (T-M2-04/05/08): the markdown block
 /// phase and the note stats (word count + heading outline) run in a
@@ -34,7 +36,10 @@ import 'package:niman/src/preview/block_parse.dart';
 ///   1.2 s spinner in front of a note whose first frame paints in 0.4 ms
 ///   (device log, 2026-09-11). The editor asks for them separately once
 ///   the note is up;
-/// * unknown task or a thrown error → a `'__error__|detail'` string.
+/// * unknown task or a thrown error → a [PreviewWorkFailure], never a
+///   string: a failed `read` must not be mistaken for the note's text
+///   (issue #156). A file that is not UTF-8 says so with
+///   [PreviewWorkFailure.notText].
 ///
 /// Outline rows encode `'line|level|text'`.
 final class PreviewWork {
@@ -74,13 +79,28 @@ final class PreviewWork {
           final stats = statsFor(message.source);
           message.reply.send(stats);
         case 'read':
-          message.reply.send(File(message.source).readAsStringSync());
+          message.reply.send(_read(message.source));
         default:
-          message.reply.send('__error__|unknown task: ${message.task}');
+          message.reply.send(
+            PreviewWorkFailure('unknown task: ${message.task}'),
+          );
       }
     } on Object catch (error) {
-      message.reply.send('__error__|$error');
+      message.reply.send(PreviewWorkFailure('$error'));
     }
+  }
+}
+
+/// The text of the file at [path], or a [PreviewWorkFailure] saying it is
+/// not text. The bytes and the decode are what `readAsStringSync` does in
+/// one call; split, the decode failure is told apart from a read failure
+/// by its type rather than by an exception message.
+Object _read(String path) {
+  final bytes = File(path).readAsBytesSync();
+  try {
+    return utf8.decode(bytes);
+  } on FormatException catch (error) {
+    return PreviewWorkFailure('$path: $error', notText: true);
   }
 }
 

@@ -405,6 +405,12 @@ final class BasqueStrings extends Strings {
   @override
   String get noteStatusError => 'Errorea';
   @override
+  String get noteNotText =>
+      'Fitxategi hau ez da testu-ohar bat, beraz '
+      'Nimanek ezin du hemen erakutsi.';
+  @override
+  String get noteLoadFailed => 'Ezin izan da ohar hau ireki.';
+  @override
   String wordCount(int count) => '$count hitz';
   @override
   String get outlineTooltip => 'Egitura';

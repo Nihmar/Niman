@@ -408,6 +408,12 @@ final class CroatianStrings extends Strings {
   @override
   String get noteStatusError => 'Greška';
   @override
+  String get noteNotText =>
+      'Ova datoteka nije tekstualna bilješka, pa je '
+      'Niman ne može prikazati ovdje.';
+  @override
+  String get noteLoadFailed => 'Ova se bilješka nije mogla otvoriti.';
+  @override
   String wordCount(int count) =>
       count % 10 == 1 && count % 100 != 11 ? '$count riječ' : '$count riječi';
   @override

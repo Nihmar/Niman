@@ -357,6 +357,8 @@ final class AppStrings {
   static String get noteStatusUnsaved => _s.noteStatusUnsaved;
   static String get noteStatusSaved => _s.noteStatusSaved;
   static String get noteStatusError => _s.noteStatusError;
+  static String get noteNotText => _s.noteNotText;
+  static String get noteLoadFailed => _s.noteLoadFailed;
   static String wordCount(int count) => _s.wordCount(count);
   static String get outlineTooltip => _s.outlineTooltip;
   static String get outlineNoHeadings => _s.outlineNoHeadings;

@@ -406,6 +406,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get noteStatusError => 'Villa';
   @override
+  String get noteNotText =>
+      'Þessi skrá er ekki textaminnispunktur, svo '
+      'Niman getur ekki sýnt hana hér.';
+  @override
+  String get noteLoadFailed => 'Ekki tókst að opna þennan minnispunkt.';
+  @override
   String wordCount(int count) => '$count orð';
   @override
   String get outlineTooltip => 'Efni';

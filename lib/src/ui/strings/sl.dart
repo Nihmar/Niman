@@ -409,6 +409,11 @@ final class SlovenianStrings extends Strings {
   @override
   String get noteStatusError => 'Napaka';
   @override
+  String get noteNotText =>
+      'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
+  @override
+  String get noteLoadFailed => 'Tega zapiska ni bilo mogoče odpreti.';
+  @override
   String wordCount(int count) => switch (count % 100) {
     1 => '$count beseda',
     2 => '$count besedi',
