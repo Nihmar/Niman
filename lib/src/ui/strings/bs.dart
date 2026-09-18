@@ -91,6 +91,19 @@ final class BosnianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Prikazuje kolonu brojeva redova u uređivaču';
   @override
+  String get readableLineLengthTitle => 'Čitljiva dužina reda';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Drži tekst bilješke u centriranoj koloni umjesto preko cijele širine '
+      'prozora';
+  @override
+  String get noteColumnWidthTitle => 'Širina kolone';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Koliko je široka kolona bilješke, u pikselima';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatura pri otvaranju';
   @override
   String get keyboardOnOpenSubtitle =>

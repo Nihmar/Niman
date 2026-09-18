@@ -12,6 +12,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
@@ -23,6 +24,7 @@ final class ShellEditorSettings {
   /// that has never been configured reads back as.
   const new({
     this.lineNumbers = true,
+    this.noteColumn = const NoteColumn(),
     this.autofocusEditor = false,
     this.previewMode = PreviewLayoutMode.auto,
     this.splitRatio = defaultSplitRatio,
@@ -43,6 +45,9 @@ final class ShellEditorSettings {
 
   /// Whether the editor shows the row-number column.
   final bool lineNumbers;
+
+  /// Where the note's text sits across its pane (issue #171).
+  final NoteColumn noteColumn;
 
   /// Whether opening a note raises the keyboard.
   final bool autofocusEditor;
@@ -95,6 +100,8 @@ final class ShellEditorSettings {
   /// offers — better than stranding the note on a surface that is gone.
   static Future<ShellEditorSettings> read(LibrarySession session) async {
     final lineNumbers = await session.lineNumbersEnabled;
+    final readableLineLength = await session.readableLineLength;
+    final noteColumnWidth = await session.noteColumnWidth;
     final autofocus = await session.editorAutofocusEnabled;
     final previewMode = await session.previewMode;
     final splitRatio = await session.splitRatio;
@@ -114,6 +121,10 @@ final class ShellEditorSettings {
         : editorsEnabled;
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
+      noteColumn: NoteColumn(
+        enabled: readableLineLength,
+        width: noteColumnWidth,
+      ),
       autofocusEditor: autofocus,
       previewMode: previewMode,
       splitRatio: splitRatio,
@@ -146,6 +157,7 @@ final class ShellEditorSettings {
   }) {
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
+      noteColumn: noteColumn,
       autofocusEditor: autofocusEditor,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
@@ -167,6 +179,7 @@ final class ShellEditorSettings {
     if (identical(this, other)) return true;
     return other is ShellEditorSettings &&
         lineNumbers == other.lineNumbers &&
+        noteColumn == other.noteColumn &&
         autofocusEditor == other.autofocusEditor &&
         previewMode == other.previewMode &&
         splitRatio == other.splitRatio &&
@@ -187,6 +200,7 @@ final class ShellEditorSettings {
   @override
   int get hashCode => Object.hash(
     lineNumbers,
+    noteColumn,
     autofocusEditor,
     previewMode,
     splitRatio,

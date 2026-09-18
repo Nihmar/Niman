@@ -91,6 +91,19 @@ final class CroatianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Prikaži stupac s brojevima redaka u uređivaču napomene';
   @override
+  String get readableLineLengthTitle => 'Čitljiva duljina retka';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Drži tekst bilješke u centriranom stupcu umjesto preko cijele širine '
+      'prozora';
+  @override
+  String get noteColumnWidthTitle => 'Širina stupca';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Koliko je širok stupac bilješke, u pikselima';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tipkovnica pri otvaranju';
   @override
   String get keyboardOnOpenSubtitle =>

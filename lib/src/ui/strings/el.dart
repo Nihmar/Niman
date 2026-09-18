@@ -90,6 +90,19 @@ final class GreekStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Εμφανίζει τη στήλη με τους αριθμούς γραμμών στον επεξεργαστή';
   @override
+  String get readableLineLengthTitle => 'Ευανάγνωστο μήκος γραμμής';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Το κείμενο της σημείωσης μένει σε κεντραρισμένη στήλη αντί για όλο το '
+      'πλάτος του παραθύρου';
+  @override
+  String get noteColumnWidthTitle => 'Πλάτος στήλης';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Πόσο φαρδιά είναι η στήλη της σημείωσης, σε pixel';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Πληκτρολόγιο στο άνοιγμα';
   @override
   String get keyboardOnOpenSubtitle =>

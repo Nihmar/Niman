@@ -82,6 +82,16 @@ final class ChineseStrings extends Strings {
   @override
   String get lineNumbersSubtitle => '在编辑器中显示行号栏';
   @override
+  String get readableLineLengthTitle => '易读行宽';
+  @override
+  String get readableLineLengthSubtitle => '将笔记正文保持在居中的一栏内，而不是铺满整个窗口';
+  @override
+  String get noteColumnWidthTitle => '栏宽';
+  @override
+  String get noteColumnWidthSubtitle => '笔记栏的宽度（像素）';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => '打开时弹出键盘';
   @override
   String get keyboardOnOpenSubtitle => '打开笔记时立即弹出键盘（关闭 = 首次输入时弹出）';

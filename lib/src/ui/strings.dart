@@ -125,6 +125,12 @@ final class AppStrings {
   static String get debugLogsSubtitle => _s.debugLogsSubtitle;
   static String get lineNumbersTitle => _s.lineNumbersTitle;
   static String get lineNumbersSubtitle => _s.lineNumbersSubtitle;
+  static String get readableLineLengthTitle => _s.readableLineLengthTitle;
+  static String get readableLineLengthSubtitle => _s.readableLineLengthSubtitle;
+  static String get noteColumnWidthTitle => _s.noteColumnWidthTitle;
+  static String get noteColumnWidthSubtitle => _s.noteColumnWidthSubtitle;
+  static String noteColumnWidthValue(int pixels) =>
+      _s.noteColumnWidthValue(pixels);
   static String get keyboardOnOpenTitle => _s.keyboardOnOpenTitle;
   static String get keyboardOnOpenSubtitle => _s.keyboardOnOpenSubtitle;
   static String get editorKindSource => _s.editorKindSource;

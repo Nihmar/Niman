@@ -89,6 +89,19 @@ final class SwedishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Visa radnumrerkolumnen i anteckningseditorn';
   @override
+  String get readableLineLengthTitle => 'Läsbar radlängd';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Håll anteckningens text i en centrerad kolumn i stället för hela '
+      'fönstrets bredd';
+  @override
+  String get noteColumnWidthTitle => 'Kolumnbredd';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Hur bred anteckningens kolumn är, i pixlar';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tangentbord vid öppning';
   @override
   String get keyboardOnOpenSubtitle =>

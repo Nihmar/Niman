@@ -184,6 +184,22 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => pushEditor(SettingsKeys.lineNumbers),
     ),
     SettingsSearchEntry(
+      title: AppStrings.readableLineLengthTitle,
+      area: editor,
+      rowKey: SettingsKeys.readableLineLength,
+      value: () async => onOff(on: await controller.readableLineLength),
+      open: () => pushEditor(SettingsKeys.readableLineLength),
+    ),
+    SettingsSearchEntry(
+      title: AppStrings.noteColumnWidthTitle,
+      area: editor,
+      rowKey: SettingsKeys.noteColumnWidth,
+      value: () async => AppStrings.noteColumnWidthValue(
+        (await controller.noteColumnWidth).round(),
+      ),
+      open: () => pushEditor(SettingsKeys.noteColumnWidth),
+    ),
+    SettingsSearchEntry(
       title: AppStrings.linkTypeTitle,
       area: editor,
       rowKey: SettingsKeys.linkType,

@@ -91,6 +91,18 @@ final class CzechStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Zobrazí sloupec čísel řádků v editoru poznámek';
   @override
+  String get readableLineLengthTitle => 'Čitelná délka řádku';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Držet text poznámky ve vystředěném sloupci místo přes celou šířku okna';
+  @override
+  String get noteColumnWidthTitle => 'Šířka sloupce';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Jak široký je sloupec poznámky, v pixelech';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Klávesnice při otevření';
   @override
   String get keyboardOnOpenSubtitle =>

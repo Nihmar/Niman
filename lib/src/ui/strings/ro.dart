@@ -92,6 +92,19 @@ final class RomanianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Afișează coloana cu numerele de linie în editorul de note';
   @override
+  String get readableLineLengthTitle => 'Lungime de rând lizibilă';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Păstrează textul notei într-o coloană centrată în loc de toată lățimea '
+      'ferestrei';
+  @override
+  String get noteColumnWidthTitle => 'Lățimea coloanei';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Cât de lată este coloana notei, în pixeli';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatura la deschidere';
   @override
   String get keyboardOnOpenSubtitle =>

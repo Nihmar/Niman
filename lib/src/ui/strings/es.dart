@@ -89,6 +89,19 @@ final class SpanishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Muestra la columna de números de línea en el editor';
   @override
+  String get readableLineLengthTitle => 'Longitud de línea legible';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Mantén el texto de la nota en una columna centrada en lugar de todo el '
+      'ancho de la ventana';
+  @override
+  String get noteColumnWidthTitle => 'Ancho de la columna';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Cuánto mide de ancho la columna de la nota, en píxeles';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Teclado al abrir';
   @override
   String get keyboardOnOpenSubtitle =>

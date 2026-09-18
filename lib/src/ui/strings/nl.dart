@@ -89,6 +89,19 @@ final class DutchStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Toon de kolom met regelnummers in de notitie-editor';
   @override
+  String get readableLineLengthTitle => 'Leesbare regellengte';
+  @override
+  String get readableLineLengthSubtitle =>
+      'De tekst van een notitie in een gecentreerde kolom houden in plaats van '
+      'over de hele vensterbreedte';
+  @override
+  String get noteColumnWidthTitle => 'Kolombreedte';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Hoe breed de kolom van de notitie is, in pixels';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Toetsenbord bij openen';
   @override
   String get keyboardOnOpenSubtitle =>
