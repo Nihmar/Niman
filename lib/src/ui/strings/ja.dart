@@ -1082,6 +1082,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get openInNewTab => '新しいタブで開く';
   @override
+  String get splitRight => '右に分割';
+  @override
+  String get splitDown => '下に分割';
+  @override
+  String get moveToOtherPane => 'もう一方のペインへ移動';
+  @override
+  String get openBeside => '横に開く';
+  @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';

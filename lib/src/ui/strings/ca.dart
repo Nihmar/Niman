@@ -1192,6 +1192,14 @@ final class CatalanStrings extends Strings {
   @override
   String get openInNewTab => 'Obre en una pestanya nova';
   @override
+  String get splitRight => 'Divideix a la dreta';
+  @override
+  String get splitDown => 'Divideix a sota';
+  @override
+  String get moveToOtherPane => 'Mou a l’altra subfinestra';
+  @override
+  String get openBeside => 'Obre al costat';
+  @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override
   String get openFileFailed =>

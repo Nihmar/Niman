@@ -1158,6 +1158,14 @@ final class LatvianStrings extends Strings {
   @override
   String get openInNewTab => 'Atvērt jaunā cilnē';
   @override
+  String get splitRight => 'Sadalīt pa labi';
+  @override
+  String get splitDown => 'Sadalīt uz leju';
+  @override
+  String get moveToOtherPane => 'Pārvietot uz otru rūti';
+  @override
+  String get openBeside => 'Atvērt blakus';
+  @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';

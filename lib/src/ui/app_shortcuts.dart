@@ -42,6 +42,9 @@ enum AppCommand {
   /// Show the previous open note's tab.
   previousTab,
 
+  /// Split the window right with the note on screen (#23).
+  splitRight,
+
   /// Select the Files tab.
   tabFiles,
 
@@ -113,6 +116,10 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
     ),
     AppShortcut(
+      AppCommand.splitRight,
+      SingleActivator(LogicalKeyboardKey.backslash, control: true),
+    ),
+    AppShortcut(
       AppCommand.tabFiles,
       SingleActivator(LogicalKeyboardKey.digit1, control: true),
     ),
@@ -146,6 +153,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.closeTab => AppStrings.shortcutCloseTab,
   AppCommand.nextTab => AppStrings.shortcutNextTab,
   AppCommand.previousTab => AppStrings.shortcutPreviousTab,
+  AppCommand.splitRight => AppStrings.splitRight,
   AppCommand.tabFiles => AppStrings.tabFiles,
   AppCommand.tabTodo => AppStrings.todoTitle,
   AppCommand.tabSearch => AppStrings.tabSearch,

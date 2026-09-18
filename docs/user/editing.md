@@ -30,6 +30,25 @@ starting where the file tree ends.
 - **An orange dot** in place of the **×** means the note has edits not
   written yet. They are written a moment later, as always.
 
+**Two panes.** The window splits in two, and each half holds its own
+tabs.
+
+- **To split,** use `Ctrl+\` (right, with the note on screen), a tab's
+  right-click **Split right** / **Split down**, or the tree's
+  right-click **Open to the side**.
+- **Splitting with a tab** moves that tab into the new pane. A pane with
+  only that tab keeps it, and the new pane opens empty for the next note.
+- **Split right,** the title bar's row of tabs divides exactly where the
+  panes do. **Split down,** the lower pane carries its tabs at its top.
+- **Focus.** A click inside a pane gives it the focus: the tree opens
+  there, and the tree shows that pane's note.
+- **Moving.** A tab's **Move to the other pane** moves it, keeping
+  everything, undo included.
+- **Unsplitting.** Closing a pane's last tab puts the window back
+  together, and the divider drags.
+- **One place per note.** A note is open in one place only: opening it
+  again takes you to the pane and tab it is in.
+
 Each tab keeps its own way of showing its note: the source editor or the
 WYSIWYG one, the preview or not. The **Default editor** setting is the
 editor a note opens in. The last few tabs you looked at keep everything

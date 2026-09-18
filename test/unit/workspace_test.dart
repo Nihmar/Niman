@@ -128,6 +128,35 @@ void main() {
       expect(_row(w), 'a.md [b.md]');
     });
 
+    test('an empty pane takes the focus, and the next note', () {
+      final w = _opened(['a.md']).split(SplitAxis.right).focus(0).focus(1);
+      expect(_row(w.open('b.md'), 1), '[b.md]');
+    });
+
+    test('splitting with a tab moves it across', () {
+      final w = _opened(['a.md', 'b.md']).splitWith(0, 0, SplitAxis.right);
+      expect(_row(w), '[b.md]');
+      expect(_row(w, 1), '[a.md]');
+      expect(w.focused, 1);
+    });
+
+    test("splitting with a pane's only tab opens the other empty", () {
+      final w = _opened(['a.md']).splitWith(0, 0, SplitAxis.down);
+      expect(w.isSplit, isTrue);
+      expect(_row(w), '[a.md]');
+      expect(w.panes[1].isEmpty, isTrue);
+    });
+
+    test('open beside: in the other pane, splitting first if need be', () {
+      var w = _opened(['a.md']).openBeside('b.md', SplitAxis.right);
+      expect(_row(w, 1), '[b.md]');
+      w = w.focus(1).openBeside('c.md', SplitAxis.right);
+      expect(_row(w), 'a.md [c.md]');
+      expect(w.focused, 0);
+      // Already open: shown where it is.
+      expect(w.openBeside('b.md', SplitAxis.right).focused, 1);
+    });
+
     test('the divider keeps both panes usable', () {
       final w = _opened(['a.md']).split(SplitAxis.right);
       expect(w.withFraction(0.05).fraction, 0.2);

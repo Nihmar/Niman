@@ -1167,6 +1167,14 @@ final class BasqueStrings extends Strings {
   @override
   String get openInNewTab => 'Ireki fitxa berrian';
   @override
+  String get splitRight => 'Zatitu eskuinera';
+  @override
+  String get splitDown => 'Zatitu behera';
+  @override
+  String get moveToOtherPane => 'Eraman beste panelera';
+  @override
+  String get openBeside => 'Ireki alboan';
+  @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';

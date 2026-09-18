@@ -1173,6 +1173,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get openInNewTab => 'Отвори во нов јазичок';
   @override
+  String get splitRight => 'Подели десно';
+  @override
+  String get splitDown => 'Подели надолу';
+  @override
+  String get moveToOtherPane => 'Премести во другиот панел';
+  @override
+  String get openBeside => 'Отвори странично';
+  @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override
   String get openFileFailed =>

@@ -1172,6 +1172,14 @@ final class BulgarianStrings extends Strings {
   @override
   String get openInNewTab => 'Отвори в нов раздел';
   @override
+  String get splitRight => 'Раздели надясно';
+  @override
+  String get splitDown => 'Раздели надолу';
+  @override
+  String get moveToOtherPane => 'Премести в другия панел';
+  @override
+  String get openBeside => 'Отвори отстрани';
+  @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';

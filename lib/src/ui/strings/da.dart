@@ -1159,6 +1159,14 @@ final class DanishStrings extends Strings {
   @override
   String get openInNewTab => 'Åbn i ny fane';
   @override
+  String get splitRight => 'Opdel til højre';
+  @override
+  String get splitDown => 'Opdel nedad';
+  @override
+  String get moveToOtherPane => 'Flyt til den anden rude';
+  @override
+  String get openBeside => 'Åbn ved siden af';
+  @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';

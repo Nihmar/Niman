@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 import 'package:path/path.dart' as p;
 
@@ -34,8 +35,21 @@ final class NoteTabBar extends StatefulWidget {
     required this.onClose,
     required this.onNew,
     this.filler = const SizedBox.shrink(),
+    this.focused = true,
+    this.onSplit,
+    this.onMoveToOtherPane,
     super.key,
   });
+
+  /// Whether this row's pane has the focus: its showing tab is marked
+  /// in the accent, the other pane's only outlined (#23).
+  final bool focused;
+
+  /// Splits the window with the tab at the index; null once it is split.
+  final void Function(int index, SplitAxis axis)? onSplit;
+
+  /// Moves the tab at the index to the other pane; null while unsplit.
+  final ValueChanged<int>? onMoveToOtherPane;
 
   /// What fills the row past the tabs and their buttons: in the title
   /// bar, the area the window is dragged by.
@@ -126,6 +140,62 @@ final class _NoteTabBarState extends State<NoteTabBar> {
     if (chosen != null) widget.onActivate(chosen);
   }
 
+  /// The tab's right-click menu: the ways to split with it, to move it,
+  /// and to close it.
+  Future<void> _showTabMenu(
+    BuildContext context,
+    int index,
+    Offset position,
+  ) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final split = widget.onSplit;
+    final move = widget.onMoveToOtherPane;
+    final chosen = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        if (split != null) ...[
+          PopupMenuItem(
+            key: const Key('tab-menu-split-right'),
+            value: 'right',
+            child: Text(AppStrings.splitRight),
+          ),
+          PopupMenuItem(
+            key: const Key('tab-menu-split-down'),
+            value: 'down',
+            child: Text(AppStrings.splitDown),
+          ),
+        ],
+        if (move != null)
+          PopupMenuItem(
+            key: const Key('tab-menu-move'),
+            value: 'move',
+            child: Text(AppStrings.moveToOtherPane),
+          ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          key: const Key('tab-menu-close'),
+          value: 'close',
+          child: Text(AppStrings.closeTabTooltip),
+        ),
+      ],
+    );
+    switch (chosen) {
+      case 'right':
+        split?.call(index, SplitAxis.right);
+      case 'down':
+        split?.call(index, SplitAxis.down);
+      case 'move':
+        move?.call(index);
+      case 'close':
+        widget.onClose(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tabs = widget.tabs;
@@ -152,9 +222,12 @@ final class _NoteTabBarState extends State<NoteTabBar> {
                       tab: tab,
                       index: i,
                       active: i == widget.active,
+                      focused: widget.focused,
                       unsaved: widget.unsaved.contains(tab.path),
                       onActivate: () => widget.onActivate(i),
                       onClose: () => widget.onClose(i),
+                      onMenu: (position) =>
+                          unawaited(_showTabMenu(context, i, position)),
                     ),
                 ],
               ),
@@ -190,18 +263,22 @@ final class _NoteTab extends StatefulWidget {
     required this.tab,
     required this.index,
     required this.active,
+    required this.focused,
     required this.unsaved,
     required this.onActivate,
     required this.onClose,
+    required this.onMenu,
     super.key,
   });
 
   final WorkspaceTab tab;
   final int index;
   final bool active;
+  final bool focused;
   final bool unsaved;
   final VoidCallback onActivate;
   final VoidCallback onClose;
+  final ValueChanged<Offset> onMenu;
 
   @override
   State<_NoteTab> createState() => _NoteTabState();
@@ -232,6 +309,9 @@ final class _NoteTabState extends State<_NoteTab> {
             // A middle click closes, as everywhere else tabs exist.
             onPointerDown: (event) {
               if (event.buttons == kMiddleMouseButton) widget.onClose();
+              if (event.buttons == kSecondaryMouseButton) {
+                widget.onMenu(event.position);
+              }
             },
             child: Material(
               key: Key('note-tab-${widget.index}'),
@@ -243,7 +323,11 @@ final class _NoteTabState extends State<_NoteTab> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(7),
                 side: active
-                    ? BorderSide(color: scheme.outlineVariant)
+                    ? BorderSide(
+                        color: widget.focused
+                            ? scheme.primary
+                            : scheme.outlineVariant,
+                      )
                     : BorderSide.none,
               ),
               child: InkWell(
