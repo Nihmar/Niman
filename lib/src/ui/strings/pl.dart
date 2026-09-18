@@ -1188,6 +1188,8 @@ final class PolishStrings extends Strings {
   @override
   String get openBeside => 'Otwórz obok';
   @override
+  String get closeAllNotes => 'Zamknij wszystkie';
+  @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override
   String get openFileFailed =>

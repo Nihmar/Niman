@@ -1175,6 +1175,8 @@ final class SwedishStrings extends Strings {
   @override
   String get openBeside => 'Öppna vid sidan';
   @override
+  String get closeAllNotes => 'Stäng alla';
+  @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';
   @override

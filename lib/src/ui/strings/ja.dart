@@ -1090,6 +1090,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get openBeside => '横に開く';
   @override
+  String get closeAllNotes => 'すべて閉じる';
+  @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';

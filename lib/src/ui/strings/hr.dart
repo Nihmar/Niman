@@ -1166,6 +1166,8 @@ final class CroatianStrings extends Strings {
   @override
   String get openBeside => 'Otvori sa strane';
   @override
+  String get closeAllNotes => 'Zatvori sve';
+  @override
   String get openFileMissing => 'Datoteka ove napomene nije na disku';
   @override
   String get openFileFailed =>

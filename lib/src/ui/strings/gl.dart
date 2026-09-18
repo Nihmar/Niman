@@ -1183,6 +1183,8 @@ final class GalicianStrings extends Strings {
   @override
   String get openBeside => 'Abrir ao lado';
   @override
+  String get closeAllNotes => 'Pechar todas';
+  @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';

@@ -1158,6 +1158,8 @@ final class TurkishStrings extends Strings {
   @override
   String get openBeside => 'Yanda aç';
   @override
+  String get closeAllNotes => 'Tümünü kapat';
+  @override
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override
   String get openFileFailed => 'Bu not Niman dışında açılamadı';

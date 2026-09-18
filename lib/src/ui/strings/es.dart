@@ -1196,6 +1196,8 @@ final class SpanishStrings extends Strings {
   @override
   String get openBeside => 'Abrir al lado';
   @override
+  String get closeAllNotes => 'Cerrar todas';
+  @override
   String get openFileMissing => 'El archivo de esta nota no está en el disco';
   @override
   String get openFileFailed => 'No se pudo abrir esta nota fuera de Niman';

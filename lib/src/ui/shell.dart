@@ -38,6 +38,7 @@ import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
+import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -836,6 +837,16 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
       path: p.join(controller.root ?? '', selectedPath),
+      // One editor on the phone: switching notes hands the one going in
+      // its memento, and the one going out hands in its own (#23).
+      initialMemento: _workspace.value.tabs
+          .where((tab) => tab.path == selectedPath)
+          .firstOrNull
+          ?.memento,
+      onMemento: (path, memento) {
+        final root = controller.root;
+        if (root != null) _workspace.remember(relPath(path, root), memento);
+      },
       showLineNumbers: _editorSettings.lineNumbers,
       noteColumn: _editorSettings.noteColumn,
       autofocusEditor: _editorSettings.autofocusEditor,
@@ -939,18 +950,13 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// [pane]'s tab row.
   Widget _paneTabs(int pane, Widget filler) {
     final w = _workspace.value;
-    final root = widget.controller.root;
     final tabs = w.panes[pane];
     return NoteTabBar(
       key: ValueKey('pane-tabs-$pane'),
       tabs: tabs.tabs,
       active: tabs.active,
       focused: !w.isSplit || w.focused == pane,
-      unsaved: {
-        if (root != null)
-          for (final path in widget.unsavedTracker.unsavedPaths)
-            if (p.isWithin(root, path)) relPath(path, root),
-      },
+      unsaved: _unsavedRelPaths(),
       onActivate: (index) => _activateTab(pane, index),
       onClose: (index) => _workspace.close(pane, index),
       onNew: () {
@@ -1638,7 +1644,14 @@ final class _LibraryShellState extends State<_LibraryShell>
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     _markOpenNote(controller.root, _shownNote);
-    _workspace.follow(_selectedIsDir ? null : selectedPath, keepOnNone: _wide);
+    // Notes stay open until they are closed: a folder selected, or the
+    // phone back on its tree, closes none (#23). On the phone a note
+    // opened joins the ones already open, for the switcher to reach.
+    _workspace.follow(
+      _selectedIsDir ? null : selectedPath,
+      keepOnNone: true,
+      alongside: !_wide,
+    );
     final splitsPreview = previewSplits(
       _editorSettings.previewMode,
       narrow: narrow,
@@ -1699,8 +1712,64 @@ final class _LibraryShellState extends State<_LibraryShell>
         if (_previewVisible) _previewFullScreenAction(),
         _previewToggleAction(),
       ],
+      _openNotesButton(),
       _noteMenu(),
     ];
+  }
+
+  /// The phone's badge for the notes left open (#23, PR 4).
+  Widget _openNotesButton() => OpenNotesButton(
+    count: _workspace.value.tabs.length,
+    onPressed: () => unawaited(_showOpenNotes()),
+  );
+
+  /// The note on the phone's screen, if one is.
+  String? get _phoneNote =>
+      _selected != null && !_selectedIsDir && !_treeVisible ? _selected : null;
+
+  /// The phone's open-notes switcher: every note left open, the one on
+  /// screen marked, each with its unsaved dot and a close.
+  Future<void> _showOpenNotes() => showOpenNotesSheet(
+    context,
+    workspace: () => _workspace.value,
+    changes: _tabsListenable,
+    unsaved: _unsavedRelPaths,
+    shown: () => _phoneNote,
+    onOpen: (path) => _openNoteFromLink(path, null),
+    onClose: _closeOpenNote,
+    onCloseAll: () {
+      _workspace.controller.update((w) => w.closeAll());
+      if (_phoneNote != null) _closeFullScreenNote();
+      setState(() => _selected = null);
+    },
+    onNewNote: () {
+      _workspace.openNextInNewTab();
+      unawaited(_createFlow.createNote(context));
+    },
+  );
+
+  /// Closes [path] from the switcher. The note on screen gives way to the
+  /// next one open, or to the tree when it was the last.
+  void _closeOpenNote(String path) {
+    final wasShown = _phoneNote == path;
+    _workspace.controller.update((w) => w.closePath(path));
+    final next = _workspace.value.activePath;
+    if (wasShown && next != null) {
+      _openNoteFromLink(next, null);
+      return;
+    }
+    if (wasShown) _closeFullScreenNote();
+    if (_selected == path) setState(() => _selected = null);
+  }
+
+  /// The open notes holding unsaved edits, library-relative.
+  Set<String> _unsavedRelPaths() {
+    final root = widget.controller.root;
+    return {
+      if (root != null)
+        for (final path in widget.unsavedTracker.unsavedPaths)
+          if (p.isWithin(root, path)) relPath(path, root),
+    };
   }
 
   /// The wide layout's tab slots: the tree + detail split for Files (and
@@ -1893,6 +1962,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Trash/sort actions of the Files-tab app bar (per mockup: trash +  /// sort chevrons; the settings gear moved to the Settings tab).
   List<Widget> _filesAppBarActions(LibrarySession controller) {
     return [
+      // Leftmost: it comes and goes, and the row grows from the left, so
+      // the buttons a thumb already knows stay where they were.
+      if (_workspace.value.tabs.isNotEmpty) _openNotesButton(),
       _syncActions.button(context, controller),
       IconButton(
         key: const Key('open-trash'),

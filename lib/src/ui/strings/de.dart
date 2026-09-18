@@ -1192,6 +1192,8 @@ final class GermanStrings extends Strings {
   @override
   String get openBeside => 'Daneben öffnen';
   @override
+  String get closeAllNotes => 'Alle schließen';
+  @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
   @override

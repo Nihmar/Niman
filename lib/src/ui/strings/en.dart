@@ -1163,6 +1163,8 @@ final class EnglishStrings extends Strings {
   @override
   String get openBeside => 'Open to the side';
   @override
+  String get closeAllNotes => 'Close all';
+  @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';
