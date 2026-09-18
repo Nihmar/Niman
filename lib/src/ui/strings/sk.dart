@@ -409,6 +409,11 @@ final class SlovakStrings extends Strings {
   @override
   String get noteStatusError => 'Chyba';
   @override
+  String get noteNotText =>
+      'Tento súbor nie je textová poznámka, preto ho Niman nemôže zobraziť tu.';
+  @override
+  String get noteLoadFailed => 'Túto poznámku sa nepodarilo otvoriť.';
+  @override
   String wordCount(int count) => switch (count) {
     1 => '1 slovo',
     >= 2 && <= 4 => '$count slová',

@@ -408,6 +408,11 @@ final class BelarusianStrings extends Strings {
   @override
   String get noteStatusError => 'Памылка';
   @override
+  String get noteNotText =>
+      'Гэты файл не тэкставая нататка, таму Niman не можа паказаць яго тут.';
+  @override
+  String get noteLoadFailed => 'Не ўдалося адкрыць гэту нататку.';
+  @override
   String wordCount(int count) =>
       switch (count % 100 >= 11 && count % 100 <= 14 ? 0 : count % 10) {
         1 => '$count слова',

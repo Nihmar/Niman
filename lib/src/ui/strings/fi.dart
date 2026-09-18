@@ -408,6 +408,12 @@ final class FinnishStrings extends Strings {
   @override
   String get noteStatusError => 'Virhe';
   @override
+  String get noteNotText =>
+      'Tämä tiedosto ei ole tekstimuistiinpano, joten '
+      'Niman ei voi näyttää sitä tässä.';
+  @override
+  String get noteLoadFailed => 'Tätä muistiinpanoa ei voitu avata.';
+  @override
   String wordCount(int count) => count == 1 ? '1 sana' : '$count sanaa';
   @override
   String get outlineTooltip => 'Rakenne';

@@ -404,6 +404,11 @@ final class EstonianStrings extends Strings {
   @override
   String get noteStatusError => 'Viga';
   @override
+  String get noteNotText =>
+      'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
+  @override
+  String get noteLoadFailed => 'Seda märget ei õnnestunud avada.';
+  @override
   String wordCount(int count) => '$count sõna';
   @override
   String get outlineTooltip => 'Struktuur';

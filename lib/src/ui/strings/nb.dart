@@ -409,6 +409,11 @@ final class NorwegianStrings extends Strings {
   @override
   String get noteStatusError => 'Feil';
   @override
+  String get noteNotText =>
+      'Denne filen er ikke et tekstnotat, så Niman kan ikke vise den her.';
+  @override
+  String get noteLoadFailed => 'Notatet kunne ikke åpnes.';
+  @override
   String wordCount(int count) => '$count ord';
   @override
   String get outlineTooltip => 'Struktur';

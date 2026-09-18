@@ -409,6 +409,11 @@ final class DanishStrings extends Strings {
   @override
   String get noteStatusError => 'Fejl';
   @override
+  String get noteNotText =>
+      'Denne fil er ikke en tekstnote, så Niman kan ikke vise den her.';
+  @override
+  String get noteLoadFailed => 'Noten kunne ikke åbnes.';
+  @override
   String wordCount(int count) => '$count ord';
   @override
   String get outlineTooltip => 'Oversigt';

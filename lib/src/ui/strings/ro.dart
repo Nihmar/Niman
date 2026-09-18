@@ -414,6 +414,11 @@ final class RomanianStrings extends Strings {
   @override
   String get noteStatusError => 'Eroare';
   @override
+  String get noteNotText =>
+      'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
+  @override
+  String get noteLoadFailed => 'Această notă nu a putut fi deschisă.';
+  @override
   String wordCount(int count) => count == 1
       ? '1 cuvânt'
       : count % 100 >= 20 || count == 0

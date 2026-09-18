@@ -382,6 +382,10 @@ final class ChineseStrings extends Strings {
   @override
   String get noteStatusError => '错误';
   @override
+  String get noteNotText => '此文件不是文本笔记，因此 Niman 无法在此显示。';
+  @override
+  String get noteLoadFailed => '无法打开此笔记。';
+  @override
   String wordCount(int count) => '$count 词';
   @override
   String get outlineTooltip => '大纲';

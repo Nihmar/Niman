@@ -406,6 +406,11 @@ final class LatvianStrings extends Strings {
   @override
   String get noteStatusError => 'Kļūda';
   @override
+  String get noteNotText =>
+      'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
+  @override
+  String get noteLoadFailed => 'Šo piezīmi neizdevās atvērt.';
+  @override
   String wordCount(int count) =>
       count % 10 == 0 || (count % 100 >= 11 && count % 100 <= 19)
       ? '$count vārdu'
