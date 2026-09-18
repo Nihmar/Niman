@@ -20,6 +20,18 @@ import 'package:niman/src/workspace/note_memento.dart';
 import 'package:niman/src/workspace/workspace_pane.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 
+/// What the right dock shows (#175).
+enum DockPane {
+  /// The note's headings.
+  outline,
+
+  /// The note's tags, and the notes that share them.
+  tags,
+
+  /// The note's kept versions.
+  history,
+}
+
 /// Which way the second pane opens.
 enum SplitAxis {
   /// Side by side: the second pane on the right.
@@ -38,6 +50,8 @@ final class Workspace {
     this.focused = 0,
     this.axis = SplitAxis.right,
     this.fraction = 0.5,
+    this.dockOpen = true,
+    this.dockPane = DockPane.outline,
   }) : assert(focused >= 0, 'focused is a pane');
 
   /// Reads a stored form.
@@ -81,7 +95,15 @@ final class Workspace {
     final focused = json['focused'];
     final axis = json['axis'];
     final fraction = json['fraction'];
+    final dock = json['dock'];
+    final dockOpen = dock is Map ? dock['open'] : null;
+    final dockPane = dock is Map ? dock['pane'] : null;
     return Workspace(
+      dockOpen: dockOpen is! bool || dockOpen,
+      dockPane: DockPane.values.firstWhere(
+        (p) => p.name == dockPane,
+        orElse: () => DockPane.outline,
+      ),
       panes: List.unmodifiable(panes),
       focused: focused is int && focused >= 0 && focused < panes.length
           ? focused
@@ -110,6 +132,13 @@ final class Workspace {
 
   /// The first pane's share of the space, when there are two.
   final double fraction;
+
+  /// Whether the right dock is open (#175) — where the window has room
+  /// for it; closing it is how a narrow laptop gets the space back.
+  final bool dockOpen;
+
+  /// Which of its panes the dock shows.
+  final DockPane dockPane;
 
   /// The pane with the focus.
   WorkspacePane get focusedPane => panes[focused];
@@ -214,7 +243,7 @@ final class Workspace {
   }
 
   /// Closes everything, and the split with it.
-  Workspace closeAll() => Workspace.empty;
+  Workspace closeAll() => Workspace(dockOpen: dockOpen, dockPane: dockPane);
 
   /// Opens a second pane, empty and focused, [axis] of the first. A split
   /// window stays as it is.
@@ -272,6 +301,10 @@ final class Workspace {
         : tab.copyWith(missing: !tab.missing),
   );
 
+  /// The dock opened or closed.
+  Workspace withDock({bool? open, DockPane? pane}) =>
+      _copy(dockOpen: open ?? dockOpen, dockPane: pane ?? dockPane);
+
   /// The split's first pane at [fraction] of the space, kept to where
   /// both panes stay usable.
   Workspace withFraction(double fraction) =>
@@ -289,6 +322,7 @@ final class Workspace {
     'focused': focused,
     'axis': axis.name,
     'fraction': fraction,
+    'dock': {'open': dockOpen, 'pane': dockPane.name},
     'panes': [
       for (final pane in panes)
         {
@@ -311,11 +345,15 @@ final class Workspace {
     int? focused,
     SplitAxis? axis,
     double? fraction,
+    bool? dockOpen,
+    DockPane? dockPane,
   }) => Workspace(
     panes: List.unmodifiable(panes ?? this.panes),
     focused: focused ?? this.focused,
     axis: axis ?? this.axis,
     fraction: fraction ?? this.fraction,
+    dockOpen: dockOpen ?? this.dockOpen,
+    dockPane: dockPane ?? this.dockPane,
   );
 
   List<WorkspacePane> _replaced(int index, WorkspacePane pane) =>
@@ -390,11 +428,19 @@ final class Workspace {
       other.focused == focused &&
       other.axis == axis &&
       other.fraction == fraction &&
+      other.dockOpen == dockOpen &&
+      other.dockPane == dockPane &&
       listEquals(other.panes, panes);
 
   @override
-  int get hashCode =>
-      Object.hash(focused, axis, fraction, Object.hashAll(panes));
+  int get hashCode => Object.hash(
+    focused,
+    axis,
+    fraction,
+    dockOpen,
+    dockPane,
+    Object.hashAll(panes),
+  );
 
   @override
   String toString() => 'Workspace(focused $focused of $panes)';
