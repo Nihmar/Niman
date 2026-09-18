@@ -23,6 +23,7 @@ final class ShellDetailPane extends StatelessWidget {
     required this.selectedIsDir,
     required this.showLineNumbers,
     required this.noteColumn,
+    required this.barActions,
     required this.autofocusEditor,
     required this.linkType,
     required this.missingNoteLocation,
@@ -64,6 +65,9 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Where the note's text sits across the pane (issue #171).
   final NoteColumn noteColumn;
+
+  /// The note's own controls at the end of its top row (#173).
+  final List<Widget> barActions;
 
   /// Whether the editor takes focus on open.
   final bool autofocusEditor;
@@ -169,6 +173,7 @@ final class ShellDetailPane extends StatelessWidget {
                 path: p.join(root!, notePath),
                 showLineNumbers: showLineNumbers,
                 noteColumn: noteColumn,
+                barActions: barActions,
                 autofocusEditor: autofocusEditor,
                 linkType: linkType,
                 missingNoteLocation: missingNoteLocation,
