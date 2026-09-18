@@ -402,6 +402,12 @@ final class MacedonianStrings extends Strings {
   String get shortcutToggleSidebar =>
       'Прикажи или скриј го стаблото на датотеките';
   @override
+  String get shortcutCloseTab => 'Затвори ја тековната белешка';
+  @override
+  String get shortcutNextTab => 'Следна отворена белешка';
+  @override
+  String get shortcutPreviousTab => 'Претходна отворена белешка';
+  @override
   String get shortcutEditorSection => 'Во уредникот';
   @override
   String get shortcutFind => 'Барај';
@@ -1158,6 +1164,14 @@ final class MacedonianStrings extends Strings {
   String get openInFileManager => 'Прикажи во управувачот на датотеки';
   @override
   String get openInDefaultApp => 'Отвори со стандардната апликација';
+  @override
+  String get newNoteTabTooltip => 'Нова белешка во нов јазичок';
+  @override
+  String get openNotesTooltip => 'Отворени белешки';
+  @override
+  String get closeTabTooltip => 'Затвори';
+  @override
+  String get openInNewTab => 'Отвори во нов јазичок';
   @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override

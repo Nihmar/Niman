@@ -397,6 +397,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Паказаць або схаваць фільтр';
   @override
+  String get shortcutCloseTab => 'Закрыць бягучую нататку';
+  @override
+  String get shortcutNextTab => 'Наступная адкрытая нататка';
+  @override
+  String get shortcutPreviousTab => 'Папярэдняя адкрытая нататка';
+  @override
   String get shortcutEditorSection => 'У рэдактары';
   @override
   String get shortcutFind => 'Шукаць';
@@ -1148,6 +1154,14 @@ final class BelarusianStrings extends Strings {
   String get openInFileManager => 'Паказаць у файлавым менеджары';
   @override
   String get openInDefaultApp => 'Адкрыць у прадвызначанай праграме';
+  @override
+  String get newNoteTabTooltip => 'Новая нататка ў новай укладцы';
+  @override
+  String get openNotesTooltip => 'Адкрытыя нататкі';
+  @override
+  String get closeTabTooltip => 'Закрыць';
+  @override
+  String get openInNewTab => 'Адкрыць у новай укладцы';
   @override
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override

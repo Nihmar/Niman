@@ -402,6 +402,12 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Прикажи или сакриј стабло датотека';
   @override
+  String get shortcutCloseTab => 'Затвори тренутну белешку';
+  @override
+  String get shortcutNextTab => 'Следећа отворена белешка';
+  @override
+  String get shortcutPreviousTab => 'Претходна отворена белешка';
+  @override
   String get shortcutEditorSection => 'У уредитељу';
   @override
   String get shortcutFind => 'Претрага';
@@ -1151,6 +1157,14 @@ final class SerbianStrings extends Strings {
   String get openInFileManager => 'Прикажи у управљачу датотека';
   @override
   String get openInDefaultApp => 'Отвори подразумеваном апликацијом';
+  @override
+  String get newNoteTabTooltip => 'Нова белешка у новој картици';
+  @override
+  String get openNotesTooltip => 'Отворене белешке';
+  @override
+  String get closeTabTooltip => 'Затвори';
+  @override
+  String get openInNewTab => 'Отвори у новој картици';
   @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override

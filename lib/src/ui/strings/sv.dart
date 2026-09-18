@@ -403,6 +403,12 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Visa eller dölj filträdet';
   @override
+  String get shortcutCloseTab => 'Stäng den aktuella anteckningen';
+  @override
+  String get shortcutNextTab => 'Nästa öppna anteckning';
+  @override
+  String get shortcutPreviousTab => 'Föregående öppna anteckning';
+  @override
   String get shortcutEditorSection => 'I editorn';
   @override
   String get shortcutFind => 'Sök';
@@ -1152,6 +1158,14 @@ final class SwedishStrings extends Strings {
   String get openInFileManager => 'Visa i filhanteraren';
   @override
   String get openInDefaultApp => 'Öppna i standardappen';
+  @override
+  String get newNoteTabTooltip => 'Ny anteckning i en ny flik';
+  @override
+  String get openNotesTooltip => 'Öppna anteckningar';
+  @override
+  String get closeTabTooltip => 'Stäng';
+  @override
+  String get openInNewTab => 'Öppna i ny flik';
   @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';

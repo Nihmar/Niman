@@ -400,6 +400,12 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Zobraziť alebo skryť filter';
   @override
+  String get shortcutCloseTab => 'Zavrieť aktuálnu poznámku';
+  @override
+  String get shortcutNextTab => 'Ďalšia otvorená poznámka';
+  @override
+  String get shortcutPreviousTab => 'Predchádzajúca otvorená poznámka';
+  @override
   String get shortcutEditorSection => 'V editore';
   @override
   String get shortcutFind => 'Hľadať';
@@ -1146,6 +1152,14 @@ final class SlovakStrings extends Strings {
   String get openInFileManager => 'Zobraziť v správcovi súborov';
   @override
   String get openInDefaultApp => 'Otvoriť v predvolenej aplikácii';
+  @override
+  String get newNoteTabTooltip => 'Nová poznámka na novej karte';
+  @override
+  String get openNotesTooltip => 'Otvorené poznámky';
+  @override
+  String get closeTabTooltip => 'Zavrieť';
+  @override
+  String get openInNewTab => 'Otvoriť na novej karte';
   @override
   String get openFileMissing => 'Súbor tejto poznámky na disku nie je';
   @override

@@ -407,6 +407,12 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Εμφάνιση ή κρύψη του δέντρου αρχείων';
   @override
+  String get shortcutCloseTab => 'Κλείσιμο της τρέχουσας σημείωσης';
+  @override
+  String get shortcutNextTab => 'Επόμενη ανοιχτή σημείωση';
+  @override
+  String get shortcutPreviousTab => 'Προηγούμενη ανοιχτή σημείωση';
+  @override
   String get shortcutEditorSection => 'Στον επεξεργαστή';
   @override
   String get shortcutFind => 'Εύρεση';
@@ -1189,6 +1195,14 @@ final class GreekStrings extends Strings {
   String get openInFileManager => 'Εμφάνιση στη διαχείριση αρχείων';
   @override
   String get openInDefaultApp => 'Άνοιγμα με την προεπιλεγμένη εφαρμογή';
+  @override
+  String get newNoteTabTooltip => 'Νέα σημείωση σε νέα καρτέλα';
+  @override
+  String get openNotesTooltip => 'Ανοιχτές σημειώσεις';
+  @override
+  String get closeTabTooltip => 'Κλείσιμο';
+  @override
+  String get openInNewTab => 'Άνοιγμα σε νέα καρτέλα';
   @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';

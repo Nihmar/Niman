@@ -397,6 +397,12 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Sýna eða fela skjalatré';
   @override
+  String get shortcutCloseTab => 'Loka núverandi minnispunkti';
+  @override
+  String get shortcutNextTab => 'Næsti opni minnispunktur';
+  @override
+  String get shortcutPreviousTab => 'Fyrri opni minnispunktur';
+  @override
   String get shortcutEditorSection => 'Í ritara';
   @override
   String get shortcutFind => 'Leita';
@@ -1146,6 +1152,14 @@ final class IcelandicStrings extends Strings {
   String get openInFileManager => 'Sýna í skráastjóra';
   @override
   String get openInDefaultApp => 'Opna í sjálfgefnu forriti';
+  @override
+  String get newNoteTabTooltip => 'Nýr minnispunktur í nýjum flipa';
+  @override
+  String get openNotesTooltip => 'Opnir minnispunktar';
+  @override
+  String get closeTabTooltip => 'Loka';
+  @override
+  String get openInNewTab => 'Opna í nýjum flipa';
   @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override

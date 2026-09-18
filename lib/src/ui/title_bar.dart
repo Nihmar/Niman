@@ -25,8 +25,19 @@ final class AppTitleBar extends StatelessWidget {
     required this.sidebarVisible,
     required this.onToggleSidebar,
     required this.window,
+    this.tabs,
+    this.tabsStart = 0,
     super.key,
   });
+
+  /// The open notes' tabs (#23), in the bar's middle, built around the
+  /// drag area they leave free; null leaves the whole middle to the
+  /// title.
+  final Widget Function(Widget dragArea)? tabs;
+
+  /// Where the tabs start, from the bar's left edge: the tree's right
+  /// edge, so the two line up and nothing moves as notes open.
+  final double tabsStart;
 
   /// What the bar shows, e.g. `Niman — note.md`.
   final String title;
@@ -39,6 +50,21 @@ final class AppTitleBar extends StatelessWidget {
 
   /// The window seam the buttons act through.
   final WindowController window;
+
+  Widget _title(ThemeData theme) => Align(
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -65,26 +91,23 @@ final class AppTitleBar extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               onPressed: onToggleSidebar,
             ),
-            Expanded(
-              // The whole middle is the drag area (double-click maximizes,
-              // handled by the widget); the title rides at its left.
-              child: DragToMoveArea(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
+            if (tabs case final tabs?) ...[
+              // The title keeps the tree's width; the tabs start at its
+              // edge. Everything that is not a tab still drags.
+              SizedBox(
+                width: (tabsStart - _leading).clamp(0, double.infinity),
+                child: DragToMoveArea(child: _title(theme)),
               ),
-            ),
+              Expanded(
+                child: tabs(const DragToMoveArea(child: SizedBox.expand())),
+              ),
+            ] else
+              Expanded(
+                // The whole middle is the drag area (double-click
+                // maximizes, handled by the widget); the title rides at
+                // its left.
+                child: DragToMoveArea(child: _title(theme)),
+              ),
             _WindowButtons(window: window),
           ],
         ),
@@ -92,6 +115,9 @@ final class AppTitleBar extends StatelessWidget {
     );
   }
 }
+
+/// Left of the title: the leading gap and the sidebar toggle.
+const double _leading = 4 + 40;
 
 /// Minimize, maximize/restore and close, at the bar's right edge.
 final class _WindowButtons extends StatelessWidget {

@@ -400,6 +400,12 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Vis eller skjul filtræet';
   @override
+  String get shortcutCloseTab => 'Luk den aktuelle note';
+  @override
+  String get shortcutNextTab => 'Næste åbne note';
+  @override
+  String get shortcutPreviousTab => 'Forrige åbne note';
+  @override
   String get shortcutEditorSection => 'I editoren';
   @override
   String get shortcutFind => 'Find';
@@ -1144,6 +1150,14 @@ final class DanishStrings extends Strings {
   String get openInFileManager => 'Vis i filhåndtering';
   @override
   String get openInDefaultApp => 'Åbn i standardappen';
+  @override
+  String get newNoteTabTooltip => 'Ny note i en ny fane';
+  @override
+  String get openNotesTooltip => 'Åbne noter';
+  @override
+  String get closeTabTooltip => 'Luk';
+  @override
+  String get openInNewTab => 'Åbn i ny fane';
   @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override

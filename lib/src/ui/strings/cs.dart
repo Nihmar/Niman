@@ -399,6 +399,12 @@ final class CzechStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Zobrazit nebo skrýt filtr';
   @override
+  String get shortcutCloseTab => 'Zavřít aktuální poznámku';
+  @override
+  String get shortcutNextTab => 'Další otevřená poznámka';
+  @override
+  String get shortcutPreviousTab => 'Předchozí otevřená poznámka';
+  @override
   String get shortcutEditorSection => 'V editoru';
   @override
   String get shortcutFind => 'Hledat';
@@ -1142,6 +1148,14 @@ final class CzechStrings extends Strings {
   String get openInFileManager => 'Zobrazit ve správci souborů';
   @override
   String get openInDefaultApp => 'Otevřít ve výchozí aplikaci';
+  @override
+  String get newNoteTabTooltip => 'Nová poznámka v nové kartě';
+  @override
+  String get openNotesTooltip => 'Otevřené poznámky';
+  @override
+  String get closeTabTooltip => 'Zavřít';
+  @override
+  String get openInNewTab => 'Otevřít v nové kartě';
   @override
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
