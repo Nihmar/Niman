@@ -45,12 +45,53 @@ already changed something.
 
 `ShellWorkspace` (`lib/src/ui/shell_workspace.dart`) is the shell's side:
 
-- It loads the workspace when the library opens.
-- It follows the note the shell shows. For now that note replaces the
-  showing tab (`replaceActive`), one note at a time as before.
-- The row actions report every rename, move and delete as `from → to` or
-  as a path, so tabs under a renamed folder follow it.
+- **Loading.** The workspace loads when the library opens. The desktop
+  draws its tabs from it at once; the phone's switcher lists the same
+  notes.
+- **Opening.** On the desktop, a click in the tree shows a note in the
+  focused pane's tab (`replaceActive`). Ctrl+click, the row menu's Open
+  in new tab and the tab row's + open alongside (`open`). Open to the
+  side opens it in the other pane (`openBeside`). On the phone a note
+  opened joins the open ones (`follow(alongside: true)`).
+- **Library changes.** The row actions report every rename, move and
+  delete as `from → to` or as a path, so tabs under a renamed folder
+  follow it.
+- **Keeping editors alive.** `mounted()` decides which editors stay
+  mounted: each pane's showing tab, plus the four most recently shown,
+  minus notes over 200K characters. Each mounted note has a `GlobalKey`,
+  so a tab moved to the other pane takes its editor, and its undo, along.
 
-Nothing is drawn from the workspace yet. The tab bar, split panes, the
-phone's open-notes switcher and restoring on launch come in the next
-steps of #23.
+### Mementos
+
+`NoteView` hands in a `NoteMemento`:
+
+- when its tab goes behind another, and when it goes away;
+- one second after the last move, scroll or edit of the note on screen;
+- when the app leaves the foreground.
+
+The second trigger matters because a window closed with nothing unsaved
+closes without the app being asked (the close guard only intercepts
+while there are edits to protect). A memento still arrives while the
+editor is being taken down, so `ShellWorkspace.remember` applies it in
+a microtask. The shell flushes the workspace when the app leaves the
+foreground, after those microtasks. The shell rebuilds only when
+something it draws changes: tabs, panes, and each tab's editor and
+preview. A caret or a scroll handed in redraws nothing.
+
+A new `NoteView` gets its tab's memento as `initialMemento`. The
+selection is put back only in the editor it was taken in, because source
+and WYSIWYG offsets count different things. The scroll is put back
+after the first layout.
+
+### The acceptance criteria
+
+`test/widget/workspace_acceptance_test.dart` checks #23's criteria on
+the deck the shell runs:
+- two notes edited independently keep their text and their own undo
+  across a switch;
+- where a note was left survives the store and a new view;
+- closing the window asks once about every unsaved note and writes
+  them all.
+
+`shell_split_test` covers the split and `open_notes_switcher_test`
+covers the phone.
