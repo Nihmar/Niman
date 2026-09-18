@@ -366,6 +366,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   bool _notText = false;
   Timer? _saveTimer;
 
+  /// Hands in where the note is, a moment after the reader stops (#23):
+  /// a window closed with nothing to save goes without asking the app,
+  /// so the memento cannot wait for the view to go away.
+  Timer? _mementoTimer;
+
+  /// How long after the last move, scroll or edit the memento goes in.
+  static const _mementoDelay = Duration(seconds: 1);
+
   /// Debounced note-statistics refresh (word count + outline, T-M2-07).
   Timer? _statsTimer;
   int _wordCount = 0;
@@ -510,6 +518,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // callback would never fire for it), and the load is exactly when the
     // buffer (and the highlight document) is first populated.
     _controller.addListener(_onValueChanged);
+    _scroll.verticalScroller.addListener(_scheduleMemento);
+    // The WYSIWYG publishes the formats at its caret on every selection
+    // change: the same moment its memento moves.
+    _wysiwygActive.addListener(_scheduleMemento);
     unawaited(_load());
   }
 
@@ -592,6 +604,9 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   @override
   void dispose() {
     _handMemento(widget.path);
+    _mementoTimer?.cancel();
+    _scroll.verticalScroller.removeListener(_scheduleMemento);
+    _wysiwygActive.removeListener(_scheduleMemento);
     _saveTimer?.cancel();
     _statsTimer?.cancel();
     _previewTimer?.cancel();
@@ -893,6 +908,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     // Selection-only changes reuse the CodeLines instance: no text changed,
     // no save. The identity check is O(1) at any file size — the full-text
     // join lives on the save path only, never the keystroke path.
+    _scheduleMemento();
     if (!textChanged) return;
     _log.debug(
       'keystroke: highlight+select sync '
@@ -1344,6 +1360,20 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _log.info('lifecycle: ${state.name}');
     if (state == AppLifecycleState.paused) unawaited(_save());
+    // Leaving the foreground may be the last thing this process does.
+    if (state != AppLifecycleState.resumed && widget.active) {
+      _mementoTimer?.cancel();
+      _handMemento(widget.path);
+    }
+  }
+
+  /// Restarts the countdown to handing in the showing note's memento.
+  void _scheduleMemento() {
+    if (widget.onMemento == null || !widget.active || !_ready) return;
+    _mementoTimer?.cancel();
+    _mementoTimer = Timer(_mementoDelay, () {
+      if (mounted) _handMemento(widget.path);
+    });
   }
 
   /// Saves the buffer at most once: a request that finds a save in flight
