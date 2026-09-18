@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman desktop — formatting on right-click</title>
+<style>
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:#1B1D21;color:#F2EDE5}
+a{color:#7CA0E6}a:hover{color:#9FB8EE}
+button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer;padding:0}
+.sh{font-size:11.5px;color:#6B7079;padding-left:22px}
+</style>
+</head>
+<body>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; position: relative; background: #1B1D21; overflow: hidden; display: flex; flex-direction: column;">
+
+  <div style="height: 40px; flex-shrink: 0; background: #2C3037; display: flex; align-items: center;">
+    <div style="width: 40px;"></div>
+    <div style="display: flex; align-items: center; height: 40px; padding: 0 14px; background: #1B1D21;"><span style="font-size: 13px; color: #F2EDE5;">Colazione di venerdì</span></div>
+    <div style="display: flex; align-items: center; height: 40px; padding: 0 14px;"><span style="font-size: 13px; color: #A6A29A;">Enciclopedia</span></div>
+    <div style="flex-grow: 1;"></div>
+    <button aria-label="Minimise" style="width: 46px; height: 40px; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><line x1="0" y1="5" x2="10" y2="5"/></svg></button>
+    <button aria-label="Maximise" style="width: 46px; height: 40px; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="8.8" height="8.8"/></svg></button>
+    <button aria-label="Close the window" style="width: 46px; height: 40px; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><line x1="0.5" y1="0.5" x2="9.5" y2="9.5"/><line x1="9.5" y1="0.5" x2="0.5" y2="9.5"/></svg></button>
+  </div>
+
+  <div style="flex-grow: 1; min-height: 0; display: flex;">
+    <div style="width: 48px; background: #2C3037; flex-shrink: 0;"></div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+    <div style="width: 258px; background: #2C3037; flex-shrink: 0;"></div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+
+    <div style="flex-grow: 1; min-width: 0; background: #1B1D21; display: flex; flex-direction: column;">
+      <div style="height: 38px; flex-shrink: 0; border-bottom: 1px solid #2C3037; display: flex; justify-content: center;">
+        <div style="width: 700px; display: flex; align-items: center; gap: 1px;">
+          <button aria-label="Bold" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; font-weight: 700; font-size: 13px;">B</button>
+          <button aria-label="Italic" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; font-style: italic; font-family: Georgia, serif; font-size: 14px;">I</button>
+          <button aria-label="Strikethrough" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; text-decoration: line-through; font-size: 13px;">S</button>
+          <div style="width: 1px; height: 16px; background: #363B44; margin: 0 5px;"></div>
+          <button aria-label="Heading" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; font-weight: 600; font-size: 13px;">H</button>
+          <button aria-label="Bullet list" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="3" cy="4.5" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="11.5" r="1" fill="currentColor" stroke="none"/><line x1="6" y1="4.5" x2="13.5" y2="4.5"/><line x1="6" y1="8" x2="13.5" y2="8"/><line x1="6" y1="11.5" x2="13.5" y2="11.5"/></svg></button>
+          <button aria-label="Task list" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2.5" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><line x1="9.5" y1="5" x2="14" y2="5"/><line x1="9.5" y1="11.5" x2="14" y2="11.5"/></svg></button>
+          <div style="width: 1px; height: 16px; background: #363B44; margin: 0 5px;"></div>
+          <button aria-label="Link" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 9.5a2.5 2.5 0 0 0 3.5 0l2-2a2.5 2.5 0 0 0-3.5-3.5l-1 1"/><path d="M9.5 6.5a2.5 2.5 0 0 0-3.5 0l-2 2a2.5 2.5 0 0 0 3.5 3.5l1-1"/></svg></button>
+          <button aria-label="Image" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/><circle cx="5.8" cy="6.5" r="1.1"/><polyline points="3,11.5 6.5,8.5 9,10.5 11.5,8 14,10.5"/></svg></button>
+          <button aria-label="Tools" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M10.2 2.4a3.6 3.6 0 0 0-4.4 4.6l-3.3 3.3a1.2 1.2 0 0 0 0 1.7l1.5 1.5a1.2 1.2 0 0 0 1.7 0l3.3-3.3a3.6 3.6 0 0 0 4.6-4.4l-2 2-1.9-.5-.5-1.9z"/></svg></button>
+          <div style="flex-grow: 1;"></div>
+          <button aria-label="More actions for this note" style="width: 28px; height: 26px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        </div>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; display: flex; justify-content: center; padding-top: 30px;">
+        <div style="width: 700px; font-family: Consolas, 'Courier New', monospace; font-size: 14px; line-height: 1.85; color: #E3DED6;">
+          <div><span style="color: #587CD3;"># </span>Colazione di venerdì</div>
+          <div style="height: 14px;"></div>
+          <div>Ordine del gruppo, raccolto ieri sera. La lista completa sta in</div>
+          <div><span style="color: #7CA0E6;">[[Riunione]]</span>; qui sotto solo <span style="background: #3B4A6B; color: #F2EDE5;">i totali da portare al banco</span>.</div>
+          <div style="height: 14px;"></div>
+          <div><span style="color: #8FBF7F;">- [ ] </span>cappuccino: 4</div>
+          <div><span style="color: #8FBF7F;">- [ ] </span>brioche: 7</div>
+          <div><span style="color: #8FBF7F;">- [x] </span>acqua naturale: 2</div>
+        </div>
+      </div>
+      <div style="height: 27px; flex-shrink: 0; background: #2C3037;"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 640px; top: 232px; width: 268px; border-radius: 10px; background: #2C3037; border: 1px solid #4A4F59; box-shadow: 0 18px 44px rgba(0,0,0,0.55); padding: 6px 0; overflow: hidden;">
+
+    <div style="display: flex; align-items: center; height: 32px; padding: 0 14px;"><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Cut</span><span class="sh">Ctrl+X</span></div>
+    <div style="display: flex; align-items: center; height: 32px; padding: 0 14px;"><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Copy</span><span class="sh">Ctrl+C</span></div>
+    <div style="display: flex; align-items: center; height: 32px; padding: 0 14px;"><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Paste</span><span class="sh">Ctrl+V</span></div>
+
+    <div style="height: 1px; background: #4A4F59; margin: 6px 0;"></div>
+
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px; background: #363B44;"><span style="width: 16px; text-align: center; font-weight: 700; font-size: 13px; color: #F2EDE5;">B</span><span style="flex-grow: 1; font-size: 13.5px; color: #F2EDE5;">Bold</span><span class="sh">Ctrl+B</span></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><span style="width: 16px; text-align: center; font-style: italic; font-family: Georgia, serif; font-size: 14px; color: #A6A29A;">I</span><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Italic</span><span class="sh">Ctrl+I</span></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><span style="width: 16px; text-align: center; text-decoration: line-through; font-size: 13px; color: #A6A29A;">S</span><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Strikethrough</span></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5.5,5 2.5,8 5.5,11"/><polyline points="10.5,5 13.5,8 10.5,11"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Code</span></div>
+
+    <div style="height: 1px; background: #4A4F59; margin: 6px 0;"></div>
+
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><span style="width: 16px; text-align: center; font-weight: 600; font-size: 13px; color: #A6A29A;">H</span><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Heading</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#6B7079" stroke-width="1.5"><polyline points="4.5,2.5 8,6 4.5,9.5"/></svg></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4"><circle cx="3" cy="4.5" r="1" fill="#A6A29A" stroke="none"/><circle cx="3" cy="8" r="1" fill="#A6A29A" stroke="none"/><circle cx="3" cy="11.5" r="1" fill="#A6A29A" stroke="none"/><line x1="6" y1="4.5" x2="13.5" y2="4.5"/><line x1="6" y1="8" x2="13.5" y2="8"/><line x1="6" y1="11.5" x2="13.5" y2="11.5"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">List</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#6B7079" stroke-width="1.5"><polyline points="4.5,2.5 8,6 4.5,9.5"/></svg></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4" stroke-linecap="round"><path d="M6.5 9.5a2.5 2.5 0 0 0 3.5 0l2-2a2.5 2.5 0 0 0-3.5-3.5l-1 1"/><path d="M9.5 6.5a2.5 2.5 0 0 0-3.5 0l-2 2a2.5 2.5 0 0 0 3.5 3.5l1-1"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Link…</span><span class="sh">Ctrl+K</span></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/><circle cx="5.8" cy="6.5" r="1.1"/><polyline points="3,11.5 6.5,8.5 9,10.5 11.5,8 14,10.5"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Image…</span></div>
+
+    <div style="height: 1px; background: #4A4F59; margin: 6px 0;"></div>
+
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4" stroke-linejoin="round"><path d="M10.2 2.4a3.6 3.6 0 0 0-4.4 4.6l-3.3 3.3a1.2 1.2 0 0 0 0 1.7l1.5 1.5a1.2 1.2 0 0 0 1.7 0l3.3-3.3a3.6 3.6 0 0 0 4.6-4.4l-2 2-1.9-.5-.5-1.9z"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Count a list…</span></div>
+    <div style="display: flex; align-items: center; gap: 11px; height: 32px; padding: 0 14px;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A6A29A" stroke-width="1.4"><path d="M3 12.5V4a1.5 1.5 0 0 1 1.5-1.5H13v11H4.5A1.5 1.5 0 0 0 3 15"/><line x1="6" y1="6" x2="10" y2="6"/></svg><span style="flex-grow: 1; font-size: 13.5px; color: #E3DED6;">Add to dictionary</span></div>
+  </div>
+</div>
+</body>
+</html>
