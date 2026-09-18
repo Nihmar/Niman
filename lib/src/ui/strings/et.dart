@@ -393,6 +393,12 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Kuva või peida filter';
   @override
+  String get shortcutCloseTab => 'Sulge praegune märge';
+  @override
+  String get shortcutNextTab => 'Järgmine avatud märge';
+  @override
+  String get shortcutPreviousTab => 'Eelmine avatud märge';
+  @override
   String get shortcutEditorSection => 'Redaktoris';
   @override
   String get shortcutFind => 'Otsing';
@@ -1128,6 +1134,14 @@ final class EstonianStrings extends Strings {
   String get openInFileManager => 'Näita failihalduris';
   @override
   String get openInDefaultApp => 'Ava vaikerakenduses';
+  @override
+  String get newNoteTabTooltip => 'Uus märge uuel vahekaardil';
+  @override
+  String get openNotesTooltip => 'Avatud märkmed';
+  @override
+  String get closeTabTooltip => 'Sulge';
+  @override
+  String get openInNewTab => 'Ava uuel vahekaardil';
   @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override

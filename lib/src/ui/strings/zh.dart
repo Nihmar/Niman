@@ -372,6 +372,12 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutToggleSidebar => '显示或隐藏文件树';
   @override
+  String get shortcutCloseTab => '关闭当前笔记';
+  @override
+  String get shortcutNextTab => '下一个打开的笔记';
+  @override
+  String get shortcutPreviousTab => '上一个打开的笔记';
+  @override
   String get shortcutEditorSection => '编辑器内';
   @override
   String get shortcutFind => '查找';
@@ -1040,6 +1046,14 @@ final class ChineseStrings extends Strings {
   String get openInFileManager => '在文件管理器中显示';
   @override
   String get openInDefaultApp => '用默认应用打开';
+  @override
+  String get newNoteTabTooltip => '在新标签页中新建笔记';
+  @override
+  String get openNotesTooltip => '打开的笔记';
+  @override
+  String get closeTabTooltip => '关闭';
+  @override
+  String get openInNewTab => '在新标签页中打开';
   @override
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override

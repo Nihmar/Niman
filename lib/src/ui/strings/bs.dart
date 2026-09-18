@@ -402,6 +402,12 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Prikaži ili sakrij stablo datoteka';
   @override
+  String get shortcutCloseTab => 'Zatvori trenutnu bilješku';
+  @override
+  String get shortcutNextTab => 'Sljedeća otvorena bilješka';
+  @override
+  String get shortcutPreviousTab => 'Prethodna otvorena bilješka';
+  @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
   String get shortcutFind => 'Pretraga';
@@ -1149,6 +1155,14 @@ final class BosnianStrings extends Strings {
   String get openInFileManager => 'Prikaži u upravitelju datoteka';
   @override
   String get openInDefaultApp => 'Otvori u zadanoj aplikaciji';
+  @override
+  String get newNoteTabTooltip => 'Nova bilješka u novoj kartici';
+  @override
+  String get openNotesTooltip => 'Otvorene bilješke';
+  @override
+  String get closeTabTooltip => 'Zatvori';
+  @override
+  String get openInNewTab => 'Otvori u novoj kartici';
   @override
   String get openFileMissing => 'Datoteka ove bilješke nije na disku';
   @override

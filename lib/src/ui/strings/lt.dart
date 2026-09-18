@@ -398,6 +398,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Rodyti arba slėpti filtrą';
   @override
+  String get shortcutCloseTab => 'Uždaryti dabartinį užrašą';
+  @override
+  String get shortcutNextTab => 'Kitas atvertas užrašas';
+  @override
+  String get shortcutPreviousTab => 'Ankstesnis atvertas užrašas';
+  @override
   String get shortcutEditorSection => 'Redaktoriuje';
   @override
   String get shortcutFind => 'Ieškoti';
@@ -1148,6 +1154,14 @@ final class LithuanianStrings extends Strings {
   String get openInFileManager => 'Rodyti failų tvarkytuvėje';
   @override
   String get openInDefaultApp => 'Atverti numatytąja programa';
+  @override
+  String get newNoteTabTooltip => 'Naujas užrašas naujoje kortelėje';
+  @override
+  String get openNotesTooltip => 'Atverti užrašai';
+  @override
+  String get closeTabTooltip => 'Uždaryti';
+  @override
+  String get openInNewTab => 'Atverti naujoje kortelėje';
   @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override

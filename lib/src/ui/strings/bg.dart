@@ -402,6 +402,12 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Покажи или скрий филтъра';
   @override
+  String get shortcutCloseTab => 'Затвори текущата бележка';
+  @override
+  String get shortcutNextTab => 'Следваща отворена бележка';
+  @override
+  String get shortcutPreviousTab => 'Предишна отворена бележка';
+  @override
   String get shortcutEditorSection => 'В редактора';
   @override
   String get shortcutFind => 'Търси';
@@ -1157,6 +1163,14 @@ final class BulgarianStrings extends Strings {
   String get openInFileManager => 'Показване във файловия мениджър';
   @override
   String get openInDefaultApp => 'Отваряне с приложението по подразбиране';
+  @override
+  String get newNoteTabTooltip => 'Нова бележка в нов раздел';
+  @override
+  String get openNotesTooltip => 'Отворени бележки';
+  @override
+  String get closeTabTooltip => 'Затвори';
+  @override
+  String get openInNewTab => 'Отвори в нов раздел';
   @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override

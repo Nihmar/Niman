@@ -194,6 +194,9 @@ abstract base class Strings {
   String get shortcutNewList;
   String get shortcutNewAudio;
   String get shortcutToggleSidebar;
+  String get shortcutCloseTab;
+  String get shortcutNextTab;
+  String get shortcutPreviousTab;
   String get shortcutEditorSection;
   String get shortcutFind;
   String get shortcutReplace;
@@ -549,6 +552,10 @@ abstract base class Strings {
   // Handing a note's file to the OS (issue #76).
   String get openInFileManager;
   String get openInDefaultApp;
+  String get newNoteTabTooltip;
+  String get openNotesTooltip;
+  String get closeTabTooltip;
+  String get openInNewTab;
   String get openFileMissing;
   String get openFileFailed;
   String get movedToTrash;

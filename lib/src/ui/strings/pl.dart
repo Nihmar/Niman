@@ -402,6 +402,12 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Pokaż lub ukryj filtr';
   @override
+  String get shortcutCloseTab => 'Zamknij bieżącą notatkę';
+  @override
+  String get shortcutNextTab => 'Następna otwarta notatka';
+  @override
+  String get shortcutPreviousTab => 'Poprzednia otwarta notatka';
+  @override
   String get shortcutEditorSection => 'W edytorze';
   @override
   String get shortcutFind => 'Znajdź';
@@ -1165,6 +1171,14 @@ final class PolishStrings extends Strings {
   String get openInFileManager => 'Pokaż w menedżerze plików';
   @override
   String get openInDefaultApp => 'Otwórz w domyślnej aplikacji';
+  @override
+  String get newNoteTabTooltip => 'Nowa notatka w nowej karcie';
+  @override
+  String get openNotesTooltip => 'Otwarte notatki';
+  @override
+  String get closeTabTooltip => 'Zamknij';
+  @override
+  String get openInNewTab => 'Otwórz w nowej karcie';
   @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override

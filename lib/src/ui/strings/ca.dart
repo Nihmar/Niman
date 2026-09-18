@@ -407,6 +407,12 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Mostra o amaga el filtre';
   @override
+  String get shortcutCloseTab => 'Tanca la nota actual';
+  @override
+  String get shortcutNextTab => 'Nota oberta següent';
+  @override
+  String get shortcutPreviousTab => 'Nota oberta anterior';
+  @override
   String get shortcutEditorSection => 'A l’editor';
   @override
   String get shortcutFind => 'Cerca';
@@ -1177,6 +1183,14 @@ final class CatalanStrings extends Strings {
   String get openInFileManager => 'Mostra al gestor de fitxers';
   @override
   String get openInDefaultApp => 'Obre amb l’aplicació per defecte';
+  @override
+  String get newNoteTabTooltip => 'Nota nova en una pestanya nova';
+  @override
+  String get openNotesTooltip => 'Notes obertes';
+  @override
+  String get closeTabTooltip => 'Tanca';
+  @override
+  String get openInNewTab => 'Obre en una pestanya nova';
   @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override

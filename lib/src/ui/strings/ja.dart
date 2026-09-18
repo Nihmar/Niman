@@ -372,6 +372,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'ファイルツリーの表示 / 非表示';
   @override
+  String get shortcutCloseTab => '現在のノートを閉じる';
+  @override
+  String get shortcutNextTab => '次の開いているノート';
+  @override
+  String get shortcutPreviousTab => '前の開いているノート';
+  @override
   String get shortcutEditorSection => 'エディタ内';
   @override
   String get shortcutFind => '検索';
@@ -1067,6 +1073,14 @@ final class JapaneseStrings extends Strings {
   String get openInFileManager => 'ファイルマネージャーで表示';
   @override
   String get openInDefaultApp => '既定のアプリで開く';
+  @override
+  String get newNoteTabTooltip => '新しいタブで新しいノート';
+  @override
+  String get openNotesTooltip => '開いているノート';
+  @override
+  String get closeTabTooltip => '閉じる';
+  @override
+  String get openInNewTab => '新しいタブで開く';
   @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override

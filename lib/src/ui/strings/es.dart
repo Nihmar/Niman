@@ -405,6 +405,12 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutToggleSidebar => 'Mostrar u ocultar el árbol de archivos';
   @override
+  String get shortcutCloseTab => 'Cerrar la nota actual';
+  @override
+  String get shortcutNextTab => 'Siguiente nota abierta';
+  @override
+  String get shortcutPreviousTab => 'Nota abierta anterior';
+  @override
   String get shortcutEditorSection => 'En el editor';
   @override
   String get shortcutFind => 'Buscar';
@@ -1173,6 +1179,14 @@ final class SpanishStrings extends Strings {
   String get openInFileManager => 'Mostrar en el gestor de archivos';
   @override
   String get openInDefaultApp => 'Abrir con la app predeterminada';
+  @override
+  String get newNoteTabTooltip => 'Nota nueva en una pestaña nueva';
+  @override
+  String get openNotesTooltip => 'Notas abiertas';
+  @override
+  String get closeTabTooltip => 'Cerrar';
+  @override
+  String get openInNewTab => 'Abrir en una pestaña nueva';
   @override
   String get openFileMissing => 'El archivo de esta nota no está en el disco';
   @override
