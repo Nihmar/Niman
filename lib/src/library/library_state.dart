@@ -44,6 +44,8 @@ import 'package:niman/src/update/update_scheduler.dart';
 import 'package:niman/src/update/update_service.dart';
 import 'package:niman/src/widget/widget_configs.dart';
 import 'package:niman/src/widget/widget_libraries.dart';
+import 'package:niman/src/workspace/workspace.dart';
+import 'package:niman/src/workspace/workspace_store.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
@@ -617,6 +619,9 @@ final class LibraryController implements LibrarySession {
     // Its sync state describes a library the app no longer knows; opened
     // again, it starts unconfigured (docs/dev/sync.md, "Configuration").
     await SyncStore(db).removeLibrary(libraryPath);
+    // What was left open in it goes too (#23): opened again, it starts
+    // with nothing open, like a library the app has never seen.
+    await WorkspaceStore(db).remove(libraryPath);
     try {
       await syncSecrets.delete(libraryPath);
     } on Exception catch (e) {
@@ -782,6 +787,20 @@ final class LibraryController implements LibrarySession {
     LibraryConfig Function(LibraryConfig) change,
   ) async {
     await _configRepo?.update(change);
+  }
+
+  @override
+  Future<Workspace> get savedWorkspace async {
+    final root = this.root;
+    if (root == null) return Workspace.empty;
+    return await WorkspaceStore(await appDatabase).load(root);
+  }
+
+  @override
+  Future<void> saveWorkspace(Workspace workspace) async {
+    final root = this.root;
+    if (root == null) return;
+    await WorkspaceStore(await appDatabase).save(root, workspace);
   }
 
   /// Whether the note editor shows the row-number column.

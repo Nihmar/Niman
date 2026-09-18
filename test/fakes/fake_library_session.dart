@@ -25,6 +25,7 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 import 'fake_link_source.dart';
@@ -290,6 +291,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// The settings a library keeps for itself (T-ML-10), in memory. A
   /// fresh fake starts at the shipped defaults, as a fresh library does.
   LibraryConfig _config = LibraryConfig.defaults;
+
+  /// What [saveWorkspace] last kept (#23).
+  Workspace workspace = Workspace.empty;
+
+  @override
+  Future<Workspace> get savedWorkspace async => workspace;
+
+  @override
+  Future<void> saveWorkspace(Workspace workspace) async =>
+      this.workspace = workspace;
 
   @override
   Future<bool> get lineNumbersEnabled async => _config.lineNumbers;
