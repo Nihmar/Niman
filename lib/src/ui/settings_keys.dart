@@ -46,6 +46,9 @@ abstract final class SettingsKeys {
 
   // Trash and history.
   static const trash = Key('trash-setting');
+  // Not a settings row: the trash screen's own Empty action, which is
+  // what the "delete permanently" entry goes to.
+  static const trashEmptyAction = Key('empty-trash-action');
   static const trashAutoEmpty = Key('trash-auto-empty-setting');
   static const historyVersions = Key('history-versions-setting');
   static const historyInterval = Key('history-interval-setting');

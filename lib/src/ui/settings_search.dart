@@ -294,7 +294,9 @@ List<SettingsSearchEntry> settingsSearchEntries({
     SettingsSearchEntry(
       title: AppStrings.trashDeletePermanently,
       area: trashHistory,
-      rowKey: SettingsKeys.trash,
+      // Its own key: the trash toggle's would make two results in one
+      // list share an identity, and this one opens a different screen.
+      rowKey: SettingsKeys.trashEmptyAction,
       value: noValue,
       open: () => push(TrashScreen(controller: controller)),
     ),
