@@ -396,20 +396,19 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(toggle, findsOneWidget);
-      // Nothing slides sideways when it goes: it is the last thing
-      // before the Spacer, and what follows is anchored to the far
-      // edge. (The row is 8 dp shorter without it, which is the whole
-      // pane changing at once and nowhere near the thumb that tapped
-      // the eye up in the app bar.)
+      // Nothing moves when it goes, in either direction: it is the last
+      // thing before the Spacer so nothing slides sideways, and the row
+      // keeps the height it has with the button in it (user,
+      // 2026-09-18) so nothing slides up or down either.
       final findButton = find.byKey(const Key('editor-find-open'));
-      final findAt = tester.getTopLeft(findButton).dx;
-      final words = tester.getTopRight(find.text('3 words')).dx;
+      final findAt = tester.getTopLeft(findButton);
+      final row = tester.getSize(find.byKey(const Key('status-row')));
 
       await tester.pumpWidget(view(preview: true));
       await tester.pump();
       expect(toggle, findsNothing);
-      expect(tester.getTopLeft(findButton).dx, findAt);
-      expect(tester.getTopRight(find.text('3 words')).dx, words);
+      expect(tester.getTopLeft(findButton), findAt);
+      expect(tester.getSize(find.byKey(const Key('status-row'))), row);
 
       // Side by side, the editor is on screen and so is the switch.
       await tester.pumpWidget(view(preview: true, split: true));
