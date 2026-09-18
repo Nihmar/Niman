@@ -107,4 +107,28 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     controller.dispose();
   });
+
+  // A window closed with nothing to save goes without asking the app, so
+  // the note on screen hands in where it is as the reader stops.
+  testWidgets('the note on screen hands in its place a moment after a move', (
+    tester,
+  ) async {
+    final controller = CodeLineEditingController();
+    final handed = <NoteMemento>[];
+    await tester.pumpWidget(
+      _app(controller: controller, onMemento: (_, m) => handed.add(m)),
+    );
+    await tester.pumpAndSettle();
+    handed.clear();
+    controller.selection = const CodeLineSelection.collapsed(
+      index: 2,
+      offset: 3,
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(handed, isEmpty);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(handed.single.selectionExtent, 26);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
+  });
 }
