@@ -312,6 +312,12 @@ final class MarkdownDocumentCodec {
   /// in the text. When the markers found are not the items parsed — an
   /// item holding a fenced block whose content looks like a marker, say
   /// — nothing is claimed rather than a blank line put in the wrong gap.
+  ///
+  /// A *sublist* is given no source of its own, so a loose one comes
+  /// back tight. That is left where it is on purpose: how loose a list
+  /// is written is the Markdown linter's call (#72), one way for the
+  /// whole note, and a note it has run over has nothing left here to
+  /// preserve.
   static List<bool> _blankLinesBefore(int count, String? source) {
     final none = List<bool>.filled(count, false);
     if (source == null || count == 0) return none;

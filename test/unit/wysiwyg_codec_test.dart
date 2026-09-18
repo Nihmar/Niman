@@ -266,6 +266,13 @@ A [[wikilink]].
       // recursion into a sublist is not handed its slice of it, so the
       // sublist comes back tight. It used to come back flat as well,
       // which was the worse half.
+      //
+      // It is not being chased any further here: the Markdown linter
+      // (#72) is what settles how loose a list is written, one way for
+      // the whole note, and once it runs there is nothing left for the
+      // codec to preserve — a note it has been through is already
+      // consistent, and one it has not is a note nobody has asked to be
+      // consistent.
       expect(edited('- a\n\n  - b\n\n- c\n'), '- a\n  - b\n\n- c\n');
     });
 
