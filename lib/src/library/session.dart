@@ -18,6 +18,7 @@ import 'package:niman/src/sync/sync_service.dart';
 import 'package:niman/src/templates/repo.dart';
 import 'package:niman/src/update/update_check.dart';
 import 'package:niman/src/widget/widget_configs.dart';
+import 'package:niman/src/workspace/workspace.dart';
 
 /// Operations the UI layer performs on an open library.
 ///
@@ -289,6 +290,13 @@ abstract interface class LibrarySession {
 
   /// Drops the pending update (the banner's dismiss action).
   void clearPendingUpdate();
+
+  /// The notes left open in this library on this device (issue #23);
+  /// nothing open when none were, or no library is.
+  Future<Workspace> get savedWorkspace;
+
+  /// Keeps [workspace] as what is open in this library on this device.
+  Future<void> saveWorkspace(Workspace workspace);
 
   /// Whether the note editor shows the row-number column (default true).
   Future<bool> get lineNumbersEnabled;

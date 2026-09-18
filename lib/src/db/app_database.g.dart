@@ -3459,6 +3459,283 @@ class SyncOpsCompanion extends UpdateCompanion<SyncOp> {
   }
 }
 
+class $WorkspacesTable extends Workspaces
+    with TableInfo<$WorkspacesTable, WorkspaceRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WorkspacesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _libraryPathMeta = const VerificationMeta(
+    'libraryPath',
+  );
+  @override
+  late final GeneratedColumn<String> libraryPath = GeneratedColumn<String>(
+    'library_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [libraryPath, state, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'workspaces';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<WorkspaceRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('library_path')) {
+      context.handle(
+        _libraryPathMeta,
+        libraryPath.isAcceptableOrUnknown(
+          data['library_path']!,
+          _libraryPathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_libraryPathMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {libraryPath};
+  @override
+  WorkspaceRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WorkspaceRow(
+      libraryPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}library_path'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $WorkspacesTable createAlias(String alias) {
+    return $WorkspacesTable(attachedDatabase, alias);
+  }
+}
+
+class WorkspaceRow extends DataClass implements Insertable<WorkspaceRow> {
+  /// Absolute, normalized path of the library root; the primary key.
+  final String libraryPath;
+
+  /// The workspace, as `Workspace.toJson` writes it.
+  final String state;
+
+  /// When it was last written.
+  final DateTime updatedAt;
+  const WorkspaceRow({
+    required this.libraryPath,
+    required this.state,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['library_path'] = Variable<String>(libraryPath);
+    map['state'] = Variable<String>(state);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  WorkspacesCompanion toCompanion(bool nullToAbsent) {
+    return WorkspacesCompanion(
+      libraryPath: Value(libraryPath),
+      state: Value(state),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory WorkspaceRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WorkspaceRow(
+      libraryPath: serializer.fromJson<String>(json['libraryPath']),
+      state: serializer.fromJson<String>(json['state']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'libraryPath': serializer.toJson<String>(libraryPath),
+      'state': serializer.toJson<String>(state),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  WorkspaceRow copyWith({
+    String? libraryPath,
+    String? state,
+    DateTime? updatedAt,
+  }) => WorkspaceRow(
+    libraryPath: libraryPath ?? this.libraryPath,
+    state: state ?? this.state,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  WorkspaceRow copyWithCompanion(WorkspacesCompanion data) {
+    return WorkspaceRow(
+      libraryPath: data.libraryPath.present
+          ? data.libraryPath.value
+          : this.libraryPath,
+      state: data.state.present ? data.state.value : this.state,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkspaceRow(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(libraryPath, state, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WorkspaceRow &&
+          other.libraryPath == this.libraryPath &&
+          other.state == this.state &&
+          other.updatedAt == this.updatedAt);
+}
+
+class WorkspacesCompanion extends UpdateCompanion<WorkspaceRow> {
+  final Value<String> libraryPath;
+  final Value<String> state;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const WorkspacesCompanion({
+    this.libraryPath = const Value.absent(),
+    this.state = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WorkspacesCompanion.insert({
+    required String libraryPath,
+    required String state,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : libraryPath = Value(libraryPath),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<WorkspaceRow> custom({
+    Expression<String>? libraryPath,
+    Expression<String>? state,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (libraryPath != null) 'library_path': libraryPath,
+      if (state != null) 'state': state,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WorkspacesCompanion copyWith({
+    Value<String>? libraryPath,
+    Value<String>? state,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return WorkspacesCompanion(
+      libraryPath: libraryPath ?? this.libraryPath,
+      state: state ?? this.state,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (libraryPath.present) {
+      map['library_path'] = Variable<String>(libraryPath.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkspacesCompanion(')
+          ..write('libraryPath: $libraryPath, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3470,6 +3747,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $SyncItemsTable syncItems = $SyncItemsTable(this);
   late final $SyncOpsTable syncOps = $SyncOpsTable(this);
+  late final $WorkspacesTable workspaces = $WorkspacesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3481,6 +3759,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncDestinations,
     syncItems,
     syncOps,
+    workspaces,
   ];
 }
 
@@ -5171,6 +5450,177 @@ typedef $$SyncOpsTableProcessedTableManager =
       SyncOp,
       PrefetchHooks Function()
     >;
+typedef $$WorkspacesTableCreateCompanionBuilder = WorkspacesCompanion Function({
+  required String libraryPath,
+  required String state,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$WorkspacesTableUpdateCompanionBuilder = WorkspacesCompanion Function({
+  Value<String> libraryPath,
+  Value<String> state,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$WorkspacesTableFilterComposer
+    extends Composer<_$AppDatabase, $WorkspacesTable> {
+  $$WorkspacesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WorkspacesTableOrderingComposer
+    extends Composer<_$AppDatabase, $WorkspacesTable> {
+  $$WorkspacesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WorkspacesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WorkspacesTable> {
+  $$WorkspacesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get libraryPath => $composableBuilder(
+    column: $table.libraryPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$WorkspacesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WorkspacesTable,
+          WorkspaceRow,
+          $$WorkspacesTableFilterComposer,
+          $$WorkspacesTableOrderingComposer,
+          $$WorkspacesTableAnnotationComposer,
+          $$WorkspacesTableCreateCompanionBuilder,
+          $$WorkspacesTableUpdateCompanionBuilder,
+          (
+            WorkspaceRow,
+            BaseReferences<_$AppDatabase, $WorkspacesTable, WorkspaceRow>,
+          ),
+          WorkspaceRow,
+          PrefetchHooks Function()
+        > {
+  $$WorkspacesTableTableManager(_$AppDatabase db, $WorkspacesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WorkspacesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WorkspacesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WorkspacesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> libraryPath = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkspacesCompanion(
+                libraryPath: libraryPath,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String libraryPath,
+                required String state,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => WorkspacesCompanion.insert(
+                libraryPath: libraryPath,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$WorkspacesTable, WorkspaceRow>(table),
+                  BaseReferences<_$AppDatabase, $WorkspacesTable, WorkspaceRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WorkspacesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WorkspacesTable,
+      WorkspaceRow,
+      $$WorkspacesTableFilterComposer,
+      $$WorkspacesTableOrderingComposer,
+      $$WorkspacesTableAnnotationComposer,
+      $$WorkspacesTableCreateCompanionBuilder,
+      $$WorkspacesTableUpdateCompanionBuilder,
+      (
+        WorkspaceRow,
+        BaseReferences<_$AppDatabase, $WorkspacesTable, WorkspaceRow>,
+      ),
+      WorkspaceRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5187,4 +5637,6 @@ class $AppDatabaseManager {
       $$SyncItemsTableTableManager(_db, _db.syncItems);
   $$SyncOpsTableTableManager get syncOps =>
       $$SyncOpsTableTableManager(_db, _db.syncOps);
+  $$WorkspacesTableTableManager get workspaces =>
+      $$WorkspacesTableTableManager(_db, _db.workspaces);
 }

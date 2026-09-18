@@ -86,6 +86,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 23) await db.customStatement('DROP TABLE workspaces');
   if (version < 22) {
     for (final table in ['sync_destinations', 'sync_items', 'sync_ops']) {
       await db.customStatement('DROP TABLE $table');
@@ -765,8 +766,8 @@ void main() {
     await db.close();
   });
 
-  test('a fresh database holds the settings, registry, widgets and sync '
-      'state alone', () async {
+  test('a fresh database holds the settings, registry, widgets, sync '
+      'state and workspaces alone', () async {
     final db = AppDatabase(NativeDatabase(dbFile));
     final tables = await db
         .customSelect(
@@ -783,6 +784,7 @@ void main() {
         'sync_destinations',
         'sync_items',
         'sync_ops',
+        'workspaces',
       ]),
     );
     expect(await db.select(db.appSettings).get(), isEmpty);
@@ -951,5 +953,37 @@ void main() {
         await db.close();
       },
     );
+  });
+
+  group('v22 → v23: the workspaces appear (#23)', () {
+    test('an existing install upgrades with nothing open', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 22);
+        await db.customStatement(
+          'INSERT INTO known_libraries (path, name, last_opened) '
+          "VALUES ('/lib/Work', 'Work', 0)",
+        );
+        await db.close();
+      }
+
+      final db = AppDatabase(NativeDatabase(dbFile));
+      expect(await db.select(db.workspaces).get(), isEmpty);
+      expect(
+        (await db.select(db.knownLibraries).get()).single.path,
+        '/lib/Work',
+      );
+      await db
+          .into(db.workspaces)
+          .insert(
+            WorkspacesCompanion.insert(
+              libraryPath: '/lib/Work',
+              state: '{}',
+              updatedAt: DateTime(2026, 9, 18),
+            ),
+          );
+      expect(await db.select(db.workspaces).get(), hasLength(1));
+      await db.close();
+    });
   });
 }
