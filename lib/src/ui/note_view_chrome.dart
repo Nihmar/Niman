@@ -13,6 +13,7 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:re_editor/re_editor.dart';
 
 /// The frontmatter parse-error banner.
 final class FrontmatterWarningBanner extends StatelessWidget {
@@ -157,14 +158,25 @@ final class NoteStatusRow extends StatelessWidget {
           if (!loading)
             Padding(
               padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-find-open'),
-                tooltip: AppStrings.findInNoteTooltip,
-                icon: const Icon(Icons.search),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: splitPreview || !showPreview ? onFind : null,
+              // In the editor's tap region like the formatting toolbar:
+              // re_editor unfocuses the editor on any tap outside it, so
+              // an unwrapped find button closes the keyboard on tap-down
+              // and the find field reopens it a frame later. Wrapped,
+              // focus moves straight to the find field and the keyboard
+              // never leaves.
+              child: CodeEditorTapRegion(
+                child: IconButton(
+                  key: const Key('editor-find-open'),
+                  tooltip: AppStrings.findInNoteTooltip,
+                  icon: const Icon(Icons.search),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  onPressed: splitPreview || !showPreview ? onFind : null,
+                ),
               ),
             ),
           if (!loading && spellCheckAvailable)
