@@ -62,7 +62,10 @@ the ones you were working in come back when you open the library again
 — see [editing](editing.md#open-notes-and-tabs). The desktop window
 also splits into two panes, each with its own tabs.
 
-On Android the same open notes are reached from a **switcher** instead
+On an Android tablet, or any wide window without the app's own title
+bar, the same tabs head the notes instead of sitting in the title bar.
+
+On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note.
 
