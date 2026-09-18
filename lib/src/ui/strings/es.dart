@@ -1188,6 +1188,14 @@ final class SpanishStrings extends Strings {
   @override
   String get openInNewTab => 'Abrir en una pestaña nueva';
   @override
+  String get splitRight => 'Dividir a la derecha';
+  @override
+  String get splitDown => 'Dividir hacia abajo';
+  @override
+  String get moveToOtherPane => 'Mover al otro panel';
+  @override
+  String get openBeside => 'Abrir al lado';
+  @override
   String get openFileMissing => 'El archivo de esta nota no está en el disco';
   @override
   String get openFileFailed => 'No se pudo abrir esta nota fuera de Niman';

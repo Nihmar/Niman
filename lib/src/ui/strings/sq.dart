@@ -1174,6 +1174,14 @@ final class AlbanianStrings extends Strings {
   @override
   String get openInNewTab => 'Hape në skedë të re';
   @override
+  String get splitRight => 'Ndaje djathtas';
+  @override
+  String get splitDown => 'Ndaje poshtë';
+  @override
+  String get moveToOtherPane => 'Zhvendose te paneli tjetër';
+  @override
+  String get openBeside => 'Hape anash';
+  @override
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override
   String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';

@@ -1172,6 +1172,14 @@ final class RomanianStrings extends Strings {
   @override
   String get openInNewTab => 'Deschide într-o filă nouă';
   @override
+  String get splitRight => 'Împarte la dreapta';
+  @override
+  String get splitDown => 'Împarte în jos';
+  @override
+  String get moveToOtherPane => 'Mută în celălalt panou';
+  @override
+  String get openBeside => 'Deschide alături';
+  @override
   String get openFileMissing => 'Fișierul acestei note nu este pe disc';
   @override
   String get openFileFailed => 'Nota nu a putut fi deschisă în afara Niman';

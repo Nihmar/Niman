@@ -1161,6 +1161,14 @@ final class SlovakStrings extends Strings {
   @override
   String get openInNewTab => 'Otvoriť na novej karte';
   @override
+  String get splitRight => 'Rozdeliť doprava';
+  @override
+  String get splitDown => 'Rozdeliť nadol';
+  @override
+  String get moveToOtherPane => 'Presunúť do druhého panela';
+  @override
+  String get openBeside => 'Otvoriť vedľa';
+  @override
   String get openFileMissing => 'Súbor tejto poznámky na disku nie je';
   @override
   String get openFileFailed =>

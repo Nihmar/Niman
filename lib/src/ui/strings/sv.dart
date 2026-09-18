@@ -1167,6 +1167,14 @@ final class SwedishStrings extends Strings {
   @override
   String get openInNewTab => 'Öppna i ny flik';
   @override
+  String get splitRight => 'Dela åt höger';
+  @override
+  String get splitDown => 'Dela nedåt';
+  @override
+  String get moveToOtherPane => 'Flytta till den andra rutan';
+  @override
+  String get openBeside => 'Öppna vid sidan';
+  @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';
   @override

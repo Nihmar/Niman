@@ -38,6 +38,7 @@ import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
+import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
@@ -68,6 +69,7 @@ import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 /// Root screen: the open/create screen until a library is ready, then the
@@ -537,6 +539,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       });
     },
     onOpenInNewTab: (path) => _workspace.show(path, newTab: true),
+    onOpenBeside: (path) => _workspace.openBeside(path, SplitAxis.right),
     onHistory: _openHistory,
   );
 
@@ -905,26 +908,66 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _buildTabs(Widget dragArea) => ListenableBuilder(
     listenable: _tabsListenable,
     builder: (context, _) {
-      final root = widget.controller.root;
-      final pane = _workspace.value.focusedPane;
-      return NoteTabBar(
-        tabs: pane.tabs,
-        active: pane.active,
-        unsaved: {
-          if (root != null)
-            for (final path in widget.unsavedTracker.unsavedPaths)
-              if (p.isWithin(root, path)) relPath(path, root),
-        },
-        onActivate: _activateTab,
-        onClose: _workspace.close,
-        onNew: () {
-          _workspace.openNextInNewTab();
-          unawaited(_createFlow.createNote(context));
-        },
-        filler: dragArea,
+      final w = _workspace.value;
+      if (!w.isSplit || w.axis == SplitAxis.down) {
+        return _paneTabs(0, dragArea);
+      }
+      // Split right: the row divides at the same x as the panes do, so
+      // nothing moves when the window splits (the Split mockup).
+      final detail =
+          MediaQuery.sizeOf(context).width -
+          _tabsStart -
+          PaneSplit.dividerWidth;
+      return Row(
+        children: [
+          SizedBox(
+            width: detail * w.fraction + PaneSplit.dividerWidth,
+            child: _paneTabs(0, dragArea),
+          ),
+          Expanded(child: _paneTabs(1, dragArea)),
+        ],
       );
     },
   );
+
+  /// Where the tabs start in the title bar: the tree's right edge.
+  double get _tabsStart =>
+      ShellRail.width +
+      1 +
+      (_sidebarVisible ? _editorSettings.treeWidth + _treeDividerWidth : 0);
+
+  /// [pane]'s tab row.
+  Widget _paneTabs(int pane, Widget filler) {
+    final w = _workspace.value;
+    final root = widget.controller.root;
+    final tabs = w.panes[pane];
+    return NoteTabBar(
+      key: ValueKey('pane-tabs-$pane'),
+      tabs: tabs.tabs,
+      active: tabs.active,
+      focused: !w.isSplit || w.focused == pane,
+      unsaved: {
+        if (root != null)
+          for (final path in widget.unsavedTracker.unsavedPaths)
+            if (p.isWithin(root, path)) relPath(path, root),
+      },
+      onActivate: (index) => _activateTab(pane, index),
+      onClose: (index) => _workspace.close(pane, index),
+      onNew: () {
+        _workspace
+          ..focus(pane)
+          ..openNextInNewTab();
+        unawaited(_createFlow.createNote(context));
+      },
+      onSplit: w.isSplit
+          ? null
+          : (index, axis) => _workspace.splitWith(pane, index, axis),
+      onMoveToOtherPane: w.isSplit
+          ? (index) => _workspace.moveToOtherPane(pane, index)
+          : null,
+      filler: filler,
+    );
+  }
 
   /// What the tabs redraw on: the workspace, and — moved out of any build
   /// it lands in — the unsaved tracker.
@@ -958,9 +1001,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   }
 
   /// Shows the tab at [index], and the Files tab it lives in.
-  void _activateTab(int index) {
+  void _activateTab(int pane, int index) {
     if (_tab != ShellTab.files) _onDestinationSelected(ShellTab.files.index);
-    _workspace.activate(index);
+    _workspace.activate(pane, index);
   }
 
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
@@ -1627,10 +1670,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       window: widget.window,
       windowTitle: narrow ? _windowTitle : _libraryName,
       buildTabs: narrow ? null : _buildTabs,
-      tabsStart:
-          ShellRail.width +
-          1 +
-          (_sidebarVisible ? _editorSettings.treeWidth + _treeDividerWidth : 0),
+      tabsStart: _tabsStart,
       sidebarVisible: _sidebarVisible,
       onToggleSidebar: _toggleSidebar,
       shellFocus: _shellFocus,
@@ -2008,6 +2048,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       AppCommand.previousTab: () {
         if (_wide) _workspace.cycle(-1);
       },
+      AppCommand.splitRight: () {
+        if (_wide) _workspace.splitActive(SplitAxis.right);
+      },
       AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
       AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
       AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
@@ -2042,82 +2085,135 @@ final class _LibraryShellState extends State<_LibraryShell>
           _treeDivider(),
         ],
         Expanded(
-          child: Column(
-            children: [
-              Expanded(
-                child: ShellDetailPane(
-                  root: controller.root,
-                  tabs: _deck(),
-                  onMemento: _workspace.remember,
-                  onLoaded: _workspace.noteLoaded,
-                  showLineNumbers: _editorSettings.lineNumbers,
-                  noteColumn: _editorSettings.noteColumn,
-                  // The kind toggles and ⋮ sit at the end of the note's
-                  // one row of chrome (#173); there is no header above.
-                  barActions: [..._kindActions, _noteMenu()],
-                  autofocusEditor: _editorSettings.autofocusEditor,
-                  linkType: _editorSettings.linkType,
-                  missingNoteLocation: _editorSettings.missingNoteLocation,
-                  attachmentsFolder: _editorSettings.attachmentsFolder,
-                  indentWidth: _editorSettings.indentWidth,
-                  toolbarLayout: _editorSettings.toolbarLayout,
-                  // A single enabled editor has nowhere to switch to:
-                  // the note hides its switch instead of offering a
-                  // dead toggle.
-                  onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-                      ? _setEditorKind
-                      : null,
-                  splitFraction: _editorSettings.splitRatio,
-                  onSplitFractionChanged: _onSplitFractionChanged,
-                  onSplitDragEnd: _onSplitDragEnd,
-                  linkSource: _linkSource,
-                  onOpenNote: _openNoteFromLink,
-                  kindMode: !_kindRawMode,
-                  onNoteKindChanged: _onNoteKindChanged,
-                  unsavedTracker: widget.unsavedTracker,
-                  spellCheck: widget.spellCheck,
-                  reloadToken: _noteReloadToken,
-                  saveNote: _noteSaver(controller),
-                  createMissingNote: _missingNoteCreator(controller),
-                  statusActions: [
-                    // The view controls live in the note's status row on the
-                    // desktop (T-PP-22): the header above is about the file,
-                    // the footer about how it is shown.
-                    if (_previewToggleVisible) ...[
-                      if (_noteEditorKind == EditorKind.source)
-                        _layoutModeAction(compact: true),
-                      if (!previewSplits(
-                        _editorSettings.previewMode,
-                        narrow: false,
-                        editor: _noteEditorKind,
-                        previewEnabled: _editorSettings.previewEnabled,
-                      ))
-                        _previewToggleAction(compact: true),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
+          child: Column(children: [Expanded(child: _panes(controller))]),
         ),
       ],
     );
   }
 
+  /// The panes of the wide layout (#23): one, or two split right or
+  /// down, each a deck of its own tabs. A click anywhere in a pane gives
+  /// it the focus, so the tree's next note opens there.
+  Widget _panes(LibrarySession controller) {
+    final w = _workspace.value;
+    if (!w.isSplit) return _detailPane(controller, 0);
+    final down = w.axis == SplitAxis.down;
+    return PaneSplit(
+      axis: w.axis,
+      fraction: w.fraction,
+      onFraction: _workspace.setFraction,
+      first: _detailPane(controller, 0),
+      // Split down, the lower pane's tabs head the pane itself: the title
+      // bar has no x to divide at.
+      second: down
+          ? Column(
+              children: [
+                SizedBox(
+                  height: 38,
+                  child: _paneTabs(1, const SizedBox.shrink()),
+                ),
+                const Divider(height: 1),
+                Expanded(child: _detailPane(controller, 1)),
+              ],
+            )
+          : _detailPane(controller, 1),
+    );
+  }
+
+  /// [pane]'s deck, focusing the pane on any press inside it.
+  Widget _detailPane(LibrarySession controller, int pane) => Listener(
+    behavior: HitTestBehavior.translucent,
+    onPointerDown: (_) => _workspace.focus(pane),
+    child: ShellDetailPane(
+      root: controller.root,
+      tabs: _deck(pane),
+      onMemento: _workspace.remember,
+      onLoaded: _workspace.noteLoaded,
+      showLineNumbers: _editorSettings.lineNumbers,
+      noteColumn: _editorSettings.noteColumn,
+      // The kind toggles and ⋮ sit at the end of the note's
+      // one row of chrome (#173); there is no header above.
+      barActions: [..._kindActions, _noteMenu()],
+      autofocusEditor: _editorSettings.autofocusEditor,
+      linkType: _editorSettings.linkType,
+      missingNoteLocation: _editorSettings.missingNoteLocation,
+      attachmentsFolder: _editorSettings.attachmentsFolder,
+      indentWidth: _editorSettings.indentWidth,
+      toolbarLayout: _editorSettings.toolbarLayout,
+      // A single enabled editor has nowhere to switch to:
+      // the note hides its switch instead of offering a
+      // dead toggle.
+      onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+          ? _setEditorKind
+          : null,
+      splitFraction: _editorSettings.splitRatio,
+      onSplitFractionChanged: _onSplitFractionChanged,
+      onSplitDragEnd: _onSplitDragEnd,
+      linkSource: _linkSource,
+      onOpenNote: _openNoteFromLink,
+      kindMode: !_kindRawMode,
+      onNoteKindChanged: _onNoteKindChanged,
+      unsavedTracker: widget.unsavedTracker,
+      spellCheck: widget.spellCheck,
+      reloadToken: _noteReloadToken,
+      saveNote: _noteSaver(controller),
+      createMissingNote: _missingNoteCreator(controller),
+      statusActions: _statusActionsFor(pane),
+    ),
+  );
+
+  /// The view controls in [pane]'s status row (T-PP-22): for the note
+  /// that pane shows, so each pane's eye says what its own tab does.
+  List<Widget> _statusActionsFor(int pane) {
+    final tab = _workspace.value.panes[pane].activeTab;
+    if (tab == null || !_previewToggleVisible) return const [];
+    final editor = _editorOf(tab.memento);
+    return [
+      if (editor == EditorKind.source) _layoutModeAction(compact: true),
+      if (!previewSplits(
+        _editorSettings.previewMode,
+        narrow: false,
+        editor: editor,
+        previewEnabled: _editorSettings.previewEnabled,
+      ))
+        PreviewToggleAction(
+          previewVisible: tab.memento.preview ?? false,
+          onToggle: () => _togglePreviewOf(tab.path),
+          compact: true,
+        ),
+    ];
+  }
+
+  /// Flips the preview of the tab showing [path], wherever it is.
+  void _togglePreviewOf(String path) {
+    final tab = _workspace.value.tabs.where((t) => t.path == path).firstOrNull;
+    if (tab == null) return;
+    final show = !(tab.memento.preview ?? false);
+    // The preview has no editable: flipping to it lets the keyboard go.
+    if (show) FocusManager.instance.primaryFocus?.unfocus();
+    _workspace.controller.update(
+      (w) => w.withMemento(path, tab.memento.copyWith(preview: show)),
+    );
+  }
+
   /// The notes whose editor is mounted (#23): the showing tab and the
   /// ones kept alive behind it, each shown its own way.
-  List<DetailTab> _deck() {
+  List<DetailTab> _deck(int pane) {
     final w = _workspace.value;
     final mounted = _workspace.mounted();
-    final active = w.activePath;
+    final showing = w.panes[pane].activeTab?.path;
+    final focused = pane == w.focused;
+    _noteKeys.removeWhere((path, _) => !mounted.contains(path));
     return [
-      for (final tab in w.focusedPane.tabs)
+      for (final tab in w.panes[pane].tabs)
         if (mounted.contains(tab.path))
           () {
             final editor = _editorOf(tab.memento);
             return DetailTab(
+              key: _noteKeys.putIfAbsent(tab.path, GlobalKey.new),
               path: tab.path,
-              active: tab.path == active,
+              active: tab.path == showing,
+              focused: focused,
               memento: tab.memento,
               showWysiwyg: editor == EditorKind.wysiwyg,
               showPreview:
@@ -2129,11 +2225,15 @@ final class _LibraryShellState extends State<_LibraryShell>
                 editor: editor,
                 previewEnabled: _editorSettings.previewEnabled,
               ),
-              anchor: tab.path == active ? _pendingAnchor : null,
+              anchor: focused && tab.path == showing ? _pendingAnchor : null,
             );
           }(),
     ];
   }
+
+  /// One key per mounted note, so a tab moved to the other pane takes
+  /// its editor along — undo and all — instead of starting a new one.
+  final Map<String, GlobalKey> _noteKeys = {};
 
   /// The tree divider's grab width.
   static const double _treeDividerWidth = 13;

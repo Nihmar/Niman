@@ -1180,6 +1180,14 @@ final class PolishStrings extends Strings {
   @override
   String get openInNewTab => 'Otwórz w nowej karcie';
   @override
+  String get splitRight => 'Podziel w prawo';
+  @override
+  String get splitDown => 'Podziel w dół';
+  @override
+  String get moveToOtherPane => 'Przenieś do drugiego panelu';
+  @override
+  String get openBeside => 'Otwórz obok';
+  @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override
   String get openFileFailed =>

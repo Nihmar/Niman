@@ -1168,6 +1168,14 @@ final class PortugueseStrings extends Strings {
   @override
   String get openInNewTab => 'Abrir num novo separador';
   @override
+  String get splitRight => 'Dividir à direita';
+  @override
+  String get splitDown => 'Dividir abaixo';
+  @override
+  String get moveToOtherPane => 'Mover para o outro painel';
+  @override
+  String get openBeside => 'Abrir ao lado';
+  @override
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override
   String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';

@@ -1158,6 +1158,14 @@ final class CroatianStrings extends Strings {
   @override
   String get openInNewTab => 'Otvori u novoj kartici';
   @override
+  String get splitRight => 'Podijeli desno';
+  @override
+  String get splitDown => 'Podijeli dolje';
+  @override
+  String get moveToOtherPane => 'Premjesti u drugo okno';
+  @override
+  String get openBeside => 'Otvori sa strane';
+  @override
   String get openFileMissing => 'Datoteka ove napomene nije na disku';
   @override
   String get openFileFailed =>

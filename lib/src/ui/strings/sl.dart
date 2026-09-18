@@ -1157,6 +1157,14 @@ final class SlovenianStrings extends Strings {
   @override
   String get openInNewTab => 'Odpri v novem zavihku';
   @override
+  String get splitRight => 'Razdeli desno';
+  @override
+  String get splitDown => 'Razdeli navzdol';
+  @override
+  String get moveToOtherPane => 'Premakni v drugo podokno';
+  @override
+  String get openBeside => 'Odpri ob strani';
+  @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';

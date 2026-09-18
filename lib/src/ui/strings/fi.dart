@@ -1174,6 +1174,14 @@ final class FinnishStrings extends Strings {
   @override
   String get openInNewTab => 'Avaa uudessa välilehdessä';
   @override
+  String get splitRight => 'Jaa oikealle';
+  @override
+  String get splitDown => 'Jaa alas';
+  @override
+  String get moveToOtherPane => 'Siirrä toiseen ruutuun';
+  @override
+  String get openBeside => 'Avaa viereen';
+  @override
   String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
   @override
   String get openFileFailed =>

@@ -745,6 +745,10 @@ final class AppStrings {
   static String get openNotesTooltip => _s.openNotesTooltip;
   static String get closeTabTooltip => _s.closeTabTooltip;
   static String get openInNewTab => _s.openInNewTab;
+  static String get splitRight => _s.splitRight;
+  static String get splitDown => _s.splitDown;
+  static String get moveToOtherPane => _s.moveToOtherPane;
+  static String get openBeside => _s.openBeside;
   static String get openFileMissing => _s.openFileMissing;
   static String get openFileFailed => _s.openFileFailed;
   static String get movedToTrash => _s.movedToTrash;

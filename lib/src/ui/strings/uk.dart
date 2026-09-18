@@ -1167,6 +1167,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get openInNewTab => 'Відкрити в новій вкладці';
   @override
+  String get splitRight => 'Розділити праворуч';
+  @override
+  String get splitDown => 'Розділити донизу';
+  @override
+  String get moveToOtherPane => 'Перемістити в іншу панель';
+  @override
+  String get openBeside => 'Відкрити збоку';
+  @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';

@@ -1174,6 +1174,14 @@ final class ItalianStrings extends Strings {
   @override
   String get openInNewTab => 'Apri in una nuova scheda';
   @override
+  String get splitRight => 'Dividi a destra';
+  @override
+  String get splitDown => 'Dividi in basso';
+  @override
+  String get moveToOtherPane => 'Sposta nell’altro pannello';
+  @override
+  String get openBeside => 'Apri di lato';
+  @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override
   String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';

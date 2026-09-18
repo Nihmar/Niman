@@ -1135,6 +1135,14 @@ final class HindiStrings extends Strings {
   @override
   String get openInNewTab => 'नए टैब में खोलें';
   @override
+  String get splitRight => 'दाईं ओर बाँटें';
+  @override
+  String get splitDown => 'नीचे बाँटें';
+  @override
+  String get moveToOtherPane => 'दूसरे पैन में ले जाएँ';
+  @override
+  String get openBeside => 'बगल में खोलें';
+  @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';
