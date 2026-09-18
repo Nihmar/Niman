@@ -63,7 +63,8 @@ and each note has its folder, the orange dot while it has unsaved
 edits, and a close. From the list you can switch to a note, close one
 (the next open note takes its place, or the tree once none are left),
 close them all, or start a new note. Each note comes back where you
-left it.
+left it, and the notes left open are still in the list after the app
+restarts.
 
 Selecting a folder in the tree leaves the note on screen, and the tree
 follows the tab you pick. Renaming or moving a note, or a folder with

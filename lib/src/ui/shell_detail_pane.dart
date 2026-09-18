@@ -44,6 +44,8 @@ final class ShellDetailPane extends StatelessWidget {
     this.reloadToken = 0,
     this.onMemento,
     this.onLoaded,
+    this.readNote,
+    this.writeNote,
     this.saveNote,
     this.createMissingNote,
     super.key,
@@ -61,6 +63,13 @@ final class ShellDetailPane extends StatelessWidget {
 
   /// Told each note's length once it loads.
   final void Function(String path, int length)? onLoaded;
+
+  /// Test seams, handed to every [NoteView]: a widget test's library is
+  /// not on disk.
+  final Future<String> Function(String path)? readNote;
+
+  /// See [readNote].
+  final Future<void> Function(String path, String content)? writeNote;
 
   /// Editor setting forwards.
   final bool showLineNumbers;
@@ -206,6 +215,8 @@ final class ShellDetailPane extends StatelessWidget {
     reloadToken: reloadToken,
     saveNote: saveNote,
     createMissingNote: createMissingNote,
+    readNote: readNote,
+    writeNote: writeNote,
   );
 }
 
