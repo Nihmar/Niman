@@ -21,6 +21,19 @@ const String _tasks = '''
 - [x] done
 ''';
 
+/// The same, a blank line apart: a *loose* list, where the parser keeps
+/// each item's content wrapped in a paragraph and puts the box inside
+/// it. The device report that found this had the list a count wrote
+/// sitting a blank line under another bulleted list, which CommonMark
+/// reads as one loose list rather than two.
+const String _looseTasks = '''
+- something else
+
+- [ ] pending
+
+- [x] done
+''';
+
 /// Short blocks with long line spans: a heading and a display formula each
 /// followed by blank lines, so an estimate made from the line count is far
 /// bigger than what either draws.
@@ -337,6 +350,29 @@ void main() {
           );
         }
       }
+    });
+
+    testWidgets('a loose task list still has its boxes', (tester) async {
+      // Device report, 2026-09-18: the boxes were plain bullets. The
+      // parser hides a loose item's checkbox inside the paragraph it
+      // wraps the content in, and the renderer only looks at the item's
+      // first child.
+      await tester.pumpWidget(_app(const MarkdownPreview(data: _looseTasks)));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(find.byIcon(Icons.check_box), findsOneWidget);
+      // The item that is not a task keeps its bullet and its text.
+      expect(find.textContaining('something else'), findsOneWidget);
+      expect(find.textContaining('pending'), findsOneWidget);
+      expect(find.textContaining('done'), findsOneWidget);
+    });
+
+    testWidgets('a tight task list is untouched', (tester) async {
+      await tester.pumpWidget(_app(const MarkdownPreview(data: _tasks)));
+      await tester.pump();
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(find.byIcon(Icons.check_box), findsOneWidget);
     });
   });
 }
