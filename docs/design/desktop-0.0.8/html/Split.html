@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Niman desktop — split panes and the right dock</title>
+<style>
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:#1B1D21;color:#F2EDE5}
+a{color:#7CA0E6}a:hover{color:#9FB8EE}
+button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer;padding:0}
+.tab{display:flex;align-items:center;gap:8px;height:30px;padding:0 9px 0 13px;border-radius:7px;max-width:180px}
+.tt{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<div style="width: 1440px; height: 800px; box-sizing: border-box; display: flex; flex-direction: column; background: #1B1D21; overflow: hidden;">
+
+  <div style="height: 40px; flex-shrink: 0; background: #2C3037; display: flex; align-items: center;">
+
+    <div style="width: 308px; flex-shrink: 0; display: flex; align-items: center;">
+      <button aria-label="Hide the file tree" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #587CD3;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="6" y1="2.5" x2="6" y2="13.5" stroke-width="2.4"/></svg></button>
+      <span style="font-size: 12.5px; color: #A6A29A; padding-left: 4px;">Notes4</span>
+    </div>
+
+    <div style="width: 435px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding-left: 1px; border-left: 1px solid #4A4F59; height: 40px; box-sizing: border-box;">
+      <div class="tab" style="background: #1B1D21; border: 1px solid #587CD3;">
+        <span class="tt" style="color: #F2EDE5;">Colazione di venerdì</span>
+        <button aria-label="Close Colazione di venerdì" style="color: #A6A29A; display: flex;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5"/></svg></button>
+      </div>
+      <div class="tab" style="background: #383D46;">
+        <span class="tt" style="color: #C8C3BA;">todo.txt</span>
+        <span style="width: 7px; height: 7px; border-radius: 4px; background: #D8A56B; display: block;"></span>
+      </div>
+      <button aria-label="New tab in this pane" style="width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></button>
+    </div>
+
+    <div style="width: 435px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding-left: 1px; border-left: 1px solid #4A4F59; height: 40px; box-sizing: border-box;">
+      <div class="tab" style="background: #1B1D21; border: 1px solid #4A4F59;">
+        <span class="tt" style="color: #E3DED6;">Enciclopedia</span>
+        <button aria-label="Close Enciclopedia" style="color: #A6A29A; display: flex;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5"/></svg></button>
+      </div>
+      <button aria-label="New tab in this pane" style="width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg></button>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 0; display: flex; align-items: center; justify-content: flex-end; border-left: 1px solid #4A4F59; height: 40px; box-sizing: border-box;">
+      <button aria-label="All open notes" style="width: 34px; height: 40px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="3.5,5.5 7,9 10.5,5.5"/></svg></button>
+      <button aria-label="Hide the right dock" style="width: 34px; height: 40px; display: flex; align-items: center; justify-content: center; color: #587CD3;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="10" y1="2.5" x2="10" y2="13.5" stroke-width="2.4"/></svg></button>
+      <div style="width: 8px;"></div>
+      <button aria-label="Minimise" style="width: 46px; height: 40px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><line x1="0" y1="5" x2="10" y2="5"/></svg></button>
+      <button aria-label="Maximise" style="width: 46px; height: 40px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="8.8" height="8.8"/></svg></button>
+      <button aria-label="Close the window" style="width: 46px; height: 40px; display: flex; align-items: center; justify-content: center; color: #A6A29A;"><svg width="10" height="10" viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><line x1="0.5" y1="0.5" x2="9.5" y2="9.5"/><line x1="9.5" y1="0.5" x2="0.5" y2="9.5"/></svg></button>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; min-height: 0; display: flex; align-items: stretch;">
+
+    <div style="width: 48px; flex-shrink: 0; background: #2C3037; display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px;">
+      <button aria-label="Files" style="width: 38px; height: 38px; border-radius: 8px; background: #363B44; color: #587CD3; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 5.5a1 1 0 0 1 1-1h3.4l1.4 1.8h8.2a1 1 0 0 1 1 1v8.2a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"/></svg></button>
+      <button aria-label="Todo" style="width: 38px; height: 38px; border-radius: 8px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="14" height="14" rx="2.5"/><polyline points="6.5,10 9,12.5 13.5,7.5"/></svg></button>
+      <button aria-label="Search" style="width: 38px; height: 38px; border-radius: 8px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="5.5"/><line x1="13" y1="13" x2="17" y2="17"/></svg></button>
+      <button aria-label="Quick note" style="width: 38px; height: 38px; border-radius: 8px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M13.5 3.5l3 3-9 9H4.5v-3z"/></svg></button>
+      <div style="flex-grow: 1;"></div>
+      <button aria-label="Library: Notes4" style="width: 38px; height: 38px; border-radius: 8px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><polygon points="10,3 17,7 10,11 3,7"/><polyline points="3,11 10,15 17,11"/></svg></button>
+      <button aria-label="Settings" style="width: 38px; height: 38px; border-radius: 8px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="2.6"/><path d="M10 3.2v2M10 14.8v2M3.2 10h2M14.8 10h2M5.2 5.2l1.4 1.4M13.4 13.4l1.4 1.4M14.8 5.2l-1.4 1.4M6.6 13.4l-1.4 1.4"/></svg></button>
+    </div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+
+    <div style="width: 258px; flex-shrink: 0; background: #2C3037; display: flex; flex-direction: column;">
+      <div style="height: 34px; flex-shrink: 0; display: flex; align-items: center; gap: 2px; padding: 0 6px;">
+        <button aria-label="New note" style="width: 28px; height: 28px; border-radius: 6px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M3 2.5h6l4 4v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"/><polyline points="9,2.5 9,6.5 13,6.5"/></svg></button>
+        <button aria-label="New folder" style="width: 28px; height: 28px; border-radius: 6px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M1.5 4a1 1 0 0 1 1-1h2.8l1.1 1.5h6.1a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-10a1 1 0 0 1-1-1z"/><line x1="7.5" y1="8.5" x2="10.5" y2="8.5"/><line x1="9" y1="7" x2="9" y2="10"/></svg></button>
+        <button aria-label="Sort" style="width: 28px; height: 28px; border-radius: 6px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="3" y1="4" x2="13" y2="4"/><line x1="3" y1="8" x2="10" y2="8"/><line x1="3" y1="12" x2="7" y2="12"/></svg></button>
+        <div style="flex-grow: 1;"></div>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; padding: 2px 0;">
+        <div style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; color: #A6A29A;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4.5,2.5 8,6 4.5,9.5"/></svg><span style="font-size: 13px;">Attachments</span></div>
+        <div style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; color: #A6A29A;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2.5,4.5 6,8 9.5,4.5"/></svg><span style="font-size: 13px;">Lists</span></div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 10px 0 22px; background: #363B44; border-left: 2px solid #587CD3; color: #F2EDE5;"><span style="font-size: 13px;">Colazione di venerdì.md</span></div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 10px 0 24px; color: #A6A29A;"><span style="font-size: 13px;">La mia spesa.md</span></div>
+        <div style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; color: #A6A29A;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4.5,2.5 8,6 4.5,9.5"/></svg><span style="font-size: 13px;">Templates</span></div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 10px 0 24px; color: #E3DED6;"><span style="font-size: 13px;">Enciclopedia.md</span></div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 10px 0 24px; color: #A6A29A;"><span style="font-size: 13px;">Quicknote.md</span></div>
+        <div style="display: flex; align-items: center; height: 30px; padding: 0 10px 0 24px; color: #E3DED6;"><span style="font-size: 13px;">todo.txt</span></div>
+      </div>
+      <div style="height: 40px; flex-shrink: 0; border-top: 1px solid #4A4F59; display: flex; align-items: center; padding: 0 8px;">
+        <button style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; background: #363B44; color: #F2EDE5; font-size: 13px;"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>New</button>
+      </div>
+    </div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+
+    <div style="width: 435px; flex-shrink: 0; display: flex; flex-direction: column; background: #1B1D21;">
+      <div style="height: 34px; flex-shrink: 0; border-bottom: 1px solid #2C3037; display: flex; align-items: center; padding: 0 20px; gap: 1px;">
+        <button aria-label="Bold" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; font-weight: 700; font-size: 12.5px;">B</button>
+        <button aria-label="Italic" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; font-style: italic; font-family: Georgia, serif; font-size: 13.5px;">I</button>
+        <button aria-label="Heading" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; font-weight: 600; font-size: 12.5px;">H</button>
+        <button aria-label="Task list" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2.5" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><line x1="9.5" y1="5" x2="14" y2="5"/><line x1="9.5" y1="11.5" x2="14" y2="11.5"/></svg></button>
+        <button aria-label="Tools" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M10.2 2.4a3.6 3.6 0 0 0-4.4 4.6l-3.3 3.3a1.2 1.2 0 0 0 0 1.7l1.5 1.5a1.2 1.2 0 0 0 1.7 0l3.3-3.3a3.6 3.6 0 0 0 4.6-4.4l-2 2-1.9-.5-.5-1.9z"/></svg></button>
+        <div style="flex-grow: 1;"></div>
+        <button aria-label="More actions for this note" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; padding: 22px 20px 0 20px;">
+        <h1 style="margin: 0 0 14px 0; font-size: 21px; font-weight: 650; color: #F2EDE5;">Colazione di venerdì</h1>
+        <p style="margin: 0 0 16px 0; font-size: 14.5px; line-height: 1.6; color: #E3DED6;">Ordine del gruppo. I totali si rifanno con Tools quando qualcuno cambia idea.</p>
+        <div style="display: flex; align-items: center; gap: 9px; height: 28px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#8FBF7F" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2.5"/></svg><span style="font-size: 14.5px; color: #E3DED6;">cappuccino: 4</span></div>
+        <div style="display: flex; align-items: center; gap: 9px; height: 28px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#8FBF7F" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2.5"/></svg><span style="font-size: 14.5px; color: #E3DED6;">brioche: 7</span></div>
+        <div style="display: flex; align-items: center; gap: 9px; height: 28px;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#8FBF7F" stroke-width="1.5" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2.5" fill="#8FBF7F"/><polyline points="5,8.2 7.2,10.4 11,5.9" stroke="#1B1D21" stroke-width="1.8"/></svg><span style="font-size: 14.5px; color: #A6A29A; text-decoration: line-through;">acqua naturale: 2</span></div>
+      </div>
+    </div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+
+    <div style="width: 435px; flex-shrink: 0; display: flex; flex-direction: column; background: #1B1D21;">
+      <div style="height: 34px; flex-shrink: 0; border-bottom: 1px solid #2C3037; display: flex; align-items: center; padding: 0 20px;">
+        <span style="font-size: 11.5px; color: #6B7079; letter-spacing: 0.3px;">PREVIEW</span>
+        <div style="flex-grow: 1;"></div>
+        <button aria-label="More actions for this note" style="width: 26px; height: 24px; border-radius: 5px; color: #A6A29A; display: inline-flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; padding: 22px 20px 0 20px;">
+        <h1 style="margin: 0 0 12px 0; font-size: 21px; font-weight: 650; color: #F2EDE5;">Enciclopedia</h1>
+        <h2 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 640; color: #F2EDE5;">Celestia</h2>
+        <p style="margin: 0 0 14px 0; font-size: 14.5px; line-height: 1.6; color: #E3DED6;">Celestia è il terzo pianeta del sistema planetario che orbita attorno alla stella <a href="#note">Pyrale</a>.</p>
+        <h3 style="margin: 0 0 10px 0; font-size: 13.5px; font-weight: 640; color: #F2EDE5;">La Galassia</h3>
+        <div style="border: 1px solid #4A4F59; border-radius: 6px; overflow: hidden; width: 290px;">
+          <div style="display: flex; border-bottom: 1px solid #4A4F59;"><span style="flex-grow: 1; padding: 7px 10px; font-size: 13px; color: #A6A29A;">Raggio</span><span style="width: 135px; padding: 7px 10px; font-size: 13px; color: #E3DED6;">14092024 ly</span></div>
+          <div style="display: flex;"><span style="flex-grow: 1; padding: 7px 10px; font-size: 13px; color: #A6A29A;">Zona abitabile</span><span style="width: 135px; padding: 7px 10px; font-size: 13px; color: #E3DED6;">6623251 ly</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="width: 1px; background: #4A4F59; flex-shrink: 0;"></div>
+
+    <div style="width: 260px; flex-shrink: 0; background: #2C3037; display: flex; flex-direction: column;">
+      <div style="height: 34px; flex-shrink: 0; display: flex; align-items: center; gap: 2px; padding: 0 6px; border-bottom: 1px solid #363B44;">
+        <button aria-label="Outline" style="width: 30px; height: 26px; border-radius: 6px; background: #363B44; color: #587CD3; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="2.5" y1="4" x2="13.5" y2="4"/><line x1="5" y1="8" x2="13.5" y2="8"/><line x1="7.5" y1="12" x2="13.5" y2="12"/></svg></button>
+        <button aria-label="Tags" style="width: 30px; height: 26px; border-radius: 6px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2.5 2.5h5l6 6-5 5-6-6z"/><circle cx="5.3" cy="5.3" r="1"/></svg></button>
+        <button aria-label="History" style="width: 30px; height: 26px; border-radius: 6px; color: #A6A29A; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.6 8a5.4 5.4 0 1 0 1.6-3.8"/><polyline points="2,3 2,6 5,6"/><polyline points="8,5 8,8.4 10.4,9.8"/></svg></button>
+        <div style="flex-grow: 1;"></div>
+        <span style="font-size: 11px; color: #A6A29A; padding-right: 4px;">Outline</span>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; padding: 8px 0;">
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px;"><span style="font-size: 13px; color: #F2EDE5;">Celestia</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 26px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Introduzione</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 26px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Cosmologia</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 40px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Dati</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 54px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #F2EDE5;">La Galassia</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 68px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Vicinato stellare</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 40px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Il pianeta: Celestia</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 26px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Geologia</span></div>
+        <div style="height: 26px; display: flex; align-items: center; padding: 0 12px 0 26px; border-left: 1px solid #4A4F59; margin-left: 15px;"><span style="font-size: 13px; color: #A6A29A;">Le isole</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 27px; flex-shrink: 0; background: #2C3037; display: flex; align-items: center; padding: 0 10px; gap: 4px; border-top: 1px solid #363B44;">
+    <button aria-label="Outline" style="height: 21px; padding: 0 6px; border-radius: 4px; color: #A6A29A; display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><line x1="2.5" y1="4" x2="13.5" y2="4"/><line x1="5" y1="8" x2="13.5" y2="8"/><line x1="7.5" y1="12" x2="13.5" y2="12"/></svg></button>
+    <button aria-label="Find" style="height: 21px; padding: 0 6px; border-radius: 4px; color: #A6A29A; display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4.3"/><line x1="10.2" y1="10.2" x2="13.5" y2="13.5"/></svg></button>
+    <button style="height: 21px; padding: 0 8px; border-radius: 4px; color: #A6A29A; font-size: 11.5px; letter-spacing: 0.3px;">WYSIWYG</button>
+    <div style="flex-grow: 1;"></div>
+    <span style="font-size: 11.5px; color: #A6A29A;">47 words</span>
+    <span style="font-size: 11.5px; color: #A6A29A; padding-left: 10px;">Saved</span>
+    <button aria-label="Split with the preview" style="height: 21px; padding: 0 6px; margin-left: 6px; border-radius: 4px; color: #587CD3; display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="10" rx="1.5"/><line x1="8" y1="3" x2="8" y2="13" stroke-width="2.2"/></svg></button>
+    <button aria-label="Preview" style="height: 21px; padding: 0 6px; border-radius: 4px; color: #A6A29A; display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1.5 8s2.4-4 6.5-4 6.5 4 6.5 4-2.4 4-6.5 4S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="1.7"/></svg></button>
+  </div>
+</div>
+</body>
+</html>
