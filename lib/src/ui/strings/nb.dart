@@ -1163,6 +1163,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get openBeside => 'Åpne ved siden av';
   @override
+  String get closeAllNotes => 'Lukk alle';
+  @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';

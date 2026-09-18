@@ -1165,6 +1165,8 @@ final class CzechStrings extends Strings {
   @override
   String get openBeside => 'Otevřít vedle';
   @override
+  String get closeAllNotes => 'Zavřít vše';
+  @override
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
   String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';

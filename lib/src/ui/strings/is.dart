@@ -1169,6 +1169,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get openBeside => 'Opna til hliðar';
   @override
+  String get closeAllNotes => 'Loka öllu';
+  @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';

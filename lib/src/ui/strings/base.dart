@@ -560,6 +560,7 @@ abstract base class Strings {
   String get splitDown;
   String get moveToOtherPane;
   String get openBeside;
+  String get closeAllNotes;
   String get openFileMissing;
   String get openFileFailed;
   String get movedToTrash;

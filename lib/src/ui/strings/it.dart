@@ -1182,6 +1182,8 @@ final class ItalianStrings extends Strings {
   @override
   String get openBeside => 'Apri di lato';
   @override
+  String get closeAllNotes => 'Chiudi tutte';
+  @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override
   String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';
