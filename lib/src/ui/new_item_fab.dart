@@ -179,7 +179,17 @@ final class _MiniFab extends StatelessWidget {
             heroTag: null,
             onPressed: onTap,
             icon: Icon(icon),
-            label: Text(label),
+            // The list note's label carries its folder, so the width is
+            // the library's to decide: a deep list folder in a long
+            // language would otherwise run past the screen edge. The
+            // button stops at two thirds of the width and the folder
+            // ellipsizes.
+            label: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.66,
+              ),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
           ),
         ),
       ),
