@@ -13,6 +13,36 @@ status row switches only when both are enabled.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk.
 
+### Open notes and tabs
+
+On the desktop the notes you have open are tabs in the title bar,
+starting where the file tree ends.
+
+- **A click** on a note in the tree shows it in the tab you are on. A
+  note that is already open is shown in its tab rather than opened twice.
+- **`Ctrl+click`**, the tree's right-click **Open in new tab**, or the
+  **+** after the tabs (a new note) opens one alongside.
+- **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
+  the **▾** list, which shows every tab with its folder when the row is
+  too full.
+- **Closing** is by the tab's **×**, a middle click, or `Ctrl+W`. The tab
+  to the right takes its place.
+- **An orange dot** in place of the **×** means the note has edits not
+  written yet. They are written a moment later, as always.
+
+Each tab keeps its own way of showing its note: the source editor or the
+WYSIWYG one, the preview or not. The **Default editor** setting is the
+editor a note opens in. The last few tabs you looked at keep everything
+behind them, undo included. Older ones come back to where you left them
+(caret, selection, scroll) but start a fresh undo history. A very long
+note keeps its editor only while it is on screen.
+
+Selecting a folder in the tree leaves the note on screen, and the tree
+follows the tab you pick. Renaming or moving a note, or a folder with
+open notes in it, carries their tabs along, and deleting closes them.
+The tabs are remembered per library on this device: opening the library
+again brings them back, and a phone never inherits a desktop's tabs.
+
 ### Readable line length
 
 A note's text keeps to a centred column instead of running the full

@@ -51,6 +51,8 @@ final class ShellLayoutProps {
     required this.tabIndex,
     required this.onDestinationSelected,
     required this.buildWideSlots,
+    this.buildTabs,
+    this.tabsStart = 0,
   });
 
   /// The open library.
@@ -113,6 +115,13 @@ final class ShellLayoutProps {
 
   /// The title that bar carries.
   final String windowTitle;
+
+  /// The open notes' tabs for the title bar (#23), around the drag area
+  /// they leave; null for none.
+  final Widget Function(Widget dragArea)? buildTabs;
+
+  /// Where the tabs start in the bar: the tree's right edge.
+  final double tabsStart;
 
   /// Whether the wide layout's tree pane shows (the rail always stays).
   final bool sidebarVisible;
@@ -344,6 +353,8 @@ final class WideShellLayout extends StatelessWidget {
                   sidebarVisible: props.sidebarVisible,
                   onToggleSidebar: props.onToggleSidebar,
                   window: props.window,
+                  tabs: props.buildTabs,
+                  tabsStart: props.tabsStart,
                 ),
               Expanded(
                 child: Row(

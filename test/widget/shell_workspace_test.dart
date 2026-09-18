@@ -97,15 +97,14 @@ void main() {
     expect(controller.workspace.tabs, isEmpty);
   });
 
-  testWidgets('what was left open is read back, and nothing moves on screen', (
-    tester,
-  ) async {
-    controller.workspace = Workspace.empty.open('kept.md');
+  testWidgets('what was left open comes back as tabs', (tester) async {
+    controller.workspace = Workspace.empty.open('kept.md').open('other.md');
     await pumpShell(tester);
-    // Read back into the model...
     await settle(tester);
-    expect(controller.workspace.activePath, 'kept.md');
-    // ...and not yet onto the screen: restoring is a later step (#23).
-    expect(find.byKey(const Key('note-top-bar')), findsNothing);
+    expect(controller.workspace.activePath, 'other.md');
+    // On a wide window the tabs are drawn from it (#23, PR 2).
+    expect(find.byKey(const Key('note-tab-0')), findsOne);
+    expect(find.byKey(const Key('note-tab-1')), findsOne);
+    expect(find.byKey(const Key('note-top-bar')), findsOne);
   });
 }

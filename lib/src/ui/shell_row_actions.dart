@@ -35,6 +35,7 @@ final class ShellRowActions {
     required this.onMoved,
     required this.onDeleted,
     required this.onHistory,
+    required this.onOpenInNewTab,
   });
 
   /// The open library's session.
@@ -63,6 +64,9 @@ final class ShellRowActions {
 
   /// Opens the note's history; the shell owns that screen.
   final Future<void> Function(String path) onHistory;
+
+  /// Opens the note in a tab of its own (#23).
+  final void Function(String path) onOpenInNewTab;
 
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
@@ -93,6 +97,8 @@ final class ShellRowActions {
         await pinToWidget(context, note);
       case 'history':
         await onHistory(note.path);
+      case 'newtab':
+        onOpenInNewTab(note.path);
       case 'reveal':
         await openOutside(context, note, TreeContextAction.openInFileManager);
       case 'openexternal':
