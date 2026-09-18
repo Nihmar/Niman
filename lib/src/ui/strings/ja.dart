@@ -382,6 +382,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteStatusError => 'エラー';
   @override
+  String get noteNotText => 'このファイルはテキストのノートではないため、Niman ではここに表示できません。';
+  @override
+  String get noteLoadFailed => 'このノートを開けませんでした。';
+  @override
   String wordCount(int count) => '$count 語';
   @override
   String get outlineTooltip => 'アウトライン';

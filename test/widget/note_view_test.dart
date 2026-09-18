@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/preview/preview_work_failure.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:re_editor/re_editor.dart';
@@ -211,6 +212,43 @@ void main() {
       await tester.pump();
       expect(writes, ['start!']);
       controller.dispose();
+    });
+
+    // Issue #156: an attachment opened from the tree used to show the
+    // worker's exception as the note's text, and report it saved.
+    testWidgets('a file that is not text says so, and is never saved', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/photo.jpg',
+            readNote: (_) async =>
+                throw const PreviewWorkFailure('bad utf-8', notText: true),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteNotText), findsOneWidget);
+      expect(find.textContaining('bad utf-8'), findsNothing);
+      expect(find.byType(NoteEditor), findsNothing);
+      expect(find.text(AppStrings.noteStatusSaved), findsNothing);
+    });
+
+    testWidgets('any other load failure is a message, not the exception', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          _view(
+            path: '/notes/a.md',
+            readNote: (_) async => throw StateError('disk on fire'),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text(AppStrings.noteLoadFailed), findsOneWidget);
+      expect(find.textContaining('disk on fire'), findsNothing);
     });
 
     // The preview has no editable: flipping the switch must dismiss the

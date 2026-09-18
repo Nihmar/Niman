@@ -411,6 +411,11 @@ final class BulgarianStrings extends Strings {
   @override
   String get noteStatusError => 'Грешка';
   @override
+  String get noteNotText =>
+      'Този файл не е текстова бележка, затова Niman не може да го покаже тук.';
+  @override
+  String get noteLoadFailed => 'Тази бележка не можа да бъде отворена.';
+  @override
   String wordCount(int count) => count == 1 ? '1 дума' : '$count думи';
   @override
   String get outlineTooltip => 'Структура';

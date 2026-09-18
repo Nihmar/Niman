@@ -412,6 +412,12 @@ final class GermanStrings extends Strings {
   @override
   String get noteStatusError => 'Fehler';
   @override
+  String get noteNotText =>
+      'Diese Datei ist keine Textnotiz, daher kann '
+      'Niman sie hier nicht anzeigen.';
+  @override
+  String get noteLoadFailed => 'Diese Notiz konnte nicht geöffnet werden.';
+  @override
   String wordCount(int count) => count == 1 ? '1 Wort' : '$count Wörter';
   @override
   String get outlineTooltip => 'Übersicht';

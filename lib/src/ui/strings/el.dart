@@ -416,6 +416,12 @@ final class GreekStrings extends Strings {
   @override
   String get noteStatusError => 'Σφάλμα';
   @override
+  String get noteNotText =>
+      'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
+      'Niman δεν μπορεί να το εμφανίσει εδώ.';
+  @override
+  String get noteLoadFailed => 'Δεν ήταν δυνατό να ανοίξει αυτή η σημείωση.';
+  @override
   String wordCount(int count) => count == 1 ? '1 λέξη' : '$count λέξεις';
   @override
   String get outlineTooltip => 'Περιεχόμενο';

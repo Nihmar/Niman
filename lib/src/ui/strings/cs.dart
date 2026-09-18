@@ -409,6 +409,11 @@ final class CzechStrings extends Strings {
   @override
   String get noteStatusError => 'Chyba';
   @override
+  String get noteNotText =>
+      'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
+  @override
+  String get noteLoadFailed => 'Tuto poznámku se nepodařilo otevřít.';
+  @override
   String wordCount(int count) => switch (count) {
     1 => '1 slovo',
     >= 2 && <= 4 => '$count slova',

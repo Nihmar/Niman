@@ -414,6 +414,12 @@ final class SpanishStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteNotText =>
+      'Este archivo no es una nota de texto, así que '
+      'Niman no puede mostrarlo aquí.';
+  @override
+  String get noteLoadFailed => 'No se pudo abrir esta nota.';
+  @override
   String wordCount(int count) => count == 1 ? '1 palabra' : '$count palabras';
   @override
   String get outlineTooltip => 'Esquema';

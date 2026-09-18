@@ -38,6 +38,7 @@ import 'package:niman/src/preview/editor_lines.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
 import 'package:niman/src/preview/math_cache.dart';
 import 'package:niman/src/preview/preview_work.dart';
+import 'package:niman/src/preview/preview_work_failure.dart';
 import 'package:niman/src/preview/scroll_map.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
@@ -47,6 +48,7 @@ import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
 import 'package:niman/src/ui/note_links.dart';
+import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_text_offsets.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -316,7 +318,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   bool _ready = false;
   bool _saving = false;
   bool _savePending = false;
+
+  /// Why the note could not be opened, in the user's words; the raw error
+  /// goes to the log only (issue #156).
   String? _error;
+
+  /// The failed file is not text at all: the error pane offers it to the
+  /// OS instead.
+  bool _notText = false;
   Timer? _saveTimer;
 
   /// Debounced note-statistics refresh (word count + outline, T-M2-07).
@@ -582,6 +591,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       _loading = true;
       _ready = false;
       _error = null;
+      _notText = false;
       _noteKind = null;
     });
     final clock = Stopwatch()..start();
@@ -602,6 +612,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         // _AsyncCompleter + the whole element graph and every note failed
         // to load).
         final loaded = await PreviewWork.run('read', path);
+        if (loaded is PreviewWorkFailure) throw loaded;
         if (loaded is! String) throw StateError('$loaded');
         content = loaded;
       }
@@ -665,9 +676,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       logNextFrame('editor', 'note open first frame (${text.length} chars)');
     } on Object catch (error) {
       if (!mounted) return;
+      // A file that is not text is an attachment, not a broken note: it
+      // says so, and nothing about it is ever reported saved (#156).
+      final notText = error is PreviewWorkFailure && error.notText;
       setState(() {
         _loading = false;
-        _error = '$error';
+        _notText = notText;
+        _error = notText ? AppStrings.noteNotText : AppStrings.noteLoadFailed;
       });
       _log.error('note load failed: $path ($error)');
     }
@@ -1418,7 +1433,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
         // Desktop: the toolbar is editor chrome, above the editor, with a
         // divider setting it off the text. Phone: it extends the keyboard,
         // below (see the bottom slot).
-        if (widget.toolbarTop && !kindBody && !_loading)
+        if (widget.toolbarTop && !kindBody && !_loading && error == null)
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
@@ -1478,7 +1493,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                           ),
                         ],
                       ))
-              : Center(child: Text(error)),
+              : NoteLoadError(
+                  message: error,
+                  path: widget.path,
+                  offerDefaultApp: _notText,
+                ),
         ),
         if (!kindBody) ...[
           SafeArea(

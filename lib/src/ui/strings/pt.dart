@@ -408,6 +408,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get noteStatusError => 'Erro';
   @override
+  String get noteNotText =>
+      'Este ficheiro não é uma nota de texto, por isso '
+      'o Niman não o pode mostrar aqui.';
+  @override
+  String get noteLoadFailed => 'Não foi possível abrir esta nota.';
+  @override
   String wordCount(int count) => count == 1 ? '1 palavra' : '$count palavras';
   @override
   String get outlineTooltip => 'Estrutura';

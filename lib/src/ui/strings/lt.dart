@@ -408,6 +408,11 @@ final class LithuanianStrings extends Strings {
   @override
   String get noteStatusError => 'Klaida';
   @override
+  String get noteNotText =>
+      'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
+  @override
+  String get noteLoadFailed => 'Šio užrašo atidaryti nepavyko.';
+  @override
   String wordCount(int count) => count % 100 >= 11 && count % 100 <= 19
       ? '$count žodžių'
       : switch (count % 10) {

@@ -416,6 +416,12 @@ final class CatalanStrings extends Strings {
   @override
   String get noteStatusError => 'Error';
   @override
+  String get noteNotText =>
+      'Aquest fitxer no és una nota de text, així '
+      'que Niman no el pot mostrar aquí.';
+  @override
+  String get noteLoadFailed => 'No s’ha pogut obrir aquesta nota.';
+  @override
   String wordCount(int count) => count == 1 ? '1 paraula' : '$count paraules';
   @override
   String get outlineTooltip => 'Estructura';

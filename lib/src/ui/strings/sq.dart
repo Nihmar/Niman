@@ -406,6 +406,11 @@ final class AlbanianStrings extends Strings {
   @override
   String get noteStatusError => 'Gabim';
   @override
+  String get noteNotText =>
+      'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
+  @override
+  String get noteLoadFailed => 'Ky shënim nuk mund të hapej.';
+  @override
   String wordCount(int count) => '$count fjalë';
   @override
   String get outlineTooltip => 'Përmbajtja';
