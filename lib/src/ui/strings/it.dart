@@ -1184,6 +1184,10 @@ final class ItalianStrings extends Strings {
   @override
   String get closeAllNotes => 'Chiudi tutte';
   @override
+  String get sidePanelTooltip => 'Mostra o nascondi il pannello laterale';
+  @override
+  String get historyAllVersions => 'Tutte le versioni';
+  @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override
   String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';

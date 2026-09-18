@@ -1184,6 +1184,10 @@ final class FinnishStrings extends Strings {
   @override
   String get closeAllNotes => 'Sulje kaikki';
   @override
+  String get sidePanelTooltip => 'Näytä tai piilota sivupaneeli';
+  @override
+  String get historyAllVersions => 'Kaikki versiot';
+  @override
   String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
   @override
   String get openFileFailed =>

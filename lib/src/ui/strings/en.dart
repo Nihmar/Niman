@@ -1165,6 +1165,10 @@ final class EnglishStrings extends Strings {
   @override
   String get closeAllNotes => 'Close all';
   @override
+  String get sidePanelTooltip => 'Show or hide the side panel';
+  @override
+  String get historyAllVersions => 'All versions';
+  @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';

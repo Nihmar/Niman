@@ -1177,6 +1177,10 @@ final class BasqueStrings extends Strings {
   @override
   String get closeAllNotes => 'Itxi guztiak';
   @override
+  String get sidePanelTooltip => 'Erakutsi edo ezkutatu alboko panela';
+  @override
+  String get historyAllVersions => 'Bertsio guztiak';
+  @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';

@@ -1145,6 +1145,10 @@ final class HindiStrings extends Strings {
   @override
   String get closeAllNotes => 'सभी बंद करें';
   @override
+  String get sidePanelTooltip => 'साइड पैनल दिखाएँ या छिपाएँ';
+  @override
+  String get historyAllVersions => 'सभी संस्करण';
+  @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';

@@ -561,6 +561,8 @@ abstract base class Strings {
   String get moveToOtherPane;
   String get openBeside;
   String get closeAllNotes;
+  String get sidePanelTooltip;
+  String get historyAllVersions;
   String get openFileMissing;
   String get openFileFailed;
   String get movedToTrash;

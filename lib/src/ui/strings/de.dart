@@ -1194,6 +1194,10 @@ final class GermanStrings extends Strings {
   @override
   String get closeAllNotes => 'Alle schließen';
   @override
+  String get sidePanelTooltip => 'Seitenleiste ein- oder ausblenden';
+  @override
+  String get historyAllVersions => 'Alle Versionen';
+  @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
   @override

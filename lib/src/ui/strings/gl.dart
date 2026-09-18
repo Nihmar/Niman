@@ -1185,6 +1185,10 @@ final class GalicianStrings extends Strings {
   @override
   String get closeAllNotes => 'Pechar todas';
   @override
+  String get sidePanelTooltip => 'Amosar ou agochar o panel lateral';
+  @override
+  String get historyAllVersions => 'Todas as versións';
+  @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';

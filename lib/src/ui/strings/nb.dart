@@ -1165,6 +1165,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get closeAllNotes => 'Lukk alle';
   @override
+  String get sidePanelTooltip => 'Vis eller skjul sidepanelet';
+  @override
+  String get historyAllVersions => 'Alle versjoner';
+  @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';

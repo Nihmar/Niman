@@ -163,7 +163,7 @@ final class ShellDetailPane extends StatelessWidget {
       children: [
         for (final tab in tabs)
           Offstage(
-            key: tab.key ?? ValueKey('detail-note-${tab.path}'),
+            key: ValueKey('detail-note-${tab.path}'),
             offstage: !tab.active,
             child: TickerMode(enabled: tab.active, child: _note(root, tab)),
           ),
@@ -172,6 +172,9 @@ final class ShellDetailPane extends StatelessWidget {
   }
 
   Widget _note(String root, DetailTab tab) => NoteView(
+    // On the view itself, so the dock reaches its state (#175), and a tab
+    // moved to the other pane takes its editor along.
+    key: tab.key,
     path: p.join(root, tab.path),
     active: tab.active,
     initialMemento: tab.memento,

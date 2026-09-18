@@ -1168,6 +1168,10 @@ final class LatvianStrings extends Strings {
   @override
   String get closeAllNotes => 'Aizvērt visas';
   @override
+  String get sidePanelTooltip => 'Rādīt vai slēpt sānu paneli';
+  @override
+  String get historyAllVersions => 'Visas versijas';
+  @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';

@@ -30,15 +30,21 @@ import 'package:niman/src/transcription/open_audio_notes.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/deferred_listenable.dart';
+import 'package:niman/src/ui/dock/history_dock_pane.dart';
+import 'package:niman/src/ui/dock/outline_dock_pane.dart';
+import 'package:niman/src/ui/dock/right_dock.dart';
+import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
+import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -836,6 +842,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// and the immersive variants: only the Scaffold around it changes).
   Widget _fullNoteView(LibrarySession controller, String selectedPath) {
     return NoteView(
+      key: _phoneNoteKey,
       path: p.join(controller.root ?? '', selectedPath),
       // One editor on the phone: switching notes hands the one going in
       // its memento, and the one going out hands in its own (#23).
@@ -925,9 +932,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       }
       // Split right: the row divides at the same x as the panes do, so
       // nothing moves when the window splits (the Split mockup).
+      // The panes end where the dock begins, when it shows (#175).
+      final dock = _dockShown ? RightDock.width + 1 : 0;
       final detail =
           MediaQuery.sizeOf(context).width -
           _tabsStart -
+          dock -
           PaneSplit.dividerWidth;
       return Row(
         children: [
@@ -986,6 +996,8 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// What of [w] the shell draws from, as one comparable value.
   static String _workspaceShape(Workspace w) => [
+    w.dockOpen,
+    w.dockPane.name,
     w.focused,
     w.axis.name,
     w.isSplit,
@@ -1660,6 +1672,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       final path = _selected;
       if (path == null) return;
       unawaited(switch (action) {
+        NoteMenuAction.outline => _showPanel(DockPane.outline),
+        NoteMenuAction.tags => _showPanel(DockPane.tags),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),
@@ -2153,6 +2167,9 @@ final class _LibraryShellState extends State<_LibraryShell>
       AppCommand.splitRight: () {
         if (_wide) _workspace.splitActive(SplitAxis.right);
       },
+      AppCommand.toggleDock: () {
+        if (_dockRoom) _toggleDock();
+      },
       AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
       AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
       AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
@@ -2189,9 +2206,107 @@ final class _LibraryShellState extends State<_LibraryShell>
         Expanded(
           child: Column(children: [Expanded(child: _panes(controller))]),
         ),
+        if (_dockShown) ...[
+          const VerticalDivider(width: 1),
+          SizedBox(width: RightDock.width, child: _rightDock(controller)),
+        ],
       ],
     );
   }
+
+  /// Whether the window has room for the right dock beside a note (#175):
+  /// a desktop, a tablet, a phone in landscape — on the same rule.
+  bool get _dockRoom =>
+      MediaQuery.sizeOf(context).width >= RightDock.minWindowWidth;
+
+  /// Whether the dock shows: there is room, and it was not closed.
+  bool get _dockShown => _dockRoom && _workspace.value.dockOpen;
+
+  /// The note the dock and the sheets speak for: the focused pane's on a
+  /// wide window, the one on screen on a phone.
+  NoteViewHandle? get _panelNote {
+    final path = _wide ? _workspace.value.activePath : _phoneNote;
+    if (path == null) return null;
+    final key = _wide ? _noteKeys[path] : _phoneNoteKey;
+    final Object? state = key?.currentState;
+    return state is NoteViewHandle ? state : null;
+  }
+
+  /// The right dock: the focused pane's note's outline, tags or history.
+  Widget _rightDock(LibrarySession controller) {
+    final w = _workspace.value;
+    final path = w.activePath;
+    return RightDock(
+      pane: w.dockPane,
+      onPane: (pane) =>
+          _workspace.controller.update((w) => w.withDock(pane: pane)),
+      onClose: () =>
+          _workspace.controller.update((w) => w.withDock(open: false)),
+      paneBuilder: (pane) => switch (pane) {
+        DockPane.outline => OutlineDockPane(note: _panelNote),
+        DockPane.tags => TagsDockPane(
+          note: _panelNote,
+          tags: controller.tagSource,
+          onOpenNote: _workspace.show,
+        ),
+        DockPane.history => HistoryDockPane(
+          ops: controller.ops,
+          path: path,
+          onOpenHistory: () {
+            if (path != null) unawaited(_openHistory(path));
+          },
+        ),
+      },
+    );
+  }
+
+  /// Shows or hides the dock (the note row's button, Ctrl+Shift+B).
+  void _toggleDock() =>
+      _workspace.controller.update((w) => w.withDock(open: !w.dockOpen));
+
+  /// The note row's dock button, where the window has room for a dock.
+  Widget _dockToggle() => IconButton(
+    key: const Key('dock-toggle'),
+    tooltip: AppStrings.sidePanelTooltip,
+    isSelected: _workspace.value.dockOpen,
+    icon: const Icon(Icons.view_sidebar_outlined),
+    selectedIcon: const Icon(Icons.view_sidebar),
+    onPressed: _toggleDock,
+  );
+
+  /// Opens [pane] for the note: in the dock where it fits, else as a
+  /// sheet (the phone's way to the same three, #175).
+  Future<void> _showPanel(DockPane pane) async {
+    if (_wide && _dockRoom) {
+      _workspace.controller.update((w) => w.withDock(open: true, pane: pane));
+      return;
+    }
+    final note = _panelNote;
+    if (note == null) return;
+    if (pane == DockPane.outline) {
+      final line = await showOutlineSheet(context, entries: note.outline.value);
+      if (line != null) note.jumpToHeading(line);
+      return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheet) => SizedBox(
+        height: MediaQuery.sizeOf(sheet).height * 0.5,
+        child: TagsDockPane(
+          note: note,
+          tags: widget.controller.tagSource,
+          onOpenNote: (path) {
+            Navigator.pop(sheet);
+            _openNoteFromLink(path, null);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// The phone's one note view, so its sheets reach its outline.
+  final GlobalKey _phoneNoteKey = GlobalKey();
 
   /// The panes of the wide layout (#23): one, or two split right or
   /// down, each a deck of its own tabs. A click anywhere in a pane gives
@@ -2235,7 +2350,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       noteColumn: _editorSettings.noteColumn,
       // The kind toggles and ⋮ sit at the end of the note's
       // one row of chrome (#173); there is no header above.
-      barActions: [..._kindActions, _noteMenu()],
+      barActions: [..._kindActions, if (_dockRoom) _dockToggle(), _noteMenu()],
       autofocusEditor: _editorSettings.autofocusEditor,
       linkType: _editorSettings.linkType,
       missingNoteLocation: _editorSettings.missingNoteLocation,
