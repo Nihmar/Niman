@@ -256,7 +256,7 @@ int _mapEndpoint(
 
 /// The head of a list item: everything on the line before its content.
 ///
-/// What Enter needs in order to carry a list on (#141): the indent to
+/// What Enter needs in order to carry a list on (#142): the indent to
 /// keep, the marker to repeat or count on, and whether the writer is
 /// standing on an item with nothing in it — which is how every editor
 /// spells "I am done with this list".
