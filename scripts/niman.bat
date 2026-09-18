@@ -53,19 +53,22 @@ rem before compiling anything. Moving those sockets under the profile
 rem fixes it and is inert where nothing blocks them.
 if not exist "%USERPROFILE%\.javasock" mkdir "%USERPROFILE%\.javasock"
 if not defined JAVA_TOOL_OPTIONS set "JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=%USERPROFILE%\.javasock"
-if not "%flavor%"=="" (
+if "%flavor%"=="beta" (
   rem The testing build (issue #106): the release pipeline plus the
   rem flavor's separate application ID; APP_CHANNEL marks the Dart side,
   rem which hides and skips update management.
-  call flutter build apk --release --flavor %flavor% --dart-define=APP_CHANNEL=testing >"%log%" 2>&1
+  call flutter build apk --release --flavor beta --dart-define=APP_CHANNEL=testing >"%log%" 2>&1
 ) else (
-  call flutter build apk --release >"%log%" 2>&1
+  rem The official APK (issue #106): AGP drops the no-flavor variant
+  rem once the channel dimension has a flavor, so the official build
+  rem is the explicit "official" flavor (no application ID suffix).
+  call flutter build apk --release --flavor official >"%log%" 2>&1
 )
 set "status=%errorlevel%"
 powershell -NoProfile -Command "Get-Content -Tail 3 '%log%'"
-set "name=app-release"
-if not "%flavor%"=="" set "name=app-%flavor%-release"
-if "%status%"=="0" echo artifact: build\app\outputs\flutter-apk\%name%.apk
+set "name=official"
+if "%flavor%"=="beta" set "name=beta"
+if "%status%"=="0" echo artifact: build\app\outputs\flutter-apk\app-%name%-release.apk
 exit /b %status%
 
 :linux
