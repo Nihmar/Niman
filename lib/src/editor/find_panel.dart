@@ -11,7 +11,9 @@
 ///
 /// The editor's default shortcuts apply (Ctrl/Cmd+F find, Ctrl/Cmd+Alt+F
 /// replace, Esc close); [NimanShortcutsActivatorsBuilder] adds the
-/// classic Ctrl+H for replace on non-mac desktop.
+/// classic Ctrl+H for replace on non-mac desktop, and lives here because
+/// the find bar was the first thing that needed it. It has since grown
+/// past find: the page keys and the word-wise keys are there too.
 library;
 
 import 'package:flutter/material.dart';
@@ -204,16 +206,66 @@ final class NimanFindPanel extends StatelessWidget
 }
 
 /// The editor's shortcuts: the package defaults, the page keys the package
-/// forgets to bind, and the classic Ctrl+H for the replace bar (non-mac
-/// desktop — mac keeps Cmd+Alt+F).
+/// forgets to bind, the word-wise keys Windows and Linux actually use, and
+/// the classic Ctrl+H for the replace bar (non-mac desktop — mac keeps
+/// Cmd+Alt+F).
 final class NimanShortcutsActivatorsBuilder
     extends CodeShortcutsActivatorsBuilder {
   /// Creates the builder.
   const new();
 
+  /// Word-wise navigation on the keys Windows and Linux use for it.
+  ///
+  /// re_editor's non-mac map is the mac one with the modifier left alone
+  /// (`code_shortcuts.dart`, `_kDefaultCommonCodeShortcutsActivators`):
+  /// word jump sits on **Alt**+Arrow, and `Ctrl`+Arrow — the key everything
+  /// else on these two platforms uses for it — is spent on line start/end,
+  /// which `Home` and `End` already do. Word-wise *selection* is then
+  /// `Shift`+`Alt`+Arrow, so `Ctrl`+`Shift`+Arrow is bound to nothing at all
+  /// and the gesture simply does not exist in the editor (device report,
+  /// 2026-09-18). `Alt`+Arrow is not a text gesture here either: on Windows
+  /// it is Back and Forward.
+  ///
+  /// So the whole set is replaced rather than added to — leaving `Ctrl`+Arrow
+  /// on line start/end would shadow the new binding, since `SingleActivator`
+  /// has no value equality and the first entry registered for a key wins.
+  ///
+  /// The package's forward/backward names are inverted in *both* the map and
+  /// the controller (`extendSelectionToWordBoundaryForward` walks the extent
+  /// left), which cancels out. The pairing below keeps that cancellation:
+  /// it is the package's, not a second mistake.
+  static const Map<CodeShortcutType, List<ShortcutActivator>> _wordWise = {
+    CodeShortcutType.cursorMoveLineStart: [
+      SingleActivator(LogicalKeyboardKey.home),
+    ],
+    CodeShortcutType.cursorMoveLineEnd: [
+      SingleActivator(LogicalKeyboardKey.end),
+    ],
+    CodeShortcutType.cursorMoveWordBoundaryBackward: [
+      SingleActivator(LogicalKeyboardKey.arrowLeft, control: true),
+    ],
+    CodeShortcutType.cursorMoveWordBoundaryForward: [
+      SingleActivator(LogicalKeyboardKey.arrowRight, control: true),
+    ],
+    CodeShortcutType.selectionExtendWordBoundaryForward: [
+      SingleActivator(LogicalKeyboardKey.arrowLeft, control: true, shift: true),
+    ],
+    CodeShortcutType.selectionExtendWordBoundaryBackward: [
+      SingleActivator(
+        LogicalKeyboardKey.arrowRight,
+        control: true,
+        shift: true,
+      ),
+    ],
+  };
+
   @override
   List<ShortcutActivator>? build(CodeShortcutType type) {
     final defaults = const DefaultCodeShortcutsActivatorsBuilder().build(type);
+    if (!kIsMacOS) {
+      final wordWise = _wordWise[type];
+      if (wordWise != null) return wordWise;
+    }
     // The package ships the page-move intents and their action wiring but
     // binds no key to them, and the controller methods behind them are
     // `// TODO` stubs (re_editor 0.10.0): Niman binds the keys here and
