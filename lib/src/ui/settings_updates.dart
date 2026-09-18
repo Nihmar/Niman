@@ -6,6 +6,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
+import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/update_actions.dart';
 import 'package:niman/src/update/update_service.dart';
@@ -105,25 +106,19 @@ final class _SettingsUpdatesScreenState extends State<SettingsUpdatesScreen> {
           if (!isTestingBuild) ...[
             HighlightRow(
               key: SettingsKeys.autoUpdate,
-              child: SwitchListTile(
-                title: Text(AppStrings.autoUpdateTitle),
-                subtitle: Text(AppStrings.autoUpdateSubtitle),
+              child: SettingsSwitchRow(
+                title: AppStrings.autoUpdateTitle,
+                description: AppStrings.autoUpdateSubtitle,
                 value: _autoUpdate ?? false,
                 onChanged: _toggleAutoUpdate,
               ),
             ),
             HighlightRow(
               key: SettingsKeys.checkUpdates,
-              child: ListTile(
-                leading: _checkingUpdates
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.system_update),
-                title: Text(AppStrings.checkForUpdatesTitle),
-                subtitle: _updateStatus == null ? null : Text(_updateStatus!),
+              child: SettingsActionRow(
+                title: AppStrings.checkForUpdatesTitle,
+                description: _updateStatus,
+                busy: _checkingUpdates,
                 onTap: _checkUpdatesManually,
               ),
             ),

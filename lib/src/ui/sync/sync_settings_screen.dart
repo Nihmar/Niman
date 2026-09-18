@@ -632,10 +632,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
           ),
         ),
         SettingsSection(AppStrings.syncSectionWhen),
-        SwitchListTile(
+        SettingsSwitchRow(
           key: const Key('sync-auto'),
-          title: Text(AppStrings.syncAutoTitle),
-          subtitle: Text(AppStrings.syncAutoSubtitle),
+          title: AppStrings.syncAutoTitle,
+          description: AppStrings.syncAutoSubtitle,
           value: destination.autoSync,
           onChanged: (on) => _setTriggers(autoSync: on),
         ),
@@ -648,10 +648,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
           onTap: _chooseInterval,
         ),
         if (_sync.offersWifiOnly)
-          SwitchListTile(
+          SettingsSwitchRow(
             key: const Key('sync-wifi-only'),
-            title: Text(AppStrings.syncWifiOnlyTitle),
-            subtitle: Text(AppStrings.syncWifiOnlySubtitle),
+            title: AppStrings.syncWifiOnlyTitle,
+            description: AppStrings.syncWifiOnlySubtitle,
             value: destination.wifiOnly,
             onChanged: destination.autoSync
                 ? (on) => _setTriggers(wifiOnly: on)
@@ -670,31 +670,23 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
           ].join(' · '),
           onTap: status.running ? () {} : _startEditing,
         ),
-        ListTile(
+        SettingsActionRow(
           key: const Key('sync-retest'),
-          enabled: !_testing && !status.running,
-          leading: _testing
-              ? const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.network_check),
-          title: Text(AppStrings.syncRetestTitle),
-          subtitle: caps == null
+          enabled: !status.running,
+          busy: _testing,
+          title: AppStrings.syncRetestTitle,
+          description: caps == null
               ? null
-              : Text(AppStrings.syncProbedAgo(historyWhen(caps.probedAt, now))),
+              : AppStrings.syncProbedAgo(historyWhen(caps.probedAt, now)),
           onTap: _retest,
         ),
         const Divider(height: 24),
-        ListTile(
+        SettingsActionRow(
           key: const Key('sync-disconnect'),
           enabled: !status.running,
-          leading: Icon(Icons.link_off, color: scheme.error),
-          title: Text(
-            AppStrings.syncDisconnectTitle,
-            style: TextStyle(color: scheme.error),
-          ),
-          subtitle: Text(AppStrings.syncDisconnectSubtitle),
+          destructive: true,
+          title: AppStrings.syncDisconnectTitle,
+          description: AppStrings.syncDisconnectSubtitle,
           onTap: _disconnect,
         ),
       ],

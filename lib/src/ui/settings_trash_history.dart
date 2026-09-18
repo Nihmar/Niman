@@ -133,9 +133,9 @@ final class _SettingsTrashHistoryScreenState
         children: [
           HighlightRow(
             key: SettingsKeys.trash,
-            child: SwitchListTile(
-              title: Text(AppStrings.trashTitle),
-              subtitle: Text(AppStrings.trashSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.trashTitle,
+              description: AppStrings.trashSubtitle,
               value: _trash ?? true,
               onChanged: _toggleTrash,
             ),
@@ -175,10 +175,8 @@ final class _SettingsTrashHistoryScreenState
           // it governs sit on the same screen.
           HighlightRow(
             key: const Key('open-trash-setting'),
-            child: ListTile(
-              leading: const Icon(Icons.delete_outlined),
-              title: Text(AppStrings.trashTitle),
-              trailing: const Icon(Icons.chevron_right),
+            child: SettingsValueRow(
+              title: AppStrings.trashTitle,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute<void>(

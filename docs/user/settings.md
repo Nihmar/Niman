@@ -5,6 +5,28 @@ Two levels. Library settings travel with the folder
 preserved); app settings (language, theme, layout, debug log) stay on the
 device.
 
+## The Settings screen
+
+Settings is split into areas, grouped by what they change: **App**
+(appearance, editor, keyboard shortcuts, updates, diagnostics), the open
+**Library** (folders, trash and history, sync, transcription,
+reminders), and **Maintenance** (re-index, switch or close the library).
+The search at the top looks through the settings themselves, not only
+the area names, and takes you to the row it found.
+
+- **Wide windows** (desktop, tablets, phones in landscape): two columns.
+  The search and the areas are on the left, and the selected area is on
+  the right, so nothing navigates. What an area opens, such as the toolbar
+  arrangement or the trash, stays in the right column with a way back.
+  A search result shows its row on the right and flashes it; the
+  results stay, one click from the next.
+- **Phones**: the list of areas, each opening a screen of its own.
+
+Every setting reads the same on both: its name, a line saying what it
+does, and the control under that. A switch flips in place; anything with
+more than two choices shows its current value in a field that opens the
+choices.
+
 ## Library settings (`LibraryConfig`)
 
 | Key | Default | Meaning |

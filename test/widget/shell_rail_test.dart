@@ -134,7 +134,9 @@ void main() {
 
     await tester.tap(railDest('settings'));
     await settle(tester);
-    expect(find.text(AppStrings.settingsSectionAppearance), findsOne);
+    // Two columns (#172): Appearance is listed on the left and, as the
+    // first area, shown on the right.
+    expect(find.text(AppStrings.settingsSectionAppearance), findsNWidgets(2));
     expect(find.byKey(const Key('shell-rail')), findsOne);
 
     await tester.tap(railDest('files'));
