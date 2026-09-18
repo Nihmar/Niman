@@ -23,6 +23,9 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 
 - Wayland supported; window owns close-request handling (dirty-check on
   close rides it).
+- The app draws its own title bar — sidebar toggle, window title, and the
+  minimise / maximise / close buttons — in place of the system one. The
+  close button meets the same unsaved-edits check the system close does.
 - Closing the window ends the process there and then, skipping the
   library teardown libc runs on the way out: on NVIDIA that teardown
   segfaults inside the EGL driver and left a core dump behind every
@@ -44,6 +47,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   on a machine needs network to fetch the prebuilt binary.
 - spellcheck via hunspell, same setting as Linux, plus the per-library
   personal dictionary.
+- The app draws its own title bar, as on Linux. The window keeps its
+  system behaviours — resizing from the edges, Aero Snap, `Win`+Arrow —
+  because the frame is still there underneath; the app only paints over
+  the caption.
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
