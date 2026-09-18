@@ -178,7 +178,7 @@ final class MarkdownDocumentCodec {
     final node = block.node!;
     if (node.tag == 'pre') return _codeOps(node);
     if (node.tag == 'ul' || node.tag == 'ol') {
-      return _listOps(node, tag: node.tag, indent: 0);
+      return _listOps(node, tag: node.tag, indent: 0, source: block.source);
     }
     final attrs = _lineAttributes(block);
     return <Map<String, dynamic>>[
@@ -232,14 +232,21 @@ final class MarkdownDocumentCodec {
     md.Element list, {
     required String tag,
     required int indent,
+    String? source,
   }) {
     final ops = <Map<String, dynamic>>[];
-    for (final item in list.children ?? const <md.Node>[]) {
-      if (item is! md.Element || item.tag != 'li') continue;
+    final items = <md.Element>[
+      for (final item in list.children ?? const <md.Node>[])
+        if (item is md.Element && item.tag == 'li') item,
+    ];
+    final blankBefore = _blankLinesBefore(items.length, source);
+    for (var index = 0; index < items.length; index++) {
+      final item = items[index];
+      if (blankBefore[index]) ops.add(<String, dynamic>{'insert': _nl});
       final inline = <md.Node>[];
       final nested = <md.Element>[];
       var type = tag == 'ol' ? 'ordered' : 'bullet';
-      for (final child in item.children ?? const <md.Node>[]) {
+      for (final child in _itemChildren(item)) {
         if (child is md.Element && (child.tag == 'ul' || child.tag == 'ol')) {
           nested.add(child);
         } else if (child is md.Element && child.tag == 'input') {
@@ -262,6 +269,57 @@ final class MarkdownDocumentCodec {
       }
     }
     return ops;
+  }
+
+  /// A top-level item's marker: `-`, `*`, `+`, `1.` or `1)`, indented by
+  /// at most the three spaces that still leave it top level.
+  static final RegExp _itemMarker = RegExp(r'^ {0,3}(?:[-*+]|\d{1,9}[.)])\s');
+
+  /// Which of a list's [count] items are written a blank line below the
+  /// one before them, read off [source].
+  ///
+  /// The blank lines of a *loose* list are the list: without them the
+  /// round trip pulled a spaced-out list closed on every save, and a
+  /// list a blank line under another one — which CommonMark reads as one
+  /// loose list, not two — came back glued to it.
+  ///
+  /// The AST says whether a list is loose (the item content keeps its
+  /// `p` wrapper) but not where its blank lines are, so they are counted
+  /// in the text. When the markers found are not the items parsed — an
+  /// item holding a fenced block whose content looks like a marker, say
+  /// — nothing is claimed rather than a blank line put in the wrong gap.
+  static List<bool> _blankLinesBefore(int count, String? source) {
+    final none = List<bool>.filled(count, false);
+    if (source == null || count == 0) return none;
+    final lines = const LineSplitter().convert(source);
+    final out = <bool>[];
+    for (var i = 0; i < lines.length; i++) {
+      if (!_itemMarker.hasMatch(lines[i])) continue;
+      out.add(i > 0 && lines[i - 1].trim().isEmpty);
+    }
+    return out.length == count ? out : none;
+  }
+
+  /// A list item's content with one level of `p` flattened.
+  ///
+  /// A *loose* list — one with a blank line between its items — wraps
+  /// each item's content in a `p`, and the task-list checkbox goes
+  /// inside that `p` rather than beside it. Scanning only the item's own
+  /// children therefore found the box in a tight list and missed it in a
+  /// loose one, and a missed box is not a display fault: the line came
+  /// back a plain bullet, and saving wrote `- [x] done` back out as
+  /// `- done`. Found here for both shapes instead.
+  ///
+  /// Every other child is passed through untouched, so an item's
+  /// paragraphs still become the one Quill line they always did.
+  Iterable<md.Node> _itemChildren(md.Element item) sync* {
+    for (final child in item.children ?? const <md.Node>[]) {
+      if (child is md.Element && child.tag == 'p') {
+        yield* child.children ?? const <md.Node>[];
+      } else {
+        yield child;
+      }
+    }
   }
 
   List<Map<String, dynamic>> _inlineOps(
