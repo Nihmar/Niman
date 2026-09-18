@@ -64,6 +64,14 @@ in the window's title.
 On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
 in the note's bar offers the same actions.
 
+The same formatting is also on the **context menu**: right-click in either
+editor (long-press on a phone). Under cut, copy and paste come the toolbar's
+buttons, with the same icons, names and grouping, and a format that is
+on at the caret reads as on, just as it does on the toolbar. They apply
+to the selection, so a word picked with the mouse can be made bold where
+it is. The toolbar stays; the menu is a second way in. It lists the
+buttons you keep on the toolbar, in the same order.
+
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
 gives you a fresh empty box. Enter on an item you have not typed
