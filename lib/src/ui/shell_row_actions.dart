@@ -36,6 +36,7 @@ final class ShellRowActions {
     required this.onDeleted,
     required this.onHistory,
     required this.onOpenInNewTab,
+    required this.onOpenBeside,
   });
 
   /// The open library's session.
@@ -68,6 +69,9 @@ final class ShellRowActions {
   /// Opens the note in a tab of its own (#23).
   final void Function(String path) onOpenInNewTab;
 
+  /// Opens the note in the other pane, splitting first if need be.
+  final void Function(String path) onOpenBeside;
+
   /// Runs [action] for [note], creating in [here] where the action makes
   /// something new. A null action (the menu was dismissed) does nothing.
   Future<void> run(
@@ -99,6 +103,8 @@ final class ShellRowActions {
         await onHistory(note.path);
       case 'newtab':
         onOpenInNewTab(note.path);
+      case 'beside':
+        onOpenBeside(note.path);
       case 'reveal':
         await openOutside(context, note, TreeContextAction.openInFileManager);
       case 'openexternal':

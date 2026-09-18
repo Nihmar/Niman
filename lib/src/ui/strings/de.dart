@@ -1184,6 +1184,14 @@ final class GermanStrings extends Strings {
   @override
   String get openInNewTab => 'In neuem Tab öffnen';
   @override
+  String get splitRight => 'Rechts teilen';
+  @override
+  String get splitDown => 'Unten teilen';
+  @override
+  String get moveToOtherPane => 'In den anderen Bereich verschieben';
+  @override
+  String get openBeside => 'Daneben öffnen';
+  @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
   @override

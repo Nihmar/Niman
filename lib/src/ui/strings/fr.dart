@@ -1195,6 +1195,14 @@ final class FrenchStrings extends Strings {
   @override
   String get openInNewTab => 'Ouvrir dans un nouvel onglet';
   @override
+  String get splitRight => 'Diviser à droite';
+  @override
+  String get splitDown => 'Diviser en bas';
+  @override
+  String get moveToOtherPane => 'Déplacer dans l’autre volet';
+  @override
+  String get openBeside => 'Ouvrir à côté';
+  @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';
   @override

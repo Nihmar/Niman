@@ -100,17 +100,47 @@ final class ShellWorkspace {
     });
   }
 
-  /// Shows the focused pane's tab at [index].
-  void activate(int index) =>
-      controller.update((w) => w.activate(w.focused, index));
+  /// Shows [pane]'s tab at [index], focusing the pane.
+  void activate(int pane, int index) =>
+      controller.update((w) => w.activate(pane, index));
 
-  /// Closes the focused pane's tab at [index].
-  void close(int index) => controller.update((w) => w.close(w.focused, index));
+  /// Closes [pane]'s tab at [index].
+  void close(int pane, int index) =>
+      controller.update((w) => w.close(pane, index));
+
+  /// Gives [pane] the focus: where the next note opens.
+  void focus(int pane) => controller.update((w) => w.focus(pane));
+
+  /// Splits [axis] with [pane]'s tab at [index] (#23): it moves into the
+  /// new pane, or the new pane opens empty beside a pane's only tab.
+  void splitWith(int pane, int index, SplitAxis axis) =>
+      controller.update((w) => w.splitWith(pane, index, axis));
+
+  /// Moves [pane]'s tab at [index] to the other pane.
+  void moveToOtherPane(int pane, int index) =>
+      controller.update((w) => w.moveTab(pane, index, 1 - pane));
+
+  /// Opens [path] in the other pane, splitting [axis] first if need be.
+  void openBeside(String path, SplitAxis axis) {
+    _following = path;
+    _followed = true;
+    controller.update((w) => w.openBeside(path, axis));
+  }
+
+  /// Sets the split's first pane to [fraction] of the space.
+  void setFraction(double fraction) =>
+      controller.update((w) => w.withFraction(fraction));
 
   /// Closes the tab showing, if any.
   void closeActive() => controller.update((w) {
     final pane = w.focusedPane;
     return pane.active < 0 ? w : w.close(w.focused, pane.active);
+  });
+
+  /// Splits [axis] with the focused pane's showing tab (`Ctrl+\`).
+  void splitActive(SplitAxis axis) => controller.update((w) {
+    final pane = w.focusedPane;
+    return w.splitWith(w.focused, pane.active, axis);
   });
 
   /// Shows the tab [step] away from the showing one, wrapping around.
@@ -132,11 +162,16 @@ final class ShellWorkspace {
   /// Records a loaded note's [length], for [largeNote].
   void noteLoaded(String path, int length) => _lengths[path] = length;
 
-  /// The tabs whose editor stays mounted: the showing one, then the most
-  /// recently shown others up to [keptAlive], passing over large notes.
+  /// The tabs whose editor stays mounted: each pane's showing one, then
+  /// the most recently shown others up to [keptAlive], passing over
+  /// large notes.
   Set<String> mounted() {
     final w = value;
     final active = w.activePath;
+    final showing = {
+      for (final pane in w.panes)
+        if (pane.activeTab case final tab?) tab.path,
+    };
     final open = {for (final tab in w.tabs) tab.path};
     _recent.removeWhere((path) => !open.contains(path));
     if (active != null) {
@@ -144,11 +179,13 @@ final class ShellWorkspace {
         ..remove(active)
         ..insert(0, active);
     }
-    final alive = <String>{?active};
+    final alive = <String>{...showing};
+    var extra = 0;
     for (final path in _recent) {
-      if (alive.length > keptAlive) break;
-      if (path == active || (_lengths[path] ?? 0) > largeNote) continue;
+      if (extra >= keptAlive) break;
+      if (alive.contains(path) || (_lengths[path] ?? 0) > largeNote) continue;
       alive.add(path);
+      extra++;
     }
     return alive;
   }

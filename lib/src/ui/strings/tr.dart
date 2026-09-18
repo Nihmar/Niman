@@ -1150,6 +1150,14 @@ final class TurkishStrings extends Strings {
   @override
   String get openInNewTab => 'Yeni sekmede aç';
   @override
+  String get splitRight => 'Sağa böl';
+  @override
+  String get splitDown => 'Aşağı böl';
+  @override
+  String get moveToOtherPane => 'Diğer bölmeye taşı';
+  @override
+  String get openBeside => 'Yanda aç';
+  @override
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override
   String get openFileFailed => 'Bu not Niman dışında açılamadı';

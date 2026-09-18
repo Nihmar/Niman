@@ -1157,6 +1157,14 @@ final class CzechStrings extends Strings {
   @override
   String get openInNewTab => 'Otevřít v nové kartě';
   @override
+  String get splitRight => 'Rozdělit doprava';
+  @override
+  String get splitDown => 'Rozdělit dolů';
+  @override
+  String get moveToOtherPane => 'Přesunout do druhého panelu';
+  @override
+  String get openBeside => 'Otevřít vedle';
+  @override
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
   String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';

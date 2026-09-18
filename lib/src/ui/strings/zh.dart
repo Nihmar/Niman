@@ -1055,6 +1055,14 @@ final class ChineseStrings extends Strings {
   @override
   String get openInNewTab => '在新标签页中打开';
   @override
+  String get splitRight => '向右拆分';
+  @override
+  String get splitDown => '向下拆分';
+  @override
+  String get moveToOtherPane => '移到另一个窗格';
+  @override
+  String get openBeside => '在侧边打开';
+  @override
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override
   String get openFileFailed => '无法在 Niman 之外打开这篇笔记';

@@ -1175,6 +1175,14 @@ final class DutchStrings extends Strings {
   @override
   String get openInNewTab => 'Openen in nieuw tabblad';
   @override
+  String get splitRight => 'Rechts splitsen';
+  @override
+  String get splitDown => 'Onder splitsen';
+  @override
+  String get moveToOtherPane => 'Naar het andere paneel verplaatsen';
+  @override
+  String get openBeside => 'Ernaast openen';
+  @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';
   @override

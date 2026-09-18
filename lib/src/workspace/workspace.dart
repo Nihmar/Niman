@@ -165,6 +165,37 @@ final class Workspace {
     );
   }
 
+  /// Gives [pane] the focus — an empty one too: the next note opens
+  /// there.
+  Workspace focus(int pane) =>
+      pane < 0 || pane >= panes.length || pane == focused
+      ? this
+      : _copy(focused: pane);
+
+  /// Splits [axis] with the tab at [index] of [pane]: it moves into the
+  /// new pane, which takes the focus. A pane with that tab alone keeps
+  /// it, and the new pane opens empty — a note is open in one place, so
+  /// there is nothing else to put there.
+  Workspace splitWith(int pane, int index, SplitAxis axis) {
+    if (isSplit) return this;
+    final split = this.split(axis);
+    final source = panes[pane];
+    if (source.tabs.length < 2 || index < 0 || index >= source.tabs.length) {
+      return split;
+    }
+    return split.moveTab(pane, index, 1);
+  }
+
+  /// Opens [path] in the other pane, splitting [axis] first when the
+  /// window is not split: "open to the side".
+  Workspace openBeside(String path, SplitAxis axis) {
+    final at = locate(path);
+    if (at != null) return activate(at.pane, at.index);
+    final split = isSplit ? this : this.split(axis);
+    final other = isSplit ? 1 - focused : 1;
+    return split.focus(other).open(path);
+  }
+
   /// Closes the tab at [index] of [pane].
   ///
   /// Closing the tab that is showing shows its right-hand neighbour, or

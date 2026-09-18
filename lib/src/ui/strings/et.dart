@@ -1143,6 +1143,14 @@ final class EstonianStrings extends Strings {
   @override
   String get openInNewTab => 'Ava uuel vahekaardil';
   @override
+  String get splitRight => 'Jaga paremale';
+  @override
+  String get splitDown => 'Jaga alla';
+  @override
+  String get moveToOtherPane => 'Teisalda teisele paanile';
+  @override
+  String get openBeside => 'Ava kõrval';
+  @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override
   String get openFileFailed =>
