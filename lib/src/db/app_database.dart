@@ -113,6 +113,28 @@ class WidgetConfigs extends Table {
   Set<Column> get primaryKey => {androidWidgetId};
 }
 
+/// The notes left open in a library on this device (issue #23): its
+/// panes, tabs and where each note was left, as the workspace's own JSON.
+///
+/// App-side on purpose, like [KnownLibraries] — decision 1 of the plan on
+/// #23. `.niman/settings.json` syncs, and a phone must not inherit the
+/// desktop's tabs; how a device is laid out is not the library's data.
+/// Forgetting the library drops its row.
+@DataClassName('WorkspaceRow')
+class Workspaces extends Table {
+  /// Absolute, normalized path of the library root; the primary key.
+  TextColumn get libraryPath => text().named('library_path')();
+
+  /// The workspace, as `Workspace.toJson` writes it.
+  TextColumn get state => text()();
+
+  /// When it was last written.
+  DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+
+  @override
+  Set<Column> get primaryKey => {libraryPath};
+}
+
 /// A library the app knows about: one row per entry on the home screen
 /// (T-ML-04).
 ///
@@ -291,6 +313,7 @@ class SyncOps extends Table {
     SyncDestinations,
     SyncItems,
     SyncOps,
+    Workspaces,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -298,7 +321,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -340,7 +363,8 @@ class AppDatabase extends _$AppDatabase {
   /// `last_update_check_ms` (null until the first check runs), and pre-v22
   /// databases gain the WebDAV sync state (M5): `sync_destinations`,
   /// `sync_items` and `sync_ops`, all empty — no library syncs until one
-  /// is configured.
+  /// is configured, and pre-v23 databases gain `workspaces` (issue #23),
+  /// empty: every library starts with nothing open.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -483,6 +507,9 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(syncDestinations);
         await m.createTable(syncItems);
         await m.createTable(syncOps);
+      }
+      if (from < 23) {
+        await m.createTable(workspaces);
       }
     },
   );
