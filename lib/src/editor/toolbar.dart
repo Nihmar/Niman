@@ -9,6 +9,7 @@ final class EditorToolbarButton {
     required this.tooltip,
     required this.onPressed,
     this.active = false,
+    this.group,
   });
 
   /// The button's widget key (tests identify buttons by it).
@@ -27,6 +28,10 @@ final class EditorToolbarButton {
   /// it is toggled off, the way a word processor's toolbar behaves
   /// (T-WYS-06). The source editor leaves it false.
   final bool active;
+
+  /// The button's kind; a dense toolbar draws a divider wherever two
+  /// neighbours' kinds differ (#173). Null never divides.
+  final Object? group;
 }
 
 /// The toolbar's height: icon 20 px with 6 px padding above and below.
@@ -43,13 +48,21 @@ const double editorToolbarHeight = 32;
 /// commands (editor/md_editing.dart) through the controller.
 final class EditorToolbar extends StatelessWidget {
   /// Creates the toolbar; [buttons] scroll horizontally when they overflow.
-  const new({required this.buttons, super.key});
+  const new({required this.buttons, this.dense = false, super.key});
 
   /// The toolbar buttons, in display order.
   final List<EditorToolbarButton> buttons;
 
+  /// The desktop's toolbar (#173): smaller targets than a thumb needs,
+  /// and a divider between kinds of button. The phone's stays full size
+  /// — it rides the keyboard, under a finger.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final pad = dense ? 6.0 : 8.0;
+    final iconSize = dense ? 18.0 : 20.0;
     return SizedBox(
       height: editorToolbarHeight,
       child: SingleChildScrollView(
@@ -57,7 +70,18 @@ final class EditorToolbar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (final button in buttons)
+            for (final (i, button) in buttons.indexed) ...[
+              if (dense &&
+                  i > 0 &&
+                  button.group != null &&
+                  buttons[i - 1].group != null &&
+                  button.group != buttons[i - 1].group)
+                Container(
+                  width: 1,
+                  height: 16,
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  color: theme.dividerColor,
+                ),
               Tooltip(
                 message: button.tooltip,
                 child: InkWell(
@@ -65,9 +89,9 @@ final class EditorToolbar extends StatelessWidget {
                   onTap: button.onPressed,
                   canRequestFocus: false,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: pad,
+                      vertical: (editorToolbarHeight - iconSize) / 2,
                     ),
                     decoration: button.active
                         ? BoxDecoration(
@@ -79,7 +103,7 @@ final class EditorToolbar extends StatelessWidget {
                         : null,
                     child: Icon(
                       button.icon,
-                      size: 20,
+                      size: iconSize,
                       color: button.active
                           ? Theme.of(context).colorScheme.onPrimaryContainer
                           : null,
@@ -87,6 +111,7 @@ final class EditorToolbar extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
           ],
         ),
       ),

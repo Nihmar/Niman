@@ -38,7 +38,6 @@ import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
-import 'package:niman/src/ui/shell_editor_header.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
 import 'package:niman/src/ui/shell_home_widgets.dart';
 import 'package:niman/src/ui/shell_layout.dart';
@@ -1823,7 +1822,6 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note controls the window app bar used to hold. Hiding the tree (the
   /// title bar's toggle) gives its width to the detail pane.
   Widget _wideBody(LibrarySession controller) {
-    final noteOpen = _selected != null && !_selectedIsDir;
     return Row(
       children: [
         if (_sidebarVisible) ...[
@@ -1843,7 +1841,6 @@ final class _LibraryShellState extends State<_LibraryShell>
         Expanded(
           child: Column(
             children: [
-              if (noteOpen) _editorHeader(),
               Expanded(
                 child: ShellDetailPane(
                   root: controller.root,
@@ -1851,6 +1848,9 @@ final class _LibraryShellState extends State<_LibraryShell>
                   selectedIsDir: _selectedIsDir,
                   showLineNumbers: _editorSettings.lineNumbers,
                   noteColumn: _editorSettings.noteColumn,
+                  // The kind toggles and ⋮ sit at the end of the note's
+                  // one row of chrome (#173); there is no header above.
+                  barActions: [..._kindActions, _noteMenu()],
                   autofocusEditor: _editorSettings.autofocusEditor,
                   linkType: _editorSettings.linkType,
                   missingNoteLocation: _editorSettings.missingNoteLocation,
@@ -2016,15 +2016,6 @@ final class _LibraryShellState extends State<_LibraryShell>
       case NewShellItem.folder:
         unawaited(_createFlow.createFolder(context));
     }
-  }
-
-  /// The open note's header in the detail pane (issue #100 moved the bar
-  /// itself into [EditorHeaderBar]).
-  Widget _editorHeader() {
-    return EditorHeaderBar(
-      path: _selected!,
-      actions: [..._kindActions, _noteMenu()],
-    );
   }
 
   /// The tree pane: the action bar and the note tree — the whole body on

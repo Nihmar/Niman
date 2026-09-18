@@ -100,6 +100,27 @@ enum ToolbarItem {
     ToolbarItem.tools => AppStrings.toolbarTools,
   };
 
+  /// What kind of button it is, for the dividers the desktop's dense
+  /// toolbar draws between kinds (#173): the user arranges the order, and
+  /// a divider falls wherever two neighbours differ.
+  ToolbarGroup get group => switch (this) {
+    ToolbarItem.bold ||
+    ToolbarItem.italic ||
+    ToolbarItem.strikethrough ||
+    ToolbarItem.superscript ||
+    ToolbarItem.underline => ToolbarGroup.text,
+    ToolbarItem.heading ||
+    ToolbarItem.list ||
+    ToolbarItem.orderedList ||
+    ToolbarItem.quote ||
+    ToolbarItem.outdent ||
+    ToolbarItem.indent => ToolbarGroup.block,
+    ToolbarItem.link ||
+    ToolbarItem.code ||
+    ToolbarItem.image ||
+    ToolbarItem.tools => ToolbarGroup.insert,
+  };
+
   /// The item with this [id], or null when the build does not know it.
   static ToolbarItem? fromId(String id) {
     for (final item in ToolbarItem.values) {
@@ -107,4 +128,16 @@ enum ToolbarItem {
     }
     return null;
   }
+}
+
+/// The kinds of toolbar button (#173).
+enum ToolbarGroup {
+  /// Formats a run of text: bold, italic, strikethrough.
+  text,
+
+  /// Shapes a whole line: heading, lists, quote, indent.
+  block,
+
+  /// Puts something in: a link, a code block, an image, a tool.
+  insert,
 }

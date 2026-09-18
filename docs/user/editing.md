@@ -51,6 +51,19 @@ Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 Formatting toolbar buttons apply to whichever editor is active.
 
+On the desktop the toolbar and the note's own controls share **one row**
+above the note, in both editors. The formatting is on the left, grouped
+(text, lines, insertions) with a thin divider between groups, and the
+note's **⋮** menu (history, rename, move, delete) is at the right end,
+next to the list or voice-note switch when the note has one. The row
+keeps to the note's column, so its first button sits over the start of
+the text. It stays when there is nothing to format, in the preview or on
+a list note, so the ⋮ is always in the same place. The note's name is
+in the window's title.
+
+On a phone the toolbar keeps its size and rides the keyboard, and the ⋮
+in the note's bar offers the same actions.
+
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on, and a task item
 gives you a fresh empty box. Enter on an item you have not typed
