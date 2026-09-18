@@ -129,12 +129,22 @@ final class AppStrings {
   static String get keyboardOnOpenSubtitle => _s.keyboardOnOpenSubtitle;
   static String get editorKindSource => _s.editorKindSource;
   static String get editorKindWysiwyg => _s.editorKindWysiwyg;
+  static String get editorKindSourceSubtitle => _s.editorKindSourceSubtitle;
+  static String get editorKindWysiwygSubtitle => _s.editorKindWysiwygSubtitle;
+  static String get settingsFolderToCreate => _s.settingsFolderToCreate;
+  static String get settingsSearchHint => _s.settingsSearchHint;
+  static String settingsSearchResults(int count) =>
+      _s.settingsSearchResults(count);
+  static String get settingsToggleOn => _s.settingsToggleOn;
+  static String get settingsToggleOff => _s.settingsToggleOff;
   static String get settingsPreviewEnabledTitle =>
       _s.settingsPreviewEnabledTitle;
   static String get settingsPreviewEnabledSubtitle =>
       _s.settingsPreviewEnabledSubtitle;
   static String get switchToWysiwygTooltip => _s.switchToWysiwygTooltip;
   static String get switchToSourceTooltip => _s.switchToSourceTooltip;
+  static String get switchToSourceLabel => _s.switchToSourceLabel;
+  static String get switchToWysiwygLabel => _s.switchToWysiwygLabel;
   static String get wysiwygTooLarge => _s.wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
@@ -144,6 +154,21 @@ final class AppStrings {
   static String get settingsSectionReminders => _s.settingsSectionReminders;
   static String get settingsSectionShortcuts => _s.settingsSectionShortcuts;
   static String get keyboardShortcutsTitle => _s.keyboardShortcutsTitle;
+
+  // Settings home (issue #104): the groups the areas sit under.
+  static String get settingsGroupApp => _s.settingsGroupApp;
+  static String settingsGroupLibrary(String name) =>
+      _s.settingsGroupLibrary(name);
+  static String get settingsGroupLibraryHint => _s.settingsGroupLibraryHint;
+  static String get settingsGroupMaintenance => _s.settingsGroupMaintenance;
+
+  // Settings home rows.
+  static String get settingsAreaFolders => _s.settingsAreaFolders;
+  static String get settingsAreaTrashHistory => _s.settingsAreaTrashHistory;
+  static String get settingsAreaDiagnostics => _s.settingsAreaDiagnostics;
+  static String get settingsAreaKeyboardDisabled =>
+      _s.settingsAreaKeyboardDisabled;
+
   static String get settingsSectionUpdates => _s.settingsSectionUpdates;
   static String get autoUpdateTitle => _s.autoUpdateTitle;
   static String get autoUpdateSubtitle => _s.autoUpdateSubtitle;
@@ -590,6 +615,8 @@ final class AppStrings {
   static String get newNoteSameFolder => _s.newNoteSameFolder;
   static String get newFromTemplateSameFolder => _s.newFromTemplateSameFolder;
   static String trashOriginalPath(String path) => _s.trashOriginalPath(path);
+  static String get trashOriginalRoot => _s.trashOriginalRoot;
+  static String trashItemCount(int count) => _s.trashItemCount(count);
   static String get newFolderHere => _s.newFolderHere;
   static String get newListNoteTitle => _s.newListNoteTitle;
   static String get newListNoteDefault => _s.newListNoteDefault;
@@ -607,6 +634,11 @@ final class AppStrings {
 
   // The template placeholder reference (T-TPL-08).
   static String get templateHelpTitle => _s.templateHelpTitle;
+  static String get templateHelpSubtitle => _s.templateHelpSubtitle;
+  static String get quickNoteSubtitle => _s.quickNoteSubtitle;
+  static String get listFolderSubtitle => _s.listFolderSubtitle;
+  static String get templateFolderSubtitle => _s.templateFolderSubtitle;
+  static String get attachmentsFolderSubtitle => _s.attachmentsFolderSubtitle;
   static String get templateHelpIntro => _s.templateHelpIntro;
   static String get templateHelpUnknown => _s.templateHelpUnknown;
 
@@ -925,6 +957,7 @@ final class AppStrings {
   static String syncScreenSubtitle(String library) =>
       _s.syncScreenSubtitle(library);
   static String get syncUrlLabel => _s.syncUrlLabel;
+  static String get syncUrlRequired => _s.syncUrlRequired;
   static String get syncUrlHint => _s.syncUrlHint;
   static String get syncHttpWarning => _s.syncHttpWarning;
   static String get syncUserLabel => _s.syncUserLabel;

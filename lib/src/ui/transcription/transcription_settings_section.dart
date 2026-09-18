@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/transcription/transcription_settings.dart';
+import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/transcription/transcription_models_screen.dart';
 
-/// The "Transcription" group of the settings list: the default model
+/// The "Transcription" rows of the settings: the default model
 /// (opening the models page) and the recordings' language.
+///
+/// The area screen carries the title; this is just the rows.
 final class TranscriptionSettingsSection extends StatelessWidget {
   /// Creates the section over the installation's [models].
   const new({required this.models, super.key});
@@ -26,27 +30,30 @@ final class TranscriptionSettingsSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SettingsSection(AppStrings.settingsSectionTranscription),
-            SettingsValueRow(
-              key: const Key('transcription-model-setting'),
-              title: AppStrings.transcriptionModelTitle,
-              value: model == null
-                  ? AppStrings.transcriptionModelNone
-                  : AppStrings.transcriptionModelName(model),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) =>
-                      TranscriptionModelsScreen(models: models),
+            HighlightRow(
+              key: SettingsKeys.transcriptionModel,
+              child: SettingsValueRow(
+                title: AppStrings.transcriptionModelTitle,
+                value: model == null
+                    ? AppStrings.transcriptionModelNone
+                    : AppStrings.transcriptionModelName(model),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) =>
+                        TranscriptionModelsScreen(models: models),
+                  ),
                 ),
               ),
             ),
-            SettingsValueRow(
-              key: const Key('transcription-language-setting'),
-              title: AppStrings.transcriptionLanguageTitle,
-              value: languageLabel(models.settings.language),
-              onTap: () =>
-                  unawaited(chooseTranscriptionLanguage(context, models)),
+            HighlightRow(
+              key: SettingsKeys.transcriptionLanguage,
+              child: SettingsValueRow(
+                title: AppStrings.transcriptionLanguageTitle,
+                value: languageLabel(models.settings.language),
+                onTap: () =>
+                    unawaited(chooseTranscriptionLanguage(context, models)),
+              ),
             ),
           ],
         );

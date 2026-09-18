@@ -100,6 +100,21 @@ final class CatalanStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Font Markdown, tal com està escrita';
+  @override
+  String get editorKindWysiwygSubtitle => 'Text amb format, editat directament';
+  @override
+  String get settingsFolderToCreate => 'per crear';
+  @override
+  String get settingsSearchHint => 'Cerca la configuració';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 paràmetre trobat' : '$count paràmetres trobats';
+  @override
+  String get settingsToggleOn => 'Activat';
+  @override
+  String get settingsToggleOff => 'Desactivat';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualització';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -108,6 +123,10 @@ final class CatalanStrings extends Strings {
   String get switchToWysiwygTooltip => 'Canvia a l’editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Canvia a la font Markdown';
+  @override
+  String get switchToSourceLabel => 'Font';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Aquesta nota és massa gran per a l’editor WYSIWYG. Obre-la a '
@@ -126,6 +145,26 @@ final class CatalanStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclat';
   @override
   String get keyboardShortcutsTitle => 'Dreceres de teclat';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => "només s'aplica a aquesta biblioteca";
+  @override
+  String get settingsGroupMaintenance => 'Manteniment';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Carpetes i camins';
+  @override
+  String get settingsAreaTrashHistory => 'Paperera i cronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnòstic i informació';
+  @override
+  String get settingsAreaKeyboardDisabled => 'Cal un teclat físic connectat';
   @override
   String get settingsSectionUpdates => 'Actualitzacions';
   @override
@@ -848,6 +887,11 @@ final class CatalanStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'era a $path';
   @override
+  String get trashOriginalRoot => 'era a l\u2019arrel de la biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elements';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Carpeta nova aquí';
@@ -881,6 +925,18 @@ final class CatalanStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Espais reservats de la plantilla';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, títol i els altres valors per omplir';
+  @override
+  String get quickNoteSubtitle => 'La nota que obre la pestanya de nota ràpida';
+  @override
+  String get listFolderSubtitle => 'Les llistes noves de tasques';
+  @override
+  String get templateFolderSubtitle => 'L’origen de «Nova des de plantilla»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imatges i àudio inserits en una nota';
   @override
   String get templateHelpIntro =>
       'Una plantilla és una nota normal amb forats. Crear una nota '
@@ -1479,6 +1535,8 @@ final class CatalanStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteca $library';
   @override
   String get syncUrlLabel => 'Adreça de la carpeta';
+  @override
+  String get syncUrlRequired => 'Introduïu l’adreça del servidor';
   @override
   String get syncUrlHint =>
       'La carpeta ha d’existir. Copia l’adreça tal com la mostra '

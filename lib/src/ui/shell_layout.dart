@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
@@ -37,6 +38,7 @@ final class ShellLayoutProps {
     required this.shortcutBindings,
     required this.onCloseFullScreenNote,
     required this.onLeaveFullScreenPreview,
+    required this.isQuickNote,
     required this.noteBarActions,
     required this.buildTabShell,
     required this.buildFullNote,
@@ -91,6 +93,10 @@ final class ShellLayoutProps {
   /// Leaves the full-screen *preview*, keeping the note.
   final VoidCallback onLeaveFullScreenPreview;
 
+  /// Whether the open note is the library's quick note: the app bar's
+  /// label says so (the tabs no longer do, issue #73, item 1).
+  final bool isQuickNote;
+
   /// The open note's own actions for the phone's note bar.
   final List<Widget> noteBarActions;
 
@@ -143,17 +149,50 @@ final class ShellLayoutProps {
       !previewSplitsHere;
 }
 
-/// The phone: the selected note opens full-screen, from any tab, over the
-/// tab shell, which stays mounted underneath (T-TS-08).
+/// The phone: the selected note opens full-screen, from any tab, as a
+/// page over the tab shell, which stays mounted underneath (T-TS-08).
 ///
-/// Swapping the tab shell out used to dispose all five kept-alive bodies
-/// at once, and going back remounted them mid-animation.
+/// The note is a page, not a tab: it opens full-screen and the tab bar
+/// does not sit under it (issue #73, item 1) — going anywhere else is
+/// back, and back lands where the note was opened from. Swapping the
+/// tab shell out used to dispose all five kept-alive bodies at once, and
+/// going back remounted them mid-animation.
 final class NarrowShellLayout extends StatelessWidget {
   /// Creates the phone layout.
   const new({required this.props, super.key});
 
   /// What to draw, and what to call.
   final ShellLayoutProps props;
+
+  /// The app bar's title: the note's name, its folder under it (the
+  /// note is a page now, not a tab — the tab bar no longer says where
+  /// it lives), and, for the quick note, the label that says so.
+  Widget _noteTitle(BuildContext context, String path) {
+    final folder = p.dirname(path);
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (props.isQuickNote)
+          Text(
+            AppStrings.quickNoteTitle.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              letterSpacing: 1,
+            ),
+          ),
+        Text(p.basename(path)),
+        if (folder != '.')
+          Text(
+            folder,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +255,7 @@ final class NarrowShellLayout extends StatelessWidget {
                                   leading: BackButton(
                                     onPressed: props.onCloseFullScreenNote,
                                   ),
-                                  title: Text(p.basename(selectedPath)),
+                                  title: _noteTitle(context, selectedPath),
                                   actions: props.noteBarActions,
                                 ),
                           body: Stack(
@@ -242,13 +281,6 @@ final class NarrowShellLayout extends StatelessWidget {
                                 ),
                             ],
                           ),
-                          bottomNavigationBar: immersive
-                              ? null
-                              : ShellTabBar(
-                                  selectedIndex: props.tabIndex,
-                                  onDestinationSelected:
-                                      props.onDestinationSelected,
-                                ),
                         ),
                       )
                     : null,

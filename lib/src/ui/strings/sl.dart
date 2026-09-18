@@ -103,6 +103,22 @@ final class SlovenianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Izvor Markdown, kot je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Oblikovano besedilo, urejeno na mestu';
+  @override
+  String get settingsFolderToCreate => 'za ustvariti';
+  @override
+  String get settingsSearchHint => 'Išči v nastavitvah';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 najdena nastavitev' : '$count najdenih nastavitev';
+  @override
+  String get settingsToggleOn => 'Vklopljeno';
+  @override
+  String get settingsToggleOff => 'Izklopljeno';
+  @override
   String get settingsPreviewEnabledTitle => 'Predogled';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -111,6 +127,10 @@ final class SlovenianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Preklopi na urejevalnik WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Preklopi na Markdown vir';
+  @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ta opomba je prevelika za urejevalnik WYSIWYG. Odprite jo kot '
@@ -129,6 +149,27 @@ final class SlovenianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tipkovnica';
   @override
   String get keyboardShortcutsTitle => 'Bližnjice';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knjižnica $name';
+  @override
+  String get settingsGroupLibraryHint => 'veli samo za to knjižnico';
+  @override
+  String get settingsGroupMaintenance => 'Vzdrževanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mape in poti';
+  @override
+  String get settingsAreaTrashHistory => 'Koš in kronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika in info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je priključena fizična tipkovnica';
   @override
   String get settingsSectionUpdates => 'Posodobitve';
   @override
@@ -827,6 +868,11 @@ final class SlovenianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bil je v $path';
   @override
+  String get trashOriginalRoot => 'je bilo v korenu knji\u017enice';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementov';
+  @override
   String get newNoteHere => 'Nova opomba sem';
   @override
   String get newFolderHere => 'Nova mapa sem';
@@ -860,6 +906,17 @@ final class SlovenianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Mestni znaki predlog';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov in druge vrednosti za izpolnitev';
+  @override
+  String get quickNoteSubtitle => 'Zapis, ki ga odpre zavihek Hitri zapis';
+  @override
+  String get listFolderSubtitle => 'Novi seznami opravil';
+  @override
+  String get templateFolderSubtitle => 'Vir za „Novo iz predloge“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike in zvok, vstavljeni v zapis';
   @override
   String get templateHelpIntro =>
       'Predloga je navadna opomba s prazninami. Ustvarjanje opombe iz nje '
@@ -1441,6 +1498,8 @@ final class SlovenianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Knjižnica $library';
   @override
   String get syncUrlLabel => 'Naslov mape';
+  @override
+  String get syncUrlRequired => 'Vnesite naslov strežnika';
   @override
   String get syncUrlHint =>
       'Mapa mora obstajati. Naslov kopirajte tako, kot ga '

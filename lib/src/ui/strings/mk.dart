@@ -100,6 +100,22 @@ final class MacedonianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown извор, како што е напишан';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматиран текст, се уредува директно';
+  @override
+  String get settingsFolderToCreate => 'за создавање';
+  @override
+  String get settingsSearchHint => 'Пребарај поставки';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 пронајдена поставка' : '$count пронајдени поставки';
+  @override
+  String get settingsToggleOn => 'Вклучено';
+  @override
+  String get settingsToggleOff => 'Исклучено';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -108,6 +124,10 @@ final class MacedonianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Префрли на WYSIWYG уредник';
   @override
   String get switchToSourceTooltip => 'Префрли на Markdown изворот';
+  @override
+  String get switchToSourceLabel => 'Извор';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Оваа белешка е премногу голема за WYSIWYG уредникот. Отвори ја во '
@@ -126,6 +146,27 @@ final class MacedonianStrings extends Strings {
   String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Тастатурски прецици';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за оваа библиотека';
+  @override
+  String get settingsGroupMaintenance => 'Одржување';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки и патеши';
+  @override
+  String get settingsAreaTrashHistory => 'Корпа и хронологија';
+  @override
+  String get settingsAreaDiagnostics => 'Дијагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потребна е поврзана физичка тастатура';
   @override
   String get settingsSectionUpdates => 'Ажурирања';
   @override
@@ -833,6 +874,12 @@ final class MacedonianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'беше во $path';
   @override
+  String get trashOriginalRoot => 'беше во коренот на библиотеката';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0441\u0442\u0430\u0432\u043a\u0430'
+      : '$count \u0441\u0442\u0430\u0432\u043a\u0438';
+  @override
   String get newNoteHere => 'Нова белешка овде';
   @override
   String get newFolderHere => 'Нова папка овде';
@@ -866,6 +913,18 @@ final class MacedonianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Места за замена во шаблон';
+  @override
+  String get templateHelpSubtitle =>
+      'Датум, наслов и другите вредности за пополнување';
+  @override
+  String get quickNoteSubtitle =>
+      'Белешката што ја отвора картичката за брза белешка';
+  @override
+  String get listFolderSubtitle => 'Новите листи на задачи';
+  @override
+  String get templateFolderSubtitle => 'Изворот на „Ново од шаблон“';
+  @override
+  String get attachmentsFolderSubtitle => 'Слики и аудио вметнати во белешка';
   @override
   String get templateHelpIntro =>
       'Шаблон е обична белешка со дупки. Креирање белешка од него ја '
@@ -1454,6 +1513,8 @@ final class MacedonianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Библиотека $library';
   @override
   String get syncUrlLabel => 'Адреса на папката';
+  @override
+  String get syncUrlRequired => 'Внесете ја адресата на серверот';
   @override
   String get syncUrlHint =>
       'Папката мора да постои. Копирајте ја адресата како што ја '

@@ -22,6 +22,7 @@ final class NewItemFab extends StatelessWidget {
     required this.onNewAudioNote,
     required this.onNewFromTemplate,
     required this.onNewFolder,
+    this.listFolder,
     super.key,
   });
 
@@ -58,8 +59,14 @@ final class NewItemFab extends StatelessWidget {
   /// Creates a new folder in the FAB target folder.
   final VoidCallback onNewFolder;
 
+  /// The configured list folder, naming where *New list note* lands:
+  /// the only action that does not use the FAB target folder, so the
+  /// only one that says its folder (issue #131).
+  final String? listFolder;
+
   @override
   Widget build(BuildContext context) {
+    final listFolder = this.listFolder;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -83,7 +90,9 @@ final class NewItemFab extends StatelessWidget {
         _MiniFab(
           key: const Key('new-list-note-action'),
           icon: Icons.checklist_outlined,
-          label: AppStrings.newListNoteTitle,
+          label: listFolder == null
+              ? AppStrings.newListNoteTitle
+              : '${AppStrings.newListNoteTitle} · $listFolder',
           open: expanded,
           onTap: onNewListNote,
         ),
@@ -170,7 +179,17 @@ final class _MiniFab extends StatelessWidget {
             heroTag: null,
             onPressed: onTap,
             icon: Icon(icon),
-            label: Text(label),
+            // The list note's label carries its folder, so the width is
+            // the library's to decide: a deep list folder in a long
+            // language would otherwise run past the screen edge. The
+            // button stops at two thirds of the width and the folder
+            // ellipsizes.
+            label: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.66,
+              ),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
           ),
         ),
       ),

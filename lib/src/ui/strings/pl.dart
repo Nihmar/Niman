@@ -100,6 +100,22 @@ final class PolishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Źródło Markdown, tak jak napisane';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Tekst sformatowany, edytowany w miejscu';
+  @override
+  String get settingsFolderToCreate => 'do utworzenia';
+  @override
+  String get settingsSearchHint => 'Szukaj w ustawieniach';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 znalezione ustawienie' : '$count znalezionych ustawień';
+  @override
+  String get settingsToggleOn => 'Włączone';
+  @override
+  String get settingsToggleOff => 'Wyłączone';
+  @override
   String get settingsPreviewEnabledTitle => 'Podgląd';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -108,6 +124,10 @@ final class PolishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Przełącz na edytor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Przełącz na źródło Markdown';
+  @override
+  String get switchToSourceLabel => 'Źródło';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ta notatka jest zbyt duża dla edytora WYSIWYG. Otwórz ją w '
@@ -126,6 +146,27 @@ final class PolishStrings extends Strings {
   String get settingsSectionShortcuts => 'Klawiatura';
   @override
   String get keyboardShortcutsTitle => 'Skróty klawiszowe';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'dotyczy tylko tej biblioteki';
+  @override
+  String get settingsGroupMaintenance => 'Konserwacja';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Foldery i ścieżki';
+  @override
+  String get settingsAreaTrashHistory => 'Kosz i historia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostyka i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Wymaga podłączonej fizycznej klawiatury';
   @override
   String get settingsSectionUpdates => 'Aktualizacje';
   @override
@@ -839,6 +880,12 @@ final class PolishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'była w $path';
   @override
+  String get trashOriginalRoot =>
+      'by\u0142o w katalogu g\u0142\u00f3wnym biblioteki';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count element\u00f3w';
+  @override
   String get newNoteHere => 'Nowa notatka tutaj';
   @override
   String get newFolderHere => 'Nowy katalog tutaj';
@@ -872,6 +919,18 @@ final class PolishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Placeholdery szablonu';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, tytuł i pozostałe wartości do wypełnienia';
+  @override
+  String get quickNoteSubtitle => 'Notatka, którą otwiera karta Szybka notatka';
+  @override
+  String get listFolderSubtitle => 'Nowe listy zadań';
+  @override
+  String get templateFolderSubtitle => 'Źródło „Nowa z szablonu“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Obrazy i dźwięk wstawione do notatki';
   @override
   String get templateHelpIntro =>
       'Szablon to zwykła notatka z dziurami. Utworzenie notatki z niego '
@@ -1467,6 +1526,8 @@ final class PolishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteka $library';
   @override
   String get syncUrlLabel => 'Adres katalogu';
+  @override
+  String get syncUrlRequired => 'Wpisz adres serwera';
   @override
   String get syncUrlHint =>
       'Katalog musi istnieć. Skopiuj adres tak, jak pokazuje go '

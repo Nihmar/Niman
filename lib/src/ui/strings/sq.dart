@@ -95,6 +95,23 @@ final class AlbanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Burimi Markdown, ashtu siç është shkruar';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Tekst i formatuar, redaktohet në vend';
+  @override
+  String get settingsFolderToCreate => 'për t\u2019u krijuar';
+  @override
+  String get settingsSearchHint => 'Kërko në cilësimet';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 cilësim u gjet' : '$count cilësime u gjetën';
+  @override
+  String get settingsToggleOn => 'Aktiv';
+  @override
+  String get settingsToggleOff => 'Joaktiv';
+  @override
   String get settingsPreviewEnabledTitle => 'Parapamja';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -103,6 +120,10 @@ final class AlbanianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Kalo te redaktori WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Kalo te burimi Markdown';
+  @override
+  String get switchToSourceLabel => 'Burimi';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Kjo shënim është tepër i madh për redaktorin WYSIWYG. Hape te '
@@ -121,6 +142,26 @@ final class AlbanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Shkurtoret e tastaturës';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'vlen vetëm për këtë bibliotekë';
+  @override
+  String get settingsGroupMaintenance => 'Mirëmbajtja';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Tresët dhe rrugët';
+  @override
+  String get settingsAreaTrashHistory => 'Koshi e kronologjia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikë e info';
+  @override
+  String get settingsAreaKeyboardDisabled => 'Kërkon tastierë fizike të lidhur';
   @override
   String get settingsSectionUpdates => 'Përditësime';
   @override
@@ -831,6 +872,12 @@ final class AlbanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'ishte në $path';
   @override
+  String get trashOriginalRoot =>
+      'ishte n\u00eb rr\u00ebnj\u00ebn e bibliotek\u00ebs';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count element\u00eb';
+  @override
   String get newNoteHere => 'Shënim i ri këtu';
   @override
   String get newFolderHere => 'Tresë e re këtu';
@@ -864,6 +911,18 @@ final class AlbanianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Vendëzëvendësuesit në shabllon';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, titulli dhe vlerat e tjera për të plotësuar';
+  @override
+  String get quickNoteSubtitle => 'Shënimi që hap skeda Shënim i shpejtë';
+  @override
+  String get listFolderSubtitle => 'Listat e reja të detyrave';
+  @override
+  String get templateFolderSubtitle => 'Burimi i „E re nga shablloni“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imazhe dhe audio të futura në një shënim';
   @override
   String get templateHelpIntro =>
       'Një shabllon është një shënim i thjeshtë me boshnira. Krijimi i '
@@ -1462,6 +1521,8 @@ final class AlbanianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteka $library';
   @override
   String get syncUrlLabel => 'Adresa e tresës';
+  @override
+  String get syncUrlRequired => 'Jep adresën e serverit';
   @override
   String get syncUrlHint =>
       'Tresa duhet të ekzistojë. Kopjojeni adresën ashtu siç e '

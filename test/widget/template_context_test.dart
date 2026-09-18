@@ -140,10 +140,12 @@ void main() {
     await controller.createNote(parentPath: '', name: 'Kingdoms');
     await settle(tester);
     // Open a note, then go back to the tree, which is what creating a
-    // note from a template leaves you doing next.
+    // note from a template leaves you doing next. The note is a page
+    // over the tab, so back is the app bar's arrow; it lands on Files,
+    // where the note was opened.
     await tester.tap(noteRow('Kingdoms.md'));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('tab-files')));
+    await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
     await useTemplate(tester, 'Loose');

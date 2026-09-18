@@ -99,6 +99,21 @@ final class SwedishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-källa, som skriven';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formaterad text, redigeras direkt';
+  @override
+  String get settingsFolderToCreate => 'skapas';
+  @override
+  String get settingsSearchHint => 'Sök i inställningar';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 inställning hittades' : '$count inställningar hittades';
+  @override
+  String get settingsToggleOn => 'På';
+  @override
+  String get settingsToggleOff => 'Av';
+  @override
   String get settingsPreviewEnabledTitle => 'Förhandsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -107,6 +122,10 @@ final class SwedishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Byt till WYSIWYG-editorn';
   @override
   String get switchToSourceTooltip => 'Byt till Markdown-källan';
+  @override
+  String get switchToSourceLabel => 'Källa';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Denna anteckning är för stor för WYSIWYG-editorn. Öppna den i '
@@ -125,6 +144,27 @@ final class SwedishStrings extends Strings {
   String get settingsSectionShortcuts => 'Tangentbord';
   @override
   String get keyboardShortcutsTitle => 'Tangentbordsgenvägar';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gäller bara för det här biblioteket';
+  @override
+  String get settingsGroupMaintenance => 'Underhåll';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappar och sökvägar';
+  @override
+  String get settingsAreaTrashHistory => 'Papperskorgen och kronologi';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostik och info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Kräver ett anslutet fysiskt tangentbord';
   @override
   String get settingsSectionUpdates => 'Uppdateringar';
   @override
@@ -829,6 +869,10 @@ final class SwedishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'låg i $path';
   @override
+  String get trashOriginalRoot => 'var i bibliotekets rot';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 objekt' : '$count objekt';
+  @override
   String get newNoteHere => 'Ny anteckning här';
   @override
   String get newFolderHere => 'Ny mapp här';
@@ -862,6 +906,19 @@ final class SwedishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Mallplatshållare';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, titel och övriga värden att fylla i';
+  @override
+  String get quickNoteSubtitle =>
+      'Anteckningen som fliken Snabbanteckning öppnar';
+  @override
+  String get listFolderSubtitle => 'De nya uppgiftslistorna';
+  @override
+  String get templateFolderSubtitle => 'Källan till „Ny från mall“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Bilder och ljud infogade i en anteckning';
   @override
   String get templateHelpIntro =>
       'En mall är en vanlig anteckning med hål i. Att skapa en anteckning '
@@ -1451,6 +1508,8 @@ final class SwedishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliotek $library';
   @override
   String get syncUrlLabel => 'Mappens adress';
+  @override
+  String get syncUrlRequired => 'Ange serverns adress';
   @override
   String get syncUrlHint =>
       'Mappen måste finnas. Kopiera adressen så som servern '

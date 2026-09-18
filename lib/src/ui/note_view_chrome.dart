@@ -13,6 +13,7 @@ import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:re_editor/re_editor.dart';
 
 /// The frontmatter parse-error banner.
 final class FrontmatterWarningBanner extends StatelessWidget {
@@ -56,6 +57,13 @@ final class FrontmatterWarningBanner extends StatelessWidget {
 
 /// The status row (T-UI-07): outline toggle + word count left, saved/
 /// unsaved right.
+///
+/// The phone's row used to keep a tight hand (34×26 touch targets,
+/// below the 48 dp guideline, left alone on purpose: a tight phone
+/// row was asked for on 2026-09-11, and the space to loosen it
+/// honestly only existed while the tab bar sat under the note).
+/// The tab bar is gone from the note page (issue #73, item 1), so
+/// the freed height funds the guideline-sized targets.
 final class NoteStatusRow extends StatelessWidget {
   /// Creates the row; every tap leaves through a callback.
   const new({
@@ -136,7 +144,7 @@ final class NoteStatusRow extends StatelessWidget {
                 icon: const Icon(Icons.toc),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: () => unawaited(onOutline()),
               ),
             ),
@@ -150,14 +158,25 @@ final class NoteStatusRow extends StatelessWidget {
           if (!loading)
             Padding(
               padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-find-open'),
-                tooltip: AppStrings.findInNoteTooltip,
-                icon: const Icon(Icons.search),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: splitPreview || !showPreview ? onFind : null,
+              // In the editor's tap region like the formatting toolbar:
+              // re_editor unfocuses the editor on any tap outside it, so
+              // an unwrapped find button closes the keyboard on tap-down
+              // and the find field reopens it a frame later. Wrapped,
+              // focus moves straight to the find field and the keyboard
+              // never leaves.
+              child: CodeEditorTapRegion(
+                child: IconButton(
+                  key: const Key('editor-find-open'),
+                  tooltip: AppStrings.findInNoteTooltip,
+                  icon: const Icon(Icons.search),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  onPressed: splitPreview || !showPreview ? onFind : null,
+                ),
               ),
             ),
           if (!loading && spellCheckAvailable)
@@ -169,28 +188,36 @@ final class NoteStatusRow extends StatelessWidget {
                 icon: const Icon(Icons.spellcheck),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 onPressed: () => unawaited(onSpellCheck()),
               ),
             ),
           // The quick way between the two editors (T-WYS-12): the setting
-          // stays per library, the button just flips it.
+          // stays per library, the button just flips it. A text button
+          // naming the destination — tooltips only ever appear after a
+          // long press on Android, and an icon alone asked the reader to
+          // guess which surface it lands on.
           if (!loading && canSwitchEditorKind)
             Padding(
               padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-kind-toggle'),
-                tooltip: showWysiwyg
+              child: Tooltip(
+                message: showWysiwyg
                     ? AppStrings.switchToSourceTooltip
                     : AppStrings.switchToWysiwygTooltip,
-                icon: Icon(
-                  showWysiwyg ? Icons.code : Icons.edit_note,
-                  size: 18,
+                child: TextButton(
+                  key: const Key('editor-kind-toggle'),
+                  onPressed: onToggleEditorKind,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    textStyle: labelStyle,
+                  ),
+                  child: Text(
+                    showWysiwyg
+                        ? AppStrings.switchToSourceLabel
+                        : AppStrings.switchToWysiwygLabel,
+                  ),
                 ),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 34, minHeight: 26),
-                onPressed: onToggleEditorKind,
               ),
             ),
           if (!loading)

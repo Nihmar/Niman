@@ -438,6 +438,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// the rail always stays, T-PP-22).
   bool _sidebarVisible = true;
 
+  /// The library's quick note (library-relative path, or none): the
+  /// note page's app bar labels it, now that the tabs no longer do
+  /// (issue #73, item 1). Refreshed with the editor settings.
+  String? _quickNotePath;
+
   /// Carries focus for the app accelerators (T-PP-10) when nothing else
   /// wants it, so a keyboard-only tab switch is followed by a working next
   /// one: [FocusManager] would otherwise leave nothing focused.
@@ -627,6 +632,11 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// Whether the FAB menu (New note / New folder minis) is expanded;
   /// the shell owns it so the body can be scrimmed while it is open.
   bool _fabExpanded = false;
+
+  /// The configured list folder, naming where the FAB's *New list
+  /// note* lands (issue #131): loaded when the menu opens, so the
+  /// label is honest without a session read on every build.
+  String? _fabListFolder;
 
   /// Where the main FAB is, so [FabScrim]'s reveal circle is centered on
   /// its icon (the shell owns it: the FAB slot and the scrim are
@@ -1056,10 +1066,15 @@ final class _LibraryShellState extends State<_LibraryShell>
     // revised); it notifies the open editor itself, so it stays out of
     // the settings value and needs no setState of its own.
     final spellDictionaries = await controller.spellDictionaries;
+    final ops = controller.ops;
+    final quickNote = ops == null ? null : await ops.quickNotePath;
     if (!mounted) return;
     widget.spellCheck.setDictionaries(spellDictionaries);
     if (settings != _editorSettings) {
       setState(() => _editorSettings = settings);
+    }
+    if (quickNote != _quickNotePath) {
+      setState(() => _quickNotePath = quickNote);
     }
   }
 
@@ -1171,9 +1186,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     logNextFrame('shell', 'search result open first frame');
   }
 
-  /// Opens the quick note at [path]; back returns to the Files tab.
-  /// A stale setting (the note was moved, renamed, or deleted) is cleared
-  /// so the tab returns to its empty state.
+  /// Opens the quick note at [path]; back returns to the tab it was
+  /// opened from: the tile sits in every tab, not in Files (issue #73,
+  /// item 1). The chooser flow arrives here from the quick note tab
+  /// itself, and Files is its home. A stale setting (the note was moved,
+  /// renamed, or deleted) is cleared so the tab returns to its empty
+  /// state.
   Future<void> _openQuickNote(String path) async {
     // Closes the keyboard before the transition (issue #4): opening the
     // overlay over a live IME rips focus mid-fade while adjustResize
@@ -1193,11 +1211,14 @@ final class _LibraryShellState extends State<_LibraryShell>
         return;
       }
       if (!mounted) return;
+      // Read the origin before the switch below: the chooser flow arrives
+      // here from the quick note tab itself, and Files is its home.
+      final fromTab = _tab == ShellTab.quickNote ? ShellTab.files : _tab;
       setState(() {
         _tab = ShellTab.quickNote;
         _visitedTabs.add(ShellTab.quickNote);
         _showQuickNoteChooser = false;
-        _noteFromTab = ShellTab.files;
+        _noteFromTab = fromTab;
         _selected = note.path;
         _selectedIsDir = false;
         _treeVisible = false;
@@ -1408,6 +1429,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       onCloseFullScreenNote: _closeFullScreenNote,
       onLeaveFullScreenPreview: () =>
           setState(() => _previewFullScreen = false),
+      isQuickNote: _selected != null && _selected == _quickNotePath,
       noteBarActions: _noteBarActions(splitsPreview: splitsPreview),
       buildTabShell: () => _tabShell(
         controller: controller,
@@ -1545,7 +1567,13 @@ final class _LibraryShellState extends State<_LibraryShell>
     return NewItemFab(
       onAnchor: (center) => _fabAnchor = center,
       expanded: _fabExpanded,
-      onToggle: () => setState(() => _fabExpanded = !_fabExpanded),
+      listFolder: _fabListFolder,
+      onToggle: () {
+        // Opening the menu loads the list folder for the label; the
+        // setting is read once per opening, not once per build.
+        if (!_fabExpanded) unawaited(_loadFabListFolder());
+        setState(() => _fabExpanded = !_fabExpanded);
+      },
       onNewNote: () {
         _closeFab();
         unawaited(_createFlow.createNote(context));
@@ -1571,6 +1599,14 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// Collapses the expanded FAB menu.
   void _closeFab() => setState(() => _fabExpanded = false);
+
+  /// Reads the configured list folder for the FAB's *New list note*
+  /// label (issue #131).
+  Future<void> _loadFabListFolder() async {
+    final folder =
+        await widget.controller.ops?.listNoteFolder ?? defaultListFolder;
+    if (mounted) setState(() => _fabListFolder = folder);
+  }
 
   /// Covers [child] with the FAB-menu scrim: a circle that grows out of
   /// the main FAB icon, dims the body, and closes the menu on any tap

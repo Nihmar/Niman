@@ -101,6 +101,22 @@ final class CroatianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown izvor, kako je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatirani tekst, uređuje se izravno';
+  @override
+  String get settingsFolderToCreate => 'za stvoriti';
+  @override
+  String get settingsSearchHint => 'Pretraži postavke';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 pronađena postavka' : '$count pronađenih postavki';
+  @override
+  String get settingsToggleOn => 'Uključeno';
+  @override
+  String get settingsToggleOff => 'Isključeno';
+  @override
   String get settingsPreviewEnabledTitle => 'Pregled';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +125,10 @@ final class CroatianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Prebaci na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Prebaci na Markdown izvor';
+  @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ova napomena je prevelika za WYSIWYG uređivač. Otvori je kao '
@@ -127,6 +147,27 @@ final class CroatianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tipkovnica';
   @override
   String get keyboardShortcutsTitle => 'Tipkovnički prečaci';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'važi samo za ovu biblioteku';
+  @override
+  String get settingsGroupMaintenance => 'Održavanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Direktorijs i putanje';
+  @override
+  String get settingsAreaTrashHistory => 'Korpa i hronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Dijagnostika i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je povezana fizička tipkovnica';
   @override
   String get settingsSectionUpdates => 'Ažuriranja';
   @override
@@ -824,6 +865,10 @@ final class CroatianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bilo u $path';
   @override
+  String get trashOriginalRoot => 'bilo je u korijenu biblioteke';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 stavka' : '$count stavki';
+  @override
   String get newNoteHere => 'Nova napomena ovdje';
   @override
   String get newFolderHere => 'Novi direktorij ovdje';
@@ -857,6 +902,17 @@ final class CroatianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Zamjenski znaci predloška';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov i ostale vrijednosti za popuniti';
+  @override
+  String get quickNoteSubtitle => 'Bilješka koju otvara kartica brze bilješke';
+  @override
+  String get listFolderSubtitle => 'Novi popisi zadataka';
+  @override
+  String get templateFolderSubtitle => 'Izvor za „Novo iz predloška“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike i zvuk umetnuti u bilješku';
   @override
   String get templateHelpIntro =>
       'Predložak je obična napomena s rupama. Kreiranjem napomene iz njega '
@@ -1441,6 +1497,8 @@ final class CroatianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteka $library';
   @override
   String get syncUrlLabel => 'Adresa direktorija';
+  @override
+  String get syncUrlRequired => 'Unesite adresu poslužitelja';
   @override
   String get syncUrlHint =>
       'Direktorij mora postojati. Kopiraj adresu kako je '

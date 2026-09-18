@@ -101,6 +101,22 @@ final class SerbianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown извор, како је написано';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматирани текст, уређује се директно';
+  @override
+  String get settingsFolderToCreate => 'за прављење';
+  @override
+  String get settingsSearchHint => 'Претражи поставке';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 пронађена поставка' : '$count пронађених поставки';
+  @override
+  String get settingsToggleOn => 'Укључено';
+  @override
+  String get settingsToggleOff => 'Искључено';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +125,10 @@ final class SerbianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Пређи на WYSIWYG уредитељ';
   @override
   String get switchToSourceTooltip => 'Пређи на Markdown извор';
+  @override
+  String get switchToSourceLabel => 'Извор';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ова белешка је превелика за WYSIWYG уредитељ. Отворите је у '
@@ -127,6 +147,27 @@ final class SerbianStrings extends Strings {
   String get settingsSectionShortcuts => 'Тастатура';
   @override
   String get keyboardShortcutsTitle => 'Пречице на тастатури';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за ову библиотеку';
+  @override
+  String get settingsGroupMaintenance => 'Одржавање';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Фасцикле и путање';
+  @override
+  String get settingsAreaTrashHistory => 'Кош и хронологија';
+  @override
+  String get settingsAreaDiagnostics => 'Дијагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потребна је повезана физичка тастатура';
   @override
   String get settingsSectionUpdates => 'Ажурирања';
   @override
@@ -830,6 +871,12 @@ final class SerbianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'било у $path';
   @override
+  String get trashOriginalRoot => 'било је у корену библиотеке';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0441\u0442\u0430\u0432\u043a\u0430'
+      : '$count \u0441\u0442\u0430\u0432\u043a\u0438';
+  @override
   String get newNoteHere => 'Нова белешка овде';
   @override
   String get newFolderHere => 'Нова фасцикла овде';
@@ -863,6 +910,17 @@ final class SerbianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Заменска места шаблона';
+  @override
+  String get templateHelpSubtitle =>
+      'Датум, наслов и остале вредности за попуну';
+  @override
+  String get quickNoteSubtitle => 'Белешка коју отвара картица брзе белешке';
+  @override
+  String get listFolderSubtitle => 'Нове листе задатака';
+  @override
+  String get templateFolderSubtitle => 'Извор за „Ново из шаблона“';
+  @override
+  String get attachmentsFolderSubtitle => 'Слике и звук уметнути у белешку';
   @override
   String get templateHelpIntro =>
       'Шаблон је обична белешка са рупама. Креирање белешке из њега '
@@ -1448,6 +1506,8 @@ final class SerbianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Библиотека $library';
   @override
   String get syncUrlLabel => 'Адреса фасцикле';
+  @override
+  String get syncUrlRequired => 'Унесите адресу сервера';
   @override
   String get syncUrlHint =>
       'Фасцикла мора да постоји. Копирајте адресу онако како је '

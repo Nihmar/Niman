@@ -13,6 +13,7 @@ palette, so they can be compared with a device screenshot directly.
 
 | | |
 |---|---|
+| #73 | A note opens as a page, not a tab: the tab bar is gone from the note page, back lands on the tab it was opened from (the quick note included), the app bar carries the folder under the title, the formatting toolbar follows the keyboard and stays out of preview, and the freed height funds the status row's 48 dp targets |
 | #122 | The preview toggle keeps its place when the fullscreen button appears |
 | #124 | The find button keeps its slot in preview-only mode; one icon weight per list |
 | #125 | One dialog for "which folder?" — `MovePicker` gone, the move can create a folder |
@@ -28,35 +29,9 @@ Two rules came out of it and are written down in
   or put it on the side the row grows from, so nothing already on screen
   moves under a thumb that is already on it.
 
-## 1. A note opens as a page, not as a tab
+## 1. Settings: a home, sub-screens and a search field
 
-Issue #73.
-
-![The editor, full page](01-editor-full-page.png)
-![The editor with the keyboard open](02-editor-keyboard-open.png)
-![The quick note, in preview](03-quick-note-preview.png)
-
-Today the bottom of an open note carries three bars: the status row, the
-formatting toolbar and the tab bar — around 150 px of permanent chrome on
-a phone, with *Quick note* lit as though the editor were a tab.
-
-- Opening a note hides the tab bar; back returns to the tab it was opened
-  from. **This has to hold for the quick note too**: its tab opens the
-  note, the bars go, and back lands where you came from.
-- The formatting toolbar appears only while the keyboard is up, and only
-  in an editor — in preview there is nothing to format, and today it
-  stays.
-- The freed height pays for the status row's touch targets, which are
-  `minWidth: 34, minHeight: 26` in
-  [`note_view_chrome.dart`](../../lib/src/ui/note_view_chrome.dart)
-  against the 48 dp guideline. Left alone so far on purpose: a tight
-  phone row was asked for on 2026-09-11, and the space to loosen it
-  honestly only exists once the tab bar is gone.
-- The app bar keeps the title and gains the note's folder under it.
-
-## 2. Settings: a home, sub-screens and a search field
-
-Issue #104.
+Issue #104. Landed.
 
 ![Settings home](04-settings-home.png)
 ![Searching the settings](05-settings-search.png)
@@ -67,7 +42,8 @@ scrolling.
 
 - A home of areas, each opening its own screen, with a search field on
   top. A result carries the area it came from, so nothing is changed by
-  accident in the wrong place.
+  accident in the wrong place. Tapping one opens the area's screen and
+  flashes the row.
 - App-wide settings separated from the library's own, with the library
   named — the current screen mixes them with nothing to tell them apart.
 - *Reindex*, *Switch library* and *Close library* are actions, not
@@ -81,48 +57,59 @@ scrolling.
 - Switch subtitles are uneven — *Preview* and *Line numbers* carry one,
   *Markdown source* and *WYSIWYG* do not, and those two are precisely the
   pair whose combination is not obvious.
+- The folder rows explain themselves, and the installed version rides
+  on the *Updates* row.
 
-## 3. The trash rejoins the family
+## 2. The trash rejoins the family
+
+Landed.
 
 ![The trash](07-trash.png)
 
-It is the only list in the app built out of `Card`s, while File, Settings
-and the toolbar screen are flat rows.
+It was the only list in the app built out of `Card`s, while File,
+Settings and the toolbar screen are flat rows.
 
-- Flat rows, and dates written out rather than the first ten characters
-  of an ISO timestamp (#129 did the date and the "was at" line; the
-  layout is still `Card` + `ListTile` in
-  [`trash.dart`](../../lib/src/ui/trash.dart)).
-- **Empty** moves to the app bar. Today it is a FAB in the bottom-right
-  corner — exactly where every other screen puts *create*.
-- The auto-empty setting is reachable from the screen it is about.
+- Flat rows, with the count and the library under the title, and the
+  parent folder written out (`was in the library root` for a
+  top-level note).
+- **Empty** moved to the app bar as a text action, disabled — not
+  gone — when there is nothing to empty. The corner it owned is where
+  every other screen puts *create*.
+- The auto-empty setting rides at the bottom of the screen it
+  governs, showing its value and opening it highlighted.
 
-## 4. Tasks: a project is not a context
+## 3. Tasks: a project is not a context
+
+Landed.
 
 ![Tasks](08-tasks.png)
 
-`+Niman` and `@Android` are drawn in the same purple, so the two things
-`todo.txt` deliberately separates look alike at a glance. Give them two
-colours from the palette (the accent and the syntax teal), and a third
-for tags.
+`+Niman` and `@Android` were drawn in the same purple, so the two things
+`todo.txt` deliberately separates looked alike at a glance.
 
-The filter row also mixes two chip shapes — one with a trailing chevron,
-one with a leading icon — and the "6 to do" count sits on a different
-baseline from the chips beside it.
+- Token chips are colored by kind, not by name: projects wear the
+  accent, contexts the syntax tag teal, tags the tertiary — the
+  per-name hash colors are gone, with them `tag_color.dart`.
+- The filter row holds two pills of one shape — leading icon, label,
+  trailing chevron — that shrink with an ellipsized label instead of
+  clipping a 360 dp row in long languages. The count keeps their text
+  style on their line.
 
-## 5. Smaller things, without a picture
+## 4. Smaller things, without a picture
 
-- **No undo after a delete.** `SnackBarAction` exists only in history,
-  sync and transcription. Deleting a note says what happened but offers
-  no way back, even though the file is in the trash.
-- **The WebDAV screen** opens with both of its buttons greyed, which
-  reads as broken, and its **Save** is a full-width button at the bottom
-  — a shape that exists nowhere else in the app.
-- **Where a new item lands.** The FAB menu could say which folder it
-  creates in, but four of its five actions use the FAB's target folder
-  while *New list note* always goes to the configured list folder. One
-  label over all five would be wrong about one of them; saying it per
-  action needs that setting in hand at build time.
+Landed, all three.
+
+- **No undo after a delete.** The notice now offers *Undo* while the
+  trash toggle is on, restoring the freshest deletion of that path.
+  A hard delete still has nothing to offer.
+- **The WebDAV screen.** *Test* and *Save* ride side by side in the
+  form instead of a full-width bottom bar. *Test* stays enabled and
+  complains at the address field; *Save* unlocks for the tested
+  address, next to the result card that says why.
+- **Where a new item lands.** Four actions use the FAB target folder
+  they open over; *New list note* names its folder on the button
+  (`New list note · Lists`), read from the setting at menu-open
+  time.
 
 ## Regenerating the pictures
 

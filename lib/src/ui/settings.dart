@@ -1,42 +1,33 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:isolate';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
-import 'package:niman/src/core/language.dart';
-import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/core/settings/library_config.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/hunspell_spell_checker.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
-import 'package:niman/src/ui/changelog.dart';
-import 'package:niman/src/ui/folder_picker.dart';
+import 'package:niman/src/ui/keyboard_presence.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
-import 'package:niman/src/ui/note_picker.dart';
+import 'package:niman/src/ui/settings_appearance.dart';
+import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_diagnostics.dart';
+import 'package:niman/src/ui/settings_editor.dart';
+import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_maintenance.dart';
+import 'package:niman/src/ui/settings_reminders.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_search.dart';
+import 'package:niman/src/ui/settings_transcription.dart';
+import 'package:niman/src/ui/settings_trash_history.dart';
+import 'package:niman/src/ui/settings_updates.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
 import 'package:niman/src/ui/sync/sync_settings_screen.dart';
-import 'package:niman/src/ui/template_help.dart';
-import 'package:niman/src/ui/toolbar_settings.dart';
-import 'package:niman/src/ui/transcription/transcription_settings_section.dart';
-import 'package:niman/src/ui/update_actions.dart';
-import 'package:niman/src/update/update_service.dart';
 import 'package:path/path.dart' as p;
 
-/// Library-level settings (M1: trash toggle, re-index, close).
-///
-/// Global theme/layout settings arrive with the M6 token system.
+/// The settings home (issue #104): the areas a settings screen splits
+/// into, grouped by what they edit — the app, the library, and the app's
+/// own diagnostics — each opening its own screen.
 ///
 /// The settings content, embedded as the Settings tab (bottom bar on
 /// narrow, rail on wide).
@@ -53,1373 +44,489 @@ final class SettingsBody extends StatefulWidget {
   /// The session of the library whose settings this body edits.
   final LibrarySession controller;
 
-  /// The editor's spelling state (T-PP-09), for its toggle; null hides it.
+  /// Called after "Close library" closes the session; the shell returns
+  /// to the Files tab.
+  final VoidCallback? onClosed;
+
+  /// The editor's spelling state (T-PP-09), for the Editor area's toggle;
+  /// null hides it.
   final EditorSpellCheck? spellCheck;
 
-  /// The installation's transcription models, for the Transcription
-  /// section; null hides it.
+  /// The installation's transcription models; null hides their section.
   final TranscriptionModels? transcription;
-
-  /// Called after "Close library" closes the session; the pushed screen
-  /// pops its own route, the shell tab returns to the Files tab. When null
-  /// the caller must handle closing the screen itself.
-  final VoidCallback? onClosed;
 
   @override
   State<SettingsBody> createState() => _SettingsBodyState();
 }
 
 final class _SettingsBodyState extends State<SettingsBody> {
-  bool? _trash;
-  bool? _debugLogs;
-  bool? _autoUpdate;
-  bool _checkingUpdates = false;
-  String? _updateStatus;
-  bool? _lineNumbers;
-  bool? _autofocusEditor;
-  bool? _reminderShowTokens;
-  PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
-  double _splitRatio = defaultSplitRatio;
-  bool _splitLoaded = false;
-  LinkType _linkType = LinkType.wikilink;
-  MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
-  int _indentWidth = 2;
-  int _historyVersions = defaultHistoryVersions;
-  int _historyInterval = defaultHistoryIntervalMinutes;
-  int _trashAutoEmptyDays = trashAutoEmptyOff;
-  String? _quickNotePath;
-  String? _listFolder;
-  String? _templateFolder;
-  String? _attachmentsFolder;
+  String? _libraryName;
   String? _version;
-  AppLanguage _language = AppLanguage.system;
-  AppBrightness _themeBrightness = AppBrightness.system;
-  AppPalette _themePalette = AppPalette.system;
-  double _uiTextScale = defaultTextScale;
-  double _noteTextScale = defaultTextScale;
+  late final KeyboardPresence _keyboard;
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  int _searchToken = 0;
 
-  /// Steps of 5% between [minTextScale] and [maxTextScale]: fine enough
-  /// to land on a size that fits, coarse enough to be hit on a phone.
-  static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
-      .round();
-  List<String> _spellDictionaries = const <String>[];
-  EditorKind _editorKind = EditorKind.source;
-  Set<EditorKind> _enabledEditors = const {
-    EditorKind.source,
-    EditorKind.wysiwyg,
-  };
-  bool _previewEnabled = true;
+  /// The live search results (issue #104): each entry with its current
+  /// value, loaded for the matches only.
+  List<(SettingsSearchEntry, String?)> _results = const [];
 
-  /// Session events: a library setting changed somewhere else.
-  StreamSubscription<int>? _sessionEvents;
+  /// The home row the search landed on (a maintenance action): flashed
+  /// in place once the search clears.
+  Key? _homeHighlight;
+
+  bool get _searching => _searchController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    _keyboard = KeyboardPresence();
+    _keyboard.listen();
     unawaited(_load());
-    unawaited(_loadVersion());
-    _sessionEvents = widget.controller.events.listen(
-      (_) => unawaited(_loadLibrary()),
-    );
   }
 
   @override
   void dispose() {
-    unawaited(_sessionEvents?.cancel());
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    _keyboard
+      ..stopListening()
+      ..dispose();
     super.dispose();
   }
 
-  /// Loads the app's own version for the About row (issue #80).
-  ///
-  /// Kept out of [_load]: the platform channel behind [appVersion] has no
-  /// answer in the test environment and would hold the settings list's
-  /// first build hostage.
+  Future<void> _load() async {
+    final root = widget.controller.root;
+    if (!mounted || root == null) return;
+    setState(() => _libraryName = p.basename(root));
+    // Kept out of the load above: the platform channel behind
+    // [appVersion] has no answer in the test environment and would hold
+    // the home's first build hostage.
+    unawaited(_loadVersion());
+  }
+
+  /// Loads the installed version for the Updates row (issue #104).
   Future<void> _loadVersion() async {
     String? version;
     try {
       version = await appVersion();
     } on Exception catch (_) {
-      // Display-only: no answer just leaves the row out.
+      // Display-only: no answer just leaves the row bare.
     }
     if (mounted && version != null) {
       setState(() => _version = version);
     }
   }
 
-  Future<void> _load() async {
-    await _loadLibrary();
-    await _loadApp();
-  }
-
-  /// The open library's own settings, re-read whenever the session says
-  /// something changed.
-  ///
-  /// This body is mounted once and kept alive, so a setting changed on
-  /// another surface — the quick note picked from its own tab, a note
-  /// made the quick note from a tree row — would otherwise sit here at
-  /// the value it had when the screen was first built (user,
-  /// 2026-09-17).
-  Future<void> _loadLibrary() async {
-    final controller = widget.controller;
-    final ops = controller.ops;
-    if (ops == null) return;
-    final enabled = await ops.trashEnabled;
-    final lineNumbers = await controller.lineNumbersEnabled;
-    final autofocus = await controller.editorAutofocusEnabled;
-    final reminderTokens = await controller.reminderShowTokens;
-    final previewMode = await controller.previewMode;
-    final splitRatio = await controller.splitRatio;
-    final linkType = await controller.linkType;
-    final missingNoteLocation = await controller.missingNoteLocation;
-    final indentWidth = await controller.indentWidth;
-    final historyVersions = await controller.historyVersions;
-    final historyInterval = await controller.historyIntervalMinutes;
-    final trashAutoEmptyDays = await controller.trashAutoEmptyDays;
-    final quickNotePath = await ops.quickNotePath;
-    final listFolder = await ops.listNoteFolder;
-    final templateFolder = await ops.templateFolder;
-    final attachmentsFolder = await ops.attachmentsFolder;
-    final uiTextScale = await controller.uiTextScale;
-    final noteTextScale = await controller.noteTextScale;
-    final spellDictionaries = await controller.spellDictionaries;
-    final editorKind = await controller.editorKind;
-    final enabledEditors = await controller.enabledEditors;
-    final previewEnabled = await controller.previewEnabled;
-    if (!mounted) return;
-    setState(() {
-      _trash = enabled;
-      _lineNumbers = lineNumbers;
-      _autofocusEditor = autofocus;
-      _reminderShowTokens = reminderTokens;
-      _previewMode = previewMode;
-      _splitRatio = splitRatio;
-      _splitLoaded = true;
-      _linkType = linkType;
-      _missingNoteLocation = missingNoteLocation;
-      _indentWidth = indentWidth;
-      _historyVersions = historyVersions;
-      _historyInterval = historyInterval;
-      _trashAutoEmptyDays = trashAutoEmptyDays;
-      _quickNotePath = quickNotePath;
-      _listFolder = listFolder;
-      _templateFolder = templateFolder;
-      _attachmentsFolder = attachmentsFolder;
-      _uiTextScale = uiTextScale;
-      _noteTextScale = noteTextScale;
-      _spellDictionaries = spellDictionaries;
-      _editorKind = editorKind;
-      _enabledEditors = {...enabledEditors};
-      _previewEnabled = previewEnabled;
-    });
-  }
-
-  /// The app's own settings (language, theme, the debug switch, the
-  /// update toggle): this screen is the only place that changes them, so
-  /// they are read once.
-  Future<void> _loadApp() async {
-    final controller = widget.controller;
-    final debug = await controller.debugLogsEnabled;
-    final autoUpdate = await controller.autoUpdateEnabled;
-    final language = await controller.language;
-    final themeBrightness = await controller.themeBrightness;
-    final themePalette = await controller.themePalette;
-    if (!mounted) return;
-    setState(() {
-      _debugLogs = debug;
-      _autoUpdate = autoUpdate;
-      _language = language;
-      _themeBrightness = themeBrightness;
-      _themePalette = themePalette;
-    });
-  }
-
-  /// Persists the UI language and applies it immediately (T-L10N-04):
-  /// the app root listens to [AppLanguages] and rebuilds every screen.
-  Future<void> _setLanguage(AppLanguage language) async {
-    await widget.controller.setLanguage(language);
-    AppLanguages.choice = language;
-    if (mounted) {
-      setState(() => _language = language);
-    }
-  }
-
-  /// Persists the brightness and applies it immediately (T-M6-05): the
-  /// app root listens to [AppThemes] and rebuilds every screen.
-  Future<void> _setThemeBrightness(AppBrightness brightness) async {
-    await widget.controller.setThemeBrightness(brightness);
-    AppThemes.brightness = brightness;
-    if (mounted) {
-      setState(() => _themeBrightness = brightness);
-    }
-  }
-
-  /// Persists the palette and applies it immediately.
-  Future<void> _setThemePalette(AppPalette palette) async {
-    await widget.controller.setThemePalette(palette);
-    AppThemes.palette = palette;
-    if (mounted) {
-      setState(() => _themePalette = palette);
-    }
-  }
-
-  /// Opens the list-folder picker (T-TK-06): the folder new list notes
-  /// are created in, chosen from the library's folders rather than
-  /// typed.
-  Future<void> _pickListFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
-      title: AppStrings.listFolderTitle,
-      folders: folders,
-      ops: ops,
-      current: _listFolder ?? defaultListFolder,
-    );
-    if (folder == null) return;
-    await ops.setListNoteFolder(folder: folder);
-    final saved = await ops.listNoteFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _listFolder = saved);
-    }
-  }
-
-  /// Opens the template-folder picker (T-M4-05): where the note
-  /// templates live, chosen from the library's folders rather than
-  /// typed.
-  Future<void> _pickTemplateFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
-      title: AppStrings.templateFolderTitle,
-      folders: folders,
-      ops: ops,
-      current: _templateFolder ?? defaultTemplateFolder,
-    );
-    if (folder == null) return;
-    await ops.setTemplateFolder(folder: folder);
-    final saved = await ops.templateFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _templateFolder = saved);
-    }
-  }
-
-  /// Opens the attachments-folder picker (issue #56): where images
-  /// copied in by the editor and voice-note clips live, chosen from the
-  /// library's folders rather than typed.
-  Future<void> _pickAttachmentsFolder() async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    final folders = await widget.controller.folders();
-    if (!mounted) return;
-    final folder = await showFolderPicker(
-      context,
-      title: AppStrings.attachmentsFolderTitle,
-      folders: folders,
-      ops: ops,
-      current: _attachmentsFolder ?? defaultAttachmentsFolder,
-    );
-    if (folder == null) return;
-    await ops.setAttachmentsFolder(folder: folder);
-    final saved = await ops.attachmentsFolder;
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _attachmentsFolder = saved);
-    }
-  }
-
-  /// Opens the quick-note picker (the chosen note is set from the tree
-  /// dialog); the shell picks the value up through the session.
-  Future<void> _pickQuickNote() async {
-    final oldPath = _quickNotePath;
-    final changed = await showQuickNotePicker(
-      context,
-      controller: widget.controller,
-      currentPath: oldPath,
-    );
-    if (!changed || !mounted) return;
-    final path = await widget.controller.ops?.quickNotePath;
-    if (mounted) {
-      setState(() => _quickNotePath = path);
-    }
-  }
-
-  Future<void> _toggleTrash(bool value) async {
-    final ops = widget.controller.ops;
-    if (ops == null) return;
-    await ops.setTrashEnabled(enabled: value);
-    widget.controller.notify();
-    if (mounted) {
-      setState(() => _trash = value);
-    }
-  }
-
-  Future<void> _toggleDebugLogs(bool value) async {
-    final controller = widget.controller;
-    await controller.setDebugLogsEnabled(enabled: value);
-    if (mounted) {
-      setState(() => _debugLogs = value);
-    }
-  }
-
-  Future<void> _toggleAutoUpdate(bool value) async {
-    final controller = widget.controller;
-    await controller.setAutoUpdateEnabled(enabled: value);
-    if (mounted) {
-      setState(() => _autoUpdate = value);
-    }
-  }
-
-  /// Runs a manual update check (issue #81) and downloads when newer.
-  ///
-  /// Works regardless of the automatic toggle. The outcome — available
-  /// (then downloaded), up to date, or failed — lands in the row's
-  /// status line, never in a dialog.
-  Future<void> _checkUpdatesManually() async {
-    if (_checkingUpdates) return;
-    setState(() {
-      _checkingUpdates = true;
-      _updateStatus = null;
-    });
-    try {
-      final current = await currentAppVersion();
-      const AppLogger(name: 'update').debug('manual check from $current');
-      final update = await checkNow(current: current);
-      if (!mounted) return;
-      if (update == null) {
-        const AppLogger(name: 'update').debug('manual check: up to date');
-        setState(() => _updateStatus = AppStrings.updateUpToDate);
-        return;
-      }
-      const AppLogger(name: 'update')
-          .debug('manual check: available ${update.version}');
-      setState(
-        () => _updateStatus = AppStrings.updateAvailableMessage(update.version),
-      );
-      await downloadAndApplyUpdate(context, update);
-      widget.controller.clearPendingUpdate();
-    } on Object catch (error) {
-      // The row stays generic; the reason goes to the debug log so an
-      // exported log shows what the check tripped on (issue #81).
-      const AppLogger(name: 'update').warning('manual check failed: $error');
-      if (!mounted) return;
-      setState(() => _updateStatus = AppStrings.updateCheckFailed);
-    } finally {
-      if (mounted) {
-        setState(() => _checkingUpdates = false);
-      }
-    }
-  }
-
-  Future<void> _toggleLineNumbers(bool value) async {
-    final controller = widget.controller;
-    await controller.setLineNumbersEnabled(enabled: value);
-    // Notify so the shell refreshes its cached value — an open editor
-    // shows/hides the column without reopening the note.
-    controller.notify();
-    if (mounted) {
-      setState(() => _lineNumbers = value);
-    }
-  }
-
-  Future<void> _toggleAutofocusEditor(bool value) async {
-    final controller = widget.controller;
-    await controller.setEditorAutofocusEnabled(enabled: value);
-    // Notify so the shell picks the value up; the next opened note
-    // focuses (an already-open note keeps its current keyboard state).
-    controller.notify();
-    if (mounted) {
-      setState(() => _autofocusEditor = value);
-    }
-  }
-
-  /// Persists the reminder-markers toggle.
-  ///
-  /// Takes effect on the next reconciliation, which the shell triggers on
-  /// the way back from here (a settings change bumps the session, and any
-  /// resume resyncs), so already-scheduled alarms pick up the new text.
-  Future<void> _toggleReminderTokens(bool value) async {
-    final controller = widget.controller;
-    await controller.setReminderShowTokens(enabled: value);
-    controller.notify();
-    if (mounted) {
-      setState(() => _reminderShowTokens = value);
-    }
-  }
-
-  Future<void> _setSplitRatio(double ratio) async {
-    final controller = widget.controller;
-    await controller.setSplitRatio(ratio);
-    controller.notify();
-    if (mounted) {
-      setState(() => _splitRatio = ratio);
-    }
-  }
-
-  Future<void> _setLinkType(LinkType type) async {
-    final controller = widget.controller;
-    await controller.setLinkType(type);
-    controller.notify();
-    if (mounted) {
-      setState(() => _linkType = type);
-    }
-  }
-
-  Future<void> _setMissingNoteLocation(MissingNoteLocation location) async {
-    final controller = widget.controller;
-    await controller.setMissingNoteLocation(location);
-    controller.notify();
-    if (mounted) {
-      setState(() => _missingNoteLocation = location);
-    }
-  }
-
-  Future<void> _setIndentWidth(int width) async {
-    final controller = widget.controller;
-    await controller.setIndentWidth(width);
-    controller.notify();
-    if (mounted) {
-      setState(() => _indentWidth = width);
-    }
-  }
-
-  Future<void> _rescan() async {
-    try {
-      await widget.controller.rescanNow();
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
-      }
-    } on Object catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
-      }
-    }
-  }
-
-  /// Opens a save dialog letting the user choose where the debug log goes,
-  /// and writes the buffered lines (+ a context header, + the device
-  /// logcat on Android) to the chosen file.
-  Future<void> _exportLog() async {
-    final controller = widget.controller;
-    // Earlier runs first: the disk mirror holds what the process before
-    // this one recorded (a reminder firing with the app closed, an OEM
-    // kill), which the in-memory buffer can never have.
-    //
-    // The two overlap: reading the mirror flushes it, so everything this
-    // run has logged since the file was attached is in BOTH. Keep only
-    // the memory lines the mirror does not already carry -- in practice
-    // the handful recorded before the attach landed. Timestamps run to
-    // the millisecond, so identical lines are the same event.
-    final persisted = await AppLog.file?.read() ?? '';
-    final onDisk = persisted.split('\n').toSet();
-    final lines = <String>[
-      for (final line in AppLog.lines())
-        if (!onDisk.contains(line)) line,
-    ];
-    // The device's own logcat for this app (Android): the native Kotlin
-    // logs, the plugins and the engine lines the AppLog buffer never
-    // sees (widget provider, config activity).
-    final logcat = await _logcatDump();
-    // The durable native widget log (Kotlin): the placement decisions
-    // logcat's ring buffer has already forgotten (a config rejection,
-    // an aborted dialog).
-    final widgetLog = await _widgetDebugLog();
-    final hasLogcat = logcat != null && logcat.trim().isNotEmpty;
-    if (lines.isEmpty && persisted.isEmpty && !hasLogcat) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppStrings.exportLogEmpty)));
-      }
+  /// Re-runs the search 200 ms after the last keystroke: every keystroke
+  /// fans out into session reads, so they wait for a pause.
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+    final query = _searchController.text;
+    setState(() => _homeHighlight = null);
+    if (query.trim().isEmpty) {
+      setState(() => _results = const []);
       return;
     }
-    final now = DateTime.now();
-    final stamp = _fileStamp(now);
-    final phase =
-        'phase: ${controller.phase.name}, '
-        'lastError: ${controller.lastError ?? '-'}';
-    final content = <String>[
-      '# Niman debug log',
-      '# exported: ${now.toIso8601String()}',
-      '# library: ${controller.root ?? '(none)'}',
-      '# $phase',
-      '',
-      if (persisted.isNotEmpty) persisted.trimRight(),
-      if (persisted.isNotEmpty && lines.isNotEmpty) '# --- not yet on disk ---',
-      ...lines,
-      if (logcat case final section? when section.trim().isNotEmpty) ...[
-        '',
-        '# --- logcat (this app, device) ---',
-        section.trimRight(),
-      ],
-      if (!hasLogcat && Platform.isAndroid) ...[
-        '',
-        '# --- logcat unavailable (could not run `logcat -d`) ---',
-      ],
-      if (widgetLog case final section? when section.trim().isNotEmpty) ...[
-        '',
-        '# --- widget debug log (native) ---',
-        section.trimRight(),
-      ],
-    ].join('\n');
-    try {
-      final uri = await FilePicker.saveFile(
-        fileName: 'niman-debug-log-$stamp.txt',
-        bytes: Uint8List.fromList(utf8.encode(content)),
-        mimeType: 'text/plain',
-        dialogTitle: AppStrings.exportLogTitle,
-      );
-      if (uri == null) return; // The user canceled; nothing to report.
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppStrings.exportLogDone(uri))));
-      }
-    } on Object catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.exportLogFailed(error))),
-        );
-      }
-    }
+    final token = ++_searchToken;
+    _searchDebounce = Timer(const Duration(milliseconds: 200), () {
+      unawaited(_runSearch(query, token));
+    });
   }
 
-  static String _fileStamp(DateTime dt) {
-    String two(int v) => v.toString().padLeft(2, '0');
-    String three(int v) => v.toString().padLeft(3, '0');
-    return '${dt.year.toString().padLeft(4, '0')}-${two(dt.month)}'
-        '-${two(dt.day)}-${two(dt.hour)}${two(dt.minute)}${two(dt.second)}'
-        '.${three(dt.millisecond)}';
-  }
-
-  /// The tail of the durable native widget decision log (Android).
-  ///
-  /// The Kotlin widget code appends every placement decision to a file
-  /// in the app's external files dir: the logcat ring buffer keeps only
-  /// tens of seconds, so the file is the record that survives until the
-  /// export. Read over the widgets channel — the native side resolves
-  /// the file, Dart never guesses the path. Null off Android or when
-  /// the file does not exist yet.
-  static Future<String?> _widgetDebugLog() async {
-    if (!Platform.isAndroid) {
-      return null;
-    }
-    try {
-      return await const MethodChannel('niman/widgets')
-          .invokeMethod<String>('widgetDebugLog');
-    } on PlatformException {
-      return null;
-    } on MissingPluginException {
-      return null;
-    }
-  }
-
-  /// The device's own logcat for this app (Android), capped to its tail.
-  ///
-  /// Since Android 7 an app may read the logd entries of its own uid, so
-  /// a child `logcat -d` answers with exactly this app's lines: the
-  /// native Kotlin logs (widget provider, config activity), the plugins
-  /// and the Flutter engine -- none of which reach the AppLog buffer.
-  /// The dump runs off the UI isolate and is bounded
-  /// by a timeout; the file keeps only the most recent 200 KB, because
-  /// a report is about what happened last.
-  ///
-  /// Null off Android, when nothing was captured, or when the dump fails.
-  static Future<String?> _logcatDump() async {
-    if (!Platform.isAndroid) {
-      return null;
-    }
-    try {
-      final stdout = await Isolate.run(() async {
-        final process = await Process.start('logcat', [
-          '-d',
-          '-v',
-          'threadtime',
-        ]);
-        // -d exits right after the dump; the timeout is the safety net
-        // for a device where it hangs. Malformed bytes become
-        // replacements: native log lines carry arbitrary text.
-        return await process.stdout
-            .transform(const Utf8Decoder(allowMalformed: true))
-            .join()
-            .timeout(
-              const Duration(seconds: 15),
-              onTimeout: () {
-                process.kill(ProcessSignal.sigkill);
-                return '';
-              },
-            );
-      });
-      final out = stdout.trimRight();
-      if (out.isEmpty) {
-        return null;
-      }
-      const maxBytes = 200 * 1024;
-      if (out.length <= maxBytes) {
-        return out;
-      }
-      final cut = out.lastIndexOf('\n', out.length - maxBytes);
-      return cut <= 0
-          ? out.substring(out.length - maxBytes)
-          : out.substring(cut + 1);
-    } on Object catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> _chooseSplitRatio() async {
-    final ratio = await showSettingsSlider(
-      context,
-      dialogKey: const Key('split-ratio-dialog'),
-      title: AppStrings.splitRatioTitle,
-      subtitle: AppStrings.splitRatioSubtitle,
-      current: _splitRatio,
-      min: minSplitRatio,
-      max: maxSplitRatio,
-      format: AppStrings.splitRatioValue,
-    );
-    if (ratio != null) await _setSplitRatio(ratio);
-  }
-
-  /// Asks how large the interface text should be.
-  Future<void> _chooseUiTextScale() async {
-    final scale = await showSettingsSlider(
-      context,
-      dialogKey: const Key('ui-text-scale-dialog'),
-      sliderKey: const Key('ui-text-scale-slider'),
-      title: AppStrings.uiTextScaleTitle,
-      subtitle: AppStrings.uiTextScaleSubtitle,
-      current: _uiTextScale,
-      min: minTextScale,
-      max: maxTextScale,
-      divisions: _textScaleSteps,
-      format: AppStrings.textScaleValue,
-    );
-    if (scale == null) return;
-    await widget.controller.setUiTextScale(scale);
-    if (mounted) setState(() => _uiTextScale = scale);
-  }
-
-  /// Asks how large the note text should be, in both panes.
-  Future<void> _chooseNoteTextScale() async {
-    final scale = await showSettingsSlider(
-      context,
-      dialogKey: const Key('note-text-scale-dialog'),
-      sliderKey: const Key('note-text-scale-slider'),
-      title: AppStrings.noteTextScaleTitle,
-      subtitle: AppStrings.noteTextScaleSubtitle,
-      current: _noteTextScale,
-      min: minTextScale,
-      max: maxTextScale,
-      divisions: _textScaleSteps,
-      format: AppStrings.textScaleValue,
-    );
-    if (scale == null) return;
-    await widget.controller.setNoteTextScale(scale);
-    if (mounted) setState(() => _noteTextScale = scale);
-  }
-
-  /// Asks for the link format the editor's link button inserts.
-  Future<void> _chooseLinkType() async {
-    final type = await showSettingsChoice<LinkType>(
-      context,
-      dialogKey: const Key('link-type-dialog'),
-      title: AppStrings.linkTypeTitle,
-      subtitle: AppStrings.linkTypeSubtitle,
-      current: _linkType,
-      options: [
-        SettingsOption(LinkType.wikilink, AppStrings.linkTypeWikilink),
-        SettingsOption(LinkType.markdown, AppStrings.linkTypeMarkdown),
-      ],
-    );
-    if (type != null) await _setLinkType(type);
-  }
-
-  /// Asks where a note created from a dead link lands (issue #78).
-  Future<void> _chooseMissingNoteLocation() async {
-    final location = await showSettingsChoice<MissingNoteLocation>(
-      context,
-      dialogKey: const Key('missing-note-location-dialog'),
-      title: AppStrings.missingNoteLocationTitle,
-      current: _missingNoteLocation,
-      options: [
-        SettingsOption(
-          MissingNoteLocation.libraryRoot,
-          AppStrings.missingNoteLocationRoot,
-        ),
-        SettingsOption(
-          MissingNoteLocation.currentFolder,
-          AppStrings.missingNoteLocationCurrentFolder,
-        ),
-      ],
-    );
-    if (location != null) await _setMissingNoteLocation(location);
-  }
-
-  /// Asks how long a deletion may sit in the trash before the library
-  /// empties it on its own (issue #79).
-  Future<void> _chooseTrashAutoEmpty() async {
-    final days = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('trash-auto-empty-dialog'),
-      title: AppStrings.trashAutoEmptyTitle,
-      subtitle: AppStrings.trashAutoEmptySubtitle,
-      current: _trashAutoEmptyDays,
-      options: [
-        for (final choice in trashAutoEmptyChoices)
-          SettingsOption(choice, AppStrings.trashAutoEmptyValue(choice)),
-      ],
-    );
-    if (days == null) return;
-    await widget.controller.setTrashAutoEmptyDays(days);
-    if (mounted) setState(() => _trashAutoEmptyDays = days);
-  }
-
-  /// Asks how many versions of each note the history keeps.
-  Future<void> _chooseHistoryVersions() async {
-    final versions = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('history-versions-dialog'),
-      title: AppStrings.historyVersionsTitle,
-      subtitle: AppStrings.historyVersionsSubtitle,
-      current: _historyVersions,
-      options: [
-        for (final count in const [0, 5, 10, 20, 50, 100])
-          SettingsOption(count, AppStrings.historyVersionsValue(count)),
-      ],
-    );
-    if (versions == null) return;
-    await widget.controller.setHistoryVersions(versions);
-    if (mounted) setState(() => _historyVersions = versions);
-  }
-
-  /// Asks for the least minutes between two versions kept while editing.
-  Future<void> _chooseHistoryInterval() async {
-    final minutes = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('history-interval-dialog'),
-      title: AppStrings.historyIntervalTitle,
-      subtitle: AppStrings.historyIntervalSubtitle,
-      current: _historyInterval,
-      options: [
-        for (final choice in historyIntervalChoices)
-          SettingsOption(choice, AppStrings.historyIntervalValue(choice)),
-      ],
-    );
-    if (minutes == null) return;
-    await widget.controller.setHistoryIntervalMinutes(minutes);
-    if (mounted) setState(() => _historyInterval = minutes);
-  }
-
-  /// Asks for the spaces added per indent level.
-  Future<void> _chooseIndentWidth() async {
-    final width = await showSettingsChoice<int>(
-      context,
-      dialogKey: const Key('indent-width-dialog'),
-      title: AppStrings.indentWidthTitle,
-      subtitle: AppStrings.indentWidthSubtitle,
-      current: _indentWidth,
-      options: [
-        for (final spaces in const [2, 4, 6, 8])
-          SettingsOption(spaces, AppStrings.indentWidthValue(spaces)),
-      ],
-    );
-    if (width != null) await _setIndentWidth(width);
-  }
-
-  /// Enables or disables one of the library's editors (T-WYS-03).
-  ///
-  /// The last enabled editor cannot be switched off: the callback arrives
-  /// null for it, so its switch reads as disabled rather than opening a
-  /// dead end with no editor at all.
-  Future<void> _toggleEditorEnabled(EditorKind kind, bool enabled) async {
-    final next = {..._enabledEditors};
-    if (enabled) {
-      next.add(kind);
-    } else {
-      if (next.length < 2) return;
-      next.remove(kind);
-    }
-    await widget.controller.setEnabledEditors(next);
-    // Notify so the shell refreshes its cached value — the open note swaps
-    // surfaces, and the status row gains or loses its switch, without
-    // reopening it.
-    widget.controller.notify();
-    if (mounted) setState(() => _enabledEditors = next);
-  }
-
-  /// Persists the preview switch (T-WYS-03).
-  Future<void> _togglePreviewEnabled(bool value) async {
-    await widget.controller.setPreviewEnabled(enabled: value);
-    widget.controller.notify();
-    if (mounted) setState(() => _previewEnabled = value);
-  }
-
-  /// Asks which hunspell dictionaries the editor should use (T-PP-09,
-  /// revised): every one found on the machine, any number of them at once.
-  /// Choosing none means the locale default.
-  Future<void> _chooseSpellDictionaries(EditorSpellCheck spell) async {
-    final names = discoverDictionaries().keys.toList()..sort();
-    final selected = _spellDictionaries.toSet();
-    final choice = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        key: const Key('spell-dictionary-dialog'),
-        scrollable: true,
-        title: Text(AppStrings.spellCheckDictionaryChoiceTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppStrings.spellCheckDictionaryChoiceSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (names.isEmpty)
-              Text(AppStrings.spellCheckNoDictionaries)
-            else
-              StatefulBuilder(
-                builder: (context, setDialogState) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final name in names)
-                      CheckboxListTile(
-                        key: Key('spell-dictionary-$name'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(name),
-                        value: selected.contains(name),
-                        onChanged: (value) => setDialogState(() {
-                          if (value ?? false) {
-                            selected.add(name);
-                          } else {
-                            selected.remove(name);
-                          }
-                        }),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            key: const Key('spell-dictionary-cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppStrings.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('spell-dictionary-save'),
-            onPressed: () =>
-                Navigator.of(context)
-                    .pop(names.where(selected.contains).toList()),
-            child: Text(AppStrings.actionSave),
-          ),
-        ],
+  Future<void> _runSearch(String query, int token) async {
+    final controller = widget.controller;
+    final matches = matchSettingsEntries(
+      settingsSearchEntries(
+        controller: controller,
+        transcription: widget.transcription,
+        spellCheck: widget.spellCheck,
+        libraryName: _libraryName ?? '',
+        context: context,
+        flashHome: _flashHome,
       ),
+      query,
     );
-    if (choice == null) return;
-    await widget.controller.setSpellDictionaries(choice);
-    spell.setDictionaries(choice);
-    if (mounted) setState(() => _spellDictionaries = choice);
+    final loaded = await Future.wait([
+      for (final entry in matches)
+        () async {
+          String? value;
+          try {
+            value = await entry.value();
+          } on Object catch (_) {
+            value = null;
+          }
+          return (entry, value);
+        }(),
+    ]);
+    if (!mounted || token != _searchToken) return;
+    setState(() => _results = loaded);
   }
 
-  /// Asks for the app's language.
-  Future<void> _chooseLanguage() async {
-    final language = await showSettingsChoice<AppLanguage>(
-      context,
-      dialogKey: const Key('language-dialog'),
-      title: AppStrings.languageTitle,
-      subtitle: AppStrings.languageSubtitle,
-      current: _language,
-      options: [
-        SettingsOption(
-          AppLanguage.system,
-          AppStrings.languageName(AppLanguage.system),
-        ),
-        for (final language in AppLanguages.supported)
-          SettingsOption(language, AppStrings.languageName(language)),
-      ],
-    );
-    if (language != null) await _setLanguage(language);
+  /// Clears the search and flashes the home [row] (a maintenance
+  /// action): the row remounts under the highlight scope and lights up.
+  void _flashHome(Key row) {
+    _searchDebounce?.cancel();
+    _searchToken++;
+    _searchController.clear();
+    setState(() {
+      _results = const [];
+      _homeHighlight = row;
+    });
   }
 
-  /// Asks how bright the app should be.
-  Future<void> _chooseThemeBrightness() async {
-    final brightness = await showSettingsChoice<AppBrightness>(
-      context,
-      dialogKey: const Key('theme-brightness-dialog'),
-      title: AppStrings.themeBrightnessTitle,
-      subtitle: AppStrings.themeBrightnessSubtitle,
-      current: _themeBrightness,
-      options: [
-        SettingsOption(AppBrightness.system, AppStrings.themeBrightnessSystem),
-        SettingsOption(AppBrightness.day, AppStrings.themeBrightnessDay),
-        SettingsOption(AppBrightness.night, AppStrings.themeBrightnessNight),
-      ],
-    );
-    if (brightness != null) await _setThemeBrightness(brightness);
-  }
-
-  /// Asks which palette the app wears.
-  Future<void> _chooseThemePalette() async {
-    final palette = await showSettingsChoice<AppPalette>(
-      context,
-      dialogKey: const Key('theme-palette-dialog'),
-      title: AppStrings.themePaletteTitle,
-      subtitle: AppStrings.themePaletteSubtitle,
-      current: _themePalette,
-      options: [
-        for (final palette in AppPalette.values)
-          SettingsOption(palette, _paletteName(palette)),
-      ],
-    );
-    if (palette != null) await _setThemePalette(palette);
-  }
-
-  /// What a palette reads as, in the dialog and on the row.
-  static String _paletteName(AppPalette palette) => switch (palette) {
-    AppPalette.system => AppStrings.themePaletteSystem,
-    AppPalette.catppuccin => AppStrings.themePaletteCatppuccin,
-    AppPalette.solarized => AppStrings.themePaletteSolarized,
-    AppPalette.gruvbox => AppStrings.themePaletteGruvbox,
-    AppPalette.niman => AppStrings.themePaletteNiman,
-  };
-
-  /// Opens the known-library list and switches to whatever is picked
-  /// (T-ML-06).
-  ///
-  /// The switch tears down the shell this screen is part of, so the
-  /// settings screen leaves with it: `onClosed` is the same exit "Close
-  /// library" takes, and the tab case falls back to popping the pushed
-  /// route.
-  Future<void> _switchLibrary() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => SwitchLibraryScreen(
-          controller: widget.controller,
-          onSwitched: () {
-            Navigator.of(context).pop();
-            widget.onClosed?.call();
-          },
-        ),
-      ),
-    );
+  /// Pushes [screen], the area's own screen: the settings home stays on
+  /// the route underneath, so back always lands back here.
+  void _pushArea(BuildContext context, Widget screen) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (context) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
-    final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
-    final spell = widget.spellCheck;
-    // Grouped, and every setting one row of the same height (2026-09-08
-    // user feedback). Switches stay switches; everything with more than
-    // two choices reads its value on the right and opens a dialog, which
-    // is also where its explanation went.
+    final theme = Theme.of(context);
+    final libraryName = _libraryName;
+    final keyboardAttached = _keyboard.attached;
+    return ListenableBuilder(
+      listenable: _keyboard,
+      builder: (context, _) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: TextField(
+                key: const Key('settings-search-field'),
+                controller: _searchController,
+                onChanged: (_) => _onSearchChanged(),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: AppStrings.settingsSearchHint,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _searching
+                      ? IconButton(
+                          key: const Key('settings-search-clear'),
+                          tooltip: MaterialLocalizations.of(context)
+                              .closeButtonTooltip,
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchDebounce?.cancel();
+                            _searchToken++;
+                            _searchController.clear();
+                            setState(() {
+                              _results = const [];
+                              _homeHighlight = null;
+                            });
+                          },
+                        )
+                      : null,
+                ),
+              ),
+            ),
+            Expanded(
+              child: _searching
+                  ? _buildResults(context)
+                  : SettingsHighlight(
+                      target: _homeHighlight,
+                      child: _buildAreas(
+                        context,
+                        controller: controller,
+                        theme: theme,
+                        libraryName: libraryName,
+                        keyboardAttached: keyboardAttached,
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// The results of the live search (issue #104): each with its current
+  /// value and the area it came from, opening its screen highlighted.
+  Widget _buildResults(BuildContext context) {
+    final theme = Theme.of(context);
+    final results = _results;
     return ListView(
       padding: const EdgeInsets.only(bottom: 16),
       children: [
-        SettingsSection(AppStrings.settingsSectionAppearance),
-        SettingsValueRow(
-          key: const Key('language-choice'),
-          title: AppStrings.languageTitle,
-          value: AppStrings.languageName(_language),
-          onTap: () => unawaited(_chooseLanguage()),
-        ),
-        SettingsValueRow(
-          key: const Key('theme-brightness-setting'),
-          title: AppStrings.themeBrightnessTitle,
-          value: switch (_themeBrightness) {
-            AppBrightness.system => AppStrings.themeBrightnessSystem,
-            AppBrightness.day => AppStrings.themeBrightnessDay,
-            AppBrightness.night => AppStrings.themeBrightnessNight,
-          },
-          onTap: () => unawaited(_chooseThemeBrightness()),
-        ),
-        SettingsValueRow(
-          key: const Key('theme-palette-setting'),
-          title: AppStrings.themePaletteTitle,
-          value: _paletteName(_themePalette),
-          onTap: () => unawaited(_chooseThemePalette()),
-        ),
-        SettingsValueRow(
-          key: const Key('ui-text-scale-setting'),
-          title: AppStrings.uiTextScaleTitle,
-          value: AppStrings.textScaleValue(_uiTextScale),
-          onTap: () => unawaited(_chooseUiTextScale()),
-        ),
-        // The split ratio stays here; the split/switch choice itself
-        // lives in the editor's app bar (user, 2026-09-09): a layout a
-        // narrow screen cannot have is not a global setting.
-        if (_splitLoaded &&
-            previewSplits(
-              _previewMode,
-              narrow: narrow,
-              editor: _editorKind,
-              previewEnabled: _previewEnabled,
-            ))
-          SettingsValueRow(
-            key: const Key('split-ratio-setting'),
-            title: AppStrings.splitRatioTitle,
-            value: AppStrings.splitRatioValue(_splitRatio),
-            onTap: () => unawaited(_chooseSplitRatio()),
-          ),
-
-        SettingsSection(AppStrings.settingsSectionEditor),
-        // The toolbar is an editor setting, not an appearance one: it
-        // decides what the editor can do, not how the app looks.
-        SettingsValueRow(
-          key: const Key('toolbar-setting'),
-          title: AppStrings.toolbarSettingsTitle,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) =>
-                  ToolbarSettingsScreen(controller: widget.controller),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text(
+            key: const Key('settings-search-count'),
+            AppStrings.settingsSearchResults(results.length),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        // Which editors the library offers: both, or one alone. The
-        // last one on cannot be switched off (its switch disables
-        // itself), so the choice never resolves to no editor.
-        SwitchListTile(
-          key: const Key('editor-source-setting'),
-          title: Text(AppStrings.editorKindSource),
-          value: _enabledEditors.contains(EditorKind.source),
-          onChanged:
-              _enabledEditors.length < 2 &&
-                  _enabledEditors.contains(EditorKind.source)
-              ? null
-              : (value) =>
-                    unawaited(_toggleEditorEnabled(EditorKind.source, value)),
-        ),
-        SwitchListTile(
-          key: const Key('editor-wysiwyg-setting'),
-          title: Text(AppStrings.editorKindWysiwyg),
-          value: _enabledEditors.contains(EditorKind.wysiwyg),
-          onChanged:
-              _enabledEditors.length < 2 &&
-                  _enabledEditors.contains(EditorKind.wysiwyg)
-              ? null
-              : (value) =>
-                    unawaited(_toggleEditorEnabled(EditorKind.wysiwyg, value)),
-        ),
-        SwitchListTile(
-          key: const Key('preview-enabled-setting'),
-          title: Text(AppStrings.settingsPreviewEnabledTitle),
-          subtitle: Text(AppStrings.settingsPreviewEnabledSubtitle),
-          value: _previewEnabled,
-          onChanged: _togglePreviewEnabled,
-        ),
-        // Switches keep their subtitle: a switch has no dialog to move
-        // the explanation into, and "off = on first tap" is exactly what
-        // someone reads the row for.
-        SwitchListTile(
-          title: Text(AppStrings.lineNumbersTitle),
-          subtitle: Text(AppStrings.lineNumbersSubtitle),
-          value: _lineNumbers ?? true,
-          onChanged: _toggleLineNumbers,
-        ),
-        // Phones and tablets only: there is no on-screen keyboard to
-        // show on desktop, so the row would toggle a no-op (user,
-        // 2026-09-09).
-        if (Platform.isAndroid || Platform.isIOS)
-          SwitchListTile(
-            title: Text(AppStrings.keyboardOnOpenTitle),
-            subtitle: Text(AppStrings.keyboardOnOpenSubtitle),
-            value: _autofocusEditor ?? false,
-            onChanged: _toggleAutofocusEditor,
+        for (final (entry, value) in results)
+          ListTile(
+            key: Key(
+              'settings-search-${(entry.rowKey as ValueKey<String>).value}',
+            ),
+            title: Text(entry.title),
+            subtitle: Text(
+              entry.area,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (value != null)
+                  Text(
+                    value,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+            onTap: entry.open,
           ),
-        SettingsValueRow(
-          key: const Key('link-type'),
-          title: AppStrings.linkTypeTitle,
-          value: switch (_linkType) {
-            LinkType.wikilink => AppStrings.linkTypeWikilink,
-            LinkType.markdown => AppStrings.linkTypeMarkdown,
-          },
-          onTap: () => unawaited(_chooseLinkType()),
-        ),
-        // Next to the link format: both decide what a link does — one
-        // what it inserts, the other what a click on a missing target
-        // becomes (issue #78).
-        SettingsValueRow(
-          key: const Key('missing-note-location'),
-          title: AppStrings.missingNoteLocationTitle,
-          value: switch (_missingNoteLocation) {
-            MissingNoteLocation.libraryRoot =>
-              AppStrings.missingNoteLocationRoot,
-            MissingNoteLocation.currentFolder =>
-              AppStrings.missingNoteLocationCurrentFolder,
-          },
-          onTap: () => unawaited(_chooseMissingNoteLocation()),
-        ),
-        SettingsValueRow(
-          key: const Key('note-text-scale-setting'),
-          title: AppStrings.noteTextScaleTitle,
-          value: AppStrings.textScaleValue(_noteTextScale),
-          onTap: () => unawaited(_chooseNoteTextScale()),
-        ),
-        SettingsValueRow(
-          key: const Key('indent-width'),
-          title: AppStrings.indentWidthTitle,
-          value: AppStrings.indentWidthValue(_indentWidth),
-          onTap: () => unawaited(_chooseIndentWidth()),
-        ),
+      ],
+    );
+  }
 
-        SettingsSection(AppStrings.settingsSectionShortcuts),
-        // Phones and tablets have no physical keyboard, so the reference
-        // behind this row describes keys that cannot be pressed: the row
-        // stays visible but reads as disabled rather than opening it.
-        SettingsValueRow(
-          key: const Key('keyboard-shortcuts-setting'),
-          title: AppStrings.keyboardShortcutsTitle,
-          enabled: !(Platform.isAndroid || Platform.isIOS),
-          onTap: () => Navigator.push(
+  /// The settings home itself: the areas grouped by what they edit.
+  Widget _buildAreas(
+    BuildContext context, {
+    required LibrarySession controller,
+    required ThemeData theme,
+    required String? libraryName,
+    required bool keyboardAttached,
+  }) {
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 16),
+      children: [
+        SettingsSection(AppStrings.settingsGroupApp),
+        SettingsAreaRow(
+          key: const Key('settings-area-appearance'),
+          icon: Icons.palette_outlined,
+          title: AppStrings.settingsSectionAppearance,
+          onTap: () => _pushArea(
             context,
-            MaterialPageRoute<void>(
-              builder: (context) => const KeyboardShortcutsScreen(),
+            SettingsAppearanceScreen(controller: controller),
+          ),
+        ),
+        SettingsAreaRow(
+          key: const Key('settings-area-editor'),
+          icon: Icons.edit_outlined,
+          title: AppStrings.settingsSectionEditor,
+          onTap: () => _pushArea(
+            context,
+            SettingsEditorScreen(
+              controller: controller,
+              spellCheck: widget.spellCheck,
             ),
           ),
         ),
-
-        if (spell != null && spell.available) ...[
-          SwitchListTile(
-            key: const Key('spell-check-setting'),
-            title: Text(AppStrings.settingsSpellCheckTitle),
-            subtitle: Text(AppStrings.settingsSpellCheckSubtitle),
-            value: spell.enabled,
-            onChanged: (value) =>
-                setState(() => spell.setEnabled(enabled: value)),
-          ),
-          SettingsValueRow(
-            key: const Key('spell-dictionary-setting'),
-            title: AppStrings.spellCheckDictionaryTitle,
-            value: _spellDictionaries.isEmpty
-                ? AppStrings.spellCheckDictionarySystem
-                : _spellDictionaries.join(', '),
-            onTap: () => unawaited(_chooseSpellDictionaries(spell)),
-          ),
-        ],
-
-        SettingsSection(AppStrings.settingsSectionLibrary),
-        // The one row with nothing to change: a fact about the open
-        // library, kept here because this is where you go looking for it.
+        // The keyboard shortcut reference is useless without a
+        // keyboard to press: with none seen the row says so instead
+        // of opening a dead end.
         ListTile(
-          key: const Key('library-path'),
-          title: Text(AppStrings.libraryPathTitle),
-          subtitle: Text(controller.root ?? ''),
+          key: const Key('keyboard-shortcuts'),
+          leading: Icon(
+            Icons.keyboard_alt_outlined,
+            color: keyboardAttached
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+          title: Text(
+            AppStrings.keyboardShortcutsTitle,
+            style: keyboardAttached
+                ? null
+                : theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+          ),
+          trailing: keyboardAttached
+              ? const Icon(Icons.chevron_right)
+              : Text(
+                  AppStrings.settingsAreaKeyboardDisabled,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+          onTap: keyboardAttached
+              ? () => _pushArea(context, const KeyboardShortcutsScreen())
+              : null,
         ),
-        SettingsValueRow(
-          key: const Key('quick-note-setting'),
-          title: AppStrings.quickNoteTitle,
-          value: _quickNotePath ?? AppStrings.quickNoteUnset,
-          onTap: _pickQuickNote,
-        ),
-        SettingsValueRow(
-          key: const Key('list-folder-setting'),
-          title: AppStrings.listFolderTitle,
-          value: _listFolder ?? defaultListFolder,
-          onTap: _pickListFolder,
-        ),
-        SettingsValueRow(
-          key: const Key('template-folder-setting'),
-          title: AppStrings.templateFolderTitle,
-          value: _templateFolder ?? defaultTemplateFolder,
-          onTap: _pickTemplateFolder,
-        ),
-        SettingsValueRow(
-          key: const Key('attachments-folder-setting'),
-          title: AppStrings.attachmentsFolderTitle,
-          value: _attachmentsFolder ?? defaultAttachmentsFolder,
-          onTap: _pickAttachmentsFolder,
-        ),
-        // Next to the folder, because that is where someone setting
-        // templates up is already standing (T-TPL-08).
-        SettingsValueRow(
-          key: const Key('template-help-setting'),
-          title: AppStrings.templateHelpTitle,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) => const TemplateHelpScreen(),
+        // Update management exists only on the release channel
+        // (issue #106): testing builds check no release channel, so
+        // the whole area is out, not just its toggles.
+        if (!isTestingBuild)
+          SettingsAreaRow(
+            key: const Key('settings-area-updates'),
+            icon: Icons.system_update,
+            title: AppStrings.settingsSectionUpdates,
+            subtitle: _version,
+            onTap: () => _pushArea(
+              context,
+              SettingsUpdatesScreen(controller: controller),
             ),
           ),
+        SettingsAreaRow(
+          key: const Key('settings-area-diagnostics'),
+          icon: Icons.health_and_safety,
+          title: AppStrings.settingsAreaDiagnostics,
+          onTap: () => _pushArea(
+            context,
+            SettingsDiagnosticsScreen(controller: controller),
+          ),
         ),
-        SwitchListTile(
-          key: const Key('trash-setting'),
-          title: Text(AppStrings.trashTitle),
-          subtitle: Text(AppStrings.trashSubtitle),
-          value: _trash ?? true,
-          onChanged: _toggleTrash,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+          // A Wrap, not a Row: a long library name next to its hint
+          // must flow onto the next line on a phone, never past the
+          // screen edge (the overflow the layout tests caught).
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 2,
+            children: [
+              Text(
+                AppStrings.settingsGroupLibrary(libraryName ?? ''),
+                style: theme.textTheme.titleSmall,
+              ),
+              Text(
+                AppStrings.settingsGroupLibraryHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
-        // Under the toggle it depends on: with the trash off there is
-        // nothing waiting in it to empty.
-        SettingsValueRow(
-          key: const Key('trash-auto-empty-setting'),
-          title: AppStrings.trashAutoEmptyTitle,
-          subtitle: AppStrings.trashAutoEmptySubtitle,
-          value: AppStrings.trashAutoEmptyValue(_trashAutoEmptyDays),
-          enabled: _trash ?? true,
-          onTap: _chooseTrashAutoEmpty,
+        SettingsAreaRow(
+          key: const Key('settings-area-folders'),
+          icon: Icons.folder_outlined,
+          title: AppStrings.settingsAreaFolders,
+          onTap: () => _pushArea(
+            context,
+            SettingsFoldersPathsScreen(controller: controller),
+          ),
         ),
-        SettingsValueRow(
-          key: const Key('history-versions-setting'),
-          title: AppStrings.historyVersionsTitle,
-          subtitle: AppStrings.historyVersionsSubtitle,
-          value: AppStrings.historyVersionsValue(_historyVersions),
-          onTap: _chooseHistoryVersions,
+        SettingsAreaRow(
+          key: const Key('settings-area-trash-history'),
+          icon: Icons.restore,
+          title: AppStrings.settingsAreaTrashHistory,
+          onTap: () => _pushArea(
+            context,
+            SettingsTrashHistoryScreen(controller: controller),
+          ),
         ),
-        SettingsValueRow(
-          key: const Key('history-interval-setting'),
-          title: AppStrings.historyIntervalTitle,
-          subtitle: AppStrings.historyIntervalSubtitle,
-          value: AppStrings.historyIntervalValue(_historyInterval),
-          enabled: _historyVersions > 0,
-          onTap: _chooseHistoryInterval,
-        ),
-        ListTile(
-          key: const Key('reindex-setting'),
-          leading: const Icon(Icons.refresh),
-          title: Text(AppStrings.reindexTitle),
-          onTap: _rescan,
-        ),
-        // Above "Close library" on purpose: switching is the common move
-        // and closing is the way out of every library at once.
-        SettingsValueRow(
-          key: const Key('switch-library-setting'),
-          title: AppStrings.switchLibraryTitle,
-          onTap: _switchLibrary,
-        ),
-        ListTile(
-          key: const Key('close-library-setting'),
-          leading: const Icon(Icons.link_off),
-          title: Text(AppStrings.closeLibraryTitle),
-          onTap: () async {
-            await controller.close();
-            widget.onClosed?.call();
-          },
-        ),
-
-        // App-wide, like the models it points at, but next to the library
-        // because that is where the voice notes it transcribes live.
-        if (widget.transcription case final transcription?)
-          TranscriptionSettingsSection(models: transcription),
-        if (controller.sync case final sync?) ...[
-          SettingsSection(AppStrings.settingsSectionSync),
+        // The status rides on the row, the way the mockup draws it
+        // (issue #104): whether this library syncs, and when it last
+        // did, is what the row is for — the screen behind it is the
+        // configuration.
+        if (controller.sync case final sync?)
           ListenableBuilder(
             listenable: sync,
             builder: (context, _) {
               final status = sync.status;
-              return ListTile(
-                key: const Key('sync-setting'),
-                leading: Icon(
-                  status.configured
-                      ? syncStatusIcon(status)
-                      : Icons.cloud_off_outlined,
-                ),
-                title: Text(AppStrings.syncWebDavTitle),
-                subtitle: Text(syncStatusLine(status, DateTime.now())),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.push(
+              return SettingsAreaRow(
+                key: const Key('settings-area-sync'),
+                icon: status.configured
+                    ? syncStatusIcon(status)
+                    : Icons.cloud_off_outlined,
+                title: AppStrings.settingsSectionSync,
+                subtitle: syncStatusLine(status, DateTime.now()),
+                onTap: () => _pushArea(
                   context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => SyncSettingsScreen(
-                      sync: sync,
-                      libraryName: p.basename(controller.root ?? ''),
-                    ),
+                  SyncSettingsScreen(
+                    sync: sync,
+                    libraryName: p.basename(controller.root ?? ''),
                   ),
                 ),
               );
             },
           ),
-        ],
-
-        SettingsSection(AppStrings.settingsSectionReminders),
-        SwitchListTile(
-          key: const Key('reminder-show-tokens'),
-          title: Text(AppStrings.reminderShowTokensTitle),
-          subtitle: Text(AppStrings.reminderShowTokensSubtitle),
-          value: _reminderShowTokens ?? false,
-          onChanged: _toggleReminderTokens,
-        ),
-
-        // Update management exists only on the release channel
-        // (issue #106): testing builds check no release channel, so the
-        // whole section is out, not just its toggles.
-        if (!isTestingBuild) ...[
-          SettingsSection(AppStrings.settingsSectionUpdates),
-          SwitchListTile(
-            key: const Key('auto-update-setting'),
-            title: Text(AppStrings.autoUpdateTitle),
-            subtitle: Text(AppStrings.autoUpdateSubtitle),
-            value: _autoUpdate ?? false,
-            onChanged: _toggleAutoUpdate,
+        // App-wide, like the models it points at, but under the
+        // library group: that is where the voice notes it
+        // transcribes live. The current model rides on the row.
+        if (widget.transcription case final transcription?)
+          ListenableBuilder(
+            listenable: transcription,
+            builder: (context, _) {
+              final model = transcription.defaultModel;
+              return SettingsAreaRow(
+                key: const Key('settings-area-transcription'),
+                icon: Icons.mic_outlined,
+                title: AppStrings.settingsSectionTranscription,
+                subtitle: model == null
+                    ? AppStrings.transcriptionModelNone
+                    : AppStrings.transcriptionModelName(model),
+                onTap: () => _pushArea(
+                  context,
+                  SettingsTranscriptionScreen(
+                    controller: controller,
+                    models: transcription,
+                  ),
+                ),
+              );
+            },
           ),
-          ListTile(
-            key: const Key('check-updates-setting'),
-            leading: _checkingUpdates
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.system_update),
-            title: Text(AppStrings.checkForUpdatesTitle),
-            subtitle: _updateStatus == null ? null : Text(_updateStatus!),
-            onTap: _checkUpdatesManually,
-          ),
-        ],
-
-        SettingsSection(AppStrings.settingsSectionDiagnostics),
-        SwitchListTile(
-          title: Text(AppStrings.debugLogsTitle),
-          subtitle: Text(AppStrings.debugLogsSubtitle),
-          value: _debugLogs ?? true,
-          onChanged: _toggleDebugLogs,
-        ),
-        ListTile(
-          key: const Key('export-log-setting'),
-          leading: const Icon(Icons.save_alt),
-          title: Text(AppStrings.exportLogTitle),
-          subtitle: Text(AppStrings.exportLogSubtitle),
-          onTap: _exportLog,
-        ),
-
-        SettingsSection(AppStrings.settingsSectionAbout),
-        // A fact about the installation, like the library path above:
-        // nothing to change, only to know (issue #80).
-        if (_version != null)
-          ListTile(
-            key: const Key('app-version'),
-            title: Text(AppStrings.versionTitle),
-            trailing: Text(
-              _version!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        SettingsValueRow(
-          key: const Key('changelog-setting'),
-          title: AppStrings.changelogTitle,
-          onTap: () => Navigator.push(
+        SettingsAreaRow(
+          key: const Key('settings-area-reminders'),
+          icon: Icons.notifications_outlined,
+          title: AppStrings.settingsSectionReminders,
+          onTap: () => _pushArea(
             context,
-            MaterialPageRoute<void>(
-              builder: (context) => const ChangelogScreen(),
-            ),
+            SettingsRemindersScreen(controller: controller),
           ),
+        ),
+        SettingsMaintenanceGroup(
+          controller: controller,
+          onClosed: widget.onClosed,
         ),
       ],
     );
   }
 }
+
+/// One area of the settings home (issue #104): the area's name with an
+/// icon and a chevron, pushing the area's own screen. The icon is an
+/// outline one — an area is a place, not a state.
+final class SettingsAreaRow extends StatelessWidget {
+  /// Creates the row for [title]'s area.
+  const new({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+    super.key,
+  });
+
+  /// The area's icon, an outline one.
+  final IconData icon;
+
+  /// The area's name.
+  final String title;
+
+  /// What the row is about right now — the sync status, a version —
+  /// shown under the title the way the mockup draws it.
+  final String? subtitle;
+
+  /// Opens the area's screen.
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(icon, color: theme.colorScheme.primary),
+      title: Text(title),
+      subtitle: subtitle == null ? null : Text(subtitle!),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    );
+  }
+}
+
+// The sync area pushes [SyncSettingsScreen] straight from the home: it
+// carries its own app bar (the WebDAV title over the library's name), so
+// no wrapper screen is needed.

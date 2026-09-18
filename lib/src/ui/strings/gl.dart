@@ -99,6 +99,23 @@ final class GalicianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Fonte Markdown, tal como está escrita';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texto con formato, editado directamente';
+  @override
+  String get settingsFolderToCreate => 'por crear';
+  @override
+  String get settingsSearchHint => 'Buscar nos axustes';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 axuste atopado' : '$count axustes atopados';
+  @override
+  String get settingsToggleOn => 'Activado';
+  @override
+  String get settingsToggleOff => 'Desactivado';
+  @override
   String get settingsPreviewEnabledTitle => 'Previsualización';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -107,6 +124,10 @@ final class GalicianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Cambiar ao editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Cambiar á fonte Markdown';
+  @override
+  String get switchToSourceLabel => 'Fonte';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Esta nota é demasiado grande para o editor WYSIWYG. Ábrea na '
@@ -125,6 +146,27 @@ final class GalicianStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atallos de teclado';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => 'aplícase só a esta biblioteca';
+  @override
+  String get settingsGroupMaintenance => 'Mantemento';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Cartafols e camiños';
+  @override
+  String get settingsAreaTrashHistory => 'Paperilleiro e cronoloxía';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnóstico e información';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesita un teclado físico conectado';
   @override
   String get settingsSectionUpdates => 'Actualizacións';
   @override
@@ -834,6 +876,11 @@ final class GalicianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'estaba en $path';
   @override
+  String get trashOriginalRoot => 'estaba na ra\u00edz da biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elemento' : '$count elementos';
+  @override
   String get newNoteHere => 'Nota nova aquí';
   @override
   String get newFolderHere => 'Cartafol novo aquí';
@@ -867,6 +914,17 @@ final class GalicianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Marcapases da plantilla';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, título e os demais valores por cubrir';
+  @override
+  String get quickNoteSubtitle => 'A nota que abre a pestana Nota rápida';
+  @override
+  String get listFolderSubtitle => 'As listas novas de tarefas';
+  @override
+  String get templateFolderSubtitle => 'A orixe de «Nova desde modelo»';
+  @override
+  String get attachmentsFolderSubtitle => 'Imaxes e audio inseridos nunha nota';
   @override
   String get templateHelpIntro =>
       'Unha plantilla é unha nota normal con furados. Crear unha nota '
@@ -1457,6 +1515,8 @@ final class GalicianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteca $library';
   @override
   String get syncUrlLabel => 'Enderezo do cartafol';
+  @override
+  String get syncUrlRequired => 'Introduza o enderezo do servidor';
   @override
   String get syncUrlHint =>
       'O cartafol debe existir. Copia o enderezo tal como o '

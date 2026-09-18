@@ -96,6 +96,22 @@ final class HungarianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-forrás, ahogy írva van';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formázott szöveg, helyben szerkesztve';
+  @override
+  String get settingsFolderToCreate => 'létrehozandó';
+  @override
+  String get settingsSearchHint => 'Keresés a beállításokban';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 beállítás található' : '$count beállítás található';
+  @override
+  String get settingsToggleOn => 'Be';
+  @override
+  String get settingsToggleOff => 'Ki';
+  @override
   String get settingsPreviewEnabledTitle => 'Előnézet';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -104,6 +120,10 @@ final class HungarianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Váltás WYSIWYG szerkesztőre';
   @override
   String get switchToSourceTooltip => 'Váltás Markdown forrásra';
+  @override
+  String get switchToSourceLabel => 'Forrás';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ez a jegyzet túl nagy a WYSIWYG szerkesztőhöz. Nyisd meg Markdown '
@@ -122,6 +142,27 @@ final class HungarianStrings extends Strings {
   String get settingsSectionShortcuts => 'Billentyűzet';
   @override
   String get keyboardShortcutsTitle => 'Billentyűparancsok';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Könyvtár $name';
+  @override
+  String get settingsGroupLibraryHint => 'csak ehhez a könyvtárhoz van';
+  @override
+  String get settingsGroupMaintenance => 'Karbantartás';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappák és útvonalak';
+  @override
+  String get settingsAreaTrashHistory => 'Kuka és kronológia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnosztika és infó';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Csatlakoztatott fizikai billentyűzet szükséges';
   @override
   String get settingsSectionUpdates => 'Frissítések';
   @override
@@ -828,6 +869,11 @@ final class HungarianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'itt volt: $path';
   @override
+  String get trashOriginalRoot =>
+      'a k\u00f6nyvt\u00e1r gy\u00f6ker\u00e9ben volt';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 elem' : '$count elem';
+  @override
   String get newNoteHere => 'Új jegyzet ide';
   @override
   String get newFolderHere => 'Új mappa ide';
@@ -861,6 +907,17 @@ final class HungarianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Sablon helyőrzők';
+  @override
+  String get templateHelpSubtitle => 'Dátum, cím és a többi kitöltendő érték';
+  @override
+  String get quickNoteSubtitle =>
+      'A jegyzet, amelyet a Gyorsjegyzet lap megnyit';
+  @override
+  String get listFolderSubtitle => 'Az új feladatlisták';
+  @override
+  String get templateFolderSubtitle => 'A „Új sablonból” forrása';
+  @override
+  String get attachmentsFolderSubtitle => 'Jegyzetbe illesztett képek és hang';
   @override
   String get templateHelpIntro =>
       'A sablon egy sima jegyzet lyukakkal. A jegyzet onnan való létrehozása '
@@ -1450,6 +1507,8 @@ final class HungarianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Könyvtár: $library';
   @override
   String get syncUrlLabel => 'Mappa címe';
+  @override
+  String get syncUrlRequired => 'Adja meg a kiszolgáló címét';
   @override
   String get syncUrlHint =>
       'A mappának léteznie kell. Másold ki a címet úgy, ahogy a '

@@ -97,6 +97,21 @@ final class NorwegianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-kilde, som skrevet';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatert tekst, redigeres direkte';
+  @override
+  String get settingsFolderToCreate => 'opprettes';
+  @override
+  String get settingsSearchHint => 'Søk i innstillinger';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 innstilling funnet' : '$count innstillinger funnet';
+  @override
+  String get settingsToggleOn => 'På';
+  @override
+  String get settingsToggleOff => 'Av';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvising';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -105,6 +120,10 @@ final class NorwegianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Bytt til WYSIWYG-editoren';
   @override
   String get switchToSourceTooltip => 'Bytt til Markdown-kilden';
+  @override
+  String get switchToSourceLabel => 'Kilde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Dette notatet er for stort for WYSIWYG-editoren. Åpne det i '
@@ -123,6 +142,27 @@ final class NorwegianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturforkortelser';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gjelder bare for dette biblioteket';
+  @override
+  String get settingsGroupMaintenance => 'Vedlikehold';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapper og stier';
+  @override
+  String get settingsAreaTrashHistory => 'Papirkorg og historikk';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikk og info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Krever et tilkoblet fysisk tastatur';
   @override
   String get settingsSectionUpdates => 'Oppdateringer';
   @override
@@ -824,6 +864,11 @@ final class NorwegianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'lå i $path';
   @override
+  String get trashOriginalRoot => 'var i roten av biblioteket';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementer';
+  @override
   String get newNoteHere => 'Nytt notat her';
   @override
   String get newFolderHere => 'Ny mappe her';
@@ -857,6 +902,17 @@ final class NorwegianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Mal-plassholdere';
+  @override
+  String get templateHelpSubtitle =>
+      'Dato, tittel og de øvrige verdiene å fylle ut';
+  @override
+  String get quickNoteSubtitle => 'Notatet Hurtiglapp-fanen åpner';
+  @override
+  String get listFolderSubtitle => 'De nye oppgavelistene';
+  @override
+  String get templateFolderSubtitle => 'Kilden til „Ny fra mal“';
+  @override
+  String get attachmentsFolderSubtitle => 'Bilder og lyd satt inn i et notat';
   @override
   String get templateHelpIntro =>
       'En mal er et vanlig notat med hull i. Å opprette et notat fra den '
@@ -1439,6 +1495,8 @@ final class NorwegianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliotek $library';
   @override
   String get syncUrlLabel => 'Mappeadresse';
+  @override
+  String get syncUrlRequired => 'Skriv inn serveradressen';
   @override
   String get syncUrlHint =>
       'Mappen må finnes. Kopier adressen slik serveren viser den.';

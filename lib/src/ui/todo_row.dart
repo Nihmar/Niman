@@ -1,9 +1,8 @@
 /// One todo row (T-TDM-02): a checkbox, the
 /// task's display text, and a subtitle with the due/reminder line plus
 /// a chip per `+project` / `@context` / `#tag` token the task carries
-/// (2026-09-07 user feedback: the tokens were invisible in the row; the
-/// old left accent bar — the first `#tag`'s color — is gone, its color
-/// now dots the chips).
+/// (2026-09-07 user feedback: the tokens were invisible in the row).
+/// Each kind wears its own color ([tokenColor]).
 ///
 /// Dumb by design: the parent owns the controller, the edit dialog and
 /// the long-press menu — the row only reports toggle, edit and menu
@@ -15,7 +14,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/todo/parser.dart';
 import 'package:niman/src/todo/todo_store.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/tag_color.dart';
+import 'package:niman/src/ui/theme/tokens.dart';
 
 /// The due-date state driving the subtitle styling (overdue and today
 /// stand out; upcoming is plain).
@@ -200,10 +199,10 @@ final class _ReminderChip extends StatelessWidget {
   }
 }
 
-/// One token chip of the row subtitle: a dot in the token's color (the
-/// same `tagColorFor` the old accent bar used) plus the token text with
-/// its sigil (`+p`, `@c`, `#t`), so the color still marks the token
-/// without a bar nobody could name.
+/// One token chip of the row subtitle: the token's kind color
+/// (`+project` the accent, `@context` the syntax tag teal, `#tag` the
+/// tertiary) behind the token text with its sigil, so what `todo.txt`
+/// separates on purpose looks apart at a glance (issue #131).
 final class _TokenChip extends StatelessWidget {
   const new({required this.token});
 
@@ -212,36 +211,29 @@ final class _TokenChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final color = tokenColor(context, token);
     return Container(
       key: Key('todo-row-token-$token'),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: scheme.onSurface.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(4),
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: tagColorFor(token),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            token,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+      child: Text(
+        token,
+        style: theme.textTheme.bodySmall?.copyWith(color: color),
       ),
     );
   }
+}
+
+/// The token's color by kind, not by name: projects wear the accent,
+/// contexts the syntax tag teal, tags the tertiary.
+Color tokenColor(BuildContext context, String token) {
+  final scheme = Theme.of(context).colorScheme;
+  if (token.startsWith('+')) return scheme.primary;
+  if (token.startsWith('@')) return SyntaxColors.of(context).tag;
+  return scheme.tertiary;
 }
 
 /// The display form of [date] (`7 Sep`), appending the year when it

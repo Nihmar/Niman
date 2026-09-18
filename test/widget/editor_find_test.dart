@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:re_editor/re_editor.dart';
 
 Widget _app(NoteView view) => MaterialApp(home: Scaffold(body: view));
 
@@ -63,6 +64,35 @@ void main() {
     // Closing refocuses the editor: release the focus (stops the cursor
     // blink) and let the one-shot focus timer fire before the invariant
     // check.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump(const Duration(milliseconds: 150));
+  });
+
+  testWidgets('the find button keeps the keyboard up through the tap', (
+    tester,
+  ) async {
+    // With the keyboard up, tapping find closed it on tap-down (the
+    // button sat outside the editor's tap region) and the find field
+    // reopened it a frame later. The button joins the region like the
+    // formatting toolbar, so focus moves straight to the find field.
+    await tester.pumpWidget(_app(_view()));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.ancestor(
+        of: find.byKey(const Key('editor-find-open')),
+        matching: find.byType(CodeEditorTapRegion),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('editor-find-open')));
+    await tester.pump();
+    await tester.pump();
+    final input = find.byKey(const Key('editor-find-input'));
+    expect(input, findsOneWidget);
+    expect(tester.widget<TextField>(input).focusNode?.hasFocus, isTrue);
+
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pump(const Duration(milliseconds: 150));
   });

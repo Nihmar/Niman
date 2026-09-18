@@ -98,6 +98,21 @@ final class DutchStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-bron, zoals geschreven';
+  @override
+  String get editorKindWysiwygSubtitle => 'Opgemaakte tekst, direct bewerkt';
+  @override
+  String get settingsFolderToCreate => 'aan te maken';
+  @override
+  String get settingsSearchHint => 'Zoeken in instellingen';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 instelling gevonden' : '$count instellingen gevonden';
+  @override
+  String get settingsToggleOn => 'Aan';
+  @override
+  String get settingsToggleOff => 'Uit';
+  @override
   String get settingsPreviewEnabledTitle => 'Voorbeeld';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -106,6 +121,10 @@ final class DutchStrings extends Strings {
   String get switchToWysiwygTooltip => 'Over naar de WYSIWYG-editor';
   @override
   String get switchToSourceTooltip => 'Over naar de Markdown-brontekst';
+  @override
+  String get switchToSourceLabel => 'Bron';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Deze notitie is te groot voor de WYSIWYG-editor. Open hem in de '
@@ -124,6 +143,27 @@ final class DutchStrings extends Strings {
   String get settingsSectionShortcuts => 'Toetsenbord';
   @override
   String get keyboardShortcutsTitle => 'Sneltoetsen';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotheek $name';
+  @override
+  String get settingsGroupLibraryHint => 'geldt alleen voor deze bibliotheek';
+  @override
+  String get settingsGroupMaintenance => 'Onderhoud';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mappen en paden';
+  @override
+  String get settingsAreaTrashHistory => 'Prullenbak en chronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostiek en info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vereist een aangesloten fysiek toetsenbord';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override
@@ -830,6 +870,10 @@ final class DutchStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'stond in $path';
   @override
+  String get trashOriginalRoot => 'stond in de hoofdmap van de bibliotheek';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 item' : '$count items';
+  @override
   String get newNoteHere => 'Nieuwe notitie hier';
   @override
   String get newFolderHere => 'Nieuwe map hier';
@@ -863,6 +907,19 @@ final class DutchStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Sjabloon-placeholders';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, titel en de overige in te vullen waarden';
+  @override
+  String get quickNoteSubtitle =>
+      'De notitie die het tabblad Snelle notitie opent';
+  @override
+  String get listFolderSubtitle => 'De nieuwe takenlijsten';
+  @override
+  String get templateFolderSubtitle => 'De bron van „Nieuw uit sjabloon“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Afbeeldingen en audio in een notitie';
   @override
   String get templateHelpIntro =>
       'Een sjabloon is een gewone notitie met gaten. Een notitie uit een '
@@ -1462,6 +1519,8 @@ final class DutchStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliotheek $library';
   @override
   String get syncUrlLabel => 'Mapadres';
+  @override
+  String get syncUrlRequired => 'Voer het serveradres in';
   @override
   String get syncUrlHint =>
       'De map moet al bestaan. Kopieer het adres zoals de server '

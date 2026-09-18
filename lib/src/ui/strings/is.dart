@@ -97,6 +97,22 @@ final class IcelandicStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown-kóði, eins og hann er skrifaður';
+  @override
+  String get editorKindWysiwygSubtitle => 'Forsniðinn texti, breytt á staðnum';
+  @override
+  String get settingsFolderToCreate => 'búa til';
+  @override
+  String get settingsSearchHint => 'Leita í stillingum';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 stilling fannst' : '$count stillingar fundust';
+  @override
+  String get settingsToggleOn => 'Kveikt';
+  @override
+  String get settingsToggleOff => 'Slökkt';
+  @override
   String get settingsPreviewEnabledTitle => 'Forsýning';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -105,6 +121,10 @@ final class IcelandicStrings extends Strings {
   String get switchToWysiwygTooltip => 'Skipta yfir í WYSIWYG ritara';
   @override
   String get switchToSourceTooltip => 'Skipta yfir í Markdown upprunatexta';
+  @override
+  String get switchToSourceLabel => 'Kóði';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Þetta minnisblað er of stórt fyrir WYSIWYG-ritilinn. Opnaðu það í '
@@ -123,6 +143,27 @@ final class IcelandicStrings extends Strings {
   String get settingsSectionShortcuts => 'Lyklaborð';
   @override
   String get keyboardShortcutsTitle => 'Lyklaborðssnarstæður';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bókasafn $name';
+  @override
+  String get settingsGroupLibraryHint => 'gildir eingöngu fyrir þetta bókasafn';
+  @override
+  String get settingsGroupMaintenance => 'Úthald';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapar og slóðir';
+  @override
+  String get settingsAreaTrashHistory => 'Korpur og tímará';
+  @override
+  String get settingsAreaDiagnostics => 'Greining og upplýsingar';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Þarf eðlilegt lyklaborð sem er tengt';
   @override
   String get settingsSectionUpdates => 'Uppfærslur';
   @override
@@ -825,6 +866,11 @@ final class IcelandicStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'var í $path';
   @override
+  String get trashOriginalRoot => 'var \u00ed r\u00f3t b\u00f3kasafnsins';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 atri\u00f0i' : '$count atri\u00f0i';
+  @override
   String get newNoteHere => 'Nýtt minnisblað hér';
   @override
   String get newFolderHere => 'Ný mappa hér';
@@ -858,6 +904,18 @@ final class IcelandicStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Stafsetningar staðir í smíð';
+  @override
+  String get templateHelpSubtitle =>
+      'Dagsetning, titill og önnur gildi til að fylla út';
+  @override
+  String get quickNoteSubtitle => 'Minnisblaðið sem flipinn Flýtiglós opnar';
+  @override
+  String get listFolderSubtitle => 'Nýju verkefnalistarnir';
+  @override
+  String get templateFolderSubtitle => 'Uppspretta „Nýtt úr sniðmáti“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Myndir og hljóð sett inn í minnisblað';
   @override
   String get templateHelpIntro =>
       'Smíð er venjulegt minnisblað með holum. Nýtt minnisblað úr '
@@ -1435,6 +1493,8 @@ final class IcelandicStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bókasafn $library';
   @override
   String get syncUrlLabel => 'Slóð möppu';
+  @override
+  String get syncUrlRequired => 'Sláðu inn vistfang þjónsins';
   @override
   String get syncUrlHint =>
       'Mappan verður að vera til. Afritaðu slóðina eins og '

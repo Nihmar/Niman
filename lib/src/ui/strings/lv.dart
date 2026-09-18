@@ -98,6 +98,22 @@ final class LatvianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown avots, kā uzrakstīts';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatēts teksts, rediģēts uz vietas';
+  @override
+  String get settingsFolderToCreate => 'jāizveido';
+  @override
+  String get settingsSearchHint => 'Meklēt iestatījumos';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 iestatījums atrasts' : '$count iestatījumi atrasti';
+  @override
+  String get settingsToggleOn => 'Ieslēgts';
+  @override
+  String get settingsToggleOff => 'Izslēgts';
+  @override
   String get settingsPreviewEnabledTitle => 'Priekšskatījums';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -106,6 +122,10 @@ final class LatvianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Pārslēgt uz WYSIWYG redaktoru';
   @override
   String get switchToSourceTooltip => 'Pārslēgt uz Markdown avotu';
+  @override
+  String get switchToSourceLabel => 'Avots';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Šī piezīme ir pārāk liela WYSIWYG redaktoram. Atveriet to kā Markdown '
@@ -124,6 +144,27 @@ final class LatvianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatūra';
   @override
   String get keyboardShortcutsTitle => 'Tastatūras saīsinājumi';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotēka $name';
+  @override
+  String get settingsGroupLibraryHint => 'piemērojams tikai šai bibliotēkai';
+  @override
+  String get settingsGroupMaintenance => 'Apkope';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Katalogi un ceļi';
+  @override
+  String get settingsAreaTrashHistory => 'Konteiners un hronoloģija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika un info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Nepieciešams pieslēgts fizisks tastatūrs';
   @override
   String get settingsSectionUpdates => 'Atjauninājumi';
   @override
@@ -826,6 +867,11 @@ final class LatvianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'atradās: $path';
   @override
+  String get trashOriginalRoot => 'bija bibliot\u0113kas sakn\u0113';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 vienums' : '$count vienumi';
+  @override
   String get newNoteHere => 'Jauna piezīme šeit';
   @override
   String get newFolderHere => 'Jauns katalogs šeit';
@@ -859,6 +905,17 @@ final class LatvianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Šablona aizstājējzīmes';
+  @override
+  String get templateHelpSubtitle =>
+      'Datums, nosaukums un pārējās aizpildāmās vērtības';
+  @override
+  String get quickNoteSubtitle => 'Piezīme, ko atver ātrās piezīmes cilne';
+  @override
+  String get listFolderSubtitle => 'Jaunie uzdevumu saraksti';
+  @override
+  String get templateFolderSubtitle => 'Avots „Jauns no veidnes“';
+  @override
+  String get attachmentsFolderSubtitle => 'Piezīmē ievietoti attēli un audio';
   @override
   String get templateHelpIntro =>
       'Šablons ir parasta piezīme ar atverēm. Izveidojot piezīmi no tā, '
@@ -1439,6 +1496,8 @@ final class LatvianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliotēka $library';
   @override
   String get syncUrlLabel => 'Kataloga adrese';
+  @override
+  String get syncUrlRequired => 'Ievadiet servera adresi';
   @override
   String get syncUrlHint =>
       'Katalogam jau jābūt izveidotam. Nokopējiet adresi tā, kā '

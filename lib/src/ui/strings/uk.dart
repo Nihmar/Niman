@@ -102,6 +102,22 @@ final class UkrainianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Джерело Markdown, як написано';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматований текст, редагується на місці';
+  @override
+  String get settingsFolderToCreate => 'створити';
+  @override
+  String get settingsSearchHint => 'Пошук налаштувань';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 налаштування знайдено' : '$count налаштувань знайдено';
+  @override
+  String get settingsToggleOn => 'Увімк.';
+  @override
+  String get settingsToggleOff => 'Вимк.';
+  @override
   String get settingsPreviewEnabledTitle => 'Перегляд';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -110,6 +126,10 @@ final class UkrainianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Перемкнути на WYSIWYG-редактор';
   @override
   String get switchToSourceTooltip => 'Перемкнути на Markdown-джерело';
+  @override
+  String get switchToSourceLabel => 'Джерело';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ця нотатка занадто велика для WYSIWYG-редактора. Відкрийте її як '
@@ -128,6 +148,28 @@ final class UkrainianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавіатура';
   @override
   String get keyboardShortcutsTitle => 'Комбінації клавіш';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Бібліотека $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      'застосовується лише до цієї бібліотеки';
+  @override
+  String get settingsGroupMaintenance => 'Обслуговування';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки та шляхи';
+  @override
+  String get settingsAreaTrashHistory => 'Кошик і хронологія';
+  @override
+  String get settingsAreaDiagnostics => 'Діагностика та інфа';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Потрібна підключена фізична клавіатура';
   @override
   String get settingsSectionUpdates => 'Оновлення';
   @override
@@ -829,6 +871,12 @@ final class UkrainianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'була в $path';
   @override
+  String get trashOriginalRoot => 'було в корені бібліотеки';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0435\u043b\u0435\u043c\u0435\u043d\u0442'
+      : '$count \u0435\u043b\u0435\u043c\u0435\u043d\u0442\u0456\u0432';
+  @override
   String get newNoteHere => 'Нова нотатка тут';
   @override
   String get newFolderHere => 'Нова папка тут';
@@ -862,6 +910,19 @@ final class UkrainianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Плейсхолдери шаблону';
+  @override
+  String get templateHelpSubtitle =>
+      'Дата, назва й інші значення для заповнення';
+  @override
+  String get quickNoteSubtitle =>
+      'Нотатка, яку відкриває вкладка Швидка нотатка';
+  @override
+  String get listFolderSubtitle => 'Нові списки справ';
+  @override
+  String get templateFolderSubtitle => 'Джерело для „Нової з шаблону“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Зображення й аудіо, вставлені в нотатку';
   @override
   String get templateHelpIntro =>
       'Шаблон — звичайна нотатка з отворами. При створенні нотатки з нього '
@@ -1449,6 +1510,8 @@ final class UkrainianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Бібліотека $library';
   @override
   String get syncUrlLabel => 'Адреса папки';
+  @override
+  String get syncUrlRequired => 'Введіть адресу сервера';
   @override
   String get syncUrlHint =>
       'Папка має існувати. Скопіюйте адресу так, як її показує '

@@ -98,6 +98,21 @@ final class DanishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-kilde, som skrevet';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formateret tekst, redigeres direkte';
+  @override
+  String get settingsFolderToCreate => 'oprettes';
+  @override
+  String get settingsSearchHint => 'Søg i indstillinger';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 indstilling fundet' : '$count indstillinger fundet';
+  @override
+  String get settingsToggleOn => 'Til';
+  @override
+  String get settingsToggleOff => 'Fra';
+  @override
   String get settingsPreviewEnabledTitle => 'Forhåndsvisning';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -106,6 +121,10 @@ final class DanishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Skift til WYSIWYG-editoren';
   @override
   String get switchToSourceTooltip => 'Skift til Markdown-kilden';
+  @override
+  String get switchToSourceLabel => 'Kilde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Denne note er for stor til WYSIWYG-editoren. Åbn den i '
@@ -124,6 +143,27 @@ final class DanishStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Genveje';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gælder kun for dette bibliotek';
+  @override
+  String get settingsGroupMaintenance => 'Vedligeholdelse';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mapper og stier';
+  @override
+  String get settingsAreaTrashHistory => 'Affald og historik';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostik og info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Kræver et tilsluttet fysisk tastatur';
   @override
   String get settingsSectionUpdates => 'Opdateringer';
   @override
@@ -826,6 +866,11 @@ final class DanishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'lå i $path';
   @override
+  String get trashOriginalRoot => 'var i bibliotekets rod';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elementer';
+  @override
   String get newNoteHere => 'Ny note her';
   @override
   String get newFolderHere => 'Ny mappe her';
@@ -859,6 +904,17 @@ final class DanishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Skabelon-pladsholdere';
+  @override
+  String get templateHelpSubtitle =>
+      'Dato, titel og de øvrige værdier at udfylde';
+  @override
+  String get quickNoteSubtitle => 'Den note fanen Hurtig note åbner';
+  @override
+  String get listFolderSubtitle => 'De nye opgavelister';
+  @override
+  String get templateFolderSubtitle => 'Kilden til „Ny fra skabelon“';
+  @override
+  String get attachmentsFolderSubtitle => 'Billeder og lyd indsat i en note';
   @override
   String get templateHelpIntro =>
       'En skabelon er en almindelig note med huller i. At oprette en note '
@@ -1441,6 +1497,8 @@ final class DanishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliotek $library';
   @override
   String get syncUrlLabel => 'Mappens adresse';
+  @override
+  String get syncUrlRequired => 'Indtast serverens adresse';
   @override
   String get syncUrlHint =>
       'Mappen skal findes. Kopiér adressen, som serveren viser '

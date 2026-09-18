@@ -9,6 +9,7 @@ import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_rows.dart';
+import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -34,23 +35,42 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the list is grouped under its six headings', (tester) async {
+  /// Opens [area]'s screen from the settings home (issue #104): the
+  /// rows the tests drive live in the pushed area screen.
+  Future<void> openArea(WidgetTester tester, Key area) async {
+    await tester.tap(find.byKey(area));
+    await tester.pumpAndSettle();
+  }
+
+  /// The switch inside the [HighlightRow] wrapper (issue #104): the
+  /// row's key sits on the wrapper, so the tile is a descendant of it.
+  SwitchListTile switchOf(WidgetTester tester, Finder row) =>
+      tester.widget<SwitchListTile>(
+        find.descendant(of: row, matching: find.byType(SwitchListTile)),
+      );
+
+  testWidgets('the home groups the settings under its areas', (tester) async {
     await pump(tester);
     for (final heading in [
       AppStrings.settingsSectionAppearance,
       AppStrings.settingsSectionEditor,
-      AppStrings.settingsSectionLibrary,
+      AppStrings.settingsAreaFolders,
+      AppStrings.settingsAreaTrashHistory,
       AppStrings.settingsSectionReminders,
-      AppStrings.settingsSectionDiagnostics,
-      AppStrings.settingsSectionAbout,
+      AppStrings.settingsAreaDiagnostics,
+      AppStrings.settingsGroupMaintenance,
     ]) {
       expect(find.text(heading), findsOne, reason: heading);
     }
+    // The About section is gone: its rows sit under Diagnostics.
+    expect(find.text(AppStrings.settingsSectionAbout), findsNothing);
   });
 
   testWidgets('no setting is a SegmentedButton any more', (tester) async {
     // The four inline segmented blocks are what made the screen a wall:
-    // each cost three lines where a switch cost one.
+    // each cost three lines where a switch cost one. The home has no
+    // setting rows at all (issue #104): the areas hold the switches and
+    // the dialogs.
     await pump(tester);
     expect(find.byType(SegmentedButton<int>), findsNothing);
     expect(find.byType(SegmentedButton<LinkType>), findsNothing);
@@ -59,6 +79,7 @@ void main() {
 
   testWidgets('a choice row reads its current value', (tester) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
     final row = find.byKey(const Key('indent-width'));
     expect(
       find.descendant(
@@ -73,6 +94,7 @@ void main() {
     tester,
   ) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
     await tester.tap(find.byKey(const Key('indent-width')));
     await tester.pumpAndSettle();
 
@@ -97,8 +119,8 @@ void main() {
     tester,
   ) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-trash-history'));
     final row = find.byKey(const Key('trash-auto-empty-setting'));
-    await tester.scrollUntilVisible(row, 200);
     await tester.pumpAndSettle();
     expect(await controller.trashAutoEmptyDays, trashAutoEmptyOff);
     expect(
@@ -130,8 +152,8 @@ void main() {
   // moved.
   testWidgets('a setting changed elsewhere reaches the row', (tester) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-folders'));
     final row = find.byKey(const Key('quick-note-setting'));
-    await tester.scrollUntilVisible(row, 200);
     await tester.pumpAndSettle();
     expect(
       find.descendant(of: row, matching: find.text(AppStrings.quickNoteUnset)),
@@ -152,6 +174,7 @@ void main() {
 
   testWidgets('cancelling a choice changes nothing', (tester) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
     await tester.tap(find.byKey(const Key('link-type')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppStrings.actionCancel));
@@ -164,6 +187,7 @@ void main() {
     tester,
   ) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-editor'));
     final row = find.byKey(const Key('missing-note-location'));
     expect(
       find.descendant(
@@ -193,6 +217,7 @@ void main() {
 
   testWidgets('the split width is a row over a slider dialog', (tester) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-appearance'));
     await tester.tap(find.byKey(const Key('split-ratio-setting')));
     await tester.pumpAndSettle();
 
@@ -210,24 +235,62 @@ void main() {
     tester,
   ) async {
     // It decides what the editor can do, not how the app looks (user,
-    // 2026-09-09).
+    // 2026-09-09); issue #104 makes the split explicit: the row sits in
+    // the editor area, not in appearance.
     await pump(tester);
-    final editor = tester.getTopLeft(
-      find.text(AppStrings.settingsSectionEditor),
-    );
-    final library = tester.getTopLeft(
-      find.text(AppStrings.settingsSectionLibrary),
-    );
-    final toolbar = tester.getTopLeft(find.byKey(const Key('toolbar-setting')));
-    expect(toolbar.dy, greaterThan(editor.dy));
-    expect(toolbar.dy, lessThan(library.dy));
+    await openArea(tester, const Key('settings-area-appearance'));
+    expect(find.byKey(const Key('toolbar-setting')), findsNothing);
+    await tester.tap(find.backButton());
+    await tester.pumpAndSettle();
+    await openArea(tester, const Key('settings-area-editor'));
+    expect(find.byKey(const Key('toolbar-setting')), findsOne);
   });
 
   testWidgets('switches keep their explanation, having no dialog', (
     tester,
   ) async {
     await pump(tester);
+    await openArea(tester, const Key('settings-area-trash-history'));
     expect(find.text(AppStrings.trashSubtitle), findsOne);
+  });
+
+  testWidgets('the reminders toggle flips and persists', (tester) async {
+    // Restored from the single-column settings: the split dropped the
+    // section with no UI at all (issue #104).
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-reminders'));
+    final row = find.byKey(const Key('reminder-show-tokens'));
+    expect(switchOf(tester, row).value, isFalse);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(await controller.reminderShowTokens, isTrue);
+    expect(switchOf(tester, row).value, isTrue);
+  });
+
+  testWidgets('maintenance holds the actions, not settings', (tester) async {
+    // Reindex, switch and close sit under their own heading on the
+    // home (issue #104), not scattered among the settings.
+    await pump(tester);
+    expect(find.text(AppStrings.settingsGroupMaintenance), findsOne);
+    expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    expect(find.byKey(const Key('switch-library-setting')), findsOneWidget);
+    expect(find.byKey(const Key('close-library-setting')), findsOneWidget);
+    // And they are out of the areas they used to hide in.
+    await openArea(tester, const Key('settings-area-trash-history'));
+    expect(find.byKey(const Key('reindex-setting')), findsNothing);
+    await tester.tap(find.backButton());
+    await tester.pumpAndSettle();
+    await openArea(tester, const Key('settings-area-folders'));
+    expect(find.byKey(const Key('switch-library-setting')), findsNothing);
+    expect(find.byKey(const Key('close-library-setting')), findsNothing);
+  });
+
+  testWidgets('a folder the library does not hold says so', (tester) async {
+    // A fresh library holds no folders: every configured folder wears
+    // the "to create" badge rather than a confident value (issue #104).
+    await pump(tester);
+    await openArea(tester, const Key('settings-area-folders'));
+    expect(find.text(AppStrings.settingsFolderToCreate), findsNWidgets(3));
   });
 
   testWidgets('the keyboard row shows on phones only, hidden on desktop', (
@@ -245,18 +308,20 @@ void main() {
 
     testWidgets('both editors are on by default', (tester) async {
       await pump(tester);
-      expect(tester.widget<SwitchListTile>(source).value, isTrue);
-      expect(tester.widget<SwitchListTile>(wysiwyg).value, isTrue);
+      await openArea(tester, const Key('settings-area-editor'));
+      expect(switchOf(tester, source).value, isTrue);
+      expect(switchOf(tester, wysiwyg).value, isTrue);
     });
 
     testWidgets('one editor switches off, never the last', (tester) async {
       await pump(tester);
+      await openArea(tester, const Key('settings-area-editor'));
       await tester.tap(wysiwyg);
       await tester.pumpAndSettle();
       expect(await controller.enabledEditors, {EditorKind.source});
       // The last one on disables its own switch rather than offering a
       // library with no editor.
-      expect(tester.widget<SwitchListTile>(source).onChanged, isNull);
+      expect(switchOf(tester, source).onChanged, isNull);
       await tester.tap(source);
       await tester.pumpAndSettle();
       expect(await controller.enabledEditors, {EditorKind.source});
@@ -274,12 +339,12 @@ void main() {
     tester,
   ) async {
     // The test host is a desktop platform, so a physical keyboard is
-    // assumed and the row stays enabled.
+    // assumed and the home row stays enabled: it pushes the reference
+    // straight from the home (issue #104), with no keyboard area.
     await pump(tester);
-    final row = find.byKey(const Key('keyboard-shortcuts-setting'));
+    final row = find.byKey(const Key('keyboard-shortcuts'));
     expect(row, findsOneWidget);
-    final tile = find.descendant(of: row, matching: find.byType(ListTile));
-    expect(tester.widget<ListTile>(tile).enabled, isTrue);
+    expect(tester.widget<ListTile>(row).enabled, isTrue);
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(find.byType(KeyboardShortcutsScreen), findsOneWidget);
@@ -310,7 +375,8 @@ void main() {
 
   group('the split-ratio row appears only where the panes can split', () {
     /// Pumps the settings body at [width], the way a phone or a tablet
-    /// would show it.
+    /// would show it, then opens the appearance area (issue #104): the
+    /// row under test sits there, so the visibility gates live there too.
     Future<void> pumpAt(WidgetTester tester, double width) async {
       tester.view.physicalSize = Size(width, 2800);
       tester.view.devicePixelRatio = 1;
@@ -321,6 +387,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await openArea(tester, const Key('settings-area-appearance'));
     }
 
     final row = find.byKey(const Key('split-ratio-setting'));
@@ -369,6 +436,118 @@ void main() {
       await pumpAt(tester, 400);
       expect(row, findsNothing);
       expect(await controller.splitRatio, 0.7);
+    });
+  });
+
+  group('the settings search', () {
+    /// Types [query] into the home's search field and lets the debounce
+    /// and the value loads settle (issue #104).
+    Future<void> search(WidgetTester tester, String query) async {
+      await pump(tester);
+      await tester.enterText(
+        find.byKey(const Key('settings-search-field')),
+        query,
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a result carries its area and opens its screen', (
+      tester,
+    ) async {
+      await search(tester, 'indent');
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsOne);
+      final result = find.byKey(const Key('settings-search-indent-width'));
+      expect(
+        find.descendant(
+          of: result,
+          matching: find.text(AppStrings.settingsSectionEditor),
+        ),
+        findsOne,
+      );
+      expect(
+        find.descendant(
+          of: result,
+          matching: find.text(AppStrings.indentWidthValue(2)),
+        ),
+        findsOne,
+      );
+      await tester.tap(result);
+      await tester.pumpAndSettle();
+      // The editor screen opened on the row.
+      expect(find.byKey(const Key('indent-width')), findsOneWidget);
+    });
+
+    testWidgets('a maintenance result flashes the home row in place', (
+      tester,
+    ) async {
+      // Maintenance actions sit on the home itself: opening one clears
+      // the search instead of pushing a screen.
+      await search(tester, 're-index');
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsOne);
+      await tester.tap(
+        find.byKey(const Key('settings-search-reindex-setting')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(AppStrings.settingsSearchResults(1)), findsNothing);
+      expect(find.byKey(const Key('reindex-setting')), findsOneWidget);
+    });
+
+    // A query matches a row's area as well as its title, so one word can
+    // bring a whole area back — and every one of those rows is a tile in
+    // one list, which Flutter will not have sharing a key.
+    testWidgets('a word that matches a whole area lists its rows', (
+      tester,
+    ) async {
+      await search(tester, 'trash');
+      expect(tester.takeException(), isNull);
+      final keys = tester
+          .widgetList<ListTile>(find.byType(ListTile))
+          .map((tile) => tile.key)
+          .whereType<Key>()
+          .toList();
+      expect(keys, isNotEmpty);
+      expect(keys.toSet().length, keys.length, reason: '$keys');
+    });
+
+    testWidgets('nothing matching reads as zero', (tester) async {
+      await search(tester, 'zzz-no-such-setting');
+      expect(find.text(AppStrings.settingsSearchResults(0)), findsOne);
+    });
+
+    // The index and the screens name each row through `SettingsKeys`, so
+    // they cannot spell it differently. They can still disagree about
+    // whether the row exists at all: a row deleted from its screen
+    // leaves an entry that opens the screen and highlights nothing.
+    testWidgets('every entry points at a row that is really there', (
+      tester,
+    ) async {
+      await pump(tester);
+      final context = tester.element(
+        find.byKey(const Key('settings-search-field')),
+      );
+      final entries = settingsSearchEntries(
+        controller: controller,
+        transcription: null,
+        spellCheck: null,
+        libraryName: 'Notes',
+        context: context,
+        flashHome: (_) {},
+      );
+      expect(entries, isNotEmpty);
+
+      for (final entry in entries) {
+        if (entry.onHome) {
+          // Maintenance actions sit on the home itself.
+          expect(find.byKey(entry.rowKey), findsOneWidget, reason: entry.title);
+          continue;
+        }
+        entry.open();
+        await tester.pumpAndSettle();
+        expect(find.byKey(entry.rowKey), findsOneWidget, reason: entry.title);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+      }
     });
   });
 }

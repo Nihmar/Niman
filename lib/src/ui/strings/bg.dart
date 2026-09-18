@@ -100,6 +100,22 @@ final class BulgarianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown изходник, както е написан';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Форматиран текст, редактира се директно';
+  @override
+  String get settingsFolderToCreate => 'за създаване';
+  @override
+  String get settingsSearchHint => 'Търсене в настройките';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 намерена настройка' : '$count намерени настройки';
+  @override
+  String get settingsToggleOn => 'Вкл.';
+  @override
+  String get settingsToggleOff => 'Изкл.';
+  @override
   String get settingsPreviewEnabledTitle => 'Преглед';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -110,6 +126,10 @@ final class BulgarianStrings extends Strings {
   String get switchToSourceTooltip =>
       'Превключване към изходен Markdown '
       'код';
+  @override
+  String get switchToSourceLabel => 'Изходник';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Тази бележка е твърде голяма за WYSIWYG редактора. Отворете я като '
@@ -128,6 +148,27 @@ final class BulgarianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавиатура';
   @override
   String get keyboardShortcutsTitle => 'Клавишни комбинации';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Библиотека $name';
+  @override
+  String get settingsGroupLibraryHint => 'важи само за тази библиотека';
+  @override
+  String get settingsGroupMaintenance => 'Поддръжка';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папки и пътища';
+  @override
+  String get settingsAreaTrashHistory => 'Кош и история';
+  @override
+  String get settingsAreaDiagnostics => 'Диагностика и инфо';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Нужна е свързана физическа клавиатура';
   @override
   String get settingsSectionUpdates => 'Актуализации';
   @override
@@ -832,6 +873,11 @@ final class BulgarianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'беше в $path';
   @override
+  String get trashOriginalRoot => 'беше в корена на библиотеката';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 елемент' : '$count елемента';
+  @override
   String get newNoteHere => 'Нова бележка тук';
   @override
   String get newFolderHere => 'Нова папка тук';
@@ -865,6 +911,19 @@ final class BulgarianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Замятащи знаци на шаблона';
+  @override
+  String get templateHelpSubtitle =>
+      'Дата, заглавие и останалите стойности за попълване';
+  @override
+  String get quickNoteSubtitle =>
+      'Бележката, която отваря разделът за бърза бележка';
+  @override
+  String get listFolderSubtitle => 'Новите списъци със задачи';
+  @override
+  String get templateFolderSubtitle => 'Източникът на „Нова от шаблон“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Изображения и звук, вмъкнати в бележка';
   @override
   String get templateHelpIntro =>
       'Шаблонът е обикновена бележка с отвори. При създаване на бележка '
@@ -1452,6 +1511,8 @@ final class BulgarianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Библиотека $library';
   @override
   String get syncUrlLabel => 'Адрес на папката';
+  @override
+  String get syncUrlRequired => 'Въведете адреса на сървъра';
   @override
   String get syncUrlHint =>
       'Папката трябва да съществува. Копирайте адреса така, '

@@ -99,6 +99,23 @@ final class SpanishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Fuente Markdown, tal como está escrita';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texto con formato, editado directamente';
+  @override
+  String get settingsFolderToCreate => 'por crear';
+  @override
+  String get settingsSearchHint => 'Buscar ajustes';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ajuste encontrado' : '$count ajustes encontrados';
+  @override
+  String get settingsToggleOn => 'Activado';
+  @override
+  String get settingsToggleOff => 'Desactivado';
+  @override
   String get settingsPreviewEnabledTitle => 'Vista previa';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -107,6 +124,10 @@ final class SpanishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Cambiar al editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Cambiar a la fuente Markdown';
+  @override
+  String get switchToSourceLabel => 'Fuente';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Esta nota es demasiado grande para el editor WYSIWYG. Ábrela en la '
@@ -125,6 +146,27 @@ final class SpanishStrings extends Strings {
   String get settingsSectionShortcuts => 'Teclado';
   @override
   String get keyboardShortcutsTitle => 'Atajos de teclado';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteca $name';
+  @override
+  String get settingsGroupLibraryHint => 'aplica solo a esta biblioteca';
+  @override
+  String get settingsGroupMaintenance => 'Mantenimiento';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Carpetas y rutas';
+  @override
+  String get settingsAreaTrashHistory => 'Papelera y cronología';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnóstico e información';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesita un teclado físico conectado';
   @override
   String get settingsSectionUpdates => 'Actualizaciones';
   @override
@@ -841,6 +883,11 @@ final class SpanishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'estaba en $path';
   @override
+  String get trashOriginalRoot => 'estaba en la ra\u00edz de la biblioteca';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elemento' : '$count elementos';
+  @override
   String get newNoteHere => 'Nueva nota aquí';
   @override
   String get newFolderHere => 'Nueva carpeta aquí';
@@ -874,6 +921,18 @@ final class SpanishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Marcadores de posición de las plantillas';
+  @override
+  String get templateHelpSubtitle =>
+      'Fecha, título y los demás valores por rellenar';
+  @override
+  String get quickNoteSubtitle => 'La nota que abre la pestaña Nota rápida';
+  @override
+  String get listFolderSubtitle => 'Las listas nuevas de tareas';
+  @override
+  String get templateFolderSubtitle => 'El origen de «Nueva desde plantilla»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imágenes y audio insertados en una nota';
   @override
   String get templateHelpIntro =>
       'Una plantilla es una nota ordinaria con huecos. Crear una nota '
@@ -1469,6 +1528,8 @@ final class SpanishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteca $library';
   @override
   String get syncUrlLabel => 'Dirección de la carpeta';
+  @override
+  String get syncUrlRequired => 'Introduce la dirección del servidor';
   @override
   String get syncUrlHint =>
       'La carpeta debe existir. Copia la dirección tal como la '
