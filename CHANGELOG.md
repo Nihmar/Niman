@@ -8,7 +8,10 @@ Update it in the release commit, before the tag.
 
 ## [0.0.7] - 2026-09-18
 
+- **Reinstall once, on Android.** Every release until now was signed with a throwaway key that changed from build to build, so Android refused to update over it. There is a real signing key now and every release from here on updates normally — but this one has to be uninstalled and installed again by hand. Your notes live in your library folder and are not touched by it; copy anything you keep elsewhere first
+
 ### Added
+- **Windows draws the app's own title bar**, the way Linux already did: the sidebar toggle and the window buttons sit in one row with the note's name, and the space in the middle is where the note tabs will go
 - **Count a list**: the editor toolbar's new **Tools** button turns a list into a checklist of totals — a page of `Alessandro - cappuccino, brioche` becomes `- [ ] cappuccino: 2`, ready to tick off at the counter. It shows which list it is about to count and exactly what it would write before writing it, reads each row the way you tell it to, and run again after the list changes it replaces what it wrote rather than adding a second block — keeping the totals you had already ticked. Both editors, same result
 - Enter carries a list on in the source editor: the next line starts with the same marker, a numbered list counts on, a task item gives you a fresh empty box, and Enter on an item you have not typed anything into ends the list. The WYSIWYG always did this
 - The trash can empty itself: a library can be told how many days a deletion may sit before it goes for good, checked when the library opens. Off in a fresh library, and off whenever the setting cannot be read — it is permission to delete notes permanently
@@ -28,6 +31,11 @@ Update it in the release commit, before the tag.
 - The switch between the source editor and the WYSIWYG says which one it would take you to, and is not offered in preview, where there is no editor on screen
 
 ### Fixed
+- **Pasting in the WYSIWYG editor closed the app on Windows.** `Ctrl+V` took it down outright; it now pastes, and falls back to plain text when the clipboard's formatted version cannot be read
+- **The right-click menu in the source editor did nothing.** Cut, copy, paste and select all were all silently dropped — and, because every attempt left the editor without the cursor, `Ctrl+A` afterwards selected nothing and `Ctrl+C` copied a single line
+- `Ctrl+←` and `Ctrl+→` jump a word and `Ctrl+Shift+←`/`→` select one, the way they do everywhere else on Windows and Linux. Before, selecting a word from the keyboard was not possible at all
+- Copying from the WYSIWYG editor keeps the Markdown: a bulleted item copies as `- item`, a heading keeps its `#`, and the last item of a list no longer loses its bullet. Pasting Markdown back in brings the structure with it, and pasting a page from a browser still arrives formatted
+- The WYSIWYG editor's right-click menu opens where you clicked instead of halfway across the window
 - **Editing a note in the WYSIWYG no longer rewrites its lists.** A task list with blank lines between its items kept its boxes — they were being written back as plain bullets, and the tick went with them — a spaced-out list kept its spacing, a numbered list kept its numbers and the number it starts at, and a nested list kept its nesting
 - A task list with blank lines between its items shows its boxes in the preview too
 - Closing the app on Linux ended in a crash on NVIDIA, where a C exit handler unwound into the EGL driver
