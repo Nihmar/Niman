@@ -1176,6 +1176,8 @@ final class HungarianStrings extends Strings {
   @override
   String get openBeside => 'Megnyitás mellette';
   @override
+  String get closeAllNotes => 'Összes bezárása';
+  @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override
   String get openFileFailed =>

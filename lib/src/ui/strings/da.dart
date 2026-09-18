@@ -1167,6 +1167,8 @@ final class DanishStrings extends Strings {
   @override
   String get openBeside => 'Åbn ved siden af';
   @override
+  String get closeAllNotes => 'Luk alle';
+  @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';

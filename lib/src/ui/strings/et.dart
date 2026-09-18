@@ -1151,6 +1151,8 @@ final class EstonianStrings extends Strings {
   @override
   String get openBeside => 'Ava kõrval';
   @override
+  String get closeAllNotes => 'Sulge kõik';
+  @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override
   String get openFileFailed =>

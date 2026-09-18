@@ -1203,6 +1203,8 @@ final class FrenchStrings extends Strings {
   @override
   String get openBeside => 'Ouvrir à côté';
   @override
+  String get closeAllNotes => 'Tout fermer';
+  @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';
   @override

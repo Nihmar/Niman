@@ -4,8 +4,8 @@
 /// editor alive behind the one showing, and follows the library when a
 /// note or a folder under an open note is renamed, moved or deleted.
 ///
-/// On a phone it still holds one note at a time: the shown note replaces
-/// the showing tab. The open-notes switcher is a later step of #23.
+/// On a phone the notes opened stay open, one on screen at a time, and
+/// the open-notes switcher reaches the others (#23, PR 4).
 library;
 
 import 'dart:async';
@@ -80,16 +80,22 @@ final class ShellWorkspace {
   /// Called from the shell's build, for the ways in that set the shell's
   /// note without going through [show] (a link, a template, a quick
   /// note), so the change lands after the frame instead of notifying in
-  /// the middle of one. With [keepOnNone] — the wide layout, where
-  /// selecting a folder leaves the tabs alone — no note closes nothing.
-  void follow(String? notePath, {bool keepOnNone = false}) {
+  /// the middle of one. With [keepOnNone] no note closes nothing: a
+  /// folder selected, or the phone back on its tree, leaves the open
+  /// notes open. With [alongside] — the phone, which has no tab to show
+  /// a note in place of — a note joins the ones already open.
+  void follow(
+    String? notePath, {
+    bool keepOnNone = false,
+    bool alongside = false,
+  }) {
     if (_followed && notePath == _following) return;
     final previous = _following;
     _following = notePath;
     _followed = true;
     scheduleMicrotask(() {
       if (notePath != null) {
-        final fresh = _nextInNewTab;
+        final fresh = alongside || _nextInNewTab;
         _nextInNewTab = false;
         controller.update(
           (w) => fresh ? w.open(notePath) : w.replaceActive(notePath),

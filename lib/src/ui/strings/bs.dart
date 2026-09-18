@@ -1172,6 +1172,8 @@ final class BosnianStrings extends Strings {
   @override
   String get openBeside => 'Otvori sa strane';
   @override
+  String get closeAllNotes => 'Zatvori sve';
+  @override
   String get openFileMissing => 'Datoteka ove bilješke nije na disku';
   @override
   String get openFileFailed =>

@@ -1063,6 +1063,8 @@ final class ChineseStrings extends Strings {
   @override
   String get openBeside => '在侧边打开';
   @override
+  String get closeAllNotes => '全部关闭';
+  @override
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override
   String get openFileFailed => '无法在 Niman 之外打开这篇笔记';

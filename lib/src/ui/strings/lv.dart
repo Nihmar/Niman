@@ -1166,6 +1166,8 @@ final class LatvianStrings extends Strings {
   @override
   String get openBeside => 'Atvērt blakus';
   @override
+  String get closeAllNotes => 'Aizvērt visas';
+  @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';

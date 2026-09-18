@@ -1175,6 +1175,8 @@ final class BasqueStrings extends Strings {
   @override
   String get openBeside => 'Ireki alboan';
   @override
+  String get closeAllNotes => 'Itxi guztiak';
+  @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';

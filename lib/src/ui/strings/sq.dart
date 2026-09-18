@@ -1182,6 +1182,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get openBeside => 'Hape anash';
   @override
+  String get closeAllNotes => 'Mbyll të gjitha';
+  @override
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override
   String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';

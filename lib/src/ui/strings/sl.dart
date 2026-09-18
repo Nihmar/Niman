@@ -1165,6 +1165,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get openBeside => 'Odpri ob strani';
   @override
+  String get closeAllNotes => 'Zapri vse';
+  @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';

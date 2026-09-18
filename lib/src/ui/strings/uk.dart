@@ -1175,6 +1175,8 @@ final class UkrainianStrings extends Strings {
   @override
   String get openBeside => 'Відкрити збоку';
   @override
+  String get closeAllNotes => 'Закрити всі';
+  @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';

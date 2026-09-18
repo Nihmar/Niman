@@ -1174,6 +1174,8 @@ final class SerbianStrings extends Strings {
   @override
   String get openBeside => 'Отвори са стране';
   @override
+  String get closeAllNotes => 'Затвори све';
+  @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override
   String get openFileFailed =>

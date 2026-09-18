@@ -56,6 +56,15 @@ behind them, undo included. Older ones come back to where you left them
 (caret, selection, scroll) but start a fresh undo history. A very long
 note keeps its editor only while it is on screen.
 
+**On a phone** the notes you open stay open after you go back to the
+tree. The note bar and the Files bar show how many there are. Tapping
+that count opens the list of open notes: the one on screen is marked,
+and each note has its folder, the orange dot while it has unsaved
+edits, and a close. From the list you can switch to a note, close one
+(the next open note takes its place, or the tree once none are left),
+close them all, or start a new note. Each note comes back where you
+left it.
+
 Selecting a folder in the tree leaves the note on screen, and the tree
 follows the tab you pick. Renaming or moving a note, or a folder with
 open notes in it, carries their tabs along, and deleting closes them.
