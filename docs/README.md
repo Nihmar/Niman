@@ -6,8 +6,8 @@ Two audiences, two folders:
   tasks and reminders, home-screen widgets, settings, shortcuts, sync,
   platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
-  instructions, code conventions, release process, the note history and
-  WebDAV sync design.
+  instructions, code conventions, release process, the note history,
+  WebDAV sync and workspace (open notes and tabs) design.
 - **`design/`** — the mockups a round was agreed against, one folder per
   round, with the decision each screen records.
 
