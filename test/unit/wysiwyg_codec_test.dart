@@ -260,11 +260,53 @@ A [[wikilink]].
       expect(edited('1. a\n\n2. b\n\n3. c\n'), '1. a\n\n2. b\n\n3. c\n');
     });
 
+    test('a sublist under a loose list keeps the nesting, not its own '
+        'blank lines', () {
+      // The blank lines are counted in the block's source, and the
+      // recursion into a sublist is not handed its slice of it, so the
+      // sublist comes back tight. It used to come back flat as well,
+      // which was the worse half.
+      expect(edited('- a\n\n  - b\n\n- c\n'), '- a\n  - b\n\n- c\n');
+    });
+
     test('an item whose content looks like a marker claims nothing', () {
       // The markers found have to be the items parsed, or a blank line
       // would land in the wrong gap: the old behaviour is the fallback.
       const note = '- a\n\n  ~~~\n  - not an item\n  ~~~\n\n- b\n';
       expect(edited(note), isNot(contains('- not an item\n\n')));
+    });
+  });
+
+  group('a nested list keeps its nesting', () {
+    String edited(String source) => codec.encode(codec.decode(source).document);
+
+    test('and comes back at the indent it was written at', () {
+      // The Delta records a depth, not a column, and the column is what
+      // Markdown needs: a sublist has to reach its parent's content,
+      // which is two in under `- ` and three in under `1. `. Indenting
+      // by a fixed width would be wrong under one or the other.
+      expect(edited('- a\n  - b\n- c\n'), '- a\n  - b\n- c\n');
+      expect(edited('- a\n  - b\n    - c\n'), '- a\n  - b\n    - c\n');
+      expect(edited('1. a\n   1. b\n2. c\n'), '1. a\n   1. b\n2. c\n');
+      expect(edited('1. a\n   - x\n2. b\n'), '1. a\n   - x\n2. b\n');
+    });
+
+    test('a sublist numbers on its own, and the list above carries on', () {
+      expect(
+        edited('1. a\n   1. x\n   2. y\n2. b\n   1. z\n'),
+        '1. a\n   1. x\n   2. y\n2. b\n   1. z\n',
+      );
+    });
+
+    test('a nested task item keeps its box', () {
+      expect(edited('- a\n  - [ ] b\n'), '- a\n  - [ ] b\n');
+    });
+
+    test('a list after the nesting starts over at the left', () {
+      expect(
+        edited('- a\n  - b\n\nprose\n\n- c\n'),
+        '- a\n  - b\n\nprose\n\n- c\n',
+      );
     });
   });
 
