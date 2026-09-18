@@ -8,6 +8,7 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/links/missing_note_handler.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
+import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -43,11 +44,10 @@ void main() {
   }
 
   /// The switch inside the [HighlightRow] wrapper (issue #104): the
-  /// row's key sits on the wrapper, so the tile is a descendant of it.
-  SwitchListTile switchOf(WidgetTester tester, Finder row) =>
-      tester.widget<SwitchListTile>(
-        find.descendant(of: row, matching: find.byType(SwitchListTile)),
-      );
+  /// row's key sits on the wrapper, so the switch is a descendant of it.
+  Switch switchOf(WidgetTester tester, Finder row) => tester.widget<Switch>(
+    find.descendant(of: row, matching: find.byType(Switch)),
+  );
 
   testWidgets('the home groups the settings under its areas', (tester) async {
     await pump(tester);
@@ -98,8 +98,9 @@ void main() {
     await tester.tap(find.byKey(const Key('indent-width')));
     await tester.pumpAndSettle();
 
-    // The explanation the list no longer prints is here instead.
-    expect(find.text(AppStrings.indentWidthSubtitle), findsOne);
+    // The explanation is under the row's label (#172) and in the dialog,
+    // where the choice is made.
+    expect(find.text(AppStrings.indentWidthSubtitle), findsNWidgets(2));
     await tester.tap(find.byKey(const Key('settings-choice-6')));
     await tester.pumpAndSettle();
 
@@ -344,7 +345,14 @@ void main() {
     await pump(tester);
     final row = find.byKey(const Key('keyboard-shortcuts'));
     expect(row, findsOneWidget);
-    expect(tester.widget<ListTile>(row).enabled, isTrue);
+    expect(
+      tester
+          .widget<ListTile>(
+            find.descendant(of: row, matching: find.byType(ListTile)),
+          )
+          .enabled,
+      isTrue,
+    );
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(find.byType(KeyboardShortcutsScreen), findsOneWidget);
@@ -366,9 +374,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final tile = find.byType(ListTile);
-    expect(tester.widget<ListTile>(tile).enabled, isFalse);
-    await tester.tap(tile);
+    final tile = find.text('Shortcuts');
+    await tester.tap(tile, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tapped, isFalse);
   });
@@ -533,6 +540,17 @@ void main() {
         libraryName: 'Notes',
         context: context,
         flashHome: (_) {},
+        // The phone's way in: the area's own screen, pushed.
+        openArea: (area, row) => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => settingsAreas(
+              controller: controller,
+              spellCheck: null,
+              transcription: null,
+              keyboardAttached: true,
+            ).firstWhere((a) => a.id == area).build(row),
+          ),
+        ),
       );
       expect(entries, isNotEmpty);
 

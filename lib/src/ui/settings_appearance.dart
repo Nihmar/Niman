@@ -227,6 +227,7 @@ final class _SettingsAppearanceScreenState
             key: SettingsKeys.language,
             child: SettingsValueRow(
               title: AppStrings.languageTitle,
+              subtitle: AppStrings.languageSubtitle,
               value: AppStrings.languageName(_language),
               onTap: () => unawaited(_chooseLanguage()),
             ),
@@ -235,6 +236,7 @@ final class _SettingsAppearanceScreenState
             key: SettingsKeys.brightness,
             child: SettingsValueRow(
               title: AppStrings.themeBrightnessTitle,
+              subtitle: AppStrings.themeBrightnessSubtitle,
               value: switch (_themeBrightness) {
                 AppBrightness.system => AppStrings.themeBrightnessSystem,
                 AppBrightness.day => AppStrings.themeBrightnessDay,
@@ -247,6 +249,7 @@ final class _SettingsAppearanceScreenState
             key: SettingsKeys.palette,
             child: SettingsValueRow(
               title: AppStrings.themePaletteTitle,
+              subtitle: AppStrings.themePaletteSubtitle,
               value: SettingsAppearanceScreen.paletteName(_themePalette),
               onTap: () => unawaited(_chooseThemePalette()),
             ),
@@ -255,6 +258,7 @@ final class _SettingsAppearanceScreenState
             key: SettingsKeys.uiTextScale,
             child: SettingsValueRow(
               title: AppStrings.uiTextScaleTitle,
+              subtitle: AppStrings.uiTextScaleSubtitle,
               value: AppStrings.textScaleValue(_uiTextScale),
               onTap: () => unawaited(_chooseUiTextScale()),
             ),
@@ -273,6 +277,7 @@ final class _SettingsAppearanceScreenState
               key: SettingsKeys.splitRatio,
               child: SettingsValueRow(
                 title: AppStrings.splitRatioTitle,
+                subtitle: AppStrings.splitRatioSubtitle,
                 value: AppStrings.splitRatioValue(_splitRatio),
                 onTap: () => unawaited(_chooseSplitRatio()),
               ),

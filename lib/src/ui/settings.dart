@@ -1,28 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:niman/src/core/app_channel.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/keyboard_presence.dart';
-import 'package:niman/src/ui/keyboard_shortcuts.dart';
-import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_area.dart';
-import 'package:niman/src/ui/settings_diagnostics.dart';
-import 'package:niman/src/ui/settings_editor.dart';
-import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_area_rows.dart';
+import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_maintenance.dart';
-import 'package:niman/src/ui/settings_reminders.dart';
+import 'package:niman/src/ui/settings_navigation.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/settings_search.dart';
-import 'package:niman/src/ui/settings_transcription.dart';
-import 'package:niman/src/ui/settings_trash_history.dart';
-import 'package:niman/src/ui/settings_updates.dart';
+import 'package:niman/src/ui/settings_section_pane.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/sync/sync_labels.dart';
-import 'package:niman/src/ui/sync/sync_settings_screen.dart';
 import 'package:path/path.dart' as p;
 
 /// The settings home (issue #104): the areas a settings screen splits
@@ -38,6 +30,7 @@ final class SettingsBody extends StatefulWidget {
     this.onClosed,
     this.spellCheck,
     this.transcription,
+    this.navigation,
     super.key,
   });
 
@@ -54,6 +47,12 @@ final class SettingsBody extends StatefulWidget {
 
   /// The installation's transcription models; null hides their section.
   final TranscriptionModels? transcription;
+
+  /// The desktop's two columns (issue #172): when given, this body is the
+  /// left column — the areas select rather than open, and the search
+  /// shows its row in the right column — and [SettingsSectionPane] draws
+  /// the selection. Null on the phone, where each area is a screen.
+  final SettingsNavigation? navigation;
 
   @override
   State<SettingsBody> createState() => _SettingsBodyState();
@@ -144,6 +143,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         libraryName: _libraryName ?? '',
         context: context,
         flashHome: _flashHome,
+        openArea: _openArea,
       ),
       query,
     );
@@ -180,6 +180,31 @@ final class _SettingsBodyState extends State<SettingsBody> {
   void _pushArea(BuildContext context, Widget screen) {
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (context) => screen));
+  }
+
+  /// The areas, as this body lists them.
+  List<SettingsArea> _areas() => settingsAreas(
+    controller: widget.controller,
+    spellCheck: widget.spellCheck,
+    transcription: widget.transcription,
+    keyboardAttached: _keyboard.attached,
+    version: _version,
+  );
+
+  /// Opens [area] with [row] flashed: in the right column on the desktop,
+  /// as its own screen on the phone.
+  void _openArea(SettingsAreaId area, Key? row) {
+    final navigation = widget.navigation;
+    if (navigation != null) {
+      navigation.select(area, highlight: row);
+      return;
+    }
+    for (final candidate in _areas()) {
+      if (candidate.id == area) {
+        _pushArea(context, candidate.build(row));
+        return;
+      }
+    }
   }
 
   @override
@@ -300,85 +325,31 @@ final class _SettingsBodyState extends State<SettingsBody> {
     required String? libraryName,
     required bool keyboardAttached,
   }) {
-    return ListView(
+    final areas = _areas();
+    final navigation = widget.navigation;
+    Widget row(SettingsArea area) {
+      Widget build() => navigation == null
+          ? SettingsAreaRow.of(area, onTap: () => _openArea(area.id, null))
+          : SettingsNavItem(
+              area: area,
+              selected: navigation.selected == area.id,
+              onTap: () => navigation.select(area.id),
+            );
+      final listenable = area.listenable;
+      return listenable == null
+          ? build()
+          : ListenableBuilder(
+              listenable: listenable,
+              builder: (context, _) => build(),
+            );
+    }
+
+    Widget list() => ListView(
       padding: const EdgeInsets.only(bottom: 16),
       children: [
         SettingsSection(AppStrings.settingsGroupApp),
-        SettingsAreaRow(
-          key: const Key('settings-area-appearance'),
-          icon: Icons.palette_outlined,
-          title: AppStrings.settingsSectionAppearance,
-          onTap: () => _pushArea(
-            context,
-            SettingsAppearanceScreen(controller: controller),
-          ),
-        ),
-        SettingsAreaRow(
-          key: const Key('settings-area-editor'),
-          icon: Icons.edit_outlined,
-          title: AppStrings.settingsSectionEditor,
-          onTap: () => _pushArea(
-            context,
-            SettingsEditorScreen(
-              controller: controller,
-              spellCheck: widget.spellCheck,
-            ),
-          ),
-        ),
-        // The keyboard shortcut reference is useless without a
-        // keyboard to press: with none seen the row says so instead
-        // of opening a dead end.
-        ListTile(
-          key: const Key('keyboard-shortcuts'),
-          leading: Icon(
-            Icons.keyboard_alt_outlined,
-            color: keyboardAttached
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          title: Text(
-            AppStrings.keyboardShortcutsTitle,
-            style: keyboardAttached
-                ? null
-                : theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-          ),
-          trailing: keyboardAttached
-              ? const Icon(Icons.chevron_right)
-              : Text(
-                  AppStrings.settingsAreaKeyboardDisabled,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-          onTap: keyboardAttached
-              ? () => _pushArea(context, const KeyboardShortcutsScreen())
-              : null,
-        ),
-        // Update management exists only on the release channel
-        // (issue #106): testing builds check no release channel, so
-        // the whole area is out, not just its toggles.
-        if (!isTestingBuild)
-          SettingsAreaRow(
-            key: const Key('settings-area-updates'),
-            icon: Icons.system_update,
-            title: AppStrings.settingsSectionUpdates,
-            subtitle: _version,
-            onTap: () => _pushArea(
-              context,
-              SettingsUpdatesScreen(controller: controller),
-            ),
-          ),
-        SettingsAreaRow(
-          key: const Key('settings-area-diagnostics'),
-          icon: Icons.health_and_safety,
-          title: AppStrings.settingsAreaDiagnostics,
-          onTap: () => _pushArea(
-            context,
-            SettingsDiagnosticsScreen(controller: controller),
-          ),
-        ),
+        for (final area in areas)
+          if (area.group == SettingsGroup.app) row(area),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           // A Wrap, not a Row: a long library name next to its hint
@@ -401,132 +372,20 @@ final class _SettingsBodyState extends State<SettingsBody> {
             ],
           ),
         ),
-        SettingsAreaRow(
-          key: const Key('settings-area-folders'),
-          icon: Icons.folder_outlined,
-          title: AppStrings.settingsAreaFolders,
-          onTap: () => _pushArea(
-            context,
-            SettingsFoldersPathsScreen(controller: controller),
-          ),
-        ),
-        SettingsAreaRow(
-          key: const Key('settings-area-trash-history'),
-          icon: Icons.restore,
-          title: AppStrings.settingsAreaTrashHistory,
-          onTap: () => _pushArea(
-            context,
-            SettingsTrashHistoryScreen(controller: controller),
-          ),
-        ),
-        // The status rides on the row, the way the mockup draws it
-        // (issue #104): whether this library syncs, and when it last
-        // did, is what the row is for — the screen behind it is the
-        // configuration.
-        if (controller.sync case final sync?)
-          ListenableBuilder(
-            listenable: sync,
-            builder: (context, _) {
-              final status = sync.status;
-              return SettingsAreaRow(
-                key: const Key('settings-area-sync'),
-                icon: status.configured
-                    ? syncStatusIcon(status)
-                    : Icons.cloud_off_outlined,
-                title: AppStrings.settingsSectionSync,
-                subtitle: syncStatusLine(status, DateTime.now()),
-                onTap: () => _pushArea(
-                  context,
-                  SyncSettingsScreen(
-                    sync: sync,
-                    libraryName: p.basename(controller.root ?? ''),
-                  ),
-                ),
-              );
-            },
-          ),
-        // App-wide, like the models it points at, but under the
-        // library group: that is where the voice notes it
-        // transcribes live. The current model rides on the row.
-        if (widget.transcription case final transcription?)
-          ListenableBuilder(
-            listenable: transcription,
-            builder: (context, _) {
-              final model = transcription.defaultModel;
-              return SettingsAreaRow(
-                key: const Key('settings-area-transcription'),
-                icon: Icons.mic_outlined,
-                title: AppStrings.settingsSectionTranscription,
-                subtitle: model == null
-                    ? AppStrings.transcriptionModelNone
-                    : AppStrings.transcriptionModelName(model),
-                onTap: () => _pushArea(
-                  context,
-                  SettingsTranscriptionScreen(
-                    controller: controller,
-                    models: transcription,
-                  ),
-                ),
-              );
-            },
-          ),
-        SettingsAreaRow(
-          key: const Key('settings-area-reminders'),
-          icon: Icons.notifications_outlined,
-          title: AppStrings.settingsSectionReminders,
-          onTap: () => _pushArea(
-            context,
-            SettingsRemindersScreen(controller: controller),
-          ),
-        ),
+        for (final area in areas)
+          if (area.group == SettingsGroup.library) row(area),
         SettingsMaintenanceGroup(
           controller: controller,
           onClosed: widget.onClosed,
+          compact: navigation != null,
         ),
       ],
     );
+    return navigation == null
+        ? list()
+        : ListenableBuilder(
+            listenable: navigation,
+            builder: (context, _) => list(),
+          );
   }
 }
-
-/// One area of the settings home (issue #104): the area's name with an
-/// icon and a chevron, pushing the area's own screen. The icon is an
-/// outline one — an area is a place, not a state.
-final class SettingsAreaRow extends StatelessWidget {
-  /// Creates the row for [title]'s area.
-  const new({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    super.key,
-  });
-
-  /// The area's icon, an outline one.
-  final IconData icon;
-
-  /// The area's name.
-  final String title;
-
-  /// What the row is about right now — the sync status, a version —
-  /// shown under the title the way the mockup draws it.
-  final String? subtitle;
-
-  /// Opens the area's screen.
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ListTile(
-      leading: Icon(icon, color: theme.colorScheme.primary),
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-}
-
-// The sync area pushes [SyncSettingsScreen] straight from the home: it
-// carries its own app bar (the WebDAV title over the library's name), so
-// no wrapper screen is needed.

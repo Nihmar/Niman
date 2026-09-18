@@ -255,34 +255,28 @@ final class _SettingsDiagnosticsScreenState
         children: [
           HighlightRow(
             key: SettingsKeys.debugLogs,
-            child: SwitchListTile(
-              title: Text(AppStrings.debugLogsTitle),
-              subtitle: Text(AppStrings.debugLogsSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.debugLogsTitle,
+              description: AppStrings.debugLogsSubtitle,
               value: _debugLogs ?? true,
               onChanged: _toggleDebugLogs,
             ),
           ),
           HighlightRow(
             key: SettingsKeys.exportLog,
-            child: ListTile(
-              leading: const Icon(Icons.save_alt),
-              title: Text(AppStrings.exportLogTitle),
-              subtitle: Text(AppStrings.exportLogSubtitle),
+            child: SettingsActionRow(
+              title: AppStrings.exportLogTitle,
+              description: AppStrings.exportLogSubtitle,
               onTap: _exportLog,
             ),
           ),
           // A fact about the installation, like the library path:
           // nothing to change, only to know (issue #80).
           if (_version != null)
-            ListTile(
+            SettingsRowFrame(
               key: const Key('app-version'),
-              title: Text(AppStrings.versionTitle),
-              trailing: Text(
-                _version!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+              title: AppStrings.versionTitle,
+              description: _version,
             ),
           HighlightRow(
             key: SettingsKeys.changelog,

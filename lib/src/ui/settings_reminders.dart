@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
+import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Reminders area of the settings home (issue #104): what a task's
@@ -79,9 +80,9 @@ final class _SettingsRemindersScreenState
         children: [
           HighlightRow(
             key: SettingsKeys.reminderShowTokens,
-            child: SwitchListTile(
-              title: Text(AppStrings.reminderShowTokensTitle),
-              subtitle: Text(AppStrings.reminderShowTokensSubtitle),
+            child: SettingsSwitchRow(
+              title: AppStrings.reminderShowTokensTitle,
+              description: AppStrings.reminderShowTokensSubtitle,
               value: _showTokens ?? false,
               onChanged: _toggleShowTokens,
             ),
