@@ -12,6 +12,13 @@ App-level accelerators (listed in-app under Settings → Keyboard):
 - `Ctrl/⌘+B` — show or hide the sidebar
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
 
+Moving and selecting in the source editor, on Windows and Linux:
+
+- `Ctrl+←` / `Ctrl+→` — jump a word
+- `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word
+- `Home` / `End` — start and end of the line, `Shift` to select
+- `Ctrl+Home` / `Ctrl+End` — start and end of the note
+
 Editor find/replace follows the familiar bindings:
 
 - `Ctrl/⌘+F` — find
