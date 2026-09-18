@@ -247,9 +247,24 @@ final class NoteEditor extends StatelessWidget {
         if (item != null) items.add(item);
       }
     }
-    return AdaptiveTextSelectionToolbar.buttonItems(
-      anchors: anchors,
-      buttonItems: items,
+    // Part of the editor, for unfocus purposes (#161).
+    //
+    // re_editor wraps the text area in a `CodeEditorTapRegion` whose
+    // `onTapOutside` unfocuses the editor (`_code_editable.dart:266`), and
+    // losing focus makes it hide the selection toolbar
+    // (`_code_editable.dart:329`). This menu lives in the root overlay, so
+    // without the region a click on it is a tap *outside*: the editor
+    // unfocuses on pointer **down**, the overlay entry is removed, and the
+    // button is gone before its `onTap` — every item silently did nothing,
+    // Select all included (device report, 2026-09-18).
+    //
+    // `CodeEditorTapRegion` is the package's own answer to this, and the
+    // WYSIWYG menu already has Flutter's equivalent (`TextFieldTapRegion`).
+    return CodeEditorTapRegion(
+      child: AdaptiveTextSelectionToolbar.buttonItems(
+        anchors: anchors,
+        buttonItems: items,
+      ),
     );
   }
 
@@ -311,12 +326,17 @@ int pageLineStep({
 ///
 /// The package ships only a mobile implementation, and that one positions
 /// itself against a `renderRect` the desktop path never provides. It also
-/// leaves the closing to the editor, which on the desktop never asks:
-/// re_editor calls `hideToolbar` from its mobile gestures only, so a menu
-/// opened by a right-click stayed up through every click after it
-/// (2026-09-10 device report). The barrier is the menu's own: one click
-/// anywhere else takes it down, and that click does nothing else, which
-/// is how a context menu behaves everywhere.
+/// leaves the closing to the editor, and on the desktop the editor only
+/// asks on focus loss: re_editor's gesture code calls `hideToolbar` from
+/// its mobile paths only, so a menu opened by a right-click stayed up
+/// through every click after it (2026-09-10 device report). The barrier is
+/// the menu's own: one click anywhere else takes it down, and that click
+/// does nothing else, which is how a context menu behaves everywhere.
+///
+/// That one remaining caller — the focus one — is why the menu has to sit
+/// inside the editor's tap region (#161, see `_selectionMenu`). A click on
+/// the menu that unfocuses the editor removes this entry on pointer down,
+/// and the item never gets its tap.
 final class _DesktopSelectionToolbar implements SelectionToolbarController {
   new({required this.builder});
 
