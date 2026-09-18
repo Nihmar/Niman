@@ -95,6 +95,22 @@ final class BasqueStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown jatorria, idatzita dagoen bezala';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatodun testua, bertan editatua';
+  @override
+  String get settingsFolderToCreate => 'sortzeke';
+  @override
+  String get settingsSearchHint => 'Bilatu ezarpenetan';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ezarpen aurkituta' : '$count ezarpen aurkituta';
+  @override
+  String get settingsToggleOn => 'Aktibatuta';
+  @override
+  String get settingsToggleOff => 'Desaktibatuta';
+  @override
   String get settingsPreviewEnabledTitle => 'Aurrebista';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -103,6 +119,10 @@ final class BasqueStrings extends Strings {
   String get switchToWysiwygTooltip => 'Pasatu WYSIWYG erreditorra';
   @override
   String get switchToSourceTooltip => 'Pasatu Markdown-iturrira';
+  @override
+  String get switchToSourceLabel => 'Iturria';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ohar honek ez du WYSIWYG erreditorrentzat. Ireki Markdown-iturrian.';
@@ -120,6 +140,27 @@ final class BasqueStrings extends Strings {
   String get settingsSectionShortcuts => 'Teklategia';
   @override
   String get keyboardShortcutsTitle => 'Teklatu-lasterdarrak';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'soilik honi balio du';
+  @override
+  String get settingsGroupMaintenance => 'Mantentze';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Biltegiak eta bideak';
+  @override
+  String get settingsAreaTrashHistory => 'Zakarrontzia eta kronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika eta info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Konektatutako teklatu fisiko bat behar du';
   @override
   String get settingsSectionUpdates => 'Eguneratzeak';
   @override
@@ -828,6 +869,11 @@ final class BasqueStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'hemen zegoen: $path';
   @override
+  String get trashOriginalRoot => 'liburutegiaren erroan zegoen';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? 'elementu 1' : '$count elementu';
+  @override
   String get newNoteHere => 'Ohar berria hemen';
   @override
   String get newFolderHere => 'Karpeta berria hemen';
@@ -861,6 +907,18 @@ final class BasqueStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Txantiloi leku-ordainleak';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, izenburua eta bete beharreko gainerako balioak';
+  @override
+  String get quickNoteSubtitle => 'Ohar azkar fitxak irekitzen duen oharra';
+  @override
+  String get listFolderSubtitle => 'Eginkizun-zerrenda berriak';
+  @override
+  String get templateFolderSubtitle => '«Txantiloitik berria»-ren iturria';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Oharrean txertatutako irudiak eta audioa';
   @override
   String get templateHelpIntro =>
       'Txantiloi bat ohar arruntena da zuloekin. Txantiloi batetik oharra '
@@ -1452,6 +1510,8 @@ final class BasqueStrings extends Strings {
   String syncScreenSubtitle(String library) => '$library biblioteka';
   @override
   String get syncUrlLabel => 'Karpetaren helbidea';
+  @override
+  String get syncUrlRequired => 'Sartu zerbitzariaren helbidea';
   @override
   String get syncUrlHint =>
       'Karpetak existitu behar du. Kopiatu helbidea zerbitzariak '

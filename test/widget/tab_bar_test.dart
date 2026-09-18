@@ -13,6 +13,7 @@ import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart';
 
@@ -303,20 +304,28 @@ void main() {
     await settle(tester);
 
     // Choose "Scratch.md" in Settings: the tile shows it after the pick.
+    // The row sits in the pushed Folders area (issue #104).
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('quick-note-setting')),
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Not set yet'), findsOne);
-    // Scrolled to a known place and tapped by key rather than by its
-    // subtitle: the rows above it come and go with the width (the
-    // preview layout ones are hidden on a phone), so any fixed nudge is
-    // wrong on some layout.
-    await tester.ensureVisible(find.byKey(const Key('quick-note-setting')));
+    await tester.tap(find.byKey(const Key('settings-area-folders')));
     await settle(tester);
+    // The folders list builds lazily and subtitles made the rows
+    // tall: drag the area screen's own list (not the home's behind
+    // it) until the row is on screen.
+    final foldersList = find.descendant(
+      of: find.byType(SettingsFoldersPathsScreen),
+      matching: find.byType(Scrollable),
+    );
+    final quickNoteRow = find.byKey(const Key('quick-note-setting'));
+    for (var i = 0; i < 5; i++) {
+      if (quickNoteRow.evaluate().isNotEmpty &&
+          tester.getCenter(quickNoteRow).dy < 800) {
+        break;
+      }
+      await tester.drag(foldersList, const Offset(0, -300));
+      await settle(tester);
+    }
+    expect(find.text('Not set yet'), findsOne);
     await tester.tap(find.byKey(const Key('quick-note-setting')));
     await settle(tester);
     await tester.tap(
@@ -330,6 +339,11 @@ void main() {
     expect(find.text('Scratch.md'), findsOne);
     expect(await controller.ops!.quickNotePath, 'Scratch.md');
 
+    // Back on the settings home: the area screen covered the bottom
+    // nav, and the tile lives there.
+    await tester.tap(find.backButton());
+    await settle(tester);
+
     // The bottom-nav tile now opens the chosen note directly (no detour
     // through the tab body).
     await tester.tap(
@@ -342,11 +356,12 @@ void main() {
     expect(find.byType(NoteView), findsOneWidget);
     expect(find.text('Scratch.md'), findsOneWidget); // app bar title.
 
-    // Back from the note goes to Files, not back to the Quick note tab.
+    // Back from the note lands on Settings, the tab the tile was tapped
+    // from — not back to a Quick note tab (there is none).
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
     expect(find.byType(NavigationBar), findsOne);
-    expect(noteRow('Scratch.md'), findsOne);
+    expect(find.byType(NoteTree), findsNothing);
   });
 
   testWidgets('FAB creates in the selected folder, menu offers all actions '

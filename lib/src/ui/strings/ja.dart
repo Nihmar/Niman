@@ -90,6 +90,21 @@ final class JapaneseStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => '書いたままのMarkdownソース';
+  @override
+  String get editorKindWysiwygSubtitle => 'その場で編集する整形済みテキスト';
+  @override
+  String get settingsFolderToCreate => '未作成';
+  @override
+  String get settingsSearchHint => '設定を検索';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1件の設定が見つかりました' : '$count件の設定が見つかりました';
+  @override
+  String get settingsToggleOn => 'オン';
+  @override
+  String get settingsToggleOff => 'オフ';
+  @override
   String get settingsPreviewEnabledTitle => 'プレビュー';
   @override
   String get settingsPreviewEnabledSubtitle => 'ソースエディタの横にレンダリング済みノートを表示する';
@@ -97,6 +112,10 @@ final class JapaneseStrings extends Strings {
   String get switchToWysiwygTooltip => 'WYSIWYG エディタに切り替え';
   @override
   String get switchToSourceTooltip => 'Markdown ソースに切り替え';
+  @override
+  String get switchToSourceLabel => 'ソース';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'このノートは WYSIWYG エディタが大きすぎます。Markdown ソースで開いてください。';
@@ -114,6 +133,26 @@ final class JapaneseStrings extends Strings {
   String get settingsSectionShortcuts => 'キーボード';
   @override
   String get keyboardShortcutsTitle => 'キーボードショートカット';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'ライブラリ $name';
+  @override
+  String get settingsGroupLibraryHint => 'このライブラリにのみ適用';
+  @override
+  String get settingsGroupMaintenance => 'メンテナンス';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'フォルダとパス';
+  @override
+  String get settingsAreaTrashHistory => 'ごみ箱と履歴';
+  @override
+  String get settingsAreaDiagnostics => '診断と情報';
+  @override
+  String get settingsAreaKeyboardDisabled => '接続された物理キーボードが必要です';
   @override
   String get settingsSectionUpdates => 'アップデート';
   @override
@@ -775,6 +814,10 @@ final class JapaneseStrings extends Strings {
   @override
   String trashOriginalPath(String path) => '元の場所: $path';
   @override
+  String get trashOriginalRoot => 'ライブラリのルートにあった';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1\u4ef6' : '$count\u4ef6';
+  @override
   String get newNoteHere => 'ここに新しいノート';
   @override
   String get newFolderHere => 'ここに新しいフォルダ';
@@ -806,6 +849,16 @@ final class JapaneseStrings extends Strings {
   String get templateFormPickNote => 'ノートを選ぶ';
   @override
   String get templateHelpTitle => 'テンプレートのプレースホルダー';
+  @override
+  String get templateHelpSubtitle => '日付、タイトル、その他の入力値';
+  @override
+  String get quickNoteSubtitle => 'クイックノートタブが開くノート';
+  @override
+  String get listFolderSubtitle => '新しいタスクリスト';
+  @override
+  String get templateFolderSubtitle => 'テンプレートから新規の供給元';
+  @override
+  String get attachmentsFolderSubtitle => 'ノートに挿入された画像と音声';
 
   // The template placeholder reference (T-TPL-08).
   @override
@@ -1337,6 +1390,8 @@ final class JapaneseStrings extends Strings {
   String syncScreenSubtitle(String library) => 'ライブラリ $library';
   @override
   String get syncUrlLabel => 'フォルダのアドレス';
+  @override
+  String get syncUrlRequired => 'サーバーのアドレスを入力';
   @override
   String get syncUrlHint => 'フォルダは作成済みである必要があります。サーバーに表示されるとおりにアドレスをコピーしてください。';
   @override

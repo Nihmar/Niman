@@ -16,7 +16,9 @@ const String _doc = 'hello world';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
-/// Pumps a NoteView whose toolbar is [layout].
+/// Pumps a NoteView whose toolbar is [layout]. The autofocus lands after
+/// the first frame and the phone's toolbar slides in with the keyboard
+/// it represents: settle both before any assertion.
 Future<void> _pumpEditor(
   WidgetTester tester,
   ToolbarLayout layout, {
@@ -30,7 +32,9 @@ Future<void> _pumpEditor(
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        // The phone's toolbar rides the keyboard: the editor opens
+        // focused, so the bar is on screen for the assertions.
+        autofocusEditor: true,
         toolbarLayout: layout,
         toolbarTop: toolbarTop,
         showPreview: showPreview,
@@ -40,8 +44,7 @@ Future<void> _pumpEditor(
       ),
     ),
   );
-  await tester.pump();
-  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 /// The toolbar's buttons, in render order.

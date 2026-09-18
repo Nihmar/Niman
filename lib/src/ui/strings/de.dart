@@ -99,6 +99,22 @@ final class GermanStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-Quelle, wie geschrieben';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatierter Text, direkt bearbeitet';
+  @override
+  String get settingsFolderToCreate => 'zu erstellen';
+  @override
+  String get settingsSearchHint => 'Einstellungen durchsuchen';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 Einstellung gefunden' : '$count Einstellungen gefunden';
+  @override
+  String get settingsToggleOn => 'An';
+  @override
+  String get settingsToggleOff => 'Aus';
+  @override
   String get settingsPreviewEnabledTitle => 'Vorschau';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -107,6 +123,10 @@ final class GermanStrings extends Strings {
   String get switchToWysiwygTooltip => 'Zum WYSIWYG-Editor wechseln';
   @override
   String get switchToSourceTooltip => 'Zum Markdown-Quelltext wechseln';
+  @override
+  String get switchToSourceLabel => 'Quelle';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Diese Notiz ist für den WYSIWYG-Editor zu groß. Öffne sie im '
@@ -125,6 +145,27 @@ final class GermanStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatur';
   @override
   String get keyboardShortcutsTitle => 'Tastaturkürzel';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliothek $name';
+  @override
+  String get settingsGroupLibraryHint => 'gilt nur für diese Bibliothek';
+  @override
+  String get settingsGroupMaintenance => 'Wartung';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Ordner und Pfade';
+  @override
+  String get settingsAreaTrashHistory => 'Papierkorb und Verlauf';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnose und Info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Benötigt eine angeschlossene physische Tastatur';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override
@@ -841,6 +882,11 @@ final class GermanStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'war in $path';
   @override
+  String get trashOriginalRoot => 'war im Hauptordner der Bibliothek';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 Element' : '$count Elemente';
+  @override
   String get newNoteHere => 'Neue Notiz hier';
   @override
   String get newFolderHere => 'Neuer Ordner hier';
@@ -874,6 +920,17 @@ final class GermanStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Vorlagen-Platzhalter';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, Titel und die übrigen auszufüllenden Werte';
+  @override
+  String get quickNoteSubtitle => 'Die Notiz, die der Reiter Kurznotiz öffnet';
+  @override
+  String get listFolderSubtitle => 'Die neuen Aufgabenlisten';
+  @override
+  String get templateFolderSubtitle => 'Die Quelle für „Neu aus Vorlage“';
+  @override
+  String get attachmentsFolderSubtitle => 'Bilder und Audio in einer Notiz';
   @override
   String get templateHelpIntro =>
       'Eine Vorlage ist eine gewöhnliche Notiz mit Löchern. Eine Notiz '
@@ -1478,6 +1535,8 @@ final class GermanStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliothek $library';
   @override
   String get syncUrlLabel => 'Ordneradresse';
+  @override
+  String get syncUrlRequired => 'Serveradresse eingeben';
   @override
   String get syncUrlHint =>
       'Der Ordner muss existieren. Kopiere die Adresse so, wie '

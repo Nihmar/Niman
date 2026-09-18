@@ -102,6 +102,23 @@ final class LithuanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Markdown pirminis tekstas, kaip parašyta';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Suformatuotas tekstas, redaguojamas vietoje';
+  @override
+  String get settingsFolderToCreate => 'sukurti';
+  @override
+  String get settingsSearchHint => 'Ieškoti nustatymuose';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nustatymas rastas' : '$count nustatymai rasti';
+  @override
+  String get settingsToggleOn => 'Įjungta';
+  @override
+  String get settingsToggleOff => 'Išjungta';
+  @override
   String get settingsPreviewEnabledTitle => 'Peržiūra';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -110,6 +127,10 @@ final class LithuanianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Perjungti į WYSIWYG redaktorių';
   @override
   String get switchToSourceTooltip => 'Perjungti į Markdown šaltinį';
+  @override
+  String get switchToSourceLabel => 'Šaltinis';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ši pastaba per didelė WYSIWYG redaktoriui. Atidarykite ją kaip '
@@ -128,6 +149,27 @@ final class LithuanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Klaviatūra';
   @override
   String get keyboardShortcutsTitle => 'Klaviatūros santraupos';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'taiko tik šiai bibliotekai';
+  @override
+  String get settingsGroupMaintenance => 'Priežiūra';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Katalogai ir keliai';
+  @override
+  String get settingsAreaTrashHistory => 'Šiukšlinė ir istorija';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika ir info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Reikia prijungtos fizinės klaviatūros';
   @override
   String get settingsSectionUpdates => 'Atnaujinimai';
   @override
@@ -825,6 +867,11 @@ final class LithuanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'buvo: $path';
   @override
+  String get trashOriginalRoot => 'buvo bibliotekos \u0161aknyje';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 elementas' : '$count elementai';
+  @override
   String get newNoteHere => 'Nauja pastaba čia';
   @override
   String get newFolderHere => 'Naujas katalogas čia';
@@ -858,6 +905,17 @@ final class LithuanianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Šablonų vietos';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, pavadinimas ir kitos pildytinos reikšmės';
+  @override
+  String get quickNoteSubtitle => 'Užrašas, kurį atidaro greito užrašo kortelė';
+  @override
+  String get listFolderSubtitle => 'Nauji užduočių sąrašai';
+  @override
+  String get templateFolderSubtitle => 'Šaltinis „Naujas iš šablono“';
+  @override
+  String get attachmentsFolderSubtitle => 'Į užrašą įterpti vaizdai ir garsas';
   @override
   String get templateHelpIntro =>
       'Šablonas – įprasta pastaba su vietomis. Sukūrus pastabą iš jo, '
@@ -1447,6 +1505,8 @@ final class LithuanianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteka $library';
   @override
   String get syncUrlLabel => 'Katalogo adresas';
+  @override
+  String get syncUrlRequired => 'Įveskite serverio adresą';
   @override
   String get syncUrlHint =>
       'Katalogas turi egzistuoti. Nukopijuokite adresą taip, '

@@ -101,6 +101,22 @@ final class BosnianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown izvor, kako je napisan';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Formatirani tekst, uređuje se direktno';
+  @override
+  String get settingsFolderToCreate => 'za napraviti';
+  @override
+  String get settingsSearchHint => 'Pretraži postavke';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 pronađena postavka' : '$count pronađenih postavki';
+  @override
+  String get settingsToggleOn => 'Uključeno';
+  @override
+  String get settingsToggleOff => 'Isključeno';
+  @override
   String get settingsPreviewEnabledTitle => 'Pregled';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +125,10 @@ final class BosnianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Pređi na WYSIWYG uređivač';
   @override
   String get switchToSourceTooltip => 'Pređi na Markdown izvor';
+  @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Ova bilješka je prevelika za WYSIWYG uređivač. Otvorite je u '
@@ -127,6 +147,27 @@ final class BosnianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatura';
   @override
   String get keyboardShortcutsTitle => 'Prečice na tastaturi';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Biblioteka $name';
+  @override
+  String get settingsGroupLibraryHint => 'važi samo za ovu biblioteku';
+  @override
+  String get settingsGroupMaintenance => 'Održavanje';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Mape i putanje';
+  @override
+  String get settingsAreaTrashHistory => 'Korpa i hronologija';
+  @override
+  String get settingsAreaDiagnostics => 'Dijagnostika i info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Potrebna je povezana fizička tastatura';
   @override
   String get settingsSectionUpdates => 'Ažuriranja';
   @override
@@ -829,6 +870,10 @@ final class BosnianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bilo u $path';
   @override
+  String get trashOriginalRoot => 'bilo je u korijenu biblioteke';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 stavka' : '$count stavki';
+  @override
   String get newNoteHere => 'Nova bilješka ovdje';
   @override
   String get newFolderHere => 'Nova mapa ovdje';
@@ -862,6 +907,17 @@ final class BosnianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Mjesta zamjene u predlošku';
+  @override
+  String get templateHelpSubtitle =>
+      'Datum, naslov i ostale vrijednosti za popuniti';
+  @override
+  String get quickNoteSubtitle => 'Bilješka koju otvara kartica brze bilješke';
+  @override
+  String get listFolderSubtitle => 'Nove liste zadataka';
+  @override
+  String get templateFolderSubtitle => 'Izvor za „Novo iz šablona“';
+  @override
+  String get attachmentsFolderSubtitle => 'Slike i zvuk umetnuti u bilješku';
   @override
   String get templateHelpIntro =>
       'Predložak je obična bilješka s rupama. Kreiranje bilješke iz njega '
@@ -1447,6 +1503,8 @@ final class BosnianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteka $library';
   @override
   String get syncUrlLabel => 'Adresa mape';
+  @override
+  String get syncUrlRequired => 'Unesite adresu servera';
   @override
   String get syncUrlHint =>
       'Mapa mora postojati. Kopiraj adresu onako kako je server '

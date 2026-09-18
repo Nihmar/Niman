@@ -102,6 +102,21 @@ final class RomanianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Sursă Markdown, așa cum e scrisă';
+  @override
+  String get editorKindWysiwygSubtitle => 'Text formatat, editat pe loc';
+  @override
+  String get settingsFolderToCreate => 'de creat';
+  @override
+  String get settingsSearchHint => 'Caută în setări';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 setare găsită' : '$count setări găsite';
+  @override
+  String get settingsToggleOn => 'Activat';
+  @override
+  String get settingsToggleOff => 'Dezactivat';
+  @override
   String get settingsPreviewEnabledTitle => 'Previzualizare';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -110,6 +125,10 @@ final class RomanianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Comută la editorul WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Comută la sursa Markdown';
+  @override
+  String get switchToSourceLabel => 'Sursă';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Această notă este prea mare pentru editorul WYSIWYG. Deschide-o în '
@@ -128,6 +147,27 @@ final class RomanianStrings extends Strings {
   String get settingsSectionShortcuts => 'Tastatură';
   @override
   String get keyboardShortcutsTitle => 'Scurtături de tastatură';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliotecă $name';
+  @override
+  String get settingsGroupLibraryHint => 'se aplică numai acestei biblioteci';
+  @override
+  String get settingsGroupMaintenance => 'Mentenanță';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Dosare și căi';
+  @override
+  String get settingsAreaTrashHistory => 'Coș și cronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostic și info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Necesită o tastatură fizică conectată';
   @override
   String get settingsSectionUpdates => 'Actualizări';
   @override
@@ -837,6 +877,11 @@ final class RomanianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'era în $path';
   @override
+  String get trashOriginalRoot => 'era \u00een r\u0103d\u0103cina bibliotecii';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 element' : '$count elemente';
+  @override
   String get newNoteHere => 'Notă nouă aici';
   @override
   String get newFolderHere => 'Dosar nou aici';
@@ -870,6 +915,18 @@ final class RomanianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Markeri de șablon';
+  @override
+  String get templateHelpSubtitle =>
+      'Data, titlul și celelalte valori de completat';
+  @override
+  String get quickNoteSubtitle => 'Nota pe care o deschide fila Notă rapidă';
+  @override
+  String get listFolderSubtitle => 'Noile liste de sarcini';
+  @override
+  String get templateFolderSubtitle => 'Sursa pentru „Nou din șablon“';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Imagini și sunet inserate într-o notă';
   @override
   String get templateHelpIntro =>
       'Un șablon este o notă obișnuită cu găuri. Crearea unei note din ea '
@@ -1465,6 +1522,8 @@ final class RomanianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Biblioteca $library';
   @override
   String get syncUrlLabel => 'Adresa dosarului';
+  @override
+  String get syncUrlRequired => 'Introduceți adresa serverului';
   @override
   String get syncUrlHint =>
       'Dosarul trebuie să existe. Copiază adresa așa cum o arată '

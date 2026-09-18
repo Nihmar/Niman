@@ -98,6 +98,21 @@ final class EstonianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdowni lähtekood, nagu kirjutatud';
+  @override
+  String get editorKindWysiwygSubtitle => 'Vormindatud tekst, muudetakse otse';
+  @override
+  String get settingsFolderToCreate => 'luua';
+  @override
+  String get settingsSearchHint => 'Otsi seadetest';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 seade leitud' : '$count seadet leitud';
+  @override
+  String get settingsToggleOn => 'Sees';
+  @override
+  String get settingsToggleOff => 'Väljas';
+  @override
   String get settingsPreviewEnabledTitle => 'Eelvaade';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -106,6 +121,10 @@ final class EstonianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Lülita WYSIWYG-redaktorile';
   @override
   String get switchToSourceTooltip => 'Lülita Markdowni allikale';
+  @override
+  String get switchToSourceLabel => 'Lähe';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'See märge on WYSIWYG-redaktoriks liiga suur. Ava see Markdowni '
@@ -124,6 +143,27 @@ final class EstonianStrings extends Strings {
   String get settingsSectionShortcuts => 'Klaviatuur';
   @override
   String get keyboardShortcutsTitle => 'Klaviatuuri lühendid';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kogu $name';
+  @override
+  String get settingsGroupLibraryHint => 'kehtib ainult selle kogu puhul';
+  @override
+  String get settingsGroupMaintenance => 'Hooldamine';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Kaustad ja aadressid';
+  @override
+  String get settingsAreaTrashHistory => 'Prügikast ja ajalugu';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika ja info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vajab ühendatud füüsilist klaviatuuri';
   @override
   String get settingsSectionUpdates => 'Uuendused';
   @override
@@ -818,6 +858,11 @@ final class EstonianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'asus siin: $path';
   @override
+  String get trashOriginalRoot => 'oli kogu juurkataloogis';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00fcksus' : '$count \u00fcksust';
+  @override
   String get newNoteHere => 'Uus märge siia';
   @override
   String get newFolderHere => 'Uus kaust siia';
@@ -851,6 +896,17 @@ final class EstonianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Šablooni asendused';
+  @override
+  String get templateHelpSubtitle =>
+      'Kuupäev, pealkiri ja muud täidetavad väärtused';
+  @override
+  String get quickNoteSubtitle => 'Märkus, mille avab kiirmenüü kaart';
+  @override
+  String get listFolderSubtitle => 'Uued ülesandeloendid';
+  @override
+  String get templateFolderSubtitle => 'Mallist uue allikas';
+  @override
+  String get attachmentsFolderSubtitle => 'Märkusesse lisatud pildid ja heli';
   @override
   String get templateHelpIntro =>
       'Šabloon on tavaline märge, millel on augud. Märgise loomine sellest '
@@ -1422,6 +1478,8 @@ final class EstonianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Kogu $library';
   @override
   String get syncUrlLabel => 'Kausta aadress';
+  @override
+  String get syncUrlRequired => 'Sisestage serveri aadress';
   @override
   String get syncUrlHint =>
       'Kaust peab olemas olema. Kopeeri aadress nii, nagu server '

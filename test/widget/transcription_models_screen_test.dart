@@ -110,6 +110,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // The transcription section sits in its own pushed area (issue
+    // #104).
+    await tester.tap(find.byKey(const Key('settings-area-transcription')));
+    await tester.pumpAndSettle();
+
     expect(find.text(AppStrings.settingsSectionTranscription), findsOne);
     final modelRow = find.byKey(const Key('transcription-model-setting'));
     expect(

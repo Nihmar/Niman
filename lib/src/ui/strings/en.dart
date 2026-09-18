@@ -96,6 +96,21 @@ final class EnglishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown source, as written';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formatted text, edited in place';
+  @override
+  String get settingsFolderToCreate => 'to create';
+  @override
+  String get settingsSearchHint => 'Search settings';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 setting found' : '$count settings found';
+  @override
+  String get settingsToggleOn => 'On';
+  @override
+  String get settingsToggleOff => 'Off';
+  @override
   String get settingsPreviewEnabledTitle => 'Preview';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -104,6 +119,10 @@ final class EnglishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Switch to the WYSIWYG editor';
   @override
   String get switchToSourceTooltip => 'Switch to the Markdown source';
+  @override
+  String get switchToSourceLabel => 'Source';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'This note is too large for the WYSIWYG editor. Open it in the Markdown '
@@ -122,6 +141,27 @@ final class EnglishStrings extends Strings {
   String get settingsSectionShortcuts => 'Keyboard';
   @override
   String get keyboardShortcutsTitle => 'Keyboard shortcuts';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Library $name';
+  @override
+  String get settingsGroupLibraryHint => 'applies only to this library';
+  @override
+  String get settingsGroupMaintenance => 'Maintenance';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Folders and paths';
+  @override
+  String get settingsAreaTrashHistory => 'Trash and history';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostics and info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Needs a connected physical keyboard';
   @override
   String get settingsSectionUpdates => 'Updates';
   @override
@@ -823,6 +863,10 @@ final class EnglishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'was at $path';
   @override
+  String get trashOriginalRoot => 'was in the library root';
+  @override
+  String trashItemCount(int count) => count == 1 ? '1 item' : '$count items';
+  @override
   String get newNoteHere => 'New note here';
   @override
   String get newFolderHere => 'New folder here';
@@ -856,6 +900,17 @@ final class EnglishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Template placeholders';
+  @override
+  String get templateHelpSubtitle =>
+      'Date, title and the other values to fill in';
+  @override
+  String get quickNoteSubtitle => 'The note the Quick note tab opens';
+  @override
+  String get listFolderSubtitle => 'The new task lists';
+  @override
+  String get templateFolderSubtitle => 'The source of New from template';
+  @override
+  String get attachmentsFolderSubtitle => 'Images and audio placed in a note';
   @override
   String get templateHelpIntro =>
       'A template is an ordinary note with holes in it. Creating a note '
@@ -1434,6 +1489,8 @@ final class EnglishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Library $library';
   @override
   String get syncUrlLabel => 'Folder address';
+  @override
+  String get syncUrlRequired => 'Enter the server address';
   @override
   String get syncUrlHint =>
       'The folder must exist. Copy the address as the server '

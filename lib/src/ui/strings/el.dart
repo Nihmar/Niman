@@ -100,6 +100,22 @@ final class GreekStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Πηγή Markdown, όπως γράφτηκε';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Μορφοποιημένο κείμενο, επεξεργασία επιτόπου';
+  @override
+  String get settingsFolderToCreate => 'για δημιουργία';
+  @override
+  String get settingsSearchHint => 'Αναζήτηση ρυθμίσεων';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ρύθμιση βρέθηκε' : '$count ρυθμίσεις βρέθηκαν';
+  @override
+  String get settingsToggleOn => 'Ενεργό';
+  @override
+  String get settingsToggleOff => 'Ανενεργό';
+  @override
   String get settingsPreviewEnabledTitle => 'Προεπισκόπηση';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +125,10 @@ final class GreekStrings extends Strings {
   String get switchToWysiwygTooltip => 'Μετάβαση στον επεξεργαστή WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Μετάβαση στην πηγή Markdown';
+  @override
+  String get switchToSourceLabel => 'Πηγή';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Αυτή η σημείωση είναι πολύ μεγάλη για τον επεξεργαστή WYSIWYG. '
@@ -127,6 +147,27 @@ final class GreekStrings extends Strings {
   String get settingsSectionShortcuts => 'Πληκτρολόγιο';
   @override
   String get keyboardShortcutsTitle => 'Συντόμευση πληκτρολογίου';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Βιβλιοθήκη $name';
+  @override
+  String get settingsGroupLibraryHint => 'ισχύει μόνο για αυτή τη βιβλιοθήκη';
+  @override
+  String get settingsGroupMaintenance => 'Συντήρηση';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Φάκελοι και διαδρομές';
+  @override
+  String get settingsAreaTrashHistory => 'Σκουπιδιέρα και χρονολόγιο';
+  @override
+  String get settingsAreaDiagnostics => 'Διάγνωση και πληροφορίες';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Χρειέται συνδεδεμένο φυσικό πληκτρολόγιο';
   @override
   String get settingsSectionUpdates => 'Ενημερώσεις';
   @override
@@ -850,6 +891,12 @@ final class GreekStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'ήταν στο $path';
   @override
+  String get trashOriginalRoot => 'ήταν στη ρίζα της βιβλιοθήκης';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u03c3\u03c4\u03bf\u03b9\u03c7\u03b5\u03af\u03bf'
+      : '$count \u03c3\u03c4\u03bf\u03b9\u03c7\u03b5\u03af\u03b1';
+  @override
   String get newNoteHere => 'Νέα σημείωση εδώ';
   @override
   String get newFolderHere => 'Νέος φάκελος εδώ';
@@ -883,6 +930,18 @@ final class GreekStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Στοιχεία αντικατάστασης στο πρότυπο';
+  @override
+  String get templateHelpSubtitle =>
+      'Ημερομηνία, τίτλος και οι υπόλοιπες τιμές προς συμπλήρωση';
+  @override
+  String get quickNoteSubtitle =>
+      'Η σημείωση που ανοίγει η καρτέλα Γρήγορη σημείωση';
+  @override
+  String get listFolderSubtitle => 'Οι νέες λίστες εργασιών';
+  @override
+  String get templateFolderSubtitle => 'Η πηγή του „Νέο από πρότυπο“';
+  @override
+  String get attachmentsFolderSubtitle => 'Εικόνες και ήχος σε μια σημείωση';
   @override
   String get templateHelpIntro =>
       'Μια πρότυπο είναι μια απλή σημείωση με κενά. Η δημιουργία '
@@ -1495,6 +1554,8 @@ final class GreekStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Βιβλιοθήκη $library';
   @override
   String get syncUrlLabel => 'Διεύθυνση φακέλου';
+  @override
+  String get syncUrlRequired => 'Εισαγάγετε τη διεύθυνση διακομιστή';
   @override
   String get syncUrlHint =>
       'Ο φάκελος πρέπει να υπάρχει. Αντιγράψτε τη διεύθυνση όπως '

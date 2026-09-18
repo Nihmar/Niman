@@ -107,6 +107,7 @@ void main() {
 
     testWidgets('opens the same list', (tester) async {
       await pumpSettings(tester);
+      // The row sits in the home's Maintenance group (issue #104).
       await tester.tap(find.byKey(const Key('switch-library-setting')));
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.switchLibraryTitle), findsWidgets);

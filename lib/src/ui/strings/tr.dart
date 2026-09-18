@@ -94,6 +94,22 @@ final class TurkishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Yazıldığı gibi Markdown kaynağı';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Biçimlendirilmiş metin, yerinde düzenlenir';
+  @override
+  String get settingsFolderToCreate => 'oluşturulacak';
+  @override
+  String get settingsSearchHint => 'Ayarlarda ara';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 ayar bulundu' : '$count ayar bulundu';
+  @override
+  String get settingsToggleOn => 'Açık';
+  @override
+  String get settingsToggleOff => 'Kapalı';
+  @override
   String get settingsPreviewEnabledTitle => 'Önizleme';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -102,6 +118,10 @@ final class TurkishStrings extends Strings {
   String get switchToWysiwygTooltip => 'WYSIWYG düzenleyicisine geç';
   @override
   String get switchToSourceTooltip => 'Markdown kaynağına geç';
+  @override
+  String get switchToSourceLabel => 'Kaynak';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Bu not WYSIWYG düzenleyicisi için çok büyük. Markdown kaynağında '
@@ -120,6 +140,27 @@ final class TurkishStrings extends Strings {
   String get settingsSectionShortcuts => 'Klavye';
   @override
   String get keyboardShortcutsTitle => 'Klavye kısayolu';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kütüphane $name';
+  @override
+  String get settingsGroupLibraryHint => 'yalnızca bu kütüphaneye uygulanır';
+  @override
+  String get settingsGroupMaintenance => 'Bakım';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Klasörler ve yollar';
+  @override
+  String get settingsAreaTrashHistory => 'Çöp kutusu ve kronoloji';
+  @override
+  String get settingsAreaDiagnostics => 'Teşhis ve bilgi';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Bağlı fiziksel bir klavye gerekli';
   @override
   String get settingsSectionUpdates => 'Güncellemeler';
   @override
@@ -820,6 +861,12 @@ final class TurkishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'buradaydı: $path';
   @override
+  String get trashOriginalRoot =>
+      'kitapl\u0131\u011f\u0131n k\u00f6k\u00fcndeydi';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00f6\u011fe' : '$count \u00f6\u011fe';
+  @override
   String get newNoteHere => 'Buraya yeni not';
   @override
   String get newFolderHere => 'Buraya yeni klasör';
@@ -853,6 +900,17 @@ final class TurkishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Şablondaki yer tutucular';
+  @override
+  String get templateHelpSubtitle =>
+      'Tarih, başlık ve doldurulacak diğer değerler';
+  @override
+  String get quickNoteSubtitle => 'Hızlı not sekmesinin açtığı not';
+  @override
+  String get listFolderSubtitle => 'Yeni görev listeleri';
+  @override
+  String get templateFolderSubtitle => 'Şablondan yeni kaynağı';
+  @override
+  String get attachmentsFolderSubtitle => 'Nota eklenen resimler ve ses';
   @override
   String get templateHelpIntro =>
       'Şablon, boşlukları olan düz bir nottur. Ondan not oluşturmak '
@@ -1423,6 +1481,8 @@ final class TurkishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Kütüphane: $library';
   @override
   String get syncUrlLabel => 'Klasör adresi';
+  @override
+  String get syncUrlRequired => 'Sunucu adresini girin';
   @override
   String get syncUrlHint =>
       'Klasör mevcut olmalı. Adresi sunucunun gösterdiği gibi '

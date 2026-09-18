@@ -101,6 +101,21 @@ final class CzechStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Zdroj Markdown, tak jak je napsán';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formátovaný text, upravovaný přímo';
+  @override
+  String get settingsFolderToCreate => 'k vytvoření';
+  @override
+  String get settingsSearchHint => 'Hledat v nastavení';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nalezené nastavení' : '$count nalezená nastavení';
+  @override
+  String get settingsToggleOn => 'Zapnuto';
+  @override
+  String get settingsToggleOff => 'Vypnuto';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhled';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +124,10 @@ final class CzechStrings extends Strings {
   String get switchToWysiwygTooltip => 'Přepnout na editor WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Přepnout na zdrojový Markdown';
+  @override
+  String get switchToSourceLabel => 'Zdroj';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Tato poznámka je příliš velká pro editor WYSIWYG. Otevřete ji ve '
@@ -127,6 +146,27 @@ final class CzechStrings extends Strings {
   String get settingsSectionShortcuts => 'Klávesové zkratky';
   @override
   String get keyboardShortcutsTitle => 'Klávesové zkratky';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knihovna $name';
+  @override
+  String get settingsGroupLibraryHint => 'platí jen pro tuto knihovnu';
+  @override
+  String get settingsGroupMaintenance => 'Údržba';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Složky a cesty';
+  @override
+  String get settingsAreaTrashHistory => 'Koš a historie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika a info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Je potřeba připojená fyzická klávesnice';
   @override
   String get settingsSectionUpdates => 'Aktualizace';
   @override
@@ -828,6 +868,11 @@ final class CzechStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bylo v $path';
   @override
+  String get trashOriginalRoot => 'bylo v ko\u0159enu knihovny';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 polo\u017eka' : '$count polo\u017eek';
+  @override
   String get newNoteHere => 'Nová poznámka zde';
   @override
   String get newFolderHere => 'Nová složka zde';
@@ -861,6 +906,17 @@ final class CzechStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Placeholderové značky šablony';
+  @override
+  String get templateHelpSubtitle => 'Datum, název a další hodnoty k vyplnění';
+  @override
+  String get quickNoteSubtitle =>
+      'Poznámka, kterou otevírá karta Rychlá poznámka';
+  @override
+  String get listFolderSubtitle => 'Nové seznamy úkolů';
+  @override
+  String get templateFolderSubtitle => 'Zdroj pro „Nový ze šablony“';
+  @override
+  String get attachmentsFolderSubtitle => 'Obrázky a zvuk vložené do poznámky';
   @override
   String get templateHelpIntro =>
       'Šablona je obyčejná poznámka se dírami. Vytvoření poznámky z ní '
@@ -1440,6 +1496,8 @@ final class CzechStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Knihovna $library';
   @override
   String get syncUrlLabel => 'Adresa složky';
+  @override
+  String get syncUrlRequired => 'Zadejte adresu serveru';
   @override
   String get syncUrlHint =>
       'Složka musí existovat. Zkopírujte adresu tak, jak ji '

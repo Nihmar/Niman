@@ -98,6 +98,21 @@ final class FinnishStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown-lähde, kirjoitettuna';
+  @override
+  String get editorKindWysiwygSubtitle => 'Muotoiltu teksti, muokataan suoraan';
+  @override
+  String get settingsFolderToCreate => 'luotava';
+  @override
+  String get settingsSearchHint => 'Hae asetuksista';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 asetus löydetty' : '$count asetusta löydetty';
+  @override
+  String get settingsToggleOn => 'Päällä';
+  @override
+  String get settingsToggleOff => 'Pois';
+  @override
   String get settingsPreviewEnabledTitle => 'Esikatselu';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -106,6 +121,10 @@ final class FinnishStrings extends Strings {
   String get switchToWysiwygTooltip => 'Vaihda WYSIWYG-muokkainniin';
   @override
   String get switchToSourceTooltip => 'Vaihda Markdown-lähdekoodiin';
+  @override
+  String get switchToSourceLabel => 'Lähde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Tämä muistiinpano on liian suuri WYSIWYG-muokkainille. Avaa se '
@@ -124,6 +143,27 @@ final class FinnishStrings extends Strings {
   String get settingsSectionShortcuts => 'Näppäimistö';
   @override
   String get keyboardShortcutsTitle => 'Näppäimistön oikotiet';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Kirjasto $name';
+  @override
+  String get settingsGroupLibraryHint => 'pätee vain tähän kirjastoon';
+  @override
+  String get settingsGroupMaintenance => 'Ylläpito';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Kansiot ja polut';
+  @override
+  String get settingsAreaTrashHistory => 'Roskakori ja kronologia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostikka ja tiedot';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vaatii yhdistetyn fyysisen näppäimiston';
   @override
   String get settingsSectionUpdates => 'Päivitykset';
   @override
@@ -829,6 +869,11 @@ final class FinnishStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'sijainti: $path';
   @override
+  String get trashOriginalRoot => 'oli kirjaston juuressa';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 kohde' : '$count kohdetta';
+  @override
   String get newNoteHere => 'Uusi muistiinpano tähän';
   @override
   String get newFolderHere => 'Uusi kansio tähän';
@@ -862,6 +907,19 @@ final class FinnishStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Mallipohjan väliaikaiset symbolit';
+  @override
+  String get templateHelpSubtitle =>
+      'Päivämäärä, otsikko ja muut täytettävät arvot';
+  @override
+  String get quickNoteSubtitle =>
+      'Muistiinpano, jonka Pikamuistiinpano-välilehti avaa';
+  @override
+  String get listFolderSubtitle => 'Uudet tehtävälistat';
+  @override
+  String get templateFolderSubtitle => 'Mallista uuden lähde';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Muistiinpanoon lisätyt kuvat ja ääni';
   @override
   String get templateHelpIntro =>
       'Mallipohja on tavallinen muistiinpano, jolla on reikät. '
@@ -1452,6 +1510,8 @@ final class FinnishStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Kirjasto $library';
   @override
   String get syncUrlLabel => 'Kansion osoite';
+  @override
+  String get syncUrlRequired => 'Anna palvelimen osoite';
   @override
   String get syncUrlHint =>
       'Kansion on oltava olemassa. Kopioi osoite sellaisena kuin '

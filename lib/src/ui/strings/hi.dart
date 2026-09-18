@@ -92,6 +92,21 @@ final class HindiStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Markdown स्रोत, जैसा लिखा है';
+  @override
+  String get editorKindWysiwygSubtitle => 'फ़ॉर्मेटेड टेक्स्ट, सीधे संपादित';
+  @override
+  String get settingsFolderToCreate => 'बनाना है';
+  @override
+  String get settingsSearchHint => 'सेटिंग खोजें';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 सेटिंग मिली' : '$count सेटिंग मिलीं';
+  @override
+  String get settingsToggleOn => 'चालू';
+  @override
+  String get settingsToggleOff => 'बंद';
+  @override
   String get settingsPreviewEnabledTitle => 'पूर्वावलोकन';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -100,6 +115,10 @@ final class HindiStrings extends Strings {
   String get switchToWysiwygTooltip => 'WYSIWYG एडिटर पर जाएँ';
   @override
   String get switchToSourceTooltip => 'Markdown स्रोत पर जाएँ';
+  @override
+  String get switchToSourceLabel => 'स्रोत';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'यह नोट WYSIWYG एडिटर के लिए बहुत बड़ा है। इसे Markdown स्रोत में खोलें।';
@@ -117,6 +136,27 @@ final class HindiStrings extends Strings {
   String get settingsSectionShortcuts => 'कीबोर्ड';
   @override
   String get keyboardShortcutsTitle => 'कीबोर्ड शॉर्टकट';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'लाइब्रेरी $name';
+  @override
+  String get settingsGroupLibraryHint => 'केवल इस लाइब्रेरी के लिए';
+  @override
+  String get settingsGroupMaintenance => 'रखरखाव';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'फ़ोल्डर और पथ';
+  @override
+  String get settingsAreaTrashHistory => 'ट्रैश और क्रोनोलॉजी';
+  @override
+  String get settingsAreaDiagnostics => 'निदान और जानकारी';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'कनेक्टेड फिज़िकल कीबोर्ड ज़रूरी है';
   @override
   String get settingsSectionUpdates => 'अपडेट';
   @override
@@ -807,6 +847,12 @@ final class HindiStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'यहाँ था: $path';
   @override
+  String get trashOriginalRoot => 'लाइब्रेरी के रूट में था';
+  @override
+  String trashItemCount(int count) => count == 1
+      ? '1 \u0906\u0907\u091f\u092e'
+      : '$count \u0906\u0907\u091f\u092e';
+  @override
   String get newNoteHere => 'यहाँ नया नोट';
   @override
   String get newFolderHere => 'यहाँ नया फ़ोल्डर';
@@ -840,6 +886,16 @@ final class HindiStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'टेम्पलेट प्लेसहोल्डर';
+  @override
+  String get templateHelpSubtitle => 'दिनांक, शीर्षक और भरने वाले अन्य मान';
+  @override
+  String get quickNoteSubtitle => 'वह नोट जिसे त्वरित नोट टैब खोलता है';
+  @override
+  String get listFolderSubtitle => 'नई कार्य सूचियाँ';
+  @override
+  String get templateFolderSubtitle => 'टेम्पलेट से नया का स्रोत';
+  @override
+  String get attachmentsFolderSubtitle => 'नोट में डाली गई छवियाँ और ऑडियो';
   @override
   String get templateHelpIntro =>
       'टेम्पलेट एक सादा नोट है जिसमें छेद हैं। टेम्पलेट से नोट बनाना '
@@ -1415,6 +1471,8 @@ final class HindiStrings extends Strings {
   String syncScreenSubtitle(String library) => 'लाइब्रेरी $library';
   @override
   String get syncUrlLabel => 'फ़ोल्डर का पता';
+  @override
+  String get syncUrlRequired => 'सर्वर का पता दर्ज करें';
   @override
   String get syncUrlHint =>
       'फ़ोल्डर पहले से मौजूद होना चाहिए। पता वैसे ही कॉपी करें '

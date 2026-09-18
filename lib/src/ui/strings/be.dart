@@ -100,6 +100,22 @@ final class BelarusianStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Зыходнік Markdown, як напісана';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Адфарматаваны тэкст, рэдагуецца на месцы';
+  @override
+  String get settingsFolderToCreate => 'стварыць';
+  @override
+  String get settingsSearchHint => 'Пошук налад';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 наладу знойдзена' : '$count наладаў знойдзена';
+  @override
+  String get settingsToggleOn => 'Укл.';
+  @override
+  String get settingsToggleOff => 'Выкл.';
+  @override
   String get settingsPreviewEnabledTitle => 'Прагляд';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -108,6 +124,10 @@ final class BelarusianStrings extends Strings {
   String get switchToWysiwygTooltip => 'Пераключыць на WYSIWYG-рэдактар';
   @override
   String get switchToSourceTooltip => 'Пераключыць на Markdown-крэйс';
+  @override
+  String get switchToSourceLabel => 'Крыніца';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Гэтая заўвага занадта вялікая для WYSIWYG-рэдактара. Адкрыйце яе як '
@@ -126,6 +146,28 @@ final class BelarusianStrings extends Strings {
   String get settingsSectionShortcuts => 'Клавіятура';
   @override
   String get keyboardShortcutsTitle => 'Комбінацыі клавіш';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Бібліятэка $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      'дзейнічае толькі для гэтай бібліятэкі';
+  @override
+  String get settingsGroupMaintenance => 'Тэхнаабслугоўванне';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Папкі і шляхі';
+  @override
+  String get settingsAreaTrashHistory => 'Кошык і гісторыя';
+  @override
+  String get settingsAreaDiagnostics => 'Дыягностыка і інфармацыя';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Патрэбная падлучаная фізічная клавіятура';
   @override
   String get settingsSectionUpdates => 'Абнаўленні';
   @override
@@ -828,6 +870,11 @@ final class BelarusianStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'было ў $path';
   @override
+  String get trashOriginalRoot => 'было ў корані бібліятэкі';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 элемент' : '$count элементаў';
+  @override
   String get newNoteHere => 'Новая заўвага тут';
   @override
   String get newFolderHere => 'Новая папка тут';
@@ -861,6 +908,19 @@ final class BelarusianStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Плейсхолдеры шаблона';
+  @override
+  String get templateHelpSubtitle =>
+      'Дата, назва і іншыя значэнні для запаўнення';
+  @override
+  String get quickNoteSubtitle =>
+      'Нататка, якую адкрывае ўкладка хуткай нататкі';
+  @override
+  String get listFolderSubtitle => 'Новыя спісы спраў';
+  @override
+  String get templateFolderSubtitle => 'Крыніца для «Новай з шаблону»';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Малюнкі і аўдыё, устаўленыя ў нататку';
   @override
   String get templateHelpIntro =>
       'Шаблон — звычайная заўвага з адтулінамі. Пры стварэнні заўвагі з '
@@ -1448,6 +1508,8 @@ final class BelarusianStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Бібліятэка $library';
   @override
   String get syncUrlLabel => 'Адрас папкі';
+  @override
+  String get syncUrlRequired => 'Увядзіце адрас сервера';
   @override
   String get syncUrlHint =>
       'Папка павінна існаваць. Скапіруйце адрас так, як яго '

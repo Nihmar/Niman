@@ -98,7 +98,7 @@ void main() {
     await pumpTab(
       tester,
       todo: [
-        'file taxes +finance due:2026-09-01 #bills',
+        'file taxes +finance @home due:2026-09-01 #bills',
         "chiamare l'idraulico due:2026-09-07 rem:2026-09-07T09:00",
         'renew the passaporto due:2026-10-02',
         'remind me rem:2026-10-02T08:30',
@@ -121,13 +121,21 @@ void main() {
     expect(find.byKey(const Key('todo-accent')), findsNothing);
     expect(find.text('+finance'), findsOneWidget);
     expect(find.text('#bills'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('todo-row-token-+finance')),
-        matching: find.byType(Container),
-      ),
-      findsWidgets,
-    );
+    // A project is not a context (issue #131): each kind wears its
+    // own color.
+    Color chipColor(String token) {
+      final container = tester.widget<Container>(
+        find.byKey(Key('todo-row-token-$token')),
+      );
+      return (container.decoration! as BoxDecoration).color!;
+    }
+
+    final project = chipColor('+finance');
+    final contextToken = chipColor('@home');
+    final tag = chipColor('#bills');
+    expect(project, isNot(contextToken));
+    expect(project, isNot(tag));
+    expect(contextToken, isNot(tag));
   });
 
   testWidgets("checking moves the row to Done with today's date", (

@@ -90,6 +90,21 @@ final class ChineseStrings extends Strings {
   @override
   String get editorKindWysiwyg => '所见即所得';
   @override
+  String get editorKindSourceSubtitle => '按原样显示的 Markdown 源码';
+  @override
+  String get editorKindWysiwygSubtitle => '就地编辑的格式化文本';
+  @override
+  String get settingsFolderToCreate => '待创建';
+  @override
+  String get settingsSearchHint => '搜索设置';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '找到 1 个设置' : '找到 $count 个设置';
+  @override
+  String get settingsToggleOn => '开';
+  @override
+  String get settingsToggleOff => '关';
+  @override
   String get settingsPreviewEnabledTitle => '预览';
   @override
   String get settingsPreviewEnabledSubtitle => '在源码编辑器旁边显示渲染后的笔记';
@@ -97,6 +112,10 @@ final class ChineseStrings extends Strings {
   String get switchToWysiwygTooltip => '切换到所见即所得编辑器';
   @override
   String get switchToSourceTooltip => '切换到 Markdown 源码';
+  @override
+  String get switchToSourceLabel => '源码';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge => '此笔记对所见即所得编辑器来说太大了。请在 Markdown 源码中打开。';
 
@@ -113,6 +132,26 @@ final class ChineseStrings extends Strings {
   String get settingsSectionShortcuts => '键盘';
   @override
   String get keyboardShortcutsTitle => '键盘快捷键';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => '文库 $name';
+  @override
+  String get settingsGroupLibraryHint => '仅适用于此文库';
+  @override
+  String get settingsGroupMaintenance => '维护';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => '文件夹和路径';
+  @override
+  String get settingsAreaTrashHistory => '回收站和版本';
+  @override
+  String get settingsAreaDiagnostics => '诊断和信息';
+  @override
+  String get settingsAreaKeyboardDisabled => '需要连接的物理键盘';
   @override
   String get settingsSectionUpdates => '更新';
   @override
@@ -765,6 +804,11 @@ final class ChineseStrings extends Strings {
   @override
   String trashOriginalPath(String path) => '原位置：$path';
   @override
+  String get trashOriginalRoot => '\u4f4d\u4e8e\u6587\u5e93\u6839\u76ee\u5f55';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u4e2a\u9879\u76ee' : '$count \u4e2a\u9879\u76ee';
+  @override
   String get newNoteHere => '在此新建笔记';
   @override
   String get newFolderHere => '在此新建文件夹';
@@ -798,6 +842,16 @@ final class ChineseStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => '模板占位符';
+  @override
+  String get templateHelpSubtitle => '日期、标题和其他待填值';
+  @override
+  String get quickNoteSubtitle => '快捷笔记选项卡打开的笔记';
+  @override
+  String get listFolderSubtitle => '新的任务列表';
+  @override
+  String get templateFolderSubtitle => '从模板新建的来源';
+  @override
+  String get attachmentsFolderSubtitle => '插入到笔记中的图片和音频';
   @override
   String get templateHelpIntro => '模板就是一篇带洞的普通笔记。从模板创建笔记会复制它的文字并填上洞。';
   @override
@@ -1299,6 +1353,8 @@ final class ChineseStrings extends Strings {
   String syncScreenSubtitle(String library) => '文库 $library';
   @override
   String get syncUrlLabel => '文件夹地址';
+  @override
+  String get syncUrlRequired => '输入服务器地址';
   @override
   String get syncUrlHint => '文件夹必须已存在。请按服务器显示的样子复制地址。';
   @override

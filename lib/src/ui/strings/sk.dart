@@ -101,6 +101,21 @@ final class SlovakStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle => 'Zdroj Markdown, tak ako je napísaný';
+  @override
+  String get editorKindWysiwygSubtitle => 'Formátovaný text, upravovaný priamo';
+  @override
+  String get settingsFolderToCreate => 'na vytvorenie';
+  @override
+  String get settingsSearchHint => 'Hľadať v nastaveniach';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 nájdené nastavenie' : '$count nájdených nastavení';
+  @override
+  String get settingsToggleOn => 'Zapnuté';
+  @override
+  String get settingsToggleOff => 'Vypnuté';
+  @override
   String get settingsPreviewEnabledTitle => 'Náhľad';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -109,6 +124,10 @@ final class SlovakStrings extends Strings {
   String get switchToWysiwygTooltip => 'Prepnúť na WYSIWYG editor';
   @override
   String get switchToSourceTooltip => 'Prepnúť na Markdown zdroj';
+  @override
+  String get switchToSourceLabel => 'Zdroj';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Táto poznámka je príliš veľká na WYSIWYG editor. Otvorte ju ako '
@@ -127,6 +146,27 @@ final class SlovakStrings extends Strings {
   String get settingsSectionShortcuts => 'Klávesnica';
   @override
   String get keyboardShortcutsTitle => 'Klávesové skratky';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Knižnica $name';
+  @override
+  String get settingsGroupLibraryHint => 'platí len pre túto knižnicu';
+  @override
+  String get settingsGroupMaintenance => 'Údržba';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Priečinky a cesty';
+  @override
+  String get settingsAreaTrashHistory => 'Kôš a kronológia';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostika a info';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Vyžaduje pripojenú fyzickú klávesnicu';
   @override
   String get settingsSectionUpdates => 'Aktualizácie';
   @override
@@ -830,6 +870,11 @@ final class SlovakStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'bola v $path';
   @override
+  String get trashOriginalRoot => 'bolo v koreni kni\u017enice';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 polo\u017eka' : '$count polo\u017eiek';
+  @override
   String get newNoteHere => 'Nová poznámka sem';
   @override
   String get newFolderHere => 'Nový priečinok sem';
@@ -863,6 +908,18 @@ final class SlovakStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Zástupné znaky šablóny';
+  @override
+  String get templateHelpSubtitle =>
+      'Dátum, názov a ďalšie hodnoty na vyplnenie';
+  @override
+  String get quickNoteSubtitle =>
+      'Poznámka, ktorú otvára karta Rýchla poznámka';
+  @override
+  String get listFolderSubtitle => 'Nové zoznamy úloh';
+  @override
+  String get templateFolderSubtitle => 'Zdroj pre „Nový zo šablóny“';
+  @override
+  String get attachmentsFolderSubtitle => 'Obrázky a zvuk vložené do poznámky';
   @override
   String get templateHelpIntro =>
       'Šablóna je obyčajná poznámka s dierami. Vytvorením poznámky z nej sa '
@@ -1443,6 +1500,8 @@ final class SlovakStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Knižnica $library';
   @override
   String get syncUrlLabel => 'Adresa priečinka';
+  @override
+  String get syncUrlRequired => 'Zadajte adresu servera';
   @override
   String get syncUrlHint =>
       'Priečinok musí existovať. Skopírujte adresu tak, ako ju '

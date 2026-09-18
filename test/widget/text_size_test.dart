@@ -60,18 +60,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens [area]'s screen from the settings home (issue #104): the
+  /// rows the tests drive live in the pushed area screen.
+  Future<void> openArea(WidgetTester tester, Key area) async {
+    await tester.tap(find.byKey(area));
+    await tester.pumpAndSettle();
+  }
+
   group('the settings rows', () {
     testWidgets('both start at the shipped size', (tester) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
       expect(find.byKey(const Key('ui-text-scale-setting')), findsOneWidget);
+      expect(find.text('100%'), findsNWidgets(1));
+      // The note slider sits in the editor's own area.
+      await tester.tap(find.backButton());
+      await tester.pumpAndSettle();
+      await openArea(tester, const Key('settings-area-editor'));
       expect(find.byKey(const Key('note-text-scale-setting')), findsOneWidget);
-      expect(find.text('100%'), findsNWidgets(2));
+      expect(find.text('100%'), findsNWidgets(1));
     });
 
     testWidgets('the interface slider is remembered, and only it moves', (
       tester,
     ) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-appearance'));
       await dragToMax(
         tester,
         row: const Key('ui-text-scale-setting'),
@@ -88,6 +102,7 @@ void main() {
       tester,
     ) async {
       await pumpSettings(tester);
+      await openArea(tester, const Key('settings-area-editor'));
       await dragToMax(
         tester,
         row: const Key('note-text-scale-setting'),

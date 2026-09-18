@@ -99,6 +99,23 @@ final class FrenchStrings extends Strings {
   @override
   String get editorKindWysiwyg => 'WYSIWYG';
   @override
+  String get editorKindSourceSubtitle =>
+      'Source Markdown, telle qu\u2019écrite';
+  @override
+  String get editorKindWysiwygSubtitle =>
+      'Texte mis en forme, modifié sur place';
+  @override
+  String get settingsFolderToCreate => 'à créer';
+  @override
+  String get settingsSearchHint => 'Rechercher dans les réglages';
+  @override
+  String settingsSearchResults(int count) =>
+      count == 1 ? '1 réglage trouvé' : '$count réglages trouvés';
+  @override
+  String get settingsToggleOn => 'Activé';
+  @override
+  String get settingsToggleOff => 'Désactivé';
+  @override
   String get settingsPreviewEnabledTitle => 'Aperçu';
   @override
   String get settingsPreviewEnabledSubtitle =>
@@ -107,6 +124,10 @@ final class FrenchStrings extends Strings {
   String get switchToWysiwygTooltip => 'Passer à l’éditeur WYSIWYG';
   @override
   String get switchToSourceTooltip => 'Passer à la source Markdown';
+  @override
+  String get switchToSourceLabel => 'Source';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
   @override
   String get wysiwygTooLarge =>
       'Cette note est trop grande pour l’éditeur WYSIWYG. Ouvrez-la dans la '
@@ -125,6 +146,28 @@ final class FrenchStrings extends Strings {
   String get settingsSectionShortcuts => 'Clavier';
   @override
   String get keyboardShortcutsTitle => 'Raccourcis clavier';
+
+  // Settings home (issue #104): the groups the areas sit under.
+  @override
+  String get settingsGroupApp => 'App';
+  @override
+  String settingsGroupLibrary(String name) => 'Bibliothèque $name';
+  @override
+  String get settingsGroupLibraryHint =>
+      "s'applique uniquement à cette bibliothèque";
+  @override
+  String get settingsGroupMaintenance => 'Maintenance';
+
+  // Settings home rows.
+  @override
+  String get settingsAreaFolders => 'Dossiers et chemins';
+  @override
+  String get settingsAreaTrashHistory => 'Corbeille et chronologie';
+  @override
+  String get settingsAreaDiagnostics => 'Diagnostic et infos';
+  @override
+  String get settingsAreaKeyboardDisabled =>
+      'Nécessite un clavier physique connecté';
   @override
   String get settingsSectionUpdates => 'Mises à jour';
   @override
@@ -844,6 +887,12 @@ final class FrenchStrings extends Strings {
   @override
   String trashOriginalPath(String path) => 'était dans $path';
   @override
+  String get trashOriginalRoot =>
+      '\u00e9tait \u00e0 la racine de la biblioth\u00e8que';
+  @override
+  String trashItemCount(int count) =>
+      count == 1 ? '1 \u00e9l\u00e9ment' : '$count \u00e9l\u00e9ments';
+  @override
   String get newNoteHere => 'Nouvelle note ici';
   @override
   String get newFolderHere => 'Nouveau dossier ici';
@@ -877,6 +926,19 @@ final class FrenchStrings extends Strings {
   // The template placeholder reference (T-TPL-08).
   @override
   String get templateHelpTitle => 'Emplacements réservés des modèles';
+  @override
+  String get templateHelpSubtitle =>
+      'Date, titre et les autres valeurs à renseigner';
+  @override
+  String get quickNoteSubtitle => 'La note qu’ouvre l’onglet Note rapide';
+  @override
+  String get listFolderSubtitle => 'Les nouvelles listes de tâches';
+  @override
+  String get templateFolderSubtitle =>
+      'La source de « Nouveau depuis un modèle »';
+  @override
+  String get attachmentsFolderSubtitle =>
+      'Images et audio insérés dans une note';
   @override
   String get templateHelpIntro =>
       'Un modèle est une note ordinaire avec des trous. Créer une note '
@@ -1490,6 +1552,8 @@ final class FrenchStrings extends Strings {
   String syncScreenSubtitle(String library) => 'Bibliothèque $library';
   @override
   String get syncUrlLabel => 'Adresse du dossier';
+  @override
+  String get syncUrlRequired => 'Saisissez l’adresse du serveur';
   @override
   String get syncUrlHint =>
       'Le dossier doit exister. Copiez l’adresse telle que le '

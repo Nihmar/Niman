@@ -5,6 +5,7 @@ import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/trash.dart';
 import 'package:path/path.dart' as p;
 
@@ -227,7 +228,8 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
-    // Switch the trash toggle off in settings (the rail tab, inline).
+    // Switch the trash toggle off in settings (the rail tab). The
+    // toggle sits in the pushed Trash area (issue #104).
     await tester.tap(
       find.descendant(
         of: find.byKey(const Key('shell-rail')),
@@ -235,14 +237,15 @@ void main() {
       ),
     );
     await settle(tester);
-    // The settings list is grouped and lazy, and the trash toggle sits
-    // under Library, so it may be below the fold.
-    final trashRow = find.byKey(const Key('trash-setting'));
-    await tester.scrollUntilVisible(trashRow, 200);
+    await tester.tap(find.byKey(const Key('settings-area-trash-history')));
     await settle(tester);
+    final trashRow = find.byKey(const Key('trash-setting'));
     await tester.tap(
       find.descendant(of: trashRow, matching: find.byType(Switch)),
     );
+    await settle(tester);
+    // Back on the settings home: the area screen covered the rail.
+    await tester.tap(find.backButton());
     await settle(tester);
     await tester.tap(
       find.descendant(
@@ -280,6 +283,53 @@ void main() {
     await settle(tester);
     expect(noteRow('Sacrifice.md', offstage: true), findsNothing);
     expect(find.text('No notes yet'), findsOne);
+    expect(await controller.ops!.trashItems(), isEmpty);
+
+    await controller.close();
+    await controller.dispose();
+  });
+
+  testWidgets('deleting a note offers undo from the trash', (tester) async {
+    // The file sits in the trash: the notice offers the way back
+    // (issue #131).
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    filePicker.directory = '/fake';
+    await tester.tap(find.text('Create new'));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'library');
+    await tester.pump(); // Frame: "Create" tracks the (trimmed) name.
+    await tester.tap(find.text('Create'));
+    await settle(tester);
+
+    await openNewItemMenu(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await tester.pump();
+    await tester.enterText(dialogField(), 'Comeback');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+
+    await tester.tap(noteRow('Comeback.md', offstage: true));
+    await settle(tester);
+    await tester.longPress(noteRow('Comeback.md', offstage: true));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('menu-delete')),
+      100,
+      scrollable: find.ancestor(
+        of: find.byKey(const Key('menu-delete')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('menu-delete')));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await settle(tester);
+    expect(noteRow('Comeback.md', offstage: true), findsNothing);
+
+    await tester.tap(find.text(AppStrings.actionUndo));
+    await settle(tester);
+    expect(noteRow('Comeback.md', offstage: true), findsOne);
     expect(await controller.ops!.trashItems(), isEmpty);
 
     await controller.close();
@@ -334,7 +384,13 @@ void main() {
       ),
       findsOne,
     );
-    await tester.tap(find.widgetWithText(TextButton, 'Empty'));
+    // The dialog's confirmation, not the app bar row behind it.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(TextButton, 'Empty'),
+      ),
+    );
     await settle(tester);
     expect(find.text('Trash is empty'), findsOne);
 

@@ -134,7 +134,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.settingsSectionAbout), findsOne);
+    expect(find.text(AppStrings.settingsAreaDiagnostics), findsOne);
+    await tester.tap(find.byKey(const Key('settings-area-diagnostics')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('changelog-setting')));
     await tester.pumpAndSettle();
     expect(find.byType(ChangelogScreen), findsOneWidget);

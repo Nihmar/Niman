@@ -13,6 +13,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -41,7 +42,7 @@ NoteView _view({
 }) => NoteView(
   path: '/notes/a.md',
   showLineNumbers: true,
-  autofocusEditor: false,
+  autofocusEditor: true,
   showWysiwyg: showWysiwyg,
   showPreview: showPreview,
   splitPreview: splitPreview,
@@ -50,8 +51,10 @@ NoteView _view({
 
 Future<void> _open(WidgetTester tester, Widget view) async {
   await tester.pumpWidget(_app(view));
-  await tester.pump();
-  await tester.pump();
+  // The autofocus lands after the first frame (the WYSIWYG surface
+  // requests its focus through a zero-duration timer), and the toolbar
+  // slides in with the keyboard it represents: settle both.
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -86,7 +89,7 @@ void main() {
             body: NoteView(
               path: '/notes/a.md',
               showLineNumbers: true,
-              autofocusEditor: false,
+              autofocusEditor: true,
               showWysiwyg: true,
               showPreview: preview,
               readNote: (_) async => '# Head\n\nbody text',
@@ -95,8 +98,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(WysiwygEditor), findsOneWidget);
     await tester.tap(find.byKey(const Key('editor-preview-toggle')));
     await tester.pump();
@@ -130,7 +132,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         spellCheck: spell,
         readNote: (_) async => 'hello wrold\n',
@@ -171,12 +173,20 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         onEditorKindChanged: (kind) => chosen = kind,
         readNote: (_) async => '# Head\n\nbody text',
       ),
     );
     expect(find.byKey(const Key('editor-kind-toggle')), findsOneWidget);
+    // The toggle names its destination, no tooltip-guessing.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('editor-kind-toggle')),
+        matching: find.text(AppStrings.switchToWysiwygLabel),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('editor-kind-toggle')));
     expect(chosen, EditorKind.wysiwyg);
   });
@@ -191,7 +201,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '# Head\n\nbody text',
       ),
@@ -208,7 +218,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         onEditorKindChanged: (kind) => chosen = kind,
         readNote: (_) async => '# Head\n\nbody text',
@@ -216,6 +226,29 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('editor-kind-toggle')));
     expect(chosen, EditorKind.source);
+  });
+
+  testWidgets('from WYSIWYG the toggle names the source editor', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: true,
+        showWysiwyg: true,
+        onEditorKindChanged: (_) {},
+        readNote: (_) async => '# Head\n\nbody text',
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('editor-kind-toggle')),
+        matching: find.text(AppStrings.switchToSourceLabel),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the toolbar formats the WYSIWYG document', (tester) async {
@@ -238,7 +271,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
       ),
@@ -278,7 +311,7 @@ void main() {
       NoteView(
         path: '/notes/a.md',
         showLineNumbers: true,
-        autofocusEditor: false,
+        autofocusEditor: true,
         showWysiwyg: true,
         readNote: (_) async => '**bold** plain *italic* more ~~struck~~\n',
       ),

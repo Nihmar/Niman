@@ -538,8 +538,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final row = find.byKey(const Key('sync-setting'));
-      await tester.scrollUntilVisible(row, 200);
+      // The sync status rides on the home row (issue #104); the screen
+      // it opens carries the configuration.
+      final row = find.byKey(const Key('settings-area-sync'));
       expect(
         find.descendant(
           of: row,

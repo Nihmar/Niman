@@ -49,11 +49,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Opens the language row's dialog and picks [language].
+  /// Opens the Appearance area (issue #104: the language row lives in
+  /// the pushed area screen), then the language row's dialog, and picks
+  /// [language].
   ///
   /// The row shows the current language and the choice happens in a
   /// dialog, so a bare `find.text` would match the row's own value.
   Future<void> chooseLanguage(WidgetTester tester, AppLanguage language) async {
+    await tester.tap(find.byKey(const Key('settings-area-appearance')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('language-choice')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(Key('settings-choice-$language')));
@@ -64,24 +68,27 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    expect(find.text('Trash'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
 
     await chooseLanguage(tester, AppLanguage.italian);
 
-    expect(find.text('Cestino'), findsOneWidget);
-    expect(find.text('Trash'), findsNothing);
+    // The area screen's app bar and rows follow the app root's rebuild.
+    expect(find.text('Aspetto'), findsOneWidget);
+    expect(find.text('Lingua'), findsOneWidget);
+    expect(find.text('Appearance'), findsNothing);
     expect(await controller.language, AppLanguage.italian);
     expect(AppLanguages.resolved, AppLanguage.italian);
   });
 
   testWidgets('a newly added language picks its own text', (tester) async {
     await pump(tester);
-    expect(find.text('Trash'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
 
     await chooseLanguage(tester, AppLanguage.french);
 
-    expect(find.text('Corbeille'), findsOneWidget);
-    expect(find.text('Trash'), findsNothing);
+    expect(find.text('Apparence'), findsOneWidget);
+    expect(find.text('Langue'), findsOneWidget);
+    expect(find.text('Appearance'), findsNothing);
     expect(await controller.language, AppLanguage.french);
     expect(AppLanguages.resolved, AppLanguage.french);
   });
@@ -90,11 +97,11 @@ void main() {
     await controller.setLanguage(AppLanguage.italian);
     AppLanguages.choice = AppLanguage.italian;
     await pump(tester);
-    expect(find.text('Cestino'), findsOneWidget);
+    expect(find.text('Aspetto'), findsOneWidget);
 
     await chooseLanguage(tester, AppLanguage.english);
 
-    expect(find.text('Trash'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
     expect(await controller.language, AppLanguage.english);
   });
 
@@ -103,12 +110,13 @@ void main() {
     AppLanguages.choice = AppLanguage.english;
     AppLanguages.system = AppLanguage.italian;
     await pump(tester);
-    expect(find.text('Trash'), findsOneWidget);
+    expect(find.text('Appearance'), findsOneWidget);
 
     await chooseLanguage(tester, AppLanguage.system);
 
     // The OS is Italian, so "System" means Italian.
-    expect(find.text('Cestino'), findsOneWidget);
+    expect(find.text('Aspetto'), findsOneWidget);
+    expect(find.text('Lingua'), findsOneWidget);
     expect(await controller.language, AppLanguage.system);
     expect(AppLanguages.resolved, AppLanguage.italian);
   });

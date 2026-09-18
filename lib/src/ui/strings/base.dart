@@ -41,10 +41,19 @@ abstract base class Strings {
   String get keyboardOnOpenSubtitle;
   String get editorKindSource;
   String get editorKindWysiwyg;
+  String get editorKindSourceSubtitle;
+  String get editorKindWysiwygSubtitle;
+  String get settingsFolderToCreate;
+  String get settingsSearchHint;
+  String settingsSearchResults(int count);
+  String get settingsToggleOn;
+  String get settingsToggleOff;
   String get settingsPreviewEnabledTitle;
   String get settingsPreviewEnabledSubtitle;
   String get switchToWysiwygTooltip;
   String get switchToSourceTooltip;
+  String get switchToSourceLabel;
+  String get switchToWysiwygLabel;
   String get wysiwygTooLarge;
 
   // Settings: the section headings the list is grouped under.
@@ -54,6 +63,18 @@ abstract base class Strings {
   String get settingsSectionReminders;
   String get settingsSectionShortcuts;
   String get keyboardShortcutsTitle;
+
+  // Settings home (issue #104): the groups the areas sit under.
+  String get settingsGroupApp;
+  String settingsGroupLibrary(String name);
+  String get settingsGroupLibraryHint;
+  String get settingsGroupMaintenance;
+
+  // Settings home rows.
+  String get settingsAreaFolders;
+  String get settingsAreaTrashHistory;
+  String get settingsAreaDiagnostics;
+  String get settingsAreaKeyboardDisabled;
   String get settingsSectionUpdates;
   String get autoUpdateTitle;
   String get autoUpdateSubtitle;
@@ -410,6 +431,8 @@ abstract base class Strings {
   String get newNoteSameFolder;
   String get newFromTemplateSameFolder;
   String trashOriginalPath(String path);
+  String get trashOriginalRoot;
+  String trashItemCount(int count);
   String get newNoteHere;
   String get newFolderHere;
   String get newListNoteTitle;
@@ -431,6 +454,11 @@ abstract base class Strings {
 
   // The template placeholder reference (T-TPL-08).
   String get templateHelpTitle;
+  String get templateHelpSubtitle;
+  String get quickNoteSubtitle;
+  String get listFolderSubtitle;
+  String get templateFolderSubtitle;
+  String get attachmentsFolderSubtitle;
   String get templateHelpIntro;
   String get templateHelpUnknown;
   String get templateHelpValuesTitle;
@@ -682,6 +710,7 @@ abstract base class Strings {
   String get syncRunning;
   String syncScreenSubtitle(String library);
   String get syncUrlLabel;
+  String get syncUrlRequired;
   String get syncUrlHint;
   String get syncHttpWarning;
   String get syncUserLabel;

@@ -53,6 +53,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   bool _saving = false;
   SyncTestResult? _result;
 
+  /// The address field's error: testing needs an address first, and the
+  /// field says so instead of the button greying out unexplained.
+  String? _urlError;
+
   /// The fields as they were when [_result] was measured: "Save" is only
   /// offered for what was tested.
   ({String url, String user, String password})? _tested;
@@ -83,7 +87,12 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   }
 
   void _onField() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        // Typing clears the address error: the complaint is answered.
+        _urlError = null;
+      });
+    }
   }
 
   bool get _configured => _sync.status.configured;
@@ -124,6 +133,10 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
 
   Future<void> _test() async {
     final fields = _fields;
+    if (fields.url.isEmpty) {
+      setState(() => _urlError = AppStrings.syncUrlRequired);
+      return;
+    }
     setState(() {
       _testing = true;
       _result = null;
@@ -282,24 +295,6 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
         ),
       ),
       body: _formShown ? _form(theme) : _overview(theme),
-      bottomNavigationBar: _formShown
-          ? SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: FilledButton.icon(
-                  key: const Key('sync-save'),
-                  onPressed: _canSave ? _save : null,
-                  icon: _saving
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.save_outlined),
-                  label: Text(AppStrings.actionSave),
-                ),
-              ),
-            )
-          : null,
     );
   }
 
@@ -340,6 +335,7 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
             decoration: InputDecoration(
               labelText: AppStrings.syncUrlLabel,
               hintText: 'https://nas.local/webdav/Notes/',
+              errorText: _urlError,
               border: const OutlineInputBorder(),
             ),
             style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
@@ -401,20 +397,47 @@ final class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
               ? AppStrings.syncPasswordKeepHint
               : AppStrings.syncPasswordHint,
         ),
+        // Test and Save ride side by side in the form (issue #131):
+        // the bottom full-width Save existed nowhere else, and both
+        // buttons opened greyed with no reason in sight. Test stays
+        // enabled and complains at the field; Save unlocks for the
+        // tested address, next to the result card that says why.
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-          child: OutlinedButton.icon(
-            key: const Key('sync-test'),
-            onPressed: _testing || _url.text.trim().isEmpty ? null : _test,
-            icon: _testing
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.network_check),
-            label: Text(
-              _testing ? AppStrings.syncTesting : AppStrings.syncTestAction,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const Key('sync-test'),
+                  onPressed: _testing ? null : _test,
+                  icon: _testing
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.network_check),
+                  label: Text(
+                    _testing
+                        ? AppStrings.syncTesting
+                        : AppStrings.syncTestAction,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  key: const Key('sync-save'),
+                  onPressed: _canSave ? _save : null,
+                  icon: _saving
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(AppStrings.actionSave),
+                ),
+              ),
+            ],
           ),
         ),
         if (result != null) _resultCard(theme, result),
