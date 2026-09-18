@@ -1,3 +1,8 @@
+// The clipboard config is marked experimental upstream and is the only
+// hook the package offers on the paste side; see `wysiwyg_clipboard.dart`
+// for why the surface has to own that path at all.
+// ignore_for_file: experimental_member_use
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +15,7 @@ import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
+import 'package:niman/src/editor/wysiwyg/wysiwyg_clipboard.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_panel.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -109,6 +115,11 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// anchor — which is also why a primary press clears it.
   Offset? _rightClickAt;
 
+  /// Markdown in, Markdown out (#165).
+  late final WysiwygClipboard _clipboard = WysiwygClipboard(
+    controller: () => _controller,
+  );
+
   /// The document's lines, for the spell review panel (T-WYS-08).
   List<String> get plainTextLines =>
       _controller.document.toPlainText().split(String.fromCharCode(10));
@@ -169,6 +180,15 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _controller = quill.QuillController(
       document: _decoded.document,
       selection: const TextSelection.collapsed(offset: 0),
+      // Paste goes through the surface's own Markdown path (#165). The
+      // hook runs before everything else Quill would try, and declines
+      // when the clipboard carries HTML so the package's rich paste keeps
+      // it — pasting a styled page from a browser is Quill's job.
+      config: quill.QuillControllerConfig(
+        clipboardConfig: quill.QuillClipboardConfig(
+          onClipboardPaste: _clipboard.paste,
+        ),
+      ),
     );
     _changes = _controller.changes.listen(_onDocumentChanged);
     _controller.onSelectionChanged = _onSelectionChanged;
@@ -379,7 +399,24 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   Widget _contextMenu(BuildContext context, quill.QuillRawEditorState state) {
     final value = state.textEditingValue;
     final selection = value.selection;
-    final items = <ContextMenuButtonItem>[...state.contextMenuButtonItems];
+    // Copy and Cut are rebuilt: the package's own items call
+    // `state.copySelection()` straight, without going through the
+    // `CopySelectionTextIntent` action the keyboard uses, so an override
+    // there would leave the menu on the old behaviour (#165). Paste needs
+    // no rebuilding — it reaches `clipboardPaste`, and the surface's hook
+    // is on that.
+    final items = <ContextMenuButtonItem>[
+      for (final item in state.contextMenuButtonItems)
+        switch (item.type) {
+          ContextMenuButtonType.copy => item.copyWith(
+            onPressed: () => _clipboardMenuAction(state, cut: false),
+          ),
+          ContextMenuButtonType.cut => item.copyWith(
+            onPressed: () => _clipboardMenuAction(state, cut: true),
+          ),
+          _ => item,
+        },
+    ];
     final spell = widget.spellCheck;
     if (spell != null) {
       final item = addToDictionaryItem(
@@ -400,6 +437,15 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         buttonItems: items,
       ),
     );
+  }
+
+  /// Copy or Cut from the menu, then close it — the menu's own rule.
+  void _clipboardMenuAction(
+    quill.QuillRawEditorState state, {
+    required bool cut,
+  }) {
+    unawaited(_clipboard.copy(cut: cut));
+    state.hideToolbar();
   }
 
   /// Remembers a right-click for [_contextMenu], and forgets it on any
@@ -461,21 +507,39 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
             builder: (context, _) => WysiwygFindPanel(controller: _find),
           ),
           Expanded(
-            // The listener only watches; the editor below it sees every
-            // event unchanged.
-            child: Listener(
-              onPointerDown: _onPointerDown,
-              child: quill.QuillEditor(
-                controller: _controller,
-                focusNode: _focus,
-                scrollController: _scroll,
-                config: quill.QuillEditorConfig(
-                  autoFocus: widget.autoFocus,
-                  padding: const EdgeInsets.all(16),
-                  embedBuilders: const [OpaqueEmbedBuilder()],
-                  textSpanBuilder: _spellSpan,
-                  contextMenuBuilder: _contextMenu,
-                  customStyles: _customStyles(Theme.of(context)),
+            // Copy and cut from the keyboard (#165). Quill builds its own
+            // clipboard actions with `Action.overridable`, which looks for
+            // an ancestor first — this is that ancestor. Paste is not here
+            // because the package offers a better seam for it below, one
+            // that keeps its focus and selection handling.
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                CopySelectionTextIntent:
+                    CallbackAction<CopySelectionTextIntent>(
+                      onInvoke: (intent) {
+                        unawaited(
+                          _clipboard.copy(cut: intent.collapseSelection),
+                        );
+                        return null;
+                      },
+                    ),
+              },
+              // The listener only watches; the editor below it sees every
+              // event unchanged.
+              child: Listener(
+                onPointerDown: _onPointerDown,
+                child: quill.QuillEditor(
+                  controller: _controller,
+                  focusNode: _focus,
+                  scrollController: _scroll,
+                  config: quill.QuillEditorConfig(
+                    autoFocus: widget.autoFocus,
+                    padding: const EdgeInsets.all(16),
+                    embedBuilders: const [OpaqueEmbedBuilder()],
+                    textSpanBuilder: _spellSpan,
+                    contextMenuBuilder: _contextMenu,
+                    customStyles: _customStyles(Theme.of(context)),
+                  ),
                 ),
               ),
             ),

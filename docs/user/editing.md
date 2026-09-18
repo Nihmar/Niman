@@ -13,6 +13,16 @@ status row switches only when both are enabled.
 - **WYSIWYG editor** (`flutter_quill`): formatted surface with a Markdown
   round-trip codec. What you see is the same `.md` file on disk.
 
+### Copy and paste
+
+The clipboard carries Markdown on both editors, so copying the same text
+from either gives the same thing: a bulleted item copies as `- item`, a
+heading keeps its `#`, bold keeps its `**`. Pasting Markdown into the
+WYSIWYG editor brings the structure back rather than the characters.
+
+Pasting a styled page from a browser still arrives as formatted text —
+the HTML is used when the clipboard carries it.
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, fenced code blocks with
