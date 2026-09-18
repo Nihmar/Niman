@@ -1177,6 +1177,10 @@ final class SwedishStrings extends Strings {
   @override
   String get closeAllNotes => 'Stäng alla';
   @override
+  String get sidePanelTooltip => 'Visa eller dölj sidopanelen';
+  @override
+  String get historyAllVersions => 'Alla versioner';
+  @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';
   @override

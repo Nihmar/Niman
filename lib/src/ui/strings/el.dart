@@ -1214,6 +1214,10 @@ final class GreekStrings extends Strings {
   @override
   String get closeAllNotes => 'Κλείσιμο όλων';
   @override
+  String get sidePanelTooltip => 'Εμφάνιση ή απόκρυψη του πλαϊνού πίνακα';
+  @override
+  String get historyAllVersions => 'Όλες οι εκδόσεις';
+  @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
   @override

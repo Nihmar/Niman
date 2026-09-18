@@ -1182,6 +1182,10 @@ final class RomanianStrings extends Strings {
   @override
   String get closeAllNotes => 'Închide toate';
   @override
+  String get sidePanelTooltip => 'Afișează sau ascunde panoul lateral';
+  @override
+  String get historyAllVersions => 'Toate versiunile';
+  @override
   String get openFileMissing => 'Fișierul acestei note nu este pe disc';
   @override
   String get openFileFailed => 'Nota nu a putut fi deschisă în afara Niman';

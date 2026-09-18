@@ -1153,6 +1153,10 @@ final class EstonianStrings extends Strings {
   @override
   String get closeAllNotes => 'Sulge kõik';
   @override
+  String get sidePanelTooltip => 'Näita või peida külgpaneel';
+  @override
+  String get historyAllVersions => 'Kõik versioonid';
+  @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override
   String get openFileFailed =>

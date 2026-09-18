@@ -1190,6 +1190,10 @@ final class PolishStrings extends Strings {
   @override
   String get closeAllNotes => 'Zamknij wszystkie';
   @override
+  String get sidePanelTooltip => 'Pokaż lub ukryj panel boczny';
+  @override
+  String get historyAllVersions => 'Wszystkie wersje';
+  @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override
   String get openFileFailed =>

@@ -1178,6 +1178,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get closeAllNotes => 'Fechar todas';
   @override
+  String get sidePanelTooltip => 'Mostrar ou ocultar o painel lateral';
+  @override
+  String get historyAllVersions => 'Todas as versões';
+  @override
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override
   String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';

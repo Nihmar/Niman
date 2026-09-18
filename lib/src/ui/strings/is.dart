@@ -1171,6 +1171,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get closeAllNotes => 'Loka öllu';
   @override
+  String get sidePanelTooltip => 'Sýna eða fela hliðarspjaldið';
+  @override
+  String get historyAllVersions => 'Allar útgáfur';
+  @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';

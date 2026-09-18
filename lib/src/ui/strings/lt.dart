@@ -1173,6 +1173,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get closeAllNotes => 'Uždaryti visus';
   @override
+  String get sidePanelTooltip => 'Rodyti arba slėpti šoninį skydelį';
+  @override
+  String get historyAllVersions => 'Visos versijos';
+  @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';

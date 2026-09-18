@@ -1202,6 +1202,10 @@ final class CatalanStrings extends Strings {
   @override
   String get closeAllNotes => 'Tanca-les totes';
   @override
+  String get sidePanelTooltip => 'Mostra o amaga el plafó lateral';
+  @override
+  String get historyAllVersions => 'Totes les versions';
+  @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override
   String get openFileFailed =>

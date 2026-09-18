@@ -1176,6 +1176,10 @@ final class SerbianStrings extends Strings {
   @override
   String get closeAllNotes => 'Затвори све';
   @override
+  String get sidePanelTooltip => 'Прикажи или сакриј бочну таблу';
+  @override
+  String get historyAllVersions => 'Све верзије';
+  @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override
   String get openFileFailed =>

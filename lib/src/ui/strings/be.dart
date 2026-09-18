@@ -1173,6 +1173,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get closeAllNotes => 'Закрыць усе';
   @override
+  String get sidePanelTooltip => 'Паказаць або схаваць бакавую панэль';
+  @override
+  String get historyAllVersions => 'Усе версіі';
+  @override
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override
   String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';

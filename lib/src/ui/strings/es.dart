@@ -1198,6 +1198,10 @@ final class SpanishStrings extends Strings {
   @override
   String get closeAllNotes => 'Cerrar todas';
   @override
+  String get sidePanelTooltip => 'Mostrar u ocultar el panel lateral';
+  @override
+  String get historyAllVersions => 'Todas las versiones';
+  @override
   String get openFileMissing => 'El archivo de esta nota no está en el disco';
   @override
   String get openFileFailed => 'No se pudo abrir esta nota fuera de Niman';

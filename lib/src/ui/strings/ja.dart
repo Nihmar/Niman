@@ -1092,6 +1092,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get closeAllNotes => 'すべて閉じる';
   @override
+  String get sidePanelTooltip => 'サイドパネルの表示・非表示';
+  @override
+  String get historyAllVersions => 'すべてのバージョン';
+  @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';
