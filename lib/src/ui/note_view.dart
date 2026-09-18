@@ -51,6 +51,7 @@ import 'package:niman/src/ui/list_tally_sheet.dart';
 import 'package:niman/src/ui/note_links.dart';
 import 'package:niman/src/ui/note_load_error.dart';
 import 'package:niman/src/ui/note_text_offsets.dart';
+import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
 import 'package:niman/src/ui/outline_panel.dart';
@@ -91,6 +92,7 @@ final class NoteView extends StatefulWidget {
     required this.showLineNumbers,
     required this.autofocusEditor,
     this.noteColumn = NoteColumn.off,
+    this.barActions = const [],
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -140,6 +142,10 @@ final class NoteView extends StatefulWidget {
   /// editors, the preview, the toolbar, the find bars and the status row
   /// keep to it.
   final NoteColumn noteColumn;
+
+  /// The note's own controls at the right end of the desktop's top row
+  /// (#173): the kind toggles and the ⋮ menu the shell builds.
+  final List<Widget> barActions;
 
   /// The link format the link button inserts (settings).
   final LinkType linkType;
@@ -1462,26 +1468,19 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     final kindChild = kindBody ? kindGui.buildBody(context, _kindHost) : null;
     return Column(
       children: [
-        // Desktop: the toolbar is editor chrome, above the editor, with a
-        // divider setting it off the text. Phone: it extends the keyboard,
+        // Desktop: one row above the note (#173) — the formatting on the
+        // left, the note's own controls and ⋮ on the right, both keeping
+        // to the note's column. The row stays when there is nothing to
+        // format (preview, a list note, a file that did not open), so
+        // the ⋮ never moves. Phone: the toolbar extends the keyboard,
         // below (see the bottom slot).
-        if (widget.toolbarTop && !kindBody && !_loading && error == null)
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.bottomCenter,
-            child: showToolbar
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      NoteColumnPadding(
-                        column: widget.noteColumn,
-                        child: _toolbar(context),
-                      ),
-                      const Divider(height: 1),
-                    ],
-                  )
-                : const SizedBox(width: double.infinity),
+        if (widget.toolbarTop)
+          NoteTopBar(
+            column: widget.noteColumn,
+            toolbar: showToolbar && !kindBody && !_loading && error == null
+                ? _toolbar(context, dense: true)
+                : null,
+            actions: widget.barActions,
           ),
         Expanded(
           child: error == null
@@ -1609,7 +1608,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// editor on any tap outside its tap region (every toolbar tap dismissed
   /// and re-showed the keyboard), so the toolbar joins the editor's tap
   /// region and tapping it keeps the editor focused.
-  Widget _toolbar(BuildContext context) {
+  Widget _toolbar(BuildContext context, {bool dense = false}) {
     final actions = _toolbarActions();
     // The re_editor tap region keeps the keyboard up for the source editor;
     // the WYSIWYG surface has its own focus handling, and publishes which
@@ -1618,6 +1617,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     if (!widget.showWysiwyg) {
       return CodeEditorTapRegion(
         child: NoteToolbarBar(
+          dense: dense,
           actions: actions,
           active: const <ToolbarItem>{},
           layout: widget.toolbarLayout,
@@ -1627,6 +1627,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     return ValueListenableBuilder<Set<ToolbarItem>>(
       valueListenable: _wysiwygActive,
       builder: (context, active, _) => NoteToolbarBar(
+        dense: dense,
         actions: actions,
         active: active,
         layout: widget.toolbarLayout,

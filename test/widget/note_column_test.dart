@@ -7,6 +7,7 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
 import 'package:niman/src/preview/markdown_preview.dart';
+import 'package:niman/src/ui/note_view.dart';
 import 'package:re_editor/re_editor.dart';
 
 const _column = NoteColumn();
@@ -111,6 +112,36 @@ void main() {
         NoteColumn.textInset,
       );
     });
+  });
+
+  // #173: the toolbar's first button starts where the text does.
+  testWidgets('the toolbar starts at the text', (tester) async {
+    await _pumpAt(
+      tester,
+      1200,
+      NoteView(
+        path: '/n/a.md',
+        showLineNumbers: true,
+        autofocusEditor: false,
+        toolbarTop: true,
+        showWysiwyg: true,
+        noteColumn: _column,
+        readNote: (_) async => 'plain words here',
+      ),
+    );
+    // In the one row above the note (#173).
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('note-top-bar')),
+        matching: find.byKey(const Key('toolbar-bold')),
+      ),
+      findsOne,
+    );
+    final icon = find.descendant(
+      of: find.byKey(const Key('toolbar-bold')),
+      matching: find.byType(Icon),
+    );
+    expect(tester.getTopLeft(icon).dx, _richTextLeft(tester, 'plain words'));
   });
 
   testWidgets('the chrome keeps to the same column', (tester) async {
