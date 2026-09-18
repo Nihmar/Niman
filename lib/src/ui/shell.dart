@@ -981,6 +981,27 @@ final class _LibraryShellState extends State<_LibraryShell>
     Listenable.merge([_workspace.controller, widget.unsavedTracker]),
   );
 
+  /// [_workspaceShape] when [_onWorkspaceChanged] last rebuilt.
+  String? _lastShape;
+
+  /// What of [w] the shell draws from, as one comparable value.
+  static String _workspaceShape(Workspace w) => [
+    w.focused,
+    w.axis.name,
+    w.isSplit,
+    w.fraction,
+    for (final pane in w.panes) ...[
+      pane.active,
+      for (final tab in pane.tabs)
+        [
+          tab.path,
+          tab.memento.editorKind,
+          tab.memento.preview,
+          tab.missing,
+        ].join('|'),
+    ],
+  ].join('\n');
+
   /// The showing tab when [_onWorkspaceChanged] last looked.
   String? _lastShown;
 
@@ -992,6 +1013,12 @@ final class _LibraryShellState extends State<_LibraryShell>
     final shown = _workspace.value.activePath;
     final changed = shown != _lastShown;
     _lastShown = shown;
+    // A caret or a scroll handed in changes nothing drawn here: only the
+    // tabs, which listen for themselves. The shell rebuilds for what it
+    // draws — tabs, panes, and how each tab shows its note.
+    final shape = _workspaceShape(_workspace.value);
+    if (!changed && shape == _lastShape) return;
+    _lastShape = shape;
     setState(() {
       if (!_wide) return;
       if (changed) _resetNoteKind();
@@ -1210,8 +1237,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     if (state != AppLifecycleState.resumed) {
       // Leaving the foreground may be the last thing this process does
       // (a swipe away, an OEM battery kill): get the buffered log on
-      // disk while there is still a chance to.
+      // disk while there is still a chance to — and where each note was
+      // left, once the editors have handed it in (their mementos land
+      // in microtasks; this runs after them).
       unawaited(AppLog.flush());
+      unawaited(Future(_workspace.controller.flush));
       return;
     }
     unawaited(_todoController.resyncReminders());
