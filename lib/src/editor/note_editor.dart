@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/settings/library_config.dart';
+import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/markdown_chunks.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -49,6 +50,7 @@ final class NoteEditor extends StatelessWidget {
     this.onIndicator,
     this.spellCheck,
     this.column = NoteColumn.off,
+    this.formatMenu,
     super.key,
   });
 
@@ -99,6 +101,10 @@ final class NoteEditor extends StatelessWidget {
 
   /// Where the text sits across the editor (issue #171).
   final NoteColumn column;
+
+  /// The toolbar's formatting actions for the context menu (#174); null
+  /// offers the clipboard alone.
+  final FormatMenuBuilder? formatMenu;
 
   /// re_editor's own padding around the text: what the editor had before
   /// the column, kept wherever there is no side space.
@@ -225,7 +231,8 @@ final class NoteEditor extends StatelessWidget {
     return _DesktopSelectionToolbar(builder: _selectionMenu);
   }
 
-  /// Cut/copy/paste/select all for the current selection.
+  /// Cut/copy/paste/select all for the current selection, then the
+  /// toolbar's formatting actions (#174), then Add to dictionary.
   Widget _selectionMenu({
     required BuildContext context,
     required TextSelectionToolbarAnchors anchors,
@@ -267,6 +274,7 @@ final class NoteEditor extends StatelessWidget {
         },
       ),
     ];
+    final extras = <ContextMenuButtonItem>[];
     // The word under the caret (or the selection, when it is one word),
     // in the line's own coordinates: multi-line selections name no word.
     final spell = spellCheck;
@@ -292,7 +300,7 @@ final class NoteEditor extends StatelessWidget {
           end: end,
           onDismiss: onDismiss,
         );
-        if (item != null) items.add(item);
+        if (item != null) extras.add(item);
       }
     }
     // Part of the editor, for unfocus purposes (#161).
@@ -309,9 +317,12 @@ final class NoteEditor extends StatelessWidget {
     // `CodeEditorTapRegion` is the package's own answer to this, and the
     // WYSIWYG menu already has Flutter's equivalent (`TextFieldTapRegion`).
     return CodeEditorTapRegion(
-      child: AdaptiveTextSelectionToolbar.buttonItems(
+      child: EditorContextMenu(
         anchors: anchors,
-        buttonItems: items,
+        clipboard: items,
+        formats: formatMenu?.call() ?? const [],
+        extras: extras,
+        onDismiss: onDismiss,
       ),
     );
   }
