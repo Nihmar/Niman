@@ -1069,6 +1069,30 @@ final class ChineseStrings extends Strings {
   @override
   String get historyAllVersions => '所有版本';
   @override
+  String get commandPaletteTitle => '命令面板';
+  @override
+  String get goToNoteTitle => '转到笔记';
+  @override
+  String get paletteGroupNote => '笔记';
+  @override
+  String get paletteGroupEditor => '编辑器';
+  @override
+  String get paletteGroupView => '视图';
+  @override
+  String get paletteGroupLibrary => '资料库';
+  @override
+  String get paletteGroupGoTo => '转到';
+  @override
+  String get paletteHint => '搜索命令和笔记';
+  @override
+  String get paletteNoResults => '没有匹配项';
+  @override
+  String get paletteCommands => '命令';
+  @override
+  String get paletteNotes => '笔记';
+  @override
+  String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
+  @override
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override
   String get openFileFailed => '无法在 Niman 之外打开这篇笔记';

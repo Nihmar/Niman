@@ -66,6 +66,10 @@ On Android the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note.
 
+The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone the
+Search tab lists the matching commands above its results, so no
+keyboard is needed.
+
 The **side panel** (outline, tags, history beside the note) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note

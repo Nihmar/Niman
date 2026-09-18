@@ -1181,6 +1181,30 @@ final class UkrainianStrings extends Strings {
   @override
   String get historyAllVersions => 'Усі версії';
   @override
+  String get commandPaletteTitle => 'Палітра команд';
+  @override
+  String get goToNoteTitle => 'Перейти до нотатки';
+  @override
+  String get paletteGroupNote => 'Нотатка';
+  @override
+  String get paletteGroupEditor => 'Редактор';
+  @override
+  String get paletteGroupView => 'Вигляд';
+  @override
+  String get paletteGroupLibrary => 'Бібліотека';
+  @override
+  String get paletteGroupGoTo => 'Перейти до';
+  @override
+  String get paletteHint => 'Шукати команди й нотатки';
+  @override
+  String get paletteNoResults => 'Нічого не знайдено';
+  @override
+  String get paletteCommands => 'Команди';
+  @override
+  String get paletteNotes => 'Нотатки';
+  @override
+  String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
+  @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';

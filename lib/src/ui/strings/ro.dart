@@ -1186,6 +1186,31 @@ final class RomanianStrings extends Strings {
   @override
   String get historyAllVersions => 'Toate versiunile';
   @override
+  String get commandPaletteTitle => 'Paleta de comenzi';
+  @override
+  String get goToNoteTitle => 'Mergi la notă';
+  @override
+  String get paletteGroupNote => 'Notă';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Vizualizare';
+  @override
+  String get paletteGroupLibrary => 'Bibliotecă';
+  @override
+  String get paletteGroupGoTo => 'Mergi la';
+  @override
+  String get paletteHint => 'Caută comenzi și note';
+  @override
+  String get paletteNoResults => 'Nimic nu se potrivește';
+  @override
+  String get paletteCommands => 'Comenzi';
+  @override
+  String get paletteNotes => 'Note';
+  @override
+  String get paletteFooter =>
+      '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
+  @override
   String get openFileMissing => 'Fișierul acestei note nu este pe disc';
   @override
   String get openFileFailed => 'Nota nu a putut fi deschisă în afara Niman';
