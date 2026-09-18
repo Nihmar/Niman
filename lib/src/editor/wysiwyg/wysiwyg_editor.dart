@@ -91,6 +91,24 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// (same length) from typing (the caret rode in on a longer document).
   int _selectionDocLength = 0;
 
+  /// Where the last right-click landed, in global coordinates (#161).
+  ///
+  /// Quill anchors its context menu from the *selection*
+  /// (`raw_editor_state.dart:251`, `TextSelectionToolbarAnchors
+  /// .fromSelection`), and for a selection spanning more than one line
+  /// that helper widens the rect to the whole editing region and anchors
+  /// at its horizontal centre. That is the phone convention — a toolbar
+  /// centred over the selection — and on a 1280 px window it puts the
+  /// menu half a screen from the click that asked for it (device report,
+  /// 2026-09-18).
+  ///
+  /// Flutter's own editors anchor a right-click menu at the pointer and
+  /// keep a `lastSecondaryTapDownPosition` for it. Quill records none, so
+  /// the surface keeps its own. Null when no mouse opened the menu (a
+  /// long press, a keyboard request), where the selection *is* the right
+  /// anchor — which is also why a primary press clears it.
+  Offset? _rightClickAt;
+
   /// The document's lines, for the spell review panel (T-WYS-08).
   List<String> get plainTextLines =>
       _controller.document.toPlainText().split(String.fromCharCode(10));
@@ -373,12 +391,24 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
       );
       if (item != null) items.add(item);
     }
+    final clicked = _rightClickAt;
     return TextFieldTapRegion(
       child: AdaptiveTextSelectionToolbar.buttonItems(
-        anchors: state.contextMenuAnchors,
+        anchors: clicked == null
+            ? state.contextMenuAnchors
+            : TextSelectionToolbarAnchors(primaryAnchor: clicked),
         buttonItems: items,
       ),
     );
+  }
+
+  /// Remembers a right-click for [_contextMenu], and forgets it on any
+  /// other press so a later long press or keyboard request anchors on the
+  /// selection instead of on a stale pointer.
+  void _onPointerDown(PointerDownEvent event) {
+    _rightClickAt = event.buttons & kSecondaryButton != 0
+        ? event.position
+        : null;
   }
 
   /// Quill's default code-block style is a near-white box with dark blue
@@ -431,17 +461,22 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
             builder: (context, _) => WysiwygFindPanel(controller: _find),
           ),
           Expanded(
-            child: quill.QuillEditor(
-              controller: _controller,
-              focusNode: _focus,
-              scrollController: _scroll,
-              config: quill.QuillEditorConfig(
-                autoFocus: widget.autoFocus,
-                padding: const EdgeInsets.all(16),
-                embedBuilders: const [OpaqueEmbedBuilder()],
-                textSpanBuilder: _spellSpan,
-                contextMenuBuilder: _contextMenu,
-                customStyles: _customStyles(Theme.of(context)),
+            // The listener only watches; the editor below it sees every
+            // event unchanged.
+            child: Listener(
+              onPointerDown: _onPointerDown,
+              child: quill.QuillEditor(
+                controller: _controller,
+                focusNode: _focus,
+                scrollController: _scroll,
+                config: quill.QuillEditorConfig(
+                  autoFocus: widget.autoFocus,
+                  padding: const EdgeInsets.all(16),
+                  embedBuilders: const [OpaqueEmbedBuilder()],
+                  textSpanBuilder: _spellSpan,
+                  contextMenuBuilder: _contextMenu,
+                  customStyles: _customStyles(Theme.of(context)),
+                ),
               ),
             ),
           ),
