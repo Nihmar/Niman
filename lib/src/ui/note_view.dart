@@ -12,6 +12,7 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
+import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/editor_tool.dart';
 import 'package:niman/src/editor/find_panel.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
@@ -900,6 +901,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       shortcutsActivators: const NimanShortcutsActivatorsBuilder(),
       spellCheck: widget.spellCheck,
       column: widget.noteColumn,
+      formatMenu: _formatMenu,
     ),
   );
 
@@ -936,6 +938,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           activeItems: _wysiwygActive,
           focusNode: _wysiwygFocus,
           column: widget.noteColumn,
+          formatMenu: _formatMenu,
         )
       : _sourcePane();
 
@@ -1638,6 +1641,25 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
   /// controller they act on.
+  /// The toolbar's buttons as context-menu entries (#174): the same
+  /// visible items in the same order, the same actions, and the same
+  /// pressed state — read when the menu opens, so it is the caret's now.
+  List<FormatMenuEntry> _formatMenu() {
+    final actions = _toolbarActions();
+    final active = widget.showWysiwyg
+        ? _wysiwygActive.value
+        : const <ToolbarItem>{};
+    return [
+      for (final item in widget.toolbarLayout.visible)
+        if (actions[item] case final action?)
+          FormatMenuEntry(
+            item: item,
+            onPressed: action,
+            active: active.contains(item),
+          ),
+    ];
+  }
+
   Map<ToolbarItem, VoidCallback> _toolbarActions() {
     if (widget.showWysiwyg) return _quillToolbarActions();
     return {

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
@@ -37,6 +38,7 @@ final class WysiwygEditor extends StatefulWidget {
     this.activeItems,
     this.focusNode,
     this.column = NoteColumn.off,
+    this.formatMenu,
     super.key,
   });
 
@@ -65,6 +67,10 @@ final class WysiwygEditor extends StatefulWidget {
   /// Where the text sits across the surface (issue #171); the source
   /// editor puts its text at the same x.
   final NoteColumn column;
+
+  /// The toolbar's formatting actions for the context menu (#174), the
+  /// same ones the source editor's menu offers.
+  final FormatMenuBuilder? formatMenu;
 
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
@@ -423,6 +429,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
           _ => item,
         },
     ];
+    final extras = <ContextMenuButtonItem>[];
     final spell = widget.spellCheck;
     if (spell != null) {
       final item = addToDictionaryItem(
@@ -432,15 +439,18 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         end: selection.end,
         onDismiss: state.hideToolbar,
       );
-      if (item != null) items.add(item);
+      if (item != null) extras.add(item);
     }
     final clicked = _rightClickAt;
     return TextFieldTapRegion(
-      child: AdaptiveTextSelectionToolbar.buttonItems(
+      child: EditorContextMenu(
         anchors: clicked == null
             ? state.contextMenuAnchors
             : TextSelectionToolbarAnchors(primaryAnchor: clicked),
-        buttonItems: items,
+        clipboard: items,
+        formats: widget.formatMenu?.call() ?? const [],
+        extras: extras,
+        onDismiss: state.hideToolbar,
       ),
     );
   }
