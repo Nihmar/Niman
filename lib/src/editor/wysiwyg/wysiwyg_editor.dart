@@ -105,6 +105,12 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// The controller the toolbar commands act on (T-WYS-06).
   quill.QuillController get controller => _controller;
 
+  /// How far the surface is scrolled; null before its first layout.
+  double? get scrollOffset => _scroll.hasClients ? _scroll.offset : null;
+
+  /// The surface's scroll, for putting a tab back where it was (#23).
+  ScrollController get scrollController => _scroll;
+
   /// The document length at the last selection callback: telling a tap
   /// (same length) from typing (the caret rode in on a longer document).
   int _selectionDocLength = 0;
