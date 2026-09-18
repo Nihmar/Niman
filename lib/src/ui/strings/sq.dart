@@ -121,6 +121,10 @@ final class AlbanianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Kalo te burimi Markdown';
   @override
+  String get switchToSourceLabel => 'Burimi';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Kjo shënim është tepër i madh për redaktorin WYSIWYG. Hape te '
       'burimi Markdown.';

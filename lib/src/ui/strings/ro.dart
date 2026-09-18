@@ -126,6 +126,10 @@ final class RomanianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Comută la sursa Markdown';
   @override
+  String get switchToSourceLabel => 'Sursă';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Această notă este prea mare pentru editorul WYSIWYG. Deschide-o în '
       'sursa Markdown.';

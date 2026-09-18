@@ -123,6 +123,10 @@ final class SwedishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Byt till Markdown-källan';
   @override
+  String get switchToSourceLabel => 'Källa';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Denna anteckning är för stor för WYSIWYG-editorn. Öppna den i '
       'Markdown-källan.';

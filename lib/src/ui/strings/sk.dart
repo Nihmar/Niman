@@ -125,6 +125,10 @@ final class SlovakStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Prepnúť na Markdown zdroj';
   @override
+  String get switchToSourceLabel => 'Zdroj';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Táto poznámka je príliš veľká na WYSIWYG editor. Otvorte ju ako '
       'Markdown zdroj.';

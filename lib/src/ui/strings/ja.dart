@@ -113,6 +113,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Markdown ソースに切り替え';
   @override
+  String get switchToSourceLabel => 'ソース';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'このノートは WYSIWYG エディタが大きすぎます。Markdown ソースで開いてください。';
 

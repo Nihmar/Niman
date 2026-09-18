@@ -122,6 +122,10 @@ final class EstonianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Lülita Markdowni allikale';
   @override
+  String get switchToSourceLabel => 'Lähe';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'See märge on WYSIWYG-redaktoriks liiga suur. Ava see Markdowni '
       'allikana.';

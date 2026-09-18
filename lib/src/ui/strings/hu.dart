@@ -121,6 +121,10 @@ final class HungarianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Váltás Markdown forrásra';
   @override
+  String get switchToSourceLabel => 'Forrás';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ez a jegyzet túl nagy a WYSIWYG szerkesztőhöz. Nyisd meg Markdown '
       'forrásként.';

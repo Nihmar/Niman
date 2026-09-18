@@ -126,6 +126,10 @@ final class GreekStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Μετάβαση στην πηγή Markdown';
   @override
+  String get switchToSourceLabel => 'Πηγή';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Αυτή η σημείωση είναι πολύ μεγάλη για τον επεξεργαστή WYSIWYG. '
       'Ανοίξτε την στην πηγή Markdown.';

@@ -124,6 +124,10 @@ final class GermanStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Zum Markdown-Quelltext wechseln';
   @override
+  String get switchToSourceLabel => 'Quelle';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Diese Notiz ist für den WYSIWYG-Editor zu groß. Öffne sie im '
       'Markdown-Quelltext.';

@@ -122,6 +122,10 @@ final class IcelandicStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Skipta yfir í Markdown upprunatexta';
   @override
+  String get switchToSourceLabel => 'Kóði';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Þetta minnisblað er of stórt fyrir WYSIWYG-ritilinn. Opnaðu það í '
       'Markdown upprunatexta.';

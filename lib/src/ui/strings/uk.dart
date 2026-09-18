@@ -127,6 +127,10 @@ final class UkrainianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Перемкнути на Markdown-джерело';
   @override
+  String get switchToSourceLabel => 'Джерело';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ця нотатка занадто велика для WYSIWYG-редактора. Відкрийте її як '
       'Markdown-джерело.';

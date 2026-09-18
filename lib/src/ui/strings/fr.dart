@@ -125,6 +125,10 @@ final class FrenchStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Passer à la source Markdown';
   @override
+  String get switchToSourceLabel => 'Source';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Cette note est trop grande pour l’éditeur WYSIWYG. Ouvrez-la dans la '
       'source Markdown.';

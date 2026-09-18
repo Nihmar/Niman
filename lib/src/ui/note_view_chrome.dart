@@ -193,23 +193,31 @@ final class NoteStatusRow extends StatelessWidget {
               ),
             ),
           // The quick way between the two editors (T-WYS-12): the setting
-          // stays per library, the button just flips it.
+          // stays per library, the button just flips it. A text button
+          // naming the destination — tooltips only ever appear after a
+          // long press on Android, and an icon alone asked the reader to
+          // guess which surface it lands on.
           if (!loading && canSwitchEditorKind)
             Padding(
               padding: iconPadding,
-              child: IconButton(
-                key: const Key('editor-kind-toggle'),
-                tooltip: showWysiwyg
+              child: Tooltip(
+                message: showWysiwyg
                     ? AppStrings.switchToSourceTooltip
                     : AppStrings.switchToWysiwygTooltip,
-                icon: Icon(
-                  showWysiwyg ? Icons.code : Icons.edit_note,
-                  size: 18,
+                child: TextButton(
+                  key: const Key('editor-kind-toggle'),
+                  onPressed: onToggleEditorKind,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    textStyle: labelStyle,
+                  ),
+                  child: Text(
+                    showWysiwyg
+                        ? AppStrings.switchToSourceLabel
+                        : AppStrings.switchToWysiwygLabel,
+                  ),
                 ),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                onPressed: onToggleEditorKind,
               ),
             ),
           if (!loading)

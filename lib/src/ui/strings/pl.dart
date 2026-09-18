@@ -125,6 +125,10 @@ final class PolishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Przełącz na źródło Markdown';
   @override
+  String get switchToSourceLabel => 'Źródło';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ta notatka jest zbyt duża dla edytora WYSIWYG. Otwórz ją w '
       'źródle Markdown.';

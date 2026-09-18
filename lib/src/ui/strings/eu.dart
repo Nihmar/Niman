@@ -120,6 +120,10 @@ final class BasqueStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Pasatu Markdown-iturrira';
   @override
+  String get switchToSourceLabel => 'Iturria';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ohar honek ez du WYSIWYG erreditorrentzat. Ireki Markdown-iturrian.';
 

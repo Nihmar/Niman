@@ -122,6 +122,10 @@ final class DutchStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Over naar de Markdown-brontekst';
   @override
+  String get switchToSourceLabel => 'Bron';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Deze notitie is te groot voor de WYSIWYG-editor. Open hem in de '
       'Markdown-brontekst.';

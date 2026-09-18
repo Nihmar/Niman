@@ -123,6 +123,10 @@ final class LatvianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Pārslēgt uz Markdown avotu';
   @override
+  String get switchToSourceLabel => 'Avots';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Šī piezīme ir pārāk liela WYSIWYG redaktoram. Atveriet to kā Markdown '
       'avotu.';

@@ -121,6 +121,10 @@ final class NorwegianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Bytt til Markdown-kilden';
   @override
+  String get switchToSourceLabel => 'Kilde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Dette notatet er for stort for WYSIWYG-editoren. Åpne det i '
       'Markdown-kilden.';

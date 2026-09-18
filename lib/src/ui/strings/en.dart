@@ -120,6 +120,10 @@ final class EnglishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Switch to the Markdown source';
   @override
+  String get switchToSourceLabel => 'Source';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'This note is too large for the WYSIWYG editor. Open it in the Markdown '
       'source.';

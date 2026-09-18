@@ -125,6 +125,10 @@ final class BelarusianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Пераключыць на Markdown-крэйс';
   @override
+  String get switchToSourceLabel => 'Крыніца';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Гэтая заўвага занадта вялікая для WYSIWYG-рэдактара. Адкрыйце яе як '
       'Markdown-крэйс.';

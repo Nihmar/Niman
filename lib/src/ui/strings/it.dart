@@ -125,6 +125,10 @@ final class ItalianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Passa al sorgente Markdown';
   @override
+  String get switchToSourceLabel => 'Sorgente';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Questa nota è troppo grande per l’editor WYSIWYG. Aprila nel sorgente '
       'Markdown.';

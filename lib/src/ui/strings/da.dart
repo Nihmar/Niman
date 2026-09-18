@@ -122,6 +122,10 @@ final class DanishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Skift til Markdown-kilden';
   @override
+  String get switchToSourceLabel => 'Kilde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Denne note er for stor til WYSIWYG-editoren. Åbn den i '
       'Markdown-kilden.';
