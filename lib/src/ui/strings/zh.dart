@@ -113,6 +113,10 @@ final class ChineseStrings extends Strings {
   @override
   String get switchToSourceTooltip => '切换到 Markdown 源码';
   @override
+  String get switchToSourceLabel => '源码';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge => '此笔记对所见即所得编辑器来说太大了。请在 Markdown 源码中打开。';
 
   // Settings: the section headings the list is grouped under.

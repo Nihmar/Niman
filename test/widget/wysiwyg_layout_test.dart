@@ -13,6 +13,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
 import 'package:niman/src/ui/editor_preview_split.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -178,6 +179,14 @@ void main() {
       ),
     );
     expect(find.byKey(const Key('editor-kind-toggle')), findsOneWidget);
+    // The toggle names its destination, no tooltip-guessing.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('editor-kind-toggle')),
+        matching: find.text(AppStrings.switchToWysiwygLabel),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('editor-kind-toggle')));
     expect(chosen, EditorKind.wysiwyg);
   });
@@ -217,6 +226,29 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('editor-kind-toggle')));
     expect(chosen, EditorKind.source);
+  });
+
+  testWidgets('from WYSIWYG the toggle names the source editor', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      NoteView(
+        path: '/notes/a.md',
+        showLineNumbers: true,
+        autofocusEditor: true,
+        showWysiwyg: true,
+        onEditorKindChanged: (_) {},
+        readNote: (_) async => '# Head\n\nbody text',
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('editor-kind-toggle')),
+        matching: find.text(AppStrings.switchToSourceLabel),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the toolbar formats the WYSIWYG document', (tester) async {

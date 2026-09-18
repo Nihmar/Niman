@@ -125,6 +125,10 @@ final class CzechStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Přepnout na zdrojový Markdown';
   @override
+  String get switchToSourceLabel => 'Zdroj';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Tato poznámka je příliš velká pro editor WYSIWYG. Otevřete ji ve '
       'zdrojovém Markdown.';

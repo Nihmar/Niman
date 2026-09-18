@@ -116,6 +116,10 @@ final class HindiStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Markdown स्रोत पर जाएँ';
   @override
+  String get switchToSourceLabel => 'स्रोत';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'यह नोट WYSIWYG एडिटर के लिए बहुत बड़ा है। इसे Markdown स्रोत में खोलें।';
 

@@ -128,6 +128,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Preklopi na Markdown vir';
   @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ta opomba je prevelika za urejevalnik WYSIWYG. Odprite jo kot '
       'Markdown vir.';

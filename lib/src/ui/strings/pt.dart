@@ -122,6 +122,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Trocar para a fonte Markdown';
   @override
+  String get switchToSourceLabel => 'Fonte';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Esta nota é grande demais para o editor WYSIWYG. Abra-a na fonte '
       'Markdown.';

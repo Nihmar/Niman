@@ -126,6 +126,10 @@ final class CroatianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Prebaci na Markdown izvor';
   @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ova napomena je prevelika za WYSIWYG uređivač. Otvori je kao '
       'Markdown izvor.';

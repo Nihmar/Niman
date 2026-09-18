@@ -125,6 +125,10 @@ final class SpanishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Cambiar a la fuente Markdown';
   @override
+  String get switchToSourceLabel => 'Fuente';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Esta nota es demasiado grande para el editor WYSIWYG. Ábrela en la '
       'fuente Markdown.';

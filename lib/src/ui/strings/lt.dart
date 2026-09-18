@@ -128,6 +128,10 @@ final class LithuanianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Perjungti į Markdown šaltinį';
   @override
+  String get switchToSourceLabel => 'Šaltinis';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ši pastaba per didelė WYSIWYG redaktoriui. Atidarykite ją kaip '
       'Markdown šaltinį.';

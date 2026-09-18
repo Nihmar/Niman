@@ -119,6 +119,10 @@ final class TurkishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Markdown kaynağına geç';
   @override
+  String get switchToSourceLabel => 'Kaynak';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Bu not WYSIWYG düzenleyicisi için çok büyük. Markdown kaynağında '
       'açın.';

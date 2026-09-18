@@ -126,6 +126,10 @@ final class BosnianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Pređi na Markdown izvor';
   @override
+  String get switchToSourceLabel => 'Izvor';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ova bilješka je prevelika za WYSIWYG uređivač. Otvorite je u '
       'Markdown izvoru.';

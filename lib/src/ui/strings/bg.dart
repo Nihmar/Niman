@@ -127,6 +127,10 @@ final class BulgarianStrings extends Strings {
       'Превключване към изходен Markdown '
       'код';
   @override
+  String get switchToSourceLabel => 'Изходник';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Тази бележка е твърде голяма за WYSIWYG редактора. Отворете я като '
       'изходен Markdown код.';

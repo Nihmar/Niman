@@ -124,6 +124,10 @@ final class CatalanStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Canvia a la font Markdown';
   @override
+  String get switchToSourceLabel => 'Font';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Aquesta nota és massa gran per a l’editor WYSIWYG. Obre-la a '
       'la font Markdown.';

@@ -125,6 +125,10 @@ final class MacedonianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Префрли на Markdown изворот';
   @override
+  String get switchToSourceLabel => 'Извор';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Оваа белешка е премногу голема за WYSIWYG уредникот. Отвори ја во '
       'Markdown изворот.';

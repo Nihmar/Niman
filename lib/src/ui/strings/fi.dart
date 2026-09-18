@@ -122,6 +122,10 @@ final class FinnishStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Vaihda Markdown-lähdekoodiin';
   @override
+  String get switchToSourceLabel => 'Lähde';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Tämä muistiinpano on liian suuri WYSIWYG-muokkainille. Avaa se '
       'Markdown-lähdekoodina.';

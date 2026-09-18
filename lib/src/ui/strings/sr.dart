@@ -126,6 +126,10 @@ final class SerbianStrings extends Strings {
   @override
   String get switchToSourceTooltip => 'Пређи на Markdown извор';
   @override
+  String get switchToSourceLabel => 'Извор';
+  @override
+  String get switchToWysiwygLabel => 'WYSIWYG';
+  @override
   String get wysiwygTooLarge =>
       'Ова белешка је превелика за WYSIWYG уредитељ. Отворите је у '
       'Markdown извору.';
