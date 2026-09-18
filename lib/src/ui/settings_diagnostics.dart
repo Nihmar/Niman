@@ -11,6 +11,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -253,7 +254,7 @@ final class _SettingsDiagnosticsScreenState
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           HighlightRow(
-            key: const Key('debug-logs-setting'),
+            key: SettingsKeys.debugLogs,
             child: SwitchListTile(
               title: Text(AppStrings.debugLogsTitle),
               subtitle: Text(AppStrings.debugLogsSubtitle),
@@ -262,7 +263,7 @@ final class _SettingsDiagnosticsScreenState
             ),
           ),
           HighlightRow(
-            key: const Key('export-log-setting'),
+            key: SettingsKeys.exportLog,
             child: ListTile(
               leading: const Icon(Icons.save_alt),
               title: Text(AppStrings.exportLogTitle),
@@ -284,7 +285,7 @@ final class _SettingsDiagnosticsScreenState
               ),
             ),
           HighlightRow(
-            key: const Key('changelog-setting'),
+            key: SettingsKeys.changelog,
             child: SettingsValueRow(
               title: AppStrings.changelogTitle,
               onTap: () => Navigator.push(

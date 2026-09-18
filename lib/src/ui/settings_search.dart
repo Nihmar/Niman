@@ -10,6 +10,7 @@ import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_reminders.dart';
 import 'package:niman/src/ui/settings_transcription.dart';
 import 'package:niman/src/ui/settings_trash_history.dart';
@@ -94,41 +95,6 @@ List<SettingsSearchEntry> settingsSearchEntries({
       on ? AppStrings.settingsToggleOn : AppStrings.settingsToggleOff;
   Future<String?> noValue() async => null;
 
-  const languageKey = Key('language-choice');
-  const brightnessKey = Key('theme-brightness-setting');
-  const paletteKey = Key('theme-palette-setting');
-  const uiScaleKey = Key('ui-text-scale-setting');
-  const splitKey = Key('split-ratio-setting');
-  const toolbarKey = Key('toolbar-setting');
-  const sourceKey = Key('editor-source-setting');
-  const wysiwygKey = Key('editor-wysiwyg-setting');
-  const previewKey = Key('preview-enabled-setting');
-  const lineNumbersKey = Key('line-numbers-setting');
-  const linkTypeKey = Key('link-type');
-  const missingNoteKey = Key('missing-note-location');
-  const noteScaleKey = Key('note-text-scale-setting');
-  const indentKey = Key('indent-width');
-  const listFolderKey = Key('list-folder-setting');
-  const templateFolderKey = Key('template-folder-setting');
-  const templateHelpKey = Key('template-help-setting');
-  const attachmentsKey = Key('attachments-folder-setting');
-  const quickNoteKey = Key('quick-note-setting');
-  const trashKey = Key('trash-setting');
-  const autoEmptyKey = Key('trash-auto-empty-setting');
-  const historyVersionsKey = Key('history-versions-setting');
-  const historyIntervalKey = Key('history-interval-setting');
-  const autoUpdateKey = Key('auto-update-setting');
-  const checkUpdatesKey = Key('check-updates-setting');
-  const debugLogsKey = Key('debug-logs-setting');
-  const exportLogKey = Key('export-log-setting');
-  const changelogKey = Key('changelog-setting');
-  const remindersKey = Key('reminder-show-tokens');
-  const modelKey = Key('transcription-model-setting');
-  const transcriptionLanguageKey = Key('transcription-language-setting');
-  const reindexKey = Key('reindex-setting');
-  const switchKey = Key('switch-library-setting');
-  const closeKey = Key('close-library-setting');
-
   final ops = controller.ops;
   final appearance = AppStrings.settingsSectionAppearance;
   final editor = AppStrings.settingsSectionEditor;
@@ -139,196 +105,196 @@ List<SettingsSearchEntry> settingsSearchEntries({
     SettingsSearchEntry(
       title: AppStrings.languageTitle,
       area: appearance,
-      rowKey: languageKey,
+      rowKey: SettingsKeys.language,
       value: () async => AppStrings.languageName(await controller.language),
-      open: () => pushAppearance(languageKey),
+      open: () => pushAppearance(SettingsKeys.language),
     ),
     SettingsSearchEntry(
       title: AppStrings.themeBrightnessTitle,
       area: appearance,
-      rowKey: brightnessKey,
+      rowKey: SettingsKeys.brightness,
       value: () async => switch (await controller.themeBrightness) {
         AppBrightness.system => AppStrings.themeBrightnessSystem,
         AppBrightness.day => AppStrings.themeBrightnessDay,
         AppBrightness.night => AppStrings.themeBrightnessNight,
       },
-      open: () => pushAppearance(brightnessKey),
+      open: () => pushAppearance(SettingsKeys.brightness),
     ),
     SettingsSearchEntry(
       title: AppStrings.themePaletteTitle,
       area: appearance,
-      rowKey: paletteKey,
+      rowKey: SettingsKeys.palette,
       value: () async =>
           SettingsAppearanceScreen.paletteName(await controller.themePalette),
-      open: () => pushAppearance(paletteKey),
+      open: () => pushAppearance(SettingsKeys.palette),
     ),
     SettingsSearchEntry(
       title: AppStrings.uiTextScaleTitle,
       area: appearance,
-      rowKey: uiScaleKey,
+      rowKey: SettingsKeys.uiTextScale,
       value: () async =>
           AppStrings.textScaleValue(await controller.uiTextScale),
-      open: () => pushAppearance(uiScaleKey),
+      open: () => pushAppearance(SettingsKeys.uiTextScale),
     ),
     SettingsSearchEntry(
       title: AppStrings.splitRatioTitle,
       area: appearance,
-      rowKey: splitKey,
+      rowKey: SettingsKeys.splitRatio,
       value: () async =>
           AppStrings.splitRatioValue(await controller.splitRatio),
-      open: () => pushAppearance(splitKey),
+      open: () => pushAppearance(SettingsKeys.splitRatio),
     ),
     SettingsSearchEntry(
       title: AppStrings.toolbarSettingsTitle,
       area: editor,
-      rowKey: toolbarKey,
+      rowKey: SettingsKeys.toolbar,
       value: noValue,
-      open: () => pushEditor(toolbarKey),
+      open: () => pushEditor(SettingsKeys.toolbar),
     ),
     SettingsSearchEntry(
       title: AppStrings.editorKindSource,
       area: editor,
-      rowKey: sourceKey,
+      rowKey: SettingsKeys.editorSource,
       value: () async => onOff(
         on: (await controller.enabledEditors).contains(EditorKind.source),
       ),
-      open: () => pushEditor(sourceKey),
+      open: () => pushEditor(SettingsKeys.editorSource),
     ),
     SettingsSearchEntry(
       title: AppStrings.editorKindWysiwyg,
       area: editor,
-      rowKey: wysiwygKey,
+      rowKey: SettingsKeys.editorWysiwyg,
       value: () async => onOff(
         on: (await controller.enabledEditors).contains(EditorKind.wysiwyg),
       ),
-      open: () => pushEditor(wysiwygKey),
+      open: () => pushEditor(SettingsKeys.editorWysiwyg),
     ),
     SettingsSearchEntry(
       title: AppStrings.settingsPreviewEnabledTitle,
       area: editor,
-      rowKey: previewKey,
+      rowKey: SettingsKeys.previewEnabled,
       value: () async => onOff(on: await controller.previewEnabled),
-      open: () => pushEditor(previewKey),
+      open: () => pushEditor(SettingsKeys.previewEnabled),
     ),
     SettingsSearchEntry(
       title: AppStrings.lineNumbersTitle,
       area: editor,
-      rowKey: lineNumbersKey,
+      rowKey: SettingsKeys.lineNumbers,
       value: () async => onOff(on: await controller.lineNumbersEnabled),
-      open: () => pushEditor(lineNumbersKey),
+      open: () => pushEditor(SettingsKeys.lineNumbers),
     ),
     SettingsSearchEntry(
       title: AppStrings.linkTypeTitle,
       area: editor,
-      rowKey: linkTypeKey,
+      rowKey: SettingsKeys.linkType,
       value: () async => switch (await controller.linkType) {
         LinkType.wikilink => AppStrings.linkTypeWikilink,
         LinkType.markdown => AppStrings.linkTypeMarkdown,
       },
-      open: () => pushEditor(linkTypeKey),
+      open: () => pushEditor(SettingsKeys.linkType),
     ),
     SettingsSearchEntry(
       title: AppStrings.missingNoteLocationTitle,
       area: editor,
-      rowKey: missingNoteKey,
+      rowKey: SettingsKeys.missingNoteLocation,
       value: () async => switch (await controller.missingNoteLocation) {
         MissingNoteLocation.libraryRoot => AppStrings.missingNoteLocationRoot,
         MissingNoteLocation.currentFolder =>
           AppStrings.missingNoteLocationCurrentFolder,
       },
-      open: () => pushEditor(missingNoteKey),
+      open: () => pushEditor(SettingsKeys.missingNoteLocation),
     ),
     SettingsSearchEntry(
       title: AppStrings.noteTextScaleTitle,
       area: editor,
-      rowKey: noteScaleKey,
+      rowKey: SettingsKeys.noteTextScale,
       value: () async =>
           AppStrings.textScaleValue(await controller.noteTextScale),
-      open: () => pushEditor(noteScaleKey),
+      open: () => pushEditor(SettingsKeys.noteTextScale),
     ),
     SettingsSearchEntry(
       title: AppStrings.indentWidthTitle,
       area: editor,
-      rowKey: indentKey,
+      rowKey: SettingsKeys.indentWidth,
       value: () async =>
           AppStrings.indentWidthValue(await controller.indentWidth),
-      open: () => pushEditor(indentKey),
+      open: () => pushEditor(SettingsKeys.indentWidth),
     ),
     SettingsSearchEntry(
       title: AppStrings.listFolderTitle,
       area: folders,
-      rowKey: listFolderKey,
+      rowKey: SettingsKeys.listFolder,
       value: () async => ops == null ? null : await ops.listNoteFolder,
-      open: () => pushFolders(listFolderKey),
+      open: () => pushFolders(SettingsKeys.listFolder),
     ),
     SettingsSearchEntry(
       title: AppStrings.templateFolderTitle,
       area: folders,
-      rowKey: templateFolderKey,
+      rowKey: SettingsKeys.templateFolder,
       value: () async => ops == null ? null : await ops.templateFolder,
-      open: () => pushFolders(templateFolderKey),
+      open: () => pushFolders(SettingsKeys.templateFolder),
     ),
     SettingsSearchEntry(
       title: AppStrings.templateHelpTitle,
       area: folders,
-      rowKey: templateHelpKey,
+      rowKey: SettingsKeys.templateHelp,
       value: noValue,
-      open: () => pushFolders(templateHelpKey),
+      open: () => pushFolders(SettingsKeys.templateHelp),
     ),
     SettingsSearchEntry(
       title: AppStrings.attachmentsFolderTitle,
       area: folders,
-      rowKey: attachmentsKey,
+      rowKey: SettingsKeys.attachmentsFolder,
       value: () async => ops == null ? null : await ops.attachmentsFolder,
-      open: () => pushFolders(attachmentsKey),
+      open: () => pushFolders(SettingsKeys.attachmentsFolder),
     ),
     SettingsSearchEntry(
       title: AppStrings.quickNoteTitle,
       area: folders,
-      rowKey: quickNoteKey,
+      rowKey: SettingsKeys.quickNote,
       value: () async => ops == null
           ? null
           : (await ops.quickNotePath) ?? AppStrings.quickNoteUnset,
-      open: () => pushFolders(quickNoteKey),
+      open: () => pushFolders(SettingsKeys.quickNote),
     ),
     SettingsSearchEntry(
       title: AppStrings.trashTitle,
       area: trashHistory,
-      rowKey: trashKey,
+      rowKey: SettingsKeys.trash,
       value: () async => ops == null ? null : onOff(on: await ops.trashEnabled),
-      open: () => pushTrash(trashKey),
+      open: () => pushTrash(SettingsKeys.trash),
     ),
     SettingsSearchEntry(
       title: AppStrings.trashAutoEmptyTitle,
       area: trashHistory,
-      rowKey: autoEmptyKey,
+      rowKey: SettingsKeys.trashAutoEmpty,
       value: () async =>
           AppStrings.trashAutoEmptyValue(await controller.trashAutoEmptyDays),
-      open: () => pushTrash(autoEmptyKey),
+      open: () => pushTrash(SettingsKeys.trashAutoEmpty),
     ),
     SettingsSearchEntry(
       title: AppStrings.historyVersionsTitle,
       area: trashHistory,
-      rowKey: historyVersionsKey,
+      rowKey: SettingsKeys.historyVersions,
       value: () async =>
           AppStrings.historyVersionsValue(await controller.historyVersions),
-      open: () => pushTrash(historyVersionsKey),
+      open: () => pushTrash(SettingsKeys.historyVersions),
     ),
     SettingsSearchEntry(
       title: AppStrings.historyIntervalTitle,
       area: trashHistory,
-      rowKey: historyIntervalKey,
+      rowKey: SettingsKeys.historyInterval,
       value: () async => AppStrings.historyIntervalValue(
         await controller.historyIntervalMinutes,
       ),
-      open: () => pushTrash(historyIntervalKey),
+      open: () => pushTrash(SettingsKeys.historyInterval),
     ),
     // What empties the trash for good lands on the screen that
     // holds it.
     SettingsSearchEntry(
       title: AppStrings.trashDeletePermanently,
       area: trashHistory,
-      rowKey: trashKey,
+      rowKey: SettingsKeys.trash,
       value: noValue,
       open: () => push(TrashScreen(controller: controller)),
     ),
@@ -336,48 +302,48 @@ List<SettingsSearchEntry> settingsSearchEntries({
       SettingsSearchEntry(
         title: AppStrings.autoUpdateTitle,
         area: AppStrings.settingsSectionUpdates,
-        rowKey: autoUpdateKey,
+        rowKey: SettingsKeys.autoUpdate,
         value: () async => onOff(on: await controller.autoUpdateEnabled),
-        open: () => pushUpdates(autoUpdateKey),
+        open: () => pushUpdates(SettingsKeys.autoUpdate),
       ),
       SettingsSearchEntry(
         title: AppStrings.checkForUpdatesTitle,
         area: AppStrings.settingsSectionUpdates,
-        rowKey: checkUpdatesKey,
+        rowKey: SettingsKeys.checkUpdates,
         value: noValue,
-        open: () => pushUpdates(checkUpdatesKey),
+        open: () => pushUpdates(SettingsKeys.checkUpdates),
       ),
     ],
     SettingsSearchEntry(
       title: AppStrings.debugLogsTitle,
       area: AppStrings.settingsAreaDiagnostics,
-      rowKey: debugLogsKey,
+      rowKey: SettingsKeys.debugLogs,
       value: () async => onOff(on: await controller.debugLogsEnabled),
-      open: () => pushDiagnostics(debugLogsKey),
+      open: () => pushDiagnostics(SettingsKeys.debugLogs),
     ),
     SettingsSearchEntry(
       title: AppStrings.exportLogTitle,
       area: AppStrings.settingsAreaDiagnostics,
-      rowKey: exportLogKey,
+      rowKey: SettingsKeys.exportLog,
       value: noValue,
-      open: () => pushDiagnostics(exportLogKey),
+      open: () => pushDiagnostics(SettingsKeys.exportLog),
     ),
     SettingsSearchEntry(
       title: AppStrings.changelogTitle,
       area: AppStrings.settingsAreaDiagnostics,
-      rowKey: changelogKey,
+      rowKey: SettingsKeys.changelog,
       value: noValue,
-      open: () => pushDiagnostics(changelogKey),
+      open: () => pushDiagnostics(SettingsKeys.changelog),
     ),
     SettingsSearchEntry(
       title: AppStrings.reminderShowTokensTitle,
       area: libraryArea(AppStrings.settingsSectionReminders),
-      rowKey: remindersKey,
+      rowKey: SettingsKeys.reminderShowTokens,
       value: () async => onOff(on: await controller.reminderShowTokens),
       open: () => push(
         SettingsRemindersScreen(
           controller: controller,
-          highlight: remindersKey,
+          highlight: SettingsKeys.reminderShowTokens,
         ),
       ),
     ),
@@ -385,7 +351,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
       SettingsSearchEntry(
         title: AppStrings.transcriptionModelTitle,
         area: libraryArea(AppStrings.settingsSectionTranscription),
-        rowKey: modelKey,
+        rowKey: SettingsKeys.transcriptionModel,
         value: () async {
           final model = models.defaultModel;
           return model == null
@@ -396,14 +362,14 @@ List<SettingsSearchEntry> settingsSearchEntries({
           SettingsTranscriptionScreen(
             controller: controller,
             models: models,
-            highlight: modelKey,
+            highlight: SettingsKeys.transcriptionModel,
           ),
         ),
       ),
       SettingsSearchEntry(
         title: AppStrings.transcriptionLanguageTitle,
         area: libraryArea(AppStrings.settingsSectionTranscription),
-        rowKey: transcriptionLanguageKey,
+        rowKey: SettingsKeys.transcriptionLanguage,
         value: () async => TranscriptionSettingsSection.languageLabel(
           models.settings.language,
         ),
@@ -411,7 +377,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
           SettingsTranscriptionScreen(
             controller: controller,
             models: models,
-            highlight: transcriptionLanguageKey,
+            highlight: SettingsKeys.transcriptionLanguage,
           ),
         ),
       ),
@@ -434,25 +400,25 @@ List<SettingsSearchEntry> settingsSearchEntries({
     SettingsSearchEntry(
       title: AppStrings.reindexTitle,
       area: maintenance,
-      rowKey: reindexKey,
+      rowKey: SettingsKeys.reindex,
       value: noValue,
-      open: () => flashHome(reindexKey),
+      open: () => flashHome(SettingsKeys.reindex),
       onHome: true,
     ),
     SettingsSearchEntry(
       title: AppStrings.switchLibraryTitle,
       area: maintenance,
-      rowKey: switchKey,
+      rowKey: SettingsKeys.switchLibrary,
       value: noValue,
-      open: () => flashHome(switchKey),
+      open: () => flashHome(SettingsKeys.switchLibrary),
       onHome: true,
     ),
     SettingsSearchEntry(
       title: AppStrings.closeLibraryTitle,
       area: maintenance,
-      rowKey: closeKey,
+      rowKey: SettingsKeys.closeLibrary,
       value: noValue,
-      open: () => flashHome(closeKey),
+      open: () => flashHome(SettingsKeys.closeLibrary),
       onHome: true,
     ),
   ];

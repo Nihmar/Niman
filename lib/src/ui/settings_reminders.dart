@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/settings_area.dart';
+import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The Reminders area of the settings home (issue #104): what a task's
@@ -77,7 +78,7 @@ final class _SettingsRemindersScreenState
         padding: const EdgeInsets.only(bottom: 16),
         children: [
           HighlightRow(
-            key: const Key('reminder-show-tokens'),
+            key: SettingsKeys.reminderShowTokens,
             child: SwitchListTile(
               title: Text(AppStrings.reminderShowTokensTitle),
               subtitle: Text(AppStrings.reminderShowTokensSubtitle),
