@@ -87,6 +87,19 @@ final class EnglishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Show the row-number column in the note editor';
   @override
+  String get readableLineLengthTitle => 'Readable line length';
+  @override
+  String get readableLineLengthSubtitle =>
+      "Keep a note's text in a centred column instead of the full "
+      'width of the window';
+  @override
+  String get noteColumnWidthTitle => 'Column width';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'How wide the note column is, in pixels';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Keyboard on open';
   @override
   String get keyboardOnOpenSubtitle =>

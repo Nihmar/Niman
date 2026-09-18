@@ -300,6 +300,24 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<bool> get readableLineLength async => _config.readableLineLength;
+
+  @override
+  Future<void> setReadableLineLength({required bool enabled}) async {
+    _config = _config.copyWith(readableLineLength: enabled);
+  }
+
+  @override
+  Future<double> get noteColumnWidth async => _config.noteColumnWidth;
+
+  @override
+  Future<void> setNoteColumnWidth(double width) async {
+    _config = _config.copyWith(
+      noteColumnWidth: normalizeNoteColumnWidth(width),
+    );
+  }
+
+  @override
   Future<bool> get editorAutofocusEnabled async => _config.editorAutofocus;
 
   @override

@@ -90,6 +90,19 @@ final class FrenchStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Affiche la colonne des numéros de ligne dans l’éditeur';
   @override
+  String get readableLineLengthTitle => 'Longueur de ligne lisible';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Garder le texte de la note dans une colonne centrée plutôt que sur '
+      'toute la largeur de la fenêtre';
+  @override
+  String get noteColumnWidthTitle => 'Largeur de la colonne';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'La largeur de la colonne de la note, en pixels';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Clavier à l’ouverture';
   @override
   String get keyboardOnOpenSubtitle =>

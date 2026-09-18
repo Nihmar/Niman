@@ -82,6 +82,16 @@ final class JapaneseStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'エディタに行番号の列を表示する';
   @override
+  String get readableLineLengthTitle => '読みやすい行の長さ';
+  @override
+  String get readableLineLengthSubtitle => 'ノートの本文をウィンドウの全幅ではなく中央の列に収める';
+  @override
+  String get noteColumnWidthTitle => '列の幅';
+  @override
+  String get noteColumnWidthSubtitle => 'ノートの列の幅（ピクセル）';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => '開いたときのキーボード';
   @override
   String get keyboardOnOpenSubtitle => 'ノートを開いた瞬間にキーボードを表示（オフ = 初回入力のとき）';

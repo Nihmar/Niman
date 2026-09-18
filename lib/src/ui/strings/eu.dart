@@ -85,6 +85,19 @@ final class BasqueStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Erakutsi lerro-zenbaki zutabea ohar-erreditoran';
   @override
+  String get readableLineLengthTitle => 'Lerro-luzera irakurgarria';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Mantendu oharraren testua zutabe zentratu batean, leihoaren zabalera '
+      'osoan beharrean';
+  @override
+  String get noteColumnWidthTitle => 'Zutabearen zabalera';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Oharraren zutabearen zabalera, pixeletan';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Teklategia irekitzean';
   @override
   String get keyboardOnOpenSubtitle =>

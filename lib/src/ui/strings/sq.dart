@@ -86,6 +86,19 @@ final class AlbanianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Tregon shtyllën me numrat e rreshtave në redaktor';
   @override
+  String get readableLineLengthTitle => 'Gjatësi rreshti e lexueshme';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Mbaje tekstin e shënimit në një kolonë në qendër në vend të gjithë '
+      'gjerësisë së dritares';
+  @override
+  String get noteColumnWidthTitle => 'Gjerësia e kolonës';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Sa e gjerë është kolona e shënimit, në piksel';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatura te hapja';
   @override
   String get keyboardOnOpenSubtitle =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_find_controller.dart';
 import 'package:niman/src/ui/strings.dart';
 
@@ -10,10 +11,17 @@ import 'package:niman/src/ui/strings.dart';
 final class WysiwygFindPanel extends StatelessWidget
     implements PreferredSizeWidget {
   /// Creates the panel over [controller].
-  const new({required this.controller, super.key});
+  const new({
+    required this.controller,
+    this.column = NoteColumn.off,
+    super.key,
+  });
 
   /// The find state and actions.
   final WysiwygFindController controller;
+
+  /// The note's column: the bar's rows keep to it (issue #171).
+  final NoteColumn column;
 
   /// Height of one row of the bar.
   static const double _rowHeight = 44;
@@ -33,8 +41,16 @@ final class WysiwygFindPanel extends StatelessWidget
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _findRow(theme),
-          if (controller.replaceMode) _replaceRow(theme),
+          NoteColumnPadding(
+            column: column,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _findRow(theme),
+                if (controller.replaceMode) _replaceRow(theme),
+              ],
+            ),
+          ),
           const Divider(height: 1, thickness: 1),
         ],
       ),

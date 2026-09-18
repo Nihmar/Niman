@@ -91,6 +91,19 @@ final class SerbianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Приказује колону бројева редова у уредитељу';
   @override
+  String get readableLineLengthTitle => 'Читљива дужина реда';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Текст белешке држи у центрираној колони уместо преко целе ширине '
+      'прозора';
+  @override
+  String get noteColumnWidthTitle => 'Ширина колоне';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Колико је широка колона белешке, у пикселима';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Тастатура при отварању';
   @override
   String get keyboardOnOpenSubtitle =>

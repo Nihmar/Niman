@@ -754,6 +754,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     return NoteView(
       path: p.join(controller.root ?? '', selectedPath),
       showLineNumbers: _editorSettings.lineNumbers,
+      noteColumn: _editorSettings.noteColumn,
       autofocusEditor: _editorSettings.autofocusEditor,
       linkType: _editorSettings.linkType,
       missingNoteLocation: _editorSettings.missingNoteLocation,
@@ -1849,6 +1850,7 @@ final class _LibraryShellState extends State<_LibraryShell>
                   selectedPath: _selected,
                   selectedIsDir: _selectedIsDir,
                   showLineNumbers: _editorSettings.lineNumbers,
+                  noteColumn: _editorSettings.noteColumn,
                   autofocusEditor: _editorSettings.autofocusEditor,
                   linkType: _editorSettings.linkType,
                   missingNoteLocation: _editorSettings.missingNoteLocation,

@@ -90,6 +90,19 @@ final class BulgarianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Показва колоната с номера на редовете в редактора';
   @override
+  String get readableLineLengthTitle => 'Четима дължина на реда';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Текстът на бележката стои в центрирана колона вместо по цялата ширина '
+      'на прозореца';
+  @override
+  String get noteColumnWidthTitle => 'Ширина на колоната';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Колко широка е колоната на бележката, в пиксели';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Клавиатура при отваряне';
   @override
   String get keyboardOnOpenSubtitle =>

@@ -20,6 +20,7 @@ import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
 import 'package:niman/src/editor/markdown_editing_controller.dart';
 import 'package:niman/src/editor/md_editing.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
@@ -89,6 +90,7 @@ final class NoteView extends StatefulWidget {
     required this.path,
     required this.showLineNumbers,
     required this.autofocusEditor,
+    this.noteColumn = NoteColumn.off,
     this.linkType = LinkType.wikilink,
     this.missingNoteLocation = MissingNoteLocation.currentFolder,
     this.attachmentsFolder = defaultAttachmentsFolder,
@@ -133,6 +135,11 @@ final class NoteView extends StatefulWidget {
 
   /// Whether the editor shows the keyboard on open (settings toggle).
   final bool autofocusEditor;
+
+  /// Where the note's text sits across the pane (issue #171): both
+  /// editors, the preview, the toolbar, the find bars and the status row
+  /// keep to it.
+  final NoteColumn noteColumn;
 
   /// The link format the link button inserts (settings).
   final LinkType linkType;
@@ -374,7 +381,11 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
     BuildContext context,
     CodeFindController controller,
     bool readOnly,
-  ) => NimanFindPanel(controller: controller, readOnly: readOnly);
+  ) => NimanFindPanel(
+    controller: controller,
+    readOnly: readOnly,
+    column: widget.noteColumn,
+  );
 
   /// The source-editor pane, cached by identity (the 0e3571e pattern): when
   /// the parent rebuilds with unchanged editor inputs — e.g. a pure
@@ -383,7 +394,14 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
   /// markers are not rebuilt on every switch. Any input change (path,
   /// toggles, note font size) rebuilds the pane once.
   Widget? _editorPaneCache;
-  ({String path, bool numbers, bool autofocus, double fontSize, int? caret})?
+  ({
+    String path,
+    bool numbers,
+    bool autofocus,
+    double fontSize,
+    int? caret,
+    NoteColumn column,
+  })?
   _editorPaneConfig;
 
   /// Text-edit counter; the disk matches [_lastSavedRevision]. A saved note
@@ -875,6 +893,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       findBuilder: _findBuilder,
       shortcutsActivators: const NimanShortcutsActivatorsBuilder(),
       spellCheck: widget.spellCheck,
+      column: widget.noteColumn,
     ),
   );
 
@@ -888,6 +907,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       autofocus: widget.autofocusEditor,
       fontSize: AppTextScales.noteFontSize,
       caret: widget.initialCaretOffset,
+      column: widget.noteColumn,
     );
     if (_editorPaneCache == null || _editorPaneConfig != config) {
       _editorPaneConfig = config;
@@ -909,6 +929,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
           spellCheck: widget.spellCheck,
           activeItems: _wysiwygActive,
           focusNode: _wysiwygFocus,
+          column: widget.noteColumn,
         )
       : _sourcePane();
 
@@ -932,6 +953,7 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
       onWikiLink: (ref, display) =>
           unawaited(openWiki(context, ref, _linkTargets)),
       embedResolver: _resolveEmbed,
+      column: widget.noteColumn,
     ),
   );
 
@@ -1451,7 +1473,13 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
             child: showToolbar
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_toolbar(context), const Divider(height: 1)],
+                    children: [
+                      NoteColumnPadding(
+                        column: widget.noteColumn,
+                        child: _toolbar(context),
+                      ),
+                      const Divider(height: 1),
+                    ],
                   )
                 : const SizedBox(width: double.infinity),
           ),
@@ -1520,23 +1548,27 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
               children: [
                 if (!_loading && _frontmatterError != null)
                   FrontmatterWarningBanner(message: _frontmatterError!),
-                NoteStatusRow(
-                  loading: _loading,
-                  splitPreview: widget.splitPreview,
-                  showPreview: widget.showPreview,
-                  showWysiwyg: widget.showWysiwyg,
-                  spellCheckAvailable:
-                      widget.spellCheck != null && widget.spellCheck!.available,
-                  canSwitchEditorKind: widget.onEditorKindChanged != null,
-                  wordCount: _wordCount,
-                  statusText: _status,
-                  statusActions: widget.statusActions,
-                  onOutline: _openOutline,
-                  onFind: widget.showWysiwyg
-                      ? () => _wysiwygKey.currentState?.openFind()
-                      : _findController.findMode,
-                  onSpellCheck: _openSpellCheck,
-                  onToggleEditorKind: _toggleEditorKind,
+                NoteColumnPadding(
+                  column: widget.noteColumn,
+                  child: NoteStatusRow(
+                    loading: _loading,
+                    splitPreview: widget.splitPreview,
+                    showPreview: widget.showPreview,
+                    showWysiwyg: widget.showWysiwyg,
+                    spellCheckAvailable:
+                        widget.spellCheck != null &&
+                        widget.spellCheck!.available,
+                    canSwitchEditorKind: widget.onEditorKindChanged != null,
+                    wordCount: _wordCount,
+                    statusText: _status,
+                    statusActions: widget.statusActions,
+                    onOutline: _openOutline,
+                    onFind: widget.showWysiwyg
+                        ? () => _wysiwygKey.currentState?.openFind()
+                        : _findController.findMode,
+                    onSpellCheck: _openSpellCheck,
+                    onToggleEditorKind: _toggleEditorKind,
+                  ),
                 ),
                 // The toolbar fades + sizes in and out (hidden in preview
                 // mode). It is only mounted once loaded, so it appears
@@ -1549,7 +1581,10 @@ final class _NoteViewState extends State<NoteView> with WidgetsBindingObserver {
                     curve: Curves.easeOutCubic,
                     alignment: Alignment.topCenter,
                     child: showToolbar
-                        ? _toolbar(context)
+                        ? NoteColumnPadding(
+                            column: widget.noteColumn,
+                            child: _toolbar(context),
+                          )
                         : const SizedBox(width: double.infinity),
                   ),
               ],

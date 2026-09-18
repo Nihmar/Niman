@@ -91,6 +91,18 @@ final class SlovakStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Zobraziť stĺpec čísel riadkov v editori poznámky';
   @override
+  String get readableLineLengthTitle => 'Čitateľná dĺžka riadka';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Držať text poznámky vo vycentrovanom stĺpci namiesto celej šírky okna';
+  @override
+  String get noteColumnWidthTitle => 'Šírka stĺpca';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Aký široký je stĺpec poznámky, v pixeloch';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Klávesnica pri otvorení';
   @override
   String get keyboardOnOpenSubtitle =>

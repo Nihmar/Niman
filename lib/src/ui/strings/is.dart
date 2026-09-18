@@ -87,6 +87,19 @@ final class IcelandicStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'Sýnir dálkinn með línuröðunum í ritaranum';
   @override
+  String get readableLineLengthTitle => 'Læsileg línulengd';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Halda texta minnispunkts í miðjuðum dálki í stað allrar breiddar '
+      'gluggans';
+  @override
+  String get noteColumnWidthTitle => 'Breidd dálks';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Hversu breiður dálkur minnispunktsins er, í dílum';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Lyklaborð við opnun';
   @override
   String get keyboardOnOpenSubtitle =>

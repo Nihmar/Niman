@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
@@ -35,6 +36,7 @@ final class WysiwygEditor extends StatefulWidget {
     this.spellCheck,
     this.activeItems,
     this.focusNode,
+    this.column = NoteColumn.off,
     super.key,
   });
 
@@ -59,6 +61,10 @@ final class WysiwygEditor extends StatefulWidget {
   /// (the phone's toolbar rides the editor's focus); null keeps the
   /// surface's own node.
   final FocusNode? focusNode;
+
+  /// Where the text sits across the surface (issue #171); the source
+  /// editor puts its text at the same x.
+  final NoteColumn column;
 
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
@@ -504,7 +510,8 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         children: [
           AnimatedBuilder(
             animation: _find,
-            builder: (context, _) => WysiwygFindPanel(controller: _find),
+            builder: (context, _) =>
+                WysiwygFindPanel(controller: _find, column: widget.column),
           ),
           Expanded(
             // Copy and cut from the keyboard (#165). Quill builds its own
@@ -528,23 +535,35 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
               // event unchanged.
               child: Listener(
                 onPointerDown: _onPointerDown,
-                child: quill.QuillEditor(
-                  controller: _controller,
-                  focusNode: _focus,
-                  scrollController: _scroll,
-                  config: quill.QuillEditorConfig(
-                    autoFocus: widget.autoFocus,
-                    padding: const EdgeInsets.all(16),
-                    embedBuilders: const [OpaqueEmbedBuilder()],
-                    textSpanBuilder: _spellSpan,
-                    contextMenuBuilder: _contextMenu,
-                    customStyles: _customStyles(Theme.of(context)),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) =>
+                      _quillEditor(constraints.maxWidth),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The Quill surface in a pane [width] wide: the column's side space is
+  /// Quill's padding, inside its scroll view, so the scrollbar keeps to
+  /// the pane's edge and the wheel scrolls from the margins too.
+  Widget _quillEditor(double width) {
+    final side = widget.column.sideSpaceIn(width);
+    const inset = NoteColumn.textInset;
+    return quill.QuillEditor(
+      controller: _controller,
+      focusNode: _focus,
+      scrollController: _scroll,
+      config: quill.QuillEditorConfig(
+        autoFocus: widget.autoFocus,
+        padding: EdgeInsets.fromLTRB(side + inset, inset, side + inset, inset),
+        embedBuilders: const [OpaqueEmbedBuilder()],
+        textSpanBuilder: _spellSpan,
+        contextMenuBuilder: _contextMenu,
+        customStyles: _customStyles(Theme.of(context)),
       ),
     );
   }

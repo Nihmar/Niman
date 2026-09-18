@@ -46,6 +46,8 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   };
   bool _previewEnabled = true;
   bool? _lineNumbers;
+  bool _readableLineLength = true;
+  double _noteColumnWidth = defaultNoteColumnWidth;
   bool? _autofocusEditor;
   LinkType _linkType = LinkType.wikilink;
   MissingNoteLocation _missingNoteLocation = MissingNoteLocation.currentFolder;
@@ -58,6 +60,10 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   static final int _textScaleSteps = ((maxTextScale - minTextScale) * 20)
       .round();
 
+  /// Steps of 20 px between the narrowest and the widest note column.
+  static final int _columnWidthSteps =
+      ((maxNoteColumnWidth - minNoteColumnWidth) / 20).round();
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +73,8 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
   Future<void> _load() async {
     final controller = widget.controller;
     final lineNumbers = await controller.lineNumbersEnabled;
+    final readableLineLength = await controller.readableLineLength;
+    final noteColumnWidth = await controller.noteColumnWidth;
     final autofocus = await controller.editorAutofocusEnabled;
     final linkType = await controller.linkType;
     final missingNoteLocation = await controller.missingNoteLocation;
@@ -78,6 +86,8 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (!mounted) return;
     setState(() {
       _lineNumbers = lineNumbers;
+      _readableLineLength = readableLineLength;
+      _noteColumnWidth = noteColumnWidth;
       _autofocusEditor = autofocus;
       _linkType = linkType;
       _missingNoteLocation = missingNoteLocation;
@@ -102,6 +112,36 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
     if (mounted) {
       setState(() => _lineNumbers = value);
     }
+  }
+
+  /// Persists the readable-line-length toggle (issue #171); an open note
+  /// takes the column on the spot, through the shell's refresh.
+  Future<void> _toggleReadableLineLength(bool value) async {
+    final controller = widget.controller;
+    await controller.setReadableLineLength(enabled: value);
+    controller.notify();
+    if (mounted) setState(() => _readableLineLength = value);
+  }
+
+  /// Asks how wide the note column is.
+  Future<void> _chooseNoteColumnWidth() async {
+    final width = await showSettingsSlider(
+      context,
+      dialogKey: const Key('note-column-width-dialog'),
+      sliderKey: const Key('note-column-width-slider'),
+      title: AppStrings.noteColumnWidthTitle,
+      subtitle: AppStrings.noteColumnWidthSubtitle,
+      current: _noteColumnWidth,
+      min: minNoteColumnWidth,
+      max: maxNoteColumnWidth,
+      divisions: _columnWidthSteps,
+      format: (value) => AppStrings.noteColumnWidthValue(value.round()),
+    );
+    if (width == null) return;
+    final controller = widget.controller;
+    await controller.setNoteColumnWidth(width.roundToDouble());
+    controller.notify();
+    if (mounted) setState(() => _noteColumnWidth = width.roundToDouble());
   }
 
   Future<void> _toggleAutofocusEditor(bool value) async {
@@ -391,6 +431,27 @@ final class _SettingsEditorScreenState extends State<SettingsEditorScreen> {
               subtitle: Text(AppStrings.lineNumbersSubtitle),
               value: _lineNumbers ?? true,
               onChanged: _toggleLineNumbers,
+            ),
+          ),
+          // Every platform has it (#171): a phone is narrower than any
+          // column, so there it only starts to count on a tablet or in
+          // landscape — which is the reason not to hide it.
+          HighlightRow(
+            key: SettingsKeys.readableLineLength,
+            child: SwitchListTile(
+              title: Text(AppStrings.readableLineLengthTitle),
+              subtitle: Text(AppStrings.readableLineLengthSubtitle),
+              value: _readableLineLength,
+              onChanged: (value) => unawaited(_toggleReadableLineLength(value)),
+            ),
+          ),
+          HighlightRow(
+            key: SettingsKeys.noteColumnWidth,
+            child: SettingsValueRow(
+              title: AppStrings.noteColumnWidthTitle,
+              value: AppStrings.noteColumnWidthValue(_noteColumnWidth.round()),
+              enabled: _readableLineLength,
+              onTap: () => unawaited(_chooseNoteColumnWidth()),
             ),
           ),
           // Phones and tablets only: there is no on-screen keyboard to

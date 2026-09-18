@@ -90,6 +90,19 @@ final class ItalianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Mostra la colonna dei numeri di riga nell’editor';
   @override
+  String get readableLineLengthTitle => 'Lunghezza di riga leggibile';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Tieni il testo della nota in una colonna centrata invece che su tutta '
+      'la larghezza della finestra';
+  @override
+  String get noteColumnWidthTitle => 'Larghezza della colonna';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Quanto è larga la colonna della nota, in pixel';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastiera all’apertura';
   @override
   String get keyboardOnOpenSubtitle =>

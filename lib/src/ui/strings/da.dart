@@ -89,6 +89,18 @@ final class DanishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Vis kolonnen med linjenumre i notateditoren';
   @override
+  String get readableLineLengthTitle => 'Læsevenlig linjelængde';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Hold notens tekst i en centreret kolonne i stedet for hele vinduets '
+      'bredde';
+  @override
+  String get noteColumnWidthTitle => 'Kolonnebredde';
+  @override
+  String get noteColumnWidthSubtitle => 'Hvor bred notens kolonne er, i pixels';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatur ved åbning';
   @override
   String get keyboardOnOpenSubtitle =>

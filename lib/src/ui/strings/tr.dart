@@ -85,6 +85,19 @@ final class TurkishStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Düzenleyicide satır numarası sütununu gösterir';
   @override
+  String get readableLineLengthTitle => 'Okunabilir satır uzunluğu';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Notun metnini pencerenin tüm genişliği yerine ortalanmış bir sütunda '
+      'tut';
+  @override
+  String get noteColumnWidthTitle => 'Sütun genişliği';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Not sütununun genişliği, piksel cinsinden';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Açılışta klavye';
   @override
   String get keyboardOnOpenSubtitle =>

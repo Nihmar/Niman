@@ -88,6 +88,17 @@ final class EstonianStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'Kuvab numbrite veeru märgiste redaktoris';
   @override
+  String get readableLineLengthTitle => 'Loetav reapikkus';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Hoia märkme tekst keskel veerus, mitte kogu akna laiuses';
+  @override
+  String get noteColumnWidthTitle => 'Veeru laius';
+  @override
+  String get noteColumnWidthSubtitle => 'Kui lai on märkme veerg, pikslites';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Klaviatuur avamisel';
   @override
   String get keyboardOnOpenSubtitle =>

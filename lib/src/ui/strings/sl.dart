@@ -93,6 +93,19 @@ final class SlovenianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Prikaži stolpec številk vrstic v urejevalniku opombe';
   @override
+  String get readableLineLengthTitle => 'Berljiva dolžina vrstice';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Besedilo zapiska naj ostane v sredinskem stolpcu namesto čez celo '
+      'širino okna';
+  @override
+  String get noteColumnWidthTitle => 'Širina stolpca';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Kako širok je stolpec zapiska, v slikovnih pikah';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tipkovnica ob odpiranju';
   @override
   String get keyboardOnOpenSubtitle =>

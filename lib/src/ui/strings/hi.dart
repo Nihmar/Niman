@@ -83,6 +83,18 @@ final class HindiStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'नोट एडिटर में पंक्ति-संख्या स्तंभ दिखाएँ';
   @override
+  String get readableLineLengthTitle => 'पढ़ने योग्य पंक्ति लंबाई';
+  @override
+  String get readableLineLengthSubtitle =>
+      'नोट का टेक्स्ट विंडो की पूरी चौड़ाई के बजाय बीच के एक कॉलम में रखें';
+  @override
+  String get noteColumnWidthTitle => 'कॉलम की चौड़ाई';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'नोट का कॉलम कितना चौड़ा है, पिक्सेल में';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'खोलने पर कीबोर्ड';
   @override
   String get keyboardOnOpenSubtitle =>

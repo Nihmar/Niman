@@ -89,6 +89,19 @@ final class GermanStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Zeigt die Zeilennummer-Spalte im Notiz-Editor';
   @override
+  String get readableLineLengthTitle => 'Lesbare Zeilenlänge';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Den Text einer Notiz in einer zentrierten Spalte halten statt über die '
+      'ganze Fensterbreite';
+  @override
+  String get noteColumnWidthTitle => 'Spaltenbreite';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Wie breit die Spalte der Notiz ist, in Pixeln';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatur beim Öffnen';
   @override
   String get keyboardOnOpenSubtitle =>
