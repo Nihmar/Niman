@@ -444,6 +444,47 @@ final class HungarianStrings extends Strings {
   String get toolbarIndent => 'Behúzás';
   @override
   String get toolbarOutdent => 'Kibeszúzás';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Eszközök';
+  @override
+  String get editorToolsTitle => 'Szerkesztő eszközei';
+  @override
+  String get toolCountListTitle => 'Lista megszámlálása';
+  @override
+  String get toolCountListSubtitle =>
+      'Összesíti, amit a sorok felsorolnak, jelölőlistaként';
+  @override
+  String get toolCountListNeedsList =>
+      'Ebben a jegyzetben nincs megszámlálható lista';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Minden sor olvasása így';
+  @override
+  String get tallyCutDash => 'Név - értékek';
+  @override
+  String get tallyCutColon => 'Név: értékek';
+  @override
+  String get tallyCutCommas => 'Vesszővel elválasztott értékek';
+  @override
+  String get tallyCutWhole => 'A teljes sor egyetlen értékként';
+  @override
+  String get tallySortLabel => 'Sorrend';
+  @override
+  String get tallySortCount => 'A legtöbb elöl';
+  @override
+  String get tallySortAlphabetical => 'Betűrendben';
+  @override
+  String get tallySortFirstSeen => 'A lista sorrendjében';
+  @override
+  String get tallyInsert => 'Beszúrás';
+  @override
+  String get tallyUpdate => 'Frissítés';
+  @override
+  String get tallyNothingToCount => 'Itt nincs mit megszámlálni';
   @override
   String get headingDialogTitle => 'Címszint';
 

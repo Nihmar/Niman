@@ -448,6 +448,47 @@ final class BulgarianStrings extends Strings {
   String get toolbarIndent => 'Отстъп';
   @override
   String get toolbarOutdent => 'Премахване на отстъп';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Инструменти';
+  @override
+  String get editorToolsTitle => 'Инструменти на редактора';
+  @override
+  String get toolCountListTitle => 'Преброй списък';
+  @override
+  String get toolCountListSubtitle =>
+      'Обобщава изброеното в редовете като списък с отметки';
+  @override
+  String get toolCountListNeedsList =>
+      'Тази бележка няма списък за преброяване';
+  @override
+  String get tallySourceLabel => 'Списък';
+  @override
+  String get tallyCutLabel => 'Чети всеки ред като';
+  @override
+  String get tallyCutDash => 'Име - стойности';
+  @override
+  String get tallyCutColon => 'Име: стойности';
+  @override
+  String get tallyCutCommas => 'Стойности, разделени със запетая';
+  @override
+  String get tallyCutWhole => 'Целият ред като една стойност';
+  @override
+  String get tallySortLabel => 'Подредба';
+  @override
+  String get tallySortCount => 'Най-често първо';
+  @override
+  String get tallySortAlphabetical => 'По азбучен ред';
+  @override
+  String get tallySortFirstSeen => 'Както са изброени';
+  @override
+  String get tallyInsert => 'Вмъкни';
+  @override
+  String get tallyUpdate => 'Обнови';
+  @override
+  String get tallyNothingToCount => 'Тук няма какво да се брои';
   @override
   String get headingDialogTitle => 'Ниво на заглавието';
 

@@ -446,6 +446,46 @@ final class NorwegianStrings extends Strings {
   String get toolbarIndent => 'Rykk inn';
   @override
   String get toolbarOutdent => 'Rykk ut';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Verktøy';
+  @override
+  String get editorToolsTitle => 'Redigeringsverktøy';
+  @override
+  String get toolCountListTitle => 'Tell en liste';
+  @override
+  String get toolCountListSubtitle =>
+      'Summerer det radene lister opp, som en sjekkliste';
+  @override
+  String get toolCountListNeedsList => 'Dette notatet har ingen liste å telle';
+  @override
+  String get tallySourceLabel => 'Liste';
+  @override
+  String get tallyCutLabel => 'Les hver rad som';
+  @override
+  String get tallyCutDash => 'Navn - verdier';
+  @override
+  String get tallyCutColon => 'Navn: verdier';
+  @override
+  String get tallyCutCommas => 'Verdier atskilt med komma';
+  @override
+  String get tallyCutWhole => 'Hele raden som én verdi';
+  @override
+  String get tallySortLabel => 'Rekkefølge';
+  @override
+  String get tallySortCount => 'Flest først';
+  @override
+  String get tallySortAlphabetical => 'Alfabetisk';
+  @override
+  String get tallySortFirstSeen => 'Som oppført';
+  @override
+  String get tallyInsert => 'Sett inn';
+  @override
+  String get tallyUpdate => 'Oppdater';
+  @override
+  String get tallyNothingToCount => 'Her er det ingenting å telle';
   @override
   String get headingDialogTitle => 'Overskriftsnivå';
 

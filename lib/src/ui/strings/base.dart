@@ -221,6 +221,27 @@ abstract base class Strings {
   String get toolbarQuote;
   String get toolbarIndent;
   String get toolbarOutdent;
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  String get toolbarTools;
+  String get editorToolsTitle;
+  String get toolCountListTitle;
+  String get toolCountListSubtitle;
+  String get toolCountListNeedsList;
+  String get tallySourceLabel;
+  String get tallyCutLabel;
+  String get tallyCutDash;
+  String get tallyCutColon;
+  String get tallyCutCommas;
+  String get tallyCutWhole;
+  String get tallySortLabel;
+  String get tallySortCount;
+  String get tallySortAlphabetical;
+  String get tallySortFirstSeen;
+  String get tallyInsert;
+  String get tallyUpdate;
+  String get tallyNothingToCount;
   String get headingDialogTitle;
 
   // Toolbar settings (T-TB-05).

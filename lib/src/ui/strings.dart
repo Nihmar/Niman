@@ -378,6 +378,26 @@ final class AppStrings {
   static String get toolbarQuote => _s.toolbarQuote;
   static String get toolbarIndent => _s.toolbarIndent;
   static String get toolbarOutdent => _s.toolbarOutdent;
+
+  // Editor tools (#136).
+  static String get toolbarTools => _s.toolbarTools;
+  static String get editorToolsTitle => _s.editorToolsTitle;
+  static String get toolCountListTitle => _s.toolCountListTitle;
+  static String get toolCountListSubtitle => _s.toolCountListSubtitle;
+  static String get toolCountListNeedsList => _s.toolCountListNeedsList;
+  static String get tallySourceLabel => _s.tallySourceLabel;
+  static String get tallyCutLabel => _s.tallyCutLabel;
+  static String get tallyCutDash => _s.tallyCutDash;
+  static String get tallyCutColon => _s.tallyCutColon;
+  static String get tallyCutCommas => _s.tallyCutCommas;
+  static String get tallyCutWhole => _s.tallyCutWhole;
+  static String get tallySortLabel => _s.tallySortLabel;
+  static String get tallySortCount => _s.tallySortCount;
+  static String get tallySortAlphabetical => _s.tallySortAlphabetical;
+  static String get tallySortFirstSeen => _s.tallySortFirstSeen;
+  static String get tallyInsert => _s.tallyInsert;
+  static String get tallyUpdate => _s.tallyUpdate;
+  static String get tallyNothingToCount => _s.tallyNothingToCount;
   static String get headingDialogTitle => _s.headingDialogTitle;
 
   // Toolbar settings (T-TB-05).

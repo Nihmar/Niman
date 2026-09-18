@@ -455,6 +455,47 @@ final class RomanianStrings extends Strings {
   String get toolbarIndent => 'Indentare';
   @override
   String get toolbarOutdent => 'Scoate indentarea';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Instrumente';
+  @override
+  String get editorToolsTitle => 'Instrumentele editorului';
+  @override
+  String get toolCountListTitle => 'Numără o listă';
+  @override
+  String get toolCountListSubtitle =>
+      'Adună ce enumeră rândurile, ca listă de bifat';
+  @override
+  String get toolCountListNeedsList =>
+      'Această notiță nu are nicio listă de numărat';
+  @override
+  String get tallySourceLabel => 'Listă';
+  @override
+  String get tallyCutLabel => 'Citește fiecare rând ca';
+  @override
+  String get tallyCutDash => 'Nume - valori';
+  @override
+  String get tallyCutColon => 'Nume: valori';
+  @override
+  String get tallyCutCommas => 'Valori separate prin virgulă';
+  @override
+  String get tallyCutWhole => 'Tot rândul, ca o singură valoare';
+  @override
+  String get tallySortLabel => 'Ordine';
+  @override
+  String get tallySortCount => 'Cele mai multe întâi';
+  @override
+  String get tallySortAlphabetical => 'Alfabetic';
+  @override
+  String get tallySortFirstSeen => 'În ordinea listei';
+  @override
+  String get tallyInsert => 'Inserează';
+  @override
+  String get tallyUpdate => 'Actualizează';
+  @override
+  String get tallyNothingToCount => 'Aici nu e nimic de numărat';
   @override
   String get headingDialogTitle => 'Nivelul titlului';
 

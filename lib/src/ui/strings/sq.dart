@@ -444,6 +444,46 @@ final class AlbanianStrings extends Strings {
   String get toolbarIndent => 'Indente';
   @override
   String get toolbarOutdent => 'Më pak indent';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Mjete';
+  @override
+  String get editorToolsTitle => 'Mjetet e redaktuesit';
+  @override
+  String get toolCountListTitle => 'Numëro një listë';
+  @override
+  String get toolCountListSubtitle =>
+      'Mbledh atë që rendisin rreshtat, si listë kontrolli';
+  @override
+  String get toolCountListNeedsList => 'Ky shënim nuk ka listë për të numëruar';
+  @override
+  String get tallySourceLabel => 'Listë';
+  @override
+  String get tallyCutLabel => 'Lexo çdo rresht si';
+  @override
+  String get tallyCutDash => 'Emri - vlerat';
+  @override
+  String get tallyCutColon => 'Emri: vlerat';
+  @override
+  String get tallyCutCommas => 'Vlera të ndara me presje';
+  @override
+  String get tallyCutWhole => 'I gjithë rreshti, si një vlerë e vetme';
+  @override
+  String get tallySortLabel => 'Renditja';
+  @override
+  String get tallySortCount => 'Më të shumtat në fillim';
+  @override
+  String get tallySortAlphabetical => 'Alfabetike';
+  @override
+  String get tallySortFirstSeen => 'Sipas listës';
+  @override
+  String get tallyInsert => 'Fut';
+  @override
+  String get tallyUpdate => 'Përditëso';
+  @override
+  String get tallyNothingToCount => "Këtu s'ka asgjë për të numëruar";
   @override
   String get headingDialogTitle => 'Niveli i titullit';
 

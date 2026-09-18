@@ -445,6 +445,47 @@ final class PortugueseStrings extends Strings {
   String get toolbarIndent => 'Aumentar indentação';
   @override
   String get toolbarOutdent => 'Diminuir indentação';
+
+  // Editor tools (#136): the Tools button, the sheet it opens, and
+  // the list count that is the first tool in it.
+  @override
+  String get toolbarTools => 'Ferramentas';
+  @override
+  String get editorToolsTitle => 'Ferramentas do editor';
+  @override
+  String get toolCountListTitle => 'Contar uma lista';
+  @override
+  String get toolCountListSubtitle =>
+      'Soma o que as linhas enumeram, como lista de verificação';
+  @override
+  String get toolCountListNeedsList =>
+      'Esta nota não tem nenhuma lista para contar';
+  @override
+  String get tallySourceLabel => 'Lista';
+  @override
+  String get tallyCutLabel => 'Ler cada linha como';
+  @override
+  String get tallyCutDash => 'Nome - valores';
+  @override
+  String get tallyCutColon => 'Nome: valores';
+  @override
+  String get tallyCutCommas => 'Valores separados por vírgulas';
+  @override
+  String get tallyCutWhole => 'A linha inteira, como um único valor';
+  @override
+  String get tallySortLabel => 'Ordem';
+  @override
+  String get tallySortCount => 'Mais frequentes primeiro';
+  @override
+  String get tallySortAlphabetical => 'Alfabética';
+  @override
+  String get tallySortFirstSeen => 'Conforme a lista';
+  @override
+  String get tallyInsert => 'Inserir';
+  @override
+  String get tallyUpdate => 'Atualizar';
+  @override
+  String get tallyNothingToCount => 'Aqui não há nada para contar';
   @override
   String get headingDialogTitle => 'Nível do título';
 
