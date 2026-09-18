@@ -46,6 +46,7 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - **Scale**: 1M notes + novel-length files. No O(n) full scans on hot paths; FTS5 for search; tree rows materialized.
 - **No disk I/O on UI isolate**: use `Isolate.run` (every `listSync`/`statSync` is a FUSE round trip on Android). Drift writes stay on main.
 - **Vocabulary**: Library, note, folder, tag, template, wikilink, trash, history. Not vault/canvas/daily note/backlinks.
+- **Every platform ships every feature**: a feature lands on Android, Linux and Windows in the same round — no platform is left behind, forgotten or quietly skipped. Same capability, not the same UI: the shape adapts to the surface (desktop tabs are an open-notes switcher on a phone) while the model underneath stays one. A platform that genuinely cannot have it says so in the issue and in `docs/user/platforms.md` — as a decision, not an omission.
 - **Interface**: icons are outline — a filled one says a state is on (selected tab, pinned note, current library). A control that shows in only some states keeps its place: disable it, or put it on the side the row grows from, so nothing on screen moves under a thumb already on it.
 - **Layout**: `lib/src/<module>/` — core, library, db, editor, preview, links, search, frontmatter, templates, sync, ui.
 - **No god classes**: one class per file, split at ~300 lines or when responsibilities mix.
