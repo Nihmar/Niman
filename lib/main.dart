@@ -11,6 +11,7 @@ import 'package:niman/src/core/launch_args.dart';
 import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/editor/wysiwyg/guarded_clipboard_service.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
+  GuardedClipboardService.install();
   unawaited(_attachLogFile());
   unawaited(_registerWidgetToggle());
   _reportSlowFrames();
