@@ -55,8 +55,8 @@ final class FrontmatterWarningBanner extends StatelessWidget {
   }
 }
 
-/// The status row (T-UI-07): outline toggle + word count left, saved/
-/// unsaved right.
+/// The status row (T-UI-07): the controls on the left, what the note
+/// reads as — its word count and whether it is saved — on the right.
 ///
 /// The phone's row used to keep a tight hand (34×26 touch targets,
 /// below the 48 dp guideline, left alone on purpose: a tight phone
@@ -101,7 +101,7 @@ final class NoteStatusRow extends StatelessWidget {
   /// Whether the editor-kind toggle shows.
   final bool canSwitchEditorKind;
 
-  /// The word count left of the status.
+  /// The note's word count, left of the status.
   final int wordCount;
 
   /// The saved/unsaved text right of the count.
@@ -124,10 +124,10 @@ final class NoteStatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.labelSmall;
+    final theme = Theme.of(context);
+    final labelStyle = theme.textTheme.labelSmall;
     // Desktop breathing room (user, 2026-09-11): the phone keeps the row
-    // tight; on desktop each icon stands off its neighbours and the word
-    // count stands off the icons.
+    // tight; on desktop each icon stands off its neighbours.
     final desktop = !(Platform.isAndroid || Platform.isIOS);
     final iconPadding = EdgeInsets.symmetric(horizontal: desktop ? 3 : 0);
     return Padding(
@@ -193,10 +193,15 @@ final class NoteStatusRow extends StatelessWidget {
               ),
             ),
           // The quick way between the two editors (T-WYS-12): the setting
-          // stays per library, the button just flips it. A text button
-          // naming the destination — tooltips only ever appear after a
-          // long press on Android, and an icon alone asked the reader to
-          // guess which surface it lands on.
+          // stays per library, the button just flips it. Icon and word
+          // together — the tooltip that named the surface only appears
+          // after a long press on Android, and a bare noun does not say
+          // whether it is where you are or where you would land, which
+          // the icon answers.
+          //
+          // Written in the muted colour the rest of the row wears: a
+          // button in the accent was the only coloured thing here and
+          // read as a link.
           if (!loading && canSwitchEditorKind)
             Padding(
               padding: iconPadding,
@@ -204,15 +209,20 @@ final class NoteStatusRow extends StatelessWidget {
                 message: showWysiwyg
                     ? AppStrings.switchToSourceTooltip
                     : AppStrings.switchToWysiwygTooltip,
-                child: TextButton(
+                child: TextButton.icon(
                   key: const Key('editor-kind-toggle'),
                   onPressed: onToggleEditorKind,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     textStyle: labelStyle,
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
                   ),
-                  child: Text(
+                  icon: Icon(
+                    showWysiwyg ? Icons.code : Icons.edit_note,
+                    size: 18,
+                  ),
+                  label: Text(
                     showWysiwyg
                         ? AppStrings.switchToSourceLabel
                         : AppStrings.switchToWysiwygLabel,
@@ -220,17 +230,20 @@ final class NoteStatusRow extends StatelessWidget {
                 ),
               ),
             ),
-          if (!loading)
-            Padding(
-              padding: EdgeInsets.only(left: desktop ? 6 : 0),
-              child: Text(
-                AppStrings.wordCount(wordCount),
-                style: labelStyle?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+          const Spacer(),
+          // Both readings of the note sit together on the right, after
+          // the controls: the switch is the only control whose width
+          // changes with its label, and nothing follows it now, so
+          // flipping the editor no longer slides the count sideways.
+          if (!loading) ...[
+            Text(
+              AppStrings.wordCount(wordCount),
+              style: labelStyle?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-          const Spacer(),
+            const SizedBox(width: 10),
+          ],
           Text(statusText, style: labelStyle),
           for (final action in statusActions) ...[
             const SizedBox(width: 6),
