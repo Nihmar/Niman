@@ -21,6 +21,13 @@ Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 Formatting toolbar buttons apply to whichever editor is active.
 
+Enter inside a list carries the list on, in both editors: the next line
+starts with the same marker, a numbered list counts on, and a task item
+gives you a fresh empty box. Enter on an item you have not typed
+anything into ends the list instead — the usual second Enter. Inside a
+fenced code block, a math block or the frontmatter it does nothing: a
+dash there is a dash.
+
 ## Tools
 
 The toolbar's **Tools** button opens the editor's extra tools. They are
