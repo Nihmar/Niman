@@ -15,6 +15,7 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - One logical change per commit; never bundle unrelated changes.
 - After each commit, **on a Linux host only**, rebuild and report **outcome + artifact path** only (no raw logs): `./scripts/niman.sh apk` / `./scripts/niman.sh linux`.
 - On a Windows host, do **not** rebuild after commits: builds are far too slow there. Build (`scripts\niman.bat apk` / `scripts\niman.bat windows`) only when explicitly asked.
+- An APK build that fails with `package dev.flutter.plugins.integration_test does not exist` is a stale plugin registrant, not a code fault: `flutter pub get` writes `android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java` with every plugin, and only `flutter build --release` rewrites it without the dev dependencies. Delete that file (gitignored, regenerated), `flutter pub get`, build again.
 
 ## Verify
 - **Before analyze and tests**, run `dart fix --apply` then `dart format lib test tool` (both idempotent).
