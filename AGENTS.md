@@ -59,5 +59,12 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - Update `CHANGELOG.md` at every release: a new `## [X.Y.Z] - YYYY-MM-DD` section describing the tagged version. It ships as an asset and feeds the in-app changelog (launch dialog after an update, Settings → About).
 - Cut a release: bump `version:` in `pubspec.yaml`, commit both with the changelog, `git tag vX.Y.Z`, `git push origin vX.Y.Z`.
 - Workflow: `.github/workflows/release.yml`. Artifacts: Android `.apk`; Linux `.tar.gz` + `.AppImage` + `.pkg.tar.zst`; Windows `.exe` (Inno Setup) + `.zip`.
-- Android APK is debug-signed until release keys are added as Actions secrets.
+- Android APK is signed with the release key from the Actions secrets
+  (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Without them the build
+  falls back to the debug key, which changes per run — that is what made
+  every release up to v0.0.7 refuse to update over the last one (#160).
+- Bump the `+N` build number on every tag, including a re-cut of an
+  existing version: it is the Android `versionCode`, and the installer
+  rejects a package that does not raise it.
 - To re-run: delete the tag locally and remotely, fix, tag again.
