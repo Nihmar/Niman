@@ -53,11 +53,13 @@ final class ShellRowActions {
   /// menu's rename/move/delete).
   final String? Function() selectedPath;
 
-  /// A rename or a move landed the row at a new path.
-  final void Function(String path) onMoved;
+  /// A rename or a move took the row at `from` to `to` — a note, or a
+  /// folder with everything under it.
+  final void Function(String from, String to) onMoved;
 
-  /// The row is gone; the shell drops the selection and closes the note.
-  final VoidCallback onDeleted;
+  /// The row at `path` is gone; the shell drops the selection and closes
+  /// the note, and the workspace every tab under it.
+  final void Function(String path) onDeleted;
 
   /// Opens the note's history; the shell owns that screen.
   final Future<void> Function(String path) onHistory;
@@ -131,7 +133,7 @@ final class ShellRowActions {
     if (name == null) return;
     await guard(() async {
       final row = await controller.ops!.rename(sel, name);
-      onMoved(row.path);
+      onMoved(sel, row.path);
     });
   }
 
@@ -159,7 +161,7 @@ final class ShellRowActions {
     if (target == null) return;
     await guard(() async {
       final row = await controller.ops!.move(sel, target);
-      onMoved(row.path);
+      onMoved(sel, row.path);
     });
   }
 
@@ -197,7 +199,7 @@ final class ShellRowActions {
     if (confirmed != true) return;
     await guard(() async {
       await ops.delete(sel);
-      onDeleted();
+      onDeleted(sel);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -214,7 +216,7 @@ final class ShellRowActions {
                         final name = await _justDeleted(ops, sel);
                         if (name == null) return;
                         await ops.restoreTrash(name);
-                        onDeleted();
+                        onDeleted(sel);
                       });
                     },
                   )

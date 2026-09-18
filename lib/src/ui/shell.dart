@@ -49,6 +49,7 @@ import 'package:niman/src/ui/shell_search_slot.dart';
 import 'package:niman/src/ui/shell_sync_actions.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
+import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
@@ -499,12 +500,26 @@ final class _LibraryShellState extends State<_LibraryShell>
     creates: _createFlow,
     templates: _templateFlow,
     selectedPath: () => _selected,
-    onMoved: (path) => setState(() => _selected = path),
-    onDeleted: () => setState(() {
-      _selected = null;
-      // Deleting the open note closes it: the tabs show at once.
-      _noteClosed();
-    }),
+    onMoved: (from, to) {
+      _workspace.moved(from, to);
+      // The selection follows only a rename that is about it: the note
+      // itself, or a folder it sits in. Renaming another row — a folder
+      // above nothing selected — used to select that row while the shell
+      // still took it for a note, and opened the folder as one.
+      final selected = _selected;
+      if (selected == null) return;
+      if (selected == from || selected.startsWith('$from/')) {
+        setState(() => _selected = to + selected.substring(from.length));
+      }
+    },
+    onDeleted: (path) {
+      _workspace.deleted(path);
+      setState(() {
+        _selected = null;
+        // Deleting the open note closes it: the tabs show at once.
+        _noteClosed();
+      });
+    },
     onHistory: _openHistory,
   );
 
@@ -808,6 +823,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     };
   }
 
+  /// The notes open in this library on this device (issue #23): for now
+  /// the one the shell shows, kept current and kept for the next launch.
+  late final ShellWorkspace _workspace = ShellWorkspace(widget.controller);
+
   /// The note the shell shows, as registered in [_LibraryShell.openNotes].
   String? _openNote;
 
@@ -935,6 +954,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       }
     });
     _homeWidgets.start();
+    unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
     );
@@ -962,6 +982,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   @override
   void dispose() {
     _markOpenNote(null, null);
+    _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _noteHideTimer?.cancel();
     unawaited(_homeWidgets.dispose());
@@ -1408,6 +1429,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     final selectedPath = _selected;
     final narrow = MediaQuery.sizeOf(context).width < splitBreakpoint;
     _markOpenNote(controller.root, selectedPath);
+    _workspace.follow(_selectedIsDir ? null : selectedPath);
     final splitsPreview = previewSplits(
       _editorSettings.previewMode,
       narrow: narrow,
