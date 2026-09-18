@@ -90,6 +90,17 @@ final class BelarusianStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'Паказвае слупок нумараў радоў у рэдактары';
   @override
+  String get readableLineLengthTitle => 'Зручная даўжыня радка';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Трымаць тэкст нататкі ў цэнтраванай калонцы замест усёй шырыні акна';
+  @override
+  String get noteColumnWidthTitle => 'Шырыня калонкі';
+  @override
+  String get noteColumnWidthSubtitle => 'Шырыня калонкі нататкі ў пікселях';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Клавіятура пры адкрыцці';
   @override
   String get keyboardOnOpenSubtitle =>

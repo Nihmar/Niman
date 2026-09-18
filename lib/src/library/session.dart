@@ -296,6 +296,18 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the editor line-numbers toggle.
   Future<void> setLineNumbersEnabled({required bool enabled});
 
+  /// Whether a note keeps to a centred column (default true, #171).
+  Future<bool> get readableLineLength;
+
+  /// Sets (and persists) the readable-line-length toggle.
+  Future<void> setReadableLineLength({required bool enabled});
+
+  /// The note column's text width, in logical pixels.
+  Future<double> get noteColumnWidth;
+
+  /// Sets (and persists) the note column's width, clamped to its range.
+  Future<void> setNoteColumnWidth(double width);
+
   /// Whether the note editor focuses (shows the keyboard) when a note
   /// opens (default false).
   Future<bool> get editorAutofocusEnabled;

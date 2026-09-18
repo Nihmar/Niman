@@ -32,6 +32,8 @@ abstract final class SettingsKeys {
   static const editorWysiwyg = Key('editor-wysiwyg-setting');
   static const previewEnabled = Key('preview-enabled-setting');
   static const lineNumbers = Key('line-numbers-setting');
+  static const readableLineLength = Key('readable-line-length-setting');
+  static const noteColumnWidth = Key('note-column-width-setting');
   static const linkType = Key('link-type');
   static const missingNoteLocation = Key('missing-note-location');
   static const noteTextScale = Key('note-text-scale-setting');

@@ -88,6 +88,19 @@ final class FinnishStrings extends Strings {
   @override
   String get lineNumbersSubtitle => 'Näytä rivinumerojen palsta muokkainnissa';
   @override
+  String get readableLineLengthTitle => 'Luettava rivinpituus';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Pidä muistiinpanon teksti keskitetyssä palstassa ikkunan koko leveyden '
+      'sijaan';
+  @override
+  String get noteColumnWidthTitle => 'Palstan leveys';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Kuinka leveä muistiinpanon palsta on, pikseleinä';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Näppäimistö avattaessa';
   @override
   String get keyboardOnOpenSubtitle =>

@@ -795,6 +795,27 @@ final class LibraryController implements LibrarySession {
     await _editLibrary((c) => c.copyWith(lineNumbers: enabled));
   }
 
+  @override
+  Future<bool> get readableLineLength async =>
+      (await _library).readableLineLength;
+
+  @override
+  Future<void> setReadableLineLength({required bool enabled}) async {
+    _log.info('readable line length set to $enabled');
+    await _editLibrary((c) => c.copyWith(readableLineLength: enabled));
+  }
+
+  @override
+  Future<double> get noteColumnWidth async => (await _library).noteColumnWidth;
+
+  @override
+  Future<void> setNoteColumnWidth(double width) async {
+    _log.info('note column width set to $width');
+    await _editLibrary(
+      (c) => c.copyWith(noteColumnWidth: normalizeNoteColumnWidth(width)),
+    );
+  }
+
   /// Whether the note editor focuses (shows the keyboard) on note open.
   @override
   Future<bool> get editorAutofocusEnabled async =>

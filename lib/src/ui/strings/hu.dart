@@ -86,6 +86,19 @@ final class HungarianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Sorszámok megjelenítése a jegyzet szerkesztőben';
   @override
+  String get readableLineLengthTitle => 'Olvasható sorhossz';
+  @override
+  String get readableLineLengthSubtitle =>
+      'A jegyzet szövege középre igazított oszlopban maradjon az ablak teljes '
+      'szélessége helyett';
+  @override
+  String get noteColumnWidthTitle => 'Oszlopszélesség';
+  @override
+  String get noteColumnWidthSubtitle =>
+      'Milyen széles a jegyzet oszlopa, pixelben';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Billentyűzet megnyitáskor';
   @override
   String get keyboardOnOpenSubtitle =>

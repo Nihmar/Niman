@@ -18,6 +18,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -26,7 +27,15 @@ import 'package:re_editor/re_editor.dart';
 final class NimanFindPanel extends StatelessWidget
     implements PreferredSizeWidget {
   /// Creates the panel over [controller].
-  const new({required this.controller, required this.readOnly, super.key});
+  const new({
+    required this.controller,
+    required this.readOnly,
+    this.column = NoteColumn.off,
+    super.key,
+  });
+
+  /// The note's column: the bar's rows keep to it (issue #171).
+  final NoteColumn column;
 
   /// The find state + actions (the note's own [CodeFindController]).
   final CodeFindController controller;
@@ -55,8 +64,16 @@ final class NimanFindPanel extends StatelessWidget
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _findRow(theme, value),
-          if (value.replaceMode) _replaceRow(theme, value),
+          NoteColumnPadding(
+            column: column,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _findRow(theme, value),
+                if (value.replaceMode) _replaceRow(theme, value),
+              ],
+            ),
+          ),
           const Divider(height: 1, thickness: 1),
         ],
       ),

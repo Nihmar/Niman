@@ -88,6 +88,18 @@ final class NorwegianStrings extends Strings {
   String get lineNumbersSubtitle =>
       'Vis kolonnen med linjetall i notateditoren';
   @override
+  String get readableLineLengthTitle => 'Lesbar linjelengde';
+  @override
+  String get readableLineLengthSubtitle =>
+      'Hold notatets tekst i en sentrert kolonne i stedet for hele '
+      'vindusbredden';
+  @override
+  String get noteColumnWidthTitle => 'Kolonnebredde';
+  @override
+  String get noteColumnWidthSubtitle => 'Hvor bred notatkolonnen er, i piksler';
+  @override
+  String noteColumnWidthValue(int pixels) => '$pixels px';
+  @override
   String get keyboardOnOpenTitle => 'Tastatur ved åpning';
   @override
   String get keyboardOnOpenSubtitle =>
