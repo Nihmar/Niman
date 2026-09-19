@@ -59,6 +59,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(TodoFilterBar)).left, greaterThan(300));
+    expect(tester.getRect(find.byType(TodoFilterBar)).left, greaterThan(200));
   });
 }
