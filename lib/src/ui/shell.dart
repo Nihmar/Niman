@@ -79,6 +79,7 @@ import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
+import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
 import 'package:niman/src/ui/todo_tab.dart';
 import 'package:niman/src/ui/trash.dart';
@@ -1083,8 +1084,35 @@ final class _LibraryShellState extends State<_LibraryShell>
       onMoveToOtherPane: w.isSplit
           ? (index) => _workspace.moveToOtherPane(pane, index)
           : null,
+      pane: pane,
+      onDrop: (drag, at) => _dropTab(drag, pane, at),
       filler: filler,
     );
+  }
+
+  /// A tab dropped in [pane]'s row, at [at] (#204): dragged along its own
+  /// row it is reordered, dragged from the other pane it moves here — and
+  /// lands where it was dropped, not at the end.
+  void _dropTab(TabDrag drag, int pane, int at) {
+    if (drag.pane == pane) {
+      // The place is read in the row as it is now, and removing the tab
+      // shifts everything after it one to the left.
+      _workspace.reorder(pane, drag.index, at > drag.index ? at - 1 : at);
+      return;
+    }
+    _workspace.moveTabHere(drag.pane, drag.index, pane, at);
+  }
+
+  /// A tab dropped on [pane]'s body (#204): into the pane, or a split
+  /// with it when the drop was near the edge of an unsplit window.
+  void _dropTabOnPane(TabDrag drag, int pane, TabDropKind kind) {
+    final axis = tabDropAxis(kind);
+    if (axis == null) {
+      if (drag.pane == pane) return;
+      _workspace.moveTabHere(drag.pane, drag.index, pane, null);
+      return;
+    }
+    _workspace.splitWith(drag.pane, drag.index, axis);
   }
 
   /// What the tabs redraw on: the workspace, and — moved out of any build
@@ -2924,44 +2952,53 @@ final class _LibraryShellState extends State<_LibraryShell>
   Widget _detailPane(LibrarySession controller, int pane) => Listener(
     behavior: HitTestBehavior.translucent,
     onPointerDown: (_) => _workspace.focus(pane),
-    child: ShellDetailPane(
-      root: controller.root,
-      tabs: _deck(pane),
-      onMemento: _workspace.remember,
-      zen: _inZen,
-      typewriter: _editorSettings.typewriter,
-      onToggleTypewriter: _toggleTypewriter,
-      onLoaded: _workspace.noteLoaded,
-      showLineNumbers: _editorSettings.lineNumbers,
-      noteColumn: _editorSettings.noteColumn,
-      // The kind toggles and ⋮ sit at the end of the note's
-      // one row of chrome (#173); there is no header above.
-      barActions: [..._kindActions, if (_dockRoom) _dockToggle(), _noteMenu()],
-      autofocusEditor: _editorSettings.autofocusEditor,
-      linkType: _editorSettings.linkType,
-      missingNoteLocation: _editorSettings.missingNoteLocation,
-      attachmentsFolder: _editorSettings.attachmentsFolder,
-      indentWidth: _editorSettings.indentWidth,
-      toolbarLayout: _editorSettings.toolbarLayout,
-      // A single enabled editor has nowhere to switch to:
-      // the note hides its switch instead of offering a
-      // dead toggle.
-      onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
-          ? _setEditorKind
-          : null,
-      splitFraction: _editorSettings.splitRatio,
-      onSplitFractionChanged: _onSplitFractionChanged,
-      onSplitDragEnd: _onSplitDragEnd,
-      linkSource: _linkSource,
-      onOpenNote: _openNoteFromLink,
-      kindMode: !_kindRawMode,
-      onNoteKindChanged: _onNoteKindChanged,
-      unsavedTracker: widget.unsavedTracker,
-      spellCheck: widget.spellCheck,
-      reloadToken: _noteReloadToken,
-      saveNote: _noteSaver(controller),
-      createMissingNote: _missingNoteCreator(controller),
-      statusActions: _statusActionsFor(pane),
+    child: TabDropZone(
+      pane: pane,
+      isSplit: _workspace.value.isSplit,
+      onDrop: (drag, kind) => _dropTabOnPane(drag, pane, kind),
+      child: ShellDetailPane(
+        root: controller.root,
+        tabs: _deck(pane),
+        onMemento: _workspace.remember,
+        zen: _inZen,
+        typewriter: _editorSettings.typewriter,
+        onToggleTypewriter: _toggleTypewriter,
+        onLoaded: _workspace.noteLoaded,
+        showLineNumbers: _editorSettings.lineNumbers,
+        noteColumn: _editorSettings.noteColumn,
+        // The kind toggles and ⋮ sit at the end of the note's
+        // one row of chrome (#173); there is no header above.
+        barActions: [
+          ..._kindActions,
+          if (_dockRoom) _dockToggle(),
+          _noteMenu(),
+        ],
+        autofocusEditor: _editorSettings.autofocusEditor,
+        linkType: _editorSettings.linkType,
+        missingNoteLocation: _editorSettings.missingNoteLocation,
+        attachmentsFolder: _editorSettings.attachmentsFolder,
+        indentWidth: _editorSettings.indentWidth,
+        toolbarLayout: _editorSettings.toolbarLayout,
+        // A single enabled editor has nowhere to switch to:
+        // the note hides its switch instead of offering a
+        // dead toggle.
+        onEditorKindChanged: _editorSettings.editorsEnabled.length > 1
+            ? _setEditorKind
+            : null,
+        splitFraction: _editorSettings.splitRatio,
+        onSplitFractionChanged: _onSplitFractionChanged,
+        onSplitDragEnd: _onSplitDragEnd,
+        linkSource: _linkSource,
+        onOpenNote: _openNoteFromLink,
+        kindMode: !_kindRawMode,
+        onNoteKindChanged: _onNoteKindChanged,
+        unsavedTracker: widget.unsavedTracker,
+        spellCheck: widget.spellCheck,
+        reloadToken: _noteReloadToken,
+        saveNote: _noteSaver(controller),
+        createMissingNote: _missingNoteCreator(controller),
+        statusActions: _statusActionsFor(pane),
+      ),
     ),
   );
 

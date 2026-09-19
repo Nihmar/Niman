@@ -253,21 +253,45 @@ final class Workspace {
 
   /// Moves the tab at [index] of [from] to the end of [to], showing it
   /// there.
-  Workspace moveTab(int from, int index, int to) {
+  Workspace moveTab(int from, int index, int to, {int? at}) {
     if (from == to || to < 0 || to >= panes.length) return this;
     final source = panes[from];
     if (index < 0 || index >= source.tabs.length) return this;
     final tab = source.tabs[index];
-    final landing = WorkspacePane.clamped([
-      ...panes[to].tabs,
-      tab,
-    ], panes[to].tabs.length);
+    final landingAt = (at ?? panes[to].tabs.length).clamp(
+      0,
+      panes[to].tabs.length,
+    );
+    final landing = WorkspacePane.clamped(
+      [...panes[to].tabs]..insert(landingAt, tab),
+      landingAt,
+    );
     final moved = _copy(panes: _replaced(to, landing), focused: to);
     // Remove it from where it came from with the close rules, then put the
     // focus back on the pane it went to (the collapse may renumber it).
     final closed = moved._filtered((p, i, _) => !(p == from && i == index));
     final landed = closed.locate(tab.path)!;
     return closed.activate(landed.pane, landed.index);
+  }
+
+  /// Moves the tab at [index] of [pane] to [to] in the same row (#204):
+  /// dragging a tab along its own pane.
+  ///
+  /// [to] is a position in the row as it is now, so dropping a tab where
+  /// it already is changes nothing, and dropping it past the end puts it
+  /// last. The moved tab keeps the focus and shows.
+  Workspace reorder(int pane, int index, int to) {
+    final target = panes[pane];
+    if (index < 0 || index >= target.tabs.length) return this;
+    final landing = to.clamp(0, target.tabs.length - 1);
+    if (landing == index) return activate(pane, index);
+    final tabs = [...target.tabs];
+    final tab = tabs.removeAt(index);
+    tabs.insert(landing, tab);
+    return _copy(
+      panes: _replaced(pane, WorkspacePane.clamped(tabs, landing)),
+      focused: pane,
+    );
   }
 
   /// Follows a rename or a move of [from] to [to]: the note itself, or —
