@@ -1214,6 +1214,25 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get dropHint =>
+      'Sleep Markdown-bestanden hierheen om ze te openen, of een map om hem '
+      'te importeren';
+  @override
+  String get importFolderAction => 'Importeren';
+  @override
+  String dropRejected(String names) =>
+      'Hier openen alleen Markdown-bestanden en mappen: $names';
+  @override
+  String importFolderTitle(String name) => '“$name” importeren?';
+  @override
+  String importFolderBody(int count) =>
+      'De Markdown-bestanden ($count) worden gekopieerd naar een nieuwe map '
+      'in de bibliotheek. De map die je losliet, blijft zoals hij is.';
+  @override
+  String importFolderDone(String folder) => 'Geïmporteerd in $folder';
+  @override
+  String importFolderEmpty(String name) => 'Geen Markdown-bestanden in $name';
+  @override
   String get openFileTitle => 'Bestand openen';
   @override
   String get outsideFileNote =>

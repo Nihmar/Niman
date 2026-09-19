@@ -1189,6 +1189,24 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get dropHint =>
+      'Açmak için Markdown dosyalarını, içe aktarmak için bir klasörü bırakın';
+  @override
+  String get importFolderAction => 'İçe aktar';
+  @override
+  String dropRejected(String names) =>
+      'Burada yalnızca Markdown dosyaları ve klasörler açılır: $names';
+  @override
+  String importFolderTitle(String name) => '“$name” içe aktarılsın mı?';
+  @override
+  String importFolderBody(int count) =>
+      'Markdown dosyaları ($count) kitaplığın yeni bir klasörüne kopyalanır. '
+      'Bıraktığınız klasör olduğu gibi kalır.';
+  @override
+  String importFolderDone(String folder) => '$folder klasörüne aktarıldı';
+  @override
+  String importFolderEmpty(String name) => '$name içinde Markdown dosyası yok';
+  @override
   String get openFileTitle => 'Dosya aç';
   @override
   String get outsideFileNote =>

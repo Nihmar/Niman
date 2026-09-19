@@ -575,6 +575,13 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get dropHint;
+  String get importFolderAction;
+  String dropRejected(String names);
+  String importFolderTitle(String name);
+  String importFolderBody(int count);
+  String importFolderDone(String folder);
+  String importFolderEmpty(String name);
   String get openFileTitle;
   String get outsideFileNote;
   String get typewriterOn;

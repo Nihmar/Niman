@@ -1211,6 +1211,25 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get dropHint =>
+      'Plasează fișiere Markdown pentru a le deschide sau un dosar pentru '
+      'a-l importa';
+  @override
+  String get importFolderAction => 'Importă';
+  @override
+  String dropRejected(String names) =>
+      'Aici se deschid doar fișiere Markdown și dosare: $names';
+  @override
+  String importFolderTitle(String name) => 'Imporți „$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Fișierele sale Markdown ($count) sunt copiate într-un dosar nou al '
+      'bibliotecii. Dosarul plasat rămâne neschimbat.';
+  @override
+  String importFolderDone(String folder) => 'Importat în $folder';
+  @override
+  String importFolderEmpty(String name) => 'Niciun fișier Markdown în $name';
+  @override
   String get openFileTitle => 'Deschide fișier';
   @override
   String get outsideFileNote =>

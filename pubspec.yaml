@@ -20,6 +20,7 @@ dependencies:
   # network comes back (docs/dev/sync.md, "Queue and triggers").
   connectivity_plus: ^7.3.1
   crypto: ^3.0.7
+  desktop_drop: ^0.8.4
   drift: ^2.34.3
 
   # The device's own colors, for the Material You palette (T-M6-05).

@@ -1093,6 +1093,21 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get dropHint => '拖放 Markdown 文件以打开，或拖放文件夹以导入';
+  @override
+  String get importFolderAction => '导入';
+  @override
+  String dropRejected(String names) => '这里只能打开 Markdown 文件和文件夹：$names';
+  @override
+  String importFolderTitle(String name) => '导入“$name”？';
+  @override
+  String importFolderBody(int count) =>
+      '其中的 Markdown 文件（$count）会复制到资料库的新文件夹中。拖入的文件夹保持不变。';
+  @override
+  String importFolderDone(String folder) => '已导入到 $folder';
+  @override
+  String importFolderEmpty(String name) => '$name 中没有 Markdown 文件';
+  @override
   String get openFileTitle => '打开文件';
   @override
   String get outsideFileNote => '不属于任何资料库：原地保存，不建索引，无历史，不跟随链接';

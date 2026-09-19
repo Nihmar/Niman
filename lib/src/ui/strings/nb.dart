@@ -1194,6 +1194,24 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get dropHint =>
+      'Slipp Markdown-filer for å åpne dem, eller en mappe for å importere den';
+  @override
+  String get importFolderAction => 'Importer';
+  @override
+  String dropRejected(String names) =>
+      'Bare Markdown-filer og mapper åpnes her: $names';
+  @override
+  String importFolderTitle(String name) => 'Importere «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Markdown-filene ($count) kopieres til en ny mappe i biblioteket. '
+      'Mappen du slapp, forblir som den er.';
+  @override
+  String importFolderDone(String folder) => 'Importert til $folder';
+  @override
+  String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
+  @override
   String get openFileTitle => 'Åpne fil';
   @override
   String get outsideFileNote =>

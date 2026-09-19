@@ -1226,6 +1226,24 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get dropHint =>
+      'Suelta archivos Markdown para abrirlos, o una carpeta para importarla';
+  @override
+  String get importFolderAction => 'Importar';
+  @override
+  String dropRejected(String names) =>
+      'Aquí solo se abren archivos Markdown y carpetas: $names';
+  @override
+  String importFolderTitle(String name) => '¿Importar «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Sus archivos Markdown ($count) se copian en una carpeta nueva de la '
+      'biblioteca. La carpeta que soltaste queda como está.';
+  @override
+  String importFolderDone(String folder) => 'Importado en $folder';
+  @override
+  String importFolderEmpty(String name) => 'No hay archivos Markdown en $name';
+  @override
   String get openFileTitle => 'Abrir archivo';
   @override
   String get outsideFileNote =>

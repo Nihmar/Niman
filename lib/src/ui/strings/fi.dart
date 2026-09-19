@@ -1212,6 +1212,25 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get dropHint =>
+      'Pudota Markdown-tiedostoja avataksesi ne tai kansio tuodaksesi sen';
+  @override
+  String get importFolderAction => 'Tuo';
+  @override
+  String dropRejected(String names) =>
+      'Täällä avautuvat vain Markdown-tiedostot ja kansiot: $names';
+  @override
+  String importFolderTitle(String name) => 'Tuodaanko ”$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Sen Markdown-tiedostot ($count) kopioidaan kirjaston uuteen kansioon. '
+      'Pudotettu kansio pysyy ennallaan.';
+  @override
+  String importFolderDone(String folder) => 'Tuotu kansioon $folder';
+  @override
+  String importFolderEmpty(String name) =>
+      'Kansiossa $name ei ole Markdown-tiedostoja';
+  @override
   String get openFileTitle => 'Avaa tiedosto';
   @override
   String get outsideFileNote =>

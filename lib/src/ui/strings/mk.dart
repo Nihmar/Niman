@@ -1211,6 +1211,24 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get dropHint =>
+      'Пуштете Markdown датотеки за да ги отворите или папка за да ја увезете';
+  @override
+  String get importFolderAction => 'Увези';
+  @override
+  String dropRejected(String names) =>
+      'Тука се отвораат само Markdown датотеки и папки: $names';
+  @override
+  String importFolderTitle(String name) => 'Да се увезе „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Нејзините Markdown датотеки ($count) се копираат во нова папка на '
+      'библиотеката. Пуштената папка останува каква што е.';
+  @override
+  String importFolderDone(String folder) => 'Увезено во $folder';
+  @override
+  String importFolderEmpty(String name) => 'Нема Markdown датотеки во $name';
+  @override
   String get openFileTitle => 'Отвори датотека';
   @override
   String get outsideFileNote =>

@@ -1201,6 +1201,25 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get dropHint =>
+      'Перацягніце файлы Markdown, каб адкрыць іх, або папку, каб '
+      'імпартаваць яе';
+  @override
+  String get importFolderAction => 'Імпартаваць';
+  @override
+  String dropRejected(String names) =>
+      'Тут адкрываюцца толькі файлы Markdown і папкі: $names';
+  @override
+  String importFolderTitle(String name) => 'Імпартаваць «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Яе файлы Markdown ($count) будуць скапіяваны ў новую папку '
+      'бібліятэкі. Сама папка застанецца як ёсць.';
+  @override
+  String importFolderDone(String folder) => 'Імпартавана ў $folder';
+  @override
+  String importFolderEmpty(String name) => 'У $name няма файлаў Markdown';
+  @override
   String get openFileTitle => 'Адкрыць файл';
   @override
   String get outsideFileNote =>

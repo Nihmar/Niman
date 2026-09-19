@@ -1205,6 +1205,25 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get dropHint =>
+      'Перетягніть файли Markdown, щоб відкрити їх, або теку, щоб '
+      'імпортувати її';
+  @override
+  String get importFolderAction => 'Імпортувати';
+  @override
+  String dropRejected(String names) =>
+      'Тут відкриваються лише файли Markdown і теки: $names';
+  @override
+  String importFolderTitle(String name) => 'Імпортувати «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Її файли Markdown ($count) буде скопійовано в нову теку бібліотеки. '
+      'Перетягнута тека залишиться як є.';
+  @override
+  String importFolderDone(String folder) => 'Імпортовано до $folder';
+  @override
+  String importFolderEmpty(String name) => 'У $name немає файлів Markdown';
+  @override
   String get openFileTitle => 'Відкрити файл';
   @override
   String get outsideFileNote =>

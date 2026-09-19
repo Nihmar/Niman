@@ -1120,6 +1120,22 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get dropHint => 'Markdown ファイルをドロップして開くか、フォルダーをドロップして読み込みます';
+  @override
+  String get importFolderAction => '読み込む';
+  @override
+  String dropRejected(String names) =>
+      'ここで開けるのは Markdown ファイルとフォルダーだけです：$names';
+  @override
+  String importFolderTitle(String name) => '「$name」を読み込みますか？';
+  @override
+  String importFolderBody(int count) =>
+      'その Markdown ファイル（$count）がライブラリの新しいフォルダーにコピーされます。ドロップしたフォルダーはそのままです。';
+  @override
+  String importFolderDone(String folder) => '$folder に読み込みました';
+  @override
+  String importFolderEmpty(String name) => '$name に Markdown ファイルはありません';
+  @override
   String get openFileTitle => 'ファイルを開く';
   @override
   String get outsideFileNote => 'ライブラリ外：その場所に保存。索引なし、履歴なし、リンクはたどりません';

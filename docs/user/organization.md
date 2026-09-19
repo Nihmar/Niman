@@ -163,6 +163,28 @@ two editors on one file.
 On Android a picked file arrives as a copy that cannot be saved back, so
 this is not offered there yet.
 
+## Dropping files on the window
+
+On Linux and Windows, files and folders dragged from the file manager
+onto Niman's window are taken in, over whichever screen is showing. A
+frame around the window says so while you drag.
+
+- **A Markdown file** (`.md`, `.markdown`, `.txt`) opens the way
+  [Open file](#opening-a-file-outside-any-library) opens one: as its
+  note when it is inside the open library, on its own otherwise. Drop
+  several and each opens, in a tab of its own.
+- **A folder of the open library** is shown in the tree, with the
+  folders above it opened on the way.
+- **A folder from anywhere else** is offered for import. Its Markdown
+  files are copied into a new folder of the library named after it
+  (`Drafts`, or `Drafts 2` when that is taken), with their layout kept.
+  Nothing else comes along: not images, not hidden folders such as
+  `.git` or `.obsidian`. The folder you dropped is left exactly as it
+  was.
+- **With no library open**, a dropped folder opens as the library, the
+  way *Open existing* would open it.
+- **Anything else** is left alone, and a message names it.
+
 ## Folders, quick note, list notes, voice notes
 
 - Notes live in plain folders inside the library.
