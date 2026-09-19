@@ -1230,6 +1230,25 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get dropHint =>
+      'Deixeu anar fitxers Markdown per obrir-los, o una carpeta per '
+      'importar-la';
+  @override
+  String get importFolderAction => 'Importa';
+  @override
+  String dropRejected(String names) =>
+      'Aquí només s’obren fitxers Markdown i carpetes: $names';
+  @override
+  String importFolderTitle(String name) => 'Voleu importar «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Els seus fitxers Markdown ($count) es copien en una carpeta nova de '
+      'la biblioteca. La carpeta que heu deixat anar queda igual.';
+  @override
+  String importFolderDone(String folder) => 'Importat a $folder';
+  @override
+  String importFolderEmpty(String name) => 'No hi ha fitxers Markdown a $name';
+  @override
   String get openFileTitle => 'Obre un fitxer';
   @override
   String get outsideFileNote =>

@@ -1213,6 +1213,24 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get dropHint =>
+      'Rilascia file Markdown per aprirli, o una cartella per importarla';
+  @override
+  String get importFolderAction => 'Importa';
+  @override
+  String dropRejected(String names) =>
+      'Qui si aprono solo file Markdown e cartelle: $names';
+  @override
+  String importFolderTitle(String name) => 'Importare «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'I suoi file Markdown ($count) vengono copiati in una nuova cartella '
+      'della libreria. La cartella rilasciata resta com’è.';
+  @override
+  String importFolderDone(String folder) => 'Importata in $folder';
+  @override
+  String importFolderEmpty(String name) => 'Nessun file Markdown in $name';
+  @override
   String get openFileTitle => 'Apri file';
   @override
   String get outsideFileNote =>

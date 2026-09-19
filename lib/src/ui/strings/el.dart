@@ -1243,6 +1243,24 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get dropHint =>
+      'Αφήστε αρχεία Markdown για να ανοίξουν ή έναν φάκελο για εισαγωγή';
+  @override
+  String get importFolderAction => 'Εισαγωγή';
+  @override
+  String dropRejected(String names) =>
+      'Εδώ ανοίγουν μόνο αρχεία Markdown και φάκελοι: $names';
+  @override
+  String importFolderTitle(String name) => 'Εισαγωγή «$name»;';
+  @override
+  String importFolderBody(int count) =>
+      'Τα αρχεία Markdown του ($count) αντιγράφονται σε νέο φάκελο της '
+      'βιβλιοθήκης. Ο φάκελος που αφήσατε μένει ως έχει.';
+  @override
+  String importFolderDone(String folder) => 'Εισήχθη στο $folder';
+  @override
+  String importFolderEmpty(String name) => 'Κανένα αρχείο Markdown στο $name';
+  @override
   String get openFileTitle => 'Άνοιγμα αρχείου';
   @override
   String get outsideFileNote =>

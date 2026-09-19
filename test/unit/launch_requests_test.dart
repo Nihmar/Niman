@@ -13,16 +13,33 @@ void main() {
   });
 
   test('every later launch arrives; only files are files', () async {
-    final requests = LaunchRequests(
-      later: Stream.fromIterable(const [
-        LaunchArgs(openPath: '/b.md'),
-        LaunchArgs(action: ShortcutAction.quickNote),
-        LaunchArgs(),
-      ]),
-    );
-    final files = requests.files.toList();
-    final arrivals = requests.arrivals.length;
-    expect(await files, ['/b.md']);
-    expect(await arrivals, 3);
+    final later = Stream.fromIterable(const [
+      LaunchArgs(openPath: '/b.md'),
+      LaunchArgs(action: ShortcutAction.quickNote),
+      LaunchArgs(),
+    ]);
+    final requests = LaunchRequests(later: later);
+    final files = <String>[];
+    var arrivals = 0;
+    requests.files.listen(files.add);
+    requests.arrivals.listen((_) => arrivals++);
+    await pumpEventQueue();
+    expect(files, ['/b.md']);
+    expect(arrivals, 3);
+  });
+
+  test('a drop asks through the same requests (#75)', () async {
+    final requests = LaunchRequests();
+    final files = <String>[];
+    final folders = <String>[];
+    requests.files.listen(files.add);
+    requests.folders.listen(folders.add);
+    requests
+      ..openFile('/c.md')
+      ..openFolder('/d');
+    await pumpEventQueue();
+    expect(files, ['/c.md']);
+    expect(folders, ['/d']);
+    await requests.dispose();
   });
 }

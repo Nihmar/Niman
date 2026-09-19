@@ -6,10 +6,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/changelog.dart';
 import 'package:niman/src/core/language.dart';
+import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/ui/changelog.dart';
 import 'package:niman/src/ui/close_guard.dart';
+import 'package:niman/src/ui/drop_target.dart';
 import 'package:niman/src/ui/shell.dart';
 import 'package:niman/src/ui/theme/device_colors.dart';
 import 'package:niman/src/ui/theme/palettes.dart';
@@ -87,7 +89,14 @@ class _NimanAppState extends State<NimanApp> with WidgetsBindingObserver {
               AppTextScales.ui,
             ),
           ),
-          child: child ?? const SizedBox.shrink(),
+          // Files and folders dropped anywhere on the window (#75), over
+          // whichever screen is up.
+          child: Consumer(
+            builder: (context, ref, _) => AppDropTarget(
+              requests: ref.watch(launchRequestsProvider),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
         locale: AppLanguages.locale,
         supportedLocales: [

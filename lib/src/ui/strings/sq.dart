@@ -1213,6 +1213,24 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get dropHint =>
+      'Lëshoni skedarë Markdown për t’i hapur, ose një dosje për ta importuar';
+  @override
+  String get importFolderAction => 'Importo';
+  @override
+  String dropRejected(String names) =>
+      'Këtu hapen vetëm skedarë Markdown dhe dosje: $names';
+  @override
+  String importFolderTitle(String name) => 'Të importohet “$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Skedarët e saj Markdown ($count) kopjohen në një dosje të re të '
+      'bibliotekës. Dosja e lëshuar mbetet siç është.';
+  @override
+  String importFolderDone(String folder) => 'U importua në $folder';
+  @override
+  String importFolderEmpty(String name) => 'Nuk ka skedarë Markdown në $name';
+  @override
   String get openFileTitle => 'Hap skedar';
   @override
   String get outsideFileNote =>

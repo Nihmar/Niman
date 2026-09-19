@@ -1223,6 +1223,25 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get dropHint =>
+      'Markdown-Dateien ablegen, um sie zu öffnen, oder einen Ordner, um ihn '
+      'zu importieren';
+  @override
+  String get importFolderAction => 'Importieren';
+  @override
+  String dropRejected(String names) =>
+      'Hier öffnen sich nur Markdown-Dateien und Ordner: $names';
+  @override
+  String importFolderTitle(String name) => '„$name“ importieren?';
+  @override
+  String importFolderBody(int count) =>
+      'Seine Markdown-Dateien ($count) werden in einen neuen Ordner der '
+      'Bibliothek kopiert. Der abgelegte Ordner bleibt, wie er ist.';
+  @override
+  String importFolderDone(String folder) => 'Importiert nach $folder';
+  @override
+  String importFolderEmpty(String name) => 'Keine Markdown-Dateien in $name';
+  @override
   String get openFileTitle => 'Datei öffnen';
   @override
   String get outsideFileNote =>

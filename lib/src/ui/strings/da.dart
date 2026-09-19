@@ -1198,6 +1198,25 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get dropHint =>
+      'Slip Markdown-filer for at åbne dem, eller en mappe for at importere '
+      'den';
+  @override
+  String get importFolderAction => 'Importér';
+  @override
+  String dropRejected(String names) =>
+      'Kun Markdown-filer og mapper åbnes her: $names';
+  @override
+  String importFolderTitle(String name) => 'Importér “$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Dens Markdown-filer ($count) kopieres til en ny mappe i biblioteket. '
+      'Mappen, du slap, forbliver som den er.';
+  @override
+  String importFolderDone(String folder) => 'Importeret til $folder';
+  @override
+  String importFolderEmpty(String name) => 'Ingen Markdown-filer i $name';
+  @override
   String get openFileTitle => 'Åbn fil';
   @override
   String get outsideFileNote =>

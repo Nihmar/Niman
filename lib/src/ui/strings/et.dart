@@ -1182,6 +1182,24 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get dropHint =>
+      'Lohista Markdowni failid avamiseks või kaust importimiseks';
+  @override
+  String get importFolderAction => 'Impordi';
+  @override
+  String dropRejected(String names) =>
+      'Siin avanevad ainult Markdowni failid ja kaustad: $names';
+  @override
+  String importFolderTitle(String name) => 'Kas importida „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Selle Markdowni failid ($count) kopeeritakse raamatukogu uude kausta. '
+      'Lohistatud kaust jääb samaks.';
+  @override
+  String importFolderDone(String folder) => 'Imporditud kausta $folder';
+  @override
+  String importFolderEmpty(String name) => 'Kaustas $name pole Markdowni faile';
+  @override
   String get openFileTitle => 'Ava fail';
   @override
   String get outsideFileNote =>

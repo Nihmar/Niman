@@ -1197,6 +1197,24 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get dropHint =>
+      'Ispustite Markdown datoteke da ih otvorite ili mapu da je uvezete';
+  @override
+  String get importFolderAction => 'Uvezi';
+  @override
+  String dropRejected(String names) =>
+      'Ovdje se otvaraju samo Markdown datoteke i mape: $names';
+  @override
+  String importFolderTitle(String name) => 'Uvesti „$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Njezine Markdown datoteke ($count) kopiraju se u novu mapu knjižnice. '
+      'Ispuštena mapa ostaje kakva jest.';
+  @override
+  String importFolderDone(String folder) => 'Uvezeno u $folder';
+  @override
+  String importFolderEmpty(String name) => 'Nema Markdown datoteka u $name';
+  @override
   String get openFileTitle => 'Otvori datoteku';
   @override
   String get outsideFileNote =>

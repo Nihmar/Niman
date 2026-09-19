@@ -1193,6 +1193,24 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get dropHint =>
+      'Drop Markdown files to open them, or a folder to import it';
+  @override
+  String get importFolderAction => 'Import';
+  @override
+  String dropRejected(String names) =>
+      'Only Markdown files and folders open here: $names';
+  @override
+  String importFolderTitle(String name) => 'Import “$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Its Markdown files ($count) are copied into a new folder of the '
+      'library. The folder you dropped stays as it is.';
+  @override
+  String importFolderDone(String folder) => 'Imported into $folder';
+  @override
+  String importFolderEmpty(String name) => 'No Markdown files in $name';
+  @override
   String get openFileTitle => 'Open file';
   @override
   String get outsideFileNote =>
