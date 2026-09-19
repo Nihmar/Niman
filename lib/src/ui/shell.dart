@@ -1894,6 +1894,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       zen: _inZen,
       zenTitle: p.basename(_workspace.value.activePath ?? ''),
       onLeaveZen: () => unawaited(_zen.leave()),
+      zenPreviewVisible: _notePreview,
+      onZenTogglePreview: _previewToggleVisible ? _togglePreview : null,
       leaveZenOnEsc: _leaveZenOnEsc,
     );
     return narrow
@@ -2412,8 +2414,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       if (_wide && !_inZen)
         AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
       if (note != null) ...{
-        if (_previewToggleVisible && !_inZen)
-          AppCommand.togglePreview: _togglePreview,
+        if (_previewToggleVisible) AppCommand.togglePreview: _togglePreview,
         if (_editorSettings.editorsEnabled.length > 1)
           AppCommand.switchEditor: () => unawaited(
             _setEditorKind(

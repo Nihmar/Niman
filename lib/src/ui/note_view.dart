@@ -1050,10 +1050,11 @@ final class _NoteViewState extends State<NoteView>
   /// has no editable target, so it must go.
   bool get _previewOnly => !_splitIn(widget) && _previewIn(widget);
 
-  /// Whether [view] shows its preview. Zen (#69) hides it without
-  /// turning it off: the memento keeps [NoteView.showPreview], so the
-  /// tab has its preview back on the way out.
-  static bool _previewIn(NoteView view) => view.showPreview && !view.zen;
+  /// Whether [view] shows its preview. In Zen (#69) too: a note read
+  /// rather than written is read there in its preview (0.0.8 test round).
+  /// Zen only takes the split apart, and the tab's own flag then says
+  /// which of the two it shows.
+  static bool _previewIn(NoteView view) => view.showPreview;
 
   /// Whether [view] sets editor and preview side by side; never in Zen.
   static bool _splitIn(NoteView view) => view.splitPreview && !view.zen;
