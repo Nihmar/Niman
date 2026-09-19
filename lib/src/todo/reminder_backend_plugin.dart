@@ -180,6 +180,18 @@ final class PluginReminderBackend implements ReminderBackend {
   Future<void> cancel(int id) => _plugin.cancel(id: id);
 
   @override
+  String overdueState(
+    TodoReminder reminder, {
+    required bool pending,
+    required bool exact,
+    required bool batteryExempt,
+  }) => osAlarmOverdueState(
+    pending: pending,
+    exact: exact,
+    batteryExempt: batteryExempt,
+  );
+
+  @override
   Future<void> schedule(TodoReminder reminder, {required bool exact}) {
     return _plugin.zonedSchedule(
       id: reminder.id,
