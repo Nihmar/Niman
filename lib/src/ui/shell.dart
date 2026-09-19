@@ -53,6 +53,7 @@ import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
 import 'package:niman/src/ui/outside_files.dart';
+import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/pane_split.dart';
@@ -2434,8 +2435,32 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// What each command does, for the ones that can run here and now: the
   /// keys run them, and the command palette lists exactly these (#155).
-  /// A new feature reaches both by adding its entry here.
-  Map<AppCommand, VoidCallback> _commandHandlers() {
+  /// A new feature reaches both by adding its handler to
+  /// [_allCommandHandlers] and, if it waits on something, its needs to
+  /// [commandNeeds], which the Commands page in Settings reads too.
+  Map<AppCommand, VoidCallback> _commandHandlers() => {
+    for (final MapEntry(key: command, value: handler)
+        in _allCommandHandlers().entries)
+      if (commandNeeds(command).every(_meets)) command: handler,
+  };
+
+  /// Whether [need] holds here and now (#207): with [commandNeeds], what
+  /// decides which commands the palette offers and the keys answer to.
+  bool _meets(CommandNeed need) => switch (need) {
+    CommandNeed.openNote => _shownNote != null,
+    CommandNeed.wideWindow => _wide,
+    CommandNeed.dockRoom => _dockRoom,
+    CommandNeed.desktop => Platform.isLinux || Platform.isWindows,
+    CommandNeed.notInZen => !_inZen,
+    CommandNeed.zenRoom => _zen.on || _zenPossible,
+    CommandNeed.previewToggle => _previewToggleVisible,
+    CommandNeed.twoEditors => _editorSettings.editorsEnabled.length > 1,
+  };
+
+  /// Every command's handler; [_commandHandlers] keeps the ones that can
+  /// run now. A handler whose command needs an open note runs only with
+  /// one on screen.
+  Map<AppCommand, VoidCallback> _allCommandHandlers() {
     final note = _shownNote;
     return {
       AppCommand.openPalette: () => unawaited(_openPalette()),
@@ -2450,31 +2475,18 @@ final class _LibraryShellState extends State<_LibraryShell>
         unawaited(_addTodo());
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
-      if (_zen.on || _zenPossible) AppCommand.zenMode: _toggleZen,
+      AppCommand.zenMode: _toggleZen,
       // Not among what Zen leaves out: in Zen the status row and its
       // switch are hidden, and this is the way to it (#70).
       AppCommand.typewriterMode: _toggleTypewriter,
-      // What Zen hides it also leaves alone: a toggle for chrome that is
-      // not on screen would change it unseen.
-      if (!_inZen) AppCommand.toggleSidebar: _toggleSidebar,
+      AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
-      AppCommand.closeTab: () {
-        if (_wide) _workspace.closeActive();
-      },
-      AppCommand.nextTab: () {
-        if (_wide) _workspace.cycle(1);
-      },
-      AppCommand.previousTab: () {
-        if (_wide) _workspace.cycle(-1);
-      },
-      if (!_inZen) ...{
-        AppCommand.splitRight: () {
-          if (_wide) _workspace.splitActive(SplitAxis.right);
-        },
-        AppCommand.toggleDock: () {
-          if (_dockRoom) _toggleDock();
-        },
-      },
+      AppCommand.closeTab: _workspace.closeActive,
+      AppCommand.nextTab: () => _workspace.cycle(1),
+      AppCommand.previousTab: () => _workspace.cycle(-1),
+      AppCommand.splitRight: () => _workspace.splitActive(SplitAxis.right),
+      AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
+      AppCommand.toggleDock: _toggleDock,
       AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
       AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
       AppCommand.tabSearch: () => _onDestinationSelected(ShellTab.search.index),
@@ -2482,30 +2494,22 @@ final class _LibraryShellState extends State<_LibraryShell>
           _onDestinationSelected(ShellTab.quickNote.index),
       AppCommand.tabSettings: () =>
           _onDestinationSelected(ShellTab.settings.index),
-      if (_wide && !_inZen)
-        AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
-      if (note != null) ...{
-        if (_previewToggleVisible) AppCommand.togglePreview: _togglePreview,
-        if (_editorSettings.editorsEnabled.length > 1)
-          AppCommand.switchEditor: () => unawaited(
-            _setEditorKind(
-              _noteEditorKind == EditorKind.wysiwyg
-                  ? EditorKind.source
-                  : EditorKind.wysiwyg,
-            ),
-          ),
-        AppCommand.renameNote: () =>
-            unawaited(_rowActions.rename(context, note)),
-        AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
-        AppCommand.deleteNote: () =>
-            unawaited(_rowActions.delete(context, note)),
-        AppCommand.noteHistory: () => unawaited(_openHistory(note)),
-      },
+      AppCommand.togglePreview: _togglePreview,
+      AppCommand.switchEditor: () => unawaited(
+        _setEditorKind(
+          _noteEditorKind == EditorKind.wysiwyg
+              ? EditorKind.source
+              : EditorKind.wysiwyg,
+        ),
+      ),
+      AppCommand.renameNote: () => unawaited(_rowActions.rename(context, note)),
+      AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
+      AppCommand.deleteNote: () => unawaited(_rowActions.delete(context, note)),
+      AppCommand.noteHistory: () => unawaited(_openHistory(note!)),
       AppCommand.reindexLibrary: () => unawaited(_reindex()),
       // A picker for any file is a desktop thing: Android hands over a
       // copy, which could not be saved back (#77).
-      if (Platform.isLinux || Platform.isWindows)
-        AppCommand.openFile: () => unawaited(_openFile()),
+      AppCommand.openFile: () => unawaited(_openFile()),
       AppCommand.switchLibrary: _switchLibrary,
     };
   }

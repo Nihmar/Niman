@@ -1200,6 +1200,31 @@ final class RomanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mergi la';
   @override
+  String get commandsTitle => 'Comenzi';
+  @override
+  String get commandsIntro =>
+      'Paleta de comenzi oferă doar comenzile care pot rula acolo unde ești. '
+      'Aici sunt toate, și când apare fiecare.';
+  @override
+  String get commandNeedNone => 'Mereu disponibilă';
+  @override
+  String get commandNeedOpenNote => 'Necesită o notă deschisă';
+  @override
+  String get commandNeedWideWindow => 'Doar în fereastră lată';
+  @override
+  String get commandNeedDockRoom =>
+      'Necesită o fereastră destul de lată pentru panoul lateral';
+  @override
+  String get commandNeedDesktop => 'Doar pe desktop';
+  @override
+  String get commandNeedNotInZen => 'Nu în modul Zen';
+  @override
+  String get commandNeedZenRoom => 'Desktop, cu o notă deschisă într-o filă';
+  @override
+  String get commandNeedPreview => 'Cu previzualizarea activă, pe o notă text';
+  @override
+  String get commandNeedTwoEditors => 'Cu ambele editoare activate';
+  @override
   String get paletteHint => 'Caută comenzi și note';
   @override
   String get paletteNoResults => 'Nimic nu se potrivește';

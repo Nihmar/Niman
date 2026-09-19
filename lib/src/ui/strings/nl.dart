@@ -1203,6 +1203,33 @@ final class DutchStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ga naar';
   @override
+  String get commandsTitle => 'Opdrachten';
+  @override
+  String get commandsIntro =>
+      'Het opdrachtenpalet biedt alleen de opdrachten aan die kunnen draaien '
+      'waar je bent. Hier staan ze allemaal, en wanneer elke verschijnt.';
+  @override
+  String get commandNeedNone => 'Altijd beschikbaar';
+  @override
+  String get commandNeedOpenNote => 'Vereist een geopende notitie';
+  @override
+  String get commandNeedWideWindow => 'Alleen in een breed venster';
+  @override
+  String get commandNeedDockRoom =>
+      'Vereist een venster dat breed genoeg is voor het zijpaneel';
+  @override
+  String get commandNeedDesktop => 'Alleen op de desktop';
+  @override
+  String get commandNeedNotInZen => 'Niet in zenmodus';
+  @override
+  String get commandNeedZenRoom =>
+      'Desktop, met een notitie open in een tabblad';
+  @override
+  String get commandNeedPreview =>
+      'Met de voorvertoning aan, bij een tekstnotitie';
+  @override
+  String get commandNeedTwoEditors => 'Met beide editors ingeschakeld';
+  @override
   String get paletteHint => 'Opdrachten en notities zoeken';
   @override
   String get paletteNoResults => 'Niets gevonden';

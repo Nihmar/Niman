@@ -1202,6 +1202,32 @@ final class AlbanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Shko te';
   @override
+  String get commandsTitle => 'Komandat';
+  @override
+  String get commandsIntro =>
+      'Paleta e komandave ofron vetëm komandat që mund të ekzekutohen aty ku '
+      'je. Këtu janë të gjitha, dhe kur shfaqet secila.';
+  @override
+  String get commandNeedNone => 'Gjithmonë e disponueshme';
+  @override
+  String get commandNeedOpenNote => 'Kërkon një shënim të hapur';
+  @override
+  String get commandNeedWideWindow => 'Vetëm në dritare të gjerë';
+  @override
+  String get commandNeedDockRoom =>
+      'Kërkon një dritare mjaft të gjerë për panelin anësor';
+  @override
+  String get commandNeedDesktop => 'Vetëm në desktop';
+  @override
+  String get commandNeedNotInZen => 'Jo në modalitetin Zen';
+  @override
+  String get commandNeedZenRoom =>
+      'Desktop, me një shënim të hapur në një skedë';
+  @override
+  String get commandNeedPreview => 'Me parapamjen aktive, në një shënim teksti';
+  @override
+  String get commandNeedTwoEditors => 'Me të dy redaktuesit aktivë';
+  @override
   String get paletteHint => 'Kërko komanda dhe shënime';
   @override
   String get paletteNoResults => 'Asnjë përputhje';

@@ -1186,6 +1186,32 @@ final class CroatianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Idi na';
   @override
+  String get commandsTitle => 'Naredbe';
+  @override
+  String get commandsIntro =>
+      'Paleta naredbi nudi samo naredbe koje se mogu pokrenuti tamo gdje '
+      'jeste. Ovdje su sve, i kada se koja prikazuje.';
+  @override
+  String get commandNeedNone => 'Uvijek dostupno';
+  @override
+  String get commandNeedOpenNote => 'Potrebna je otvorena bilješka';
+  @override
+  String get commandNeedWideWindow => 'Samo u širokom prozoru';
+  @override
+  String get commandNeedDockRoom =>
+      'Potreban je prozor dovoljno širok za bočnu ploču';
+  @override
+  String get commandNeedDesktop => 'Samo na računalu';
+  @override
+  String get commandNeedNotInZen => 'Ne u Zen načinu';
+  @override
+  String get commandNeedZenRoom => 'Računalo, s bilješkom otvorenom u kartici';
+  @override
+  String get commandNeedPreview =>
+      'S uključenim pregledom, na tekstualnoj bilješci';
+  @override
+  String get commandNeedTwoEditors => 'S oba uključena uređivača';
+  @override
   String get paletteHint => 'Traži naredbe i bilješke';
   @override
   String get paletteNoResults => 'Nema rezultata';

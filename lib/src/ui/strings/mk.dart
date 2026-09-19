@@ -1201,6 +1201,31 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Оди на';
   @override
+  String get commandsTitle => 'Команди';
+  @override
+  String get commandsIntro =>
+      'Палетата со команди нуди само команди што може да се извршат таму каде '
+      'што сте. Тука се сите, и кога се појавува секоја.';
+  @override
+  String get commandNeedNone => 'Секогаш достапно';
+  @override
+  String get commandNeedOpenNote => 'Потребна е отворена белешка';
+  @override
+  String get commandNeedWideWindow => 'Само во широк прозорец';
+  @override
+  String get commandNeedDockRoom =>
+      'Потребен е прозорец доволно широк за страничниот панел';
+  @override
+  String get commandNeedDesktop => 'Само на компјутер';
+  @override
+  String get commandNeedNotInZen => 'Не во Зен режим';
+  @override
+  String get commandNeedZenRoom => 'Компјутер, со белешка отворена во јазиче';
+  @override
+  String get commandNeedPreview => 'Со вклучен преглед, на текстуална белешка';
+  @override
+  String get commandNeedTwoEditors => 'Со двата вклучени уредувачи';
+  @override
   String get paletteHint => 'Барај команди и белешки';
   @override
   String get paletteNoResults => 'Нема совпаѓања';

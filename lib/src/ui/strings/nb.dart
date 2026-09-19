@@ -1183,6 +1183,32 @@ final class NorwegianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå til';
   @override
+  String get commandsTitle => 'Kommandoer';
+  @override
+  String get commandsIntro =>
+      'Kommandopaletten tilbyr bare kommandoene som kan kjøres der du er. Her '
+      'er alle, og når hver av dem vises.';
+  @override
+  String get commandNeedNone => 'Alltid tilgjengelig';
+  @override
+  String get commandNeedOpenNote => 'Krever et åpent notat';
+  @override
+  String get commandNeedWideWindow => 'Bare i bredt vindu';
+  @override
+  String get commandNeedDockRoom =>
+      'Krever et vindu som er bredt nok for sidepanelet';
+  @override
+  String get commandNeedDesktop => 'Bare på datamaskin';
+  @override
+  String get commandNeedNotInZen => 'Ikke i Zen-modus';
+  @override
+  String get commandNeedZenRoom => 'Datamaskin, med et notat åpent i en fane';
+  @override
+  String get commandNeedPreview => 'Med forhåndsvisning på, på et tekstnotat';
+  @override
+  String get commandNeedTwoEditors =>
+      'Med begge redigeringsprogrammene slått på';
+  @override
   String get paletteHint => 'Søk i kommandoer og notater';
   @override
   String get paletteNoResults => 'Ingen treff';
