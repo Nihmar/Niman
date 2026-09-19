@@ -229,7 +229,7 @@ final class NoteEditor extends StatelessWidget {
               },
             ),
       },
-      toolbarController: _toolbarController(),
+      toolbarController: _stableToolbar(),
     );
   }
 
@@ -241,13 +241,48 @@ final class NoteEditor extends StatelessWidget {
   /// Windows or Linux took the app down (2026-09-10 crash report). The
   /// desktop gets a controller of our own instead: the same menu, placed
   /// at the click and dismissed by the next one.
-  SelectionToolbarController _toolbarController() {
+  SelectionToolbarController _toolbarController(ToolbarMenuBuilder builder) {
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS) {
-      return MobileSelectionToolbarController(builder: _selectionMenu);
+      return MobileSelectionToolbarController(builder: builder);
     }
-    return _DesktopSelectionToolbar(builder: _selectionMenu);
+    return _DesktopSelectionToolbar(builder: builder);
   }
+
+  /// One toolbar controller per editing controller, for as long as the
+  /// note is open.
+  ///
+  /// re_editor shows the toolbar through the controller it was built with
+  /// and hides it through the one it has now. Built anew on every build,
+  /// the one asked to hide had never shown anything, and the menu stayed
+  /// on screen — on the phone after any rebuild, and since the note
+  /// column (#171) the editor is rebuilt whenever the keyboard comes or
+  /// goes (0.0.8 test round). The controller stays; its menu is built by
+  /// the latest editor, with the latest spelling and format actions.
+  SelectionToolbarController _stableToolbar() {
+    _latest[controller] = this;
+    final key = controller;
+    return _toolbars[key] ??= _toolbarController(
+      ({
+        required context,
+        required anchors,
+        required controller,
+        required onDismiss,
+        required onRefresh,
+      }) => _latest[key]!._selectionMenu(
+        context: context,
+        anchors: anchors,
+        controller: controller,
+        onDismiss: onDismiss,
+        onRefresh: onRefresh,
+      ),
+    );
+  }
+
+  static final Expando<SelectionToolbarController> _toolbars = Expando(
+    'selection toolbar',
+  );
+  static final Expando<NoteEditor> _latest = Expando('latest editor');
 
   /// Cut/copy/paste/select all for the current selection, then the
   /// toolbar's formatting actions (#174), then Add to dictionary.
