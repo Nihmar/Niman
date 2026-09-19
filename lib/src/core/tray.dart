@@ -26,17 +26,33 @@ import 'package:nativeapi/nativeapi.dart'
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
 
+/// The tray menu's own entries (#209), beside the quick actions.
+enum TrayCommand {
+  /// Bring the window back — the only way to, on a desktop whose
+  /// indicator has no click event of its own.
+  open,
+
+  /// Leave for good: the window closes with its usual ask about unsaved
+  /// notes, and the process ends.
+  quit,
+}
+
 /// What the shell needs from the desktop tray.
 ///
 /// Implemented by [PlatformTrayService] (Linux/Windows) and
 /// [NoopTrayService] (elsewhere), plus a fake in widget tests.
 abstract interface class TrayService {
-  /// Creates the tray icon offering [labels], in order. A host without a
-  /// tray (no SNI watcher, no plugin) degrades to nothing.
+  /// Creates the tray icon: [openLabel] at the top, then [labels]' quick
+  /// actions in order, then [quitLabel] (#209). A host without a tray (no
+  /// SNI watcher, no plugin) degrades to nothing.
   ///
   /// Called again with different labels — the language changed under the
   /// menu — it relabels what is already there.
-  Future<void> init(Map<ShortcutAction, String> labels);
+  Future<void> init({
+    required Map<ShortcutAction, String> labels,
+    required String openLabel,
+    required String quitLabel,
+  });
 
   /// Menu taps, carrying the same ids the launcher publishes — the shell
   /// runs them through the same `_runShortcut` as the shortcuts do.
@@ -44,6 +60,9 @@ abstract interface class TrayService {
 
   /// Clicks on the icon itself (bring the window back to the front).
   Stream<void> get activated;
+
+  /// The menu's own entries: Open Niman, Quit (#209).
+  Stream<TrayCommand> get commands;
 
   /// Releases the tray icon.
   Future<void> dispose();
@@ -81,6 +100,8 @@ final class PlatformTrayService implements TrayService {
   final StreamController<ShortcutAction> _actions =
       StreamController<ShortcutAction>.broadcast();
   final StreamController<void> _activated = StreamController<void>.broadcast();
+  final StreamController<TrayCommand> _commands =
+      StreamController<TrayCommand>.broadcast();
 
   /// The native handles are kept for the tray's whole life: their finalizers
   /// must not release anything the native side still references.
@@ -95,15 +116,28 @@ final class PlatformTrayService implements TrayService {
   @override
   Stream<void> get activated => _activated.stream;
 
+  @override
+  Stream<TrayCommand> get commands => _commands.stream;
+
   /// The labels the menu currently carries, so a repeat call with the same
   /// ones costs nothing.
   Map<ShortcutAction, String> _labels = const {};
 
+  /// The menu's own two labels, for the same reason.
+  ({String open, String quit})? _ends;
+
   @override
-  Future<void> init(Map<ShortcutAction, String> labels) async {
+  Future<void> init({
+    required Map<ShortcutAction, String> labels,
+    required String openLabel,
+    required String quitLabel,
+  }) async {
+    final ends = (open: openLabel, quit: quitLabel);
     final existing = _tray;
     if (existing != null) {
-      if (!mapEquals(_labels, labels)) _relabel(existing, labels);
+      if (!mapEquals(_labels, labels) || _ends != ends) {
+        _relabel(existing, labels, ends);
+      }
       return;
     }
     try {
@@ -120,7 +154,7 @@ final class PlatformTrayService implements TrayService {
         _icon = icon;
         tray.icon = icon;
       }
-      final built = _buildMenu(labels);
+      final built = _buildMenu(labels, ends);
       if (built == null) {
         tray.dispose();
         _log.warning('tray menu unavailable (native side declined)');
@@ -135,6 +169,7 @@ final class PlatformTrayService implements TrayService {
       _menu = built.menu;
       _items.addAll(built.items);
       _labels = Map<ShortcutAction, String>.of(labels);
+      _ends = ends;
       _log.info('tray ready (${labels.length} actions)');
     } on Object catch (error) {
       // A session without SNI (or a build without the native library) is a
@@ -149,9 +184,13 @@ final class PlatformTrayService implements TrayService {
   /// means new items. The new menu is hung first and the old one released
   /// after, never the other way round: the native side must never be
   /// pointed at something already freed.
-  void _relabel(TrayIcon tray, Map<ShortcutAction, String> labels) {
+  void _relabel(
+    TrayIcon tray,
+    Map<ShortcutAction, String> labels,
+    ({String open, String quit}) ends,
+  ) {
     try {
-      final built = _buildMenu(labels);
+      final built = _buildMenu(labels, ends);
       if (built == null) {
         _log.warning('tray relabel declined by the native side');
         return;
@@ -164,6 +203,7 @@ final class PlatformTrayService implements TrayService {
         ..clear()
         ..addAll(built.items);
       _labels = Map<ShortcutAction, String>.of(labels);
+      _ends = ends;
       old?.dispose();
       for (final item in oldItems) {
         item.dispose();
@@ -178,24 +218,42 @@ final class PlatformTrayService implements TrayService {
   /// native side declines.
   ({Menu menu, List<MenuItem> items})? _buildMenu(
     Map<ShortcutAction, String> labels,
+    ({String open, String quit}) ends,
   ) {
     final menu = Menu.create();
     if (menu == null) return null;
     final items = <MenuItem>[];
-    for (final entry in labels.entries) {
-      final item = MenuItem.createWithLabelAndType(
-        entry.value,
-        MenuItemType.normal,
-      );
-      if (item == null) continue;
+
+    /// One entry, with what a click on it means.
+    void add(String label, void Function() run) {
+      final item = MenuItem.createWithLabelAndType(label, MenuItemType.normal);
+      if (item == null) return;
       item.addListener((event) {
         if (event is! MenuItemClickedEvent || event.itemId != item.id) return;
-        _log.debug('tray action: ${entry.key.id}');
-        _actions.add(entry.key);
+        run();
       });
       menu.addItem(item);
       items.add(item);
     }
+
+    // Open first (#209): on Linux the indicator has no click of its own,
+    // so this is the way back to the window.
+    add(ends.open, () {
+      _log.debug('tray: open');
+      _commands.add(TrayCommand.open);
+    });
+    menu.addSeparator();
+    for (final entry in labels.entries) {
+      add(entry.value, () {
+        _log.debug('tray action: ${entry.key.id}');
+        _actions.add(entry.key);
+      });
+    }
+    menu.addSeparator();
+    add(ends.quit, () {
+      _log.debug('tray: quit');
+      _commands.add(TrayCommand.quit);
+    });
     return (menu: menu, items: items);
   }
 
@@ -213,6 +271,7 @@ final class PlatformTrayService implements TrayService {
     _items.clear();
     await _actions.close();
     await _activated.close();
+    await _commands.close();
   }
 }
 
@@ -222,13 +281,20 @@ final class NoopTrayService implements TrayService {
   const new();
 
   @override
-  Future<void> init(Map<ShortcutAction, String> labels) async {}
+  Future<void> init({
+    required Map<ShortcutAction, String> labels,
+    required String openLabel,
+    required String quitLabel,
+  }) async {}
 
   @override
   Stream<ShortcutAction> get actions => const Stream<ShortcutAction>.empty();
 
   @override
   Stream<void> get activated => const Stream<void>.empty();
+
+  @override
+  Stream<TrayCommand> get commands => const Stream<TrayCommand>.empty();
 
   @override
   Future<void> dispose() async {}

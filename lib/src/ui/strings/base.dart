@@ -189,6 +189,10 @@ abstract base class Strings {
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   String get shortcutQuickNote;
+  String get trayOpen;
+  String get trayQuit;
+  String get closeToTrayTitle;
+  String get closeToTraySubtitle;
   String get shortcutNewTodo;
   String get shortcutNewNote;
   String get shortcutNewList;

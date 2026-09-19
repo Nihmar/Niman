@@ -25,6 +25,7 @@ abstract final class SettingsKeys {
   static const palette = Key('theme-palette-setting');
   static const uiTextScale = Key('ui-text-scale-setting');
   static const splitRatio = Key('split-ratio-setting');
+  static const closeToTray = Key('close-to-tray-setting');
 
   // Editor.
   static const toolbar = Key('toolbar-setting');

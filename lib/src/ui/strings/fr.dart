@@ -396,6 +396,16 @@ final class FrenchStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Note rapide';
   @override
+  String get trayOpen => 'Ouvrir Niman';
+  @override
+  String get trayQuit => 'Quitter';
+  @override
+  String get closeToTrayTitle => 'Fermer dans la zone de notification';
+  @override
+  String get closeToTraySubtitle =>
+      'Le × de la fenêtre masque Niman et le laisse tourner, pour que les '
+      'rappels arrivent encore. On quitte depuis le menu de l’icône.';
+  @override
   String get shortcutNewTodo => 'Nouvelle tâche';
   @override
   String get shortcutNewNote => 'Nouvelle note';

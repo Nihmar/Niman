@@ -59,6 +59,21 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _closeToTrayMeta = const VerificationMeta(
+    'closeToTray',
+  );
+  @override
+  late final GeneratedColumn<bool> closeToTray = GeneratedColumn<bool>(
+    'close_to_tray',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("close_to_tray" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _lastUpdateCheckMsMeta = const VerificationMeta(
     'lastUpdateCheckMs',
   );
@@ -179,6 +194,7 @@ class $AppSettingsTable extends AppSettings
     libraryPath,
     debugLogsEnabled,
     autoUpdateEnabled,
+    closeToTray,
     lastUpdateCheckMs,
     previewMode,
     splitRatio,
@@ -229,6 +245,15 @@ class $AppSettingsTable extends AppSettings
         autoUpdateEnabled.isAcceptableOrUnknown(
           data['auto_update_enabled']!,
           _autoUpdateEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('close_to_tray')) {
+      context.handle(
+        _closeToTrayMeta,
+        closeToTray.isAcceptableOrUnknown(
+          data['close_to_tray']!,
+          _closeToTrayMeta,
         ),
       );
     }
@@ -338,6 +363,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}auto_update_enabled'],
       )!,
+      closeToTray: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}close_to_tray'],
+      )!,
       lastUpdateCheckMs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_update_check_ms'],
@@ -404,6 +433,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// The manual "Check for updates" row in Settings works regardless.
   final bool autoUpdateEnabled;
 
+  /// Whether the window's × hides Niman to the tray and leaves it
+  /// running (#209), instead of quitting.
+  ///
+  /// On by default on the desktops: the desktop reminders need the
+  /// process alive to fire, and the tray icon is how you get the window
+  /// back. The tray's Quit, and the × with this off, quit for real.
+  final bool closeToTray;
+
   /// Last update-check time, milliseconds since epoch; null until the
   /// first check runs (issue #81).
   final int? lastUpdateCheckMs;
@@ -467,6 +504,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     this.libraryPath,
     required this.debugLogsEnabled,
     required this.autoUpdateEnabled,
+    required this.closeToTray,
     this.lastUpdateCheckMs,
     required this.previewMode,
     required this.splitRatio,
@@ -487,6 +525,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     }
     map['debug_logs_enabled'] = Variable<bool>(debugLogsEnabled);
     map['auto_update_enabled'] = Variable<bool>(autoUpdateEnabled);
+    map['close_to_tray'] = Variable<bool>(closeToTray);
     if (!nullToAbsent || lastUpdateCheckMs != null) {
       map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs);
     }
@@ -516,6 +555,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           : Value(libraryPath),
       debugLogsEnabled: Value(debugLogsEnabled),
       autoUpdateEnabled: Value(autoUpdateEnabled),
+      closeToTray: Value(closeToTray),
       lastUpdateCheckMs: lastUpdateCheckMs == null && nullToAbsent
           ? const Value.absent()
           : Value(lastUpdateCheckMs),
@@ -547,6 +587,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       libraryPath: serializer.fromJson<String?>(json['libraryPath']),
       debugLogsEnabled: serializer.fromJson<bool>(json['debugLogsEnabled']),
       autoUpdateEnabled: serializer.fromJson<bool>(json['autoUpdateEnabled']),
+      closeToTray: serializer.fromJson<bool>(json['closeToTray']),
       lastUpdateCheckMs: serializer.fromJson<int?>(json['lastUpdateCheckMs']),
       previewMode: serializer.fromJson<String>(json['previewMode']),
       splitRatio: serializer.fromJson<double>(json['splitRatio']),
@@ -571,6 +612,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'libraryPath': serializer.toJson<String?>(libraryPath),
       'debugLogsEnabled': serializer.toJson<bool>(debugLogsEnabled),
       'autoUpdateEnabled': serializer.toJson<bool>(autoUpdateEnabled),
+      'closeToTray': serializer.toJson<bool>(closeToTray),
       'lastUpdateCheckMs': serializer.toJson<int?>(lastUpdateCheckMs),
       'previewMode': serializer.toJson<String>(previewMode),
       'splitRatio': serializer.toJson<double>(splitRatio),
@@ -589,6 +631,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     Value<String?> libraryPath = const Value.absent(),
     bool? debugLogsEnabled,
     bool? autoUpdateEnabled,
+    bool? closeToTray,
     Value<int?> lastUpdateCheckMs = const Value.absent(),
     String? previewMode,
     double? splitRatio,
@@ -604,6 +647,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
     debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
     autoUpdateEnabled: autoUpdateEnabled ?? this.autoUpdateEnabled,
+    closeToTray: closeToTray ?? this.closeToTray,
     lastUpdateCheckMs: lastUpdateCheckMs.present
         ? lastUpdateCheckMs.value
         : this.lastUpdateCheckMs,
@@ -633,6 +677,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       autoUpdateEnabled: data.autoUpdateEnabled.present
           ? data.autoUpdateEnabled.value
           : this.autoUpdateEnabled,
+      closeToTray: data.closeToTray.present
+          ? data.closeToTray.value
+          : this.closeToTray,
       lastUpdateCheckMs: data.lastUpdateCheckMs.present
           ? data.lastUpdateCheckMs.value
           : this.lastUpdateCheckMs,
@@ -669,6 +716,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
           ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
+          ..write('closeToTray: $closeToTray, ')
           ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
@@ -689,6 +737,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     libraryPath,
     debugLogsEnabled,
     autoUpdateEnabled,
+    closeToTray,
     lastUpdateCheckMs,
     previewMode,
     splitRatio,
@@ -708,6 +757,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.libraryPath == this.libraryPath &&
           other.debugLogsEnabled == this.debugLogsEnabled &&
           other.autoUpdateEnabled == this.autoUpdateEnabled &&
+          other.closeToTray == this.closeToTray &&
           other.lastUpdateCheckMs == this.lastUpdateCheckMs &&
           other.previewMode == this.previewMode &&
           other.splitRatio == this.splitRatio &&
@@ -725,6 +775,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String?> libraryPath;
   final Value<bool> debugLogsEnabled;
   final Value<bool> autoUpdateEnabled;
+  final Value<bool> closeToTray;
   final Value<int?> lastUpdateCheckMs;
   final Value<String> previewMode;
   final Value<double> splitRatio;
@@ -740,6 +791,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
     this.autoUpdateEnabled = const Value.absent(),
+    this.closeToTray = const Value.absent(),
     this.lastUpdateCheckMs = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
@@ -756,6 +808,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.libraryPath = const Value.absent(),
     this.debugLogsEnabled = const Value.absent(),
     this.autoUpdateEnabled = const Value.absent(),
+    this.closeToTray = const Value.absent(),
     this.lastUpdateCheckMs = const Value.absent(),
     this.previewMode = const Value.absent(),
     this.splitRatio = const Value.absent(),
@@ -772,6 +825,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? libraryPath,
     Expression<bool>? debugLogsEnabled,
     Expression<bool>? autoUpdateEnabled,
+    Expression<bool>? closeToTray,
     Expression<int>? lastUpdateCheckMs,
     Expression<String>? previewMode,
     Expression<double>? splitRatio,
@@ -788,6 +842,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (libraryPath != null) 'library_path': libraryPath,
       if (debugLogsEnabled != null) 'debug_logs_enabled': debugLogsEnabled,
       if (autoUpdateEnabled != null) 'auto_update_enabled': autoUpdateEnabled,
+      if (closeToTray != null) 'close_to_tray': closeToTray,
       if (lastUpdateCheckMs != null) 'last_update_check_ms': lastUpdateCheckMs,
       if (previewMode != null) 'preview_mode': previewMode,
       if (splitRatio != null) 'split_ratio': splitRatio,
@@ -808,6 +863,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String?>? libraryPath,
     Value<bool>? debugLogsEnabled,
     Value<bool>? autoUpdateEnabled,
+    Value<bool>? closeToTray,
     Value<int?>? lastUpdateCheckMs,
     Value<String>? previewMode,
     Value<double>? splitRatio,
@@ -824,6 +880,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       libraryPath: libraryPath ?? this.libraryPath,
       debugLogsEnabled: debugLogsEnabled ?? this.debugLogsEnabled,
       autoUpdateEnabled: autoUpdateEnabled ?? this.autoUpdateEnabled,
+      closeToTray: closeToTray ?? this.closeToTray,
       lastUpdateCheckMs: lastUpdateCheckMs ?? this.lastUpdateCheckMs,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
@@ -852,6 +909,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     }
     if (autoUpdateEnabled.present) {
       map['auto_update_enabled'] = Variable<bool>(autoUpdateEnabled.value);
+    }
+    if (closeToTray.present) {
+      map['close_to_tray'] = Variable<bool>(closeToTray.value);
     }
     if (lastUpdateCheckMs.present) {
       map['last_update_check_ms'] = Variable<int>(lastUpdateCheckMs.value);
@@ -897,6 +957,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('libraryPath: $libraryPath, ')
           ..write('debugLogsEnabled: $debugLogsEnabled, ')
           ..write('autoUpdateEnabled: $autoUpdateEnabled, ')
+          ..write('closeToTray: $closeToTray, ')
           ..write('lastUpdateCheckMs: $lastUpdateCheckMs, ')
           ..write('previewMode: $previewMode, ')
           ..write('splitRatio: $splitRatio, ')
@@ -3880,6 +3941,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
       Value<bool> autoUpdateEnabled,
+      Value<bool> closeToTray,
       Value<int?> lastUpdateCheckMs,
       Value<String> previewMode,
       Value<double> splitRatio,
@@ -3897,6 +3959,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String?> libraryPath,
       Value<bool> debugLogsEnabled,
       Value<bool> autoUpdateEnabled,
+      Value<bool> closeToTray,
       Value<int?> lastUpdateCheckMs,
       Value<String> previewMode,
       Value<double> splitRatio,
@@ -3935,6 +3998,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<bool> get autoUpdateEnabled => $composableBuilder(
     column: $table.autoUpdateEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get closeToTray => $composableBuilder(
+    column: $table.closeToTray,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4018,6 +4086,11 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get closeToTray => $composableBuilder(
+    column: $table.closeToTray,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get lastUpdateCheckMs => $composableBuilder(
     column: $table.lastUpdateCheckMs,
     builder: (column) => ColumnOrderings(column),
@@ -4093,6 +4166,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get autoUpdateEnabled => $composableBuilder(
     column: $table.autoUpdateEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get closeToTray => $composableBuilder(
+    column: $table.closeToTray,
     builder: (column) => column,
   );
 
@@ -4178,6 +4256,7 @@ class $$AppSettingsTableTableManager
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
                 Value<bool> autoUpdateEnabled = const Value.absent(),
+                Value<bool> closeToTray = const Value.absent(),
                 Value<int?> lastUpdateCheckMs = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
@@ -4193,6 +4272,7 @@ class $$AppSettingsTableTableManager
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
                 autoUpdateEnabled: autoUpdateEnabled,
+                closeToTray: closeToTray,
                 lastUpdateCheckMs: lastUpdateCheckMs,
                 previewMode: previewMode,
                 splitRatio: splitRatio,
@@ -4210,6 +4290,7 @@ class $$AppSettingsTableTableManager
                 Value<String?> libraryPath = const Value.absent(),
                 Value<bool> debugLogsEnabled = const Value.absent(),
                 Value<bool> autoUpdateEnabled = const Value.absent(),
+                Value<bool> closeToTray = const Value.absent(),
                 Value<int?> lastUpdateCheckMs = const Value.absent(),
                 Value<String> previewMode = const Value.absent(),
                 Value<double> splitRatio = const Value.absent(),
@@ -4225,6 +4306,7 @@ class $$AppSettingsTableTableManager
                 libraryPath: libraryPath,
                 debugLogsEnabled: debugLogsEnabled,
                 autoUpdateEnabled: autoUpdateEnabled,
+                closeToTray: closeToTray,
                 lastUpdateCheckMs: lastUpdateCheckMs,
                 previewMode: previewMode,
                 splitRatio: splitRatio,

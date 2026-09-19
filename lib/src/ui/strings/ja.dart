@@ -362,6 +362,15 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutQuickNote => 'クイックノート';
   @override
+  String get trayOpen => 'Niman を開く';
+  @override
+  String get trayQuit => '終了';
+  @override
+  String get closeToTrayTitle => '閉じるとトレイに入れる';
+  @override
+  String get closeToTraySubtitle =>
+      'ウィンドウの × で Niman を隠し、実行したままにします。リマインダーはそのまま届きます。終了はトレイのメニューから。';
+  @override
   String get shortcutNewTodo => '新しい TODO';
   @override
   String get shortcutNewNote => '新しいノート';

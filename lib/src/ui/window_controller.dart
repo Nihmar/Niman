@@ -31,6 +31,10 @@ abstract interface class WindowController {
   /// Brings the window back to the front (the tray icon's activation).
   Future<void> show();
 
+  /// Hides the window, leaving the app running (#209): what the × does
+  /// with close-to-tray on.
+  Future<void> hide();
+
   /// Whether this platform gets the app's own title bar instead of the
   /// system one. Both desktops (T-PP-22); Android has no window to own.
   bool get customTitleBar;
@@ -144,6 +148,12 @@ final class WindowManagerController implements WindowController {
   }
 
   @override
+  Future<void> hide() async {
+    _log.info('window hidden to the tray');
+    await _manager.hide();
+  }
+
+  @override
   Future<void> dispose() async {
     _manager.removeListener(_listener);
     _maximized.dispose();
@@ -187,6 +197,9 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<void> show() async {}
+
+  @override
+  Future<void> hide() async {}
 
   @override
   bool get customTitleBar => false;

@@ -362,6 +362,14 @@ final class ChineseStrings extends Strings {
   @override
   String get shortcutQuickNote => '快速笔记';
   @override
+  String get trayOpen => '打开 Niman';
+  @override
+  String get trayQuit => '退出';
+  @override
+  String get closeToTrayTitle => '关闭到托盘';
+  @override
+  String get closeToTraySubtitle => '窗口的 × 会隐藏 Niman 并让它继续运行，提醒仍会响。退出请用托盘菜单。';
+  @override
   String get shortcutNewTodo => '新建待办';
   @override
   String get shortcutNewNote => '新建笔记';
