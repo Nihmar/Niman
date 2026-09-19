@@ -107,19 +107,45 @@ final class EditorContextMenu extends StatelessWidget {
 
   List<Widget> _desktopChildren(BuildContext context) {
     const divider = Divider(height: 9, indent: 8, endIndent: 8);
+    // Every row with its icon, the clipboard's too (0.0.8 test round):
+    // one column of icons down the menu, the way the formatting reads.
+    Widget plain(ContextMenuButtonItem item) => _MenuRow(
+      rowKey: Key('context-${item.type.name}'),
+      icon: _iconOf(item),
+      label:
+          item.label ??
+          AdaptiveTextSelectionToolbar.getButtonLabel(context, item),
+      onPressed: item.onPressed ?? () {},
+    );
     return [
-      ...AdaptiveTextSelectionToolbar.getAdaptiveButtons(context, clipboard),
+      for (final item in clipboard) plain(item),
       if (formats.isNotEmpty) divider,
       for (final (i, entry) in formats.indexed) ...[
         if (i > 0 && entry.item.group != formats[i - 1].item.group) divider,
-        _FormatMenuRow(entry: entry, onPressed: () => _run(entry.onPressed)),
+        _MenuRow(
+          rowKey: Key('context-${entry.item.id}'),
+          icon: entry.item.icon,
+          label: entry.item.label,
+          active: entry.active,
+          onPressed: () => _run(entry.onPressed),
+        ),
       ],
       if (extras.isNotEmpty) ...[
         divider,
-        ...AdaptiveTextSelectionToolbar.getAdaptiveButtons(context, extras),
+        for (final item in extras) plain(item),
       ],
     ];
   }
+
+  /// The clipboard's icons; anything else (Add to dictionary) is a word
+  /// to keep.
+  static IconData _iconOf(ContextMenuButtonItem item) => switch (item.type) {
+    ContextMenuButtonType.cut => Icons.content_cut,
+    ContextMenuButtonType.copy => Icons.content_copy,
+    ContextMenuButtonType.paste => Icons.content_paste,
+    ContextMenuButtonType.selectAll => Icons.select_all,
+    _ => Icons.spellcheck,
+  };
 
   List<Widget> _mobileChildren(BuildContext context) {
     final theme = Theme.of(context);
@@ -156,23 +182,31 @@ final class EditorContextMenu extends StatelessWidget {
   }
 }
 
-/// One formatting row of the desktop menu: the toolbar's icon, its name,
-/// pressed while the format is on.
-final class _FormatMenuRow extends StatelessWidget {
-  const new({required this.entry, required this.onPressed});
+/// One row of the desktop menu: an icon, a name, pressed while [active]
+/// (a format that is on at the caret).
+final class _MenuRow extends StatelessWidget {
+  const new({
+    required this.rowKey,
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.active = false,
+  });
 
-  final FormatMenuEntry entry;
+  final Key rowKey;
+  final IconData icon;
+  final String label;
   final VoidCallback onPressed;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final active = entry.active;
     return Semantics(
       toggled: active,
       child: InkWell(
-        key: Key('context-${entry.item.id}'),
+        key: rowKey,
         onTap: onPressed,
         canRequestFocus: false,
         child: Container(
@@ -182,7 +216,7 @@ final class _FormatMenuRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                entry.item.icon,
+                icon,
                 size: 18,
                 color: active
                     ? scheme.onPrimaryContainer
@@ -191,7 +225,7 @@ final class _FormatMenuRow extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  entry.item.label,
+                  label,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: active ? scheme.onPrimaryContainer : null,
