@@ -1197,6 +1197,72 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get keySpace => 'Razmaknica';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Gore';
+  @override
+  String get keyArrowDown => 'Dolje';
+  @override
+  String get keyArrowLeft => 'Lijevo';
+  @override
+  String get keyArrowRight => 'Desno';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Bez prečaca';
+  @override
+  String get shortcutRestoreDefaults => 'Vrati zadano';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Vratiti sve prečace kako ih Niman isporučuje?';
+  @override
+  String get shortcutRevert => 'Vrati na zadano';
+  @override
+  String get shortcutClear => 'Ukloni prečac';
+  @override
+  String get shortcutCapturePrompt =>
+      'Pritisnite tipke. I Esc i Tab se bilježe: izlaz je Odustani.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Dodajte Ctrl, Alt ili Meta: sama tipka služi za pisanje.';
+  @override
+  String get shortcutMove => 'Premjesti';
+  @override
+  String get shortcutUseAnyway => 'Ipak upotrijebi';
+  @override
+  String get shortcutUndo => 'Poništi';
+  @override
+  String get shortcutRedo => 'Ponovi';
+  @override
+  String get shortcutChange => 'Promijeni prečac';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tipke za $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys već pripada $other. Premjestiti ovamo? $other ostaje bez prečaca.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys je i $what u tekstnim poljima i uređivaču. Ondje će ga preuzeti '
+      'vaša naredba.';
+  @override
   String get openFileMissing => 'Datoteka ove napomene nije na disku';
   @override
   String get openFileFailed =>

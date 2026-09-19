@@ -292,6 +292,15 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   /// fresh fake starts at the shipped defaults, as a fresh library does.
   LibraryConfig _config = LibraryConfig.defaults;
 
+  /// What [setKeyMap] last kept (#159).
+  String? keyMapJson;
+
+  @override
+  Future<String?> get keyMap async => keyMapJson;
+
+  @override
+  Future<void> setKeyMap(String json) async => keyMapJson = json;
+
   /// What [saveWorkspace] last kept (#23).
   Workspace workspace = Workspace.empty;
 

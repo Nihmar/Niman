@@ -1200,6 +1200,73 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get keySpace => 'Bil';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Bakklykill';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Upp';
+  @override
+  String get keyArrowDown => 'Niður';
+  @override
+  String get keyArrowLeft => 'Vinstri';
+  @override
+  String get keyArrowRight => 'Hægri';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Enginn flýtilykill';
+  @override
+  String get shortcutRestoreDefaults => 'Endurheimta sjálfgefið';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Setja alla flýtilykla aftur eins og Niman afhendir þá?';
+  @override
+  String get shortcutRevert => 'Aftur í sjálfgefið';
+  @override
+  String get shortcutClear => 'Fjarlægja flýtilykil';
+  @override
+  String get shortcutCapturePrompt =>
+      'Ýttu á lyklana. Esc og Tab eru líka tekin: Hætta við er leiðin út.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Bættu við Ctrl, Alt eða Meta: stakur lykill er til að skrifa.';
+  @override
+  String get shortcutMove => 'Færa hann';
+  @override
+  String get shortcutUseAnyway => 'Nota samt';
+  @override
+  String get shortcutUndo => 'Afturkalla';
+  @override
+  String get shortcutRedo => 'Endurtaka';
+  @override
+  String get shortcutChange => 'Breyta flýtilykli';
+  @override
+  String shortcutCaptureTitle(String command) => 'Lyklar fyrir $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys tilheyrir þegar $other. Færa hingað? $other verður án '
+      'flýtilykils.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys er líka $what í textareitum og ritlinum. Þar tekur skipunin þín '
+      'hann.';
+  @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';

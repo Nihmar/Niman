@@ -86,6 +86,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 24) await drop('app_settings', 'key_map');
   if (version < 23) await db.customStatement('DROP TABLE workspaces');
   if (version < 22) {
     for (final table in ['sync_destinations', 'sync_items', 'sync_ops']) {
@@ -983,6 +984,29 @@ void main() {
             ),
           );
       expect(await db.select(db.workspaces).get(), hasLength(1));
+      await db.close();
+    });
+  });
+
+  group('v23 → v24: the key map appears (#159)', () {
+    test('an existing install upgrades with every key as shipped', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 23);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/Work')",
+        );
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      expect(await repo.keyMap(), equals(null));
+      await repo.setKeyMap('{"newNote":null}');
+      expect(await repo.keyMap(), '{"newNote":null}');
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/Work',
+      );
       await db.close();
     });
   });

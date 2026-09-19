@@ -1213,6 +1213,72 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get keySpace => 'Spazio';
+  @override
+  String get keyEnter => 'Invio';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Canc';
+  @override
+  String get keyArrowUp => 'Su';
+  @override
+  String get keyArrowDown => 'Giù';
+  @override
+  String get keyArrowLeft => 'Sinistra';
+  @override
+  String get keyArrowRight => 'Destra';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'Fine';
+  @override
+  String get keyPageUp => 'Pag su';
+  @override
+  String get keyPageDown => 'Pag giù';
+  @override
+  String get keyInsert => 'Ins';
+  @override
+  String get shortcutNone => 'Nessuna scorciatoia';
+  @override
+  String get shortcutRestoreDefaults => 'Ripristina predefinite';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Rimettere tutte le scorciatoie come le fornisce Niman?';
+  @override
+  String get shortcutRevert => 'Torna alla predefinita';
+  @override
+  String get shortcutClear => 'Rimuovi la scorciatoia';
+  @override
+  String get shortcutCapturePrompt =>
+      'Premi i tasti. Anche Esc e Tab vengono presi: si esce con Annulla.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Aggiungi Ctrl, Alt o Meta: un tasto da solo serve per scrivere.';
+  @override
+  String get shortcutMove => 'Spostala';
+  @override
+  String get shortcutUseAnyway => 'Usa comunque';
+  @override
+  String get shortcutUndo => 'Annulla';
+  @override
+  String get shortcutRedo => 'Ripeti';
+  @override
+  String get shortcutChange => 'Cambia la scorciatoia';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tasti per $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys è già di $other. Spostarla qui? $other resterà senza scorciatoia.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys è anche $what nei campi di testo e nell’editor. Lì la prenderà '
+      'il tuo comando.';
+  @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override
   String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';

@@ -1195,6 +1195,73 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get keySpace => 'Preslednica';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Vračalka';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Gor';
+  @override
+  String get keyArrowDown => 'Dol';
+  @override
+  String get keyArrowLeft => 'Levo';
+  @override
+  String get keyArrowRight => 'Desno';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Brez bližnjice';
+  @override
+  String get shortcutRestoreDefaults => 'Obnovi privzete';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Vrniti vse bližnjice, kot jih prinaša Niman?';
+  @override
+  String get shortcutRevert => 'Nazaj na privzeto';
+  @override
+  String get shortcutClear => 'Odstrani bližnjico';
+  @override
+  String get shortcutCapturePrompt =>
+      'Pritisnite tipke. Zajameta se tudi Esc in Tab: izhod je Prekliči.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Dodajte Ctrl, Alt ali Meta: tipka sama je za tipkanje.';
+  @override
+  String get shortcutMove => 'Premakni';
+  @override
+  String get shortcutUseAnyway => 'Vseeno uporabi';
+  @override
+  String get shortcutUndo => 'Razveljavi';
+  @override
+  String get shortcutRedo => 'Uveljavi';
+  @override
+  String get shortcutChange => 'Spremeni bližnjico';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tipke za $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys že pripada ukazu $other. Jo premaknem sem? $other bo ostal brez '
+      'bližnjice.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys je v besedilnih poljih in urejevalniku tudi $what. Tam jo bo '
+      'prevzel vaš ukaz.';
+  @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';

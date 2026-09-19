@@ -1213,6 +1213,72 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get keySpace => 'Espazo';
+  @override
+  String get keyEnter => 'Intro';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Retroceso';
+  @override
+  String get keyDelete => 'Supr';
+  @override
+  String get keyArrowUp => 'Arriba';
+  @override
+  String get keyArrowDown => 'Abaixo';
+  @override
+  String get keyArrowLeft => 'Esquerda';
+  @override
+  String get keyArrowRight => 'Dereita';
+  @override
+  String get keyHome => 'Inicio';
+  @override
+  String get keyEnd => 'Fin';
+  @override
+  String get keyPageUp => 'Re Páx';
+  @override
+  String get keyPageDown => 'Av Páx';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Sen atallo';
+  @override
+  String get shortcutRestoreDefaults => 'Restaurar predeterminados';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Volver poñer todos os atallos como os trae Niman?';
+  @override
+  String get shortcutRevert => 'Volver ao predeterminado';
+  @override
+  String get shortcutClear => 'Quitar o atallo';
+  @override
+  String get shortcutCapturePrompt =>
+      'Preme as teclas. Esc e Tab tamén se capturan: sae con Cancelar.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Engade Ctrl, Alt ou Meta: unha tecla soa é para escribir.';
+  @override
+  String get shortcutMove => 'Movelo';
+  @override
+  String get shortcutUseAnyway => 'Usar igualmente';
+  @override
+  String get shortcutUndo => 'Desfacer';
+  @override
+  String get shortcutRedo => 'Refacer';
+  @override
+  String get shortcutChange => 'Cambiar o atallo';
+  @override
+  String shortcutCaptureTitle(String command) => 'Teclas para $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys xa é de $other. Movelo aquí? $other quedará sen atallo.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys tamén é $what nos campos de texto e no editor. Alí collerao a '
+      'túa orde.';
+  @override
   String get openFileMissing => 'O ficheiro desta nota non está no disco';
   @override
   String get openFileFailed => 'Non foi posible abrir esta nota fóra do Niman';

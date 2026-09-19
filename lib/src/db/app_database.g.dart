@@ -153,6 +153,15 @@ class $AppSettingsTable extends AppSettings
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _keyMapMeta = const VerificationMeta('keyMap');
+  @override
+  late final GeneratedColumn<String> keyMap = GeneratedColumn<String>(
+    'key_map',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -167,6 +176,7 @@ class $AppSettingsTable extends AppSettings
     themePalette,
     legacyLibrarySettings,
     changelogSeenVersion,
+    keyMap,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -276,6 +286,12 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('key_map')) {
+      context.handle(
+        _keyMapMeta,
+        keyMap.isAcceptableOrUnknown(data['key_map']!, _keyMapMeta),
+      );
+    }
     return context;
   }
 
@@ -332,6 +348,10 @@ class $AppSettingsTable extends AppSettings
       changelogSeenVersion: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}changelog_seen_version'],
+      ),
+      keyMap: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key_map'],
       ),
     );
   }
@@ -407,6 +427,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// null until the first launch has written it, which is what turns the
   /// update dialog off on a fresh install.
   final String? changelogSeenVersion;
+
+  /// The keyboard shortcuts the user changed (#159), as `KeyMap.toJson`
+  /// writes them; null while none was. The device's, never a library's:
+  /// a shortcut belongs to the keyboard.
+  final String? keyMap;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -420,6 +445,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.themePalette,
     required this.legacyLibrarySettings,
     this.changelogSeenVersion,
+    this.keyMap,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -441,6 +467,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['legacy_library_settings'] = Variable<String>(legacyLibrarySettings);
     if (!nullToAbsent || changelogSeenVersion != null) {
       map['changelog_seen_version'] = Variable<String>(changelogSeenVersion);
+    }
+    if (!nullToAbsent || keyMap != null) {
+      map['key_map'] = Variable<String>(keyMap);
     }
     return map;
   }
@@ -465,6 +494,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       changelogSeenVersion: changelogSeenVersion == null && nullToAbsent
           ? const Value.absent()
           : Value(changelogSeenVersion),
+      keyMap: keyMap == null && nullToAbsent
+          ? const Value.absent()
+          : Value(keyMap),
     );
   }
 
@@ -490,6 +522,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       changelogSeenVersion: serializer.fromJson<String?>(
         json['changelogSeenVersion'],
       ),
+      keyMap: serializer.fromJson<String?>(json['keyMap']),
     );
   }
   @override
@@ -508,6 +541,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'themePalette': serializer.toJson<String>(themePalette),
       'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
       'changelogSeenVersion': serializer.toJson<String?>(changelogSeenVersion),
+      'keyMap': serializer.toJson<String?>(keyMap),
     };
   }
 
@@ -524,6 +558,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? themePalette,
     String? legacyLibrarySettings,
     Value<String?> changelogSeenVersion = const Value.absent(),
+    Value<String?> keyMap = const Value.absent(),
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -541,6 +576,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     changelogSeenVersion: changelogSeenVersion.present
         ? changelogSeenVersion.value
         : this.changelogSeenVersion,
+    keyMap: keyMap.present ? keyMap.value : this.keyMap,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -576,6 +612,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       changelogSeenVersion: data.changelogSeenVersion.present
           ? data.changelogSeenVersion.value
           : this.changelogSeenVersion,
+      keyMap: data.keyMap.present ? data.keyMap.value : this.keyMap,
     );
   }
 
@@ -593,7 +630,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
-          ..write('changelogSeenVersion: $changelogSeenVersion')
+          ..write('changelogSeenVersion: $changelogSeenVersion, ')
+          ..write('keyMap: $keyMap')
           ..write(')'))
         .toString();
   }
@@ -612,6 +650,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     themePalette,
     legacyLibrarySettings,
     changelogSeenVersion,
+    keyMap,
   );
   @override
   bool operator ==(Object other) =>
@@ -628,7 +667,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.themeBrightness == this.themeBrightness &&
           other.themePalette == this.themePalette &&
           other.legacyLibrarySettings == this.legacyLibrarySettings &&
-          other.changelogSeenVersion == this.changelogSeenVersion);
+          other.changelogSeenVersion == this.changelogSeenVersion &&
+          other.keyMap == this.keyMap);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -644,6 +684,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> themePalette;
   final Value<String> legacyLibrarySettings;
   final Value<String?> changelogSeenVersion;
+  final Value<String?> keyMap;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -657,6 +698,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
     this.changelogSeenVersion = const Value.absent(),
+    this.keyMap = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -671,6 +713,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.themePalette = const Value.absent(),
     this.legacyLibrarySettings = const Value.absent(),
     this.changelogSeenVersion = const Value.absent(),
+    this.keyMap = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -685,6 +728,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? themePalette,
     Expression<String>? legacyLibrarySettings,
     Expression<String>? changelogSeenVersion,
+    Expression<String>? keyMap,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -701,6 +745,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
         'legacy_library_settings': legacyLibrarySettings,
       if (changelogSeenVersion != null)
         'changelog_seen_version': changelogSeenVersion,
+      if (keyMap != null) 'key_map': keyMap,
     });
   }
 
@@ -717,6 +762,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? themePalette,
     Value<String>? legacyLibrarySettings,
     Value<String?>? changelogSeenVersion,
+    Value<String?>? keyMap,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -732,6 +778,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       legacyLibrarySettings:
           legacyLibrarySettings ?? this.legacyLibrarySettings,
       changelogSeenVersion: changelogSeenVersion ?? this.changelogSeenVersion,
+      keyMap: keyMap ?? this.keyMap,
     );
   }
 
@@ -778,6 +825,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
         changelogSeenVersion.value,
       );
     }
+    if (keyMap.present) {
+      map['key_map'] = Variable<String>(keyMap.value);
+    }
     return map;
   }
 
@@ -795,7 +845,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('themeBrightness: $themeBrightness, ')
           ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
-          ..write('changelogSeenVersion: $changelogSeenVersion')
+          ..write('changelogSeenVersion: $changelogSeenVersion, ')
+          ..write('keyMap: $keyMap')
           ..write(')'))
         .toString();
   }
@@ -3777,6 +3828,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> themePalette,
       Value<String> legacyLibrarySettings,
       Value<String?> changelogSeenVersion,
+      Value<String?> keyMap,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -3792,6 +3844,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> themePalette,
       Value<String> legacyLibrarySettings,
       Value<String?> changelogSeenVersion,
+      Value<String?> keyMap,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -3860,6 +3913,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get changelogSeenVersion => $composableBuilder(
     column: $table.changelogSeenVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get keyMap => $composableBuilder(
+    column: $table.keyMap,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3932,6 +3990,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.changelogSeenVersion,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get keyMap => $composableBuilder(
+    column: $table.keyMap,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -3998,6 +4061,9 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.changelogSeenVersion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get keyMap =>
+      $composableBuilder(column: $table.keyMap, builder: (column) => column);
 }
 
 class $$AppSettingsTableTableManager
@@ -4043,6 +4109,7 @@ class $$AppSettingsTableTableManager
                 Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
                 Value<String?> changelogSeenVersion = const Value.absent(),
+                Value<String?> keyMap = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -4056,6 +4123,7 @@ class $$AppSettingsTableTableManager
                 themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
                 changelogSeenVersion: changelogSeenVersion,
+                keyMap: keyMap,
               ),
           createCompanionCallback:
               ({
@@ -4071,6 +4139,7 @@ class $$AppSettingsTableTableManager
                 Value<String> themePalette = const Value.absent(),
                 Value<String> legacyLibrarySettings = const Value.absent(),
                 Value<String?> changelogSeenVersion = const Value.absent(),
+                Value<String?> keyMap = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -4084,6 +4153,7 @@ class $$AppSettingsTableTableManager
                 themePalette: themePalette,
                 legacyLibrarySettings: legacyLibrarySettings,
                 changelogSeenVersion: changelogSeenVersion,
+                keyMap: keyMap,
               ),
           withReferenceMapper: (p0) => p0
               .map(

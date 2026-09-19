@@ -471,6 +471,13 @@ abstract interface class LibrarySession {
   /// How bright the app is ([AppBrightness.system] by default).
   Future<AppBrightness> get themeBrightness;
 
+  /// The keyboard shortcuts changed on this device (#159), as stored;
+  /// null while none was.
+  Future<String?> get keyMap;
+
+  /// Keeps [json] as this device's changed shortcuts.
+  Future<void> setKeyMap(String json);
+
   /// Sets (and persists) the brightness choice.
   Future<void> setThemeBrightness(AppBrightness brightness);
 

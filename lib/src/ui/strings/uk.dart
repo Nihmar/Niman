@@ -1205,6 +1205,74 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get keySpace => 'Пробіл';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Угору';
+  @override
+  String get keyArrowDown => 'Униз';
+  @override
+  String get keyArrowLeft => 'Ліворуч';
+  @override
+  String get keyArrowRight => 'Праворуч';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Немає скорочення';
+  @override
+  String get shortcutRestoreDefaults => 'Відновити типові';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Повернути всі скорочення, як їх постачає Niman?';
+  @override
+  String get shortcutRevert => 'Повернути типове';
+  @override
+  String get shortcutClear => 'Видалити скорочення';
+  @override
+  String get shortcutCapturePrompt =>
+      'Натисніть клавіші. Esc і Tab теж записуються: вийти можна кнопкою '
+      '«Скасувати».';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Додайте Ctrl, Alt або Meta: одна клавіша — для набору тексту.';
+  @override
+  String get shortcutMove => 'Перемістити';
+  @override
+  String get shortcutUseAnyway => 'Усе одно використати';
+  @override
+  String get shortcutUndo => 'Скасувати дію';
+  @override
+  String get shortcutRedo => 'Повторити';
+  @override
+  String get shortcutChange => 'Змінити скорочення';
+  @override
+  String shortcutCaptureTitle(String command) => 'Клавіші для «$command»';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys уже належить «$other». Перемістити сюди? «$other» залишиться '
+      'без скорочення.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys також «$what» у текстових полях і редакторі. Там його візьме '
+      'ваша команда.';
+  @override
   String get openFileMissing => 'Файлу цієї нотатки немає на диску';
   @override
   String get openFileFailed => 'Не вдалося відкрити цю нотатку поза Niman';

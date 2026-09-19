@@ -1243,6 +1243,75 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get keySpace => 'Διάστημα';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Πάνω';
+  @override
+  String get keyArrowDown => 'Κάτω';
+  @override
+  String get keyArrowLeft => 'Αριστερά';
+  @override
+  String get keyArrowRight => 'Δεξιά';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Χωρίς συντόμευση';
+  @override
+  String get shortcutRestoreDefaults => 'Επαναφορά προεπιλογών';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Να επανέλθουν όλες οι συντομεύσεις όπως τις παρέχει το Niman;';
+  @override
+  String get shortcutRevert => 'Επιστροφή στην προεπιλογή';
+  @override
+  String get shortcutClear => 'Αφαίρεση συντόμευσης';
+  @override
+  String get shortcutCapturePrompt =>
+      'Πατήστε τα πλήκτρα. Καταγράφονται και τα Esc και Tab: έξοδος με την '
+      'Ακύρωση.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Προσθέστε Ctrl, Alt ή Meta: ένα πλήκτρο μόνο του είναι για '
+      'πληκτρολόγηση.';
+  @override
+  String get shortcutMove => 'Μετακίνηση';
+  @override
+  String get shortcutUseAnyway => 'Χρήση ούτως ή άλλως';
+  @override
+  String get shortcutUndo => 'Αναίρεση';
+  @override
+  String get shortcutRedo => 'Επανάληψη';
+  @override
+  String get shortcutChange => 'Αλλαγή συντόμευσης';
+  @override
+  String shortcutCaptureTitle(String command) => 'Πλήκτρα για «$command»';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      'Το $keys ανήκει ήδη στο «$other». Να μετακινηθεί εδώ; Το «$other» θα '
+      'μείνει χωρίς συντόμευση.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      'Το $keys είναι επίσης «$what» στα πεδία κειμένου και στον '
+      'επεξεργαστή. Εκεί θα το πάρει η εντολή σας.';
+  @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
   @override

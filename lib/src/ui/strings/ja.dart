@@ -1120,6 +1120,70 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get keySpace => 'Space';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => '上';
+  @override
+  String get keyArrowDown => '下';
+  @override
+  String get keyArrowLeft => '左';
+  @override
+  String get keyArrowRight => '右';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'ショートカットなし';
+  @override
+  String get shortcutRestoreDefaults => '既定に戻す';
+  @override
+  String get shortcutRestoreDefaultsConfirm => 'すべてのショートカットを Niman の既定に戻しますか？';
+  @override
+  String get shortcutRevert => '既定に戻す';
+  @override
+  String get shortcutClear => 'ショートカットを削除';
+  @override
+  String get shortcutCapturePrompt =>
+      'キーを押してください。Esc と Tab も記録されます。終了は「キャンセル」で。';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Ctrl、Alt、Meta のいずれかを加えてください。単独のキーは入力用です。';
+  @override
+  String get shortcutMove => '移動する';
+  @override
+  String get shortcutUseAnyway => 'それでも使う';
+  @override
+  String get shortcutUndo => '元に戻す';
+  @override
+  String get shortcutRedo => 'やり直す';
+  @override
+  String get shortcutChange => 'ショートカットを変更';
+  @override
+  String shortcutCaptureTitle(String command) => '「$command」のキー';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys はすでに「$other」に割り当てられています。ここへ移動しますか？「$other」はショートカットなしになります。';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys はテキスト欄とエディタでは「$what」でもあります。そこでもあなたのコマンドが優先されます。';
+  @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';

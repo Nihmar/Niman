@@ -1198,6 +1198,72 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get keySpace => 'Mellemrum';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Op';
+  @override
+  String get keyArrowDown => 'Ned';
+  @override
+  String get keyArrowLeft => 'Venstre';
+  @override
+  String get keyArrowRight => 'Højre';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Ingen genvej';
+  @override
+  String get shortcutRestoreDefaults => 'Gendan standard';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Sæt alle genveje tilbage, som Niman leverer dem?';
+  @override
+  String get shortcutRevert => 'Tilbage til standard';
+  @override
+  String get shortcutClear => 'Fjern genvejen';
+  @override
+  String get shortcutCapturePrompt =>
+      'Tryk på tasterne. Esc og Tab optages også: Annuller er vejen ud.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Tilføj Ctrl, Alt eller Meta: en tast alene er til at skrive.';
+  @override
+  String get shortcutMove => 'Flyt den';
+  @override
+  String get shortcutUseAnyway => 'Brug alligevel';
+  @override
+  String get shortcutUndo => 'Fortryd';
+  @override
+  String get shortcutRedo => 'Gentag';
+  @override
+  String get shortcutChange => 'Skift genvejen';
+  @override
+  String shortcutCaptureTitle(String command) => 'Taster til $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys er allerede $other. Flyt den hertil? $other får ingen genvej.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys er også $what i tekstfelter og editoren. Dér tager din kommando '
+      'den.';
+  @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';

@@ -1218,6 +1218,74 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get keySpace => 'Spacja';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'W górę';
+  @override
+  String get keyArrowDown => 'W dół';
+  @override
+  String get keyArrowLeft => 'W lewo';
+  @override
+  String get keyArrowRight => 'W prawo';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Brak skrótu';
+  @override
+  String get shortcutRestoreDefaults => 'Przywróć domyślne';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Przywrócić wszystkie skróty tak, jak dostarcza je Niman?';
+  @override
+  String get shortcutRevert => 'Przywróć domyślny';
+  @override
+  String get shortcutClear => 'Usuń skrót';
+  @override
+  String get shortcutCapturePrompt =>
+      'Naciśnij klawisze. Esc i Tab też są przechwytywane: wyjście przez '
+      'Anuluj.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Dodaj Ctrl, Alt lub Meta: sam klawisz służy do pisania.';
+  @override
+  String get shortcutMove => 'Przenieś';
+  @override
+  String get shortcutUseAnyway => 'Użyj mimo to';
+  @override
+  String get shortcutUndo => 'Cofnij';
+  @override
+  String get shortcutRedo => 'Ponów';
+  @override
+  String get shortcutChange => 'Zmień skrót';
+  @override
+  String shortcutCaptureTitle(String command) => 'Klawisze dla: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys należy już do: $other. Przenieść tutaj? $other zostanie bez '
+      'skrótu.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys to także $what w polach tekstowych i edytorze. Tam przejmie go '
+      'Twoje polecenie.';
+  @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override
   String get openFileFailed =>

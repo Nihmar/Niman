@@ -1204,6 +1204,73 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get keySpace => 'Размак';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Горе';
+  @override
+  String get keyArrowDown => 'Доле';
+  @override
+  String get keyArrowLeft => 'Лево';
+  @override
+  String get keyArrowRight => 'Десно';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Без пречице';
+  @override
+  String get shortcutRestoreDefaults => 'Врати подразумеване';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Вратити све пречице како их Niman испоручује?';
+  @override
+  String get shortcutRevert => 'Врати на подразумевану';
+  @override
+  String get shortcutClear => 'Уклони пречицу';
+  @override
+  String get shortcutCapturePrompt =>
+      'Притисните тастере. И Esc и Tab се бележе: излаз је Откажи.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Додајте Ctrl, Alt или Meta: сам тастер је за куцање.';
+  @override
+  String get shortcutMove => 'Премести';
+  @override
+  String get shortcutUseAnyway => 'Ипак користи';
+  @override
+  String get shortcutUndo => 'Опозови';
+  @override
+  String get shortcutRedo => 'Понови';
+  @override
+  String get shortcutChange => 'Промени пречицу';
+  @override
+  String shortcutCaptureTitle(String command) => 'Тастери за „$command“';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys већ припада „$other“. Преместити овде? „$other“ остаје без '
+      'пречице.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys је и „$what“ у текстуалним пољима и уређивачу. Тамо ће је '
+      'преузети ваша команда.';
+  @override
   String get openFileMissing => 'Датотека ове белешке није на диску';
   @override
   String get openFileFailed =>

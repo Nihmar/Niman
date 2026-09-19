@@ -1201,6 +1201,74 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get keySpace => 'Прабел';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Уверх';
+  @override
+  String get keyArrowDown => 'Уніз';
+  @override
+  String get keyArrowLeft => 'Улева';
+  @override
+  String get keyArrowRight => 'Управа';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Няма спалучэння';
+  @override
+  String get shortcutRestoreDefaults => 'Аднавіць стандартныя';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Вярнуць усе спалучэнні, як у Niman па змаўчанні?';
+  @override
+  String get shortcutRevert => 'Вярнуць стандартнае';
+  @override
+  String get shortcutClear => 'Выдаліць спалучэнне';
+  @override
+  String get shortcutCapturePrompt =>
+      'Націсніце клавішы. Esc і Tab таксама запісваюцца: выйсці можна праз '
+      '«Скасаваць».';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Дадайце Ctrl, Alt або Meta: адна клавіша — для набору тэксту.';
+  @override
+  String get shortcutMove => 'Перанесці';
+  @override
+  String get shortcutUseAnyway => 'Усё роўна выкарыстаць';
+  @override
+  String get shortcutUndo => 'Адрабіць';
+  @override
+  String get shortcutRedo => 'Паўтарыць';
+  @override
+  String get shortcutChange => 'Змяніць спалучэнне';
+  @override
+  String shortcutCaptureTitle(String command) => 'Клавішы для «$command»';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys ужо ў «$other». Перанесці сюды? «$other» застанецца без '
+      'спалучэння.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys таксама $what у тэкставых палях і рэдактары. Там яго возьме '
+      'ваша каманда.';
+  @override
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override
   String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';
