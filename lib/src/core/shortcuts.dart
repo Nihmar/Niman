@@ -91,17 +91,23 @@ ShortcutService createShortcutService({bool? isAndroid}) {
 /// [ShortcutService.consumeLaunchAction] contract the Android launcher
 /// uses, so the CLI and the launcher share one route (`_runShortcut`)
 /// and cannot drift (T-PP-05).
+///
+/// On the desktop it also carries the flags of every later launch the
+/// first instance is handed (#41): `niman --quick-note` from a desktop
+/// action, with Niman already open, runs in the Niman that is open.
 final class CliShortcutService implements ShortcutService {
-  /// Creates the service for the flag the CLI parsed.
-  new(this._action);
+  /// Creates the service for the flag the CLI parsed, and the `later`
+  /// ones handed over.
+  new(this._action, {this._later = const Stream<ShortcutAction>.empty()});
 
   ShortcutAction? _action;
+  final Stream<ShortcutAction> _later;
 
   @override
   Future<void> publish(Map<ShortcutAction, String> labels) async {}
 
   @override
-  Stream<ShortcutAction> get actions => const Stream<ShortcutAction>.empty();
+  Stream<ShortcutAction> get actions => _later;
 
   @override
   Future<ShortcutAction?> consumeLaunchAction() async {

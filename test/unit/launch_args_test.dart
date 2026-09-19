@@ -29,10 +29,40 @@ void main() {
     expect(launch.action, ShortcutAction.newNote);
   });
 
-  test('a bare path is captured for the P3 file-open slice', () {
+  test('a bare path is the file to open (#41)', () {
     final launch = parseLaunchArgs(['/tmp/notes/a.md']);
     expect(launch.action, isNull);
     expect(launch.openPath, '/tmp/notes/a.md');
+  });
+
+  test('a relative path is made absolute against where it was typed', () {
+    // The first instance started somewhere else: `niman ../a.md` must
+    // reach it as the file the user meant.
+    final launch = parseLaunchArgs(['../notes/a.md'], cwd: '/home/u/work');
+    expect(launch.openPath, '/home/u/notes/a.md');
+  });
+
+  test('a file URI, as some file managers pass it, is its path', () {
+    expect(
+      parseLaunchArgs(['file:///home/u/My%20notes/a.md']).openPath,
+      '/home/u/My notes/a.md',
+    );
+    // Not a file this process can open.
+    expect(parseLaunchArgs(['file://server/share/a.md']).openPath, isNull);
+  });
+
+  test('a launch survives the hand-over to the first instance', () {
+    const launch = LaunchArgs(
+      action: ShortcutAction.newTodo,
+      openPath: '/home/u/a.md',
+    );
+    final back = LaunchArgs.fromJson(launch.toJson());
+    expect(back.action, ShortcutAction.newTodo);
+    expect(back.openPath, '/home/u/a.md');
+    // What cannot be read is left out, a relative path included.
+    final odd = LaunchArgs.fromJson({'action': 'nope', 'open': 'a.md'});
+    expect(odd.action, isNull);
+    expect(odd.openPath, isNull);
   });
 
   test(
@@ -46,4 +76,13 @@ void main() {
       await service.dispose();
     },
   );
+
+  test('later launches’ actions arrive as the service’s actions', () async {
+    final service = CliShortcutService(
+      null,
+      later: Stream.fromIterable([ShortcutAction.quickNote]),
+    );
+    expect(await service.consumeLaunchAction(), isNull);
+    expect(await service.actions.toList(), [ShortcutAction.quickNote]);
+  });
 }
