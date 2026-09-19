@@ -1201,6 +1201,14 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get spellCheckScanning => 'Праверка нататкі…';
+  @override
+  String get spellCheckAgain => 'Праверыць зноў';
+  @override
+  String spellCheckCapped(int count) =>
+      'Паказаны першыя $count: выпраўце некалькі і праверце зноў, каб '
+      'убачыць астатнія';
+  @override
   String get dropHint =>
       'Перацягніце файлы Markdown, каб адкрыць іх, або папку, каб '
       'імпартаваць яе';

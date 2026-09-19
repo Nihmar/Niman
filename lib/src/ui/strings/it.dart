@@ -1213,6 +1213,14 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get spellCheckScanning => 'Controllo della nota…';
+  @override
+  String get spellCheckAgain => 'Controlla di nuovo';
+  @override
+  String spellCheckCapped(int count) =>
+      'Sono elencati i primi $count: correggine alcuni, poi controlla di '
+      'nuovo per gli altri';
+  @override
   String get dropHint =>
       'Rilascia file Markdown per aprirli, o una cartella per importarla';
   @override

@@ -1198,6 +1198,13 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get spellCheckScanning => 'Kontrollerer noten…';
+  @override
+  String get spellCheckAgain => 'Kontrollér igen';
+  @override
+  String spellCheckCapped(int count) =>
+      'De første $count vises: ret nogle, og kontrollér igen for resten';
+  @override
   String get dropHint =>
       'Slip Markdown-filer for at åbne dem, eller en mappe for at importere '
       'den';

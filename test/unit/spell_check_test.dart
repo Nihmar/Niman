@@ -193,26 +193,88 @@ void main() {
       expect(check.available, isFalse);
     });
 
-    test('scan lists the note issues with suggestions', () {
+    test('a pass lists the note issues; suggestions come per word', () async {
+      var suggests = 0;
       final check = EditorSpellCheck(
         createChecker: (_) => _FakeChecker(
           {'wrold'},
           suggestions: const {
             'wrold': ['world', 'would'],
           },
+          onSuggest: () => suggests++,
         ),
       );
-      final issues = check.scan([
-        (text: 'hello wrold', skip: const <TextRange>[]),
-      ]);
-      expect(issues, hasLength(1));
-      final issue = issues.single;
+      const lines = <String>['hello wrold', 'wrold again'];
+      final scan = check.startScan(
+        lineCount: lines.length,
+        lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
+      );
+      await scan.run();
+      expect(scan.done, isTrue);
+      expect(scan.capped, isFalse);
+      expect(scan.linesDone, 2);
+      final issue = scan.issues.first;
       expect(issue.word, 'wrold');
       expect(issue.line, 0);
       expect(issue.start, 6);
       expect(issue.end, 11);
       expect(issue.lineText, 'hello wrold');
-      expect(issue.suggestions, ['world', 'would']);
+      // The pass makes none of hunspell's slow suggestions (#61).
+      expect(suggests, 0);
+      expect(check.suggestionsFor('wrold'), ['world', 'would']);
+      expect(check.suggestionsFor('wrold'), ['world', 'would']);
+      expect(suggests, 1, reason: 'cached per word');
+    });
+
+    test('a pass stops at the cap, and says so', () async {
+      final check = EditorSpellCheck(
+        createChecker: (_) => _FakeChecker({'wrold'}),
+      );
+      final scan = check.startScan(
+        lineCount: EditorSpellCheck.maxIssues + 50,
+        lineAt: (_) => (text: 'wrold', skip: const <TextRange>[]),
+      );
+      await scan.run();
+      expect(scan.issues, hasLength(EditorSpellCheck.maxIssues));
+      expect(scan.capped, isTrue);
+      expect(scan.done, isTrue);
+    });
+
+    test('a long pass hands the frame back between slices, and a cancelled '
+        'one stops', () async {
+      final check = EditorSpellCheck(
+        // Every word costs 2 ms, as a cold hunspell verdict can.
+        createChecker: (_) => _FakeChecker({'wrold'}, cost: 2),
+      );
+      final scan = check.startScan(
+        lineCount: 40,
+        // A new word per line, so no verdict comes from the cache.
+        lineAt: (i) =>
+            (text: '${_letters(i)} wrold', skip: const <TextRange>[]),
+      );
+      var notices = 0;
+      scan.addListener(() => notices++);
+      final running = scan.run();
+      // Other work gets a turn before the pass is over.
+      var turns = 0;
+      while (!scan.done) {
+        turns++;
+        await Future<void>.delayed(Duration.zero);
+      }
+      await running;
+      expect(turns, greaterThan(1));
+      expect(notices, greaterThan(2));
+
+      final stopped = check.startScan(
+        lineCount: 40,
+        lineAt: (i) => (text: _letters(i + 1000), skip: const <TextRange>[]),
+      );
+      final going = stopped.run();
+      await Future<void>.delayed(Duration.zero);
+      stopped.cancel();
+      await going;
+      expect(stopped.linesDone, lessThan(40));
+      expect(stopped.done, isFalse);
     });
 
     test('reset forgets the cached lines', () {
@@ -491,21 +553,47 @@ Future<void> _settle() async {
   }
 }
 
+/// [n] spelled in letters, one word per number: `wbca` for 120.
+String _letters(int n) {
+  final letters = [
+    for (final digit in '$n'.split('')) 'abcdefghij'[int.parse(digit)],
+  ];
+  return 'w${letters.join()}';
+}
+
 /// A checker whose misspellings are the words in [wrong].
 final class _FakeChecker implements SpellChecker {
-  new(this.wrong, {this.suggestions = const <String, List<String>>{}});
+  new(
+    this.wrong, {
+    this.suggestions = const <String, List<String>>{},
+    this.cost = 0,
+    this.onSuggest,
+  });
 
   final Set<String> wrong;
   final Map<String, List<String>> suggestions;
+
+  /// Milliseconds each verdict keeps the isolate busy.
+  final int cost;
+  final void Function()? onSuggest;
 
   @override
   bool get available => true;
 
   @override
-  bool isCorrect(String word) => !wrong.contains(word);
+  bool isCorrect(String word) {
+    if (cost > 0) {
+      final clock = Stopwatch()..start();
+      while (clock.elapsedMilliseconds < cost) {}
+    }
+    return !wrong.contains(word);
+  }
 
   @override
-  List<String> suggest(String word) => suggestions[word] ?? const <String>[];
+  List<String> suggest(String word) {
+    onSuggest?.call();
+    return suggestions[word] ?? const <String>[];
+  }
 
   @override
   void dispose() {}

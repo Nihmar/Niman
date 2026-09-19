@@ -1214,6 +1214,14 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get spellCheckScanning => 'Notitie controleren…';
+  @override
+  String get spellCheckAgain => 'Opnieuw controleren';
+  @override
+  String spellCheckCapped(int count) =>
+      'De eerste $count worden getoond: verbeter er een paar en controleer '
+      'opnieuw voor de rest';
+  @override
   String get dropHint =>
       'Sleep Markdown-bestanden hierheen om ze te openen, of een map om hem '
       'te importeren';

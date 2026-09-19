@@ -1203,6 +1203,14 @@ final class BosnianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get spellCheckScanning => 'Provjera bilješke…';
+  @override
+  String get spellCheckAgain => 'Provjeri ponovo';
+  @override
+  String spellCheckCapped(int count) =>
+      'Prikazano je prvih $count: ispravite neke, pa ponovo provjerite za '
+      'ostale';
+  @override
   String get dropHint =>
       'Ispustite Markdown datoteke da ih otvorite ili mapu da je uvezete';
   @override

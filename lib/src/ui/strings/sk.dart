@@ -1199,6 +1199,14 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
   @override
+  String get spellCheckScanning => 'Kontrola poznámky…';
+  @override
+  String get spellCheckAgain => 'Skontrolovať znova';
+  @override
+  String spellCheckCapped(int count) =>
+      'Zobrazených je prvých $count: niektoré opravte a skontrolujte znova '
+      'kvôli zvyšku';
+  @override
   String get dropHint =>
       'Pretiahnite súbory Markdown na otvorenie alebo priečinok na import';
   @override

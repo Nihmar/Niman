@@ -1230,6 +1230,14 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get spellCheckScanning => 'S’està revisant la nota…';
+  @override
+  String get spellCheckAgain => 'Torna a revisar';
+  @override
+  String spellCheckCapped(int count) =>
+      'Es mostren els primers $count: corregiu-ne alguns i torneu a revisar '
+      'per veure la resta';
+  @override
   String get dropHint =>
       'Deixeu anar fitxers Markdown per obrir-los, o una carpeta per '
       'importar-la';

@@ -1213,6 +1213,14 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get spellCheckScanning => 'Revisando a nota…';
+  @override
+  String get spellCheckAgain => 'Revisar de novo';
+  @override
+  String spellCheckCapped(int count) =>
+      'Móstranse os primeiros $count: corrixe algúns e revisa de novo para '
+      'ver o resto';
+  @override
   String get dropHint =>
       'Solta ficheiros Markdown para abrilos, ou un cartafol para importalo';
   @override

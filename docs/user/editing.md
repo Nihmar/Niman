@@ -297,3 +297,13 @@ engines say, and its underline clears on the next scan. Words are read
 case-insensitively but stored as first typed. The file travels with the
 library, so different libraries can carry different vocabularies; it
 survives app restarts.
+
+The status row's spelling button opens a panel listing the note's
+misspellings, each with hunspell's suggestions; tapping one replaces the
+word. The panel opens at once on any note, however long: it checks the
+note a little at a time, with a bar showing how far it has got, and the
+list fills as it goes. The suggestions arrive just after the words they
+belong to. A fix updates the list on the spot, without checking the
+whole note again. The panel lists at most 200 words; when a note has
+more it says so, and **Check again** lists the next ones once some are
+fixed.

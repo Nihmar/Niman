@@ -1204,6 +1204,14 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get spellCheckScanning => 'Провера белешке…';
+  @override
+  String get spellCheckAgain => 'Провери поново';
+  @override
+  String spellCheckCapped(int count) =>
+      'Приказано је првих $count: исправите неке, па поново проверите за '
+      'остале';
+  @override
   String get dropHint =>
       'Испустите Markdown датотеке да их отворите или фасциклу да је увезете';
   @override

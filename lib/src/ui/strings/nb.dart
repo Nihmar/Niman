@@ -1194,6 +1194,13 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get spellCheckScanning => 'Kontrollerer notatet…';
+  @override
+  String get spellCheckAgain => 'Kontroller igjen';
+  @override
+  String spellCheckCapped(int count) =>
+      'De første $count vises: rett noen, og kontroller igjen for resten';
+  @override
   String get dropHint =>
       'Slipp Markdown-filer for å åpne dem, eller en mappe for å importere den';
   @override

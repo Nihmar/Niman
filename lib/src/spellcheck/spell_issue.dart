@@ -33,4 +33,17 @@ final class SpellIssue {
 
   /// Hunspell's suggestions, best first.
   final List<String> suggestions;
+
+  /// The same issue [shift] characters further along its line: an earlier
+  /// word on the line was replaced by one of another length.
+  SpellIssue movedBy(int shift) => shift == 0
+      ? this
+      : SpellIssue(
+          line: line,
+          start: start + shift,
+          end: end + shift,
+          word: word,
+          lineText: lineText,
+          suggestions: suggestions,
+        );
 }
