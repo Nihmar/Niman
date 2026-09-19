@@ -161,18 +161,6 @@ void main() {
     );
   });
 
-  testWidgets('on a phone the search lists the commands, and runs them', (
-    tester,
-  ) async {
-    await pumpAt(tester, const Size(400, 800));
-    await tester.tap(find.byKey(const Key('tab-search')));
-    await settle(tester);
-    await tester.enterText(find.byType(TextField).first, 'settings');
-    await settle(tester);
-    final command = find.byKey(const Key('search-command-tabSettings'));
-    expect(command, findsOne);
-    await tester.tap(command);
-    await settle(tester);
-    expect(find.byKey(const Key('settings-search-field')), findsOne);
-  });
+  // #206 moved the phone's commands out of the Search tab and into a
+  // palette of its own; phone_palette_test covers the ways in.
 }
