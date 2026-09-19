@@ -468,6 +468,19 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// one: [FocusManager] would otherwise leave nothing focused.
   final FocusNode _shellFocus = FocusNode(debugLabel: 'app shortcuts');
 
+  /// Takes the focus back when it falls to nothing on a wide window.
+  ///
+  /// The preview's eye, a note closing, the preview opening: each lets
+  /// the focus go, and it lands on the route's scope, above the shell,
+  /// where no key reaches the bindings until a click puts it somewhere.
+  /// The phone is left alone: there, focus is the software keyboard.
+  void _reclaimFocus() {
+    if (!mounted || !_wide || _shellFocus.hasFocus) return;
+    if (FocusManager.instance.primaryFocus is! FocusScopeNode) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    _shellFocus.requestFocus();
+  }
+
   /// Phone (< [splitBreakpoint]) mode: which pane is visible.
   /// `false` = the selected note is open full-screen.
   bool _treeVisible = true;
@@ -1201,6 +1214,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _workspace.controller.addListener(_onWorkspaceChanged);
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
+    FocusManager.instance.addListener(_reclaimFocus);
     unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
@@ -1232,6 +1246,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
+    FocusManager.instance.removeListener(_reclaimFocus);
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
