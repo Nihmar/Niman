@@ -1,7 +1,6 @@
 // Issue #69: a note in Zen mode. Its row above, its status row and its
-// row numbers go, the caret thickens, and the preview — split or on its
-// own — makes way for the editor without being turned off: the tab's
-// memento still says it was on.
+// row numbers go, the caret thickens, and a split comes apart: the tab's
+// own flag says whether the editor or the preview shows.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/editor/note_editor.dart';
@@ -69,28 +68,32 @@ void main() {
     expect(find.byType(NoteEditor), findsOne);
   });
 
-  testWidgets('the preview is hidden, not turned off: its tab going behind '
-      'another still hands it in as on', (tester) async {
+  // 0.0.8 test round: a note read rather than written is read in Zen
+  // too — in its preview.
+  testWidgets('a tab in its preview shows the preview in Zen, and hands '
+      'its flag in unchanged', (tester) async {
     NoteMemento? handed;
     void keep(String _, NoteMemento m) => handed = m;
-    await tester.pumpWidget(_app(showPreview: true, onMemento: keep));
-    await tester.pumpAndSettle();
-    expect(preview, findsOne);
-
     await tester.pumpWidget(
       _app(showPreview: true, zen: true, onMemento: keep),
     );
     await tester.pumpAndSettle();
-    expect(preview, findsNothing);
-    expect(find.byType(NoteEditor), findsOne);
+    expect(preview, findsOne);
 
     await tester.pumpWidget(
       _app(showPreview: true, zen: true, active: false, onMemento: keep),
     );
     expect(handed?.preview, isTrue);
+  });
 
-    await tester.pumpWidget(_app(showPreview: true, onMemento: keep));
+  testWidgets('a split tab in its preview shows the preview alone in Zen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(splitPreview: true, showPreview: true, zen: true),
+    );
     await tester.pumpAndSettle();
+    expect(find.byType(EditorPreviewSplit), findsNothing);
     expect(preview, findsOne);
   });
 }

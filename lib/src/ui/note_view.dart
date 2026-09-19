@@ -805,6 +805,10 @@ final class _NoteViewState extends State<NoteView>
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
       _controller.text = text;
+      // Loading is not an edit: without this the first Ctrl+Z took the
+      // buffer back to what it held before — nothing — and the save that
+      // followed wrote an empty note.
+      _controller.clearHistory();
       _wysiwygText = text;
       // A template `{{cursor}}` landing (#53): the offset was measured in
       // this same text, so placing it is a line walk, not a guess. The
@@ -923,6 +927,9 @@ final class _NoteViewState extends State<NoteView>
     // before the revision bump and the save schedule.
     _loading = true;
     _controller.text = text;
+    // The disk's text is where undo starts from now: undoing past it
+    // would write the replaced text back over the other program's change.
+    _controller.clearHistory();
     _wysiwygText = text;
     _lastLines = _controller.codeLines;
     _lastSavedRevision = _revision;
@@ -1043,10 +1050,11 @@ final class _NoteViewState extends State<NoteView>
   /// has no editable target, so it must go.
   bool get _previewOnly => !_splitIn(widget) && _previewIn(widget);
 
-  /// Whether [view] shows its preview. Zen (#69) hides it without
-  /// turning it off: the memento keeps [NoteView.showPreview], so the
-  /// tab has its preview back on the way out.
-  static bool _previewIn(NoteView view) => view.showPreview && !view.zen;
+  /// Whether [view] shows its preview. In Zen (#69) too: a note read
+  /// rather than written is read there in its preview (0.0.8 test round).
+  /// Zen only takes the split apart, and the tab's own flag then says
+  /// which of the two it shows.
+  static bool _previewIn(NoteView view) => view.showPreview;
 
   /// Whether [view] sets editor and preview side by side; never in Zen.
   static bool _splitIn(NoteView view) => view.splitPreview && !view.zen;
@@ -1682,7 +1690,14 @@ final class _NoteViewState extends State<NoteView>
     // note is a list, not a document, on screen.
     final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
     final kindBody = widget.kindMode && kindGui != null;
-    final kindChild = kindBody ? kindGui.buildBody(context, _kindHost) : null;
+    // A list or a voice note keeps to the note column like text does
+    // (0.0.8 test round): the column is the app's shape, not the editor's.
+    final kindChild = kindBody
+        ? NoteColumnPadding(
+            column: widget.noteColumn,
+            child: kindGui.buildBody(context, _kindHost),
+          )
+        : null;
     return Column(
       children: [
         // Desktop: one row above the note (#173) — the formatting on the

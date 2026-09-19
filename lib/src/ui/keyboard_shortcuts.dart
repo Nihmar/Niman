@@ -19,6 +19,7 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_capture_dialog.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
+import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The combinations the text fields and the editor already mean, with
@@ -108,11 +109,15 @@ Future<bool> _ask(
 
 /// The screen.
 final class KeyboardShortcutsScreen extends StatelessWidget {
-  /// The shortcuts of this device, kept through [controller].
-  const new({required this.controller, super.key});
+  /// The shortcuts of this device, kept through [controller]; [highlight]
+  /// is the row the settings search landed on.
+  const new({required this.controller, this.highlight, super.key});
 
   /// Where the key map is kept.
   final LibrarySession controller;
+
+  /// The row to flash, or null.
+  final Key? highlight;
 
   static String _groupName(PaletteGroup? group) => switch (group) {
     PaletteGroup.note => AppStrings.paletteGroupNote,
@@ -148,57 +153,67 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: ValueListenableBuilder<KeyMap>(
-        valueListenable: AppKeyMap.current,
-        builder: (context, map, _) {
-          final groups = <PaletteGroup?, List<AppCommand>>{};
-          for (final command in AppCommand.values) {
-            (groups[paletteGroup(command)] ??= []).add(command);
-          }
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 24),
-            children: [
-              for (final group in [null, ...PaletteGroup.values])
-                if (groups[group] case final commands?) ...[
-                  _Heading(_groupName(group)),
-                  for (final command in commands)
-                    _ShortcutRow(
-                      command: command,
-                      keys: map.bindingOf(command),
-                      changed: map.isChanged(command),
-                      onChange: () => unawaited(
-                        changeShortcut(context, command, controller),
-                      ),
-                      onClear: () => unawaited(
-                        _keep(controller, map.withBinding(command, null)),
-                      ),
-                      onRevert: () =>
-                          unawaited(_keep(controller, map.reverted(command))),
-                    ),
-                ],
-              _Heading(AppStrings.shortcutEditorSection),
-              ListTile(
-                dense: true,
-                title: Text(AppStrings.shortcutFind),
-                trailing: const _Keys('Ctrl+F'),
-              ),
-              ListTile(
-                dense: true,
-                title: Text(AppStrings.shortcutReplace),
-                trailing: const _Keys('Ctrl+H'),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(
-                  AppStrings.shortcutSavingNote,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+      body: SettingsHighlight(
+        target: highlight,
+        child: ValueListenableBuilder<KeyMap>(
+          valueListenable: AppKeyMap.current,
+          builder: (context, map, _) {
+            final groups = <PaletteGroup?, List<AppCommand>>{};
+            for (final command in AppCommand.values) {
+              (groups[paletteGroup(command)] ??= []).add(command);
+            }
+            // Every row built, not a lazy list: the settings search lands
+            // on a row that has to exist to scroll itself into view, and
+            // there are only a few dozen of them.
+            return SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final group in [null, ...PaletteGroup.values])
+                    if (groups[group] case final commands?) ...[
+                      _Heading(_groupName(group)),
+                      for (final command in commands)
+                        _ShortcutRow(
+                          command: command,
+                          keys: map.bindingOf(command),
+                          changed: map.isChanged(command),
+                          onChange: () => unawaited(
+                            changeShortcut(context, command, controller),
+                          ),
+                          onClear: () => unawaited(
+                            _keep(controller, map.withBinding(command, null)),
+                          ),
+                          onRevert: () => unawaited(
+                            _keep(controller, map.reverted(command)),
+                          ),
+                        ),
+                    ],
+                  _Heading(AppStrings.shortcutEditorSection),
+                  ListTile(
+                    dense: true,
+                    title: Text(AppStrings.shortcutFind),
+                    trailing: const _Keys('Ctrl+F'),
                   ),
-                ),
+                  ListTile(
+                    dense: true,
+                    title: Text(AppStrings.shortcutReplace),
+                    trailing: const _Keys('Ctrl+H'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Text(
+                      AppStrings.shortcutSavingNote,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -225,6 +240,10 @@ final class _Heading extends StatelessWidget {
   }
 }
 
+/// The key of [command]'s row on the keyboard screen: the settings
+/// search lands on it.
+Key shortcutRowKey(AppCommand command) => Key('shortcut-${command.name}');
+
 /// One command: its name, its keys (or none), and the ways to change
 /// them.
 final class _ShortcutRow extends StatelessWidget {
@@ -248,51 +267,53 @@ final class _ShortcutRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final keys = this.keys;
-    return ListTile(
-      key: Key('shortcut-${command.name}'),
-      dense: true,
-      title: Text(appCommandLabel(command)),
-      onTap: onChange,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (keys == null)
-            Text(
-              AppStrings.shortcutNone,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontStyle: FontStyle.italic,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            )
-          else
-            _Keys(describeActivator(keys)),
-          // Always the same two slots, so the keys never shift under the
-          // pointer as they come and go.
-          SizedBox.square(
-            dimension: 36,
-            child: changed
-                ? IconButton(
-                    key: Key('shortcut-revert-${command.name}'),
-                    tooltip: AppStrings.shortcutRevert,
-                    iconSize: 18,
-                    icon: const Icon(Icons.undo),
-                    onPressed: onRevert,
-                  )
-                : null,
-          ),
-          SizedBox.square(
-            dimension: 36,
-            child: keys != null
-                ? IconButton(
-                    key: Key('shortcut-clear-${command.name}'),
-                    tooltip: AppStrings.shortcutClear,
-                    iconSize: 18,
-                    icon: const Icon(Icons.close),
-                    onPressed: onClear,
-                  )
-                : null,
-          ),
-        ],
+    return HighlightRow(
+      key: shortcutRowKey(command),
+      child: ListTile(
+        dense: true,
+        title: Text(appCommandLabel(command)),
+        onTap: onChange,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (keys == null)
+              Text(
+                AppStrings.shortcutNone,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              )
+            else
+              _Keys(describeActivator(keys)),
+            // Always the same two slots, so the keys never shift under the
+            // pointer as they come and go.
+            SizedBox.square(
+              dimension: 36,
+              child: changed
+                  ? IconButton(
+                      key: Key('shortcut-revert-${command.name}'),
+                      tooltip: AppStrings.shortcutRevert,
+                      iconSize: 18,
+                      icon: const Icon(Icons.undo),
+                      onPressed: onRevert,
+                    )
+                  : null,
+            ),
+            SizedBox.square(
+              dimension: 36,
+              child: keys != null
+                  ? IconButton(
+                      key: Key('shortcut-clear-${command.name}'),
+                      tooltip: AppStrings.shortcutClear,
+                      iconSize: 18,
+                      icon: const Icon(Icons.close),
+                      onPressed: onClear,
+                    )
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }

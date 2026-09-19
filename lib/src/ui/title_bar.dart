@@ -95,7 +95,7 @@ final class AppTitleBar extends StatelessWidget {
               // The title keeps the tree's width; the tabs start at its
               // edge. Everything that is not a tab still drags.
               SizedBox(
-                width: (tabsStart - _leading).clamp(0, double.infinity),
+                width: (tabsStart - _leading).clamp(_tabsGap, double.infinity),
                 child: DragToMoveArea(child: _title(theme)),
               ),
               Expanded(
@@ -126,8 +126,12 @@ final class SlimTitleBar extends StatelessWidget {
     required this.title,
     required this.leading,
     required this.window,
+    this.actions = const [],
     super.key,
   });
+
+  /// Buttons before the window's own, at the right.
+  final List<Widget> actions;
 
   /// What the window is showing.
   final String title;
@@ -163,6 +167,7 @@ final class SlimTitleBar extends StatelessWidget {
                 ),
               ),
             ),
+            ...actions,
             _WindowButtons(window: window),
           ],
         ),
@@ -179,8 +184,17 @@ final class ZenTitleBar extends StatelessWidget {
     required this.title,
     required this.onLeave,
     required this.window,
+    this.previewVisible = false,
+    this.onTogglePreview,
     super.key,
   });
+
+  /// Whether the note shows its preview.
+  final bool previewVisible;
+
+  /// Flips between the note's editor and its preview: the status row
+  /// that holds the eye elsewhere is hidden in Zen. Null leaves it out.
+  final VoidCallback? onTogglePreview;
 
   /// The note's name, so a glance back says where the writing is.
   final String title;
@@ -196,6 +210,21 @@ final class ZenTitleBar extends StatelessWidget {
     key: const Key('zen-title-bar'),
     title: title,
     window: window,
+    actions: [
+      if (onTogglePreview case final toggle?)
+        IconButton(
+          key: const Key('zen-preview-toggle'),
+          tooltip: previewVisible
+              ? AppStrings.showEditorTooltip
+              : AppStrings.showPreviewTooltip,
+          icon: Icon(
+            previewVisible ? Icons.edit_outlined : Icons.visibility_outlined,
+          ),
+          iconSize: 18,
+          visualDensity: VisualDensity.compact,
+          onPressed: toggle,
+        ),
+    ],
     leading: IconButton(
       key: const Key('zen-leave'),
       tooltip: '${AppStrings.zenModeLeave} (${AppStrings.keyEscape})',
@@ -209,6 +238,11 @@ final class ZenTitleBar extends StatelessWidget {
 
 /// Left of the title: the leading gap and the sidebar toggle.
 const double _leading = 4 + 40;
+
+/// The least room between the sidebar toggle and the first tab. With the
+/// tree hidden the tabs' edge (the note pane's) falls 5 px from the
+/// toggle, and the first tab read as stuck to it (0.0.8 test round).
+const double _tabsGap = 16;
 
 /// Minimize, maximize/restore and close, at the bar's right edge.
 final class _WindowButtons extends StatelessWidget {

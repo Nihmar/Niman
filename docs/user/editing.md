@@ -126,15 +126,17 @@ stays visible: this is a writing mode, not a fullscreen.
 - **Leaving.** `Esc`, `F11` again, or the bar's button. `Esc` goes to
   the nearest thing first: a find bar closes, a selection collapses, a
   dialog or the palette shuts, and the next `Esc` leaves Zen.
-- **The preview** makes way for the editor, the split one too. It is
-  hidden, not turned off: leaving Zen brings it back as it was.
+- **The preview** stays yours: a note read rather than written can be
+  read in Zen in its preview. A split comes apart; the note shows its
+  editor or its preview, as its tab says, and the eye in Zen's bar (or
+  *Show preview* / *Show editor* in the palette) flips between them.
 - **Split panes.** Zen shows the pane you were in; the other waits
   behind it, notes, undo and all, and comes back on the way out.
 - **Moving between notes.** `Ctrl+Tab`, `Ctrl+O` and the palette work
   as usual, and the bar follows the note on screen. Closing the last
   note, or going to another place of the rail, leaves Zen.
 - **What stays out.** The toggles for what Zen hides (the sidebar, the
-  side panel, the splits, the preview) are left out of the palette
+  side panel, the splits) are left out of the palette
   while Zen is on, rather than changing something you cannot see.
 
 Zen is not remembered: a restart, or another library, opens without
@@ -165,7 +167,8 @@ mode**), off unless you turn it on. `Ctrl+Shift+T` or *Editor: Turn
 typewriter mode on* in the command palette switch it from anywhere, and
 on the desktop a button in the note's status row shows it and switches
 it. The phone's status row has no room for one more button: there the
-setting, and the commands under the Search tab, reach it.
+note's ⋮ menu has *Turn typewriter mode on/off*, as do the setting and
+the commands under the Search tab.
 
 It is independent of [Zen mode](#zen-mode): either can be on without
 the other, and entering or leaving Zen leaves typewriter mode as it
