@@ -1194,6 +1194,11 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get typewriterTitle => 'Skrivemaskinmodus';
+  @override
+  String get typewriterSubtitle =>
+      'Hold linjen du skriver på midt i redigeringsfeltet';
+  @override
   String get zenMode => 'Zen-modus';
   @override
   String get zenModeEnter => 'Gå til zen-modus';

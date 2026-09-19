@@ -1205,6 +1205,11 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get typewriterTitle => 'Режим друкарської машинки';
+  @override
+  String get typewriterSubtitle =>
+      'Рядок, який ви пишете, залишається посередині редактора';
+  @override
   String get zenMode => 'Режим дзен';
   @override
   String get zenModeEnter => 'Увійти в режим дзен';

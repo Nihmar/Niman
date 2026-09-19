@@ -313,6 +313,13 @@ abstract interface class LibrarySession {
   /// Sets (and persists) the readable-line-length toggle.
   Future<void> setReadableLineLength({required bool enabled});
 
+  /// Whether the line being written keeps to the middle of the editor
+  /// (typewriter mode, #70; default false).
+  Future<bool> get typewriter;
+
+  /// Sets (and persists) typewriter mode.
+  Future<void> setTypewriter({required bool enabled});
+
   /// The note column's text width, in logical pixels.
   Future<double> get noteColumnWidth;
 

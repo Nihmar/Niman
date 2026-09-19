@@ -1199,6 +1199,11 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
   @override
+  String get typewriterTitle => 'Režim písacieho stroja';
+  @override
+  String get typewriterSubtitle =>
+      'Riadok, ktorý píšete, zostáva v strede editora';
+  @override
   String get zenMode => 'Režim zen';
   @override
   String get zenModeEnter => 'Prejsť do režimu zen';

@@ -1193,6 +1193,11 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get typewriterTitle => 'Typewriter mode';
+  @override
+  String get typewriterSubtitle =>
+      'Keep the line you are writing in the middle of the editor';
+  @override
   String get zenMode => 'Zen mode';
   @override
   String get zenModeEnter => 'Enter Zen mode';

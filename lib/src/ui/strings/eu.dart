@@ -1205,6 +1205,11 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get typewriterTitle => 'Idazmakina modua';
+  @override
+  String get typewriterSubtitle =>
+      'Idazten ari zaren lerroa editorearen erdian mantentzen da';
+  @override
   String get zenMode => 'Zen modua';
   @override
   String get zenModeEnter => 'Sartu zen moduan';

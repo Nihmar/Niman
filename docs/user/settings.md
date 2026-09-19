@@ -49,6 +49,7 @@ choices.
 | `lineNumbers` | true | Editor row-number column |
 | `readableLineLength` | true | Keep a note's text in a centred column |
 | `noteColumnWidth` | 700 | That column's text width, px (480–1400, clamped) |
+| `typewriter` | false | Keep the line being written in the middle of the editor |
 | `editorAutofocus` | false | Raise the keyboard on note open |
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `editorToolbar` | "" (= shipped) | Arranged toolbar layout |

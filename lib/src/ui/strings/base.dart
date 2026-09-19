@@ -575,6 +575,8 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get typewriterTitle;
+  String get typewriterSubtitle;
   String get zenMode;
   String get zenModeEnter;
   String get zenModeLeave;
