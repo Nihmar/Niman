@@ -126,11 +126,15 @@ final class NoteEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!column.enabled && !typewriter) return _editor(0, 0);
+    // In typewriter mode the row being written is lit, faintly: it is the
+    // row the eye keeps coming back to (0.0.8 test round).
+    final line = typewriter ? typewriterLineColor(context) : null;
+    if (!column.enabled && !typewriter) return _editor(0, 0, line);
     return LayoutBuilder(
       builder: (context, constraints) => _editor(
         column.enabled ? column.sideSpaceIn(constraints.maxWidth) : 0,
         typewriter ? typewriterSlack(constraints.maxHeight) : 0,
+        line,
       ),
     );
   }
@@ -144,7 +148,7 @@ final class NoteEditor extends StatelessWidget {
   /// editors does not move the text sideways. Both sides stay inside the
   /// editor's scroll view, so the scrollbar keeps to the pane's edge and
   /// the wheel scrolls from the margins too.
-  Widget _editor(double side, double slack) {
+  Widget _editor(double side, double slack, Color? line) {
     final gutter = side == 0 ? 0.0 : side + NoteColumn.textInset - _fieldInset;
     return CodeEditor(
       controller: controller,
@@ -164,6 +168,7 @@ final class NoteEditor extends StatelessWidget {
       style: CodeEditorStyle(
         fontSize: fontSize,
         cursorWidth: caretWidth,
+        cursorLineColor: line,
         fontFamily: 'monospace',
         fontFamilyFallback: const [
           'Consolas',

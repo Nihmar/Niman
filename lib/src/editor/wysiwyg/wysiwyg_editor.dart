@@ -186,6 +186,8 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   void initState() {
     super.initState();
     _open(widget.data);
+    _scroll.addListener(_updateBand);
+    _focus.addListener(_updateBand);
   }
 
   void _open(String source) {
@@ -346,6 +348,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
 
   @override
   void dispose() {
+    _scroll.removeListener(_updateBand);
+    _focus.removeListener(_updateBand);
+    _band.dispose();
     _typewriter.dispose();
     _debounce?.cancel();
     unawaited(_changes?.cancel());
@@ -566,8 +571,13 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
                 onPointerDown: _onPointerDown,
                 child: LayoutBuilder(
                   key: _viewportKey,
-                  builder: (context, constraints) =>
+                  builder: (context, constraints) => Stack(
+                    fit: StackFit.passthrough,
+                    children: [
+                      if (widget.typewriter) _litRow(),
                       _quillEditor(constraints.maxWidth, constraints.maxHeight),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -591,25 +601,70 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   /// or its place being put back stays where it was put.
   void _followCaret() {
     if (!widget.typewriter) return;
+    // The lit row follows the caret wherever it goes.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateBand());
     if (!_focus.hasFocus && !_find.visible) return;
     _typewriter.caretMoved();
   }
 
-  bool _centerCaret() {
+  /// The caret's rect in the viewport's coordinates, or null before the
+  /// surface is laid out.
+  Rect? _caretInViewport() {
     final editor = _editorKey.currentState?.renderEditor;
     final viewport = _viewportKey.currentContext?.findRenderObject();
     if (editor == null || !editor.attached || viewport is! RenderBox) {
-      return false;
+      return null;
     }
     final caret = editor.getLocalRectForCaret(
       TextPosition(offset: _controller.selection.extentOffset),
     );
-    final y =
-        editor.localToGlobal(caret.center).dy -
+    final top =
+        editor.localToGlobal(caret.topLeft).dy -
         viewport.localToGlobal(Offset.zero).dy;
-    centerCaret(_scroll, y);
+    return Rect.fromLTWH(0, top, viewport.size.width, caret.height);
+  }
+
+  bool _centerCaret() {
+    final caret = _caretInViewport();
+    if (caret == null) return false;
+    centerCaret(_scroll, caret.center.dy);
     return true;
   }
+
+  /// The row the caret is on, lit in typewriter mode while the surface
+  /// has the focus (0.0.8 test round); null lights nothing. Quill has no
+  /// current-line colour of its own, so the band is painted behind it.
+  final ValueNotifier<Rect?> _band = ValueNotifier(null);
+
+  void _updateBand() {
+    if (!mounted) return;
+    _band.value = widget.typewriter && _focus.hasFocus
+        ? _caretInViewport()
+        : null;
+  }
+
+  /// The band behind the caret's row (typewriter mode).
+  Widget _litRow() => Positioned.fill(
+    child: IgnorePointer(
+      child: ValueListenableBuilder<Rect?>(
+        valueListenable: _band,
+        builder: (context, row, _) => row == null
+            ? const SizedBox.shrink()
+            : Stack(
+                children: [
+                  Positioned(
+                    key: const Key('wysiwyg-lit-row'),
+                    left: 0,
+                    right: 0,
+                    top: row.top - 2,
+                    height: row.height + 4,
+                    child: ColoredBox(color: typewriterLineColor(context)),
+                  ),
+                ],
+              ),
+      ),
+    ),
+  );
 
   /// Esc (#69). Quill's own (hiding its selection toolbar) is on whenever
   /// there is a caret, so the key never left the editor. Here it cancels a
