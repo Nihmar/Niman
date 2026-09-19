@@ -1194,6 +1194,32 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Иди на';
   @override
+  String get commandsTitle => 'Команде';
+  @override
+  String get commandsIntro =>
+      'Палета команди нуди само команде које могу да се покрену тамо где сте. '
+      'Овде су све, и када се која приказује.';
+  @override
+  String get commandNeedNone => 'Увек доступно';
+  @override
+  String get commandNeedOpenNote => 'Потребна је отворена белешка';
+  @override
+  String get commandNeedWideWindow => 'Само у широком прозору';
+  @override
+  String get commandNeedDockRoom =>
+      'Потребан је прозор довољно широк за бочни панел';
+  @override
+  String get commandNeedDesktop => 'Само на рачунару';
+  @override
+  String get commandNeedNotInZen => 'Не у Зен режиму';
+  @override
+  String get commandNeedZenRoom => 'Рачунар, са белешком отвореном у картици';
+  @override
+  String get commandNeedPreview =>
+      'Са укљученим прегледом, на текстуалној белешци';
+  @override
+  String get commandNeedTwoEditors => 'Са оба укључена уређивача';
+  @override
   String get paletteHint => 'Тражи команде и белешке';
   @override
   String get paletteNoResults => 'Нема резултата';

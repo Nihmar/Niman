@@ -1171,6 +1171,31 @@ final class EstonianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Mine';
   @override
+  String get commandsTitle => 'Käsud';
+  @override
+  String get commandsIntro =>
+      'Käsupalett pakub ainult käske, mida saab seal, kus sa oled, käivitada. '
+      'Siin on need kõik ja millal igaüks ilmub.';
+  @override
+  String get commandNeedNone => 'Alati saadaval';
+  @override
+  String get commandNeedOpenNote => 'Vajab avatud märget';
+  @override
+  String get commandNeedWideWindow => 'Ainult laias aknas';
+  @override
+  String get commandNeedDockRoom =>
+      'Vajab külgpaneeli jaoks piisavalt laia akent';
+  @override
+  String get commandNeedDesktop => 'Ainult arvutis';
+  @override
+  String get commandNeedNotInZen => 'Mitte Zen-režiimis';
+  @override
+  String get commandNeedZenRoom => 'Arvuti, märge avatud vahekaardil';
+  @override
+  String get commandNeedPreview => 'Eelvaade sees, tekstimärkmel';
+  @override
+  String get commandNeedTwoEditors => 'Kui mõlemad redaktorid on lubatud';
+  @override
   String get paletteHint => 'Otsi käske ja märkmeid';
   @override
   String get paletteNoResults => 'Midagi ei leitud';

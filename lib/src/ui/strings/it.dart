@@ -1202,6 +1202,32 @@ final class ItalianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Vai a';
   @override
+  String get commandsTitle => 'Comandi';
+  @override
+  String get commandsIntro =>
+      'La palette dei comandi offre solo i comandi che si possono eseguire '
+      'dove sei. Qui ci sono tutti, e quando compare ciascuno.';
+  @override
+  String get commandNeedNone => 'Sempre disponibile';
+  @override
+  String get commandNeedOpenNote => 'Serve una nota aperta';
+  @override
+  String get commandNeedWideWindow => 'Solo con finestra larga';
+  @override
+  String get commandNeedDockRoom =>
+      'Serve una finestra larga abbastanza per il pannello laterale';
+  @override
+  String get commandNeedDesktop => 'Solo desktop';
+  @override
+  String get commandNeedNotInZen => 'Non in modalità Zen';
+  @override
+  String get commandNeedZenRoom => 'Desktop, con una nota aperta in una scheda';
+  @override
+  String get commandNeedPreview =>
+      "Con l'anteprima attiva, su una nota di testo";
+  @override
+  String get commandNeedTwoEditors => 'Con entrambi gli editor abilitati';
+  @override
   String get paletteHint => 'Cerca comandi e note';
   @override
   String get paletteNoResults => 'Nessun risultato';

@@ -1196,6 +1196,32 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir para';
   @override
+  String get commandsTitle => 'Comandos';
+  @override
+  String get commandsIntro =>
+      'A paleta de comandos oferece apenas os comandos que podem ser '
+      'executados onde você está. Aqui estão todos, e quando cada um aparece.';
+  @override
+  String get commandNeedNone => 'Sempre disponível';
+  @override
+  String get commandNeedOpenNote => 'Precisa de uma nota aberta';
+  @override
+  String get commandNeedWideWindow => 'Apenas com janela larga';
+  @override
+  String get commandNeedDockRoom =>
+      'Precisa de uma janela larga o suficiente para o painel lateral';
+  @override
+  String get commandNeedDesktop => 'Apenas no computador';
+  @override
+  String get commandNeedNotInZen => 'Fora do modo Zen';
+  @override
+  String get commandNeedZenRoom => 'Computador, com uma nota aberta numa aba';
+  @override
+  String get commandNeedPreview =>
+      'Com a pré-visualização ativada, numa nota de texto';
+  @override
+  String get commandNeedTwoEditors => 'Com os dois editores ativados';
+  @override
   String get paletteHint => 'Procurar comandos e notas';
   @override
   String get paletteNoResults => 'Sem resultados';

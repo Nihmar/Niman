@@ -1232,6 +1232,33 @@ final class GreekStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Μετάβαση';
   @override
+  String get commandsTitle => 'Εντολές';
+  @override
+  String get commandsIntro =>
+      'Η παλέτα εντολών προσφέρει μόνο τις εντολές που μπορούν να εκτελεστούν '
+      'εκεί που βρίσκεστε. Εδώ είναι όλες, και πότε εμφανίζεται η καθεμία.';
+  @override
+  String get commandNeedNone => 'Πάντα διαθέσιμη';
+  @override
+  String get commandNeedOpenNote => 'Χρειάζεται ανοιχτή σημείωση';
+  @override
+  String get commandNeedWideWindow => 'Μόνο σε φαρδύ παράθυρο';
+  @override
+  String get commandNeedDockRoom =>
+      'Χρειάζεται παράθυρο αρκετά φαρδύ για το πλαϊνό πάνελ';
+  @override
+  String get commandNeedDesktop => 'Μόνο σε υπολογιστή';
+  @override
+  String get commandNeedNotInZen => 'Όχι σε λειτουργία Zen';
+  @override
+  String get commandNeedZenRoom =>
+      'Υπολογιστής, με σημείωση ανοιχτή σε καρτέλα';
+  @override
+  String get commandNeedPreview =>
+      'Με ενεργή προεπισκόπηση, σε σημείωση κειμένου';
+  @override
+  String get commandNeedTwoEditors => 'Με ενεργούς και τους δύο επεξεργαστές';
+  @override
   String get paletteHint => 'Αναζήτηση εντολών και σημειώσεων';
   @override
   String get paletteNoResults => 'Κανένα αποτέλεσμα';

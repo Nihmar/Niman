@@ -1195,6 +1195,32 @@ final class SwedishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå till';
   @override
+  String get commandsTitle => 'Kommandon';
+  @override
+  String get commandsIntro =>
+      'Kommandopaletten erbjuder bara de kommandon som kan köras där du är. '
+      'Här är alla, och när vart och ett visas.';
+  @override
+  String get commandNeedNone => 'Alltid tillgängligt';
+  @override
+  String get commandNeedOpenNote => 'Kräver en öppen anteckning';
+  @override
+  String get commandNeedWideWindow => 'Bara i brett fönster';
+  @override
+  String get commandNeedDockRoom =>
+      'Kräver ett fönster som är tillräckligt brett för sidopanelen';
+  @override
+  String get commandNeedDesktop => 'Bara på datorn';
+  @override
+  String get commandNeedNotInZen => 'Inte i Zen-läge';
+  @override
+  String get commandNeedZenRoom => 'Dator, med en anteckning öppen i en flik';
+  @override
+  String get commandNeedPreview =>
+      'Med förhandsgranskning på, i en textanteckning';
+  @override
+  String get commandNeedTwoEditors => 'Med båda redigerarna aktiverade';
+  @override
   String get paletteHint => 'Sök kommandon och anteckningar';
   @override
   String get paletteNoResults => 'Inga träffar';

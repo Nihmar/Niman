@@ -46,7 +46,9 @@ Links: `Ctrl+click` a link in the source editor to follow it.
 ## Changing a shortcut
 
 Settings → **Keyboard shortcuts** lists every command, with its keys or
-with *No shortcut*.
+with *No shortcut*. Settings → **Commands** lists the same commands with
+when each one can run: the palette and the keys offer a command only
+where it can, so one that needs an open note is not there without one.
 
 - **Change.** Tap a command and press the new combination. While the
   window is recording it takes every key, Esc and Tab included, so leave

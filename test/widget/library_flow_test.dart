@@ -233,7 +233,10 @@ void main() {
     // over it (#172): nothing to go back from.
     await tester.tap(find.byKey(const Key('rail-settings')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('settings-area-trash-history')));
+    final trashArea = find.byKey(const Key('settings-area-trash-history'));
+    await tester.ensureVisible(trashArea);
+    await settle(tester);
+    await tester.tap(trashArea);
     await settle(tester);
     final trashRow = find.byKey(const Key('trash-setting'));
     await tester.tap(

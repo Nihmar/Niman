@@ -1186,6 +1186,32 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Doties uz';
   @override
+  String get commandsTitle => 'Komandas';
+  @override
+  String get commandsIntro =>
+      'Komandu palete piedāvā tikai tās komandas, kuras var izpildīt tur, kur '
+      'tu esi. Šeit ir visas, un kad katra parādās.';
+  @override
+  String get commandNeedNone => 'Vienmēr pieejama';
+  @override
+  String get commandNeedOpenNote => 'Nepieciešama atvērta piezīme';
+  @override
+  String get commandNeedWideWindow => 'Tikai platā logā';
+  @override
+  String get commandNeedDockRoom =>
+      'Nepieciešams pietiekami plats logs sānu panelim';
+  @override
+  String get commandNeedDesktop => 'Tikai datorā';
+  @override
+  String get commandNeedNotInZen => 'Ne Zen režīmā';
+  @override
+  String get commandNeedZenRoom => 'Dators, ar piezīmi atvērtu cilnē';
+  @override
+  String get commandNeedPreview =>
+      'Ar ieslēgtu priekšskatījumu, teksta piezīmē';
+  @override
+  String get commandNeedTwoEditors => 'Ar abiem redaktoriem ieslēgtiem';
+  @override
   String get paletteHint => 'Meklēt komandas un piezīmes';
   @override
   String get paletteNoResults => 'Nekas neatbilst';

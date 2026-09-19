@@ -11,6 +11,7 @@ import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_areas.dart';
+import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/sync/sync_labels.dart';
@@ -424,27 +425,37 @@ List<SettingsSearchEntry> settingsSearchEntries({
   ];
   // Every command's own row on the keyboard screen: searching "zen" lands
   // on Zen mode's keys, not only on the screen's title (0.0.8 test round).
-  // None without a keyboard, where that screen does not open, and none
-  // named like a row above (Re-index now, Switch library): the setting
-  // itself is the better answer, and the list shows no twins.
+  // Without a keyboard, where that screen does not open, on its row of
+  // the Commands page instead (#207). None named like a row above
+  // (Re-index now, Switch library): the setting itself is the better
+  // answer, and the list shows no twins.
   final titles = {for (final entry in entries) entry.title};
   return [
     ...entries,
-    if (keyboardAttached)
-      for (final command in AppCommand.values)
-        if (!titles.contains(appCommandLabel(command)))
-          SettingsSearchEntry(
-            title: appCommandLabel(command),
-            area: AppStrings.keyboardShortcutsTitle,
-            rowKey: shortcutRowKey(command),
-            value: () async =>
-                switch (AppKeyMap.current.value.bindingOf(command)) {
-                  final keys? => describeActivator(keys),
-                  null => AppStrings.shortcutNone,
-                },
-            open: () =>
-                openArea(SettingsAreaId.shortcuts, shortcutRowKey(command)),
-          ),
+    for (final command in AppCommand.values)
+      if (titles.contains(appCommandLabel(command)))
+        ...const <SettingsSearchEntry>[]
+      else if (keyboardAttached)
+        SettingsSearchEntry(
+          title: appCommandLabel(command),
+          area: AppStrings.keyboardShortcutsTitle,
+          rowKey: shortcutRowKey(command),
+          value: () async =>
+              switch (AppKeyMap.current.value.bindingOf(command)) {
+                final keys? => describeActivator(keys),
+                null => AppStrings.shortcutNone,
+              },
+          open: () =>
+              openArea(SettingsAreaId.shortcuts, shortcutRowKey(command)),
+        )
+      else
+        SettingsSearchEntry(
+          title: appCommandLabel(command),
+          area: AppStrings.commandsTitle,
+          rowKey: commandRowKey(command),
+          value: noValue,
+          open: () => openArea(SettingsAreaId.commands, commandRowKey(command)),
+        ),
   ];
 }
 

@@ -77,7 +77,8 @@ bool paletteAsks(AppCommand command) => switch (command) {
   _ => false,
 };
 
-String _groupName(PaletteGroup group) => switch (group) {
+/// [group]'s name, as the palette's names start and the lists head it.
+String paletteGroupName(PaletteGroup group) => switch (group) {
   PaletteGroup.note => AppStrings.paletteGroupNote,
   PaletteGroup.editor => AppStrings.paletteGroupEditor,
   PaletteGroup.view => AppStrings.paletteGroupView,
@@ -97,7 +98,7 @@ final class PaletteCommand {
   factory of(AppCommand command, {String? label}) {
     final group = paletteGroup(command);
     final verb = label ?? appCommandLabel(command);
-    final name = group == null ? verb : '${_groupName(group)}: $verb';
+    final name = group == null ? verb : '${paletteGroupName(group)}: $verb';
     final binding = AppKeyMap.current.value.bindingOf(command);
     return PaletteCommand(
       command: command,

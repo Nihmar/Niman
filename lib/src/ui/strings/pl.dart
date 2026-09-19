@@ -1208,6 +1208,31 @@ final class PolishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Przejdź do';
   @override
+  String get commandsTitle => 'Polecenia';
+  @override
+  String get commandsIntro =>
+      'Paleta poleceń pokazuje tylko polecenia, które można wykonać tam, '
+      'gdzie jesteś. Tu są wszystkie i kiedy każde się pojawia.';
+  @override
+  String get commandNeedNone => 'Zawsze dostępne';
+  @override
+  String get commandNeedOpenNote => 'Wymaga otwartej notatki';
+  @override
+  String get commandNeedWideWindow => 'Tylko w szerokim oknie';
+  @override
+  String get commandNeedDockRoom =>
+      'Wymaga okna wystarczająco szerokiego na panel boczny';
+  @override
+  String get commandNeedDesktop => 'Tylko na komputerze';
+  @override
+  String get commandNeedNotInZen => 'Nie w trybie Zen';
+  @override
+  String get commandNeedZenRoom => 'Komputer, z notatką otwartą w karcie';
+  @override
+  String get commandNeedPreview => 'Z włączonym podglądem, w notatce tekstowej';
+  @override
+  String get commandNeedTwoEditors => 'Gdy oba edytory są włączone';
+  @override
   String get paletteHint => 'Szukaj poleceń i notatek';
   @override
   String get paletteNoResults => 'Brak wyników';
