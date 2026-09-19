@@ -49,6 +49,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
 - Ships its own SQLite (`sqlite3` package bundles the native library via
   Dart build hooks — Windows has no system `sqlite3.dll`). First build
   on a machine needs network to fetch the prebuilt binary.
+- Ships the Visual C++ runtime too (`msvcp140.dll`, `vcruntime140.dll`,
+  `vcruntime140_1.dll`, next to `niman.exe`), so the installer and the
+  zip run on a Windows that never had the redistributable installed. A
+  release build fails if they are missing.
 - spellcheck via hunspell, same setting as Linux, plus the per-library
   personal dictionary.
 - The app draws its own title bar, as on Linux. The window keeps its
