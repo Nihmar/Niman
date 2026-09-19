@@ -57,6 +57,7 @@ import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
+import 'package:niman/src/ui/settings_window.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_detail_pane.dart';
 import 'package:niman/src/ui/shell_editor_settings.dart';
@@ -1328,6 +1329,15 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   @override
   void dispose() {
+    // A library closed or switched from the settings window: the window
+    // goes with the shell it was over (#202). Off the teardown, which
+    // must not change the navigator it runs under.
+    final window = _settingsWindow;
+    if (window != null) {
+      scheduleMicrotask(() {
+        if (window.isActive) window.navigator?.removeRoute(window);
+      });
+    }
     _markOpenNote(null, null);
     _workspace.controller.removeListener(_onWorkspaceChanged);
     AppKeyMap.current.removeListener(_onKeyMapChanged);
@@ -2286,6 +2296,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       unawaited(_openQuickNoteFromTile());
       return;
     }
+    // A wide window opens Settings over the note instead of in its place
+    // (#202); the phone keeps it as a tab.
+    if (tab == ShellTab.settings && _wide) {
+      unawaited(_openSettingsWindow());
+      return;
+    }
     // Tapping the tab a note was opened from closes the note: the tab is
     // already selected, so nothing else would happen.
     if (tab == _tab && !_treeVisible) {
@@ -2293,6 +2309,27 @@ final class _LibraryShellState extends State<_LibraryShell>
       return;
     }
     _selectShellTab(tab);
+  }
+
+  /// The settings window while it is up: its key does not open a second,
+  /// and a library that closes from inside it takes it down (#202).
+  Route<void>? _settingsWindow;
+
+  /// Settings as a floating window (#202).
+  Future<void> _openSettingsWindow() async {
+    if (_settingsWindow != null) return;
+    final route = settingsWindowRoute(
+      context,
+      controller: widget.controller,
+      spellCheck: widget.spellCheck,
+      transcription: widget.transcription,
+    );
+    _settingsWindow = route;
+    try {
+      await Navigator.of(context).push(route);
+    } finally {
+      if (identical(_settingsWindow, route)) _settingsWindow = null;
+    }
   }
 
   /// The title bar's text: the app, and the open note when there is one.
