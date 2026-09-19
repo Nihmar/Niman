@@ -1223,6 +1223,14 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get palettePinned => 'Prikvačeno';
+  @override
+  String get palettePin => 'Prikvači';
+  @override
+  String get paletteUnpin => 'Otkvači';
+  @override
+  String get palettePinFooter => 'alt+P prikvači';
+  @override
   String get spellCheckScanning => 'Provjera bilješke…';
   @override
   String get spellCheckAgain => 'Provjeri ponovno';

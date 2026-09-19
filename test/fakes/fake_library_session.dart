@@ -305,6 +305,16 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   @override
   Future<void> setKeyMap(String json) async => keyMapJson = json;
 
+  /// The pinned commands as stored (#208).
+  String? pinnedCommandsJson;
+
+  @override
+  Future<String?> get pinnedCommands async => pinnedCommandsJson;
+
+  @override
+  Future<void> setPinnedCommands(String json) async =>
+      pinnedCommandsJson = json;
+
   /// What [saveWorkspace] last kept (#23).
   Workspace workspace = Workspace.empty;
 

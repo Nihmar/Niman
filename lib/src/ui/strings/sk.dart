@@ -1224,6 +1224,14 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
   @override
+  String get palettePinned => 'Pripnuté';
+  @override
+  String get palettePin => 'Pripnúť';
+  @override
+  String get paletteUnpin => 'Odopnúť';
+  @override
+  String get palettePinFooter => 'alt+P pripne';
+  @override
   String get spellCheckScanning => 'Kontrola poznámky…';
   @override
   String get spellCheckAgain => 'Skontrolovať znova';

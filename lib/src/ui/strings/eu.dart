@@ -1230,6 +1230,14 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get palettePinned => 'Ainguratuta';
+  @override
+  String get palettePin => 'Ainguratu';
+  @override
+  String get paletteUnpin => 'Askatu';
+  @override
+  String get palettePinFooter => 'alt+P ainguratzeko';
+  @override
   String get spellCheckScanning => 'Oharra egiaztatzen…';
   @override
   String get spellCheckAgain => 'Egiaztatu berriro';

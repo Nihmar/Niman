@@ -1229,6 +1229,14 @@ final class BosnianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get palettePinned => 'Prikačeno';
+  @override
+  String get palettePin => 'Prikači';
+  @override
+  String get paletteUnpin => 'Otkači';
+  @override
+  String get palettePinFooter => 'alt+P prikači';
+  @override
   String get spellCheckScanning => 'Provjera bilješke…';
   @override
   String get spellCheckAgain => 'Provjeri ponovo';

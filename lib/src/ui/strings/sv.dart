@@ -1232,6 +1232,14 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get palettePinned => 'Fästa';
+  @override
+  String get palettePin => 'Fäst';
+  @override
+  String get paletteUnpin => 'Lossa';
+  @override
+  String get palettePinFooter => 'alt+P för att fästa';
+  @override
   String get spellCheckScanning => 'Kontrollerar anteckningen…';
   @override
   String get spellCheckAgain => 'Kontrollera igen';

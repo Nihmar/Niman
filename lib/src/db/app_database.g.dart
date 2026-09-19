@@ -162,6 +162,17 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _pinnedCommandsMeta = const VerificationMeta(
+    'pinnedCommands',
+  );
+  @override
+  late final GeneratedColumn<String> pinnedCommands = GeneratedColumn<String>(
+    'pinned_commands',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -177,6 +188,7 @@ class $AppSettingsTable extends AppSettings
     legacyLibrarySettings,
     changelogSeenVersion,
     keyMap,
+    pinnedCommands,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -292,6 +304,15 @@ class $AppSettingsTable extends AppSettings
         keyMap.isAcceptableOrUnknown(data['key_map']!, _keyMapMeta),
       );
     }
+    if (data.containsKey('pinned_commands')) {
+      context.handle(
+        _pinnedCommandsMeta,
+        pinnedCommands.isAcceptableOrUnknown(
+          data['pinned_commands']!,
+          _pinnedCommandsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -352,6 +373,10 @@ class $AppSettingsTable extends AppSettings
       keyMap: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}key_map'],
+      ),
+      pinnedCommands: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pinned_commands'],
       ),
     );
   }
@@ -432,6 +457,11 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   /// writes them; null while none was. The device's, never a library's:
   /// a shortcut belongs to the keyboard.
   final String? keyMap;
+
+  /// The commands pinned in the palette (#208), as a JSON array of their
+  /// names, in pinning order; null while none was. The device's, like the
+  /// key map: a pin is about how this machine is used.
+  final String? pinnedCommands;
   const AppSetting({
     required this.id,
     this.libraryPath,
@@ -446,6 +476,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     required this.legacyLibrarySettings,
     this.changelogSeenVersion,
     this.keyMap,
+    this.pinnedCommands,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -470,6 +501,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     }
     if (!nullToAbsent || keyMap != null) {
       map['key_map'] = Variable<String>(keyMap);
+    }
+    if (!nullToAbsent || pinnedCommands != null) {
+      map['pinned_commands'] = Variable<String>(pinnedCommands);
     }
     return map;
   }
@@ -497,6 +531,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       keyMap: keyMap == null && nullToAbsent
           ? const Value.absent()
           : Value(keyMap),
+      pinnedCommands: pinnedCommands == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinnedCommands),
     );
   }
 
@@ -523,6 +560,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
         json['changelogSeenVersion'],
       ),
       keyMap: serializer.fromJson<String?>(json['keyMap']),
+      pinnedCommands: serializer.fromJson<String?>(json['pinnedCommands']),
     );
   }
   @override
@@ -542,6 +580,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'legacyLibrarySettings': serializer.toJson<String>(legacyLibrarySettings),
       'changelogSeenVersion': serializer.toJson<String?>(changelogSeenVersion),
       'keyMap': serializer.toJson<String?>(keyMap),
+      'pinnedCommands': serializer.toJson<String?>(pinnedCommands),
     };
   }
 
@@ -559,6 +598,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     String? legacyLibrarySettings,
     Value<String?> changelogSeenVersion = const Value.absent(),
     Value<String?> keyMap = const Value.absent(),
+    Value<String?> pinnedCommands = const Value.absent(),
   }) => AppSetting(
     id: id ?? this.id,
     libraryPath: libraryPath.present ? libraryPath.value : this.libraryPath,
@@ -577,6 +617,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
         ? changelogSeenVersion.value
         : this.changelogSeenVersion,
     keyMap: keyMap.present ? keyMap.value : this.keyMap,
+    pinnedCommands: pinnedCommands.present
+        ? pinnedCommands.value
+        : this.pinnedCommands,
   );
   AppSetting copyWithCompanion(AppSettingsCompanion data) {
     return AppSetting(
@@ -613,6 +656,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ? data.changelogSeenVersion.value
           : this.changelogSeenVersion,
       keyMap: data.keyMap.present ? data.keyMap.value : this.keyMap,
+      pinnedCommands: data.pinnedCommands.present
+          ? data.pinnedCommands.value
+          : this.pinnedCommands,
     );
   }
 
@@ -631,7 +677,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
           ..write('changelogSeenVersion: $changelogSeenVersion, ')
-          ..write('keyMap: $keyMap')
+          ..write('keyMap: $keyMap, ')
+          ..write('pinnedCommands: $pinnedCommands')
           ..write(')'))
         .toString();
   }
@@ -651,6 +698,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     legacyLibrarySettings,
     changelogSeenVersion,
     keyMap,
+    pinnedCommands,
   );
   @override
   bool operator ==(Object other) =>
@@ -668,7 +716,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.themePalette == this.themePalette &&
           other.legacyLibrarySettings == this.legacyLibrarySettings &&
           other.changelogSeenVersion == this.changelogSeenVersion &&
-          other.keyMap == this.keyMap);
+          other.keyMap == this.keyMap &&
+          other.pinnedCommands == this.pinnedCommands);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
@@ -685,6 +734,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> legacyLibrarySettings;
   final Value<String?> changelogSeenVersion;
   final Value<String?> keyMap;
+  final Value<String?> pinnedCommands;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.libraryPath = const Value.absent(),
@@ -699,6 +749,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.legacyLibrarySettings = const Value.absent(),
     this.changelogSeenVersion = const Value.absent(),
     this.keyMap = const Value.absent(),
+    this.pinnedCommands = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -714,6 +765,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.legacyLibrarySettings = const Value.absent(),
     this.changelogSeenVersion = const Value.absent(),
     this.keyMap = const Value.absent(),
+    this.pinnedCommands = const Value.absent(),
   });
   static Insertable<AppSetting> custom({
     Expression<int>? id,
@@ -729,6 +781,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<String>? legacyLibrarySettings,
     Expression<String>? changelogSeenVersion,
     Expression<String>? keyMap,
+    Expression<String>? pinnedCommands,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -746,6 +799,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (changelogSeenVersion != null)
         'changelog_seen_version': changelogSeenVersion,
       if (keyMap != null) 'key_map': keyMap,
+      if (pinnedCommands != null) 'pinned_commands': pinnedCommands,
     });
   }
 
@@ -763,6 +817,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<String>? legacyLibrarySettings,
     Value<String?>? changelogSeenVersion,
     Value<String?>? keyMap,
+    Value<String?>? pinnedCommands,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -779,6 +834,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           legacyLibrarySettings ?? this.legacyLibrarySettings,
       changelogSeenVersion: changelogSeenVersion ?? this.changelogSeenVersion,
       keyMap: keyMap ?? this.keyMap,
+      pinnedCommands: pinnedCommands ?? this.pinnedCommands,
     );
   }
 
@@ -828,6 +884,9 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (keyMap.present) {
       map['key_map'] = Variable<String>(keyMap.value);
     }
+    if (pinnedCommands.present) {
+      map['pinned_commands'] = Variable<String>(pinnedCommands.value);
+    }
     return map;
   }
 
@@ -846,7 +905,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('themePalette: $themePalette, ')
           ..write('legacyLibrarySettings: $legacyLibrarySettings, ')
           ..write('changelogSeenVersion: $changelogSeenVersion, ')
-          ..write('keyMap: $keyMap')
+          ..write('keyMap: $keyMap, ')
+          ..write('pinnedCommands: $pinnedCommands')
           ..write(')'))
         .toString();
   }
@@ -3829,6 +3889,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<String> legacyLibrarySettings,
       Value<String?> changelogSeenVersion,
       Value<String?> keyMap,
+      Value<String?> pinnedCommands,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -3845,6 +3906,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<String> legacyLibrarySettings,
       Value<String?> changelogSeenVersion,
       Value<String?> keyMap,
+      Value<String?> pinnedCommands,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -3918,6 +3980,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get keyMap => $composableBuilder(
     column: $table.keyMap,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pinnedCommands => $composableBuilder(
+    column: $table.pinnedCommands,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3995,6 +4062,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.keyMap,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pinnedCommands => $composableBuilder(
+    column: $table.pinnedCommands,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -4064,6 +4136,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get keyMap =>
       $composableBuilder(column: $table.keyMap, builder: (column) => column);
+
+  GeneratedColumn<String> get pinnedCommands => $composableBuilder(
+    column: $table.pinnedCommands,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -4110,6 +4187,7 @@ class $$AppSettingsTableTableManager
                 Value<String> legacyLibrarySettings = const Value.absent(),
                 Value<String?> changelogSeenVersion = const Value.absent(),
                 Value<String?> keyMap = const Value.absent(),
+                Value<String?> pinnedCommands = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 libraryPath: libraryPath,
@@ -4124,6 +4202,7 @@ class $$AppSettingsTableTableManager
                 legacyLibrarySettings: legacyLibrarySettings,
                 changelogSeenVersion: changelogSeenVersion,
                 keyMap: keyMap,
+                pinnedCommands: pinnedCommands,
               ),
           createCompanionCallback:
               ({
@@ -4140,6 +4219,7 @@ class $$AppSettingsTableTableManager
                 Value<String> legacyLibrarySettings = const Value.absent(),
                 Value<String?> changelogSeenVersion = const Value.absent(),
                 Value<String?> keyMap = const Value.absent(),
+                Value<String?> pinnedCommands = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 libraryPath: libraryPath,
@@ -4154,6 +4234,7 @@ class $$AppSettingsTableTableManager
                 legacyLibrarySettings: legacyLibrarySettings,
                 changelogSeenVersion: changelogSeenVersion,
                 keyMap: keyMap,
+                pinnedCommands: pinnedCommands,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -1231,6 +1231,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get palettePinned => 'Закріплені';
+  @override
+  String get palettePin => 'Закріпити';
+  @override
+  String get paletteUnpin => 'Відкріпити';
+  @override
+  String get palettePinFooter => 'alt+P закріпити';
+  @override
   String get spellCheckScanning => 'Перевірка нотатки…';
   @override
   String get spellCheckAgain => 'Перевірити знову';

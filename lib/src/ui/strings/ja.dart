@@ -1143,6 +1143,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get palettePinned => 'ピン留め';
+  @override
+  String get palettePin => 'ピン留め';
+  @override
+  String get paletteUnpin => '解除';
+  @override
+  String get palettePinFooter => 'alt+P でピン留め';
+  @override
   String get spellCheckScanning => 'ノートを確認中…';
   @override
   String get spellCheckAgain => 'もう一度確認';

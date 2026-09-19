@@ -1207,6 +1207,14 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get palettePinned => 'Kinnitatud';
+  @override
+  String get palettePin => 'Kinnita';
+  @override
+  String get paletteUnpin => 'Eemalda';
+  @override
+  String get palettePinFooter => 'alt+P kinnitab';
+  @override
   String get spellCheckScanning => 'Märkme kontrollimine…';
   @override
   String get spellCheckAgain => 'Kontrolli uuesti';

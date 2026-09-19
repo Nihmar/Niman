@@ -1225,6 +1225,14 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get palettePinned => 'Fest';
+  @override
+  String get palettePin => 'Festa';
+  @override
+  String get paletteUnpin => 'Losa';
+  @override
+  String get palettePinFooter => 'alt+P til að festa';
+  @override
   String get spellCheckScanning => 'Athugar minnismiðann…';
   @override
   String get spellCheckAgain => 'Athuga aftur';
