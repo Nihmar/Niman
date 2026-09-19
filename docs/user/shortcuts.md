@@ -8,6 +8,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+P` — the command palette: commands and notes in one
   search
 - `Ctrl/⌘+O` — go to a note by name (the palette, on notes alone)
+- `Ctrl/⌘+Shift+O` — open a Markdown file outside any library (see
+  [organization](organization.md#opening-a-file-outside-any-library))
 - `Ctrl/⌘+N` — new note
 - `Ctrl/⌘+Shift+N` — new list note
 - `Ctrl/⌘+Shift+A` — new voice note

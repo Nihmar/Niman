@@ -1243,6 +1243,12 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get openFileTitle => 'Άνοιγμα αρχείου';
+  @override
+  String get outsideFileNote =>
+      'Εκτός βιβλιοθήκης: αποθηκεύεται εκεί που είναι, χωρίς ευρετήριο, '
+      'χωρίς ιστορικό, οι σύνδεσμοι δεν ακολουθούνται';
+  @override
   String get typewriterOn => 'Ενεργοποίηση λειτουργίας γραφομηχανής';
   @override
   String get typewriterOff => 'Απενεργοποίηση λειτουργίας γραφομηχανής';

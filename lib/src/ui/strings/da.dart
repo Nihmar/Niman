@@ -1198,6 +1198,12 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get openFileTitle => 'Åbn fil';
+  @override
+  String get outsideFileNote =>
+      'Uden for biblioteker: gemmes hvor den ligger, ikke indekseret, ingen '
+      'historik, links følges ikke';
+  @override
   String get typewriterOn => 'Slå skrivemaskinetilstand til';
   @override
   String get typewriterOff => 'Slå skrivemaskinetilstand fra';

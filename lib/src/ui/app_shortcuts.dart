@@ -58,6 +58,9 @@ enum AppCommand {
   /// Switch typewriter mode (#70): the line being written in the middle.
   typewriterMode,
 
+  /// Open a Markdown file outside the library (#77).
+  openFile,
+
   /// The command palette (#155): commands and notes in one search.
   openPalette,
 
@@ -180,6 +183,10 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
     ),
     AppShortcut(
+      AppCommand.openFile,
+      SingleActivator(LogicalKeyboardKey.keyO, control: true, shift: true),
+    ),
+    AppShortcut(
       AppCommand.goToNote,
       SingleActivator(LogicalKeyboardKey.keyO, control: true),
     ),
@@ -222,6 +229,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.splitDown => AppStrings.splitDown,
   AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.typewriterMode => AppStrings.typewriterTitle,
+  AppCommand.openFile => AppStrings.openFileTitle,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,
   AppCommand.togglePreview => AppStrings.showPreviewTooltip,

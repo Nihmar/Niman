@@ -1211,6 +1211,12 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get openFileTitle => 'Отвори файл';
+  @override
+  String get outsideFileNote =>
+      'Извън библиотека: записва се на място, без индекс, без история, '
+      'връзките не се следват';
+  @override
   String get typewriterOn => 'Включи режим „пишеща машина“';
   @override
   String get typewriterOff => 'Изключи режим „пишеща машина“';

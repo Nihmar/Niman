@@ -1211,6 +1211,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get openFileTitle => 'Отвори датотека';
+  @override
+  String get outsideFileNote =>
+      'Надвор од библиотека: се зачувува каде што е, без индекс, без '
+      'историја, врските не се следат';
+  @override
   String get typewriterOn => 'Вклучи режим на машина за пишување';
   @override
   String get typewriterOff => 'Исклучи режим на машина за пишување';

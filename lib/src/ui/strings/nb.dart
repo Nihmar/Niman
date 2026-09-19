@@ -1194,6 +1194,12 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get openFileTitle => 'Åpne fil';
+  @override
+  String get outsideFileNote =>
+      'Utenfor biblioteker: lagres der den ligger, ikke indeksert, ingen '
+      'historikk, lenker følges ikke';
+  @override
   String get typewriterOn => 'Slå på skrivemaskinmodus';
   @override
   String get typewriterOff => 'Slå av skrivemaskinmodus';

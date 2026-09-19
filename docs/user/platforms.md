@@ -84,6 +84,11 @@ bar goes, and a phone is already one note on one screen. The window is
 maximized for it; if the window manager declines, Zen still hides
 everything but the note.
 
+**Opening a file outside any library** (`Ctrl+Shift+O`, see
+[organization](organization.md#opening-a-file-outside-any-library)) is
+Linux and Windows only for now: Android's picker hands over a copy of
+the file, which could be read but not saved back.
+
 The **side panel** (outline, tags, history beside the note) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note

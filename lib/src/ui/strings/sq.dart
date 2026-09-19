@@ -1213,6 +1213,12 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get openFileTitle => 'Hap skedar';
+  @override
+  String get outsideFileNote =>
+      'Jashtë çdo biblioteke: ruhet aty ku është, pa indeks, pa histori, '
+      'lidhjet nuk ndiqen';
+  @override
   String get typewriterOn => 'Aktivizo mënyrën e makinës së shkrimit';
   @override
   String get typewriterOff => 'Çaktivizo mënyrën e makinës së shkrimit';

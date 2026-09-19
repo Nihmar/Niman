@@ -1203,6 +1203,12 @@ final class BosnianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get openFileTitle => 'Otvori datoteku';
+  @override
+  String get outsideFileNote =>
+      'Izvan biblioteke: sprema se gdje jest, bez indeksa, bez historije, '
+      'veze se ne prate';
+  @override
   String get typewriterOn => 'Uključi način pisaće mašine';
   @override
   String get typewriterOff => 'Isključi način pisaće mašine';

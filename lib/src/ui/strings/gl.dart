@@ -1213,6 +1213,12 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get openFileTitle => 'Abrir ficheiro';
+  @override
+  String get outsideFileNote =>
+      'Fóra de toda biblioteca: gárdase onde está, sen índice, sen '
+      'historial, as ligazóns non se seguen';
+  @override
   String get typewriterOn => 'Activar o modo máquina de escribir';
   @override
   String get typewriterOff => 'Desactivar o modo máquina de escribir';

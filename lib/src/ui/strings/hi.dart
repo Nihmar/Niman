@@ -1174,6 +1174,12 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get openFileTitle => 'फ़ाइल खोलें';
+  @override
+  String get outsideFileNote =>
+      'किसी लाइब्रेरी से बाहर: जहाँ है वहीं सहेजी जाती है, इंडेक्स नहीं, '
+      'इतिहास नहीं, लिंक नहीं खुलते';
+  @override
   String get typewriterOn => 'टाइपराइटर मोड चालू करें';
   @override
   String get typewriterOff => 'टाइपराइटर मोड बंद करें';

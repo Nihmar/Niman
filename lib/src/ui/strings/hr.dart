@@ -1197,6 +1197,12 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get openFileTitle => 'Otvori datoteku';
+  @override
+  String get outsideFileNote =>
+      'Izvan knjižnice: sprema se gdje jest, bez indeksa, bez povijesti, '
+      'poveznice se ne prate';
+  @override
   String get typewriterOn => 'Uključi način pisaćeg stroja';
   @override
   String get typewriterOff => 'Isključi način pisaćeg stroja';
