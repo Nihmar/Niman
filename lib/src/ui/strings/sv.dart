@@ -393,6 +393,16 @@ final class SwedishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Snabbanteckning';
   @override
+  String get trayOpen => 'Öppna Niman';
+  @override
+  String get trayQuit => 'Avsluta';
+  @override
+  String get closeToTrayTitle => 'Stäng till aktivitetsfältet';
+  @override
+  String get closeToTraySubtitle =>
+      'Fönstrets × gömmer Niman och låter det fortsätta, så påminnelser '
+      'kommer fortfarande. Avsluta från ikonens meny.';
+  @override
   String get shortcutNewTodo => 'Ny uppgift';
   @override
   String get shortcutNewNote => 'Ny anteckning';

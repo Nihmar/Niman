@@ -392,6 +392,16 @@ final class BosnianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Brza bilješka';
   @override
+  String get trayOpen => 'Otvori Niman';
+  @override
+  String get trayQuit => 'Izađi';
+  @override
+  String get closeToTrayTitle => 'Zatvori u traku obavještenja';
+  @override
+  String get closeToTraySubtitle =>
+      '× prozora skriva Niman i ostavlja ga pokrenutim, pa podsjetnici još '
+      'dolaze. Izlazi se iz menija ikone.';
+  @override
   String get shortcutNewTodo => 'Nova zadaća';
   @override
   String get shortcutNewNote => 'Nova bilješka';

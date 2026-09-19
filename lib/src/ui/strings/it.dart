@@ -394,6 +394,16 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Nota rapida';
   @override
+  String get trayOpen => 'Apri Niman';
+  @override
+  String get trayQuit => 'Esci';
+  @override
+  String get closeToTrayTitle => 'Chiudi nell’area di notifica';
+  @override
+  String get closeToTraySubtitle =>
+      'La × della finestra nasconde Niman e lo lascia in esecuzione, così i '
+      'promemoria continuano ad arrivare. Si esce dal menu dell’icona.';
+  @override
   String get shortcutNewTodo => 'Nuova attività';
   @override
   String get shortcutNewNote => 'Nuova nota';

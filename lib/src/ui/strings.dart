@@ -347,6 +347,10 @@ final class AppStrings {
 
   // Launcher quick actions (T-SC-02), in the order they are published.
   static String get shortcutQuickNote => _s.shortcutQuickNote;
+  static String get trayOpen => _s.trayOpen;
+  static String get trayQuit => _s.trayQuit;
+  static String get closeToTrayTitle => _s.closeToTrayTitle;
+  static String get closeToTraySubtitle => _s.closeToTraySubtitle;
   static String get shortcutNewTodo => _s.shortcutNewTodo;
   static String get shortcutNewNote => _s.shortcutNewNote;
   static String get shortcutNewList => _s.shortcutNewList;

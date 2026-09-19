@@ -392,6 +392,16 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Szybka notatka';
   @override
+  String get trayOpen => 'Otwórz Niman';
+  @override
+  String get trayQuit => 'Zakończ';
+  @override
+  String get closeToTrayTitle => 'Zamknij do zasobnika';
+  @override
+  String get closeToTraySubtitle =>
+      '× okna ukrywa Niman i zostawia go uruchomionym, więc przypomnienia '
+      'nadal przychodzą. Wyjście z menu ikony.';
+  @override
   String get shortcutNewTodo => 'Nowe zadanie';
   @override
   String get shortcutNewNote => 'Nowa notatka';

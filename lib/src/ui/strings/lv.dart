@@ -386,6 +386,16 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Ātrā piezīme';
   @override
+  String get trayOpen => 'Atvērt Niman';
+  @override
+  String get trayQuit => 'Iziet';
+  @override
+  String get closeToTrayTitle => 'Aizvērt uz paziņojumu joslu';
+  @override
+  String get closeToTraySubtitle =>
+      'Loga × paslēpj Niman un atstāj to darboties, tāpēc atgādinājumi '
+      'joprojām pienāk. Iziet var no ikonas izvēlnes.';
+  @override
   String get shortcutNewTodo => 'Jauns uzdevums';
   @override
   String get shortcutNewNote => 'Jauna piezīme';

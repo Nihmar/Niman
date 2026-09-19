@@ -86,6 +86,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 26) await drop('app_settings', 'close_to_tray');
   if (version < 25) await drop('app_settings', 'pinned_commands');
   if (version < 24) await drop('app_settings', 'key_map');
   if (version < 23) await db.customStatement('DROP TABLE workspaces');
@@ -1034,6 +1035,27 @@ void main() {
         (await db.select(db.appSettings).get()).single.libraryPath,
         '/lib/Work',
       );
+      await db.close();
+    });
+  });
+
+  group('v25 → v26: close to tray appears (#209)', () {
+    test('an existing install upgrades with it on', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 25);
+        await db.customStatement(
+          "INSERT INTO app_settings (id, library_path) VALUES (1, '/lib/W')",
+        );
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      // On: the desktop reminders need Niman alive, and the tray is how
+      // the window comes back.
+      expect(await repo.closeToTray(), isTrue);
+      await repo.setCloseToTray(enabled: false);
+      expect(await repo.closeToTray(), isFalse);
       await db.close();
     });
   });

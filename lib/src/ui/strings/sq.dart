@@ -388,6 +388,16 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Shënim i shpejtë';
   @override
+  String get trayOpen => 'Hap Niman';
+  @override
+  String get trayQuit => 'Dil';
+  @override
+  String get closeToTrayTitle => 'Mbyll në zonën e njoftimeve';
+  @override
+  String get closeToTraySubtitle =>
+      '× e dritares fsheh Niman dhe e lë në punë, kështu kujtesat vijnë '
+      'përsëri. Dilet nga menuja e ikonës.';
+  @override
   String get shortcutNewTodo => 'Detyrë e re';
   @override
   String get shortcutNewNote => 'Shënim i ri';

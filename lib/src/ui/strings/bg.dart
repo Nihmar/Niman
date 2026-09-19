@@ -392,6 +392,16 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Бърза бележка';
   @override
+  String get trayOpen => 'Отвори Niman';
+  @override
+  String get trayQuit => 'Изход';
+  @override
+  String get closeToTrayTitle => 'Затваряне в областта за известия';
+  @override
+  String get closeToTraySubtitle =>
+      '× на прозореца скрива Niman и го оставя да работи, така напомнянията '
+      'продължават да идват. Излиза се от менюто на иконата.';
+  @override
   String get shortcutNewTodo => 'Нова задача';
   @override
   String get shortcutNewNote => 'Нова бележка';

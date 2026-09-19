@@ -390,6 +390,16 @@ final class CroatianStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Brza napomena';
   @override
+  String get trayOpen => 'Otvori Niman';
+  @override
+  String get trayQuit => 'Izađi';
+  @override
+  String get closeToTrayTitle => 'Zatvori u traku obavijesti';
+  @override
+  String get closeToTraySubtitle =>
+      '× prozora skriva Niman i ostavlja ga pokrenutim, pa podsjetnici još '
+      'dolaze. Izlazi se iz izbornika ikone.';
+  @override
   String get shortcutNewTodo => 'Nova zadaća';
   @override
   String get shortcutNewNote => 'Nova napomena';

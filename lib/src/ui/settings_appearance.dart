@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/language.dart';
@@ -6,6 +7,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/settings_area.dart';
 import 'package:niman/src/ui/settings_keys.dart';
 import 'package:niman/src/ui/settings_rows.dart';
@@ -50,6 +52,10 @@ final class _SettingsAppearanceScreenState
   PreviewLayoutMode _previewMode = PreviewLayoutMode.auto;
   EditorKind _editorKind = EditorKind.source;
   bool _previewEnabled = true;
+  bool _closeToTray = true;
+
+  /// The tray is the desktops': elsewhere there is nothing to close into.
+  static final bool _hasTray = Platform.isLinux || Platform.isWindows;
 
   /// Steps of 5% between [minTextScale] and [maxTextScale]: fine enough
   /// to land on a size that fits, coarse enough to be hit on a phone.
@@ -72,6 +78,7 @@ final class _SettingsAppearanceScreenState
     final previewMode = await controller.previewMode;
     final editorKind = await controller.editorKind;
     final previewEnabled = await controller.previewEnabled;
+    final closeToTray = await controller.closeToTray;
     if (!mounted) return;
     setState(() {
       _language = language;
@@ -80,6 +87,7 @@ final class _SettingsAppearanceScreenState
       _uiTextScale = uiTextScale;
       _splitRatio = splitRatio;
       _splitLoaded = true;
+      _closeToTray = closeToTray;
       _previewMode = previewMode;
       _editorKind = editorKind;
       _previewEnabled = previewEnabled;
@@ -190,6 +198,12 @@ final class _SettingsAppearanceScreenState
     if (mounted) setState(() => _uiTextScale = scale);
   }
 
+  Future<void> _setCloseToTray({required bool enabled}) async {
+    await widget.controller.setCloseToTray(enabled: enabled);
+    CloseToTray.enabled.value = enabled;
+    if (mounted) setState(() => _closeToTray = enabled);
+  }
+
   Future<void> _setSplitRatio(double ratio) async {
     final controller = widget.controller;
     await controller.setSplitRatio(ratio);
@@ -280,6 +294,19 @@ final class _SettingsAppearanceScreenState
                 subtitle: AppStrings.splitRatioSubtitle,
                 value: AppStrings.splitRatioValue(_splitRatio),
                 onTap: () => unawaited(_chooseSplitRatio()),
+              ),
+            ),
+          // The window's × (#209): the desktops only, where there is a
+          // tray to hide into.
+          if (_hasTray)
+            HighlightRow(
+              key: SettingsKeys.closeToTray,
+              child: SettingsSwitchRow(
+                title: AppStrings.closeToTrayTitle,
+                description: AppStrings.closeToTraySubtitle,
+                value: _closeToTray,
+                onChanged: (value) =>
+                    unawaited(_setCloseToTray(enabled: value)),
               ),
             ),
         ],

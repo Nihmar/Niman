@@ -389,6 +389,16 @@ final class CzechStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Rychlá poznámka';
   @override
+  String get trayOpen => 'Otevřít Niman';
+  @override
+  String get trayQuit => 'Ukončit';
+  @override
+  String get closeToTrayTitle => 'Zavřít do oznamovací oblasti';
+  @override
+  String get closeToTraySubtitle =>
+      '× okna skryje Niman a nechá jej běžet, takže připomínky stále chodí. '
+      'Ukončení z nabídky ikony.';
+  @override
   String get shortcutNewTodo => 'Nový úkol';
   @override
   String get shortcutNewNote => 'Nová poznámka';

@@ -390,6 +390,16 @@ final class DanishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Kviknote';
   @override
+  String get trayOpen => 'Åbn Niman';
+  @override
+  String get trayQuit => 'Afslut';
+  @override
+  String get closeToTrayTitle => 'Luk til bakken';
+  @override
+  String get closeToTraySubtitle =>
+      'Vinduets × skjuler Niman og lader det køre, så påmindelser stadig '
+      'kommer. Afslut fra ikonets menu.';
+  @override
   String get shortcutNewTodo => 'Ny opgave';
   @override
   String get shortcutNewNote => 'Ny note';

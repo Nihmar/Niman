@@ -391,6 +391,16 @@ final class EnglishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Quick note';
   @override
+  String get trayOpen => 'Open Niman';
+  @override
+  String get trayQuit => 'Quit';
+  @override
+  String get closeToTrayTitle => 'Close to the tray';
+  @override
+  String get closeToTraySubtitle =>
+      'The window’s × hides Niman and leaves it running, so reminders still '
+      'fire. Quit from the tray menu.';
+  @override
   String get shortcutNewTodo => 'New todo';
   @override
   String get shortcutNewNote => 'New note';

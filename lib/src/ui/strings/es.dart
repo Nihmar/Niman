@@ -395,6 +395,16 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutQuickNote => 'Nota rápida';
   @override
+  String get trayOpen => 'Abrir Niman';
+  @override
+  String get trayQuit => 'Salir';
+  @override
+  String get closeToTrayTitle => 'Cerrar al área de notificación';
+  @override
+  String get closeToTraySubtitle =>
+      'La × de la ventana oculta Niman y lo deja en marcha, así los '
+      'recordatorios siguen llegando. Se sale desde el menú del icono.';
+  @override
   String get shortcutNewTodo => 'Nueva tarea';
   @override
   String get shortcutNewNote => 'Nueva nota';

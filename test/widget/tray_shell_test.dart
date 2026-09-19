@@ -96,6 +96,37 @@ void main() {
     await close();
   });
 
+  // #209: the menu's own entries, and the labels they carry.
+  testWidgets('the menu offers Open Niman and Quit', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    expect(tray.openLabel, AppStrings.trayOpen);
+    expect(tray.quitLabel, AppStrings.trayQuit);
+    await close();
+  });
+
+  testWidgets("the menu's Open brings the window back", (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    tray.run(TrayCommand.open);
+    await tester.pump();
+    expect(window.showCalls, 1);
+    await close();
+  });
+
+  testWidgets("the menu's Quit closes the window", (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    tray.run(TrayCommand.quit);
+    await settle(tester);
+    expect(window.closeCalls, 1);
+    await close();
+  });
+
   testWidgets('an icon click brings the window back', (tester) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
