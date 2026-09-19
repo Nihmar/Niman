@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -200,59 +201,70 @@ final class _NoteTabBarState extends State<NoteTabBar> {
   Widget build(BuildContext context) {
     final tabs = widget.tabs;
     return LayoutBuilder(
-      builder: (context, constraints) => Row(
-        key: const Key('note-tab-bar'),
-        children: [
-          // As wide as the tabs need, up to what leaves the buttons and
-          // some of the filler: past that the row scrolls.
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: (constraints.maxWidth - 2 * 40 - NoteTabBar.minFiller)
-                  .clamp(0, double.infinity),
-            ),
-            child: SingleChildScrollView(
-              controller: _scroll,
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final (i, tab) in tabs.indexed)
-                    _NoteTab(
-                      key: i == widget.active ? _activeKey : ValueKey(tab.path),
-                      tab: tab,
-                      index: i,
-                      active: i == widget.active,
-                      focused: widget.focused,
-                      unsaved: widget.unsaved.contains(tab.path),
-                      onActivate: () => widget.onActivate(i),
-                      onClose: () => widget.onClose(i),
-                      onMenu: (position) =>
-                          unawaited(_showTabMenu(context, i, position)),
-                    ),
-                ],
+      builder: (context, constraints) {
+        final room = (constraints.maxWidth - 2 * 40 - NoteTabBar.minFiller)
+            .clamp(0.0, double.infinity);
+        // Short of room, the tabs shrink first — their names cut with an
+        // ellipsis — and only below the narrowest does the row scroll.
+        // Scrolling a wide tab into a narrow pane showed its end and cut
+        // its name at the start (0.0.8 test round).
+        final tabWidth = tabs.isEmpty
+            ? _NoteTab.widest
+            : (room / tabs.length).clamp(_NoteTab.narrowest, _NoteTab.widest);
+        return Row(
+          key: const Key('note-tab-bar'),
+          children: [
+            // As wide as the tabs need, up to what leaves the buttons and
+            // some of the filler: past that the row scrolls.
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: room),
+              child: SingleChildScrollView(
+                controller: _scroll,
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final (i, tab) in tabs.indexed)
+                      _NoteTab(
+                        key: i == widget.active
+                            ? _activeKey
+                            : ValueKey(tab.path),
+                        tab: tab,
+                        index: i,
+                        active: i == widget.active,
+                        focused: widget.focused,
+                        unsaved: widget.unsaved.contains(tab.path),
+                        onActivate: () => widget.onActivate(i),
+                        onClose: () => widget.onClose(i),
+                        onMenu: (position) =>
+                            unawaited(_showTabMenu(context, i, position)),
+                        maxWidth: tabWidth,
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            key: const Key('tab-new'),
-            tooltip: AppStrings.newNoteTabTooltip,
-            icon: const Icon(Icons.add, size: 18),
-            visualDensity: VisualDensity.compact,
-            onPressed: widget.onNew,
-          ),
-          if (tabs.isNotEmpty)
-            Builder(
-              builder: (context) => IconButton(
-                key: const Key('tab-list'),
-                tooltip: AppStrings.openNotesTooltip,
-                icon: const Icon(Icons.expand_more, size: 18),
-                visualDensity: VisualDensity.compact,
-                onPressed: () => unawaited(_showList(context)),
-              ),
+            IconButton(
+              key: const Key('tab-new'),
+              tooltip: AppStrings.newNoteTabTooltip,
+              icon: const Icon(Icons.add, size: 18),
+              visualDensity: VisualDensity.compact,
+              onPressed: widget.onNew,
             ),
-          Expanded(child: widget.filler),
-        ],
-      ),
+            if (tabs.isNotEmpty)
+              Builder(
+                builder: (context) => IconButton(
+                  key: const Key('tab-list'),
+                  tooltip: AppStrings.openNotesTooltip,
+                  icon: const Icon(Icons.expand_more, size: 18),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => unawaited(_showList(context)),
+                ),
+              ),
+            Expanded(child: widget.filler),
+          ],
+        );
+      },
     );
   }
 }
@@ -268,8 +280,20 @@ final class _NoteTab extends StatefulWidget {
     required this.onActivate,
     required this.onClose,
     required this.onMenu,
+    this.maxWidth = _NoteTab.widest,
     super.key,
   });
+
+  /// A tab's width when there is room for it.
+  static const double widest = 190;
+
+  /// The narrowest a tab gets before the row scrolls instead: its close
+  /// button and a few letters of its name.
+  static const double narrowest = 72;
+
+  /// How wide this tab may be: less than [widest] when the row is short
+  /// of room, so the tabs shrink before they scroll.
+  final double maxWidth;
 
   final WorkspaceTab tab;
   final int index;
@@ -334,9 +358,9 @@ final class _NoteTabState extends State<_NoteTab> {
                 borderRadius: BorderRadius.circular(7),
                 onTap: widget.onActivate,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 90,
-                    maxWidth: 190,
+                  constraints: BoxConstraints(
+                    minWidth: math.min(90, widget.maxWidth),
+                    maxWidth: widget.maxWidth,
                   ),
                   child: SizedBox(
                     height: 30,
