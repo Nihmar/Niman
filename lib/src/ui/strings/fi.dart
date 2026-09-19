@@ -1212,6 +1212,14 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get typewriterOn => 'Ota kirjoituskonetila käyttöön';
+  @override
+  String get typewriterOff => 'Poista kirjoituskonetila käytöstä';
+  @override
+  String get typewriterTitle => 'Kirjoituskonetila';
+  @override
+  String get typewriterSubtitle => 'Pidä kirjoitettava rivi editorin keskellä';
+  @override
   String get zenMode => 'Zen-tila';
   @override
   String get zenModeEnter => 'Siirry zen-tilaan';

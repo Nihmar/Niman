@@ -6,6 +6,7 @@ import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/markdown_chunks.dart';
 import 'package:niman/src/editor/note_column.dart';
+import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:re_editor/re_editor.dart';
 
@@ -55,6 +56,7 @@ final class NoteEditor extends StatelessWidget {
     this.column = NoteColumn.off,
     this.formatMenu,
     this.caretWidth,
+    this.typewriter = false,
     super.key,
   });
 
@@ -114,20 +116,27 @@ final class NoteEditor extends StatelessWidget {
   /// thickens it).
   final double? caretWidth;
 
+  /// Typewriter mode (#70): room below the last line, so the caret can
+  /// reach the middle there too. The owner does the centring.
+  final bool typewriter;
+
   /// re_editor's own padding around the text: what the editor had before
   /// the column, kept wherever there is no side space.
   static const double _fieldInset = 5;
 
   @override
   Widget build(BuildContext context) {
-    if (!column.enabled) return _editor(0);
+    if (!column.enabled && !typewriter) return _editor(0, 0);
     return LayoutBuilder(
-      builder: (context, constraints) =>
-          _editor(column.sideSpaceIn(constraints.maxWidth)),
+      builder: (context, constraints) => _editor(
+        column.enabled ? column.sideSpaceIn(constraints.maxWidth) : 0,
+        typewriter ? typewriterSlack(constraints.maxHeight) : 0,
+      ),
     );
   }
 
-  /// The editor with [side] logical pixels of column space on each side.
+  /// The editor with [side] logical pixels of column space on each side,
+  /// and [slack] of room below the last line (typewriter mode).
   ///
   /// The left side space is the row-number column's to take: the numbers
   /// sit at its right end, against the text, and the text starts at
@@ -135,7 +144,7 @@ final class NoteEditor extends StatelessWidget {
   /// editors does not move the text sideways. Both sides stay inside the
   /// editor's scroll view, so the scrollbar keeps to the pane's edge and
   /// the wheel scrolls from the margins too.
-  Widget _editor(double side) {
+  Widget _editor(double side, double slack) {
     final gutter = side == 0 ? 0.0 : side + NoteColumn.textInset - _fieldInset;
     return CodeEditor(
       controller: controller,
@@ -194,13 +203,13 @@ final class NoteEditor extends StatelessWidget {
           ),
         );
       },
-      padding: side == 0
+      padding: side == 0 && slack == 0
           ? null
           : EdgeInsets.fromLTRB(
               _fieldInset,
               _fieldInset,
-              side + NoteColumn.textInset,
-              _fieldInset,
+              side == 0 ? _fieldInset : side + NoteColumn.textInset,
+              _fieldInset + slack,
             ),
       // Heading-section folds (the tokenizer's outline — fences/math/
       // frontmatter are never anchors), not `{}`/`[]`.

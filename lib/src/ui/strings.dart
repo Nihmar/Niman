@@ -764,6 +764,10 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get typewriterOn => _s.typewriterOn;
+  static String get typewriterOff => _s.typewriterOff;
+  static String get typewriterTitle => _s.typewriterTitle;
+  static String get typewriterSubtitle => _s.typewriterSubtitle;
   static String get zenMode => _s.zenMode;
   static String get zenModeEnter => _s.zenModeEnter;
   static String get zenModeLeave => _s.zenModeLeave;

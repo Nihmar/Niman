@@ -1201,6 +1201,15 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get typewriterOn => 'Įjungti rašomosios mašinėlės režimą';
+  @override
+  String get typewriterOff => 'Išjungti rašomosios mašinėlės režimą';
+  @override
+  String get typewriterTitle => 'Rašomosios mašinėlės režimas';
+  @override
+  String get typewriterSubtitle =>
+      'Eilutė, kurią rašote, lieka redaktoriaus viduryje';
+  @override
   String get zenMode => 'Zen režimas';
   @override
   String get zenModeEnter => 'Įjungti zen režimą';

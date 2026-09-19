@@ -1198,6 +1198,15 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get typewriterOn => 'Slå skrivemaskinetilstand til';
+  @override
+  String get typewriterOff => 'Slå skrivemaskinetilstand fra';
+  @override
+  String get typewriterTitle => 'Skrivemaskinetilstand';
+  @override
+  String get typewriterSubtitle =>
+      'Hold linjen, du skriver på, midt i editoren';
+  @override
   String get zenMode => 'Zen-tilstand';
   @override
   String get zenModeEnter => 'Gå i zen-tilstand';

@@ -1174,6 +1174,15 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get typewriterOn => 'टाइपराइटर मोड चालू करें';
+  @override
+  String get typewriterOff => 'टाइपराइटर मोड बंद करें';
+  @override
+  String get typewriterTitle => 'टाइपराइटर मोड';
+  @override
+  String get typewriterSubtitle =>
+      'जिस पंक्ति पर आप लिख रहे हैं उसे एडिटर के बीच में रखें';
+  @override
   String get zenMode => 'ज़ेन मोड';
   @override
   String get zenModeEnter => 'ज़ेन मोड में जाएँ';

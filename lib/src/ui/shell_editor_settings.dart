@@ -25,6 +25,7 @@ final class ShellEditorSettings {
   const new({
     this.lineNumbers = true,
     this.noteColumn = const NoteColumn(),
+    this.typewriter = false,
     this.autofocusEditor = false,
     this.previewMode = PreviewLayoutMode.auto,
     this.splitRatio = defaultSplitRatio,
@@ -48,6 +49,9 @@ final class ShellEditorSettings {
 
   /// Where the note's text sits across its pane (issue #171).
   final NoteColumn noteColumn;
+
+  /// Whether the caret's row keeps to the middle of the editor (#70).
+  final bool typewriter;
 
   /// Whether opening a note raises the keyboard.
   final bool autofocusEditor;
@@ -102,6 +106,7 @@ final class ShellEditorSettings {
     final lineNumbers = await session.lineNumbersEnabled;
     final readableLineLength = await session.readableLineLength;
     final noteColumnWidth = await session.noteColumnWidth;
+    final typewriter = await session.typewriter;
     final autofocus = await session.editorAutofocusEnabled;
     final previewMode = await session.previewMode;
     final splitRatio = await session.splitRatio;
@@ -125,6 +130,7 @@ final class ShellEditorSettings {
         enabled: readableLineLength,
         width: noteColumnWidth,
       ),
+      typewriter: typewriter,
       autofocusEditor: autofocus,
       previewMode: previewMode,
       splitRatio: splitRatio,
@@ -154,10 +160,12 @@ final class ShellEditorSettings {
     EditorKind? editorKind,
     TreeSort? treeSort,
     double? treeWidth,
+    bool? typewriter,
   }) {
     return ShellEditorSettings(
       lineNumbers: lineNumbers,
       noteColumn: noteColumn,
+      typewriter: typewriter ?? this.typewriter,
       autofocusEditor: autofocusEditor,
       previewMode: previewMode ?? this.previewMode,
       splitRatio: splitRatio ?? this.splitRatio,
@@ -180,6 +188,7 @@ final class ShellEditorSettings {
     return other is ShellEditorSettings &&
         lineNumbers == other.lineNumbers &&
         noteColumn == other.noteColumn &&
+        typewriter == other.typewriter &&
         autofocusEditor == other.autofocusEditor &&
         previewMode == other.previewMode &&
         splitRatio == other.splitRatio &&
@@ -201,6 +210,7 @@ final class ShellEditorSettings {
   int get hashCode => Object.hash(
     lineNumbers,
     noteColumn,
+    typewriter,
     autofocusEditor,
     previewMode,
     splitRatio,

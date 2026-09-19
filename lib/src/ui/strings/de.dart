@@ -1223,6 +1223,15 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get typewriterOn => 'Schreibmaschinenmodus einschalten';
+  @override
+  String get typewriterOff => 'Schreibmaschinenmodus ausschalten';
+  @override
+  String get typewriterTitle => 'Schreibmaschinenmodus';
+  @override
+  String get typewriterSubtitle =>
+      'Die Zeile, in der Sie schreiben, bleibt in der Mitte des Editors';
+  @override
   String get zenMode => 'Zen-Modus';
   @override
   String get zenModeEnter => 'Zen-Modus starten';
