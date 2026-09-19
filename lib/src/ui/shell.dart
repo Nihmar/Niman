@@ -76,6 +76,7 @@ import 'package:niman/src/ui/tree.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/update_banner.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:niman/src/ui/zen_mode.dart';
 import 'package:niman/src/widget/widget_host.dart';
 import 'package:niman/src/widget/widget_target.dart';
 import 'package:niman/src/widget/widget_updater.dart';
@@ -472,8 +473,9 @@ final class _LibraryShellState extends State<_LibraryShell>
   ///
   /// The preview's eye, a note closing, the preview opening: each lets
   /// the focus go, and it lands on the route's scope, above the shell,
-  /// where no key reaches the bindings until a click puts it somewhere.
-  /// The phone is left alone: there, focus is the software keyboard.
+  /// where no key reaches the bindings — not the next command, and not
+  /// the Esc that leaves Zen (#69). The phone is left alone: there,
+  /// focus is the software keyboard.
   void _reclaimFocus() {
     if (!mounted || !_wide || _shellFocus.hasFocus) return;
     if (FocusManager.instance.primaryFocus is! FocusScopeNode) return;
@@ -1215,6 +1217,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     AppKeyMap.current.addListener(_onKeyMapChanged);
     _chosenKeys.attach();
     FocusManager.instance.addListener(_reclaimFocus);
+    _zen.addListener(_onZenChanged);
     unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
@@ -1247,6 +1250,11 @@ final class _LibraryShellState extends State<_LibraryShell>
     AppKeyMap.current.removeListener(_onKeyMapChanged);
     _chosenKeys.detach();
     FocusManager.instance.removeListener(_reclaimFocus);
+    // A library switch tears the shell down: the window it maximized goes
+    // back as it was.
+    _zen.removeListener(_onZenChanged);
+    unawaited(_zen.leave());
+    _zen.dispose();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -1726,6 +1734,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       keepOnNone: true,
       alongside: !_wide,
     );
+    _leaveZenIfEmpty();
     final splitsPreview = previewSplits(
       _editorSettings.previewMode,
       narrow: narrow,
@@ -1764,6 +1773,10 @@ final class _LibraryShellState extends State<_LibraryShell>
       tabIndex: _tab.index,
       onDestinationSelected: _onDestinationSelected,
       buildWideSlots: () => _wideSlots(controller),
+      zen: _inZen,
+      zenTitle: p.basename(_workspace.value.activePath ?? ''),
+      onLeaveZen: () => unawaited(_zen.leave()),
+      leaveZenOnEsc: _leaveZenOnEsc,
     );
     return narrow
         ? NarrowShellLayout(props: props)
@@ -1857,11 +1870,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// desktop log showed the cost of the old swap-in/swap-out: 6-9 ms tree
   /// flattens, 28 ms Search and 62 ms Settings first builds, every switch.
   List<Widget> _wideSlots(LibrarySession controller) {
-    final filesVisible =
-        _tab == ShellTab.files ||
-        (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
     return [
-      _wideSlot(visible: filesVisible, child: _wideBody(controller)),
+      _wideSlot(visible: _filesSlotVisible, child: _wideBody(controller)),
       // One slot per remaining tab, in tab order so a slot's identity
       // never moves. Unvisited tabs build the empty placeholder
       // `_tabBodyFor` returns.
@@ -1880,6 +1890,12 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
     ];
   }
+
+  /// Whether the wide layout shows the tree and the panes: Files, or an
+  /// open quick note, which lives in the panes.
+  bool get _filesSlotVisible =>
+      _tab == ShellTab.files ||
+      (_tab == ShellTab.quickNote && !_showQuickNoteChooser);
 
   /// One kept-alive wide-layout slot. Hidden slots skip layout, paint and
   /// tickers (see [TabBodyStack]); [retainLayout] keeps an expensive one
@@ -2174,6 +2190,45 @@ final class _LibraryShellState extends State<_LibraryShell>
   Map<ShortcutActivator, VoidCallback> _appShortcutBindings() =>
       appShortcutBindings(_commandHandlers());
 
+  /// Esc leaves Zen (#69): the app's Esc is a [DismissIntent], and this is
+  /// what it dismisses while Zen is on. It gets there only when nothing
+  /// nearer wanted the key: the find bar and a selection take the first
+  /// press, a dialog or a menu its own.
+  late final Action<DismissIntent> _leaveZenOnEsc = LeaveZenAction(
+    _zen,
+    () => _inZen,
+  );
+
+  /// Zen mode (#69), per window and never stored.
+  late final ZenMode _zen = ZenMode(widget.window);
+
+  /// Whether Zen can show: a desktop window wide enough for the panes,
+  /// on the notes, with a note open in them.
+  bool get _zenPossible =>
+      widget.window.customTitleBar &&
+      _wide &&
+      _filesSlotVisible &&
+      _workspace.value.activePath != null;
+
+  /// Whether Zen is what is on screen.
+  bool get _inZen => _zen.on && _zenPossible;
+
+  void _toggleZen() => unawaited(_zen.toggle());
+
+  void _onZenChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Leaves Zen once there is nothing left for it to show — the last tab
+  /// closed, another place of the rail chosen, the window narrowed — so
+  /// the chrome and the window size come back rather than wait.
+  void _leaveZenIfEmpty() {
+    if (!_zen.on || _zenPossible) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _zen.on && !_zenPossible) unawaited(_zen.leave());
+    });
+  }
+
   /// What each command does, for the ones that can run here and now: the
   /// keys run them, and the command palette lists exactly these (#155).
   /// A new feature reaches both by adding its entry here.
@@ -2192,7 +2247,10 @@ final class _LibraryShellState extends State<_LibraryShell>
         unawaited(_addTodo());
       },
       AppCommand.quickNote: () => unawaited(_openQuickNoteFromTile()),
-      AppCommand.toggleSidebar: _toggleSidebar,
+      if (_zen.on || _zenPossible) AppCommand.zenMode: _toggleZen,
+      // What Zen hides it also leaves alone: a toggle for chrome that is
+      // not on screen would change it unseen.
+      if (!_inZen) AppCommand.toggleSidebar: _toggleSidebar,
       // The tabs are the wide layout's (#23); a phone has one note.
       AppCommand.closeTab: () {
         if (_wide) _workspace.closeActive();
@@ -2203,11 +2261,13 @@ final class _LibraryShellState extends State<_LibraryShell>
       AppCommand.previousTab: () {
         if (_wide) _workspace.cycle(-1);
       },
-      AppCommand.splitRight: () {
-        if (_wide) _workspace.splitActive(SplitAxis.right);
-      },
-      AppCommand.toggleDock: () {
-        if (_dockRoom) _toggleDock();
+      if (!_inZen) ...{
+        AppCommand.splitRight: () {
+          if (_wide) _workspace.splitActive(SplitAxis.right);
+        },
+        AppCommand.toggleDock: () {
+          if (_dockRoom) _toggleDock();
+        },
       },
       AppCommand.tabFiles: () => _onDestinationSelected(ShellTab.files.index),
       AppCommand.tabTodo: () => _onDestinationSelected(ShellTab.todo.index),
@@ -2216,10 +2276,11 @@ final class _LibraryShellState extends State<_LibraryShell>
           _onDestinationSelected(ShellTab.quickNote.index),
       AppCommand.tabSettings: () =>
           _onDestinationSelected(ShellTab.settings.index),
-      if (_wide)
+      if (_wide && !_inZen)
         AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
       if (note != null) ...{
-        if (_previewToggleVisible) AppCommand.togglePreview: _togglePreview,
+        if (_previewToggleVisible && !_inZen)
+          AppCommand.togglePreview: _togglePreview,
         if (_editorSettings.editorsEnabled.length > 1)
           AppCommand.switchEditor: () => unawaited(
             _setEditorKind(
@@ -2323,6 +2384,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       _noteEditorKind == EditorKind.wysiwyg
           ? AppStrings.switchToSourceTooltip
           : AppStrings.switchToWysiwygTooltip,
+    AppCommand.zenMode =>
+      _zen.on ? AppStrings.zenModeLeave : AppStrings.zenModeEnter,
     _ => null,
   };
 
@@ -2333,9 +2396,10 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// note controls the window app bar used to hold. Hiding the tree (the
   /// title bar's toggle) gives its width to the detail pane.
   Widget _wideBody(LibrarySession controller) {
+    final zen = _inZen;
     return Row(
       children: [
-        if (_sidebarVisible) ...[
+        if (_sidebarVisible && !zen) ...[
           SizedBox(
             width: _editorSettings.treeWidth,
             child: Column(
@@ -2350,6 +2414,10 @@ final class _LibraryShellState extends State<_LibraryShell>
           _treeDivider(),
         ],
         Expanded(
+          // Keyed: the tree and the dock come and go on either side of it
+          // (Zen takes both at once), and the panes must stay where they
+          // are.
+          key: const ValueKey('wide-panes'),
           child: Column(
             children: [
               // Without a title bar of the app's own (an Android tablet,
@@ -2368,11 +2436,11 @@ final class _LibraryShellState extends State<_LibraryShell>
                 ),
                 const Divider(height: 1),
               ],
-              Expanded(child: _panes(controller)),
+              Expanded(child: zen ? _zenPanes(controller) : _panes(controller)),
             ],
           ),
         ),
-        if (_dockShown) ...[
+        if (_dockShown && !zen) ...[
           const VerticalDivider(width: 1),
           SizedBox(width: RightDock.width, child: _rightDock(controller)),
         ],
@@ -2503,6 +2571,25 @@ final class _LibraryShellState extends State<_LibraryShell>
     );
   }
 
+  /// Zen's panes: the focused one alone. The other stays mounted behind
+  /// it, so its notes keep their undo and their place for the way back.
+  Widget _zenPanes(LibrarySession controller) {
+    final w = _workspace.value;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (var pane = 0; pane < w.panes.length; pane++)
+          Offstage(
+            offstage: pane != w.focused,
+            child: TickerMode(
+              enabled: pane == w.focused,
+              child: _detailPane(controller, pane),
+            ),
+          ),
+      ],
+    );
+  }
+
   /// [pane]'s deck, focusing the pane on any press inside it.
   Widget _detailPane(LibrarySession controller, int pane) => Listener(
     behavior: HitTestBehavior.translucent,
@@ -2511,6 +2598,7 @@ final class _LibraryShellState extends State<_LibraryShell>
       root: controller.root,
       tabs: _deck(pane),
       onMemento: _workspace.remember,
+      zen: _inZen,
       onLoaded: _workspace.noteLoaded,
       showLineNumbers: _editorSettings.lineNumbers,
       noteColumn: _editorSettings.noteColumn,

@@ -1198,6 +1198,12 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get zenMode => 'Zen-tilstand';
+  @override
+  String get zenModeEnter => 'Gå i zen-tilstand';
+  @override
+  String get zenModeLeave => 'Forlad zen-tilstand';
+  @override
   String get keySpace => 'Mellemrum';
   @override
   String get keyEnter => 'Enter';

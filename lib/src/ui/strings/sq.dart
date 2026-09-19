@@ -1213,6 +1213,12 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get zenMode => 'Mënyra zen';
+  @override
+  String get zenModeEnter => 'Hyr në mënyrën zen';
+  @override
+  String get zenModeLeave => 'Dil nga mënyra zen';
+  @override
   String get keySpace => 'Hapësirë';
   @override
   String get keyEnter => 'Enter';

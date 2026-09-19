@@ -575,6 +575,9 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get zenMode;
+  String get zenModeEnter;
+  String get zenModeLeave;
   String get keySpace;
   String get keyEnter;
   String get keyTab;

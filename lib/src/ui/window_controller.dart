@@ -48,6 +48,10 @@ abstract interface class WindowController {
   /// Whether the window is maximized (the title bar's button icon).
   ValueListenable<bool> get maximized;
 
+  /// Asks the platform whether the window is maximized right now: Zen
+  /// mode (#69) must know whether the maximizing was its own to undo.
+  Future<bool> isMaximized();
+
   /// Releases the platform side.
   Future<void> dispose();
 }
@@ -119,6 +123,9 @@ final class WindowManagerController implements WindowController {
       await _manager.maximize();
     }
   }
+
+  @override
+  Future<bool> isMaximized() => _manager.isMaximized();
 
   @override
   Future<void> setPreventClose({required bool prevent}) {
@@ -195,6 +202,9 @@ final class NoopWindowController implements WindowController {
 
   @override
   Future<void> toggleMaximize() async {}
+
+  @override
+  Future<bool> isMaximized() async => false;
 
   @override
   Future<void> dispose() async {

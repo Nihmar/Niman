@@ -52,6 +52,9 @@ enum AppCommand {
   /// Split the window down with the note on screen (#23).
   splitDown,
 
+  /// Enter or leave Zen mode (#69): the note, and nothing else.
+  zenMode,
+
   /// The command palette (#155): commands and notes in one search.
   openPalette,
 
@@ -162,6 +165,9 @@ final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
       AppCommand.toggleDock,
       SingleActivator(LogicalKeyboardKey.keyB, control: true, shift: true),
     ),
+    // F11, the key that means fullscreen elsewhere: the issue's
+    // Ctrl+Shift+Z is redo in both editors.
+    AppShortcut(AppCommand.zenMode, SingleActivator(LogicalKeyboardKey.f11)),
     AppShortcut(
       AppCommand.openPalette,
       SingleActivator(LogicalKeyboardKey.keyP, control: true, shift: true),
@@ -207,6 +213,7 @@ String appCommandLabel(AppCommand command) => switch (command) {
   AppCommand.splitRight => AppStrings.splitRight,
   AppCommand.toggleDock => AppStrings.sidePanelTooltip,
   AppCommand.splitDown => AppStrings.splitDown,
+  AppCommand.zenMode => AppStrings.zenMode,
   AppCommand.openPalette => AppStrings.commandPaletteTitle,
   AppCommand.goToNote => AppStrings.goToNoteTitle,
   AppCommand.togglePreview => AppStrings.showPreviewTooltip,
