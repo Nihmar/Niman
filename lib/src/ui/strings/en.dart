@@ -1193,6 +1193,10 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get typewriterOn => 'Turn typewriter mode on';
+  @override
+  String get typewriterOff => 'Turn typewriter mode off';
+  @override
   String get typewriterTitle => 'Typewriter mode';
   @override
   String get typewriterSubtitle =>

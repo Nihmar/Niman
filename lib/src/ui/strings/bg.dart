@@ -1211,6 +1211,10 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get typewriterOn => 'Включи режим „пишеща машина“';
+  @override
+  String get typewriterOff => 'Изключи режим „пишеща машина“';
+  @override
   String get typewriterTitle => 'Режим „пишеща машина“';
   @override
   String get typewriterSubtitle =>

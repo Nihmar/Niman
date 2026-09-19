@@ -1214,6 +1214,10 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get typewriterOn => 'Typemachinemodus aanzetten';
+  @override
+  String get typewriterOff => 'Typemachinemodus uitzetten';
+  @override
   String get typewriterTitle => 'Typemachinemodus';
   @override
   String get typewriterSubtitle =>

@@ -14,6 +14,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/editor/wysiwyg/markdown_document_codec.dart';
 import 'package:niman/src/editor/wysiwyg/opaque_embed.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
@@ -39,6 +40,7 @@ final class WysiwygEditor extends StatefulWidget {
     this.focusNode,
     this.column = NoteColumn.off,
     this.formatMenu,
+    this.typewriter = false,
     super.key,
   });
 
@@ -71,6 +73,10 @@ final class WysiwygEditor extends StatefulWidget {
   /// The toolbar's formatting actions for the context menu (#174), the
   /// same ones the source editor's menu offers.
   final FormatMenuBuilder? formatMenu;
+
+  /// Typewriter mode (#70): the caret's row keeps to the middle of the
+  /// surface, with room below the last line for it to get there.
+  final bool typewriter;
 
   @override
   State<WysiwygEditor> createState() => WysiwygEditorState();
@@ -210,7 +216,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     );
     _changes = _controller.changes.listen(_onDocumentChanged);
     _controller.onSelectionChanged = _onSelectionChanged;
-    _controller.addListener(_publishActive);
+    _controller
+      ..addListener(_publishActive)
+      ..addListener(_followCaret);
     _selectionDocLength = _controller.document.length;
     _find = WysiwygFindController(_controller);
     // A new note's data is not the previous note's echo.
@@ -318,6 +326,8 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
   @override
   void didUpdateWidget(WysiwygEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Switched on while writing: the caret goes to the middle at once.
+    if (widget.typewriter && !oldWidget.typewriter) _followCaret();
     if (oldWidget.data == widget.data) return;
     // Our own emit coming back, possibly stale while the writer types on:
     // never re-decode from it.
@@ -329,17 +339,20 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     _find.dispose();
     _controller
       ..removeListener(_publishActive)
+      ..removeListener(_followCaret)
       ..dispose();
     _open(widget.data);
   }
 
   @override
   void dispose() {
+    _typewriter.dispose();
     _debounce?.cancel();
     unawaited(_changes?.cancel());
     _find.dispose();
     _controller
       ..removeListener(_publishActive)
+      ..removeListener(_followCaret)
       ..dispose();
     // The caller's node is theirs to dispose; only the internal one dies
     // with the surface.
@@ -552,8 +565,9 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
               child: Listener(
                 onPointerDown: _onPointerDown,
                 child: LayoutBuilder(
+                  key: _viewportKey,
                   builder: (context, constraints) =>
-                      _quillEditor(constraints.maxWidth),
+                      _quillEditor(constraints.maxWidth, constraints.maxHeight),
                 ),
               ),
             ),
@@ -561,6 +575,40 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         ],
       ),
     );
+  }
+
+  /// Typewriter mode's follow of the caret (#70).
+  late final TypewriterFollow _typewriter = TypewriterFollow(_centerCaret);
+
+  /// Quill's editable, for where its caret is drawn.
+  final GlobalKey<quill.EditorState> _editorKey = GlobalKey();
+
+  /// The surface's viewport: what the caret is centred in.
+  final GlobalKey _viewportKey = GlobalKey();
+
+  /// The caret moved, or the text under it did: typewriter mode brings its
+  /// row to the middle — while someone is writing here, so a note opening
+  /// or its place being put back stays where it was put.
+  void _followCaret() {
+    if (!widget.typewriter) return;
+    if (!_focus.hasFocus && !_find.visible) return;
+    _typewriter.caretMoved();
+  }
+
+  bool _centerCaret() {
+    final editor = _editorKey.currentState?.renderEditor;
+    final viewport = _viewportKey.currentContext?.findRenderObject();
+    if (editor == null || !editor.attached || viewport is! RenderBox) {
+      return false;
+    }
+    final caret = editor.getLocalRectForCaret(
+      TextPosition(offset: _controller.selection.extentOffset),
+    );
+    final y =
+        editor.localToGlobal(caret.center).dy -
+        viewport.localToGlobal(Offset.zero).dy;
+    centerCaret(_scroll, y);
+    return true;
   }
 
   /// Esc (#69). Quill's own (hiding its selection toolbar) is on whenever
@@ -588,19 +636,27 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     return enabled ? KeyEventResult.handled : null;
   }
 
-  /// The Quill surface in a pane [width] wide: the column's side space is
-  /// Quill's padding, inside its scroll view, so the scrollbar keeps to
-  /// the pane's edge and the wheel scrolls from the margins too.
-  Widget _quillEditor(double width) {
+  /// The Quill surface in a pane [width] wide and [height] tall: the
+  /// column's side space is Quill's padding, inside its scroll view, so
+  /// the scrollbar keeps to the pane's edge and the wheel scrolls from the
+  /// margins too. Typewriter mode adds its room below the last line there.
+  Widget _quillEditor(double width, double height) {
     final side = widget.column.sideSpaceIn(width);
     const inset = NoteColumn.textInset;
+    final slack = widget.typewriter ? typewriterSlack(height) : 0.0;
     return quill.QuillEditor(
       controller: _controller,
       focusNode: _focus,
       scrollController: _scroll,
       config: quill.QuillEditorConfig(
+        editorKey: _editorKey,
         autoFocus: widget.autoFocus,
-        padding: EdgeInsets.fromLTRB(side + inset, inset, side + inset, inset),
+        padding: EdgeInsets.fromLTRB(
+          side + inset,
+          inset,
+          side + inset,
+          inset + slack,
+        ),
         embedBuilders: const [OpaqueEmbedBuilder()],
         textSpanBuilder: _spellSpan,
         contextMenuBuilder: _contextMenu,

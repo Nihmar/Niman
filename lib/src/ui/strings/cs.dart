@@ -1195,6 +1195,10 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get typewriterOn => 'Zapnout režim psacího stroje';
+  @override
+  String get typewriterOff => 'Vypnout režim psacího stroje';
+  @override
   String get typewriterTitle => 'Režim psacího stroje';
   @override
   String get typewriterSubtitle =>

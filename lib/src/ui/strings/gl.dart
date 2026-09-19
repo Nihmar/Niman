@@ -1213,6 +1213,10 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get typewriterOn => 'Activar o modo máquina de escribir';
+  @override
+  String get typewriterOff => 'Desactivar o modo máquina de escribir';
+  @override
   String get typewriterTitle => 'Modo máquina de escribir';
   @override
   String get typewriterSubtitle =>

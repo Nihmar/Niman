@@ -1218,6 +1218,10 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get typewriterOn => 'Włącz tryb maszyny do pisania';
+  @override
+  String get typewriterOff => 'Wyłącz tryb maszyny do pisania';
+  @override
   String get typewriterTitle => 'Tryb maszyny do pisania';
   @override
   String get typewriterSubtitle =>

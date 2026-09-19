@@ -80,6 +80,8 @@ final class NoteStatusRow extends StatelessWidget {
     required this.onFind,
     required this.onSpellCheck,
     required this.onToggleEditorKind,
+    this.typewriter = false,
+    this.onToggleTypewriter,
     super.key,
   });
 
@@ -121,6 +123,12 @@ final class NoteStatusRow extends StatelessWidget {
 
   /// Flips between the source editor and the WYSIWYG surface.
   final VoidCallback onToggleEditorKind;
+
+  /// Whether typewriter mode is on (#70).
+  final bool typewriter;
+
+  /// Switches typewriter mode; null leaves the switch out.
+  final VoidCallback? onToggleTypewriter;
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +215,30 @@ final class NoteStatusRow extends StatelessWidget {
                     minHeight: 48,
                   ),
                   onPressed: () => unawaited(onSpellCheck()),
+                ),
+              ),
+            // Typewriter mode (#70), on or off at a glance: the one control
+            // in the note that says so. Greyed rather than dropped in
+            // preview-only mode, like find, so nothing after it moves.
+            if (!loading && onToggleTypewriter != null)
+              Padding(
+                padding: iconPadding,
+                child: IconButton(
+                  key: const Key('typewriter-toggle'),
+                  tooltip: typewriter
+                      ? AppStrings.typewriterOff
+                      : AppStrings.typewriterOn,
+                  isSelected: typewriter,
+                  icon: const Icon(Icons.vertical_align_center),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  onPressed: splitPreview || !showPreview
+                      ? onToggleTypewriter
+                      : null,
                 ),
               ),
             // The quick way between the two editors (T-WYS-12): the setting

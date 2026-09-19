@@ -43,6 +43,8 @@ final class ShellDetailPane extends StatelessWidget {
     required this.spellCheck,
     this.reloadToken = 0,
     this.zen = false,
+    this.typewriter = false,
+    this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
     this.readNote,
@@ -137,6 +139,12 @@ final class ShellDetailPane extends StatelessWidget {
   /// Zen mode (#69): the notes without their chrome.
   final bool zen;
 
+  /// Typewriter mode (#70), and the status row's switch for it.
+  final bool typewriter;
+
+  /// See [typewriter].
+  final VoidCallback? onToggleTypewriter;
+
   /// External-change reload requests for the open note (home-screen
   /// widget toggles); forwarded to the NoteView.
   final int reloadToken;
@@ -202,6 +210,8 @@ final class ShellDetailPane extends StatelessWidget {
     // keyboard.
     toolbarTop: true,
     zen: zen,
+    typewriter: typewriter,
+    onToggleTypewriter: onToggleTypewriter,
     splitPreview: tab.splitPreview,
     showPreview: tab.showPreview,
     showWysiwyg: tab.showWysiwyg,

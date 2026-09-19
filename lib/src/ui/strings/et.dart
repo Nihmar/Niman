@@ -1182,6 +1182,10 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get typewriterOn => 'Lülita kirjutusmasina režiim sisse';
+  @override
+  String get typewriterOff => 'Lülita kirjutusmasina režiim välja';
+  @override
   String get typewriterTitle => 'Kirjutusmasina režiim';
   @override
   String get typewriterSubtitle =>

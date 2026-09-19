@@ -1203,6 +1203,10 @@ final class BosnianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get typewriterOn => 'Uključi način pisaće mašine';
+  @override
+  String get typewriterOff => 'Isključi način pisaće mašine';
+  @override
   String get typewriterTitle => 'Način pisaće mašine';
   @override
   String get typewriterSubtitle => 'Red koji pišete ostaje u sredini uređivača';

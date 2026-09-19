@@ -1189,6 +1189,10 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get typewriterOn => 'Daktilo modunu aç';
+  @override
+  String get typewriterOff => 'Daktilo modunu kapat';
+  @override
   String get typewriterTitle => 'Daktilo modu';
   @override
   String get typewriterSubtitle =>

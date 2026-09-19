@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show ScrollController, TextPosition;
 import 'package:re_editor/re_editor.dart';
 
 /// What the editor is showing, in source lines (T-M2-06).
@@ -26,8 +27,30 @@ final class EditorLineView extends ChangeNotifier {
   /// rebuild anything itself.
   void attach(ValueListenable<CodeIndicatorValue?> source) {
     if (identical(_source, source)) return;
-    _source?.removeListener(notifyListeners);
-    _source = source..addListener(notifyListeners);
+    _source?.removeListener(_published);
+    _source = source..addListener(_published);
+  }
+
+  /// Where that scroll stood when the lines were last published.
+  double _publishedAt = 0;
+
+  /// The editor's own vertical scroll, the lines' offsets are measured
+  /// against, so [caretRowCenter] can say where a line is now.
+  ///
+  /// re_editor publishes the lines on layout, relative to the viewport,
+  /// and a scroll that lays nothing new out only repaints: the offsets it
+  /// published are then as far off as the note has scrolled since.
+  ///
+  /// Read only while it drives one view: as the editor is rebuilt it is
+  /// briefly attached to two, and has no single offset to give.
+  ScrollController? scroller;
+
+  void _published() {
+    final scroller = this.scroller;
+    if (scroller != null && scroller.positions.length == 1) {
+      _publishedAt = scroller.offset;
+    }
+    notifyListeners();
   }
 
   /// The laid-out lines, top-first, with viewport-relative offsets.
@@ -72,13 +95,37 @@ final class EditorLineView extends ChangeNotifier {
     return null;
   }
 
+  /// How far the middle of the caret's row at [position] sits from the
+  /// top of the viewport, or null when its line is not laid out.
+  ///
+  /// The row, not the line: a paragraph of prose wraps over several, and
+  /// typewriter mode (#70) centres the one being written.
+  double? caretRowCenter(CodeLinePosition position) {
+    for (final paragraph in paragraphs) {
+      if (paragraph.index != position.index) continue;
+      final offset = paragraph.getOffset(
+        TextPosition(offset: position.offset, affinity: position.affinity),
+      );
+      if (offset == null) return null;
+      final scroller = this.scroller;
+      final since = scroller != null && scroller.positions.length == 1
+          ? scroller.offset - _publishedAt
+          : 0.0;
+      return paragraph.top +
+          offset.dy +
+          paragraph.preferredLineHeight / 2 -
+          since;
+    }
+    return null;
+  }
+
   /// One unwrapped row's height, or null before the first layout.
   double? get rowHeight =>
       paragraphs.isEmpty ? null : paragraphs.first.preferredLineHeight;
 
   @override
   void dispose() {
-    _source?.removeListener(notifyListeners);
+    _source?.removeListener(_published);
     _source = null;
     super.dispose();
   }

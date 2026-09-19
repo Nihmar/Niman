@@ -1200,6 +1200,10 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get typewriterOn => 'Kveikja á ritvélarham';
+  @override
+  String get typewriterOff => 'Slökkva á ritvélarham';
+  @override
   String get typewriterTitle => 'Ritvélarhamur';
   @override
   String get typewriterSubtitle =>

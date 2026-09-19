@@ -1197,6 +1197,10 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get typewriterOn => 'Uključi način pisaćeg stroja';
+  @override
+  String get typewriterOff => 'Isključi način pisaćeg stroja';
+  @override
   String get typewriterTitle => 'Način pisaćeg stroja';
   @override
   String get typewriterSubtitle =>

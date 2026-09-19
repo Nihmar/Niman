@@ -28,6 +28,7 @@ import 'package:niman/src/editor/note_editor.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
+import 'package:niman/src/editor/typewriter_scroll.dart';
 import 'package:niman/src/editor/wysiwyg/quill_editor_commands.dart';
 import 'package:niman/src/editor/wysiwyg/quill_tally.dart';
 import 'package:niman/src/editor/wysiwyg/wysiwyg_editor.dart';
@@ -133,6 +134,8 @@ final class NoteView extends StatefulWidget {
     this.onNoteKindChanged,
     this.toolbarTop = false,
     this.zen = false,
+    this.typewriter = false,
+    this.onToggleTypewriter,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
     this.spellCheck,
@@ -295,6 +298,14 @@ final class NoteView extends StatefulWidget {
   /// its row numbers go, and the caret thickens a little, since the
   /// chrome that framed it has gone.
   final bool zen;
+
+  /// Typewriter mode (#70): the caret's row keeps to the middle of the
+  /// editor, in both editors. Independent of [zen]: either may be on
+  /// without the other.
+  final bool typewriter;
+
+  /// The status row's typewriter switch; null leaves it out.
+  final VoidCallback? onToggleTypewriter;
 
   /// The app-level registry of notes with unsaved edits (T-PP-11), which
   /// the window's close guard reads; null when the owner does not track
@@ -465,6 +476,7 @@ final class _NoteViewState extends State<NoteView>
     int? caret,
     NoteColumn column,
     bool zen,
+    bool typewriter,
   })?
   _editorPaneConfig;
 
@@ -517,6 +529,7 @@ final class _NoteViewState extends State<NoteView>
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
     _scroll = CodeScrollController();
+    _editorLines.scroller = _scroll.verticalScroller;
     // Wrapped so Enter carries a list on (#142). The wrapper forwards
     // everything else, and disposing it disposes what it wraps — so it
     // is disposed exactly when the controller inside it is ours.
@@ -543,6 +556,7 @@ final class _NoteViewState extends State<NoteView>
     // callback would never fire for it), and the load is exactly when the
     // buffer (and the highlight document) is first populated.
     _controller.addListener(_onValueChanged);
+    _controller.addListener(_followCaret);
     _scroll.verticalScroller.addListener(_scheduleMemento);
     // The WYSIWYG publishes the formats at its caret on every selection
     // change: the same moment its memento moves.
@@ -566,6 +580,8 @@ final class _NoteViewState extends State<NoteView>
       );
     }
     if (oldWidget.active && !widget.active) _handMemento(oldWidget.path);
+    // Switched on while writing: the caret goes to the middle at once.
+    if (widget.typewriter && !oldWidget.typewriter) _followCaret();
     if (!oldWidget.active && widget.active && _ready) {
       // Back on screen: the shell asks the showing note what kind it is.
       widget.onNoteKindChanged?.call(_noteKind);
@@ -637,6 +653,8 @@ final class _NoteViewState extends State<NoteView>
     _previewTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onValueChanged);
+    _controller.removeListener(_followCaret);
+    _typewriter.dispose();
     if (_revision != _lastSavedRevision) unawaited(_save());
     _unsaved?.unregister(_unsavedNote);
     widget.spellCheck?.removeListener(_onSpellCheckChanged);
@@ -994,6 +1012,33 @@ final class _NoteViewState extends State<NoteView>
     widget.onWysiwygChanged?.call(markdown);
   }
 
+  /// Typewriter mode's follow of the source editor's caret (#70).
+  late final TypewriterFollow _typewriter = TypewriterFollow(
+    _centerSourceCaret,
+  );
+
+  /// The source caret moved, or the text under it did: typewriter mode
+  /// brings its row to the middle. Only while someone is writing here —
+  /// the editor or its find bar has the focus — so a note loading, or its
+  /// place being put back, stays where it was put.
+  void _followCaret() {
+    if (!widget.typewriter || widget.showWysiwyg || !widget.active) return;
+    if (!_focus.hasFocus && _findController.value == null) return;
+    _typewriter.caretMoved();
+  }
+
+  bool _centerSourceCaret() {
+    final y = _editorLines.caretRowCenter(_controller.selection.extent);
+    if (y == null) {
+      // Off screen, so not laid out: the editor brings it to the middle
+      // as best it can guess, and the next frame puts it there exactly.
+      _controller.makeCursorCenterIfInvisible();
+      return false;
+    }
+    centerCaret(_scroll.verticalScroller, y);
+    return true;
+  }
+
   /// Whether only the preview is on screen (the editor hidden): the IME
   /// has no editable target, so it must go.
   bool get _previewOnly => !_splitIn(widget) && _previewIn(widget);
@@ -1032,6 +1077,7 @@ final class _NoteViewState extends State<NoteView>
       focusNode: _focus,
       showLineNumbers: widget.showLineNumbers && !widget.zen,
       caretWidth: widget.zen ? zenCaretWidth : null,
+      typewriter: widget.typewriter,
       // A template `{{cursor}}` landing (#53) always takes focus: the
       // note was just created around that caret, and with the keyboard
       // down the first tap re-places it wherever the finger lands.
@@ -1059,6 +1105,7 @@ final class _NoteViewState extends State<NoteView>
       path: widget.path,
       numbers: widget.showLineNumbers,
       zen: widget.zen,
+      typewriter: widget.typewriter,
       autofocus: widget.autofocusEditor,
       fontSize: AppTextScales.noteFontSize,
       caret: widget.initialCaretOffset,
@@ -1086,6 +1133,7 @@ final class _NoteViewState extends State<NoteView>
           focusNode: _wysiwygFocus,
           column: widget.noteColumn,
           formatMenu: _formatMenu,
+          typewriter: widget.typewriter,
         )
       : _sourcePane();
 
@@ -1733,6 +1781,8 @@ final class _NoteViewState extends State<NoteView>
                         : _findController.findMode,
                     onSpellCheck: _openSpellCheck,
                     onToggleEditorKind: _toggleEditorKind,
+                    typewriter: widget.typewriter,
+                    onToggleTypewriter: widget.onToggleTypewriter,
                   ),
                 ),
                 // The toolbar fades + sizes in and out (hidden in preview
