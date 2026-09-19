@@ -134,7 +134,9 @@ draft from another app, a downloaded article. On Linux and Windows,
 **Open file** (`Ctrl+Shift+O`, or *Note: Open file…* in the command
 palette) opens one on its own, with Niman's editor and nothing else. The
 screen that opens a library offers the same button, so no library is
-needed at all.
+needed at all. Double-clicking a `.md` file in the file manager does the
+same once Niman is its app (see [platforms](platforms.md)), and so does
+`niman <file>` on the command line.
 
 The file gets the editor, both of them, and the preview. It gets none of
 what a library adds:

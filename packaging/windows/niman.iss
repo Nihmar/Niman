@@ -31,6 +31,9 @@ UninstallDisplayName=Niman
 DisableProgramGroupPage=yes
 SetupIconFile=..\..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\niman.exe
+; The .md association below (#41): Explorer re-reads it on install and
+; uninstall.
+ChangesAssociations=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -38,9 +41,23 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "mdassoc"; Description: "{cm:AssocFileExtension,Niman,.md}"
 
 [Files]
 Source: "..\..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Markdown files open in Niman (#41). Per user, like the rest of the
+; install (PrivilegesRequired=lowest). Niman is added to the files' "Open
+; with" list; Windows keeps the choice of default app to the user, so it
+; becomes the default only when nothing else claims .md, or when picked.
+[Registry]
+Root: HKCU; Subkey: "Software\Classes\Niman.Markdown"; ValueType: string; ValueName: ""; ValueData: "Markdown document"; Flags: uninsdeletekey; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\Niman.Markdown\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\niman.exe,0"; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\Niman.Markdown\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\niman.exe"" ""%1"""; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; ValueName: "Niman.Markdown"; ValueData: ""; Flags: uninsdeletevalue; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\.markdown\OpenWithProgids"; ValueType: string; ValueName: "Niman.Markdown"; ValueData: ""; Flags: uninsdeletevalue; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\Applications\niman.exe\SupportedTypes"; ValueType: string; ValueName: ".md"; ValueData: ""; Flags: uninsdeletekey; Tasks: mdassoc
+Root: HKCU; Subkey: "Software\Classes\Applications\niman.exe\SupportedTypes"; ValueType: string; ValueName: ".markdown"; ValueData: ""; Tasks: mdassoc
 
 [Icons]
 Name: "{autoprograms}\Niman"; Filename: "{app}\niman.exe"

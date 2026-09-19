@@ -8,16 +8,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/core/crash_reporter.dart';
 import 'package:niman/src/core/launch_args.dart';
+import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/core/log_file.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/shortcuts.dart';
+import 'package:niman/src/core/single_instance.dart';
 import 'package:niman/src/editor/wysiwyg/guarded_clipboard_service.dart';
 import 'package:niman/src/widget/widget_toggle.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 /// Entrypoint of the Niman application.
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   CrashReporter.install();
   GuardedClipboardService.install();
@@ -26,23 +28,56 @@ void main(List<String> args) {
   _reportSlowFrames();
   // Desktop only by construction: Android launches with no arguments, so
   // the platform service stays in charge there.
-  final launch = parseLaunchArgs(args);
-  final openPath = launch.openPath;
-  if (openPath != null) {
-    const AppLogger(name: 'launch')
-        .info('file argument not opened yet (P3): $openPath');
-  }
+  final launch = parseLaunchArgs(args, cwd: Directory.current.path);
+  final desktop = Platform.isLinux || Platform.isWindows;
+  // One Niman per session (#41): a later launch hands itself to the first
+  // and ends here, before it opens anything.
+  final instance = desktop ? await _claimSession(launch) : null;
+  if (desktop && instance == null) exit(0);
+  final later = instance?.launches.map(LaunchArgs.fromJson).asBroadcastStream();
   runApp(
     ProviderScope(
       overrides: [
-        if (launch.action case final action?)
+        if (desktop)
           shortcutServiceProvider.overrideWith(
-            (ref) => CliShortcutService(action),
+            (ref) => CliShortcutService(
+              launch.action,
+              later: later == null
+                  ? const Stream.empty()
+                  : later
+                        .map((launch) => launch.action)
+                        .where((action) => action != null)
+                        .cast<ShortcutAction>(),
+            ),
+          ),
+        if (desktop)
+          launchRequestsProvider.overrideWithValue(
+            LaunchRequests(
+              file: launch.openPath,
+              later: later ?? const Stream.empty(),
+            ),
           ),
       ],
       child: const NimanApp(),
     ),
   );
+}
+
+/// Claims the session for this process, or hands [launch] to the Niman
+/// already holding it and answers null.
+///
+/// A failure to claim at all (an unwritable support folder) must not stop
+/// Niman from starting: it runs unguarded, as it did before #41, and says
+/// so in the log. The instance answered then is a stand-in that is never
+/// handed anything.
+Future<SingleInstance?> _claimSession(LaunchArgs launch) async {
+  try {
+    final dir = await getApplicationSupportDirectory();
+    return await SingleInstance.claim(dir, launch.toJson());
+  } on Object catch (error) {
+    const AppLogger(name: 'instance').warning('running unguarded ($error)');
+    return SingleInstance.unguarded();
+  }
 }
 
 /// Registers the widget checkbox toggle (round 2, R2): without this the
