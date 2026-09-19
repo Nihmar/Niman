@@ -764,6 +764,41 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get keySpace => _s.keySpace;
+  static String get keyEnter => _s.keyEnter;
+  static String get keyTab => _s.keyTab;
+  static String get keyEscape => _s.keyEscape;
+  static String get keyBackspace => _s.keyBackspace;
+  static String get keyDelete => _s.keyDelete;
+  static String get keyArrowUp => _s.keyArrowUp;
+  static String get keyArrowDown => _s.keyArrowDown;
+  static String get keyArrowLeft => _s.keyArrowLeft;
+  static String get keyArrowRight => _s.keyArrowRight;
+  static String get keyHome => _s.keyHome;
+  static String get keyEnd => _s.keyEnd;
+  static String get keyPageUp => _s.keyPageUp;
+  static String get keyPageDown => _s.keyPageDown;
+  static String get keyInsert => _s.keyInsert;
+  static String get shortcutNone => _s.shortcutNone;
+  static String get shortcutRestoreDefaults => _s.shortcutRestoreDefaults;
+  static String get shortcutRestoreDefaultsConfirm =>
+      _s.shortcutRestoreDefaultsConfirm;
+  static String get shortcutRevert => _s.shortcutRevert;
+  static String get shortcutClear => _s.shortcutClear;
+  static String get shortcutCapturePrompt => _s.shortcutCapturePrompt;
+  static String get shortcutCaptureNeedsModifier =>
+      _s.shortcutCaptureNeedsModifier;
+  static String get shortcutMove => _s.shortcutMove;
+  static String get shortcutUseAnyway => _s.shortcutUseAnyway;
+  static String get shortcutUndo => _s.shortcutUndo;
+  static String get shortcutRedo => _s.shortcutRedo;
+  static String get shortcutChange => _s.shortcutChange;
+  static String shortcutCaptureTitle(String command) =>
+      _s.shortcutCaptureTitle(command);
+  static String shortcutConflict(String keys, String other) =>
+      _s.shortcutConflict(keys, other);
+  static String shortcutTakesEditorKey(String keys, String what) =>
+      _s.shortcutTakesEditorKey(keys, what);
   static String get openFileMissing => _s.openFileMissing;
   static String get openFileFailed => _s.openFileFailed;
   static String get movedToTrash => _s.movedToTrash;

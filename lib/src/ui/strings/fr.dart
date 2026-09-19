@@ -1234,6 +1234,74 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get keySpace => 'Espace';
+  @override
+  String get keyEnter => 'Entrée';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Échap';
+  @override
+  String get keyBackspace => 'Retour arrière';
+  @override
+  String get keyDelete => 'Suppr';
+  @override
+  String get keyArrowUp => 'Haut';
+  @override
+  String get keyArrowDown => 'Bas';
+  @override
+  String get keyArrowLeft => 'Gauche';
+  @override
+  String get keyArrowRight => 'Droite';
+  @override
+  String get keyHome => 'Début';
+  @override
+  String get keyEnd => 'Fin';
+  @override
+  String get keyPageUp => 'Page préc.';
+  @override
+  String get keyPageDown => 'Page suiv.';
+  @override
+  String get keyInsert => 'Inser';
+  @override
+  String get shortcutNone => 'Aucun raccourci';
+  @override
+  String get shortcutRestoreDefaults => 'Rétablir les valeurs par défaut';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Remettre tous les raccourcis comme Niman les livre ?';
+  @override
+  String get shortcutRevert => 'Revenir à la valeur par défaut';
+  @override
+  String get shortcutClear => 'Retirer le raccourci';
+  @override
+  String get shortcutCapturePrompt =>
+      'Appuyez sur les touches. Échap et Tab sont capturées aussi : sortez '
+      'avec Annuler.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Ajoutez Ctrl, Alt ou Méta : une touche seule sert à écrire.';
+  @override
+  String get shortcutMove => 'Le déplacer';
+  @override
+  String get shortcutUseAnyway => 'Utiliser quand même';
+  @override
+  String get shortcutUndo => 'Annuler la saisie';
+  @override
+  String get shortcutRedo => 'Rétablir';
+  @override
+  String get shortcutChange => 'Changer le raccourci';
+  @override
+  String shortcutCaptureTitle(String command) => 'Touches pour $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys appartient déjà à $other. Le déplacer ici ? $other n’aura plus '
+      'de raccourci.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys est aussi $what dans les champs de texte et l’éditeur. Votre '
+      'commande le prendra là aussi.';
+  @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';
   @override

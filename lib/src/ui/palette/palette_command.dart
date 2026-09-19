@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// The group a command's name starts with.
@@ -92,10 +93,7 @@ final class PaletteCommand {
     final group = paletteGroup(command);
     final verb = label ?? appCommandLabel(command);
     final name = group == null ? verb : '${_groupName(group)}: $verb';
-    ShortcutActivator? binding;
-    for (final shortcut in nimanAppShortcuts) {
-      if (shortcut.command == command) binding = shortcut.activation;
-    }
+    final binding = AppKeyMap.current.value.bindingOf(command);
     return PaletteCommand(
       command: command,
       name: paletteAsks(command) ? '$name…' : name,

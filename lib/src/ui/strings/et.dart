@@ -1182,6 +1182,73 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get keySpace => 'Tühik';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Üles';
+  @override
+  String get keyArrowDown => 'Alla';
+  @override
+  String get keyArrowLeft => 'Vasakule';
+  @override
+  String get keyArrowRight => 'Paremale';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Kiirklahv puudub';
+  @override
+  String get shortcutRestoreDefaults => 'Taasta vaikeväärtused';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Kas panna kõik kiirklahvid tagasi nii, nagu Niman need tarnib?';
+  @override
+  String get shortcutRevert => 'Tagasi vaikeväärtusele';
+  @override
+  String get shortcutClear => 'Eemalda kiirklahv';
+  @override
+  String get shortcutCapturePrompt =>
+      'Vajuta klahve. Ka Esc ja Tab salvestatakse: välju nupuga Loobu.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Lisa Ctrl, Alt või Meta: üksik klahv on trükkimiseks.';
+  @override
+  String get shortcutMove => 'Teisalda';
+  @override
+  String get shortcutUseAnyway => 'Kasuta siiski';
+  @override
+  String get shortcutUndo => 'Võta tagasi';
+  @override
+  String get shortcutRedo => 'Tee uuesti';
+  @override
+  String get shortcutChange => 'Muuda kiirklahvi';
+  @override
+  String shortcutCaptureTitle(String command) => 'Klahvid: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys kuulub juba käsule $other. Kas teisaldada siia? $other jääb '
+      'kiirklahvita.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys on tekstiväljades ja redaktoris ka $what. Seal võtab selle üle '
+      'sinu käsk.';
+  @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override
   String get openFileFailed =>

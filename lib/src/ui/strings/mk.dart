@@ -1211,6 +1211,73 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get keySpace => 'Празно место';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Горе';
+  @override
+  String get keyArrowDown => 'Долу';
+  @override
+  String get keyArrowLeft => 'Лево';
+  @override
+  String get keyArrowRight => 'Десно';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Нема кратенка';
+  @override
+  String get shortcutRestoreDefaults => 'Врати стандардни';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Да се вратат сите кратенки како ги испорачува Niman?';
+  @override
+  String get shortcutRevert => 'Врати на стандардната';
+  @override
+  String get shortcutClear => 'Отстрани кратенка';
+  @override
+  String get shortcutCapturePrompt =>
+      'Притиснете ги копчињата. И Esc и Tab се запишуваат: излезете со Откажи.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Додајте Ctrl, Alt или Meta: едно копче само е за пишување.';
+  @override
+  String get shortcutMove => 'Премести';
+  @override
+  String get shortcutUseAnyway => 'Сепак користи';
+  @override
+  String get shortcutUndo => 'Врати';
+  @override
+  String get shortcutRedo => 'Повтори';
+  @override
+  String get shortcutChange => 'Промени кратенка';
+  @override
+  String shortcutCaptureTitle(String command) => 'Копчиња за „$command“';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys веќе е на „$other“. Да се премести тука? „$other“ ќе остане без '
+      'кратенка.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys е и „$what“ во текстуалните полиња и уредувачот. Таму ќе ја '
+      'преземе вашата команда.';
+  @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override
   String get openFileFailed =>

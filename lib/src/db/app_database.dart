@@ -82,6 +82,11 @@ class AppSettings extends Table {
   TextColumn get changelogSeenVersion =>
       text().named('changelog_seen_version').nullable()();
 
+  /// The keyboard shortcuts the user changed (#159), as `KeyMap.toJson`
+  /// writes them; null while none was. The device's, never a library's:
+  /// a shortcut belongs to the keyboard.
+  TextColumn get keyMap => text().named('key_map').nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -321,7 +326,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -364,7 +369,8 @@ class AppDatabase extends _$AppDatabase {
   /// databases gain the WebDAV sync state (M5): `sync_destinations`,
   /// `sync_items` and `sync_ops`, all empty — no library syncs until one
   /// is configured, and pre-v23 databases gain `workspaces` (issue #23),
-  /// empty: every library starts with nothing open.
+  /// empty: every library starts with nothing open, and pre-v24 databases
+  /// gain `key_map` (issue #159), null: every shortcut as shipped.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -510,6 +516,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 23) {
         await m.createTable(workspaces);
+      }
+      if (from < 24) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN key_map TEXT',
+        );
       }
     },
   );

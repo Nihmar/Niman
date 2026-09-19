@@ -1212,6 +1212,74 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get keySpace => 'Välilyönti';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Askelpalautin';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Ylös';
+  @override
+  String get keyArrowDown => 'Alas';
+  @override
+  String get keyArrowLeft => 'Vasemmalle';
+  @override
+  String get keyArrowRight => 'Oikealle';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Ei pikanäppäintä';
+  @override
+  String get shortcutRestoreDefaults => 'Palauta oletukset';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Palautetaanko kaikki pikanäppäimet sellaisiksi kuin Niman ne toimittaa?';
+  @override
+  String get shortcutRevert => 'Takaisin oletukseen';
+  @override
+  String get shortcutClear => 'Poista pikanäppäin';
+  @override
+  String get shortcutCapturePrompt =>
+      'Paina näppäimiä. Myös Esc ja Tab tallentuvat: poistu '
+      'Peruuta-painikkeella.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Lisää Ctrl, Alt tai Meta: pelkkä näppäin on kirjoittamista varten.';
+  @override
+  String get shortcutMove => 'Siirrä';
+  @override
+  String get shortcutUseAnyway => 'Käytä silti';
+  @override
+  String get shortcutUndo => 'Kumoa';
+  @override
+  String get shortcutRedo => 'Tee uudelleen';
+  @override
+  String get shortcutChange => 'Vaihda pikanäppäin';
+  @override
+  String shortcutCaptureTitle(String command) => 'Näppäimet: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys kuuluu jo toiminnolle $other. Siirretäänkö se tänne? $other jää '
+      'ilman pikanäppäintä.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys on myös $what tekstikentissä ja editorissa. Siellä komentosi '
+      'ottaa sen.';
+  @override
   String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
   @override
   String get openFileFailed =>

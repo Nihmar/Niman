@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// A command the shell can run from the keyboard.
@@ -110,7 +111,9 @@ final class AppShortcut {
   final ShortcutActivator activation;
 }
 
-/// Every app accelerator, in the order the reference lists them.
+/// Every app accelerator as shipped, in the order the reference lists
+/// them. What runs is [AppKeyMap.current]: these, changed where the user
+/// changed them (#159).
 ///
 /// Tab order matches the rail (T-PP-14), so Ctrl+1..5 select the five tabs.
 final List<AppShortcut> nimanAppShortcuts = List<AppShortcut>.unmodifiable(
@@ -229,8 +232,29 @@ String describeActivator(ShortcutActivator activation) {
     if (activation.meta) 'Meta',
     if (activation.alt) 'Alt',
     if (activation.shift) 'Shift',
-    activation.trigger.keyLabel,
+    keyName(activation.trigger),
   ].join('+');
+}
+
+/// [key] as a person reads it, in their language (#159): the modifiers
+/// keep their names, and so do letters and digits; the named keys do not.
+String keyName(LogicalKeyboardKey key) {
+  if (key == LogicalKeyboardKey.space) return AppStrings.keySpace;
+  if (key == LogicalKeyboardKey.enter) return AppStrings.keyEnter;
+  if (key == LogicalKeyboardKey.tab) return AppStrings.keyTab;
+  if (key == LogicalKeyboardKey.escape) return AppStrings.keyEscape;
+  if (key == LogicalKeyboardKey.backspace) return AppStrings.keyBackspace;
+  if (key == LogicalKeyboardKey.delete) return AppStrings.keyDelete;
+  if (key == LogicalKeyboardKey.arrowUp) return AppStrings.keyArrowUp;
+  if (key == LogicalKeyboardKey.arrowDown) return AppStrings.keyArrowDown;
+  if (key == LogicalKeyboardKey.arrowLeft) return AppStrings.keyArrowLeft;
+  if (key == LogicalKeyboardKey.arrowRight) return AppStrings.keyArrowRight;
+  if (key == LogicalKeyboardKey.home) return AppStrings.keyHome;
+  if (key == LogicalKeyboardKey.end) return AppStrings.keyEnd;
+  if (key == LogicalKeyboardKey.pageUp) return AppStrings.keyPageUp;
+  if (key == LogicalKeyboardKey.pageDown) return AppStrings.keyPageDown;
+  if (key == LogicalKeyboardKey.insert) return AppStrings.keyInsert;
+  return key.keyLabel;
 }
 
 /// The `CallbackShortcuts` bindings: one activator per command with a
@@ -240,7 +264,9 @@ Map<ShortcutActivator, VoidCallback> appShortcutBindings(
   Map<AppCommand, VoidCallback> handlers,
 ) {
   final bindings = <ShortcutActivator, VoidCallback>{};
-  for (final shortcut in nimanAppShortcuts) {
+  // The keys in force: the shipped ones, changed where the user changed
+  // them (#159).
+  for (final shortcut in AppKeyMap.current.value.shortcuts) {
     final handler = handlers[shortcut.command];
     if (handler != null) bindings[shortcut.activation] = handler;
   }

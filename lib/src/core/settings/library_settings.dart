@@ -262,6 +262,20 @@ final class AppSettingsRepo {
     );
   }
 
+  /// The keyboard shortcuts the user changed (#159), or null for none.
+  Future<String?> keyMap() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? null : rows.first.keyMap;
+  }
+
+  /// Keeps [json] as the changed shortcuts.
+  Future<void> setKeyMap(String json) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(keyMap: Value(json)),
+    );
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

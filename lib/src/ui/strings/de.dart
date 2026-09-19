@@ -1223,6 +1223,75 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get keySpace => 'Leertaste';
+  @override
+  String get keyEnter => 'Eingabe';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Rücktaste';
+  @override
+  String get keyDelete => 'Entf';
+  @override
+  String get keyArrowUp => 'Nach oben';
+  @override
+  String get keyArrowDown => 'Nach unten';
+  @override
+  String get keyArrowLeft => 'Nach links';
+  @override
+  String get keyArrowRight => 'Nach rechts';
+  @override
+  String get keyHome => 'Pos1';
+  @override
+  String get keyEnd => 'Ende';
+  @override
+  String get keyPageUp => 'Bild auf';
+  @override
+  String get keyPageDown => 'Bild ab';
+  @override
+  String get keyInsert => 'Einfg';
+  @override
+  String get shortcutNone => 'Kein Kürzel';
+  @override
+  String get shortcutRestoreDefaults => 'Standard wiederherstellen';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Alle Kürzel so zurücksetzen, wie Niman sie ausliefert?';
+  @override
+  String get shortcutRevert => 'Zurück zum Standard';
+  @override
+  String get shortcutClear => 'Kürzel entfernen';
+  @override
+  String get shortcutCapturePrompt =>
+      'Drücken Sie die Tasten. Auch Esc und Tab werden aufgenommen: '
+      'Abbrechen führt hinaus.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Fügen Sie Strg, Alt oder Meta hinzu: eine Taste allein ist zum '
+      'Schreiben da.';
+  @override
+  String get shortcutMove => 'Verschieben';
+  @override
+  String get shortcutUseAnyway => 'Trotzdem verwenden';
+  @override
+  String get shortcutUndo => 'Rückgängig';
+  @override
+  String get shortcutRedo => 'Wiederholen';
+  @override
+  String get shortcutChange => 'Kürzel ändern';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tasten für $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys gehört schon zu $other. Hierher verschieben? $other hat dann '
+      'kein Kürzel.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys ist in Textfeldern und im Editor auch $what. Dort übernimmt Ihr '
+      'Befehl sie.';
+  @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
   @override

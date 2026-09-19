@@ -73,6 +73,11 @@ The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone the
 Search tab lists the matching commands above its results, so no
 keyboard is needed.
 
+**Keyboard shortcuts** can be changed wherever there is a keyboard: on
+Linux and Windows, and on Android with a hardware keyboard attached, the
+same screen under Settings. Without a keyboard the screen says so
+instead of opening.
+
 The **side panel** (outline, tags, history beside the note) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note

@@ -1211,6 +1211,73 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get keySpace => 'Spațiu';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Sus';
+  @override
+  String get keyArrowDown => 'Jos';
+  @override
+  String get keyArrowLeft => 'Stânga';
+  @override
+  String get keyArrowRight => 'Dreapta';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Fără scurtătură';
+  @override
+  String get shortcutRestoreDefaults => 'Restabilește implicitele';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Refaci toate scurtăturile așa cum le livrează Niman?';
+  @override
+  String get shortcutRevert => 'Înapoi la implicită';
+  @override
+  String get shortcutClear => 'Elimină scurtătura';
+  @override
+  String get shortcutCapturePrompt =>
+      'Apasă tastele. Și Esc și Tab sunt preluate: ieși cu Anulează.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Adaugă Ctrl, Alt sau Meta: o tastă singură e pentru scris.';
+  @override
+  String get shortcutMove => 'Mut-o';
+  @override
+  String get shortcutUseAnyway => 'Folosește oricum';
+  @override
+  String get shortcutUndo => 'Anulează acțiunea';
+  @override
+  String get shortcutRedo => 'Refă';
+  @override
+  String get shortcutChange => 'Schimbă scurtătura';
+  @override
+  String shortcutCaptureTitle(String command) => 'Taste pentru $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys este deja a $other. O muți aici? $other va rămâne fără '
+      'scurtătură.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys este și $what în câmpurile de text și în editor. Acolo o va '
+      'prelua comanda ta.';
+  @override
   String get openFileMissing => 'Fișierul acestei note nu este pe disc';
   @override
   String get openFileFailed => 'Nota nu a putut fi deschisă în afara Niman';

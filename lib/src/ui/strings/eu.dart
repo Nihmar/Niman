@@ -1205,6 +1205,73 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get keySpace => 'Zuriunea';
+  @override
+  String get keyEnter => 'Sartu';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Atzera';
+  @override
+  String get keyDelete => 'Ezabatu';
+  @override
+  String get keyArrowUp => 'Gora';
+  @override
+  String get keyArrowDown => 'Behera';
+  @override
+  String get keyArrowLeft => 'Ezkerrera';
+  @override
+  String get keyArrowRight => 'Eskuinera';
+  @override
+  String get keyHome => 'Hasiera';
+  @override
+  String get keyEnd => 'Amaiera';
+  @override
+  String get keyPageUp => 'Orri gora';
+  @override
+  String get keyPageDown => 'Orri behera';
+  @override
+  String get keyInsert => 'Txertatu';
+  @override
+  String get shortcutNone => 'Lasterbiderik ez';
+  @override
+  String get shortcutRestoreDefaults => 'Berrezarri lehenetsiak';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Lasterbide guztiak Nimanek dakartzan bezala jarri?';
+  @override
+  String get shortcutRevert => 'Itzuli lehenetsira';
+  @override
+  String get shortcutClear => 'Kendu lasterbidea';
+  @override
+  String get shortcutCapturePrompt =>
+      'Sakatu teklak. Esc eta Tab ere hartzen dira: irten Utzi botoiarekin.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Gehitu Ctrl, Alt edo Meta: tekla bakarra idazteko da.';
+  @override
+  String get shortcutMove => 'Mugitu';
+  @override
+  String get shortcutUseAnyway => 'Erabili hala ere';
+  @override
+  String get shortcutUndo => 'Desegin';
+  @override
+  String get shortcutRedo => 'Berregin';
+  @override
+  String get shortcutChange => 'Aldatu lasterbidea';
+  @override
+  String shortcutCaptureTitle(String command) => 'Teklak: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys dagoeneko $other-ena da. Hona mugitu? $other lasterbiderik gabe '
+      'geratuko da.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys ere $what da testu-eremuetan eta editorean. Han zure komandoak '
+      'hartuko du.';
+  @override
   String get openFileMissing => 'Ohar honen fitxategia ez dago diskoan';
   @override
   String get openFileFailed => 'Ezin izan da ohar hau Nimanetik kanpo ireki';

@@ -1196,6 +1196,74 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get keySpace => 'Atstarpe';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Augšup';
+  @override
+  String get keyArrowDown => 'Lejup';
+  @override
+  String get keyArrowLeft => 'Pa kreisi';
+  @override
+  String get keyArrowRight => 'Pa labi';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Nav īsinājumtaustiņa';
+  @override
+  String get shortcutRestoreDefaults => 'Atjaunot noklusējumus';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Atjaunot visus īsinājumtaustiņus, kā tos piegādā Niman?';
+  @override
+  String get shortcutRevert => 'Atpakaļ uz noklusējumu';
+  @override
+  String get shortcutClear => 'Noņemt īsinājumtaustiņu';
+  @override
+  String get shortcutCapturePrompt =>
+      'Nospiediet taustiņus. Arī Esc un Tab tiek ierakstīti: izeja ir poga '
+      'Atcelt.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Pievienojiet Ctrl, Alt vai Meta: viens taustiņš ir rakstīšanai.';
+  @override
+  String get shortcutMove => 'Pārvietot';
+  @override
+  String get shortcutUseAnyway => 'Tomēr izmantot';
+  @override
+  String get shortcutUndo => 'Atsaukt';
+  @override
+  String get shortcutRedo => 'Atkārtot';
+  @override
+  String get shortcutChange => 'Mainīt īsinājumtaustiņu';
+  @override
+  String shortcutCaptureTitle(String command) => 'Taustiņi: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys jau pieder $other. Pārvietot šeit? $other paliks bez '
+      'īsinājumtaustiņa.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys teksta laukos un redaktorā ir arī $what. Tur to pārņems jūsu '
+      'komanda.';
+  @override
   String get openFileMissing => 'Šīs piezīmes faila diskā nav';
   @override
   String get openFileFailed => 'Šo piezīmi neizdevās atvērt ārpus Niman';
