@@ -46,7 +46,9 @@ Links: `Ctrl+click` a link in the source editor to follow it.
 ## Changing a shortcut
 
 In the palette itself, `Alt+P` pins or unpins the selected command;
-pinned ones head it before anything is typed.
+pinned ones head it before anything is typed. On a phone the palette
+opens with two fingers dragged down, with the ⚡ on the Search tab's
+bar, or from an open note's ⋮ menu.
 
 Settings → **Keyboard shortcuts** lists every command, with its keys or
 with *No shortcut*. Settings → **Commands** lists the same commands with

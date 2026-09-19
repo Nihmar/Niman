@@ -13,6 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
+import 'package:niman/src/ui/palette/palette_swipe.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/strings.dart';
@@ -51,6 +52,7 @@ final class ShellLayoutProps {
     required this.onDestinationSelected,
     required this.onSwitchLibrary,
     required this.buildWideSlots,
+    this.onOpenPalette,
     this.buildTabs,
     this.tabsStart = 0,
     this.zen = false,
@@ -146,6 +148,10 @@ final class ShellLayoutProps {
 
   /// The rail's library button (#170): the library window (#203).
   final VoidCallback onSwitchLibrary;
+
+  /// Opens the command palette from the phone's two-finger swipe (#206);
+  /// null on a layout whose keyboard has a key for it.
+  final VoidCallback? onOpenPalette;
 
   /// The wide layout's stacked tab slots, in tab order.
   final List<Widget> Function() buildWideSlots;
@@ -253,76 +259,81 @@ final class NarrowShellLayout extends StatelessWidget {
           }
           props.onCloseFullScreenNote();
         },
-        child: ColoredBox(
-          // Opaque surface behind every phone transition (issue #4): the
-          // full-note fade starts from transparent, and without this the
-          // first frames expose the black Android window instead.
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // The tab shell never unmounts: hidden it skips layout,
-              // paint and tickers, and the fullscreen note above is
-              // opaque. The hiding waits out the open fade (issue #4):
-              // the note fades in over the tabs instead of over the
-              // window background.
-              Offstage(
-                key: const ValueKey('tab-shell-offstage'),
-                offstage: fullNote && props.noteHidingTabs,
-                child: TickerMode(
-                  enabled: !fullNote,
-                  child: KeyedSubtree(
-                    key: const ValueKey('tab-shell'),
-                    child: props.buildTabShell(),
+        child: PaletteSwipe(
+          // Two fingers down open the palette, over the tabs and over an
+          // open note alike (#206).
+          onOpen: props.onOpenPalette,
+          child: ColoredBox(
+            // Opaque surface behind every phone transition (issue #4): the
+            // full-note fade starts from transparent, and without this the
+            // first frames expose the black Android window instead.
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // The tab shell never unmounts: hidden it skips layout,
+                // paint and tickers, and the fullscreen note above is
+                // opaque. The hiding waits out the open fade (issue #4):
+                // the note fades in over the tabs instead of over the
+                // window background.
+                Offstage(
+                  key: const ValueKey('tab-shell-offstage'),
+                  offstage: fullNote && props.noteHidingTabs,
+                  child: TickerMode(
+                    enabled: !fullNote,
+                    child: KeyedSubtree(
+                      key: const ValueKey('tab-shell'),
+                      child: props.buildTabShell(),
+                    ),
                   ),
                 ),
-              ),
-              AnimatedSwitcher(
-                duration: props.noteFade,
-                switchInCurve: Curves.easeOutCubic,
-                transitionBuilder: (child, animation) =>
-                    FadeTransition(opacity: animation, child: child),
-                child: fullNote && selectedPath != null
-                    ? KeyedSubtree(
-                        key: const ValueKey('full-note'),
-                        child: Scaffold(
-                          appBar: immersive
-                              ? null
-                              : AppBar(
-                                  leading: BackButton(
-                                    onPressed: props.onCloseFullScreenNote,
+                AnimatedSwitcher(
+                  duration: props.noteFade,
+                  switchInCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: fullNote && selectedPath != null
+                      ? KeyedSubtree(
+                          key: const ValueKey('full-note'),
+                          child: Scaffold(
+                            appBar: immersive
+                                ? null
+                                : AppBar(
+                                    leading: BackButton(
+                                      onPressed: props.onCloseFullScreenNote,
+                                    ),
+                                    title: _noteTitle(context, selectedPath),
+                                    actions: props.noteBarActions,
                                   ),
-                                  title: _noteTitle(context, selectedPath),
-                                  actions: props.noteBarActions,
+                            body: Stack(
+                              children: [
+                                // Stable subtree across the immersive
+                                // toggle: only the top inset flips, so
+                                // entering or leaving fullscreen never
+                                // reparents (and disposes) the open note's
+                                // state, focus and scroll. The all-false
+                                // SafeArea is a layout no-op.
+                                Positioned.fill(
+                                  child: SafeArea(
+                                    top: immersive,
+                                    bottom: false,
+                                    left: false,
+                                    right: false,
+                                    child: props.buildFullNote(selectedPath),
+                                  ),
                                 ),
-                          body: Stack(
-                            children: [
-                              // Stable subtree across the immersive
-                              // toggle: only the top inset flips, so
-                              // entering or leaving fullscreen never
-                              // reparents (and disposes) the open note's
-                              // state, focus and scroll. The all-false
-                              // SafeArea is a layout no-op.
-                              Positioned.fill(
-                                child: SafeArea(
-                                  top: immersive,
-                                  bottom: false,
-                                  left: false,
-                                  right: false,
-                                  child: props.buildFullNote(selectedPath),
-                                ),
-                              ),
-                              if (immersive)
-                                ExitFullScreenButton(
-                                  onExit: props.onLeaveFullScreenPreview,
-                                ),
-                            ],
+                                if (immersive)
+                                  ExitFullScreenButton(
+                                    onExit: props.onLeaveFullScreenPreview,
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                    : null,
-              ),
-            ],
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       ),
