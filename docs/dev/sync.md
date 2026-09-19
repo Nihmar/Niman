@@ -593,14 +593,23 @@ a duplicate costs a PROPFIND, a missed one waits for the next full sync.
   sync, and leaves `trashLocal` and `moveLocal` to a full sync
   (`SyncReport.deferred`): a single 404 is not enough to trash a file.
 - **Full sync** (manual, library opened, resume, periodic, after a quick
-  sync that deferred something) walks both trees and reads every hint,
-  due or backing off.
+  sync that deferred something) walks both trees and reads every hint.
+  It settles only the due ones: a hint still backing off keeps its
+  backoff, and the decisions on the paths it covers wait with it
+  (`SyncReport.waiting`). Before #163 the periodic full sync re-planned
+  such a path every minute whatever its 600 s backoff said. A manual run
+  calls `retryNow` first, so everything is due and nothing waits.
 - **Settling** (both kinds): a hint is removed (`completeOp`, only if
   not rewritten meanwhile) when no path it covers — its path, its move
   source, anything under either — failed or changed during the run; a
   conflict settles it too (the report carries it). Otherwise `failOp`
   backs it off. A run that stopped backs every hint off; one that was
   not confirmed, had no destination or no password leaves them alone.
+- **Stuck paths:** a hint whose path was skipped (changed during the
+  run) `SyncEngine.stuckAfter` (3) runs in a row is added to the
+  report's failures, "… (N runs in a row)". The run is then not clean,
+  `last_error` is set and the status panel lists it, instead of the run
+  calling itself a success while one file never moves (#163).
 
 #### Triggers (`lib/src/sync/sync_scheduler.dart`)
 
