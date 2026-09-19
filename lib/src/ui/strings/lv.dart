@@ -1222,6 +1222,14 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get palettePinned => 'Piesprausti';
+  @override
+  String get palettePin => 'Piespraust';
+  @override
+  String get paletteUnpin => 'Noņemt';
+  @override
+  String get palettePinFooter => 'alt+P piesprauž';
+  @override
   String get spellCheckScanning => 'Pārbauda piezīmi…';
   @override
   String get spellCheckAgain => 'Pārbaudīt vēlreiz';

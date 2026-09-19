@@ -86,6 +86,7 @@ Future<void> _rewindTo(AppDatabase db, int version) async {
   Future<void> drop(String table, String column) =>
       db.customStatement('ALTER TABLE $table DROP COLUMN $column');
 
+  if (version < 25) await drop('app_settings', 'pinned_commands');
   if (version < 24) await drop('app_settings', 'key_map');
   if (version < 23) await db.customStatement('DROP TABLE workspaces');
   if (version < 22) {
@@ -1002,6 +1003,32 @@ void main() {
       final repo = AppSettingsRepo(db);
       expect(await repo.keyMap(), equals(null));
       await repo.setKeyMap('{"newNote":null}');
+      expect(await repo.keyMap(), '{"newNote":null}');
+      expect(
+        (await db.select(db.appSettings).get()).single.libraryPath,
+        '/lib/Work',
+      );
+      await db.close();
+    });
+  });
+
+  group('v24 → v25: the pinned commands appear (#208)', () {
+    test('an existing install upgrades with nothing pinned', () async {
+      {
+        final db = AppDatabase(NativeDatabase(dbFile));
+        await _rewindTo(db, 24);
+        await db.customStatement(
+          'INSERT INTO app_settings (id, library_path, key_map) '
+          "VALUES (1, '/lib/Work', '{\"newNote\":null}')",
+        );
+        await db.close();
+      }
+      final db = AppDatabase(NativeDatabase(dbFile));
+      final repo = AppSettingsRepo(db);
+      expect(await repo.pinnedCommands(), equals(null));
+      await repo.setPinnedCommands('["zenMode"]');
+      expect(await repo.pinnedCommands(), '["zenMode"]');
+      // The keys the device already had are untouched.
       expect(await repo.keyMap(), '{"newNote":null}');
       expect(
         (await db.select(db.appSettings).get()).single.libraryPath,

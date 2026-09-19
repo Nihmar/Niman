@@ -1217,6 +1217,14 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get palettePinned => 'Pinned';
+  @override
+  String get palettePin => 'Pin';
+  @override
+  String get paletteUnpin => 'Unpin';
+  @override
+  String get palettePinFooter => 'alt+P to pin';
+  @override
   String get spellCheckScanning => 'Checking the note…';
   @override
   String get spellCheckAgain => 'Check again';

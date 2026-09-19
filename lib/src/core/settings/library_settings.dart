@@ -276,6 +276,20 @@ final class AppSettingsRepo {
     );
   }
 
+  /// The commands pinned in the palette (#208), or null for none.
+  Future<String?> pinnedCommands() async {
+    final rows = await _db.select(_db.appSettings).get();
+    return rows.isEmpty ? null : rows.first.pinnedCommands;
+  }
+
+  /// Keeps [json] as the pinned commands.
+  Future<void> setPinnedCommands(String json) async {
+    await _ensureRow();
+    await (_db.update(_db.appSettings)..where((t) => t.id.equals(1))).write(
+      AppSettingsCompanion(pinnedCommands: Value(json)),
+    );
+  }
+
   Future<void> _ensureRow() async {
     final rows = await _db.select(_db.appSettings).get();
     if (rows.isNotEmpty) {

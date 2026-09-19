@@ -87,6 +87,11 @@ class AppSettings extends Table {
   /// a shortcut belongs to the keyboard.
   TextColumn get keyMap => text().named('key_map').nullable()();
 
+  /// The commands pinned in the palette (#208), as a JSON array of their
+  /// names, in pinning order; null while none was. The device's, like the
+  /// key map: a pin is about how this machine is used.
+  TextColumn get pinnedCommands => text().named('pinned_commands').nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -326,7 +331,7 @@ class AppDatabase extends _$AppDatabase {
   new(super.e);
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 25;
 
   /// The index tables that lived here through v14, dropped by v15.
   static const _indexTables = [
@@ -370,7 +375,9 @@ class AppDatabase extends _$AppDatabase {
   /// `sync_items` and `sync_ops`, all empty — no library syncs until one
   /// is configured, and pre-v23 databases gain `workspaces` (issue #23),
   /// empty: every library starts with nothing open, and pre-v24 databases
-  /// gain `key_map` (issue #159), null: every shortcut as shipped.
+  /// gain `key_map` (issue #159), null: every shortcut as shipped, and
+  /// pre-v25 databases gain `pinned_commands` (issue #208), null: the
+  /// palette opens on what was used lately, as it did.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -520,6 +527,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 24) {
         await m.database.customStatement(
           'ALTER TABLE app_settings ADD COLUMN key_map TEXT',
+        );
+      }
+      if (from < 25) {
+        await m.database.customStatement(
+          'ALTER TABLE app_settings ADD COLUMN pinned_commands TEXT',
         );
       }
     },
