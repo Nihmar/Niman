@@ -1183,6 +1183,30 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Go to';
   @override
+  String get commandsTitle => 'Commands';
+  @override
+  String get commandsIntro =>
+      'The command palette offers only the commands that can run where you '
+      'are. These are all of them, and when each one shows.';
+  @override
+  String get commandNeedNone => 'Always available';
+  @override
+  String get commandNeedOpenNote => 'Needs an open note';
+  @override
+  String get commandNeedWideWindow => 'Wide window only';
+  @override
+  String get commandNeedDockRoom => 'Needs a window wide enough for the dock';
+  @override
+  String get commandNeedDesktop => 'Desktop only';
+  @override
+  String get commandNeedNotInZen => 'Not in Zen mode';
+  @override
+  String get commandNeedZenRoom => 'Desktop, with a note open in a tab';
+  @override
+  String get commandNeedPreview => 'With the preview on, on a text note';
+  @override
+  String get commandNeedTwoEditors => 'With both editors enabled';
+  @override
   String get paletteHint => 'Search commands and notes';
   @override
   String get paletteNoResults => 'Nothing matches';

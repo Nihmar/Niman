@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
+import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/palette/command_needs.dart';
+import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/window_controller.dart';
 
 import '../fakes/fake_library_session.dart';
@@ -104,6 +107,58 @@ void main() {
     await keys(tester, LogicalKeyboardKey.keyP, shift: true);
     await type(tester, 'rename');
     expect(find.byKey(const Key('palette-item-0')), findsOne);
+  });
+
+  // #207: the palette and the Commands page read one table. Whatever the
+  // page says a command needs, the palette offers it exactly when that
+  // holds: every command has a handler, and none shows early.
+  Set<AppCommand> offered(WidgetTester tester) => {
+    for (final command
+        in tester.widget<CommandPalette>(find.byType(CommandPalette)).commands)
+      command.command,
+  };
+
+  Set<AppCommand> expected(Set<CommandNeed> met) => {
+    for (final command in AppCommand.values)
+      if (command != AppCommand.openPalette &&
+          command != AppCommand.goToNote &&
+          commandNeeds(command).every(met.contains))
+        command,
+  };
+
+  testWidgets('it offers a command exactly when the Commands page says', (
+    tester,
+  ) async {
+    await pumpAt(tester, const Size(1400, 900));
+    await keys(tester, LogicalKeyboardKey.keyP, shift: true);
+    expect(
+      offered(tester),
+      expected({
+        CommandNeed.wideWindow,
+        CommandNeed.dockRoom,
+        CommandNeed.notInZen,
+        CommandNeed.desktop,
+      }),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await settle(tester);
+
+    await tester.tap(noteRow('alpha.md'));
+    await settle(tester);
+    await keys(tester, LogicalKeyboardKey.keyP, shift: true);
+    expect(
+      offered(tester),
+      expected({
+        CommandNeed.openNote,
+        CommandNeed.wideWindow,
+        CommandNeed.dockRoom,
+        CommandNeed.notInZen,
+        CommandNeed.desktop,
+        CommandNeed.zenRoom,
+        CommandNeed.previewToggle,
+        CommandNeed.twoEditors,
+      }),
+    );
   });
 
   testWidgets('on a phone the search lists the commands, and runs them', (

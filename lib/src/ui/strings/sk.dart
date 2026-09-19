@@ -1189,6 +1189,31 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Prejsť na';
   @override
+  String get commandsTitle => 'Príkazy';
+  @override
+  String get commandsIntro =>
+      'Paleta príkazov ponúka len príkazy, ktoré sa dajú spustiť tam, kde '
+      'práve ste. Tu sú všetky a kedy sa ktorý zobrazí.';
+  @override
+  String get commandNeedNone => 'Vždy k dispozícii';
+  @override
+  String get commandNeedOpenNote => 'Vyžaduje otvorenú poznámku';
+  @override
+  String get commandNeedWideWindow => 'Len v širokom okne';
+  @override
+  String get commandNeedDockRoom => 'Vyžaduje okno dosť široké pre bočný panel';
+  @override
+  String get commandNeedDesktop => 'Len na počítači';
+  @override
+  String get commandNeedNotInZen => 'Nie v režime Zen';
+  @override
+  String get commandNeedZenRoom => 'Počítač, s poznámkou otvorenou na karte';
+  @override
+  String get commandNeedPreview =>
+      'So zapnutým náhľadom, pri textovej poznámke';
+  @override
+  String get commandNeedTwoEditors => 'So zapnutými oboma editormi';
+  @override
   String get paletteHint => 'Hľadať príkazy a poznámky';
   @override
   String get paletteNoResults => 'Nič nezodpovedá';

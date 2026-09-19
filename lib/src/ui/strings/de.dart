@@ -1212,6 +1212,32 @@ final class GermanStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gehe zu';
   @override
+  String get commandsTitle => 'Befehle';
+  @override
+  String get commandsIntro =>
+      'Die Befehlspalette bietet nur die Befehle an, die dort ausführbar '
+      'sind, wo du gerade bist. Hier stehen alle, und wann jeder erscheint.';
+  @override
+  String get commandNeedNone => 'Immer verfügbar';
+  @override
+  String get commandNeedOpenNote => 'Braucht eine offene Notiz';
+  @override
+  String get commandNeedWideWindow => 'Nur in breiten Fenstern';
+  @override
+  String get commandNeedDockRoom =>
+      'Braucht ein Fenster, das breit genug für die Seitenleiste ist';
+  @override
+  String get commandNeedDesktop => 'Nur auf dem Desktop';
+  @override
+  String get commandNeedNotInZen => 'Nicht im Zen-Modus';
+  @override
+  String get commandNeedZenRoom => 'Desktop, mit einer Notiz in einem Tab';
+  @override
+  String get commandNeedPreview =>
+      'Mit aktivierter Vorschau, bei einer Textnotiz';
+  @override
+  String get commandNeedTwoEditors => 'Wenn beide Editoren aktiviert sind';
+  @override
   String get paletteHint => 'Befehle und Notizen suchen';
   @override
   String get paletteNoResults => 'Keine Treffer';

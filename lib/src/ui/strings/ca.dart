@@ -1220,6 +1220,33 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ves a';
   @override
+  String get commandsTitle => 'Ordres';
+  @override
+  String get commandsIntro =>
+      "La paleta d'ordres només ofereix les ordres que es poden executar on "
+      'ets. Aquí hi són totes, i quan apareix cadascuna.';
+  @override
+  String get commandNeedNone => 'Sempre disponible';
+  @override
+  String get commandNeedOpenNote => 'Cal una nota oberta';
+  @override
+  String get commandNeedWideWindow => 'Només amb finestra ampla';
+  @override
+  String get commandNeedDockRoom =>
+      'Cal una finestra prou ampla per al plafó lateral';
+  @override
+  String get commandNeedDesktop => "Només a l'escriptori";
+  @override
+  String get commandNeedNotInZen => 'Fora del mode Zen';
+  @override
+  String get commandNeedZenRoom =>
+      'Escriptori, amb una nota oberta en una pestanya';
+  @override
+  String get commandNeedPreview =>
+      'Amb la previsualització activada, en una nota de text';
+  @override
+  String get commandNeedTwoEditors => 'Amb tots dos editors activats';
+  @override
   String get paletteHint => 'Cerca ordres i notes';
   @override
   String get paletteNoResults => 'Cap coincidència';

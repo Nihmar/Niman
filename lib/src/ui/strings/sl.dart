@@ -1185,6 +1185,32 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Pojdi na';
   @override
+  String get commandsTitle => 'Ukazi';
+  @override
+  String get commandsIntro =>
+      'Paleta ukazov ponuja le ukaze, ki jih je mogoče zagnati tam, kjer ste. '
+      'Tu so vsi in kdaj se kateri prikaže.';
+  @override
+  String get commandNeedNone => 'Vedno na voljo';
+  @override
+  String get commandNeedOpenNote => 'Potrebuje odprt zapisek';
+  @override
+  String get commandNeedWideWindow => 'Samo v širokem oknu';
+  @override
+  String get commandNeedDockRoom =>
+      'Potrebuje okno, dovolj široko za stransko ploščo';
+  @override
+  String get commandNeedDesktop => 'Samo na namizju';
+  @override
+  String get commandNeedNotInZen => 'Ne v načinu Zen';
+  @override
+  String get commandNeedZenRoom => 'Namizje, z zapiskom odprtim v zavihku';
+  @override
+  String get commandNeedPreview =>
+      'Z vklopljenim predogledom, pri besedilnem zapisku';
+  @override
+  String get commandNeedTwoEditors => 'Z obema vklopljenima urejevalnikoma';
+  @override
   String get paletteHint => 'Išči ukaze in zapiske';
   @override
   String get paletteNoResults => 'Ni zadetkov';

@@ -1189,6 +1189,31 @@ final class IcelandicStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Fara í';
   @override
+  String get commandsTitle => 'Skipanir';
+  @override
+  String get commandsIntro =>
+      'Skipanaspjaldið býður aðeins upp á skipanir sem hægt er að keyra þar '
+      'sem þú ert. Hér eru þær allar, og hvenær hver birtist.';
+  @override
+  String get commandNeedNone => 'Alltaf tiltæk';
+  @override
+  String get commandNeedOpenNote => 'Krefst opinnar glósu';
+  @override
+  String get commandNeedWideWindow => 'Aðeins í breiðum glugga';
+  @override
+  String get commandNeedDockRoom =>
+      'Krefst glugga sem er nógu breiður fyrir hliðarspjaldið';
+  @override
+  String get commandNeedDesktop => 'Aðeins á tölvu';
+  @override
+  String get commandNeedNotInZen => 'Ekki í Zen-ham';
+  @override
+  String get commandNeedZenRoom => 'Tölva, með glósu opna í flipa';
+  @override
+  String get commandNeedPreview => 'Með forskoðun á, í textaglósu';
+  @override
+  String get commandNeedTwoEditors => 'Með báða ritla virka';
+  @override
   String get paletteHint => 'Leita í skipunum og minnispunktum';
   @override
   String get paletteNoResults => 'Ekkert fannst';

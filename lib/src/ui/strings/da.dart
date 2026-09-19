@@ -1187,6 +1187,32 @@ final class DanishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Gå til';
   @override
+  String get commandsTitle => 'Kommandoer';
+  @override
+  String get commandsIntro =>
+      'Kommandopaletten tilbyder kun de kommandoer, der kan køre, hvor du er. '
+      'Her er dem alle, og hvornår hver enkelt vises.';
+  @override
+  String get commandNeedNone => 'Altid tilgængelig';
+  @override
+  String get commandNeedOpenNote => 'Kræver en åben note';
+  @override
+  String get commandNeedWideWindow => 'Kun i bredt vindue';
+  @override
+  String get commandNeedDockRoom =>
+      'Kræver et vindue, der er bredt nok til sidepanelet';
+  @override
+  String get commandNeedDesktop => 'Kun på computer';
+  @override
+  String get commandNeedNotInZen => 'Ikke i Zen-tilstand';
+  @override
+  String get commandNeedZenRoom => 'Computer, med en note åben i en fane';
+  @override
+  String get commandNeedPreview =>
+      'Med forhåndsvisning slået til, på en tekstnote';
+  @override
+  String get commandNeedTwoEditors => 'Med begge editorer slået til';
+  @override
   String get paletteHint => 'Søg i kommandoer og noter';
   @override
   String get paletteNoResults => 'Intet passer';

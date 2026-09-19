@@ -1110,6 +1110,29 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteGroupGoTo => '移動';
   @override
+  String get commandsTitle => 'コマンド';
+  @override
+  String get commandsIntro =>
+      'コマンドパレットには、いまいる場所で実行できるコマンドだけが表示されます。ここにはすべてのコマンドと、それぞれが表示される条件があります。';
+  @override
+  String get commandNeedNone => '常に利用可能';
+  @override
+  String get commandNeedOpenNote => 'ノートを開いている必要があります';
+  @override
+  String get commandNeedWideWindow => '広いウィンドウのみ';
+  @override
+  String get commandNeedDockRoom => 'サイドパネルが入る幅のウィンドウが必要です';
+  @override
+  String get commandNeedDesktop => 'デスクトップのみ';
+  @override
+  String get commandNeedNotInZen => '禅モード以外';
+  @override
+  String get commandNeedZenRoom => 'デスクトップで、タブにノートを開いているとき';
+  @override
+  String get commandNeedPreview => 'プレビューが有効で、テキストノートのとき';
+  @override
+  String get commandNeedTwoEditors => '両方のエディターが有効なとき';
+  @override
   String get paletteHint => 'コマンドとノートを検索';
   @override
   String get paletteNoResults => '一致するものがありません';

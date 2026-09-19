@@ -119,14 +119,8 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
   /// The row to flash, or null.
   final Key? highlight;
 
-  static String _groupName(PaletteGroup? group) => switch (group) {
-    PaletteGroup.note => AppStrings.paletteGroupNote,
-    PaletteGroup.editor => AppStrings.paletteGroupEditor,
-    PaletteGroup.view => AppStrings.paletteGroupView,
-    PaletteGroup.library => AppStrings.paletteGroupLibrary,
-    PaletteGroup.goTo => AppStrings.paletteGroupGoTo,
-    null => AppStrings.paletteCommands,
-  };
+  static String _groupName(PaletteGroup? group) =>
+      group == null ? AppStrings.paletteCommands : paletteGroupName(group);
 
   Future<void> _restoreDefaults(BuildContext context) async {
     final yes = await _ask(
@@ -172,7 +166,7 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
                 children: [
                   for (final group in [null, ...PaletteGroup.values])
                     if (groups[group] case final commands?) ...[
-                      _Heading(_groupName(group)),
+                      SettingsListHeading(_groupName(group)),
                       for (final command in commands)
                         _ShortcutRow(
                           command: command,
@@ -189,16 +183,16 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
                           ),
                         ),
                     ],
-                  _Heading(AppStrings.shortcutEditorSection),
+                  SettingsListHeading(AppStrings.shortcutEditorSection),
                   ListTile(
                     dense: true,
                     title: Text(AppStrings.shortcutFind),
-                    trailing: const _Keys('Ctrl+F'),
+                    trailing: const ShortcutKeys('Ctrl+F'),
                   ),
                   ListTile(
                     dense: true,
                     title: Text(AppStrings.shortcutReplace),
-                    trailing: const _Keys('Ctrl+H'),
+                    trailing: const ShortcutKeys('Ctrl+H'),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -219,9 +213,13 @@ final class KeyboardShortcutsScreen extends StatelessWidget {
   }
 }
 
-final class _Heading extends StatelessWidget {
-  const new(this.text);
+/// A list's group heading, in small capitals: the keyboard and the
+/// Commands pages head their groups with it.
+final class SettingsListHeading extends StatelessWidget {
+  /// A heading reading [text].
+  const new(this.text, {super.key});
 
+  /// The group's name.
   final String text;
 
   @override
@@ -285,7 +283,7 @@ final class _ShortcutRow extends StatelessWidget {
                 ),
               )
             else
-              _Keys(describeActivator(keys)),
+              ShortcutKeys(describeActivator(keys)),
             // Always the same two slots, so the keys never shift under the
             // pointer as they come and go.
             SizedBox.square(
@@ -319,9 +317,12 @@ final class _ShortcutRow extends StatelessWidget {
   }
 }
 
-final class _Keys extends StatelessWidget {
-  const new(this.text);
+/// A key combination drawn as a keycap.
+final class ShortcutKeys extends StatelessWidget {
+  /// A keycap reading [text].
+  const new(this.text, {super.key});
 
+  /// The keys, as `describeActivator` writes them.
   final String text;
 
   @override

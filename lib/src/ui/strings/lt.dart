@@ -1191,6 +1191,31 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Eiti į';
   @override
+  String get commandsTitle => 'Komandos';
+  @override
+  String get commandsIntro =>
+      'Komandų paletė siūlo tik tas komandas, kurias galima vykdyti ten, kur '
+      'esate. Čia jos visos ir kada kiekviena rodoma.';
+  @override
+  String get commandNeedNone => 'Visada prieinama';
+  @override
+  String get commandNeedOpenNote => 'Reikia atidarytos pastabos';
+  @override
+  String get commandNeedWideWindow => 'Tik plačiame lange';
+  @override
+  String get commandNeedDockRoom =>
+      'Reikia pakankamai plataus lango šoniniam skydeliui';
+  @override
+  String get commandNeedDesktop => 'Tik kompiuteryje';
+  @override
+  String get commandNeedNotInZen => 'Ne Zen režimu';
+  @override
+  String get commandNeedZenRoom => 'Kompiuteris, pastaba atidaryta kortelėje';
+  @override
+  String get commandNeedPreview => 'Įjungus peržiūrą, tekstinėje pastaboje';
+  @override
+  String get commandNeedTwoEditors => 'Įjungus abu redaktorius';
+  @override
   String get paletteHint => 'Ieškoti komandų ir užrašų';
   @override
   String get paletteNoResults => 'Nieko nerasta';
