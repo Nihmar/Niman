@@ -16,7 +16,12 @@
 ///   stand until the note is long enough to move.
 library;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+
+/// The faint light on the row being written, in typewriter mode: both
+/// editors paint it the same.
+Color typewriterLineColor(BuildContext context) =>
+    Theme.of(context).colorScheme.primary.withValues(alpha: 0.07);
 
 /// How long the glide to the middle takes: short enough never to fall
 /// behind typing, long enough to read as a movement rather than a jump.

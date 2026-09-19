@@ -147,4 +147,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('typewriter-toggle')), findsNothing);
   });
+
+  // 0.0.8 test round: the row being written is lit, faintly.
+  testWidgets('the source editor lights the caret row, only when on', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(typewriter: true));
+    await tester.pumpAndSettle();
+    Color? lit() => tester
+        .widget<CodeEditor>(find.byType(CodeEditor))
+        .style
+        ?.cursorLineColor;
+    expect(lit(), isNotNull);
+    await tester.pumpWidget(_app(typewriter: false));
+    await tester.pumpAndSettle();
+    expect(lit(), isNull);
+  });
+
+  testWidgets('the WYSIWYG lights the caret row while it has the focus', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(typewriter: true, wysiwyg: true));
+    await tester.pumpAndSettle();
+    final band = find.byKey(const Key('wysiwyg-lit-row'));
+    expect(band, findsNothing, reason: 'nothing lit before the focus');
+    await tester.tap(find.byType(quill.QuillEditor));
+    await tester.pumpAndSettle();
+    expect(band, findsOne);
+    await tester.pumpWidget(_app(typewriter: false, wysiwyg: true));
+    await tester.pumpAndSettle();
+    expect(band, findsNothing);
+  });
 }
