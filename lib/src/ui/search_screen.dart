@@ -8,9 +8,6 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/search/query.dart';
 import 'package:niman/src/search/replace.dart';
 import 'package:niman/src/search/search_repo.dart';
-import 'package:niman/src/ui/app_shortcuts.dart';
-import 'package:niman/src/ui/palette/palette_command.dart';
-import 'package:niman/src/ui/palette/palette_match.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/tree.dart' show displayNameOf;
 
@@ -37,18 +34,8 @@ final class SearchScreen extends StatefulWidget {
     this.source,
     this.replaceSource,
     this.fieldSource,
-    this.commands,
-    this.onRunCommand,
     super.key,
   });
-
-  /// The commands that can run now (#155): the ones matching the query
-  /// head the results. On a phone this is the command palette, reached
-  /// without a keyboard. Null lists none.
-  final List<PaletteCommand> Function()? commands;
-
-  /// Runs a command picked from them.
-  final ValueChanged<AppCommand>? onRunCommand;
 
   /// The open library session (for the search source).
   final LibrarySession controller;
@@ -414,55 +401,13 @@ final class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         Expanded(
-          child: _replaceMode
-              ? _replacePreviewList(theme)
-              : _withCommands(theme, _results(theme)),
+          child: _replaceMode ? _replacePreviewList(theme) : _results(theme),
         ),
       ],
     );
     const AppLogger(name: 'search.ui')
         .debug('build: ${DateTime.now().difference(started).inMilliseconds}ms');
     return child;
-  }
-
-  /// The commands matching the query (#155), over [results].
-  Widget _withCommands(ThemeData theme, Widget results) {
-    final commands = widget.commands;
-    final run = widget.onRunCommand;
-    final query = _query.text.trim();
-    if (commands == null || run == null || query.isEmpty) return results;
-    final matches = paletteRank(
-      commands(),
-      query,
-      name: (c) => c.name,
-      id: (c) => c.command,
-    ).take(5).toList();
-    if (matches.isEmpty) return results;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Text(
-            AppStrings.paletteCommands.toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 0.6,
-            ),
-          ),
-        ),
-        for (final command in matches)
-          ListTile(
-            key: Key('search-command-${command.command.name}'),
-            dense: true,
-            leading: const Icon(Icons.bolt_outlined),
-            title: Text(command.name),
-            onTap: () => run(command.command),
-          ),
-        const Divider(height: 1),
-        Expanded(child: results),
-      ],
-    );
   }
 
   Widget _results(ThemeData theme) {

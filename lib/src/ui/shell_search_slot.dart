@@ -9,27 +9,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:niman/src/library/session.dart';
-import 'package:niman/src/ui/app_shortcuts.dart';
-import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/search_screen.dart';
 import 'package:niman/src/ui/tags_screen.dart';
 
 /// Search, with Tags flipping in over it.
 final class SearchSlot extends StatefulWidget {
   /// Creates the slot over [controller]'s library.
-  const new({
-    required this.controller,
-    required this.onOpenNote,
-    this.commands,
-    this.onRunCommand,
-    super.key,
-  });
-
-  /// The commands the search lists over its results (#155).
-  final List<PaletteCommand> Function()? commands;
-
-  /// Runs one of them.
-  final ValueChanged<AppCommand>? onRunCommand;
+  const new({required this.controller, required this.onOpenNote, super.key});
 
   /// The open library.
   final LibrarySession controller;
@@ -68,8 +54,6 @@ final class _SearchSlotState extends State<SearchSlot> {
             child: SearchScreen(
               controller: widget.controller,
               onOpenNote: widget.onOpenNote,
-              commands: widget.commands,
-              onRunCommand: widget.onRunCommand,
               onOpenTags: () => setState(() {
                 _showTags = true;
                 _tagsVisited = true;

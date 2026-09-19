@@ -83,9 +83,11 @@ On an Android phone the same open notes are reached from a **switcher** instead
 of tabs: a count on the note bar opens the list. One note is on screen
 at a time, and the phone has no split: a phone's width holds one note.
 
-The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone the
-Search tab lists the matching commands above its results, so no
-keyboard is needed. Either way it offers only the commands that can run
+The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone it
+is its own thing, apart from the library's search: **two fingers dragged
+down** anywhere open it, and so do the ⚡ on the Search tab's bar and
+*Command palette* in an open note's ⋮ menu. The Search tab searches
+notes. Either way the palette offers only the commands that can run
 where you are; Settings → **Commands** lists them all, with their keys
 and what each one needs to show (an open note, a wide window, the
 desktop, and so on).
