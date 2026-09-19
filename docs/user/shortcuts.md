@@ -24,7 +24,8 @@ shortcuts lists them and lets you change them:
   leaves it (see [editing](editing.md#zen-mode))
 - `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
   stays in the middle (see [editing](editing.md#typewriter-mode))
-- `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
+- `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs (on a
+  wide window Settings opens as a floating window)
 
 Moving and selecting in the source editor, on Windows and Linux:
 

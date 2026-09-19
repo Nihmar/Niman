@@ -110,10 +110,11 @@ final class ShellTabBar extends StatelessWidget {
 /// `AGENTS.md`.
 ///
 /// Settings and the library switcher sit at the foot, below the gap.
-/// They are not places inside the library, they are ways out of it. The
-/// switcher is not a destination at all — it opens a screen and does not
-/// take the selection — so it is the one control here that is not part
-/// of [shellDestinations].
+/// They are not places inside the library, they are ways out of it.
+/// Settings is still a destination by index, but on a wide window the
+/// shell opens it as a floating window (#202), so it does not take the
+/// selection either. The switcher is not a destination at all, so it is
+/// the one control here that is not part of [shellDestinations].
 final class ShellRail extends StatelessWidget {
   /// Creates the rail with [selectedIndex] current.
   const new({

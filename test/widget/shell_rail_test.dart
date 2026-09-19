@@ -8,6 +8,7 @@
 // found by key: their labels are tooltips, not text on screen.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
@@ -125,7 +126,9 @@ void main() {
     expect(railIndex(tester), 1);
   });
 
-  testWidgets('wide: the rail settings show inline, then back to files', (
+  // #202: a floating window over what was on screen, which it closes
+  // back to; the rail keeps its selection.
+  testWidgets('wide: the rail settings open a window, and close back', (
     tester,
   ) async {
     await pumpWide(tester);
@@ -134,14 +137,46 @@ void main() {
 
     await tester.tap(railDest('settings'));
     await settle(tester);
+    final window = find.byKey(const Key('settings-window'));
+    expect(window, findsOne);
     // Two columns (#172): Appearance is listed on the left and, as the
     // first area, shown on the right.
-    expect(find.text(AppStrings.settingsSectionAppearance), findsNWidgets(2));
-    expect(find.byKey(const Key('shell-rail')), findsOne);
+    expect(
+      find.descendant(
+        of: window,
+        matching: find.text(AppStrings.settingsSectionAppearance),
+      ),
+      findsNWidgets(2),
+    );
+    expect(railIndex(tester), 0, reason: 'Files keeps the rail');
+    expect(noteRow('Docs'), findsOne, reason: 'the tree is still there');
 
-    await tester.tap(railDest('files'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await settle(tester);
+    expect(window, findsNothing);
     expect(noteRow('Docs'), findsOne);
+
+    await tester.tap(railDest('settings'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('floating-window-close')));
+    await settle(tester);
+    expect(window, findsNothing);
+  });
+
+  // #202: the window sits on the app's navigator, over the shell; a
+  // library closed from inside it must not leave it over the next screen.
+  testWidgets('wide: closing the library from the settings window closes '
+      'the window too', (tester) async {
+    await pumpWide(tester);
+    await tester.tap(railDest('settings'));
+    await settle(tester);
+    final close = find.byKey(const Key('close-library-setting'));
+    await tester.ensureVisible(close);
+    await settle(tester);
+    await tester.tap(close);
+    await settle(tester);
+    expect(find.byType(ShellRail), findsNothing, reason: 'the library closed');
+    expect(find.byKey(const Key('settings-window')), findsNothing);
   });
 
   testWidgets('wide: opening a tree note keeps the rail, note in detail', (
