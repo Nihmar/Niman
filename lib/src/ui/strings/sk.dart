@@ -1199,6 +1199,12 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
   @override
+  String get openFileTitle => 'Otvoriť súbor';
+  @override
+  String get outsideFileNote =>
+      'Mimo knižnice: ukladá sa na mieste, bez indexu, bez histórie, odkazy '
+      'sa nesledujú';
+  @override
   String get typewriterOn => 'Zapnúť režim písacieho stroja';
   @override
   String get typewriterOff => 'Vypnúť režim písacieho stroja';

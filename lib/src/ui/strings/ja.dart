@@ -1120,6 +1120,10 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get openFileTitle => 'ファイルを開く';
+  @override
+  String get outsideFileNote => 'ライブラリ外：その場所に保存。索引なし、履歴なし、リンクはたどりません';
+  @override
   String get typewriterOn => 'タイプライターモードをオンにする';
   @override
   String get typewriterOff => 'タイプライターモードをオフにする';

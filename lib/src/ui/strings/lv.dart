@@ -1196,6 +1196,12 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get openFileTitle => 'Atvērt failu';
+  @override
+  String get outsideFileNote =>
+      'Ārpus bibliotēkas: saglabā turpat, bez indeksa, bez vēstures, saites '
+      'netiek sekotas';
+  @override
   String get typewriterOn => 'Ieslēgt rakstāmmašīnas režīmu';
   @override
   String get typewriterOff => 'Izslēgt rakstāmmašīnas režīmu';

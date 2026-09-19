@@ -1218,6 +1218,12 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get openFileTitle => 'Otwórz plik';
+  @override
+  String get outsideFileNote =>
+      'Poza biblioteką: zapisywany na miejscu, bez indeksu, bez historii, '
+      'łącza nie są otwierane';
+  @override
   String get typewriterOn => 'Włącz tryb maszyny do pisania';
   @override
   String get typewriterOff => 'Wyłącz tryb maszyny do pisania';

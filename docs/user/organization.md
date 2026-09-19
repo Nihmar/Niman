@@ -127,6 +127,40 @@ note, and on desktop offers **Open in default app** right there. Nothing
 is written to such a file, ever — it is never reported as saved,
 because there is nothing of it in the editor to save.
 
+## Opening a file outside any library
+
+Not every Markdown file belongs in a library: a project's README, a
+draft from another app, a downloaded article. On Linux and Windows,
+**Open file** (`Ctrl+Shift+O`, or *Note: Open file…* in the command
+palette) opens one on its own, with Niman's editor and nothing else. The
+screen that opens a library offers the same button, so no library is
+needed at all.
+
+The file gets the editor, both of them, and the preview. It gets none of
+what a library adds:
+
+- **Saved where it is**, as it is. Nothing is written beside it.
+- **Not indexed**: search, tags and backlinks never see it.
+- **No history, no sync, no trash.**
+- **Links shown, not followed** into a library. Its frontmatter is text:
+  a `type:` in it draws no list.
+- **No image button**: there is no attachments folder to copy an image
+  into. Images next to the file still show in the preview.
+
+It opens over whatever was showing, with a thin bar naming the file and
+the folder it sits in. Opening another adds a tab (`Ctrl+Tab` between
+them, `Ctrl+W` closes one), and closing the last, or going back, lands
+where you were. If another program changes the file while it is open,
+the change comes in, unless you have unsaved edits of your own; those
+win. As everywhere in Niman, edits save on their own after a pause.
+
+A file inside the library you have open is one of its notes, and opens
+as one, with its history and its links. Opening it on its own would put
+two editors on one file.
+
+On Android a picked file arrives as a copy that cannot be saved back, so
+this is not offered there yet.
+
 ## Folders, quick note, list notes, voice notes
 
 - Notes live in plain folders inside the library.

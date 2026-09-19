@@ -1223,6 +1223,12 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get openFileTitle => 'Datei öffnen';
+  @override
+  String get outsideFileNote =>
+      'Außerhalb jeder Bibliothek: dort gespeichert, wo sie liegt, nicht '
+      'indiziert, ohne Verlauf, Links werden nicht verfolgt';
+  @override
   String get typewriterOn => 'Schreibmaschinenmodus einschalten';
   @override
   String get typewriterOff => 'Schreibmaschinenmodus ausschalten';

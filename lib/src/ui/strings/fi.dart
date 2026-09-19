@@ -1212,6 +1212,12 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get openFileTitle => 'Avaa tiedosto';
+  @override
+  String get outsideFileNote =>
+      'Kirjastojen ulkopuolella: tallennetaan paikalleen, ei indeksiä, ei '
+      'historiaa, linkkejä ei seurata';
+  @override
   String get typewriterOn => 'Ota kirjoituskonetila käyttöön';
   @override
   String get typewriterOff => 'Poista kirjoituskonetila käytöstä';

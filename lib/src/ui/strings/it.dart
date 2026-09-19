@@ -1213,6 +1213,12 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get openFileTitle => 'Apri file';
+  @override
+  String get outsideFileNote =>
+      'Fuori da ogni libreria: salvato dov’è, non indicizzato, senza '
+      'cronologia, link non seguiti';
+  @override
   String get typewriterOn => 'Attiva la modalità macchina da scrivere';
   @override
   String get typewriterOff => 'Disattiva la modalità macchina da scrivere';

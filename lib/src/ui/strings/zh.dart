@@ -1093,6 +1093,10 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get openFileTitle => '打开文件';
+  @override
+  String get outsideFileNote => '不属于任何资料库：原地保存，不建索引，无历史，不跟随链接';
+  @override
   String get typewriterOn => '开启打字机模式';
   @override
   String get typewriterOff => '关闭打字机模式';
