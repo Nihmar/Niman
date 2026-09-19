@@ -64,6 +64,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
   required void Function(Key rowKey) flashHome,
   required void Function(SettingsAreaId area, Key rowKey) openArea,
   bool keyboardAttached = true,
+  bool libraryRows = true,
 }) {
   void push(Widget screen) =>
       Navigator.of(context)
@@ -402,22 +403,24 @@ List<SettingsSearchEntry> settingsSearchEntries({
       open: () => flashHome(SettingsKeys.reindex),
       onHome: true,
     ),
-    SettingsSearchEntry(
-      title: AppStrings.switchLibraryTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.switchLibrary,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.switchLibrary),
-      onHome: true,
-    ),
-    SettingsSearchEntry(
-      title: AppStrings.closeLibraryTitle,
-      area: maintenance,
-      rowKey: SettingsKeys.closeLibrary,
-      value: noValue,
-      open: () => flashHome(SettingsKeys.closeLibrary),
-      onHome: true,
-    ),
+    if (libraryRows) ...[
+      SettingsSearchEntry(
+        title: AppStrings.switchLibraryTitle,
+        area: maintenance,
+        rowKey: SettingsKeys.switchLibrary,
+        value: noValue,
+        open: () => flashHome(SettingsKeys.switchLibrary),
+        onHome: true,
+      ),
+      SettingsSearchEntry(
+        title: AppStrings.closeLibraryTitle,
+        area: maintenance,
+        rowKey: SettingsKeys.closeLibrary,
+        value: noValue,
+        open: () => flashHome(SettingsKeys.closeLibrary),
+        onHome: true,
+      ),
+    ],
   ];
   // Every command's own row on the keyboard screen: searching "zen" lands
   // on Zen mode's keys, not only on the screen's title (0.0.8 test round).
