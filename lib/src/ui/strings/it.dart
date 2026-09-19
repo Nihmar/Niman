@@ -1239,6 +1239,14 @@ final class ItalianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ per spostarti · ↵ per usare · esc per chiudere';
   @override
+  String get palettePinned => 'Fissati';
+  @override
+  String get palettePin => 'Fissa';
+  @override
+  String get paletteUnpin => 'Togli';
+  @override
+  String get palettePinFooter => 'alt+P per fissare';
+  @override
   String get spellCheckScanning => 'Controllo della nota…';
   @override
   String get spellCheckAgain => 'Controlla di nuovo';

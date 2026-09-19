@@ -1239,6 +1239,14 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get palettePinned => 'Të fiksuara';
+  @override
+  String get palettePin => 'Fikso';
+  @override
+  String get paletteUnpin => 'Shfikso';
+  @override
+  String get palettePinFooter => 'alt+P për t’i fiksuar';
+  @override
   String get spellCheckScanning => 'Po kontrollohet shënimi…';
   @override
   String get spellCheckAgain => 'Kontrollo sërish';

@@ -1257,6 +1257,14 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get palettePinned => 'Fixats';
+  @override
+  String get palettePin => 'Fixa';
+  @override
+  String get paletteUnpin => 'Treu';
+  @override
+  String get palettePinFooter => 'alt+P per fixar';
+  @override
   String get spellCheckScanning => 'S’està revisant la nota…';
   @override
   String get spellCheckAgain => 'Torna a revisar';

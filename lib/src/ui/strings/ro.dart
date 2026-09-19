@@ -1236,6 +1236,14 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get palettePinned => 'Fixate';
+  @override
+  String get palettePin => 'Fixează';
+  @override
+  String get paletteUnpin => 'Elimină';
+  @override
+  String get palettePinFooter => 'alt+P pentru a fixa';
+  @override
   String get spellCheckScanning => 'Se verifică nota…';
   @override
   String get spellCheckAgain => 'Verifică din nou';

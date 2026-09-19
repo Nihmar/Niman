@@ -586,6 +586,10 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get palettePinned;
+  String get palettePin;
+  String get paletteUnpin;
+  String get palettePinFooter;
   String get spellCheckScanning;
   String get spellCheckAgain;
   String spellCheckCapped(int count);

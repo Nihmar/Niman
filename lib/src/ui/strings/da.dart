@@ -1224,6 +1224,14 @@ final class DanishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
   @override
+  String get palettePinned => 'Fastgjort';
+  @override
+  String get palettePin => 'Fastgør';
+  @override
+  String get paletteUnpin => 'Frigør';
+  @override
+  String get palettePinFooter => 'alt+P for at fastgøre';
+  @override
   String get spellCheckScanning => 'Kontrollerer noten…';
   @override
   String get spellCheckAgain => 'Kontrollér igen';

@@ -775,6 +775,10 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get palettePinned => _s.palettePinned;
+  static String get palettePin => _s.palettePin;
+  static String get paletteUnpin => _s.paletteUnpin;
+  static String get palettePinFooter => _s.palettePinFooter;
   static String get spellCheckScanning => _s.spellCheckScanning;
   static String get spellCheckAgain => _s.spellCheckAgain;
   static String spellCheckCapped(int count) => _s.spellCheckCapped(count);

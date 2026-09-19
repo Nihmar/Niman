@@ -56,6 +56,7 @@ import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/palette/command_needs.dart';
 import 'package:niman/src/ui/palette/command_palette.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
+import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -157,6 +158,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     );
     // The keys this device was given (#159): read once, like the theme.
     AppKeyMap.current.value = KeyMap.fromJson(await session.keyMap);
+    // And the commands pinned in its palette (#208).
+    await PinnedCommands.load(session);
   }
 
   /// Applies the stored UI language (T-L10N-03).
@@ -2646,6 +2649,8 @@ final class _LibraryShellState extends State<_LibraryShell>
       notesOnly: notesOnly,
       recentCommands: _recentCommands,
       recentNotes: _workspace.recentNotes,
+      onTogglePin: (command) =>
+          unawaited(PinnedCommands.toggle(widget.controller, command)),
       searchNotes: (query) async => ops == null
           ? const []
           : [for (final note in await ops.notesNamed(query)) note.path],

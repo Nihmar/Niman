@@ -1115,6 +1115,14 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get palettePinned => '已固定';
+  @override
+  String get palettePin => '固定';
+  @override
+  String get paletteUnpin => '取消固定';
+  @override
+  String get palettePinFooter => 'alt+P 固定';
+  @override
   String get spellCheckScanning => '正在检查笔记…';
   @override
   String get spellCheckAgain => '重新检查';

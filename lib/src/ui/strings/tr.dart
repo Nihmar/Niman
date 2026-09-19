@@ -1214,6 +1214,14 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get palettePinned => 'Sabitlenenler';
+  @override
+  String get palettePin => 'Sabitle';
+  @override
+  String get paletteUnpin => 'Kaldır';
+  @override
+  String get palettePinFooter => 'sabitlemek için alt+P';
+  @override
   String get spellCheckScanning => 'Not denetleniyor…';
   @override
   String get spellCheckAgain => 'Yeniden denetle';

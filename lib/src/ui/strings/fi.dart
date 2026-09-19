@@ -1237,6 +1237,14 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get palettePinned => 'Kiinnitetyt';
+  @override
+  String get palettePin => 'Kiinnitä';
+  @override
+  String get paletteUnpin => 'Irrota';
+  @override
+  String get palettePinFooter => 'alt+P kiinnittää';
+  @override
   String get spellCheckScanning => 'Tarkistetaan muistiinpanoa…';
   @override
   String get spellCheckAgain => 'Tarkista uudelleen';

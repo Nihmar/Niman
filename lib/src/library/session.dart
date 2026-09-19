@@ -485,6 +485,13 @@ abstract interface class LibrarySession {
   /// Keeps [json] as this device's changed shortcuts.
   Future<void> setKeyMap(String json);
 
+  /// The commands pinned in the palette on this device (#208), as
+  /// stored; null while none was.
+  Future<String?> get pinnedCommands;
+
+  /// Keeps [json] as this device's pinned commands.
+  Future<void> setPinnedCommands(String json);
+
   /// Sets (and persists) the brightness choice.
   Future<void> setThemeBrightness(AppBrightness brightness);
 

@@ -1233,6 +1233,14 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get palettePinned => 'Kitűzve';
+  @override
+  String get palettePin => 'Kitűzés';
+  @override
+  String get paletteUnpin => 'Levétel';
+  @override
+  String get palettePinFooter => 'alt+P a kitűzéshez';
+  @override
   String get spellCheckScanning => 'Jegyzet ellenőrzése…';
   @override
   String get spellCheckAgain => 'Ellenőrzés újra';

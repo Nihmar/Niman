@@ -1260,6 +1260,14 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get palettePinned => 'Épinglés';
+  @override
+  String get palettePin => 'Épingler';
+  @override
+  String get paletteUnpin => 'Détacher';
+  @override
+  String get palettePinFooter => 'alt+P pour épingler';
+  @override
   String get spellCheckScanning => 'Vérification de la note…';
   @override
   String get spellCheckAgain => 'Vérifier à nouveau';

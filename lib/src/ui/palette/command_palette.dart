@@ -14,6 +14,7 @@ import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/palette/palette_match.dart';
+import 'package:niman/src/ui/palette/pinned_commands.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -43,7 +44,8 @@ final class PaletteNoteChoice extends PaletteChoice {
 /// Shows the palette and resolves to what was picked, or null.
 ///
 /// [commands] are the ones that can run here and now; [notesOnly] is
-/// Go to note's palette, with the commands left out.
+/// Go to note's palette, with the commands left out. [onTogglePin] pins
+/// and unpins a command (#208); null leaves the pins out.
 Future<PaletteChoice?> showCommandPalette(
   BuildContext context, {
   required List<PaletteCommand> commands,
@@ -51,6 +53,7 @@ Future<PaletteChoice?> showCommandPalette(
   List<AppCommand> recentCommands = const [],
   List<String> recentNotes = const [],
   bool notesOnly = false,
+  void Function(AppCommand command)? onTogglePin,
 }) {
   return showGeneralDialog<PaletteChoice>(
     context: context,
@@ -63,6 +66,7 @@ Future<PaletteChoice?> showCommandPalette(
       searchNotes: searchNotes,
       recentCommands: recentCommands,
       recentNotes: recentNotes,
+      onTogglePin: notesOnly ? null : onTogglePin,
     ),
   );
 }
@@ -75,6 +79,7 @@ final class CommandPalette extends StatefulWidget {
     required this.searchNotes,
     this.recentCommands = const [],
     this.recentNotes = const [],
+    this.onTogglePin,
     super.key,
   });
 
@@ -89,6 +94,10 @@ final class CommandPalette extends StatefulWidget {
 
   /// Notes opened lately, most recent first.
   final List<String> recentNotes;
+
+  /// Pins or unpins a command (#208); null leaves the pins out (Go to
+  /// note's palette, which has no commands).
+  final void Function(AppCommand command)? onTogglePin;
 
   /// How wide the panel runs.
   static const double width = 620;
@@ -115,18 +124,65 @@ final class _CommandPaletteState extends State<CommandPalette> {
     super.initState();
     _commands = _rankCommands('');
     _notes = widget.recentNotes.take(8).toList();
+    // A pin from a row re-ranks the list under it (#208): the row moves
+    // to the pinned head, or leaves it, without reopening the palette.
+    PinnedCommands.current.addListener(_onPins);
   }
 
-  List<PaletteCommand> _rankCommands(String query) => paletteRank(
-    widget.commands,
-    query,
-    name: (c) => c.name,
-    id: (c) => c.command,
-    recent: widget.recentCommands,
-  ).take(query.trim().isEmpty ? 8 : 12).toList();
+  void _onPins() {
+    if (mounted) setState(() => _commands = _rankCommands(_query.text));
+  }
+
+  List<PaletteCommand> _rankCommands(String query) {
+    final ranked = paletteRank(
+      widget.commands,
+      query,
+      name: (c) => c.name,
+      id: (c) => c.command,
+      recent: widget.recentCommands,
+    );
+    if (query.trim().isEmpty) {
+      // Pinned first, in pinning order, then what was used lately (#208).
+      // A pinned command that cannot run here is not among [commands],
+      // so it is not listed: the palette offers only what can run.
+      final pinned = [
+        for (final command in PinnedCommands.current.value)
+          ?ranked.where((c) => c.command == command).firstOrNull,
+      ];
+      return [
+        ...pinned,
+        ...ranked.where((c) => !pinned.contains(c)),
+      ].take(8 + pinned.length).toList();
+    }
+    return ranked.take(12).toList();
+  }
+
+  /// How many of [_commands] are the pinned ones at the head: what the
+  /// PINNED heading covers.
+  int get _pinnedShown {
+    if (_query.text.trim().isNotEmpty) return 0;
+    var count = 0;
+    for (final command in _commands) {
+      if (!PinnedCommands.isPinned(command.command)) break;
+      count++;
+    }
+    return count;
+  }
+
+  /// Pins or unpins the command at [index] of the list, if it is one.
+  void _togglePin(int index) {
+    final onTogglePin = widget.onTogglePin;
+    if (onTogglePin == null) return;
+    final items = _items;
+    if (index < 0 || index >= items.length) return;
+    if (items[index] case PaletteCommandChoice(:final command)) {
+      onTogglePin(command);
+    }
+  }
 
   @override
   void dispose() {
+    PinnedCommands.current.removeListener(_onPins);
     _debounce?.cancel();
     _query.dispose();
     _scroll.dispose();
@@ -183,6 +239,9 @@ final class _CommandPaletteState extends State<CommandPalette> {
         _move(-1);
       case LogicalKeyboardKey.enter || LogicalKeyboardKey.numpadEnter:
         _choose();
+      // Alt+P pins or unpins what is selected (#208): the footer says so.
+      case LogicalKeyboardKey.keyP when HardwareKeyboard.instance.isAltPressed:
+        _togglePin(_selected);
       case LogicalKeyboardKey.escape:
         if (_chosen) break;
         _chosen = true;
@@ -198,6 +257,8 @@ final class _CommandPaletteState extends State<CommandPalette> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final items = _items;
+    final pinned = _pinnedShown;
+    final pin = widget.onTogglePin;
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: scheme.onSurfaceVariant,
     );
@@ -265,10 +326,15 @@ final class _CommandPaletteState extends State<CommandPalette> {
                             shrinkWrap: true,
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             children: [
-                              if (_commands.isNotEmpty && _notes.isNotEmpty)
+                              if (pinned > 0)
+                                _Heading(AppStrings.palettePinned),
+                              for (final command in _commands.take(pinned))
+                                row(_CommandLine(command: command, pin: pin)),
+                              if (_commands.length > pinned &&
+                                  (pinned > 0 || _notes.isNotEmpty))
                                 _Heading(AppStrings.paletteCommands),
-                              for (final command in _commands)
-                                row(_CommandLine(command: command)),
+                              for (final command in _commands.skip(pinned))
+                                row(_CommandLine(command: command, pin: pin)),
                               if (_commands.isNotEmpty && _notes.isNotEmpty)
                                 _Heading(AppStrings.paletteNotes),
                               for (final path in _notes)
@@ -283,7 +349,10 @@ final class _CommandPaletteState extends State<CommandPalette> {
                       vertical: 8,
                     ),
                     child: Text(
-                      AppStrings.paletteFooter,
+                      widget.onTogglePin == null
+                          ? AppStrings.paletteFooter
+                          : '${AppStrings.paletteFooter} · '
+                                '${AppStrings.palettePinFooter}',
                       key: const Key('palette-footer'),
                       style: muted,
                     ),
@@ -353,9 +422,12 @@ final class _PaletteRow extends StatelessWidget {
 }
 
 final class _CommandLine extends StatelessWidget {
-  const new({required this.command});
+  const new({required this.command, this.pin});
 
   final PaletteCommand command;
+
+  /// Pins or unpins this row's command (#208); null leaves the pin out.
+  final void Function(AppCommand command)? pin;
 
   @override
   Widget build(BuildContext context) {
@@ -379,6 +451,10 @@ final class _CommandLine extends StatelessWidget {
               fontFamily: 'monospace',
             ),
           ),
+        if (pin case final pin?) ...[
+          const SizedBox(width: 6),
+          _PinButton(command: command.command, onPressed: pin),
+        ],
       ],
     );
   }
@@ -424,6 +500,31 @@ final class _NoteLine extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// The pin on a command's row: filled while it is pinned.
+final class _PinButton extends StatelessWidget {
+  const new({required this.command, required this.onPressed});
+
+  final AppCommand command;
+  final void Function(AppCommand command) onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final pinned = PinnedCommands.isPinned(command);
+    final scheme = Theme.of(context).colorScheme;
+    return IconButton(
+      key: Key('palette-pin-${command.name}'),
+      tooltip: pinned ? AppStrings.paletteUnpin : AppStrings.palettePin,
+      iconSize: 16,
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+      color: pinned ? scheme.primary : scheme.onSurfaceVariant,
+      icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
+      onPressed: () => onPressed(command),
     );
   }
 }

@@ -1253,6 +1253,14 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get palettePinned => 'Fijados';
+  @override
+  String get palettePin => 'Fijar';
+  @override
+  String get paletteUnpin => 'Quitar';
+  @override
+  String get palettePinFooter => 'alt+P para fijar';
+  @override
   String get spellCheckScanning => 'Revisando la nota…';
   @override
   String get spellCheckAgain => 'Revisar de nuevo';
