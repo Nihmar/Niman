@@ -1205,6 +1205,14 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get spellCheckScanning => 'Oharra egiaztatzen…';
+  @override
+  String get spellCheckAgain => 'Egiaztatu berriro';
+  @override
+  String spellCheckCapped(int count) =>
+      'Lehen ${count}ak ageri dira: zuzendu batzuk eta egiaztatu berriro '
+      'gainerakoak ikusteko';
+  @override
   String get dropHint =>
       'Askatu Markdown fitxategiak irekitzeko, edo karpeta bat inportatzeko';
   @override

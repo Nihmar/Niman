@@ -1195,6 +1195,14 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get spellCheckScanning => 'Preverjanje zapiska…';
+  @override
+  String get spellCheckAgain => 'Preveri znova';
+  @override
+  String spellCheckCapped(int count) =>
+      'Prikazanih je prvih $count: popravite nekaj, nato znova preverite za '
+      'ostale';
+  @override
   String get dropHint =>
       'Spustite datoteke Markdown, da jih odprete, ali mapo, da jo uvozite';
   @override

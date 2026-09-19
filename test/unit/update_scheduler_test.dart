@@ -86,5 +86,35 @@ void main() {
       await scheduler.checkOnce();
       expect(reported, false);
     });
+
+    // Closing a library within the launch delay left the first check to
+    // fire on the settings database that closed with it.
+    test('stopped before the launch check, it never runs', () async {
+      var checks = 0;
+      UpdateScheduler(
+          isEnabled: () async {
+            checks++;
+            return true;
+          },
+          runCheck: () async => null,
+          noteChecked: (_) async {},
+          onUpdate: (_) {},
+          startupDelay: const Duration(milliseconds: 50),
+        )
+        ..start()
+        ..stop();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(checks, 0);
+    });
+
+    test('a failing gate is as quiet as a failing check', () async {
+      final scheduler = UpdateScheduler(
+        isEnabled: () async => throw StateError('database closed'),
+        runCheck: () async => fail('not reached'),
+        noteChecked: (_) async => fail('not reached'),
+        onUpdate: (_) => fail('not reached'),
+      );
+      await scheduler.checkOnce();
+    });
   });
 }

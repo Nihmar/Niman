@@ -1205,6 +1205,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get spellCheckScanning => 'Перевірка нотатки…';
+  @override
+  String get spellCheckAgain => 'Перевірити знову';
+  @override
+  String spellCheckCapped(int count) =>
+      'Показано перші $count: виправте кілька, а потім перевірте знову, щоб '
+      'побачити решту';
+  @override
   String get dropHint =>
       'Перетягніть файли Markdown, щоб відкрити їх, або теку, щоб '
       'імпортувати її';

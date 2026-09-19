@@ -1206,6 +1206,13 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get spellCheckScanning => 'Kontrollerar anteckningen…';
+  @override
+  String get spellCheckAgain => 'Kontrollera igen';
+  @override
+  String spellCheckCapped(int count) =>
+      'De första $count visas: rätta några och kontrollera igen för resten';
+  @override
   String get dropHint =>
       'Släpp Markdown-filer för att öppna dem, eller en mapp för att '
       'importera den';

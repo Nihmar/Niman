@@ -1206,6 +1206,14 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get spellCheckScanning => 'Jegyzet ellenőrzése…';
+  @override
+  String get spellCheckAgain => 'Ellenőrzés újra';
+  @override
+  String spellCheckCapped(int count) =>
+      'Az első $count látható: javíts ki néhányat, majd ellenőrizz újra a '
+      'többiért';
+  @override
   String get dropHint =>
       'Húzz ide Markdown-fájlokat a megnyitáshoz, vagy egy mappát az '
       'importáláshoz';

@@ -1213,6 +1213,14 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get spellCheckScanning => 'Po kontrollohet shënimi…';
+  @override
+  String get spellCheckAgain => 'Kontrollo sërish';
+  @override
+  String spellCheckCapped(int count) =>
+      'Shfaqen të parat $count: korrigjoni disa, pastaj kontrolloni sërish '
+      'për të tjerat';
+  @override
   String get dropHint =>
       'Lëshoni skedarë Markdown për t’i hapur, ose një dosje për ta importuar';
   @override

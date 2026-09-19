@@ -1547,7 +1547,8 @@ final class _NoteViewState extends State<NoteView>
       context: context,
       isScrollControlled: true,
       builder: (context) => SpellCheckSheet(
-        scan: _scanSpelling,
+        start: _scanSpelling,
+        suggest: spell.suggestionsFor,
         apply: _applySpelling,
         available: spell.available,
       ),
@@ -1555,23 +1556,25 @@ final class _NoteViewState extends State<NoteView>
     if (mounted) setState(() {});
   }
 
-  /// The whole note's issues, in reading order (the panel's pass).
-  List<SpellIssue> _scanSpelling() {
-    final spell = widget.spellCheck;
-    if (spell == null) return const <SpellIssue>[];
+  /// A pass over the whole note, in reading order (the panel's), reading
+  /// each line — and tokenizing it for what to skip — only as the pass
+  /// gets to it (#61).
+  SpellScan _scanSpelling() {
+    final spell = widget.spellCheck!;
     if (widget.showWysiwyg) {
-      final state = _wysiwygKey.currentState;
-      if (state == null) return const <SpellIssue>[];
-      return spell.scan(<SpellLine>[
-        for (final line in state.plainTextLines)
-          (text: line, skip: const <TextRange>[]),
-      ]);
+      final lines =
+          _wysiwygKey.currentState?.plainTextLines ?? const <String>[];
+      return spell.startScan(
+        lineCount: lines.length,
+        lineAt: (i) => (text: lines[i], skip: const <TextRange>[]),
+      );
     }
     final lines = _controller.codeLines;
-    return spell.scan(<SpellLine>[
-      for (var i = 0; i < lines.length; i++)
-        (text: lines[i].text, skip: spellSkipRanges(_highlight.tokensOf(i))),
-    ]);
+    return spell.startScan(
+      lineCount: lines.length,
+      lineAt: (i) =>
+          (text: lines[i].text, skip: spellSkipRanges(_highlight.tokensOf(i))),
+    );
   }
 
   /// Replaces one issue's word in the controller (the panel's fix).

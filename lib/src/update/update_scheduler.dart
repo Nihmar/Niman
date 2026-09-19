@@ -45,21 +45,26 @@ final class UpdateScheduler {
   /// Period between checks.
   final Duration checkInterval;
 
+  Timer? _launch;
   Timer? _timer;
   bool _started = false;
 
   /// Starts the launch check and the periodic timer; idempotent.
+  ///
+  /// The launch check is a timer too, so [stop] cancels it: a library
+  /// closed within [startupDelay] of opening left it to fire on the
+  /// settings database that had closed with it.
   void start() {
     if (_started) return;
     _started = true;
-    unawaited(Future<void>.delayed(startupDelay).then((_) => checkOnce()));
+    _launch = Timer(startupDelay, () => unawaited(checkOnce()));
     _timer = Timer.periodic(checkInterval, (_) => unawaited(checkOnce()));
   }
 
   /// Runs one gated check now.
   Future<void> checkOnce() async {
-    if (!await isEnabled()) return;
     try {
+      if (!await isEnabled()) return;
       final update = await runCheck();
       await noteChecked(DateTime.now().toUtc());
       if (update != null) onUpdate(update);
@@ -70,6 +75,8 @@ final class UpdateScheduler {
 
   /// Stops the periodic timer; idempotent.
   void stop() {
+    _launch?.cancel();
+    _launch = null;
     _timer?.cancel();
     _timer = null;
     _started = false;

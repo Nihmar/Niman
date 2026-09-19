@@ -1195,6 +1195,14 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get spellCheckScanning => 'Kontrola poznámky…';
+  @override
+  String get spellCheckAgain => 'Zkontrolovat znovu';
+  @override
+  String spellCheckCapped(int count) =>
+      'Zobrazeno je prvních $count: některé opravte a zkontrolujte znovu '
+      'kvůli zbytku';
+  @override
   String get dropHint =>
       'Přetáhněte soubory Markdown pro otevření, nebo složku pro import';
   @override

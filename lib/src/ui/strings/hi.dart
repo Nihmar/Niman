@@ -1174,6 +1174,13 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get spellCheckScanning => 'नोट जाँचा जा रहा है…';
+  @override
+  String get spellCheckAgain => 'फिर से जाँचें';
+  @override
+  String spellCheckCapped(int count) =>
+      'पहले $count दिखाए गए हैं: कुछ ठीक करें, फिर बाकी के लिए फिर से जाँचें';
+  @override
   String get dropHint =>
       'खोलने के लिए Markdown फ़ाइलें छोड़ें, या आयात करने के लिए फ़ोल्डर';
   @override

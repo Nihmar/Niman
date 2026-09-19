@@ -1211,6 +1211,14 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get spellCheckScanning => 'Se verifică nota…';
+  @override
+  String get spellCheckAgain => 'Verifică din nou';
+  @override
+  String spellCheckCapped(int count) =>
+      'Sunt afișate primele $count: corectează câteva, apoi verifică din nou '
+      'pentru rest';
+  @override
   String get dropHint =>
       'Plasează fișiere Markdown pentru a le deschide sau un dosar pentru '
       'a-l importa';

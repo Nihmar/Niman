@@ -1200,6 +1200,14 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get spellCheckScanning => 'Athugar minnismiðann…';
+  @override
+  String get spellCheckAgain => 'Athuga aftur';
+  @override
+  String spellCheckCapped(int count) =>
+      'Fyrstu $count eru sýndar: lagaðu nokkrar og athugaðu svo aftur fyrir '
+      'restina';
+  @override
   String get dropHint =>
       'Slepptu Markdown-skrám til að opna þær, eða möppu til að flytja hana '
       'inn';

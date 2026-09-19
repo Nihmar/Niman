@@ -1206,6 +1206,14 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get spellCheckScanning => 'A verificar a nota…';
+  @override
+  String get spellCheckAgain => 'Verificar de novo';
+  @override
+  String spellCheckCapped(int count) =>
+      'São listados os primeiros $count: corrija alguns e verifique de novo '
+      'para ver o resto';
+  @override
   String get dropHint =>
       'Largue ficheiros Markdown para os abrir, ou uma pasta para a importar';
   @override

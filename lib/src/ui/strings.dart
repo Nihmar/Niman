@@ -764,6 +764,9 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get spellCheckScanning => _s.spellCheckScanning;
+  static String get spellCheckAgain => _s.spellCheckAgain;
+  static String spellCheckCapped(int count) => _s.spellCheckCapped(count);
   static String get dropHint => _s.dropHint;
   static String get importFolderAction => _s.importFolderAction;
   static String dropRejected(String names) => _s.dropRejected(names);
