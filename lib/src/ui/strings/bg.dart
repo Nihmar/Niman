@@ -1211,6 +1211,12 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get zenMode => 'Режим „Дзен“';
+  @override
+  String get zenModeEnter => 'Влез в режим „Дзен“';
+  @override
+  String get zenModeLeave => 'Излез от режим „Дзен“';
+  @override
   String get keySpace => 'Интервал';
   @override
   String get keyEnter => 'Enter';

@@ -1201,6 +1201,12 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
   @override
+  String get zenMode => 'Рэжым дзэн';
+  @override
+  String get zenModeEnter => 'Увайсці ў рэжым дзэн';
+  @override
+  String get zenModeLeave => 'Выйсці з рэжыму дзэн';
+  @override
   String get keySpace => 'Прабел';
   @override
   String get keyEnter => 'Enter';

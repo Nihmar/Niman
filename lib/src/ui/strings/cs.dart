@@ -1195,6 +1195,12 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get zenMode => 'Režim zen';
+  @override
+  String get zenModeEnter => 'Přejít do režimu zen';
+  @override
+  String get zenModeLeave => 'Opustit režim zen';
+  @override
   String get keySpace => 'Mezerník';
   @override
   String get keyEnter => 'Enter';

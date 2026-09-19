@@ -1197,6 +1197,12 @@ final class CroatianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ za kretanje · ↵ za odabir · esc za zatvaranje';
   @override
+  String get zenMode => 'Zen način';
+  @override
+  String get zenModeEnter => 'Uđi u zen način';
+  @override
+  String get zenModeLeave => 'Izađi iz zen načina';
+  @override
   String get keySpace => 'Razmaknica';
   @override
   String get keyEnter => 'Enter';

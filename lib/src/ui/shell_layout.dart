@@ -53,6 +53,10 @@ final class ShellLayoutProps {
     required this.buildWideSlots,
     this.buildTabs,
     this.tabsStart = 0,
+    this.zen = false,
+    this.zenTitle = '',
+    this.onLeaveZen,
+    this.leaveZenOnEsc,
   });
 
   /// The open library.
@@ -140,6 +144,18 @@ final class ShellLayoutProps {
 
   /// The wide layout's stacked tab slots, in tab order.
   final List<Widget> Function() buildWideSlots;
+
+  /// Zen mode (#69): the wide layout keeps the note and a thin bar.
+  final bool zen;
+
+  /// The note's name, for Zen's bar.
+  final String zenTitle;
+
+  /// Leaves Zen, from its bar.
+  final VoidCallback? onLeaveZen;
+
+  /// Leaves Zen on the app's Esc, a [DismissIntent]; off outside Zen.
+  final Action<DismissIntent>? leaveZenOnEsc;
 
   /// Whether a note (not a folder) is open at all.
   bool get noteOpen => selectedPath != null && !selectedIsDir;
@@ -336,45 +352,58 @@ final class WideShellLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CallbackShortcuts(
-        bindings: props.shortcutBindings,
-        // The shell has to be an ancestor of the primary focus for key
-        // events to bubble to the bindings; a fresh window focuses
-        // nothing (T-PP-10), so the body claims it until the tree or the
-        // editor takes over.
-        child: Focus(
-          focusNode: props.shellFocus,
-          autofocus: true,
-          child: Column(
-            children: [
-              if (props.window.customTitleBar)
-                AppTitleBar(
-                  title: props.windowTitle,
-                  sidebarVisible: props.sidebarVisible,
-                  onToggleSidebar: props.onToggleSidebar,
-                  window: props.window,
-                  tabs: props.buildTabs,
-                  tabsStart: props.tabsStart,
-                ),
-              Expanded(
-                child: Row(
-                  children: [
-                    ShellRail(
-                      selectedIndex: props.tabIndex,
-                      onDestinationSelected: props.onDestinationSelected,
-                      onSwitchLibrary: () => _switchLibrary(context),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: props.buildWideSlots(),
+      // Under the Scaffold, whose own Esc (the drawer's, off without one)
+      // would otherwise be the nearest and keep the key (#69).
+      body: Actions(
+        actions: {DismissIntent: ?props.leaveZenOnEsc},
+        child: CallbackShortcuts(
+          bindings: props.shortcutBindings,
+          // The shell has to be an ancestor of the primary focus for key
+          // events to bubble to the bindings; a fresh window focuses
+          // nothing (T-PP-10), so the body claims it until the tree or the
+          // editor takes over.
+          child: Focus(
+            focusNode: props.shellFocus,
+            autofocus: true,
+            child: Column(
+              children: [
+                if (props.zen)
+                  ZenTitleBar(
+                    title: props.zenTitle,
+                    onLeave: props.onLeaveZen ?? () {},
+                    window: props.window,
+                  )
+                else if (props.window.customTitleBar)
+                  AppTitleBar(
+                    title: props.windowTitle,
+                    sidebarVisible: props.sidebarVisible,
+                    onToggleSidebar: props.onToggleSidebar,
+                    window: props.window,
+                    tabs: props.buildTabs,
+                    tabsStart: props.tabsStart,
+                  ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (!props.zen) ...[
+                        ShellRail(
+                          selectedIndex: props.tabIndex,
+                          onDestinationSelected: props.onDestinationSelected,
+                          onSwitchLibrary: () => _switchLibrary(context),
+                        ),
+                        const VerticalDivider(width: 1),
+                      ],
+                      Expanded(
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: props.buildWideSlots(),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

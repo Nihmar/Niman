@@ -48,6 +48,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.toggleDock ||
   AppCommand.splitRight ||
   AppCommand.splitDown ||
+  AppCommand.zenMode ||
   AppCommand.nextTab ||
   AppCommand.previousTab => PaletteGroup.view,
   AppCommand.reindexLibrary || AppCommand.switchLibrary => PaletteGroup.library,

@@ -1226,6 +1226,12 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get zenMode => 'Modo zen';
+  @override
+  String get zenModeEnter => 'Entrar en modo zen';
+  @override
+  String get zenModeLeave => 'Salir del modo zen';
+  @override
   String get keySpace => 'Espacio';
   @override
   String get keyEnter => 'Intro';

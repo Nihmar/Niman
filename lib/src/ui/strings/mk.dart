@@ -1211,6 +1211,12 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get zenMode => 'Зен режим';
+  @override
+  String get zenModeEnter => 'Влези во зен режим';
+  @override
+  String get zenModeLeave => 'Излези од зен режим';
+  @override
   String get keySpace => 'Празно место';
   @override
   String get keyEnter => 'Enter';

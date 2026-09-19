@@ -1194,6 +1194,12 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get zenMode => 'Zen-modus';
+  @override
+  String get zenModeEnter => 'Gå til zen-modus';
+  @override
+  String get zenModeLeave => 'Gå ut av zen-modus';
+  @override
   String get keySpace => 'Mellomrom';
   @override
   String get keyEnter => 'Enter';

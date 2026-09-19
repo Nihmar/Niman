@@ -1174,6 +1174,12 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get zenMode => 'ज़ेन मोड';
+  @override
+  String get zenModeEnter => 'ज़ेन मोड में जाएँ';
+  @override
+  String get zenModeLeave => 'ज़ेन मोड से बाहर निकलें';
+  @override
   String get keySpace => 'स्पेस';
   @override
   String get keyEnter => 'एंटर';
