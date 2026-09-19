@@ -1213,6 +1213,25 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para pechar';
   @override
+  String get dropHint =>
+      'Solta ficheiros Markdown para abrilos, ou un cartafol para importalo';
+  @override
+  String get importFolderAction => 'Importar';
+  @override
+  String dropRejected(String names) =>
+      'Aquí só se abren ficheiros Markdown e cartafoles: $names';
+  @override
+  String importFolderTitle(String name) => 'Importar «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Os seus ficheiros Markdown ($count) cópianse nun cartafol novo da '
+      'biblioteca. O cartafol que soltaches queda como está.';
+  @override
+  String importFolderDone(String folder) => 'Importado en $folder';
+  @override
+  String importFolderEmpty(String name) =>
+      'Non hai ficheiros Markdown en $name';
+  @override
   String get openFileTitle => 'Abrir ficheiro';
   @override
   String get outsideFileNote =>

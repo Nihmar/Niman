@@ -1200,6 +1200,25 @@ final class IcelandicStrings extends Strings {
   String get paletteFooter =>
       '↑↓ til að færa · ↵ til að nota · esc til að loka';
   @override
+  String get dropHint =>
+      'Slepptu Markdown-skrám til að opna þær, eða möppu til að flytja hana '
+      'inn';
+  @override
+  String get importFolderAction => 'Flytja inn';
+  @override
+  String dropRejected(String names) =>
+      'Hér opnast aðeins Markdown-skrár og möppur: $names';
+  @override
+  String importFolderTitle(String name) => 'Flytja inn „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Markdown-skrár hennar ($count) eru afritaðar í nýja möppu í safninu. '
+      'Mappan sem þú slepptir helst óbreytt.';
+  @override
+  String importFolderDone(String folder) => 'Flutt inn í $folder';
+  @override
+  String importFolderEmpty(String name) => 'Engar Markdown-skrár í $name';
+  @override
   String get openFileTitle => 'Opna skrá';
   @override
   String get outsideFileNote =>

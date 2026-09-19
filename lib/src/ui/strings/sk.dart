@@ -1199,6 +1199,25 @@ final class SlovakStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
   @override
+  String get dropHint =>
+      'Pretiahnite súbory Markdown na otvorenie alebo priečinok na import';
+  @override
+  String get importFolderAction => 'Importovať';
+  @override
+  String dropRejected(String names) =>
+      'Tu sa otvárajú len súbory Markdown a priečinky: $names';
+  @override
+  String importFolderTitle(String name) => 'Importovať „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Jeho súbory Markdown ($count) sa skopírujú do nového priečinka '
+      'knižnice. Pretiahnutý priečinok zostane bez zmeny.';
+  @override
+  String importFolderDone(String folder) => 'Importované do $folder';
+  @override
+  String importFolderEmpty(String name) =>
+      'V priečinku $name nie sú súbory Markdown';
+  @override
   String get openFileTitle => 'Otvoriť súbor';
   @override
   String get outsideFileNote =>

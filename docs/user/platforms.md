@@ -94,6 +94,10 @@ bar goes, and a phone is already one note on one screen. The window is
 maximized for it; if the window manager declines, Zen still hides
 everything but the note.
 
+**Dropping files and folders on the window** (see
+[organization](organization.md#dropping-files-on-the-window)) is Linux
+and Windows only: a phone has nothing to drag from.
+
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is
 Linux and Windows only for now: Android's picker hands over a copy of

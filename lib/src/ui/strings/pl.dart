@@ -1218,6 +1218,24 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get dropHint =>
+      'Upuść pliki Markdown, aby je otworzyć, lub folder, aby go zaimportować';
+  @override
+  String get importFolderAction => 'Importuj';
+  @override
+  String dropRejected(String names) =>
+      'Tu otwierają się tylko pliki Markdown i foldery: $names';
+  @override
+  String importFolderTitle(String name) => 'Zaimportować „$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Jego pliki Markdown ($count) zostaną skopiowane do nowego folderu '
+      'biblioteki. Upuszczony folder pozostaje bez zmian.';
+  @override
+  String importFolderDone(String folder) => 'Zaimportowano do $folder';
+  @override
+  String importFolderEmpty(String name) => 'Brak plików Markdown w $name';
+  @override
   String get openFileTitle => 'Otwórz plik';
   @override
   String get outsideFileNote =>

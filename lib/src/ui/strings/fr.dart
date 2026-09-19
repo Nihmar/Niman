@@ -1234,6 +1234,25 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get dropHint =>
+      'Déposez des fichiers Markdown pour les ouvrir, ou un dossier pour '
+      'l’importer';
+  @override
+  String get importFolderAction => 'Importer';
+  @override
+  String dropRejected(String names) =>
+      'Seuls les fichiers Markdown et les dossiers s’ouvrent ici : $names';
+  @override
+  String importFolderTitle(String name) => 'Importer « $name » ?';
+  @override
+  String importFolderBody(int count) =>
+      'Ses fichiers Markdown ($count) sont copiés dans un nouveau dossier de '
+      'la bibliothèque. Le dossier déposé reste tel quel.';
+  @override
+  String importFolderDone(String folder) => 'Importé dans $folder';
+  @override
+  String importFolderEmpty(String name) => 'Aucun fichier Markdown dans $name';
+  @override
   String get openFileTitle => 'Ouvrir un fichier';
   @override
   String get outsideFileNote =>
