@@ -367,6 +367,10 @@ for multistatus parsing: servers pick their own namespace prefixes
   `MOVE`, `OPTIONS`; paths are library-relative and percent-encoded per
   segment; hrefs in responses are decoded and made relative to the
   base, whatever mix of absolute URL / absolute path the server uses;
+- reads a `response` as an item only when it answers for something:
+  its own `status` (when it has one) is a 2xx and at least one of its
+  propstats succeeded. `stat` takes an exact path, or a lone item of
+  the kind asked for (a folder never stands in for a missing file);
 - streams both ways: `PUT` from a file stream with `Content-Length`,
   `GET` into a sink with sha256 computed in flight, never a whole file
   in memory;
@@ -410,7 +414,10 @@ one runs joins it.
 5. **Apply**, one decision at a time. Before touching a side, the engine
    checks it still is what the scan saw (local size + mtime; the remote
    with a PROPFIND when the decision has no precondition): a path that
-   moved meanwhile is skipped and decided again next run.
+   moved meanwhile is skipped and decided again next run. That PROPFIND
+   is only as good as the client's reading of "not there": some servers
+   answer a missing path with a `207` holding a `404`, which the parser
+   now drops rather than reading as the file (#163).
    - *upload*: missing remote folders are created (once per run), `PUT`
      streamed from disk with `If-Match` / `If-None-Match` and
      `X-OC-Mtime`, then a `PROPFIND Depth: 0` for the metadata to record.
@@ -586,14 +593,23 @@ a duplicate costs a PROPFIND, a missed one waits for the next full sync.
   sync, and leaves `trashLocal` and `moveLocal` to a full sync
   (`SyncReport.deferred`): a single 404 is not enough to trash a file.
 - **Full sync** (manual, library opened, resume, periodic, after a quick
-  sync that deferred something) walks both trees and reads every hint,
-  due or backing off.
+  sync that deferred something) walks both trees and reads every hint.
+  It settles only the due ones: a hint still backing off keeps its
+  backoff, and the decisions on the paths it covers wait with it
+  (`SyncReport.waiting`). Before #163 the periodic full sync re-planned
+  such a path every minute whatever its 600 s backoff said. A manual run
+  calls `retryNow` first, so everything is due and nothing waits.
 - **Settling** (both kinds): a hint is removed (`completeOp`, only if
   not rewritten meanwhile) when no path it covers — its path, its move
   source, anything under either — failed or changed during the run; a
   conflict settles it too (the report carries it). Otherwise `failOp`
   backs it off. A run that stopped backs every hint off; one that was
   not confirmed, had no destination or no password leaves them alone.
+- **Stuck paths:** a hint whose path was skipped (changed during the
+  run) `SyncEngine.stuckAfter` (3) runs in a row is added to the
+  report's failures, "… (N runs in a row)". The run is then not clean,
+  `last_error` is set and the status panel lists it, instead of the run
+  calling itself a success while one file never moves (#163).
 
 #### Triggers (`lib/src/sync/sync_scheduler.dart`)
 

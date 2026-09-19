@@ -326,6 +326,28 @@ void main() {
     expect((await a.sync()).summary(), 'nothing to do');
   });
 
+  // #163: a server that answers a PROPFIND for a missing file with a 207
+  // holding a 404 made every new file look taken on the server, and the
+  // upload was skipped on every run, forever.
+  test(
+    'a new file uploads to a server that answers "missing" with a 207',
+    () async {
+      // Without preconditions the run looks before each PUT, as that
+      // session's server made it.
+      server
+        ..missingAsMultistatus = true
+        ..preconditions = false;
+      a
+        ..write('.niman/settings.json', '{"lineNumbers": true}')
+        ..write('New.md', 'new');
+      final report = await a.sync();
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.skipped, isEmpty);
+      expect(remoteText('.niman/settings.json'), '{"lineNumbers": true}');
+      expect(remoteText('New.md'), 'new');
+    },
+  );
+
   group('a bare server (no ETags, no preconditions, no MOVE)', () {
     setUp(() {
       server
@@ -825,7 +847,8 @@ void main() {
       expect(remoteText('a.md'), 'two');
     });
 
-    test('a full sync settles every hint, backing off or not', () async {
+    test('an automatic full sync leaves a backing-off hint and its path '
+        'alone; once it is due, it goes (#163)', () async {
       a.write('a.md', 'two');
       await a.hint('a.md', SyncOpKind.changed);
       final op = (await a.store.pendingOps(a.path)).single;
@@ -834,9 +857,50 @@ void main() {
 
       final report = await a.sync();
       expect(report.clean, isTrue, reason: report.summary());
-      expect(report.hintsDone, 2);
+      expect(report.waiting.map((d) => d.path), ['a.md']);
+      expect(report.hintsDone, 1);
+      expect(remoteText('a.md'), 'one');
+      expect(await a.queue(), ['changed a.md x1']);
+
+      // What a sync the user asks for does first.
+      await a.store.retryNow(a.path);
+      final again = await a.sync();
+      expect(again.clean, isTrue, reason: again.summary());
+      expect(remoteText('a.md'), 'two');
       expect(await a.queue(), isEmpty);
     });
+
+    test(
+      'a path skipped run after run is reported as failing (#163)',
+      () async {
+        await a.hint('a.md', SyncOpKind.changed);
+        SyncReport? last;
+        for (var run = 1; run <= SyncEngine.stuckAfter; run++) {
+          a.write('a.md', 'v$run');
+          await a.store.retryNow(a.path);
+          var rewritten = false;
+          last = await a.engine.run(
+            onProgress: (stage, _, _) {
+              // The file changes under the run, every time.
+              if (stage == SyncStage.applying && !rewritten) {
+                rewritten = true;
+                a.write('a.md', 'v$run and more');
+              }
+            },
+          );
+          await a.ops.writer.indexed;
+          expect(last.skipped, ['a.md']);
+          expect(
+            last.failures.isEmpty,
+            run < SyncEngine.stuckAfter,
+            reason: 'run $run',
+          );
+        }
+        expect(last!.clean, isFalse);
+        expect(last.failures.single.path, 'a.md');
+        expect(last.failures.single.error, contains('3 runs in a row'));
+      },
+    );
 
     test('a hint rewritten during the run survives it', () async {
       a.write('a.md', 'two');

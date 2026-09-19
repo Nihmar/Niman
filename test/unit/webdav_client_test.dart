@@ -153,6 +153,13 @@ void main() {
       expect((await client.stat('yes.md'))!.size, 1);
     });
 
+    test('stat returns null for a missing item a server answers with a '
+        '207 holding a 404 (#163)', () async {
+      server.missingAsMultistatus = true;
+      expect(await client.stat('nope.md'), isNull);
+      expect(await client.stat('Folder', collection: true), isNull);
+    });
+
     test(
       'GET streams into a sink with the sha256 computed on the way',
       () async {
