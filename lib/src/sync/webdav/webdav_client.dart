@@ -269,12 +269,20 @@ final class WebDavClient {
 
   /// The item at [path] (`PROPFIND Depth: 0`), or null when it does not
   /// exist.
+  ///
+  /// A server may spell the href its own way (another percent-encoding,
+  /// a trailing slash), so a lone item that is not the path asked for
+  /// still counts — but only when it is the kind asked for. A folder
+  /// answering for a file is the server describing the parent of a file
+  /// that is not there, not the file (#163).
   Future<WebDavResource?> stat(String path, {bool collection = false}) async {
     try {
       final items = await propfind(path, depth: 0, collection: collection);
       final self = _clean(path);
-      return items.where((item) => item.path == self).firstOrNull ??
-          items.firstOrNull;
+      final exact = items.where((item) => item.path == self).firstOrNull;
+      if (exact != null) return exact;
+      final only = items.length == 1 ? items.single : null;
+      return only != null && only.isCollection == collection ? only : null;
     } on WebDavNotFound {
       return null;
     }

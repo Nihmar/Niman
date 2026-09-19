@@ -326,6 +326,28 @@ void main() {
     expect((await a.sync()).summary(), 'nothing to do');
   });
 
+  // #163: a server that answers a PROPFIND for a missing file with a 207
+  // holding a 404 made every new file look taken on the server, and the
+  // upload was skipped on every run, forever.
+  test(
+    'a new file uploads to a server that answers "missing" with a 207',
+    () async {
+      // Without preconditions the run looks before each PUT, as that
+      // session's server made it.
+      server
+        ..missingAsMultistatus = true
+        ..preconditions = false;
+      a
+        ..write('.niman/settings.json', '{"lineNumbers": true}')
+        ..write('New.md', 'new');
+      final report = await a.sync();
+      expect(report.clean, isTrue, reason: report.summary());
+      expect(report.skipped, isEmpty);
+      expect(remoteText('.niman/settings.json'), '{"lineNumbers": true}');
+      expect(remoteText('New.md'), 'new');
+    },
+  );
+
   group('a bare server (no ETags, no preconditions, no MOVE)', () {
     setUp(() {
       server
