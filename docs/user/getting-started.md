@@ -12,7 +12,13 @@ disk; the app's SQLite database is only a rebuildable index.
   the files. Never edit the `.niman/` or `.history/` folders by hand,
   but everything else is yours.
 - **Multiple libraries:** open several folders from a remembered list and
-  switch anytime. Each library has its own settings.
+  switch anytime. Each library has its own settings. On a wide window the
+  layers button at the foot of the rail opens the library window: the
+  known libraries to switch to, **Open existing**, **Create new** and
+  **Close library**, which goes back to the opening screen. Open notes
+  are saved first; a note that cannot be saved keeps the library open
+  and says why. On a phone the same actions are in Settings →
+  Maintenance.
 
 ## First steps
 

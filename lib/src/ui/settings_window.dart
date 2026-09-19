@@ -32,6 +32,7 @@ Route<void> settingsWindowRoute(
       controller: controller,
       spellCheck: spellCheck,
       transcription: transcription,
+      libraryRows: false,
     ),
   );
 }

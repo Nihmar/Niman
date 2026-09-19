@@ -15,6 +15,7 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
     required this.controller,
     this.onClosed,
     this.compact = false,
+    this.libraryRows = true,
     super.key,
   });
 
@@ -28,6 +29,10 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
   /// Whether the rows sit in the desktop's narrow left column (#172),
   /// sized like the areas above them rather than like a phone's list.
   final bool compact;
+
+  /// Whether to offer Switch library and Close library; the library
+  /// window does both where the rail is (#203).
+  final bool libraryRows;
 
   /// Re-reads every note from disk into the index.
   Future<void> _rescan(BuildContext context) async {
@@ -91,30 +96,32 @@ final class SettingsMaintenanceGroup extends StatelessWidget {
         ),
         // Above "Close library" on purpose: switching is the common
         // move and closing is the way out of every library at once.
-        HighlightRow(
-          key: SettingsKeys.switchLibrary,
-          child: ListTile(
-            dense: compact,
-            visualDensity: compact ? VisualDensity.compact : null,
-            leading: const Icon(Icons.swap_horiz_outlined),
-            title: Text(AppStrings.switchLibraryTitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _switchLibrary(context),
+        if (libraryRows) ...[
+          HighlightRow(
+            key: SettingsKeys.switchLibrary,
+            child: ListTile(
+              dense: compact,
+              visualDensity: compact ? VisualDensity.compact : null,
+              leading: const Icon(Icons.swap_horiz_outlined),
+              title: Text(AppStrings.switchLibraryTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _switchLibrary(context),
+            ),
           ),
-        ),
-        HighlightRow(
-          key: SettingsKeys.closeLibrary,
-          child: ListTile(
-            dense: compact,
-            visualDensity: compact ? VisualDensity.compact : null,
-            leading: const Icon(Icons.link_off_outlined),
-            title: Text(AppStrings.closeLibraryTitle),
-            onTap: () async {
-              await controller.close();
-              onClosed?.call();
-            },
+          HighlightRow(
+            key: SettingsKeys.closeLibrary,
+            child: ListTile(
+              dense: compact,
+              visualDensity: compact ? VisualDensity.compact : null,
+              leading: const Icon(Icons.link_off_outlined),
+              title: Text(AppStrings.closeLibraryTitle),
+              onTap: () async {
+                await controller.close();
+                onClosed?.call();
+              },
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

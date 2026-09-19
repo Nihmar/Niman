@@ -16,7 +16,6 @@ import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/shell_navigation.dart';
 import 'package:niman/src/ui/shell_preview_actions.dart';
 import 'package:niman/src/ui/strings.dart';
-import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/title_bar.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:path/path.dart' as p;
@@ -50,6 +49,7 @@ final class ShellLayoutProps {
     required this.shellFocus,
     required this.tabIndex,
     required this.onDestinationSelected,
+    required this.onSwitchLibrary,
     required this.buildWideSlots,
     this.buildTabs,
     this.tabsStart = 0,
@@ -143,6 +143,9 @@ final class ShellLayoutProps {
 
   /// A tap on the bar or the rail; the shell decides what it means.
   final ValueChanged<int> onDestinationSelected;
+
+  /// The rail's library button (#170): the library window (#203).
+  final VoidCallback onSwitchLibrary;
 
   /// The wide layout's stacked tab slots, in tab order.
   final List<Widget> Function() buildWideSlots;
@@ -340,23 +343,6 @@ final class WideShellLayout extends StatelessWidget {
   /// What to draw, and what to call.
   final ShellLayoutProps props;
 
-  /// The known-library list, from the rail's foot (#170).
-  ///
-  /// The same screen the settings row opens, pushed the same way and
-  /// with the same exit: the switch tears the shell down itself, so
-  /// leaving this route is all the caller has to do.
-  Future<void> _switchLibrary(BuildContext context) async {
-    final navigator = Navigator.of(context);
-    await navigator.push(
-      MaterialPageRoute<void>(
-        builder: (context) => SwitchLibraryScreen(
-          controller: props.controller,
-          onSwitched: () => Navigator.of(context).pop(),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -399,7 +385,7 @@ final class WideShellLayout extends StatelessWidget {
                         ShellRail(
                           selectedIndex: props.tabIndex,
                           onDestinationSelected: props.onDestinationSelected,
-                          onSwitchLibrary: () => _switchLibrary(context),
+                          onSwitchLibrary: props.onSwitchLibrary,
                         ),
                         const VerticalDivider(width: 1),
                       ],

@@ -21,6 +21,7 @@ final class SettingsTab extends StatefulWidget {
     required this.controller,
     this.spellCheck,
     this.transcription,
+    this.libraryRows = true,
     super.key,
   });
 
@@ -32,6 +33,10 @@ final class SettingsTab extends StatefulWidget {
 
   /// The installation's transcription models; null hides their section.
   final TranscriptionModels? transcription;
+
+  /// Whether Settings offers Switch library and Close library; the
+  /// settings window leaves them to the library window (#203).
+  final bool libraryRows;
 
   /// The left column's width: the areas' names and the search, no more.
   static const double listWidth = 280;
@@ -58,6 +63,7 @@ final class _SettingsTabState extends State<SettingsTab> {
             controller: widget.controller,
             spellCheck: widget.spellCheck,
             transcription: widget.transcription,
+            libraryRows: widget.libraryRows,
           );
         }
         return Row(
@@ -69,6 +75,7 @@ final class _SettingsTabState extends State<SettingsTab> {
                 spellCheck: widget.spellCheck,
                 transcription: widget.transcription,
                 navigation: _navigation,
+                libraryRows: widget.libraryRows,
               ),
             ),
             const VerticalDivider(width: 1),
