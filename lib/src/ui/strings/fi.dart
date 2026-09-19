@@ -1212,6 +1212,13 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get spellCheckScanning => 'Tarkistetaan muistiinpanoa…';
+  @override
+  String get spellCheckAgain => 'Tarkista uudelleen';
+  @override
+  String spellCheckCapped(int count) =>
+      'Ensimmäiset $count näytetään: korjaa osa ja tarkista uudelleen loput';
+  @override
   String get dropHint =>
       'Pudota Markdown-tiedostoja avataksesi ne tai kansio tuodaksesi sen';
   @override

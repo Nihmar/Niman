@@ -1196,6 +1196,14 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get spellCheckScanning => 'Pārbauda piezīmi…';
+  @override
+  String get spellCheckAgain => 'Pārbaudīt vēlreiz';
+  @override
+  String spellCheckCapped(int count) =>
+      'Parādīti pirmie $count: izlabojiet dažus un pārbaudiet vēlreiz, lai '
+      'redzētu pārējos';
+  @override
   String get dropHint =>
       'Nometiet Markdown failus, lai tos atvērtu, vai mapi, lai to importētu';
   @override

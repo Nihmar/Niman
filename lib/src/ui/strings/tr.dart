@@ -1189,6 +1189,14 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get spellCheckScanning => 'Not denetleniyor…';
+  @override
+  String get spellCheckAgain => 'Yeniden denetle';
+  @override
+  String spellCheckCapped(int count) =>
+      'İlk $count tanesi listelendi: birkaçını düzeltin, sonra kalanlar için '
+      'yeniden denetleyin';
+  @override
   String get dropHint =>
       'Açmak için Markdown dosyalarını, içe aktarmak için bir klasörü bırakın';
   @override

@@ -1211,6 +1211,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get spellCheckScanning => 'Се проверува белешката…';
+  @override
+  String get spellCheckAgain => 'Провери повторно';
+  @override
+  String spellCheckCapped(int count) =>
+      'Прикажани се првите $count: поправете неколку, па проверете повторно '
+      'за останатите';
+  @override
   String get dropHint =>
       'Пуштете Markdown датотеки за да ги отворите или папка за да ја увезете';
   @override

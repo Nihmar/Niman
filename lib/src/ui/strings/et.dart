@@ -1182,6 +1182,14 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get spellCheckScanning => 'Märkme kontrollimine…';
+  @override
+  String get spellCheckAgain => 'Kontrolli uuesti';
+  @override
+  String spellCheckCapped(int count) =>
+      'Näidatakse esimesed $count: paranda mõned ja kontrolli ülejäänute '
+      'jaoks uuesti';
+  @override
   String get dropHint =>
       'Lohista Markdowni failid avamiseks või kaust importimiseks';
   @override

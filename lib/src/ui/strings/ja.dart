@@ -1120,6 +1120,13 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get spellCheckScanning => 'ノートを確認中…';
+  @override
+  String get spellCheckAgain => 'もう一度確認';
+  @override
+  String spellCheckCapped(int count) =>
+      '最初の $count 件を表示しています。いくつか直してから、残りのためにもう一度確認してください';
+  @override
   String get dropHint => 'Markdown ファイルをドロップして開くか、フォルダーをドロップして読み込みます';
   @override
   String get importFolderAction => '読み込む';

@@ -1193,6 +1193,13 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get spellCheckScanning => 'Checking the note…';
+  @override
+  String get spellCheckAgain => 'Check again';
+  @override
+  String spellCheckCapped(int count) =>
+      'The first $count are listed: fix some, then check again for the rest';
+  @override
   String get dropHint =>
       'Drop Markdown files to open them, or a folder to import it';
   @override

@@ -1211,6 +1211,14 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get spellCheckScanning => 'Проверка на бележката…';
+  @override
+  String get spellCheckAgain => 'Провери отново';
+  @override
+  String spellCheckCapped(int count) =>
+      'Показани са първите $count: поправете някои и проверете отново за '
+      'останалите';
+  @override
   String get dropHint =>
       'Пуснете файлове Markdown, за да ги отворите, или папка, за да я '
       'импортирате';
