@@ -31,6 +31,7 @@ final class SettingsBody extends StatefulWidget {
     this.spellCheck,
     this.transcription,
     this.navigation,
+    this.libraryRows = true,
     super.key,
   });
 
@@ -53,6 +54,10 @@ final class SettingsBody extends StatefulWidget {
   /// shows its row in the right column — and [SettingsSectionPane] draws
   /// the selection. Null on the phone, where each area is a screen.
   final SettingsNavigation? navigation;
+
+  /// Whether Maintenance offers Switch library and Close library. Not in
+  /// the settings window (#203): the rail's library window does both.
+  final bool libraryRows;
 
   @override
   State<SettingsBody> createState() => _SettingsBodyState();
@@ -145,6 +150,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
         flashHome: _flashHome,
         openArea: _openArea,
         keyboardAttached: _keyboard.attached,
+        libraryRows: widget.libraryRows,
       ),
       query,
     );
@@ -379,6 +385,7 @@ final class _SettingsBodyState extends State<SettingsBody> {
           controller: controller,
           onClosed: widget.onClosed,
           compact: navigation != null,
+          libraryRows: widget.libraryRows,
         ),
       ],
     );
