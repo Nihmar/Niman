@@ -14,12 +14,17 @@ reminders), and **Maintenance** (re-index, switch or close the library).
 The search at the top looks through the settings themselves, not only
 the area names, and takes you to the row it found.
 
-- **Wide windows** (desktop, tablets, phones in landscape): two columns.
-  The search and the areas are on the left, and the selected area is on
-  the right, so nothing navigates. What an area opens, such as the toolbar
-  arrangement or the trash, stays in the right column with a way back.
-  A search result shows its row on the right and flashes it; the
-  results stay, one click from the next.
+- **Wide windows** (desktop, tablets, phones in landscape): Settings
+  opens as a floating window over the note, from the gear at the foot of
+  the rail or its key, and closes back to it. The note, its tabs and the
+  tree stay where they were. `Esc` or a click outside closes it; from a
+  screen an area opened, `Esc` steps back first. Inside are two columns:
+  the search and the areas on the left, the selected area on the right,
+  so nothing navigates. What an area opens, such as the toolbar
+  arrangement or the trash, stays in the window with a way back. A
+  search result shows its row on the right and flashes it; the results
+  stay, one click from the next. The window is at most 960 × 680 and
+  shrinks with a small window.
 - **Phones**: the list of areas, each opening a screen of its own.
 
 Every setting reads the same on both: its name, a line saying what it

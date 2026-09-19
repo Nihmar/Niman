@@ -228,9 +228,9 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
 
-    // Switch the trash toggle off in settings (the rail tab). The
-    // window is wide, so the Trash area shows beside the list rather
-    // than over it (#172): nothing to go back from.
+    // Switch the trash toggle off in settings, a window on a wide one
+    // (#202), where the Trash area shows beside the list rather than
+    // over it (#172): nothing to go back from.
     await tester.tap(find.byKey(const Key('rail-settings')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('settings-area-trash-history')));
@@ -241,7 +241,7 @@ void main() {
     );
     await settle(tester);
     expect(find.backButton(), findsNothing);
-    await tester.tap(find.byKey(const Key('rail-files')));
+    await tester.tap(find.byKey(const Key('floating-window-close')));
     await settle(tester);
 
     // Recreate the note, then delete it with the toggle off: hard delete.
