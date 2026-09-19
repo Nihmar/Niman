@@ -116,7 +116,7 @@ final class _TodoTabState extends State<TodoTab> {
               ),
             Expanded(
               child: NoteColumnPadding(
-                column: widget.column,
+                column: _column,
                 child: _body(snapshot, wide: wide),
               ),
             ),
@@ -125,6 +125,16 @@ final class _TodoTabState extends State<TodoTab> {
       },
     );
   }
+
+  /// The note column, never narrower than the filter bar needs: the
+  /// Open/Done switch, both pills, the count, Add and help on one line.
+  NoteColumn get _column {
+    final column = widget.column;
+    if (!column.enabled || column.width >= _minColumnWidth) return column;
+    return const NoteColumn(width: _minColumnWidth);
+  }
+
+  static const double _minColumnWidth = 800;
 
   /// The Open/Done switch: its own row on the phone, the leading control
   /// of the desktop filter panel.
