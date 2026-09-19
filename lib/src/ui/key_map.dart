@@ -1,5 +1,5 @@
-/// The keys the user chose (#159): which command each combination runs,
-/// over the ones Niman ships.
+/// The keys the user chose (#159, #205): which command — or which
+/// formatting action — each combination runs, over the ones Niman ships.
 ///
 /// Only the differences are kept — a key moved, a key cleared — so a
 /// command that ships a key later still gets it on a map that never
@@ -15,13 +15,16 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:niman/src/editor/editor_shortcuts.dart';
+import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/ui/app_shortcuts.dart';
 
 /// The shipped keys, changed where the user changed them.
 @immutable
 final class KeyMap {
-  /// A map with [overrides]: a command's own key, or null for none.
-  const new([this.overrides = const {}]);
+  /// A map with [overrides] for the app's commands and [editorOverrides]
+  /// for the editors' formatting (#205): a key, or null for none.
+  const new([this.overrides = const {}, this.editorOverrides = const {}]);
 
   /// Reads a stored form; anything unreadable is left out, so a key map
   /// written by a newer build loses only what this one cannot read.
@@ -35,16 +38,27 @@ final class KeyMap {
     }
     if (raw is! Map) return KeyMap.defaults;
     final overrides = <AppCommand, SingleActivator?>{};
+    final editorOverrides = <ToolbarItem, SingleActivator?>{};
     for (final MapEntry(:key, :value) in raw.entries) {
+      if (value != null && value is! String) continue;
+      final keys = value is String ? decodeKeys(value) : null;
+      if (value is String && keys == null) continue;
+      // The formatting keys live in the same object under a prefix
+      // (#205), so an older build reading this map simply skips them.
+      if (key is String && key.startsWith(_editorPrefix)) {
+        final id = key.substring(_editorPrefix.length);
+        final item = ToolbarItem.values.where((i) => i.id == id).firstOrNull;
+        if (item != null) editorOverrides[item] = keys;
+        continue;
+      }
       final command = AppCommand.values.where((c) => c.name == key).firstOrNull;
       if (command == null) continue;
-      if (value == null) {
-        overrides[command] = null;
-      } else if (value is String) {
-        if (decodeKeys(value) case final keys?) overrides[command] = keys;
-      }
+      overrides[command] = keys;
     }
-    return KeyMap(Map.unmodifiable(overrides));
+    return KeyMap(
+      Map.unmodifiable(overrides),
+      Map.unmodifiable(editorOverrides),
+    );
   }
 
   /// Nothing changed: the keys as shipped.
@@ -52,6 +66,12 @@ final class KeyMap {
 
   /// What the user changed, command by command.
   final Map<AppCommand, SingleActivator?> overrides;
+
+  /// What the user changed among the editors' formatting keys (#205).
+  final Map<ToolbarItem, SingleActivator?> editorOverrides;
+
+  /// How the formatting keys are named in the stored form.
+  static const String _editorPrefix = 'editor:';
 
   /// The key [command] ships with, or null.
   static SingleActivator? defaultOf(AppCommand command) {
@@ -69,6 +89,48 @@ final class KeyMap {
 
   /// Whether [command]'s key is the user's rather than the shipped one.
   bool isChanged(AppCommand command) => overrides.containsKey(command);
+
+  /// The key [item]'s formatting ships with, or null.
+  static SingleActivator? editorDefaultOf(ToolbarItem item) =>
+      editorShortcutDefaults[item];
+
+  /// The key [item] runs on now, or null for none.
+  SingleActivator? editorBindingOf(ToolbarItem item) =>
+      editorOverrides.containsKey(item)
+      ? editorOverrides[item]
+      : editorDefaultOf(item);
+
+  /// Whether [item]'s key is the user's rather than the shipped one.
+  bool isEditorChanged(ToolbarItem item) => editorOverrides.containsKey(item);
+
+  /// The formatting [keys] apply now, or null.
+  ToolbarItem? editorItemOn(SingleActivator keys) {
+    for (final item in ToolbarItem.values) {
+      final binding = editorBindingOf(item);
+      if (binding != null && sameKeys(binding, keys)) return item;
+    }
+    return null;
+  }
+
+  /// [item] on [keys] (null clears it); a change back to the shipped key
+  /// is no change at all.
+  KeyMap withEditorBinding(ToolbarItem item, SingleActivator? keys) {
+    final next = {...editorOverrides};
+    final shipped = editorDefaultOf(item);
+    final same = keys == null
+        ? shipped == null
+        : shipped != null && sameKeys(keys, shipped);
+    if (same) {
+      next.remove(item);
+    } else {
+      next[item] = keys;
+    }
+    return KeyMap(overrides, Map.unmodifiable(next));
+  }
+
+  /// [item] back on its shipped key.
+  KeyMap editorReverted(ToolbarItem item) =>
+      KeyMap(overrides, Map.unmodifiable({...editorOverrides}..remove(item)));
 
   /// The command [keys] runs now, or null.
   AppCommand? commandOn(SingleActivator keys) {
@@ -98,12 +160,14 @@ final class KeyMap {
     } else {
       next[command] = keys;
     }
-    return KeyMap(Map.unmodifiable(next));
+    return KeyMap(Map.unmodifiable(next), editorOverrides);
   }
 
   /// [command] back on its shipped key.
-  KeyMap reverted(AppCommand command) =>
-      KeyMap(Map.unmodifiable({...overrides}..remove(command)));
+  KeyMap reverted(AppCommand command) => KeyMap(
+    Map.unmodifiable({...overrides}..remove(command)),
+    editorOverrides,
+  );
 
   /// Whether two combinations are the same keys.
   static bool sameKeys(SingleActivator a, SingleActivator b) =>
@@ -118,6 +182,8 @@ final class KeyMap {
   String toJson() => jsonEncode({
     for (final MapEntry(:key, :value) in overrides.entries)
       key.name: value == null ? null : encodeKeys(value),
+    for (final MapEntry(:key, :value) in editorOverrides.entries)
+      '$_editorPrefix${key.id}': value == null ? null : encodeKeys(value),
   });
 
   /// `ctrl+shift+<key id>`: modifiers by name, the key by its id, which

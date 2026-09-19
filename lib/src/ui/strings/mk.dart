@@ -410,6 +410,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Во уредникот';
   @override
+  String get shortcutFormatSection => 'Форматирање';
+  @override
   String get shortcutFind => 'Барај';
   @override
   String get shortcutReplace => 'Најди и замени';

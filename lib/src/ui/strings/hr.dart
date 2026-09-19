@@ -408,6 +408,8 @@ final class CroatianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'U uređivaču';
   @override
+  String get shortcutFormatSection => 'Oblikovanje';
+  @override
   String get shortcutFind => 'Traži';
   @override
   String get shortcutReplace => 'Traži i zamijeni';

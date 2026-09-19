@@ -409,6 +409,8 @@ final class EnglishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'In the editor';
   @override
+  String get shortcutFormatSection => 'Formatting';
+  @override
   String get shortcutFind => 'Find';
   @override
   String get shortcutReplace => 'Find and replace';

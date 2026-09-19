@@ -407,6 +407,8 @@ final class NorwegianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'I editoren';
   @override
+  String get shortcutFormatSection => 'Formatering';
+  @override
   String get shortcutFind => 'Søk';
   @override
   String get shortcutReplace => 'Finn og erstat';

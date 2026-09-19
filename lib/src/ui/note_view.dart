@@ -15,6 +15,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/core/text_scale.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
+import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/editor_tool.dart';
 import 'package:niman/src/editor/find_panel.dart';
 import 'package:niman/src/editor/highlight_sync.dart';
@@ -525,6 +526,8 @@ final class _NoteViewState extends State<NoteView>
     WidgetsBinding.instance.addObserver(this);
     _focus = FocusNode();
     _focus.addListener(_onFocusChanged);
+    // The formatting keys, while this editor is the focused one (#205).
+    _formatKeys.attach();
     _wysiwygFocus.addListener(_onWysiwygFocusChanged);
     _ownsController = widget.controller == null;
     _highlight = EditorHighlightSync();
@@ -661,6 +664,7 @@ final class _NoteViewState extends State<NoteView>
     _findController.dispose();
     _outlineNotifier.dispose();
     _wysiwygActive.dispose();
+    _formatKeys.detach();
     _focus.dispose();
     _wysiwygFocus.dispose();
     _scroll.verticalScroller.dispose();
@@ -1660,6 +1664,13 @@ final class _NoteViewState extends State<NoteView>
     setState(() {});
     unawaited(_save());
   }
+
+  /// The formatting keys (#205), applied through the toolbar's own
+  /// actions for whichever surface is showing.
+  late final EditorFormatKeys _formatKeys = EditorFormatKeys(
+    actions: _toolbarActions,
+    active: () => mounted && _keyboardUp,
+  );
 
   /// Whether the editor on screen holds the focus — the phone's proxy for
   /// "the keyboard is up": the formatting toolbar shows only while the

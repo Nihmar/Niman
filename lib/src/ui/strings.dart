@@ -356,6 +356,7 @@ final class AppStrings {
   static String get shortcutNextTab => _s.shortcutNextTab;
   static String get shortcutPreviousTab => _s.shortcutPreviousTab;
   static String get shortcutEditorSection => _s.shortcutEditorSection;
+  static String get shortcutFormatSection => _s.shortcutFormatSection;
   static String get shortcutFind => _s.shortcutFind;
   static String get shortcutReplace => _s.shortcutReplace;
   static String get shortcutSavingNote => _s.shortcutSavingNote;

@@ -115,6 +115,10 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('shortcut-conflict-yes')));
     await tester.pumpAndSettle();
+    // Ctrl+B is Bold in the editors since #205: taking it is allowed,
+    // after the warning that says so.
+    await tester.tap(find.byKey(const Key('shortcut-editor-key-yes')));
+    await tester.pumpAndSettle();
     final map = AppKeyMap.current.value;
     expect(
       map.commandOn(

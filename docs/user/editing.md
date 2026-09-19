@@ -191,7 +191,10 @@ Tables, task lists, footnotes, strikethrough, fenced code blocks with
 syntax highlighting. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
-Formatting toolbar buttons apply to whichever editor is active.
+Formatting toolbar buttons apply to whichever editor is active, and so
+do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
+changeable in Settings → Keyboard shortcuts → Formatting (see
+[shortcuts](shortcuts.md)).
 
 On the desktop the toolbar and the note's own controls share **one row**
 above the note, in both editors. The formatting is on the left, grouped

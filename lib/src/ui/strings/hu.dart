@@ -407,6 +407,8 @@ final class HungarianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'A szerkesztőben';
   @override
+  String get shortcutFormatSection => 'Formázás';
+  @override
   String get shortcutFind => 'Keresés';
   @override
   String get shortcutReplace => 'Keresés és csere';

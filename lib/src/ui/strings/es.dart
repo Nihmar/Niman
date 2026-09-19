@@ -413,6 +413,8 @@ final class SpanishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'En el editor';
   @override
+  String get shortcutFormatSection => 'Formato';
+  @override
   String get shortcutFind => 'Buscar';
   @override
   String get shortcutReplace => 'Buscar y reemplazar';

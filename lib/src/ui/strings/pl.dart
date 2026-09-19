@@ -410,6 +410,8 @@ final class PolishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'W edytorze';
   @override
+  String get shortcutFormatSection => 'Formatowanie';
+  @override
   String get shortcutFind => 'Znajdź';
   @override
   String get shortcutReplace => 'Znajdź i zamień';

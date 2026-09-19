@@ -402,6 +402,8 @@ final class TurkishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Düzenleyicide';
   @override
+  String get shortcutFormatSection => 'Biçimlendirme';
+  @override
   String get shortcutFind => 'Bul';
   @override
   String get shortcutReplace => 'Bul ve değiştir';

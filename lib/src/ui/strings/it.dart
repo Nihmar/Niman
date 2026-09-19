@@ -412,6 +412,8 @@ final class ItalianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Nell’editor';
   @override
+  String get shortcutFormatSection => 'Formattazione';
+  @override
   String get shortcutFind => 'Trova';
   @override
   String get shortcutReplace => 'Trova e sostituisci';

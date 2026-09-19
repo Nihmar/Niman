@@ -409,6 +409,8 @@ final class SlovenianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'V urejevalniku';
   @override
+  String get shortcutFormatSection => 'Oblikovanje';
+  @override
   String get shortcutFind => 'Iskanje';
   @override
   String get shortcutReplace => 'Iskanje in zamenjava';

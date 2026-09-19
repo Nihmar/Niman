@@ -198,6 +198,7 @@ abstract base class Strings {
   String get shortcutNextTab;
   String get shortcutPreviousTab;
   String get shortcutEditorSection;
+  String get shortcutFormatSection;
   String get shortcutFind;
   String get shortcutReplace;
   String get shortcutSavingNote;

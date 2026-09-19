@@ -405,6 +405,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Í ritara';
   @override
+  String get shortcutFormatSection => 'Snið';
+  @override
   String get shortcutFind => 'Leita';
   @override
   String get shortcutReplace => 'Finna og skipta út';
