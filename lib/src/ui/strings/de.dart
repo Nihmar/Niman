@@ -1198,6 +1198,31 @@ final class GermanStrings extends Strings {
   @override
   String get historyAllVersions => 'Alle Versionen';
   @override
+  String get commandPaletteTitle => 'Befehlspalette';
+  @override
+  String get goToNoteTitle => 'Zur Notiz';
+  @override
+  String get paletteGroupNote => 'Notiz';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Ansicht';
+  @override
+  String get paletteGroupLibrary => 'Bibliothek';
+  @override
+  String get paletteGroupGoTo => 'Gehe zu';
+  @override
+  String get paletteHint => 'Befehle und Notizen suchen';
+  @override
+  String get paletteNoResults => 'Keine Treffer';
+  @override
+  String get paletteCommands => 'Befehle';
+  @override
+  String get paletteNotes => 'Notizen';
+  @override
+  String get paletteFooter =>
+      '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
+  @override
   String get openFileMissing =>
       'Die Datei dieser Notiz liegt nicht auf dem Datenträger';
   @override

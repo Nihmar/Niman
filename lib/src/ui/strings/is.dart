@@ -1175,6 +1175,31 @@ final class IcelandicStrings extends Strings {
   @override
   String get historyAllVersions => 'Allar útgáfur';
   @override
+  String get commandPaletteTitle => 'Skipanaspjald';
+  @override
+  String get goToNoteTitle => 'Fara í minnispunkt';
+  @override
+  String get paletteGroupNote => 'Minnispunktur';
+  @override
+  String get paletteGroupEditor => 'Ritill';
+  @override
+  String get paletteGroupView => 'Sýn';
+  @override
+  String get paletteGroupLibrary => 'Safn';
+  @override
+  String get paletteGroupGoTo => 'Fara í';
+  @override
+  String get paletteHint => 'Leita í skipunum og minnispunktum';
+  @override
+  String get paletteNoResults => 'Ekkert fannst';
+  @override
+  String get paletteCommands => 'Skipanir';
+  @override
+  String get paletteNotes => 'Minnispunktar';
+  @override
+  String get paletteFooter =>
+      '↑↓ til að færa · ↵ til að nota · esc til að loka';
+  @override
   String get openFileMissing => 'Skrá þessa minnisblaðs er ekki á disknum';
   @override
   String get openFileFailed => 'Ekki tókst að opna þetta minnisblað utan Niman';

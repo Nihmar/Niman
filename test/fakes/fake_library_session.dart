@@ -585,6 +585,24 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
   }
 
   @override
+  Future<List<Note>> notesNamed(String query, {int limit = 50}) async {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const [];
+    final hits =
+        [
+          for (final row in _rows)
+            if (!row.isDir && row.name.toLowerCase().contains(q)) row,
+        ]..sort((a, b) {
+          final pa = a.name.toLowerCase().startsWith(q) ? 0 : 1;
+          final pb = b.name.toLowerCase().startsWith(q) ? 0 : 1;
+          if (pa != pb) return pa - pb;
+          final byLength = a.name.length - b.name.length;
+          return byLength != 0 ? byLength : a.path.compareTo(b.path);
+        });
+    return [for (final row in hits.take(limit)) _toNote(row)];
+  }
+
+  @override
   Future<SearchSource?> get searchSource async =>
       FakeSearchSource(hits: searchHits);
 

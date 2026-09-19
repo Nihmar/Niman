@@ -1173,6 +1173,31 @@ final class DanishStrings extends Strings {
   @override
   String get historyAllVersions => 'Alle versioner';
   @override
+  String get commandPaletteTitle => 'Kommandopalet';
+  @override
+  String get goToNoteTitle => 'Gå til note';
+  @override
+  String get paletteGroupNote => 'Note';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Visning';
+  @override
+  String get paletteGroupLibrary => 'Bibliotek';
+  @override
+  String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get paletteHint => 'Søg i kommandoer og noter';
+  @override
+  String get paletteNoResults => 'Intet passer';
+  @override
+  String get paletteCommands => 'Kommandoer';
+  @override
+  String get paletteNotes => 'Noter';
+  @override
+  String get paletteFooter =>
+      '↑↓ for at flytte · ↵ for at bruge · esc for at lukke';
+  @override
   String get openFileMissing => 'Denne notes fil findes ikke på disken';
   @override
   String get openFileFailed => 'Noten kunne ikke åbnes uden for Niman';

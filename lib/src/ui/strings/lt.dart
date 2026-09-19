@@ -1177,6 +1177,30 @@ final class LithuanianStrings extends Strings {
   @override
   String get historyAllVersions => 'Visos versijos';
   @override
+  String get commandPaletteTitle => 'Komandų paletė';
+  @override
+  String get goToNoteTitle => 'Eiti į užrašą';
+  @override
+  String get paletteGroupNote => 'Užrašas';
+  @override
+  String get paletteGroupEditor => 'Redaktorius';
+  @override
+  String get paletteGroupView => 'Rodinys';
+  @override
+  String get paletteGroupLibrary => 'Biblioteka';
+  @override
+  String get paletteGroupGoTo => 'Eiti į';
+  @override
+  String get paletteHint => 'Ieškoti komandų ir užrašų';
+  @override
+  String get paletteNoResults => 'Nieko nerasta';
+  @override
+  String get paletteCommands => 'Komandos';
+  @override
+  String get paletteNotes => 'Užrašai';
+  @override
+  String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
+  @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';

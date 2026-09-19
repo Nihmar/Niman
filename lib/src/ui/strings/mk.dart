@@ -1187,6 +1187,30 @@ final class MacedonianStrings extends Strings {
   @override
   String get historyAllVersions => 'Сите верзии';
   @override
+  String get commandPaletteTitle => 'Палета со команди';
+  @override
+  String get goToNoteTitle => 'Оди на белешка';
+  @override
+  String get paletteGroupNote => 'Белешка';
+  @override
+  String get paletteGroupEditor => 'Уредувач';
+  @override
+  String get paletteGroupView => 'Приказ';
+  @override
+  String get paletteGroupLibrary => 'Библиотека';
+  @override
+  String get paletteGroupGoTo => 'Оди на';
+  @override
+  String get paletteHint => 'Барај команди и белешки';
+  @override
+  String get paletteNoResults => 'Нема совпаѓања';
+  @override
+  String get paletteCommands => 'Команди';
+  @override
+  String get paletteNotes => 'Белешки';
+  @override
+  String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
+  @override
   String get openFileMissing => 'Датотеката на оваа белешка не е на дискот';
   @override
   String get openFileFailed =>

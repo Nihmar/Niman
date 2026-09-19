@@ -1175,6 +1175,30 @@ final class SlovakStrings extends Strings {
   @override
   String get historyAllVersions => 'Všetky verzie';
   @override
+  String get commandPaletteTitle => 'Paleta príkazov';
+  @override
+  String get goToNoteTitle => 'Prejsť na poznámku';
+  @override
+  String get paletteGroupNote => 'Poznámka';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Zobrazenie';
+  @override
+  String get paletteGroupLibrary => 'Knižnica';
+  @override
+  String get paletteGroupGoTo => 'Prejsť na';
+  @override
+  String get paletteHint => 'Hľadať príkazy a poznámky';
+  @override
+  String get paletteNoResults => 'Nič nezodpovedá';
+  @override
+  String get paletteCommands => 'Príkazy';
+  @override
+  String get paletteNotes => 'Poznámky';
+  @override
+  String get paletteFooter => '↑↓ pohyb · ↵ použiť · esc zavrieť';
+  @override
   String get openFileMissing => 'Súbor tejto poznámky na disku nie je';
   @override
   String get openFileFailed =>

@@ -1182,6 +1182,30 @@ final class PortugueseStrings extends Strings {
   @override
   String get historyAllVersions => 'Todas as versões';
   @override
+  String get commandPaletteTitle => 'Paleta de comandos';
+  @override
+  String get goToNoteTitle => 'Ir para a nota';
+  @override
+  String get paletteGroupNote => 'Nota';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Vista';
+  @override
+  String get paletteGroupLibrary => 'Biblioteca';
+  @override
+  String get paletteGroupGoTo => 'Ir para';
+  @override
+  String get paletteHint => 'Procurar comandos e notas';
+  @override
+  String get paletteNoResults => 'Sem resultados';
+  @override
+  String get paletteCommands => 'Comandos';
+  @override
+  String get paletteNotes => 'Notas';
+  @override
+  String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
+  @override
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override
   String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';

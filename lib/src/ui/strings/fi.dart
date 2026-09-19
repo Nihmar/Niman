@@ -1188,6 +1188,30 @@ final class FinnishStrings extends Strings {
   @override
   String get historyAllVersions => 'Kaikki versiot';
   @override
+  String get commandPaletteTitle => 'Komentopaletti';
+  @override
+  String get goToNoteTitle => 'Siirry muistiinpanoon';
+  @override
+  String get paletteGroupNote => 'Muistiinpano';
+  @override
+  String get paletteGroupEditor => 'Muokkain';
+  @override
+  String get paletteGroupView => 'Näkymä';
+  @override
+  String get paletteGroupLibrary => 'Kirjasto';
+  @override
+  String get paletteGroupGoTo => 'Siirry';
+  @override
+  String get paletteHint => 'Hae komentoja ja muistiinpanoja';
+  @override
+  String get paletteNoResults => 'Ei osumia';
+  @override
+  String get paletteCommands => 'Komennot';
+  @override
+  String get paletteNotes => 'Muistiinpanot';
+  @override
+  String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
+  @override
   String get openFileMissing => 'Tämän muistiinpanon tiedostoa ei ole levyllä';
   @override
   String get openFileFailed =>

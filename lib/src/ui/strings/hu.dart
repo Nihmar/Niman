@@ -1182,6 +1182,30 @@ final class HungarianStrings extends Strings {
   @override
   String get historyAllVersions => 'Összes verzió';
   @override
+  String get commandPaletteTitle => 'Parancspaletta';
+  @override
+  String get goToNoteTitle => 'Ugrás jegyzetre';
+  @override
+  String get paletteGroupNote => 'Jegyzet';
+  @override
+  String get paletteGroupEditor => 'Szerkesztő';
+  @override
+  String get paletteGroupView => 'Nézet';
+  @override
+  String get paletteGroupLibrary => 'Könyvtár';
+  @override
+  String get paletteGroupGoTo => 'Ugrás';
+  @override
+  String get paletteHint => 'Parancsok és jegyzetek keresése';
+  @override
+  String get paletteNoResults => 'Nincs találat';
+  @override
+  String get paletteCommands => 'Parancsok';
+  @override
+  String get paletteNotes => 'Jegyzetek';
+  @override
+  String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
+  @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override
   String get openFileFailed =>

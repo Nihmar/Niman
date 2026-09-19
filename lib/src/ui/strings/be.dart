@@ -1177,6 +1177,30 @@ final class BelarusianStrings extends Strings {
   @override
   String get historyAllVersions => 'Усе версіі';
   @override
+  String get commandPaletteTitle => 'Палітра каманд';
+  @override
+  String get goToNoteTitle => 'Перайсці да нататкі';
+  @override
+  String get paletteGroupNote => 'Нататка';
+  @override
+  String get paletteGroupEditor => 'Рэдактар';
+  @override
+  String get paletteGroupView => 'Выгляд';
+  @override
+  String get paletteGroupLibrary => 'Бібліятэка';
+  @override
+  String get paletteGroupGoTo => 'Перайсці';
+  @override
+  String get paletteHint => 'Шукаць каманды і нататкі';
+  @override
+  String get paletteNoResults => 'Нічога не знойдзена';
+  @override
+  String get paletteCommands => 'Каманды';
+  @override
+  String get paletteNotes => 'Нататкі';
+  @override
+  String get paletteFooter => '↑↓ перамяшчэнне · ↵ выбраць · esc закрыць';
+  @override
   String get openFileMissing => 'Файла гэтай заўвагі няма на дыску';
   @override
   String get openFileFailed => 'Не ўдалося адкрыць гэтую заўвагу па-за Niman';

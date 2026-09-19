@@ -165,6 +165,14 @@ final class ShellWorkspace {
     );
   }
 
+  /// Open notes, the most recently shown first: what the palette offers
+  /// before anything is typed (#155).
+  List<String> get recentNotes => [
+    ..._recent,
+    for (final tab in value.tabs)
+      if (!_recent.contains(tab.path)) tab.path,
+  ];
+
   /// Records a loaded note's [length], for [largeNote].
   void noteLoaded(String path, int length) => _lengths[path] = length;
 

@@ -1181,6 +1181,31 @@ final class SwedishStrings extends Strings {
   @override
   String get historyAllVersions => 'Alla versioner';
   @override
+  String get commandPaletteTitle => 'Kommandopalett';
+  @override
+  String get goToNoteTitle => 'Gå till anteckning';
+  @override
+  String get paletteGroupNote => 'Anteckning';
+  @override
+  String get paletteGroupEditor => 'Redigerare';
+  @override
+  String get paletteGroupView => 'Visning';
+  @override
+  String get paletteGroupLibrary => 'Bibliotek';
+  @override
+  String get paletteGroupGoTo => 'Gå till';
+  @override
+  String get paletteHint => 'Sök kommandon och anteckningar';
+  @override
+  String get paletteNoResults => 'Inga träffar';
+  @override
+  String get paletteCommands => 'Kommandon';
+  @override
+  String get paletteNotes => 'Anteckningar';
+  @override
+  String get paletteFooter =>
+      '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
+  @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';
   @override

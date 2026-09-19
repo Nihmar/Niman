@@ -1209,6 +1209,31 @@ final class FrenchStrings extends Strings {
   @override
   String get historyAllVersions => 'Toutes les versions';
   @override
+  String get commandPaletteTitle => 'Palette de commandes';
+  @override
+  String get goToNoteTitle => 'Aller à la note';
+  @override
+  String get paletteGroupNote => 'Note';
+  @override
+  String get paletteGroupEditor => 'Éditeur';
+  @override
+  String get paletteGroupView => 'Affichage';
+  @override
+  String get paletteGroupLibrary => 'Bibliothèque';
+  @override
+  String get paletteGroupGoTo => 'Aller à';
+  @override
+  String get paletteHint => 'Chercher des commandes et des notes';
+  @override
+  String get paletteNoResults => 'Aucun résultat';
+  @override
+  String get paletteCommands => 'Commandes';
+  @override
+  String get paletteNotes => 'Notes';
+  @override
+  String get paletteFooter =>
+      '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
+  @override
   String get openFileMissing =>
       'Le fichier de cette note est introuvable sur le disque';
   @override

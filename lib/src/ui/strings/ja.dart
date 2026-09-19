@@ -1096,6 +1096,30 @@ final class JapaneseStrings extends Strings {
   @override
   String get historyAllVersions => 'すべてのバージョン';
   @override
+  String get commandPaletteTitle => 'コマンドパレット';
+  @override
+  String get goToNoteTitle => 'ノートへ移動';
+  @override
+  String get paletteGroupNote => 'ノート';
+  @override
+  String get paletteGroupEditor => 'エディタ';
+  @override
+  String get paletteGroupView => '表示';
+  @override
+  String get paletteGroupLibrary => 'ライブラリ';
+  @override
+  String get paletteGroupGoTo => '移動';
+  @override
+  String get paletteHint => 'コマンドとノートを検索';
+  @override
+  String get paletteNoResults => '一致するものがありません';
+  @override
+  String get paletteCommands => 'コマンド';
+  @override
+  String get paletteNotes => 'ノート';
+  @override
+  String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
+  @override
   String get openFileMissing => 'このノートのファイルがディスクにありません';
   @override
   String get openFileFailed => 'このノートを Niman の外で開けませんでした';

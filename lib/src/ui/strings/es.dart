@@ -1202,6 +1202,30 @@ final class SpanishStrings extends Strings {
   @override
   String get historyAllVersions => 'Todas las versiones';
   @override
+  String get commandPaletteTitle => 'Paleta de comandos';
+  @override
+  String get goToNoteTitle => 'Ir a la nota';
+  @override
+  String get paletteGroupNote => 'Nota';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Vista';
+  @override
+  String get paletteGroupLibrary => 'Biblioteca';
+  @override
+  String get paletteGroupGoTo => 'Ir a';
+  @override
+  String get paletteHint => 'Buscar comandos y notas';
+  @override
+  String get paletteNoResults => 'Sin coincidencias';
+  @override
+  String get paletteCommands => 'Comandos';
+  @override
+  String get paletteNotes => 'Notas';
+  @override
+  String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
+  @override
   String get openFileMissing => 'El archivo de esta nota no está en el disco';
   @override
   String get openFileFailed => 'No se pudo abrir esta nota fuera de Niman';

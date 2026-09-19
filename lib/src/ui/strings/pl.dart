@@ -1194,6 +1194,30 @@ final class PolishStrings extends Strings {
   @override
   String get historyAllVersions => 'Wszystkie wersje';
   @override
+  String get commandPaletteTitle => 'Paleta poleceń';
+  @override
+  String get goToNoteTitle => 'Przejdź do notatki';
+  @override
+  String get paletteGroupNote => 'Notatka';
+  @override
+  String get paletteGroupEditor => 'Edytor';
+  @override
+  String get paletteGroupView => 'Widok';
+  @override
+  String get paletteGroupLibrary => 'Biblioteka';
+  @override
+  String get paletteGroupGoTo => 'Przejdź do';
+  @override
+  String get paletteHint => 'Szukaj poleceń i notatek';
+  @override
+  String get paletteNoResults => 'Brak wyników';
+  @override
+  String get paletteCommands => 'Polecenia';
+  @override
+  String get paletteNotes => 'Notatki';
+  @override
+  String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
+  @override
   String get openFileMissing => 'Pliku tej notatki nie ma na dysku';
   @override
   String get openFileFailed =>
