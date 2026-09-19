@@ -3,6 +3,7 @@
 // navigation between them. The phone keeps its list of screens.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
 import 'package:niman/src/ui/settings_keys.dart';
@@ -78,6 +79,27 @@ void main() {
         find.byKey(const Key('settings-search-template-folder-setting')),
         findsOne,
       );
+    });
+
+    // 0.0.8 test round: searching "zen" found nothing, though Zen mode
+    // has a key of its own on the keyboard screen.
+    testWidgets('a command is found by its name, and lands on its keys', (
+      tester,
+    ) async {
+      await pumpAt(tester, 1200);
+      await tester.enterText(
+        find.byKey(const Key('settings-search-field')),
+        'zen',
+      );
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pumpAndSettle();
+      final result = find.byKey(const Key('settings-search-shortcut-zenMode'));
+      expect(result, findsOne);
+      expect(find.descendant(of: result, matching: find.text('F11')), findsOne);
+      await tester.tap(result);
+      await tester.pumpAndSettle();
+      expect(find.byType(KeyboardShortcutsScreen), findsOne);
+      expect(find.byKey(const Key('shortcut-zenMode')), findsOne);
     });
 
     testWidgets('what an area opens stays in the right column', (tester) async {
