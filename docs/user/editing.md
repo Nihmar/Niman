@@ -25,6 +25,11 @@ starting where the file tree ends.
 - **Switching** is by the tab, by `Ctrl+Tab` / `Ctrl+Shift+Tab`, or by
   the **▾** list, which shows every tab with its folder when the row is
   too full.
+- **Dragging a tab** along its row reorders it; a line shows where it
+  will land. Dropped on the other pane's row or body it moves there,
+  keeping everything, undo included. With the window not split, dropping
+  it on a pane's right or bottom quarter splits the window with that tab
+  — the shaded half shows what you are about to get.
 - **Closing** is by the tab's **×**, a middle click, or `Ctrl+W`. The tab
   to the right takes its place.
 - **An orange dot** in place of the **×** means the note has edits not
@@ -43,7 +48,7 @@ tabs.
 - **Focus.** A click inside a pane gives it the focus: the tree opens
   there, and the tree shows that pane's note.
 - **Moving.** A tab's **Move to the other pane** moves it, keeping
-  everything, undo included.
+  everything, undo included; so does dragging it onto the other pane.
 - **Unsplitting.** Closing a pane's last tab puts the window back
   together, and the divider drags.
 - **One place per note.** A note is open in one place only: opening it
