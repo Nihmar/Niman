@@ -35,6 +35,10 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   a per-library personal dictionary (right-click *Add to dictionary*,
   `<library>/.niman/dictionary.txt`).
 - Tray support where the desktop provides one.
+- Markdown files open in Niman: the desktop entry declares
+  `text/markdown`, so Niman is offered for `.md` files and can be made
+  their default app. Double-clicking one opens it in the Niman already
+  running, or starts one.
 - A tree row's right-click menu can show the note in the file manager
   (over `org.freedesktop.FileManager1`, falling back to `xdg-open` on
   the folder) or open it in the default app — see
@@ -51,6 +55,12 @@ New tests must be portable too (see [conventions](../dev/conventions.md)).
   system behaviours — resizing from the edges, Aero Snap, `Win`+Arrow —
   because the frame is still there underneath; the app only paints over
   the caption.
+- The installer can associate `.md` and `.markdown` files with Niman
+  (a checkbox, on by default). Niman joins the files' *Open with* list;
+  Windows leaves the choice of default app to you, so it becomes the
+  default only when nothing else claims `.md`, or when you pick it.
+  Double-clicking one opens it in the Niman already running, or starts
+  one.
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
@@ -98,7 +108,7 @@ the tags as sheets and the history as its screen.
 
 ## Not yet
 
-Share-in on Android, file association on desktop, single-instance guard
-— tracked as [#39](https://github.com/Nihmar/Niman/issues/39).
+Share-in on Android — tracked as
+[#39](https://github.com/Nihmar/Niman/issues/39).
 Debug-signed APKs until release keys land (see
 [releasing](../dev/releasing.md)).
