@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/todo/reminders.dart';
 import 'package:niman/src/todo/todo_controller.dart';
 import 'package:niman/src/todo/todo_filter.dart';
@@ -39,8 +40,13 @@ final class TodoTab extends StatefulWidget {
     this.reminders,
     this.clock,
     this.onAddTask,
+    this.column = NoteColumn.off,
     super.key,
   });
+
+  /// The note column (#171), which the list keeps to as a note's text
+  /// does (0.0.8 test round).
+  final NoteColumn column;
 
   /// The session-bound todo state (owned by the shell).
   final TodoController controller;
@@ -108,7 +114,12 @@ final class _TodoTabState extends State<TodoTab> {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
-            Expanded(child: _body(snapshot, wide: wide)),
+            Expanded(
+              child: NoteColumnPadding(
+                column: widget.column,
+                child: _body(snapshot, wide: wide),
+              ),
+            ),
           ],
         );
       },

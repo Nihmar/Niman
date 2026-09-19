@@ -1689,7 +1689,14 @@ final class _NoteViewState extends State<NoteView>
     // note is a list, not a document, on screen.
     final kindGui = _noteKind == null ? null : NoteKinds.forType(_noteKind);
     final kindBody = widget.kindMode && kindGui != null;
-    final kindChild = kindBody ? kindGui.buildBody(context, _kindHost) : null;
+    // A list or a voice note keeps to the note column like text does
+    // (0.0.8 test round): the column is the app's shape, not the editor's.
+    final kindChild = kindBody
+        ? NoteColumnPadding(
+            column: widget.noteColumn,
+            child: kindGui.buildBody(context, _kindHost),
+          )
+        : null;
     return Column(
       children: [
         // Desktop: one row above the note (#173) — the formatting on the

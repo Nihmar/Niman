@@ -3007,6 +3007,7 @@ final class _LibraryShellState extends State<_LibraryShell>
         controller: _todoController,
         reminders: widget.reminders,
         onAddTask: _addTodo,
+        column: _editorSettings.noteColumn,
       ),
       ShellTab.search => _searchSlot(controller),
       // Empty unless the shell actually sent the user here to choose: an
