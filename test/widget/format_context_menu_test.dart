@@ -59,6 +59,15 @@ void main() {
     await tester.pump();
     // The clipboard first, the formatting after it.
     expect(find.text('Paste'), findsOneWidget);
+    // The clipboard rows carry their icons, as the formatting does.
+    for (final icon in [
+      Icons.content_cut,
+      Icons.content_copy,
+      Icons.content_paste,
+      Icons.select_all,
+    ]) {
+      expect(find.byIcon(icon), findsOneWidget, reason: '$icon');
+    }
     final paste = tester.getTopLeft(find.text('Paste')).dy;
     expect(
       tester.getTopLeft(find.byKey(const Key('context-bold'))).dy,

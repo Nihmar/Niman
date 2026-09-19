@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show kMiddleMouseButton;
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/db/index_database.dart';
@@ -41,6 +42,7 @@ final class NoteTree extends StatefulWidget {
     required this.onSelect,
     this.onLongPress,
     this.onSecondaryTapDown,
+    this.onOpenInNewTab,
     this.nameDesc = false,
     super.key,
   });
@@ -70,6 +72,10 @@ final class NoteTree extends StatefulWidget {
   /// cursor, T-PP-20): the desktop twin of [onLongPress], which stays
   /// for touchscreens.
   final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
+
+  /// Called with a note's row on a middle click: the note in a tab of its
+  /// own, as a browser opens a link (0.0.8 test round).
+  final void Function(Note note)? onOpenInNewTab;
 
   @override
   State<NoteTree> createState() => _NoteTreeState();
@@ -214,6 +220,7 @@ final class _NoteTreeState extends State<NoteTree> {
                   onToggle: widget.onToggle,
                   onLongPress: widget.onLongPress,
                   onSecondaryTapDown: widget.onSecondaryTapDown,
+                  onMiddleClick: widget.onOpenInNewTab,
                 );
               },
             );
@@ -249,6 +256,7 @@ final class _NoteTreeState extends State<NoteTree> {
       onToggle: widget.onToggle,
       onLongPress: widget.onLongPress,
       onSecondaryTapDown: widget.onSecondaryTapDown,
+      onMiddleClick: widget.onOpenInNewTab,
       icon: Icons.push_pin_outlined,
     );
   }
@@ -319,6 +327,7 @@ final class _RowTile extends StatelessWidget {
     required this.onToggle,
     this.onLongPress,
     this.onSecondaryTapDown,
+    this.onMiddleClick,
     this.icon,
     super.key,
   });
@@ -332,6 +341,9 @@ final class _RowTile extends StatelessWidget {
   final void Function(Note note)? onLongPress;
   final void Function(Note note, TapDownDetails details)? onSecondaryTapDown;
 
+  /// A middle click on a note's row (not a folder's).
+  final void Function(Note note)? onMiddleClick;
+
   /// Replaces the file-type icon; the pinned block uses it to say why the
   /// row is there.
   final IconData? icon;
@@ -339,7 +351,8 @@ final class _RowTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
+    final middle = onMiddleClick;
+    final row = InkWell(
       onTap: () => onSelect(note),
       onLongPress: onLongPress == null ? null : () => onLongPress!(note),
       onSecondaryTapDown: onSecondaryTapDown == null
@@ -385,6 +398,13 @@ final class _RowTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+    if (middle == null || note.isDir) return row;
+    return Listener(
+      onPointerDown: (event) {
+        if (event.buttons == kMiddleMouseButton) middle(note);
+      },
+      child: row,
     );
   }
 }

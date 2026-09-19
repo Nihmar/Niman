@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/app.dart';
+import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_tab_bar.dart';
@@ -219,5 +220,25 @@ void main() {
     await press(tester, LogicalKeyboardKey.f11);
     expect(zenBar, findsNothing);
     expect(window.maximizeCalls, 0);
+  });
+
+  // 0.0.8 test round: a note read rather than written wants its preview
+  // in Zen too; the bar holds the eye, since the status row is hidden.
+  testWidgets('the bar flips the note between editor and preview', (
+    tester,
+  ) async {
+    await controller.setPreviewMode(PreviewLayoutMode.fullScreen);
+    await pumpAt(tester);
+    await press(tester, LogicalKeyboardKey.f11);
+    bool preview() =>
+        tester.widget<NoteView>(find.byType(NoteView)).showPreview;
+    expect(preview(), isFalse);
+    await tester.tap(find.byKey(const Key('zen-preview-toggle')));
+    await settle(tester);
+    expect(preview(), isTrue);
+    expect(zenBar, findsOne, reason: 'still in Zen');
+    await tester.tap(find.byKey(const Key('zen-preview-toggle')));
+    await settle(tester);
+    expect(preview(), isFalse);
   });
 }
