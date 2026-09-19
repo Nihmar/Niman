@@ -112,6 +112,11 @@ final class SyncReport {
   /// sync's call, which sees the whole remote tree.
   final List<SyncDecision> deferred = [];
 
+  /// What an automatic full sync left alone because its queued hint is
+  /// still backing off (#163): the backoff holds for every run, not only
+  /// the quick ones. A sync the user asks for lifts it first.
+  final List<SyncDecision> waiting = [];
+
   /// The longest `Retry-After` the server asked for, if any.
   Duration? retryAfter;
 
@@ -134,6 +139,7 @@ final class SyncReport {
       if (skipped.isNotEmpty) '${skipped.length} skipped',
       if (failures.isNotEmpty) '${failures.length} failed',
       if (deferred.isNotEmpty) '${deferred.length} left for a full sync',
+      if (waiting.isNotEmpty) '${waiting.length} waiting out a backoff',
     ];
     return parts.isEmpty ? 'nothing to do' : parts.join(', ');
   }
@@ -320,9 +326,23 @@ final class SyncEngine {
   }) async {
     final clock = Stopwatch()..start();
     final report = SyncReport()..quick = quick;
-    final hints = quick
+    final pending = quick
         ? await store.dueOps(root)
         : await store.pendingOps(root);
+    // A full run settles only the hints that are due; the others keep
+    // their backoff, and their paths wait with them (#163).
+    final nowMs = _now().millisecondsSinceEpoch;
+    final hints = [
+      for (final hint in pending)
+        if (hint.nextAttemptAtMs <= nowMs) hint,
+    ];
+    final held = [
+      for (final hint in pending)
+        if (hint.nextAttemptAtMs > nowMs) hint,
+    ];
+    if (held.isNotEmpty) {
+      _log.info('run: ${held.length} queued hints still backing off');
+    }
     final kind = quick ? 'quick' : 'full';
     _log.info('run: $kind start for $root (${hints.length} queued hints)');
     if (quick && hints.isEmpty) {
@@ -345,6 +365,7 @@ final class SyncEngine {
         hints,
         confirm,
         onProgress,
+        held: held,
       );
     } on WebDavAuthFailure catch (e) {
       _abort(report, SyncAbort.authentication, e.message);
@@ -410,14 +431,48 @@ final class SyncEngine {
       for (final path in report.skipped) path: 'changed during the sync',
       for (final failure in report.failures) failure.path: failure.error,
     };
+    final failed = {for (final failure in report.failures) failure.path};
     for (final hint in hints) {
       final error = _troubleFor(troubles, hint);
       if (error == null) {
         if (await store.completeOp(hint)) report.hintsDone++;
-      } else if (await store.failOp(hint, error) != null) {
-        report.hintsFailed++;
+        continue;
+      }
+      final updated = await store.failOp(hint, error);
+      if (updated == null) continue;
+      report.hintsFailed++;
+      // A path skipped run after run is not a passing hiccup: it is
+      // failing, and the run says so instead of calling itself a success
+      // (#163). A real failure is in the report already.
+      if (updated.attempts >= stuckAfter && !failed.contains(hint.path)) {
+        report.failures.add((
+          path: hint.path,
+          error: '$error (${updated.attempts} runs in a row)',
+        ));
+        _log.warning(
+          'queue: ${hint.path} skipped ${updated.attempts} runs in a row, '
+          'reported as failing',
+        );
       }
     }
+  }
+
+  /// How many runs in a row a path may be skipped before the run reports
+  /// it as failing (#163).
+  static const int stuckAfter = 3;
+
+  /// Whether [decision] touches a path one of the [held] hints covers:
+  /// its path or its move source, the hint's own or anything under it.
+  static bool _heldBy(List<SyncOp> held, SyncDecision decision) {
+    final touched = [decision.path, ?decision.fromPath];
+    for (final hint in held) {
+      for (final covered in [hint.path, ?hint.fromPath]) {
+        for (final path in touched) {
+          if (path == covered || path.startsWith('$covered/')) return true;
+        }
+      }
+    }
+    return false;
   }
 
   /// The error of the first troubled path [hint] covers (its path, its
@@ -474,8 +529,9 @@ final class SyncEngine {
     SyncReport report,
     List<SyncOp> hints,
     SyncConfirm? confirm,
-    SyncProgress? onProgress,
-  ) async {
+    SyncProgress? onProgress, {
+    List<SyncOp> held = const [],
+  }) async {
     final allRows = await store.items(root);
     final firstSync = allRows.isEmpty && destination.lastSyncAtMs == null;
     if (report.quick && firstSync) {
@@ -547,6 +603,24 @@ final class SyncEngine {
           'plan: quick sync leaves ${report.deferred.length} for a full '
           'sync (${report.deferred.take(3).join('; ')}'
           '${report.deferred.length > 3 ? '; …' : ''})',
+        );
+        plan = SyncPlan(kept, rowCount: plan.rowCount);
+      }
+    }
+    if (held.isNotEmpty) {
+      final kept = <SyncDecision>[];
+      for (final decision in plan.decisions) {
+        if (_heldBy(held, decision)) {
+          report.waiting.add(decision);
+        } else {
+          kept.add(decision);
+        }
+      }
+      if (report.waiting.isNotEmpty) {
+        _log.info(
+          'plan: ${report.waiting.length} wait out their backoff '
+          '(${report.waiting.take(3).join('; ')}'
+          '${report.waiting.length > 3 ? '; …' : ''})',
         );
         plan = SyncPlan(kept, rowCount: plan.rowCount);
       }
