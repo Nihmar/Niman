@@ -4,12 +4,13 @@ Version=1.5
 Name=Niman
 GenericName=Markdown Notes
 Comment=Markdown notes
-Exec=niman %U
+Exec=niman %F
 Icon=dev.niman.niman
 Terminal=false
 Categories=Office;TextEditor;Utility;
 Keywords=notes;markdown;note;todo;task;list;quick;new;reminder;niman;
 StartupWMClass=dev.niman.niman
+MimeType=text/markdown;text/x-markdown;
 Actions=quick-note;new-todo;new-note;new-list;new-voice;
 
 [Desktop Action quick-note]
