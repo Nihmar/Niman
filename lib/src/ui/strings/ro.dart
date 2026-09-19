@@ -1211,6 +1211,10 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get typewriterOn => 'Activează modul mașină de scris';
+  @override
+  String get typewriterOff => 'Dezactivează modul mașină de scris';
+  @override
   String get typewriterTitle => 'Mod mașină de scris';
   @override
   String get typewriterSubtitle =>

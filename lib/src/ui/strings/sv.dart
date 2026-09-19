@@ -1206,6 +1206,10 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get typewriterOn => 'Slå på skrivmaskinsläge';
+  @override
+  String get typewriterOff => 'Slå av skrivmaskinsläge';
+  @override
   String get typewriterTitle => 'Skrivmaskinsläge';
   @override
   String get typewriterSubtitle =>

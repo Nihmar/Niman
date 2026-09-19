@@ -1196,6 +1196,10 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get typewriterOn => 'Ieslēgt rakstāmmašīnas režīmu';
+  @override
+  String get typewriterOff => 'Izslēgt rakstāmmašīnas režīmu';
+  @override
   String get typewriterTitle => 'Rakstāmmašīnas režīms';
   @override
   String get typewriterSubtitle => 'Rinda, kuru rakstāt, paliek redaktora vidū';

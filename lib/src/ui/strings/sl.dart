@@ -1195,6 +1195,10 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get typewriterOn => 'Vklopi način pisalnega stroja';
+  @override
+  String get typewriterOff => 'Izklopi način pisalnega stroja';
+  @override
   String get typewriterTitle => 'Način pisalnega stroja';
   @override
   String get typewriterSubtitle =>

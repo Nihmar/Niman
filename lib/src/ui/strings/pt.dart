@@ -1206,6 +1206,10 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get typewriterOn => 'Ativar o modo máquina de escrever';
+  @override
+  String get typewriterOff => 'Desativar o modo máquina de escrever';
+  @override
   String get typewriterTitle => 'Modo máquina de escrever';
   @override
   String get typewriterSubtitle =>

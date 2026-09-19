@@ -1223,6 +1223,10 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get typewriterOn => 'Schreibmaschinenmodus einschalten';
+  @override
+  String get typewriterOff => 'Schreibmaschinenmodus ausschalten';
+  @override
   String get typewriterTitle => 'Schreibmaschinenmodus';
   @override
   String get typewriterSubtitle =>

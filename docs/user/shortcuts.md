@@ -20,6 +20,8 @@ shortcuts lists them and lets you change them:
 - `Ctrl/⌘+Shift+B` — show or hide the side panel (outline, tags, history)
 - `F11` — Zen mode: the note and nothing else; `Esc` or `F11` again
   leaves it (see [editing](editing.md#zen-mode))
+- `Ctrl/⌘+Shift+T` — typewriter mode on or off: the line being written
+  stays in the middle (see [editing](editing.md#typewriter-mode))
 - `Ctrl/⌘+1…5` — Files, Todo, Search, Quick note, Settings tabs
 
 Moving and selecting in the source editor, on Windows and Linux:

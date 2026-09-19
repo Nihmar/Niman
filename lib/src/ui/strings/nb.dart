@@ -1194,6 +1194,10 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get typewriterOn => 'Slå på skrivemaskinmodus';
+  @override
+  String get typewriterOff => 'Slå av skrivemaskinmodus';
+  @override
   String get typewriterTitle => 'Skrivemaskinmodus';
   @override
   String get typewriterSubtitle =>

@@ -1230,6 +1230,10 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get typewriterOn => 'Activa el mode màquina d’escriure';
+  @override
+  String get typewriterOff => 'Desactiva el mode màquina d’escriure';
+  @override
   String get typewriterTitle => 'Mode màquina d’escriure';
   @override
   String get typewriterSubtitle =>
