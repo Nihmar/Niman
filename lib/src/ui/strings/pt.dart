@@ -1206,6 +1206,72 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get keySpace => 'Espaço';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Retrocesso';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Cima';
+  @override
+  String get keyArrowDown => 'Baixo';
+  @override
+  String get keyArrowLeft => 'Esquerda';
+  @override
+  String get keyArrowRight => 'Direita';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Sem atalho';
+  @override
+  String get shortcutRestoreDefaults => 'Repor predefinições';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Repor todos os atalhos como o Niman os fornece?';
+  @override
+  String get shortcutRevert => 'Voltar à predefinição';
+  @override
+  String get shortcutClear => 'Remover o atalho';
+  @override
+  String get shortcutCapturePrompt =>
+      'Prima as teclas. Esc e Tab também são captados: saia com Cancelar.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Acrescente Ctrl, Alt ou Meta: uma tecla sozinha é para escrever.';
+  @override
+  String get shortcutMove => 'Movê-lo';
+  @override
+  String get shortcutUseAnyway => 'Usar mesmo assim';
+  @override
+  String get shortcutUndo => 'Anular';
+  @override
+  String get shortcutRedo => 'Refazer';
+  @override
+  String get shortcutChange => 'Alterar o atalho';
+  @override
+  String shortcutCaptureTitle(String command) => 'Teclas para $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys já é de $other. Movê-lo para aqui? $other ficará sem atalho.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys também é $what nos campos de texto e no editor. Aí o seu '
+      'comando fica com ele.';
+  @override
   String get openFileMissing => 'O arquivo desta nota não está no disco';
   @override
   String get openFileFailed => 'Não foi possível abrir esta nota fora do Niman';

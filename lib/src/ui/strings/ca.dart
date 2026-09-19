@@ -1230,6 +1230,73 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get keySpace => 'Espai';
+  @override
+  String get keyEnter => 'Retorn';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Retrocés';
+  @override
+  String get keyDelete => 'Supr';
+  @override
+  String get keyArrowUp => 'Amunt';
+  @override
+  String get keyArrowDown => 'Avall';
+  @override
+  String get keyArrowLeft => 'Esquerra';
+  @override
+  String get keyArrowRight => 'Dreta';
+  @override
+  String get keyHome => 'Inici';
+  @override
+  String get keyEnd => 'Fi';
+  @override
+  String get keyPageUp => 'Re Pàg';
+  @override
+  String get keyPageDown => 'Av Pàg';
+  @override
+  String get keyInsert => 'Insereix';
+  @override
+  String get shortcutNone => 'Cap drecera';
+  @override
+  String get shortcutRestoreDefaults => 'Restaura les predeterminades';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Tornar totes les dreceres tal com les porta Niman?';
+  @override
+  String get shortcutRevert => 'Torna a la predeterminada';
+  @override
+  String get shortcutClear => 'Treu la drecera';
+  @override
+  String get shortcutCapturePrompt =>
+      'Premeu les tecles. Esc i Tab també es capturen: sortiu amb Cancel·la.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Afegiu Ctrl, Alt o Meta: una tecla sola és per escriure.';
+  @override
+  String get shortcutMove => 'Mou-la';
+  @override
+  String get shortcutUseAnyway => 'Fes-la servir igualment';
+  @override
+  String get shortcutUndo => 'Desfés';
+  @override
+  String get shortcutRedo => 'Refés';
+  @override
+  String get shortcutChange => 'Canvia la drecera';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tecles per a $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys ja és de $other. La voleu moure aquí? $other es quedarà sense '
+      'drecera.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys també és $what als camps de text i a l’editor. Allà l’agafarà '
+      'la vostra ordre.';
+  @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override
   String get openFileFailed =>

@@ -1174,6 +1174,74 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get keySpace => 'स्पेस';
+  @override
+  String get keyEnter => 'एंटर';
+  @override
+  String get keyTab => 'टैब';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'बैकस्पेस';
+  @override
+  String get keyDelete => 'डिलीट';
+  @override
+  String get keyArrowUp => 'ऊपर';
+  @override
+  String get keyArrowDown => 'नीचे';
+  @override
+  String get keyArrowLeft => 'बाएँ';
+  @override
+  String get keyArrowRight => 'दाएँ';
+  @override
+  String get keyHome => 'होम';
+  @override
+  String get keyEnd => 'एंड';
+  @override
+  String get keyPageUp => 'पेज अप';
+  @override
+  String get keyPageDown => 'पेज डाउन';
+  @override
+  String get keyInsert => 'इंसर्ट';
+  @override
+  String get shortcutNone => 'कोई शॉर्टकट नहीं';
+  @override
+  String get shortcutRestoreDefaults => 'डिफ़ॉल्ट बहाल करें';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'सभी शॉर्टकट वैसे ही वापस करें जैसे Niman देता है?';
+  @override
+  String get shortcutRevert => 'डिफ़ॉल्ट पर वापस';
+  @override
+  String get shortcutClear => 'शॉर्टकट हटाएँ';
+  @override
+  String get shortcutCapturePrompt =>
+      'कुंजियाँ दबाएँ। Esc और Tab भी दर्ज होते हैं: बाहर निकलने के लिए रद्द '
+      'करें।';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Ctrl, Alt या Meta जोड़ें: अकेली कुंजी टाइप करने के लिए है।';
+  @override
+  String get shortcutMove => 'इसे ले जाएँ';
+  @override
+  String get shortcutUseAnyway => 'फिर भी उपयोग करें';
+  @override
+  String get shortcutUndo => 'पूर्ववत करें';
+  @override
+  String get shortcutRedo => 'फिर से करें';
+  @override
+  String get shortcutChange => 'शॉर्टकट बदलें';
+  @override
+  String shortcutCaptureTitle(String command) => '$command के लिए कुंजियाँ';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys पहले से $other का है। इसे यहाँ ले जाएँ? $other बिना शॉर्टकट के '
+      'रहेगा।';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys टेक्स्ट फ़ील्ड और एडिटर में $what भी है। वहाँ आपका कमांड इसे ले '
+      'लेगा।';
+  @override
   String get openFileMissing => 'इस नोट की फ़ाइल डिस्क पर नहीं है';
   @override
   String get openFileFailed => 'यह नोट Niman के बाहर नहीं खुल सका';

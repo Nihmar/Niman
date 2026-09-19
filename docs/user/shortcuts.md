@@ -2,7 +2,8 @@
 
 ## Keyboard (desktop)
 
-App-level accelerators (listed in-app under Settings → Keyboard):
+App-level accelerators, as Niman ships them. Settings → Keyboard
+shortcuts lists them and lets you change them:
 
 - `Ctrl/⌘+Shift+P` — the command palette: commands and notes in one
   search
@@ -34,6 +35,40 @@ Editor find/replace follows the familiar bindings:
 - `PageUp` / `PageDown` — move in results
 
 Links: `Ctrl+click` a link in the source editor to follow it.
+
+## Changing a shortcut
+
+Settings → **Keyboard shortcuts** lists every command, with its keys or
+with *No shortcut*.
+
+- **Change.** Tap a command and press the new combination. While the
+  window is recording it takes every key, Esc and Tab included, so leave
+  with **Cancel**, or by holding Esc down. A key on its own is refused,
+  because a plain letter is for typing; function keys (F1…F24) may stand
+  alone.
+- **Conflicts.** A combination another command already has is never
+  taken silently. The screen names that command and asks whether to
+  move the keys; if you do, that command is left with no shortcut.
+- **Keys the text fields and the editor use.** Copy, paste, cut, select
+  all, undo, redo, find and replace may be taken, after a plain warning:
+  your command takes them there too.
+- **Remove and restore.** **×** removes a command's shortcut. A command
+  with none is still one `Ctrl+Shift+P` away in the command palette.
+  **↺** puts back the key Niman ships, and **Restore defaults** puts back
+  every one.
+
+A key you chose wins everywhere, both editors included: Niman looks for
+it before the editor hears the key. The keys as shipped are chosen not
+to collide with the editor's own.
+
+The shortcuts belong to this device: they are kept in its settings,
+never in a library, so a library synced to another computer does not
+bring this keyboard's keys with it.
+
+Some combinations never reach an app. `Win`+anything on Windows, and the
+ones your Linux desktop keeps for itself, are taken before Niman sees
+them. Niman cannot tell which these are, so a shortcut set on one simply
+never fires.
 
 ## The command palette
 

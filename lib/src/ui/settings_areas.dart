@@ -163,7 +163,7 @@ List<SettingsArea> settingsAreas({
       title: AppStrings.keyboardShortcutsTitle,
       enabled: keyboardAttached,
       disabledNote: AppStrings.settingsAreaKeyboardDisabled,
-      build: (_) => const KeyboardShortcutsScreen(),
+      build: (_) => KeyboardShortcutsScreen(controller: controller),
     ),
     if (!isTestingBuild)
       SettingsArea(

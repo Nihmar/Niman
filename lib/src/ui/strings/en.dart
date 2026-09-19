@@ -1193,6 +1193,72 @@ final class EnglishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
   @override
+  String get keySpace => 'Space';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Up';
+  @override
+  String get keyArrowDown => 'Down';
+  @override
+  String get keyArrowLeft => 'Left';
+  @override
+  String get keyArrowRight => 'Right';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'No shortcut';
+  @override
+  String get shortcutRestoreDefaults => 'Restore defaults';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Put every shortcut back as Niman ships it?';
+  @override
+  String get shortcutRevert => 'Back to the default';
+  @override
+  String get shortcutClear => 'Remove the shortcut';
+  @override
+  String get shortcutCapturePrompt =>
+      'Press the keys. Esc and Tab are taken too: Cancel is the way out.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Add Ctrl, Alt or Meta: a key on its own is for typing.';
+  @override
+  String get shortcutMove => 'Move it';
+  @override
+  String get shortcutUseAnyway => 'Use anyway';
+  @override
+  String get shortcutUndo => 'Undo';
+  @override
+  String get shortcutRedo => 'Redo';
+  @override
+  String get shortcutChange => 'Change the shortcut';
+  @override
+  String shortcutCaptureTitle(String command) => 'Keys for $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys is already $other. Move it here? $other will have no shortcut.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys is also $what in text fields and the editor. Your command will '
+      'take it there.';
+  @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';
