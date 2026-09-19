@@ -42,6 +42,7 @@ PaletteGroup? paletteGroup(AppCommand command) => switch (command) {
   AppCommand.moveNote ||
   AppCommand.deleteNote ||
   AppCommand.noteHistory ||
+  AppCommand.openFile ||
   AppCommand.closeTab => PaletteGroup.note,
   AppCommand.togglePreview ||
   AppCommand.switchEditor ||
@@ -71,6 +72,7 @@ bool paletteAsks(AppCommand command) => switch (command) {
   AppCommand.renameNote ||
   AppCommand.moveNote ||
   AppCommand.deleteNote ||
+  AppCommand.openFile ||
   AppCommand.switchLibrary => true,
   _ => false,
 };

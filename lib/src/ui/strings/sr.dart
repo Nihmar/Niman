@@ -1204,6 +1204,12 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get openFileTitle => 'Отвори датотеку';
+  @override
+  String get outsideFileNote =>
+      'Ван библиотеке: чува се где јесте, без индекса, без историје, везе се '
+      'не прате';
+  @override
   String get typewriterOn => 'Укључи режим писаће машине';
   @override
   String get typewriterOff => 'Искључи режим писаће машине';

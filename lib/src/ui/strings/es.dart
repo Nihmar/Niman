@@ -1226,6 +1226,12 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get openFileTitle => 'Abrir archivo';
+  @override
+  String get outsideFileNote =>
+      'Fuera de toda biblioteca: se guarda donde está, sin índice, sin '
+      'historial, los enlaces no se siguen';
+  @override
   String get typewriterOn => 'Activar el modo máquina de escribir';
   @override
   String get typewriterOff => 'Desactivar el modo máquina de escribir';

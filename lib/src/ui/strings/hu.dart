@@ -1206,6 +1206,12 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get openFileTitle => 'Fájl megnyitása';
+  @override
+  String get outsideFileNote =>
+      'Könyvtáron kívül: a helyén mentődik, nincs indexelve, nincs előzmény, '
+      'a hivatkozások nem nyílnak meg';
+  @override
   String get typewriterOn => 'Írógépmód bekapcsolása';
   @override
   String get typewriterOff => 'Írógépmód kikapcsolása';

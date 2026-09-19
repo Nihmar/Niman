@@ -1205,6 +1205,12 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ переміщення · ↵ вибрати · esc закрити';
   @override
+  String get openFileTitle => 'Відкрити файл';
+  @override
+  String get outsideFileNote =>
+      'Поза бібліотекою: зберігається на місці, без індексу, без історії, '
+      'посилання не відкриваються';
+  @override
   String get typewriterOn => 'Увімкнути режим друкарської машинки';
   @override
   String get typewriterOff => 'Вимкнути режим друкарської машинки';

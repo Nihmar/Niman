@@ -1195,6 +1195,12 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get openFileTitle => 'Otevřít soubor';
+  @override
+  String get outsideFileNote =>
+      'Mimo knihovnu: ukládá se na místě, bez indexu, bez historie, odkazy '
+      'se nesledují';
+  @override
   String get typewriterOn => 'Zapnout režim psacího stroje';
   @override
   String get typewriterOff => 'Vypnout režim psacího stroje';

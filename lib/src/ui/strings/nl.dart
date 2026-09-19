@@ -1214,6 +1214,12 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get openFileTitle => 'Bestand openen';
+  @override
+  String get outsideFileNote =>
+      'Buiten elke bibliotheek: opgeslagen waar het staat, niet geïndexeerd, '
+      'geen geschiedenis, links worden niet gevolgd';
+  @override
   String get typewriterOn => 'Typemachinemodus aanzetten';
   @override
   String get typewriterOff => 'Typemachinemodus uitzetten';

@@ -575,6 +575,8 @@ abstract base class Strings {
   String get paletteCommands;
   String get paletteNotes;
   String get paletteFooter;
+  String get openFileTitle;
+  String get outsideFileNote;
   String get typewriterOn;
   String get typewriterOff;
   String get typewriterTitle;

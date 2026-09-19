@@ -8,9 +8,11 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/db/app_database.dart';
 import 'package:niman/src/db/index_scan.dart';
+import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/ui/known_library_list.dart';
+import 'package:niman/src/ui/outside_files.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
@@ -31,10 +33,13 @@ import 'package:path/path.dart' as p;
 /// root on shared storage is usable, and the screen asks for it up front.
 final class OpenLibraryScreen extends StatefulWidget {
   /// Creates the open/create screen.
-  const new({required this.controller, super.key});
+  const new({required this.controller, this.outsideFiles, super.key});
 
   /// The session that opens or creates the library for this screen.
   final LibrarySession controller;
+
+  /// Where a file opened on its own goes (#77); null offers none.
+  final OutsideFiles? outsideFiles;
 
   @override
   State<OpenLibraryScreen> createState() => _OpenLibraryScreenState();
@@ -163,6 +168,20 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
                     _AccessPrompt(onGrant: active ? null : _grantAccess)
                   else
                     _actions(active: active, narrow: narrow),
+                  // A file needs no library to be read or edited (#77);
+                  // the desktops only, where a picked file is the file
+                  // itself rather than a copy.
+                  if (widget.outsideFiles != null &&
+                      (Platform.isLinux || Platform.isWindows))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: TextButton.icon(
+                        key: const Key('open-outside-file'),
+                        onPressed: active ? null : _openFile,
+                        icon: const Icon(Icons.description_outlined),
+                        label: Text(AppStrings.openFileTitle),
+                      ),
+                    ),
                   if (active) ...[
                     const Padding(
                       padding: EdgeInsets.only(top: 16),
@@ -230,6 +249,14 @@ final class _OpenLibraryScreenState extends State<OpenLibraryScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [open, const SizedBox(width: 8), create],
     );
+  }
+
+  /// Opens a Markdown file on its own, with no library around it.
+  Future<void> _openFile() async {
+    final files = widget.outsideFiles;
+    final path = await pickOutsideFile();
+    if (path == null || files == null || !mounted) return;
+    await openOutsideFile(context, files, EditorOnlyDocument(path));
   }
 
   /// Opens a library the user picked off the known list.

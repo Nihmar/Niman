@@ -1211,6 +1211,12 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get openFileTitle => 'Deschide fișier';
+  @override
+  String get outsideFileNote =>
+      'În afara oricărei biblioteci: salvat unde se află, neindexat, fără '
+      'istoric, legăturile nu sunt urmate';
+  @override
   String get typewriterOn => 'Activează modul mașină de scris';
   @override
   String get typewriterOff => 'Dezactivează modul mașină de scris';
