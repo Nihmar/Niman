@@ -923,33 +923,38 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The tabs in the title bar (#23), with the unsaved dot of every note
   /// whose editor holds edits the disk does not have yet.
-  Widget _buildTabs(Widget dragArea) => ListenableBuilder(
-    listenable: _tabsListenable,
-    builder: (context, _) {
-      final w = _workspace.value;
-      if (!w.isSplit || w.axis == SplitAxis.down) {
-        return _paneTabs(0, dragArea);
-      }
-      // Split right: the row divides at the same x as the panes do, so
-      // nothing moves when the window splits (the Split mockup).
-      // The panes end where the dock begins, when it shows (#175).
-      final dock = _dockShown ? RightDock.width + 1 : 0;
-      final detail =
-          MediaQuery.sizeOf(context).width -
-          _tabsStart -
-          dock -
-          PaneSplit.dividerWidth;
-      return Row(
-        children: [
-          SizedBox(
-            width: detail * w.fraction + PaneSplit.dividerWidth,
-            child: _paneTabs(0, dragArea),
-          ),
-          Expanded(child: _paneTabs(1, dragArea)),
-        ],
+  Widget _buildTabs(Widget dragArea) {
+    // The panes end where the dock begins, when it shows (#175).
+    final dock = _dockShown ? RightDock.width + 1 : 0;
+    return _tabRow(
+      dragArea,
+      panesWidth: MediaQuery.sizeOf(context).width - _tabsStart - dock,
+    );
+  }
+
+  /// The open notes' tabs over panes [panesWidth] wide, with [filler]
+  /// past them. Split right, the row divides at the same x as the panes
+  /// do, so nothing moves when the window splits (the Split mockup).
+  Widget _tabRow(Widget filler, {required double panesWidth}) =>
+      ListenableBuilder(
+        listenable: _tabsListenable,
+        builder: (context, _) {
+          final w = _workspace.value;
+          if (!w.isSplit || w.axis == SplitAxis.down) {
+            return _paneTabs(0, filler);
+          }
+          final detail = panesWidth - PaneSplit.dividerWidth;
+          return Row(
+            children: [
+              SizedBox(
+                width: detail * w.fraction + PaneSplit.dividerWidth,
+                child: _paneTabs(0, filler),
+              ),
+              Expanded(child: _paneTabs(1, filler)),
+            ],
+          );
+        },
       );
-    },
-  );
 
   /// Where the tabs start in the title bar: the tree's right edge.
   double get _tabsStart =>
@@ -2204,7 +2209,27 @@ final class _LibraryShellState extends State<_LibraryShell>
           _treeDivider(),
         ],
         Expanded(
-          child: Column(children: [Expanded(child: _panes(controller))]),
+          child: Column(
+            children: [
+              // Without a title bar of the app's own (an Android tablet,
+              // a phone in landscape) the tabs head the panes instead:
+              // the same row, at the same x as the panes below it.
+              if (!widget.window.customTitleBar) ...[
+                SizedBox(
+                  key: const Key('pane-tab-row'),
+                  height: 38,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => _tabRow(
+                      const SizedBox.shrink(),
+                      panesWidth: constraints.maxWidth,
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+              ],
+              Expanded(child: _panes(controller)),
+            ],
+          ),
         ),
         if (_dockShown) ...[
           const VerticalDivider(width: 1),
