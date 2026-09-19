@@ -213,6 +213,19 @@ jobs:
         shell: bash
         run: flutter build windows --release --build-name="$VERSION" --build-number="$GITHUB_RUN_NUMBER"
 
+      # A clean Windows has no Visual C++ runtime (#35): the bundle must
+      # carry it, or niman.exe does not start there. windows/CMakeLists.txt
+      # installs it; this keeps a release from shipping without it.
+      - name: Check the bundled Visual C++ runtime
+        shell: pwsh
+        run: |
+          $missing = @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') |
+            Where-Object { -not (Test-Path "build\windows\x64\runner\Release\$_") }
+          if ($missing) {
+            Write-Error "bundle lacks the VC++ runtime: $($missing -join ', ')"
+            exit 1
+          }
+
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 

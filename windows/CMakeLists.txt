@@ -83,6 +83,17 @@ endif()
 set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 
+# The Visual C++ runtime next to niman.exe (#35). Flutter links it
+# dynamically, and a clean Windows without the 2015-2022 redistributable
+# has none of it: the app would not start there. CMake's module finds the
+# redistributable DLLs (msvcp140, vcruntime140, vcruntime140_1) of the
+# toolchain that built the app, and installs them with the bundle. The
+# Universal CRT is part of Windows 10 and later, so it stays out.
+set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${INSTALL_BUNDLE_LIB_DIR}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT Runtime)
+include(InstallRequiredSystemLibraries)
+
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
