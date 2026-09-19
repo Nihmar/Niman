@@ -35,3 +35,16 @@ closed or not. See [widgets](widgets.md).
 Per library (`.niman/settings.json`): `reminderShowTokens` (default
 false). Global debug log (last 5 000 lines, exportable, survives
 reboots) helps diagnose missed reminders.
+
+A reminder whose time has passed gets a `todo reminders: overdue` line
+in the log, saying what happened to it:
+
+- **Android**, where the system holds the alarm: `STILL PENDING, never
+  fired` (the system is still holding it past its time) or `no longer
+  pending, fired`, plus the two settings that can defer an alarm, exact
+  alarms and battery optimization.
+- **Linux and Windows**, where the alarm is a timer inside Niman:
+  `timer fired … late`, `timer STILL ARMED past its time` (the machine
+  slept through it) or `NOT FIRED` (Niman was not running at its time;
+  it fires as soon as Niman starts). A desktop reminder needs Niman
+  running, in the tray if the window is closed.

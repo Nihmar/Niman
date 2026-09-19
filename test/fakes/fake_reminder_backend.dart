@@ -93,6 +93,18 @@ final class FakeReminderBackend implements ReminderBackend {
   Stream<String?> get taps => const Stream<String?>.empty();
 
   @override
+  String overdueState(
+    TodoReminder reminder, {
+    required bool pending,
+    required bool exact,
+    required bool batteryExempt,
+  }) => osAlarmOverdueState(
+    pending: pending,
+    exact: exact,
+    batteryExempt: batteryExempt,
+  );
+
+  @override
   Future<String?> launchPayload() async => null;
 
   @override

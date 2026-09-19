@@ -32,6 +32,9 @@ final class DesktopReminderBackend implements ReminderBackend {
   /// Armed timers by reminder id; the pending map the service reads back.
   final Map<int, Timer> _armed = {};
 
+  /// When each reminder fired in this run, by id (#42).
+  final Map<int, DateTime> _fired = {};
+
   final StreamController<String?> _taps = StreamController<String?>.broadcast();
 
   static const AppLogger _log = AppLogger(name: 'todo');
@@ -74,6 +77,7 @@ final class DesktopReminderBackend implements ReminderBackend {
     final delay = reminder.when.difference(DateTime.now());
     final timer = Timer(delay.isNegative ? Duration.zero : delay, () {
       _armed.remove(reminder.id);
+      _fired[reminder.id] = DateTime.now();
       unawaited(_show(reminder));
     });
     _armed[reminder.id] = timer;
@@ -90,6 +94,35 @@ final class DesktopReminderBackend implements ReminderBackend {
         'todo reminders: show failed for id ${reminder.id} ($error)',
       );
     }
+  }
+
+  /// The desktop reading of an overdue reminder (#42). No OS keeps its
+  /// alarm, so "not pending" does not mean "fired": after a restart the
+  /// timers start empty, and a reminder due while Niman was closed was
+  /// never armed at all. Exact alarms and battery say nothing here.
+  @override
+  String overdueState(
+    TodoReminder reminder, {
+    required bool pending,
+    required bool exact,
+    required bool batteryExempt,
+  }) {
+    if (pending) {
+      return 'timer STILL ARMED past its time: the machine slept through '
+          'it, or the process stalled';
+    }
+    final fired = _fired[reminder.id];
+    if (fired != null) {
+      return 'timer fired ${_late(fired.difference(reminder.when))} late';
+    }
+    return 'NOT FIRED: no timer in this run, Niman was not running at its '
+        'time; it fires now';
+  }
+
+  /// A lateness, short: "0 s", "42 s", "3 min".
+  static String _late(Duration d) {
+    final seconds = d.isNegative ? 0 : d.inSeconds;
+    return seconds < 60 ? '$seconds s' : '${d.inMinutes} min';
   }
 
   /// Null: a desktop launch is a plain start, never a notification tap.
