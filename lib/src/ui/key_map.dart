@@ -172,9 +172,14 @@ final class AppKeyMap {
 /// The shipped keys are bound through the focus tree, where an editor
 /// that means something else by a combination hears it first — and the
 /// shipped keys are picked not to collide. A key the user chose is the
-/// user's word, so it wins everywhere, in both editors too: registered
-/// with [HardwareKeyboard], it is looked at before the focus tree hears
-/// of the event at all.
+/// user's word, so it wins everywhere, in both editors too: it is an
+/// early handler of the [FocusManager], which sees the event before the
+/// focus tree and, having run the command, keeps it from the tree.
+///
+/// A [HardwareKeyboard] handler looked right and was not: returning true
+/// there does not stop the focus tree, so a chosen key ran twice — once
+/// here, once through the shell's own bindings. A toggle (the side
+/// panel) undid itself, and the editors heard the key as well.
 final class ChosenKeys {
   /// Runs through [handlers] while [active] says so.
   new({required this.handlers, required this.active});
@@ -186,14 +191,19 @@ final class ChosenKeys {
   final bool Function() active;
 
   /// Starts listening.
-  void attach() => HardwareKeyboard.instance.addHandler(handle);
+  void attach() => FocusManager.instance.addEarlyKeyEventHandler(_early);
 
   /// Stops listening.
-  void detach() => HardwareKeyboard.instance.removeHandler(handle);
+  void detach() => FocusManager.instance.removeEarlyKeyEventHandler(_early);
 
-  /// Runs the command [event] is the chosen key of; true when one ran.
+  KeyEventResult _early(KeyEvent event) =>
+      handle(event) ? KeyEventResult.handled : KeyEventResult.ignored;
+
+  /// Runs the command [event] is the chosen key of; true when the event is
+  /// the chosen key's and nobody else should hear it — the press that ran
+  /// the command, and the repeats of it held down, which run nothing.
   bool handle(KeyEvent event) {
-    if (event is! KeyDownEvent || AppKeyMap.capturing || !active()) {
+    if (event is KeyUpEvent || AppKeyMap.capturing || !active()) {
       return false;
     }
     final map = AppKeyMap.current.value;
@@ -202,7 +212,7 @@ final class ChosenKeys {
       if (!keys.accepts(event, HardwareKeyboard.instance)) continue;
       final run = handlers()[command];
       if (run == null) return false;
-      run();
+      if (event is KeyDownEvent) run();
       return true;
     }
     return false;
