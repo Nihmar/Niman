@@ -1206,6 +1206,25 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get dropHint =>
+      'Húzz ide Markdown-fájlokat a megnyitáshoz, vagy egy mappát az '
+      'importáláshoz';
+  @override
+  String get importFolderAction => 'Importálás';
+  @override
+  String dropRejected(String names) =>
+      'Itt csak Markdown-fájlok és mappák nyílnak meg: $names';
+  @override
+  String importFolderTitle(String name) => 'Importálod: „$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'A Markdown-fájljai ($count) a könyvtár egy új mappájába másolódnak. A '
+      'behúzott mappa változatlan marad.';
+  @override
+  String importFolderDone(String folder) => 'Importálva ide: $folder';
+  @override
+  String importFolderEmpty(String name) => 'Nincs Markdown-fájl itt: $name';
+  @override
   String get openFileTitle => 'Fájl megnyitása';
   @override
   String get outsideFileNote =>

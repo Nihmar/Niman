@@ -1195,6 +1195,24 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get dropHint =>
+      'Spustite datoteke Markdown, da jih odprete, ali mapo, da jo uvozite';
+  @override
+  String get importFolderAction => 'Uvozi';
+  @override
+  String dropRejected(String names) =>
+      'Tu se odpirajo samo datoteke Markdown in mape: $names';
+  @override
+  String importFolderTitle(String name) => 'Uvozim »$name«?';
+  @override
+  String importFolderBody(int count) =>
+      'Njene datoteke Markdown ($count) se kopirajo v novo mapo knjižnice. '
+      'Spuščena mapa ostane nespremenjena.';
+  @override
+  String importFolderDone(String folder) => 'Uvoženo v $folder';
+  @override
+  String importFolderEmpty(String name) => 'V $name ni datotek Markdown';
+  @override
   String get openFileTitle => 'Odpri datoteko';
   @override
   String get outsideFileNote =>

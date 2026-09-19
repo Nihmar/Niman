@@ -1205,6 +1205,25 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mugitzeko · ↵ erabiltzeko · esc ixteko';
   @override
+  String get dropHint =>
+      'Askatu Markdown fitxategiak irekitzeko, edo karpeta bat inportatzeko';
+  @override
+  String get importFolderAction => 'Inportatu';
+  @override
+  String dropRejected(String names) =>
+      'Hemen Markdown fitxategiak eta karpetak soilik irekitzen dira: $names';
+  @override
+  String importFolderTitle(String name) => '«$name» inportatu?';
+  @override
+  String importFolderBody(int count) =>
+      'Bere Markdown fitxategiak ($count) liburutegiko karpeta berri batera '
+      'kopiatzen dira. Askatutako karpeta dagoen bezala geratzen da.';
+  @override
+  String importFolderDone(String folder) => '$folder karpetara inportatua';
+  @override
+  String importFolderEmpty(String name) =>
+      'Ez dago Markdown fitxategirik $name karpetan';
+  @override
   String get openFileTitle => 'Ireki fitxategia';
   @override
   String get outsideFileNote =>

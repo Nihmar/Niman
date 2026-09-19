@@ -1211,6 +1211,25 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get dropHint =>
+      'Пуснете файлове Markdown, за да ги отворите, или папка, за да я '
+      'импортирате';
+  @override
+  String get importFolderAction => 'Импортиране';
+  @override
+  String dropRejected(String names) =>
+      'Тук се отварят само файлове Markdown и папки: $names';
+  @override
+  String importFolderTitle(String name) => 'Да се импортира ли „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Файловете ѝ Markdown ($count) се копират в нова папка на '
+      'библиотеката. Пуснатата папка остава непроменена.';
+  @override
+  String importFolderDone(String folder) => 'Импортирано в $folder';
+  @override
+  String importFolderEmpty(String name) => 'Няма файлове Markdown в $name';
+  @override
   String get openFileTitle => 'Отвори файл';
   @override
   String get outsideFileNote =>

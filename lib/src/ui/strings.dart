@@ -764,6 +764,13 @@ final class AppStrings {
   static String get paletteCommands => _s.paletteCommands;
   static String get paletteNotes => _s.paletteNotes;
   static String get paletteFooter => _s.paletteFooter;
+  static String get dropHint => _s.dropHint;
+  static String get importFolderAction => _s.importFolderAction;
+  static String dropRejected(String names) => _s.dropRejected(names);
+  static String importFolderTitle(String name) => _s.importFolderTitle(name);
+  static String importFolderBody(int count) => _s.importFolderBody(count);
+  static String importFolderDone(String folder) => _s.importFolderDone(folder);
+  static String importFolderEmpty(String name) => _s.importFolderEmpty(name);
   static String get openFileTitle => _s.openFileTitle;
   static String get outsideFileNote => _s.outsideFileNote;
   static String get typewriterOn => _s.typewriterOn;

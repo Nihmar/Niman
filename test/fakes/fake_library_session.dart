@@ -267,8 +267,12 @@ final class FakeLibrarySession implements LibrarySession, NoteOperations {
 
   @override
   Future<void> rescanNow() async {
-    throw StateError('No library is open');
+    if (_root == null) throw StateError('No library is open');
+    rescans++;
   }
+
+  /// How many times the library was re-read on request.
+  int rescans = 0;
 
   @override
   Future<bool> get debugLogsEnabled async => true;

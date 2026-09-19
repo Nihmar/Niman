@@ -1201,6 +1201,25 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get dropHint =>
+      'Numeskite Markdown failus, kad juos atidarytumėte, arba aplanką, kad '
+      'jį importuotumėte';
+  @override
+  String get importFolderAction => 'Importuoti';
+  @override
+  String dropRejected(String names) =>
+      'Čia atidaromi tik Markdown failai ir aplankai: $names';
+  @override
+  String importFolderTitle(String name) => 'Importuoti „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Jo Markdown failai ($count) nukopijuojami į naują bibliotekos '
+      'aplanką. Numestas aplankas lieka nepakitęs.';
+  @override
+  String importFolderDone(String folder) => 'Importuota į $folder';
+  @override
+  String importFolderEmpty(String name) => 'Aplanke $name nėra Markdown failų';
+  @override
   String get openFileTitle => 'Atidaryti failą';
   @override
   String get outsideFileNote =>

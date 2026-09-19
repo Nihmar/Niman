@@ -19,6 +19,7 @@ import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/library_state.dart';
+import 'package:niman/src/library/markdown_import.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/session.dart';
 import 'package:niman/src/links/resolver.dart';
@@ -118,6 +119,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     AppLanguages.revision.removeListener(_republishQuickActions);
     unawaited(_arrivals?.cancel());
     unawaited(_launchFiles?.cancel());
+    unawaited(_launchFolders?.cancel());
     super.dispose();
   }
 
@@ -205,6 +207,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// asks for opens here while there is no library for the shell.
   StreamSubscription<void>? _arrivals;
   StreamSubscription<String>? _launchFiles;
+  StreamSubscription<String>? _launchFolders;
 
   void _listenToLaunches() {
     final requests = ref.read(launchRequestsProvider);
@@ -213,6 +216,16 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     );
     _launchFiles = requests.files.listen((path) {
       if (mounted && !_libraryReady) _openOutside(path);
+    });
+    // A folder dropped with no library open is one to open as a library
+    // (#75), the way Open existing takes a folder.
+    _launchFolders = requests.folders.listen((path) {
+      final session = ref.read(librarySessionProvider);
+      // Only while nothing is open or opening: a library on its way in
+      // is not replaced by a drop.
+      if (mounted && session.phase == LibraryPhase.none) {
+        unawaited(session.open(path, create: false));
+      }
     });
   }
 
@@ -634,6 +647,7 @@ final class _LibraryShellState extends State<_LibraryShell>
   StreamSubscription<ShortcutAction>? _trayTaps;
   StreamSubscription<void>? _trayActivations;
   StreamSubscription<String>? _launchFiles;
+  StreamSubscription<String>? _launchFolders;
 
   /// Library session events (every note op bumps the revision): the
   /// pinned notes follow the files, so each one refreshes the note
@@ -1296,6 +1310,10 @@ final class _LibraryShellState extends State<_LibraryShell>
     _launchFiles = widget.launchRequests.files.listen(
       (path) => unawaited(_openPath(path)),
     );
+    // Folders dropped on the window (#75).
+    _launchFolders = widget.launchRequests.folders.listen(
+      (path) => unawaited(_openFolder(path)),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final path = widget.launchRequests.consumeFile();
       if (path != null && mounted) unawaited(_openPath(path));
@@ -1332,6 +1350,7 @@ final class _LibraryShellState extends State<_LibraryShell>
     unawaited(_trayTaps?.cancel());
     unawaited(_trayActivations?.cancel());
     unawaited(_launchFiles?.cancel());
+    unawaited(_launchFolders?.cancel());
     _todoController.dispose();
     _personalDictionary?.dispose();
     _shellFocus.dispose();
@@ -2428,6 +2447,78 @@ final class _LibraryShellState extends State<_LibraryShell>
       widget.outsideFiles,
       EditorOnlyDocument(path),
     );
+  }
+
+  /// A folder dropped on the window (#75). One of this library's own is
+  /// shown in the tree; any other is offered for import — its Markdown
+  /// copied into a new folder here — and shown once it is in.
+  Future<void> _openFolder(String path) async {
+    final root = widget.controller.root;
+    if (root == null || !mounted) return;
+    if (p.equals(root, path) || p.isWithin(root, path)) {
+      _revealFolder(p.equals(root, path) ? '' : relPath(path, root));
+      return;
+    }
+    final name = p.basename(p.normalize(path));
+    final count = markdownFilesIn(Directory(path)).length;
+    final messenger = ScaffoldMessenger.of(context);
+    if (count == 0) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.importFolderEmpty(name))),
+      );
+      return;
+    }
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('import-folder'),
+        title: Text(AppStrings.importFolderTitle(name)),
+        content: Text(AppStrings.importFolderBody(count)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppStrings.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('import-folder-yes'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(AppStrings.importFolderAction),
+          ),
+        ],
+      ),
+    );
+    if (go != true || !mounted) return;
+    await _guard(() async {
+      final imported = await importMarkdownFolder(
+        source: path,
+        libraryRoot: root,
+      );
+      if (imported == null || !mounted) return;
+      // The watcher would find them too; asking now shows them at once.
+      await widget.controller.rescanNow();
+      if (!mounted) return;
+      _revealFolder(imported.folder);
+      messenger.showSnackBar(
+        SnackBar(content: Text(AppStrings.importFolderDone(imported.folder))),
+      );
+    });
+  }
+
+  /// Shows the library folder [folder] (relative; '' is the root) in the
+  /// tree: the Files tab, the tree open, the folder and every folder
+  /// above it expanded, and it selected.
+  void _revealFolder(String folder) {
+    setState(() {
+      _tab = ShellTab.files;
+      _sidebarVisible = true;
+      if (folder.isEmpty) return;
+      for (var at = folder; at.isNotEmpty && at != '.'; at = parentOf(at)) {
+        _expanded.add(at);
+      }
+      _selected = folder;
+      _selectedIsDir = true;
+      _treeVisible = true;
+    });
   }
 
   /// Re-reads the library into its index, saying when it is done.

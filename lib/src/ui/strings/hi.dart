@@ -1174,6 +1174,24 @@ final class HindiStrings extends Strings {
   String get paletteFooter =>
       '↑↓ चलने के लिए · ↵ चुनने के लिए · esc बंद करने के लिए';
   @override
+  String get dropHint =>
+      'खोलने के लिए Markdown फ़ाइलें छोड़ें, या आयात करने के लिए फ़ोल्डर';
+  @override
+  String get importFolderAction => 'आयात करें';
+  @override
+  String dropRejected(String names) =>
+      'यहाँ केवल Markdown फ़ाइलें और फ़ोल्डर खुलते हैं: $names';
+  @override
+  String importFolderTitle(String name) => '“$name” आयात करें?';
+  @override
+  String importFolderBody(int count) =>
+      'इसकी Markdown फ़ाइलें ($count) लाइब्रेरी के नए फ़ोल्डर में कॉपी होती '
+      'हैं। छोड़ा गया फ़ोल्डर जैसा है वैसा रहता है।';
+  @override
+  String importFolderDone(String folder) => '$folder में आयात किया गया';
+  @override
+  String importFolderEmpty(String name) => '$name में कोई Markdown फ़ाइल नहीं';
+  @override
   String get openFileTitle => 'फ़ाइल खोलें';
   @override
   String get outsideFileNote =>

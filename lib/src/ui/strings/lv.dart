@@ -1196,6 +1196,24 @@ final class LatvianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pārvietoties · ↵ izmantot · esc aizvērt';
   @override
+  String get dropHint =>
+      'Nometiet Markdown failus, lai tos atvērtu, vai mapi, lai to importētu';
+  @override
+  String get importFolderAction => 'Importēt';
+  @override
+  String dropRejected(String names) =>
+      'Šeit atveras tikai Markdown faili un mapes: $names';
+  @override
+  String importFolderTitle(String name) => 'Vai importēt “$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Tās Markdown faili ($count) tiek nokopēti jaunā bibliotēkas mapē. '
+      'Nomestā mape paliek nemainīga.';
+  @override
+  String importFolderDone(String folder) => 'Importēts mapē $folder';
+  @override
+  String importFolderEmpty(String name) => 'Mapē $name nav Markdown failu';
+  @override
   String get openFileTitle => 'Atvērt failu';
   @override
   String get outsideFileNote =>

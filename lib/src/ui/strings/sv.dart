@@ -1206,6 +1206,25 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get dropHint =>
+      'Släpp Markdown-filer för att öppna dem, eller en mapp för att '
+      'importera den';
+  @override
+  String get importFolderAction => 'Importera';
+  @override
+  String dropRejected(String names) =>
+      'Här öppnas bara Markdown-filer och mappar: $names';
+  @override
+  String importFolderTitle(String name) => 'Importera ”$name”?';
+  @override
+  String importFolderBody(int count) =>
+      'Dess Markdown-filer ($count) kopieras till en ny mapp i biblioteket. '
+      'Mappen du släppte förblir som den är.';
+  @override
+  String importFolderDone(String folder) => 'Importerad till $folder';
+  @override
+  String importFolderEmpty(String name) => 'Inga Markdown-filer i $name';
+  @override
   String get openFileTitle => 'Öppna fil';
   @override
   String get outsideFileNote =>

@@ -1204,6 +1204,24 @@ final class SerbianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за кретање · ↵ за избор · esc за затварање';
   @override
+  String get dropHint =>
+      'Испустите Markdown датотеке да их отворите или фасциклу да је увезете';
+  @override
+  String get importFolderAction => 'Увези';
+  @override
+  String dropRejected(String names) =>
+      'Овде се отварају само Markdown датотеке и фасцикле: $names';
+  @override
+  String importFolderTitle(String name) => 'Увести „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Њене Markdown датотеке ($count) копирају се у нову фасциклу '
+      'библиотеке. Испуштена фасцикла остаје каква јесте.';
+  @override
+  String importFolderDone(String folder) => 'Увезено у $folder';
+  @override
+  String importFolderEmpty(String name) => 'Нема Markdown датотека у $name';
+  @override
   String get openFileTitle => 'Отвори датотеку';
   @override
   String get outsideFileNote =>

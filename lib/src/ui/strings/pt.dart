@@ -1206,6 +1206,24 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get dropHint =>
+      'Largue ficheiros Markdown para os abrir, ou uma pasta para a importar';
+  @override
+  String get importFolderAction => 'Importar';
+  @override
+  String dropRejected(String names) =>
+      'Aqui só abrem ficheiros Markdown e pastas: $names';
+  @override
+  String importFolderTitle(String name) => 'Importar «$name»?';
+  @override
+  String importFolderBody(int count) =>
+      'Os seus ficheiros Markdown ($count) são copiados para uma pasta nova '
+      'da biblioteca. A pasta que largou fica como está.';
+  @override
+  String importFolderDone(String folder) => 'Importado para $folder';
+  @override
+  String importFolderEmpty(String name) => 'Sem ficheiros Markdown em $name';
+  @override
   String get openFileTitle => 'Abrir ficheiro';
   @override
   String get outsideFileNote =>

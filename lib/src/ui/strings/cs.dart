@@ -1195,6 +1195,25 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get dropHint =>
+      'Přetáhněte soubory Markdown pro otevření, nebo složku pro import';
+  @override
+  String get importFolderAction => 'Importovat';
+  @override
+  String dropRejected(String names) =>
+      'Zde se otevírají jen soubory Markdown a složky: $names';
+  @override
+  String importFolderTitle(String name) => 'Importovat „$name“?';
+  @override
+  String importFolderBody(int count) =>
+      'Její soubory Markdown ($count) se zkopírují do nové složky knihovny. '
+      'Přetažená složka zůstane beze změny.';
+  @override
+  String importFolderDone(String folder) => 'Importováno do $folder';
+  @override
+  String importFolderEmpty(String name) =>
+      'Ve složce $name nejsou soubory Markdown';
+  @override
   String get openFileTitle => 'Otevřít soubor';
   @override
   String get outsideFileNote =>
