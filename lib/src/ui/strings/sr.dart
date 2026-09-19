@@ -410,6 +410,8 @@ final class SerbianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'У уредитељу';
   @override
+  String get shortcutFormatSection => 'Обликовање';
+  @override
   String get shortcutFind => 'Претрага';
   @override
   String get shortcutReplace => 'Пронађи и замени';

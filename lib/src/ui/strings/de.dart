@@ -411,6 +411,8 @@ final class GermanStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Im Editor';
   @override
+  String get shortcutFormatSection => 'Formatierung';
+  @override
   String get shortcutFind => 'Suchen';
   @override
   String get shortcutReplace => 'Suchen und ersetzen';

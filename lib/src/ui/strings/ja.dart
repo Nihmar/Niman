@@ -380,6 +380,8 @@ final class JapaneseStrings extends Strings {
   @override
   String get shortcutEditorSection => 'エディタ内';
   @override
+  String get shortcutFormatSection => '書式';
+  @override
   String get shortcutFind => '検索';
   @override
   String get shortcutReplace => '検索して置換';

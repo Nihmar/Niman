@@ -408,6 +408,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get shortcutEditorSection => 'No editor';
   @override
+  String get shortcutFormatSection => 'Formatação';
+  @override
   String get shortcutFind => 'Localizar';
   @override
   String get shortcutReplace => 'Localizar e substituir';

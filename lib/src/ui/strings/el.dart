@@ -415,6 +415,8 @@ final class GreekStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Στον επεξεργαστή';
   @override
+  String get shortcutFormatSection => 'Μορφοποίηση';
+  @override
   String get shortcutFind => 'Εύρεση';
   @override
   String get shortcutReplace => 'Εύρεση και αντικατάσταση';

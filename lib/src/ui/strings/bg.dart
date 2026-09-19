@@ -410,6 +410,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'В редактора';
   @override
+  String get shortcutFormatSection => 'Форматиране';
+  @override
   String get shortcutFind => 'Търси';
   @override
   String get shortcutReplace => 'Намери и замени';

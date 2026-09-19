@@ -407,6 +407,8 @@ final class FinnishStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Muokkainnissa';
   @override
+  String get shortcutFormatSection => 'Muotoilu';
+  @override
   String get shortcutFind => 'Etsi';
   @override
   String get shortcutReplace => 'Etsi ja korvaa';

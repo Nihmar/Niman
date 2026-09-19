@@ -404,6 +404,8 @@ final class LatvianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Redaktorā';
   @override
+  String get shortcutFormatSection => 'Formatējums';
+  @override
   String get shortcutFind => 'Meklēt';
   @override
   String get shortcutReplace => 'Meklēt un aizstāt';
