@@ -99,7 +99,12 @@ bool _sameMap(Map<String, String> a, Map<String, String> b) =>
 /// Tolerant the way real servers need: any namespace prefix, elements
 /// with no namespace at all, hrefs as absolute URLs or absolute paths,
 /// percent-encoded in any style, property values in several propstats.
-/// Only `200` propstats count. A response whose href lies outside [base]
+/// Only `200` propstats count, and a response that answers for nothing
+/// is not an item: one whose own `status` is not a 2xx, or whose every
+/// propstat failed. Some servers answer a `PROPFIND` for a missing file
+/// that way — a `207` with a `404` inside — and taking it for the file
+/// made a new file look taken on the server, so it never uploaded
+/// (#163). A response whose href lies outside [base]
 /// is reported through [onSkipped] and left out; an unparsable document
 /// throws [WebDavProtocolFailure].
 ///
@@ -142,6 +147,7 @@ List<WebDavResource> parseMultistatus(
       onSkipped?.call(href);
       continue;
     }
+    if (!_answers(response)) continue;
     final props = <XmlElement>[
       for (final propstat in _children(response, 'propstat'))
         if (_isOk(propstat))
@@ -185,11 +191,23 @@ Iterable<XmlElement> _children(XmlElement parent, String local) =>
     parent.childElements.where((e) => _isDav(e, local));
 
 /// Whether a propstat's `status` is a 2xx (most say `HTTP/1.1 200 OK`).
-bool _isOk(XmlElement propstat) {
-  final status = _children(propstat, 'status').firstOrNull?.innerText;
+bool _isOk(XmlElement propstat) => _okStatus(propstat);
+
+/// Whether [element]'s own `status`, when it has one, is a 2xx.
+bool _okStatus(XmlElement element) {
+  final status = _children(element, 'status').firstOrNull?.innerText;
   if (status == null) return true;
   final code = RegExp(r'\s(\d{3})\b').firstMatch(' $status')?.group(1);
   return code != null && code.startsWith('2');
+}
+
+/// Whether a `response` answers for a resource that is there: its own
+/// status (RFC 4918 lets a response carry one instead of propstats) is a
+/// 2xx, and when it has propstats, at least one of them succeeded.
+bool _answers(XmlElement response) {
+  if (!_okStatus(response)) return false;
+  final propstats = _children(response, 'propstat').toList();
+  return propstats.isEmpty || propstats.any(_isOk);
 }
 
 String? _text(XmlElement? element) {

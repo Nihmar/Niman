@@ -119,6 +119,10 @@ final class FakeWebDavServer {
   /// `PROPFIND` answers 405.
   bool propfindRefused = false;
 
+  /// `PROPFIND` on a missing path answers `207` with a `404` inside,
+  /// as some servers do (#163), instead of a plain `404`.
+  bool missingAsMultistatus = false;
+
   /// The server's clock: file mtimes (whole seconds) and the `Date`
   /// header. Tests move it to put writes in different seconds.
   DateTime Function() clock = DateTime.now;
@@ -360,6 +364,25 @@ final class FakeWebDavServer {
       return;
     }
     final node = _tree[path];
+    if (node == null && missingAsMultistatus) {
+      final p = prefix.isEmpty ? '' : '$prefix:';
+      final ns = prefix.isEmpty ? 'xmlns="DAV:"' : 'xmlns:$prefix="DAV:"';
+      // The href asked for, not a resource: the status says so.
+      final href = Uri(pathSegments: ['dav', ...path.split('/')]).path;
+      response
+        ..statusCode = 207
+        ..headers.contentType = ContentType('application', 'xml')
+        ..write(
+          [
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<${p}multistatus $ns><${p}response>',
+            '<${p}href>$href</${p}href>',
+            '<${p}status>HTTP/1.1 404 Not Found</${p}status>',
+            '</${p}response></${p}multistatus>',
+          ].join(),
+        );
+      return;
+    }
     if (node == null) {
       response.statusCode = 404;
       return;
