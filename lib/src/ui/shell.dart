@@ -1824,12 +1824,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The open note's ⋮ menu (mockup H2), on the phone's note bar and in
   /// the wide layout's editor header.
   Widget _noteMenu() => NoteMenuButton(
+    typewriter: _editorSettings.typewriter,
     onSelected: (action) {
       final path = _selected;
       if (path == null) return;
       unawaited(switch (action) {
         NoteMenuAction.outline => _showPanel(DockPane.outline),
         NoteMenuAction.tags => _showPanel(DockPane.tags),
+        NoteMenuAction.typewriter => Future<void>.sync(_toggleTypewriter),
         NoteMenuAction.history => _openHistory(path),
         NoteMenuAction.rename => _rowActions.rename(context, path),
         NoteMenuAction.move => _rowActions.move(context, path),

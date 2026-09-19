@@ -113,4 +113,20 @@ void main() {
     expect(noteTypewriter(tester), isFalse);
     expect(await controller.typewriter, isFalse);
   });
+
+  // 0.0.8 test round: on the phone there was no way to it but Settings.
+  testWidgets('on a phone the note’s ⋮ switches it', (tester) async {
+    await pumpAt(tester, const Size(400, 800));
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    expect(find.text('Turn typewriter mode on'), findsOne);
+    await tester.tap(find.byKey(const Key('note-menu-typewriter')));
+    await settle(tester);
+    expect(await controller.typewriter, isTrue);
+    expect(noteTypewriter(tester), isTrue);
+
+    await tester.tap(find.byKey(const Key('note-menu')));
+    await settle(tester);
+    expect(find.text('Turn typewriter mode off'), findsOne);
+  });
 }

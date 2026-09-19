@@ -10,6 +10,10 @@ enum NoteMenuAction {
   /// The note's tags, and the notes that share them.
   tags,
 
+  /// Typewriter mode on or off (#70): on the phone, where there is no
+  /// key and no switch on the status row, the way to it beside the note.
+  typewriter,
+
   /// Browse and restore past versions.
   history,
 
@@ -26,11 +30,15 @@ enum NoteMenuAction {
 /// The open note's ⋮ menu (mockup H2): History, Rename, Move, Delete —
 /// the file actions, next to the view controls on the note's bar.
 final class NoteMenuButton extends StatelessWidget {
-  /// A menu reporting the picked action to [onSelected].
-  const new({required this.onSelected, super.key});
+  /// A menu reporting the picked action to [onSelected]; [typewriter]
+  /// says which way its typewriter entry reads.
+  const new({required this.onSelected, this.typewriter = false, super.key});
 
   /// Called with the action picked.
   final ValueChanged<NoteMenuAction> onSelected;
+
+  /// Whether typewriter mode is on.
+  final bool typewriter;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +50,11 @@ final class NoteMenuButton extends StatelessWidget {
       itemBuilder: (context) => [
         _item(NoteMenuAction.outline, Icons.toc, AppStrings.outlineTooltip),
         _item(NoteMenuAction.tags, Icons.sell_outlined, AppStrings.tagsTitle),
+        _item(
+          NoteMenuAction.typewriter,
+          Icons.vertical_align_center,
+          typewriter ? AppStrings.typewriterOff : AppStrings.typewriterOn,
+        ),
         _item(
           NoteMenuAction.history,
           Icons.history,
