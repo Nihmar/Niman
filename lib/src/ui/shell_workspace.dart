@@ -126,6 +126,15 @@ final class ShellWorkspace {
   void moveToOtherPane(int pane, int index) =>
       controller.update((w) => w.moveTab(pane, index, 1 - pane));
 
+  /// Moves [from]'s tab at [index] into [to], at [at] of its row — a tab
+  /// dragged from the other pane (#204); null lands it last.
+  void moveTabHere(int from, int index, int to, int? at) =>
+      controller.update((w) => w.moveTab(from, index, to, at: at));
+
+  /// Moves [pane]'s tab at [index] to [to] in its own row (#204).
+  void reorder(int pane, int index, int to) =>
+      controller.update((w) => w.reorder(pane, index, to));
+
   /// Opens [path] in the other pane, splitting [axis] first if need be.
   void openBeside(String path, SplitAxis axis) {
     _following = path;
