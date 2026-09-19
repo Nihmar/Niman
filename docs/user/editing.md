@@ -167,7 +167,8 @@ mode**), off unless you turn it on. `Ctrl+Shift+T` or *Editor: Turn
 typewriter mode on* in the command palette switch it from anywhere, and
 on the desktop a button in the note's status row shows it and switches
 it. The phone's status row has no room for one more button: there the
-setting, and the commands under the Search tab, reach it.
+note's ⋮ menu has *Turn typewriter mode on/off*, as do the setting and
+the commands under the Search tab.
 
 It is independent of [Zen mode](#zen-mode): either can be on without
 the other, and entering or leaving Zen leaves typewriter mode as it
