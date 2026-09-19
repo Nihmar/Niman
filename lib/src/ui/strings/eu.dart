@@ -404,6 +404,8 @@ final class BasqueStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Erreditoran';
   @override
+  String get shortcutFormatSection => 'Formatua';
+  @override
   String get shortcutFind => 'Bilatu';
   @override
   String get shortcutReplace => 'Bilatu eta ordezkatu';

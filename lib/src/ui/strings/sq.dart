@@ -406,6 +406,8 @@ final class AlbanianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Në redaktor';
   @override
+  String get shortcutFormatSection => 'Formatimi';
+  @override
   String get shortcutFind => 'Kërko';
   @override
   String get shortcutReplace => 'Gjej dhe zëvendëso';

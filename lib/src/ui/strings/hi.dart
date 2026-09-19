@@ -395,6 +395,8 @@ final class HindiStrings extends Strings {
   @override
   String get shortcutEditorSection => 'एडिटर में';
   @override
+  String get shortcutFormatSection => 'फ़ॉर्मैटिंग';
+  @override
   String get shortcutFind => 'ढूँढें';
   @override
   String get shortcutReplace => 'ढूँढें और बदलें';

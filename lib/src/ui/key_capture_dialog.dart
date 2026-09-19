@@ -13,10 +13,10 @@ import 'package:niman/src/ui/app_shortcuts.dart';
 import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/strings.dart';
 
-/// Asks for [command]'s new keys; resolves to them, or null on Cancel.
+/// Asks for [what]'s new keys; resolves to them, or null on Cancel.
 Future<SingleActivator?> showKeyCaptureDialog(
   BuildContext context,
-  AppCommand command,
+  String what,
 ) async {
   AppKeyMap.capturing = true;
   try {
@@ -24,7 +24,7 @@ Future<SingleActivator?> showKeyCaptureDialog(
       context: context,
       // Only Cancel closes it: Esc is one of the keys it records.
       barrierDismissible: false,
-      builder: (context) => KeyCaptureDialog(command: command),
+      builder: (context) => KeyCaptureDialog(what: what),
     );
   } finally {
     AppKeyMap.capturing = false;
@@ -33,11 +33,11 @@ Future<SingleActivator?> showKeyCaptureDialog(
 
 /// The dialog itself.
 final class KeyCaptureDialog extends StatefulWidget {
-  /// Records keys for [command].
-  const new({required this.command, super.key});
+  /// Records keys for [what], named as the screen names it.
+  const new({required this.what, super.key});
 
-  /// The command being given keys.
-  final AppCommand command;
+  /// What is being given keys: a command, or a formatting action (#205).
+  final String what;
 
   @override
   State<KeyCaptureDialog> createState() => _KeyCaptureDialogState();
@@ -115,9 +115,7 @@ final class _KeyCaptureDialogState extends State<KeyCaptureDialog> {
     final keys = _keys;
     return AlertDialog(
       key: const Key('key-capture'),
-      title: Text(
-        AppStrings.shortcutCaptureTitle(appCommandLabel(widget.command)),
-      ),
+      title: Text(AppStrings.shortcutCaptureTitle(widget.what)),
       content: Focus(
         focusNode: _focus,
         autofocus: true,

@@ -408,6 +408,8 @@ final class SlovakStrings extends Strings {
   @override
   String get shortcutEditorSection => 'V editore';
   @override
+  String get shortcutFormatSection => 'Formátovanie';
+  @override
   String get shortcutFind => 'Hľadať';
   @override
   String get shortcutReplace => 'Hľadať a nahradiť';

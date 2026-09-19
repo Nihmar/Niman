@@ -401,6 +401,8 @@ final class EstonianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'Redaktoris';
   @override
+  String get shortcutFormatSection => 'Vormindus';
+  @override
   String get shortcutFind => 'Otsing';
   @override
   String get shortcutReplace => 'Otsi ja asenda';

@@ -410,6 +410,8 @@ final class DutchStrings extends Strings {
   @override
   String get shortcutEditorSection => 'In de editor';
   @override
+  String get shortcutFormatSection => 'Opmaak';
+  @override
   String get shortcutFind => 'Zoeken';
   @override
   String get shortcutReplace => 'Vinden en vervangen';

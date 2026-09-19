@@ -405,6 +405,8 @@ final class BelarusianStrings extends Strings {
   @override
   String get shortcutEditorSection => 'У рэдактары';
   @override
+  String get shortcutFormatSection => 'Фарматаванне';
+  @override
   String get shortcutFind => 'Шукаць';
   @override
   String get shortcutReplace => 'Знайсці і замяніць';

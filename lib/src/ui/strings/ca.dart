@@ -415,6 +415,8 @@ final class CatalanStrings extends Strings {
   @override
   String get shortcutEditorSection => 'A l’editor';
   @override
+  String get shortcutFormatSection => 'Format';
+  @override
   String get shortcutFind => 'Cerca';
   @override
   String get shortcutReplace => 'Cerca i reemplaça';
