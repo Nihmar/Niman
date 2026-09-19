@@ -1236,6 +1236,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ за движење · ↵ за избор · esc за затворање';
   @override
+  String get palettePinned => 'Прикачено';
+  @override
+  String get palettePin => 'Прикачи';
+  @override
+  String get paletteUnpin => 'Откачи';
+  @override
+  String get palettePinFooter => 'alt+P прикачува';
+  @override
   String get spellCheckScanning => 'Се проверува белешката…';
   @override
   String get spellCheckAgain => 'Провери повторно';

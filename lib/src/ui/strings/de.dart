@@ -1249,6 +1249,14 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get palettePinned => 'Angepinnt';
+  @override
+  String get palettePin => 'Anpinnen';
+  @override
+  String get paletteUnpin => 'Lösen';
+  @override
+  String get palettePinFooter => 'alt+P zum Anpinnen';
+  @override
   String get spellCheckScanning => 'Notiz wird geprüft…';
   @override
   String get spellCheckAgain => 'Erneut prüfen';

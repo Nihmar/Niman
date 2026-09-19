@@ -1243,6 +1243,14 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get palettePinned => 'Przypięte';
+  @override
+  String get palettePin => 'Przypnij';
+  @override
+  String get paletteUnpin => 'Odepnij';
+  @override
+  String get palettePinFooter => 'alt+P przypina';
+  @override
   String get spellCheckScanning => 'Sprawdzanie notatki…';
   @override
   String get spellCheckAgain => 'Sprawdź ponownie';

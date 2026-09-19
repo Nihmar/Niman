@@ -45,6 +45,9 @@ Links: `Ctrl+click` a link in the source editor to follow it.
 
 ## Changing a shortcut
 
+In the palette itself, `Alt+P` pins or unpins the selected command;
+pinned ones head it before anything is typed.
+
 Settings → **Keyboard shortcuts** lists every command, with its keys or
 with *No shortcut*. Settings → **Commands** lists the same commands with
 when each one can run: the palette and the keys offer a command only

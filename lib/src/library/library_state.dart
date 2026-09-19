@@ -1112,6 +1112,15 @@ final class LibraryController implements LibrarySession {
     await AppSettingsRepo(await appDatabase).setKeyMap(json);
   }
 
+  @override
+  Future<String?> get pinnedCommands async =>
+      await AppSettingsRepo(await appDatabase).pinnedCommands();
+
+  @override
+  Future<void> setPinnedCommands(String json) async {
+    await AppSettingsRepo(await appDatabase).setPinnedCommands(json);
+  }
+
   /// How bright the app is (T-M6-05).
   @override
   Future<AppBrightness> get themeBrightness async =>

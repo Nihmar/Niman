@@ -1232,6 +1232,14 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get palettePinned => 'Fixados';
+  @override
+  String get palettePin => 'Fixar';
+  @override
+  String get paletteUnpin => 'Remover';
+  @override
+  String get palettePinFooter => 'alt+P para fixar';
+  @override
   String get spellCheckScanning => 'A verificar a nota…';
   @override
   String get spellCheckAgain => 'Verificar de novo';

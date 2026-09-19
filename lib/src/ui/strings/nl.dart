@@ -1241,6 +1241,14 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get palettePinned => 'Vastgezet';
+  @override
+  String get palettePin => 'Vastzetten';
+  @override
+  String get paletteUnpin => 'Losmaken';
+  @override
+  String get palettePinFooter => 'alt+P om vast te zetten';
+  @override
   String get spellCheckScanning => 'Notitie controleren…';
   @override
   String get spellCheckAgain => 'Opnieuw controleren';
