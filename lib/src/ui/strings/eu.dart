@@ -1195,6 +1195,31 @@ final class BasqueStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Joan';
   @override
+  String get commandsTitle => 'Komandoak';
+  @override
+  String get commandsIntro =>
+      'Komando-paletak zauden lekuan exekutatu daitezkeen komandoak soilik '
+      'eskaintzen ditu. Hemen daude guztiak, eta noiz agertzen den bakoitza.';
+  @override
+  String get commandNeedNone => 'Beti erabilgarri';
+  @override
+  String get commandNeedOpenNote => 'Ohar ireki bat behar du';
+  @override
+  String get commandNeedWideWindow => 'Leiho zabalean soilik';
+  @override
+  String get commandNeedDockRoom =>
+      'Alboko panelerako adina zabala den leihoa behar du';
+  @override
+  String get commandNeedDesktop => 'Mahaigainean soilik';
+  @override
+  String get commandNeedNotInZen => 'Ez Zen moduan';
+  @override
+  String get commandNeedZenRoom => 'Mahaigaina, ohar bat fitxa batean irekita';
+  @override
+  String get commandNeedPreview => 'Aurrebista aktibatuta, testu-ohar batean';
+  @override
+  String get commandNeedTwoEditors => 'Bi editoreak gaituta';
+  @override
   String get paletteHint => 'Bilatu komandoak eta oharrak';
   @override
   String get paletteNoResults => 'Ez dago bat datorrenik';

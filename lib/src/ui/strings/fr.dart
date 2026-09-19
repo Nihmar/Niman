@@ -1223,6 +1223,32 @@ final class FrenchStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Aller à';
   @override
+  String get commandsTitle => 'Commandes';
+  @override
+  String get commandsIntro =>
+      'La palette de commandes ne propose que les commandes exécutables là où '
+      'vous êtes. Les voici toutes, avec le moment où chacune apparaît.';
+  @override
+  String get commandNeedNone => 'Toujours disponible';
+  @override
+  String get commandNeedOpenNote => 'Nécessite une note ouverte';
+  @override
+  String get commandNeedWideWindow => 'Fenêtre large uniquement';
+  @override
+  String get commandNeedDockRoom =>
+      'Nécessite une fenêtre assez large pour le panneau latéral';
+  @override
+  String get commandNeedDesktop => 'Bureau uniquement';
+  @override
+  String get commandNeedNotInZen => 'Pas en mode Zen';
+  @override
+  String get commandNeedZenRoom =>
+      'Bureau, avec une note ouverte dans un onglet';
+  @override
+  String get commandNeedPreview => "Avec l'aperçu activé, sur une note texte";
+  @override
+  String get commandNeedTwoEditors => 'Avec les deux éditeurs activés';
+  @override
   String get paletteHint => 'Chercher des commandes et des notes';
   @override
   String get paletteNoResults => 'Aucun résultat';

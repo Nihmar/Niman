@@ -1185,6 +1185,30 @@ final class CzechStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Přejít na';
   @override
+  String get commandsTitle => 'Příkazy';
+  @override
+  String get commandsIntro =>
+      'Paleta příkazů nabízí jen příkazy, které lze spustit tam, kde právě '
+      'jste. Tady jsou všechny a kdy se který zobrazí.';
+  @override
+  String get commandNeedNone => 'Vždy k dispozici';
+  @override
+  String get commandNeedOpenNote => 'Vyžaduje otevřenou poznámku';
+  @override
+  String get commandNeedWideWindow => 'Jen v širokém okně';
+  @override
+  String get commandNeedDockRoom => 'Vyžaduje okno dost široké pro boční panel';
+  @override
+  String get commandNeedDesktop => 'Jen na počítači';
+  @override
+  String get commandNeedNotInZen => 'Ne v režimu Zen';
+  @override
+  String get commandNeedZenRoom => 'Počítač, s poznámkou otevřenou na kartě';
+  @override
+  String get commandNeedPreview => 'Se zapnutým náhledem, u textové poznámky';
+  @override
+  String get commandNeedTwoEditors => 'Se zapnutými oběma editory';
+  @override
   String get paletteHint => 'Hledat příkazy a poznámky';
   @override
   String get paletteNoResults => 'Nic neodpovídá';

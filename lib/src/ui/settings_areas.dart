@@ -13,6 +13,7 @@ import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/transcription/transcription_models.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings_appearance.dart';
+import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
@@ -35,6 +36,9 @@ enum SettingsAreaId {
 
   /// The keyboard shortcuts.
   shortcuts,
+
+  /// What the command palette can run, and when (#207).
+  commands,
 
   /// The release channel.
   updates,
@@ -165,6 +169,16 @@ List<SettingsArea> settingsAreas({
       disabledNote: AppStrings.settingsAreaKeyboardDisabled,
       build: (highlight) =>
           KeyboardShortcutsScreen(controller: controller, highlight: highlight),
+    ),
+    // Without a keyboard too: the phone reaches the palette's commands
+    // as well, and they show there on the same conditions.
+    SettingsArea(
+      id: SettingsAreaId.commands,
+      group: SettingsGroup.app,
+      rowKey: const Key('settings-area-commands'),
+      icon: () => Icons.bolt_outlined,
+      title: AppStrings.commandsTitle,
+      build: (highlight) => SettingsCommandsScreen(highlight: highlight),
     ),
     if (!isTestingBuild)
       SettingsArea(

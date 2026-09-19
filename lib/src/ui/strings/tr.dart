@@ -1178,6 +1178,31 @@ final class TurkishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Git';
   @override
+  String get commandsTitle => 'Komutlar';
+  @override
+  String get commandsIntro =>
+      'Komut paleti yalnızca bulunduğun yerde çalışabilen komutları sunar. '
+      'Hepsi burada, her birinin ne zaman göründüğüyle birlikte.';
+  @override
+  String get commandNeedNone => 'Her zaman kullanılabilir';
+  @override
+  String get commandNeedOpenNote => 'Açık bir not gerekir';
+  @override
+  String get commandNeedWideWindow => 'Yalnızca geniş pencerede';
+  @override
+  String get commandNeedDockRoom =>
+      'Yan panel için yeterince geniş bir pencere gerekir';
+  @override
+  String get commandNeedDesktop => 'Yalnızca masaüstünde';
+  @override
+  String get commandNeedNotInZen => 'Zen modunda değil';
+  @override
+  String get commandNeedZenRoom => 'Masaüstü, bir sekmede açık bir notla';
+  @override
+  String get commandNeedPreview => 'Önizleme açıkken, bir metin notunda';
+  @override
+  String get commandNeedTwoEditors => 'Her iki düzenleyici de etkinken';
+  @override
   String get paletteHint => 'Komut ve not ara';
   @override
   String get paletteNoResults => 'Eşleşen yok';

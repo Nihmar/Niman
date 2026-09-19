@@ -1202,6 +1202,31 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Siirry';
   @override
+  String get commandsTitle => 'Komennot';
+  @override
+  String get commandsIntro =>
+      'Komentopaletti tarjoaa vain komennot, jotka voi suorittaa siellä missä '
+      'olet. Tässä ovat kaikki, ja milloin kukin näkyy.';
+  @override
+  String get commandNeedNone => 'Aina käytettävissä';
+  @override
+  String get commandNeedOpenNote => 'Vaatii avoimen muistiinpanon';
+  @override
+  String get commandNeedWideWindow => 'Vain leveässä ikkunassa';
+  @override
+  String get commandNeedDockRoom =>
+      'Vaatii tarpeeksi leveän ikkunan sivupaneelille';
+  @override
+  String get commandNeedDesktop => 'Vain työpöydällä';
+  @override
+  String get commandNeedNotInZen => 'Ei Zen-tilassa';
+  @override
+  String get commandNeedZenRoom => 'Työpöytä, muistiinpano auki välilehdellä';
+  @override
+  String get commandNeedPreview => 'Esikatselu päällä, tekstimuistiinpanossa';
+  @override
+  String get commandNeedTwoEditors => 'Kun molemmat editorit ovat käytössä';
+  @override
   String get paletteHint => 'Hae komentoja ja muistiinpanoja';
   @override
   String get paletteNoResults => 'Ei osumia';

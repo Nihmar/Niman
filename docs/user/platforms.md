@@ -85,7 +85,10 @@ at a time, and the phone has no split: a phone's width holds one note.
 
 The **command palette** is `Ctrl+Shift+P` on the desktop. On a phone the
 Search tab lists the matching commands above its results, so no
-keyboard is needed.
+keyboard is needed. Either way it offers only the commands that can run
+where you are; Settings → **Commands** lists them all, with their keys
+and what each one needs to show (an open note, a wide window, the
+desktop, and so on).
 
 **Keyboard shortcuts** can be changed wherever there is a keyboard: on
 Linux and Windows, and on Android with a hardware keyboard attached, the

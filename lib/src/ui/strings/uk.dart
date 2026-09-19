@@ -1195,6 +1195,32 @@ final class UkrainianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Перейти до';
   @override
+  String get commandsTitle => 'Команди';
+  @override
+  String get commandsIntro =>
+      'Палітра команд пропонує лише ті команди, які можна виконати там, де ви '
+      "є. Тут усі, і коли кожна з'являється.";
+  @override
+  String get commandNeedNone => 'Завжди доступно';
+  @override
+  String get commandNeedOpenNote => 'Потрібна відкрита нотатка';
+  @override
+  String get commandNeedWideWindow => 'Лише в широкому вікні';
+  @override
+  String get commandNeedDockRoom =>
+      'Потрібне вікно, достатньо широке для бічної панелі';
+  @override
+  String get commandNeedDesktop => "Лише на комп'ютері";
+  @override
+  String get commandNeedNotInZen => 'Не в режимі Дзен';
+  @override
+  String get commandNeedZenRoom => "Комп'ютер, з нотаткою, відкритою у вкладці";
+  @override
+  String get commandNeedPreview =>
+      'З увімкненим переглядом, у текстовій нотатці';
+  @override
+  String get commandNeedTwoEditors => 'З обома увімкненими редакторами';
+  @override
   String get paletteHint => 'Шукати команди й нотатки';
   @override
   String get paletteNoResults => 'Нічого не знайдено';

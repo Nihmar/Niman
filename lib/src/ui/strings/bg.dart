@@ -1200,6 +1200,31 @@ final class BulgarianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Към';
   @override
+  String get commandsTitle => 'Команди';
+  @override
+  String get commandsIntro =>
+      'Палитрата с команди предлага само командите, които могат да се '
+      'изпълнят там, където сте. Тук са всички и кога се показва всяка.';
+  @override
+  String get commandNeedNone => 'Винаги налично';
+  @override
+  String get commandNeedOpenNote => 'Изисква отворена бележка';
+  @override
+  String get commandNeedWideWindow => 'Само в широк прозорец';
+  @override
+  String get commandNeedDockRoom =>
+      'Изисква прозорец, достатъчно широк за страничния панел';
+  @override
+  String get commandNeedDesktop => 'Само на компютър';
+  @override
+  String get commandNeedNotInZen => 'Не в режим Дзен';
+  @override
+  String get commandNeedZenRoom => 'Компютър, с бележка, отворена в раздел';
+  @override
+  String get commandNeedPreview => 'С включен преглед, при текстова бележка';
+  @override
+  String get commandNeedTwoEditors => 'С двата включени редактора';
+  @override
   String get paletteHint => 'Търсене на команди и бележки';
   @override
   String get paletteNoResults => 'Няма съвпадения';

@@ -1163,6 +1163,31 @@ final class HindiStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'जाएँ';
   @override
+  String get commandsTitle => 'कमांड';
+  @override
+  String get commandsIntro =>
+      'कमांड पैलेट केवल वे कमांड दिखाता है जो आप जहाँ हैं वहाँ चल सकते हैं। '
+      'यहाँ सभी हैं, और यह भी कि हर एक कब दिखता है।';
+  @override
+  String get commandNeedNone => 'हमेशा उपलब्ध';
+  @override
+  String get commandNeedOpenNote => 'खुला नोट चाहिए';
+  @override
+  String get commandNeedWideWindow => 'केवल चौड़ी विंडो में';
+  @override
+  String get commandNeedDockRoom =>
+      'साइड पैनल के लिए पर्याप्त चौड़ी विंडो चाहिए';
+  @override
+  String get commandNeedDesktop => 'केवल डेस्कटॉप पर';
+  @override
+  String get commandNeedNotInZen => 'ज़ेन मोड में नहीं';
+  @override
+  String get commandNeedZenRoom => 'डेस्कटॉप, किसी टैब में खुले नोट के साथ';
+  @override
+  String get commandNeedPreview => 'पूर्वावलोकन चालू होने पर, टेक्स्ट नोट पर';
+  @override
+  String get commandNeedTwoEditors => 'दोनों एडिटर चालू होने पर';
+  @override
   String get paletteHint => 'कमांड और नोट खोजें';
   @override
   String get paletteNoResults => 'कुछ नहीं मिला';

@@ -1191,6 +1191,31 @@ final class BelarusianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Перайсці';
   @override
+  String get commandsTitle => 'Каманды';
+  @override
+  String get commandsIntro =>
+      'Палітра каманд прапануе толькі тыя каманды, якія можна выканаць там, '
+      "дзе вы ёсць. Тут усе, і калі кожная з'яўляецца.";
+  @override
+  String get commandNeedNone => 'Заўсёды даступна';
+  @override
+  String get commandNeedOpenNote => 'Патрэбна адкрытая нататка';
+  @override
+  String get commandNeedWideWindow => 'Толькі ў шырокім акне';
+  @override
+  String get commandNeedDockRoom =>
+      'Патрэбна акно, дастаткова шырокае для бакавой панэлі';
+  @override
+  String get commandNeedDesktop => "Толькі на камп'ютары";
+  @override
+  String get commandNeedNotInZen => 'Не ў рэжыме Дзэн';
+  @override
+  String get commandNeedZenRoom => "Камп'ютар, з нататкай, адкрытай ва ўкладцы";
+  @override
+  String get commandNeedPreview => 'З уключаным праглядам, у тэкставай нататцы';
+  @override
+  String get commandNeedTwoEditors => 'З абодвума ўключанымі рэдактарамі';
+  @override
   String get paletteHint => 'Шукаць каманды і нататкі';
   @override
   String get paletteNoResults => 'Нічога не знойдзена';

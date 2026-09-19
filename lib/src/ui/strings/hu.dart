@@ -1196,6 +1196,33 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ugrás';
   @override
+  String get commandsTitle => 'Parancsok';
+  @override
+  String get commandsIntro =>
+      'A parancspaletta csak azokat a parancsokat kínálja, amelyek ott '
+      'futtathatók, ahol éppen vagy. Itt van mind, és hogy melyik mikor '
+      'jelenik meg.';
+  @override
+  String get commandNeedNone => 'Mindig elérhető';
+  @override
+  String get commandNeedOpenNote => 'Nyitott jegyzet kell hozzá';
+  @override
+  String get commandNeedWideWindow => 'Csak széles ablakban';
+  @override
+  String get commandNeedDockRoom =>
+      'Az oldalsó panelhez elég széles ablak kell';
+  @override
+  String get commandNeedDesktop => 'Csak asztali gépen';
+  @override
+  String get commandNeedNotInZen => 'Nem Zen módban';
+  @override
+  String get commandNeedZenRoom =>
+      'Asztali gép, jegyzettel egy lapon megnyitva';
+  @override
+  String get commandNeedPreview => 'Bekapcsolt előnézettel, szöveges jegyzeten';
+  @override
+  String get commandNeedTwoEditors => 'Mindkét szerkesztő bekapcsolásával';
+  @override
   String get paletteHint => 'Parancsok és jegyzetek keresése';
   @override
   String get paletteNoResults => 'Nincs találat';

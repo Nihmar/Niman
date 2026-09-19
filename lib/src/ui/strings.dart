@@ -759,6 +759,17 @@ final class AppStrings {
   static String get paletteGroupView => _s.paletteGroupView;
   static String get paletteGroupLibrary => _s.paletteGroupLibrary;
   static String get paletteGroupGoTo => _s.paletteGroupGoTo;
+  static String get commandsTitle => _s.commandsTitle;
+  static String get commandsIntro => _s.commandsIntro;
+  static String get commandNeedNone => _s.commandNeedNone;
+  static String get commandNeedOpenNote => _s.commandNeedOpenNote;
+  static String get commandNeedWideWindow => _s.commandNeedWideWindow;
+  static String get commandNeedDockRoom => _s.commandNeedDockRoom;
+  static String get commandNeedDesktop => _s.commandNeedDesktop;
+  static String get commandNeedNotInZen => _s.commandNeedNotInZen;
+  static String get commandNeedZenRoom => _s.commandNeedZenRoom;
+  static String get commandNeedPreview => _s.commandNeedPreview;
+  static String get commandNeedTwoEditors => _s.commandNeedTwoEditors;
   static String get paletteHint => _s.paletteHint;
   static String get paletteNoResults => _s.paletteNoResults;
   static String get paletteCommands => _s.paletteCommands;

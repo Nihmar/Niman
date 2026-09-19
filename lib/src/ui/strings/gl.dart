@@ -1203,6 +1203,32 @@ final class GalicianStrings extends Strings {
   @override
   String get paletteGroupGoTo => 'Ir a';
   @override
+  String get commandsTitle => 'Ordes';
+  @override
+  String get commandsIntro =>
+      'A paleta de ordes só ofrece as ordes que se poden executar onde estás. '
+      'Aquí están todas, e cando aparece cada unha.';
+  @override
+  String get commandNeedNone => 'Sempre dispoñible';
+  @override
+  String get commandNeedOpenNote => 'Precisa unha nota aberta';
+  @override
+  String get commandNeedWideWindow => 'Só con xanela ancha';
+  @override
+  String get commandNeedDockRoom =>
+      'Precisa unha xanela o bastante ancha para o panel lateral';
+  @override
+  String get commandNeedDesktop => 'Só no escritorio';
+  @override
+  String get commandNeedNotInZen => 'Fóra do modo Zen';
+  @override
+  String get commandNeedZenRoom => 'Escritorio, cunha nota aberta nunha lapela';
+  @override
+  String get commandNeedPreview =>
+      'Coa vista previa activada, nunha nota de texto';
+  @override
+  String get commandNeedTwoEditors => 'Cos dous editores activados';
+  @override
   String get paletteHint => 'Buscar ordes e notas';
   @override
   String get paletteNoResults => 'Sen coincidencias';

@@ -570,6 +570,17 @@ abstract base class Strings {
   String get paletteGroupView;
   String get paletteGroupLibrary;
   String get paletteGroupGoTo;
+  String get commandsTitle;
+  String get commandsIntro;
+  String get commandNeedNone;
+  String get commandNeedOpenNote;
+  String get commandNeedWideWindow;
+  String get commandNeedDockRoom;
+  String get commandNeedDesktop;
+  String get commandNeedNotInZen;
+  String get commandNeedZenRoom;
+  String get commandNeedPreview;
+  String get commandNeedTwoEditors;
   String get paletteHint;
   String get paletteNoResults;
   String get paletteCommands;

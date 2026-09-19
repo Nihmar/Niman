@@ -1083,6 +1083,28 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteGroupGoTo => '转到';
   @override
+  String get commandsTitle => '命令';
+  @override
+  String get commandsIntro => '命令面板只列出在当前位置可以运行的命令。这里是全部命令，以及每条命令何时出现。';
+  @override
+  String get commandNeedNone => '始终可用';
+  @override
+  String get commandNeedOpenNote => '需要打开一条笔记';
+  @override
+  String get commandNeedWideWindow => '仅限宽窗口';
+  @override
+  String get commandNeedDockRoom => '需要足够容纳侧边面板的宽窗口';
+  @override
+  String get commandNeedDesktop => '仅限桌面端';
+  @override
+  String get commandNeedNotInZen => '不在禅模式下';
+  @override
+  String get commandNeedZenRoom => '桌面端，且有笔记在标签页中打开';
+  @override
+  String get commandNeedPreview => '预览已开启，且为文本笔记';
+  @override
+  String get commandNeedTwoEditors => '两个编辑器均已启用';
+  @override
   String get paletteHint => '搜索命令和笔记';
   @override
   String get paletteNoResults => '没有匹配项';
