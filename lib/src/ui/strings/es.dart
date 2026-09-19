@@ -1226,6 +1226,14 @@ final class SpanishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para moverte · ↵ para usar · esc para cerrar';
   @override
+  String get spellCheckScanning => 'Revisando la nota…';
+  @override
+  String get spellCheckAgain => 'Revisar de nuevo';
+  @override
+  String spellCheckCapped(int count) =>
+      'Se muestran los primeros $count: corrige algunos y vuelve a revisar '
+      'para ver el resto';
+  @override
   String get dropHint =>
       'Suelta archivos Markdown para abrirlos, o una carpeta para importarla';
   @override

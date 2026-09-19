@@ -1234,6 +1234,14 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get spellCheckScanning => 'Vérification de la note…';
+  @override
+  String get spellCheckAgain => 'Vérifier à nouveau';
+  @override
+  String spellCheckCapped(int count) =>
+      'Les $count premiers sont listés : corrigez-en quelques-uns, puis '
+      'vérifiez à nouveau pour le reste';
+  @override
   String get dropHint =>
       'Déposez des fichiers Markdown pour les ouvrir, ou un dossier pour '
       'l’importer';

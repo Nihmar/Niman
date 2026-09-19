@@ -1093,6 +1093,12 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get spellCheckScanning => '正在检查笔记…';
+  @override
+  String get spellCheckAgain => '重新检查';
+  @override
+  String spellCheckCapped(int count) => '已列出前 $count 个：先修正一些，再重新检查其余的';
+  @override
   String get dropHint => '拖放 Markdown 文件以打开，或拖放文件夹以导入';
   @override
   String get importFolderAction => '导入';

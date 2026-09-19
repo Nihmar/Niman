@@ -46,8 +46,8 @@ const Set<TokenKind> _skipKinds = <TokenKind>{
   TokenKind.tag,
 };
 
-/// One line handed to [EditorSpellCheck.scan]: its text and the ranges the
-/// checker must ignore.
+/// One line handed to [EditorSpellCheck.startScan]: its text and the
+/// ranges the checker must ignore.
 typedef SpellLine = ({String text, List<TextRange> skip});
 
 /// One checked line: the text it was checked for and the ranges found.
@@ -95,6 +95,7 @@ final class EditorSpellCheck extends ChangeNotifier {
     _checker = null;
     _lines.clear();
     _words.clear();
+    _suggestions.clear();
     notifyListeners();
   }
 
@@ -172,6 +173,7 @@ final class EditorSpellCheck extends ChangeNotifier {
   void _onDictionaryChanged() {
     _lines.clear();
     _words.clear();
+    _suggestions.clear();
     notifyListeners();
   }
 
@@ -234,41 +236,34 @@ final class EditorSpellCheck extends ChangeNotifier {
     return ranges;
   }
 
-  /// Every misspelling in [lines], in reading order, with suggestions.
+  /// Starts the panel's whole-note pass over [lineCount] lines, read one
+  /// at a time through [lineAt] as the pass reaches them (#61).
   ///
-  /// The panel's whole-note pass, unlike the per-visible-line [rangesFor];
-  /// capped so a mostly-code note cannot build an unbounded list, and
-  /// sharing the same word-verdict cache.
-  List<SpellIssue> scan(List<SpellLine> lines) {
-    if (!_enabled) return const <SpellIssue>[];
+  /// The pass runs on this isolate — hunspell's handle cannot leave it —
+  /// but a slice at a time, handing the frame back between slices, so the
+  /// panel opens at once and fills as it goes. It shares the underline's
+  /// word-verdict cache. Its issues carry no suggestions: those are
+  /// hunspell's slow call, and [suggestionsFor] makes them one word at a
+  /// time, for the words the panel shows.
+  SpellScan startScan({
+    required int lineCount,
+    required SpellLine Function(int index) lineAt,
+  }) => SpellScan._(this, lineCount, lineAt);
+
+  /// Hunspell's suggestions for [word], best first; cached per word.
+  List<String> suggestionsFor(String word) {
+    if (!_enabled) return const <String>[];
     final checker = _checker ??= _newChecker();
-    if (!checker.available) return const <SpellIssue>[];
-    final issues = <SpellIssue>[];
-    for (var i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      for (final match in _word.allMatches(line.text)) {
-        final start = match.start;
-        final end = match.end;
-        if (_covered(start, end, line.skip)) continue;
-        final word = match.group(0)!;
-        if (!_checkable(word)) continue;
-        final correct = _words[word] ??= checker.isCorrect(word);
-        if (correct) continue;
-        issues.add(
-          SpellIssue(
-            line: i,
-            start: start,
-            end: end,
-            word: word,
-            lineText: line.text,
-            suggestions: checker.suggest(word),
-          ),
-        );
-        if (issues.length >= maxIssues) return issues;
-      }
-    }
-    return issues;
+    if (!checker.available) return const <String>[];
+    return _suggestions[word] ??= checker.suggest(word);
   }
+
+  final Map<String, List<String>> _suggestions = <String, List<String>>{};
+
+  /// Whether [word] is flagged, through the verdict cache; the pass's
+  /// single step.
+  bool _misspelled(SpellChecker checker, String word) =>
+      _checkable(word) && !(_words[word] ??= checker.isCorrect(word));
 
   /// The most issues the panel lists.
   static const int maxIssues = 200;
@@ -370,4 +365,95 @@ ContextMenuButtonItem? addToDictionaryItem({
       onDismiss();
     },
   );
+}
+
+/// One run of the panel's whole-note pass (#61): the issues found so far,
+/// how far it got, and whether it stopped at [EditorSpellCheck.maxIssues].
+final class SpellScan extends ChangeNotifier {
+  new _(this._spell, this.lineCount, this._lineAt);
+
+  final EditorSpellCheck _spell;
+  final SpellLine Function(int index) _lineAt;
+
+  /// How long one slice may keep the frame before handing it back.
+  static const Duration slice = Duration(milliseconds: 8);
+
+  /// The lines the pass covers.
+  final int lineCount;
+
+  final List<SpellIssue> _issues = <SpellIssue>[];
+  int _linesDone = 0;
+  bool _done = false;
+  bool _capped = false;
+  bool _cancelled = false;
+
+  /// The misspellings found so far, in reading order, without
+  /// suggestions (see [EditorSpellCheck.suggestionsFor]).
+  List<SpellIssue> get issues => List.unmodifiable(_issues);
+
+  /// The lines checked so far.
+  int get linesDone => _linesDone;
+
+  /// Whether the pass is over: every line checked, or the list full.
+  bool get done => _done;
+
+  /// Whether the pass stopped at [EditorSpellCheck.maxIssues] with lines
+  /// left: the panel says it shows the first ones only.
+  bool get capped => _capped;
+
+  /// Runs the pass to its end, a slice at a time.
+  Future<void> run() async {
+    final spell = _spell;
+    final checker = spell._enabled
+        ? (spell._checker ??= spell._newChecker())
+        : null;
+    if (checker == null || !checker.available) {
+      _finish();
+      return;
+    }
+    final clock = Stopwatch()..start();
+    while (_linesDone < lineCount && !_cancelled) {
+      final index = _linesDone;
+      final line = _lineAt(index);
+      for (final match in EditorSpellCheck._word.allMatches(line.text)) {
+        if (EditorSpellCheck._covered(match.start, match.end, line.skip)) {
+          continue;
+        }
+        final word = match.group(0)!;
+        if (!spell._misspelled(checker, word)) continue;
+        _issues.add(
+          SpellIssue(
+            line: index,
+            start: match.start,
+            end: match.end,
+            word: word,
+            lineText: line.text,
+            suggestions: const <String>[],
+          ),
+        );
+        if (_issues.length >= EditorSpellCheck.maxIssues) break;
+      }
+      _linesDone++;
+      if (_issues.length >= EditorSpellCheck.maxIssues) {
+        _capped = _linesDone < lineCount;
+        break;
+      }
+      if (clock.elapsed >= slice) {
+        notifyListeners();
+        // Hands the frame back: what was found shows, input goes through.
+        await Future<void>.delayed(Duration.zero);
+        clock.reset();
+      }
+    }
+    _finish();
+  }
+
+  void _finish() {
+    if (_cancelled) return;
+    _done = true;
+    notifyListeners();
+  }
+
+  /// Stops the pass (the panel closed).
+  void cancel() => _cancelled = true;
 }

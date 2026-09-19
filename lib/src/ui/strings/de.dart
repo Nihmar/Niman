@@ -1223,6 +1223,14 @@ final class GermanStrings extends Strings {
   String get paletteFooter =>
       '↑↓ zum Bewegen · ↵ zum Ausführen · Esc zum Schließen';
   @override
+  String get spellCheckScanning => 'Notiz wird geprüft…';
+  @override
+  String get spellCheckAgain => 'Erneut prüfen';
+  @override
+  String spellCheckCapped(int count) =>
+      'Die ersten $count werden angezeigt: einige korrigieren, dann für den '
+      'Rest erneut prüfen';
+  @override
   String get dropHint =>
       'Markdown-Dateien ablegen, um sie zu öffnen, oder einen Ordner, um ihn '
       'zu importieren';

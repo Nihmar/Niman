@@ -1243,6 +1243,14 @@ final class GreekStrings extends Strings {
   String get paletteFooter =>
       '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
   @override
+  String get spellCheckScanning => 'Έλεγχος σημείωσης…';
+  @override
+  String get spellCheckAgain => 'Νέος έλεγχος';
+  @override
+  String spellCheckCapped(int count) =>
+      'Εμφανίζονται τα πρώτα $count: διορθώστε μερικά και ελέγξτε ξανά για '
+      'τα υπόλοιπα';
+  @override
   String get dropHint =>
       'Αφήστε αρχεία Markdown για να ανοίξουν ή έναν φάκελο για εισαγωγή';
   @override

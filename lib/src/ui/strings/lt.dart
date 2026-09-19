@@ -1201,6 +1201,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get spellCheckScanning => 'Tikrinamas užrašas…';
+  @override
+  String get spellCheckAgain => 'Tikrinti dar kartą';
+  @override
+  String spellCheckCapped(int count) =>
+      'Rodomi pirmieji $count: pataisykite kelis ir patikrinkite dar kartą, '
+      'kad pamatytumėte likusius';
+  @override
   String get dropHint =>
       'Numeskite Markdown failus, kad juos atidarytumėte, arba aplanką, kad '
       'jį importuotumėte';

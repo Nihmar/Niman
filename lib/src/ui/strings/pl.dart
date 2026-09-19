@@ -1218,6 +1218,14 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get spellCheckScanning => 'Sprawdzanie notatki…';
+  @override
+  String get spellCheckAgain => 'Sprawdź ponownie';
+  @override
+  String spellCheckCapped(int count) =>
+      'Wyświetlono pierwsze $count: popraw kilka, a potem sprawdź ponownie '
+      'resztę';
+  @override
   String get dropHint =>
       'Upuść pliki Markdown, aby je otworzyć, lub folder, aby go zaimportować';
   @override
