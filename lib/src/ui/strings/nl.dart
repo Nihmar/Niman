@@ -1214,6 +1214,74 @@ final class DutchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
   @override
+  String get keySpace => 'Spatie';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Omhoog';
+  @override
+  String get keyArrowDown => 'Omlaag';
+  @override
+  String get keyArrowLeft => 'Links';
+  @override
+  String get keyArrowRight => 'Rechts';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Geen sneltoets';
+  @override
+  String get shortcutRestoreDefaults => 'Standaard herstellen';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Alle sneltoetsen terugzetten zoals Niman ze levert?';
+  @override
+  String get shortcutRevert => 'Terug naar standaard';
+  @override
+  String get shortcutClear => 'Sneltoets verwijderen';
+  @override
+  String get shortcutCapturePrompt =>
+      'Druk op de toetsen. Ook Esc en Tab worden opgenomen: Annuleren is de '
+      'uitweg.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Voeg Ctrl, Alt of Meta toe: een losse toets is om te typen.';
+  @override
+  String get shortcutMove => 'Verplaatsen';
+  @override
+  String get shortcutUseAnyway => 'Toch gebruiken';
+  @override
+  String get shortcutUndo => 'Ongedaan maken';
+  @override
+  String get shortcutRedo => 'Opnieuw';
+  @override
+  String get shortcutChange => 'Sneltoets wijzigen';
+  @override
+  String shortcutCaptureTitle(String command) => 'Toetsen voor $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys is al van $other. Hierheen verplaatsen? $other heeft dan geen '
+      'sneltoets.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys is ook $what in tekstvelden en de editor. Daar neemt je '
+      'opdracht hem over.';
+  @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';
   @override

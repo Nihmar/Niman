@@ -1206,6 +1206,72 @@ final class SwedishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ för att flytta · ↵ för att använda · esc för att stänga';
   @override
+  String get keySpace => 'Blanksteg';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backsteg';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Upp';
+  @override
+  String get keyArrowDown => 'Ned';
+  @override
+  String get keyArrowLeft => 'Vänster';
+  @override
+  String get keyArrowRight => 'Höger';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Inget kortkommando';
+  @override
+  String get shortcutRestoreDefaults => 'Återställ standard';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Sätta tillbaka alla kortkommandon som Niman levererar dem?';
+  @override
+  String get shortcutRevert => 'Tillbaka till standard';
+  @override
+  String get shortcutClear => 'Ta bort kortkommandot';
+  @override
+  String get shortcutCapturePrompt =>
+      'Tryck på tangenterna. Även Esc och Tab fångas: Avbryt är vägen ut.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Lägg till Ctrl, Alt eller Meta: en tangent ensam är för att skriva.';
+  @override
+  String get shortcutMove => 'Flytta det';
+  @override
+  String get shortcutUseAnyway => 'Använd ändå';
+  @override
+  String get shortcutUndo => 'Ångra';
+  @override
+  String get shortcutRedo => 'Gör om';
+  @override
+  String get shortcutChange => 'Ändra kortkommandot';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tangenter för $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys tillhör redan $other. Flytta hit? $other får inget kortkommando.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys är även $what i textfält och redigeraren. Där tar ditt kommando '
+      'det.';
+  @override
   String get openFileMissing =>
       'Den här anteckningens fil finns inte på disken';
   @override

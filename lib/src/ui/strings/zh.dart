@@ -1093,6 +1093,68 @@ final class ChineseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ 移动 · ↵ 使用 · esc 关闭';
   @override
+  String get keySpace => '空格';
+  @override
+  String get keyEnter => '回车';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => '退格';
+  @override
+  String get keyDelete => '删除';
+  @override
+  String get keyArrowUp => '上';
+  @override
+  String get keyArrowDown => '下';
+  @override
+  String get keyArrowLeft => '左';
+  @override
+  String get keyArrowRight => '右';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => '无快捷键';
+  @override
+  String get shortcutRestoreDefaults => '恢复默认';
+  @override
+  String get shortcutRestoreDefaultsConfirm => '要把所有快捷键恢复为 Niman 的默认设置吗？';
+  @override
+  String get shortcutRevert => '恢复为默认';
+  @override
+  String get shortcutClear => '移除快捷键';
+  @override
+  String get shortcutCapturePrompt => '请按下按键。Esc 和 Tab 也会被记录：请用“取消”退出。';
+  @override
+  String get shortcutCaptureNeedsModifier => '请加上 Ctrl、Alt 或 Meta：单独一个键用于输入。';
+  @override
+  String get shortcutMove => '移过来';
+  @override
+  String get shortcutUseAnyway => '仍然使用';
+  @override
+  String get shortcutUndo => '撤销';
+  @override
+  String get shortcutRedo => '重做';
+  @override
+  String get shortcutChange => '更改快捷键';
+  @override
+  String shortcutCaptureTitle(String command) => '“$command”的按键';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys 已属于“$other”。要移到这里吗？“$other”将没有快捷键。';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys 在文本框和编辑器中也是“$what”。在那里将由你的命令接管。';
+  @override
   String get openFileMissing => '这篇笔记的文件不在磁盘上';
   @override
   String get openFileFailed => '无法在 Niman 之外打开这篇笔记';

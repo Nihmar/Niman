@@ -1195,6 +1195,72 @@ final class CzechStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
   @override
+  String get keySpace => 'Mezerník';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Nahoru';
+  @override
+  String get keyArrowDown => 'Dolů';
+  @override
+  String get keyArrowLeft => 'Vlevo';
+  @override
+  String get keyArrowRight => 'Vpravo';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Bez zkratky';
+  @override
+  String get shortcutRestoreDefaults => 'Obnovit výchozí';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Vrátit všechny zkratky tak, jak je dodává Niman?';
+  @override
+  String get shortcutRevert => 'Zpět na výchozí';
+  @override
+  String get shortcutClear => 'Odebrat zkratku';
+  @override
+  String get shortcutCapturePrompt =>
+      'Stiskněte klávesy. Zaznamenají se i Esc a Tab: odejít lze přes Zrušit.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Přidejte Ctrl, Alt nebo Meta: samotná klávesa slouží k psaní.';
+  @override
+  String get shortcutMove => 'Přesunout';
+  @override
+  String get shortcutUseAnyway => 'Přesto použít';
+  @override
+  String get shortcutUndo => 'Zpět';
+  @override
+  String get shortcutRedo => 'Znovu';
+  @override
+  String get shortcutChange => 'Změnit zkratku';
+  @override
+  String shortcutCaptureTitle(String command) => 'Klávesy pro $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys už patří k $other. Přesunout sem? $other zůstane bez zkratky.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys je také $what v textových polích a editoru. Tam ji převezme váš '
+      'příkaz.';
+  @override
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
   String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';

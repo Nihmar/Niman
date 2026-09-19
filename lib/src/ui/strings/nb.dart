@@ -1194,6 +1194,73 @@ final class NorwegianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
   @override
+  String get keySpace => 'Mellomrom';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Tilbake';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Opp';
+  @override
+  String get keyArrowDown => 'Ned';
+  @override
+  String get keyArrowLeft => 'Venstre';
+  @override
+  String get keyArrowRight => 'Høyre';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Ingen snarvei';
+  @override
+  String get shortcutRestoreDefaults => 'Gjenopprett standard';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Sette alle snarveier tilbake slik Niman leverer dem?';
+  @override
+  String get shortcutRevert => 'Tilbake til standard';
+  @override
+  String get shortcutClear => 'Fjern snarveien';
+  @override
+  String get shortcutCapturePrompt =>
+      'Trykk tastene. Esc og Tab tas også opp: Avbryt er veien ut.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Legg til Ctrl, Alt eller Meta: en tast alene er for å skrive.';
+  @override
+  String get shortcutMove => 'Flytt den';
+  @override
+  String get shortcutUseAnyway => 'Bruk likevel';
+  @override
+  String get shortcutUndo => 'Angre';
+  @override
+  String get shortcutRedo => 'Gjør om';
+  @override
+  String get shortcutChange => 'Endre snarveien';
+  @override
+  String shortcutCaptureTitle(String command) => 'Taster for $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys tilhører allerede $other. Flytte den hit? $other får ingen '
+      'snarvei.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys er også $what i tekstfelt og redigeringen. Der tar kommandoen '
+      'din den.';
+  @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';

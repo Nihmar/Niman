@@ -1189,6 +1189,73 @@ final class TurkishStrings extends Strings {
   String get paletteFooter =>
       '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
   @override
+  String get keySpace => 'Boşluk';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Geri al tuşu';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Yukarı';
+  @override
+  String get keyArrowDown => 'Aşağı';
+  @override
+  String get keyArrowLeft => 'Sol';
+  @override
+  String get keyArrowRight => 'Sağ';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Kısayol yok';
+  @override
+  String get shortcutRestoreDefaults => 'Varsayılanları geri yükle';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      "Tüm kısayollar Niman'ın sunduğu hâline döndürülsün mü?";
+  @override
+  String get shortcutRevert => 'Varsayılana dön';
+  @override
+  String get shortcutClear => 'Kısayolu kaldır';
+  @override
+  String get shortcutCapturePrompt =>
+      "Tuşlara basın. Esc ve Tab da kaydedilir: çıkış İptal'dir.";
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Ctrl, Alt veya Meta ekleyin: tek başına bir tuş yazmak içindir.';
+  @override
+  String get shortcutMove => 'Taşı';
+  @override
+  String get shortcutUseAnyway => 'Yine de kullan';
+  @override
+  String get shortcutUndo => 'Geri al';
+  @override
+  String get shortcutRedo => 'Yinele';
+  @override
+  String get shortcutChange => 'Kısayolu değiştir';
+  @override
+  String shortcutCaptureTitle(String command) => '$command için tuşlar';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys zaten $other komutunun. Buraya taşınsın mı? $other kısayolsuz '
+      'kalacak.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys metin alanlarında ve düzenleyicide $what da demek. Orada '
+      'komutunuz onu alacak.';
+  @override
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override
   String get openFileFailed => 'Bu not Niman dışında açılamadı';

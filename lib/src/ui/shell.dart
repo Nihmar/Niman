@@ -35,6 +35,7 @@ import 'package:niman/src/ui/dock/outline_dock_pane.dart';
 import 'package:niman/src/ui/dock/right_dock.dart';
 import 'package:niman/src/ui/dock/tags_dock_pane.dart';
 import 'package:niman/src/ui/history/history_flow.dart';
+import 'package:niman/src/ui/key_map.dart';
 import 'package:niman/src/ui/kinds/audio_transcript_writer.dart';
 import 'package:niman/src/ui/new_item_fab.dart';
 import 'package:niman/src/ui/note_menu.dart';
@@ -140,6 +141,8 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
       brightness: await session.themeBrightness,
       palette: await session.themePalette,
     );
+    // The keys this device was given (#159): read once, like the theme.
+    AppKeyMap.current.value = KeyMap.fromJson(await session.keyMap);
   }
 
   /// Applies the stored UI language (T-L10N-03).
@@ -1196,6 +1199,8 @@ final class _LibraryShellState extends State<_LibraryShell>
     });
     _homeWidgets.start();
     _workspace.controller.addListener(_onWorkspaceChanged);
+    AppKeyMap.current.addListener(_onKeyMapChanged);
+    _chosenKeys.attach();
     unawaited(_workspace.load());
     _libraryEvents = widget.controller.events.listen(
       (_) => _homeWidgets.pushNotes(),
@@ -1225,6 +1230,8 @@ final class _LibraryShellState extends State<_LibraryShell>
   void dispose() {
     _markOpenNote(null, null);
     _workspace.controller.removeListener(_onWorkspaceChanged);
+    AppKeyMap.current.removeListener(_onKeyMapChanged);
+    _chosenKeys.detach();
     _tabsListenable.dispose();
     _workspace.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -2224,6 +2231,18 @@ final class _LibraryShellState extends State<_LibraryShell>
       ),
     };
   }
+
+  /// The keys changed on the keyboard screen: the bindings follow.
+  void _onKeyMapChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The keys the user chose, winning in both editors too (#159); not
+  /// under a dialog or another screen.
+  late final ChosenKeys _chosenKeys = ChosenKeys(
+    handlers: _commandHandlers,
+    active: () => mounted && (ModalRoute.of(context)?.isCurrent ?? true),
+  );
 
   /// Re-reads the library into its index, saying when it is done.
   Future<void> _reindex() => _guard(() async {

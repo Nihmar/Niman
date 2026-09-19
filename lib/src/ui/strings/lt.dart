@@ -1201,6 +1201,74 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get keySpace => 'Tarpas';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Aukštyn';
+  @override
+  String get keyArrowDown => 'Žemyn';
+  @override
+  String get keyArrowLeft => 'Kairėn';
+  @override
+  String get keyArrowRight => 'Dešinėn';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Nėra spartiojo klavišo';
+  @override
+  String get shortcutRestoreDefaults => 'Atkurti numatytuosius';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Grąžinti visus sparčiuosius klavišus, kaip juos pateikia Niman?';
+  @override
+  String get shortcutRevert => 'Grąžinti numatytąjį';
+  @override
+  String get shortcutClear => 'Pašalinti spartųjį klavišą';
+  @override
+  String get shortcutCapturePrompt =>
+      'Paspauskite klavišus. Esc ir Tab taip pat įrašomi: išeiti galima '
+      'mygtuku Atšaukti.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Pridėkite Ctrl, Alt arba Meta: vienas klavišas skirtas rašyti.';
+  @override
+  String get shortcutMove => 'Perkelti';
+  @override
+  String get shortcutUseAnyway => 'Vis tiek naudoti';
+  @override
+  String get shortcutUndo => 'Anuliuoti';
+  @override
+  String get shortcutRedo => 'Pakartoti';
+  @override
+  String get shortcutChange => 'Keisti spartųjį klavišą';
+  @override
+  String shortcutCaptureTitle(String command) => 'Klavišai: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys jau priklauso $other. Perkelti čia? $other liks be sparčiojo '
+      'klavišo.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys teksto laukuose ir redaktoriuje taip pat yra $what. Ten jį '
+      'perims jūsų komanda.';
+  @override
   String get openFileMissing => 'Šios pastabos failo diske nėra';
   @override
   String get openFileFailed => 'Nepavyko atverti šios pastabos už Niman ribų';

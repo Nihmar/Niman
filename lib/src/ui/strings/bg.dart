@@ -1211,6 +1211,73 @@ final class BulgarianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ за придвижване · ↵ за избор · esc за затваряне';
   @override
+  String get keySpace => 'Интервал';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Нагоре';
+  @override
+  String get keyArrowDown => 'Надолу';
+  @override
+  String get keyArrowLeft => 'Наляво';
+  @override
+  String get keyArrowRight => 'Надясно';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Без клавиш';
+  @override
+  String get shortcutRestoreDefaults => 'Възстанови стандартните';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Да се върнат ли всички клавишни комбинации както са в Niman?';
+  @override
+  String get shortcutRevert => 'Върни стандартната';
+  @override
+  String get shortcutClear => 'Премахни комбинацията';
+  @override
+  String get shortcutCapturePrompt =>
+      'Натиснете клавишите. Esc и Tab също се записват: излезте с „Отказ“.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Добавете Ctrl, Alt или Meta: самостоятелен клавиш е за писане.';
+  @override
+  String get shortcutMove => 'Премести';
+  @override
+  String get shortcutUseAnyway => 'Използвай въпреки това';
+  @override
+  String get shortcutUndo => 'Отмяна';
+  @override
+  String get shortcutRedo => 'Повтори';
+  @override
+  String get shortcutChange => 'Промени комбинацията';
+  @override
+  String shortcutCaptureTitle(String command) => 'Клавиши за „$command“';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys вече е на „$other“. Да се премести ли тук? „$other“ ще остане '
+      'без комбинация.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys е и „$what“ в текстовите полета и редактора. Там ще я поеме '
+      'вашата команда.';
+  @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';

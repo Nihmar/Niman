@@ -1213,6 +1213,73 @@ final class AlbanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ për të lëvizur · ↵ për të përdorur · esc për ta mbyllur';
   @override
+  String get keySpace => 'Hapësirë';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Lart';
+  @override
+  String get keyArrowDown => 'Poshtë';
+  @override
+  String get keyArrowLeft => 'Majtas';
+  @override
+  String get keyArrowRight => 'Djathtas';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Pa shkurtore';
+  @override
+  String get shortcutRestoreDefaults => 'Rikthe parazgjedhjet';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Të kthehen të gjitha shkurtoret siç i sjell Niman?';
+  @override
+  String get shortcutRevert => 'Kthehu te parazgjedhja';
+  @override
+  String get shortcutClear => 'Hiq shkurtoren';
+  @override
+  String get shortcutCapturePrompt =>
+      'Shtyp tastet. Edhe Esc e Tab regjistrohen: dil me Anulo.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Shto Ctrl, Alt ose Meta: një tast i vetëm është për të shkruar.';
+  @override
+  String get shortcutMove => 'Zhvendose';
+  @override
+  String get shortcutUseAnyway => 'Përdore gjithsesi';
+  @override
+  String get shortcutUndo => 'Zhbëj';
+  @override
+  String get shortcutRedo => 'Ribëj';
+  @override
+  String get shortcutChange => 'Ndrysho shkurtoren';
+  @override
+  String shortcutCaptureTitle(String command) => 'Tastet për $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      '$keys i përket tashmë $other. Ta zhvendos këtu? $other do të mbetet '
+      'pa shkurtore.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      '$keys është edhe $what në fushat e tekstit dhe në redaktor. Atje do '
+      'ta marrë komanda jote.';
+  @override
   String get openFileMissing => 'Skedari i këtij shënimi nuk ndodhet në disk';
   @override
   String get openFileFailed => 'Ky shënim nuk u hap dot jashtë Niman';

@@ -1206,6 +1206,76 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get keySpace => 'Szóköz';
+  @override
+  String get keyEnter => 'Enter';
+  @override
+  String get keyTab => 'Tab';
+  @override
+  String get keyEscape => 'Esc';
+  @override
+  String get keyBackspace => 'Backspace';
+  @override
+  String get keyDelete => 'Delete';
+  @override
+  String get keyArrowUp => 'Fel';
+  @override
+  String get keyArrowDown => 'Le';
+  @override
+  String get keyArrowLeft => 'Balra';
+  @override
+  String get keyArrowRight => 'Jobbra';
+  @override
+  String get keyHome => 'Home';
+  @override
+  String get keyEnd => 'End';
+  @override
+  String get keyPageUp => 'Page Up';
+  @override
+  String get keyPageDown => 'Page Down';
+  @override
+  String get keyInsert => 'Insert';
+  @override
+  String get shortcutNone => 'Nincs billentyűparancs';
+  @override
+  String get shortcutRestoreDefaults => 'Alapértékek visszaállítása';
+  @override
+  String get shortcutRestoreDefaultsConfirm =>
+      'Visszaállítod az összes billentyűparancsot úgy, ahogy a Niman '
+      'szállítja?';
+  @override
+  String get shortcutRevert => 'Vissza az alapértékre';
+  @override
+  String get shortcutClear => 'Billentyűparancs eltávolítása';
+  @override
+  String get shortcutCapturePrompt =>
+      'Nyomd le a billentyűket. Az Esc és a Tab is rögzül: a Mégse gombbal '
+      'léphetsz ki.';
+  @override
+  String get shortcutCaptureNeedsModifier =>
+      'Adj hozzá Ctrl-t, Alt-ot vagy Metát: egy billentyű magában gépelésre '
+      'való.';
+  @override
+  String get shortcutMove => 'Áthelyezés';
+  @override
+  String get shortcutUseAnyway => 'Használat mégis';
+  @override
+  String get shortcutUndo => 'Visszavonás';
+  @override
+  String get shortcutRedo => 'Ismétlés';
+  @override
+  String get shortcutChange => 'Billentyűparancs módosítása';
+  @override
+  String shortcutCaptureTitle(String command) => 'Billentyűk: $command';
+  @override
+  String shortcutConflict(String keys, String other) =>
+      'A(z) $keys már a(z) $other parancsé. Áthelyezed ide? A(z) $other '
+      'billentyűparancs nélkül marad.';
+  @override
+  String shortcutTakesEditorKey(String keys, String what) =>
+      'A(z) $keys a szövegmezőkben és a szerkesztőben $what is. Ott a '
+      'parancsod veszi át.';
+  @override
   String get openFileMissing => 'Ennek a jegyzetnek a fájlja nincs a lemezen';
   @override
   String get openFileFailed =>
