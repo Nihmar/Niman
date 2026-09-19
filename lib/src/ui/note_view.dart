@@ -805,6 +805,10 @@ final class _NoteViewState extends State<NoteView>
       // only, never the whole text.
       _noteKind = frontmatterTypeOf(text);
       _controller.text = text;
+      // Loading is not an edit: without this the first Ctrl+Z took the
+      // buffer back to what it held before — nothing — and the save that
+      // followed wrote an empty note.
+      _controller.clearHistory();
       _wysiwygText = text;
       // A template `{{cursor}}` landing (#53): the offset was measured in
       // this same text, so placing it is a line walk, not a guess. The
@@ -923,6 +927,9 @@ final class _NoteViewState extends State<NoteView>
     // before the revision bump and the save schedule.
     _loading = true;
     _controller.text = text;
+    // The disk's text is where undo starts from now: undoing past it
+    // would write the replaced text back over the other program's change.
+    _controller.clearHistory();
     _wysiwygText = text;
     _lastLines = _controller.codeLines;
     _lastSavedRevision = _revision;
