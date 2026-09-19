@@ -42,6 +42,37 @@ void main() {
     },
   );
 
+  // #42: the overdue line has to read true on a desktop, where no OS
+  // keeps the alarm: not armed is not the same as fired.
+  group('an overdue reminder reads as what happened here', () {
+    String state(TodoReminder r, {required bool pending}) => backend
+        .overdueState(r, pending: pending, exact: true, batteryExempt: true);
+
+    test('a timer that fired says how late', () async {
+      final r = reminder(const Duration(milliseconds: -5));
+      await backend.schedule(r, exact: true);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(await backend.pendingIds(), isEmpty);
+      final line = state(r, pending: false);
+      expect(line, startsWith('timer fired '));
+      expect(line, endsWith(' s late'));
+      expect(line, isNot(contains('battery')));
+    });
+
+    test('one never armed in this run did not fire', () {
+      final r = reminder(const Duration(hours: -1));
+      final line = state(r, pending: false);
+      expect(line, contains('NOT FIRED'));
+      expect(line, contains('not running'));
+    });
+
+    test('one still armed past its time was slept through', () async {
+      final r = reminder(const Duration(hours: 1));
+      await backend.schedule(r, exact: true);
+      expect(state(r, pending: true), contains('STILL ARMED'));
+    });
+  });
+
   test('a cancelled reminder never fires', () async {
     final r = reminder(const Duration(milliseconds: 30));
     await backend.schedule(r, exact: true);

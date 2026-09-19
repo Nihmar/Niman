@@ -299,13 +299,16 @@ final class LocalReminderService implements ReminderService {
     }
     for (final reminder in overdue) {
       final held = pending.contains(reminder.id);
+      final state = _backend.overdueState(
+        reminder,
+        pending: held,
+        exact: exact,
+        batteryExempt: batteryExempt,
+      );
       _log.warning(
         'todo reminders: overdue ${reminder.id} '
         'due ${reminder.when.toIso8601String()} '
-        '(${_since(now.difference(reminder.when))} ago), '
-        '${held ? 'STILL PENDING, never fired' : 'no longer pending, fired'}, '
-        'alarms ${exact ? 'exact' : 'inexact'}, '
-        'battery ${batteryExempt ? 'unrestricted' : 'optimized'}',
+        '(${_since(now.difference(reminder.when))} ago), $state',
       );
     }
   }
