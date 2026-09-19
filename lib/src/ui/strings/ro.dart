@@ -1211,6 +1211,12 @@ final class RomanianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pentru navigare · ↵ pentru a folosi · esc pentru a închide';
   @override
+  String get zenMode => 'Mod zen';
+  @override
+  String get zenModeEnter => 'Intră în modul zen';
+  @override
+  String get zenModeLeave => 'Ieși din modul zen';
+  @override
   String get keySpace => 'Spațiu';
   @override
   String get keyEnter => 'Enter';

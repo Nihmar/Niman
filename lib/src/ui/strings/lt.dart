@@ -1201,6 +1201,12 @@ final class LithuanianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ judėti · ↵ naudoti · esc uždaryti';
   @override
+  String get zenMode => 'Zen režimas';
+  @override
+  String get zenModeEnter => 'Įjungti zen režimą';
+  @override
+  String get zenModeLeave => 'Išeiti iš zen režimo';
+  @override
   String get keySpace => 'Tarpas';
   @override
   String get keyEnter => 'Enter';

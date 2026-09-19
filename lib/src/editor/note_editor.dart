@@ -9,6 +9,9 @@ import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:re_editor/re_editor.dart';
 
+/// The caret's width in Zen mode (#69): the package's is 2.
+const double zenCaretWidth = 3;
+
 /// The note source editor: a thin wrapper over re_editor's [CodeEditor].
 ///
 /// This replaces the custom line-based widget stack (hand-built caret,
@@ -51,6 +54,7 @@ final class NoteEditor extends StatelessWidget {
     this.spellCheck,
     this.column = NoteColumn.off,
     this.formatMenu,
+    this.caretWidth,
     super.key,
   });
 
@@ -106,6 +110,10 @@ final class NoteEditor extends StatelessWidget {
   /// offers the clipboard alone.
   final FormatMenuBuilder? formatMenu;
 
+  /// The caret's width; null keeps the package's own (Zen mode, #69,
+  /// thickens it).
+  final double? caretWidth;
+
   /// re_editor's own padding around the text: what the editor had before
   /// the column, kept wherever there is no side space.
   static const double _fieldInset = 5;
@@ -146,6 +154,7 @@ final class NoteEditor extends StatelessWidget {
       // tokenizer instead.
       style: CodeEditorStyle(
         fontSize: fontSize,
+        cursorWidth: caretWidth,
         fontFamily: 'monospace',
         fontFamilyFallback: const [
           'Consolas',

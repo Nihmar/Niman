@@ -109,6 +109,39 @@ phone never shows a margin, and the reason the setting exists on
 Android as well: on a tablet, or a phone in landscape, it starts to
 count.
 
+### Zen mode
+
+On Linux and Windows, `F11` (or *View: Enter Zen mode* in the command
+palette) leaves the note and nothing else: the rail, the tree, the
+tabs, the side panel, the note's toolbar row, its status row and the
+row numbers all go. A thin bar at the top keeps the note's name, the
+button that leaves Zen, and the window's own buttons, so the window can
+still be moved and found in the taskbar. The caret is a little thicker,
+now that nothing frames it.
+
+The window is maximized on the way in, and put back on the way out —
+unless it was maximized already, in which case it stays so. The taskbar
+stays visible: this is a writing mode, not a fullscreen.
+
+- **Leaving.** `Esc`, `F11` again, or the bar's button. `Esc` goes to
+  the nearest thing first: a find bar closes, a selection collapses, a
+  dialog or the palette shuts, and the next `Esc` leaves Zen.
+- **The preview** makes way for the editor, the split one too. It is
+  hidden, not turned off: leaving Zen brings it back as it was.
+- **Split panes.** Zen shows the pane you were in; the other waits
+  behind it, notes, undo and all, and comes back on the way out.
+- **Moving between notes.** `Ctrl+Tab`, `Ctrl+O` and the palette work
+  as usual, and the bar follows the note on screen. Closing the last
+  note, or going to another place of the rail, leaves Zen.
+- **What stays out.** The toggles for what Zen hides (the sidebar, the
+  side panel, the splits, the preview) are left out of the palette
+  while Zen is on, rather than changing something you cannot see.
+
+Zen is not remembered: a restart, or another library, opens without
+it. It is the desktop's alone — a phone is one note on one screen
+already. `F11` can be changed under Settings → Keyboard shortcuts, like
+every other.
+
 ### Copy and paste
 
 The clipboard carries Markdown on both editors, so copying the same text

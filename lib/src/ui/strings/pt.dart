@@ -1206,6 +1206,12 @@ final class PortugueseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ para navegar · ↵ para usar · esc para fechar';
   @override
+  String get zenMode => 'Modo zen';
+  @override
+  String get zenModeEnter => 'Entrar no modo zen';
+  @override
+  String get zenModeLeave => 'Sair do modo zen';
+  @override
   String get keySpace => 'Espaço';
   @override
   String get keyEnter => 'Enter';

@@ -1206,6 +1206,12 @@ final class HungarianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ mozgás · ↵ használat · esc bezárás';
   @override
+  String get zenMode => 'Zen mód';
+  @override
+  String get zenModeEnter => 'Zen mód bekapcsolása';
+  @override
+  String get zenModeLeave => 'Kilépés a zen módból';
+  @override
   String get keySpace => 'Szóköz';
   @override
   String get keyEnter => 'Enter';

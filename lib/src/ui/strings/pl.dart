@@ -1218,6 +1218,12 @@ final class PolishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ aby przejść · ↵ aby użyć · esc aby zamknąć';
   @override
+  String get zenMode => 'Tryb zen';
+  @override
+  String get zenModeEnter => 'Włącz tryb zen';
+  @override
+  String get zenModeLeave => 'Wyjdź z trybu zen';
+  @override
   String get keySpace => 'Spacja';
   @override
   String get keyEnter => 'Enter';

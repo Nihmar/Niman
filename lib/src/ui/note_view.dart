@@ -132,6 +132,7 @@ final class NoteView extends StatefulWidget {
     this.kindMode = true,
     this.onNoteKindChanged,
     this.toolbarTop = false,
+    this.zen = false,
     this.unsavedTracker,
     this.statusActions = const <Widget>[],
     this.spellCheck,
@@ -289,6 +290,11 @@ final class NoteView extends StatefulWidget {
   /// Whether the formatting toolbar sits above the editor (desktop)
   /// instead of below it (phone, where it extends the keyboard).
   final bool toolbarTop;
+
+  /// Zen mode (#69): the note alone. Its row above, its status row and
+  /// its row numbers go, and the caret thickens a little, since the
+  /// chrome that framed it has gone.
+  final bool zen;
 
   /// The app-level registry of notes with unsaved edits (T-PP-11), which
   /// the window's close guard reads; null when the owner does not track
@@ -458,6 +464,7 @@ final class _NoteViewState extends State<NoteView>
     double fontSize,
     int? caret,
     NoteColumn column,
+    bool zen,
   })?
   _editorPaneConfig;
 
@@ -591,8 +598,8 @@ final class _NoteViewState extends State<NoteView>
     // mounted below), so the source editor's autofocus no longer fires on
     // its own — request it like a fresh mount did. Split mode never
     // remounted either, so focus stays untouched there.
-    final splitNow = widget.splitPreview && !widget.showWysiwyg;
-    if (!splitNow && oldWidget.showPreview && !widget.showPreview) {
+    final splitNow = _splitIn(widget) && !widget.showWysiwyg;
+    if (!splitNow && _previewIn(oldWidget) && !_previewIn(widget)) {
       if (widget.autofocusEditor) {
         if (widget.showWysiwyg) {
           _wysiwygFocus.requestFocus();
@@ -603,7 +610,7 @@ final class _NoteViewState extends State<NoteView>
     }
     // The preview has no editable: a note opening in it, or the switch
     // flipping to it, dismisses the keyboard instead of leaving it up.
-    final wasPreviewOnly = !oldWidget.splitPreview && oldWidget.showPreview;
+    final wasPreviewOnly = !_splitIn(oldWidget) && _previewIn(oldWidget);
     if (_previewOnly && (widget.path != oldWidget.path || !wasPreviewOnly)) {
       _dismissKeyboardForPreview();
     }
@@ -989,7 +996,15 @@ final class _NoteViewState extends State<NoteView>
 
   /// Whether only the preview is on screen (the editor hidden): the IME
   /// has no editable target, so it must go.
-  bool get _previewOnly => !widget.splitPreview && widget.showPreview;
+  bool get _previewOnly => !_splitIn(widget) && _previewIn(widget);
+
+  /// Whether [view] shows its preview. Zen (#69) hides it without
+  /// turning it off: the memento keeps [NoteView.showPreview], so the
+  /// tab has its preview back on the way out.
+  static bool _previewIn(NoteView view) => view.showPreview && !view.zen;
+
+  /// Whether [view] sets editor and preview side by side; never in Zen.
+  static bool _splitIn(NoteView view) => view.splitPreview && !view.zen;
 
   /// Dismisses the keyboard when the preview is the only pane: a note
   /// opening in preview, or the switch flipping to it, must not leave
@@ -1015,7 +1030,8 @@ final class _NoteViewState extends State<NoteView>
       key: ValueKey(widget.path),
       controller: _controller,
       focusNode: _focus,
-      showLineNumbers: widget.showLineNumbers,
+      showLineNumbers: widget.showLineNumbers && !widget.zen,
+      caretWidth: widget.zen ? zenCaretWidth : null,
       // A template `{{cursor}}` landing (#53) always takes focus: the
       // note was just created around that caret, and with the keyboard
       // down the first tap re-places it wherever the finger lands.
@@ -1042,6 +1058,7 @@ final class _NoteViewState extends State<NoteView>
     final config = (
       path: widget.path,
       numbers: widget.showLineNumbers,
+      zen: widget.zen,
       autofocus: widget.autofocusEditor,
       fontSize: AppTextScales.noteFontSize,
       caret: widget.initialCaretOffset,
@@ -1294,7 +1311,7 @@ final class _NoteViewState extends State<NoteView>
   /// bailed on the incomplete map). The loop stops when the map is
   /// complete, the position stops moving, or the attempts run out.
   void _syncPreviewToLine(int line, {int attempt = 0}) {
-    if (!widget.showPreview || !mounted) return;
+    if (!_previewIn(widget) || !mounted) return;
     const log = AppLogger(name: 'links');
     log.debug(
       'anchor jump: scheduling preview scroll to line $line '
@@ -1597,7 +1614,8 @@ final class _NoteViewState extends State<NoteView>
     final error = _error;
     // The WYSIWYG surface is never split: it already is a rendering, and the
     // shell's previewSplits agrees — this is the belt to its braces.
-    final split = widget.splitPreview && !widget.showWysiwyg;
+    final split = _splitIn(widget) && !widget.showWysiwyg;
+    final showPreview = _previewIn(widget);
     // The toolbar formats the editor: it stays in split mode (the editor
     // is on screen) and hides in full-screen preview mode. On the phone
     // it also rides the keyboard (it shows only while the keyboard is
@@ -1605,7 +1623,7 @@ final class _NoteViewState extends State<NoteView>
     // Hiding every button hides the toolbar itself; the editor keeps its
     // keyboard shortcuts.
     final showToolbar =
-        (split || !widget.showPreview) &&
+        (split || !showPreview) &&
         (widget.toolbarTop || _keyboardUp) &&
         widget.toolbarLayout.visible.isNotEmpty;
     // Kind mode (T-TK-02): a known `type` swaps the body for the kind GUI
@@ -1622,7 +1640,7 @@ final class _NoteViewState extends State<NoteView>
         // format (preview, a list note, a file that did not open), so
         // the ⋮ never moves. Phone: the toolbar extends the keyboard,
         // below (see the bottom slot).
-        if (widget.toolbarTop)
+        if (widget.toolbarTop && !widget.zen)
           NoteTopBar(
             column: widget.noteColumn,
             toolbar: showToolbar && !kindBody && !_loading && error == null
@@ -1659,7 +1677,7 @@ final class _NoteViewState extends State<NoteView>
                     : Stack(
                         children: [
                           Offstage(
-                            offstage: widget.showPreview,
+                            offstage: showPreview,
                             child: KeyedSubtree(
                               key: ValueKey(
                                 widget.showWysiwyg
@@ -1670,7 +1688,7 @@ final class _NoteViewState extends State<NoteView>
                             ),
                           ),
                           Offstage(
-                            offstage: !widget.showPreview,
+                            offstage: !showPreview,
                             child: KeyedSubtree(
                               key: const ValueKey('pane-preview'),
                               child: _buildPreview(context),
@@ -1684,7 +1702,7 @@ final class _NoteViewState extends State<NoteView>
                   offerDefaultApp: _notText,
                 ),
         ),
-        if (!kindBody) ...[
+        if (!kindBody && !widget.zen) ...[
           SafeArea(
             // The bottom chrome only: top stays false so the status-bar
             // inset is never inserted between the preview and this row
@@ -1699,8 +1717,8 @@ final class _NoteViewState extends State<NoteView>
                   column: widget.noteColumn,
                   child: NoteStatusRow(
                     loading: _loading,
-                    splitPreview: widget.splitPreview,
-                    showPreview: widget.showPreview,
+                    splitPreview: _splitIn(widget),
+                    showPreview: showPreview,
                     showWysiwyg: widget.showWysiwyg,
                     spellCheckAvailable:
                         widget.spellCheck != null &&

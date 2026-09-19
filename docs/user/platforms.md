@@ -78,6 +78,12 @@ Linux and Windows, and on Android with a hardware keyboard attached, the
 same screen under Settings. Without a keyboard the screen says so
 instead of opening.
 
+**Zen mode** (`F11`, see [editing](editing.md#zen-mode)) is Linux and
+Windows only. It needs the app's own title bar, which is where its thin
+bar goes, and a phone is already one note on one screen. The window is
+maximized for it; if the window manager declines, Zen still hides
+everything but the note.
+
 The **side panel** (outline, tags, history beside the note) shows on
 any window at least 1000 px wide: desktops, tablets, a phone in
 landscape if it is that wide. A phone upright has no room for a note

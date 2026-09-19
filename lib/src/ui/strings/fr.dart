@@ -1234,6 +1234,12 @@ final class FrenchStrings extends Strings {
   String get paletteFooter =>
       '↑↓ pour naviguer · ↵ pour utiliser · échap pour fermer';
   @override
+  String get zenMode => 'Mode zen';
+  @override
+  String get zenModeEnter => 'Passer en mode zen';
+  @override
+  String get zenModeLeave => 'Quitter le mode zen';
+  @override
   String get keySpace => 'Espace';
   @override
   String get keyEnter => 'Entrée';

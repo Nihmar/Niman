@@ -1212,6 +1212,12 @@ final class FinnishStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ liiku · ↵ käytä · esc sulje';
   @override
+  String get zenMode => 'Zen-tila';
+  @override
+  String get zenModeEnter => 'Siirry zen-tilaan';
+  @override
+  String get zenModeLeave => 'Poistu zen-tilasta';
+  @override
   String get keySpace => 'Välilyönti';
   @override
   String get keyEnter => 'Enter';

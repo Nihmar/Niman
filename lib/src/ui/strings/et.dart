@@ -1182,6 +1182,12 @@ final class EstonianStrings extends Strings {
   String get paletteFooter =>
       '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
   @override
+  String get zenMode => 'Zen-režiim';
+  @override
+  String get zenModeEnter => 'Lülitu zen-režiimi';
+  @override
+  String get zenModeLeave => 'Välju zen-režiimist';
+  @override
   String get keySpace => 'Tühik';
   @override
   String get keyEnter => 'Enter';

@@ -1230,6 +1230,12 @@ final class CatalanStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
   @override
+  String get zenMode => 'Mode zen';
+  @override
+  String get zenModeEnter => 'Entra al mode zen';
+  @override
+  String get zenModeLeave => 'Surt del mode zen';
+  @override
   String get keySpace => 'Espai';
   @override
   String get keyEnter => 'Retorn';

@@ -1120,6 +1120,12 @@ final class JapaneseStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ で移動 · ↵ で実行 · esc で閉じる';
   @override
+  String get zenMode => 'Zen モード';
+  @override
+  String get zenModeEnter => 'Zen モードに入る';
+  @override
+  String get zenModeLeave => 'Zen モードを終了';
+  @override
   String get keySpace => 'Space';
   @override
   String get keyEnter => 'Enter';

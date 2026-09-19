@@ -1195,6 +1195,12 @@ final class SlovenianStrings extends Strings {
   @override
   String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
   @override
+  String get zenMode => 'Način zen';
+  @override
+  String get zenModeEnter => 'Vstopi v način zen';
+  @override
+  String get zenModeLeave => 'Zapusti način zen';
+  @override
   String get keySpace => 'Preslednica';
   @override
   String get keyEnter => 'Enter';
