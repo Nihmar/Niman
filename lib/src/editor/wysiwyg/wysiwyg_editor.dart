@@ -563,6 +563,31 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
     );
   }
 
+  /// Esc (#69). Quill's own (hiding its selection toolbar) is on whenever
+  /// there is a caret, so the key never left the editor. Here it cancels a
+  /// selection first, like the source editor's; with none it is the
+  /// app's Esc — a [DismissIntent], which leaves Zen mode — when something
+  /// above takes it, and Quill's otherwise.
+  KeyEventResult? _onKey(KeyEvent event, quill.Node? node) {
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.escape) {
+      return null;
+    }
+    final selection = _controller.selection;
+    if (!selection.isCollapsed) {
+      _controller.updateSelection(
+        TextSelection.collapsed(offset: selection.extentOffset),
+        quill.ChangeSource.local,
+      );
+      return KeyEventResult.handled;
+    }
+    final dismiss = Actions.maybeFind<DismissIntent>(context);
+    if (dismiss == null) return null;
+    final (enabled, _) = Actions.of(context)
+        .invokeActionIfEnabled(dismiss, const DismissIntent(), context);
+    return enabled ? KeyEventResult.handled : null;
+  }
+
   /// The Quill surface in a pane [width] wide: the column's side space is
   /// Quill's padding, inside its scroll view, so the scrollbar keeps to
   /// the pane's edge and the wheel scrolls from the margins too.
@@ -580,6 +605,7 @@ final class WysiwygEditorState extends State<WysiwygEditor> {
         textSpanBuilder: _spellSpan,
         contextMenuBuilder: _contextMenu,
         customStyles: _customStyles(Theme.of(context)),
+        onKeyPressed: _onKey,
       ),
     );
   }
