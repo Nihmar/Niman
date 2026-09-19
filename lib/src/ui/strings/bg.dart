@@ -1186,6 +1186,31 @@ final class BulgarianStrings extends Strings {
   @override
   String get historyAllVersions => 'Всички версии';
   @override
+  String get commandPaletteTitle => 'Палитра с команди';
+  @override
+  String get goToNoteTitle => 'Към бележка';
+  @override
+  String get paletteGroupNote => 'Бележка';
+  @override
+  String get paletteGroupEditor => 'Редактор';
+  @override
+  String get paletteGroupView => 'Изглед';
+  @override
+  String get paletteGroupLibrary => 'Библиотека';
+  @override
+  String get paletteGroupGoTo => 'Към';
+  @override
+  String get paletteHint => 'Търсене на команди и бележки';
+  @override
+  String get paletteNoResults => 'Няма съвпадения';
+  @override
+  String get paletteCommands => 'Команди';
+  @override
+  String get paletteNotes => 'Бележки';
+  @override
+  String get paletteFooter =>
+      '↑↓ за придвижване · ↵ за избор · esc за затваряне';
+  @override
   String get openFileMissing => 'Файлът на тази бележка не е на диска';
   @override
   String get openFileFailed => 'Бележката не можа да бъде отворена извън Niman';

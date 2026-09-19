@@ -1169,6 +1169,31 @@ final class NorwegianStrings extends Strings {
   @override
   String get historyAllVersions => 'Alle versjoner';
   @override
+  String get commandPaletteTitle => 'Kommandopalett';
+  @override
+  String get goToNoteTitle => 'Gå til notat';
+  @override
+  String get paletteGroupNote => 'Notat';
+  @override
+  String get paletteGroupEditor => 'Redigering';
+  @override
+  String get paletteGroupView => 'Visning';
+  @override
+  String get paletteGroupLibrary => 'Bibliotek';
+  @override
+  String get paletteGroupGoTo => 'Gå til';
+  @override
+  String get paletteHint => 'Søk i kommandoer og notater';
+  @override
+  String get paletteNoResults => 'Ingen treff';
+  @override
+  String get paletteCommands => 'Kommandoer';
+  @override
+  String get paletteNotes => 'Notater';
+  @override
+  String get paletteFooter =>
+      '↑↓ for å flytte · ↵ for å bruke · esc for å lukke';
+  @override
   String get openFileMissing => 'Filen til dette notatet finnes ikke på disken';
   @override
   String get openFileFailed => 'Notatet kunne ikke åpnes utenfor Niman';

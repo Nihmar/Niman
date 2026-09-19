@@ -1171,6 +1171,30 @@ final class SlovenianStrings extends Strings {
   @override
   String get historyAllVersions => 'Vse različice';
   @override
+  String get commandPaletteTitle => 'Paleta ukazov';
+  @override
+  String get goToNoteTitle => 'Pojdi na zapisek';
+  @override
+  String get paletteGroupNote => 'Zapisek';
+  @override
+  String get paletteGroupEditor => 'Urejevalnik';
+  @override
+  String get paletteGroupView => 'Pogled';
+  @override
+  String get paletteGroupLibrary => 'Knjižnica';
+  @override
+  String get paletteGroupGoTo => 'Pojdi na';
+  @override
+  String get paletteHint => 'Išči ukaze in zapiske';
+  @override
+  String get paletteNoResults => 'Ni zadetkov';
+  @override
+  String get paletteCommands => 'Ukazi';
+  @override
+  String get paletteNotes => 'Zapiski';
+  @override
+  String get paletteFooter => '↑↓ za premik · ↵ za uporabo · esc za zapiranje';
+  @override
   String get openFileMissing => 'Datoteke te opombe ni na disku';
   @override
   String get openFileFailed => 'Te opombe ni bilo mogoče odpreti zunaj Nimana';

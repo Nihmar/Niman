@@ -1157,6 +1157,31 @@ final class EstonianStrings extends Strings {
   @override
   String get historyAllVersions => 'Kõik versioonid';
   @override
+  String get commandPaletteTitle => 'Käsupalett';
+  @override
+  String get goToNoteTitle => 'Mine märkmele';
+  @override
+  String get paletteGroupNote => 'Märge';
+  @override
+  String get paletteGroupEditor => 'Redaktor';
+  @override
+  String get paletteGroupView => 'Vaade';
+  @override
+  String get paletteGroupLibrary => 'Teek';
+  @override
+  String get paletteGroupGoTo => 'Mine';
+  @override
+  String get paletteHint => 'Otsi käske ja märkmeid';
+  @override
+  String get paletteNoResults => 'Midagi ei leitud';
+  @override
+  String get paletteCommands => 'Käsud';
+  @override
+  String get paletteNotes => 'Märkmed';
+  @override
+  String get paletteFooter =>
+      '↑↓ liikumiseks · ↵ kasutamiseks · esc sulgemiseks';
+  @override
   String get openFileMissing => 'Selle märkme faili kettal ei ole';
   @override
   String get openFileFailed =>

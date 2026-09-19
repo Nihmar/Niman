@@ -139,6 +139,10 @@ final class NoteOps implements NoteOperations {
   @override
   Future<Note?> find(String path) => _dao.find(path);
 
+  @override
+  Future<List<Note>> notesNamed(String query, {int limit = 50}) =>
+      _dao.named(query, limit: limit);
+
   Future<Note> _mustFind(String path) async {
     final row = await _dao.find(path);
     if (row == null) throw StateError('No indexed note at "$path"');

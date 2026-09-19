@@ -1169,6 +1169,30 @@ final class EnglishStrings extends Strings {
   @override
   String get historyAllVersions => 'All versions';
   @override
+  String get commandPaletteTitle => 'Command palette';
+  @override
+  String get goToNoteTitle => 'Go to note';
+  @override
+  String get paletteGroupNote => 'Note';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'View';
+  @override
+  String get paletteGroupLibrary => 'Library';
+  @override
+  String get paletteGroupGoTo => 'Go to';
+  @override
+  String get paletteHint => 'Search commands and notes';
+  @override
+  String get paletteNoResults => 'Nothing matches';
+  @override
+  String get paletteCommands => 'Commands';
+  @override
+  String get paletteNotes => 'Notes';
+  @override
+  String get paletteFooter => '↑↓ to navigate · ↵ to use · esc to dismiss';
+  @override
   String get openFileMissing => 'This note’s file is not on disk';
   @override
   String get openFileFailed => 'Could not open this note outside Niman';

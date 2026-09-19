@@ -65,6 +65,9 @@ abstract interface class NoteOperations {
   /// The indexed note/folder at library-relative [path], or null.
   Future<Note?> find(String path);
 
+  /// Notes whose name holds [query], best matches first (#155).
+  Future<List<Note>> notesNamed(String query, {int limit = 50});
+
   /// The text of the note at [path].
   ///
   /// The editor reads notes through its own seam; this is for the flows

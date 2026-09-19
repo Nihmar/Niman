@@ -1189,6 +1189,31 @@ final class DutchStrings extends Strings {
   @override
   String get historyAllVersions => 'Alle versies';
   @override
+  String get commandPaletteTitle => 'Opdrachtpalet';
+  @override
+  String get goToNoteTitle => 'Naar notitie';
+  @override
+  String get paletteGroupNote => 'Notitie';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Weergave';
+  @override
+  String get paletteGroupLibrary => 'Bibliotheek';
+  @override
+  String get paletteGroupGoTo => 'Ga naar';
+  @override
+  String get paletteHint => 'Opdrachten en notities zoeken';
+  @override
+  String get paletteNoResults => 'Niets gevonden';
+  @override
+  String get paletteCommands => 'Opdrachten';
+  @override
+  String get paletteNotes => 'Notities';
+  @override
+  String get paletteFooter =>
+      '↑↓ om te bewegen · ↵ om te gebruiken · esc om te sluiten';
+  @override
   String get openFileMissing =>
       'Het bestand van deze notitie staat niet op de schijf';
   @override

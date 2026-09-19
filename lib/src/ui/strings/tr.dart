@@ -1164,6 +1164,31 @@ final class TurkishStrings extends Strings {
   @override
   String get historyAllVersions => 'Tüm sürümler';
   @override
+  String get commandPaletteTitle => 'Komut paleti';
+  @override
+  String get goToNoteTitle => 'Nota git';
+  @override
+  String get paletteGroupNote => 'Not';
+  @override
+  String get paletteGroupEditor => 'Düzenleyici';
+  @override
+  String get paletteGroupView => 'Görünüm';
+  @override
+  String get paletteGroupLibrary => 'Kitaplık';
+  @override
+  String get paletteGroupGoTo => 'Git';
+  @override
+  String get paletteHint => 'Komut ve not ara';
+  @override
+  String get paletteNoResults => 'Eşleşen yok';
+  @override
+  String get paletteCommands => 'Komutlar';
+  @override
+  String get paletteNotes => 'Notlar';
+  @override
+  String get paletteFooter =>
+      '↑↓ gezinmek için · ↵ kullanmak için · esc kapatmak için';
+  @override
   String get openFileMissing => 'Bu notun dosyası diskte yok';
   @override
   String get openFileFailed => 'Bu not Niman dışında açılamadı';

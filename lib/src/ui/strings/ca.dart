@@ -1206,6 +1206,30 @@ final class CatalanStrings extends Strings {
   @override
   String get historyAllVersions => 'Totes les versions';
   @override
+  String get commandPaletteTitle => 'Paleta d’ordres';
+  @override
+  String get goToNoteTitle => 'Ves a la nota';
+  @override
+  String get paletteGroupNote => 'Nota';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Visualització';
+  @override
+  String get paletteGroupLibrary => 'Biblioteca';
+  @override
+  String get paletteGroupGoTo => 'Ves a';
+  @override
+  String get paletteHint => 'Cerca ordres i notes';
+  @override
+  String get paletteNoResults => 'Cap coincidència';
+  @override
+  String get paletteCommands => 'Ordres';
+  @override
+  String get paletteNotes => 'Notes';
+  @override
+  String get paletteFooter => '↑↓ per moure’t · ↵ per usar · esc per tancar';
+  @override
   String get openFileMissing => 'El fitxer d’aquesta nota no és al disc';
   @override
   String get openFileFailed =>

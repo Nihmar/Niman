@@ -1171,6 +1171,30 @@ final class CzechStrings extends Strings {
   @override
   String get historyAllVersions => 'Všechny verze';
   @override
+  String get commandPaletteTitle => 'Paleta příkazů';
+  @override
+  String get goToNoteTitle => 'Přejít na poznámku';
+  @override
+  String get paletteGroupNote => 'Poznámka';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Zobrazení';
+  @override
+  String get paletteGroupLibrary => 'Knihovna';
+  @override
+  String get paletteGroupGoTo => 'Přejít na';
+  @override
+  String get paletteHint => 'Hledat příkazy a poznámky';
+  @override
+  String get paletteNoResults => 'Nic neodpovídá';
+  @override
+  String get paletteCommands => 'Příkazy';
+  @override
+  String get paletteNotes => 'Poznámky';
+  @override
+  String get paletteFooter => '↑↓ pohyb · ↵ použít · esc zavřít';
+  @override
   String get openFileMissing => 'Soubor této poznámky na disku není';
   @override
   String get openFileFailed => 'Tuto poznámku se nepodařilo otevřít mimo Niman';

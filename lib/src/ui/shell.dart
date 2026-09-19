@@ -45,6 +45,8 @@ import 'package:niman/src/ui/note_view_memento.dart';
 import 'package:niman/src/ui/open_library.dart';
 import 'package:niman/src/ui/open_notes_sheet.dart';
 import 'package:niman/src/ui/outline_panel.dart';
+import 'package:niman/src/ui/palette/command_palette.dart';
+import 'package:niman/src/ui/palette/palette_command.dart';
 import 'package:niman/src/ui/pane_split.dart';
 import 'package:niman/src/ui/quick_note_tab.dart';
 import 'package:niman/src/ui/settings_tab.dart';
@@ -63,6 +65,7 @@ import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/shell_tree_footer.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/switch_library_screen.dart';
 import 'package:niman/src/ui/sync/sync_status.dart';
 import 'package:niman/src/ui/tab_body_stack.dart';
 import 'package:niman/src/ui/todo_edit_dialog.dart';
@@ -2146,8 +2149,17 @@ final class _LibraryShellState extends State<_LibraryShell>
 
   /// The app accelerators (T-PP-10), built from the shared registry so the
   /// installed keys and the in-app reference cannot drift.
-  Map<ShortcutActivator, VoidCallback> _appShortcutBindings() {
-    return appShortcutBindings({
+  Map<ShortcutActivator, VoidCallback> _appShortcutBindings() =>
+      appShortcutBindings(_commandHandlers());
+
+  /// What each command does, for the ones that can run here and now: the
+  /// keys run them, and the command palette lists exactly these (#155).
+  /// A new feature reaches both by adding its entry here.
+  Map<AppCommand, VoidCallback> _commandHandlers() {
+    final note = _shownNote;
+    return {
+      AppCommand.openPalette: () => unawaited(_openPalette()),
+      AppCommand.goToNote: () => unawaited(_openPalette(notesOnly: true)),
       AppCommand.newNote: () => unawaited(_createFlow.createNote(context)),
       AppCommand.newListNote: () =>
           unawaited(_createFlow.createListNote(context)),
@@ -2182,8 +2194,103 @@ final class _LibraryShellState extends State<_LibraryShell>
           _onDestinationSelected(ShellTab.quickNote.index),
       AppCommand.tabSettings: () =>
           _onDestinationSelected(ShellTab.settings.index),
-    });
+      if (_wide)
+        AppCommand.splitDown: () => _workspace.splitActive(SplitAxis.down),
+      if (note != null) ...{
+        if (_previewToggleVisible) AppCommand.togglePreview: _togglePreview,
+        if (_editorSettings.editorsEnabled.length > 1)
+          AppCommand.switchEditor: () => unawaited(
+            _setEditorKind(
+              _noteEditorKind == EditorKind.wysiwyg
+                  ? EditorKind.source
+                  : EditorKind.wysiwyg,
+            ),
+          ),
+        AppCommand.renameNote: () =>
+            unawaited(_rowActions.rename(context, note)),
+        AppCommand.moveNote: () => unawaited(_rowActions.move(context, note)),
+        AppCommand.deleteNote: () =>
+            unawaited(_rowActions.delete(context, note)),
+        AppCommand.noteHistory: () => unawaited(_openHistory(note)),
+      },
+      AppCommand.reindexLibrary: () => unawaited(_reindex()),
+      AppCommand.switchLibrary: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => SwitchLibraryScreen(
+            controller: widget.controller,
+            onSwitched: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+    };
   }
+
+  /// Re-reads the library into its index, saying when it is done.
+  Future<void> _reindex() => _guard(() async {
+    await widget.controller.rescanNow();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(AppStrings.reindexDone)));
+  });
+
+  /// Commands run from the palette this session, most recent first.
+  final List<AppCommand> _recentCommands = [];
+
+  /// The command palette (#155); [notesOnly] is Go to note's.
+  Future<void> _openPalette({bool notesOnly = false}) async {
+    final handlers = _commandHandlers();
+    final commands = _paletteCommands(handlers);
+    final ops = widget.controller.ops;
+    final choice = await showCommandPalette(
+      context,
+      commands: commands,
+      notesOnly: notesOnly,
+      recentCommands: _recentCommands,
+      recentNotes: _workspace.recentNotes,
+      searchNotes: (query) async => ops == null
+          ? const []
+          : [for (final note in await ops.notesNamed(query)) note.path],
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case PaletteCommandChoice(:final command):
+        _runCommand(handlers, command);
+      case PaletteNoteChoice(:final path):
+        _openNoteFromLink(path, null);
+    }
+  }
+
+  /// The palette's commands: every one that can run now, but the
+  /// palette's own two.
+  List<PaletteCommand> _paletteCommands([
+    Map<AppCommand, VoidCallback>? handlers,
+  ]) => [
+    for (final command in (handlers ?? _commandHandlers()).keys)
+      if (command != AppCommand.openPalette && command != AppCommand.goToNote)
+        PaletteCommand.of(command, label: _paletteLabel(command)),
+  ];
+
+  /// Runs [command] through [handlers], remembering it for next time.
+  void _runCommand(Map<AppCommand, VoidCallback> handlers, AppCommand command) {
+    _recentCommands
+      ..remove(command)
+      ..insert(0, command);
+    handlers[command]?.call();
+  }
+
+  /// A command's name where the state words it better than the
+  /// registry: what it would switch to, not a fixed verb.
+  String? _paletteLabel(AppCommand command) => switch (command) {
+    AppCommand.togglePreview =>
+      _notePreview
+          ? AppStrings.showEditorTooltip
+          : AppStrings.showPreviewTooltip,
+    AppCommand.switchEditor =>
+      _noteEditorKind == EditorKind.wysiwyg
+          ? AppStrings.switchToSourceTooltip
+          : AppStrings.switchToWysiwygTooltip,
+    _ => null,
+  };
 
   /// The wide-layout body: the tree pane and the split detail pane.
   ///
@@ -2556,7 +2663,14 @@ final class _LibraryShellState extends State<_LibraryShell>
   /// The Search tab's body; the slot owns which of the two shows
   /// (issue #100 moved it into [SearchSlot]).
   Widget _searchSlot(LibrarySession controller) {
-    return SearchSlot(controller: controller, onOpenNote: _openSearchNote);
+    return SearchSlot(
+      controller: controller,
+      onOpenNote: _openSearchNote,
+      // The palette's commands head the search's results (#155): on a
+      // phone that is how they are reached without a keyboard.
+      commands: _paletteCommands,
+      onRunCommand: (command) => _runCommand(_commandHandlers(), command),
+    );
   }
 
   /// The desktop tree's controls at the base of its column (T-PP-22):

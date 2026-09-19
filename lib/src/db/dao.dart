@@ -67,6 +67,36 @@ final class NoteDao {
     return rows.isEmpty ? null : rows.first;
   }
 
+  /// Notes (not folders) whose name holds [query], case-insensitively:
+  /// the command palette's note half (#155). Names that start with it
+  /// come first, then the shorter ones, then by path; at most [limit].
+  ///
+  /// A substring scan over the names — fine at a million rows on the
+  /// database's own isolate, behind the palette's debounce; full text
+  /// stays the search screen's.
+  Future<List<Note>> named(String query, {int limit = 50}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    final escaped = q
+        .replaceAll(r'\', r'\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_');
+    final rows = await _db
+        .customSelect(
+          r"SELECT * FROM notes WHERE is_dir = 0 AND name LIKE ? ESCAPE '\' "
+          r"ORDER BY (name LIKE ? ESCAPE '\') DESC, length(name), path "
+          'LIMIT ?',
+          variables: [
+            Variable.withString('%$escaped%'),
+            Variable.withString('$escaped%'),
+            Variable.withInt(limit),
+          ],
+          readsFrom: {_db.notes},
+        )
+        .get();
+    return [for (final row in rows) _db.notes.map(row.data)];
+  }
+
   /// All directory rows, path-ordered (for move-target pickers).
   ///
   /// `is_dir = 1` rather than the bare column: SQLite matches an index on

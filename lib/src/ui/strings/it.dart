@@ -1188,6 +1188,31 @@ final class ItalianStrings extends Strings {
   @override
   String get historyAllVersions => 'Tutte le versioni';
   @override
+  String get commandPaletteTitle => 'Palette dei comandi';
+  @override
+  String get goToNoteTitle => 'Vai alla nota';
+  @override
+  String get paletteGroupNote => 'Nota';
+  @override
+  String get paletteGroupEditor => 'Editor';
+  @override
+  String get paletteGroupView => 'Vista';
+  @override
+  String get paletteGroupLibrary => 'Libreria';
+  @override
+  String get paletteGroupGoTo => 'Vai a';
+  @override
+  String get paletteHint => 'Cerca comandi e note';
+  @override
+  String get paletteNoResults => 'Nessun risultato';
+  @override
+  String get paletteCommands => 'Comandi';
+  @override
+  String get paletteNotes => 'Note';
+  @override
+  String get paletteFooter =>
+      '↑↓ per spostarti · ↵ per usare · esc per chiudere';
+  @override
   String get openFileMissing => 'Il file di questa nota non è sul disco';
   @override
   String get openFileFailed => 'Impossibile aprire questa nota fuori da Niman';

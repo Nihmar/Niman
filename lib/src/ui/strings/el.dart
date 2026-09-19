@@ -1218,6 +1218,31 @@ final class GreekStrings extends Strings {
   @override
   String get historyAllVersions => 'Όλες οι εκδόσεις';
   @override
+  String get commandPaletteTitle => 'Παλέτα εντολών';
+  @override
+  String get goToNoteTitle => 'Μετάβαση σε σημείωση';
+  @override
+  String get paletteGroupNote => 'Σημείωση';
+  @override
+  String get paletteGroupEditor => 'Επεξεργαστής';
+  @override
+  String get paletteGroupView => 'Προβολή';
+  @override
+  String get paletteGroupLibrary => 'Βιβλιοθήκη';
+  @override
+  String get paletteGroupGoTo => 'Μετάβαση';
+  @override
+  String get paletteHint => 'Αναζήτηση εντολών και σημειώσεων';
+  @override
+  String get paletteNoResults => 'Κανένα αποτέλεσμα';
+  @override
+  String get paletteCommands => 'Εντολές';
+  @override
+  String get paletteNotes => 'Σημειώσεις';
+  @override
+  String get paletteFooter =>
+      '↑↓ για μετακίνηση · ↵ για χρήση · esc για κλείσιμο';
+  @override
   String get openFileMissing =>
       'Το αρχείο αυτής της σημείωσης δεν βρίσκεται στον δίσκο';
   @override

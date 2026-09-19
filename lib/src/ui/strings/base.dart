@@ -563,6 +563,18 @@ abstract base class Strings {
   String get closeAllNotes;
   String get sidePanelTooltip;
   String get historyAllVersions;
+  String get commandPaletteTitle;
+  String get goToNoteTitle;
+  String get paletteGroupNote;
+  String get paletteGroupEditor;
+  String get paletteGroupView;
+  String get paletteGroupLibrary;
+  String get paletteGroupGoTo;
+  String get paletteHint;
+  String get paletteNoResults;
+  String get paletteCommands;
+  String get paletteNotes;
+  String get paletteFooter;
   String get openFileMissing;
   String get openFileFailed;
   String get movedToTrash;
