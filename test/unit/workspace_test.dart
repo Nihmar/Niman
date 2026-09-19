@@ -119,6 +119,18 @@ void main() {
       expect(w.focused, 1);
     });
 
+    // #204: dragged, a tab lands where it was dropped.
+    test('a tab moves across into a place in the row', () {
+      final w = _opened(['a.md', 'b.md'])
+          .split(SplitAxis.right)
+          .open('c.md')
+          .open('d.md')
+          .moveTab(0, 0, 1, at: 1);
+      expect(_row(w), '[b.md]');
+      expect(_row(w, 1), 'c.md [a.md] d.md');
+      expect(w.focused, 1);
+    });
+
     test("moving a pane's only tab closes that pane", () {
       final w = _opened(['a.md'])
           .split(SplitAxis.right)
@@ -126,6 +138,23 @@ void main() {
           .moveTab(1, 0, 0);
       expect(w.isSplit, isFalse);
       expect(_row(w), 'a.md [b.md]');
+    });
+
+    // #204: dragging a tab along its own row.
+    test('a tab is reordered in its row, and keeps showing', () {
+      final w = _opened(['a.md', 'b.md', 'c.md']).reorder(0, 0, 2);
+      expect(_row(w), 'b.md c.md [a.md]');
+    });
+
+    test('a reorder onto its own place changes nothing', () {
+      final w = _opened(['a.md', 'b.md']).activate(0, 0);
+      expect(_row(w.reorder(0, 0, 0)), '[a.md] b.md');
+    });
+
+    test('a reorder past the row lands last, and one outside does nothing', () {
+      final w = _opened(['a.md', 'b.md']);
+      expect(_row(w.reorder(0, 0, 9)), 'b.md [a.md]');
+      expect(w.reorder(0, 5, 0), w);
     });
 
     test('an empty pane takes the focus, and the next note', () {

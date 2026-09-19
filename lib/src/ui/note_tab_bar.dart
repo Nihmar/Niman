@@ -15,6 +15,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/tab_drag.dart';
 import 'package:niman/src/workspace/workspace.dart';
 import 'package:niman/src/workspace/workspace_tab.dart';
 import 'package:path/path.dart' as p;
@@ -39,8 +40,18 @@ final class NoteTabBar extends StatefulWidget {
     this.focused = true,
     this.onSplit,
     this.onMoveToOtherPane,
+    this.pane = 0,
+    this.onDrop,
     super.key,
   });
+
+  /// Which pane's row this is (#204): what a dragged tab carries.
+  final int pane;
+
+  /// A tab dropped in this row, at a place in it — this row's own tab
+  /// dragged along it, or the other pane's moved here. Null leaves the
+  /// row undraggable.
+  final void Function(TabDrag drag, int at)? onDrop;
 
   /// Whether this row's pane has the focus: its showing tab is marked
   /// in the accent, the other pane's only outlined (#23).
@@ -117,6 +128,70 @@ final class _NoteTabBarState extends State<NoteTabBar> {
         alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
       );
     });
+  }
+
+  /// A tab that can be dragged (#204), and taken as a drop's place: the
+  /// left half of a tab is before it, the right half after it.
+  Widget _draggable({
+    required int index,
+    required WorkspaceTab tab,
+    required Widget child,
+  }) {
+    final onDrop = widget.onDrop;
+    if (onDrop == null) return child;
+    final label = noteTabLabel(tab.path);
+    return Draggable<TabDrag>(
+      // The pointer, not the tab's own corner: the chip follows the hand.
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      data: TabDrag(pane: widget.pane, index: index, label: label),
+      feedback: TabDragFeedback(label),
+      childWhenDragging: Opacity(opacity: 0.4, child: child),
+      child: Stack(
+        children: [
+          child,
+          Positioned.fill(
+            child: Row(
+              children: [
+                Expanded(child: _dropSlot(index, marker: _Marker.before)),
+                Expanded(child: _dropSlot(index + 1, marker: _Marker.after)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A place in the row a tab can be dropped at, drawn as a line while
+  /// the drop is over it.
+  Widget _dropSlot(int at, {double? width, _Marker? marker}) {
+    final onDrop = widget.onDrop;
+    if (onDrop == null) return SizedBox(width: width ?? 0);
+    return DragTarget<TabDrag>(
+      onWillAcceptWithDetails: (details) => true,
+      onAcceptWithDetails: (details) => onDrop(details.data, at),
+      builder: (context, candidate, _) {
+        final over = candidate.isNotEmpty;
+        final line = ColoredBox(
+          color: Theme.of(context).colorScheme.primary,
+          child: const SizedBox(width: 2, height: double.infinity),
+        );
+        return SizedBox(
+          width: width,
+          height: double.infinity,
+          child: !over
+              ? const SizedBox.shrink()
+              : Align(
+                  alignment: switch (marker) {
+                    _Marker.before => Alignment.centerLeft,
+                    _Marker.after => Alignment.centerRight,
+                    null => Alignment.centerLeft,
+                  },
+                  child: line,
+                ),
+        );
+      },
+    );
   }
 
   Future<void> _showList(BuildContext context) async {
@@ -225,21 +300,28 @@ final class _NoteTabBarState extends State<NoteTabBar> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (final (i, tab) in tabs.indexed)
-                      _NoteTab(
-                        key: i == widget.active
-                            ? _activeKey
-                            : ValueKey(tab.path),
-                        tab: tab,
+                      _draggable(
                         index: i,
-                        active: i == widget.active,
-                        focused: widget.focused,
-                        unsaved: widget.unsaved.contains(tab.path),
-                        onActivate: () => widget.onActivate(i),
-                        onClose: () => widget.onClose(i),
-                        onMenu: (position) =>
-                            unawaited(_showTabMenu(context, i, position)),
-                        maxWidth: tabWidth,
+                        tab: tab,
+                        child: _NoteTab(
+                          key: i == widget.active
+                              ? _activeKey
+                              : ValueKey(tab.path),
+                          tab: tab,
+                          index: i,
+                          active: i == widget.active,
+                          focused: widget.focused,
+                          unsaved: widget.unsaved.contains(tab.path),
+                          onActivate: () => widget.onActivate(i),
+                          onClose: () => widget.onClose(i),
+                          onMenu: (position) =>
+                              unawaited(_showTabMenu(context, i, position)),
+                          maxWidth: tabWidth,
+                        ),
                       ),
+                    // Past the last tab: a drop here puts the tab at the
+                    // end of the row, and an empty pane's row is all this.
+                    _dropSlot(tabs.length, width: 40),
                   ],
                 ),
               ),
@@ -481,4 +563,13 @@ final class _TabListRow extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Which side of a tab a drop's line is drawn on.
+enum _Marker {
+  /// Before the tab: its left edge.
+  before,
+
+  /// After it: its right edge.
+  after,
 }
